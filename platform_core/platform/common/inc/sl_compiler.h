@@ -211,9 +211,15 @@ extern "C" {
 #define     __IO    volatile        ///< Defines 'read / write' permissions
 
 // The following defines should be used for structure members.
-#define     __IM    volatile const  ///< Defines 'read only' structure member permissions
-#define     __OM    volatile        ///< Defines 'write only' structure member permissions
-#define     __IOM   volatile        ///< Defines 'read / write' structure member permissions
+#ifndef   __IM
+  #define __IM    volatile const  ///< Defines 'read only' structure member permissions
+#endif
+#ifndef   __OM
+  #define __OM    volatile        ///< Defines 'write only' structure member permissions
+#endif
+#ifndef   __IOM
+  #define __IOM   volatile        ///< Defines 'read / write' structure member permissions
+#endif
 
 #ifdef __cplusplus
 }

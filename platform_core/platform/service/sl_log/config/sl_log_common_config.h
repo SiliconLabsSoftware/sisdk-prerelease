@@ -101,7 +101,9 @@
 // <i> When disabled, SL_DEBUG_ASSERT becomes a no-op to save code space in release builds.
 // <i>during development to catch errors early
 // <i> Default: 0 (disabled)
+#if !defined(SL_LOG_DEBUG_ASSERT_ENABLE)
 #define SL_LOG_DEBUG_ASSERT_ENABLE 0
+#endif
 
 /** @brief Event ID: Crash (args: type, pc, sp). "CRSH" = Crash */
 #define SL_LOG_EVENT_ID_CRASH 0x43525348U

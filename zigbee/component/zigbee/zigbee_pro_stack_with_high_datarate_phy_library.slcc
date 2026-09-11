@@ -30,17 +30,6 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - rail_mux
-- path: libs/build/gcc/cortex-m55/zigbee-pro-stack-with-high-datarate-phy/release/libzigbee-pro-stack-with-high-datarate-phy.a
-  condition:
-  - toolchain_gcc
-  - cortexm55
-  - zigbee_phy_2_4
-  - zigbee_multi_network
-  - zigbee_high_datarate_phy
-  unless:
-  - zigbee_phy_2_4_subghz_selection_end_device
-  - zigbee_phy_2_4_subghz_switch_coordinator
-  - rail_mux
 - path: libs/build/gcc/cortex-m33/zigbee-pro-stack-with-high-datarate-phy/release_singlenetwork/libzigbee-pro-stack-with-high-datarate-phy.a
   condition:
   - toolchain_gcc
@@ -49,6 +38,17 @@ library:
   - zigbee_high_datarate_phy
   unless:
   - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+  - rail_mux
+- path: libs/build/gcc/cortex-m55/zigbee-pro-stack-with-high-datarate-phy/release/libzigbee-pro-stack-with-high-datarate-phy.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  - zigbee_high_datarate_phy
+  unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - rail_mux
@@ -75,34 +75,10 @@ library:
   - zigbee_phy_2_4_subghz_switch_coordinator
   - rail_mux
   - stack_protection_iar
-- path: libs/build/iar/cortex-m55/zigbee-pro-stack-with-high-datarate-phy/release/libzigbee-pro-stack-with-high-datarate-phy.a
-  condition:
-  - toolchain_iar
-  - cortexm55
-  - zigbee_phy_2_4
-  - zigbee_multi_network
-  - zigbee_high_datarate_phy
-  unless:
-  - zigbee_phy_2_4_subghz_selection_end_device
-  - zigbee_phy_2_4_subghz_switch_coordinator
-  - rail_mux
-  - stack_protection_iar
 - path: libs/build/iar/cortex-m33/zigbee-pro-stack-with-high-datarate-phy/release_singlenetwork/libzigbee-pro-stack-with-high-datarate-phy.a
   condition:
   - toolchain_iar
   - cortexm33
-  - zigbee_phy_2_4
-  - zigbee_high_datarate_phy
-  unless:
-  - zigbee_multi_network
-  - zigbee_phy_2_4_subghz_selection_end_device
-  - zigbee_phy_2_4_subghz_switch_coordinator
-  - rail_mux
-  - stack_protection_iar
-- path: libs/build/iar/cortex-m55/zigbee-pro-stack-with-high-datarate-phy/release_singlenetwork/libzigbee-pro-stack-with-high-datarate-phy.a
-  condition:
-  - toolchain_iar
-  - cortexm55
   - zigbee_phy_2_4
   - zigbee_high_datarate_phy
   unless:
@@ -123,18 +99,6 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - rail_mux
-- path: libs/build/iar/cortex-m55/zigbee-pro-stack-with-high-datarate-phy/release_stackprotection/libzigbee-pro-stack-with-high-datarate-phy.a
-  condition:
-  - toolchain_iar
-  - cortexm55
-  - zigbee_phy_2_4
-  - zigbee_multi_network
-  - zigbee_high_datarate_phy
-  - stack_protection_iar
-  unless:
-  - zigbee_phy_2_4_subghz_selection_end_device
-  - zigbee_phy_2_4_subghz_switch_coordinator
-  - rail_mux
 - path: libs/build/iar/cortex-m33/zigbee-pro-stack-with-high-datarate-phy/release_stackprotection_singlenetwork/libzigbee-pro-stack-with-high-datarate-phy.a
   condition:
   - toolchain_iar
@@ -144,6 +108,42 @@ library:
   - stack_protection_iar
   unless:
   - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+  - rail_mux
+- path: libs/build/iar/cortex-m55/zigbee-pro-stack-with-high-datarate-phy/release/libzigbee-pro-stack-with-high-datarate-phy.a
+  condition:
+  - toolchain_iar
+  - cortexm55
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  - zigbee_high_datarate_phy
+  unless:
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+  - rail_mux
+  - stack_protection_iar
+- path: libs/build/iar/cortex-m55/zigbee-pro-stack-with-high-datarate-phy/release_singlenetwork/libzigbee-pro-stack-with-high-datarate-phy.a
+  condition:
+  - toolchain_iar
+  - cortexm55
+  - zigbee_phy_2_4
+  - zigbee_high_datarate_phy
+  unless:
+  - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+  - rail_mux
+  - stack_protection_iar
+- path: libs/build/iar/cortex-m55/zigbee-pro-stack-with-high-datarate-phy/release_stackprotection/libzigbee-pro-stack-with-high-datarate-phy.a
+  condition:
+  - toolchain_iar
+  - cortexm55
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  - zigbee_high_datarate_phy
+  - stack_protection_iar
+  unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - rail_mux
@@ -170,17 +170,6 @@ library:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - rail_mux
-- path: libs/build/llvm/cortex-m55/zigbee-pro-stack-with-high-datarate-phy/release/libzigbee-pro-stack-with-high-datarate-phy.a
-  condition:
-  - toolchain_llvm
-  - cortexm55
-  - zigbee_phy_2_4
-  - zigbee_multi_network
-  - zigbee_high_datarate_phy
-  unless:
-  - zigbee_phy_2_4_subghz_selection_end_device
-  - zigbee_phy_2_4_subghz_switch_coordinator
-  - rail_mux
 - path: libs/build/llvm/cortex-m33/zigbee-pro-stack-with-high-datarate-phy/release_singlenetwork/libzigbee-pro-stack-with-high-datarate-phy.a
   condition:
   - toolchain_llvm
@@ -189,6 +178,17 @@ library:
   - zigbee_high_datarate_phy
   unless:
   - zigbee_multi_network
+  - zigbee_phy_2_4_subghz_selection_end_device
+  - zigbee_phy_2_4_subghz_switch_coordinator
+  - rail_mux
+- path: libs/build/llvm/cortex-m55/zigbee-pro-stack-with-high-datarate-phy/release/libzigbee-pro-stack-with-high-datarate-phy.a
+  condition:
+  - toolchain_llvm
+  - cortexm55
+  - zigbee_phy_2_4
+  - zigbee_multi_network
+  - zigbee_high_datarate_phy
+  unless:
   - zigbee_phy_2_4_subghz_selection_end_device
   - zigbee_phy_2_4_subghz_switch_coordinator
   - rail_mux

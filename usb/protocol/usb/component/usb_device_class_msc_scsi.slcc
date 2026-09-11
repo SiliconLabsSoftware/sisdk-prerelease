@@ -32,6 +32,7 @@ requires:
 - name: usb_device_configuration
 - name: usb_device_core
 - name: usb_device
+- name: log_none
 template_file:
 - path: template/sl_usbd_class_msc_scsi_instances.h.jinja
 - path: template/sl_usbd_class_msc_scsi_instances.c.jinja

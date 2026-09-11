@@ -136,6 +136,13 @@ void sl_hal_ldma_init(LDMA_TypeDef *ldma,
   ldma->DBGHALT = 0;
   ldma->REQDIS  = 0;
   ldma->IF_CLR = 0xFFFFFFFFU;
+
+  SL_PRINT_STRING_DEBUG("fixed=%d clr=%d\r\n",
+                        (int)init->num_fixed_priority,
+                        (int)init->sync_prs_clr_en);
+  SL_PRINT_STRING_DEBUG("set=%d, %d\r\n",
+                        (int)init->sync_prs_set_en,
+                        (int)__LINE__);
 }
 
 /***************************************************************************//**

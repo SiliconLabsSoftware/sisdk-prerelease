@@ -254,6 +254,7 @@ extern "C" {
  * The memory pool API allows to:
  *   - Create a pool composed of N number of fixed-size blocks: sl_memory_create_pool().
  *   - Delete a pool: sl_memory_delete_pool().
+ *   - Force-delete a pool even with outstanding block allocations: sl_memory_delete_pool_force().
  *   - Get a block from the pool: sl_memory_pool_alloc().
  *   - Free a pool's block: sl_memory_pool_free().
  *
@@ -1108,6 +1109,29 @@ sl_status_t sl_memory_delete_pool(sl_memory_pool_t *pool_handle);
  *       to sl_memory_create_pool_advanced() to create another pool.
  ******************************************************************************/
 sl_status_t sl_memory_delete_pool_no_unreserve(sl_memory_pool_t *pool_handle);
+
+/***************************************************************************//**
+ * Force-deletes a memory pool regardless of outstanding block allocations.
+ *
+ * @param[in] pool_handle Handle to the memory pool.
+ *
+ * @return  SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @note Unlike sl_memory_delete_pool(), this function does NOT require all
+ *       blocks to be freed first. It frees the entire pool (and, on the
+ *       power-aware version, its underlying reservation) even when some blocks
+ *       are still allocated.
+ *
+ * @note The caller must guarantee that neither the pool nor any of its blocks
+ *       are accessed after this function returns.
+ *
+ * @note Available on both the lightweight and power-aware versions of the pool.
+ *
+ * @note The pool_handle provided is neither freed or invalidated. It can be
+ *       reused in a new call to sl_memory_create_pool() or
+ *       to sl_memory_create_pool_advanced() to create another pool.
+ ******************************************************************************/
+sl_status_t sl_memory_delete_pool_force(sl_memory_pool_t *pool_handle);
 
 /***************************************************************************//**
  * Allocates a block from a memory pool.

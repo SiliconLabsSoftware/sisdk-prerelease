@@ -798,9 +798,6 @@ sl_status_t sl_hal_emu_dcdc_power_off(void);
  * @param[in] init
  *   The DCDC initialization structure.
  *
- * @return
- *   True if initialization parameters are valid.
- *
  * @note
  *   Make sure the DCDC is enabled and unlocked before calling this function.
  ******************************************************************************/
@@ -1536,6 +1533,7 @@ __INLINE uint32_t sl_hal_emu_efp_get_enabled_pending_interrupts(void)
   return EMU->EFPIF & ien;
 }
 
+#if defined(_EMU_CTRL_EFPDRVDVDD_MASK)
 /***************************************************************************//**
  * @brief
  *   Enable EFP to drive DVDD voltage.
@@ -1599,6 +1597,7 @@ __INLINE void sl_hal_emu_disable_efp_drive_decouple(void)
 {
   EMU->CTRL_CLR = EMU_CTRL_EFPDRVDECOUPLE;
 }
+#endif
 #endif /* defined(_EMU_EFPIF_MASK) */
 
 #if defined(_DCDC_LOCK_MASK)

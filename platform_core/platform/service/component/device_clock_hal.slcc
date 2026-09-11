@@ -30,6 +30,8 @@ provides:
 - name: device_clock_hal
   condition: [device_sdid_240]
 - name: device_clock_hal
+  condition: [device_sdid_245]
+- name: device_clock_hal
   condition: [device_sdid_250]
 - name: device_clock_hal
   condition: [device_sdid_260]
@@ -55,6 +57,8 @@ source:
   condition: [device_sdid_235]
 - path: clocks/sl_device_clock_efr32xg29.c
   condition: [device_sdid_240]
+- path: clocks/sl_device_clock_efr32xg2a.c
+  condition: [device_sdid_245]
 - path: clocks/sl_device_clock_efr32xg2b.c
   condition: [device_sdid_250]
 - path: clocks/sl_device_clock_efr32xg2d.c

@@ -51,6 +51,16 @@ extern "C" {
 #define ZPAL_RETENTION_REGISTER_PROTOCOL_RESERVED_COUNT 16 ///< Number of registers reserved for the stack.
 
 /**
+ * @brief Initialize the retention registers.
+ */
+void zpal_retention_register_init(void);
+
+/**
+ * @brief Clear the retention registers.
+ */
+void zpal_retention_register_clear(void);
+
+/**
  * @brief Reads a 32-bit value from the specified retention register.
  *
  * @param[in]   index Retention register number (zero-based).

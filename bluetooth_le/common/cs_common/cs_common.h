@@ -62,7 +62,11 @@ SL_ENUM(cs_algo_mode_t) {
 SL_ENUM(cs_tone_antenna_config_index_t) {
   CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY = 0, ///< Single only
   CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE = 1, ///< Dual local single remote
+  CS_ANTENNA_CONFIG_INDEX_TRIPLE_LOCAL_SINGLE_REMOTE = 2, ///< Triple local single remote
+  CS_ANTENNA_CONFIG_INDEX_QUAD_LOCAL_SINGLE_REMOTE = 3, ///< Quad local single remote
   CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE = 4, ///< Single local dual remote
+  CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_TRIPLE_REMOTE = 5, ///< Single local triple remote
+  CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_QUAD_REMOTE = 6, ///< Single local quad remote
   CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY = 7, ///< Dual only
 };
 
@@ -70,6 +74,8 @@ SL_ENUM(cs_tone_antenna_config_index_t) {
 SL_ENUM(cs_sync_antenna_t) {
   CS_SYNC_ANTENNA_1 = 1,
   CS_SYNC_ANTENNA_2 = 2,
+  CS_SYNC_ANTENNA_3 = 3,
+  CS_SYNC_ANTENNA_4 = 4,
   CS_SYNC_SWITCHING = 0xfe
 };
 

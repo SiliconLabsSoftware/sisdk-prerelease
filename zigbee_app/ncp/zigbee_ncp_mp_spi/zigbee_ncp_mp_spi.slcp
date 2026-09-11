@@ -1,6 +1,6 @@
 project_name: zigbee_ncp_mp_spi
 label: Zigbee - NCP Multi-PAN SPI
-package: zigbee
+package: zigbee_app
 category: Zigbee Application
 quality: production
 description: "Multi-PAN NCP: two PANs on one radio. Communicates with host over SPI. Extensible for init, events, and messaging."

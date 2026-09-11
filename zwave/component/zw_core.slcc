@@ -32,6 +32,7 @@ template_contribution:
   value: ZW_CORE
 requires:
   # Z-Wave
+- name: zw_startup
 - name: zw_versions
 - name: zaf_protocol_config
 - name: sleeptimer
@@ -73,6 +74,7 @@ include:
   - path: "ZW_application_transport_interface.h"
   - path: "ZW_slave_api.h"
   - path: "ZW_UserTask.h"
+  - path: "ZW_dynamic_tx_power_algorithm_api.h"
   - path: "ZW_classcmd.h"
   - path: "ZW_wake_on_critical_message.h"
 - path: "dist/include/zpal"
@@ -105,7 +107,6 @@ include:
   - path: "NodeMask.h"
 - path: "platform/SiliconLabs/PAL/inc"
   file_list:
-  - path: "system_startup.h"
   - path: "zpal_uart_config_ext.h"
 - path: "platform/SiliconLabs/PAL/inc/application_properties"
   file_list:

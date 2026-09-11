@@ -87,6 +87,14 @@ extern "C" {
 #define SLI_CLOCK_MANAGER_INIT_SOCPLL2
 #endif
 
+#if defined(SL_CLOCK_MANAGER_PERPLL0_EN) && (SL_CLOCK_MANAGER_PERPLL0_EN == 1)
+#define SLI_CLOCK_MANAGER_INIT_PERPLL0
+#endif
+
+#if defined(SL_CLOCK_MANAGER_PERPLL1_EN) && (SL_CLOCK_MANAGER_PERPLL1_EN == 1)
+#define SLI_CLOCK_MANAGER_INIT_PERPLL1
+#endif
+
 /*******************************************************************************
  *************************   INIT CLOCK BRANCHES   *****************************
  ******************************************************************************/

@@ -28,6 +28,7 @@
 
 #include "cmsis_os2.h"
 
+#include "sl_log_helper.h"
 #include "sl_bit.h"
 #include "sl_enum.h"
 #include "sl_status.h"
@@ -100,6 +101,7 @@ sl_status_t sli_usbd_msc_os_init(void)
     comm_signal_handle[class_nbr] = osSemaphoreNew(UINT32_MAX, 0, &comm_signal_attr[class_nbr]);
 
     if (comm_signal_handle[class_nbr] == NULL) {
+      SL_PRINT_STRING_ERROR("Failed to create MSC communication semaphore\r\n");
       return SL_STATUS_FAIL;
     }
 
@@ -111,6 +113,7 @@ sl_status_t sli_usbd_msc_os_init(void)
     connect_signal_handle[class_nbr] = osSemaphoreNew(UINT32_MAX, 0, &connect_signal_attr[class_nbr]);
 
     if (connect_signal_handle[class_nbr] == NULL) {
+      SL_PRINT_STRING_ERROR("Failed to create MSC connect semaphore\r\n");
       return SL_STATUS_FAIL;
     }
   }
@@ -125,9 +128,12 @@ sl_status_t sli_usbd_msc_os_init(void)
     lun_lock_handle[lu_ix] = osMutexNew(&lun_lock_attr[lu_ix]);
 
     if (lun_lock_handle[lu_ix] == NULL) {
+      SL_PRINT_STRING_ERROR("Failed to create MSC LUN mutex\r\n");
       return SL_STATUS_FAIL;
     }
   }
+
+  SL_PRINT_STRING_INFO("USB MSC OS initialized\r\n");
 
   return SL_STATUS_OK;
 }
@@ -152,6 +158,7 @@ sl_status_t sli_usbd_msc_os_create_task(uint8_t       class_nbr,
                                        &task_attr[class_nbr]);
 
   if (task_handle[class_nbr] == NULL) {
+    SL_PRINT_STRING_ERROR("Failed to create MSC task\r\n");
     return SL_STATUS_FAIL;
   }
 

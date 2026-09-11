@@ -17,7 +17,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="12693" column="14" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="12693" bodyend="-1"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="12697" column="14" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="12697" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="structsl__bt__evt__external__bondingdb__data__s_1a71eb6b25cc5f94d2168fca11a1d03389" prot="public" static="no" mutable="no">
         <type>uint8_t</type>
@@ -45,7 +45,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="12694" column="14" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="12694" bodyend="-1"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="12698" column="14" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="12698" bodyend="-1"/>
       </memberdef>
       <memberdef kind="variable" id="structsl__bt__evt__external__bondingdb__data__s_1a80a72bbf186e03f48f7b5b0c06928e4b" prot="public" static="no" mutable="no">
         <type><ref refid="structuint8array" kindref="compound">uint8array</ref></type>
@@ -60,7 +60,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="12739" column="14" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="12739" bodyend="-1"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="12743" column="14" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="12743" bodyend="-1"/>
       </memberdef>
     </sectiondef>
     <briefdescription>
@@ -81,7 +81,7 @@
         <link refid="structuint8array"/>
       </node>
     </collaborationgraph>
-    <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="12691" column="1" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="12692" bodyend="12740"/>
+    <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="12695" column="1" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="12696" bodyend="12744"/>
     <listofallmembers>
       <member refid="structsl__bt__evt__external__bondingdb__data__s_1a754c8dfe8753c4ab961b2567c69fbff0" prot="public" virt="non-virtual"><scope>sl_bt_evt_external_bondingdb_data_s</scope><name>connection</name></member>
       <member refid="structsl__bt__evt__external__bondingdb__data__s_1a80a72bbf186e03f48f7b5b0c06928e4b" prot="public" virt="non-virtual"><scope>sl_bt_evt_external_bondingdb_data_s</scope><name>data</name></member>

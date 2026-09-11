@@ -717,9 +717,9 @@ sl_status_t sli_get_free_socket(sli_si91x_socket_t **socket, int *socket_fd)
     return SL_STATUS_FAIL;
   }
 
-  // Fill the socket packet type configuration structure
-  sli_si91x_sockets[socket_index]->socket_packet_type_configuration.rx_event_handler = NULL;
-  sli_si91x_sockets[socket_index]->socket_packet_type_configuration.pre_tx_handler   = sli_si91x_socket_pre_tx_handler;
+  sli_si91x_sockets[socket_index]->socket_packet_type_configuration.rx_event_handler =
+    sli_si91x_wifi_command_engine_rx_packet_handler;
+  sli_si91x_sockets[socket_index]->socket_packet_type_configuration.pre_tx_handler = sli_si91x_socket_pre_tx_handler;
   sli_si91x_sockets[socket_index]->socket_packet_type_configuration.packet_processing_type =
     SLI_COMMAND_ENGINE_COMMAND_PACKET;
   sli_si91x_sockets[socket_index]->socket_packet_type_configuration.route_packet_type = SLI_WIFI_COMMAND_PACKET;

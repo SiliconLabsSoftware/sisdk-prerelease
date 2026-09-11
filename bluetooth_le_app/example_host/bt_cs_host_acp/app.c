@@ -122,13 +122,19 @@
   "        Used only for initiator instances\n"                                             \
   "        0 : Single antennas on both sides\n"                                             \
   "        1 : Dual antenna initiator & single antenna reflector\n"                         \
+  "        2 : Triple antenna initiator & single antenna reflector\n"                       \
+  "        3 : Quad antenna initiator & single antenna reflector\n"                         \
   "        4 : Single antenna initiator & dual antenna reflector\n"                         \
+  "        5 : Single antenna initiator & triple antenna reflector\n"                       \
+  "        6 : Single antenna initiator & quad antenna reflector\n"                         \
   "        7 : Dual antennas on both sides\n"                                               \
   "        Note: considered only with CS main mode: PBR!\n"                                 \
   "    -q  Antenna usage for CS SYNC packets, default: 0xFE\n"                              \
   "        Used for both initiator and reflector instances\n"                               \
   "        1 : use antenna ID1 only\n"                                                      \
   "        2 : use antenna ID2 only\n"                                                      \
+  "        3 : use antenna ID3 only\n"                                                      \
+  "        4 : use antenna ID4 only\n"                                                      \
   "        0xFE : Switching between antennas for each channel\n"                            \
   "        Note: considered only with CS main mode: RTT!\n"                                 \
   "    -s  Optimized procedure scheduling\n"                                                \
@@ -378,9 +384,13 @@ void app_cli_init(int argc, char *argv[])
       {
         int cs_tone_antenna_config_idx_req = atoi(optarg);
         if (cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY
-            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY
             && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE
-            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE) {
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_TRIPLE_LOCAL_SINGLE_REMOTE
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_QUAD_LOCAL_SINGLE_REMOTE
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_TRIPLE_REMOTE
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_QUAD_REMOTE
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY) {
           app_log_error(APP_PREFIX "Invalid antenna usage for PBR (%d) provided!" APP_LOG_NL,
                         cs_tone_antenna_config_idx_req);
           exit(EXIT_FAILURE);
@@ -399,6 +409,8 @@ void app_cli_init(int argc, char *argv[])
         }
         if (arg_data != CS_SYNC_ANTENNA_1
             && arg_data != CS_SYNC_ANTENNA_2
+            && arg_data != CS_SYNC_ANTENNA_3
+            && arg_data != CS_SYNC_ANTENNA_4
             && arg_data != CS_SYNC_SWITCHING) {
           app_log_error(APP_PREFIX "Invalid antenna usage for RTT (%u) provided!" APP_LOG_NL, arg_data);
           exit(EXIT_FAILURE);

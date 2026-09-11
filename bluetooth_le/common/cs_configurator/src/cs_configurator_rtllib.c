@@ -229,14 +229,24 @@ sl_status_t cs_configurator_validate_for_rtl(cs_configurator_parameters_t *confi
   }
   sl_bt_cs_mode_t main_mode = config->cs_config->main_mode_type;
   sl_bt_cs_mode_t sub_mode = config->cs_config->sub_mode_type;
+  uint8_t aci = config->cs_procedure_parameters->tone_antenna_config_selection;
+
+  if (main_mode == sl_bt_cs_mode_rtt) {
+    switch (aci) {
+      case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
+      case CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE:
+      case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE:
+      case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
+        break;
+      default:
+        return SL_STATUS_INVALID_PARAMETER;
+    }
+  }
 
   sc = validate_rtl_supported_combinations(main_mode,
                                            sub_mode,
                                            algo_mode,
                                            channel_map_preset);
-  if (sc != SL_STATUS_OK) {
-    return sc;
-  }
 
-  return SL_STATUS_OK;
+  return sc;
 }

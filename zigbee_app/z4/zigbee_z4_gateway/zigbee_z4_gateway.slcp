@@ -1,6 +1,6 @@
 project_name: zigbee_z4_gateway
 label: Zigbee - Host Z4 Gateway
-package: zigbee
+package: zigbee_app
 category: Zigbee Host Application
 quality: production
 

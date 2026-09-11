@@ -101,6 +101,10 @@ void sl_hal_rtcc_init(const sl_hal_rtcc_init_t *init)
               | (((uint32_t)init->counter_wrap_on_ccv_1) << _RTCC_CFG_CNTCCV1TOP_SHIFT)
               | (((uint32_t)init->prescaler) << _RTCC_CFG_CNTPRESC_SHIFT)
               | (((uint32_t)init->prescaler_mode) << _RTCC_CFG_CNTTICK_SHIFT);
+
+  SL_PRINT_STRING_DEBUG("debug=%d presc=%d\r\n",
+                        (int)init->debug_run,
+                        (int)init->prescaler);
 }
 
 /***************************************************************************//**
@@ -121,6 +125,10 @@ void sl_hal_rtcc_channel_init(uint32_t channel,
     volatile uint32_t *reg = &PRS->CONSUMER_RTCC_CC0;
     reg[channel] = init->prs_select;
   }
+
+  SL_PRINT_STRING_DEBUG("channel=%d mode=%d\r\n",
+                        (int)channel,
+                        (int)init->channel_mode);
 }
 
 /***************************************************************************//**

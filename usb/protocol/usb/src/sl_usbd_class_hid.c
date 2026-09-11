@@ -38,6 +38,7 @@
 #include "sl_core.h"
 #endif
 
+#include "sl_log_helper.h"
 #include "sl_usbd_core.h"
 #include "sli_usbd_core.h"
 
@@ -215,11 +216,13 @@ sl_status_t sl_usbd_hid_init(void)
 
   status = sli_usbd_hid_os_init();
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("USB HID OS initialization failed\r\n");
     return status;
   }
 
   status = sli_usbd_hid_report_init();
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("USB HID report initialization failed\r\n");
     return status;
   }
 
@@ -264,6 +267,8 @@ sl_status_t sl_usbd_hid_init(void)
   usbd_hid_ptr->ctrl_nbr_next = SL_USBD_HID_CLASS_INSTANCE_QUANTITY;
   usbd_hid_ptr->comm_nbr_next = SL_USBD_HID_CLASS_INSTANCE_QUANTITY * SL_USBD_HID_CONFIGURATION_QUANTITY;
 
+  SL_PRINT_STRING_INFO("USB HID class initialized\r\n");
+
   return SL_STATUS_OK;
 }
 
@@ -285,6 +290,7 @@ sl_status_t sl_usbd_hid_create_instance(uint8_t                     subclass,
   CORE_DECLARE_IRQ_STATE;
 
   if (p_class_nbr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -304,6 +310,7 @@ sl_status_t sl_usbd_hid_create_instance(uint8_t                     subclass,
   if (usbd_hid_ptr->ctrl_nbr_next == 0u) {
     CORE_EXIT_ATOMIC();
     *p_class_nbr = SL_USBD_CLASS_NBR_NONE;
+    SL_PRINT_STRING_ERROR("No HID class instances available\r\n");
     return SL_STATUS_ALLOCATION_FAILED;
   }
 
@@ -341,10 +348,12 @@ sl_status_t sl_usbd_hid_create_instance(uint8_t                     subclass,
 
   if (status != SL_STATUS_OK) {
     *p_class_nbr = SL_USBD_CLASS_NBR_NONE;
+    SL_PRINT_STRING_ERROR("HID report descriptor parsing failed\r\n");
     return status;
   }
 
   *p_class_nbr = class_nbr;
+  SL_PRINT_STRING_INFO("USB HID instance created\r\n");
   return SL_STATUS_OK;
 }
 
@@ -365,10 +374,12 @@ sl_status_t sl_usbd_hid_add_to_configuration(uint8_t  class_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (class_nbr >= SL_USBD_HID_CLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if (class_nbr < usbd_hid_ptr->ctrl_nbr_next) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -379,6 +390,7 @@ sl_status_t sl_usbd_hid_add_to_configuration(uint8_t  class_nbr,
 
   if (usbd_hid_ptr->comm_nbr_next == 0u) {
     CORE_EXIT_ATOMIC();
+    SL_PRINT_STRING_ERROR("No HID communication structures available\r\n");
     return SL_STATUS_ALLOCATION_FAILED;
   }
 
@@ -404,6 +416,7 @@ sl_status_t sl_usbd_hid_add_to_configuration(uint8_t  class_nbr,
                                       &if_nbr);
 
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("Failed to add HID interface\r\n");
     return status;
   }
 
@@ -427,6 +440,7 @@ sl_status_t sl_usbd_hid_add_to_configuration(uint8_t  class_nbr,
                                                &ep_addr);
 
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("Failed to add HID interrupt input endpoint\r\n");
     return status;
   }
 
@@ -444,6 +458,7 @@ sl_status_t sl_usbd_hid_add_to_configuration(uint8_t  class_nbr,
                                                  &ep_addr);
 
     if (status != SL_STATUS_OK) {
+      SL_PRINT_STRING_ERROR("Failed to add HID interrupt output endpoint\r\n");
       return status;
     }
   } else {
@@ -475,16 +490,19 @@ sl_status_t sl_usbd_hid_is_enabled(uint8_t  class_nbr,
   sl_status_t      status;
 
   if (p_enabled == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_HID_CLASS_INSTANCE_QUANTITY) {
     *p_enabled = false;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if (class_nbr < usbd_hid_ptr->ctrl_nbr_next) {
     *p_enabled = false;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -522,21 +540,25 @@ sl_status_t sl_usbd_hid_read_sync(uint8_t    class_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if ((p_buf == NULL) && (buf_len != 0)) {
     *p_xfer_len = 0u;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_HID_CLASS_INSTANCE_QUANTITY) {
     *p_xfer_len = 0u;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if (class_nbr < usbd_hid_ptr->ctrl_nbr_next) {
     *p_xfer_len = 0u;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -644,14 +666,17 @@ sl_status_t sl_usbd_hid_read_async(uint8_t                      class_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if ((p_buf == NULL) && (buf_len != 0)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_HID_CLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if (class_nbr < usbd_hid_ptr->ctrl_nbr_next) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -744,21 +769,25 @@ sl_status_t sl_usbd_hid_write_sync(uint8_t    class_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if ((p_buf == NULL) && (buf_len != 0)) {
     *p_xfer_len = 0u;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_HID_CLASS_INSTANCE_QUANTITY) {
     *p_xfer_len = 0u;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if (class_nbr < usbd_hid_ptr->ctrl_nbr_next) {
     *p_xfer_len = 0u;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -888,14 +917,17 @@ sl_status_t sl_usbd_hid_write_async(uint8_t                      class_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if ((p_buf == NULL) && (buf_len != 0)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_HID_CLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if (class_nbr < usbd_hid_ptr->ctrl_nbr_next) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 

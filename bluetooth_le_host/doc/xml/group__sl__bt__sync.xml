@@ -199,6 +199,7 @@
         <detaileddescription>
 <para>Update synchronization parameters for a periodic sync that was already established.</para>
 <para>When a sync is established by scanning (see <ref refid="group__sl__bt__sync__scanner" kindref="compound">Periodic Advertising Sync Scanner</ref>) or by receiving Periodic Advertising Synchronization Transfer (see <ref refid="group__sl__bt__past__receiver" kindref="compound">PAST Receiver</ref>), the sync gets the <computeroutput>skip</computeroutput> and <computeroutput>timeout</computeroutput> parameters that were configured in the corresponding class. The application can use this command <ref refid="group__sl__bt__sync_1ga6a07b03d27d0260c258d18f28791fbef" kindref="member">sl_bt_sync_update_sync_parameters</ref> to update the values of a sync that has been established. The application can for example update the values to better match the actual interval of the periodic advertising train, or to increase the <computeroutput>skip</computeroutput> value to minimize wakeups when power saving is prioritized over receiving every periodic advertisement.</para>
+<para>For an already synchronized train, <computeroutput>timeout</computeroutput> takes effect immediately. The scanner listens on the next periodic advertising interval, then continues skipping according to the updated <computeroutput>skip</computeroutput>.</para>
 <para>Irrespective of the value of the <computeroutput>skip</computeroutput> parameter, the Controller stops skipping packets if the skipping would cause a timeout.</para>
 <para><parameterlist kind="param"><parameteritem>
 <parameternamelist>
@@ -244,7 +245,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="4682" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="4682" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="4686" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="4686" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__sync_1ga628b8ea37bf3347475eb01b0971981aa" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -277,7 +278,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="4700" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="4700" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="4704" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="4704" declcolumn="13"/>
       </memberdef>
     </sectiondef>
     <sectiondef kind="define">

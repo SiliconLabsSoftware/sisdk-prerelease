@@ -1,6 +1,6 @@
 project_name: zigbee_ncp_uart_hw_gp_multi_rail
 label: Zigbee - NCP UART HW GP Multi Rail
-package: zigbee
+package: zigbee_app
 category: Zigbee Application
 quality: production
 description: "NCP using multirail-demo: second RAIL handle schedules Green Power device frames in response to bidirectional GPDF (rx-after-tx)."

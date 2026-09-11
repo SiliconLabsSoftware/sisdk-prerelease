@@ -283,6 +283,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Update synchronization parameters for a periodic sync that was already established.</p>
 <p>When a sync is established by scanning (see <a class="el" href="group__sl__bt__sync__scanner.html">Periodic Advertising Sync Scanner</a>) or by receiving Periodic Advertising Synchronization Transfer (see <a class="el" href="group__sl__bt__past__receiver.html">PAST Receiver</a>), the sync gets the <code>skip</code> and <code>timeout</code> parameters that were configured in the corresponding class. The application can use this command <a class="el" href="group__sl__bt__sync.html#ga6a07b03d27d0260c258d18f28791fbef">sl_bt_sync_update_sync_parameters</a> to update the values of a sync that has been established. The application can for example update the values to better match the actual interval of the periodic advertising train, or to increase the <code>skip</code> value to minimize wakeups when power saving is prioritized over receiving every periodic advertisement.</p>
+<p>For an already synchronized train, <code>timeout</code> takes effect immediately. The scanner listens on the next periodic advertising interval, then continues skipping according to the updated <code>skip</code>.</p>
 <p>Irrespective of the value of the <code>skip</code> parameter, the Controller stops skipping packets if the skipping would cause a timeout.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

@@ -47,6 +47,12 @@ NO_INIT(HalResetCauseType halExtendedResetCause);
 // Crash info live in noinit RAM segment that is not modified during startup.
 NO_INIT(HalCrashInfoType halCrashInfo);
 
+// LWM capture signature live in noinit RAM segment that is not modified during startup.
+NO_INIT(uint32_t halWatchdogLwmCaptureSignature);
+
+// LWM capture PC live in noinit RAM segment that is not modified during startup.
+NO_INIT(uint32_t halWatchdogLwmCapturePc);
+
 //------------------------------------------------------------------------------
 // Preprocessor definitions
 
@@ -161,6 +167,41 @@ static const char nameStrings[] = "R0\0R1\0R2\0R3\0"
 static uint16_t savedResetCause;
 static HalAssertInfoType savedAssertInfo;
 
+static bool halInternalIsTextThumbPc(uint32_t pc)
+{
+  if ((pc & 1U) == 0U) {
+    return false;
+  }
+
+  const uintptr_t addr = (uintptr_t)pc;
+
+  return (addr >= (uintptr_t)_TEXT_SEGMENT_BEGIN) && (addr < (uintptr_t)_TEXT_SEGMENT_END);
+}
+
+void halWatchdogLwmCaptureMark(uint32_t pc)
+{
+  if (!halInternalIsTextThumbPc(pc)) {
+    halWatchdogLwmCaptureClear();
+    return;
+  }
+
+  halWatchdogLwmCapturePc = pc;
+  halWatchdogLwmCaptureSignature = HAL_WATCHDOG_LWM_CAPTURE_SIGNATURE;
+}
+
+bool halWatchdogLwmCaptureIsValid(void)
+{
+  return (halWatchdogLwmCaptureSignature == HAL_WATCHDOG_LWM_CAPTURE_SIGNATURE)
+         && halInternalIsTextThumbPc(halWatchdogLwmCapturePc)
+         && halInternalIsTextThumbPc(halCrashInfo.PC);
+}
+
+void halWatchdogLwmCaptureClear(void)
+{
+  halWatchdogLwmCaptureSignature = 0U;
+  halWatchdogLwmCapturePc = 0U;
+}
+
 //------------------------------------------------------------------------------
 // Functions
 
@@ -208,7 +249,13 @@ void halPrintCrashDetails(uint8_t port)
 
   switch (reason) {
     case RESET_WATCHDOG_EXPIRED:
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: WDG expired\n");
+      if (halWatchdogLwmCaptureIsValid()) {
+        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: WDG expired PC=%08" PRIx32 "\n",
+                           c->PC);
+        halWatchdogLwmCaptureClear();
+      } else {
+        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: WDG expired\n");
+      }
       return;
     case RESET_WATCHDOG_CAUGHT:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: WDG caught PC=%08" PRIx32 "\n",

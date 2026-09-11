@@ -55,7 +55,11 @@ extern "C" {
 /**
  * @brief RSSI value is invalid or not measured
  */
-#define ZPAL_RADIO_INVALID_RSSI_DBM (-128)
+#define ZPAL_RADIO_INVALID_RSSI_DBM (-128)                  ///< invalid RSSI measured by RAIL
+#define ZPAL_RADIO_BACKGROUND_RSSI_VALID_MIN (-127)         ///< Minimum valid value for an RSSI sample
+#define ZPAL_RADIO_BACKGROUND_RSSI_VALID_MAX (124)          ///< Maximum valid value for an RSSI sample
+#define ZPAL_RADIO_BACKGROUND_RSSI_NOT_AVAILABLE_RX (125)   ///< background RSSI cannot be measured because of incomming transmission
+#define ZPAL_RADIO_BACKGROUND_RSSI_NOT_AVAILABLE_TX (126)   ///< background RSSI cannot be measured because of outgoing transmission
 #define ZPAL_RADIO_RSSI_NOT_AVAILABLE (127)
 
 //deci-dBm values
@@ -320,6 +324,7 @@ typedef enum {
   ZPAL_RADIO_EVENT_TX_BEAM_COMPLETE,   ///< Beam sent.
   ZPAL_RADIO_EVENT_TX_FAIL,            ///< Transmit failed.
   ZPAL_RADIO_EVENT_TX_FAIL_LBT,        ///< Transmit failed because of an LBT failure.
+  ZPAL_RADIO_EVENT_TX_NONE,            ///< No transmit event.
 } zpal_radio_tx_event_t;
 
 /**
@@ -575,7 +580,10 @@ void zpal_radio_clear_network_stats(void);
  * @brief Returns the background RSSI (in dBm).
  *
  * @param[in]   channel   uint8_t channel Id for measurement.
- * @param[out]  rssi      pointer where to store the background RSSI value.
+ * @param[out]  rssi      pointer where to store the background RSSI value. RSSI is set to:
+ *                        @ref ZPAL_RADIO_INVALID_RSSI_DBM in case of PHY issue.
+ *                        @ref ZPAL_RADIO_BACKGROUND_RSSI_NOT_AVAILABLE_RX if Rx is in progress.
+ *                        @ref ZPAL_RADIO_BACKGROUND_RSSI_NOT_AVAILABLE_TX if Tx is in progress.
  * @return @ref ZPAL_STATUS_OK if a valid RSSI value is available and read.
  *         @ref ZPAL_STATUS_BUSY if the radio is busy (TX/RX active), or if the
  *         underlying RAIL channel-hopping RSSI read is invalid. In those cases @a rssi is set to

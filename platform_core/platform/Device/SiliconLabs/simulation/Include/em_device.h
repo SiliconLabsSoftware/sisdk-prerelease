@@ -28,7 +28,19 @@
 * registers using "__IM" must be as permisive as possible instead of read only.
 * Additionally, "volatile" is not necessary since there are no interrupts in
 * the simulator and all behavior happens in sequence.
+*
+* Undef first so this header can override CMSIS / sl_compiler.h definitions
+* regardless of include order (avoids "__IM" redefined warnings).
 ******************************************************************************/
+#ifdef __IM
+#undef __IM
+#endif
+#ifdef __OM
+#undef __OM
+#endif
+#ifdef __IOM
+#undef __IOM
+#endif
 #define     __IM     /*volatile const*/  /*! Defines 'read only' structure member permissions */
 #define     __OM     volatile            /*! Defines 'write only' structure member permissions */
 #define     __IOM    volatile            /*! Defines 'read / write' structure member permissions */

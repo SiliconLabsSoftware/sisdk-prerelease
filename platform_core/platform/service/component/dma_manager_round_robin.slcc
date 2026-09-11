@@ -48,6 +48,9 @@ config_file:
 - path: config/8ch/sl_dma_manager_round_robin_config.h
   file_id: dma_manager_round_robin_config
   condition: [device_sdid_240]
+- path: config/16ch/sl_dma_manager_round_robin_config.h
+  file_id: dma_manager_round_robin_config
+  condition: [device_sdid_245]
 - path: config/8ch/sl_dma_manager_round_robin_config.h
   file_id: dma_manager_round_robin_config
   condition: [device_sdid_250]

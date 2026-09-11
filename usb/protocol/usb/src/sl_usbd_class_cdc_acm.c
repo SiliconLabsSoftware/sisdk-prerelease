@@ -41,6 +41,7 @@
 #include "sl_core.h"
 #endif
 
+#include "sl_log_helper.h"
 #include "sl_usbd_core.h"
 #include "sl_usbd_class_cdc.h"
 #include "sl_usbd_class_cdc_acm.h"
@@ -297,16 +298,19 @@ sl_status_t sl_usbd_cdc_acm_init(void)
     // Alloc control buffers.
     p_ctrl->req_buf_ptr = (uint8_t *)req_buffer;
     if (p_ctrl->req_buf_ptr == NULL) {
+      SL_PRINT_STRING_ERROR("CDC ACM buffer allocation failed\r\n");
       return SL_STATUS_ALLOCATION_FAILED;
     }
 
     p_ctrl->line_state_buf_ptr = (uint8_t *)line_state_buffer;
     if (p_ctrl->line_state_buf_ptr == NULL) {
+      SL_PRINT_STRING_ERROR("CDC ACM buffer allocation failed\r\n");
       return SL_STATUS_ALLOCATION_FAILED;
     }
 
     memset(p_ctrl->line_state_buf_ptr, 0, SLI_USBD_CDC_ACM_STATE_BUF_SIZE);
   }
+  SL_PRINT_STRING_INFO("USB CDC ACM initialized\r\n");
   return SL_STATUS_OK;
 }
 
@@ -326,6 +330,7 @@ sl_status_t sl_usbd_cdc_acm_create_instance(uint16_t                    line_sta
   CORE_DECLARE_IRQ_STATE;
 
   if (p_subclass_nbr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -333,6 +338,7 @@ sl_status_t sl_usbd_cdc_acm_create_instance(uint16_t                    line_sta
   if (usbd_cdc_acm.ctrl_nbr_next == 0u) {
     CORE_EXIT_ATOMIC();
     *p_subclass_nbr = SL_USBD_CDC_ACM_NBR_NONE;
+    SL_PRINT_STRING_WARN("USB CDC ACM instance limit reached\r\n");
     return SL_STATUS_ALLOCATION_FAILED;
   }
 
@@ -370,6 +376,7 @@ sl_status_t sl_usbd_cdc_acm_create_instance(uint16_t                    line_sta
   p_ctrl->call_mgmt_capabilities = call_mgmt_capabilities;        // See Note #2.
   p_ctrl->callbacks = p_acm_callbacks;
   p_ctrl->nbr = class_nbr;
+  SL_PRINT_STRING_INFO("USB CDC ACM instance created\r\n");
 
   *p_subclass_nbr = subclass_nbr;
   return SL_STATUS_OK;
@@ -385,6 +392,7 @@ sl_status_t sl_usbd_cdc_acm_add_to_configuration(uint8_t  subclass_nbr,
   sl_status_t status;
 
   if (subclass_nbr >= SL_USBD_CDC_ACM_SUBCLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -404,11 +412,13 @@ sl_status_t sl_usbd_cdc_acm_is_enabled(uint8_t  subclass_nbr,
   sli_usbd_cdc_acm_ctrl_t *p_ctrl;
 
   if (p_enabled == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (subclass_nbr >= SL_USBD_CDC_ACM_SUBCLASS_INSTANCE_QUANTITY) {
     *p_enabled = false;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -433,11 +443,13 @@ sl_status_t sl_usbd_cdc_acm_read(uint8_t  subclass_nbr,
   sl_status_t            status;
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (subclass_nbr >= SL_USBD_CDC_ACM_SUBCLASS_INSTANCE_QUANTITY) {
     *p_xfer_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -474,14 +486,17 @@ sl_status_t sl_usbd_cdc_acm_read_async(uint8_t                      subclass_nbr
   sl_status_t            status;
 
   if (async_fnct == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if ((p_buf == NULL) && (buf_len != 0u)) {
+    SL_LOG_DEBUG_ASSERT(false);
      return SL_STATUS_NULL_POINTER;
   }
 
   if (subclass_nbr >= SL_USBD_CDC_ACM_SUBCLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -530,11 +545,13 @@ sl_status_t sl_usbd_cdc_acm_write(uint8_t  subclass_nbr,
   sl_status_t            status;
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (subclass_nbr >= SL_USBD_CDC_ACM_SUBCLASS_INSTANCE_QUANTITY) {
     *p_xfer_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -571,14 +588,17 @@ sl_status_t sl_usbd_cdc_acm_write_async(uint8_t                      subclass_nb
   sl_status_t            status;
 
   if (async_fnct == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if ((p_buf == NULL) && (buf_len != 0u)) {
+    SL_LOG_DEBUG_ASSERT(false);
      return SL_STATUS_NULL_POINTER;
   }
 
   if (subclass_nbr >= SL_USBD_CDC_ACM_SUBCLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -622,10 +642,12 @@ sl_status_t sl_usbd_cdc_acm_get_line_control_state(uint8_t subclass_nbr,
   sli_usbd_cdc_acm_ctrl_t *p_ctrl;
 
   if (p_line_ctrl == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (subclass_nbr >= SL_USBD_CDC_ACM_SUBCLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -645,10 +667,12 @@ sl_status_t sl_usbd_cdc_acm_get_line_coding(uint8_t                       subcla
   CORE_DECLARE_IRQ_STATE;
 
   if (p_line_coding == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (subclass_nbr >= SL_USBD_CDC_ACM_SUBCLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -674,10 +698,12 @@ sl_status_t sl_usbd_cdc_acm_set_line_coding(uint8_t                       subcla
   CORE_DECLARE_IRQ_STATE;
 
   if (p_line_coding == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (subclass_nbr >= SL_USBD_CDC_ACM_SUBCLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -686,12 +712,14 @@ sl_status_t sl_usbd_cdc_acm_set_line_coding(uint8_t                       subcla
       && (p_line_coding->data_bits != 7u)
       && (p_line_coding->data_bits != 8u)
       && (p_line_coding->data_bits != 16u)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if ((p_line_coding->stop_bits != SL_USBD_CDC_ACM_STOP_BIT_1)
       && (p_line_coding->stop_bits != SL_USBD_CDC_ACM_STOP_BIT_1_5)
       && (p_line_coding->stop_bits != SL_USBD_CDC_ACM_STOP_BIT_2)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -700,6 +728,7 @@ sl_status_t sl_usbd_cdc_acm_set_line_coding(uint8_t                       subcla
       && (p_line_coding->parity != SL_USBD_CDC_ACM_PARITY_EVEN)
       && (p_line_coding->parity != SL_USBD_CDC_ACM_PARITY_MARK)
       && (p_line_coding->parity != SL_USBD_CDC_ACM_PARITY_SPACE)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -730,6 +759,7 @@ sl_status_t sl_usbd_cdc_acm_set_line_state_event(uint8_t subclass_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (subclass_nbr >= SL_USBD_CDC_ACM_SUBCLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -789,6 +819,7 @@ sl_status_t sl_usbd_cdc_acm_clear_line_state_event(uint8_t subclass_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (subclass_nbr >= SL_USBD_CDC_ACM_SUBCLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 

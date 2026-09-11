@@ -1,6 +1,6 @@
 project_name: zigbee_z3_switch
 label: Zigbee - SoC Z3 Switch
-package: zigbee
+package: zigbee_app
 category: Zigbee Application
 quality: production
 

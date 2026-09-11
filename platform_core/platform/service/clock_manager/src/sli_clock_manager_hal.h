@@ -131,10 +131,26 @@ sl_status_t sli_clock_manager_hal_hfxo_get_ctune(uint32_t *ctune);
 sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune);
 
 /***************************************************************************//**
+ * Starts an HFXO startup time measurement.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_start_hfxo_startup_time_measurement(void);
+
+/***************************************************************************//**
+ * Stops the active HFXO startup time measurement.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_stop_hfxo_startup_time_measurement(void);
+
+/***************************************************************************//**
  * Gets the HFXO's average startup time.
  ******************************************************************************/
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sli_clock_manager_hal_get_hfxo_average_startup_time(uint32_t *val);
+
+/***************************************************************************//**
+ * Processes a completed HFXO startup time measurement.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+void sli_clock_manager_hal_process_hfxo_startup_time_measurement(void);
 
 /***************************************************************************//**
  * Sets the LFXO frequency tuning control.

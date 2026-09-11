@@ -31,7 +31,7 @@
 #include "em_device.h"
 
 /* zpal includes */
-#include "system_startup.h"
+#include "zw_startup.h"
 #include "zpal_retention_register_private.h"
 #include "zpal_misc.h"
 #include "zpal_radio.h"
@@ -65,7 +65,7 @@ static zpal_status_t zw_shutdown_manager_sleeptimer_ticks_to_burtc_ticks(uint32_
   }
 
   uint32_t sleeptimer_freq = sl_sleeptimer_get_timer_frequency();
-  uint32_t burtc_freq = zpal_get_burtc_counter_frequency_hz();
+  uint32_t burtc_freq = zw_startup_get_burtc_counter_frequency_hz();
 
   if (sleeptimer_freq == 0U || burtc_freq == 0U) {
     return ZPAL_STATUS_FAIL;
@@ -171,7 +171,7 @@ void zw_shutdown_manager_callback(sl_power_manager_em_t from, sl_power_manager_e
     ZPAL_LOG_DEBUG(ZPAL_LOG_SHUTDOWN_MANAGER, "Reprogrammed BURTC compare %lu BURTC ticks (sleeptimer %lu ticks, %lu ms)\n", burtc_ticks_remaining, sleeptimer_ticks_remaining, sl_sleeptimer_tick_to_ms(sleeptimer_ticks_remaining));
     ZPAL_LOG_DEBUG(ZPAL_LOG_SHUTDOWN_MANAGER, "BURTC actual count=%d\n", counter);
 
-    // store the current BURTC count in retention register to compute sleep duration at wakeup time (system_startup_core() in system_startup.c)
+    // store the current BURTC count in retention register to compute sleep duration at wakeup time (system_startup_core() in zw_startup.c)
     zpal_retention_register_write_private(ZPAL_RETENTION_REGISTER_PRIVATE_DEEP_SLEEP_TICK, counter);
 
     BURTC_Start(); // start BURTC count

@@ -128,6 +128,8 @@ sl_status_t cs_configurator_get_estimation_time_us(cs_configurator_parameters_t 
 }
 
 sl_status_t cs_configurator_validate(cs_configurator_parameters_t *config,
+                                     cs_procedure_scheduling_t scheduling,
+                                     cs_algo_mode_t algo_mode,
                                      cs_channel_map_preset_t channel_map_preset,
                                      uint32_t estimation_time_us,
                                      uint8_t peer_count,
@@ -135,6 +137,7 @@ sl_status_t cs_configurator_validate(cs_configurator_parameters_t *config,
 {
   if ((config == NULL)
       || (config->cs_instance_config == NULL)
+      || (config->cs_config == NULL)
       || (config->cs_procedure_parameters == NULL)
       || (config->connection_parameters == NULL)) {
     return SL_STATUS_NULL_POINTER;
@@ -185,6 +188,17 @@ sl_status_t cs_configurator_validate(cs_configurator_parameters_t *config,
   if (config->cs_procedure_parameters->max_subevent_len
       > (config->cs_procedure_parameters->max_procedure_len * 625UL)) {
     return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  // Validate the parameters for the RTL library
+  sl_status_t sc = cs_configurator_validate_for_rtl(config,
+                                                    scheduling,
+                                                    algo_mode,
+                                                    channel_map_preset,
+                                                    estimation_time_us,
+                                                    peer_count);
+  if (sc != SL_STATUS_OK) {
+    return sc;
   }
 
   return SL_STATUS_OK;

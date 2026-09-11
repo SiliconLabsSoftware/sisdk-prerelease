@@ -87,6 +87,12 @@ void zpal_init_invalidate(void);
 zpal_reset_reason_t zpal_get_reset_reason(void);
 
 /**
+ * @brief Set the reset reason.
+ * @param[in] reason Reset reason.
+ */
+void zpal_set_reset_reason(zpal_reset_reason_t reason);
+
+/**
  * @brief System startup, implemented by Z-Wave SDK.
  *
  * @param[in] reset_reason Reset reason.

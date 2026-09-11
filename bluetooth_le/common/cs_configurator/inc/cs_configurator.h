@@ -91,9 +91,11 @@ sl_status_t cs_configurator_get_estimation_time_us(cs_configurator_parameters_t 
                                                    uint32_t *estimation_time_us_out);
 
 /***************************************************************************//**
- * Validate CS configuration values against timing and peer constraints.
+ * Validate CS configuration values against timing, RTL, and peer constraints.
  *
  * @param[in] config             Pointer to configuration parameters.
+ * @param[in] scheduling         Procedure scheduling mode.
+ * @param[in] algo_mode          RTL CS algorithm mode.
  * @param[in] channel_map_preset Channel map preset.
  * @param[in] estimation_time_us Estimated procedure time in microseconds.
  * @param[in] peer_count         Number of connected peers.
@@ -102,6 +104,8 @@ sl_status_t cs_configurator_get_estimation_time_us(cs_configurator_parameters_t 
  * @return Status of the validation.
  ******************************************************************************/
 sl_status_t cs_configurator_validate(cs_configurator_parameters_t *config,
+                                     cs_procedure_scheduling_t scheduling,
+                                     cs_algo_mode_t algo_mode,
                                      cs_channel_map_preset_t channel_map_preset,
                                      uint32_t estimation_time_us,
                                      uint8_t peer_count,

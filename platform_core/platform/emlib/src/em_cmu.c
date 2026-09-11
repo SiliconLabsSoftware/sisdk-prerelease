@@ -171,7 +171,7 @@ static const struct hfrcoCalTableElement hfrcoCalTable[] =
   { 51600000UL, 60500000UL, 0xBCEE9F00UL, cmuHFRCODPLLFreq_56M0Hz      },
   { 60500000UL, 72600000UL, 0xBCEF9F00UL, cmuHFRCODPLLFreq_64M0Hz      },
   { 72600000UL, 80000000UL, 0xCCF09F00UL, cmuHFRCODPLLFreq_80M0Hz      },
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) || defined (_SILICON_LABS_32B_SERIES_2_CONFIG_10)
   { 80000000UL, 100000000UL, 0xCCF19F00UL, cmuHFRCODPLLFreq_100M0Hz   }
 #endif
 };
@@ -192,6 +192,7 @@ static uint16_t hfxo_precision = 0xFFFF;
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)
 static int8_t ctuneDelta = 40; // Recommendation from analog team to counter the internal chip imbalance.
 #else
@@ -735,6 +736,7 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
@@ -785,6 +787,7 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
@@ -807,6 +810,7 @@ void CMU_ClockDivSet(CMU_Clock_TypeDef clock, CMU_ClkDiv_TypeDef div)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
@@ -1672,6 +1676,7 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)   \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
@@ -2114,6 +2119,7 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
@@ -2136,6 +2142,7 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+        || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10) \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)\
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
         || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
@@ -2166,6 +2173,7 @@ void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)   \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)   \
+      || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)  \
       || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)) \
@@ -5102,6 +5110,7 @@ static void em4GrpaClkGet(uint32_t *freq, CMU_Select_TypeDef *sel)
 __STATIC_INLINE uint32_t getWaitStatesByFrequencyAndVScale(uint32_t freq, int vscale)
 {
   uint32_t flashWs = MSC_READCTRL_MODE_WS3;
+  (void)freq;
 
   if (vscale == 0) {
     // VScale 1.1V core frequency ranges for wait-states configurations.
@@ -5291,7 +5300,7 @@ static uint32_t HFRCODPLLDevinfoGet(CMU_HFRCODPLLFreq_TypeDef freq)
       break;
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)
     case cmuHFRCODPLLFreq_100M0Hz:
       ret = DEVINFO->HFRCODPLLCAL[17].HFRCODPLLCAL;
       break;

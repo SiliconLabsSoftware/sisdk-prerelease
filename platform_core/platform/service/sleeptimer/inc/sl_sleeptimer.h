@@ -145,6 +145,14 @@ extern "C" {
 sl_status_t sl_sleeptimer_init(void);
 
 /***************************************************************************//**
+ * Checks if the Sleeptimer is initialized.
+ *
+ * @return true if initialized, false otherwise.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLEEPTIMER, SL_CODE_CLASS_TIME_CRITICAL)
+bool sl_sleeptimer_is_initialized(void);
+
+/***************************************************************************//**
  * Starts a 32 bits timer.
  *
  * @param handle Pointer to handle to timer.

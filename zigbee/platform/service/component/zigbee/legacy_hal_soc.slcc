@@ -34,6 +34,8 @@ requires:
 - name: common_token_manager
 - name: legacy_hal_wdog
   condition: [device_series_2]
+- name: 154_wdog_implementation
+  condition: [watchdog_manager]
 
 source:
 - path: platform/service/legacy_hal/src/crc.c

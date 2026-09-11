@@ -140,10 +140,12 @@ typedef struct ipv6_mreq {
 /// Sets or reads the full 8-bit IPv6 Traffic Class (RFC 3542 section 6.5), as int.
 #define IPV6_TCLASS                  1
 /// Set the unicast hop limit for the socket, as int.
-/// Valid values 0 and 255, -1 for using the route default.
+/// Valid values 0 to 255, -1 for using the route default.
 #define IPV6_UNICAST_HOPS            2
 /// Set the multicast hop limit for the socket, as int.
-/// Valid values 0 and 255, -1 for using the route default.
+/// Valid values 0 to 255, -1 for using the kernel default (2).
+/// Although RFC 3493 recommends a default of 1, the stack uses 3 as a
+/// compromise to allow LFN multicast to work out of the box.
 #define IPV6_MULTICAST_HOPS          3
 /// Specify PMTU preference, as int;
 /// Valid values -1 (PMTUD for unicast, default), 0 (PMTUD always), 1 (PMTUD off).

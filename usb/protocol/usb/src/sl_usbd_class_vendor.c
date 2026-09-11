@@ -36,6 +36,7 @@
 #include "sl_core.h"
 #endif
 
+#include "sl_log_helper.h"
 #include "sl_usbd_core.h"
 #include "sl_usbd_class_vendor.h"
 
@@ -296,6 +297,7 @@ sl_status_t sl_usbd_vendor_create_instance(bool                        intr_en,
   if (usbd_vendor.ctrl_nbr_next == 0u) {
     CORE_EXIT_ATOMIC();
     *p_class_nbr = SL_USBD_CLASS_NBR_NONE;
+    SL_PRINT_STRING_ERROR("No vendor class instances available\r\n");
     return SL_STATUS_ALLOCATION_FAILED;
   }
 
@@ -312,6 +314,7 @@ sl_status_t sl_usbd_vendor_create_instance(bool                        intr_en,
   p_ctrl->callback_ptr = p_vendor_callbacks;                   // App callback for vendor-specific req.
 
   *p_class_nbr = vendor_class_nbr;
+  SL_PRINT_STRING_DEBUG("USB Vendor instance created\r\n");
   return SL_STATUS_OK;
 }
 
@@ -331,6 +334,7 @@ sl_status_t sl_usbd_vendor_add_to_configuration(uint8_t class_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (class_nbr >= SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -341,6 +345,7 @@ sl_status_t sl_usbd_vendor_add_to_configuration(uint8_t class_nbr,
 
   if (usbd_vendor.comm_nbr_next == 0u) {
     CORE_EXIT_ATOMIC();
+    SL_PRINT_STRING_ERROR("No vendor class communication structures available\r\n");
     return SL_STATUS_ALLOCATION_FAILED;
   }
 
@@ -452,6 +457,7 @@ sl_status_t sl_usbd_vendor_add_to_configuration(uint8_t class_nbr,
   // Save ref to vendor class instance ctrl struct.
   p_comm->ctrl_ptr = p_ctrl;
 
+  SL_PRINT_STRING_DEBUG("USB Vendor instance added to configuration\r\n");
   return SL_STATUS_OK;
 }
 
@@ -498,6 +504,7 @@ sl_status_t sl_usbd_vendor_add_microsoft_ext_property(uint8_t        class_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (class_nbr >= SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -508,14 +515,17 @@ sl_status_t sl_usbd_vendor_add_microsoft_ext_property(uint8_t        class_nbr,
         || (property_type == SL_USBD_MICROSOFT_PROPERTY_TYPE_REG_DWORD_BIG_ENDIAN)
         || (property_type == SL_USBD_MICROSOFT_PROPERTY_TYPE_REG_LINK)
         || (property_type == SL_USBD_MICROSOFT_PROPERTY_TYPE_REG_MULTI_SZ))) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if ((p_property_name == NULL) && (property_name_len != 0u)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if ((p_property == NULL) && (property_len != 0u)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -528,7 +538,7 @@ sl_status_t sl_usbd_vendor_add_microsoft_ext_property(uint8_t        class_nbr,
 #if (RTOS_ARG_CHK_EXT_EN == 1)
   if (ext_property_nbr >= SL_USBD_VENDOR_MS_EXTENDED_PROPERTIES_QUANTITY) {
     CORE_EXIT_ATOMIC();
-
+    SL_PRINT_STRING_ERROR("No Microsoft extended properties available\r\n");
     return SL_STATUS_ALLOCATION_FAILED;
   }
 #endif
@@ -670,16 +680,19 @@ sl_status_t sl_usbd_vendor_read_bulk_sync(uint8_t    class_nbr,
   sl_status_t        status;
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if ((p_buf == NULL) && (buf_len != 0u)) {
     *p_xfer_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY) {
     *p_xfer_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -725,16 +738,19 @@ sl_status_t sl_usbd_vendor_write_bulk_sync(uint8_t     class_nbr,
   sl_status_t            status;
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if ((p_buf == NULL) && (buf_len != 0u)) {
     *p_xfer_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY) {
     *p_xfer_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -779,10 +795,12 @@ sl_status_t sl_usbd_vendor_read_bulk_async(uint8_t                         class
   sl_status_t        status;
 
   if ((p_buf == NULL) && (buf_len != 0u)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -833,10 +851,12 @@ sl_status_t sl_usbd_vendor_write_bulk_async(uint8_t                         clas
   sl_status_t             status;
 
   if ((p_buf == NULL) && (buf_len != 0u)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -888,16 +908,19 @@ sl_status_t sl_usbd_vendor_read_interrupt_sync(uint8_t    class_nbr,
   sl_status_t             status;
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if ((p_buf == NULL) && (buf_len != 0u)) {
     *p_xfer_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY) {
     *p_xfer_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -943,16 +966,19 @@ sl_status_t sl_usbd_vendor_write_interrupt_sync(uint8_t   class_nbr,
   sl_status_t             status;
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if ((p_buf == NULL) && (buf_len != 0u)) {
     *p_xfer_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY) {
     *p_xfer_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -997,10 +1023,12 @@ sl_status_t sl_usbd_vendor_read_interrupt_async(uint8_t                         
   sl_status_t             status;
 
   if ((p_buf == NULL) && (buf_len != 0u)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1051,10 +1079,12 @@ sl_status_t sl_usbd_vendor_write_interrupt_async(uint8_t                        
   sl_status_t        status;
 
   if ((p_buf == NULL) && (buf_len != 0u)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_VENDOR_CLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 

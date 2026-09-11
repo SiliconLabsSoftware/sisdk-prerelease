@@ -44,6 +44,7 @@ requires:
 - name: udelay
 - name: clock_manager_runtime
 - name: gpio
+- name: log_none
 
 template_contribution:
 - name: component_catalog

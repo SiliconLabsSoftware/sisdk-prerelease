@@ -27,6 +27,7 @@
 
 #include "cmsis_os2.h"
 
+#include "sl_log_helper.h"
 #include "sl_usbd_core.h"
 #include "sl_usbd_class_hid.h"
 #include "sli_usbd_class_hid.h"
@@ -102,6 +103,7 @@ sl_status_t sli_usbd_hid_os_init(void)
     tx_mutex_handle[class_nbr] = osMutexNew(&tx_mutex_attr[class_nbr]);
 
     if (tx_mutex_handle[class_nbr] == NULL) {
+      SL_PRINT_STRING_ERROR("Failed to create HID TX mutex\r\n");
       return SL_STATUS_FAIL;
     }
 
@@ -113,6 +115,7 @@ sl_status_t sli_usbd_hid_os_init(void)
     output_mutex_handle[class_nbr] = osMutexNew(&output_mutex_attr[class_nbr]);
 
     if (output_mutex_handle[class_nbr] == NULL) {
+      SL_PRINT_STRING_ERROR("Failed to create HID output mutex\r\n");
       return SL_STATUS_FAIL;
     }
 
@@ -124,6 +127,7 @@ sl_status_t sli_usbd_hid_os_init(void)
     input_mutex_handle[class_nbr] = osMutexNew(&input_mutex_attr[class_nbr]);
 
     if (input_mutex_handle[class_nbr] == NULL) {
+      SL_PRINT_STRING_ERROR("Failed to create HID input mutex\r\n");
       return SL_STATUS_FAIL;
     }
 
@@ -135,6 +139,7 @@ sl_status_t sli_usbd_hid_os_init(void)
     input_eventflags_handle[class_nbr] = osEventFlagsNew(&input_eventflags_attr[class_nbr]);
 
     if (input_eventflags_handle[class_nbr] == NULL) {
+      SL_PRINT_STRING_ERROR("Failed to create HID input event flags\r\n");
       return SL_STATUS_FAIL;
     }
 
@@ -155,8 +160,10 @@ sl_status_t sli_usbd_hid_os_init(void)
                                   &timer_task_attr);
 
   if (timer_task_handle == NULL) {
+    SL_PRINT_STRING_ERROR("Failed to create HID timer task\r\n");
     return SL_STATUS_FAIL;
   }
+  SL_PRINT_STRING_INFO("USB HID OS initialized\r\n");
 
   return SL_STATUS_OK;
 }

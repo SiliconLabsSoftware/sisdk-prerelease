@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Application logging command line interface source file
+ * @brief DEVICE_INIT_DCDC Config
  *******************************************************************************
  * # License
- * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,35 +28,31 @@
  *
  ******************************************************************************/
 
-#include "app_log.h"
-#include "app_log_cli.h"
-#include <stdint.h>
-#include <stdlib.h>
+#ifndef SL_DEVICE_INIT_DCDC_CONFIG_H
+#define SL_DEVICE_INIT_DCDC_CONFIG_H
 
-/**************************************************************************//**
- * Set application log options.
- *****************************************************************************/
-sl_status_t app_log_set_option(char option, char *value)
-{
-  sl_status_t sc = SL_STATUS_OK;
-  unsigned long log_lev;
+// <<< Use Configuration Wizard in Context Menu >>>
 
-  switch (option) {
-    // App log level.
-    case 'l':
-      log_lev = strtoul(value, NULL, 0);
-      if (log_lev >= APP_LOG_LEVEL_COUNT) {
-        sc = SL_STATUS_INVALID_PARAMETER;
-#if defined(APP_LOG_LEVEL_FILTER_DYNAMIC) && APP_LOG_LEVEL_FILTER_DYNAMIC == 1
-      } else {
-        sc = app_log_filter_threshold_set((uint8_t)log_lev);
-#endif // defined(APP_LOG_LEVEL_FILTER_DYNAMIC) && APP_LOG_LEVEL_FILTER_DYNAMIC == 1
-      }
-      break;
-    // Unknown option.
-    default:
-      sc = SL_STATUS_NOT_FOUND;
-      break;
-  }
-  return sc;
-}
+// <q SL_DEVICE_INIT_DCDC_ENABLE> Enable DC/DC Converter
+// <i>
+// <i> Default: 1
+#define SL_DEVICE_INIT_DCDC_ENABLE         1
+
+// <q SL_DEVICE_INIT_DCDC_BYPASS> Set DC/DC Converter in Bypass Mode
+// <i>
+// <i> Default: 0
+#define SL_DEVICE_INIT_DCDC_BYPASS         0
+
+// <q SL_DEVICE_INIT_DCDC_PFMX_IPKVAL_OVERRIDE> Override for DCDC PFMX Mode Peak Current Setting
+// <i>
+// <i> Default: 6
+#define SL_DEVICE_INIT_DCDC_PFMX_IPKVAL_OVERRIDE  6
+
+// <o SL_DEVICE_INIT_DCDC_PFMX_IPKVAL> DCDC PFMX Mode Peak Current Setting <0-15>
+// <i>
+// <i> Default: DCDC_PFMXCTRL_IPKVAL_DEFAULT
+#define SL_DEVICE_INIT_DCDC_PFMX_IPKVAL    6
+
+// <<< end of configuration section >>>
+
+#endif // SL_DEVICE_INIT_DCDC_CONFIG_H

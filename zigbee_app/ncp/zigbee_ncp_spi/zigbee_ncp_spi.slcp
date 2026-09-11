@@ -1,6 +1,6 @@
 project_name: zigbee_ncp_spi
 label: Zigbee - NCP SPI
-package: zigbee
+package: zigbee_app
 category: Zigbee Application
 quality: production
 description: NCP for host communication over SPI. Extensible for initialization, events, and messaging with the host.

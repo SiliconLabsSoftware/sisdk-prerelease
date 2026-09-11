@@ -245,7 +245,8 @@ extern "C" {
 #define SLI_CLOCK_MANAGER_PCLK_MAX_FREQ_HZ      40000000UL
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)
 // The maximum PCLK frequency for EFX32XG25 is actually 48.75MHz,
 // but 50MHz is used to account for the fact that the HFRCO Band
 // said to be 100MHz would actually be around 97.5MHz. 50MHz is

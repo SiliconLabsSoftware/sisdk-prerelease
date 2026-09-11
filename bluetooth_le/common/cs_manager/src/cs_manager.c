@@ -58,6 +58,39 @@ static void handle_cs_procedure_enable_completed(const sl_bt_evt_cs_procedure_en
 static void send_instance_create_failed(cs_manager_t *m, sl_status_t status);
 static void enable_security(cs_manager_t *m);
 static sl_status_t update_phy(cs_manager_t *m);
+static uint8_t select_cs_sync_antenna(uint8_t conn_handle,
+                                      uint8_t sync_antenna_req,
+                                      uint8_t num_antennas);
+static sl_status_t select_pbr_n_to_1_antennas(uint8_t conn_handle,
+                                              uint8_t aci_req,
+                                              uint8_t local_antenna_count,
+                                              uint8_t max_antenna_paths,
+                                              uint8_t *antenna_config,
+                                              uint8_t *num_antenna_paths);
+static sl_status_t select_pbr_1_to_n_antennas(uint8_t conn_handle,
+                                              uint8_t aci_req,
+                                              uint8_t remote_antenna_count,
+                                              uint8_t max_antenna_paths,
+                                              uint8_t *antenna_config,
+                                              uint8_t *num_antenna_paths);
+static sl_status_t select_pbr_dual_only_antennas(uint8_t conn_handle,
+                                                 uint8_t local_antenna_count,
+                                                 uint8_t remote_antenna_count,
+                                                 uint8_t max_antenna_paths,
+                                                 uint8_t *antenna_config,
+                                                 uint8_t *num_antenna_paths);
+static sl_status_t select_pbr_antennas(uint8_t conn_handle,
+                                       uint8_t aci_req,
+                                       uint8_t local_antenna_count,
+                                       uint8_t remote_antenna_count,
+                                       uint8_t max_antenna_paths,
+                                       uint8_t *antenna_config,
+                                       uint8_t *num_antenna_paths);
+static uint8_t remote_antenna_count_from_aci(uint8_t aci);
+static uint8_t count_preferred_peer_antenna_bits(uint8_t mask);
+static uint8_t adjust_preferred_peer_antenna(uint8_t conn_handle,
+                                             uint8_t preferred_peer_antenna,
+                                             uint8_t aci);
 
 // -----------------------------------------------------------------------------
 // Static variables
@@ -158,36 +191,9 @@ sl_status_t cs_manager_create(uint8_t conn_handle,
     (void)app_rta_release(cs_manager_ctx);
     return sc;
   }
-  cs_sync_antenna = inst_config->cs_sync_antenna;
-
-  switch (inst_config->cs_sync_antenna) {
-    case CS_SYNC_ANTENNA_1:
-      cs_manager_log_info(INSTANCE_PREFIX "RTT - Using the antenna ID 1" NL,
-                          conn_handle);
-      break;
-    case CS_SYNC_ANTENNA_2:
-      if (num_antennas >= 2) {
-        cs_manager_log_info(INSTANCE_PREFIX " RTT - 2-antenna device! Using the antenna ID 2" NL,
-                            conn_handle);
-      } else {
-        cs_manager_log_info(INSTANCE_PREFIX " RTT - only 1-antenna device! Using the antenna ID 1" NL,
-                            conn_handle);
-        cs_sync_antenna = CS_SYNC_ANTENNA_1;
-      }
-      break;
-    case CS_SYNC_SWITCHING:
-      cs_manager_log_info(INSTANCE_PREFIX " RTT - switching between %u available antennas" NL,
-                          conn_handle,
-                          num_antennas);
-      cs_sync_antenna = CS_SYNC_SWITCHING;
-      break;
-    default:
-      cs_manager_log_info(INSTANCE_PREFIX " RTT - unknown antenna usage! "
-                                          "Using the default setting: antenna ID 1" NL,
-                          conn_handle);
-      cs_sync_antenna = CS_SYNC_ANTENNA_1;
-      break;
-  }
+  cs_sync_antenna = select_cs_sync_antenna(conn_handle,
+                                           inst_config->cs_sync_antenna,
+                                           num_antennas);
 
   sl_bt_cs_role_status_t initiator_status = sl_bt_cs_role_status_disable;
   sl_bt_cs_role_status_t reflector_status = sl_bt_cs_role_status_disable;
@@ -446,6 +452,61 @@ sl_status_t cs_manager_get_default_procedure_parameters(cs_procedure_parameters_
   (void)params;
   return SL_STATUS_NOT_SUPPORTED;
   #endif // SL_CATALOG_CS_MANAGER_FEATURE_CONTROL_PRESENT
+}
+
+sl_status_t cs_manager_select_antennas(uint8_t conn_handle,
+                                       uint8_t main_mode,
+                                       uint8_t local_antenna_count,
+                                       uint8_t remote_antenna_count,
+                                       uint8_t max_antenna_paths,
+                                       cs_procedure_parameters_t *procedure_parameters,
+                                       uint8_t *num_antenna_paths_out)
+{
+  sl_status_t sc = SL_STATUS_OK;
+  uint8_t antenna_config;
+  uint8_t num_antenna_paths = 0;
+
+  if (procedure_parameters == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  antenna_config = procedure_parameters->tone_antenna_config_selection;
+
+  // ACI 0..7 map to [local:remote] patterns with N_AP in {1,2,3,4} (spec max is 4).
+  if (main_mode == sl_bt_cs_mode_pbr) {
+    sc = select_pbr_antennas(conn_handle,
+                             procedure_parameters->tone_antenna_config_selection,
+                             local_antenna_count,
+                             remote_antenna_count,
+                             max_antenna_paths,
+                             &antenna_config,
+                             &num_antenna_paths);
+    cs_manager_log_debug(INSTANCE_PREFIX "CS - PBR - using %u antenna paths" NL,
+                         conn_handle,
+                         num_antenna_paths);
+  }
+
+  procedure_parameters->tone_antenna_config_selection = antenna_config;
+  cs_manager_log_info(INSTANCE_PREFIX "Using tone antenna configuration index: %u" NL,
+                      conn_handle,
+                      antenna_config);
+
+  // Align preferred_peer_antenna bit count with the remote antennas required by ACI
+  if (main_mode == sl_bt_cs_mode_pbr) {
+    procedure_parameters->preferred_peer_antenna =
+      adjust_preferred_peer_antenna(conn_handle,
+                                    procedure_parameters->preferred_peer_antenna,
+                                    antenna_config);
+  }
+  cs_manager_log_info(INSTANCE_PREFIX "Using preferred peer antenna: 0x%02X" NL,
+                      conn_handle,
+                      procedure_parameters->preferred_peer_antenna);
+
+  if (num_antenna_paths_out != NULL) {
+    *num_antenna_paths_out = num_antenna_paths;
+  }
+
+  return sc;
 }
 
 sl_status_t cs_manager_get_default_config(cs_config_t *config)
@@ -736,6 +797,436 @@ void cs_manager_on_bt_event(const sl_bt_msg_t *evt)
 
 // -----------------------------------------------------------------------------
 // Private functions
+
+/******************************************************************************
+ * Select PBR N:1 antennas (ACI 0..3) with fallbacks.
+ *****************************************************************************/
+static sl_status_t select_pbr_n_to_1_antennas(uint8_t conn_handle,
+                                              uint8_t aci_req,
+                                              uint8_t local_antenna_count,
+                                              uint8_t max_antenna_paths,
+                                              uint8_t *antenna_config,
+                                              uint8_t *num_antenna_paths)
+{
+  sl_status_t sc = SL_STATUS_OK;
+
+  switch (aci_req) {
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
+      *num_antenna_paths = 1;
+      break;
+    case CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE:
+      if ((local_antenna_count >= 2) && (max_antenna_paths >= 2)) {
+        *num_antenna_paths = 2;
+        cs_manager_log_info(INSTANCE_PREFIX "CS - PBR - 2:1 antenna usage set" NL,
+                            conn_handle);
+      } else {
+        cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage is possible only!" NL,
+                               conn_handle);
+        *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+        *num_antenna_paths = 1;
+        sc = SL_STATUS_NOT_SUPPORTED;
+      }
+      break;
+    case CS_ANTENNA_CONFIG_INDEX_TRIPLE_LOCAL_SINGLE_REMOTE:
+      if ((local_antenna_count >= 3) && (max_antenna_paths >= 3)) {
+        *num_antenna_paths = 3;
+        cs_manager_log_info(INSTANCE_PREFIX "CS - PBR - 3:1 antenna usage set" NL,
+                            conn_handle);
+      } else if ((local_antenna_count >= 2) && (max_antenna_paths >= 2)) {
+        *num_antenna_paths = 2;
+        *antenna_config = CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE;
+        cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - falling back to 2:1 antenna usage" NL,
+                               conn_handle);
+        sc = SL_STATUS_NOT_SUPPORTED;
+      } else {
+        cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage is possible only!" NL,
+                               conn_handle);
+        *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+        *num_antenna_paths = 1;
+        sc = SL_STATUS_NOT_SUPPORTED;
+      }
+      break;
+    case CS_ANTENNA_CONFIG_INDEX_QUAD_LOCAL_SINGLE_REMOTE:
+      if ((local_antenna_count >= 4) && (max_antenna_paths >= 4)) {
+        *num_antenna_paths = 4;
+        cs_manager_log_info(INSTANCE_PREFIX "CS - PBR - 4:1 antenna usage set" NL,
+                            conn_handle);
+      } else if ((local_antenna_count >= 3) && (max_antenna_paths >= 3)) {
+        *num_antenna_paths = 3;
+        *antenna_config = CS_ANTENNA_CONFIG_INDEX_TRIPLE_LOCAL_SINGLE_REMOTE;
+        cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - falling back to 3:1 antenna usage" NL,
+                               conn_handle);
+        sc = SL_STATUS_NOT_SUPPORTED;
+      } else if ((local_antenna_count >= 2) && (max_antenna_paths >= 2)) {
+        *num_antenna_paths = 2;
+        *antenna_config = CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE;
+        cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - falling back to 2:1 antenna usage" NL,
+                               conn_handle);
+        sc = SL_STATUS_NOT_SUPPORTED;
+      } else {
+        cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage is possible only!" NL,
+                               conn_handle);
+        *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+        *num_antenna_paths = 1;
+        sc = SL_STATUS_NOT_SUPPORTED;
+      }
+      break;
+    default:
+      break;
+  }
+
+  return sc;
+}
+
+/******************************************************************************
+ * Select PBR 1:N antennas (ACI 4..6) with fallbacks.
+ *****************************************************************************/
+static sl_status_t select_pbr_1_to_n_antennas(uint8_t conn_handle,
+                                              uint8_t aci_req,
+                                              uint8_t remote_antenna_count,
+                                              uint8_t max_antenna_paths,
+                                              uint8_t *antenna_config,
+                                              uint8_t *num_antenna_paths)
+{
+  sl_status_t sc = SL_STATUS_OK;
+
+  switch (aci_req) {
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE:
+      if ((remote_antenna_count >= 2) && (max_antenna_paths >= 2)) {
+        *num_antenna_paths = 2;
+        cs_manager_log_info(INSTANCE_PREFIX "CS - PBR - 1:2 antenna usage set" NL,
+                            conn_handle);
+      } else {
+        cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage is possible only!" NL,
+                               conn_handle);
+        *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+        *num_antenna_paths = 1;
+        sc = SL_STATUS_NOT_SUPPORTED;
+      }
+      break;
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_TRIPLE_REMOTE:
+      if ((remote_antenna_count >= 3) && (max_antenna_paths >= 3)) {
+        *num_antenna_paths = 3;
+        cs_manager_log_info(INSTANCE_PREFIX "CS - PBR - 1:3 antenna usage set" NL,
+                            conn_handle);
+      } else if ((remote_antenna_count >= 2) && (max_antenna_paths >= 2)) {
+        *num_antenna_paths = 2;
+        *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE;
+        cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - falling back to 1:2 antenna usage" NL,
+                               conn_handle);
+        sc = SL_STATUS_NOT_SUPPORTED;
+      } else {
+        cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage is possible only!" NL,
+                               conn_handle);
+        *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+        *num_antenna_paths = 1;
+        sc = SL_STATUS_NOT_SUPPORTED;
+      }
+      break;
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_QUAD_REMOTE:
+      if ((remote_antenna_count >= 4) && (max_antenna_paths >= 4)) {
+        *num_antenna_paths = 4;
+        cs_manager_log_info(INSTANCE_PREFIX "CS - PBR - 1:4 antenna usage set" NL,
+                            conn_handle);
+      } else if ((remote_antenna_count >= 3) && (max_antenna_paths >= 3)) {
+        *num_antenna_paths = 3;
+        *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_TRIPLE_REMOTE;
+        cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - falling back to 1:3 antenna usage" NL,
+                               conn_handle);
+        sc = SL_STATUS_NOT_SUPPORTED;
+      } else if ((remote_antenna_count >= 2) && (max_antenna_paths >= 2)) {
+        *num_antenna_paths = 2;
+        *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE;
+        cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - falling back to 1:2 antenna usage" NL,
+                               conn_handle);
+        sc = SL_STATUS_NOT_SUPPORTED;
+      } else {
+        cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage is possible only!" NL,
+                               conn_handle);
+        *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+        *num_antenna_paths = 1;
+        sc = SL_STATUS_NOT_SUPPORTED;
+      }
+      break;
+    default:
+      break;
+  }
+
+  return sc;
+}
+
+/******************************************************************************
+ * Select PBR 2:2 (dual-only) antennas with fallbacks.
+ *****************************************************************************/
+static sl_status_t select_pbr_dual_only_antennas(uint8_t conn_handle,
+                                                 uint8_t local_antenna_count,
+                                                 uint8_t remote_antenna_count,
+                                                 uint8_t max_antenna_paths,
+                                                 uint8_t *antenna_config,
+                                                 uint8_t *num_antenna_paths)
+{
+  sl_status_t sc = SL_STATUS_OK;
+
+  if ((remote_antenna_count >= 2) && (local_antenna_count >= 2)
+      && (max_antenna_paths >= 4)) {
+    *num_antenna_paths = 4;
+    cs_manager_log_info(INSTANCE_PREFIX "CS - PBR - 2:2 antenna usage set" NL,
+                        conn_handle);
+  } else if ((remote_antenna_count >= 2) && (local_antenna_count >= 2)
+             && (max_antenna_paths >= 2)) {
+    // Prefer local antenna switching when max paths cannot support 2:2
+    *num_antenna_paths = 2;
+    *antenna_config = CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE;
+    cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - max antenna paths limited to %u; "
+                                           "using 2:1 antenna usage" NL,
+                           conn_handle,
+                           max_antenna_paths);
+    sc = SL_STATUS_NOT_SUPPORTED;
+  } else if ((remote_antenna_count >= 2) && (local_antenna_count >= 2)) {
+    cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - max antenna paths limited to %u; "
+                                           "using 1:1 antenna usage" NL,
+                           conn_handle,
+                           max_antenna_paths);
+    *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+    *num_antenna_paths = 1;
+    sc = SL_STATUS_NOT_SUPPORTED;
+  } else if ((remote_antenna_count == 1) && (local_antenna_count == 2)
+             && (max_antenna_paths >= 2)) {
+    *num_antenna_paths = 2;
+    *antenna_config = CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE;
+    cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - 2:1 antenna usage set" NL,
+                           conn_handle);
+    sc = SL_STATUS_NOT_SUPPORTED;
+  } else if ((remote_antenna_count == 2) && (local_antenna_count == 1)
+             && (max_antenna_paths >= 2)) {
+    // Only one local antenna: use remote switching when max paths allow
+    *num_antenna_paths = 2;
+    *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE;
+    cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - 1:2 antenna usage set" NL,
+                           conn_handle);
+    sc = SL_STATUS_NOT_SUPPORTED;
+  } else {
+    cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - 1:1 antenna usage is possible only!" NL,
+                           conn_handle);
+    *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+    *num_antenna_paths = 1;
+    sc = SL_STATUS_NOT_SUPPORTED;
+  }
+
+  return sc;
+}
+
+/******************************************************************************
+ * Select PBR tone ACI and antenna path count.
+ *****************************************************************************/
+static sl_status_t select_pbr_antennas(uint8_t conn_handle,
+                                       uint8_t aci_req,
+                                       uint8_t local_antenna_count,
+                                       uint8_t remote_antenna_count,
+                                       uint8_t max_antenna_paths,
+                                       uint8_t *antenna_config,
+                                       uint8_t *num_antenna_paths)
+{
+  // ACI 0..3 map to N:1
+  if (aci_req <= CS_ANTENNA_CONFIG_INDEX_QUAD_LOCAL_SINGLE_REMOTE) {
+    return select_pbr_n_to_1_antennas(conn_handle,
+                                      aci_req,
+                                      local_antenna_count,
+                                      max_antenna_paths,
+                                      antenna_config,
+                                      num_antenna_paths);
+  }
+  // ACI 4..6 map to 1:N
+  if (aci_req <= CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_QUAD_REMOTE) {
+    return select_pbr_1_to_n_antennas(conn_handle,
+                                      aci_req,
+                                      remote_antenna_count,
+                                      max_antenna_paths,
+                                      antenna_config,
+                                      num_antenna_paths);
+  }
+  if (aci_req == CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY) {
+    return select_pbr_dual_only_antennas(conn_handle,
+                                         local_antenna_count,
+                                         remote_antenna_count,
+                                         max_antenna_paths,
+                                         antenna_config,
+                                         num_antenna_paths);
+  }
+
+  cs_manager_log_warning(INSTANCE_PREFIX "CS - PBR - unknown antenna usage! "
+                                         "Using the default setting: 1:1 antenna" NL,
+                         conn_handle);
+  *antenna_config = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+  *num_antenna_paths = 1;
+  return SL_STATUS_NOT_SUPPORTED;
+}
+
+/******************************************************************************
+ * Select CS sync antenna based on the request and available local antennas.
+ *****************************************************************************/
+static uint8_t select_cs_sync_antenna(uint8_t conn_handle,
+                                      uint8_t sync_antenna_req,
+                                      uint8_t num_antennas)
+{
+  uint8_t cs_sync_antenna = sync_antenna_req;
+
+  switch (sync_antenna_req) {
+    case CS_SYNC_ANTENNA_1:
+      cs_manager_log_info(INSTANCE_PREFIX "RTT - Using the antenna ID 1" NL,
+                          conn_handle);
+      break;
+    case CS_SYNC_ANTENNA_2:
+      if (num_antennas >= 2) {
+        cs_manager_log_info(INSTANCE_PREFIX " RTT - 2-antenna device! Using the antenna ID 2" NL,
+                            conn_handle);
+      } else {
+        cs_manager_log_info(INSTANCE_PREFIX " RTT - only 1-antenna device! Using the antenna ID 1" NL,
+                            conn_handle);
+        cs_sync_antenna = CS_SYNC_ANTENNA_1;
+      }
+      break;
+    case CS_SYNC_ANTENNA_3:
+      if (num_antennas >= 3) {
+        cs_manager_log_info(INSTANCE_PREFIX " RTT - 3-antenna device! Using the antenna ID 3" NL,
+                            conn_handle);
+      } else if (num_antennas >= 2) {
+        cs_manager_log_info(INSTANCE_PREFIX " RTT - only 2-antenna device! Using the antenna ID 2" NL,
+                            conn_handle);
+        cs_sync_antenna = CS_SYNC_ANTENNA_2;
+      } else {
+        cs_manager_log_info(INSTANCE_PREFIX " RTT - only 1-antenna device! Using the antenna ID 1" NL,
+                            conn_handle);
+        cs_sync_antenna = CS_SYNC_ANTENNA_1;
+      }
+      break;
+    case CS_SYNC_ANTENNA_4:
+      if (num_antennas >= 4) {
+        cs_manager_log_info(INSTANCE_PREFIX " RTT - 4-antenna device! Using the antenna ID 4" NL,
+                            conn_handle);
+      } else if (num_antennas >= 3) {
+        cs_manager_log_info(INSTANCE_PREFIX " RTT - only 3-antenna device! Using the antenna ID 3" NL,
+                            conn_handle);
+        cs_sync_antenna = CS_SYNC_ANTENNA_3;
+      } else if (num_antennas >= 2) {
+        cs_manager_log_info(INSTANCE_PREFIX " RTT - only 2-antenna device! Using the antenna ID 2" NL,
+                            conn_handle);
+        cs_sync_antenna = CS_SYNC_ANTENNA_2;
+      } else {
+        cs_manager_log_info(INSTANCE_PREFIX " RTT - only 1-antenna device! Using the antenna ID 1" NL,
+                            conn_handle);
+        cs_sync_antenna = CS_SYNC_ANTENNA_1;
+      }
+      break;
+    case CS_SYNC_SWITCHING:
+      cs_manager_log_info(INSTANCE_PREFIX " RTT - switching between %u available antennas" NL,
+                          conn_handle,
+                          num_antennas);
+      cs_sync_antenna = CS_SYNC_SWITCHING;
+      break;
+    default:
+      cs_manager_log_info(INSTANCE_PREFIX " RTT - unknown antenna usage! "
+                                          "Using the default setting: antenna ID 1" NL,
+                          conn_handle);
+      cs_sync_antenna = CS_SYNC_ANTENNA_1;
+      break;
+  }
+
+  return cs_sync_antenna;
+}
+
+/******************************************************************************
+ * Return the number of remote (peer) antennas implied by ACI 0..7.
+ *****************************************************************************/
+static uint8_t remote_antenna_count_from_aci(uint8_t aci)
+{
+  switch (aci) {
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
+    case CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE:
+    case CS_ANTENNA_CONFIG_INDEX_TRIPLE_LOCAL_SINGLE_REMOTE:
+    case CS_ANTENNA_CONFIG_INDEX_QUAD_LOCAL_SINGLE_REMOTE:
+      return 1;
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE:
+    case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
+      return 2;
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_TRIPLE_REMOTE:
+      return 3;
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_QUAD_REMOTE:
+      return 4;
+    default:
+      return 1;
+  }
+}
+
+/******************************************************************************
+ * Count set bits in the preferred peer antenna mask (bits 0..3 only).
+ *****************************************************************************/
+static uint8_t count_preferred_peer_antenna_bits(uint8_t mask)
+{
+  uint8_t count = 0;
+
+  mask &= 0x0Fu;
+  while (mask != 0) {
+    count = (uint8_t)(count + (mask & 0x01u));
+    mask >>= 1;
+  }
+  return count;
+}
+
+/******************************************************************************
+ * Align preferred_peer_antenna with the remote antenna count required by ACI.
+ *
+ * Trims excess low-order-first bits when too many are set. When too few are
+ * set, logs a warning and leaves the mask unchanged (no bits are added).
+ *****************************************************************************/
+static uint8_t adjust_preferred_peer_antenna(uint8_t conn_handle,
+                                             uint8_t preferred_peer_antenna,
+                                             uint8_t aci)
+{
+  uint8_t required = remote_antenna_count_from_aci(aci);
+  uint8_t mask = (uint8_t)(preferred_peer_antenna & 0x0Fu);
+  uint8_t ones = count_preferred_peer_antenna_bits(mask);
+  uint8_t adjusted = 0;
+  uint8_t kept = 0;
+
+  if (ones < required) {
+    cs_manager_log_warning(INSTANCE_PREFIX
+                           "CS - preferred_peer_antenna 0x%02X has %u set bit(s), "
+                           "but ACI %u requires %u remote antenna(s)" NL,
+                           conn_handle,
+                           preferred_peer_antenna,
+                           ones,
+                           aci,
+                           required);
+    return mask;
+  }
+
+  if (ones > required) {
+    cs_manager_log_warning(INSTANCE_PREFIX
+                           "CS - preferred_peer_antenna 0x%02X has %u set bit(s), "
+                           "but ACI %u allows only %u remote antenna(s); "
+                           "trimming excess bits" NL,
+                           conn_handle,
+                           preferred_peer_antenna,
+                           ones,
+                           aci,
+                           required);
+  }
+
+  // Keep only the first @p required low-order set bits
+  for (uint8_t bit = 0; bit < 4; bit++) {
+    uint8_t bit_mask = (uint8_t)(1u << bit);
+    if ((mask & bit_mask) != 0) {
+      adjusted |= bit_mask;
+      kept++;
+      if (kept >= required) {
+        break;
+      }
+    }
+  }
+
+  return adjusted;
+}
 
 static void send_instance_create_failed(cs_manager_t *m, sl_status_t status)
 {

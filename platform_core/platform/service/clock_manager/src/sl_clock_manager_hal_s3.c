@@ -34,7 +34,9 @@
 #include "sl_clock_manager.h"
 #include "sli_clock_manager.h"
 #include "sli_clock_manager_hal.h"
+#include "sli_clock_manager_perpll.h"
 #include "sli_clock_manager_log.h"
+#include "sl_assert.h"
 #include "sl_common.h"
 #include "sl_core.h"
 #include "sl_gpio.h"
@@ -78,6 +80,21 @@
 #define SOCPLL_OUTPUT_COUNT 3
 #endif
 
+#if defined(SL_CATALOG_CLOCK_MANAGER_PERPLL1_RUNTIME_CONFIG_PRESENT)
+#define PERPLL_RUNTIME_CONFIG_PRESENT
+#define PERPLL_RUNTIME_CONFIG_INSTANCE    1
+#define PERPLL_RUNTIME_CONFIG_BUS_CLOCK   SL_BUS_CLOCK_PERPLL1
+
+// Resolution of the PERPLL fractional divider.
+#define PERPLL_DIVF_RESOLUTION    16384UL
+
+// Maximum value of each PERPLL divider field.
+#define PERPLL_DIVN_MAX           (_PERPLL_CTRL_PERPLLDIVN_MASK >> _PERPLL_CTRL_PERPLLDIVN_SHIFT)
+#define PERPLL_DIVF_MAX           (_PERPLL_CTRL_PERPLLDIVF_MASK >> _PERPLL_CTRL_PERPLLDIVF_SHIFT)
+#define PERPLL_DCO_DIV_MAX        (_PERPLL_DCOCFG_PERPLLDCOOUTDIV_MASK >> _PERPLL_DCOCFG_PERPLLDCOOUTDIV_SHIFT)
+#define PERPLL_DIV_2POW_MAX       (_PERPLL_DCOCFG_PERPLLOUTDIV2POW_MASK >> _PERPLL_DCOCFG_PERPLLOUTDIV2POW_SHIFT)
+#endif
+
 /*******************************************************************************
  **************************   GLOBAL VARIABLES   *******************************
  ******************************************************************************/
@@ -104,6 +121,32 @@ sl_oscillator_t current_qspi_reference_clock = SL_OSCILLATOR_INVALID;
 uint16_t clock_manager_hfxo_startup_time = 0;
 #endif
 
+#if defined(PERPLL_PRESENT) && defined(SL_CLOCK_MANAGER_HFXO_FREQ)
+const uint32_t sli_clock_manager_perpll_freq_table[SLI_CLOCK_MANAGER_PERPLL_FREQ_COUNT]
+[SLI_CLOCK_MANAGER_PERPLL_FIELD_COUNT] = {
+  // Target frequency, DIVN, DIVF, DIVDCO, DIV2POW.
+#if (SL_CLOCK_MANAGER_HFXO_FREQ == 38000000UL)
+  { 14112000, 14, 5574, 20, 0 }, { 15360000, 14, 2759, 18, 0 }, { 16384000, 13, 8547, 16, 0 }, { 16934400, 14, 706, 16, 0 },
+  { 18432000, 13, 8547, 14, 0 }, { 20000000, 13, 12935, 13, 0 }, { 20480000, 14, 2759, 13, 0 }, { 22579200, 14, 10442, 12, 0 },
+  { 24576000, 13, 8547, 10, 0 }, { 40000000, 14, 13798, 2, 1 }, { 48000000, 15, 11210, 5, 0 }, { 50000000, 13, 12935, 4, 0 }
+#elif (SL_CLOCK_MANAGER_HFXO_FREQ == 38400000UL)
+  { 14112000, 14, 2785, 20, 0 }, { 15360000, 14, 0, 18, 0 }, { 16384000, 13, 5898, 16, 0 }, { 16934400, 13, 14352, 16, 0 },
+  { 18432000, 13, 5898, 14, 0 }, { 20000000, 13, 10240, 13, 0 }, { 20480000, 14, 0, 13, 0 }, { 22579200, 14, 7602, 12, 0 },
+  { 24576000, 13, 5898, 10, 0 }, { 40000000, 14, 10924, 2, 1 }, { 48000000, 15, 8192, 5, 0 }, { 50000000, 13, 10240, 4, 0 }
+#elif (SL_CLOCK_MANAGER_HFXO_FREQ == 39000000UL)
+  { 14112000, 14, 10569, 21, 0 }, { 15360000, 14, 9000, 19, 0 }, { 16384000, 13, 2029, 16, 0 }, { 16934400, 13, 10351, 16, 0 },
+  { 18432000, 14, 1130, 15, 0 }, { 20000000, 13, 6310, 13, 0 }, { 20480000, 13, 12400, 13, 0 }, { 22579200, 14, 3455, 12, 0 },
+  { 24576000, 13, 2030, 10, 0 }, { 40000000, 14, 6725, 2, 1 }, { 48000000, 12, 12900, 4, 0 }, { 50000000, 13, 6302, 4, 0 }
+#elif (SL_CLOCK_MANAGER_HFXO_FREQ == 40000000UL)
+  { 14112000, 14, 3800, 21, 0 }, { 15360000, 14, 2200, 19, 0 }, { 16384000, 12, 12220, 16, 0 }, { 16934400, 13, 3950, 16, 0 },
+  { 18432000, 13, 10935, 15, 0 }, { 20000000, 13, 0, 13, 0 }, { 20480000, 13, 6000, 13, 0 }, { 22579200, 14, 3453, 12, 0 },
+  { 24576000, 12, 12100, 10, 0 }, { 40000000, 14, 0, 2, 1 }, { 48000000, 12, 6600, 4, 0 }, { 50000000, 13, 0, 4, 0 }
+#else
+#error "PERPLL predefined frequencies require SL_CLOCK_MANAGER_HFXO_FREQ of 38, 38.4, 39, or 40 MHz."
+#endif
+};
+#endif
+
 /*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -112,6 +155,14 @@ SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 static sl_status_t bus_clock_get_register_info(sl_bus_clock_t module,
                                                volatile uint32_t **reg,
                                                uint32_t *bit);
+static sl_status_t get_high_frequency_branch_precision(sl_clock_branch_t clock_branch,
+                                                       uint16_t *precision);
+static sl_status_t get_low_frequency_branch_precision(sl_clock_branch_t clock_branch,
+                                                      uint16_t *precision);
+static sl_status_t get_mixed_frequency_branch_precision(sl_clock_branch_t clock_branch,
+                                                   uint16_t *precision);
+static sl_status_t get_reference_clock_branch_precision(sl_clock_branch_t clock_branch,
+                                                        uint16_t *precision);
 
 #if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
   || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
@@ -1265,16 +1316,10 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
   return return_status;
 }
 
-/***************************************************************************//**
- * Gets precision of given clock branch.
- ******************************************************************************/
-sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t clock_branch,
-                                                             uint16_t *precision)
+static sl_status_t get_high_frequency_branch_precision(sl_clock_branch_t clock_branch,
+                                                       uint16_t *precision)
 {
   sl_status_t return_status = SL_STATUS_FAIL;
-  CORE_DECLARE_IRQ_STATE;
-
-  CORE_ENTER_ATOMIC();
 
   switch (clock_branch) {
     case SL_CLOCK_BRANCH_SYSCLK:
@@ -1340,7 +1385,7 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
 
         default:
           *precision = 0U;
-          return_status =  SL_STATUS_INVALID_STATE;
+          return_status = SL_STATUS_INVALID_STATE;
           break;
       }
       break;
@@ -1402,6 +1447,89 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
       break;
 #endif
 
+#if defined(_CMU_EM01GRPDCLKCTRL_CLKSEL_MASK)
+    case SL_CLOCK_BRANCH_EM01GRPDCLK:
+      switch (CMU->EM01GRPDCLKCTRL & _CMU_EM01GRPDCLKCTRL_CLKSEL_MASK) {
+        case CMU_EM01GRPDCLKCTRL_CLKSEL_HFXO:
+          return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_HFXO, precision);
+          break;
+
+        case CMU_EM01GRPDCLKCTRL_CLKSEL_HFRCODPLL:
+        case CMU_EM01GRPDCLKCTRL_CLKSEL_HFRCOEM23:
+        case CMU_EM01GRPDCLKCTRL_CLKSEL_FSRCO:
+          *precision = 0xFFFF;
+          return_status = SL_STATUS_NOT_AVAILABLE;
+          break;
+
+        default:
+          *precision = 0U;
+          return_status = SL_STATUS_INVALID_STATE;
+          break;
+      }
+      break;
+#endif
+
+#if defined(_CMU_QSPISYSCLKCTRL_MASK)
+    case SL_CLOCK_BRANCH_QSPISYSCLK:
+      switch (CMU->QSPISYSCLKCTRL & _CMU_QSPISYSCLKCTRL_CLKSEL_MASK) {
+        case CMU_QSPISYSCLKCTRL_CLKSEL_HFXO:
+          return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_HFXO, precision);
+          break;
+
+        case CMU_QSPISYSCLKCTRL_CLKSEL_HFRCODPLL:
+          *precision = 0xFFFF;
+          return_status = SL_STATUS_NOT_AVAILABLE;
+          break;
+
+        case CMU_QSPISYSCLKCTRL_CLKSEL_SOCPLL:
+          return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_SOCPLL0, precision);
+          break;
+
+        default:
+          *precision = 0U;
+          return_status = SL_STATUS_INVALID_STATE;
+          break;
+      }
+      break;
+#endif
+
+#if defined(_CMU_PIXELRZCLKCTRL_MASK)
+    case SL_CLOCK_BRANCH_PIXELRZCLK:
+      switch (CMU->PIXELRZCLKCTRL & _CMU_PIXELRZCLKCTRL_CLKSEL_MASK) {
+        case CMU_PIXELRZCLKCTRL_CLKSEL_HFXO:
+          return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_HFXO, precision);
+          break;
+
+        case CMU_PIXELRZCLKCTRL_CLKSEL_HFRCODPLL:
+        case CMU_PIXELRZCLKCTRL_CLKSEL_FSRCO:
+        case CMU_PIXELRZCLKCTRL_CLKSEL_HFRCOEM23:
+          *precision = 0xFFFF;
+          return_status = SL_STATUS_NOT_AVAILABLE;
+          break;
+
+        default:
+          *precision = 0U;
+          return_status = SL_STATUS_INVALID_STATE;
+          break;
+      }
+      break;
+#endif
+
+    default:
+      *precision = 0U;
+      return_status = SL_STATUS_INVALID_PARAMETER;
+      break;
+  }
+
+  return return_status;
+}
+
+static sl_status_t get_low_frequency_branch_precision(sl_clock_branch_t clock_branch,
+                                                      uint16_t *precision)
+{
+  sl_status_t return_status = SL_STATUS_FAIL;
+
+  switch (clock_branch) {
 #if defined(_CMU_EM23GRPACLKCTRL_CLKSEL_MASK)
     case SL_CLOCK_BRANCH_EM23GRPACLK:
       switch (CMU->EM23GRPACLKCTRL & _CMU_EM23GRPACLKCTRL_CLKSEL_MASK) {
@@ -1533,6 +1661,21 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
       }
       break;
 
+    default:
+      *precision = 0U;
+      return_status = SL_STATUS_INVALID_PARAMETER;
+      break;
+  }
+
+  return return_status;
+}
+
+static sl_status_t get_mixed_frequency_branch_precision(sl_clock_branch_t clock_branch,
+                                                   uint16_t *precision)
+{
+  sl_status_t return_status = SL_STATUS_FAIL;
+
+  switch (clock_branch) {
     case SL_CLOCK_BRANCH_EUSART0CLK:
       switch (CMU->EUSART0CLKCTRL & _CMU_EUSART0CLKCTRL_CLKSEL_MASK) {
 #if defined(_CMU_EUSART0CLKCTRL_CLKSEL_EM01GRPCCLK)
@@ -1621,52 +1764,6 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
       }
       break;
 
-#if defined(_CMU_EM01GRPDCLKCTRL_CLKSEL_MASK)
-    case SL_CLOCK_BRANCH_EM01GRPDCLK:
-      switch (CMU->EM01GRPDCLKCTRL & _CMU_EM01GRPDCLKCTRL_CLKSEL_MASK) {
-        case CMU_EM01GRPDCLKCTRL_CLKSEL_HFXO:
-          return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_HFXO, precision);
-          break;
-
-        case CMU_EM01GRPDCLKCTRL_CLKSEL_HFRCODPLL:
-        case CMU_EM01GRPDCLKCTRL_CLKSEL_HFRCOEM23:
-        case CMU_EM01GRPDCLKCTRL_CLKSEL_FSRCO:
-          *precision = 0xFFFF;
-          return_status = SL_STATUS_NOT_AVAILABLE;
-          break;
-
-        default:
-          *precision = 0U;
-          return_status = SL_STATUS_INVALID_STATE;
-          break;
-      }
-      break;
-#endif
-
-#if defined(_CMU_QSPISYSCLKCTRL_MASK)
-    case SL_CLOCK_BRANCH_QSPISYSCLK:
-      switch (CMU->QSPISYSCLKCTRL & _CMU_QSPISYSCLKCTRL_CLKSEL_MASK) {
-        case CMU_QSPISYSCLKCTRL_CLKSEL_HFXO:
-          return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_HFXO, precision);
-          break;
-
-        case CMU_QSPISYSCLKCTRL_CLKSEL_HFRCODPLL:
-          *precision = 0xFFFF;
-          return_status = SL_STATUS_NOT_AVAILABLE;
-          break;
-
-        case CMU_QSPISYSCLKCTRL_CLKSEL_SOCPLL:
-          return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_SOCPLL0, precision);
-          break;
-
-        default:
-          *precision = 0U;
-          return_status = SL_STATUS_INVALID_STATE;
-          break;
-      }
-      break;
-#endif
-
     case SL_CLOCK_BRANCH_I2C0CLK:
       switch (CMU->I2C0CLKCTRL & _CMU_I2C0CLKCTRL_CLKSEL_MASK) {
 #if defined(_CMU_I2C0CLKCTRL_CLKSEL_EM01GRPDCLK)
@@ -1693,28 +1790,6 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
           break;
       }
       break;
-
-#if defined(_CMU_PIXELRZCLKCTRL_MASK)
-    case SL_CLOCK_BRANCH_PIXELRZCLK:
-      switch (CMU->PIXELRZCLKCTRL & _CMU_PIXELRZCLKCTRL_CLKSEL_MASK) {
-        case CMU_PIXELRZCLKCTRL_CLKSEL_HFXO:
-          return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_HFXO, precision);
-          break;
-
-        case CMU_PIXELRZCLKCTRL_CLKSEL_HFRCODPLL:
-        case CMU_PIXELRZCLKCTRL_CLKSEL_FSRCO:
-        case CMU_PIXELRZCLKCTRL_CLKSEL_HFRCOEM23:
-          *precision = 0xFFFF;
-          return_status = SL_STATUS_NOT_AVAILABLE;
-          break;
-
-        default:
-          *precision = 0U;
-          return_status = SL_STATUS_INVALID_STATE;
-          break;
-      }
-      break;
-#endif
 
     case SL_CLOCK_BRANCH_SYSTICKCLK:
       if (SysTick->CTRL & SysTick_CTRL_CLKSOURCE_Msk) {
@@ -1747,54 +1822,148 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t c
 
         default:
           *precision = 0U;
-          return_status =  SL_STATUS_INVALID_STATE;
-          break;
-      }
-      break;
-  #endif
-
-    case SL_CLOCK_BRANCH_DPLLREFCLK:
-      switch (CMU->DPLLREFCLKCTRL & _CMU_DPLLREFCLKCTRL_CLKSEL_MASK) {
-        case CMU_DPLLREFCLKCTRL_CLKSEL_HFXO:
-          return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_HFXO, precision);
-          break;
-
-        case CMU_DPLLREFCLKCTRL_CLKSEL_LFXO:
-          return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_LFXO, precision);
-          break;
-
-        case CMU_DPLLREFCLKCTRL_CLKSEL_CLKIN0:
-          *precision = 0xFFFF;
-          return_status = SL_STATUS_NOT_AVAILABLE;
-          break;
-
-        default:
-          *precision = 0U;
-          return_status =  SL_STATUS_INVALID_STATE;
-          break;
-      }
-      break;
-
-#if defined(_CMU_FLPLLREFCLKCTRL_MASK)
-    case SL_CLOCK_BRANCH_FLPLLREFCLK:
-      switch (CMU->FLPLLREFCLKCTRL & _CMU_FLPLLREFCLKCTRL_CLKSEL_MASK) {
-        case CMU_FLPLLREFCLKCTRL_CLKSEL_HFRCODPLLRT:
-          *precision = 0xFFFF;
-          return_status = SL_STATUS_NOT_AVAILABLE;
-          break;
-
-        case CMU_FLPLLREFCLKCTRL_CLKSEL_CLKIN0:
-          *precision = 0XFFFF;
-          return_status = SL_STATUS_NOT_AVAILABLE;
-          break;
-
-        default:
-          *precision = 0U;
-          return_status =  SL_STATUS_INVALID_STATE;
+          return_status = SL_STATUS_INVALID_STATE;
           break;
       }
       break;
 #endif
+
+    default:
+      *precision = 0U;
+      return_status = SL_STATUS_INVALID_PARAMETER;
+      break;
+  }
+
+  return return_status;
+}
+
+static sl_status_t get_reference_clock_branch_precision(sl_clock_branch_t clock_branch,
+                                                        uint16_t *precision)
+{
+  sl_status_t return_status = SL_STATUS_FAIL;
+
+  if (clock_branch == SL_CLOCK_BRANCH_DPLLREFCLK) {
+    switch (CMU->DPLLREFCLKCTRL & _CMU_DPLLREFCLKCTRL_CLKSEL_MASK) {
+      case CMU_DPLLREFCLKCTRL_CLKSEL_HFXO:
+        return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_HFXO, precision);
+        break;
+
+      case CMU_DPLLREFCLKCTRL_CLKSEL_LFXO:
+        return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_LFXO, precision);
+        break;
+
+      case CMU_DPLLREFCLKCTRL_CLKSEL_CLKIN0:
+        *precision = 0xFFFF;
+        return_status = SL_STATUS_NOT_AVAILABLE;
+        break;
+
+      default:
+        *precision = 0U;
+        return_status = SL_STATUS_INVALID_STATE;
+        break;
+    }
+  }
+
+#if defined(_CMU_FLPLLREFCLKCTRL_MASK)
+  else if (clock_branch == SL_CLOCK_BRANCH_FLPLLREFCLK) {
+    switch (CMU->FLPLLREFCLKCTRL & _CMU_FLPLLREFCLKCTRL_CLKSEL_MASK) {
+      case CMU_FLPLLREFCLKCTRL_CLKSEL_HFRCODPLLRT:
+      case CMU_FLPLLREFCLKCTRL_CLKSEL_CLKIN0:
+        *precision = 0xFFFF;
+        return_status = SL_STATUS_NOT_AVAILABLE;
+        break;
+
+      default:
+        *precision = 0U;
+        return_status = SL_STATUS_INVALID_STATE;
+        break;
+    }
+  }
+#endif
+
+  else {
+    *precision = 0U;
+    return_status = SL_STATUS_INVALID_PARAMETER;
+  }
+
+  return return_status;
+}
+
+/***************************************************************************//**
+ * Gets precision of given clock branch.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_get_clock_branch_precision(sl_clock_branch_t clock_branch,
+                                                             uint16_t *precision)
+{
+  sl_status_t return_status = SL_STATUS_FAIL;
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_ATOMIC();
+
+  switch (clock_branch) {
+    case SL_CLOCK_BRANCH_SYSCLK:
+#if defined(_CMU_SYSCLKCTRL_CPUCLKPRESC_MASK)
+    case SL_CLOCK_BRANCH_CPUCLK:
+#endif
+    case SL_CLOCK_BRANCH_HCLK:
+#if defined(_CMU_SYSCLKCTRL_HCLKDIVNPRESC_MASK)
+    case SL_CLOCK_BRANCH_HCLKDIVN:
+#endif
+    case SL_CLOCK_BRANCH_PCLK:
+    case SL_CLOCK_BRANCH_LSPCLK:
+    case SL_CLOCK_BRANCH_EXPORTCLK:
+#if defined(_CMU_TRACECLKCTRL_MASK)
+    case SL_CLOCK_BRANCH_TRACECLK:
+#endif
+#if defined(_CMU_EM01GRPACLKCTRL_CLKSEL_MASK)
+    case SL_CLOCK_BRANCH_EM01GRPACLK:
+#endif
+#if defined(_CMU_EM01GRPCCLKCTRL_CLKSEL_MASK)
+    case SL_CLOCK_BRANCH_EM01GRPCCLK:
+#endif
+#if defined(_CMU_EM01GRPDCLKCTRL_CLKSEL_MASK)
+    case SL_CLOCK_BRANCH_EM01GRPDCLK:
+#endif
+#if defined(_CMU_QSPISYSCLKCTRL_MASK)
+    case SL_CLOCK_BRANCH_QSPISYSCLK:
+#endif
+#if defined(_CMU_PIXELRZCLKCTRL_MASK)
+    case SL_CLOCK_BRANCH_PIXELRZCLK:
+#endif
+      return_status = get_high_frequency_branch_precision(clock_branch, precision);
+      break;
+
+#if defined(_CMU_EM23GRPACLKCTRL_CLKSEL_MASK)
+    case SL_CLOCK_BRANCH_EM23GRPACLK:
+#endif
+#if defined(_CMU_EM4GRPACLKCTRL_CLKSEL_MASK)
+    case SL_CLOCK_BRANCH_EM4GRPACLK:
+#endif
+    case SL_CLOCK_BRANCH_WDOG0CLK:
+    case SL_CLOCK_BRANCH_WDOG1CLK:
+    case SL_CLOCK_BRANCH_SYSRTCCLK:
+      return_status = get_low_frequency_branch_precision(clock_branch, precision);
+      break;
+
+    case SL_CLOCK_BRANCH_EUSART0CLK:
+#if defined(_CMU_EUSART1CLKCTRL_CLKSEL_MASK)
+    case SL_CLOCK_BRANCH_EUSART1CLK:
+#endif
+    case SL_CLOCK_BRANCH_PCNT0CLK:
+    case SL_CLOCK_BRANCH_I2C0CLK:
+    case SL_CLOCK_BRANCH_SYSTICKCLK:
+#if defined(_CMU_VDAC0CLKCTRL_MASK)
+    case SL_CLOCK_BRANCH_VDAC0CLK:
+#endif
+      return_status = get_mixed_frequency_branch_precision(clock_branch, precision);
+      break;
+
+    case SL_CLOCK_BRANCH_DPLLREFCLK:
+#if defined(_CMU_FLPLLREFCLKCTRL_MASK)
+    case SL_CLOCK_BRANCH_FLPLLREFCLK:
+#endif
+      return_status = get_reference_clock_branch_precision(clock_branch, precision);
+      break;
 
     default:
 #if defined(SL_CATALOG_CLOCK_MANAGER_RUNTIME_HAL_INTERNAL_PRESENT)
@@ -2068,6 +2237,13 @@ sl_status_t sli_clock_manager_hal_hfxo_get_ctune(uint32_t *ctune)
   return SL_STATUS_OK;
 }
 
+#if defined(SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN) \
+  && (SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN == 1) \
+  && defined(SL_CLOCK_MANAGER_HFXO_EN) && (SL_CLOCK_MANAGER_HFXO_EN == 1) \
+  && (SL_CLOCK_MANAGER_HFXO_MODE == HFXO_CFG_MODE_XTAL)
+static bool clock_manager_hfxo_startup_measurement_active = false;
+#endif
+
 /***************************************************************************//**
  * Updates the tuning capacitances and calibrate the Core Bias Current.
  ******************************************************************************/
@@ -2075,6 +2251,7 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune)
 {
   uint32_t hfxo_ctrl_backup = HFXO0->CTRL;
   sl_status_t status = SL_STATUS_OK;
+  bool startup_measurement_stopped = false;
 
   if (ctune > (_HFXO_XTALCTRL_CTUNEXIANA_MASK >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT)) {
     SLI_CLOCK_MANAGER_LOG_WARN("HFXO CTUNE calibration rejected, val=%u", ctune);
@@ -2090,6 +2267,10 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune)
     return status;
   }
 #endif
+
+  if (sli_clock_manager_hal_stop_hfxo_startup_time_measurement() == SL_STATUS_OK) {
+    startup_measurement_stopped = true;
+  }
 
   // The FORCEEN and DISONDEMAND bits need to be set to launch the calibration.
   HFXO0->CTRL_SET = HFXO_CTRL_FORCEEN;
@@ -2133,8 +2314,81 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune)
     SLI_CLOCK_MANAGER_LOG_WARN("HFXO CTUNE calibration failed, val=%u status=0x%x",
                                ctune, (uint32_t)status);
   }
+  if (startup_measurement_stopped) {
+    (void)sli_clock_manager_hal_start_hfxo_startup_time_measurement();
+  }
 
   return status;
+}
+
+/***************************************************************************//**
+ * Starts an HFXO startup time measurement. This function assumes execution in a critical section.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_start_hfxo_startup_time_measurement(void)
+{
+#if defined(SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN) \
+  && (SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN == 1) \
+  && defined(SL_CLOCK_MANAGER_HFXO_EN) && (SL_CLOCK_MANAGER_HFXO_EN == 1) \
+  && (SL_CLOCK_MANAGER_HFXO_MODE == HFXO_CFG_MODE_XTAL)
+  sl_status_t status = SL_STATUS_OK;
+
+#if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
+  if (SLI_CLOCK_MANAGER_HFXO_MODE != HFXO_CFG_MODE_XTAL) {
+    return SL_STATUS_NOT_AVAILABLE;
+  }
+#endif
+
+  if (clock_manager_hfxo_startup_measurement_active) {
+    status = SL_STATUS_INVALID_STATE;
+  } else {
+    clock_manager_hfxo_startup_measurement_active = true;
+    CMU->HFXO0LFCLKCTRL = (CMU->HFXO0LFCLKCTRL
+                           & ~_CMU_HFXO0LFCLKCTRL_CLKSEL_MASK)
+                          | SL_CLOCK_MANAGER_HFXO0LFCLK_SOURCE;
+    HFXO0->CMD_SET = HFXO_CMD_STOPMEAS;
+    while ((HFXO0->STATUS & _HFXO_STATUS_SYNCBUSY_MASK) != 0U) {
+      // Wait for the stop command
+    }
+    HFXO0->IF_CLR = HFXO_IF_STUPMEASDONE;
+    HFXO0->CMD_SET = HFXO_CMD_STARTMEAS;
+  }
+
+  return status;
+#else
+  return SL_STATUS_NOT_AVAILABLE;
+#endif
+}
+
+/***************************************************************************//**
+ * Stops the active HFXO startup time measurement.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_stop_hfxo_startup_time_measurement(void)
+{
+#if defined(SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN) \
+  && (SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN == 1) \
+  && defined(SL_CLOCK_MANAGER_HFXO_EN) && (SL_CLOCK_MANAGER_HFXO_EN == 1) \
+  && (SL_CLOCK_MANAGER_HFXO_MODE == HFXO_CFG_MODE_XTAL)
+  sl_status_t status = SL_STATUS_OK;
+
+  if (!clock_manager_hfxo_startup_measurement_active) {
+    status = SL_STATUS_INVALID_STATE;
+  } else {
+    HFXO0->CMD_SET = HFXO_CMD_STOPMEAS;
+    while ((HFXO0->STATUS & _HFXO_STATUS_SYNCBUSY_MASK) != 0U) {
+      // Wait for the stop command
+    }
+
+    HFXO0->IF_CLR = HFXO_IF_STUPMEASDONE;
+    CMU->HFXO0LFCLKCTRL = (CMU->HFXO0LFCLKCTRL
+                           & ~_CMU_HFXO0LFCLKCTRL_CLKSEL_MASK)
+                          | _CMU_HFXO0LFCLKCTRL_CLKSEL_DISABLED;
+    clock_manager_hfxo_startup_measurement_active = false;
+  }
+
+  return status;
+#else
+  return SL_STATUS_NOT_AVAILABLE;
+#endif
 }
 
 /***************************************************************************//**
@@ -2156,6 +2410,34 @@ sl_status_t sli_clock_manager_hal_get_hfxo_average_startup_time(uint32_t *val)
 #else
   (void) val;
   return SL_STATUS_NOT_SUPPORTED;
+#endif
+}
+
+/***************************************************************************//**
+ * Processes a completed HFXO startup time measurement.
+ ******************************************************************************/
+void sli_clock_manager_hal_process_hfxo_startup_time_measurement(void)
+{
+#if defined(SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN) \
+  && (SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN == 1) \
+  && defined(SL_CLOCK_MANAGER_HFXO_EN) && (SL_CLOCK_MANAGER_HFXO_EN == 1) \
+  && (SL_CLOCK_MANAGER_HFXO_MODE == HFXO_CFG_MODE_XTAL)
+
+  if (((HFXO0->IF & HFXO_IF_STUPMEASDONE) != 0U)
+      && ((HFXO0->STATUS & HFXO_STATUS_STUPMEASBSY) == 0U)) {
+    clock_manager_hfxo_startup_time = (HFXO0->AVGSTARTUPTIME
+                                       & _HFXO_AVGSTARTUPTIME_AVGSTUP_MASK)
+                                      >> _HFXO_AVGSTARTUPTIME_AVGSTUP_SHIFT;
+    HFXO0->CMD_SET = HFXO_CMD_STOPMEAS;
+    while ((HFXO0->STATUS & _HFXO_STATUS_SYNCBUSY_MASK) != 0U) {
+      // Wait for the stop command
+    }
+    HFXO0->IF_CLR = HFXO_IF_STUPMEASDONE;
+    CMU->HFXO0LFCLKCTRL = (CMU->HFXO0LFCLKCTRL
+                           & ~_CMU_HFXO0LFCLKCTRL_CLKSEL_MASK)
+                          | _CMU_HFXO0LFCLKCTRL_CLKSEL_DISABLED;
+    clock_manager_hfxo_startup_measurement_active = false;
+  }
 #endif
 }
 
@@ -2537,23 +2819,6 @@ void HFXO_IRQ_HANDLER_FUNCTION(void)
     sli_clock_manager_notify_hfxo_ready();
   }
 #endif
-
-#if defined(SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN) && SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN
-  // Startup time Measure Done Interrupt Flag Handling.
-  if ((irq_flag & HFXO_IF_STUPMEASDONE) && (HFXO0->IEN & HFXO_IEN_STUPMEASDONE)) {
-    // Clear Ready flag and disable interrupt.
-    HFXO0->IF_CLR = irq_flag & HFXO_IF_STUPMEASDONE;
-    HFXO0->IEN_CLR = irq_flag & HFXO_IEN_STUPMEASDONE;
-
-    // Update startup time
-    clock_manager_hfxo_startup_time = (HFXO0->AVGSTARTUPTIME & _HFXO_AVGSTARTUPTIME_AVGSTUP_MASK)
-                                      >> _HFXO_AVGSTARTUPTIME_AVGSTUP_SHIFT;
-
-    // Disable startup time measure by removing clock since we cannot change the cfg while it is running.
-    CMU->HFXO0LFCLKCTRL = (CMU->HFXO0LFCLKCTRL & ~_CMU_HFXO0LFCLKCTRL_CLKSEL_MASK) \
-                          | _CMU_HFXO0LFCLKCTRL_CLKSEL_DISABLED;
-  }
-#endif
 }
 
 /***************************************************************************//**
@@ -2742,19 +3007,130 @@ SL_WEAK sl_status_t sli_clock_manager_hal_enable_clock_branch(sl_clock_branch_t 
   return SL_STATUS_NOT_AVAILABLE;
 }
 
+#if defined(PERPLL_RUNTIME_CONFIG_PRESENT)
+/***************************************************************************//**
+ * Computes the PERPLL output frequency for a given set of dividers.
+ *
+ * Fout = (Fref / 2) * ((DIVN + 2) + (DIVF / 16384)) / (DCODIV + 2) / 2^DIV2POW
+ ******************************************************************************/
+static uint32_t perpll_get_frequency(uint32_t reference_frequency,
+                                     uint32_t divn,
+                                     uint32_t divf,
+                                     uint32_t dco_div,
+                                     uint32_t div_2pow,
+                                     bool fractional_en)
+{
+  uint64_t numerator = (uint64_t)(reference_frequency / 2UL)
+                       * (((uint64_t)(divn + 2UL) * PERPLL_DIVF_RESOLUTION) + (fractional_en ? divf : 0UL));
+  uint64_t denominator = ((uint64_t)PERPLL_DIVF_RESOLUTION * (dco_div + 2UL)) << div_2pow;
+
+  return (uint32_t)(numerator / denominator);
+}
+
+/***************************************************************************//**
+ * Applies a new set of dividers to a PERPLL instance and waits for it to
+ * relock. The PLL is taken out of on-demand mode for the duration of the
+ * reprogramming so that its output is stable again before returning.
+ ******************************************************************************/
+static void perpll_reprogram(uint8_t perpll_num,
+                             uint32_t divn,
+                             uint32_t divf,
+                             uint32_t dco_div,
+                             uint32_t div_2pow,
+                             bool fractional_en,
+                             uint32_t frequency)
+{
+  PERPLL_TypeDef *perpll = PERPLL(perpll_num);
+  sl_status_t status;
+  bool forceen_was_set;
+
+  EFM_ASSERT(perpll != NULL);
+
+  // The PERPLL bus clock is normally already enabled by the Clock Manager init,
+  // but the caller may reach this point before or independently from it.
+  status = sl_clock_manager_enable_bus_clock(PERPLL_RUNTIME_CONFIG_BUS_CLOCK);
+  EFM_ASSERT(status == SL_STATUS_OK);
+
+  // Unlock register interface.
+  perpll->LOCKKEY = PERPLL_LOCKKEY_LOCKKEY_UNLOCK;
+
+  // FORCEEN is normally clear. Save it so the original request state can be
+  // restored after the temporary software clock request used to relock.
+  forceen_was_set = ((perpll->CTRL & PERPLL_CTRL_FORCEEN) != 0U);
+
+  // Disable clock on-demand while reconfiguring the PERPLL.
+  perpll->CTRL_SET = PERPLL_CTRL_DISONDEMAND;
+  perpll->CTRL_CLR = PERPLL_CTRL_FORCEEN;
+  while ((perpll->STATUS & _PERPLL_STATUS_ENS_MASK) != 0U) {
+    // Wait until PERPLL is disabled.
+  }
+
+  perpll->CTRL = (perpll->CTRL & ~(_PERPLL_CTRL_ENFRACN_MASK | _PERPLL_CTRL_PERPLLDIVN_MASK | _PERPLL_CTRL_PERPLLDIVF_MASK))
+                 | (divn << _PERPLL_CTRL_PERPLLDIVN_SHIFT)
+                 | ((fractional_en ? 1UL : 0UL) << _PERPLL_CTRL_ENFRACN_SHIFT)
+                 | ((fractional_en ? divf : 0UL) << _PERPLL_CTRL_PERPLLDIVF_SHIFT);
+
+  perpll->DCOCFG = (perpll->DCOCFG & ~(_PERPLL_DCOCFG_PERPLLDCOOUTDIV_MASK | _PERPLL_DCOCFG_PERPLLOUTDIV2POW_MASK))
+                   | (dco_div << _PERPLL_DCOCFG_PERPLLDCOOUTDIV_SHIFT)
+                   | (div_2pow << _PERPLL_DCOCFG_PERPLLOUTDIV2POW_SHIFT);
+
+  // Enable signal for pllclk0 from GP_PLL48.
+  perpll->CTRL_SET = PERPLL_CTRL_ENPLLCLKOUT0;
+
+  // Force a clock request by software to update analog part of PERPLL.
+  perpll->CTRL_SET = PERPLL_CTRL_FORCEEN;
+
+  while ((perpll->STATUS & (PERPLL_STATUS_RDY | PERPLL_STATUS_PLLLOCK | PERPLL_STATUS_ENS))
+         != (PERPLL_STATUS_RDY | PERPLL_STATUS_PLLLOCK | PERPLL_STATUS_ENS)) {
+    // Wait for PERPLL lock and ready.
+  }
+
+  // Update CMSIS PERPLL frequency.
+  SystemPERPLLClockSet(perpll_num, frequency);
+
+  // Re-enable clock on-demand by hardware and restore FORCEEN.
+  perpll->CTRL_CLR = PERPLL_CTRL_DISONDEMAND;
+  if (forceen_was_set) {
+    perpll->CTRL_SET = PERPLL_CTRL_FORCEEN;
+  } else {
+    perpll->CTRL_CLR = PERPLL_CTRL_FORCEEN;
+  }
+}
+#endif
+
 /***************************************************************************//**
  * Reprograms a PERPLL instance's dividers and waits for it to relock.
- *
- * @note Default implementation. Devices with a runtime-configurable PERPLL
- *       provide a strong implementation in their device specific HAL.
  ******************************************************************************/
-SL_WEAK sl_status_t sli_clock_manager_hal_set_perpll_frequency(uint8_t perpll_num,
-                                                               uint32_t divn,
-                                                               uint32_t divf,
-                                                               uint32_t dco_div,
-                                                               uint32_t div_2pow,
-                                                               bool fractional_en)
+sl_status_t sli_clock_manager_hal_set_perpll_frequency(uint8_t perpll_num,
+                                                       uint32_t divn,
+                                                       uint32_t divf,
+                                                       uint32_t dco_div,
+                                                       uint32_t div_2pow,
+                                                       bool fractional_en)
 {
+#if defined(PERPLL_RUNTIME_CONFIG_PRESENT)
+  if (perpll_num != PERPLL_RUNTIME_CONFIG_INSTANCE) {
+    return SL_STATUS_NOT_AVAILABLE;
+  }
+
+  if ((divn > PERPLL_DIVN_MAX)
+      || (divf > PERPLL_DIVF_MAX)
+      || (dco_div > PERPLL_DCO_DIV_MAX)
+      || (div_2pow > PERPLL_DIV_2POW_MAX)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  // DIVN cannot be 0 in Integer-N mode and DIVF cannot be 0 in Fractional-N mode.
+  if (fractional_en ? (divf == 0U) : (divn == 0U)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  uint32_t frequency = perpll_get_frequency(SystemHFXOClockGet(), divn, divf, dco_div, div_2pow, fractional_en);
+
+  perpll_reprogram(perpll_num, divn, divf, dco_div, div_2pow, fractional_en, frequency);
+
+  return SL_STATUS_OK;
+#else
   (void)perpll_num;
   (void)divn;
   (void)divf;
@@ -2762,20 +3138,41 @@ SL_WEAK sl_status_t sli_clock_manager_hal_set_perpll_frequency(uint8_t perpll_nu
   (void)div_2pow;
   (void)fractional_en;
   return SL_STATUS_NOT_AVAILABLE;
+#endif
 }
 
 /***************************************************************************//**
  * Reprograms a PERPLL instance to a predefined target frequency.
- *
- * @note Default implementation. Devices with a runtime-configurable PERPLL
- *       provide a strong implementation in their device specific HAL.
  ******************************************************************************/
-SL_WEAK sl_status_t sli_clock_manager_hal_set_perpll_predefined_frequency(uint8_t perpll_num,
-                                                                          sli_clock_manager_perpll_predefined_frequency_t frequency)
+sl_status_t sli_clock_manager_hal_set_perpll_predefined_frequency(uint8_t perpll_num,
+                                                                  sli_clock_manager_perpll_predefined_frequency_t frequency)
 {
+#if defined(PERPLL_RUNTIME_CONFIG_PRESENT)
+  if (perpll_num != PERPLL_RUNTIME_CONFIG_INSTANCE) {
+    return SL_STATUS_NOT_AVAILABLE;
+  }
+
+  if ((uint32_t)frequency >= SLI_CLOCK_MANAGER_PERPLL_FREQ_COUNT) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  const uint32_t *perpll_freq_config = sli_clock_manager_perpll_freq_table[frequency];
+
+  // All predefined frequencies are expressed in Fractional-N mode.
+  perpll_reprogram(perpll_num,
+                   perpll_freq_config[SLI_CLOCK_MANAGER_PERPLL_FIELD_DIVN],
+                   perpll_freq_config[SLI_CLOCK_MANAGER_PERPLL_FIELD_DIVF],
+                   perpll_freq_config[SLI_CLOCK_MANAGER_PERPLL_FIELD_DCO_DIV],
+                   perpll_freq_config[SLI_CLOCK_MANAGER_PERPLL_FIELD_DIV_2POW],
+                   true,
+                   perpll_freq_config[SLI_CLOCK_MANAGER_PERPLL_FIELD_FREQ]);
+
+  return SL_STATUS_OK;
+#else
   (void)perpll_num;
   (void)frequency;
   return SL_STATUS_NOT_AVAILABLE;
+#endif
 }
 
 /***************************************************************************//**
@@ -2788,6 +3185,13 @@ static sl_status_t bus_clock_get_register_info(sl_bus_clock_t module,
   if (module == SL_BUS_CLOCK_INVALID) {
     return SL_STATUS_NOT_AVAILABLE;
   }
+
+#if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_381)
+  if (*module == SL_BUS_CLOCK_NOT_OWNED_VALUE) {
+    EFM_ASSERT(false);
+    return SL_STATUS_NOT_AVAILABLE;
+  }
+#endif
 
 #if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_301)
   uint32_t clken_index;

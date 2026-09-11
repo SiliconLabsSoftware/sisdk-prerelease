@@ -150,14 +150,6 @@ zpal_status_t zpal_bootloader_verify_image(void);
 zpal_status_t zpal_bootloader_write_data(uint32_t offset, uint8_t * data, uint16_t length);
 
 /**
- * @brief Returns whether the software is running on the first boot after a new firmware image was written.
- * @param[in] updated_successfully Set to true if update was successful, false otherwise. Valid only when
- *                                it's the first boot.
- * @return True if it's the first boot, false otherwise.
- */
-bool zpal_bootloader_is_first_boot(bool *updated_successfully);
-
-/**
  * @brief Resets the bootloader page counters.
  * Used when initiating an upgrade to jump back to the start of the storage slot.
  */

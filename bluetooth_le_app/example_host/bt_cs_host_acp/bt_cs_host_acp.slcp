@@ -51,12 +51,12 @@ source:
   - path: app_cs.c
   - path: app_cs_error.c
   - path: app_cs_result.c
-  - path: ../../common/app_log/app_log_cli.c
+  - path: ../common/app_log/app_log_cli.c
   - path: ../../common/cs/app_cs_discovery.c
   - path: ../../common/cs/app_cs_capabilities_log.c
 
 include:
-  - path: ../../common/app_log
+  - path: ../common/app_log
     file_list:
       - path: app_log_cli.h
   - path: .

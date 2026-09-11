@@ -24,6 +24,10 @@ requires:
 - name: sl_core
 - name: se_manager
 root_path: platform_core/platform/service/clock_manager
+include:
+- path: src
+  file_list:
+  - path: sli_clock_manager_perpll.h
 source:
 - path: src/sl_clock_manager_hal_s3.c
   condition: [device_series_3]

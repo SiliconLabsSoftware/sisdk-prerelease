@@ -1,28 +1,17 @@
-project_name: zigbee_minimal
-label: Zigbee - SoC Minimal
-package: zigbee
+project_name: zigbee_soc_empty
+label: Zigbee - SoC Empty
+package: zigbee_app
 category: Zigbee Application
 quality: production
-description: This is a Zigbee minimal SoC network-layer application suitable as a  starting point for new application development.
+description: Empty Zigbee SoC router template with no board-specific peripherals. Starts network steering on first boot and is a starting point for any compatible Series 2 or Series 3 device. Generate as an end device by overriding the device type and swapping to the leaf stack (see readme).
 author: Silicon Laboratories, Inc.
 
 component:
   - id: sl_main
   - id: watchdog_manager
-  - id: cli
-    instance:
-      - example
-  - id: iostream_recommended_console
-  - id: zigbee_debug_basic
-  - id: zigbee_debug_print
-  - id: simple_led
-    instance:
-      - led0
   - id: zigbee_pro_stack
   - id: zigbee_source_route
   - id: zigbee_zcl_framework_core
-  - id: zigbee_zcl_cli
-  - id: zigbee_core_cli
   - id: zigbee_counters
   - id: zigbee_network_steering
   - id: zigbee_scan_dispatch
@@ -38,18 +27,6 @@ component:
       - toolchain_llvm
 
 configuration:
-  - name: SL_BOARD_ENABLE_VCOM
-    value: 1
-  - name: SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE
-    value: usartHwFlowControlCtsAndRts
-    condition:
-      - iostream_usart
-  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
-    value: SL_IOSTREAM_EUSART_UART_FLOW_CTRL_CTS_RTS
-    condition:
-      - iostream_eusart
-  - name: SL_CLI_MAX_INPUT_ARGUMENTS
-    value: 16
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE
     value: SLI_ZIGBEE_NETWORK_DEVICE_TYPE_ROUTER
   - name: SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE
@@ -69,15 +46,6 @@ configuration:
     value: 0
   - name: SL_PSA_ITS_SUPPORT_V3_DRIVER
     value: 1
-  - name: SL_CLI_EXAMPLE_TASK_STACK_SIZE
-    value: 600
-    condition:
-      - cmsis_rtos2
-  # On series 3, the bootloader requires more stack to do context parsing of OTA images
-  - name: SL_CLI_EXAMPLE_TASK_STACK_SIZE
-    value: 1500
-    condition:
-      - device_series_3
   - name: SL_ZIGBEE_STACK_RTOS_TASK_STACK_SIZE
     value: 5800
     condition:
@@ -86,19 +54,6 @@ configuration:
     value: 6000
     condition:
       - device_series_3
-  # On series 3 with LLVM and OTA storage, more RTOS stack to avoid stack overflow during token/OTA init
-  - name: SL_ZIGBEE_STACK_RTOS_TASK_STACK_SIZE
-    value: 8192
-    condition:
-      - device_series_3
-      - toolchain_llvm
-      - zigbee_ota_storage_simple_eeprom
-  - name: SL_ZIGBEE_APP_FRAMEWORK_RTOS_TASK_STACK_SIZE
-    value: 8192
-    condition:
-      - device_series_3
-      - toolchain_llvm
-      - zigbee_ota_storage_simple_eeprom
   - name: SL_ZIGBEE_AF_PLUGIN_ZCL_CLUSTER_DEFER_ATTRIBUTE_WRITES_TO_NVM_MS
     value: 2000
     condition:
@@ -110,6 +65,7 @@ source:
   - path: app.c
 
 config_file:
+  - path: config/zigbee_soc_empty_config.h
   - path: config/zcl/zcl_config.zap
     file_id: zap_configuration_file_id
     directory: zcl
@@ -131,11 +87,10 @@ filter:
   - name: Device Type
     value: [SoC]
   - name: Project Difficulty
-    value: [Advanced]
+    value: [Beginner]
 tag:
   - hwfilter:ram:64k
   - hwfilter:device:device_supports_zigbee
-  - hwfilter:board:simple_led:led0
   - toolchain:gcc
   - toolchain:iar
   - toolchain:llvm

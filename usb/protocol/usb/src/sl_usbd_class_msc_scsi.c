@@ -32,6 +32,7 @@
 #include "sl_core.h"
 #endif
 
+#include "sl_log_helper.h"
 #include "sl_string.h"
 #include "sl_bit.h"
 #include "sl_enum.h"
@@ -626,6 +627,7 @@ sl_status_t sl_usbd_msc_scsi_init(void)
   for (ix = 0u; ix < (SL_USBD_MSC_CONFIGURATION_QUANTITY * SL_USBD_MSC_LUN_QUANTITY); ix++) {
     memset((void *)&usbd_msc_scsi_obj.lun_table[ix], 0u, sizeof(sl_usbd_msc_scsi_lun_t));
   }
+  SL_PRINT_STRING_INFO("USB MSC SCSI initialized\r\n");
 
   return SL_STATUS_OK;
 }
@@ -641,6 +643,7 @@ sl_status_t sl_usbd_msc_scsi_create_instance(uint32_t                      msc_t
   sl_status_t status;
 
   if (p_class_nbr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -681,22 +684,27 @@ sl_status_t sl_usbd_msc_scsi_lun_add(uint8_t                           class_nbr
   CORE_DECLARE_IRQ_STATE;
 
   if (p_scsi_lun_ptr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_lu_info == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_lu_info->scsi_lun_api_ptr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_lu_info->vendor_id_ptr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_lu_info->product_id_ptr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -717,6 +725,7 @@ sl_status_t sl_usbd_msc_scsi_lun_add(uint8_t                           class_nbr
     CORE_EXIT_ATOMIC();
 
     *p_scsi_lun_ptr = NULL;
+    SL_PRINT_STRING_ERROR("No MSC SCSI logical units available\r\n");
     return SL_STATUS_ALLOCATION_FAILED;
   }
 
@@ -742,12 +751,14 @@ sl_status_t sl_usbd_msc_scsi_lun_add(uint8_t                           class_nbr
   status = sl_usbd_msc_lun_add(class_nbr, p_scsi_lun, &(p_scsi_lun->lu_nbr));
 
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("Failed to add MSC SCSI logical unit\r\n");
     return SL_STATUS_FAIL;
   }
 
   status = p_lu_info->scsi_lun_api_ptr->init(p_scsi_lun);
 
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("MSC SCSI logical unit initialization failed\r\n");
     return SL_STATUS_FAIL;
   }
 
@@ -871,6 +882,7 @@ sl_status_t sl_usbd_msc_scsi_is_enable(uint8_t  class_nbr,
   sl_status_t status;
 
   if (p_enabled == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 

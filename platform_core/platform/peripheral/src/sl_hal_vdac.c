@@ -133,6 +133,13 @@ void sl_hal_vdac_init(VDAC_TypeDef *vdac,
                | ((uint32_t)init->sine_reset           << _VDAC_CFG_SINERESET_SHIFT)
                | ((uint32_t)init->sine_enable          << _VDAC_CFG_SINEMODE_SHIFT)
                | ((uint32_t)init->diff                 << _VDAC_CFG_DIFF_SHIFT);
+
+  SL_PRINT_STRING_DEBUG("warmup=%d presc=%lu\r\n",
+                        (int)init->warmup_time,
+                        (unsigned long)init->prescaler);
+  SL_PRINT_STRING_DEBUG("ref=%d sine=%d\r\n",
+                        (int)init->reference,
+                        (int)init->sine_enable);
 }
 
 /***************************************************************************//**
@@ -198,6 +205,10 @@ void sl_hal_vdac_init_channel(VDAC_TypeDef *vdac,
                     | ((uint32_t)init->aux_out_enable  << _VDAC_OUTCTRL_AUXOUTENCH1_SHIFT)
                     | ((uint32_t)init->main_out_enable << _VDAC_OUTCTRL_MAINOUTENCH1_SHIFT);
   }
+
+  SL_PRINT_STRING_DEBUG("channel=%d trig=%d\r\n",
+                        (int)channel,
+                        (int)init->trigger_mode);
 
   // Check if the other channel had to be turned off above and needs to be turned on again.
   if (channel == SL_HAL_VDAC_CHANNEL_0) {
@@ -324,6 +335,10 @@ uint32_t sl_hal_vdac_calculate_prescaler(VDAC_TypeDef *vdac,
   if (prescaler > (_VDAC_CFG_PRESC_MASK >> _VDAC_CFG_PRESC_SHIFT)) {
     prescaler = _VDAC_CFG_PRESC_MASK >> _VDAC_CFG_PRESC_SHIFT;
   }
+
+  SL_PRINT_STRING_DEBUG("vdac=%lu ref=%lu\r\n",
+                        (unsigned long)vdac_frequency,
+                        (unsigned long)reference_frequency);
 
   return prescaler;
 }

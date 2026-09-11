@@ -65,6 +65,15 @@ uint32_t GetLastTickBeforeDeepSleep(void);
 zpal_reset_reason_t GetResetReason(void);
 
 /**
+ * @brief Returns whether the software is running on the first boot after a new firmware image was written.
+ *
+ * @param[out] updated_successfully Set to true if the update was successful. Valid only when
+ *                                  this function returns true.
+ * @return true if this is the first boot after a firmware update, false otherwise.
+ */
+bool zw_startup_is_first_boot(bool *updated_successfully);
+
+/**
  * Please @see ZW_UserTask_ApplicationRegisterTask() in ZW_UserTask.h for more info.
  */
 bool ZW_ApplicationRegisterTask(VOID_CALLBACKFUNC(appTaskFunc)(SApplicationHandles*),

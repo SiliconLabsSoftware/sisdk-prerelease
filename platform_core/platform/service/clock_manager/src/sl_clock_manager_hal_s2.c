@@ -824,12 +824,36 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune)
 }
 
 /***************************************************************************//**
+ * Starts an HFXO startup time measurement.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_start_hfxo_startup_time_measurement(void)
+{
+  return SL_STATUS_NOT_SUPPORTED;
+}
+
+/***************************************************************************//**
+ * Stops the active HFXO startup time measurement.
+ ******************************************************************************/
+sl_status_t sli_clock_manager_hal_stop_hfxo_startup_time_measurement(void)
+{
+  return SL_STATUS_NOT_SUPPORTED;
+}
+
+/***************************************************************************//**
  * Gets the HFXO's average startup time.
  ******************************************************************************/
 sl_status_t sli_clock_manager_hal_get_hfxo_average_startup_time(uint32_t *val)
 {
   (void) val;
   return SL_STATUS_NOT_SUPPORTED; // Not supported on Series 2
+}
+
+/***************************************************************************//**
+ * Processes a completed HFXO startup time measurement.
+ ******************************************************************************/
+void sli_clock_manager_hal_process_hfxo_startup_time_measurement(void)
+{
+  // Not supported on Series 2.
 }
 
 /***************************************************************************//**

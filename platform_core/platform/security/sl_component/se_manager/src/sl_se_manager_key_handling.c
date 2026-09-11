@@ -101,8 +101,11 @@
 #define KEYSPEC_ATTRIBUTES_SYM_SIZE_MASK    0x000003ffU
 #define KEYSPEC_ATTRIBUTES_SYM_SIZE_OFFSET  0U
 
+#define KEYSPEC_ATTRIBUTES_SYM_KEY_USAGE_REQUIRE_CM_MASK    (3U << 10)
+#define KEYSPEC_ATTRIBUTES_SYM_KEY_USAGE_REQUIRE_CM_OFFSET  10U
 #define KEYSPEC_ATTRIBUTES_SYM_KEY_USER_REQUIRE_DPA_MASK    (1U << 10)
 #define KEYSPEC_ATTRIBUTES_SYM_KEY_USER_REQUIRE_DFA_MASK    (1U << 11)
+
 #else
 #define KEYSPEC_ATTRIBUTES_SYM_SIZE_MASK    0x00007fffU
 #define KEYSPEC_ATTRIBUTES_SYM_SIZE_OFFSET  0U
@@ -137,6 +140,10 @@
 #define KEYSPEC_TRANSFER_KSU_ID_OFFSET        10U
 #define KEYSPEC_TRANSFER_KSU_KEY_USAGE_MASK   0x00007000U
 #define KEYSPEC_TRANSFER_KSU_KEY_USAGE_OFFSET 12U
+
+// Series 3 specific
+#define KEYSPEC_TRANSFER_SYM_KEY_USAGE_REQUIRE_CM_MASK    (3U << 15)
+#define KEYSPEC_TRANSFER_SYM_KEY_USAGE_REQUIRE_CM_OFFSET  15U
 #endif
 
 #define KEYSPEC_TYPE_ECC_EDWARDS    ((uint32_t)(0xaUL << KEYSPEC_TYPE_OFFSET))
@@ -1427,14 +1434,25 @@ sl_status_t sl_se_transfer_key(sl_se_command_context_t *cmd_ctx,
   if (key_out->storage.method == SL_SE_KEY_STORAGE_INTERNAL_KSU) {
     // Set KSU specific keyspecs
     key_update_index = ((keyspec_out & KEYSPEC_KSU_KEYSLOT_MASK) >> KEYSPEC_KSU_KEYSLOT_OFFSET);
+
+    // Extract properties from keyspec
     uint32_t key_update_ksu_id = ((keyspec_out & KEYSPEC_KSU_ID_MASK) >> KEYSPEC_KSU_ID_OFFSET);
     uint32_t key_update_ksu_usage = ((keyspec_out & KEYSPEC_KSU_KEY_USAGE_MASK) >> KEYSPEC_KSU_KEY_USAGE_OFFSET);
+    uint32_t key_update_ksu_cm_requirements =
+        ((keyspec_out & KEYSPEC_ATTRIBUTES_SYM_KEY_USAGE_REQUIRE_CM_MASK) >>
+         KEYSPEC_ATTRIBUTES_SYM_KEY_USAGE_REQUIRE_CM_OFFSET);
     keyspec_out = (keyspec_out & ~KEYSPEC_TRANSFER_KSU_ID_MASK)
                   | ((key_update_ksu_id << KEYSPEC_TRANSFER_KSU_ID_OFFSET)
                      & KEYSPEC_TRANSFER_KSU_ID_MASK);
-    keyspec_out = (keyspec_out & ~KEYSPEC_TRANSFER_KSU_ID_MASK)
-                  | ((key_update_ksu_usage << KEYSPEC_TRANSFER_KSU_KEY_USAGE_OFFSET)
-                     & KEYSPEC_TRANSFER_KSU_KEY_USAGE_MASK);
+    keyspec_out =
+        (keyspec_out & ~KEYSPEC_TRANSFER_KSU_KEY_USAGE_MASK) |
+        ((key_update_ksu_usage << KEYSPEC_TRANSFER_KSU_KEY_USAGE_OFFSET) &
+         KEYSPEC_TRANSFER_KSU_KEY_USAGE_MASK);
+    keyspec_out =
+        (keyspec_out & ~KEYSPEC_TRANSFER_SYM_KEY_USAGE_REQUIRE_CM_MASK) |
+        ((key_update_ksu_cm_requirements
+          << KEYSPEC_TRANSFER_SYM_KEY_USAGE_REQUIRE_CM_OFFSET) &
+         KEYSPEC_TRANSFER_SYM_KEY_USAGE_REQUIRE_CM_MASK);
   }
   #endif
   keyspec_out = (keyspec_out & ~KEYSPEC_TRANSFER_INDEX_MASK)

@@ -42,6 +42,7 @@
 #define SUPPORT_ZW_GET_BACKGROUND_RSSI                  1 /* ZW_GetBackgroundRSSI */
 #define SUPPORT_ZW_SET_LISTEN_BEFORE_TALK_THRESHOLD     1
 #define SUPPORT_ZW_REQUEST_NODE_INFO                    1 /* ZW_RequestNodeInfo */
+#define SUPPORT_ZW_GET_NODE_PROTOCOL_INFO               1 /* ZW_GetNodeProtocolInfo */
 
 #define SUPPORT_ZW_NETWORK_MANAGEMENT_SET_MAX_INCLUSION_REQUEST_INTERVALS     1
 

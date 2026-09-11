@@ -33,7 +33,6 @@
 #include "sli_clock_manager_hal.h"
 #include "sli_clock_manager_log.h"
 #include "sl_assert.h"
-#include "cmsis_compiler.h"
 
 /***************************************************************************//**
  * Performs Clock Manager runtime initialization.
@@ -271,6 +270,22 @@ sl_status_t slx_clock_manager_hfxo_calibrate_ctune(uint32_t ctune)
 }
 
 /***************************************************************************//**
+ * Starts an HFXO startup time measurement.
+ ******************************************************************************/
+sl_status_t slx_clock_manager_start_hfxo_startup_time_measurement(void)
+{
+  return sli_clock_manager_hal_start_hfxo_startup_time_measurement();
+}
+
+/***************************************************************************//**
+ * Stops the active HFXO startup time measurement.
+ ******************************************************************************/
+sl_status_t slx_clock_manager_stop_hfxo_startup_time_measurement(void)
+{
+  return sli_clock_manager_hal_stop_hfxo_startup_time_measurement();
+}
+
+/***************************************************************************//**
  * Gets the HFXO's average startup time.
  ******************************************************************************/
 sl_status_t sli_clock_manager_get_hfxo_average_startup_time(uint32_t *val)
@@ -279,6 +294,14 @@ sl_status_t sli_clock_manager_get_hfxo_average_startup_time(uint32_t *val)
     return SL_STATUS_NULL_POINTER;
   }
   return sli_clock_manager_hal_get_hfxo_average_startup_time(val);
+}
+
+/***************************************************************************//**
+ * Processes a completed HFXO startup time measurement.
+ ******************************************************************************/
+void sli_clock_manager_process_hfxo_startup_time_measurement(void)
+{
+  sli_clock_manager_hal_process_hfxo_startup_time_measurement();
 }
 
 /***************************************************************************//**

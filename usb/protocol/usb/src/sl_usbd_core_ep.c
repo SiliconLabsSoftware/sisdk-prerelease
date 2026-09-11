@@ -34,6 +34,7 @@
 #include "sl_core.h"
 #endif
 
+#include "sl_log_helper.h"
 #include "sl_usbd_core.h"
 #include "sl_usbd_core_config.h"
 
@@ -129,6 +130,7 @@ sl_status_t sl_usbd_core_read_bulk_sync(uint8_t  ep_addr,
   SLI_USBD_DBG_STATS_DEV_INC(bulk_rx_sync_exec_nbr);
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -203,6 +205,7 @@ sl_status_t sl_usbd_core_read_bulk_async(uint8_t                  ep_addr,
   SLI_USBD_DBG_STATS_DEV_INC(bulk_rx_async_exec_nbr);
 
   if (async_fnct == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -272,6 +275,7 @@ sl_status_t sl_usbd_core_write_bulk_sync(uint8_t     ep_addr,
   SLI_USBD_DBG_STATS_DEV_INC(bulk_tx_sync_exec_nbr);
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -348,6 +352,7 @@ sl_status_t sl_usbd_core_write_bulk_async(uint8_t                  ep_addr,
   SLI_USBD_DBG_STATS_DEV_INC(bulk_tx_async_exec_nbr);
 
   if (async_fnct == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -422,6 +427,7 @@ sl_status_t sl_usbd_core_read_interrupt_sync(uint8_t  ep_addr,
   SLI_USBD_DBG_STATS_DEV_INC(interrupt_rx_sync_exec_nbr);
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -494,6 +500,7 @@ sl_status_t sl_usbd_core_read_interrupt_async(uint8_t                  ep_addr,
   SLI_USBD_DBG_STATS_DEV_INC(interrupt_rx_async_exec_nbr);
 
   if (async_fnct == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -563,6 +570,7 @@ sl_status_t sl_usbd_core_write_interrupt_sync(uint8_t   ep_addr,
   SLI_USBD_DBG_STATS_DEV_INC(interrupt_tx_sync_exec_nbr);
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -638,6 +646,7 @@ sl_status_t sl_usbd_core_write_interrupt_async(uint8_t                  ep_addr,
   SLI_USBD_DBG_STATS_DEV_INC(interrupt_tx_async_exec_nbr);
 
   if (async_fnct == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
   sl_usbd_core_get_device_state(&state);
@@ -706,6 +715,7 @@ sl_status_t sl_usbd_core_read_isochronous_async(uint8_t                   ep_add
   SLI_USBD_DBG_STATS_DEV_INC(isochronous_rx_async_exec_nbr);
 
   if (async_fnct == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -777,6 +787,7 @@ sl_status_t sl_usbd_core_write_isochronous_async(uint8_t                  ep_add
   SLI_USBD_DBG_STATS_DEV_INC(isochronous_tx_async_exec_nbr);
 
   if (async_fnct == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -873,6 +884,7 @@ sl_status_t sl_usbd_core_read_control_sync(void       *p_buf,
   SLI_USBD_DBG_STATS_DEV_INC(ctrl_rx_sync_exec_nbr);
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -944,6 +956,7 @@ sl_status_t sl_usbd_core_write_control_sync(void        *p_buf,
   SLI_USBD_DBG_STATS_DEV_INC(ctrl_tx_sync_exec_nbr);
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -1454,6 +1467,7 @@ sl_status_t sl_usbd_core_get_max_endpoint_packet_size(uint8_t  ep_addr,
   uint16_t max_pkt_len;
 
   if (p_max_size == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -1486,6 +1500,7 @@ sl_status_t sl_usbd_core_get_max_endpoint_packet_size(uint8_t  ep_addr,
 sl_status_t sl_usbd_core_get_max_open_endpoint_number(uint8_t *p_nbr_open)
 {
   if (p_nbr_open == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -2144,6 +2159,7 @@ static sl_status_t usbd_core_endpoint_read(sli_usbd_endpoint_t         *p_ep,
 
   if ((buf_len != 0u) && (p_buf == NULL)) {
     *p_xfer_len = 0u;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -2347,6 +2363,7 @@ static sl_status_t usbd_core_endpoint_write(sli_usbd_endpoint_t         *p_ep,
 
   if ((buf_len != 0u) && (p_buf == NULL)) {
     *p_xfer_len = 0u;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 

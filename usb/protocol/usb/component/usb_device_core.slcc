@@ -44,6 +44,7 @@ requires:
 - name: enum
 - name: sl_string
 - name: memory_manager
+- name: log_none
 validation_helper:
 - path: script/sl_usbd_core_validation.lua
 root_path: usb/protocol/usb

@@ -359,6 +359,44 @@ sl_status_t cs_manager_get_default_connection_parameters(cs_manager_connection_p
 sl_status_t cs_manager_set_default_connection_parameters(const cs_manager_connection_parameters_t *params);
 
 /**************************************************************************//**
+ * Select tone antenna configuration based on local/remote capabilities.
+ *
+ * For PBR, negotiates the effective Antenna Configuration Index (ACI 0..7)
+ * from the requested selection in @p procedure_parameters against the available
+ * local/remote antenna counts and @p max_antenna_paths. Updates
+ * @p procedure_parameters->tone_antenna_config_selection. Also aligns
+ * preferred_peer_antenna so it does not select more remote antennas than the
+ * ACI implies (excess bits are trimmed; a warning is logged when too few bits
+ * are set, without adding any).
+ *
+ * For non-PBR modes the requested tone antenna selection is left unchanged
+ * and @p num_antenna_paths_out is set to 0 when provided.
+ *
+ * @param[in]     conn_handle           Connection handle (for logging).
+ * @param[in]     main_mode             CS main mode (@ref sl_bt_cs_mode_t).
+ * @param[in]     local_antenna_count   Number of antennas on the local device.
+ * @param[in]     remote_antenna_count  Number of antennas on the remote device.
+ * @param[in]     max_antenna_paths     Maximum antenna paths supported by both
+ *                                      peers (typically min of local/remote).
+ * @param[in,out] procedure_parameters  Procedure parameters to update.
+ * @param[out]    num_antenna_paths_out Optional. Receives the resulting number
+ *                                      of PBR antenna paths (1, 2, 3, or 4),
+ *                                      or 0 for non-PBR modes.
+ * @return Status of the operation.
+ * @retval SL_STATUS_OK             Requested configuration is supported.
+ * @retval SL_STATUS_NULL_POINTER   @p procedure_parameters is NULL.
+ * @retval SL_STATUS_NOT_SUPPORTED  Requested configuration was not supported;
+ *                                  a fallback was applied to @p procedure_parameters.
+ *****************************************************************************/
+sl_status_t cs_manager_select_antennas(uint8_t conn_handle,
+                                       uint8_t main_mode,
+                                       uint8_t local_antenna_count,
+                                       uint8_t remote_antenna_count,
+                                       uint8_t max_antenna_paths,
+                                       cs_procedure_parameters_t *procedure_parameters,
+                                       uint8_t *num_antenna_paths_out);
+
+/**************************************************************************//**
  * Start a CS ranging procedure on a connection.
  *
  * @param[in] conn_handle         Connection handle.

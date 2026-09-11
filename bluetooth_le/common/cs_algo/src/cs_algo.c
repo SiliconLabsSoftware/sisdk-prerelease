@@ -618,7 +618,7 @@ static uint8_t get_local_sw_times(void)
  * Derive the number of antenna paths from Antenna Config Index (ACI).
  *
  * @param[in] aci Negotiated tone antenna configuration index (0 to 7).
- * @return Number of antenna paths (1, 2, or 4).
+ * @return Number of antenna paths (1, 2, 3, or 4).
  *****************************************************************************/
 static uint8_t num_antenna_paths_from_aci(uint8_t aci)
 {
@@ -626,6 +626,11 @@ static uint8_t num_antenna_paths_from_aci(uint8_t aci)
     case CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE:
     case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE:
       return 2;
+    case CS_ANTENNA_CONFIG_INDEX_TRIPLE_LOCAL_SINGLE_REMOTE:
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_TRIPLE_REMOTE:
+      return 3;
+    case CS_ANTENNA_CONFIG_INDEX_QUAD_LOCAL_SINGLE_REMOTE:
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_QUAD_REMOTE:
     case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
       return 4;
     case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:

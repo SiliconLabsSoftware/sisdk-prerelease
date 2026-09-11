@@ -36,6 +36,7 @@
 #include "sl_clock_manager_tree_config.h"
 #include "sli_clock_manager_init_hal.h"
 #include "sli_clock_manager_hal.h"
+#include "sli_clock_manager_perpll.h"
 #include "sli_clock_manager_log.h"
 #include "sl_clock_manager_init.h"
 #include "sli_clock_manager_init_selection.h"
@@ -88,6 +89,86 @@
 #define QSPI_FUNCTION_SCOPE
 #else
 #define QSPI_FUNCTION_SCOPE static
+#endif
+
+#if defined(SLI_CLOCK_MANAGER_INIT_PERPLL0) || defined(SLI_CLOCK_MANAGER_INIT_PERPLL1)
+// PERPLL0 defines.
+#define SLI_CLOCK_MANAGER_PERPLL0_EN                  SL_CLOCK_MANAGER_PERPLL0_EN
+#define SLI_CLOCK_MANAGER_PERPLL0_FREQ                SL_CLOCK_MANAGER_PERPLL0_FREQ
+#define SLI_CLOCK_MANAGER_PERPLL0_ADVANCED_SETTINGS   SL_CLOCK_MANAGER_PERPLL0_ADVANCED_SETTINGS
+#if (SL_CLOCK_MANAGER_PERPLL0_ADVANCED_SETTINGS == 1)
+#define SLI_CLOCK_MANAGER_PERPLL0_FRACTIONAL_EN       SL_CLOCK_MANAGER_PERPLL0_FRACTIONAL_EN
+#if (SL_CLOCK_MANAGER_PERPLL0_FRACTIONAL_EN == 1)
+#define SLI_CLOCK_MANAGER_PERPLL0_DIVF                SL_CLOCK_MANAGER_PERPLL0_DIVF
+#else
+#define SLI_CLOCK_MANAGER_PERPLL0_DIVF                0
+#endif
+#define SLI_CLOCK_MANAGER_PERPLL0_DIVN                SL_CLOCK_MANAGER_PERPLL0_DIVN
+#define SLI_CLOCK_MANAGER_PERPLL0_DCO_DIV             SL_CLOCK_MANAGER_PERPLL0_DCO_DIV
+#define SLI_CLOCK_MANAGER_PERPLL0_DIV_2POW            SL_CLOCK_MANAGER_PERPLL0_DIV_2POW
+#else
+#define SLI_CLOCK_MANAGER_PERPLL0_FRACTIONAL_EN       0
+#define SLI_CLOCK_MANAGER_PERPLL0_DIVF                0
+#define SLI_CLOCK_MANAGER_PERPLL0_DIVN                0
+#define SLI_CLOCK_MANAGER_PERPLL0_DCO_DIV             0
+#define SLI_CLOCK_MANAGER_PERPLL0_DIV_2POW            0
+#endif
+
+// PERPLL1 defines.
+#define SLI_CLOCK_MANAGER_PERPLL1_EN                  SL_CLOCK_MANAGER_PERPLL1_EN
+#define SLI_CLOCK_MANAGER_PERPLL1_FREQ                SL_CLOCK_MANAGER_PERPLL1_FREQ
+#define SLI_CLOCK_MANAGER_PERPLL1_ADVANCED_SETTINGS   SL_CLOCK_MANAGER_PERPLL1_ADVANCED_SETTINGS
+#if (SL_CLOCK_MANAGER_PERPLL1_ADVANCED_SETTINGS == 1)
+#define SLI_CLOCK_MANAGER_PERPLL1_FRACTIONAL_EN       SL_CLOCK_MANAGER_PERPLL1_FRACTIONAL_EN
+#if (SL_CLOCK_MANAGER_PERPLL1_FRACTIONAL_EN == 1)
+#define SLI_CLOCK_MANAGER_PERPLL1_DIVF                SL_CLOCK_MANAGER_PERPLL1_DIVF
+#else
+#define SLI_CLOCK_MANAGER_PERPLL1_DIVF                0
+#endif
+#define SLI_CLOCK_MANAGER_PERPLL1_DIVN                SL_CLOCK_MANAGER_PERPLL1_DIVN
+#define SLI_CLOCK_MANAGER_PERPLL1_DCO_DIV             SL_CLOCK_MANAGER_PERPLL1_DCO_DIV
+#define SLI_CLOCK_MANAGER_PERPLL1_DIV_2POW            SL_CLOCK_MANAGER_PERPLL1_DIV_2POW
+#else
+#define SLI_CLOCK_MANAGER_PERPLL1_FRACTIONAL_EN       0
+#define SLI_CLOCK_MANAGER_PERPLL1_DIVF                0
+#define SLI_CLOCK_MANAGER_PERPLL1_DIVN                0
+#define SLI_CLOCK_MANAGER_PERPLL1_DCO_DIV             0
+#define SLI_CLOCK_MANAGER_PERPLL1_DIV_2POW            0
+#endif
+
+// Bus Clock macros for PERPLL instances.
+#define PERPLL_BUS_CLOCK(n)                         (((n) == 0) ? SL_BUS_CLOCK_PERPLL0   \
+                                                     : ((n) == 1) ? SL_BUS_CLOCK_PERPLL1 \
+                                                     : 0x0UL)
+
+// Clock Manager configuration macros for PERPLL instances.
+#define CLOCK_MANAGER_PERPLL_FREQ(n)                (((n) == 0) ? SLI_CLOCK_MANAGER_PERPLL0_FREQ   \
+                                                     : ((n) == 1) ? SLI_CLOCK_MANAGER_PERPLL1_FREQ \
+                                                     : 0x0UL)
+
+#define CLOCK_MANAGER_PERPLL_ADVANCED_SETTINGS(n)   (((n) == 0) ? SLI_CLOCK_MANAGER_PERPLL0_ADVANCED_SETTINGS   \
+                                                     : ((n) == 1) ? SLI_CLOCK_MANAGER_PERPLL1_ADVANCED_SETTINGS \
+                                                     : 0x0UL)
+
+#define CLOCK_MANAGER_PERPLL_FRACTIONAL_EN(n)       (((n) == 0) ? SLI_CLOCK_MANAGER_PERPLL0_FRACTIONAL_EN   \
+                                                     : ((n) == 1) ? SLI_CLOCK_MANAGER_PERPLL1_FRACTIONAL_EN \
+                                                     : 0x0UL)
+
+#define CLOCK_MANAGER_PERPLL_DIVF(n)                (((n) == 0) ? SLI_CLOCK_MANAGER_PERPLL0_DIVF   \
+                                                     : ((n) == 1) ? SLI_CLOCK_MANAGER_PERPLL1_DIVF \
+                                                     : 0x0UL)
+
+#define CLOCK_MANAGER_PERPLL_DIVN(n)                (((n) == 0) ? SLI_CLOCK_MANAGER_PERPLL0_DIVN   \
+                                                     : ((n) == 1) ? SLI_CLOCK_MANAGER_PERPLL1_DIVN \
+                                                     : 0x0UL)
+
+#define CLOCK_MANAGER_PERPLL_DCO_DIV(n)             (((n) == 0) ? SLI_CLOCK_MANAGER_PERPLL0_DCO_DIV   \
+                                                     : ((n) == 1) ? SLI_CLOCK_MANAGER_PERPLL1_DCO_DIV \
+                                                     : 0x0UL)
+
+#define CLOCK_MANAGER_PERPLL_DIV_2POW(n)            (((n) == 0) ? SLI_CLOCK_MANAGER_PERPLL0_DIV_2POW   \
+                                                     : ((n) == 1) ? SLI_CLOCK_MANAGER_PERPLL1_DIV_2POW \
+                                                     : 0x0UL)
 #endif
 
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION) && defined(SOCPLL_PRESENT) \
@@ -408,8 +489,40 @@ static void get_hfxo_ctune(uint8_t *ctune_xi_steady, uint8_t *ctune_xo_steady)
     }
 #endif  // (SL_CLOCK_MANAGER_HFXO_SEPARATE_CTUNEXIANA_CTUNEXOANA_EN == 1)
   }
+#else
+  (void)ctune_xi_steady;
+  (void)ctune_xo_steady;
 #endif  // (SL_CLOCK_MANAGER_HFXO_MODE == HFXO_CFG_MODE_XTAL)
 }
+
+#if defined(SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN) && SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN \
+  && (SL_CLOCK_MANAGER_HFXO_MODE == HFXO_CFG_MODE_XTAL)
+static void init_hfxo_startup_time_measurement(void)
+{
+#if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
+  if (SLI_CLOCK_MANAGER_HFXO_MODE != HFXO_CFG_MODE_XTAL) {
+    return;
+  }
+#endif
+
+  while (((HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) != 0U) || ((HFXO0->STATUS & _HFXO_STATUS_SYNCBUSY_MASK) != 0U)) {
+    // Wait for HFXO to be disabled
+  }
+
+  // Configure HFXO for startup time measurement
+  sl_hal_bus_reg_write_mask(&HFXO0->CFG,
+                            _HFXO_CFG_NUMSTUPMEAS_MASK | _HFXO_CFG_STUPMEASEN_MASK,
+                            SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENTS | HFXO_CFG_STUPMEASEN);
+
+  // Clear any interrupt
+  HFXO0->IEN_CLR = HFXO_IEN_STUPMEASDONE;
+  HFXO0->IF_CLR = HFXO_IF_STUPMEASDONE;
+
+  // Start the initial one-shot measurement through the runtime HAL.
+  sl_status_t status = sli_clock_manager_hal_start_hfxo_startup_time_measurement();
+  EFM_ASSERT(status == SL_STATUS_OK);
+}
+#endif
 
 /***************************************************************************//**
  * Initializes HFXO.
@@ -427,11 +540,6 @@ FUNCTION_SCOPE void init_hfxo(void)
   // Enable HFXO bus clock.
   status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_HFXO0);
   EFM_ASSERT(status == SL_STATUS_OK);
-
-#if defined(SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN) && SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN
-  // Setup LF clock to measure startup time
-  CLOCK_MANAGER_CLOCK_SELECT_SET(HFXO0LFCLK, SL_CLOCK_MANAGER_HFXO0LFCLK_SOURCE);
-#endif
 
 #if defined(SL_CLOCK_MANAGER_HFXO_SLEEPY_CRYSTAL_SUPPORT) && (SL_CLOCK_MANAGER_HFXO_SLEEPY_CRYSTAL_SUPPORT == 1)
   // Configure Sleepy Crystal settings
@@ -570,27 +678,7 @@ FUNCTION_SCOPE void init_hfxo(void)
   // Prepare for the next measurements to get a better average.
 #if defined(SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN) && SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENT_EN \
   && (SL_CLOCK_MANAGER_HFXO_MODE == HFXO_CFG_MODE_XTAL)
-
-  while (((HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) != 0U) || ((HFXO0->STATUS & _HFXO_STATUS_SYNCBUSY_MASK) != 0U)) {
-    // Wait for HFXO to be disabled
-  }
-
-  // Configure HFXO for startup time measurement
-  sl_hal_bus_reg_write_mask(&HFXO0->CFG,
-                            _HFXO_CFG_NUMSTUPMEAS_MASK | _HFXO_CFG_STUPMEASEN_MASK,
-                            SL_CLOCK_MANAGER_HFXO_STARTUP_TIME_MEASUREMENTS | HFXO_CFG_STUPMEASEN);
-
-  // Clear any interrupt
-  HFXO0->IF_CLR = HFXO_IF_STUPMEASDONE;
-
-  // Enable HFXO Interrupt to handle HFXO startup time measurement
-  NVIC_EnableIRQ(HFXO_IRQ_NUMBER);
-  HFXO0->IEN_SET = HFXO_IEN_STUPMEASDONE;
-
-  // Start the measure
-  HFXO0->CMD_SET = HFXO_CMD_STARTMEAS;
-
-  SLI_CLOCK_MANAGER_LOG_DEBUG("HFXO startup time measurement started");
+  init_hfxo_startup_time_measurement();
 #endif
 
   // Keep oscillator on-demand.
@@ -1051,6 +1139,105 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
   // Re-enable clock on-demand by hardware.
   socpll->CTRL_CLR = SOCPLL_CTRL_DISONDEMAND;
   socpll->CTRL_CLR = SOCPLL_CTRL_FORCEEN;
+}
+#endif
+
+#if defined(SLI_CLOCK_MANAGER_INIT_PERPLL0) || defined(SLI_CLOCK_MANAGER_INIT_PERPLL1)
+/***************************************************************************//**
+ * Initializes PERPLL.
+ ******************************************************************************/
+FUNCTION_SCOPE void init_perpll(uint8_t perpll_num)
+{
+  sl_status_t status;
+  PERPLL_TypeDef *perpll = PERPLL(perpll_num);
+  EFM_ASSERT(perpll != NULL);
+  sl_bus_clock_t perpll_bus_clock = PERPLL_BUS_CLOCK(perpll_num);
+  uint32_t perpll_freq = 0;
+
+  // Enable PERPLL Bus Clock.
+  status = sl_clock_manager_enable_bus_clock(perpll_bus_clock);
+  EFM_ASSERT(status == SL_STATUS_OK);
+
+  // Unlock register interface.
+  perpll->LOCKKEY = PERPLL_LOCKKEY_LOCKKEY_UNLOCK;
+
+  // Disable clock on-demand while configuring PERPLL.
+  perpll->CTRL_SET = PERPLL_CTRL_DISONDEMAND;
+  perpll->CTRL_CLR = PERPLL_CTRL_FORCEEN;
+  while ((perpll->STATUS & _PERPLL_STATUS_ENS_MASK) != 0U) {
+    // Wait until PERPLL is disabled.
+  }
+
+  // Set the PERPLL clock reference and dividers.
+  if (CLOCK_MANAGER_PERPLL_ADVANCED_SETTINGS(perpll_num) == 0) {
+#if (defined(SL_CLOCK_MANAGER_PERPLL0_ADVANCED_SETTINGS) && (SL_CLOCK_MANAGER_PERPLL0_ADVANCED_SETTINGS == 0)) \
+    || (defined(SL_CLOCK_MANAGER_PERPLL1_ADVANCED_SETTINGS) && (SL_CLOCK_MANAGER_PERPLL1_ADVANCED_SETTINGS == 0))
+    const uint32_t *perpll_freq_config = sli_clock_manager_perpll_freq_table[CLOCK_MANAGER_PERPLL_FREQ(perpll_num)];
+
+    perpll->CTRL = (perpll->CTRL & ~(_PERPLL_CTRL_ENFRACN_MASK | _PERPLL_CTRL_PERPLLDIVN_MASK | _PERPLL_CTRL_PERPLLDIVF_MASK))
+                   | (perpll_freq_config[SLI_CLOCK_MANAGER_PERPLL_FIELD_DIVN] << _PERPLL_CTRL_PERPLLDIVN_SHIFT)
+                   | (1 << _PERPLL_CTRL_ENFRACN_SHIFT)
+                   | (perpll_freq_config[SLI_CLOCK_MANAGER_PERPLL_FIELD_DIVF] << _PERPLL_CTRL_PERPLLDIVF_SHIFT);
+
+    perpll->DCOCFG = (perpll->DCOCFG & ~(_PERPLL_DCOCFG_PERPLLDCOOUTDIV_MASK | _PERPLL_DCOCFG_PERPLLOUTDIV2POW_MASK))
+                     | (perpll_freq_config[SLI_CLOCK_MANAGER_PERPLL_FIELD_DCO_DIV] << _PERPLL_DCOCFG_PERPLLDCOOUTDIV_SHIFT)
+                     | (perpll_freq_config[SLI_CLOCK_MANAGER_PERPLL_FIELD_DIV_2POW] << _PERPLL_DCOCFG_PERPLLOUTDIV2POW_SHIFT);
+
+    // Set the PERPLL frequency.
+    perpll_freq = perpll_freq_config[SLI_CLOCK_MANAGER_PERPLL_FIELD_FREQ];
+#endif
+  } else {
+#if (defined(SL_CLOCK_MANAGER_PERPLL0_ADVANCED_SETTINGS) && (SL_CLOCK_MANAGER_PERPLL0_ADVANCED_SETTINGS == 1)) \
+    || (defined(SL_CLOCK_MANAGER_PERPLL1_ADVANCED_SETTINGS) && (SL_CLOCK_MANAGER_PERPLL1_ADVANCED_SETTINGS == 1))
+
+    if (CLOCK_MANAGER_PERPLL_FRACTIONAL_EN(perpll_num) == 0) {
+      // If Integer-N mode is selected, DIVN cannot be 0.
+      EFM_ASSERT(CLOCK_MANAGER_PERPLL_DIVN(perpll_num) != 0);
+    } else {
+      // If Fractional-N mode is selected, DIVF cannot be 0.
+      EFM_ASSERT(CLOCK_MANAGER_PERPLL_DIVF(perpll_num) != 0);
+    }
+
+    perpll->CTRL = (perpll->CTRL & ~(_PERPLL_CTRL_ENFRACN_MASK | _PERPLL_CTRL_PERPLLDIVN_MASK | _PERPLL_CTRL_PERPLLDIVF_MASK))
+                   | (CLOCK_MANAGER_PERPLL_DIVN(perpll_num) << _PERPLL_CTRL_PERPLLDIVN_SHIFT)
+                   | (CLOCK_MANAGER_PERPLL_FRACTIONAL_EN(perpll_num) << _PERPLL_CTRL_ENFRACN_SHIFT)
+                   | (CLOCK_MANAGER_PERPLL_DIVF(perpll_num) << _PERPLL_CTRL_PERPLLDIVF_SHIFT);
+
+    perpll->DCOCFG = (perpll->DCOCFG & ~(_PERPLL_DCOCFG_PERPLLDCOOUTDIV_MASK | _PERPLL_DCOCFG_PERPLLOUTDIV2POW_MASK))
+                     | (CLOCK_MANAGER_PERPLL_DCO_DIV(perpll_num) << _PERPLL_DCOCFG_PERPLLDCOOUTDIV_SHIFT)
+                     | (CLOCK_MANAGER_PERPLL_DIV_2POW(perpll_num) << _PERPLL_DCOCFG_PERPLLOUTDIV2POW_SHIFT);
+
+    // Calculate the PERPLL frequency.
+    // Fout = (Fref/2) * ((divn+2) + (divf/16384)) / (dco_div + 2) / (2^div_2pow).
+    perpll_freq = (uint32_t)(((uint64_t)(SLI_CLOCK_MANAGER_HFXO_FREQ / 2U)
+                              * (((uint64_t)CLOCK_MANAGER_PERPLL_DIVN(perpll_num) + 2U) * 16384U
+                                 + CLOCK_MANAGER_PERPLL_DIVF(perpll_num)))
+                             / ((uint64_t)(CLOCK_MANAGER_PERPLL_DCO_DIV(perpll_num) + 2U)
+                                << (14U + CLOCK_MANAGER_PERPLL_DIV_2POW(perpll_num))));
+
+#endif
+  }
+
+  // Enable signal for pllclk0 from GP_PLL48.
+  perpll->CTRL_SET = PERPLL_CTRL_ENPLLCLKOUT0;
+
+  // Force a clock request by software to update analog part of PERPLL.
+  perpll->CTRL_SET = PERPLL_CTRL_FORCEEN;
+
+  while ((perpll->STATUS & (PERPLL_STATUS_RDY | PERPLL_STATUS_PLLLOCK | PERPLL_STATUS_ENS))
+         != (PERPLL_STATUS_RDY | PERPLL_STATUS_PLLLOCK | PERPLL_STATUS_ENS)) {
+    // Wait for PERPLL lock and ready.
+  }
+
+  // Update CMSIS PERPLL frequency.
+  SystemPERPLLClockSet(perpll_num, perpll_freq);
+
+  // Re-enable clock on-demand by hardware.
+  perpll->CTRL_CLR = PERPLL_CTRL_DISONDEMAND;
+  perpll->CTRL_CLR = PERPLL_CTRL_FORCEEN;
+
+  SLI_CLOCK_MANAGER_LOG_INFO("PERPLL%u locked, freq=%u",
+                             (uint32_t)perpll_num, (uint32_t)perpll_freq);
 }
 #endif
 
@@ -1610,7 +1797,6 @@ sl_status_t sli_clock_manager_hal_init(void)
 #if defined(SLI_CLOCK_MANAGER_SKIP_INIT) && (SLI_CLOCK_MANAGER_SKIP_INIT == 1)
   return SL_STATUS_OK;
 #else
-  sl_status_t status;
 
 #if defined(SLI_CLOCK_MANAGER_INIT_SYSCLK)
   // Make sure SYSCLK is on FSRCO
@@ -1627,7 +1813,7 @@ sl_status_t sli_clock_manager_hal_init(void)
 #endif
 
 #if defined(SLI_CLOCK_MANAGER_INIT_SYSRTC0CLK)
-  status =  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_SYSRTC0);
+  sl_status_t status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_SYSRTC0);
   EFM_ASSERT(status == SL_STATUS_OK);
 #endif
 
@@ -1681,6 +1867,14 @@ sl_status_t sli_clock_manager_hal_init(void)
 
 #if defined(SLI_CLOCK_MANAGER_INIT_SOCPLL2)
   init_socpll(2);
+#endif
+
+#if defined(SLI_CLOCK_MANAGER_INIT_PERPLL0)
+  init_perpll(0);
+#endif
+
+#if defined(SLI_CLOCK_MANAGER_INIT_PERPLL1)
+  init_perpll(1);
 #endif
 
 #if defined(SLI_CLOCK_MANAGER_INIT_HFRCOEM23)

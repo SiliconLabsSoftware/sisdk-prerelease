@@ -32,6 +32,8 @@ config_file:
 - path: config/s2/sl_device_init_emu_config.h
   condition: [device_sdid_240]
 - path: config/s2/sl_device_init_emu_config.h
+  condition: [device_sdid_245]
+- path: config/s2/sl_device_init_emu_config.h
   condition: [device_sdid_250]
 - path: config/s2/sl_device_init_emu_config.h
   condition: [device_sdid_260]
@@ -61,6 +63,8 @@ source:
 - path: src/sl_device_init_emu_s2.c
   condition: [device_sdid_240]
 - path: src/sl_device_init_emu_s2.c
+  condition: [device_sdid_245]
+- path: src/sl_device_init_emu_s2.c
   condition: [device_sdid_250]
 - path: src/sl_device_init_emu_s2.c
   condition: [device_sdid_260]
@@ -85,6 +89,8 @@ provides:
   condition: [device_sdid_235]
 - name: device_init_emu
   condition: [device_sdid_240]
+- name: device_init_emu
+  condition: [device_sdid_245]
 - name: device_init_emu
   condition: [device_sdid_250]
 - name: device_init_emu

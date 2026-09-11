@@ -94,6 +94,9 @@ static sl_status_t create_pool(sl_memory_reservation_t *reservation_handle,
                                uint32_t block_count,
                                size_t align,
                                sl_memory_pool_t *pool_handle);
+static void delete_pool_metadata(sl_memory_pool_t *pool_handle);
+static sl_status_t delete_pool(sl_memory_pool_t *pool_handle,
+                               bool force);
 
 /*******************************************************************************
  ******************************  LOCAL VARIABLES   *****************************
@@ -175,59 +178,18 @@ sl_status_t sl_memory_create_pool_advanced(sl_memory_reservation_t *reservation_
 
 /***************************************************************************//**
  * Deletes a memory pool.
- *
- * @note The pool_handle provided is neither freed or invalidated. It can be
- *       reused in a new call to sl_memory_create_pool() to create another pool.
  ******************************************************************************/
 sl_status_t sl_memory_delete_pool(sl_memory_pool_t *pool_handle)
 {
-  sl_status_t status;
-  sl_memory_reservation_t *reservation;
-
-  // Verify that the handle pointer isn't NULL.
-  if (pool_handle == NULL) {
-    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: handle=NULL");
-    return SL_STATUS_NULL_POINTER;
-  }
-
-  reservation = pool_handle->reservation;
-
-  status = sl_memory_delete_pool_no_unreserve(pool_handle);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-
-  // Release block.
-  status = sl_memory_release_block(reservation);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-
-  // Free reservation pool_handle.
-  status = sl_memory_reservation_handle_free(reservation);
-
-#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
-  if (status == SL_STATUS_OK) {
-    SEGGER_SYSVIEW_PrintfHost("Pool @0x%08lX deleted", (unsigned long)(uintptr_t)pool_handle);
-  }
-#endif
-
-  if (status == SL_STATUS_OK) {
-    SLI_MEMORY_MANAGER_LOG_INFO("delete_pool(): pool=%p", (uint32_t)pool_handle);
-  }
-
-  return status;
+  return delete_pool(pool_handle, false);
 }
 
 /***************************************************************************//**
  * Deletes a memory pool, but keeps the reservation.
- *
- * @note The pool_handle provided is neither freed or invalidated. It can be
- *       reused in a new call to sl_memory_create_pool() to create another pool.
  ******************************************************************************/
 sl_status_t sl_memory_delete_pool_no_unreserve(sl_memory_pool_t *pool_handle)
 {
-  // Verify that the handle pointer isn't NULL.
+  // Verify that the handle pointers aren't NULL.
   if ((pool_handle == NULL) || (pool_handle->reservation == NULL)) {
     SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool_no_unreserve() failed: handle=NULL");
     return SL_STATUS_NULL_POINTER;
@@ -239,17 +201,20 @@ sl_status_t sl_memory_delete_pool_no_unreserve(sl_memory_pool_t *pool_handle)
     return SL_STATUS_INVALID_STATE;
   }
 
-  // Free free_count/bank/block lists.
-  (void)sl_memory_free(pool_handle->free_cnt_tbl);
-  (void)sl_memory_free(pool_handle->bank_tbl);
-  (void)sl_memory_free(pool_handle->block_tbl);
-
-  // Reset the handle.
-  memset(pool_handle, 0, sizeof(sl_memory_pool_t));
+  // Free the pool metadata and reset the handle.
+  delete_pool_metadata(pool_handle);
 
   SLI_MEMORY_MANAGER_LOG_INFO("delete_pool_no_unreserve(): pool=%p", (uint32_t)pool_handle);
 
   return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Force-deletes a memory pool regardless of outstanding block allocations.
+ ******************************************************************************/
+sl_status_t sl_memory_delete_pool_force(sl_memory_pool_t *pool_handle)
+{
+  return delete_pool(pool_handle, true);
 }
 
 /***************************************************************************//**
@@ -754,6 +719,101 @@ static void free_free_cnt_entry(sl_memory_pool_t *pool_handle,
 {
   entry->next = pool_handle->empty_free_cnt_head;
   pool_handle->empty_free_cnt_head = entry;
+}
+
+/***************************************************************************//**
+ * Free the pool metadata lists (free count/bank/block tables) and reset the
+ * pool handle. Does not release the pool's underlying reservation.
+ *
+ * @param[in]  pool_handle  Pointer to the pool handle.
+ ******************************************************************************/
+static void delete_pool_metadata(sl_memory_pool_t *pool_handle)
+{
+  // Free free_count/bank/block lists.
+  (void)sl_memory_free(pool_handle->free_cnt_tbl);
+  (void)sl_memory_free(pool_handle->bank_tbl);
+  (void)sl_memory_free(pool_handle->block_tbl);
+
+  // Reset the handle.
+  memset(pool_handle, 0, sizeof(sl_memory_pool_t));
+}
+
+/***************************************************************************//**
+ * Deletes a memory pool and releases its reservation. Shared implementation for
+ * sl_memory_delete_pool() and sl_memory_delete_pool_force().
+ *
+ * @param[in]  pool_handle  Pointer to the pool handle.
+ * @param[in]  force        When false, the pool is deleted only if all blocks
+ *                          have been freed. When true, the pool is deleted
+ *                          regardless of outstanding block allocations.
+ *
+ * @return     SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+static sl_status_t delete_pool(sl_memory_pool_t *pool_handle,
+                               bool force)
+{
+  sl_status_t status;
+  sl_memory_reservation_t *reservation;
+
+  // Verify that the handle pointers aren't NULL.
+  if ((pool_handle == NULL) || (pool_handle->reservation == NULL)) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: handle=NULL");
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  // Verify that no blocks are allocated, unless a force-delete was requested.
+  if (!force && (pool_handle->free_blk_cnt != (uint32_t)(pool_handle->block_count))) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: blocks in use");
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  reservation = pool_handle->reservation;
+
+#if defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT)
+  // When force-deleting, reverse the bank-retention counts still held by blocks
+  // that were never individually freed. sl_memory_release_block() only accounts
+  // for the reservation metadata, not the per-block payload retention added by
+  // sl_memory_pool_alloc(), so without this the affected RAM banks would stay
+  // retained after the pool is deleted.
+  if (force) {
+    sl_memory_heap_t *heap = pool_handle->heap;
+    uint8_t *base = (uint8_t *)reservation->block_address;
+
+    CORE_DECLARE_IRQ_STATE;
+    CORE_ENTER_ATOMIC();
+    for (uint32_t i = 0; i < pool_handle->block_count; i++) {
+      if (IS_ALLOCATED_BLOCK(pool_handle->block_tbl[i].block_addr)) {
+        uint8_t *blk = base + (i * pool_handle->block_size);
+        SLI_MEMORY_DECREMENT_BANK_COUNTER(heap, blk, blk + pool_handle->block_size - 1);
+      }
+    }
+    CORE_EXIT_ATOMIC();
+  }
+#endif
+
+  // Free the pool metadata and reset the handle.
+  delete_pool_metadata(pool_handle);
+
+  // Release block.
+  status = sl_memory_release_block(reservation);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  // Free reservation handle.
+  status = sl_memory_reservation_handle_free(reservation);
+
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  if (status == SL_STATUS_OK) {
+    SEGGER_SYSVIEW_PrintfHost("Pool @0x%08lX deleted", (unsigned long)(uintptr_t)pool_handle);
+  }
+#endif
+
+  if (status == SL_STATUS_OK) {
+    SLI_MEMORY_MANAGER_LOG_INFO("delete_pool(): pool=%p", (uint32_t)pool_handle);
+  }
+
+  return status;
 }
 
 /***************************************************************************//**

@@ -39,10 +39,15 @@
 #include "sl_atomic.h"
 #include "sl_clock_manager.h"
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+#if defined(SL_CATALOG_HFXO_MANAGER_PRESENT)
+#include "sli_hfxo_manager.h"
+#endif
 #if defined(SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN) && (SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN == 1)
 #include "sl_power_manager_execution_modes.h"
 #endif
-
 #if defined(SL_CATALOG_POWER_MANAGER_RETENTION_PRESENT)
 #include "sli_power_manager_periph_state.h"
 #endif
@@ -94,7 +99,7 @@ uint8_t requirement_high_accuracy_hf_clock_counter = 0;
 bool requirement_high_accuracy_hf_clock_back_to_zero = false;
 #endif
 
-#if !defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
+#if !defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS) && !defined(SLI_HFXO_BYPASS_MODE)
 // Saved energy mode we are coming from when waiting for HFXO ready.
 static sl_power_manager_em_t waiting_clock_restore_from_em = SL_POWER_MANAGER_EM0;
 #endif
@@ -189,7 +194,8 @@ sl_status_t sl_power_manager_init(void)
 
   if (!is_initialized) {
 #if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT) \
-    && !defined(SL_CATALOG_POWER_MANAGER_DEEPSLEEP_BLOCKING_HFXO_RESTORE_PRESENT)
+    && !defined(SL_CATALOG_POWER_MANAGER_DEEPSLEEP_BLOCKING_HFXO_RESTORE_PRESENT) \
+    && !defined(SLI_HFXO_BYPASS_MODE)
     // Additional Sleeptimer HW configuration if the "power_manager_deepsleep" component is used
     sli_sleeptimer_hal_power_manager_integration_init();
 #endif
@@ -295,7 +301,7 @@ __NO_INLINE void sl_power_manager_sleep(void)
       requirement_high_accuracy_hf_clock_back_to_zero = false;
 #endif
 
-#if defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
+#if defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS) || defined(SLI_HFXO_BYPASS_MODE)
       sli_power_manager_notify_em_transition(current_em, lowest_em);
 #else
       if (is_sleeping_waiting_for_clock_restore == false) {
@@ -331,7 +337,7 @@ __NO_INLINE void sl_power_manager_sleep(void)
     // Apply lowest reachable energy mode
     sli_power_manager_apply_em(current_em);
 
-#if !defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
+#if !defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS) && !defined(SLI_HFXO_BYPASS_MODE)
     // In case we are waiting for the restore from an early wake-up,
     // we put back the current EM to the one before the early wake-up to do the next notification correctly.
     if (is_sleeping_waiting_for_clock_restore == true) {
@@ -345,7 +351,7 @@ __NO_INLINE void sl_power_manager_sleep(void)
 
     primask_state = yield_critical_with_primask(primask_state);
 
-#if !defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
+#if !defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS) && !defined(SLI_HFXO_BYPASS_MODE)
     // In case the HF restore was completed from the HFXO ISR,
     // and notification not done elsewhere, do it here
     if (is_restored_from_hfxo_isr_internal == true) {
@@ -373,7 +379,7 @@ __NO_INLINE void sl_power_manager_sleep(void)
       is_hf_x_oscillator_not_preserved = false;
     }
 
-#if defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
+#if defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS) || defined(SLI_HFXO_BYPASS_MODE)
     sli_power_manager_is_high_freq_accuracy_clk_ready(true);
 #else
     // If possible, go back to sleep in EM1 while waiting for HF accuracy restore
@@ -908,7 +914,8 @@ static void evaluate_wakeup(sl_power_manager_em_t to)
             if (sli_power_manager_is_high_freq_accuracy_clk_used()) {
               hf_accuracy_clk_flag = SLI_SLEEPTIMER_POWER_MANAGER_HF_ACCURACY_CLK_FLAG;
 #if (SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_SYSRTC) \
-              && defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)
+              && defined(SL_CATALOG_SYSRTC_PRETRIGGERS_PRESENT)   \
+              && !defined(SLI_HFXO_BYPASS_MODE)
               uint32_t hfxo_startup_time;
               sli_clock_manager_get_hfxo_average_startup_time(&hfxo_startup_time);
               wakeup_delay -= hfxo_startup_time;
@@ -1038,9 +1045,9 @@ static void clock_restore(void)
       sli_power_manager_restore_high_freq_accuracy_clk();
       is_hf_x_oscillator_not_preserved = false;
     }
-#if defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS)
+#if defined(SLI_SLEEPTIMER_SYSRTC_WITH_PRETRIGGERS) || defined(SLI_HFXO_BYPASS_MODE)
     // Do the entire clock restore process in one go as we don't use the HFXO RDY ISR.
-    // The HFXO should be ready most of the time anyways because of the pre-triggers.
+    // The HFXO should be ready because of the pre-triggers or bypass mode.
     sli_power_manager_is_high_freq_accuracy_clk_ready(true);
     sli_power_manager_restore_states();
     is_states_saved = false;

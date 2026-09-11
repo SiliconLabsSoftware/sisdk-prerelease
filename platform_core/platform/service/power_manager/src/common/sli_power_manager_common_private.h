@@ -42,10 +42,12 @@ extern "C" {
 #if defined(_EMU_CTRL_EM23VSCALE_MASK) && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
 // Voltage scaling for EM23 present.
 #define SLI_POWER_MANAGER_VSCALE_EM23_PRESENT
-#if defined(EMU_CMD_EM01VSCALE1) && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+#if defined(EMU_CMD_EM01VSCALE1)
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)
 // Voltage scaling for EM01 present.
 #define SLI_POWER_MANAGER_VSCALE_EM01_PRESENT
 #define SLI_POWER_MANAGER_VSCALE1_MAX_VOLTAGE_CLOCK     40000000UL
+#endif
 #endif
 #endif
 

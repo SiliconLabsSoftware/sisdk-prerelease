@@ -5,16 +5,16 @@ description: >-
   Channel Sounding (CS) Initiator for Bluetooth LE example uses the Ranging 
   Requester (RREQ) role of Ranging Profile (RAP) to collect ranging data and
   processes results using distance estimation algorithm with RTL Library.
-  
+
   This example connects to CS RRSP Reflector devices and starts the distance 
   measurement. Results are printed on the display of the main board if 
   available and can be read via the serial port VCOM. 
-  
+
   It can measure in two CS measurement main modes PBR (default)
   and RTT. RTT mode can be selected by setting the `CS_MANAGER_DEFAULT_MAIN_MODE_TYPE`
   macro to `sl_bt_cs_mode_rtt`. Submode can also be used by setting the
   `CS_MANAGER_DEFAULT_SUB_MODE_TYPE` to RTT. Submode is disabled by default.
-  
+
   The Initiator can measure in two object tracking modes: in moving object
   tracking mode (default) or in stationary object tracking mode. In moving object
   tracking mode measurement results will be calculated for every procedure. Moving

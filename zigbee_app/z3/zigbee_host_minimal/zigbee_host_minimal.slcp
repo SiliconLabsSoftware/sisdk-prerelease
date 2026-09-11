@@ -1,6 +1,6 @@
 project_name: zigbee_host_minimal
 label: Zigbee - Host Minimal
-package: zigbee
+package: zigbee_app
 category: Zigbee Application
 quality: production
 

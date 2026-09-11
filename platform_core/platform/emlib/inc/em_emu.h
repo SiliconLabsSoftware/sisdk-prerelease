@@ -56,7 +56,8 @@ extern "C" {
   && !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
 /** Voltage scaling present */
 #define EMU_VSCALE_PRESENT
-#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) \
+  && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)
 /** Voltage scaling for EM01 present */
 #define EMU_VSCALE_EM01_PRESENT
 #endif
@@ -1079,6 +1080,7 @@ typedef struct {
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \

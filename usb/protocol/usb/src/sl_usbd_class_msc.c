@@ -34,6 +34,7 @@
 #include "sl_core.h"
 #endif
 
+#include "sl_log_helper.h"
 #include "sl_bit.h"
 #include "sl_enum.h"
 #include "sl_status.h"
@@ -233,6 +234,7 @@ sl_status_t sl_usbd_msc_init(void)
   status = sli_usbd_msc_os_init();
 
   if (status != SL_STATUS_OK) {
+    SL_PRINT_STRING_ERROR("Failed to initialize MSC OS\r\n");
     return status;
   }
 
@@ -297,34 +299,42 @@ sl_status_t sl_usbd_msc_create_instance(uint8_t                       subclass,
   CORE_DECLARE_IRQ_STATE;
 
   if (p_subclass_drv == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_subclass_drv->enable == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_subclass_drv->disable == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_subclass_drv->process_command == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_subclass_drv->read_data == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_subclass_drv->write_data == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_class_nbr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (msc_task_stack_size == 0) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -332,6 +342,7 @@ sl_status_t sl_usbd_msc_create_instance(uint8_t                       subclass,
   if (usbd_msc_ptr->next_ctrl_nbr == 0u) {
     CORE_EXIT_ATOMIC();
     *p_class_nbr = SL_USBD_CLASS_NBR_NONE;
+    SL_PRINT_STRING_ERROR("No MSC class instances available\r\n");
     return SL_STATUS_ALLOCATION_FAILED;
   }
 
@@ -358,6 +369,7 @@ sl_status_t sl_usbd_msc_create_instance(uint8_t                       subclass,
   p_ctrl->subclass_arg      = p_subclass_arg;
 
   *p_class_nbr = msc_nbr;
+  SL_PRINT_STRING_DEBUG("USB MSC instance created\r\n");
   return SL_STATUS_OK;
 }
 
@@ -379,6 +391,7 @@ sl_status_t sl_usbd_msc_add_to_configuration(uint8_t  class_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (class_nbr >= usbd_msc_ptr->class_instance_qty) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -417,6 +430,7 @@ sl_status_t sl_usbd_msc_add_to_configuration(uint8_t  class_nbr,
 
   if (usbd_msc_ptr->next_comm_nbr == 0u) {
     CORE_EXIT_ATOMIC();
+    SL_PRINT_STRING_ERROR("No MSC communication structures available\r\n");
     return SL_STATUS_ALLOCATION_FAILED;
   }
 
@@ -493,11 +507,13 @@ sl_status_t sl_usbd_msc_lun_add(uint8_t         class_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (p_lu_nbr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= usbd_msc_ptr->class_instance_qty) {
     *p_lu_nbr = SL_USBD_MSC_LU_NBR_INVALID;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -533,11 +549,13 @@ sl_status_t sl_usbd_msc_is_enabled(uint8_t  class_nbr,
   sl_status_t            status;
 
   if (p_enabled == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= usbd_msc_ptr->class_instance_qty) {
     *p_enabled = false;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 

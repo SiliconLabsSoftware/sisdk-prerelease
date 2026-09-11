@@ -216,7 +216,6 @@
         <enumValue value="2"/>
         <enumValue value="3"/>
         <enumValue value="4"/>
-        <enumValue value="25"/>
       </enumProperty>
       <enumProperty label="TX" id="portio.uart1.enable.tx" description="" defaultValueIndex="0">
         <enumValue value="Disabled"/>
@@ -2562,7 +2561,6 @@
             <location number="2" portBankIndex="1" pinIndex="5"/>
             <location number="3" portBankIndex="1" pinIndex="9"/>
             <location number="4" portBankIndex="1" pinIndex="11"/>
-            <location number="25" portBankIndex="0" pinIndex="34"/>
           </route>
         </selector>
         <selector name="UART1_RX" locationPropertyId="portio.uart1.location.rx">

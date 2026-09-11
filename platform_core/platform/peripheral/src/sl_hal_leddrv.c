@@ -173,6 +173,13 @@ void sl_hal_leddrv_init(LEDDRV_TypeDef *leddrv,
 
   // Calibration mode must be set after LEDDRV_CTRL_ENFRC
   leddrv->CFG_SET = ((uint32_t)init->ton_cal_mode << _LEDDRV_CFG_TONCALMODE_SHIFT);
+
+  SL_PRINT_STRING_DEBUG("ton=%lu toff=%lu\r\n",
+                        (unsigned long)init->time_on_max,
+                        (unsigned long)init->time_off_max);
+  SL_PRINT_STRING_DEBUG("dual=%d direct=%d\r\n",
+                        (int)init->dual_drive_mode_enable,
+                        (int)init->direct_drive_mode_enable);
 }
 
 static uint32_t get_leddrv_gpio_port(sl_hal_leddrv_port_select_t port)

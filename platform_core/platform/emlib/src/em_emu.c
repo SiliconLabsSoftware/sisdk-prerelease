@@ -219,7 +219,8 @@ static errataFixDcdcHs_TypeDef errataFixDcdcHsState = errataFixDcdcHsInit;
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
 #define RAM0_BLOCKS           16U
 #define RAM0_BLOCK_SIZE   0x4000U // 16 kB blocks
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)
 #define RAM0_BLOCKS           16U
 #define RAM0_BLOCK_SIZE   0x8000U // 32 kB blocks
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)

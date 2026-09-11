@@ -8,14 +8,14 @@ component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
 - path: bluetooth_mesh/component
-- path: bluetooth_apploader/component
 - path: bluetooth_mesh_srtest/component
-- path: bluetooth_le/component
-- path: bluetooth_le_controller/component
-- path: bluetooth_common/component
-- path: bluetooth_le_host/component
-- path: bluetooth_mesh_stack/component
 - path: bluetooth_le_internal/component
+- path: bluetooth_common/component
+- path: bluetooth_apploader/component
+- path: bluetooth_le_host/component
+- path: bluetooth_le/component
+- path: bluetooth_mesh_stack/component
+- path: bluetooth_le_controller/component
 - path: boards_internal/hardware/kit/component
 - path: boards_internal/hardware/kit/common/component
 - path: boards_internal/hardware/board/component
@@ -99,10 +99,10 @@ component_path:
 - path: printf/component
 - path: proprietary_default_radio_confs/.
 - path: protocol_user_sequencer_internal/component/protocol_user_sequencer_internal
-- path: rail_library_alpha_chips/component/rail_library_alpha_chips
-- path: rail_library/component/rail_library
-- path: rail_library_chips_internal/component/rail_library_chips_internal
 - path: rail_library_internal/component/rail_library_internal
+- path: rail_library/component/rail_library
+- path: rail_library_alpha_chips/component/rail_library_alpha_chips
+- path: rail_library_chips_internal/component/rail_library_chips_internal
 - path: rail/component
 - path: realtime_locationing/component
 - path: rtos_benchmark_internal/component
@@ -116,18 +116,10 @@ component_path:
 - path: thread/component
 - path: unity_test_framework/component
 - path: unity_internal/component
-- path: usb/protocol/usb/component
 - path: usb_internal/protocol/usb/component
+- path: usb/protocol/usb/component
 - path: wisun/component
 - path: wisun/component/middleware
-- path: zigbee/platform/radio/mac/component/zigbee
-- path: zigbee/platform/radio/rail_lib/plugin/component/zigbee
-- path: zigbee/component/zigbee
-- path: zigbee/util/plugin/component/zigbee
-- path: zigbee/util/silicon_labs/silabs_core/component/zigbee
-- path: zigbee/app/framework/component/zigbee
-- path: zigbee/platform/service/component/zigbee
-- path: zigbee_smart_energy/component/zigbee_smart_energy
 - path: zigbee_internal/platform/radio/mac/component/zigbee_internal
 - path: zigbee_internal/platform/radio/rail_lib/plugin/component/zigbee_internal
 - path: zigbee_internal/component/zigbee_internal
@@ -135,6 +127,14 @@ component_path:
 - path: zigbee_internal/util/silicon_labs/silabs_core/component/zigbee_internal
 - path: zigbee_internal/app/framework/component/zigbee_internal
 - path: zigbee_internal/platform/service/component/zigbee_internal
+- path: zigbee_smart_energy/component/zigbee_smart_energy
+- path: zigbee/platform/radio/mac/component/zigbee
+- path: zigbee/platform/radio/rail_lib/plugin/component/zigbee
+- path: zigbee/component/zigbee
+- path: zigbee/util/plugin/component/zigbee
+- path: zigbee/util/silicon_labs/silabs_core/component/zigbee
+- path: zigbee/app/framework/component/zigbee
+- path: zigbee/platform/service/component/zigbee
 - path: zwave/component
 - path: zwave/component/CommandClasses
 - path: zwave/component-internal
@@ -143,9 +143,9 @@ toolchain_mapping: toolchains.slct
 documentation:
 - docset: machine-learning
   version: 3.1.0
-- docset: amazon_expresslink_sdk_internal
-  version: 1.0.0
 - docset: amazon_freertos_test_suite_internal
+  version: 1.0.0
+- docset: amazon_expresslink_sdk_internal
   version: 1.0.0
 - docset: aws_sdk_202412_00
   version: "202412.0.0"
@@ -197,11 +197,11 @@ documentation:
   version: 1.0.8
 - docset: protocol-usb
   version: 1.8.0
-- docset: wifi
-  version: 4.2.0
 - docset: wifi_siwx353
   version: 0.1.0
 - docset: wifi_internal
+  version: 4.2.0
+- docset: wifi
   version: 4.2.0
 - docset: wiseconnect_common
   version: 4.2.0
@@ -209,8 +209,8 @@ documentation:
   version: 9.2.0
 upgrade_manifest:
 - path: bluetooth_mesh/upgrade.slcu
-- path: bluetooth_le/upgrade.slcu
 - path: bluetooth_le_host/component/upgrade.slcu
+- path: bluetooth_le/upgrade.slcu
 - path: bluetooth_mesh_stack/component/upgrade.slcu
 - path: connect_stack/component/upgrade.slcu
 - path: cpc/upgrade.slcu

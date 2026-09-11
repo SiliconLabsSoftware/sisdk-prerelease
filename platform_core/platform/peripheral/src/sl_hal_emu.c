@@ -61,7 +61,8 @@
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
 #define RAM0_BLOCKS           16U
 #define RAM0_BLOCK_SIZE   0x4000U // 16 kB blocks
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)
 #define RAM0_BLOCKS           16U
 #define RAM0_BLOCK_SIZE   0x8000U // 32 kB blocks
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)
@@ -154,12 +155,14 @@ extern __INLINE uint32_t sl_hal_emu_efp_get_pending_interrupts(void);
 extern __INLINE void sl_hal_emu_efp_set_interrupts(uint32_t flags);
 extern __INLINE void sl_hal_emu_efp_clear_interrupts(uint32_t flags);
 extern __INLINE uint32_t sl_hal_emu_efp_get_enabled_pending_interrupts(void);
+#if defined(_EMU_CTRL_EFPDRVDVDD_MASK)
 extern __INLINE void sl_hal_emu_enable_efp_drive_dvdd(void);
 extern __INLINE void sl_hal_emu_disable_efp_drive_dvdd(void);
 extern __INLINE void sl_hal_emu_enable_efp_direct_mode(void);
 extern __INLINE void sl_hal_emu_disable_efp_direct_mode(void);
 extern __INLINE void sl_hal_emu_enable_efp_drive_decouple(void);
 extern __INLINE void sl_hal_emu_disable_efp_drive_decouple(void);
+#endif
 #endif /* defined(_EMU_EFPIF_MASK) */
 #if defined(_DCDC_LOCK_MASK)
 extern __INLINE void sl_hal_emu_dcdc_lock(void);

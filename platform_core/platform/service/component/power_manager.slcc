@@ -32,6 +32,8 @@ config_file:
   condition: [device_sdid_235]
 - path: platform/service/power_manager/config/sl_power_manager_config.h
   condition: [device_sdid_240]
+- path: platform/service/power_manager/config/EFX32XG25/sl_power_manager_config.h
+  condition: [device_sdid_245]
 - path: platform/service/power_manager/config/sl_power_manager_config.h
   condition: [device_sdid_250]
 - path: platform/service/power_manager/config/sl_power_manager_config.h

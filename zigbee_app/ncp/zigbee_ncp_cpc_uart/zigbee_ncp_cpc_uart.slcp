@@ -1,6 +1,6 @@
 project_name: zigbee_ncp_cpc_uart
 label: Zigbee - NCP CPC over UART
-package: zigbee
+package: zigbee_app
 category: Zigbee Application
 quality: production
 description: NCP using Co-Processor Communication (CPC) over UART. Host connects via CPC daemon to EFR. Extensible for init, events, and messaging.

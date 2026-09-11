@@ -33,6 +33,7 @@
 #include "sl_core.h"
 #endif
 
+#include "sl_log_helper.h"
 #include "sl_usbd_core.h"
 #include "sl_usbd_core_config.h"
 
@@ -102,6 +103,7 @@ sl_status_t sli_usbd_core_os_create_task(void)
                                            &message_queue_attr);
 
   if (message_queue_handle == NULL) {
+    SL_PRINT_STRING_ERROR("Failed to create message queue\r\n");
     return SL_STATUS_FAIL;
   }
 
@@ -110,6 +112,7 @@ sl_status_t sli_usbd_core_os_create_task(void)
                             &task_attr);
 
   if (task_handle == NULL) {
+    SL_PRINT_STRING_ERROR("Failed to create task\r\n");
     return SL_STATUS_FAIL;
   }
 
@@ -122,6 +125,7 @@ sl_status_t sli_usbd_core_os_create_task(void)
 sl_status_t sli_usbd_core_os_create_endpoint_signal(uint8_t endpoint)
 {
   if (endpoint >= SL_USBD_OPEN_ENDPOINTS_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_FAIL;
   }
 
@@ -132,6 +136,7 @@ sl_status_t sli_usbd_core_os_create_endpoint_signal(uint8_t endpoint)
 
   sem_id[endpoint] = osSemaphoreNew(SL_USBD_OPEN_ENDPOINTS_QUANTITY, 0, &sem_attr[endpoint]);
   if (sem_id[endpoint] == NULL) {
+    SL_PRINT_STRING_ERROR("Failed to create semaphore\r\n");
     return SL_STATUS_FAIL;
   }
 
@@ -144,6 +149,7 @@ sl_status_t sli_usbd_core_os_create_endpoint_signal(uint8_t endpoint)
 sl_status_t sli_usbd_core_os_delete_endpoint_signal(uint8_t endpoint)
 {
   if (endpoint >= SL_USBD_OPEN_ENDPOINTS_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_FAIL;
   }
 
@@ -166,6 +172,7 @@ sl_status_t sli_usbd_core_os_pend_endpoint_signal(uint8_t  endpoint,
   osStatus_t status;
 
   if (endpoint >= SL_USBD_OPEN_ENDPOINTS_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_FAIL;
   }
 
@@ -178,6 +185,7 @@ sl_status_t sli_usbd_core_os_pend_endpoint_signal(uint8_t  endpoint,
   status = osSemaphoreAcquire(sem_id[endpoint], ticks);
 
   if (status == osErrorTimeout) {
+    SL_PRINT_STRING_DEBUG("Timeout waiting for endpoint signal\r\n");
     return SL_STATUS_TIMEOUT;
   }
 
@@ -194,6 +202,7 @@ sl_status_t sli_usbd_core_os_pend_endpoint_signal(uint8_t  endpoint,
 sl_status_t sli_usbd_core_os_abort_endpoint_signal(uint8_t endpoint)
 {
   if (endpoint >= SL_USBD_OPEN_ENDPOINTS_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_FAIL;
   }
 
@@ -210,6 +219,7 @@ sl_status_t sli_usbd_core_os_abort_endpoint_signal(uint8_t endpoint)
 sl_status_t sli_usbd_core_os_post_endpoint_signal(uint8_t endpoint)
 {
   if (endpoint >= SL_USBD_OPEN_ENDPOINTS_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_FAIL;
   }
 
@@ -226,6 +236,7 @@ sl_status_t sli_usbd_core_os_post_endpoint_signal(uint8_t endpoint)
 sl_status_t sli_usbd_core_os_create_endpoint_lock(uint8_t endpoint)
 {
   if (endpoint >= SL_USBD_OPEN_ENDPOINTS_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_FAIL;
   }
 
@@ -237,6 +248,7 @@ sl_status_t sli_usbd_core_os_create_endpoint_lock(uint8_t endpoint)
   mutex_handle[endpoint] = osMutexNew(&mutex_attr[endpoint]);
 
   if (mutex_handle[endpoint] == NULL) {
+    SL_PRINT_STRING_ERROR("Failed to create mutex\r\n");
     return SL_STATUS_FAIL;
   }
 
@@ -249,6 +261,7 @@ sl_status_t sli_usbd_core_os_create_endpoint_lock(uint8_t endpoint)
 sl_status_t sli_usbd_core_os_delete_endpoint_lock(uint8_t endpoint)
 {
   if (endpoint >= SL_USBD_OPEN_ENDPOINTS_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_FAIL;
   }
 
@@ -267,6 +280,7 @@ sl_status_t sli_usbd_core_os_delete_endpoint_lock(uint8_t endpoint)
 sl_status_t sli_usbd_core_os_acquire_endpoint_lock(uint8_t endpoint)
 {
   if (endpoint >= SL_USBD_OPEN_ENDPOINTS_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_FAIL;
   }
 
@@ -283,6 +297,7 @@ sl_status_t sli_usbd_core_os_acquire_endpoint_lock(uint8_t endpoint)
 sl_status_t sli_usbd_core_os_release_endpoint_lock(uint8_t endpoint)
 {
   if (endpoint >= SL_USBD_OPEN_ENDPOINTS_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_FAIL;
   }
 

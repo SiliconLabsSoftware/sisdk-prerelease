@@ -1,6 +1,6 @@
 project_name: zigbee_ncp_uart_hw
 label: Zigbee - NCP UART HW
-package: zigbee
+package: zigbee_app
 category: Zigbee Application
 quality: production
 description: NCP for host over UART with hardware flow control. Extensible for init, events, and messaging. For SE ECC, add EmberZnet-Smart-Energy side-package (CBKE 163k1/283k1).

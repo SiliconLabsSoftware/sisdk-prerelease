@@ -1,0 +1,106 @@
+project_name: zigbee_soc_empty_freertos
+label: Zigbee - SoC Empty FreeRTOS
+package: zigbee_app
+category: Zigbee Application
+quality: production
+description: Empty Zigbee SoC FreeRTOS router template with no board-specific peripherals. Starts network steering on first boot and is a starting point for any compatible Series 2 or Series 3 device. Generate as an end device by overriding the device type and swapping to the leaf stack (see readme).
+author: Silicon Laboratories, Inc.
+
+component:
+  - id: sl_main
+  - id: watchdog_manager
+  - id: zigbee_pro_stack
+  - id: zigbee_source_route
+  - id: zigbee_zcl_framework_core
+  - id: zigbee_counters
+  - id: zigbee_network_steering
+  - id: zigbee_scan_dispatch
+  - id: zigbee_update_tc_link_key
+  - id: zigbee_application_bootloader
+  - id: zigbee_ipc
+  - id: freertos
+  - id: clock_manager
+  # Platform - enable LTO for gcc and llvm
+  - id: toolchain_gcc_lto
+    condition:
+      - toolchain_gcc
+  - id: toolchain_llvm_lto
+    condition:
+      - toolchain_llvm
+
+configuration:
+  - name: SLI_ZIGBEE_PRIMARY_NETWORK_DEVICE_TYPE
+    value: SLI_ZIGBEE_NETWORK_DEVICE_TYPE_ROUTER
+  - name: SLI_ZIGBEE_PRIMARY_NETWORK_SECURITY_TYPE
+    value: SLI_ZIGBEE_NETWORK_SECURITY_TYPE_3_0
+  - name: SL_ZIGBEE_BINDING_TABLE_SIZE
+    value: 10
+  - name: SL_STACK_SIZE
+    value: 1024
+    unless:
+      - device_series_3
+  - name: SL_STACK_SIZE
+    value: 16384
+    condition:
+      - device_series_3
+  - name: NVM3_DEFAULT_NVM_SIZE
+    value: 32768
+    condition:
+      - device_series_2
+  # If using zigbee_secure_key_storage we do not need to support backwards
+  # compatibility because we have never deployed images with keys in PSA
+  # As a result, these lines end up saving some code space
+  - name: SL_PSA_ITS_SUPPORT_V1_DRIVER
+    value: 0
+  - name: SL_PSA_ITS_SUPPORT_V2_DRIVER
+    value: 0
+  - name: SL_PSA_ITS_SUPPORT_V3_DRIVER
+    value: 1
+  - name: SL_ZIGBEE_STACK_RTOS_TASK_STACK_SIZE
+    value: 5800
+    condition:
+      - device_series_3
+  - name: SL_ZIGBEE_APP_FRAMEWORK_RTOS_TASK_STACK_SIZE
+    value: 6000
+    condition:
+      - device_series_3
+  - name: SL_ZIGBEE_AF_PLUGIN_ZCL_CLUSTER_DEFER_ATTRIBUTE_WRITES_TO_NVM_MS
+    value: 2000
+    condition:
+      - device_series_3
+
+source:
+  - path: main.c
+    unless: [cmsis_rtos2]
+  - path: app.c
+
+config_file:
+  - path: config/zigbee_soc_empty_freertos_config.h
+  - path: config/zcl/zcl_config.zap
+    file_id: zap_configuration_file_id
+    directory: zcl
+
+include:
+  - path: ./
+
+readme:
+  - path: ./readme.md
+
+ui_hints:
+  highlight:
+    - path: readme.md
+      focus: false
+
+filter:
+  - name: Wireless Technology
+    value: [Zigbee]
+  - name: Device Type
+    value: [SoC]
+  - name: Project Difficulty
+    value: [Beginner]
+tag:
+  - hwfilter:ram:64k
+  - hwfilter:device:device_supports_zigbee
+  - toolchain:gcc
+  - toolchain:iar
+  - toolchain:llvm

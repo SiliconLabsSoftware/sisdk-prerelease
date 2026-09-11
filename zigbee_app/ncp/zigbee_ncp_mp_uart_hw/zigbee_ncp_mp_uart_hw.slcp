@@ -1,6 +1,6 @@
 project_name: zigbee_ncp_mp_uart_hw
 label: Zigbee - NCP Multi-PAN UART HW
-package: zigbee
+package: zigbee_app
 category: Zigbee Application
 quality: production
 description: "Multi-PAN NCP: two PANs on one radio. Communicates with host over UART with hardware flow control. Extensible for init, events, and messaging."

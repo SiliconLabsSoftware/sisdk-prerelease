@@ -1,6 +1,6 @@
 project_name: zigbeed
 label: Zigbee - Host zigbeed
-package: zigbee
+package: zigbee_app
 category: Zigbee Host Application
 quality: production
 description: Zigbee stack daemon for Linux. Communicates with 802.15.4 RCP via CPCd; exposes EZSP to host apps. See docs.silabs.com Multiprotocol on Linux.

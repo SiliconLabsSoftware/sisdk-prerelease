@@ -2211,6 +2211,19 @@ static const app_settings_entry_t app_statistics_entries[] =
     .description = "Rx drop count"
   },
   {
+    .key = "rx_filtered_count",
+    .domain = app_statistics_domain_mac,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.mac.rx_filtered_count,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Rx filtered count"
+  },
+  {
     .key = "tx_bytes",
     .domain = app_statistics_domain_mac,
     .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
@@ -2391,6 +2404,19 @@ static const app_settings_entry_t app_statistics_entries[] =
     .set_handler = NULL,
     .get_handler = app_settings_get_integer,
     .description = "PAN control tx count"
+  },
+  {
+    .key = "pan_control_rx_drop_count",
+    .domain = app_statistics_domain_wisun,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.wisun.pan_control_rx_drop_count,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "PAN control rx drop count"
   },
   {
     .key = "ip_rx_count",

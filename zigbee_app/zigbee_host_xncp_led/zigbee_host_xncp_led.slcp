@@ -1,6 +1,6 @@
 project_name: zigbee_host_xncp_led
 label: Zigbee - Host xNCP LED
-package: zigbee
+package: zigbee_app
 category: Zigbee Host Application
 quality: production
 

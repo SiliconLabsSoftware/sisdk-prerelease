@@ -30,6 +30,8 @@ config_file:
   condition: [device_sdid_235]
 - path: platform/emdrv/dmadrv/config/s2_8ch/dmadrv_config.h
   condition: [device_sdid_240]
+- path: platform/emdrv/dmadrv/config/s2_16ch/dmadrv_config.h
+  condition: [device_sdid_245]
 - path: platform/emdrv/dmadrv/config/s2_8ch/dmadrv_config.h
   condition: [device_sdid_250]
 - path: platform/emdrv/dmadrv/config/s2_8ch/dmadrv_config.h

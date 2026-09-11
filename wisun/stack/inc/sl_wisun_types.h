@@ -421,6 +421,8 @@ typedef struct {
   uint32_t idle_duration_s;
   /// Radio TX duration in milliseconds
   uint32_t radio_tx_duration_ms;
+  /// Number of received MAC frames filtered out.
+  uint32_t rx_filtered_count;
   /// MAC RX availability percentage.
   uint8_t rx_availability_percentage;
   /// Reserved, set to zero
@@ -449,6 +451,8 @@ typedef struct {
   uint32_t pan_control_rx_count;
   /// Number of completed PAN control transmission requests.
   uint32_t pan_control_tx_count;
+  /// Number of received PAN control frames discarded during processing.
+  uint32_t pan_control_rx_drop_count;
 } sl_wisun_statistics_wisun_t;
 
 /// 6LoWPAN/IP stack statistics

@@ -30,6 +30,9 @@
 #ifndef DIAGNOSTIC_H
 #define DIAGNOSTIC_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
 /// @brief Define the reset reasons that should print out detailed crash data.
 #define RESET_CRASH_REASON_MASK ((1 << RESET_UNKNOWN)    \
                                  | (1 << RESET_WATCHDOG) \
@@ -1197,6 +1200,18 @@ void halPrintCrashDetails(uint8_t port);
 
 // Print the complete crash data.
 void halPrintCrashData(uint8_t port);
+
+// Signature written to NO_INIT RAM when WDOG LWM capture succeeds.
+#define HAL_WATCHDOG_LWM_CAPTURE_SIGNATURE  0x5744474Cu
+
+// Mark that a valid LWM capture is present for the next EXPIRED reset.
+void halWatchdogLwmCaptureMark(uint32_t pc);
+
+// Return true if the LWM capture marker and stored PC are valid.
+bool halWatchdogLwmCaptureIsValid(void);
+
+// Clear the LWM capture marker after it has been consumed.
+void halWatchdogLwmCaptureClear(void);
 
 // If last reset was from an assert, return saved assert information.
 const HalAssertInfoType *halGetAssertInfo(void);

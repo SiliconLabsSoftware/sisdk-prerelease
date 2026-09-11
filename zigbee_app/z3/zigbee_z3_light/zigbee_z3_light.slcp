@@ -1,6 +1,6 @@
 project_name: zigbee_z3_light
 label: Zigbee - SoC Z3 Light
-package: zigbee
+package: zigbee_app
 category: Zigbee Application
 quality: production
 description: This is a Zigbee 3.0 light application using NVM3 as the persistent storage.

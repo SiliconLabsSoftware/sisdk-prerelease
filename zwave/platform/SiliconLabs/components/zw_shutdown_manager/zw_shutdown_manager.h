@@ -45,7 +45,7 @@ extern "C" {
  * @return ZPAL_STATUS_OK if initialization was successful, otherwise ZPAL_STATUS_FAIL
  * @note sl_sleeptimer uses SYSRTC while EM4 wakeup uses BURTC. If their counter frequencies differ,
  * remaining sleeptimer ticks are converted to BURTC ticks using sl_sleeptimer_get_timer_frequency()
- * and zpal_get_burtc_counter_frequency_hz() before programming the BURTC compare.
+ * and zw_startup_get_burtc_counter_frequency_hz() before programming the BURTC compare.
  * @note this function can be called more than once safely if it returns
  * ZPAL_STATUS_FAIL on the first try.
  */

@@ -69,6 +69,7 @@
 
 #include <zpal_misc.h>
 #include <zpal_bootloader.h>
+#include <ZW_system_startup_api.h>
 
 #include "stdlib.h"
 #include <ZAF_file_ids.h>
@@ -435,7 +436,7 @@ static bool invoke_migrate(CC_handler_map_latest_t const * const p_cc_entry, __a
 static void cc_firmware_update_send_status_report(void)
 {
   bool updated_successfully = false;
-  if (false == zpal_bootloader_is_first_boot(&updated_successfully)) {
+  if (false == zw_startup_is_first_boot(&updated_successfully)) {
     ZPAL_LOG_DEBUG(ZPAL_LOG_CC_FIRMWARE_UPDATE, "\n Not first boot.");
     return;
   }

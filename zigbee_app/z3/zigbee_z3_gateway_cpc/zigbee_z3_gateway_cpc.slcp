@@ -1,6 +1,6 @@
 project_name: zigbee_z3_gateway_cpc
 label: Zigbee - Host Z3 Gateway CPC
-package: zigbee
+package: zigbee_app
 category: Zigbee Host Application
 quality: experimental
 

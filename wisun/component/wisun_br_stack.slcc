@@ -19,7 +19,7 @@ requires:
 - name: "slist"
 - name: "sl_common"
 - name: "wisun_crypto"
-- name: "mbedtls_tls_server"
+- name: "mbedtls_ssl_server"
 - name: "wisun_br_implementation"
 - name: "event_system"
 - name: "errno"

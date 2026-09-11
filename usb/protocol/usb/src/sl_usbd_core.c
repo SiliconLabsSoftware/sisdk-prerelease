@@ -37,6 +37,7 @@
 #include "sl_core.h"
 #endif
 
+#include "sl_log_helper.h"
 #include "sl_usbd_device_config.h"
 #include "sl_usbd_core_config.h"
 #include "sl_usbd_core.h"
@@ -649,12 +650,14 @@ sl_status_t sl_usbd_core_add_configuration(uint8_t                  attrib,
 #endif
 
   if (p_cfg_nbr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Chk max pwr (see Note #1).
   if (max_pwr > SL_USBD_MAX_BUS_PWR_LIMIT_mA) {
     *p_cfg_nbr = SL_USBD_CONFIG_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -848,6 +851,7 @@ sl_status_t sl_usbd_core_get_device_state(sl_usbd_device_state_t *p_dev_state)
   sli_usbd_device_t *p_dev;
 
   if (p_dev_state == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -867,6 +871,7 @@ sl_status_t sl_usbd_core_get_device_speed(sl_usbd_device_speed_t *p_dev_speed)
   sli_usbd_device_t *p_dev;
 
   if (p_dev_speed == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -929,6 +934,7 @@ sl_status_t sl_usbd_core_get_device_configuration(sl_usbd_device_config_t **p_de
   sli_usbd_device_t *p_dev;
 
   if (p_dev_cfg == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -948,6 +954,7 @@ sl_status_t sl_usbd_core_get_device_frame_number(uint16_t *p_frame_nbr)
   sli_usbd_device_t     *p_dev;
 
   if (p_frame_nbr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -988,11 +995,13 @@ sl_status_t sl_usbd_core_add_interface(uint8_t                cfg_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (p_if_nbr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_class_drv == NULL) {
     *p_if_nbr = SL_USBD_INTERFACE_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -1000,6 +1009,7 @@ sl_status_t sl_usbd_core_add_interface(uint8_t                cfg_nbr,
   if (!(((p_class_drv->interface_descriptor == NULL) && (p_class_drv->interface_get_descriptor_size == NULL))
         || ((p_class_drv->interface_descriptor != NULL) && (p_class_drv->interface_get_descriptor_size != NULL)))) {
     *p_if_nbr = SL_USBD_INTERFACE_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -1007,6 +1017,7 @@ sl_status_t sl_usbd_core_add_interface(uint8_t                cfg_nbr,
   if (!(((p_class_drv->endpoint_descriptor == NULL) && (p_class_drv->endpoint_get_descriptor_size == NULL))
         || ((p_class_drv->endpoint_descriptor != NULL) && (p_class_drv->endpoint_get_descriptor_size != NULL)))) {
     *p_if_nbr = SL_USBD_INTERFACE_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -1134,6 +1145,7 @@ sl_status_t sl_usbd_core_add_alt_interface(uint8_t     config_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (p_if_alt_nbr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -1242,11 +1254,13 @@ sl_status_t sl_usbd_core_add_interface_group(uint8_t      config_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (p_if_grp_num == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (((uint16_t)(if_start) + (uint16_t)(if_cnt)) > (uint16_t)SLI_USBD_INTERFACE_NBR_TOT) {
     *p_if_grp_num = SL_USBD_INTERFACE_GROUP_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1371,16 +1385,19 @@ sl_status_t sl_usbd_core_get_device_descriptor(uint8_t *p_buf,
   local_status = SL_STATUS_OK;
 
   if (p_desc_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_buf == NULL) {
     *p_desc_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (max_len == 0) {
     *p_desc_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1419,16 +1436,19 @@ sl_status_t sl_usbd_core_get_configuration_descriptor(uint8_t  *p_buf,
   local_status = SL_STATUS_OK;
 
   if (p_desc_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_buf == NULL) {
     *p_desc_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (max_len == 0) {
     *p_desc_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1468,16 +1488,19 @@ sl_status_t sl_usbd_core_get_string_descriptor(uint8_t *p_buf,
   local_status = SL_STATUS_OK;
 
   if (p_desc_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (p_buf == NULL) {
     *p_desc_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (max_len == 0) {
     *p_desc_len = 0;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1675,6 +1698,7 @@ sl_status_t sl_usbd_core_add_bulk_endpoint(uint8_t   config_nbr,
                                            uint8_t   *p_ep_addr)
 {
   if (p_ep_addr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -1730,11 +1754,13 @@ sl_status_t sl_usbd_core_add_interrupt_endpoint(uint8_t    config_nbr,
   uint8_t interval_code;
 
   if (p_ep_addr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (interval == 0u) {
     *p_ep_addr = SL_USBD_ENDPOINT_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1745,6 +1771,7 @@ sl_status_t sl_usbd_core_add_interrupt_endpoint(uint8_t    config_nbr,
 #endif
   if (max_pkt_len > 64u) {
     *p_ep_addr = SL_USBD_ENDPOINT_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1811,12 +1838,14 @@ sl_status_t sl_usbd_core_add_isochronous_endpoint(uint8_t    config_nbr,
   uint8_t interval_code;
 
   if (p_ep_addr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   // Chk if dflt IF setting with isoc EP max_pkt_len > 0.
   if ((if_alt_nbr == 0u) && (max_pkt_len > 0u)) {
     *p_ep_addr = SL_USBD_ENDPOINT_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1833,11 +1862,13 @@ sl_status_t sl_usbd_core_add_isochronous_endpoint(uint8_t    config_nbr,
 #endif
   if (max_pkt_len > 1023u) {
     *p_ep_addr = SL_USBD_ENDPOINT_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if (transaction_frame != 1u) {
     *p_ep_addr = SL_USBD_ENDPOINT_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 #if (USBD_CFG_HS_EN == 1)
@@ -1936,6 +1967,7 @@ sl_status_t sl_usbd_core_set_isochronous_endpoint_refresh_rate(uint8_t config_nb
 
   // See Note #3.
   if ((sync_refresh < 1u) || (sync_refresh > 9u)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -2230,6 +2262,7 @@ sl_status_t sl_usbd_core_get_max_phy_endpoint_number(uint8_t *p_ep_phy_nbr)
   sli_usbd_device_t *p_dev;
 
   if (p_ep_phy_nbr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -5815,6 +5848,7 @@ static sli_usbd_interface_t *usbd_core_get_interface_structure(const sli_usbd_co
 
   // Chk if IF nbr is valid.
   if (if_nbr >= p_config->interface_nbr_total) {
+    SL_LOG_DEBUG_ASSERT(false);
     return (NULL);
   }
 
@@ -5855,6 +5889,7 @@ static sli_usbd_alt_interface_t *usbd_core_get_alt_interface_structure(const sli
 
   // Chk alt setting nbr.
   if (if_alt_nbr >= p_if->alt_nbr_total) {
+    SL_LOG_DEBUG_ASSERT(false);
     return (NULL);
   }
 
@@ -6077,6 +6112,7 @@ static sl_status_t usbd_core_add_string(sli_usbd_device_t       *p_dev,
 
   // Return if NULL ptr.
   if (p_str == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -6128,6 +6164,7 @@ static const char *usbd_core_get_string_descriptor(const sli_usbd_device_t *p_de
   const char *p_str;
 
   if (str_nbr > p_dev->str_max_index) {
+    SL_LOG_DEBUG_ASSERT(false);
     return (NULL);
   }
 
@@ -6158,6 +6195,7 @@ static uint8_t usbd_core_get_string_index(const sli_usbd_device_t *p_dev,
 
   // Return if a NULL pointer.
   if (p_str == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return (0u);
   }
 

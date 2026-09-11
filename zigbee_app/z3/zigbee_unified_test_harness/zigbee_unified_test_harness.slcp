@@ -1,6 +1,6 @@
 project_name: zigbee_unified_test_harness
 label: Zigbee - SoC Unified Test Harness
-package: zigbee
+package: zigbee_app
 category: Zigbee Application
 quality: production
 description: This is a Zigbee 3.0 Zigbee Unified Test Harness (ZUTH) dongle application.

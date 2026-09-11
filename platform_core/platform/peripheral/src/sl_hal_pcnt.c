@@ -120,6 +120,13 @@ void sl_hal_pcnt_init(PCNT_TypeDef *pcnt,
                   | (((uint32_t)init->flutter_remove) << _PCNT_OVSCTRL_FLUTTERRM_SHIFT)
                   | (((uint32_t)init->filter_lenght) << _PCNT_OVSCTRL_FILTLEN_SHIFT);
 
+  SL_PRINT_STRING_DEBUG("mode=%d debug=%d\r\n",
+                        (int)init->mode,
+                        (int)init->debug_halt);
+  SL_PRINT_STRING_DEBUG("m_event=%d aux=%d\r\n",
+                        (int)init->main_count_event,
+                        (int)init->aux_count_event);
+
   if (init->mode == SL_HAL_PCNT_MODE_EXT_CLK_SINGLE || init->mode == SL_HAL_PCNT_MODE_EXT_CLK_QUAD) {
     // Enable PCNT Clock Domain Reset. The PCNT must be in reset before changing
     // the clock source to an external clock.

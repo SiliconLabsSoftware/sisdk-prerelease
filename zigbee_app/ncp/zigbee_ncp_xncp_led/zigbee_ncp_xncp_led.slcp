@@ -1,6 +1,6 @@
 project_name: zigbee_ncp_xncp_led
 label: Zigbee - NCP xNCP LED
-package: zigbee
+package: zigbee_app
 category: Zigbee Application
 quality: production
 description: An extensible network co-processor (xNCP) application with an LED controlled by a HOST.

@@ -1,0 +1,25 @@
+id: zw_startup
+label: Z-Wave Startup Component
+category: Z-Wave
+description: >
+  This component provides the Z-Wave system startup implementation for Silicon Labs devices.
+  It initializes the hardware required by the Z-Wave protocol, determines the reset and wake-up
+  reason, and records GPIO flags from EM4 wake-up events. The component also provides the BURTC
+  counter information used for deep-sleep duration calculations, and supplies the FreeRTOS idle,
+  stack-overflow, and static-task-memory hooks.
+  It depends on the platform abstraction layer for retention registers, watchdog, NVM, and
+  initialization services.
+package: zwave
+quality: production
+metadata:
+  sbom:
+    reference: zw_sbom_license
+source:
+- path: "platform/SiliconLabs/components/zw_startup/zw_startup.c"
+include:
+- path: "platform/SiliconLabs/components/zw_startup/"
+  file_list:
+  - path: "zw_startup.h"
+provides:
+- name: zw_startup
+root_path: zwave

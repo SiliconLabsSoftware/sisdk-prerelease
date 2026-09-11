@@ -197,6 +197,202 @@ static uint16_t multiply_u16_saturated(uint16_t value, uint8_t multiplier)
   return (uint16_t)scaled;
 }
 
+/******************************************************************************
+ * Select antennas for the 2:2 (dual-only) PBR request with fallbacks.
+ *****************************************************************************/
+static sl_status_t select_pbr_dual_only_antennas(cs_initiator_config_t *config,
+                                                 uint8_t local_antenna_num,
+                                                 uint8_t remote_antenna_num,
+                                                 uint8_t *antenna_paths)
+{
+  sl_status_t sc = SL_STATUS_OK;
+
+  if (remote_antenna_num >= 2 && local_antenna_num >= 2) {
+    *antenna_paths = 4;
+  } else if (remote_antenna_num == 1 && local_antenna_num >= 2) {
+    sc = SL_STATUS_NOT_SUPPORTED;
+    config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R;
+    *antenna_paths = 2;
+  } else if (remote_antenna_num >= 2 && local_antenna_num == 1) {
+    sc = SL_STATUS_NOT_SUPPORTED;
+    config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R;
+    *antenna_paths = 2;
+  } else {
+    sc = SL_STATUS_NOT_SUPPORTED;
+    config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+    *antenna_paths = 1;
+  }
+
+  return sc;
+}
+
+/******************************************************************************
+ * Select PBR tone antennas and path count.
+ *****************************************************************************/
+static sl_status_t select_pbr_antennas(cs_initiator_config_t *config,
+                                       uint8_t local_antenna_num,
+                                       uint8_t remote_antenna_num,
+                                       uint8_t *antenna_paths)
+{
+  sl_status_t sc = SL_STATUS_OK;
+
+  // ACI 0..7 map to [local:remote] patterns with N_AP in {1,2,3,4} (spec max is 4).
+  switch (config->cs_tone_antenna_config_idx_req) {
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
+      *antenna_paths = 1;
+      break;
+    case CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R:
+      if (local_antenna_num >= 2) {
+        *antenna_paths = 2;
+      } else {
+        sc = SL_STATUS_NOT_SUPPORTED;
+        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+        *antenna_paths = 1;
+      }
+      break;
+    case CS_ANTENNA_CONFIG_INDEX_TRIPLE_I_SINGLE_R:
+      if (local_antenna_num >= 3) {
+        *antenna_paths = 3;
+      } else if (local_antenna_num >= 2) {
+        sc = SL_STATUS_NOT_SUPPORTED;
+        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R;
+        *antenna_paths = 2;
+      } else {
+        sc = SL_STATUS_NOT_SUPPORTED;
+        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+        *antenna_paths = 1;
+      }
+      break;
+    case CS_ANTENNA_CONFIG_INDEX_QUAD_I_SINGLE_R:
+      if (local_antenna_num >= 4) {
+        *antenna_paths = 4;
+      } else if (local_antenna_num >= 3) {
+        sc = SL_STATUS_NOT_SUPPORTED;
+        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_TRIPLE_I_SINGLE_R;
+        *antenna_paths = 3;
+      } else if (local_antenna_num >= 2) {
+        sc = SL_STATUS_NOT_SUPPORTED;
+        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R;
+        *antenna_paths = 2;
+      } else {
+        sc = SL_STATUS_NOT_SUPPORTED;
+        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+        *antenna_paths = 1;
+      }
+      break;
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R:
+      if (remote_antenna_num >= 2) {
+        *antenna_paths = 2;
+      } else {
+        sc = SL_STATUS_NOT_SUPPORTED;
+        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+        *antenna_paths = 1;
+      }
+      break;
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_TRIPLE_R:
+      if (remote_antenna_num >= 3) {
+        *antenna_paths = 3;
+      } else if (remote_antenna_num >= 2) {
+        sc = SL_STATUS_NOT_SUPPORTED;
+        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R;
+        *antenna_paths = 2;
+      } else {
+        sc = SL_STATUS_NOT_SUPPORTED;
+        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+        *antenna_paths = 1;
+      }
+      break;
+    case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_QUAD_R:
+      if (remote_antenna_num >= 4) {
+        *antenna_paths = 4;
+      } else if (remote_antenna_num >= 3) {
+        sc = SL_STATUS_NOT_SUPPORTED;
+        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_TRIPLE_R;
+        *antenna_paths = 3;
+      } else if (remote_antenna_num >= 2) {
+        sc = SL_STATUS_NOT_SUPPORTED;
+        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R;
+        *antenna_paths = 2;
+      } else {
+        sc = SL_STATUS_NOT_SUPPORTED;
+        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+        *antenna_paths = 1;
+      }
+      break;
+    case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
+      sc = select_pbr_dual_only_antennas(config,
+                                         local_antenna_num,
+                                         remote_antenna_num,
+                                         antenna_paths);
+      break;
+    default:
+      sc = SL_STATUS_NOT_SUPPORTED;
+      *antenna_paths = 1;
+      config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
+      break;
+  }
+
+  return sc;
+}
+
+/******************************************************************************
+ * Select RTT sync antenna.
+ *****************************************************************************/
+static sl_status_t select_rtt_antennas(cs_initiator_config_t *config,
+                                       uint8_t local_antenna_num)
+{
+  sl_status_t sc = SL_STATUS_OK;
+
+  switch (config->cs_sync_antenna_req) {
+    case CS_SYNC_ANTENNA_1:
+      config->cs_sync_antenna = CS_SYNC_ANTENNA_1;
+      break;
+    case CS_SYNC_ANTENNA_2:
+      if (local_antenna_num >= 2) {
+        config->cs_sync_antenna = CS_SYNC_ANTENNA_2;
+      } else {
+        config->cs_sync_antenna = CS_SYNC_ANTENNA_1;
+        sc = SL_STATUS_NOT_SUPPORTED;
+      }
+      break;
+    case CS_SYNC_ANTENNA_3:
+      if (local_antenna_num >= 3) {
+        config->cs_sync_antenna = CS_SYNC_ANTENNA_3;
+      } else if (local_antenna_num >= 2) {
+        config->cs_sync_antenna = CS_SYNC_ANTENNA_2;
+        sc = SL_STATUS_NOT_SUPPORTED;
+      } else {
+        config->cs_sync_antenna = CS_SYNC_ANTENNA_1;
+        sc = SL_STATUS_NOT_SUPPORTED;
+      }
+      break;
+    case CS_SYNC_ANTENNA_4:
+      if (local_antenna_num >= 4) {
+        config->cs_sync_antenna = CS_SYNC_ANTENNA_4;
+      } else if (local_antenna_num >= 3) {
+        config->cs_sync_antenna = CS_SYNC_ANTENNA_3;
+        sc = SL_STATUS_NOT_SUPPORTED;
+      } else if (local_antenna_num >= 2) {
+        config->cs_sync_antenna = CS_SYNC_ANTENNA_2;
+        sc = SL_STATUS_NOT_SUPPORTED;
+      } else {
+        config->cs_sync_antenna = CS_SYNC_ANTENNA_1;
+        sc = SL_STATUS_NOT_SUPPORTED;
+      }
+      break;
+    case CS_SYNC_SWITCHING:
+      config->cs_sync_antenna = CS_SYNC_SWITCHING;
+      break;
+    default:
+      config->cs_sync_antenna_req = CS_SYNC_ANTENNA_1;
+      config->cs_sync_antenna = CS_SYNC_ANTENNA_1;
+      sc = SL_STATUS_NOT_SUPPORTED;
+      break;
+  }
+
+  return sc;
+}
+
 // -----------------------------------------------------------------------------
 // Public function definitions
 
@@ -323,6 +519,8 @@ sl_status_t cs_initiator_get_multiple_intervals(uint8_t main_mode,
  *
  * Updates the antenna-related fields of @p config based on the available
  * number of local/remote antennas and the requested antenna configuration.
+ * When the requested ACI is not available, falls back to the next-best
+ * supported configuration (e.g. 3:1 -> 2:1 -> 1:1).
  *****************************************************************************/
 sl_status_t cs_initiator_select_antennas(cs_initiator_config_t *config,
                                          uint8_t local_antenna_num,
@@ -338,77 +536,17 @@ sl_status_t cs_initiator_select_antennas(cs_initiator_config_t *config,
 
   // Prepare for the CS main mode: PBR antenna usage
   if (config->cs_main_mode == sl_bt_cs_mode_pbr) {
-    switch (config->cs_tone_antenna_config_idx_req) {
-      case CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY:
-        antenna_paths = 1;
-        break;
-      case CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R:
-        if (local_antenna_num < 2) {
-          sc = SL_STATUS_NOT_SUPPORTED;
-          config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-          antenna_paths = 1;
-        } else {
-          antenna_paths = 2;
-        }
-        break;
-      case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R:
-        if (remote_antenna_num < 2) {
-          sc = SL_STATUS_NOT_SUPPORTED;
-          config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-          antenna_paths = 1;
-        } else {
-          antenna_paths = 2;
-        }
-        break;
-      case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
-        if (remote_antenna_num >= 2 && local_antenna_num >= 2) {
-          antenna_paths = 4;
-        } else {
-          sc = SL_STATUS_NOT_SUPPORTED;
-          if (remote_antenna_num == 1 && local_antenna_num == 2) {
-            antenna_paths = 2;
-            config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R;
-          } else if (remote_antenna_num == 2 && local_antenna_num == 1) {
-            antenna_paths = 2;
-            config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R;
-          } else {
-            config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-            antenna_paths = 1;
-          }
-        }
-        break;
-      default:
-        antenna_paths = 1;
-        config->cs_tone_antenna_config_idx_req = CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY;
-        break;
-    }
+    sc = select_pbr_antennas(config,
+                             local_antenna_num,
+                             remote_antenna_num,
+                             &antenna_paths);
   }
 
   config->cs_tone_antenna_config_idx = config->cs_tone_antenna_config_idx_req;
 
   // Prepare for the CS main mode: RTT antenna usage
   if (config->cs_main_mode == sl_bt_cs_mode_rtt) {
-    switch (config->cs_sync_antenna_req) {
-      case CS_SYNC_ANTENNA_1:
-        config->cs_sync_antenna = CS_SYNC_ANTENNA_1;
-        break;
-      case CS_SYNC_ANTENNA_2:
-        if (local_antenna_num >= 2) {
-          config->cs_sync_antenna = CS_SYNC_ANTENNA_2;
-        } else {
-          config->cs_sync_antenna = CS_SYNC_ANTENNA_1;
-          sc = SL_STATUS_NOT_SUPPORTED;
-        }
-        break;
-      case CS_SYNC_SWITCHING:
-        config->cs_sync_antenna = CS_SYNC_SWITCHING;
-        break;
-      default:
-        config->cs_sync_antenna_req = CS_SYNC_ANTENNA_1;
-        config->cs_sync_antenna = CS_SYNC_ANTENNA_1;
-        sc = SL_STATUS_NOT_SUPPORTED;
-        break;
-    }
+    sc = select_rtt_antennas(config, local_antenna_num);
     // In case of RTT num_antenna_paths is ignored
     antenna_paths = 0;
   }

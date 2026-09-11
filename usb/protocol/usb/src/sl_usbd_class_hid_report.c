@@ -37,6 +37,7 @@
 #include "sl_core.h"
 #endif
 
+#include "sl_log_helper.h"
 #include "sl_usbd_core.h"
 #include "sli_usbd_core.h"
 
@@ -105,6 +106,7 @@ sl_status_t sli_usbd_hid_report_init(void)
 
   usbd_hid_ptr->report_id_table_index = SL_USBD_HID_REPORT_ID_QUANTITY;
   usbd_hid_ptr->report_id_timer_list = NULL;
+  SL_PRINT_STRING_INFO("USB HID report module initialized\r\n");
 
   return SL_STATUS_OK;
 }
@@ -334,6 +336,7 @@ sl_status_t sli_usbd_hid_report_parse(uint8_t                 class_nbr,
     uint32_t alloc_size = SLI_USBD_ROUND_INC_UP_PWR2(p_report->max_output_report_size, 4);
     p_report->max_output_report_ptr = (uint8_t *)sl_malloc(alloc_size);
     if (p_report->max_output_report_ptr == NULL) {
+      SL_PRINT_STRING_ERROR("Failed to allocate HID output report pointer\r\n");
       return SL_STATUS_ALLOCATION_FAILED;
     }
   }
@@ -343,6 +346,7 @@ sl_status_t sli_usbd_hid_report_parse(uint8_t                 class_nbr,
     uint32_t alloc_size = SLI_USBD_ROUND_INC_UP_PWR2(p_report->max_feature_report_size, 4);
     p_report->max_feature_report_ptr = (uint8_t *)sl_malloc(alloc_size);
     if (p_report->max_feature_report_ptr == NULL) {
+      SL_PRINT_STRING_ERROR("Failed to allocate HID feature report pointer\r\n");
       return SL_STATUS_ALLOCATION_FAILED;
     }
   }
@@ -364,6 +368,7 @@ sl_status_t sli_usbd_hid_report_parse(uint8_t                 class_nbr,
           uint32_t alloc_size = SLI_USBD_ROUND_INC_UP_PWR2(p_report_id->size, 4);
           p_report_id->data_ptr = (uint8_t *)sl_malloc(alloc_size);
           if (p_report_id->data_ptr == NULL) {
+            SL_PRINT_STRING_ERROR("Failed to allocate HID input report pointer\r\n");
             return SL_STATUS_ALLOCATION_FAILED;
           }
           // The first byte must be the report id.
@@ -652,6 +657,7 @@ static sli_usbd_hid_report_id_t *usbd_hid_report_allocate_id(void)
   CORE_ENTER_ATOMIC();
   if (usbd_hid_ptr->report_id_table_index == 0u) {
     CORE_EXIT_ATOMIC();
+    SL_PRINT_STRING_ERROR("Failed to allocate HID report id\r\n");
     return (NULL);
   }
 

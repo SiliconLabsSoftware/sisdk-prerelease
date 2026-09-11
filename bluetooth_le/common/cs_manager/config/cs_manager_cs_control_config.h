@@ -93,15 +93,19 @@
 // <i> Use all the available antennas that can be supported
 // <i> Value: 0. 1 antenna path, [1:1] antenna [initiator:reflector]
 // <i> Value: 1. 2 antenna paths, [2:1] antenna
-// <i> Value: 2. 3 antenna paths, [3:1] antenna (not supported)
-// <i> Value: 3. 4 antenna paths, [4:1] antenna (not supported)
+// <i> Value: 2. 3 antenna paths, [3:1] antenna
+// <i> Value: 3. 4 antenna paths, [4:1] antenna
 // <i> Value: 4. 2 antenna paths, [1:2] antenna
-// <i> Value: 5. 3 antenna paths, [1:3] antenna (not supported)
-// <i> Value: 6. 4 antenna paths, [1:4] antenna (not supported)
+// <i> Value: 5. 3 antenna paths, [1:3] antenna
+// <i> Value: 6. 4 antenna paths, [1:4] antenna
 // <i> Value: 7. 4 antenna paths, [2:2] antenna
 // <CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY=> 1 antenna path, [1:1] antenna
 // <CS_ANTENNA_CONFIG_INDEX_DUAL_LOCAL_SINGLE_REMOTE=> 2 antenna paths, [2:1] antenna
+// <CS_ANTENNA_CONFIG_INDEX_TRIPLE_LOCAL_SINGLE_REMOTE=> 3 antenna paths, [3:1] antenna
+// <CS_ANTENNA_CONFIG_INDEX_QUAD_LOCAL_SINGLE_REMOTE=> 4 antenna paths, [4:1] antenna
 // <CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_DUAL_REMOTE=> 2 antenna paths, [1:2] antenna
+// <CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_TRIPLE_REMOTE=> 3 antenna paths, [1:3] antenna
+// <CS_ANTENNA_CONFIG_INDEX_SINGLE_LOCAL_QUAD_REMOTE=> 4 antenna paths, [1:4] antenna
 // <CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY=> 4 antenna paths, [2:2] antenna
 // <i> Default: CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY
 #define CS_MANAGER_DEFAULT_CS_TONE_ANTENNA_CONFIG_IDX   CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY

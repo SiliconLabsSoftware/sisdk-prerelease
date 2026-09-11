@@ -64,6 +64,9 @@ static uint32_t sli_cmm_pool_id_available = 0;
  ***************************   LOCAL FUNCTIONS   *******************************
  ******************************************************************************/
 
+static sl_status_t delete_pool(sl_memory_pool_t *pool_handle,
+                               bool force);
+
 #if (defined(SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE) && (SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE == 1))
 static inline bool value_looks_like_free_list_ptr(const sl_memory_pool_t *pool_handle,
                                                   size_t value);
@@ -105,47 +108,18 @@ sl_status_t sl_memory_create_pool_advanced(sl_memory_reservation_t *reservation,
 
 /***************************************************************************//**
  * Deletes a memory pool.
- *
- * @note The pool_handle provided is neither freed or invalidated. It can be
- *       reused in a new call to sl_memory_create_pool() to create another pool.
  ******************************************************************************/
 sl_status_t sl_memory_delete_pool(sl_memory_pool_t *pool_handle)
 {
-  uint32_t free_block_count;
-  sl_status_t status;
+  return delete_pool(pool_handle, false);
+}
 
-  if (pool_handle == NULL) {
-    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: handle=NULL");
-    return SL_STATUS_NULL_POINTER;
-  }
-
-  // Verify that the pool was properly initialized.
-  if (pool_handle->block_address == NULL) {
-    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: pool not init");
-    return SL_STATUS_NULL_POINTER;
-  }
-
-  // Verify that no blocks are allocated.
-  free_block_count = sl_memory_pool_get_free_block_count(pool_handle);
-  if (free_block_count != pool_handle->block_count) {
-    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: blocks in use");
-    return SL_STATUS_INVALID_STATE;
-  }
-
-  // Free block.
-  status = sl_memory_free(pool_handle->block_address);
-
-#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
-  if (status == SL_STATUS_OK) {
-    SEGGER_SYSVIEW_PrintfHost("Pool @0x%08lX deleted", (unsigned long)(uintptr_t)pool_handle);
-  }
-#endif
-
-  if (status == SL_STATUS_OK) {
-    SLI_MEMORY_MANAGER_LOG_INFO("delete_pool(): pool=%p", (uint32_t)pool_handle);
-  }
-
-  return status;
+/***************************************************************************//**
+ * Force-deletes a memory pool regardless of outstanding block allocations.
+ ******************************************************************************/
+sl_status_t sl_memory_delete_pool_force(sl_memory_pool_t *pool_handle)
+{
+  return delete_pool(pool_handle, true);
 }
 
 /***************************************************************************//**
@@ -393,6 +367,58 @@ sl_status_t sl_memory_heap_create_pool_advanced(sl_memory_heap_t *heap,
   SLI_MEMORY_MANAGER_LOG_INFO("create_pool_advanced(): blk_size=%u blk_cnt=%u",
                               (uint32_t)block_size,
                               (uint32_t)block_count);
+
+  return status;
+}
+
+/***************************************************************************//**
+ * Deletes a memory pool. Shared implementation for sl_memory_delete_pool() and
+ * sl_memory_delete_pool_force().
+ *
+ * @param[in] pool_handle  Pointer to the memory pool handle.
+ * @param[in] force        When false, the pool is deleted only if all blocks
+ *                         have been freed. When true, the pool is deleted
+ *                         regardless of outstanding block allocations.
+ *
+ * @return  SL_STATUS_OK if successful. Error code otherwise.
+ ******************************************************************************/
+static sl_status_t delete_pool(sl_memory_pool_t *pool_handle,
+                               bool force)
+{
+  sl_status_t status;
+
+  if (pool_handle == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: handle=NULL");
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  // Verify that the pool was properly initialized.
+  if (pool_handle->block_address == NULL) {
+    SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: pool not init");
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  // Verify that no blocks are allocated, unless a force-delete was requested.
+  if (!force) {
+    uint32_t free_block_count = sl_memory_pool_get_free_block_count(pool_handle);
+    if (free_block_count != pool_handle->block_count) {
+      SLI_MEMORY_MANAGER_LOG_ERROR("delete_pool() failed: blocks in use");
+      return SL_STATUS_INVALID_STATE;
+    }
+  }
+
+  // Free block.
+  status = sl_memory_free(pool_handle->block_address);
+
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  if (status == SL_STATUS_OK) {
+    SEGGER_SYSVIEW_PrintfHost("Pool @0x%08lX deleted", (unsigned long)(uintptr_t)pool_handle);
+  }
+#endif
+
+  if (status == SL_STATUS_OK) {
+    SLI_MEMORY_MANAGER_LOG_INFO("delete_pool(): pool=%p", (uint32_t)pool_handle);
+  }
 
   return status;
 }

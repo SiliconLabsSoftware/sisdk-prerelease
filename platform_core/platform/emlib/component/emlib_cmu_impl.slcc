@@ -31,6 +31,8 @@ provides:
 - name: emlib_cmu_impl
   condition: [device_sdid_240]
 - name: emlib_cmu_impl
+  condition: [device_sdid_245]
+- name: emlib_cmu_impl
   condition: [device_sdid_250]
 - name: emlib_cmu_impl
   condition: [device_sdid_260]

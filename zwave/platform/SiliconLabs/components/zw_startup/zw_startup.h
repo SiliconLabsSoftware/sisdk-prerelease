@@ -23,15 +23,19 @@
 #include <stdint.h>
 
 /**
- * @brief Get the wake-up pins activated that led to a wake-up
+ * @brief Get the GPIO flags captured during the last EM4 wake-up.
  *
- * @return uint32_t GPIO bitmask
+ * @return GPIO bitmask containing the pins that caused the wake-up.
  */
 uint32_t getWakeUpFlags(void);
 
 /**
- * @brief BURTC main counter frequency in Hz (clock branch frequency shifted by CNTPRESC).
+ * @brief Get the BURTC main counter frequency.
+ *
+ * The returned frequency accounts for the configured BURTC clock divider.
+ *
+ * @return The BURTC main counter frequency in Hz.
  */
-uint32_t zpal_get_burtc_counter_frequency_hz(void);
+uint32_t zw_startup_get_burtc_counter_frequency_hz(void);
 
 #endif /* __SYSTEM_STARTUP_H__ */

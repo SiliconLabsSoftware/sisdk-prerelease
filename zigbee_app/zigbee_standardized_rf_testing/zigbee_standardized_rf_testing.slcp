@@ -1,6 +1,6 @@
 project_name: zigbee_standardized_rf_testing
 label: Zigbee - SoC Standardized RF Testing
-package: zigbee
+package: zigbee_app
 category: Zigbee Application
 quality: production
 

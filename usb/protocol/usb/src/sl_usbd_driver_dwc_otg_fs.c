@@ -35,7 +35,7 @@
 #include "sl_core.h"
 #endif
 #include "sl_clock_manager.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_compiler.h"
 
 #include "sl_usbd_core.h"
@@ -1052,8 +1052,9 @@ sl_status_t sli_usbd_driver_init(void)
 #if defined(_SILICON_LABS_32B_SERIES_2) || defined(_SILICON_LABS_32B_SERIES_3)
   // Make sure the HCLK has at least a 30MHz frequency
   uint32_t hclk_freq = SystemHCLKGet();
-  EFM_ASSERT(hclk_freq >= 30000000);
-
+  SL_LOG_DEBUG_ASSERT(hclk_freq >= 30000000);
+  (void)hclk_freq;
+  
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_USB);                   // Enable USB clock. It will also enable PLL0.
 
   // IO settings.

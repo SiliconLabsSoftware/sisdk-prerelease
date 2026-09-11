@@ -1,0 +1,27 @@
+id: clock_manager_perpll1_runtime_config
+label: Clock Manager PERPLL1 Runtime Configuration
+package: platform_core
+description: >
+  Marks PERPLL1 as runtime-configurable. When this component is present,
+  PERPLL1 stops being a fixed compile-time clock source: its frequency can
+  be reprogrammed at runtime through the Clock Manager runtime configuration
+  APIs, typically by the I2S driver so that it can produce an exact audio
+  sample rate.
+
+  Because reprogramming PERPLL1 affects every Clock Branch fed by it, adding
+  this component reserves PERPLL1 for I2S0CLK. The Clock Manager validation
+  warns if any other Clock Branch is configured to use PERPLL1.
+category: Services|Clock Manager
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: clock_manager_perpll1_runtime_config
+requires:
+- name: device_series_3
+- name: device_has_perpll1
+template_contribution:
+- name: component_catalog
+  value: clock_manager_perpll1_runtime_config
+root_path: platform_core

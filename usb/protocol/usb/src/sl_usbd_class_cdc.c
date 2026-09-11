@@ -41,6 +41,7 @@
 #include "sl_core.h"
 #endif
 
+#include "sl_log_helper.h"
 #include "sl_usbd_core.h"
 #include "sl_usbd_class_cdc.h"
 
@@ -373,7 +374,7 @@ sl_status_t sl_usbd_cdc_init(void)
     p_data_ep->data_in = SL_USBD_ENDPOINT_ADDR_NONE;
     p_data_ep->data_out = SL_USBD_ENDPOINT_ADDR_NONE;
   }
-
+  SL_PRINT_STRING_INFO("USB CDC core initialized\r\n");
   return SL_STATUS_OK;
 }
 
@@ -393,12 +394,14 @@ sl_status_t sl_usbd_cdc_create_instance(uint8_t                       subclass,
   CORE_DECLARE_IRQ_STATE;
 
   if (p_class_nbr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   // interval must be a power of 2.
   if ((notify_en == true) && (SLI_USBD_IS_PWR2(notify_interval) != true)) {
     *p_class_nbr = SL_USBD_CDC_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -425,7 +428,7 @@ sl_status_t sl_usbd_cdc_create_instance(uint8_t                       subclass,
   p_ctrl->subclass_arg = p_subclass_arg;
 
   *p_class_nbr = cdc_nbr;
-
+  SL_PRINT_STRING_INFO("USB CDC instance created\r\n");
   return SL_STATUS_OK;
 }
 
@@ -451,6 +454,7 @@ sl_status_t sl_usbd_cdc_add_to_configuration(uint8_t  class_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (class_nbr >= SL_USBD_CDC_CLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -616,6 +620,7 @@ sl_status_t sl_usbd_cdc_is_enabled(uint8_t  class_nbr,
 
   if (class_nbr >= SL_USBD_CDC_CLASS_INSTANCE_QUANTITY) {
     *p_enabled = false;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -654,17 +659,20 @@ sl_status_t sl_usbd_cdc_add_data_interface(uint8_t  class_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (p_if_nbr == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_CDC_CLASS_INSTANCE_QUANTITY) {
     *p_if_nbr = SL_USBD_CDC_DATA_IF_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Check 'isoc_en' argument (see Note #1) .
   if (isoc_en != false) {
     *p_if_nbr = SL_USBD_CDC_DATA_IF_NBR_NONE;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -727,11 +735,13 @@ sl_status_t sl_usbd_cdc_read_data(uint8_t  class_nbr,
   sl_status_t           status;
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_CDC_CLASS_INSTANCE_QUANTITY) {
     *p_xfer_len = 0u;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -746,6 +756,7 @@ sl_status_t sl_usbd_cdc_read_data(uint8_t  class_nbr,
   // Check 'data_if_nbr' is valid.
   if (data_if_nbr >= p_ctrl->data_interface_nbr) {
     *p_xfer_len = 0u;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -794,14 +805,17 @@ sl_status_t sl_usbd_cdc_read_data_async(uint8_t                      class_nbr,
   sl_status_t           status;
 
   if (async_fnct == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if ((p_buf == NULL) && (buf_len != 0u)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_CDC_CLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -814,6 +828,7 @@ sl_status_t sl_usbd_cdc_read_data_async(uint8_t                      class_nbr,
 
   // Check 'data_if_nbr' is valid.
   if (data_if_nbr >= p_ctrl->data_interface_nbr) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -873,11 +888,13 @@ sl_status_t sl_usbd_cdc_write_data(uint8_t  class_nbr,
   sl_status_t           status;
 
   if (p_xfer_len == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_CDC_CLASS_INSTANCE_QUANTITY) {
     *p_xfer_len = 0u;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -891,6 +908,7 @@ sl_status_t sl_usbd_cdc_write_data(uint8_t  class_nbr,
   // Check 'data_if_nbr' is valid.
   if (data_if_nbr >= p_ctrl->data_interface_nbr) {
     *p_xfer_len = 0u;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -940,14 +958,17 @@ sl_status_t sl_usbd_cdc_write_data_async(uint8_t                      class_nbr,
   sl_status_t           status;
 
   if (async_fnct == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if ((p_buf == NULL) && (buf_len != 0u)) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_CDC_CLASS_INSTANCE_QUANTITY) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -959,6 +980,7 @@ sl_status_t sl_usbd_cdc_write_data_async(uint8_t                      class_nbr,
   }
   // Check 'data_if_nbr' is valid.
   if (data_if_nbr >= p_ctrl->data_interface_nbr) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1017,11 +1039,13 @@ sl_status_t sl_usbd_cdc_notify_host(uint8_t   class_nbr,
   CORE_DECLARE_IRQ_STATE;
 
   if (p_result == NULL) {
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
 
   if (class_nbr >= SL_USBD_CDC_CLASS_INSTANCE_QUANTITY) {
     *p_result = false;
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_PARAMETER;
   }
   p_ctrl = &usbd_cdc_obj.ctrl_table[class_nbr];

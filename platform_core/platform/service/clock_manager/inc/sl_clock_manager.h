@@ -550,6 +550,39 @@ sl_status_t slx_clock_manager_hfxo_get_ctune(uint32_t *ctune);
 sl_status_t slx_clock_manager_hfxo_calibrate_ctune(uint32_t ctune);
 
 /***************************************************************************//**
+ * Starts an HFXO startup time measurement.
+ *
+ * @return  Status code.
+ *          SL_STATUS_OK if the measurement was started.
+ *          SL_STATUS_INVALID_STATE if a measurement is already active.
+ *          SL_STATUS_NOT_AVAILABLE if the measurement is not enabled.
+ *          SL_STATUS_NOT_SUPPORTED if the measurement is not supported.
+ *
+ * @note This function only arms the measurement and returns. It can be called
+ *       while HFXO is running; the start-ups are measured as HFXO stops and
+ *       restarts afterwards.
+ *
+ * @note This function is not intended to be called from an interrupt handler.
+ ******************************************************************************/
+sl_status_t slx_clock_manager_start_hfxo_startup_time_measurement(void);
+
+/***************************************************************************//**
+ * Stops the active HFXO startup time measurement.
+ *
+ * @return  Status code.
+ *          SL_STATUS_OK if the measurement was stopped.
+ *          SL_STATUS_INVALID_STATE if no measurement is active.
+ *          SL_STATUS_NOT_AVAILABLE if the measurement is not enabled.
+ *          SL_STATUS_NOT_SUPPORTED if the measurement is not supported.
+ *
+ * @note The stopped measurement is discarded, even if it just completed. The
+ *       last startup time obtained before it remains in use.
+ *
+ * @note This function is not intended to be called from an interrupt handler.
+ ******************************************************************************/
+sl_status_t slx_clock_manager_stop_hfxo_startup_time_measurement(void);
+
+/***************************************************************************//**
  * Sets the LFXO frequency tuning control.
  *
  * @param[in] val  The LFXO frequency tuning setting to use.

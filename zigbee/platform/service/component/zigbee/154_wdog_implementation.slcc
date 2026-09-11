@@ -1,0 +1,41 @@
+id: 154_wdog_implementation
+label: Zigbee WDOG LWM Handler
+package: zigbee
+category: Zigbee|Platform
+quality: production
+metadata:
+  sbom:
+    license: MSLA
+ui_hints:
+  visibility: never
+description: >
+  Captures crash context at platform Watchdog Manager LWM (WDOG WARN) and
+  prints PC/stack on the following hardware watchdog reset via legacy diagnostic.
+requires:
+- name: component_catalog
+- name: device
+- name: legacy_hal_soc
+- name: watchdog_manager
+provides:
+- name: 154_wdog_implementation
+source:
+- path: platform/service/zb_wdog_lwm_handler/src/sl_zb_wdog_lwm_handler.c
+include:
+- path: platform/service/zb_wdog_lwm_handler/inc
+  file_list:
+  - path: sl_zb_wdog_lwm_handler.h
+config_file:
+- path: platform/service/zb_wdog_lwm_handler/config/sl_zb_wdog_lwm_handler_config.h
+template_contribution:
+- name: event_handler
+  value:
+    event: service_init
+    include: sl_zb_wdog_lwm_handler.h
+    handler: sl_zb_wdog_lwm_handler_init
+  priority: -9350
+- name: component_catalog
+  value: 154_wdog_implementation
+documentation:
+  docset: gecko-platform
+  document: platform-service/legacyhal
+root_path: zigbee

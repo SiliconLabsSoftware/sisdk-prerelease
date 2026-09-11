@@ -20,10 +20,13 @@ include:
 - path: "platform/SiliconLabs/PAL/inc/"
   file_list:
   - path: "zpal_retention_register_private.h"
-  - path: "system_startup.h"
+- path: "platform/SiliconLabs/components/zw_startup/"
+  file_list:
+  - path: "zw_startup.h"
 provides:
 - name: zw_shutdown_manager
 requires:
+- name: zw_startup
 - name: zw_dcdc_override
 template_contribution:
 - name: component_catalog

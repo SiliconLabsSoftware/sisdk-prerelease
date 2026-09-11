@@ -30,6 +30,8 @@ provides:
 - name: dmadrv_core
   condition: [device_sdid_240]
 - name: dmadrv_core
+  condition: [device_sdid_245]
+- name: dmadrv_core
   condition: [device_sdid_250]
 - name: dmadrv_core
   condition: [device_sdid_260]

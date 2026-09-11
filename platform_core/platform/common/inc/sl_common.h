@@ -95,7 +95,7 @@ extern "C" {
   ((n) <= 1u ? 1u : (1u << (32u - __builtin_clz((unsigned)((n) - 1u)))))
 
 /** @brief Round n down to closest interval of i. */
-#define SL_FLOOR(n, i) ((n / i) * i)
+#define SL_FLOOR(n, i) (((n) / (i)) * (i))
 
 /** @brief Divide x by y and round up to the closest integer. */
 #define SL_DIV_ROUND_UP(x, y) (((x) + (y) - 1) / (y))
