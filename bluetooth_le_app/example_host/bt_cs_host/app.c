@@ -146,13 +146,19 @@
   "        Used only for initiator instances\n"                                    \
   "        0 : Single antennas on both sides\n"                                    \
   "        1 : Dual antenna initiator & single antenna reflector\n"                \
+  "        2 : Triple antenna initiator & single antenna reflector\n"              \
+  "        3 : Quad antenna initiator & single antenna reflector\n"                \
   "        4 : Single antenna initiator & dual antenna reflector\n"                \
+  "        5 : Single antenna initiator & triple antenna reflector\n"              \
+  "        6 : Single antenna initiator & quad antenna reflector\n"                \
   "        7 : Dual antennas on both sides\n"                                      \
   "        Note: considered only with CS main mode: PBR!\n"                        \
   "    -q  Antenna usage for CS SYNC packets, default: 0xFE\n"                     \
   "        Used for both initiator and reflector instances\n"                      \
   "        1 : use antenna ID1 only\n"                                             \
   "        2 : use antenna ID2 only\n"                                             \
+  "        3 : use antenna ID3 only\n"                                             \
+  "        4 : use antenna ID4 only\n"                                             \
   "        0xFE : Switching between antennas for each channel\n"                   \
   "        Note: considered only with CS main mode: RTT!\n"                        \
   "    -s  Optimized procedure scheduling\n"                                       \
@@ -381,7 +387,11 @@ void app_cli_init(int argc, char *argv[])
         if (cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_ONLY
             && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY
             && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R
-            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R) {
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_TRIPLE_I_SINGLE_R
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_QUAD_I_SINGLE_R
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_I_TRIPLE_R
+            && cs_tone_antenna_config_idx_req != CS_ANTENNA_CONFIG_INDEX_SINGLE_I_QUAD_R) {
           app_log_error(APP_PREFIX "Invalid antenna usage for PBR (%d) provided!" APP_LOG_NL, cs_tone_antenna_config_idx_req);
           exit(EXIT_FAILURE);
         } else {
@@ -415,6 +425,8 @@ void app_cli_init(int argc, char *argv[])
         } else {
           if (arg_data != CS_SYNC_ANTENNA_1
               && arg_data != CS_SYNC_ANTENNA_2
+              && arg_data != CS_SYNC_ANTENNA_3
+              && arg_data != CS_SYNC_ANTENNA_4
               && arg_data != CS_SYNC_SWITCHING) {
             app_log_error(APP_PREFIX "Invalid antenna usage for RTT (%d) provided!" APP_LOG_NL, arg_data);
             exit(EXIT_FAILURE);
@@ -946,6 +958,10 @@ static const char *antenna_usage_to_str(const cs_initiator_config_t *config)
         return "antenna ID 1";
       case CS_SYNC_ANTENNA_2:
         return "antenna ID 2";
+      case CS_SYNC_ANTENNA_3:
+        return "antenna ID 3";
+      case CS_SYNC_ANTENNA_4:
+        return "antenna ID 4";
       case CS_SYNC_SWITCHING:
         return "switch between all antenna IDs";
       default:
@@ -957,8 +973,16 @@ static const char *antenna_usage_to_str(const cs_initiator_config_t *config)
         return "single antenna on both sides (1:1)";
       case CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R:
         return "dual antenna initiator & single antenna reflector (2:1)";
+      case CS_ANTENNA_CONFIG_INDEX_TRIPLE_I_SINGLE_R:
+        return "triple antenna initiator & single antenna reflector (3:1)";
+      case CS_ANTENNA_CONFIG_INDEX_QUAD_I_SINGLE_R:
+        return "quad antenna initiator & single antenna reflector (4:1)";
       case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R:
         return "single antenna initiator & dual antenna reflector (1:2)";
+      case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_TRIPLE_R:
+        return "single antenna initiator & triple antenna reflector (1:3)";
+      case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_QUAD_R:
+        return "single antenna initiator & quad antenna reflector (1:4)";
       case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
         return "dual antennas on both sides (2:2)";
       default:
