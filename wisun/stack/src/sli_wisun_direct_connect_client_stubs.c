@@ -17,6 +17,9 @@
 
 #include "sl_status.h"
 #include "sl_wisun_types.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 // Generic functions
 
@@ -24,6 +27,9 @@ typedef struct sli_dc_client_ctx_t {
   // empty stub
   int dummy;
 } sli_dc_client_ctx_t;
+
+typedef struct mcps_data_ind_s mcps_data_ind_t;
+typedef struct mcps_data_ie_list mcps_data_ie_list_t;
 
 sli_dc_client_ctx_t *sli_wisun_dc_client_get_ctx(void)
 {
@@ -105,4 +111,20 @@ void sli_wisun_dc_client_handle_auth_success(void)
 void sli_wisun_dc_client_handle_connection_lost(void)
 {
   // Empty stub
+}
+
+void sli_wisun_dc_client_recv_eapol(uint8_t kmp_id, const uint8_t src_eui64[8],
+                                    const uint8_t *buf, size_t buf_len)
+{
+  (void)kmp_id;
+  (void)src_eui64;
+  (void)buf;
+  (void)buf_len;
+}
+
+bool sli_wisun_dc_client_llc_indication(const mcps_data_ind_t *data, const mcps_data_ie_list_t *ie_ext)
+{
+  (void)data;
+  (void)ie_ext;
+  return false;
 }

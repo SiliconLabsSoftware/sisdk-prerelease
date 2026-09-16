@@ -3312,6 +3312,11 @@ typedef struct sl_rail_phy_info {
    * Available when phy info version is 21 or greater.
    */
   uint32_t syncword_duration_us;
+  /**
+   * CS RTT digital delay from the radio configurator, S32.4 (1/16 ns).
+   * Available when phy info version is 22 or greater.
+   */
+  int32_t cs_rtt_dig_delay;
 } sl_rail_phy_info_t;
 #endif // DOXYGEN_UNDOCUMENTED
 

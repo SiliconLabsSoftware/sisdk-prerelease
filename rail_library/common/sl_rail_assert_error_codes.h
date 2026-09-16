@@ -229,6 +229,8 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_assert_error_codes_t, uint32_t)
   SL_RAIL_ASSERT_SEQ_POWER_MANAGER_INVALID_REQUEST = 88,
   /** Sequencer power manager received too many requests */
   SL_RAIL_ASSERT_SEQ_POWER_MANAGER_TOO_MANY_REQUESTS = 89,
+  /** Sequencer power manager timed out waiting for a power up acknowledge */
+  SL_RAIL_ASSERT_SEQ_POWER_MANAGER_ACK_TIMEOUT = 90,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -323,6 +325,7 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_assert_error_codes_t, uint32_t)
 #define SL_RAIL_ASSERT_SEQUENCE_TIMEOUT                           ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_SEQUENCE_TIMEOUT)
 #define SL_RAIL_ASSERT_SEQ_POWER_MANAGER_INVALID_REQUEST          ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_SEQ_POWER_MANAGER_INVALID_REQUEST)
 #define SL_RAIL_ASSERT_SEQ_POWER_MANAGER_TOO_MANY_REQUESTS        ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_SEQ_POWER_MANAGER_TOO_MANY_REQUESTS)
+#define SL_RAIL_ASSERT_SEQ_POWER_MANAGER_ACK_TIMEOUT              ((sl_rail_assert_error_codes_t) SL_RAIL_ASSERT_SEQ_POWER_MANAGER_ACK_TIMEOUT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /// Use this define to create an array of error messages that map to the codes
@@ -439,6 +442,7 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_assert_error_codes_t, uint32_t)
     /*87*/ "The sequence timed out",                                                   \
     /*88*/ "Sequencer power manager received invalid request",                         \
     /*89*/ "Sequencer power manager received too many requests",                       \
+    /*90*/ "Sequencer power manager timed out waiting for power up",                   \
 }
 
 /** @} */ // end of Assertions

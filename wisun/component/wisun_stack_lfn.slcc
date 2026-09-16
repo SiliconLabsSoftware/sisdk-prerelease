@@ -15,10 +15,13 @@ requires:
 - name: "device_supports_wisun"
 - name: "wisun_stack"
 - name: "wisun_dc_client_implementation"
+- name: "wisun_dc_server_implementation"
 - name: "wisun_lxpm_implementation"
 
 recommends:
 - id: wisun_dc_client_stubs
+  vendor: silabs
+- id: wisun_dc_server_stubs
   vendor: silabs
 - id: wisun_lxpm_stubs
 

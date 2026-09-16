@@ -61,124 +61,140 @@ void sl_hal_sysrtc_wait_sync_group(uint8_t group_number)
   SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(_SYSRTC_GRP0_SYNCBUSY_MASK)
 #if defined(_SYSRTC_EN_MASK)
     case 0:
-      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_INST->GRP0_SYNCBUSY != 0U)) {
+      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_GRP_INST->GRP0_SYNCBUSY != 0U)) {
         // Wait for the synchronization to finish.
       }
       break;
 #else
     case 0:
-      while (SYSRTC_INST->GRP0_SYNCBUSY != 0U) {
+      while (SYSRTC_GRP_INST->GRP0_SYNCBUSY != 0U) {
         // Wait for the synchronization to finish.
       }
       break;
 #endif
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(_SYSRTC_GRP1_SYNCBUSY_MASK)
 #if defined(_SYSRTC_EN_MASK)
     case 1:
-      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_INST->GRP1_SYNCBUSY != 0U)) {
+      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_GRP_INST->GRP1_SYNCBUSY != 0U)) {
         // Wait for the synchronization to finish.
       }
       break;
 #else
     case 1:
-      while (SYSRTC_INST->GRP1_SYNCBUSY != 0U) {
+      while (SYSRTC_GRP_INST->GRP1_SYNCBUSY != 0U) {
         // Wait for the synchronization to finish.
       }
       break;
 #endif
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(_SYSRTC_GRP2_SYNCBUSY_MASK)
 #if defined(_SYSRTC_EN_MASK)
     case 2:
-      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_INST->GRP2_SYNCBUSY != 0U)) {
+      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_GRP_INST->GRP2_SYNCBUSY != 0U)) {
         // Wait for the synchronization to finish.
       }
       break;
 #else
     case 2:
-      while (SYSRTC_INST->GRP2_SYNCBUSY != 0U) {
+      while (SYSRTC_GRP_INST->GRP2_SYNCBUSY != 0U) {
         // Wait for the synchronization to finish.
       }
       break;
 #endif
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(_SYSRTC_GRP3_SYNCBUSY_MASK)
 #if defined(_SYSRTC_EN_MASK)
     case 3:
-      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_INST->GRP3_SYNCBUSY != 0U)) {
+      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_GRP_INST->GRP3_SYNCBUSY != 0U)) {
         // Wait for the synchronization to finish.
       }
       break;
 #else
     case 3:
-      while (SYSRTC_INST->GRP3_SYNCBUSY != 0U) {
+      while (SYSRTC_GRP_INST->GRP3_SYNCBUSY != 0U) {
         // Wait for the synchronization to finish.
       }
       break;
 #endif
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(_SYSRTC_GRP4_SYNCBUSY_MASK)
 #if defined(_SYSRTC_EN_MASK)
     case 4:
-      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_INST->GRP4_SYNCBUSY != 0U)) {
+      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_GRP_INST->GRP4_SYNCBUSY != 0U)) {
         // Wait for the synchronization to finish.
       }
       break;
 #else
     case 4:
-      while (SYSRTC_INST->GRP4_SYNCBUSY != 0U) {
+      while (SYSRTC_GRP_INST->GRP4_SYNCBUSY != 0U) {
         // Wait for the synchronization to finish.
       }
       break;
 #endif
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(_SYSRTC_GRP5_SYNCBUSY_MASK)
 #if defined(_SYSRTC_EN_MASK)
     case 5:
-      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_INST->GRP5_SYNCBUSY != 0U)) {
+      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_GRP_INST->GRP5_SYNCBUSY != 0U)) {
         // Wait for the synchronization to finish.
       }
       break;
 #else
     case 5:
-      while (SYSRTC_INST->GRP5_SYNCBUSY != 0U) {
+      while (SYSRTC_GRP_INST->GRP5_SYNCBUSY != 0U) {
         // Wait for the synchronization to finish.
       }
       break;
 #endif
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(_SYSRTC_GRP6_SYNCBUSY_MASK)
 #if defined(_SYSRTC_EN_MASK)
     case 6:
-      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_INST->GRP6_SYNCBUSY != 0U)) {
+      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_GRP_INST->GRP6_SYNCBUSY != 0U)) {
         // Wait for the synchronization to finish.
       }
       break;
 #else
     case 6:
-      while (SYSRTC_INST->GRP6_SYNCBUSY != 0U) {
+      while (SYSRTC_GRP_INST->GRP6_SYNCBUSY != 0U) {
         // Wait for the synchronization to finish.
       }
       break;
 #endif
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(_SYSRTC_GRP7_SYNCBUSY_MASK)
 #if defined(_SYSRTC_EN_MASK)
     case 7:
-      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_INST->GRP7_SYNCBUSY != 0U)) {
+      while ((SYSRTC_INST->EN & SYSRTC_EN_EN) && (SYSRTC_GRP_INST->GRP7_SYNCBUSY != 0U)) {
         // Wait for the synchronization to finish.
       }
       break;
 #else
     case 7:
-      while (SYSRTC_INST->GRP7_SYNCBUSY != 0U) {
+      while (SYSRTC_GRP_INST->GRP7_SYNCBUSY != 0U) {
         // Wait for the synchronization to finish.
       }
       break;
+#endif
 #endif
 #endif
     default:
@@ -199,37 +215,53 @@ void sl_hal_sysrtc_wait_sync_group(uint8_t group_number)
 static inline uint32_t sli_hal_sysrtc_group_get_control_register(uint8_t group_number)
 {
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CMP0EN)
     case 0:
-      return SYSRTC_INST->GRP0_CTRL;
+      return SYSRTC_GRP_INST->GRP0_CTRL;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CMP0EN)
     case 1:
-      return SYSRTC_INST->GRP1_CTRL;
+      return SYSRTC_GRP_INST->GRP1_CTRL;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CMP0EN)
     case 2:
-      return SYSRTC_INST->GRP2_CTRL;
+      return SYSRTC_GRP_INST->GRP2_CTRL;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CMP0EN)
     case 3:
-      return SYSRTC_INST->GRP3_CTRL;
+      return SYSRTC_GRP_INST->GRP3_CTRL;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CMP0EN)
     case 4:
-      return SYSRTC_INST->GRP4_CTRL;
+      return SYSRTC_GRP_INST->GRP4_CTRL;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CMP0EN)
     case 5:
-      return SYSRTC_INST->GRP5_CTRL;
+      return SYSRTC_GRP_INST->GRP5_CTRL;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CMP0EN)
     case 6:
-      return SYSRTC_INST->GRP6_CTRL;
+      return SYSRTC_GRP_INST->GRP6_CTRL;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CMP0EN)
     case 7:
-      return SYSRTC_INST->GRP7_CTRL;
+      return SYSRTC_GRP_INST->GRP7_CTRL;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -251,45 +283,61 @@ static inline void sli_hal_sysrtc_group_set_control_register(uint8_t group_numbe
                                                              uint32_t value)
 {
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CMP0EN)
     case 0:
-      SYSRTC_INST->GRP0_CTRL = value;
+      SYSRTC_GRP_INST->GRP0_CTRL = value;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CMP0EN)
     case 1:
-      SYSRTC_INST->GRP1_CTRL = value;
+      SYSRTC_GRP_INST->GRP1_CTRL = value;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CMP0EN)
     case 2:
-      SYSRTC_INST->GRP2_CTRL = value;
+      SYSRTC_GRP_INST->GRP2_CTRL = value;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CMP0EN)
     case 3:
-      SYSRTC_INST->GRP3_CTRL = value;
+      SYSRTC_GRP_INST->GRP3_CTRL = value;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CMP0EN)
     case 4:
-      SYSRTC_INST->GRP4_CTRL = value;
+      SYSRTC_GRP_INST->GRP4_CTRL = value;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CMP0EN)
     case 5:
-      SYSRTC_INST->GRP5_CTRL = value;
+      SYSRTC_GRP_INST->GRP5_CTRL = value;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CMP0EN)
     case 6:
-      SYSRTC_INST->GRP6_CTRL = value;
+      SYSRTC_GRP_INST->GRP6_CTRL = value;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CMP0EN)
     case 7:
-      SYSRTC_INST->GRP7_CTRL = value;
+      SYSRTC_GRP_INST->GRP7_CTRL = value;
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -320,6 +368,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
   uint32_t bit_value = 0;
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CMP0EN)
     case 0:
       if (channel == 0) {
@@ -337,6 +386,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CMP0EN)
     case 1:
       if (channel == 0) {
@@ -354,6 +405,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CMP0EN)
     case 2:
       if (channel == 0) {
@@ -371,6 +424,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CMP0EN)
     case 3:
       if (channel == 0) {
@@ -388,6 +443,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CMP0EN)
     case 4:
       if (channel == 0) {
@@ -405,6 +462,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CMP0EN)
     case 5:
       if (channel == 0) {
@@ -422,6 +481,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CMP0EN)
     case 6:
       if (channel == 0) {
@@ -439,6 +500,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CMP0EN)
     case 7:
       if (channel == 0) {
@@ -455,6 +518,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_enable_bit(uint8_t gro
         SL_LOG_DEBUG_ASSERT(1);
       }
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -487,6 +551,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
   uint32_t bit_value = 0;
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CMP0EN)
     case 0:
       if (channel == 0) {
@@ -504,6 +569,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CMP0EN)
     case 1:
       if (channel == 0) {
@@ -521,6 +588,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CMP0EN)
     case 2:
       if (channel == 0) {
@@ -538,6 +607,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CMP0EN)
     case 3:
       if (channel == 0) {
@@ -555,6 +626,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CMP0EN)
     case 4:
       if (channel == 0) {
@@ -572,6 +645,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CMP0EN)
     case 5:
       if (channel == 0) {
@@ -589,6 +664,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CMP0EN)
     case 6:
       if (channel == 0) {
@@ -606,6 +683,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CMP0EN)
     case 7:
       if (channel == 0) {
@@ -622,6 +701,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_compare_action_bit(uint8_t gro
         SL_LOG_DEBUG_ASSERT(1);
       }
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -658,6 +738,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_enable_bit(uint8_t gro
   SL_LOG_DEBUG_ASSERT(channel == 0);
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CAP0EN)
     case 0:
       if (channel == 0) {
@@ -665,6 +746,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CAP0EN)
     case 1:
       if (channel == 0) {
@@ -672,6 +755,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CAP0EN)
     case 2:
       if (channel == 0) {
@@ -679,6 +764,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CAP0EN)
     case 3:
       if (channel == 0) {
@@ -686,6 +773,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CAP0EN)
     case 4:
       if (channel == 0) {
@@ -693,6 +782,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CAP0EN)
     case 5:
       if (channel == 0) {
@@ -700,6 +791,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CAP0EN)
     case 6:
       if (channel == 0) {
@@ -707,12 +800,15 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_enable_bit(uint8_t gro
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CAP0EN)
     case 7:
       if (channel == 0) {
         bit_value = ((enable ? 1UL : 0UL) << _SYSRTC_GRP7_CTRL_CAP0EN_SHIFT);
       }
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -749,6 +845,7 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_edge_bit(uint8_t group
   SL_LOG_DEBUG_ASSERT(channel == 0);
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CAP0EN)
     case 0:
       if (channel == 0) {
@@ -756,6 +853,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_edge_bit(uint8_t group
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CAP0EN)
     case 1:
       if (channel == 0) {
@@ -763,6 +862,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_edge_bit(uint8_t group
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CAP0EN)
     case 2:
       if (channel == 0) {
@@ -770,6 +871,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_edge_bit(uint8_t group
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CAP0EN)
     case 3:
       if (channel == 0) {
@@ -777,6 +880,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_edge_bit(uint8_t group
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CAP0EN)
     case 4:
       if (channel == 0) {
@@ -784,6 +889,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_edge_bit(uint8_t group
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CAP0EN)
     case 5:
       if (channel == 0) {
@@ -791,6 +898,8 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_edge_bit(uint8_t group
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CAP0EN)
     case 6:
       if (channel == 0) {
@@ -798,12 +907,15 @@ static inline uint32_t sli_hal_sysrtc_group_build_capture_edge_bit(uint8_t group
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CAP0EN)
     case 7:
       if (channel == 0) {
         bit_value = ((uint32_t)edge << _SYSRTC_GRP7_CTRL_CAP0EDGE_SHIFT);
       }
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -824,6 +936,7 @@ void sl_hal_sysrtc_init_group(uint8_t group_number,
   sl_hal_sysrtc_wait_sync_group(group_number);
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CMP0EN)
     case 0:
       temp = ((group_init->compare_channel0_enable ? 1UL : 0UL) << _SYSRTC_GRP0_CTRL_CMP0EN_SHIFT);
@@ -849,9 +962,11 @@ void sl_hal_sysrtc_init_group(uint8_t group_number,
         temp |= ((uint32_t)group_init->p_capture_channel0_config->capture_input_edge << _SYSRTC_GRP0_CTRL_CAP0EDGE_SHIFT);
       }
 #endif
-      SYSRTC_INST->GRP0_CTRL = temp;
+      SYSRTC_GRP_INST->GRP0_CTRL = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CMP0EN)
     case 1:
       temp = ((group_init->compare_channel0_enable ? 1UL : 0UL) << _SYSRTC_GRP1_CTRL_CMP0EN_SHIFT);
@@ -876,9 +991,11 @@ void sl_hal_sysrtc_init_group(uint8_t group_number,
         temp |= ((uint32_t)group_init->p_capture_channel0_config->capture_input_edge << _SYSRTC_GRP1_CTRL_CAP0EDGE_SHIFT);
       }
 #endif
-      SYSRTC_INST->GRP1_CTRL = temp;
+      SYSRTC_GRP_INST->GRP1_CTRL = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CMP0EN)
     case 2:
       temp = ((group_init->compare_channel0_enable ? 1UL : 0UL) << _SYSRTC_GRP2_CTRL_CMP0EN_SHIFT);
@@ -903,9 +1020,11 @@ void sl_hal_sysrtc_init_group(uint8_t group_number,
         temp |= ((uint32_t)group_init->p_capture_channel0_config->capture_input_edge << _SYSRTC_GRP2_CTRL_CAP0EDGE_SHIFT);
       }
 #endif
-      SYSRTC_INST->GRP2_CTRL = temp;
+      SYSRTC_GRP_INST->GRP2_CTRL = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CMP0EN)
     case 3:
       temp = ((group_init->compare_channel0_enable ? 1UL : 0UL) << _SYSRTC_GRP3_CTRL_CMP0EN_SHIFT);
@@ -930,9 +1049,11 @@ void sl_hal_sysrtc_init_group(uint8_t group_number,
         temp |= ((uint32_t)group_init->p_capture_channel0_config->capture_input_edge << _SYSRTC_GRP3_CTRL_CAP0EDGE_SHIFT);
       }
 #endif
-      SYSRTC_INST->GRP3_CTRL = temp;
+      SYSRTC_GRP_INST->GRP3_CTRL = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CMP0EN)
     case 4:
       temp = ((group_init->compare_channel0_enable ? 1UL : 0UL) << _SYSRTC_GRP4_CTRL_CMP0EN_SHIFT);
@@ -957,9 +1078,11 @@ void sl_hal_sysrtc_init_group(uint8_t group_number,
         temp |= ((uint32_t)group_init->p_capture_channel0_config->capture_input_edge << _SYSRTC_GRP4_CTRL_CAP0EDGE_SHIFT);
       }
 #endif
-      SYSRTC_INST->GRP4_CTRL = temp;
+      SYSRTC_GRP_INST->GRP4_CTRL = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CMP0EN)
     case 5:
       temp = ((group_init->compare_channel0_enable ? 1UL : 0UL) << _SYSRTC_GRP5_CTRL_CMP0EN_SHIFT);
@@ -984,9 +1107,11 @@ void sl_hal_sysrtc_init_group(uint8_t group_number,
         temp |= ((uint32_t)group_init->p_capture_channel0_config->capture_input_edge << _SYSRTC_GRP5_CTRL_CAP0EDGE_SHIFT);
       }
 #endif
-      SYSRTC_INST->GRP5_CTRL = temp;
+      SYSRTC_GRP_INST->GRP5_CTRL = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CMP0EN)
     case 6:
       temp = ((group_init->compare_channel0_enable ? 1UL : 0UL) << _SYSRTC_GRP6_CTRL_CMP0EN_SHIFT);
@@ -1011,9 +1136,11 @@ void sl_hal_sysrtc_init_group(uint8_t group_number,
         temp |= ((uint32_t)group_init->p_capture_channel0_config->capture_input_edge << _SYSRTC_GRP6_CTRL_CAP0EDGE_SHIFT);
       }
 #endif
-      SYSRTC_INST->GRP6_CTRL = temp;
+      SYSRTC_GRP_INST->GRP6_CTRL = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CMP0EN)
     case 7:
       temp = ((group_init->compare_channel0_enable ? 1UL : 0UL) << _SYSRTC_GRP7_CTRL_CMP0EN_SHIFT);
@@ -1038,8 +1165,9 @@ void sl_hal_sysrtc_init_group(uint8_t group_number,
         temp |= ((uint32_t)group_init->p_capture_channel0_config->capture_input_edge << _SYSRTC_GRP7_CTRL_CAP0EDGE_SHIFT);
       }
 #endif
-      SYSRTC_INST->GRP7_CTRL = temp;
+      SYSRTC_GRP_INST->GRP7_CTRL = temp;
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -1071,6 +1199,7 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
 
   // Clear the enable bit first
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CMP0EN)
     case 0:
       if (channel == 0) {
@@ -1088,6 +1217,8 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CMP0EN)
     case 1:
       if (channel == 0) {
@@ -1105,6 +1236,8 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CMP0EN)
     case 2:
       if (channel == 0) {
@@ -1122,6 +1255,8 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CMP0EN)
     case 3:
       if (channel == 0) {
@@ -1139,6 +1274,8 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CMP0EN)
     case 4:
       if (channel == 0) {
@@ -1156,6 +1293,8 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CMP0EN)
     case 5:
       if (channel == 0) {
@@ -1173,6 +1312,8 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CMP0EN)
     case 6:
       if (channel == 0) {
@@ -1190,6 +1331,8 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CMP0EN)
     case 7:
       if (channel == 0) {
@@ -1206,6 +1349,7 @@ void sl_hal_sysrtc_group_enable_compare_channel(uint8_t group_number,
         SL_LOG_DEBUG_ASSERT(1);
       }
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -1245,6 +1389,7 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
 
   // Build mask to clear the action bits
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CMP0EN)
     case 0:
       if (channel == 0) {
@@ -1262,6 +1407,8 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CMP0EN)
     case 1:
       if (channel == 0) {
@@ -1279,6 +1426,8 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CMP0EN)
     case 2:
       if (channel == 0) {
@@ -1296,6 +1445,8 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CMP0EN)
     case 3:
       if (channel == 0) {
@@ -1313,6 +1464,8 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CMP0EN)
     case 4:
       if (channel == 0) {
@@ -1330,6 +1483,8 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CMP0EN)
     case 5:
       if (channel == 0) {
@@ -1347,6 +1502,8 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CMP0EN)
     case 6:
       if (channel == 0) {
@@ -1364,6 +1521,8 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CMP0EN)
     case 7:
       if (channel == 0) {
@@ -1380,6 +1539,7 @@ void sl_hal_sysrtc_group_set_compare_channel_action(uint8_t group_number,
         SL_LOG_DEBUG_ASSERT(1);
       }
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -1423,6 +1583,7 @@ void sl_hal_sysrtc_group_enable_capture_channel(uint8_t group_number,
 
   // Clear the enable bit first
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CAP0EN)
     case 0:
       if (channel == 0) {
@@ -1430,6 +1591,8 @@ void sl_hal_sysrtc_group_enable_capture_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CAP0EN)
     case 1:
       if (channel == 0) {
@@ -1437,6 +1600,8 @@ void sl_hal_sysrtc_group_enable_capture_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CAP0EN)
     case 2:
       if (channel == 0) {
@@ -1444,6 +1609,8 @@ void sl_hal_sysrtc_group_enable_capture_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CAP0EN)
     case 3:
       if (channel == 0) {
@@ -1451,6 +1618,8 @@ void sl_hal_sysrtc_group_enable_capture_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CAP0EN)
     case 4:
       if (channel == 0) {
@@ -1458,6 +1627,8 @@ void sl_hal_sysrtc_group_enable_capture_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CAP0EN)
     case 5:
       if (channel == 0) {
@@ -1465,6 +1636,8 @@ void sl_hal_sysrtc_group_enable_capture_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CAP0EN)
     case 6:
       if (channel == 0) {
@@ -1472,12 +1645,15 @@ void sl_hal_sysrtc_group_enable_capture_channel(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CAP0EN)
     case 7:
       if (channel == 0) {
         temp &= ~(1UL << _SYSRTC_GRP7_CTRL_CAP0EN_SHIFT);
       }
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -1521,6 +1697,7 @@ void sl_hal_sysrtc_group_set_capture_channel_edge(uint8_t group_number,
 
   // Build mask to clear the edge bits
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CAP0EN)
     case 0:
       if (channel == 0) {
@@ -1528,6 +1705,8 @@ void sl_hal_sysrtc_group_set_capture_channel_edge(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CAP0EN)
     case 1:
       if (channel == 0) {
@@ -1535,6 +1714,8 @@ void sl_hal_sysrtc_group_set_capture_channel_edge(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CAP0EN)
     case 2:
       if (channel == 0) {
@@ -1542,6 +1723,8 @@ void sl_hal_sysrtc_group_set_capture_channel_edge(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CAP0EN)
     case 3:
       if (channel == 0) {
@@ -1549,6 +1732,8 @@ void sl_hal_sysrtc_group_set_capture_channel_edge(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CAP0EN)
     case 4:
       if (channel == 0) {
@@ -1556,6 +1741,8 @@ void sl_hal_sysrtc_group_set_capture_channel_edge(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CAP0EN)
     case 5:
       if (channel == 0) {
@@ -1563,6 +1750,8 @@ void sl_hal_sysrtc_group_set_capture_channel_edge(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CAP0EN)
     case 6:
       if (channel == 0) {
@@ -1570,12 +1759,15 @@ void sl_hal_sysrtc_group_set_capture_channel_edge(uint8_t group_number,
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CAP0EN)
     case 7:
       if (channel == 0) {
         mask = _SYSRTC_GRP7_CTRL_CAP0EDGE_MASK;
       }
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -1599,45 +1791,61 @@ void sl_hal_sysrtc_enable_group_interrupts(uint8_t group_number,
   SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(_SYSRTC_GRP0_IEN_MASK)
     case 0:
-      SYSRTC_INST->GRP0_IEN_SET = flags;
+      SYSRTC_GRP_INST->GRP0_IEN_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(_SYSRTC_GRP1_IEN_MASK)
     case 1:
-      SYSRTC_INST->GRP1_IEN_SET = flags;
+      SYSRTC_GRP_INST->GRP1_IEN_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(_SYSRTC_GRP2_IEN_MASK)
     case 2:
-      SYSRTC_INST->GRP2_IEN_SET = flags;
+      SYSRTC_GRP_INST->GRP2_IEN_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(_SYSRTC_GRP3_IEN_MASK)
     case 3:
-      SYSRTC_INST->GRP3_IEN_SET = flags;
+      SYSRTC_GRP_INST->GRP3_IEN_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(_SYSRTC_GRP4_IEN_MASK)
     case 4:
-      SYSRTC_INST->GRP4_IEN_SET = flags;
+      SYSRTC_GRP_INST->GRP4_IEN_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(_SYSRTC_GRP5_IEN_MASK)
     case 5:
-      SYSRTC_INST->GRP5_IEN_SET = flags;
+      SYSRTC_GRP_INST->GRP5_IEN_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(_SYSRTC_GRP6_IEN_MASK)
     case 6:
-      SYSRTC_INST->GRP6_IEN_SET = flags;
+      SYSRTC_GRP_INST->GRP6_IEN_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(_SYSRTC_GRP7_IEN_MASK)
     case 7:
-      SYSRTC_INST->GRP7_IEN_SET = flags;
+      SYSRTC_GRP_INST->GRP7_IEN_SET = flags;
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -1653,45 +1861,61 @@ void sl_hal_sysrtc_disable_group_interrupts(uint8_t group_number,
   SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(_SYSRTC_GRP0_IEN_MASK)
     case 0:
-      SYSRTC_INST->GRP0_IEN_CLR = flags;
+      SYSRTC_GRP_INST->GRP0_IEN_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(_SYSRTC_GRP1_IEN_MASK)
     case 1:
-      SYSRTC_INST->GRP1_IEN_CLR = flags;
+      SYSRTC_GRP_INST->GRP1_IEN_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(_SYSRTC_GRP2_IEN_MASK)
     case 2:
-      SYSRTC_INST->GRP2_IEN_CLR = flags;
+      SYSRTC_GRP_INST->GRP2_IEN_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(_SYSRTC_GRP3_IEN_MASK)
     case 3:
-      SYSRTC_INST->GRP3_IEN_CLR = flags;
+      SYSRTC_GRP_INST->GRP3_IEN_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(_SYSRTC_GRP4_IEN_MASK)
     case 4:
-      SYSRTC_INST->GRP4_IEN_CLR = flags;
+      SYSRTC_GRP_INST->GRP4_IEN_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(_SYSRTC_GRP5_IEN_MASK)
     case 5:
-      SYSRTC_INST->GRP5_IEN_CLR = flags;
+      SYSRTC_GRP_INST->GRP5_IEN_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(_SYSRTC_GRP6_IEN_MASK)
     case 6:
-      SYSRTC_INST->GRP6_IEN_CLR = flags;
+      SYSRTC_GRP_INST->GRP6_IEN_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(_SYSRTC_GRP7_IEN_MASK)
     case 7:
-      SYSRTC_INST->GRP7_IEN_CLR = flags;
+      SYSRTC_GRP_INST->GRP7_IEN_CLR = flags;
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -1707,45 +1931,61 @@ void sl_hal_sysrtc_clear_group_interrupts(uint8_t group_number,
   SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(_SYSRTC_GRP0_IF_MASK)
     case 0:
-      SYSRTC_INST->GRP0_IF_CLR = flags;
+      SYSRTC_GRP_INST->GRP0_IF_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(_SYSRTC_GRP1_IF_MASK)
     case 1:
-      SYSRTC_INST->GRP1_IF_CLR = flags;
+      SYSRTC_GRP_INST->GRP1_IF_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(_SYSRTC_GRP2_IF_MASK)
     case 2:
-      SYSRTC_INST->GRP2_IF_CLR = flags;
+      SYSRTC_GRP_INST->GRP2_IF_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(_SYSRTC_GRP3_IF_MASK)
     case 3:
-      SYSRTC_INST->GRP3_IF_CLR = flags;
+      SYSRTC_GRP_INST->GRP3_IF_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(_SYSRTC_GRP4_IF_MASK)
     case 4:
-      SYSRTC_INST->GRP4_IF_CLR = flags;
+      SYSRTC_GRP_INST->GRP4_IF_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(_SYSRTC_GRP5_IF_MASK)
     case 5:
-      SYSRTC_INST->GRP5_IF_CLR = flags;
+      SYSRTC_GRP_INST->GRP5_IF_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(_SYSRTC_GRP6_IF_MASK)
     case 6:
-      SYSRTC_INST->GRP6_IF_CLR = flags;
+      SYSRTC_GRP_INST->GRP6_IF_CLR = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(_SYSRTC_GRP7_IF_MASK)
     case 7:
-      SYSRTC_INST->GRP7_IF_CLR = flags;
+      SYSRTC_GRP_INST->GRP7_IF_CLR = flags;
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -1760,37 +2000,53 @@ uint32_t sl_hal_sysrtc_get_group_interrupts(uint8_t group_number)
   SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(_SYSRTC_GRP0_IF_MASK)
     case 0:
-      return SYSRTC_INST->GRP0_IF;
+      return SYSRTC_GRP_INST->GRP0_IF;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(_SYSRTC_GRP1_IF_MASK)
     case 1:
-      return SYSRTC_INST->GRP1_IF;
+      return SYSRTC_GRP_INST->GRP1_IF;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(_SYSRTC_GRP2_IF_MASK)
     case 2:
-      return SYSRTC_INST->GRP2_IF;
+      return SYSRTC_GRP_INST->GRP2_IF;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(_SYSRTC_GRP3_IF_MASK)
     case 3:
-      return SYSRTC_INST->GRP3_IF;
+      return SYSRTC_GRP_INST->GRP3_IF;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(_SYSRTC_GRP4_IF_MASK)
     case 4:
-      return SYSRTC_INST->GRP4_IF;
+      return SYSRTC_GRP_INST->GRP4_IF;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(_SYSRTC_GRP5_IF_MASK)
     case 5:
-      return SYSRTC_INST->GRP5_IF;
+      return SYSRTC_GRP_INST->GRP5_IF;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(_SYSRTC_GRP6_IF_MASK)
     case 6:
-      return SYSRTC_INST->GRP6_IF;
+      return SYSRTC_GRP_INST->GRP6_IF;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(_SYSRTC_GRP7_IF_MASK)
     case 7:
-      return SYSRTC_INST->GRP7_IF;
+      return SYSRTC_GRP_INST->GRP7_IF;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -1808,45 +2064,61 @@ uint32_t sl_hal_sysrtc_get_group_enabled_interrupts(uint8_t group_number)
   SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(_SYSRTC_GRP0_IEN_MASK)
     case 0:
-      ien = SYSRTC_INST->GRP0_IEN;
-      return SYSRTC_INST->GRP0_IF & ien;
+      ien = SYSRTC_GRP_INST->GRP0_IEN;
+      return SYSRTC_GRP_INST->GRP0_IF & ien;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(_SYSRTC_GRP1_IEN_MASK)
     case 1:
-      ien = SYSRTC_INST->GRP1_IEN;
-      return SYSRTC_INST->GRP1_IF & ien;
+      ien = SYSRTC_GRP_INST->GRP1_IEN;
+      return SYSRTC_GRP_INST->GRP1_IF & ien;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(_SYSRTC_GRP2_IEN_MASK)
     case 2:
-      ien = SYSRTC_INST->GRP2_IEN;
-      return SYSRTC_INST->GRP2_IF & ien;
+      ien = SYSRTC_GRP_INST->GRP2_IEN;
+      return SYSRTC_GRP_INST->GRP2_IF & ien;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(_SYSRTC_GRP3_IEN_MASK)
     case 3:
-      ien = SYSRTC_INST->GRP3_IEN;
-      return SYSRTC_INST->GRP3_IF & ien;
+      ien = SYSRTC_GRP_INST->GRP3_IEN;
+      return SYSRTC_GRP_INST->GRP3_IF & ien;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(_SYSRTC_GRP4_IEN_MASK)
     case 4:
-      ien = SYSRTC_INST->GRP4_IEN;
-      return SYSRTC_INST->GRP4_IF & ien;
+      ien = SYSRTC_GRP_INST->GRP4_IEN;
+      return SYSRTC_GRP_INST->GRP4_IF & ien;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(_SYSRTC_GRP5_IEN_MASK)
     case 5:
-      ien = SYSRTC_INST->GRP5_IEN;
-      return SYSRTC_INST->GRP5_IF & ien;
+      ien = SYSRTC_GRP_INST->GRP5_IEN;
+      return SYSRTC_GRP_INST->GRP5_IF & ien;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(_SYSRTC_GRP6_IEN_MASK)
     case 6:
-      ien = SYSRTC_INST->GRP6_IEN;
-      return SYSRTC_INST->GRP6_IF & ien;
+      ien = SYSRTC_GRP_INST->GRP6_IEN;
+      return SYSRTC_GRP_INST->GRP6_IF & ien;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(_SYSRTC_GRP7_IEN_MASK)
     case 7:
-      ien = SYSRTC_INST->GRP7_IEN;
-      return SYSRTC_INST->GRP7_IF & ien;
+      ien = SYSRTC_GRP_INST->GRP7_IEN;
+      return SYSRTC_GRP_INST->GRP7_IF & ien;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -1863,45 +2135,61 @@ void sl_hal_sysrtc_set_group_interrupts(uint8_t group_number,
   SL_LOG_DEBUG_ASSERT(SYSRTC_GROUP_VALID(group_number));
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(_SYSRTC_GRP0_IF_MASK)
     case 0:
-      SYSRTC_INST->GRP0_IF_SET = flags;
+      SYSRTC_GRP_INST->GRP0_IF_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(_SYSRTC_GRP1_IF_MASK)
     case 1:
-      SYSRTC_INST->GRP1_IF_SET = flags;
+      SYSRTC_GRP_INST->GRP1_IF_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(_SYSRTC_GRP2_IF_MASK)
     case 2:
-      SYSRTC_INST->GRP2_IF_SET = flags;
+      SYSRTC_GRP_INST->GRP2_IF_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(_SYSRTC_GRP3_IF_MASK)
     case 3:
-      SYSRTC_INST->GRP3_IF_SET = flags;
+      SYSRTC_GRP_INST->GRP3_IF_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(_SYSRTC_GRP4_IF_MASK)
     case 4:
-      SYSRTC_INST->GRP4_IF_SET = flags;
+      SYSRTC_GRP_INST->GRP4_IF_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(_SYSRTC_GRP5_IF_MASK)
     case 5:
-      SYSRTC_INST->GRP5_IF_SET = flags;
+      SYSRTC_GRP_INST->GRP5_IF_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(_SYSRTC_GRP6_IF_MASK)
     case 6:
-      SYSRTC_INST->GRP6_IF_SET = flags;
+      SYSRTC_GRP_INST->GRP6_IF_SET = flags;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(_SYSRTC_GRP7_IF_MASK)
     case 7:
-      SYSRTC_INST->GRP7_IF_SET = flags;
+      SYSRTC_GRP_INST->GRP7_IF_SET = flags;
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -1917,141 +2205,157 @@ uint32_t sl_hal_sysrtc_get_group_compare_channel_value(uint8_t group_number,
   sl_hal_sysrtc_wait_sync_group(group_number);
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CMP0EN)
     case 0:
       if (channel == 0) {
-        return SYSRTC_INST->GRP0_CMP0VALUE;
+        return SYSRTC_GRP_INST->GRP0_CMP0VALUE;
 #if defined(SYSRTC_GRP0_CTRL_CMP1EN)
       } else if (channel == 1) {
-        return SYSRTC_INST->GRP0_CMP1VALUE;
+        return SYSRTC_GRP_INST->GRP0_CMP1VALUE;
 #endif
 #if defined(SYSRTC_GRP0_CTRL_CMP2EN)
       } else if (channel == 2) {
-        return SYSRTC_INST->GRP0_CMP2VALUE;
+        return SYSRTC_GRP_INST->GRP0_CMP2VALUE;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CMP0EN)
     case 1:
       if (channel == 0) {
-        return SYSRTC_INST->GRP1_CMP0VALUE;
+        return SYSRTC_GRP_INST->GRP1_CMP0VALUE;
 #if defined(SYSRTC_GRP1_CTRL_CMP1EN)
       } else if (channel == 1) {
-        return SYSRTC_INST->GRP1_CMP1VALUE;
+        return SYSRTC_GRP_INST->GRP1_CMP1VALUE;
 #endif
 #if defined(SYSRTC_GRP1_CTRL_CMP2EN)
       } else if (channel == 2) {
-        return SYSRTC_INST->GRP1_CMP2VALUE;
+        return SYSRTC_GRP_INST->GRP1_CMP2VALUE;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CMP0EN)
     case 2:
       if (channel == 0) {
-        return SYSRTC_INST->GRP2_CMP0VALUE;
+        return SYSRTC_GRP_INST->GRP2_CMP0VALUE;
 #if defined(SYSRTC_GRP2_CTRL_CMP1EN)
       } else if (channel == 1) {
-        return SYSRTC_INST->GRP2_CMP1VALUE;
+        return SYSRTC_GRP_INST->GRP2_CMP1VALUE;
 #endif
 #if defined(SYSRTC_GRP2_CTRL_CMP2EN)
       } else if (channel == 2) {
-        return SYSRTC_INST->GRP2_CMP2VALUE;
+        return SYSRTC_GRP_INST->GRP2_CMP2VALUE;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CMP0EN)
     case 3:
       if (channel == 0) {
-        return SYSRTC_INST->GRP3_CMP0VALUE;
+        return SYSRTC_GRP_INST->GRP3_CMP0VALUE;
 #if defined(SYSRTC_GRP3_CTRL_CMP1EN)
       } else if (channel == 1) {
-        return SYSRTC_INST->GRP3_CMP1VALUE;
+        return SYSRTC_GRP_INST->GRP3_CMP1VALUE;
 #endif
 #if defined(SYSRTC_GRP3_CTRL_CMP2EN)
       } else if (channel == 2) {
-        return SYSRTC_INST->GRP3_CMP2VALUE;
+        return SYSRTC_GRP_INST->GRP3_CMP2VALUE;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CMP0EN)
     case 4:
       if (channel == 0) {
-        return SYSRTC_INST->GRP4_CMP0VALUE;
+        return SYSRTC_GRP_INST->GRP4_CMP0VALUE;
 #if defined(SYSRTC_GRP4_CTRL_CMP1EN)
       } else if (channel == 1) {
-        return SYSRTC_INST->GRP4_CMP1VALUE;
+        return SYSRTC_GRP_INST->GRP4_CMP1VALUE;
 #endif
 #if defined(SYSRTC_GRP4_CTRL_CMP2EN)
       } else if (channel == 2) {
-        return SYSRTC_INST->GRP4_CMP2VALUE;
+        return SYSRTC_GRP_INST->GRP4_CMP2VALUE;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CMP0EN)
     case 5:
       if (channel == 0) {
-        return SYSRTC_INST->GRP5_CMP0VALUE;
+        return SYSRTC_GRP_INST->GRP5_CMP0VALUE;
 #if defined(SYSRTC_GRP5_CTRL_CMP1EN)
       } else if (channel == 1) {
-        return SYSRTC_INST->GRP5_CMP1VALUE;
+        return SYSRTC_GRP_INST->GRP5_CMP1VALUE;
 #endif
 #if defined(SYSRTC_GRP5_CTRL_CMP2EN)
       } else if (channel == 2) {
-        return SYSRTC_INST->GRP5_CMP2VALUE;
+        return SYSRTC_GRP_INST->GRP5_CMP2VALUE;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CMP0EN)
     case 6:
       if (channel == 0) {
-        return SYSRTC_INST->GRP6_CMP0VALUE;
+        return SYSRTC_GRP_INST->GRP6_CMP0VALUE;
 #if defined(SYSRTC_GRP6_CTRL_CMP1EN)
       } else if (channel == 1) {
-        return SYSRTC_INST->GRP6_CMP1VALUE;
+        return SYSRTC_GRP_INST->GRP6_CMP1VALUE;
 #endif
 #if defined(SYSRTC_GRP6_CTRL_CMP2EN)
       } else if (channel == 2) {
-        return SYSRTC_INST->GRP6_CMP2VALUE;
+        return SYSRTC_GRP_INST->GRP6_CMP2VALUE;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CMP0EN)
     case 7:
       if (channel == 0) {
-        return SYSRTC_INST->GRP7_CMP0VALUE;
+        return SYSRTC_GRP_INST->GRP7_CMP0VALUE;
 #if defined(SYSRTC_GRP7_CTRL_CMP1EN)
       } else if (channel == 1) {
-        return SYSRTC_INST->GRP7_CMP1VALUE;
+        return SYSRTC_GRP_INST->GRP7_CMP1VALUE;
 #endif
 #if defined(SYSRTC_GRP7_CTRL_CMP2EN)
       } else if (channel == 2) {
-        return SYSRTC_INST->GRP7_CMP2VALUE;
+        return SYSRTC_GRP_INST->GRP7_CMP2VALUE;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
         return 0;
       }
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -2069,141 +2373,157 @@ void sl_hal_sysrtc_set_group_compare_channel_value(uint8_t group_number,
   sl_hal_sysrtc_wait_sync_group(group_number);
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CMP0EN)
     case 0:
       if (channel == 0) {
-        SYSRTC_INST->GRP0_CMP0VALUE = value;
+        SYSRTC_GRP_INST->GRP0_CMP0VALUE = value;
 #if defined(SYSRTC_GRP0_CTRL_CMP1EN)
       } else if (channel == 1) {
-        SYSRTC_INST->GRP0_CMP1VALUE = value;
+        SYSRTC_GRP_INST->GRP0_CMP1VALUE = value;
 #endif
 #if defined(SYSRTC_GRP0_CTRL_CMP2EN)
       } else if (channel == 2) {
-        SYSRTC_INST->GRP0_CMP2VALUE = value;
+        SYSRTC_GRP_INST->GRP0_CMP2VALUE = value;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CMP0EN)
     case 1:
       if (channel == 0) {
-        SYSRTC_INST->GRP1_CMP0VALUE = value;
+        SYSRTC_GRP_INST->GRP1_CMP0VALUE = value;
 #if defined(SYSRTC_GRP1_CTRL_CMP1EN)
       } else if (channel == 1) {
-        SYSRTC_INST->GRP1_CMP1VALUE = value;
+        SYSRTC_GRP_INST->GRP1_CMP1VALUE = value;
 #endif
 #if defined(SYSRTC_GRP1_CTRL_CMP2EN)
       } else if (channel == 2) {
-        SYSRTC_INST->GRP1_CMP2VALUE = value;
+        SYSRTC_GRP_INST->GRP1_CMP2VALUE = value;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CMP0EN)
     case 2:
       if (channel == 0) {
-        SYSRTC_INST->GRP2_CMP0VALUE = value;
+        SYSRTC_GRP_INST->GRP2_CMP0VALUE = value;
 #if defined(SYSRTC_GRP2_CTRL_CMP1EN)
       } else if (channel == 1) {
-        SYSRTC_INST->GRP2_CMP1VALUE = value;
+        SYSRTC_GRP_INST->GRP2_CMP1VALUE = value;
 #endif
 #if defined(SYSRTC_GRP2_CTRL_CMP2EN)
       } else if (channel == 2) {
-        SYSRTC_INST->GRP2_CMP2VALUE = value;
+        SYSRTC_GRP_INST->GRP2_CMP2VALUE = value;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CMP0EN)
     case 3:
       if (channel == 0) {
-        SYSRTC_INST->GRP3_CMP0VALUE = value;
+        SYSRTC_GRP_INST->GRP3_CMP0VALUE = value;
 #if defined(SYSRTC_GRP3_CTRL_CMP1EN)
       } else if (channel == 1) {
-        SYSRTC_INST->GRP3_CMP1VALUE = value;
+        SYSRTC_GRP_INST->GRP3_CMP1VALUE = value;
 #endif
 #if defined(SYSRTC_GRP3_CTRL_CMP2EN)
       } else if (channel == 2) {
-        SYSRTC_INST->GRP3_CMP2VALUE = value;
+        SYSRTC_GRP_INST->GRP3_CMP2VALUE = value;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CMP0EN)
     case 4:
       if (channel == 0) {
-        SYSRTC_INST->GRP4_CMP0VALUE = value;
+        SYSRTC_GRP_INST->GRP4_CMP0VALUE = value;
 #if defined(SYSRTC_GRP4_CTRL_CMP1EN)
       } else if (channel == 1) {
-        SYSRTC_INST->GRP4_CMP1VALUE = value;
+        SYSRTC_GRP_INST->GRP4_CMP1VALUE = value;
 #endif
 #if defined(SYSRTC_GRP4_CTRL_CMP2EN)
       } else if (channel == 2) {
-        SYSRTC_INST->GRP4_CMP2VALUE = value;
+        SYSRTC_GRP_INST->GRP4_CMP2VALUE = value;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CMP0EN)
     case 5:
       if (channel == 0) {
-        SYSRTC_INST->GRP5_CMP0VALUE = value;
+        SYSRTC_GRP_INST->GRP5_CMP0VALUE = value;
 #if defined(SYSRTC_GRP5_CTRL_CMP1EN)
       } else if (channel == 1) {
-        SYSRTC_INST->GRP5_CMP1VALUE = value;
+        SYSRTC_GRP_INST->GRP5_CMP1VALUE = value;
 #endif
 #if defined(SYSRTC_GRP5_CTRL_CMP2EN)
       } else if (channel == 2) {
-        SYSRTC_INST->GRP5_CMP2VALUE = value;
+        SYSRTC_GRP_INST->GRP5_CMP2VALUE = value;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CMP0EN)
     case 6:
       if (channel == 0) {
-        SYSRTC_INST->GRP6_CMP0VALUE = value;
+        SYSRTC_GRP_INST->GRP6_CMP0VALUE = value;
 #if defined(SYSRTC_GRP6_CTRL_CMP1EN)
       } else if (channel == 1) {
-        SYSRTC_INST->GRP6_CMP1VALUE = value;
+        SYSRTC_GRP_INST->GRP6_CMP1VALUE = value;
 #endif
 #if defined(SYSRTC_GRP6_CTRL_CMP2EN)
       } else if (channel == 2) {
-        SYSRTC_INST->GRP6_CMP2VALUE = value;
+        SYSRTC_GRP_INST->GRP6_CMP2VALUE = value;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
       }
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CMP0EN)
     case 7:
       if (channel == 0) {
-        SYSRTC_INST->GRP7_CMP0VALUE = value;
+        SYSRTC_GRP_INST->GRP7_CMP0VALUE = value;
 #if defined(SYSRTC_GRP7_CTRL_CMP1EN)
       } else if (channel == 1) {
-        SYSRTC_INST->GRP7_CMP1VALUE = value;
+        SYSRTC_GRP_INST->GRP7_CMP1VALUE = value;
 #endif
 #if defined(SYSRTC_GRP7_CTRL_CMP2EN)
       } else if (channel == 2) {
-        SYSRTC_INST->GRP7_CMP2VALUE = value;
+        SYSRTC_GRP_INST->GRP7_CMP2VALUE = value;
 #endif
       } else {
         SL_LOG_DEBUG_ASSERT(1);
       }
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -2218,37 +2538,53 @@ uint32_t sl_hal_sysrtc_get_group_capture_channel_value(uint8_t group_number)
   sl_hal_sysrtc_wait_sync_group(group_number);
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(SYSRTC_GRP0_CTRL_CAP0EN)
     case 0:
-      return SYSRTC_INST->GRP0_CAP0VALUE;
+      return SYSRTC_GRP_INST->GRP0_CAP0VALUE;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(SYSRTC_GRP1_CTRL_CAP0EN)
     case 1:
-      return SYSRTC_INST->GRP1_CAP0VALUE;
+      return SYSRTC_GRP_INST->GRP1_CAP0VALUE;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(SYSRTC_GRP2_CTRL_CAP0EN)
     case 2:
-      return SYSRTC_INST->GRP2_CAP0VALUE;
+      return SYSRTC_GRP_INST->GRP2_CAP0VALUE;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(SYSRTC_GRP3_CTRL_CAP0EN)
     case 3:
-      return SYSRTC_INST->GRP3_CAP0VALUE;
+      return SYSRTC_GRP_INST->GRP3_CAP0VALUE;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(SYSRTC_GRP4_CTRL_CAP0EN)
     case 4:
-      return SYSRTC_INST->GRP4_CAP0VALUE;
+      return SYSRTC_GRP_INST->GRP4_CAP0VALUE;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(SYSRTC_GRP5_CTRL_CAP0EN)
     case 5:
-      return SYSRTC_INST->GRP5_CAP0VALUE;
+      return SYSRTC_GRP_INST->GRP5_CAP0VALUE;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(SYSRTC_GRP6_CTRL_CAP0EN)
     case 6:
-      return SYSRTC_INST->GRP6_CAP0VALUE;
+      return SYSRTC_GRP_INST->GRP6_CAP0VALUE;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(SYSRTC_GRP7_CTRL_CAP0EN)
     case 7:
-      return SYSRTC_INST->GRP7_CAP0VALUE;
+      return SYSRTC_GRP_INST->GRP7_CAP0VALUE;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -2269,16 +2605,21 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
   sl_hal_sysrtc_wait_sync_group(group_number);
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(_SYSRTC_GRP0_PRETRIG_MASK)
     case 0:
 #if defined(_SYSRTC_GRP0_CTRL_CCPRETRIGEN_MASK)
-      SYSRTC_INST->GRP0_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP0_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP0_CTRL_CCPRETRIGEN_MASK;
+      SYSRTC_GRP_INST->GRP0_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP0_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP0_CTRL_CCPRETRIGEN_MASK;
 #else
       // The pre-triggers can only be used with the compare channel 0.
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
-      temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP0_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP0_PRETRIG_EMUWAKEUP_MASK)
-             | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP0_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP0_PRETRIG_HFXOSTART_MASK);
+#if defined(_SYSRTC_GRP0_PRETRIG_EMUWAKEUP_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP0_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP0_PRETRIG_EMUWAKEUP_MASK);
+#endif
+#if defined(_SYSRTC_GRP0_PRETRIG_HFXOSTART_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP0_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP0_PRETRIG_HFXOSTART_MASK);
+#endif
 #if defined(_SYSRTC_GRP0_PRETRIGSTATUS_MASK)
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP0_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP0_PRETRIG_HFXOACTIVE_SHIFT);
@@ -2286,138 +2627,185 @@ void sl_hal_sysrtc_set_group_pretrigger(uint8_t group_number,
       // The pre-triggers can only be disabled if ticks is 0.
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
-      SYSRTC_INST->GRP0_PRETRIG = temp;
+      SYSRTC_GRP_INST->GRP0_PRETRIG = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(_SYSRTC_GRP1_PRETRIG_MASK)
     case 1:
 #if defined(_SYSRTC_GRP1_CTRL_CCPRETRIGEN_MASK)
-      SYSRTC_INST->GRP1_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP1_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP1_CTRL_CCPRETRIGEN_MASK;
+      SYSRTC_GRP_INST->GRP1_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP1_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP1_CTRL_CCPRETRIGEN_MASK;
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
-      temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP1_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP1_PRETRIG_EMUWAKEUP_MASK)
-             | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP1_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP1_PRETRIG_HFXOSTART_MASK);
+#if defined(_SYSRTC_GRP1_PRETRIG_EMUWAKEUP_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP1_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP1_PRETRIG_EMUWAKEUP_MASK);
+#endif
+#if defined(_SYSRTC_GRP1_PRETRIG_HFXOSTART_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP1_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP1_PRETRIG_HFXOSTART_MASK);
+#endif
 #if defined(_SYSRTC_GRP1_PRETRIGSTATUS_MASK)
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP1_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP1_PRETRIG_HFXOACTIVE_SHIFT);
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
-      SYSRTC_INST->GRP1_PRETRIG = temp;
+      SYSRTC_GRP_INST->GRP1_PRETRIG = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(_SYSRTC_GRP2_PRETRIG_MASK)
     case 2:
 #if defined(_SYSRTC_GRP2_CTRL_CCPRETRIGEN_MASK)
-      SYSRTC_INST->GRP2_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP2_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP2_CTRL_CCPRETRIGEN_MASK;
+      SYSRTC_GRP_INST->GRP2_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP2_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP2_CTRL_CCPRETRIGEN_MASK;
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
-      temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP2_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP2_PRETRIG_EMUWAKEUP_MASK)
-             | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP2_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP2_PRETRIG_HFXOSTART_MASK);
+#if defined(_SYSRTC_GRP2_PRETRIG_EMUWAKEUP_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP2_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP2_PRETRIG_EMUWAKEUP_MASK);
+#endif
+#if defined(_SYSRTC_GRP2_PRETRIG_HFXOSTART_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP2_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP2_PRETRIG_HFXOSTART_MASK);
+#endif
 #if defined(_SYSRTC_GRP2_PRETRIGSTATUS_MASK)
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP2_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP2_PRETRIG_HFXOACTIVE_SHIFT);
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
-      SYSRTC_INST->GRP2_PRETRIG = temp;
+      SYSRTC_GRP_INST->GRP2_PRETRIG = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(_SYSRTC_GRP3_PRETRIG_MASK)
     case 3:
 #if defined(_SYSRTC_GRP3_CTRL_CCPRETRIGEN_MASK)
-      SYSRTC_INST->GRP3_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP3_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP3_CTRL_CCPRETRIGEN_MASK;
+      SYSRTC_GRP_INST->GRP3_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP3_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP3_CTRL_CCPRETRIGEN_MASK;
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
-      temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP3_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP3_PRETRIG_EMUWAKEUP_MASK)
-             | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP3_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP3_PRETRIG_HFXOSTART_MASK);
+#if defined(_SYSRTC_GRP3_PRETRIG_EMUWAKEUP_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP3_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP3_PRETRIG_EMUWAKEUP_MASK);
+#endif
+#if defined(_SYSRTC_GRP3_PRETRIG_HFXOSTART_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP3_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP3_PRETRIG_HFXOSTART_MASK);
+#endif
 #if defined(_SYSRTC_GRP3_PRETRIGSTATUS_MASK)
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP3_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP3_PRETRIG_HFXOACTIVE_SHIFT);
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
-      SYSRTC_INST->GRP3_PRETRIG = temp;
+      SYSRTC_GRP_INST->GRP3_PRETRIG = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(_SYSRTC_GRP4_PRETRIG_MASK)
     case 4:
 #if defined(_SYSRTC_GRP4_CTRL_CCPRETRIGEN_MASK)
-      SYSRTC_INST->GRP4_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP4_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP4_CTRL_CCPRETRIGEN_MASK;
+      SYSRTC_GRP_INST->GRP4_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP4_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP4_CTRL_CCPRETRIGEN_MASK;
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
-      temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP4_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP4_PRETRIG_EMUWAKEUP_MASK)
-             | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP4_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP4_PRETRIG_HFXOSTART_MASK);
+#if defined(_SYSRTC_GRP4_PRETRIG_EMUWAKEUP_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP4_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP4_PRETRIG_EMUWAKEUP_MASK);
+#endif
+#if defined(_SYSRTC_GRP4_PRETRIG_HFXOSTART_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP4_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP4_PRETRIG_HFXOSTART_MASK);
+#endif
 #if defined(_SYSRTC_GRP4_PRETRIGSTATUS_MASK)
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP4_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP4_PRETRIG_HFXOACTIVE_SHIFT);
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
-      SYSRTC_INST->GRP4_PRETRIG = temp;
+      SYSRTC_GRP_INST->GRP4_PRETRIG = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(_SYSRTC_GRP5_PRETRIG_MASK)
     case 5:
 #if defined(_SYSRTC_GRP5_CTRL_CCPRETRIGEN_MASK)
-      SYSRTC_INST->GRP5_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP5_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP5_CTRL_CCPRETRIGEN_MASK;
+      SYSRTC_GRP_INST->GRP5_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP5_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP5_CTRL_CCPRETRIGEN_MASK;
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
-      temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP5_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP5_PRETRIG_EMUWAKEUP_MASK)
-             | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP5_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP5_PRETRIG_HFXOSTART_MASK);
+#if defined(_SYSRTC_GRP5_PRETRIG_EMUWAKEUP_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP5_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP5_PRETRIG_EMUWAKEUP_MASK);
+#endif
+#if defined(_SYSRTC_GRP5_PRETRIG_HFXOSTART_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP5_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP5_PRETRIG_HFXOSTART_MASK);
+#endif
 #if defined(_SYSRTC_GRP5_PRETRIGSTATUS_MASK)
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP5_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP5_PRETRIG_HFXOACTIVE_SHIFT);
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
-      SYSRTC_INST->GRP5_PRETRIG = temp;
+      SYSRTC_GRP_INST->GRP5_PRETRIG = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(_SYSRTC_GRP6_PRETRIG_MASK)
     case 6:
 #if defined(_SYSRTC_GRP6_CTRL_CCPRETRIGEN_MASK)
-      SYSRTC_INST->GRP6_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP6_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP6_CTRL_CCPRETRIGEN_MASK;
+      SYSRTC_GRP_INST->GRP6_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP6_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP6_CTRL_CCPRETRIGEN_MASK;
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
-      temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP6_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP6_PRETRIG_EMUWAKEUP_MASK)
-             | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP6_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP6_PRETRIG_HFXOSTART_MASK);
+#if defined(_SYSRTC_GRP6_PRETRIG_EMUWAKEUP_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP6_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP6_PRETRIG_EMUWAKEUP_MASK);
+#endif
+#if defined(_SYSRTC_GRP6_PRETRIG_HFXOSTART_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP6_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP6_PRETRIG_HFXOSTART_MASK);
+#endif
 #if defined(_SYSRTC_GRP6_PRETRIGSTATUS_MASK)
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP6_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP6_PRETRIG_HFXOACTIVE_SHIFT);
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
-      SYSRTC_INST->GRP6_PRETRIG = temp;
+      SYSRTC_GRP_INST->GRP6_PRETRIG = temp;
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(_SYSRTC_GRP7_PRETRIG_MASK)
     case 7:
 #if defined(_SYSRTC_GRP7_CTRL_CCPRETRIGEN_MASK)
-      SYSRTC_INST->GRP7_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP7_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP7_CTRL_CCPRETRIGEN_MASK;
+      SYSRTC_GRP_INST->GRP7_CTRL |= (group_pretrigger_config->compare_channel << _SYSRTC_GRP7_CTRL_CCPRETRIGEN_SHIFT) & _SYSRTC_GRP7_CTRL_CCPRETRIGEN_MASK;
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->compare_channel == 0);
 #endif
-      temp = (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP7_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP7_PRETRIG_EMUWAKEUP_MASK)
-             | (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP7_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP7_PRETRIG_HFXOSTART_MASK);
+#if defined(_SYSRTC_GRP7_PRETRIG_EMUWAKEUP_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->emu_wakeup.ticks << _SYSRTC_GRP7_PRETRIG_EMUWAKEUP_SHIFT) & _SYSRTC_GRP7_PRETRIG_EMUWAKEUP_MASK);
+#endif
+#if defined(_SYSRTC_GRP7_PRETRIG_HFXOSTART_MASK)
+      temp |= (((uint32_t)group_pretrigger_config->hfxo_start.ticks << _SYSRTC_GRP7_PRETRIG_HFXOSTART_SHIFT) & _SYSRTC_GRP7_PRETRIG_HFXOSTART_MASK);
+#endif
 #if defined(_SYSRTC_GRP7_PRETRIGSTATUS_MASK)
       temp |= ((group_pretrigger_config->emu_wakeup.enable ? 1UL : 0UL) << _SYSRTC_GRP7_PRETRIG_EMUACTIVE_SHIFT)
               | ((group_pretrigger_config->hfxo_start.enable ? 1UL : 0UL) << _SYSRTC_GRP7_PRETRIG_HFXOACTIVE_SHIFT);
 #else
       SL_LOG_DEBUG_ASSERT(group_pretrigger_config->hfxo_start.enable || (group_pretrigger_config->hfxo_start.ticks == 0));
 #endif
-      SYSRTC_INST->GRP7_PRETRIG = temp;
+      SYSRTC_GRP_INST->GRP7_PRETRIG = temp;
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
   }
+
+#if defined(_SYSRTC_HFXOMAIN_HFXOSTART_MASK)
+  SYSRTC_INST->HFXOMAIN = (group_pretrigger_config->hfxo_start.ticks << _SYSRTC_HFXOMAIN_HFXOSTART_SHIFT) & _SYSRTC_HFXOMAIN_HFXOSTART_MASK;
+#endif
 }
 
 /***************************************************************************//**
@@ -2428,61 +2816,77 @@ uint32_t sl_hal_sysrtc_get_group_pretrigger_status(uint8_t group_number)
   sl_hal_sysrtc_wait_sync_group(group_number);
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(_SYSRTC_GRP0_PRETRIGSTATUS_MASK)
     case 0:
-      return SYSRTC_INST->GRP0_PRETRIGSTATUS;
+      return SYSRTC_GRP_INST->GRP0_PRETRIGSTATUS;
 #elif defined(_SYSRTC_GRP0_PRETRIG_MASK)
     case 0:
-      return SYSRTC_INST->GRP0_PRETRIG & (SYSRTC_GRP0_PRETRIG_HFXOACTIVE | SYSRTC_GRP0_PRETRIG_EMUACTIVE);
+      return SYSRTC_GRP_INST->GRP0_PRETRIG & (SYSRTC_GRP0_PRETRIG_HFXOACTIVE | SYSRTC_GRP0_PRETRIG_EMUACTIVE);
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(_SYSRTC_GRP1_PRETRIGSTATUS_MASK)
     case 1:
-      return SYSRTC_INST->GRP1_PRETRIGSTATUS;
+      return SYSRTC_GRP_INST->GRP1_PRETRIGSTATUS;
 #elif defined(_SYSRTC_GRP1_PRETRIG_MASK)
     case 1:
-      return SYSRTC_INST->GRP1_PRETRIG & (SYSRTC_GRP1_PRETRIG_HFXOACTIVE | SYSRTC_GRP1_PRETRIG_EMUACTIVE);
+      return SYSRTC_GRP_INST->GRP1_PRETRIG & (SYSRTC_GRP1_PRETRIG_HFXOACTIVE | SYSRTC_GRP1_PRETRIG_EMUACTIVE);
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(_SYSRTC_GRP2_PRETRIGSTATUS_MASK)
     case 2:
-      return SYSRTC_INST->GRP2_PRETRIGSTATUS;
+      return SYSRTC_GRP_INST->GRP2_PRETRIGSTATUS;
 #elif defined(_SYSRTC_GRP2_PRETRIG_MASK)
     case 2:
-      return SYSRTC_INST->GRP2_PRETRIG & (SYSRTC_GRP2_PRETRIG_HFXOACTIVE | SYSRTC_GRP2_PRETRIG_EMUACTIVE);
+      return SYSRTC_GRP_INST->GRP2_PRETRIG & (SYSRTC_GRP2_PRETRIG_HFXOACTIVE | SYSRTC_GRP2_PRETRIG_EMUACTIVE);
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(_SYSRTC_GRP3_PRETRIGSTATUS_MASK)
     case 3:
-      return SYSRTC_INST->GRP3_PRETRIGSTATUS;
+      return SYSRTC_GRP_INST->GRP3_PRETRIGSTATUS;
 #elif defined(_SYSRTC_GRP3_PRETRIG_MASK)
     case 3:
-      return SYSRTC_INST->GRP3_PRETRIG & (SYSRTC_GRP3_PRETRIG_HFXOACTIVE | SYSRTC_GRP3_PRETRIG_EMUACTIVE);
+      return SYSRTC_GRP_INST->GRP3_PRETRIG & (SYSRTC_GRP3_PRETRIG_HFXOACTIVE | SYSRTC_GRP3_PRETRIG_EMUACTIVE);
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(_SYSRTC_GRP4_PRETRIGSTATUS_MASK)
     case 4:
-      return SYSRTC_INST->GRP4_PRETRIGSTATUS;
+      return SYSRTC_GRP_INST->GRP4_PRETRIGSTATUS;
 #elif defined(_SYSRTC_GRP4_PRETRIG_MASK)
     case 4:
-      return SYSRTC_INST->GRP4_PRETRIG & (SYSRTC_GRP4_PRETRIG_HFXOACTIVE | SYSRTC_GRP4_PRETRIG_EMUACTIVE);
+      return SYSRTC_GRP_INST->GRP4_PRETRIG & (SYSRTC_GRP4_PRETRIG_HFXOACTIVE | SYSRTC_GRP4_PRETRIG_EMUACTIVE);
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(_SYSRTC_GRP5_PRETRIGSTATUS_MASK)
     case 5:
-      return SYSRTC_INST->GRP5_PRETRIGSTATUS;
+      return SYSRTC_GRP_INST->GRP5_PRETRIGSTATUS;
 #elif defined(_SYSRTC_GRP5_PRETRIG_MASK)
     case 5:
-      return SYSRTC_INST->GRP5_PRETRIG & (SYSRTC_GRP5_PRETRIG_HFXOACTIVE | SYSRTC_GRP5_PRETRIG_EMUACTIVE);
+      return SYSRTC_GRP_INST->GRP5_PRETRIG & (SYSRTC_GRP5_PRETRIG_HFXOACTIVE | SYSRTC_GRP5_PRETRIG_EMUACTIVE);
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(_SYSRTC_GRP6_PRETRIGSTATUS_MASK)
     case 6:
-      return SYSRTC_INST->GRP6_PRETRIGSTATUS;
+      return SYSRTC_GRP_INST->GRP6_PRETRIGSTATUS;
 #elif defined(_SYSRTC_GRP6_PRETRIG_MASK)
     case 6:
-      return SYSRTC_INST->GRP6_PRETRIG & (SYSRTC_GRP6_PRETRIG_HFXOACTIVE | SYSRTC_GRP6_PRETRIG_EMUACTIVE);
+      return SYSRTC_GRP_INST->GRP6_PRETRIG & (SYSRTC_GRP6_PRETRIG_HFXOACTIVE | SYSRTC_GRP6_PRETRIG_EMUACTIVE);
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(_SYSRTC_GRP7_PRETRIGSTATUS_MASK)
     case 7:
-      return SYSRTC_INST->GRP7_PRETRIGSTATUS;
+      return SYSRTC_GRP_INST->GRP7_PRETRIGSTATUS;
 #elif defined(_SYSRTC_GRP7_PRETRIG_MASK)
     case 7:
-      return SYSRTC_INST->GRP7_PRETRIG & (SYSRTC_GRP7_PRETRIG_HFXOACTIVE | SYSRTC_GRP7_PRETRIG_EMUACTIVE);
+      return SYSRTC_GRP_INST->GRP7_PRETRIG & (SYSRTC_GRP7_PRETRIG_HFXOACTIVE | SYSRTC_GRP7_PRETRIG_EMUACTIVE);
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);
@@ -2507,77 +2911,93 @@ void sl_hal_sysrtc_clear_group_pretrigger_status(uint8_t group_number,
   sl_hal_sysrtc_wait_sync_group(group_number);
 
   switch (group_number) {
+#if defined(SYSRTC_GRP0_PRESENT)
 #if defined(_SYSRTC_GRP0_PRETRIGSTATUS_MASK)
     case 0:
-      SYSRTC_INST->GRP0_PRETRIGSTATUS_CLR = flags;
+      SYSRTC_GRP_INST->GRP0_PRETRIGSTATUS_CLR = flags;
       break;
 #elif defined(_SYSRTC_GRP0_PRETRIG_MASK)
     case 0:
-      SYSRTC_INST->GRP0_PRETRIG_CLR = flags & (SYSRTC_GRP0_PRETRIG_HFXOACTIVE | SYSRTC_GRP0_PRETRIG_EMUACTIVE);
+      SYSRTC_GRP_INST->GRP0_PRETRIG_CLR = flags & (SYSRTC_GRP0_PRETRIG_HFXOACTIVE | SYSRTC_GRP0_PRETRIG_EMUACTIVE);
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP1_PRESENT)
 #if defined(_SYSRTC_GRP1_PRETRIGSTATUS_MASK)
     case 1:
-      SYSRTC_INST->GRP1_PRETRIGSTATUS_CLR = flags;
+      SYSRTC_GRP_INST->GRP1_PRETRIGSTATUS_CLR = flags;
       break;
 #elif defined(_SYSRTC_GRP1_PRETRIG_MASK)
     case 1:
-      SYSRTC_INST->GRP1_PRETRIG_CLR = flags & (SYSRTC_GRP1_PRETRIG_HFXOACTIVE | SYSRTC_GRP1_PRETRIG_EMUACTIVE);
+      SYSRTC_GRP_INST->GRP1_PRETRIG_CLR = flags & (SYSRTC_GRP1_PRETRIG_HFXOACTIVE | SYSRTC_GRP1_PRETRIG_EMUACTIVE);
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP2_PRESENT)
 #if defined(_SYSRTC_GRP2_PRETRIGSTATUS_MASK)
     case 2:
-      SYSRTC_INST->GRP2_PRETRIGSTATUS_CLR = flags;
+      SYSRTC_GRP_INST->GRP2_PRETRIGSTATUS_CLR = flags;
       break;
 #elif defined(_SYSRTC_GRP2_PRETRIG_MASK)
     case 2:
-      SYSRTC_INST->GRP2_PRETRIG_CLR = flags & (SYSRTC_GRP2_PRETRIG_HFXOACTIVE | SYSRTC_GRP2_PRETRIG_EMUACTIVE);
+      SYSRTC_GRP_INST->GRP2_PRETRIG_CLR = flags & (SYSRTC_GRP2_PRETRIG_HFXOACTIVE | SYSRTC_GRP2_PRETRIG_EMUACTIVE);
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP3_PRESENT)
 #if defined(_SYSRTC_GRP3_PRETRIGSTATUS_MASK)
     case 3:
-      SYSRTC_INST->GRP3_PRETRIGSTATUS_CLR = flags;
+      SYSRTC_GRP_INST->GRP3_PRETRIGSTATUS_CLR = flags;
       break;
 #elif defined(_SYSRTC_GRP3_PRETRIG_MASK)
     case 3:
-      SYSRTC_INST->GRP3_PRETRIG_CLR = flags & (SYSRTC_GRP3_PRETRIG_HFXOACTIVE | SYSRTC_GRP3_PRETRIG_EMUACTIVE);
+      SYSRTC_GRP_INST->GRP3_PRETRIG_CLR = flags & (SYSRTC_GRP3_PRETRIG_HFXOACTIVE | SYSRTC_GRP3_PRETRIG_EMUACTIVE);
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP4_PRESENT)
 #if defined(_SYSRTC_GRP4_PRETRIGSTATUS_MASK)
     case 4:
-      SYSRTC_INST->GRP4_PRETRIGSTATUS_CLR = flags;
+      SYSRTC_GRP_INST->GRP4_PRETRIGSTATUS_CLR = flags;
       break;
 #elif defined(_SYSRTC_GRP4_PRETRIG_MASK)
     case 4:
-      SYSRTC_INST->GRP4_PRETRIG_CLR = flags & (SYSRTC_GRP4_PRETRIG_HFXOACTIVE | SYSRTC_GRP4_PRETRIG_EMUACTIVE);
+      SYSRTC_GRP_INST->GRP4_PRETRIG_CLR = flags & (SYSRTC_GRP4_PRETRIG_HFXOACTIVE | SYSRTC_GRP4_PRETRIG_EMUACTIVE);
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP5_PRESENT)
 #if defined(_SYSRTC_GRP5_PRETRIGSTATUS_MASK)
     case 5:
-      SYSRTC_INST->GRP5_PRETRIGSTATUS_CLR = flags;
+      SYSRTC_GRP_INST->GRP5_PRETRIGSTATUS_CLR = flags;
       break;
 #elif defined(_SYSRTC_GRP5_PRETRIG_MASK)
     case 5:
-      SYSRTC_INST->GRP5_PRETRIG_CLR = flags & (SYSRTC_GRP5_PRETRIG_HFXOACTIVE | SYSRTC_GRP5_PRETRIG_EMUACTIVE);
+      SYSRTC_GRP_INST->GRP5_PRETRIG_CLR = flags & (SYSRTC_GRP5_PRETRIG_HFXOACTIVE | SYSRTC_GRP5_PRETRIG_EMUACTIVE);
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP6_PRESENT)
 #if defined(_SYSRTC_GRP6_PRETRIGSTATUS_MASK)
     case 6:
-      SYSRTC_INST->GRP6_PRETRIGSTATUS_CLR = flags;
+      SYSRTC_GRP_INST->GRP6_PRETRIGSTATUS_CLR = flags;
       break;
 #elif defined(_SYSRTC_GRP6_PRETRIG_MASK)
     case 6:
-      SYSRTC_INST->GRP6_PRETRIG_CLR = flags & (SYSRTC_GRP6_PRETRIG_HFXOACTIVE | SYSRTC_GRP6_PRETRIG_EMUACTIVE);
+      SYSRTC_GRP_INST->GRP6_PRETRIG_CLR = flags & (SYSRTC_GRP6_PRETRIG_HFXOACTIVE | SYSRTC_GRP6_PRETRIG_EMUACTIVE);
       break;
 #endif
+#endif
+#if defined(SYSRTC_GRP7_PRESENT)
 #if defined(_SYSRTC_GRP7_PRETRIGSTATUS_MASK)
     case 7:
-      SYSRTC_INST->GRP7_PRETRIGSTATUS_CLR = flags;
+      SYSRTC_GRP_INST->GRP7_PRETRIGSTATUS_CLR = flags;
       break;
 #elif defined(_SYSRTC_GRP7_PRETRIG_MASK)
     case 7:
-      SYSRTC_INST->GRP7_PRETRIG_CLR = flags & (SYSRTC_GRP7_PRETRIG_HFXOACTIVE | SYSRTC_GRP7_PRETRIG_EMUACTIVE);
+      SYSRTC_GRP_INST->GRP7_PRETRIG_CLR = flags & (SYSRTC_GRP7_PRETRIG_HFXOACTIVE | SYSRTC_GRP7_PRETRIG_EMUACTIVE);
       break;
+#endif
 #endif
     default:
       SL_LOG_DEBUG_ASSERT(1);

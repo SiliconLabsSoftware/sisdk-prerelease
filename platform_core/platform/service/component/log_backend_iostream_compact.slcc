@@ -1,5 +1,5 @@
 id: log_backend_iostream_compact
-label: Log Backend I/O Stream – Compact Binary Output
+label: Compact Binary Output
 package: platform_core
 description: >
   Compact binary output for the I/O Stream log backend. Events are written as
@@ -7,7 +7,7 @@ description: >
   handling. This format minimizes on-wire overhead and is intended for offline
   parsing by host-side tooling. Requires the log_backend_iostream component
   for transport.
-category: Services|Log
+category: Services|Log|Log Backend I/O Stream
 quality: production
 metadata:
   sbom:

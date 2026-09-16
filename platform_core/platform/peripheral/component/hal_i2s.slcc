@@ -28,4 +28,5 @@ requires:
 - name: cmsis_core
 - name: enum
 - name: clock_manager_runtime
+- name: log_none
 root_path: platform_core/platform/peripheral

@@ -32,7 +32,6 @@ requires:
 - name: psa_crypto_sha256
 - name: psa_crypto_ecdh
 - name: psa_crypto_ecc_curve25519
-- name: mbedtls_mpi
 template_contribution:
 - name: component_catalog
   value: cpc_security

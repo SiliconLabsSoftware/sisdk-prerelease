@@ -116,10 +116,10 @@ void sl_hal_sysrtc_disable(void);
 __INLINE void sl_hal_sysrtc_wait_ready(void)
 {
 #if defined (_SYSRTC_SWRST_RESETTING_MASK)
-  while ((SYSRTC0->SWRST & _SYSRTC_SWRST_RESETTING_MASK) || (SYSRTC0->EN & _SYSRTC_EN_DISABLING_MASK) || (SYSRTC0->SYNCBUSY != 0U)) {
+  while ((SYSRTC_INST->SWRST & _SYSRTC_SWRST_RESETTING_MASK) || (SYSRTC_INST->EN & _SYSRTC_EN_DISABLING_MASK) || (SYSRTC_INST->SYNCBUSY != 0U)) {
     // Wait for all synchronizations to finish.
   #else
-  while ((SYSRTC0->EN & _SYSRTC_EN_DISABLING_MASK) || (SYSRTC0->SYNCBUSY != 0U)) {
+  while ((SYSRTC_INST->EN & _SYSRTC_EN_DISABLING_MASK) || (SYSRTC_INST->SYNCBUSY != 0U)) {
 #endif // _SYSRTC_SWRST_RESETTING_MASK
   }
 }

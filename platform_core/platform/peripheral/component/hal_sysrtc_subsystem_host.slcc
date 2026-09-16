@@ -20,6 +20,8 @@ include:
   - path: peripheral_sysrtc_compat.h
 requires:
 - name: log_none
+- name: hal_sysrtc_subsystem_sixx381
+  condition: [device_generic_family_sixx381]
 provides:
 - name: hal_sysrtc_subsystem_host
 - name: hal_sysrtc_subsystem

@@ -130,7 +130,7 @@ void sli_sleeptimer_hal_power_manager_integration_init(void)
 #endif
 
   // Set SYSRTC Compare Channel 1
-  SYSRTC0->GRP0_CTRL_SET = (_SYSRTC_GRP0_CTRL_CMP1CMOA_CMPIF << _SYSRTC_GRP0_CTRL_CMP1CMOA_SHIFT);
+  SYSRTC_GRP_INST->GRP0_CTRL_SET = (_SYSRTC_GRP0_CTRL_CMP1CMOA_CMPIF << _SYSRTC_GRP0_CTRL_CMP1CMOA_SHIFT);
 }
 #endif
 
@@ -152,7 +152,7 @@ void sli_sleeptimer_hal_hfxo_manager_integration_init(void)
 #endif
 
   // Set SYSRTC Capture Channel
-  SYSRTC0->GRP0_CTRL_SET = (_SYSRTC_GRP0_CTRL_CAP0EDGE_RISING << _SYSRTC_GRP0_CTRL_CAP0EDGE_SHIFT);
+  SYSRTC_GRP_INST->GRP0_CTRL_SET = (_SYSRTC_GRP0_CTRL_CAP0EDGE_RISING << _SYSRTC_GRP0_CTRL_CAP0EDGE_SHIFT);
 }
 #endif
 
@@ -206,7 +206,7 @@ void sleeptimer_hal_set_compare(uint32_t value)
   CORE_EXIT_CRITICAL();
 
   if (cc_disabled) {
-    SYSRTC0->GRP0_CTRL_SET = SYSRTC_GRP0_CTRL_CMP0EN;
+    SYSRTC_GRP_INST->GRP0_CTRL_SET = SYSRTC_GRP0_CTRL_CMP0EN;
     cc_disabled = false;
   }
 }
@@ -243,8 +243,8 @@ void sleeptimer_hal_set_compare_prs_hfxo_startup(int32_t value)
   CORE_EXIT_CRITICAL();
 
   if (cc1_disabled) {
-    SYSRTC0->GRP0_CTRL_SET = SYSRTC_GRP0_CTRL_CMP1EN;
-    SYSRTC0->GRP0_CTRL_SET = SYSRTC_GRP0_CTRL_CAP0EN;
+    SYSRTC_GRP_INST->GRP0_CTRL_SET = SYSRTC_GRP0_CTRL_CMP1EN;
+    SYSRTC_GRP_INST->GRP0_CTRL_SET = SYSRTC_GRP0_CTRL_CAP0EN;
     cc1_disabled = false;
   }
 }
@@ -282,7 +282,7 @@ void sleeptimer_hal_disable_int(uint8_t local_flag)
     sysrtc_int_dis |= SYSRTC_GRP0_IEN_CMP0;
 
     cc_disabled = true;
-    SYSRTC0->GRP0_CTRL_CLR = _SYSRTC_GRP0_CTRL_CMP0EN_MASK;
+    SYSRTC_GRP_INST->GRP0_CTRL_CLR = _SYSRTC_GRP0_CTRL_CMP0EN_MASK;
   }
 
   sl_hal_sysrtc_disable_group_interrupts(0u, sysrtc_int_dis);
@@ -294,7 +294,7 @@ void sleeptimer_hal_disable_int(uint8_t local_flag)
 void sleeptimer_hal_set_int(uint8_t local_flag)
 {
   if (local_flag & SLEEPTIMER_EVENT_COMP) {
-    SYSRTC0->GRP0_IF_SET = SYSRTC_GRP0_IF_CMP0;
+    SYSRTC_GRP_INST->GRP0_IF_SET = SYSRTC_GRP0_IF_CMP0;
   }
 }
 
@@ -422,8 +422,8 @@ void sleeptimer_hal_reset_prs_signal(void)
 void sleeptimer_hal_disable_prs_compare_and_capture_channel(void)
 {
   if (!cc1_disabled) {
-    SYSRTC0->GRP0_CTRL_CLR = SYSRTC_GRP0_CTRL_CMP1EN;
-    SYSRTC0->GRP0_CTRL_CLR = SYSRTC_GRP0_CTRL_CAP0EN;
+    SYSRTC_GRP_INST->GRP0_CTRL_CLR = SYSRTC_GRP0_CTRL_CMP1EN;
+    SYSRTC_GRP_INST->GRP0_CTRL_CLR = SYSRTC_GRP0_CTRL_CAP0EN;
     cc1_disabled = true;
   }
 }

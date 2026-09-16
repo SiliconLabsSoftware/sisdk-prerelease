@@ -29,7 +29,6 @@
 #include <stdint.h>
 
 #include "sl_status.h"
-#include "sl_wisun_connection_params_api.h" /* public: defines sl_wisun_connection_params_t */
 
 /*
  * Opaque forward declarations.

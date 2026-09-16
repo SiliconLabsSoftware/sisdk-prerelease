@@ -205,9 +205,9 @@ int sl_si91x_socket_async(int family, int type, int protocol, sl_si91x_socket_re
  *   | option_name                                       | option_value                              |  description                                                                                                               |
  *   |---------------------------------------------------|-------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
  *   | @ref SL_SI91X_SO_RCVTIME                          | sl_si91x_time_value                       | Socket Receive timeout. sl_si91x_time_value structure is used to represent time in two parts: seconds and microseconds.    |
- *   | @ref SL_SI91X_SO_MAXRETRY                         | uint16_t                                  | Maximum number of TCP retries                                                                                              |
+ *   | @ref SL_SI91X_SO_MAXRETRY                         | uint16_t                                  | Maximum number of TCP TX retransmission attempts (default: 10)                                                             |
  *   | @ref SL_SI91X_SO_MSS                              | uint16_t                                  | Maximum Segment Size (MSS) for the TCP connection                                                                          |
- *   | @ref SL_SI91X_SO_TCP_KEEPALIVE                    | uint16_t                                  | Set TCP keepalive in seconds                                                                                               |
+ *   | @ref SL_SI91X_SO_TCP_KEEPALIVE                    | uint16_t                                  | TCP keep-alive idle time in seconds (idle connection; default: 1200)                                                       |
  *   | @ref SL_SI91X_SO_HIGH_PERFORMANCE_SOCKET          | BIT(7)                                    | Set high performance socket                                                                                                |
  *   | @ref SL_SI91X_SO_SSL_ENABLE                       | SL_SI91X_ENABLE_TLS                       | Enable TLS/SSL                                                                                                             |
  *   | @ref SL_SI91X_SO_SSL_V_1_0_ENABLE                 | SL_SI91X_ENABLE_TLS \| SL_SI91X_TLS_V_1_0 | Enable TLS v1.0                                                                                                            |
@@ -252,6 +252,23 @@ int sl_si91x_socket_async(int family, int type, int protocol, sl_si91x_socket_re
  * This function is used only for the SiWx91x socket API.
  * The options set in this function will not be effective if called after `sl_si91x_connect()` or `sl_si91x_listen()` for TCP, or after `sl_si91x_sendto()`, `sl_si91x_recvfrom()`, or `sl_si91x_connect()` for UDP.
  * The value of the option SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE should be a power of 2 between 1 and 128.
+ *
+ * @note TCP keep-alive (@ref SL_SI91X_SO_TCP_KEEPALIVE):
+ * - Applies when the TCP connection is idle (no peer activity that refreshes the keep-alive timer). Keep-alive packet check whether the peer is still reachable.
+ * - Configures the idle time (in seconds) before the first TCP keep-alive packet is sent. The default is 1200 seconds.
+ * - If the peer does not respond, the NWP retries keep-alive with fixed defaults of 10 retries at 10-second intervals (not configurable via this API).
+ * - Remote termination on silent peer loss occurs after: initial idle time + (retries × retry interval).
+ *   For example, with idle time set to 20 seconds: 20 + (10 × 10) = 120 seconds until remote termination.
+ * - Keep-alive does not cover TCP transmit (TX) failures on unacknowledged sends; use @ref SL_SI91X_SO_MAXRETRY / @ref SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE for that.
+ *
+ * @note TCP transmit (TX) retransmission (@ref SL_SI91X_SO_MAXRETRY, @ref SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE):
+ * - Applies to TCP transmit (TX): when sent data is not acknowledged, the NWP retransmits until the peer ACKs or retries are exhausted.
+ * - @ref SL_SI91X_SO_MAXRETRY configures the maximum number of TCP retransmission attempts. If not set, the default is 10.
+ * - @ref SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE configures the maximum retransmission timeout in seconds. The value must be a power of 2 between 1 and 128. If not set, the NWP default is 1 second.
+ * - The wait between retransmissions grows exponentially (doubles each retry) and is capped by @ref SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE.
+ * - With the default cap of 1 second, each wait stays about 1 second, so remote termination on unacked TX is roughly @ref SL_SI91X_SO_MAXRETRY seconds (for example, 10 retries ≈ 10 s).
+ * - With a higher cap, waits double until the cap is hit. For example, with @ref SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE = 16 and 10 retries:
+ *   1 → 2 → 4 → 8 → 16 → 16 → 16 → 16 → 16 → 16 seconds (about 111 s total until remote termination).
  *
  * @par Example
  * 1. Mark the socket as a high-performance RX socket (must be done before
@@ -1261,8 +1278,14 @@ int sl_si91x_select(int nfds,
  * @brief Registers a callback for remote socket termination events.
  *
  * @details
- * This function registers a callback function is called when a remote socket is terminated.
+ * This function registers a callback that is called when a remote socket is terminated.
  * The callback function should be of type @ref sl_si91x_socket_remote_termination_callback_t.
+ *
+ * Typical causes reported by firmware:
+ * - Remote peer closed the connection with a TCP FIN exchange (or RST).
+ * - Remote peer disconnected abruptly / became unreachable and no response until
+ *   keep-alive timeout expires.
+ * - TCP send/retransmission retries were exhausted.
  *
  * @pre Pre-conditions:
  * - The SiWx91x Wi-Fi/Net stack must be initialized.
@@ -1288,6 +1311,13 @@ int sl_si91x_select(int nfds,
  *   @ref sl_si91x_socket() / @ref sl_si91x_socket_async() / `socket()`.
  * - The second argument is the remote peer port.
  * - Correlate the first argument with the value returned by socket creation APIs through close.
+ *
+ * @note SL_SI91X_EXT_TCP_IP_WAIT_FOR_SOCKET_CLOSE
+ * - If this bit is **not** set in `ext_tcp_ip_feature_bit_map`, firmware auto-closes the
+ *   TCP socket on remote termination (host need not issue an explicit close for cleanup
+ *   in the auto-close path).
+ * - If this bit **is** set (recommended for TCP), the socket is not fully closed until the
+ *   host calls `close()` / `sl_si91x_shutdown()` after this callback.
  *
  * @par Example
  * @code{.c}

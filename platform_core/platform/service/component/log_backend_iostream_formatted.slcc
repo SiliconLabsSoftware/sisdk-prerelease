@@ -1,5 +1,5 @@
 id: log_backend_iostream_formatted
-label: Log Backend I/O Stream – Formatted Output
+label: Formatted Output
 package: platform_core
 description: >
   Human-readable text output for the I/O Stream log backend. Event logs emit
@@ -11,7 +11,7 @@ description: >
   Formatted strings are currently supported only for host logs.
   Captive core logs do not support formatted output; instead, they are emitted
   in an encoded form and require a post processing script for decoding and interpretation.
-category: Services|Log
+category: Services|Log|Log Backend I/O Stream
 quality: production
 metadata:
   sbom:

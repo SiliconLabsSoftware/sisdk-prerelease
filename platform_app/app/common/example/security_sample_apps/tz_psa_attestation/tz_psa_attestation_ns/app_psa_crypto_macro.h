@@ -20,7 +20,8 @@
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
-#include "em_cmu.h"
+#include "sl_clock_manager.h"
+#include "sl_device_peripheral.h"
 #include "psa/crypto.h"
 #include <inttypes.h>
 #include <stdio.h>
@@ -33,6 +34,7 @@
   do {                                                                    \
     psa_status_t ret;                                                     \
     uint32_t cycles;                                                      \
+    uint32_t core_freq;                                                   \
                                                                           \
     DWT->CYCCNT = 0;                                                      \
     ret = CODE;                                                           \
@@ -44,15 +46,17 @@
       printf("PSA_ERROR: %ld", ret);                                      \
     }                                                                     \
                                                                           \
-    if (cycles < (CMU_ClockFreqGet(cmuClock_CORE) / 10)) {                \
+    (void)sl_clock_manager_get_clock_branch_frequency(SL_CLOCK_BRANCH_HCLK, \
+                                                      &core_freq);        \
+    if (cycles < (core_freq / 10)) {                                      \
       printf(" (cycles: %" PRIu32 " time: %" PRIu32 " us)\n",             \
              cycles,                                                      \
-             (cycles * 10) / (CMU_ClockFreqGet(cmuClock_CORE) / 100000)); \
+             (cycles * 10) / (core_freq / 100000));                       \
     }                                                                     \
     else {                                                                \
       printf(" (cycles: %" PRIu32 " time: %" PRIu32 " ms)\n",             \
              cycles,                                                      \
-             cycles / (CMU_ClockFreqGet(cmuClock_CORE) / 1000));          \
+             cycles / (core_freq / 1000));                                \
     }                                                                     \
     return ret;                                                           \
   } while (0)

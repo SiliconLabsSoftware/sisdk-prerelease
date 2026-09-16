@@ -14,6 +14,8 @@ quality: production
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: never
 provides:
 - name: log_backend_iostream
 requires:

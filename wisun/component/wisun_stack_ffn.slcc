@@ -13,18 +13,22 @@ requires:
 - name: "a_wisun_stack"
 - name: "wisun_dc_client_implementation"
 - name: "wisun_lxpm_implementation"
-- name: "wisun_stack_dc_server"
+- name: "wisun_dc_server_implementation"
 
 recommends:
 - id: wisun_stack
   vendor: silabs
 - id: wisun_dc_client_stubs
   vendor: silabs
+- id: wisun_dc_server_stubs
+  vendor: silabs
 - id: wisun_lxpm_stubs
 
   vendor: silabs
 provides:
 - name: "wisun_stack_ffn"
+- name: "wisun_stack_supports_dc_server"
+- name: "wisun_stack_supports_dc_client"
 - name: "wisun_stack_device_type"
   allow_multiple: true
 
@@ -32,7 +36,6 @@ define:
 - name: "HAVE_LFN_PARENT"
 - name: "HAVE_FFN"
 - name: "HAVE_ROUTER"
-- name: "HAVE_DC_SERVER"
 - name: "HAVE_RATE_ALG"
 - name: "HAVE_MODE_SWITCH"
 

@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
- *   Radio Configurator Version: 2602.1.1
+ *   Radio Configurator Version: 2604.2.0
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -62,7 +62,7 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr = {
 };
 
 static const uint32_t phyInfo[] = {
-  20UL,
+  22UL,
   0x00000000UL, // 0.0
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -83,6 +83,9 @@ static const uint32_t phyInfo[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 2000UL,
+  (uint32_t) 2000UL,
+  (uint32_t) 41931068,
 };
 
 const uint32_t rfsense_ook_1kbps_modemConfigBase[] = {
@@ -109,10 +112,10 @@ const uint32_t rfsense_ook_1kbps_modemConfigBase[] = {
   /*    4108 */ 0x00000000UL,
   /*    410C */ 0x000041FFUL,
   /*    4110 */ 0x00000000UL,
-  0x1001C020UL, 0x0007F800UL,
-  0x3001C020UL, 0x000802F5UL,
-  0x1001C024UL, 0x000000FFUL,
-  0x3001C024UL, 0x00001300UL,
+  0x0001E020UL, 0xFFF807FFUL,
+  0x0001D020UL, 0x000802F5UL,
+  0x0001E024UL, 0xFFFFFF00UL,
+  0x0001D024UL, 0x00001300UL,
   0x0007C028UL, 0x83B380ECUL,
   /*    C02C */ 0x51407543UL,
   /*    C030 */ 0x48000FA0UL,
@@ -138,8 +141,8 @@ const uint32_t rfsense_ook_1kbps_modemConfigBase[] = {
   0x01010018UL, 0x00000000UL,
   0x01010020UL, 0x0000A001UL,
   0x0101401CUL, 0x00000010UL,
-  0x11014020UL, 0x00200000UL,
-  0x31014020UL, 0x00000191UL,
+  0x01016020UL, 0xFFDFFFFFUL,
+  0x01015020UL, 0x00000191UL,
   0x01064024UL, 0x0601C001UL,
   /*    4028 */ 0x00005000UL,
   /*    402C */ 0x00000000UL,
@@ -235,24 +238,21 @@ const uint32_t rfsense_ook_1kbps_modemConfigBase[] = {
   /*    803C */ 0x00000001UL,
   0x010280A0UL, 0x00037870UL,
   /*    80A4 */ 0x000000D0UL,
-  0x110180A8UL, 0x000001F6UL,
-  0x310180A8UL, 0x01CB4201UL,
-  0x110180ACUL, 0x000001F6UL,
-  0x310180ACUL, 0x00FD3E01UL,
+  0x0101A0A8UL, 0xFFFFFE09UL,
+  0x010190A8UL, 0x01CB4201UL,
+  0x0101A0ACUL, 0xFFFFFE09UL,
+  0x010190ACUL, 0x00FD3E01UL,
   0x010280B0UL, 0x02000300UL,
   /*    80B4 */ 0x01000037UL,
   0x02020098UL, 0x04000C00UL,
   /*    009C */ 0x0000004CUL,
   0x020100A4UL, 0x00000400UL,
-  0x020300D0UL, 0x8A400005UL,
-  /*    00D4 */ 0x00000188UL,
-  /*    00D8 */ 0x000000C0UL,
   0x020100E4UL, 0x11512F2CUL,
   0x020100F4UL, 0x00000000UL,
-  0x120100F8UL, 0x000FCF00UL,
-  0x320100F8UL, 0x1100203DUL,
-  0x120100FCUL, 0x0000003FUL,
-  0x320100FCUL, 0x00045400UL,
+  0x020120F8UL, 0xFFF030FFUL,
+  0x020110F8UL, 0x1100203DUL,
+  0x020120FCUL, 0xFFFFFFC0UL,
+  0x020110FCUL, 0x00045400UL,
   0x02010130UL, 0x0251C060UL,
   0x02010154UL, 0x00003FC4UL,
   0x02010168UL, 0x00000400UL,

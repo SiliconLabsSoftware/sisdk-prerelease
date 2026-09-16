@@ -201,7 +201,7 @@ extern __INLINE void sli_hal_i2s_flush_fifos(I2S_TypeDef_t *i2s, sl_i2s_directio
 sl_status_t sl_hal_i2s_init(I2S_TypeDef_t *i2s, const sl_hal_i2s_init_t *init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
 
   if (init == NULL) {
     return SL_STATUS_NULL_POINTER;
@@ -235,6 +235,8 @@ sl_status_t sl_hal_i2s_init(I2S_TypeDef_t *i2s, const sl_hal_i2s_init_t *init)
   i2s_set_data_format(i2s, init->format);
   i2s_set_endianness(i2s, init->endianness);
 
+  SL_PRINT_STRING_INFO("I2S initialization completed");
+  
   return SL_STATUS_OK;
 }
 
@@ -243,7 +245,7 @@ sl_status_t sl_hal_i2s_init(I2S_TypeDef_t *i2s, const sl_hal_i2s_init_t *init)
  ******************************************************************************/
 void sl_hal_i2s_deinit(I2S_TypeDef_t *i2s)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
   sl_hal_i2s_reset(i2s);
 }
 
@@ -254,7 +256,7 @@ void sl_hal_i2s_deinit(I2S_TypeDef_t *i2s)
  ******************************************************************************/
 void sl_hal_i2s_reset(I2S_TypeDef_t *i2s)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
 
   i2s_reset_quiesce(i2s);
 #if defined(I2ST_PRESENT)
@@ -275,7 +277,7 @@ void sl_hal_i2s_reset(I2S_TypeDef_t *i2s)
 sl_status_t sl_hal_i2s_configure_tdm(I2S_TypeDef_t *i2s, const sl_hal_i2s_tdm_config_t *config)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
 
   if (config == NULL) {
     return SL_STATUS_NULL_POINTER;
@@ -334,7 +336,7 @@ sl_status_t sl_hal_i2s_configure_tdm(I2S_TypeDef_t *i2s, const sl_hal_i2s_tdm_co
 sl_status_t sl_hal_i2s_configure_channel(I2S_TypeDef_t *i2s, const sl_hal_i2s_channel_config_t *config)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
 
   if (config == NULL) {
     return SL_STATUS_NULL_POINTER;
@@ -449,7 +451,7 @@ sl_status_t sl_hal_i2s_configure_channel(I2S_TypeDef_t *i2s, const sl_hal_i2s_ch
       break;
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 
@@ -469,7 +471,7 @@ sl_status_t sl_hal_i2s_set_serial_clock_frequency(I2S_TypeDef_t *i2s, uint32_t s
   uint32_t actual_clock_hz;
   sl_status_t status;
 
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
 
   if (sample_rate_hz == 0U) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -513,7 +515,7 @@ sl_status_t sl_hal_i2s_set_serial_clock_frequency(I2S_TypeDef_t *i2s, uint32_t s
  ******************************************************************************/
 void sl_hal_i2s_enable(I2S_TypeDef_t *i2s)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
   i2s->IER |= I2S_IER_IEN;
 }
 
@@ -522,7 +524,7 @@ void sl_hal_i2s_enable(I2S_TypeDef_t *i2s)
  ******************************************************************************/
 void sl_hal_i2s_disable(I2S_TypeDef_t *i2s)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
   i2s->IER &= ~I2S_IER_IEN;
 }
 
@@ -531,9 +533,9 @@ void sl_hal_i2s_disable(I2S_TypeDef_t *i2s)
  ******************************************************************************/
 void sl_hal_i2s_enable_tx_rx(I2S_TypeDef_t *i2s, sl_i2s_direction_t dir)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
   bool dir_ok = (dir < SL_I2S_DIR_MAX);
-  EFM_ASSERT(dir_ok);
+  SL_LOG_DEBUG_ASSERT(dir_ok);
   if (!dir_ok) {
     return;
   }
@@ -552,9 +554,9 @@ void sl_hal_i2s_enable_tx_rx(I2S_TypeDef_t *i2s, sl_i2s_direction_t dir)
  ******************************************************************************/
 void sl_hal_i2s_disable_tx_rx(I2S_TypeDef_t *i2s, sl_i2s_direction_t dir)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
   bool dir_ok = (dir < SL_I2S_DIR_MAX);
-  EFM_ASSERT(dir_ok);
+  SL_LOG_DEBUG_ASSERT(dir_ok);
   if (!dir_ok) {
     return;
   }
@@ -579,7 +581,7 @@ void sl_hal_i2s_disable_tx_rx(I2S_TypeDef_t *i2s, sl_i2s_direction_t dir)
  ******************************************************************************/
 void sl_hal_i2s_enable_sclk(I2S_TypeDef_t *i2s, bool enable)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
 
 #if defined(I2ST_PRESENT)
   if (SL_HAL_I2ST_IS_INSTANCE(i2s)) {
@@ -603,9 +605,9 @@ void sl_hal_i2s_enable_channel_interrupt(I2S_TypeDef_t *i2s,
                                          sl_i2s_channel_id_t channel_id,
                                          uint32_t interrupt_mask)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
   bool channel_ok = SL_HAL_I2S_VALIDATE_CHANNEL(i2s, channel_id);
-  EFM_ASSERT(channel_ok);
+  SL_LOG_DEBUG_ASSERT(channel_ok);
   if (!channel_ok) {
     return;
   }
@@ -620,9 +622,9 @@ void sl_hal_i2s_disable_channel_interrupt(I2S_TypeDef_t *i2s,
                                           sl_i2s_channel_id_t channel_id,
                                           uint32_t interrupt_mask)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
   bool channel_ok = SL_HAL_I2S_VALIDATE_CHANNEL(i2s, channel_id);
-  EFM_ASSERT(channel_ok);
+  SL_LOG_DEBUG_ASSERT(channel_ok);
   if (!channel_ok) {
     return;
   }
@@ -639,7 +641,7 @@ void sl_hal_i2s_disable_channel_interrupt(I2S_TypeDef_t *i2s,
  ******************************************************************************/
 void sli_hal_i2s_enable_dma(I2S_TypeDef_t *i2s, sl_i2s_direction_t dir, bool enable)
 {
-  EFM_ASSERT(dir < SL_I2S_DIR_MAX);
+  SL_LOG_DEBUG_ASSERT(dir < SL_I2S_DIR_MAX);
   if (!(dir < SL_I2S_DIR_MAX)) {
     return;
   }
@@ -657,7 +659,7 @@ void sli_hal_i2s_enable_dma(I2S_TypeDef_t *i2s, sl_i2s_direction_t dir, bool ena
       mask = I2S_DMACR_DMAEN_TXBLOCK | I2S_DMACR_DMAEN_RXBLOCK;
       break;
     default: {
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return;
     }
   }
@@ -678,7 +680,7 @@ void sli_hal_i2s_enable_dma(I2S_TypeDef_t *i2s, sl_i2s_direction_t dir, bool ena
  ******************************************************************************/
 __STATIC_INLINE void i2s_set_operating_mode(I2S_TypeDef_t *i2s, sl_i2s_operating_mode_t mode)
 {
-  EFM_ASSERT(mode < SL_I2S_OPERATING_MODE_MAX);
+  SL_LOG_DEBUG_ASSERT(mode < SL_I2S_OPERATING_MODE_MAX);
   uint32_t op_mode = (uint32_t)mode;
   i2s->IER = (i2s->IER & ~_I2S_IER_I2S_OP_MODE_MASK)
              | ((op_mode << _I2S_IER_I2S_OP_MODE_SHIFT) & _I2S_IER_I2S_OP_MODE_MASK);
@@ -690,7 +692,7 @@ __STATIC_INLINE void i2s_set_operating_mode(I2S_TypeDef_t *i2s, sl_i2s_operating
 __STATIC_INLINE void i2s_set_data_format(I2S_TypeDef_t *i2s,
                                          sl_i2s_data_format_t format)
 {
-  EFM_ASSERT(format <= SL_I2S_DATA_FORMAT_RJ);
+  SL_LOG_DEBUG_ASSERT(format <= SL_I2S_DATA_FORMAT_RJ);
   uint32_t reg_format = (uint32_t)format;
 
   i2s->IER = (i2s->IER & ~_I2S_IER_AUDIO_INTF_TYPE_MASK)
@@ -702,7 +704,7 @@ __STATIC_INLINE void i2s_set_data_format(I2S_TypeDef_t *i2s,
  ******************************************************************************/
 __STATIC_INLINE void i2s_set_endianness(I2S_TypeDef_t *i2s, sl_i2s_endianness_t endianness)
 {
-  EFM_ASSERT(endianness < SL_I2S_ENDIANNESS_MAX);
+  SL_LOG_DEBUG_ASSERT(endianness < SL_I2S_ENDIANNESS_MAX);
   uint32_t reg_endianness = (uint32_t)endianness;
 
   i2s->IER = (i2s->IER & ~_I2S_IER_SD_ENDIAN_MASK)
@@ -718,7 +720,7 @@ __STATIC_INLINE void i2s_set_rx_wlen(I2S_TypeDef_t *i2s,
 {
   volatile uint32_t *rcr_reg = SL_HAL_I2S_CHANNEL_REG_PTR(i2s, RCR0, channel_id);
 
-  EFM_ASSERT(wlen <= SL_I2S_WORD_LENGTH_24_BIT);
+  SL_LOG_DEBUG_ASSERT(wlen <= SL_I2S_WORD_LENGTH_24_BIT);
   *rcr_reg = (*rcr_reg & ~_I2S_RCR0_WLEN_MASK) | (uint32_t)wlen;
 }
 
@@ -731,7 +733,7 @@ __STATIC_INLINE void i2s_set_tx_wlen(I2S_TypeDef_t *i2s,
 {
   volatile uint32_t *tcr_reg = SL_HAL_I2S_CHANNEL_REG_PTR(i2s, TCR0, channel_id);
 
-  EFM_ASSERT(wlen <= SL_I2S_WORD_LENGTH_24_BIT);
+  SL_LOG_DEBUG_ASSERT(wlen <= SL_I2S_WORD_LENGTH_24_BIT);
   *tcr_reg = (*tcr_reg & ~_I2S_TCR0_WLEN_MASK) | (uint32_t)wlen;
 }
 
@@ -744,7 +746,7 @@ __STATIC_INLINE void i2s_set_rx_fifo_trigger_level(I2S_TypeDef_t *i2s,
 {
   volatile uint32_t *rfcr = SL_HAL_I2S_CHANNEL_REG_PTR(i2s, RFCR0, channel_id);
 
-  EFM_ASSERT(level < SL_I2S_FIFO_TRIGGER_LEVEL_MAX);
+  SL_LOG_DEBUG_ASSERT(level < SL_I2S_FIFO_TRIGGER_LEVEL_MAX);
   *rfcr = (*rfcr & ~_I2S_RFCR0_RXCHDT_MASK) | ((uint32_t)level & _I2S_RFCR0_RXCHDT_MASK);
 }
 
@@ -757,7 +759,7 @@ __STATIC_INLINE void i2s_set_tx_fifo_trigger_level(I2S_TypeDef_t *i2s,
 {
   volatile uint32_t *tfcr = SL_HAL_I2S_CHANNEL_REG_PTR(i2s, TFCR0, channel_id);
 
-  EFM_ASSERT(level < SL_I2S_FIFO_TRIGGER_LEVEL_MAX);
+  SL_LOG_DEBUG_ASSERT(level < SL_I2S_FIFO_TRIGGER_LEVEL_MAX);
   *tfcr = (*tfcr & ~_I2S_TFCR0_TXCHET_MASK) | ((uint32_t)level & _I2S_TFCR0_TXCHET_MASK);
 }
 
@@ -1205,6 +1207,7 @@ static sl_status_t i2s_configure_serial_clock_legacy(I2S_TypeDef_t *i2s, uint32_
   }
 
   if (selected_row == NULL) {
+    SL_PRINT_STRING_ERROR("No PERPLL1 configuration found");
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1383,7 +1386,7 @@ static sl_i2s_word_length_t i2s_ws_size_to_max_wlen(i2s_ws_size_t ws_size)
       return SL_I2S_WORD_LENGTH_24_BIT;
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_I2S_WORD_LENGTH_NONE;
   }
 }

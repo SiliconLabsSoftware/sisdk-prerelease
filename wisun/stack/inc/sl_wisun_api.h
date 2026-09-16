@@ -524,24 +524,39 @@ sl_status_t sl_wisun_set_regulation_parameters(const sl_wisun_regulation_params_
 sl_status_t sl_wisun_reset_regulation_duty_cycle(void);
 
 /**************************************************************************//**
- * Configure neighbor table size.
+ * Configure the neighbor table limits.
  *
- * @param[in] max_child_count Maximum number of RPL children
- * Increasing this parameter means a higher number of potential neighbors
- * while lowering it means reduced RAM consumption.
- * The default value is 22.
- * @param[in] max_neighbor_count Maximum number of neighbors including children, parent, and temporary neighbors
- * The default value is 32
- * @param[in] max_security_neighbor_count Maximum number of neigbors in the security table. Entries in the security
- * table are removed on key expirations.
- * Default value is 300
- * @return SL_STATUS_OK if successful, an error code otherwise
+ * @param[in] max_child_count Maximum number of registered child devices.
+ * Both FFN and LFN children count toward this limit. The default value is 22.
+ * @param[in] max_neighbor_count Maximum number of MAC neighbor table entries.
+ * This total includes registered children, parents, candidate parents, temporary
+ * neighbors, and Direct Connect peers. The default value is 32.
+ * @param[in] max_security_neighbor_count Maximum number of security neighbor
+ * entries used to retain incoming frame counters. A security entry may outlive
+ * its corresponding MAC neighbor entry. The default value is 300.
  *
- * max_neighbor_count must be greater than max_child_count. max_neighbor_count - max_child_count represents
- * the available neighbors for RPL parents and temporary neighbors (neighbors not yet registered, parent candidate
- * or neighbors sending multicast). max_security_neighbor_count must be greater or equal than max_neighbor_count
- * Each entry in the neighbor table consumes about 450 bytes of RAM.
- * Each entry in the security neighbor table consumes about 50 bytes of RAM.
+ * @return SL_STATUS_OK if successful.
+ * @return SL_STATUS_INVALID_PARAMETER if a limit is zero, if max_neighbor_count
+ * is less than or equal to max_child_count, or if max_security_neighbor_count
+ * is less than max_neighbor_count.
+ * @return An error code otherwise.
+ *
+ * @note The difference between max_neighbor_count and max_child_count provides
+ * capacity for non-child neighbors, such as parents and temporary neighbors.
+ * This capacity is shared; it is not a separately reserved pool.
+ *
+ * @note Security neighbor entries preserve incoming frame counters after a MAC
+ * neighbor entry is removed. An entry is purged once it is no longer associated
+ * with a MAC neighbor and none of its frame counters belongs to an installed
+ * key. Entries may also be evicted when the security neighbor table is full.
+ *
+ * @note On a 32-bit Cortex-M33, the heap consumption for each allocated MAC
+ * neighbor table entry is of ~500 bytes (this does not include the associated
+ * security neighbor entry).
+ * Each allocated security neighbor table entry consumes ~48 bytes of heap.
+ * These values include the 8-byte heap metadata associated with each
+ * allocation.
+ *
  * Available in libraries: Full, FFN, LFN, BR (see @ref API_AVAILABILITY)
  *****************************************************************************/
 sl_status_t sl_wisun_config_neighbor_table(uint8_t max_child_count, uint8_t max_neighbor_count, uint16_t max_security_neighbor_count);

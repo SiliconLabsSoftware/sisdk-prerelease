@@ -99,11 +99,15 @@ static void app_event_log_print_event(const app_event_log_event_t *evt)
       } else if (evt->logger_event.u.rf_test.events & SL_RAIL_EVENT_TX_PACKET_SENT) {
         printf("RF test TX");
       } else {
-        printf("RF test Rail event");
+        printf("RF test Rail event: 0x%08" PRIx32 "%08" PRIx32,
+               (uint32_t)(evt->logger_event.u.rf_test.events >> 32),
+               (uint32_t)evt->logger_event.u.rf_test.events);
       }
       break;
     default:
-      printf("Unknown event %llu", evt->logger_event.type);
+      printf("Unknown event 0x%08" PRIx32 "%08" PRIx32,
+             (uint32_t)(evt->logger_event.type >> 32),
+             (uint32_t)evt->logger_event.type);
       break;
   }
 }

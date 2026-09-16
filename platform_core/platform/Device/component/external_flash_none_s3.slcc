@@ -21,7 +21,6 @@ provides:
   condition:
   - device_se_size_256k
 requires:
-- name: device_efx
 - name: device_has_ext_mem
 source:
 - path: platform/common/src/sl_flash_none.c

@@ -39,6 +39,7 @@ component:
   - id: "device_init_dcdc"
     condition: [device_has_dcdc, wisun_low_power]
   - id: wisun_direct_connect_pmk
+  - id: wisun_stack_dc_server
 
 source:
   - path: "app.c"

@@ -228,6 +228,19 @@ typedef void (*sl_si91x_socket_select_callback_t)(sl_si91x_fdset_t *fd_read,
  * The callback function notifies on the termination of the remote socket when the sl_si91x_set_remote_termination_callback API is registered and called.
  * The callback provides the following details: host socket index (BSD socket descriptor), remote peer port number, and number of bytes sent before termination of the remote socket.
  *
+ * Typical causes reported by firmware:
+ * - Remote peer closed the connection with a TCP FIN exchange (or RST).
+ * - Remote peer disconnected abruptly / became unreachable and no response until
+ *   keep-alive timeout expires.
+ * - TCP send/retransmission retries were exhausted.
+ *
+ * @note `SL_SI91X_EXT_TCP_IP_WAIT_FOR_SOCKET_CLOSE`
+ * - If this bit is **not** set in `ext_tcp_ip_feature_bit_map`, firmware auto-closes the
+ *   TCP socket on remote termination (host need not issue an explicit close for cleanup
+ *   in the auto-close path).
+ * - If this bit **is** set (recommended for TCP), the socket is not fully closed until the
+ *   host calls `close()` / `sl_si91x_shutdown()` after this callback.
+ *
  * Use the same socket index returned by `sl_si91x_socket()` / `sl_si91x_socket_async()` / `socket()` to correlate create, transfer, and remote-termination events.
  *
  * @param[in] socket

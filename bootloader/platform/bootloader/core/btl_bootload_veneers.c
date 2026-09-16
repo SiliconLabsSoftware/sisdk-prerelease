@@ -54,5 +54,8 @@ uint32_t bootload_nsc_getBootloaderVersion(void)
 __attribute__((cmse_nonsecure_entry))
 bool bootload_nsc_getApplicationVersion(uint32_t *version)
 {
+  if (!bl_verify_ns_memory_access(version, sizeof(*version))) {
+    bl_fatal_assert_action();
+  }
   return bootload_getApplicationVersion(version);
 }

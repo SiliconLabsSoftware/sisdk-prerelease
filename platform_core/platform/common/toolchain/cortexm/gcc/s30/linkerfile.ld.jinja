@@ -837,7 +837,7 @@ heap_size = heap_limit - __HeapBase;
 {%- endif %}
 {%- endif %}
 
-  .ram_end :
+  .ram_end (NOLOAD):
   {
     __end__ = .;
     _end = __end__;

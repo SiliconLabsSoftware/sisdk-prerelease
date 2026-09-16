@@ -1544,8 +1544,21 @@ sl_rail_radio_state_t sl_rail_mux_get_radio_state(sl_rail_handle_t railHandle)
   uint8_t context_index = fn_get_context_index(railHandle);
   EFM_ASSERT(context_index < SUPPORTED_PROTOCOL_COUNT);
   sl_rail_radio_state_t radio_state = sl_rail_get_radio_state(mux_rail_handle);
-  return ((radio_state & SL_RAIL_RF_STATE_IDLE) != SL_RAIL_RF_STATE_IDLE && (radio_state & SL_RAIL_RF_STATE_RX) != SL_RAIL_RF_STATE_RX) ? radio_state
-         : (protocol_context[context_index].channel == INVALID_CHANNEL ? SL_RAIL_RF_STATE_IDLE : SL_RAIL_RF_STATE_RX);
+  // Pass through non-RX states (e.g. TX). Note: (radio_state & RX) != RX does not
+  // cover RX_ACTIVE — that state has the RX bit set, so this branch is skipped;
+  // SL_RAIL_RF_STATE_IDLE also aliases ACTIVE, which RX_ACTIVE has set.
+  if ((radio_state & SL_RAIL_RF_STATE_IDLE) != SL_RAIL_RF_STATE_IDLE && (radio_state & SL_RAIL_RF_STATE_RX) != SL_RAIL_RF_STATE_RX) {
+    return radio_state;
+  }
+  // Preserve RX_ACTIVE before the INVALID_CHANNEL check so a mid-frame receive is
+  // not collapsed to IDLE if protocol context is briefly cleared.
+  if ((radio_state & SL_RAIL_RF_STATE_RX_ACTIVE) == SL_RAIL_RF_STATE_RX_ACTIVE) {
+    return SL_RAIL_RF_STATE_RX_ACTIVE;
+  }
+  if (protocol_context[context_index].channel == INVALID_CHANNEL) {
+    return SL_RAIL_RF_STATE_IDLE;
+  }
+  return SL_RAIL_RF_STATE_RX;
 }
 sl_rail_status_t sl_rail_mux_set_tx_fifo(sl_rail_handle_t rail_handle,
                                        sl_rail_fifo_buffer_align_t *p_addr,

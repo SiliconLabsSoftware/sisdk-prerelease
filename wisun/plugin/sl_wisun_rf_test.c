@@ -33,6 +33,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "sl_rail.h"
+#include "sl_rail_ieee802154.h"
 #include "sl_status.h"
 #include "sl_wisun_api.h"
 #include "sl_wisun_rf_test.h"
@@ -140,6 +141,23 @@ static sl_status_t check_rf_test(bool check_phy_set)
   status = SL_STATUS_OK;
 error_handler:
     return status;
+}
+
+static sl_status_t rf_test_set_promiscuous_mode(sl_rail_handle_t rail_handle, bool enable)
+{
+  sl_rail_status_t rail_status;
+
+  rail_status = sl_rail_ieee802154_set_promiscuous_mode(rail_handle, enable);
+  // No 802.15.4 acceleration means address filtering is not active.
+  if (rail_status == SL_RAIL_STATUS_INVALID_STATE) {
+    return SL_STATUS_OK;
+  }
+  if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
+    sl_wisun_trace_error("rf_test: promiscuous mode %s failed",
+                         enable ? "enable" : "restore");
+    return SL_STATUS_FAIL;
+  }
+  return SL_STATUS_OK;
 }
 
 sl_status_t sl_wisun_rf_test_set_phy_config(sl_wisun_phy_config_t *phy_config)
@@ -391,6 +409,11 @@ sl_status_t sl_wisun_rf_test_start_rx(uint16_t channel, uint32_t duration)
   //tx power will be set during the stop proceedure
   stack_tx_power_ddbm = sl_rail_get_tx_power_dbm(rail_handle);
 
+  // RF test payloads are not Wi-SUN MAC frames. Bypass RAIL dest-address
+  // filtering so they are not dropped.
+  status = rf_test_set_promiscuous_mode(rail_handle, true);
+  SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_STATUS_OK == status, status);
+
   rail_status = sl_rail_start_rx(rail_handle, channel, &rf_scheduler_info);
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_RAIL_STATUS_NO_ERROR == rail_status, SL_STATUS_FAIL);
 
@@ -468,6 +491,7 @@ static sl_status_t stop_rf_test(uint8_t mode)
 {
   sl_rail_status_t rail_status;
   sl_status_t status;
+  sl_status_t promiscuous_status;
   sl_rail_handle_t rail_handle;
 
   status = sli_wisun_disable_rf_test_event_callback();
@@ -483,7 +507,10 @@ static sl_status_t stop_rf_test(uint8_t mode)
   if (mode == RF_TEST_RX_ACTIVE) {
     sl_rail_cancel_timer(rail_handle);
     rail_status = sl_rail_idle(rail_handle, SL_RAIL_IDLE_ABORT, true);
+    // Restore address filtering.
+    promiscuous_status = rf_test_set_promiscuous_mode(rail_handle, false);
     SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_RAIL_STATUS_NO_ERROR == rail_status, SL_STATUS_FAIL);
+    SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_STATUS_OK == promiscuous_status, promiscuous_status);
   }
   if (mode == RF_TEST_TX_ACTIVE) {
     rf_test_tx_remaining_count = 0;

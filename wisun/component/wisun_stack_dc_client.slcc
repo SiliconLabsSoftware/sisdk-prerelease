@@ -23,12 +23,12 @@ requires:
 - name: "device_supports_wisun"
 - name: "wisun_dc_client_implementation"
 - name: "wisun_dc_client_plugin"
-  condition: [wisun_stack_ffn]
+  condition: [wisun_stack_supports_dc_client]
 - name: "wisun_lxpm_implementation"
 
 recommends:
 - id: "wisun_dc_client_library"
-  unless: [wisun_stack_ffn]
+  unless: [wisun_stack_supports_dc_client]
   vendor: silabs
 - id: "wisun_lxpm_stubs"
 

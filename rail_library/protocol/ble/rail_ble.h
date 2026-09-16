@@ -2254,16 +2254,15 @@ typedef struct RAIL_BLE_CsStepConfig {
    */
   bool *pSaveIqData;
   /**
-   * Array containing antenna settings for this step. This field has two uses
-   * depending on the mode of the current step.
+   * Antenna used for the CS_SYNC packet on mode 0, mode 1, and mode 3 steps.
+   */
+  RAIL_BLE_CsAntennaId_t csSyncAntenna;
+  /**
+   * Array containing antenna settings for the CS tone on mode 2 and mode 3
+   * steps.
    *
-   * On mode 0 and mode 1 steps, only the first element will be used to
-   * indicate the antenna to be utilized during a mode 0 and
-   * mode 1 step.
-   *
-   * On mode 2 steps, as many elements as
-   * \ref RAIL_BLE_CS_MAX_ANTENNA_SLOTS - 1 that were configured for the
-   * CS event will be applied.
+   * \ref RAIL_BLE_CsConfig_t::slotCount - 1 antennas will be used for CS
+   * tone slots.
    *
    * @note \ref RAIL_BLE_ConfigCsAntenna must be called prior to setting
    *   this field in order to set the antenna count as well as configure

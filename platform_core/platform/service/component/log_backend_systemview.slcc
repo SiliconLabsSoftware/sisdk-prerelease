@@ -1,5 +1,5 @@
 id: log_backend_systemview
-label: Log Segger Systemview
+label: Log Backend SystemView
 package: platform_core
 description: >
   The Debug Logger Systemview component provides a lightweight logging mechanism

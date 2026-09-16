@@ -143,7 +143,7 @@ typedef struct ipv6_mreq {
 /// Valid values 0 to 255, -1 for using the route default.
 #define IPV6_UNICAST_HOPS            2
 /// Set the multicast hop limit for the socket, as int.
-/// Valid values 0 to 255, -1 for using the kernel default (2).
+/// Valid values 0 to 255, -1 for using the kernel default (3).
 /// Although RFC 3493 recommends a default of 1, the stack uses 3 as a
 /// compromise to allow LFN multicast to work out of the box.
 #define IPV6_MULTICAST_HOPS          3

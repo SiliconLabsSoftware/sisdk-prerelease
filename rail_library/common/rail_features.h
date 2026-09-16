@@ -388,9 +388,10 @@ extern "C" {
 /// Angle-of-Departure transmits.
 /// See also runtime refinement \ref RAIL_BLE_SupportsAntennaSwitching().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_BLE_SUPPORTS_ANTENNA_SWITCHING.
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6) \
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
   || (_SILICON_LABS_32B_SERIES_3_CONFIG >= 300))
 #define RAIL_BLE_SUPPORTS_ANTENNA_SWITCHING RAIL_SUPPORTS_PROTOCOL_BLE
 #else

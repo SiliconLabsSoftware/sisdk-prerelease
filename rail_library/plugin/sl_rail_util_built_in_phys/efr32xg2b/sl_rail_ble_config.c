@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
- *   Radio Configurator Version: 2602.5.0
+ *   Radio Configurator Version: 2604.2.0
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -91,8 +91,8 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr = {
 };
 
 static const uint32_t phyInfo_0[] = {
-  20UL,
-  0x00800000UL, // 128.0
+  22UL,
+  0x00333318UL, // 51.199599429770956
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
   (uint32_t) timingConfig_0,
@@ -112,11 +112,14 @@ static const uint32_t phyInfo_0[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 32UL,
+  (uint32_t) 613554,
 };
 
 static const uint32_t phyInfo_1[] = {
-  20UL,
-  0x00800000UL, // 128.0
+  22UL,
+  0x006665D5UL, // 102.39778572773454
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
   (uint32_t) timingConfig_1,
@@ -136,10 +139,13 @@ static const uint32_t phyInfo_1[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 16UL,
+  (uint32_t) 311252,
 };
 
 static const uint32_t phyInfo_2[] = {
-  20UL,
+  22UL,
   0x00333333UL, // 51.199999999999996
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -160,10 +166,13 @@ static const uint32_t phyInfo_2[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 32UL,
+  (uint32_t) 615910,
 };
 
 static const uint32_t phyInfo_3[] = {
-  20UL,
+  22UL,
   0x00666666UL, // 102.39999999999999
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -184,11 +193,14 @@ static const uint32_t phyInfo_3[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 16UL,
+  (uint32_t) 311046,
 };
 
 static const uint32_t phyInfo_4[] = {
-  20UL,
-  0x00800000UL, // 128.0
+  22UL,
+  0x0033332CUL, // 51.199891437998645
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
   (uint32_t) timingConfig_4,
@@ -208,11 +220,14 @@ static const uint32_t phyInfo_4[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 20UL,
+  (uint32_t) 32UL,
+  (uint32_t) 617506,
 };
 
 static const uint32_t phyInfo_5[] = {
-  20UL,
-  0x00800000UL, // 128.0
+  22UL,
+  0x0033332CUL, // 51.199891437998645
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
   (uint32_t) timingConfig_5,
@@ -232,11 +247,14 @@ static const uint32_t phyInfo_5[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 20UL,
+  (uint32_t) 32UL,
+  (uint32_t) 617506,
 };
 
 static const uint32_t phyInfo_6[] = {
-  20UL,
-  0x00800000UL, // 128.0
+  22UL,
+  0x0033332CUL, // 51.199891437998645
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
   (uint32_t) timingConfig_6,
@@ -256,11 +274,14 @@ static const uint32_t phyInfo_6[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 20UL,
+  (uint32_t) 32UL,
+  (uint32_t) 605506,
 };
 
 static const uint32_t phyInfo_7[] = {
-  20UL,
-  0x00800000UL, // 128.0
+  22UL,
+  0x00333303UL, // 51.1992665140582
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
   (uint32_t) timingConfig_0,
@@ -280,6 +301,36 @@ static const uint32_t phyInfo_7[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 32UL,
+  (uint32_t) 613590,
+};
+
+static const uint32_t phyInfo_8[] = {
+  22UL,
+  0x00333304UL, // 51.199290202442576
+  (uint32_t) NULL,
+  (uint32_t) irCalConfig,
+  (uint32_t) timingConfig_0,
+  0x00000000UL,
+  4396932UL,
+  16000000UL,
+  1000000UL,
+  0x00F40101UL,
+  0x035023D7UL,
+  (uint32_t) NULL,
+  (uint32_t) hfxoRetimingConfigEntries,
+  (uint32_t) NULL,
+  0UL,
+  0UL,
+  999986UL,
+  (uint32_t) NULL,
+  (uint32_t) NULL,
+  (uint32_t) NULL,
+  (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 32UL,
+  (uint32_t) 611349,
 };
 
 const uint32_t ble_viterbi1M_modemConfigBase[] = {
@@ -418,7 +469,7 @@ const uint32_t ble_viterbi1M_cs_modemConfigBase[] = {
   /*    410C */ 0x000041FFUL,
   /*    4110 */ 0x00000000UL,
   0x0001E020UL, 0xFFF807FFUL,
-  0x0001D020UL, 0x000802F5UL,
+  0x0001D020UL, 0x000803F5UL,
   0x0001E024UL, 0xFFFFFF00UL,
   0x0001D024UL, 0x00001100UL,
   0x0007C028UL, 0x83B380ECUL,
@@ -527,7 +578,7 @@ const uint32_t ble_viterbi1M_cs_modemConfigBase[] = {
   0x02020098UL, 0x04000C00UL,
   /*    009C */ 0x0000004CUL,
   0x020100A4UL, 0x00000400UL,
-  0x020300D0UL, 0xCF4FC579UL,
+  0x020300D0UL, 0xFF4FC579UL,
   /*    00D4 */ 0x00003988UL,
   /*    00D8 */ 0x00000CB0UL,
   0x020100E4UL, 0x11512F2DUL,
@@ -540,13 +591,13 @@ const uint32_t ble_viterbi1M_cs_modemConfigBase[] = {
   0x02010154UL, 0x00003FC4UL,
   0x02010168UL, 0x00000400UL,
   0x0307404CUL, 0x00000000UL,
-  /*    4050 */ 0x00E00008UL,
+  /*    4050 */ 0x00E00000UL,
   /*    4054 */ 0x064C8000UL,
   /*    4058 */ 0x00000020UL,
   /*    405C */ 0x00000020UL,
   /*    4060 */ 0x00000020UL,
   /*    4064 */ 0x00000020UL,
-  0x030140A4UL, 0x1918021DUL,
+  0x030140A4UL, 0x1918020DUL,
   0x030540ACUL, 0x00000000UL,
   /*    40B0 */ 0x00000000UL,
   /*    40B4 */ 0x00000000UL,
@@ -1083,8 +1134,8 @@ const uint32_t ble_viterbi1M_cs_0_78_40MHz_modemConfig[] = {
   0x0101A0ACUL, 0xFFFFFE09UL,
   0x010190ACUL, 0x00FD3E01UL,
   0x0304403CUL, 0x00802900UL,
-  /*    4040 */ 0x0460DFE3UL,
-  /*    4044 */ 0x08C04102UL,
+  /*    4040 */ 0x0461DFE3UL,
+  /*    4044 */ 0x08C040FAUL,
   /*    4048 */ 0x00000001UL,
   0x030940C0UL, 0x004E0000UL,
   /*    40C4 */ 0xFFFF003DUL,
@@ -1126,8 +1177,8 @@ const uint32_t ble_viterbi2M_cs_0_78_40MHz_modemConfig[] = {
   0x0101A0ACUL, 0xFFFFFE09UL,
   0x010190ACUL, 0x000D0A01UL,
   0x0304403CUL, 0x00802904UL,
-  /*    4040 */ 0x04615FE3UL,
-  /*    4044 */ 0x08C04102UL,
+  /*    4040 */ 0x04625FE3UL,
+  /*    4044 */ 0x08C040FAUL,
   /*    4048 */ 0x00010021UL,
   0x030940C0UL, 0x00250000UL,
   /*    40C4 */ 0x004A005AUL,
@@ -1166,7 +1217,7 @@ const uint32_t quuppa_viterbi1M_2_modemConfig[] = {
 };
 
 const uint32_t quuppa_viterbi1M_3_modemConfig[] = {
-  0x04018FFCUL, (uint32_t) &phyInfo_7,
+  0x04018FFCUL, (uint32_t) &phyInfo_8,
   0x00014038UL, 0x00000066UL,
   0x010140ECUL, 0x8C30C894UL,
   0x0101410CUL, 0x00524FC4UL,

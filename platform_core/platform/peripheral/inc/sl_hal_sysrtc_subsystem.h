@@ -45,6 +45,9 @@ extern "C" {
 #include "sl_hal_sysrtc_compat.h"
 #include "sl_enum.h"
 #include "sl_log_helper.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
 #if defined(SL_CATALOG_HAL_SYSRTC_INTERNAL_PRESENT)
 #include "sli_hal_sysrtc_subsystem.h"
 #endif
@@ -68,14 +71,45 @@ extern "C" {
 /// Maximum capture channels for SYSRTC group.
 #define SYSRTC_GROUP_MAX_CHANNEL_CAPTURE  1u
 
+#if !defined(SL_CATALOG_HAL_SYSRTC_INTERNAL_PRESENT)
 /// SYSRTC instance.
-#if !defined(SYSRTC_INST)
-#define SYSRTC_INST   SYSRTC0
-#endif
-
+#define SYSRTC_INST           SYSRTC0
+/// SYSRTC instance for groups.
+#define SYSRTC_GRP_INST       SYSRTC0
 /// Number of SYSRTC groups.
-#if !defined(SYSRTC_GROUP_NUMBER)
 #define SYSRTC_GROUP_NUMBER   1u
+#if defined(_SYSRTC_GRP0_CMP0VALUE_MASK)
+/// SYSRTC group 0 present.
+#define SYSRTC_GRP0_PRESENT
+#endif
+#if defined(_SYSRTC_GRP1_CMP0VALUE_MASK)
+/// SYSRTC group 1 present.
+#define SYSRTC_GRP1_PRESENT
+#endif
+#if defined(_SYSRTC_GRP2_CMP0VALUE_MASK)
+/// SYSRTC group 2 present.
+#define SYSRTC_GRP2_PRESENT
+#endif
+#if defined(_SYSRTC_GRP3_CMP0VALUE_MASK)
+/// SYSRTC group 3 present.
+#define SYSRTC_GRP3_PRESENT
+#endif
+#if defined(_SYSRTC_GRP4_CMP0VALUE_MASK)
+/// SYSRTC group 4 present.
+#define SYSRTC_GRP4_PRESENT
+#endif
+#if defined(_SYSRTC_GRP5_CMP0VALUE_MASK)
+/// SYSRTC group 5 present.
+#define SYSRTC_GRP5_PRESENT
+#endif
+#if defined(_SYSRTC_GRP6_CMP0VALUE_MASK)
+/// SYSRTC group 6 present.
+#define SYSRTC_GRP6_PRESENT
+#endif
+#if defined(_SYSRTC_GRP7_CMP0VALUE_MASK)
+/// SYSRTC group 7 present.
+#define SYSRTC_GRP7_PRESENT
+#endif
 #endif
 
 /// Validation of valid SYSRTC group for assert statements.

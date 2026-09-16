@@ -21,11 +21,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include "em_device.h"
-#if defined(_SILICON_LABS_32B_SERIES_2)
-#include "em_prs.h"
-#else
 #include "sl_hal_prs.h"
-#endif
 #include "sl_clock_manager.h"
 #include "app_se_manager_macro.h"
 #include "sl_se_manager.h"

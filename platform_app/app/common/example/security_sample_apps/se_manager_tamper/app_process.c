@@ -429,11 +429,7 @@ void app_process_action(void)
                    "through PRS\n");
             printf("  ");
             // Issue a tamper reset through PRS
-#if defined(_SILICON_LABS_32B_SERIES_2)
-            PRS_PulseTrigger(0x01 << SW_RST_TAMPER_PRS_CH);
-#else
             sl_hal_prs_async_set_channel_swpulse(SW_RST_TAMPER_PRS_CH);
-#endif
           }
         } else {
           app_state = SE_MANAGER_EXIT;

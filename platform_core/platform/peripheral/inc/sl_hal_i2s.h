@@ -40,7 +40,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_device_i2s.h"
 #include "sl_status.h"
 
@@ -388,10 +388,10 @@ void sl_hal_i2s_disable_channel_interrupt(I2S_TypeDef_t *i2s, sl_i2s_channel_id_
  ******************************************************************************/
 __INLINE bool sl_hal_i2s_is_tx_ready(I2S_TypeDef_t *i2s, sl_i2s_channel_id_t channel_id)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
 
   if (!SL_HAL_I2S_VALIDATE_CHANNEL(i2s, channel_id)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return false;
   }
   return ((*SL_HAL_I2S_CHANNEL_REG_PTR(i2s, ISR0, channel_id) & (uint32_t)I2S_ISR0_TXFE) != 0U);
@@ -408,10 +408,10 @@ __INLINE bool sl_hal_i2s_is_tx_ready(I2S_TypeDef_t *i2s, sl_i2s_channel_id_t cha
  ******************************************************************************/
 __INLINE bool sl_hal_i2s_is_rx_data_ready(I2S_TypeDef_t *i2s, sl_i2s_channel_id_t channel_id)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
 
   if (!SL_HAL_I2S_VALIDATE_CHANNEL(i2s, channel_id)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return false;
   }
   return ((*SL_HAL_I2S_CHANNEL_REG_PTR(i2s, ISR0, channel_id) & (uint32_t)I2S_ISR0_RXDA) != 0U);
@@ -425,7 +425,7 @@ __INLINE bool sl_hal_i2s_is_rx_data_ready(I2S_TypeDef_t *i2s, sl_i2s_channel_id_
  ******************************************************************************/
 __INLINE void sl_hal_i2s_transmit_word(I2S_TypeDef_t *i2s, uint32_t data)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
   i2s->TXDMA = data;
 }
 
@@ -438,7 +438,7 @@ __INLINE void sl_hal_i2s_transmit_word(I2S_TypeDef_t *i2s, uint32_t data)
  ******************************************************************************/
 __INLINE uint32_t sl_hal_i2s_receive_word(I2S_TypeDef_t *i2s)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
   return i2s->RXDMA;
 }
 
@@ -452,10 +452,10 @@ __INLINE uint32_t sl_hal_i2s_receive_word(I2S_TypeDef_t *i2s)
  ******************************************************************************/
 __INLINE uint32_t sl_hal_i2s_get_channel_interrupt_status(I2S_TypeDef_t *i2s, sl_i2s_channel_id_t channel_id)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
 
   if (!SL_HAL_I2S_VALIDATE_CHANNEL(i2s, channel_id)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return 0U;
   }
   return *SL_HAL_I2S_CHANNEL_REG_PTR(i2s, ISR0, channel_id);
@@ -471,10 +471,10 @@ __INLINE uint32_t sl_hal_i2s_get_channel_interrupt_status(I2S_TypeDef_t *i2s, sl
  ******************************************************************************/
 __INLINE void sl_hal_i2s_clear_tx_errors(I2S_TypeDef_t *i2s, sl_i2s_channel_id_t channel_id)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
 
   if (!SL_HAL_I2S_VALIDATE_CHANNEL(i2s, channel_id)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return;
   }
   (void)*SL_HAL_I2S_CHANNEL_REG_PTR(i2s, TICR0, channel_id);
@@ -490,10 +490,10 @@ __INLINE void sl_hal_i2s_clear_tx_errors(I2S_TypeDef_t *i2s, sl_i2s_channel_id_t
  ******************************************************************************/
 __INLINE void sl_hal_i2s_clear_rx_overrun(I2S_TypeDef_t *i2s, sl_i2s_channel_id_t channel_id)
 {
-  EFM_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_I2S_REF_VALID(i2s));
 
   if (!SL_HAL_I2S_VALIDATE_CHANNEL(i2s, channel_id)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return;
   }
   (void)*SL_HAL_I2S_CHANNEL_REG_PTR(i2s, ROR0, channel_id);
@@ -573,7 +573,7 @@ __INLINE bool sli_hal_i2s_is_tx_fifo_empty(I2S_TypeDef_t *i2s)
 __INLINE void sli_hal_i2s_flush_fifos(I2S_TypeDef_t *i2s, sl_i2s_direction_t dir)
 {
   bool dir_ok = (dir < SL_I2S_DIR_MAX);
-  EFM_ASSERT(dir_ok);
+  SL_LOG_DEBUG_ASSERT(dir_ok);
   if (!dir_ok) {
     return;
   }

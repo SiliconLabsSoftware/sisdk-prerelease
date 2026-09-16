@@ -4,6 +4,10 @@ The Wi-SUN NCP application is a network coprocessor implementation that allows u
 
 ## Direct Connect
 
+Direct Connect server support is optional. Add the **wisun_stack_dc_server**
+component to enable it; without that component, DC server APIs return
+`SL_STATUS_NOT_AVAILABLE`.
+
 Direct Connect requires a PMK imported into PSA before authentication. The NCP does not provision a PMK by default.
 
 Add the **wisun_direct_connect_pmk** component to import the configured PMK at boot. Configure the settings in **sl_wisun_direct_connect_pmk_config.h** or via Simplicity Studio:

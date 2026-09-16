@@ -75,9 +75,14 @@ void app_process_action(void)
 
   switch (app_state) {
     case PSA_CRYPTO_INIT:
+    {
+      uint32_t core_freq;
+
       app_state = PSA_CRYPTO_IDLE;
+      (void)sl_clock_manager_get_clock_branch_frequency(SL_CLOCK_BRANCH_HCLK,
+                                                        &core_freq);
       printf("\n%s - Core running at %" PRIu32 " kHz.\n", example_string,
-             CMU_ClockFreqGet(cmuClock_CORE) / 1000);
+             core_freq / 1000);
       printf("  . PSA Crypto initialization... ");
       if (init_psa_crypto() == PSA_SUCCESS) {
         printf("\n  . Current nonce size of PSA Attestation Token is "
@@ -89,6 +94,7 @@ void app_process_action(void)
         app_state = SELECT_NONCE_SIZE;
       }
       break;
+    }
 
     case SELECT_NONCE_SIZE:
       if (space_press) {

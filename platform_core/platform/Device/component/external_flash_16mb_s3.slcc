@@ -18,7 +18,6 @@ provides:
   condition:
   - device_se_size_256k
 requires:
-- name: device_efx
 - name: device_has_ext_mem
 template_contribution:
 - name: device_flash_size

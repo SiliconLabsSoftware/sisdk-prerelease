@@ -32,7 +32,6 @@
 #include "sl_component_catalog.h"
 #endif
 
-#include "mbedtls/bignum.h"
 #include "psa/crypto.h"
 #include "psa/crypto_sizes.h"
 
@@ -140,6 +139,8 @@ static sl_status_t erase_binding_key(void);
 static void security_recover_endpoint(void);
 
 static sl_status_t psa_status_to_sl_status(psa_status_t status);
+
+static void security_zeroize(void *buffer, size_t size);
 
 static void process_security_command_rx(sli_cpc_security_protocol_cmd_t *cmd);
 
@@ -570,10 +571,22 @@ static void on_plaintext_key_share_cmd(sli_cpc_security_protocol_cmd_t *cmd)
   send_response(&security_protocol_response);
 }
 
+#if (SL_CPC_SECURITY_BINDING_KEY_METHOD == SL_CPC_SECURITY_BINDING_KEY_ECDH)
+/***************************************************************************//**
+ * Reverse the byte order of a buffer in place
+ ******************************************************************************/
+static void reverse_byte_order(uint8_t *buffer, size_t len)
+{
+  for (size_t i = 0; i < len / 2; i++) {
+    uint8_t tmp = buffer[i];
+    buffer[i] = buffer[len - 1 - i];
+    buffer[len - 1 - i] = tmp;
+  }
+}
+
 /***************************************************************************//**
  * ECDH Exchange
  ******************************************************************************/
-#if (SL_CPC_SECURITY_BINDING_KEY_METHOD == SL_CPC_SECURITY_BINDING_KEY_ECDH)
 static sl_status_t ecdh_exchange(uint8_t* peer_key, size_t peer_key_len)
 {
   psa_key_id_t private_key;
@@ -581,21 +594,14 @@ static sl_status_t ecdh_exchange(uint8_t* peer_key, size_t peer_key_len)
   psa_key_attributes_t key_attributes;
   sl_status_t status;
 
-  mbedtls_mpi peer_key_big_endian;
-  mbedtls_mpi our_public_key_big_endian;
   uint8_t* sha256_output;
   uint8_t* shared_secret;
-  mbedtls_mpi shared_secret_big_endian;
   size_t hash_out_len;
   size_t shared_secret_len;
 
   if (peer_key_len != SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES) {
     return SL_STATUS_INVALID_PARAMETER;
   }
-
-  mbedtls_mpi_init(&peer_key_big_endian);
-  mbedtls_mpi_init(&our_public_key_big_endian);
-  mbedtls_mpi_init(&shared_secret_big_endian);
 
   sha256_output = malloc(SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
   if (sha256_output == NULL) {
@@ -629,17 +635,17 @@ static sl_status_t ecdh_exchange(uint8_t* peer_key, size_t peer_key_len)
                                      &our_public_key_len);
   if (psa_status != PSA_SUCCESS) {
     SLI_CPC_ASSERT(psa_destroy_key(private_key) == PSA_SUCCESS);
-    private_key = MBEDTLS_SVC_KEY_ID_INIT;
+    private_key = PSA_KEY_ID_NULL;
     status = psa_status_to_sl_status(psa_status);
     goto cleanup;
   }
 
-  // Convert our public key to big endian and the peer key to little endian
-  // This is done to work around a limitation in MbedTLS 2.16 LTS that only handles big endian keys with ECP-Montgomery
-  mbedtls_mpi_read_binary_le(&our_public_key_big_endian, our_public_key, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
-  mbedtls_mpi_write_binary(&our_public_key_big_endian, our_public_key, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
-  mbedtls_mpi_read_binary(&peer_key_big_endian, peer_key, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
-  mbedtls_mpi_write_binary_le(&peer_key_big_endian, peer_key, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
+  // The CPC binding protocol exchanges Curve25519 public keys in big endian,
+  // whereas PSA imports and exports them in little endian. Convert our public
+  // key to big endian before sending it and the peer key to little endian
+  // before feeding it to psa_raw_key_agreement().
+  reverse_byte_order(our_public_key, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
+  reverse_byte_order(peer_key, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
 
   // Compute ECDH shared secret
   psa_status = psa_raw_key_agreement(PSA_ALG_ECDH,
@@ -651,20 +657,19 @@ static sl_status_t ecdh_exchange(uint8_t* peer_key, size_t peer_key_len)
                                      &shared_secret_len);
   if (psa_status != PSA_SUCCESS) {
     SLI_CPC_ASSERT(psa_destroy_key(private_key) == PSA_SUCCESS);
-    private_key = MBEDTLS_SVC_KEY_ID_INIT;
+    private_key = PSA_KEY_ID_NULL;
     status = psa_status_to_sl_status(psa_status);
     goto cleanup;
   }
 
-  mbedtls_mpi_read_binary(&shared_secret_big_endian, shared_secret, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
-  mbedtls_mpi_write_binary_le(&shared_secret_big_endian, shared_secret, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
+  reverse_byte_order(shared_secret, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
 
   psa_status = psa_hash_compute(PSA_ALG_SHA_256, shared_secret, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES,
                                 sha256_output, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES,
                                 &hash_out_len);
   if (psa_status != PSA_SUCCESS || hash_out_len != SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES) {
     SLI_CPC_ASSERT(psa_destroy_key(private_key) == PSA_SUCCESS);
-    private_key = MBEDTLS_SVC_KEY_ID_INIT;
+    private_key = PSA_KEY_ID_NULL;
     status = psa_status_to_sl_status(psa_status);
     goto cleanup;
   }
@@ -672,12 +677,12 @@ static sl_status_t ecdh_exchange(uint8_t* peer_key, size_t peer_key_len)
   // Get rid of the private_key
   psa_status = psa_destroy_key(private_key);
   if (psa_status != PSA_SUCCESS) {
-    mbedtls_platform_zeroize(sha256_output, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
+    security_zeroize(sha256_output, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
     status = psa_status_to_sl_status(psa_status);
     goto cleanup;
   }
 
-  private_key = MBEDTLS_SVC_KEY_ID_INIT;
+  private_key = PSA_KEY_ID_NULL;
 
   // Store the binding key by truncating the first bytes from the sha256 output
   if (store_binding_key(sha256_output, SLI_SECURITY_BINDING_KEY_LENGTH_BYTES) != SL_STATUS_OK) {
@@ -688,8 +693,8 @@ static sl_status_t ecdh_exchange(uint8_t* peer_key, size_t peer_key_len)
   status = SL_STATUS_OK;
 
   cleanup:
-  mbedtls_platform_zeroize(sha256_output, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
-  mbedtls_platform_zeroize(shared_secret, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
+  security_zeroize(sha256_output, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
+  security_zeroize(shared_secret, SLI_SECURITY_PUBLIC_KEY_LENGTH_BYTES);
   free(shared_secret);
   clean_sha256:
   free(sha256_output);
@@ -731,7 +736,7 @@ static void on_session_init_cmd(sli_cpc_security_protocol_cmd_t *cmd)
   } else {
     response->status = SL_STATUS_NOT_INITIALIZED;
     //Just to be pedantic and not leak anything
-    mbedtls_platform_zeroize(response->random2, sizeof(response->random2));
+    security_zeroize(response->random2, sizeof(response->random2));
   }
 
   security_protocol_response.len = sli_cpc_security_command[cmd->command_id].response_len;
@@ -887,7 +892,7 @@ static sl_status_t store_binding_key(uint8_t *key, uint16_t key_size)
                                            &key_id);
 
   // The key is expected to be in RAM, we need to squash it now that it's loaded in the SE
-  mbedtls_platform_zeroize(key, key_size);
+  security_zeroize(key, key_size);
 
 #if (defined(SLI_CPC_DEVICE_UNDER_TEST))
   security_endpoint_initialized = true;
@@ -1037,7 +1042,7 @@ sl_status_t initialize_session(uint8_t *random1, uint8_t *random2)
 
       if (psa_status != PSA_SUCCESS) {
         // If for whatever reason the export failed, squash random4 anyway
-        mbedtls_platform_zeroize(random4, sizeof(random4));
+        security_zeroize(random4, sizeof(random4));
         return SL_STATUS_FAIL;
       }
     }
@@ -1055,14 +1060,14 @@ sl_status_t initialize_session(uint8_t *random1, uint8_t *random2)
 
       // Squash the random4 containing the binding key in plain text now that its
       // hash has been computed
-      mbedtls_platform_zeroize(random4, sizeof(random4));
+      security_zeroize(random4, sizeof(random4));
 
       // Something is terribly wrong if sha256 doesn't give a 256 length (session key length)
       SLI_CPC_ASSERT(hash_length == SLI_SECURITY_SESSION_KEY_LENGTH_BYTES);
 
       if (psa_status != PSA_SUCCESS) {
         // If for whatever reason the hash failed, squash tmp_session_key anyway
-        mbedtls_platform_zeroize(tmp_session_key, sizeof(tmp_session_key));
+        security_zeroize(tmp_session_key, sizeof(tmp_session_key));
         return SL_STATUS_FAIL;
       }
     }
@@ -1092,7 +1097,7 @@ sl_status_t initialize_session(uint8_t *random1, uint8_t *random2)
                                            &session_key_id);
 
       // Squash the session_key temp buffer now that it is managed by psa_crypto
-      mbedtls_platform_zeroize(tmp_session_key, sizeof(tmp_session_key));
+      security_zeroize(tmp_session_key, sizeof(tmp_session_key));
 
       if (status != PSA_SUCCESS) {
         return SL_STATUS_FAIL;
@@ -1163,6 +1168,21 @@ static sl_status_t psa_status_to_sl_status(psa_status_t status)
     default:
       return SL_STATUS_FAIL;
       break;
+  }
+}
+
+/***************************************************************************//**
+ * Clear sensitive data without allowing the writes to be optimized away
+ ******************************************************************************/
+static void security_zeroize(void *buffer, size_t size)
+{
+  // volatile forces the compiler to emit the stores. Without it, dead-store
+  // elimination can drop the wipe when the buffer is unused after this call.
+  volatile uint8_t *p = (volatile uint8_t *)buffer;
+
+  while (size != 0) {
+    *p++ = 0;
+    size--;
   }
 }
 

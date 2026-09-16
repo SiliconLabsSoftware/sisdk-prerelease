@@ -114,3 +114,10 @@ upgrade:
           Custom assert function has been removed from the stack library and moved to the crash handler.
         add:
           - wisun_crash_handler
+      - trigger: wisun_stack_ffn
+        description: >
+          Direct Connect server was moved out of the FFN stack library into the
+          optional wisun_stack_dc_server component. It is added automatically so
+          upgraded projects keep prior DC server behavior and APIs.
+        add:
+          - wisun_stack_dc_server

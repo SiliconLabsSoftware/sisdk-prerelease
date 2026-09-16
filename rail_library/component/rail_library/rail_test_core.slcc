@@ -36,16 +36,7 @@ requires:
   - device_series_2
 - name: power_manager
   condition:
-  - device_generic_family_sixx301
-- name: power_manager
-  condition:
-  - device_generic_family_sixx353
-- name: power_manager
-  condition:
-  - device_family_sixg300xilpwh74000
-- name: power_manager
-  condition:
-  - device_family_sixg300xilpwln74010
+  - device_series_3
 
   # emlib
 - name: emlib_rmu

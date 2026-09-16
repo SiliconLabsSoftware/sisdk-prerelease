@@ -109,6 +109,7 @@ typedef uint32_t TxOptions_t;  ///< The universal TX-Option flag count.
 #define TRANSMIT_COMPLETE_NO_ACK  0x01  ///< Retransmission error
 #define TRANSMIT_COMPLETE_FAIL    0x02  ///< Transmit error
 #define TRANSMIT_ROUTING_NOT_IDLE 0x03  ///< Transmit error
+#define TRANSMIT_FAIL_RADIO_BUSY  0x06  ///< LBT / cca (CSWG Host API Table 4.2.3)
 
 #ifdef ZW_CONTROLLER
 /* Assign route transmit complete but no routes was found */

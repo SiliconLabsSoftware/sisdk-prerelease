@@ -1708,16 +1708,15 @@ typedef struct sl_rail_ble_cs_step_config {
    */
   bool *p_save_iq_data;
   /**
-   * Array containing antenna settings for this step. This field has two uses
-   * the antenna settings for this step.
+   * Antenna used for the CS_SYNC packet on mode 0, mode 1, and mode 3 steps.
+   */
+  sl_rail_ble_cs_antenna_id_t cs_sync_antenna;
+  /**
+   * Array containing antenna settings for the CS tone on mode 2 and mode 3
+   * steps.
    *
-   * On mode 0 and mode 1 steps, only the first element will be used to
-   * indicate the antenna to be utilized during a mode 0 and
-   * mode 1 step.
-   *
-   * On mode 2 steps, as many elements as
-   * \ref SL_RAIL_BLE_CS_MAX_ANTENNA_SLOTS - 1 that were configured for the
-   * CS event will be applied.
+   * \ref sl_rail_ble_cs_config_t::slot_count - 1 antennas will be used for CS
+   * tone slots.
    *
    * @note \ref sl_rail_ble_config_cs_antenna must be called prior to setting
    *   this field in order to set the antenna count as well as configure

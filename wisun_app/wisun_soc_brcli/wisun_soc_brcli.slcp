@@ -37,6 +37,7 @@ component:
   - id: "errno"
   - id: "wisun_crash_handler"
   - id: "wisun_direct_connect_pmk"
+  - id: "wisun_stack_dc_server"
 
 requires:
   - name: wisun_br_dhcpv6

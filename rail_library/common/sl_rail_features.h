@@ -333,9 +333,10 @@ extern "C" {
 /// Antenna Switching needed for Angle-of-Arrival receives or
 /// Angle-of-Departure transmits.
 /// See also runtime refinement \ref sl_rail_ble_supports_antenna_switching().
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6) \
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 6)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
   || (_SILICON_LABS_32B_SERIES_3_CONFIG >= 300))
 #define SL_RAIL_BLE_SUPPORTS_ANTENNA_SWITCHING SL_RAIL_SUPPORTS_PROTOCOL_BLE
 #else

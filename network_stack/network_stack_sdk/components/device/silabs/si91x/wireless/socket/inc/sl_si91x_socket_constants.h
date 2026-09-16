@@ -53,8 +53,8 @@
 #define SLI_DEFAULT_STREAM_MSS_SIZE_IPV6   1440
 #define SLI_DEFAULT_DATAGRAM_MSS_SIZE_IPV6 1452
 
-#define SLI_MAX_TCP_RETRY_COUNT         10
-#define SLI_DEFAULT_TCP_KEEP_ALIVE_TIME 1200
+#define SLI_MAX_TCP_RETRY_COUNT         10   //Default value for TCP retry count, Internal use, not configurable
+#define SLI_DEFAULT_TCP_KEEP_ALIVE_TIME 1200 //Default value for TCP keep alive time, Internal use, not configurable
 
 #define SLI_SI91X_CERT_INDEX_0 0
 #define SLI_SI91X_CERT_INDEX_1 1
