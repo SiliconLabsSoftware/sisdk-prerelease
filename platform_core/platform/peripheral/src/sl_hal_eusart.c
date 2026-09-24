@@ -376,6 +376,13 @@ void sl_hal_eusart_reset(EUSART_TypeDef *eusart)
   }
 #endif
 
+  // Reset synchronized registers.
+  eusart->CLKDIV = _EUSART_CLKDIV_RESETVALUE;
+  eusart->TRIGCTRL = _EUSART_TRIGCTRL_RESETVALUE;
+  // Force the previous register writes to be finished to prevent issues
+  // when disabling the eusart bus clock just after calling this function.
+  eusart->CLKDIV = _EUSART_CLKDIV_RESETVALUE;
+
   // All registers that end with CFG should be programmed before EUSART gets enabled (EUSARTn_EN is set).
   // Set all configurable register to its reset value.
   // Note: Program desired settings to all registers that have names ending with CFG in the following sequence:
@@ -419,13 +426,6 @@ void sl_hal_eusart_reset(EUSART_TypeDef *eusart)
 #endif
   eusart->IEN = _EUSART_IEN_RESETVALUE;
   eusart->IF_CLR = _EUSART_IF_MASK;
-
-  // Reset synchronized registers.
-  eusart->CLKDIV = _EUSART_CLKDIV_RESETVALUE;
-  eusart->TRIGCTRL = _EUSART_TRIGCTRL_RESETVALUE;
-  // Force the previous register writes to be finished to prevent issues
-  // when disabling the eusart bus clock just after calling this function.
-  eusart->CLKDIV = _EUSART_CLKDIV_RESETVALUE;
 }
 
 /***************************************************************************//**

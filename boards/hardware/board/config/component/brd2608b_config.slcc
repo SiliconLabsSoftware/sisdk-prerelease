@@ -27,6 +27,11 @@
       vendor: silabs
     path: brd2608b/btl_euart_driver_cfg.h
   - override:
+      component: bootloader_ezsp_gpio_activation
+      file_id: ezsp_gpio_activation_cfg
+      vendor: silabs
+    path: brd2608b/btl_ezsp_gpio_activation_cfg.h
+  - override:
       component: bootloader_gpio_activation
       file_id: btl_gpio_activation_cfg
       vendor: silabs
@@ -41,6 +46,16 @@
       file_id: btl_spi_controller_usart_driver_cfg
       vendor: silabs
     path: brd2608b/btl_spi_controller_usart_driver_cfg.h
+  - override:
+      component: bootloader_spi_peripheral_eusart_driver
+      file_id: btl_spi_peripheral_eusart_driver_cfg
+      vendor: silabs
+    path: brd2608b/btl_spi_peripheral_eusart_driver_cfg.h
+  - override:
+      component: bootloader_spi_peripheral_usart_driver
+      file_id: btl_spi_peripheral_usart_driver_cfg
+      vendor: silabs
+    path: brd2608b/btl_spi_peripheral_usart_driver_cfg.h
   - override:
       component: bootloader_uart_driver
       file_id: btl_uart_driver_cfg

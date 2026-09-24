@@ -761,14 +761,6 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
 #if defined(SL_CATALOG_WISUN_FFN_DEVICE_SUPPORT_PRESENT)
   const sl_wisun_connection_params_t *conn_param = NULL;
   sl_wisun_connection_params_t update_param = { 0 };
-
-  if (setting->network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
-    conn_param = sl_wisun_get_conn_param_by_nw_size((sl_wisun_network_size_t) setting->network_size);
-    if (conn_param == NULL) {
-      printf("[Failed: unable to get connection parameters for network size %"PRIu8"]\n", setting->network_size);
-      return SL_STATUS_INVALID_PARAMETER;
-    }
-  }
 #endif
 
   ret = sl_wisun_set_device_type((sl_wisun_device_type_t)setting->device_type);
@@ -784,41 +776,54 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
   }
 
 #if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
-  // NOTE: Automatic network size is the default in the stack.
-  if (setting->device_type == SL_WISUN_LFN && setting->lfn_profile != SL_WISUN_LFN_PROFILE_AUTOMATIC) {
-    // Store LFN profile based on wisun config
-    ret = sl_wisun_set_lfn_parameters(sl_wisun_app_core_get_lfn_params());
-    if (ret != SL_STATUS_OK) {
-      printf("[Failed: unable to set device type: %"PRIu32"]\n", ret);
-      return ret;
+  // NOTE: Automatic LFN profile is the default in the stack.
+  if (setting->device_type == SL_WISUN_LFN) {
+    if (setting->lfn_profile != SL_WISUN_LFN_PROFILE_AUTOMATIC) {
+      ret = sl_wisun_set_lfn_parameters(sl_wisun_app_core_get_lfn_params());
+      if (ret != SL_STATUS_OK) {
+        printf("[Failed: unable to set device type: %"PRIu32"]\n", ret);
+        return ret;
+      }
+    } else {
+      ret = app_set_options(setting);
+      if (ret != SL_STATUS_OK) {
+        printf("[Failed: unable to set stack options: %"PRIu32"]\n", ret);
+        return ret;
+      }
     }
   }
 #endif
 
 #if defined(SL_CATALOG_WISUN_FFN_DEVICE_SUPPORT_PRESENT)
   // NOTE: Automatic network size is the default in the stack.
-  if (setting->network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
-    memcpy(&update_param, conn_param, sizeof(sl_wisun_connection_params_t));
+  if (setting->device_type == SL_WISUN_ROUTER) {
+    if (setting->network_size != SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
+      conn_param = sl_wisun_get_conn_param_by_nw_size((sl_wisun_network_size_t) setting->network_size);
+      if (conn_param == NULL) {
+        printf("[Failed: unable to get connection parameters for network size %"PRIu8"]\n", setting->network_size);
+        return SL_STATUS_INVALID_PARAMETER;
+      }
+
+      memcpy(&update_param, conn_param, sizeof(sl_wisun_connection_params_t));
 #if defined(WISUN_CONFIG_BROADCAST_RETRIES)
-    update_param.mpl.trickle_expirations = WISUN_CONFIG_BROADCAST_RETRIES;
+      update_param.mpl.trickle_expirations = WISUN_CONFIG_BROADCAST_RETRIES;
 #endif
-    memcpy(&update_param.mac, &setting->mac, sizeof(setting->mac));
-    memcpy(&update_param.traffic, &setting->traffic, sizeof(setting->traffic));
-    conn_param = &update_param;
+      memcpy(&update_param.mac, &setting->mac, sizeof(setting->mac));
+      memcpy(&update_param.traffic, &setting->traffic, sizeof(setting->traffic));
+      conn_param = &update_param;
 
-    ret = sl_wisun_set_connection_parameters(conn_param);
-    if (ret != SL_STATUS_OK) {
-      printf("[Failed: unable to set connection parameters: %"PRIu32"]\n", ret);
-      _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_NETWORK_SIZE_ERROR);
-      return ret;
-    }
-  }
-
-  if (setting->network_size == SL_WISUN_NETWORK_SIZE_AUTOMATIC) {
-    ret = app_set_options(setting);
-    if (ret != SL_STATUS_OK) {
-      printf("[Failed: unable to set stack options: %"PRIu32"]\n", ret);
-      return ret;
+      ret = sl_wisun_set_connection_parameters(conn_param);
+      if (ret != SL_STATUS_OK) {
+        printf("[Failed: unable to set connection parameters: %"PRIu32"]\n", ret);
+        _app_wisun_core_set_state(SL_WISUN_APP_CORE_STATE_SET_NETWORK_SIZE_ERROR);
+        return ret;
+      }
+    } else {
+      ret = app_set_options(setting);
+      if (ret != SL_STATUS_OK) {
+        printf("[Failed: unable to set stack options: %"PRIu32"]\n", ret);
+        return ret;
+      }
     }
   }
 #endif

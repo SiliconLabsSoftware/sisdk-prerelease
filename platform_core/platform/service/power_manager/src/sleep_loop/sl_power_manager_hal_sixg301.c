@@ -60,6 +60,17 @@ static bool em1hclkdiv_sysclk_switch_en;
 static uint32_t sysclk_prescalers_value;
 
 /***************************************************************************//**
+ * Configure EM2 debug enable.
+ ******************************************************************************/
+void sli_power_manager_init_em2_debug(void)
+{
+#if defined(_EMU_CTRL_EM2DBGEN_MASK) && defined(SL_POWER_MANAGER_INIT_EMU_EM2_DEBUG_ENABLE)
+  EMU->CTRL = (EMU->CTRL & ~_EMU_CTRL_EM2DBGEN_MASK)
+              | (SL_POWER_MANAGER_INIT_EMU_EM2_DEBUG_ENABLE << _EMU_CTRL_EM2DBGEN_SHIFT);
+#endif
+}
+
+/***************************************************************************//**
  * Do some hardware initialization if necessary.
  ******************************************************************************/
 void sli_power_manager_init_hardware(void)

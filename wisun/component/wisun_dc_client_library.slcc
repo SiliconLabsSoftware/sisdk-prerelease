@@ -9,15 +9,25 @@ root_path: "wisun/./stack"
 ui_hints:
   visibility: never
 
+requires:
+- name: "wisun_stack"
+- name: "wisun_lxpm_implementation"
+
+recommends:
+- id: "wisun_lxpm_stubs"
+
+  vendor: silabs
 conflicts:
 - name: "wisun_br_stack"
 - name: "wisun_stack_ffn"
 - name: "wisun_stack_lfn"
+- name: "wisun_stack_dc_server"
 
 provides:
 - name: "wisun_implementation"
 - name: "wisun_dc_client_library"
 - name: "wisun_dc_client_implementation"
+- name: "wisun_stack_device_type"
 
 define:
 - name: "HAVE_DC_CLIENT"

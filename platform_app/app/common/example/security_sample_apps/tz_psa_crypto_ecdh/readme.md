@@ -27,7 +27,7 @@ After both projects build, the workspace's `tz_application` post-build action co
 
 The Non-secure side exercises the following curves through the Secure-side PSA Crypto veneer:
 
-- SECP R1 — `secp192r1`, `secp256r1`, `secp384r1`, `secp521r1` (all Series 2 TrustZone parts)
+- SECP R1 — `secp256r1`, `secp384r1`, `secp521r1` (all Series 2 TrustZone parts)
 - Montgomery — `Curve25519` (all Series 2 TrustZone parts), `Curve448` (Secure Vault parts only, gated via `requires: condition: [device_security_vault]`)
 
 ### Secure-side Components

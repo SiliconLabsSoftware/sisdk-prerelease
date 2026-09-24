@@ -76,7 +76,7 @@ extern "C" {
 
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
 #define SLI_UART_HANDLE_IS_ASYNC(uart_handle) \
-        ((uart_handle)->preinit_config.async_en)
+        ((uart_handle)->async_en)
 #define SLI_UART_HANDLE_IS_SYNC(uart_handle) \
         (!SLI_UART_HANDLE_IS_ASYNC((uart_handle)))
 #else

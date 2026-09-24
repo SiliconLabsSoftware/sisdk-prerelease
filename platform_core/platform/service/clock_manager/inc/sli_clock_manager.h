@@ -99,6 +99,17 @@ SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_clock_manager_process_hfxo_startup_time_measurement(void);
 
 /***************************************************************************//**
+ * Enable or disable HFXO settings required for SYSRTC pre-triggers.
+ *
+ * Configures HFXO so SYSRTC can request on-demand startup (including during
+ * EM23), which is required for SYSRTC HFXO pre-triggers to work.
+ *
+ * @param[in] enable  true to enable SYSRTC HFXO pre-trigger support,
+ *                    false to disable it.
+ ******************************************************************************/
+void sli_clock_manager_enable_hfxo_sysrtc_pretriggers(bool enable);
+
+/***************************************************************************//**
  * Retrieves the FREQPLAN NWP SOCPLL config.
  *
  * @param[out]  socpll_freqplan_config Table with SOCPLL FREQPLAN configurations

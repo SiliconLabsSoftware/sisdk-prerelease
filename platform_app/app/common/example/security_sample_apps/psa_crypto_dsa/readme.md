@@ -36,7 +36,6 @@ This example uses the PSA Crypto API to perform ECDSA and EdDSA digital-signatur
 
 **`PSA_ECC_FAMILY_SECP_R1` (ECDSA)**
 
-- SECP192R1 — 192-bit
 - SECP256R1 — 256-bit
 - SECP384R1 — 384-bit
 - SECP521R1 — 521-bit

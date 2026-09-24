@@ -1,0 +1,106 @@
+id: "wisun_dc_server_plugin"
+label: "Wi-SUN Direct connect server plugin"
+description: "Extends Wi-SUN FFN or Border Router stack with Direct Connect Server capability"
+package: "wisun"
+category: "Wi-SUN"
+quality: "production"
+root_path: "wisun/./stack"
+
+ui_hints:
+  visibility: never
+
+requires:
+- name: "wisun_stack_supports_dc_server"
+
+conflicts:
+- name: "wisun_dc_client_library"
+
+provides:
+- name: "wisun_dc_server_implementation"
+- name: "wisun_dc_server_plugin"
+
+library:
+  # FFN DC server plugin
+- path: "libwisun_dc_server_ffn_plugin_efr32xg2x_gcc_debug.a"
+  condition:
+  - "device_series_2"
+  - "toolchain_gcc"
+  - "wisun_stack_debug"
+  - "wisun_stack_ffn"
+- path: "libwisun_dc_server_ffn_plugin_efr32xg2x_iar_debug.a"
+  condition:
+  - "device_series_2"
+  - "toolchain_iar"
+  - "wisun_stack_debug"
+  - "wisun_stack_ffn"
+- path: "libwisun_dc_server_ffn_plugin_efr32xg2x_llvm_debug.a"
+  condition:
+  - "device_series_2"
+  - "toolchain_llvm"
+  - "wisun_stack_debug"
+  - "wisun_stack_ffn"
+- path: "libwisun_dc_server_ffn_plugin_efr32xg2x_gcc_release.a"
+  condition:
+  - "device_series_2"
+  - "toolchain_gcc"
+  - "wisun_stack_ffn"
+  unless:
+  - "wisun_stack_debug"
+- path: "libwisun_dc_server_ffn_plugin_efr32xg2x_iar_release.a"
+  condition:
+  - "device_series_2"
+  - "toolchain_iar"
+  - "wisun_stack_ffn"
+  unless:
+  - "wisun_stack_debug"
+- path: "libwisun_dc_server_ffn_plugin_efr32xg2x_llvm_release.a"
+  condition:
+  - "device_series_2"
+  - "toolchain_llvm"
+  - "wisun_stack_ffn"
+  unless:
+  - "wisun_stack_debug"
+  # BR DC server plugin
+- path: "libwisun_dc_server_br_plugin_efr32xg2x_gcc_debug.a"
+  condition:
+  - "device_series_2"
+  - "toolchain_gcc"
+  - "wisun_stack_debug"
+  - "wisun_br_stack"
+- path: "libwisun_dc_server_br_plugin_efr32xg2x_iar_debug.a"
+  condition:
+  - "device_series_2"
+  - "toolchain_iar"
+  - "wisun_stack_debug"
+  - "wisun_br_stack"
+- path: "libwisun_dc_server_br_plugin_efr32xg2x_llvm_debug.a"
+  condition:
+  - "device_series_2"
+  - "toolchain_llvm"
+  - "wisun_stack_debug"
+  - "wisun_br_stack"
+- path: "libwisun_dc_server_br_plugin_efr32xg2x_gcc_release.a"
+  condition:
+  - "device_series_2"
+  - "toolchain_gcc"
+  - "wisun_br_stack"
+  unless:
+  - "wisun_stack_debug"
+- path: "libwisun_dc_server_br_plugin_efr32xg2x_iar_release.a"
+  condition:
+  - "device_series_2"
+  - "toolchain_iar"
+  - "wisun_br_stack"
+  unless:
+  - "wisun_stack_debug"
+- path: "libwisun_dc_server_br_plugin_efr32xg2x_llvm_release.a"
+  condition:
+  - "device_series_2"
+  - "toolchain_llvm"
+  - "wisun_br_stack"
+  unless:
+  - "wisun_stack_debug"
+
+metadata:
+  sbom:
+    license: MSLA

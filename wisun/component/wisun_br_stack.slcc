@@ -1,9 +1,9 @@
 id: "wisun_br_stack"
-label: "Wi-SUN Border Router Stack"
+label: "Wi-SUN Stack Border Router Support"
 description: >
   Provides Wi-SUN border router stack functionalities.
 package: "wisun"
-category: "Wi-SUN"
+category: "Wi-SUN|Stack"
 quality: "production"
 root_path: "wisun/./stack"
 

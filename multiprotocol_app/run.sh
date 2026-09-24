@@ -113,7 +113,7 @@ while [[ $# -gt 0 ]]; do
             # caller's setupRaspi expect timeout (~20s).
             echo "Waiting for OTBR control socket to appear..."
             otbr_ready=0
-            for i in $(seq 1 15); do
+            for _ in $(seq 1 15); do
                 if docker exec multiprotocol sh -c 'ls /run/openthread-*.sock >/dev/null 2>&1'; then
                     otbr_ready=1
                     break

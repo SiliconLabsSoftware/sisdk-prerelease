@@ -14,6 +14,7 @@ ui_hints:
 source:
 - path: platform/service/sleeptimer/src/sl_sleeptimer_hal_sysrtc.c
   condition: [device_has_sysrtc]
+  unless: [device_generic_family_sixx381]
 - path: platform/service/sleeptimer/src/sl_sleeptimer_hal_rtcc.c
   condition: [device_has_rtcc]
 - path: platform/service/sleeptimer/src/sl_sleeptimer_hal_prortc.c
@@ -52,4 +53,6 @@ requires:
   condition: [device_si91x]
 - name: hostbased_sleeptimer
   condition: [win32]
+- name: sleeptimer_sixx381
+  condition: [device_generic_family_sixx381]
 root_path: platform_core

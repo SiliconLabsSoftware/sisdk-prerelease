@@ -89,14 +89,12 @@ static const psa_ecc_family_t asymmetric_key_curve[] = {
 static uint8_t secpr1_key_size_select;
 
 static const char *secpr1_key_size_string[] = {
-  "SECP192R1",
   "SECP256R1",
   "SECP384R1",
   "SECP521R1",
 };
 
 static const size_t secpr1_key_size[] = {
-  192,
   256,
   384,
   521
@@ -486,11 +484,10 @@ static void print_key_size_option(void)
            asymmetric_key_curve_string[asymmetric_key_curve_select],
            secpr1_key_size[secpr1_key_size_select],
            secpr1_key_size_string[secpr1_key_size_select]);
-    printf("  + Press SPACE to select %s key length (%d or %d or %d or %d), "
+    printf("  + Press SPACE to select %s key length (%d or %d or %d), "
            "press ENTER to run.\n",
            asymmetric_key_curve_string[asymmetric_key_curve_select],
-           secpr1_key_size[0], secpr1_key_size[1], secpr1_key_size[2],
-           secpr1_key_size[3]);
+           secpr1_key_size[0], secpr1_key_size[1], secpr1_key_size[2]);
     app_state = SELECT_SECPR1_SIZE;
   } else {
 #if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)

@@ -13,35 +13,39 @@ quality: production
 metadata:
   sbom:
     license: Zlib
+root_path: platform_core/platform/service/power_manager
 config_file:
-- path: platform/service/power_manager/config/sl_power_manager_config.h
+- path: config/sl_power_manager_config.h
   condition: [device_sdid_200]
-- path: platform/service/power_manager/config/EFR32XG22/sl_power_manager_config.h
+- path: config/EFR32XG22/sl_power_manager_config.h
   condition: [device_sdid_205]
-- path: platform/service/power_manager/config/sl_power_manager_config.h
+- path: config/sl_power_manager_config.h
   condition: [device_sdid_210]
-- path: platform/service/power_manager/config/sl_power_manager_config.h
+- path: config/sl_power_manager_config.h
   condition: [device_sdid_215]
-- path: platform/service/power_manager/config/EFX32XG25/sl_power_manager_config.h
+- path: config/EFX32XG25/sl_power_manager_config.h
   condition: [device_sdid_220]
-- path: platform/service/power_manager/config/sl_power_manager_config.h
+- path: config/sl_power_manager_config.h
   condition: [device_sdid_225]
-- path: platform/service/power_manager/config/sl_power_manager_config.h
+- path: config/sl_power_manager_config.h
   condition: [device_sdid_230]
-- path: platform/service/power_manager/config/sl_power_manager_config.h
+- path: config/sl_power_manager_config.h
   condition: [device_sdid_235]
-- path: platform/service/power_manager/config/sl_power_manager_config.h
+- path: config/sl_power_manager_config.h
   condition: [device_sdid_240]
-- path: platform/service/power_manager/config/EFX32XG25/sl_power_manager_config.h
+- path: config/EFX32XG25/sl_power_manager_config.h
   condition: [device_sdid_245]
-- path: platform/service/power_manager/config/sl_power_manager_config.h
+- path: config/sl_power_manager_config.h
   condition: [device_sdid_250]
-- path: platform/service/power_manager/config/sl_power_manager_config.h
+- path: config/sl_power_manager_config.h
   condition: [device_sdid_260]
-- path: platform/service/power_manager/config/sl_power_manager_config.h
+- path: config/sl_power_manager_config.h
   condition: [device_sdid_265]
-- path: platform/service/power_manager/config/SIXG301/sl_power_manager_config.h
+- path: config/SIXG301/sl_power_manager_config.h
   condition: [device_generic_family_sixx301]
+- path: config/sl_power_manager_em4_config.h
+  file_id: power_manager_em4_config
+  condition: [device_has_emu]
 provides:
 - name: power_manager
 requires:
@@ -53,4 +57,3 @@ recommends:
 documentation:
   docset: gecko-platform
   document: platform-service-power-manager-overview
-root_path: platform_core

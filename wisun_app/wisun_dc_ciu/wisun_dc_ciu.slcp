@@ -31,13 +31,13 @@ requires:
   - name: memory_manager
   - name: power_manager
   - name: freertos
+  - name: wisun_stack_dc_client
 
 component:
   # Wi-SUN
   - id: wisun_stack
   - id: wisun_stack_debug
   - id: wisun_default_radioconf
-  - id: wisun_stack_dc_client
 
   # platform
   - id: sl_main

@@ -64,3 +64,11 @@ upgrade:
           - ram_interrupt_vector_init
     configuration:
       - script: platform_core/platform/service/component/upgrade_configuration_interrupt_manager.lua
+  - sdk:
+      id: simplicity_sdk
+      version: "2026.12.0"
+    configuration:
+      - script: platform_core/platform/service/component/upgrade_configuration_power_manager_em4.lua
+        description: >
+          SL_POWER_MANAGER_INIT_EMU_EM4_PIN_RETENTION_MODE moved from
+          sl_power_manager_config.h to sl_power_manager_em4_config.h.

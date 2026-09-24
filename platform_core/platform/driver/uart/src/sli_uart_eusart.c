@@ -201,17 +201,29 @@ static inline bool eusart_uart_is_lf_mode(EUSART_TypeDef *eusart,
 #if defined(EUSART_PRESENT)
 
 /***************************************************************************//**
+ * Returns the GPIO EUSARTROUTE entry for the given EUSART instance.
+ ******************************************************************************/
+static GPIO_EUSARTROUTE_TypeDef *eusart_uart_get_gpio_route(EUSART_TypeDef *eusart)
+{
+  unsigned int eusart_num = (unsigned int)EUSART_NUM(eusart);
+
+  return eusart_num < SL_ARRAY_SIZE(GPIO->EUSARTROUTE) ? &GPIO->EUSARTROUTE[eusart_num] : NULL;
+}
+
+/***************************************************************************//**
  * Initializes the EUSART pins.
  ******************************************************************************/
 static void eusart_uart_init_transport_pins(sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
+  GPIO_EUSARTROUTE_TypeDef *route = eusart_uart_get_gpio_route(eusart);
+  EFM_ASSERT(route != NULL);
 
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].TXROUTE = (pin_config->tx.port << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
-                                                  | (pin_config->tx.pin << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].RXROUTE = (pin_config->rx.port << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
-                                                  | (pin_config->rx.pin << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN |= GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_RXPEN;
+  route->TXROUTE = (pin_config->tx.port << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
+                   | (pin_config->tx.pin << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
+  route->RXROUTE = (pin_config->rx.port << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
+                   | (pin_config->rx.pin << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
+  route->ROUTEEN |= GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_RXPEN;
 }
 
 /***************************************************************************//**
@@ -220,10 +232,11 @@ static void eusart_uart_init_transport_pins(sl_peripheral_t uart, const sl_uart_
 static void eusart_uart_deinit_transport_pins(sl_peripheral_t uart)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
+  GPIO_EUSARTROUTE_TypeDef *route = eusart_uart_get_gpio_route(eusart);
 
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].TXROUTE = _GPIO_EUSART_TXROUTE_RESETVALUE;
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].RXROUTE = _GPIO_EUSART_RXROUTE_RESETVALUE;
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN = _GPIO_EUSART_ROUTEEN_RESETVALUE;
+  route->TXROUTE = _GPIO_EUSART_TXROUTE_RESETVALUE;
+  route->RXROUTE = _GPIO_EUSART_RXROUTE_RESETVALUE;
+  route->ROUTEEN = _GPIO_EUSART_ROUTEEN_RESETVALUE;
 }
 
 /***************************************************************************//**
@@ -232,12 +245,13 @@ static void eusart_uart_deinit_transport_pins(sl_peripheral_t uart)
 static void eusart_uart_init_hwfc_pins(sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
+  GPIO_EUSARTROUTE_TypeDef *route = eusart_uart_get_gpio_route(eusart);
 
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].CTSROUTE = (pin_config->cts.port << _GPIO_EUSART_CTSROUTE_PORT_SHIFT)
-                                                   | (pin_config->cts.pin << _GPIO_EUSART_CTSROUTE_PIN_SHIFT);
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].RTSROUTE = (pin_config->rts.port << _GPIO_EUSART_RTSROUTE_PORT_SHIFT)
-                                                   | (pin_config->rts.pin << _GPIO_EUSART_RTSROUTE_PIN_SHIFT);
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN |= GPIO_EUSART_ROUTEEN_RTSPEN;
+  route->CTSROUTE = (pin_config->cts.port << _GPIO_EUSART_CTSROUTE_PORT_SHIFT)
+                    | (pin_config->cts.pin << _GPIO_EUSART_CTSROUTE_PIN_SHIFT);
+  route->RTSROUTE = (pin_config->rts.port << _GPIO_EUSART_RTSROUTE_PORT_SHIFT)
+                    | (pin_config->rts.pin << _GPIO_EUSART_RTSROUTE_PIN_SHIFT);
+  route->ROUTEEN |= GPIO_EUSART_ROUTEEN_RTSPEN;
 }
 
 /***************************************************************************//**
@@ -246,10 +260,11 @@ static void eusart_uart_init_hwfc_pins(sl_peripheral_t uart, const sl_uart_pin_c
 static void eusart_uart_deinit_hwfc_pins(sl_peripheral_t uart)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
+  GPIO_EUSARTROUTE_TypeDef *route = eusart_uart_get_gpio_route(eusart);
 
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].CTSROUTE = _GPIO_EUSART_CTSROUTE_RESETVALUE;
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].RTSROUTE = _GPIO_EUSART_RTSROUTE_RESETVALUE;
-  GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN &= ~GPIO_EUSART_ROUTEEN_RTSPEN;
+  route->CTSROUTE = _GPIO_EUSART_CTSROUTE_RESETVALUE;
+  route->RTSROUTE = _GPIO_EUSART_RTSROUTE_RESETVALUE;
+  route->ROUTEEN &= ~GPIO_EUSART_ROUTEEN_RTSPEN;
 }
 
 #endif // EUSART_PRESENT

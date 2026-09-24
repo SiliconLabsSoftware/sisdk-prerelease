@@ -1241,6 +1241,14 @@ sl_status_t sli_clock_manager_hal_set_perpll_predefined_frequency(uint8_t perpll
   return SL_STATUS_NOT_AVAILABLE;
 }
 
+/***************************************************************************//**
+ * Enable or disable HFXO settings required for SYSRTC pre-triggers.
+ ******************************************************************************/
+void sli_clock_manager_hal_enable_hfxo_sysrtc_pretriggers(bool enable)
+{
+  (void)enable;
+}
+
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 1)
 /***************************************************************************//**
  * Gets the register and bit for the bus clock.

@@ -16,7 +16,7 @@ def _sudo() -> list[str]:
 
 
 def _run_ignore(cmd: list[str]) -> None:
-    subprocess.run(cmd, capture_output=True, text=True)
+    subprocess.run(cmd, capture_output=True, text=True, check=False)
 
 
 def stop_docker_multiprotocol() -> None:
@@ -38,7 +38,7 @@ def stop_systemd_services() -> None:
     for n in names:
         _run_ignore([*sudo, "systemctl", "stop", n])
 
-    # Template otbr@N — stop common interface IDs (matches validate_interface_id 0–3 in run.sh).
+    # Template otbr@N - stop common interface IDs (matches validate_interface_id 0-3 in run.sh).
     for i in range(4):
         _run_ignore([*sudo, "systemctl", "stop", f"otbr@{i}"])
 

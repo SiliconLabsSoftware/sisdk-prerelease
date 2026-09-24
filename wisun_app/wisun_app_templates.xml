@@ -72,7 +72,7 @@
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar llvm segger"/>
     <properties key="category" value="Wi-SUN Examples"/>
-    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Wi-SUN"/>
   </descriptors>

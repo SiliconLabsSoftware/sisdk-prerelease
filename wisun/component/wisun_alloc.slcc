@@ -1,5 +1,5 @@
 id: wisun_alloc
-label: Wi-SUN alloc
+label: "Wi-SUN Memory Allocator"
 description: >
   Wi-SUN alloc is an optional application component that reserves a separate heap used for critical features needed
   to maintain the Wi-SUN network. This includes all cryptographic operations.

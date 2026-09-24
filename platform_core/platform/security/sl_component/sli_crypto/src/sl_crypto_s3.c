@@ -736,7 +736,11 @@ sl_status_t sli_crypto_process_rpa(sli_crypto_descriptor_t     *key_descriptor,
   while (RPA->IF == _RPA_IF_RESETVALUE) ;
 
   // Validate the result
+#if defined(_RPA_IF_RPADONEIF_MASK)
   if ((RPA->IF & _RPA_IF_RPADONEIF_MASK) != RPA_IF_RPADONEIF) {
+#else
+  if ((RPA->IF & _RPA_IF_RPADONE_MASK) != RPA_IF_RPADONE) {
+#endif
     RPA->EN_CLR = RPA_EN_EN;
     sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_RPA);
     sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_LPWAES);

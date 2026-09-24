@@ -53,9 +53,10 @@ extern "C" {
  *    DMA interrupt is unmasked.
  *  - Records any error reported by the channel so the regular error handling
  *    path can run.
- *  - Walks the channel's descriptor list, invokes user completion callbacks for
- *    descriptors whose hardware transfer has completed, and transitions the
- *    channel to @p SL_DMA_CHANNEL_STATE_DISABLED when there is no more work.
+ *  - Walks the channel's descriptor list, invokes user completion callbacks
+ *    for completed descriptors that requested @c callback_on_complete (the
+ *    last descriptor of a segmented transfer), and transitions the channel
+ *    to @p SL_DMA_CHANNEL_STATE_DISABLED when there is no more work.
  *
  * It is intended for drivers that need to wait for a DMA transfer to complete
  * while the DMA channel IRQ is masked (for example, a blocking transfer
@@ -82,10 +83,10 @@ extern "C" {
  *       interrupt-controller global state (such as the active IRQ number) to
  *       identify the channel: the channel is taken from @p handle.
  *
- * @note Only meaningful in @ref SL_DMA_CHANNEL_MODE_NORMAL. In
- *       @ref SL_DMA_CHANNEL_MODE_LOOPING the channel never disables itself and
- *       this function will only clear pending IRQ flags without invoking the
- *       looping callback (which is normally tied to IRQ context).
+ * @note Meaningful for normal-mode completion and for cycling lists: completed
+ *       descriptors are processed with the same rules as the IRQ path (rotate
+ *       in-cycle heads; invoke the handle callback when
+ *       @c callback_on_complete is set).
  *
  * @note Supports both low-range channels (0..15, via @c IF/@c IEN) and, on
  *       parts that define @c _LDMA_IFH_MASK, high-range channels (16..31, via

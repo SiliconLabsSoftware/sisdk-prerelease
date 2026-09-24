@@ -305,14 +305,21 @@ typedef struct sli_uart_ops sli_uart_ops_t;
 
 #define SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO UINT8_MAX ///< Automatically allocate the DMA channel at init.
 
-/// @brief UART pre-initialization configuration preserved across deinit.
-typedef struct uart_preinit_config {
-  size_t async_tx_transfer_count;
-  size_t async_rx_transfer_count;
-  uint8_t async_tx_dma_channel_number;
-  uint8_t async_rx_dma_channel_number;
-  bool async_en;
-} sl_uart_preinit_config_t;
+/// @brief UART asynchronous transfer configuration.
+typedef struct {
+  size_t async_tx_transfer_count;       ///< Number of TX transfers that can be queued.
+  size_t async_rx_transfer_count;       ///< Number of RX transfers that can be queued.
+  uint8_t async_tx_dma_channel_number;  ///< TX DMA channel, or @ref SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO.
+  uint8_t async_rx_dma_channel_number;  ///< RX DMA channel, or @ref SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO.
+} sl_uart_async_config_t;
+
+/// Default async configuration with auto-allocated DMA channels and a transfer pool of 5.
+#define SL_UART_ASYNC_CONFIG_DEFAULT (sl_uart_async_config_t) {                                      \
+          .async_tx_transfer_count = 5,                                           \
+          .async_rx_transfer_count = 5,                                           \
+          .async_tx_dma_channel_number = SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO,   \
+          .async_rx_dma_channel_number = SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO,   \
+}
 
 /// UART handle state
 typedef enum {
@@ -340,7 +347,8 @@ typedef struct uart_handle {
   sl_power_manager_em_t em_requirement;
 #endif
 #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
-  sl_uart_preinit_config_t preinit_config;
+  sl_uart_async_config_t async_config;
+  bool async_en;
   sl_uart_handle_state_t async_tx_state;
   sl_uart_handle_state_t async_rx_state;
   sl_slist_node_t *async_tx_transfer_submitted_list_head;
@@ -403,19 +411,32 @@ __STATIC_INLINE size_t sl_uart_handle_get_size(void)
 /***************************************************************************//**
  * Initializes given UART instance.
  *
+ * The handle is completely zeroed before initialization. Dynamically allocated
+ * handles (for example via malloc) do not need to be cleared by the caller.
+ *
  * @param[in]  uart_handle Handle to UART.
  *
  * @param[in]  uart UART peripheral to use with this handle.
  *
  * @param[in]  pin_config Pointer to the pin configuration.
  *
- * @return @ref SL_STATUS_OK if successful.
- *         @ref SL_STATUS_ALREADY_INITIALIZED if the UART is already initialized.
- *         Error code otherwise.
+ * @param[in]  async_config Pointer to the asynchronous configuration, or NULL
+ *                          for a synchronous instance. When non-NULL, async
+ *                          resources (DMA channels and transfer pools) are
+ *                          initialized. Use @ref SL_UART_ASYNC_CONFIG_DEFAULT
+ *                          for typical async setups. After @ref sl_uart_deinit,
+ *                          pass the async configuration again to re-initialize
+ *                          as async.
+ *
+ * @note Calling this function on an already-initialized handle (without a
+ *       prior @ref sl_uart_deinit) is undefined behavior.
+ *
+ * @return @ref SL_STATUS_OK if successful. Error code otherwise.
  ******************************************************************************/
 sl_status_t sl_uart_init(sl_uart_handle_t *uart_handle,
                          sl_peripheral_t uart,
-                         const sl_uart_pin_config_t *pin_config);
+                         const sl_uart_pin_config_t *pin_config,
+                         const sl_uart_async_config_t *async_config);
 
 /***************************************************************************//**
  * De-initializes given UART instance.

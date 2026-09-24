@@ -1,6 +1,6 @@
 id: wisun_rcp_app
-label: Wi-SUN Border Router RCP
-description: Provide Wi-SUN Border Router RCP
+label: Wi-SUN RCP
+description: Provide Wi-SUN RCP
 package: wisun
 category: "Wi-SUN|Application|Wi-SUN RCP"
 quality: production

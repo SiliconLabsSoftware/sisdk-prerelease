@@ -146,9 +146,6 @@ void sli_sleeptimer_hal_hfxo_manager_integration_init(void)
 #if defined(_SILICON_LABS_32B_SERIES_2)
   PRS_ConnectSignal(2UL, prsTypeAsync, prsSignalHFXO0L_STATUS1);
   PRS_ConnectConsumer(2UL, prsTypeAsync, prsConsumerSYSRTC0_SRC0);
-#else
-  sl_hal_prs_async_connect_channel_producer(2UL, SL_HAL_PRS_ASYNC_SYXO0L_STATUS1);
-  sl_hal_prs_connect_channel_consumer(2UL, SL_HAL_PRS_TYPE_ASYNC, SL_HAL_PRS_CONSUMER_SYSRTC0_IN0);
 #endif
 
   // Set SYSRTC Capture Channel

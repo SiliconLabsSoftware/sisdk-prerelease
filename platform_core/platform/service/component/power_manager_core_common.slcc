@@ -16,6 +16,8 @@ include:
   - path: sl_power_manager.h
   - path: sl_power_manager_debug.h
   - path: sli_power_manager.h
+  - path: sl_power_manager_em4.h
+    condition: [device_has_emu]
   - path: sl_power_manager_execution_modes.h
     condition: [device_series_3]
 - path: src/common

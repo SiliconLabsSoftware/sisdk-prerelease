@@ -23,10 +23,6 @@ library:
   condition:
   - toolchain_gcc
   - linux_arch_x86_64
-- path: lib/gcc/darwin/x86-64/release/librtl_static.a
-  condition:
-  - toolchain_gcc
-  - macos
 - path: lib/gcc/windows/x86-64/release/librtl_static.a
   condition:
   - toolchain_gcc
@@ -67,10 +63,22 @@ template_contribution:
 - name: component_catalog
   value: rtl_lib
 
+# LLVM's Arm multilib selects libc++ from the link command. Without these
+# driver flags on the link line, Clang picks the *_exn_rtti_* variant and
+# pulls in ~50 KB of exception/RTTI runtime (e.g. cxa_demangle).
+toolchain_settings:
+- option: llvm_c++_compiler_option
+  value: -fno-exceptions -fno-rtti
+  condition: [device_cortexm, toolchain_llvm]
+- option: llvm_linker_option
+  value: -fno-exceptions -fno-rtti
+  condition: [device_cortexm, toolchain_llvm]
+
 documentation:
   docset: rtl-lib
   document: modules
 
+# Refuse generation on architectures with no matching library: entry above.
 validation_helper:
-- path: scripts/lua/mac_deprecation.lua
-  condition: [macos]
+- path: scripts/lua/rtllib_unsupported_target.lua
+  unless: [cortexm33, linux_arch_x86_64, linux_arch_aarch64, linux_arch_arm32v7, win32]

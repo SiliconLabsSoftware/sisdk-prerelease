@@ -104,14 +104,12 @@ static const psa_ecc_family_t asymmetric_key_curve[] = {
 static uint8_t secpr1_key_size_select;
 
 static const char *secpr1_key_size_string[] = {
-  "SECP192R1",
   "SECP256R1",
   "SECP384R1",
   "SECP521R1",
 };
 
 static const size_t secpr1_key_size[] = {
-  192,
   256,
   384,
   521
@@ -143,23 +141,6 @@ static const psa_key_usage_t asymmetric_key_usage[] = {
   0,
   PSA_KEY_USAGE_EXPORT,
   PSA_KEY_USAGE_COPY
-};
-
-/// SECP192R1 key pair
-static const uint8_t secp192r1_private[] = {
-  0x4f, 0xc2, 0x13, 0x5e, 0x07, 0x5f, 0x69, 0xe5,
-  0x72, 0x93, 0x08, 0xc6, 0x70, 0xa5, 0x97, 0xaf,
-  0x3d, 0x3d, 0x65, 0x6d, 0x90, 0x1e, 0x06, 0xbd
-};
-
-static const uint8_t secp192r1_public[] = {
-  0x04,         // Uncompressed point format
-  0xe1, 0x8e, 0x21, 0xaa, 0x15, 0xd2, 0x7a, 0x71,
-  0x3c, 0x9b, 0x5d, 0x8a, 0xb9, 0x27, 0x9a, 0xff,
-  0xae, 0x18, 0x2c, 0x32, 0xc5, 0x8b, 0x9a, 0x71,
-  0x65, 0xdd, 0x82, 0xc0, 0x5a, 0x3b, 0x84, 0xb1,
-  0xac, 0x33, 0x5b, 0xf3, 0x42, 0x83, 0xce, 0x34,
-  0xad, 0x5a, 0x9a, 0x3b, 0xe2, 0x68, 0x41, 0xbe
 };
 
 /// SECP256R1 key pair
@@ -875,19 +856,18 @@ static void print_key_size_option(void)
            secpr1_key_size_string[secpr1_key_size_select]);
 #if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
     if (asymmetric_key_storage_select > KEY_STORAGE_PLAIN_MAX) {
-      printf("  + Press SPACE to select %s key length (%d or %d), "
+      printf("  + Press SPACE to select %s key length (%d), "
              "press ENTER to next option.\n",
              asymmetric_key_curve_string[asymmetric_key_curve_select],
-             secpr1_key_size[0], secpr1_key_size[1]);
+             secpr1_key_size[0]);
       app_state = SELECT_SECPR1_SIZE;
     } else
 #endif
     {
-      printf("  + Press SPACE to select %s key length (%d or %d or %d or %d), "
+      printf("  + Press SPACE to select %s key length (%d or %d or %d), "
              "press ENTER to next option.\n",
              asymmetric_key_curve_string[asymmetric_key_curve_select],
-             secpr1_key_size[0], secpr1_key_size[1], secpr1_key_size[2],
-             secpr1_key_size[3]);
+             secpr1_key_size[0], secpr1_key_size[1], secpr1_key_size[2]);
       app_state = SELECT_SECPR1_SIZE;
     }
   } else if (asymmetric_key_curve_select == 1) {
@@ -960,13 +940,6 @@ static void print_export_public(void)
 static uint8_t * get_test_key_buf_ptr(bool private)
 {
   switch (selected_key_size) {
-    case 192:
-      if (private) {
-        return((uint8_t *)secp192r1_private);
-      } else {
-        return((uint8_t *)secp192r1_public);
-      }
-
     case 256:
       if (private) {
         return((uint8_t *)secp256r1_private);

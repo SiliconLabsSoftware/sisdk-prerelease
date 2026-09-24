@@ -744,7 +744,7 @@ const char *sl_rtl_get_lib_version(void);
  *
  * **Supported Combinations**
  *
- * Main Mode: Phase-Based Ranging (PBR), Sub Mode: None
+ * Main Mode: Phase-Based Ranging (PBR) or Combined (Mode 3), Sub Mode: None
  *
  * | CS Algorithm Mode           | Channel Map Preset <br> HIGH | Channel Map Preset <br> MEDIUM | Channel Map Preset <br> LOW |
  * | :-------------------------- | :--------------------------: | :----------------------------: | :-------------------------: |
@@ -842,8 +842,7 @@ typedef enum  {
                                          (RTT) */
   SL_RTL_CS_MODE_PBR =          2,  /**< Round-trip phase based estimation
                                          (PBR) */
-  SL_RTL_CS_MODE_COMBINED =     3,  /**< Combined PBR and RTT estimation.
-                                         Currently unsupported mode. */
+  SL_RTL_CS_MODE_COMBINED =     3,  /**< Combined PBR and RTT estimation. */
   SL_RTL_CS_MODE_NONE =         0xFF,  /**< No mode is set. This option is used
                                            solely to indicate the absence of a
                                            sub mode. */

@@ -160,17 +160,29 @@ static inline sl_hal_usart_ovs_t uart_oversampling_to_usart_hal_oversampling(sl_
 }
 
 /***************************************************************************//**
+ * Returns the GPIO USARTROUTE entry for the given USART instance.
+ ******************************************************************************/
+static GPIO_USARTROUTE_TypeDef *usart_uart_get_gpio_route(USART_TypeDef *usart)
+{
+  unsigned int usart_num = (unsigned int)USART_NUM(usart);
+
+  return usart_num < SL_ARRAY_SIZE(GPIO->USARTROUTE) ? &GPIO->USARTROUTE[usart_num] : NULL;
+}
+
+/***************************************************************************//**
  * Initializes the USART pins.
  ******************************************************************************/
 static void usart_uart_init_transport_pins(sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
+  GPIO_USARTROUTE_TypeDef *route = usart_uart_get_gpio_route(usart);
+  EFM_ASSERT(route != NULL);
 
-  GPIO->USARTROUTE[USART_NUM(usart)].TXROUTE = (pin_config->tx.port << _GPIO_USART_TXROUTE_PORT_SHIFT)
-                                               | (pin_config->tx.pin << _GPIO_USART_TXROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE[USART_NUM(usart)].RXROUTE = (pin_config->rx.port << _GPIO_USART_RXROUTE_PORT_SHIFT)
-                                               | (pin_config->rx.pin << _GPIO_USART_RXROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE[USART_NUM(usart)].ROUTEEN |= GPIO_USART_ROUTEEN_TXPEN | GPIO_USART_ROUTEEN_RXPEN;
+  route->TXROUTE = (pin_config->tx.port << _GPIO_USART_TXROUTE_PORT_SHIFT)
+                   | (pin_config->tx.pin << _GPIO_USART_TXROUTE_PIN_SHIFT);
+  route->RXROUTE = (pin_config->rx.port << _GPIO_USART_RXROUTE_PORT_SHIFT)
+                   | (pin_config->rx.pin << _GPIO_USART_RXROUTE_PIN_SHIFT);
+  route->ROUTEEN |= GPIO_USART_ROUTEEN_TXPEN | GPIO_USART_ROUTEEN_RXPEN;
 }
 
 /***************************************************************************//**
@@ -179,10 +191,11 @@ static void usart_uart_init_transport_pins(sl_peripheral_t uart, const sl_uart_p
 static void usart_uart_deinit_transport_pins(sl_peripheral_t uart)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
+  GPIO_USARTROUTE_TypeDef *route = usart_uart_get_gpio_route(usart);
 
-  GPIO->USARTROUTE[USART_NUM(usart)].TXROUTE = _GPIO_USART_TXROUTE_RESETVALUE;
-  GPIO->USARTROUTE[USART_NUM(usart)].RXROUTE = _GPIO_USART_RXROUTE_RESETVALUE;
-  GPIO->USARTROUTE[USART_NUM(usart)].ROUTEEN = _GPIO_USART_ROUTEEN_RESETVALUE;
+  route->TXROUTE = _GPIO_USART_TXROUTE_RESETVALUE;
+  route->RXROUTE = _GPIO_USART_RXROUTE_RESETVALUE;
+  route->ROUTEEN = _GPIO_USART_ROUTEEN_RESETVALUE;
 }
 
 /***************************************************************************//**
@@ -191,12 +204,13 @@ static void usart_uart_deinit_transport_pins(sl_peripheral_t uart)
 static void usart_uart_init_hwfc_pins(sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
+  GPIO_USARTROUTE_TypeDef *route = usart_uart_get_gpio_route(usart);
 
-  GPIO->USARTROUTE[USART_NUM(usart)].CTSROUTE = (pin_config->cts.port << _GPIO_USART_CTSROUTE_PORT_SHIFT)
-                                                | (pin_config->cts.pin << _GPIO_USART_CTSROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE[USART_NUM(usart)].RTSROUTE = (pin_config->rts.port << _GPIO_USART_RTSROUTE_PORT_SHIFT)
-                                                | (pin_config->rts.pin << _GPIO_USART_RTSROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE[USART_NUM(usart)].ROUTEEN |= GPIO_USART_ROUTEEN_RTSPEN;
+  route->CTSROUTE = (pin_config->cts.port << _GPIO_USART_CTSROUTE_PORT_SHIFT)
+                    | (pin_config->cts.pin << _GPIO_USART_CTSROUTE_PIN_SHIFT);
+  route->RTSROUTE = (pin_config->rts.port << _GPIO_USART_RTSROUTE_PORT_SHIFT)
+                    | (pin_config->rts.pin << _GPIO_USART_RTSROUTE_PIN_SHIFT);
+  route->ROUTEEN |= GPIO_USART_ROUTEEN_RTSPEN;
 }
 
 /***************************************************************************//**
@@ -205,10 +219,11 @@ static void usart_uart_init_hwfc_pins(sl_peripheral_t uart, const sl_uart_pin_co
 static void usart_uart_deinit_hwfc_pins(sl_peripheral_t uart)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
+  GPIO_USARTROUTE_TypeDef *route = usart_uart_get_gpio_route(usart);
 
-  GPIO->USARTROUTE[USART_NUM(usart)].CTSROUTE = _GPIO_USART_CTSROUTE_RESETVALUE;
-  GPIO->USARTROUTE[USART_NUM(usart)].RTSROUTE = _GPIO_USART_RTSROUTE_RESETVALUE;
-  GPIO->USARTROUTE[USART_NUM(usart)].ROUTEEN &= ~GPIO_USART_ROUTEEN_RTSPEN;
+  route->CTSROUTE = _GPIO_USART_CTSROUTE_RESETVALUE;
+  route->RTSROUTE = _GPIO_USART_RTSROUTE_RESETVALUE;
+  route->ROUTEEN &= ~GPIO_USART_ROUTEEN_RTSPEN;
 }
 
 /***************************************************************************//**

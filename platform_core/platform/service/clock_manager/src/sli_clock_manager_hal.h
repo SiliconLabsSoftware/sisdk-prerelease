@@ -264,6 +264,11 @@ sl_status_t sli_clock_manager_hal_set_perpll_frequency(uint8_t perpll_num,
 sl_status_t sli_clock_manager_hal_set_perpll_predefined_frequency(uint8_t perpll_num,
                                                                   sli_clock_manager_perpll_predefined_frequency_t frequency);
 
+/***************************************************************************//**
+ * Enable or disable HFXO settings required for SYSRTC pre-triggers.
+ ******************************************************************************/
+void sli_clock_manager_hal_enable_hfxo_sysrtc_pretriggers(bool enable);
+
 #if defined(SL_CATALOG_CLOCK_MANAGER_RUNTIME_HAL_INTERNAL_PRESENT)
 /***************************************************************************//**
  * Gets frequency of given internal clock branch.

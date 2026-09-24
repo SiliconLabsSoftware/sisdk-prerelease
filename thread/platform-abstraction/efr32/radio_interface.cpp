@@ -148,7 +148,7 @@ extern void sli_update_tx_power_after_config_update(sl_rail_tx_pa_mode_t pa_mode
 extern void sli_set_tx_power_in_rail(int8_t aTxPower);
 
 // External functions from radio.cpp
-extern bool sl_rail_util_coex_is_enabled(void);
+extern "C" bool sl_rail_util_coex_is_enabled(void);
 
 static const otRadioCaps sRadioCapabilities =
     (OT_RADIO_CAPS_ACK_TIMEOUT | OT_RADIO_CAPS_CSMA_BACKOFF | OT_RADIO_CAPS_ENERGY_SCAN | OT_RADIO_CAPS_SLEEP_TO_TX

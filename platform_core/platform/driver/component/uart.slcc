@@ -3,7 +3,10 @@ package: platform_core
 label: UART Driver
 description: >
   Platform UART driver for USART, EUART, and EUSART peripherals. Declares the
-  underlying peripheral signals (TX, RX, CTS, RTS) and interrupt handlers in  per-instance configuration so users can configure pin routing through the  pin tool and initialize instances at runtime.
+  underlying peripheral signals (TX, RX, CTS, RTS) and interrupt handlers in
+  per-instance configuration so users can configure pin routing through the
+  pin tool. Generated instances are initialized by sl_uart_init_instances()
+  (automatically when sl_main is present).
 category: Platform|Driver|UART
 quality: experimental
 metadata:
@@ -14,6 +17,8 @@ instantiable:
   prefix: inst
 provides:
 - name: uart
+  allow_multiple: true
+- name: uart_instance
   allow_multiple: true
 requires:
 - name: uart_core

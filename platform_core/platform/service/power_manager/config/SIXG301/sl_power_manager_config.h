@@ -65,16 +65,6 @@
 #endif
 // </e>
 
-// <o SL_POWER_MANAGER_INIT_EMU_EM4_PIN_RETENTION_MODE> Pin retention mode
-// <i>
-// <EMU_EM4CTRL_EM4IORETMODE_DISABLE=> No retention
-// <EMU_EM4CTRL_EM4IORETMODE_EM4EXIT=> Retention through EM4
-// <EMU_EM4CTRL_EM4IORETMODE_SWUNLATCH=> Retention through EM4 and wakeup
-// <d> power_manager_pin_retention_disable
-#ifndef SL_POWER_MANAGER_INIT_EMU_EM4_PIN_RETENTION_MODE
-#define SL_POWER_MANAGER_INIT_EMU_EM4_PIN_RETENTION_MODE EMU_EM4CTRL_EM4IORETMODE_DISABLE
-#endif
-
 // <e SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN> Enable Execution Modes feature
 // <i> This will override the SL_CLOCK_MANAGER_SYSCLK_SOURCE config in Clock Manager.
 // <i> The SYSCLK source will be hardcoded to HFRCODPLL in standard execution mode and will be changed to SOCPLL when switching to performance mode.

@@ -12,6 +12,7 @@ ui_hints:
 root_path: platform_core/platform/service/power_manager/
 source:
 - path: src/common/sl_power_manager_em4.c
+  condition: [device_has_emu]
 - path: src/common/sl_power_manager_execution_modes_hal_sixg301.c
   condition: [device_generic_family_sixx301]
 provides:
@@ -33,6 +34,7 @@ requires:
 - name: power_manager_energy_mode_impl
 - name: power_manager_core_common
 - name: code_classification
+- name: component_catalog
 template_contribution:
 - name: event_handler
   value:
@@ -43,6 +45,9 @@ template_contribution:
   condition: [sl_system, kernel]
 - name: component_catalog
   value: power_manager
+- name: component_catalog
+  value: power_manager_em4
+  condition: [device_has_emu]
 - name: code_classification_components
   value: power_manager
 define:

@@ -1,5 +1,5 @@
 id: "wisun_crash_handler"
-label: "Wi-SUN crash handler plugin"
+label: "Wi-SUN Crash Handler Plugin"
 description: "Wi-SUN crash handler"
 package: "wisun"
 category: "Wi-SUN|Application"

@@ -53,7 +53,7 @@ typedef enum {
 #else
 #define KEY_STORAGE_MAX         PERSISTENT_PLAIN_KEY
 #endif
-#define SECPR1_SIZE_MAX         (3)
+#define SECPR1_SIZE_MAX         (2)
 #define KEY_CURVE_MAX           (1)
 #define MONTGOMERY_SIZE_MAX     (1)
 

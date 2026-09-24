@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 {% set uart_instances_it = (uart_instances | default([], true) | list) + (uart_async_instances | default([], true) | list) %}
+{% set uart_async_instances_it = uart_async_instances | default([], true) | list %}
 #ifndef SL_UART_INSTANCES_H
 #define SL_UART_INSTANCES_H
 
@@ -41,9 +42,23 @@ extern "C" {
 {% for instance in uart_instances_it %}
 extern sl_peripheral_t sl_uart_{{ instance }}_peripheral;
 extern sl_uart_handle_t sl_uart_{{ instance }}_handle;
+{% if instance in uart_async_instances_it %}
+extern const sl_uart_async_config_t sl_uart_{{ instance }}_async_config;
+{% endif %}
 extern const sl_uart_pin_config_t sl_uart_{{ instance }}_pin_config;
 extern const sl_uart_config_t sl_uart_{{ instance }}_line_config;
 {% endfor %}
+
+/***************************************************************************//**
+ * Initializes all UART driver instances declared via SLC.
+ *
+ * Calls @ref sl_uart_init and @ref sl_uart_configure_line for every statically
+ * declared UART and UART async instance.
+ *
+ * @note When sl_main is present, this function is invoked automatically during
+ *       driver initialization.
+ ******************************************************************************/
+void sl_uart_instances_init(void);
 
 #ifdef __cplusplus
 }

@@ -14,6 +14,7 @@ requires:
 
 conflicts:
 - name: "wisun_br_stack"
+- name: "wisun_dc_client_library"
 
 provides:
 - name: "wisun_dc_client_implementation"

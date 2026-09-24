@@ -41,7 +41,6 @@ The two-level certificate-chain flow is:
 
 `PSA_ECC_FAMILY_SECP_R1`
 
-- SECP192R1 — 192-bit
 - SECP256R1 — 256-bit
 - SECP384R1 — 384-bit
 - SECP521R1 — 521-bit

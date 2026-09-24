@@ -57,6 +57,9 @@
 #include "sli_sleeptimer.h"
 #include "sl_power_manager.h"
 #endif
+#if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
+#include "sli_clock_manager_runtime_configuration.h"
+#endif
 
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
@@ -3173,6 +3176,24 @@ sl_status_t sli_clock_manager_hal_set_perpll_predefined_frequency(uint8_t perpll
   (void)frequency;
   return SL_STATUS_NOT_AVAILABLE;
 #endif
+}
+
+/***************************************************************************//**
+ * Enable or disable HFXO settings required for SYSRTC pre-triggers.
+ ******************************************************************************/
+void sli_clock_manager_hal_enable_hfxo_sysrtc_pretriggers(bool enable)
+{
+  if (enable) {
+    HFXO0->CTRL_CLR = HFXO_CTRL_DISONDEMANDSYSRTC;
+#if defined(HFXO_CTRL_EM23ONDEMAND)
+    HFXO0->CTRL_SET = HFXO_CTRL_EM23ONDEMAND;
+#endif
+  } else {
+    HFXO0->CTRL_SET = HFXO_CTRL_DISONDEMANDSYSRTC;
+#if defined(HFXO_CTRL_EM23ONDEMAND)
+    HFXO0->CTRL_CLR = HFXO_CTRL_EM23ONDEMAND;
+#endif
+  }
 }
 
 /***************************************************************************//**

@@ -70,9 +70,6 @@ include:
   - "path": "sn_coap_protocol.h"
   - "path": "sn_coap_header.h"
   - "path": "ns_list.h"
-- path: "mbed-trace"
-  file_list:
-  - "path": "mbed_trace.h"
 - path: "mbed-client-randlib"
   file_list:
   - "path": "randLIB.h"

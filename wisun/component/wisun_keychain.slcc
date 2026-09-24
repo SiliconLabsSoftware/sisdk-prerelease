@@ -1,5 +1,5 @@
 id: wisun_keychain
-label: Wi-SUN keychain
+label: "Wi-SUN Keychain"
 description: >
   Wi-SUN keychain is an optional application component that simplifies certificate/private key handling.
   It supports DDP credentials as well as built-in compilation time credentials.

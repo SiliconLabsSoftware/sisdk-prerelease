@@ -60,6 +60,19 @@ special_cases = {
             }
         }
     },
+    "brd2608b": {
+        "compatible": True,
+        "requirements": {
+            "SL_EZSPSPI_HOST_INT": {
+                "component": "breakout_0",
+                "signal": "2"
+            },
+            "SL_EZSPSPI_WAKE_INT": {
+                "component": "breakout_0",
+                "signal": "3"
+            }
+        }
+    },    
     "brd4104a": {
         "compatible": True,
         "requirements": {

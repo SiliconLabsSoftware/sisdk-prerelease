@@ -3,7 +3,7 @@ label: "Wi-SUN Direct Connect Client Support"
 description: >
   Adds Wi-SUN Direct Connect (DC) client capability.
 package: "wisun"
-category: "Wi-SUN|Stack"
+category: "Wi-SUN|Stack Plugin|Direct Connect"
 quality: "production"
 root_path: "wisun/./stack"
 
@@ -20,19 +20,15 @@ root_path: "wisun/./stack"
 # "recommends", but it seems to work in practice.
 
 requires:
-- name: "device_supports_wisun"
 - name: "wisun_dc_client_implementation"
 - name: "wisun_dc_client_plugin"
   condition: [wisun_stack_supports_dc_client]
-- name: "wisun_lxpm_implementation"
 
 recommends:
 - id: "wisun_dc_client_library"
   unless: [wisun_stack_supports_dc_client]
   vendor: silabs
-- id: "wisun_lxpm_stubs"
 
-  vendor: silabs
 conflicts:
 - name: "wisun_br_stack"
 
@@ -48,8 +44,6 @@ define:
 
 provides:
 - name: "wisun_stack_dc_client"
-- name: "wisun_stack_device_type"
-  condition: [wisun_dc_client_library]
 
 template_contribution:
 - name: component_catalog

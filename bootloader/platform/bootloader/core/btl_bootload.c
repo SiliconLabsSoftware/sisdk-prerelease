@@ -452,9 +452,12 @@ bool bootload_checkApplicationPropertiesMagic(void *appProperties)
   // Taking minimum value of appEndCfg and flashEnd, to avoid errors when
   // user configured endOfAppSpace exceeds the flash limit.
   uint32_t appEnd = (appEndCfg <= flashEnd) ? appEndCfg : flashEnd;
+  // Validate the complete application properties structure.
+  const uint32_t requiredSize = sizeof(ApplicationProperties_t);
 
-  if ((appProperties == NULL) || ((uint32_t) appProperties == 0xFFFFFFFFUL)
-      || ((uint32_t)appProperties + sizeof(appProperties) > appEnd)) {
+  if ((appProperties == NULL) || ((uint32_t)appProperties == 0xFFFFFFFFUL)
+      || ((uint32_t)appProperties >= appEnd)
+      || ((appEnd - (uint32_t)appProperties) < requiredSize)) {
     return false;
   }
 

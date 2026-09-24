@@ -47,3 +47,9 @@ requires:
 template_contribution:
 - name: component_catalog
   value: uart
+- name: event_handler
+  condition: [uart_instance]
+  value:
+    event: driver_init
+    include: sl_uart_instances.h
+    handler: sl_uart_instances_init

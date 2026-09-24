@@ -4,7 +4,7 @@ description: >
   Creates WAN and PAN network interfaces to route IPv6 messages
   between the Wi-SUN network and Internet.
 package: wisun
-category: Wi-SUN|Application|Wi-SUN BR CLI
+category: Wi-SUN|Application|Wi-SUN Border Router CLI
 quality: evaluation
 
 

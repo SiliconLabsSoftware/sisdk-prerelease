@@ -1,0 +1,32 @@
+id: portal
+label: Portal
+package: platform_core
+description: >
+  Portal service provides power domain management via the Host APB interface.
+  It allows software to request and release power domain power-up, with optional
+  notification callbacks when domains are ready.
+category: Services|Portal
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+root_path: platform_core/platform/service/portal
+source:
+- path: src/sli_portal.c
+include:
+- path: inc
+  file_list:
+  - path: sli_portal.h
+provides:
+- name: portal
+requires:
+- name: hal_portal
+- name: device
+- name: device_has_portal
+- name: sl_core
+- name: status
+template_contribution:
+- name: component_catalog
+  value: portal

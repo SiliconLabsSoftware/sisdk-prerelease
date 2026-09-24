@@ -116,17 +116,21 @@
 
 enum
 {
-    kReceiveFifoSize = 128,
+    // Must hold both DMA ping-pong buffers (2 * RECEIVE_BUFFER_SIZE) if the
+    // main loop is busy, plus one unused slot so head==tail still means empty.
+    kReceiveFifoSize = 257,
 };
 
 // In order to reduce the probability of data loss due to disabled interrupts, we use
 // two duplicate receive buffers so we can always have one "active" receive request.
 #define RECEIVE_BUFFER_SIZE 128
-static uint8_t       sReceiveBuffer1[RECEIVE_BUFFER_SIZE];
-static uint8_t       sReceiveBuffer2[RECEIVE_BUFFER_SIZE];
-static uint8_t       lastCount    = 0;
-static volatile bool sTxComplete  = false;
+static uint8_t         sReceiveBuffer1[RECEIVE_BUFFER_SIZE];
+static uint8_t         sReceiveBuffer2[RECEIVE_BUFFER_SIZE];
+static UARTDRV_Count_t lastCount   = 0;
+static volatile bool   sTxComplete = false;
+#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT) || defined(SL_CATALOG_KERNEL_PRESENT))
 static volatile bool sRxDataReady = false;
+#endif // (SL_CATALOG_POWER_MANAGER_PRESENT) || (SL_CATALOG_KERNEL_PRESENT)
 
 typedef struct ReceiveFifo_t
 {
@@ -143,6 +147,53 @@ static ReceiveFifo_t sReceiveFifo;
 static void processReceive(void);
 static void processTransmit(void);
 
+// Circular FIFO: leave one byte unused so mHead == mTail means empty.
+static uint16_t fifoFreeSpace(void)
+{
+    uint16_t used = (uint16_t)((sReceiveFifo.mTail + kReceiveFifoSize - sReceiveFifo.mHead) % kReceiveFifoSize);
+
+    return (uint16_t)(kReceiveFifoSize - 1 - used);
+}
+
+static void fifoPush(const uint8_t *aData, uint16_t aCount)
+{
+    uint16_t tail;
+    uint16_t first;
+
+    if ((aData == NULL) || (aCount == 0))
+    {
+        return;
+    }
+
+    if (aCount > fifoFreeSpace())
+    {
+        aCount = fifoFreeSpace();
+    }
+
+    if (aCount == 0)
+    {
+        return;
+    }
+
+    tail  = sReceiveFifo.mTail;
+    first = (uint16_t)(kReceiveFifoSize - tail);
+
+    if (aCount <= first)
+    {
+        memcpy(sReceiveFifo.mBuffer + tail, aData, aCount);
+    }
+    else
+    {
+        memcpy(sReceiveFifo.mBuffer + tail, aData, first);
+        memcpy(sReceiveFifo.mBuffer, aData + first, aCount - first);
+    }
+
+    sReceiveFifo.mTail = (uint16_t)((tail + aCount) % kReceiveFifoSize);
+}
+
+#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT) || defined(SL_CATALOG_KERNEL_PRESENT))
+// TODO: Enabling power manager or kernel support may cause RX issues.
+//       The interrupt-driven wake-up path may require additional handling.
 void UART_IRQHandler(void)
 {
     sRxDataReady = true;
@@ -152,18 +203,19 @@ void UART_IRQHandler(void)
 #endif
     otSysEventSignalPending();
 }
+#endif // (SL_CATALOG_POWER_MANAGER_PRESENT) || (SL_CATALOG_KERNEL_PRESENT)
 
 static void receiveDone(UARTDRV_Handle_t aHandle, Ecode_t aStatus, uint8_t *aData, UARTDRV_Count_t aCount)
 {
     OT_UNUSED_VARIABLE(aStatus);
 
-    // We can only write if incrementing mTail doesn't equal mHead
-    if (sReceiveFifo.mHead != (sReceiveFifo.mTail + aCount - lastCount) % kReceiveFifoSize)
+    if (aCount > lastCount)
     {
-        memcpy(sReceiveFifo.mBuffer + sReceiveFifo.mTail, aData + lastCount, aCount - lastCount);
-        sReceiveFifo.mTail = (sReceiveFifo.mTail + aCount - lastCount) % kReceiveFifoSize;
-        lastCount          = 0;
+        fifoPush(aData + lastCount, (uint16_t)(aCount - lastCount));
     }
+
+    // DMA buffer is reused below; remaining unread DMA count is now in the FIFO.
+    lastCount = 0;
 
     UARTDRV_Receive(aHandle, aData, aCount, receiveDone);
 
@@ -193,18 +245,21 @@ static void processReceive(void)
     uint8_t        *aData;
     UARTDRV_Count_t aCount, remaining;
 
+#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT) || defined(SL_CATALOG_KERNEL_PRESENT))
     otEXPECT(sRxDataReady);
+#endif // (SL_CATALOG_POWER_MANAGER_PRESENT) || (SL_CATALOG_KERNEL_PRESENT)
 
     CORE_DECLARE_IRQ_STATE;
     CORE_ENTER_ATOMIC();
 
+#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT) || defined(SL_CATALOG_KERNEL_PRESENT))
     sRxDataReady = false;
+#endif // (SL_CATALOG_POWER_MANAGER_PRESENT) || (SL_CATALOG_KERNEL_PRESENT)
     UARTDRV_GetReceiveStatus(UART_HANDLE, &aData, &aCount, &remaining);
-    if (aCount > lastCount)
+    if ((aData != NULL) && (aCount > lastCount))
     {
-        memcpy(sReceiveFifo.mBuffer + sReceiveFifo.mTail, aData + lastCount, aCount - lastCount);
-        sReceiveFifo.mTail = (sReceiveFifo.mTail + aCount - lastCount) % kReceiveFifoSize;
-        lastCount          = aCount;
+        fifoPush(aData + lastCount, (uint16_t)(aCount - lastCount));
+        lastCount = aCount;
     }
 
     CORE_EXIT_ATOMIC();
@@ -229,7 +284,9 @@ static void processReceive(void)
         // Set mHead to the local tail we have cached
         sReceiveFifo.mHead = tail;
     }
+#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT) || defined(SL_CATALOG_KERNEL_PRESENT))
 exit:
+#endif // (SL_CATALOG_POWER_MANAGER_PRESENT) || (SL_CATALOG_KERNEL_PRESENT)
     return;
 }
 
@@ -254,9 +311,11 @@ otError otPlatUartEnable(void)
 {
     otError error = OT_ERROR_NONE;
 
+#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT) || defined(SL_CATALOG_KERNEL_PRESENT))
     // Enable UART interrupt to wake OT task when data arrives
     NVIC_ClearPendingIRQ(UART_IRQ);
     NVIC_EnableIRQ(UART_IRQ);
+#endif // (SL_CATALOG_POWER_MANAGER_PRESENT) || (SL_CATALOG_KERNEL_PRESENT)
 
     // Clear previous RX interrupts
     CLEAR_RX_IRQ();
@@ -265,7 +324,9 @@ otError otPlatUartEnable(void)
     EUSART_ENABLE();
 #endif
 
+#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT) || defined(SL_CATALOG_KERNEL_PRESENT))
     UART_IRQ_ENABLE(UART_PERIPHERAL, UART_IRQ_NAME);
+#endif // (SL_CATALOG_POWER_MANAGER_PRESENT) || (SL_CATALOG_KERNEL_PRESENT)
 
     sReceiveFifo.mHead = 0;
     sReceiveFifo.mTail = 0;

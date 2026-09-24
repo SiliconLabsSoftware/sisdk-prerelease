@@ -491,3 +491,11 @@ sl_status_t sli_clock_manager_set_perpll_predefined_frequency(uint8_t perpll_num
 {
   return sli_clock_manager_hal_set_perpll_predefined_frequency(perpll_num, frequency);
 }
+
+/***************************************************************************//**
+ * Enable or disable HFXO settings required for SYSRTC pre-triggers.
+ ******************************************************************************/
+void sli_clock_manager_enable_hfxo_sysrtc_pretriggers(bool enable)
+{
+  sli_clock_manager_hal_enable_hfxo_sysrtc_pretriggers(enable);
+}

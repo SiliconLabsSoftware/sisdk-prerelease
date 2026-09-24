@@ -1,6 +1,6 @@
 id: wisun_rcp
-label: Wi-SUN Border Router RCP (proxy package)
-description: Provide Wi-SUN Border Router RCP
+label: Wi-SUN RCP (proxy package)
+description: Provide Wi-SUN RCP
 package: wisun
 category: "Wi-SUN|Application|Wi-SUN RCP"
 quality: production
@@ -8,6 +8,10 @@ quality: production
 
 ui_hints:
   visibility: never
+
+conflicts:
+- name: wisun_stack
+- name: wisun_br_stack
 
 requires:
 - name: device_supports_wisun

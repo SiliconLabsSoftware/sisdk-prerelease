@@ -152,24 +152,31 @@ sl_status_t sl_uart_handle_free(sl_uart_handle_t *uart_handle)
 /***************************************************************************//**
  * Initializes the UART instance and its peripheral.
  ******************************************************************************/
-sl_status_t sl_uart_init(sl_uart_handle_t *uart_handle, sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
+sl_status_t sl_uart_init(sl_uart_handle_t *uart_handle,
+                         sl_peripheral_t uart,
+                         const sl_uart_pin_config_t *pin_config,
+                         const sl_uart_async_config_t *async_config)
 {
   sl_status_t status;
 
-  if (uart_handle->uart != NULL) {
-    return SL_STATUS_ALREADY_INITIALIZED;
-  }
+  EFM_ASSERT(uart_handle != NULL);
+  EFM_ASSERT(pin_config != NULL);
 
   sli_uart_init_core(uart_handle, uart, pin_config);
 
-  if (SLI_UART_HANDLE_IS_ASYNC(uart_handle)) {
-    status = sli_uart_async_init(uart_handle);
+  #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
+  if (async_config != NULL) {
+    status = sli_uart_async_init(uart_handle, async_config);
     if (status != SL_STATUS_OK) {
       sli_uart_deinit_core(uart_handle);
 
       return status;
     }
   }
+  #else
+  (void)async_config;
+  EFM_ASSERT(async_config == NULL);
+  #endif
 
   #if !defined(__ZEPHYR__)
   status = sl_uart_resume(uart_handle);
@@ -648,7 +655,9 @@ void sli_uart_init_core(sl_uart_handle_t *uart_handle, sl_peripheral_t uart, con
 {
   EFM_ASSERT(uart_handle != NULL);
   EFM_ASSERT(uart != NULL);
-  EFM_ASSERT(uart_handle->uart == NULL);
+  EFM_ASSERT(pin_config != NULL);
+
+  memset(uart_handle, 0, sizeof(sl_uart_handle_t));
 
   uart_handle->uart = uart;
   uart_handle->pin_config = *pin_config;
@@ -679,16 +688,7 @@ void sli_uart_deinit_core(sl_uart_handle_t *uart_handle)
 {
   EFM_ASSERT(uart_handle != NULL);
 
-  #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
-  // Save the pre-init configuration to restore it after clearing the handle.
-  sl_uart_preinit_config_t preinit_config = uart_handle->preinit_config;
-  #endif
-
   memset(uart_handle, 0, sizeof(sl_uart_handle_t));
-
-  #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
-  uart_handle->preinit_config = preinit_config;
-  #endif
 }
 
 void sli_uart_deinit_peripheral(sl_uart_handle_t *uart_handle)
@@ -858,10 +858,6 @@ void sli_uart_tx_irq_handler(sl_uart_handle_t *uart_handle)
   sl_peripheral_t uart = uart_handle->uart;
   uint32_t irq_status = ops->get_enabled_pending_irq(uart);
 
-  if (SLI_UART_HANDLE_IS_ASYNC(uart_handle)) {
-    sli_uart_async_tx_handler(uart_handle, irq_status);
-  }
-
   // Only handle TX IRQ flags, as IF is shared between RX and TX.
   uint32_t tx_comp = ops->irq_tx_complete_flag;
   uint32_t tx_rdy = ops->irq_tx_ready_flag;
@@ -869,6 +865,10 @@ void sli_uart_tx_irq_handler(sl_uart_handle_t *uart_handle)
 
   // Clear the interrupt before handling, as it may be set once more by the handler.
   ops->clear_irq(uart, irq_status & tx_irq_mask);
+
+  if (SLI_UART_HANDLE_IS_ASYNC(uart_handle)) {
+    sli_uart_async_tx_handler(uart_handle, irq_status);
+  }
 
   // TXC may be armed in hardware by the async engine while the caller has it disabled, so gate the
   // callback on enabled_irq rather than on the hardware state alone.

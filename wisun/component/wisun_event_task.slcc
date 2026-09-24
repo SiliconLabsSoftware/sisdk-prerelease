@@ -1,8 +1,8 @@
 id: "wisun_event_task"
-label: "Wi-SUN event task plugin"
+label: "Wi-SUN Event Task Plugin"
 description: "Wi-SUN event subscription task"
 package: "wisun"
-category: "Wi-SUN|Application|Wi-SUN CLI"
+category: "Wi-SUN|Application"
 quality: "production"
 
 requires:

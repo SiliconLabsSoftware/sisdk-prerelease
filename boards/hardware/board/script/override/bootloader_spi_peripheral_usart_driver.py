@@ -13,7 +13,7 @@ def communication_peripheral_connected_to_exp_header(board: Hardware, required_s
         if board.get_peripheral_options(Req('usart'), 'exp_h', signal):
             # Usart available on exp 4/6/8/10
             found = True
-        elif board.provides('brd2608a'):
+        elif board.provides('brd2608a') or board.provides('brd2608b'):
             if board.get_peripheral_options(Req('usart'), 'breakout_1', signal):
                 # Usart can be connected through breakout
                 found = True
@@ -33,7 +33,7 @@ def compatible(provides: Set[str], board: Hardware) -> bool:
         ]
 
         found = communication_peripheral_connected_to_exp_header(board, required_signals)
-    elif board.provides('brd2608a') and board.has_component('breakout_1'):
+    elif (board.provides('brd2608a') or board.provides('brd2608b')) and board.has_component('breakout_1'):
         required_signals = [{
                                 '5': 'TX',
                                 '4': 'RX',
@@ -49,7 +49,7 @@ def compatible(provides: Set[str], board: Hardware) -> bool:
 def configure(project: Project_Config, board: Hardware, _):
     req = project.requirement('SL_USART_SPINCP')
 
-    if board.provides('brd2608a'):
+    if board.provides('brd2608a') or board.provides('brd2608b'):
         board_map_list = [{
                               '5': 'TX',
                               '4': 'RX',

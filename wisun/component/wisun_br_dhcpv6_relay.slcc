@@ -4,7 +4,7 @@ description: >
   Creates a bridge between WAN and FAN interfaces using DHCPv6 Relay
   Agent/Server messages.
 package: wisun
-category: Wi-SUN|Application|Wi-SUN BR CLI
+category: Wi-SUN|Application|Wi-SUN Border Router CLI
 quality: production
 
 

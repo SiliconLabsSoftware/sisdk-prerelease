@@ -29,9 +29,12 @@
  ******************************************************************************/
 #include <stdint.h>
 {% set uart_instances_it = (uart_instances | default([], true) | list) + (uart_async_instances | default([], true) | list) %}
+{% set uart_async_instances_it = uart_async_instances | default([], true) | list %}
+#include "sl_assert.h"
 #include "sl_common.h"
 #include "sl_device_peripheral.h"
 #include "sl_device_uart.h"
+#include "sl_status.h"
 #include "sl_uart_instances.h"
 {% for instance in uart_instances_it %}
 #include "sl_uart_{{ instance }}_config.h"
@@ -44,18 +47,9 @@
 #define SL_UART_TX_IRQHandler(periph)     SL_CONCAT_PASTER_2(periph, _TX_IRQHandler)
 {% for instance in uart_instances_it %}
 sl_peripheral_t sl_uart_{{ instance }}_peripheral = SL_UART_PERIPHERAL(SL_UART_{{ instance | upper }}_PERIPHERAL);
-{% if instance in uart_instances %}
 sl_uart_handle_t sl_uart_{{ instance }}_handle;
-{% else %}
-sl_uart_handle_t sl_uart_{{ instance }}_handle = {
-  .preinit_config = {
-    .async_tx_transfer_count = 5,
-    .async_rx_transfer_count = 5,
-    .async_tx_dma_channel_number = SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO,
-    .async_rx_dma_channel_number = SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO,
-    .async_en = true,
-  },
-};
+{% if instance in uart_async_instances_it %}
+const sl_uart_async_config_t sl_uart_{{ instance }}_async_config = SL_UART_ASYNC_CONFIG_DEFAULT;
 {% endif %}
 
 const sl_uart_pin_config_t sl_uart_{{ instance }}_pin_config = {
@@ -89,3 +83,21 @@ void SL_UART_TX_IRQHandler(SL_UART_{{ instance | upper }}_PERIPHERAL)(void)
 }
 
 {% endfor %}
+void sl_uart_instances_init(void)
+{
+  {%- if uart_instances_it %}
+  sl_status_t status;
+
+  {%- for instance in uart_instances_it %}
+  status = sl_uart_init(&sl_uart_{{ instance }}_handle,
+                        sl_uart_{{ instance }}_peripheral,
+                        &sl_uart_{{ instance }}_pin_config,
+                        {% if instance in uart_async_instances_it %}&sl_uart_{{ instance }}_async_config{% else %}NULL{% endif %});
+  EFM_ASSERT(status == SL_STATUS_OK);
+
+  status = sl_uart_configure_line(&sl_uart_{{ instance }}_handle,
+                                  &sl_uart_{{ instance }}_line_config);
+  EFM_ASSERT(status == SL_STATUS_OK);
+  {%- endfor %}
+  {%- endif %}
+}

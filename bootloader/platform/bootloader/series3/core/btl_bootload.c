@@ -292,18 +292,43 @@ SL_WEAK void bootload_bootloaderCallback(uint32_t address,
 
 bool bootload_checkApplicationPropertiesMagic(void *appProperties)
 {
-  if ((appProperties == NULL) || ((uint32_t) appProperties == 0xFFFFFFFFUL)) {
+  uint32_t appPropertiesAddr;
+  uint32_t flashBase;
+  uint32_t flashEnd;
+  uint32_t appEndCfg;
+  uint32_t appEnd;
+  const uint32_t requiredSize = sizeof(ApplicationProperties_t);
+  if ((appProperties == NULL) || ((uint32_t)appProperties == 0xFFFFFFFFUL)) {
+    return false;
+  }
+  // Series 3 secure and non-secure flash maps differ by 0x10000000.
+  // Map the pointer and the flash window into this security state's alias
+  // before comparing. FLASH_BASE is already FLASH_S_BASE or FLASH_NS_BASE
+  // for this compilation; GetAliasedAddr() is idempotent on that value.
+  // Do this after the NULL / 0xFFFFFFFF checks: GetAliasedAddr(NULL) is
+  // FLASH_BASE in the secure world. Do not alias a zero endOfAppSpace
+  // (GetAliasedAddr(0) is FLASH_S_BASE when secure).
+  appPropertiesAddr = bootloader_GetAliasedAddr((uint32_t)appProperties);
+  flashBase = bootloader_GetAliasedAddr(FLASH_BASE);
+  flashEnd = flashBase + FLASH_SIZE;
+  appEndCfg = (uint32_t)mainBootloaderTable->endOfAppSpace;
+  if (appEndCfg != 0UL) {
+    appEndCfg = bootloader_GetAliasedAddr(appEndCfg);
+  }
+  appEnd = ((appEndCfg != 0UL) && (appEndCfg <= flashEnd)) ? appEndCfg : flashEnd;
+  if ((appPropertiesAddr >= appEnd)
+      || ((appEnd - appPropertiesAddr) < requiredSize)) {
     return false;
   }
 
 #if (FLASH_BASE > 0x0UL)
-  if ((uint32_t)appProperties < FLASH_BASE) {
+  if (appPropertiesAddr < flashBase) {
     return false;
   }
 #endif
 
   uint8_t magicRev[16U] = APPLICATION_PROPERTIES_REVERSED;
-  const uint8_t *magic = (uint8_t *)appProperties;
+  const uint8_t *magic = (uint8_t *)appPropertiesAddr;
 
   for (size_t i = 0U; i < 16U; i++) {
     if (magicRev[15U - i] != magic[i]) {

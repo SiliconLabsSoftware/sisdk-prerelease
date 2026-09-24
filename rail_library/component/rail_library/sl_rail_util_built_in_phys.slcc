@@ -298,6 +298,9 @@ source:
   unless: [device_is_module]
 - path: plugin/sl_rail_util_built_in_phys/efr32xg2b/sl_rail_ble_config.c
   condition: [device_sdid_250]
+  unless: [device_is_module, rail_hardware_board_has_hfxo_freq_38M4Hz]
+- path: plugin/sl_rail_util_built_in_phys/efr32xg2b/sl_rail_ble_config_38M4Hz.c
+  condition: [device_sdid_250, rail_hardware_board_has_hfxo_freq_38M4Hz]
   unless: [device_is_module]
 - path: plugin/sl_rail_util_built_in_phys/efr32xg2b/sl_rail_ieee802154_config.c
   condition: [device_sdid_250]

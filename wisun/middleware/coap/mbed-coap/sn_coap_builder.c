@@ -33,9 +33,8 @@
 #include "mbed-coap/sn_coap_header.h"
 #include "sn_coap_header_internal.h"
 #include "sn_coap_protocol_internal.h"
-#include "mbed-trace/mbed_trace.h"
+#include "sl_wisun_trace_api.h"
 
-#define TRACE_GROUP "coap"
 /* * * * LOCAL FUNCTION PROTOTYPES * * * */
 static uint8_t *sn_coap_builder_header_build(uint8_t *dst_packet_data_pptr, const sn_coap_hdr_s *src_coap_msg_ptr);
 static uint8_t *sn_coap_builder_options_build(uint8_t *dst_packet_data_ptr, const sn_coap_hdr_s *src_coap_msg_ptr);
@@ -60,7 +59,7 @@ sn_coap_hdr_s *sn_coap_build_response(struct coap_s *handle, const sn_coap_hdr_s
 
   coap_res_ptr = sn_coap_parser_alloc_message(handle);
   if (!coap_res_ptr) {
-    tr_error("sn_coap_build_response - failed to allocate message!");
+    sl_wisun_trace_error("sn_coap_build_response - failed to allocate message!");
     return NULL;
   }
 
@@ -86,7 +85,7 @@ sn_coap_hdr_s *sn_coap_build_response(struct coap_s *handle, const sn_coap_hdr_s
     coap_res_ptr->token_len = coap_packet_ptr->token_len;
     coap_res_ptr->token_ptr = sn_coap_protocol_malloc_copy(handle, coap_packet_ptr->token_ptr, coap_res_ptr->token_len);
     if (!coap_res_ptr->token_ptr) {
-      tr_error("sn_coap_build_response - failed to allocate token!");
+      sl_wisun_trace_error("sn_coap_build_response - failed to allocate token!");
       handle->sn_coap_protocol_free(coap_res_ptr);
       return NULL;
     }
@@ -112,7 +111,7 @@ int16_t sn_coap_builder_2(uint8_t * restrict dst_packet_data_ptr, const sn_coap_
   /* (as long as SN_COAP_CONSTANT_NEEDED_SIZE is not set) */
   uint16_t dst_byte_count_to_be_built = sn_coap_builder_calc_needed_packet_data_size_2(src_coap_msg_ptr, blockwise_payload_size);
   if (!dst_byte_count_to_be_built) {
-    tr_error("sn_coap_builder_2 - failed to allocate message!");
+    sl_wisun_trace_error("sn_coap_builder_2 - failed to allocate message!");
     return -1;
   }
 
@@ -125,7 +124,7 @@ int16_t sn_coap_builder_2(uint8_t * restrict dst_packet_data_ptr, const sn_coap_
   dst_packet_data_ptr = sn_coap_builder_header_build(dst_packet_data_ptr, src_coap_msg_ptr);
   if (!dst_packet_data_ptr) {
     /* Header building failed */
-    tr_error("sn_coap_builder_2 - header building failed!");
+    sl_wisun_trace_error("sn_coap_builder_2 - header building failed!");
     return -1;
   }
 
@@ -144,7 +143,7 @@ int16_t sn_coap_builder_2(uint8_t * restrict dst_packet_data_ptr, const sn_coap_
 
   /* Shout as much as we can about overflow - if we exceed this, may have overrun user's buffer */
   if (dst_packet_data_ptr - base_packet_data_ptr > dst_byte_count_to_be_built) {
-    tr_error("sn_coap_builder_2 - overflowed expected size!");
+    sl_wisun_trace_error("sn_coap_builder_2 - overflowed expected size!");
     return -1;
   }
 
@@ -181,7 +180,7 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
     /* TOKEN - Length is 1-8 bytes */
     if (src_coap_msg_ptr->token_ptr != NULL) {
       if (src_coap_msg_ptr->token_len > 8 || src_coap_msg_ptr->token_len < 1) {       /* Check that option is not longer than defined */
-        tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - token too large!");
+        sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - token too large!");
         return 0;
       }
       returned_byte_count += src_coap_msg_ptr->token_len;
@@ -193,7 +192,7 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
       if (repeatable_option_size) {
         returned_byte_count += repeatable_option_size;
       } else {
-        tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - uri path size failed!");
+        sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - uri path size failed!");
         return 0;
       }
     }
@@ -201,7 +200,7 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
     /* CONTENT FORMAT - An integer option, up to 2 bytes */
     if (src_coap_msg_ptr->content_format != COAP_CT_NONE) {
       if ((uint32_t) src_coap_msg_ptr->content_format > 0xffff) {
-        tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - content format too large!");
+        sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - content format too large!");
         return 0;
       }
       returned_byte_count += sn_coap_builder_options_calc_uint_option_size(src_coap_msg_ptr->content_format);
@@ -213,7 +212,7 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
       /* ACCEPT - An integer option, up to 2 bytes */
       if (src_options_list_ptr->accept != COAP_CT_NONE) {
         if ((uint32_t) src_options_list_ptr->accept > 0xffff) {
-          tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - accept too large!");
+          sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - accept too large!");
           return 0;
         }
         returned_byte_count += sn_coap_builder_options_calc_uint_option_size(src_options_list_ptr->accept);
@@ -231,7 +230,7 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
         } else if (src_options_list_ptr->proxy_uri_len >= 270 && src_options_list_ptr->proxy_uri_len <= 1034) {
           returned_byte_count += 3;
         } else {
-          tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - proxy uri too large!");
+          sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - proxy uri too large!");
           return 0;
         }
 
@@ -245,7 +244,7 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
         if (repeatable_option_size) {
           returned_byte_count += repeatable_option_size;
         } else {
-          tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - etag too large!");
+          sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - etag too large!");
           return 0;
         }
       }
@@ -256,7 +255,7 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
         } else if (src_options_list_ptr->uri_host_len >= 13 && src_options_list_ptr->uri_host_len <= 255) {
           returned_byte_count += 2;
         } else {
-          tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - uri host too large!");
+          sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - uri host too large!");
           return 0;
         }
         returned_byte_count += src_options_list_ptr->uri_host_len;
@@ -268,14 +267,14 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
         if (repeatable_option_size) {
           returned_byte_count += repeatable_option_size;
         } else {
-          tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - location path too large!");
+          sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - location path too large!");
           return 0;
         }
       }
       /* URI PORT - An integer option, up to 2 bytes */
       if (src_options_list_ptr->uri_port != COAP_OPTION_URI_PORT_NONE) {
         if ((uint32_t) src_options_list_ptr->uri_port > 0xffff) {
-          tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - uri port too large!");
+          sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - uri port too large!");
           return 0;
         }
         returned_byte_count += sn_coap_builder_options_calc_uint_option_size(src_options_list_ptr->uri_port);
@@ -287,7 +286,7 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
         if (repeatable_option_size) {
           returned_byte_count += repeatable_option_size;
         } else {
-          tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - location query too large!");
+          sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - location query too large!");
           return 0;
         }
       }
@@ -305,7 +304,7 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
         if (repeatable_option_size) {
           returned_byte_count += repeatable_option_size;
         } else {
-          tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - observe too large!");
+          sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - observe too large!");
           return 0;
         }
       }
@@ -313,7 +312,7 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
       /* BLOCK 1 - An integer option, up to 3 bytes */
       if (src_options_list_ptr->block1 != COAP_OPTION_BLOCK_NONE) {
         if ((uint32_t) src_options_list_ptr->block1 > 0xffffff) {
-          tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - block1 too large!");
+          sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - block1 too large!");
           return 0;
         }
         returned_byte_count += sn_coap_builder_options_calc_uint_option_size(src_options_list_ptr->block1);
@@ -325,7 +324,7 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
       /* BLOCK 2 - An integer option, up to 3 bytes */
       if (src_options_list_ptr->block2 != COAP_OPTION_BLOCK_NONE) {
         if ((uint32_t) src_options_list_ptr->block2 > 0xffffff) {
-          tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - block2 too large!");
+          sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - block2 too large!");
           return 0;
         }
         returned_byte_count += sn_coap_builder_options_calc_uint_option_size(src_options_list_ptr->block2);
@@ -352,7 +351,7 @@ uint16_t(sn_coap_builder_calc_needed_packet_data_size_2)(const sn_coap_hdr_s * s
     returned_byte_count += sn_coap_builder_options_calculate_jump_need(src_coap_msg_ptr);
   }
   if (returned_byte_count > UINT16_MAX) {
-    tr_error("sn_coap_builder_calc_needed_packet_data_size_2 - packet data size would overflow!");
+    sl_wisun_trace_error("sn_coap_builder_calc_needed_packet_data_size_2 - packet data size would overflow!");
     return 0;
   }
   return (uint16_t)returned_byte_count;
@@ -496,7 +495,7 @@ static uint8_t *sn_coap_builder_header_build(uint8_t * restrict dst_packet_data_
 {
   /* * * * Check validity of Header values * * * */
   if (sn_coap_header_validity_check(src_coap_msg_ptr, COAP_VERSION) != 0) {
-    tr_error("sn_coap_builder_header_build - header build failed!");
+    sl_wisun_trace_error("sn_coap_builder_header_build - header build failed!");
     return NULL;
   }
 
@@ -534,7 +533,7 @@ static uint8_t *sn_coap_builder_options_build(uint8_t * restrict dst_packet_data
       && src_coap_msg_ptr->content_format == COAP_CT_NONE && src_coap_msg_ptr->options_list_ptr == NULL) {
     /* If the empty message is confirmable it is CoAP ping. */
     if (src_coap_msg_ptr->msg_type != COAP_MSG_TYPE_CONFIRMABLE) {
-      tr_error("sn_coap_builder_options_build - options not used!");
+      sl_wisun_trace_error("sn_coap_builder_options_build - options not used!");
     }
     return dst_packet_data_ptr;
   }

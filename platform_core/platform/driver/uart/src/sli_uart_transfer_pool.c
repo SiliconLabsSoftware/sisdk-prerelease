@@ -99,14 +99,14 @@ sl_status_t sli_uart_transfer_pool_init(sl_uart_handle_t *uart_handle)
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
 
-  status = uart_transfer_pool_alloc(uart_handle->preinit_config.async_tx_transfer_count,
+  status = uart_transfer_pool_alloc(uart_handle->async_config.async_tx_transfer_count,
                                     sizeof(sli_uart_async_tx_transfer_t),
                                     &uart_handle->async_tx_free_list_head);
   if (status != SL_STATUS_OK) {
     return status;
   }
 
-  status = uart_transfer_pool_alloc(uart_handle->preinit_config.async_rx_transfer_count,
+  status = uart_transfer_pool_alloc(uart_handle->async_config.async_rx_transfer_count,
                                     sizeof(sli_uart_async_rx_transfer_t),
                                     &uart_handle->async_rx_free_list_head);
   if (status != SL_STATUS_OK) {

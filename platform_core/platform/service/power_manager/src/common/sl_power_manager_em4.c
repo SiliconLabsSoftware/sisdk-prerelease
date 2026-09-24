@@ -30,6 +30,7 @@
 
 #include "sl_power_manager.h"
 #include "sl_power_manager_config.h"
+#include "sl_power_manager_em4_config.h"
 #include "sli_power_manager.h"
 #include "sli_power_manager_log.h"
 

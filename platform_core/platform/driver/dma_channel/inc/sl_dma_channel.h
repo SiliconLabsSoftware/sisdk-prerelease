@@ -67,8 +67,11 @@ extern "C" {
  *   - Maintain a software queue (singly-linked list) mirroring the hardware
  *     descriptor link chain so that completions can be processed in batch
  *     when interrupts are delayed or masked.
- *   - Invoke a user callback once per descriptor (or per aborted descriptor
- *     when an error occurs) with explicit error / abort flags.
+ *   - Invoke a user callback once per submitted transfer that requested a
+ *     callback (or per aborted descriptor when an error occurs) with explicit
+ *     error / abort flags. Transfers larger than the hardware descriptor
+ *     capacity are split into multiple descriptors; only the last descriptor
+ *     raises a done interrupt and, if requested, invokes the callback.
  *   - Automatically select an optimal transfer unit size (byte/half/word)
  *     based on alignment and length for M2M transfers, and automatically
  *     segment transfers larger than the hardware descriptor capacity.
@@ -100,9 +103,10 @@ extern "C" {
  *     argument to let the driver allocate one, or pre-allocate via
  *     @ref sl_dma_channel_descriptor_alloc() for deterministic memory use.
  *  -# **Handle completions.** The callback registered at init time is
- *     invoked once per descriptor that requested a callback, with explicit
- *     `error` / `aborted` flags. Application code may also poll progress
- *     via @ref sl_dma_channel_get_status().
+ *     invoked once per transfer that requested a callback (for a segmented
+ *     transfer, when the last descriptor completes), with explicit `error`
+ *     / `aborted` flags. Application code may also poll progress via
+ *     @ref sl_dma_channel_get_status().
  *  -# **Tear down.** When done, call @ref sl_dma_channel_abort() if a
  *     transfer is still active, then @ref sl_dma_channel_deinit() to release
  *     the channel handle and `sl_dma_manager_free_channel()` to return the
@@ -115,7 +119,7 @@ extern "C" {
  *  | @ref sl_dma_channel_submit_transfer_m2m()             | Memory-to-memory                             | No     | No                         |
  *  | @ref sl_dma_channel_submit_transfer_m2p()             | Memory-to-peripheral                         | No     | Yes                        |
  *  | @ref sl_dma_channel_submit_transfer_p2m()             | Peripheral-to-memory                         | No     | Yes                        |
- *  | @ref sl_dma_channel_submit_transfer_list()            | Linked list of heterogeneous transfers       | No     | When list contains M2P/P2M |
+ *  | @ref sl_dma_channel_submit_transfer_list()            | Linked list of heterogeneous transfers       | Yes, if the list contains a cycle | When list contains M2P/P2M |
  *  | @ref sl_dma_channel_submit_ping_pong_transfer_m2p()   | Two-buffer streaming M2P                     | Yes    | Yes                        |
  *  | @ref sl_dma_channel_submit_ping_pong_transfer_p2m()   | Two-buffer streaming P2M                     | Yes    | Yes                        |
  *  | @ref sl_dma_channel_submit_triple_buffered_transfer_m2p() | Three-buffer streaming M2P               | Yes    | Yes                        |
@@ -147,12 +151,14 @@ extern "C" {
  *                   the descriptor (or when the descriptor was aborted as a
  *                   side-effect of an error).
  *
- *  Both `false` means a normal completion. In looping modes
- *  (ping-pong / triple-buffered) the callback is invoked on every buffer
- *  completion until the channel is aborted by the application. The callback
- *  return type is `void` — there is no way to stop a looping transfer from
- *  the callback by returning a value; call @ref sl_dma_channel_abort()
- *  instead.
+ *  Both `false` means a normal completion. In looping mode (a cycling transfer
+ *  list, including ping-pong / triple-buffered helpers) the callback is still
+ *  invoked per transfer when that transfer requested
+ *  @c callback_on_complete (the helper APIs set this). If a transfer is
+ *  segmented, only its last descriptor raises a done interrupt and invokes
+ *  the callback. The callback return type is `void` — there is no way to
+ *  stop a looping transfer from the callback by returning a value; call
+ *  @ref sl_dma_channel_abort() instead.
  *
  *  ## Error handling
  *
@@ -239,7 +245,8 @@ typedef struct sl_dma_channel_xfer_descriptor sl_dma_channel_xfer_descriptor_t;
 typedef struct sl_dma_channel_xfer_descriptor_flags {
   uint32_t driver_allocated       : 1; ///< Indicates if the descriptor was internally allocated by the driver
   uint32_t callback_on_complete   : 1; ///< Indicates if a callback should be called on descriptor completion
-  uint32_t reserved               : 30;
+  uint32_t is_in_cycle            : 1; ///< Belongs to a cycling transfer
+  uint32_t reserved               : 29;
 } sl_dma_channel_xfer_descriptor_flags_t;
 
 /// DMA channel state
@@ -251,7 +258,7 @@ typedef enum {
 /// DMA channel operating mode
 typedef enum {
   SL_DMA_CHANNEL_MODE_NORMAL,   ///< Normal mode: single or linked transfers with callbacks
-  SL_DMA_CHANNEL_MODE_LOOPING   ///< Looping mode: circular descriptor chain (ping-pong/triple-buffered)
+  SL_DMA_CHANNEL_MODE_LOOPING   ///< Looping mode: cycling transfer list (including ping-pong / triple-buffered)
 } sl_dma_channel_mode_t;
 
 /***************************************************************************//**
@@ -284,9 +291,10 @@ struct sl_dma_channel_handle {
   /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
   uint8_t channel_number;             ///< DMA channel number.
   sl_peripheral_dma_t dma_peripheral; ///< DMA peripheral base instance.
-  sl_dma_channel_callback_t callback; ///< Per-descriptor completion/error callback (optional).
+  sl_dma_channel_callback_t callback; ///< Per-transfer completion/error callback (optional).
   void *user_data;                    ///< User data pointer forwarded to callback.
   sl_dma_channel_xfer_descriptor_t *descriptor_list; ///< Head descriptor in current chain (active HW desc or first pending)
+  sl_dma_channel_xfer_descriptor_t *descriptor_list_tail; ///< Tail of the software descriptor list; NULL if the list is empty
   sl_dma_channel_mode_t mode;         ///< Current operating mode (normal or looping)
   sl_dma_channel_state_t state;       ///< Current state (enabled, disabled or aborting)
   /// @endcond
@@ -308,7 +316,7 @@ typedef struct sl_dma_channel_transfer {
   bool increment_source;                        ///< Increment source pointer per unit
   bool increment_destination;                   ///< Increment destination pointer per unit
   bool block_handshake_mode;                    ///< Transfer one block per DMA channel request if true
-  bool callback_on_complete;                    ///< Generate callback when this transfer completes
+  bool callback_on_complete;                    ///< Generate callback when this transfer completes (last segment only if segmented)
   bool cacheable;                               ///< If requires cacheable attribute (XDMA)
   sl_dma_channel_xfer_descriptor_t *descriptor; ///< HW Descriptor buffer (Dynamically allocated if NULL)
   struct sl_dma_channel_transfer *next;         ///< Next in list (NULL = end or forms loop)
@@ -633,7 +641,9 @@ sl_status_t sl_dma_channel_set_peripheral_signal(const sl_dma_channel_handle_t *
  *         triple-buffered transfer is active).
  * @return SL_STATUS_ALLOCATION_FAILED if descriptor allocation fails.
  *
- * @note A completion callback is always requested for this transfer.
+ * @note A completion callback is always requested for this transfer. If the
+ *       transfer is segmented, only the last descriptor raises a done interrupt
+ *       and the callback is invoked when that last segment completes.
  *
  * @note Buffer alignment requirements: Both source and destination must be aligned
  *       for the selected unit size (WORD requires 4-byte alignment, HALF requires
@@ -680,7 +690,9 @@ sl_status_t sl_dma_channel_submit_transfer_m2m(sl_dma_channel_handle_t *handle,
  *
  * @note Transfer defaults: source increments, destination does not increment,
  *       block handshake mode is enabled, and a completion callback is always
- *       requested.
+ *       requested. If the transfer is segmented, only the last descriptor
+ *       raises a done interrupt and the callback is invoked when that last
+ *       segment completes.
  *
  * @note Buffer alignment requirements: Both the source address and the peripheral
  *       register address must be aligned according to the unit size. For
@@ -730,7 +742,9 @@ sl_status_t sl_dma_channel_submit_transfer_m2p(sl_dma_channel_handle_t *handle,
  *
  * @note Transfer defaults: source does not increment, destination increments,
  *       block handshake mode is enabled, and a completion callback is always
- *       requested.
+ *       requested. If the transfer is segmented, only the last descriptor
+ *       raises a done interrupt and the callback is invoked when that last
+ *       segment completes.
  *
  * @note Buffer alignment requirements: Both the destination address and the
  *       peripheral register address must be aligned according to the unit size.
@@ -756,8 +770,10 @@ sl_status_t sl_dma_channel_submit_transfer_p2m(sl_dma_channel_handle_t *handle,
  * DMA channel.
  *
  * Large transfers may be automatically segmented if they exceed the maximum
- * transfer size. For multi-segment transfers, the completion callback is only
- * triggered when the last segment completes.
+ * transfer size. Intermediate segment descriptors do not set the hardware
+ * done interrupt (done_ifs). Only the last descriptor of each transfer does,
+ * so a single done interrupt is raised for that logical transfer. The
+ * completion callback is invoked only when that last segment completes.
  *
  * @param[in,out] handle    Pointer to the DMA channel handle.
  * @param[in]     list_head Pointer to the head of the transfer list.
@@ -768,21 +784,23 @@ sl_status_t sl_dma_channel_submit_transfer_p2m(sl_dma_channel_handle_t *handle,
  *         (in bytes), if source or destination buffers are misaligned for the
  *         specified unit size, or if a user-provided descriptor is too small for a
  *         transfer requiring segmentation.
- * @return SL_STATUS_INVALID_STATE if channel is in looping mode (ping-pong or
- *         triple-buffered transfer is active).
+ * @return SL_STATUS_INVALID_STATE if the channel is already in looping mode.
  * @return SL_STATUS_ALLOCATION_FAILED if descriptor allocation fails.
  *
  * @warning Transfer structures in the transfer list should only be freed
  * or reused after they have completed.
  *
- * @warning This function must not be used to submit looping transfers, which are
- * transfers where the transfer list forms a circular structure (the last
- * transfer's next pointer points back to an earlier transfer in the list,
- * creating a loop). Looping transfers are only supported through specialized
- * ping-pong and triple-buffered transfer APIs. The transfer list submitted to
- * this function must be linear, with the last transfer in the list having its
- * next pointer set to NULL. Submitting a looping transfer to this function will
- * result in undefined behavior that the DMA Channel Driver cannot recover from.
+ * @note A cycle in @c transfer->next is supported. When the submitted list
+ *       contains a single cycle, the channel enters looping mode and those
+ *       transfers repeat until @ref sl_dma_channel_abort(). Any transfers
+ *       already queued on the channel run to completion first. Submit is
+ *       rejected only if the channel is already looping. The only way to
+ *       stop a loop is @ref sl_dma_channel_abort().
+ *
+ * @note For cyclic lists (including ping-pong / multi-buffer streaming), the
+ *       application must keep worst-case DMA IRQ latency and callback work
+ *       within one buffer period so completions are not missed before the
+ *       ring reuses that buffer.
  *
  * @note Each transfer in the list must have size > 0. Transfers with size == 0
  *       will cause this function to return SL_STATUS_INVALID_PARAMETER.
@@ -828,8 +846,7 @@ sl_status_t sl_dma_channel_submit_transfer_list(sl_dma_channel_handle_t *handle,
  *         is not a multiple of the unit size (in bytes), if source buffers are
  *         misaligned for the specified unit size, or if size exceeds the maximum
  *         single descriptor capacity.
- * @return SL_STATUS_INVALID_STATE if channel is already in looping mode or has
- *         pending transfers.
+ * @return SL_STATUS_INVALID_STATE if channel is already in looping mode.
  * @return SL_STATUS_ALLOCATION_FAILED if descriptor allocation fails.
  *
  * @note The transfer loops infinitely until the channel is stopped with
@@ -877,8 +894,7 @@ sl_status_t sl_dma_channel_submit_ping_pong_transfer_m2p(sl_dma_channel_handle_t
  *         is not a multiple of the unit size (in bytes), if destination buffers are
  *         misaligned for the specified unit size, or if size exceeds the maximum
  *         single descriptor capacity.
- * @return SL_STATUS_INVALID_STATE if channel is already in looping mode or has
- *         pending transfers.
+ * @return SL_STATUS_INVALID_STATE if channel is already in looping mode.
  * @return SL_STATUS_ALLOCATION_FAILED if descriptor allocation fails.
  *
  * @note The transfer loops infinitely until the channel is stopped with
@@ -927,8 +943,7 @@ sl_status_t sl_dma_channel_submit_ping_pong_transfer_p2m(sl_dma_channel_handle_t
  *         is not a multiple of the unit size (in bytes), if source buffers are
  *         misaligned for the specified unit size, or if size exceeds the maximum
  *         single descriptor capacity.
- * @return SL_STATUS_INVALID_STATE if channel is already in looping mode or has
- *         pending transfers.
+ * @return SL_STATUS_INVALID_STATE if channel is already in looping mode.
  * @return SL_STATUS_ALLOCATION_FAILED if descriptor allocation fails.
  *
  * @note The transfer loops infinitely until the channel is stopped with
@@ -978,8 +993,7 @@ sl_status_t sl_dma_channel_submit_triple_buffered_transfer_m2p(sl_dma_channel_ha
  *         is not a multiple of the unit size (in bytes), if destination buffers are
  *         misaligned for the specified unit size, or if size exceeds the maximum
  *         single descriptor capacity.
- * @return SL_STATUS_INVALID_STATE if channel is already in looping mode or has
- *         pending transfers.
+ * @return SL_STATUS_INVALID_STATE if channel is already in looping mode.
  * @return SL_STATUS_ALLOCATION_FAILED if descriptor allocation fails.
  *
  * @note The transfer loops infinitely until the channel is stopped with

@@ -33,7 +33,6 @@ ui_hints:
       focus: true
 component:
   - id: psa_crypto_ecdsa 
-  - id: psa_crypto_ecc_secp192r1
   - id: psa_crypto_ecc_secp256r1
   - id: psa_crypto_ecc_secp384r1
   - id: psa_crypto_ecc_secp521r1

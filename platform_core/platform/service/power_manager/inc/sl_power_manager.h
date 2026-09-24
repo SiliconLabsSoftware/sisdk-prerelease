@@ -41,8 +41,15 @@
 #include "sl_core.h"
 #include "sl_code_classification.h"
 #include "sl_device_peripheral_types.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
 #if defined(SL_CATALOG_POWER_MANAGER_RETENTION_PRESENT)
 #include "sl_power_manager_retention_config.h"
+#endif
+#if defined(SL_CATALOG_POWER_MANAGER_EM4_PRESENT)
+#include "sl_power_manager_em4.h"
+#include "sl_power_manager_em4_config.h"
 #endif
 
 #include <stdbool.h>
@@ -383,31 +390,6 @@ SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 bool sl_power_manager_is_latest_wakeup_internal(void);
 
 /***************************************************************************//**
- * Enter energy mode 4 (EM4).
- *
- * @note  You should not expect to return from this function. Once the device
- *        enters EM4, only a power on reset or external reset pin can wake the
- *        device.
- *
- * @note  On xG22 devices, this function re-configures the IADC if EM4 entry
- *        is possible.
- ******************************************************************************/
-void sl_power_manager_enter_em4(void);
-
-/***************************************************************************//**
- *   When EM4 pin retention is set to power_manager_pin_retention_latch,
- *   then pins are retained through EM4 entry and wakeup. The pin state is
- *   released by calling this function. The feature allows peripherals or
- *   GPIO to be re-initialized after EM4 exit (reset), and when
- *   initialization is done, this function can release pins and return
- *   control to the peripherals or GPIO.
- *
- * @note When the EM4 Pin Retention feature is not available on a device,
- *       calling this function will do nothing.
- ******************************************************************************/
-void sl_power_manager_em4_unlatch_pin_retention(void);
-
-/***************************************************************************//**
  * Energy mode 4 pre-sleep hook function.
  *
  * @note  This function is called by @ref sl_power_manager_enter_em4 just
@@ -663,28 +645,7 @@ uint8_t sl_power_manager_get_peripheral_retention_strategy(const sl_peripheral_t
 *
 * ## EM4 Sleep
 *
-* The Power Manager module provides support for entering Energy Mode 4 (EM4),
-* the lowest energy mode available.
-*
-* To enter EM4, the @ref sl_power_manager_enter_em4() function is used. This function
-* ensures that the system transitions to EM4 safely and performs any necessary
-* pre-sleep operations via the @ref sl_power_manager_em4_presleep_hook() function,
-* which can be overridden by the application if additional actions are required.
-*
-* Additionally, the Power Manager provides support for EM4 pin retention. Use the
-* `SL_POWER_MANAGER_INIT_EMU_EM4_PIN_RETENTION_MODE` configuration to set the pin
-* retention mode in EM4. When enabled, pins retain their state through EM4 entry
-* and wake-up. The retained pin state can be released after wake-up by calling
-* the @ref sl_power_manager_em4_unlatch_pin_retention() function.
-*
-* Keep in mind that EM4 entry is irreversible, and waking up from this energy
-* mode will result in a system reset. Careful consideration should be given to
-* the conditions under which EM4 is entered.
-*
-* If `SL_SLEEPTIMER_PERIPHERAL` is set to `SL_SLEEPTIMER_PERIPHERAL_BURTC` in
-* `sl_sleeptimer_config.h`, it does not configure EM4 wake on BURTC and does
-* not support EM4 timekeeping; see @ref sleeptimer_burtc_em4 in the Sleeptimer
-* in the Sleeptimer documentation.
+* See @ref power_manager_em4 for EM4 entry and pin retention APIs.
 *
 * ## Update Power Manager after runtime clock changes
 *

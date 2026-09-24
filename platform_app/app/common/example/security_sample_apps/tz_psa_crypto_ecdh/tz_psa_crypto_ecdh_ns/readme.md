@@ -36,7 +36,7 @@ The Non-secure project (`tz_psa_crypto_ecdh_ns.slcp`) brings in:
 
 - `trustzone_nonsecure` — the TrustZone wrapper that wires NSC calls and starts the Non-secure runtime after the Secure side hands off.
 - `tz_secure_key_library` — pulls in the Secure-side veneer headers so the Non-secure code can call `PSA Crypto`, `PSA ITS`, etc., as plain function calls.
-- `nvm3_default`, `psa_its`, and `psa_crypto_*` components for the curves exercised — `psa_crypto_ecdh`, `psa_crypto_ecc_secp192r1`, `psa_crypto_ecc_secp256r1`, `psa_crypto_ecc_secp384r1`, `psa_crypto_ecc_secp521r1`, `psa_crypto_ecc_curve25519`, and `psa_crypto_ecc_curve448` (added conditionally on `device_security_vault`).
+- `nvm3_default`, `psa_its`, and `psa_crypto_*` components for the curves exercised — `psa_crypto_ecdh`, `psa_crypto_ecc_secp256r1`, `psa_crypto_ecc_secp384r1`, `psa_crypto_ecc_secp521r1`, `psa_crypto_ecc_curve25519`, and `psa_crypto_ecc_curve448` (added conditionally on `device_security_vault`).
 - `printf`, `iostream_retarget_stdio`, `iostream_recommended_stream` — for the public-key and shared-secret dump on VCOM.
 - A flash layout that places the Non-secure application at `0x2C000` (immediately after the Secure half), with `memory_flash_size = 0x54000` (336 KB) and `memory_ram_size = 0x5000` (20 KB) starting at `0x20003000` (just after the Secure-side RAM region).
 - `SL_BOARD_ENABLE_VCOM = 1` to bring up the board-controller UART bridge for console output.

@@ -1,0 +1,20 @@
+id: device_portal
+label: Device Manager Portal
+package: platform_core
+description: >
+  The Device Manager Portal component defines the enums used commonly
+  across the Portal driver and peripheral layers.
+category: Services|Device Manager
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: device_portal
+requires:
+- name: enum
+root_path: platform_core/platform/service/device_manager
+include:
+- path: inc
+  file_list:
+  - path: sli_device_portal.h

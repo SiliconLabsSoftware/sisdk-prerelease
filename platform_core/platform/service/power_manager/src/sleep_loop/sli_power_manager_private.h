@@ -83,6 +83,8 @@ typedef struct {
 
 void sli_power_manager_init_hardware(void);
 
+void sli_power_manager_init_em2_debug(void);
+
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_power_manager_apply_em(sl_power_manager_em_t em);
 

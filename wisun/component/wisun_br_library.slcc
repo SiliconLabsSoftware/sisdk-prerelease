@@ -1,10 +1,13 @@
 id: "wisun_br_common_library"
 label: "Wi-SUN Border Router Stack (Library)"
 package: "wisun"
-category: "Wi-SUN"
+category: "Wi-SUN|Stack"
 quality: "production"
 description: "Provide Wi-SUN Border Router stack library"
 root_path: "wisun/./stack"
+
+ui_hints:
+  visibility: never
 
 requires:
 - name: "wisun_br_stack"

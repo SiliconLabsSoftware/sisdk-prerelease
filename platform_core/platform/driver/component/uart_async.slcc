@@ -4,7 +4,8 @@ label: UART Async Driver
 description: >
   Platform UART async driver for USART, EUART, and EUSART peripherals. Declares the
   underlying peripheral signals (TX, RX, CTS, RTS) and configures the DMA channels  for transmission and reception. An instance declared via this component will only
-  support the asynchronous transfer APIs.
+  support the asynchronous transfer APIs. Generated instances are initialized
+  by sl_uart_init_instances() (automatically when sl_main is present).
 category: Platform|Driver|UART
 quality: experimental
 metadata:
@@ -16,6 +17,8 @@ instantiable:
 provides:
 - name: uart_async
   allow_multiple: true
+- name: uart_instance
+  allow_multiple: true
 requires:
 - name: uart_async_core
 - name: uart_core
@@ -25,7 +28,6 @@ config_file:
 template_file:
 - path: init/sl_uart_instances.c.jinja
 - path: init/sl_uart_instances.h.jinja
-
 template_contribution:
 - name: uart_async_instances
   value: '{{instance}}'

@@ -32,7 +32,6 @@ Note: this example exercises **raw ECDH** only (`PSA_ALG_ECDH` via `psa_raw_key_
 
 **`PSA_ECC_FAMILY_SECP_R1`**
 
-- SECP192R1 — 192-bit
 - SECP256R1 — 256-bit
 - SECP384R1 — 384-bit
 - SECP521R1 — 521-bit

@@ -215,10 +215,11 @@ sl_status_t sl_power_manager_init(void)
     sleeptimer_frequency = sl_sleeptimer_get_timer_frequency();
 #endif
 
-#if defined(_EMU_CTRL_EM2DBGEN_MASK) && defined(SL_POWER_MANAGER_INIT_EMU_EM2_DEBUG_ENABLE)
-    // EM2 set debug enable
-    EMU->CTRL = (EMU->CTRL & ~_EMU_CTRL_EM2DBGEN_MASK)
-                | (SL_POWER_MANAGER_INIT_EMU_EM2_DEBUG_ENABLE << _EMU_CTRL_EM2DBGEN_SHIFT);
+#if defined(_EMU_CTRL_EM2DBGEN_MASK) && defined(SL_POWER_MANAGER_INIT_EMU_EM2_DEBUG_ENABLE) && defined(_SILICON_LABS_32B_SERIES_2)
+  EMU->CTRL = (EMU->CTRL & ~_EMU_CTRL_EM2DBGEN_MASK)
+              | (SL_POWER_MANAGER_INIT_EMU_EM2_DEBUG_ENABLE << _EMU_CTRL_EM2DBGEN_SHIFT);
+#else
+    sli_power_manager_init_em2_debug();
 #endif
 
     // Initialize EM4
@@ -1110,6 +1111,11 @@ static void on_clock_wakeup_timeout(sl_sleeptimer_timer_handle_t *handle,
   CORE_EXIT_CRITICAL();
 }
 #endif
+
+SL_WEAK void sli_power_manager_init_em4(void)
+{
+  // This implementation is empty, but this function can be redefined.
+}
 
 /***************************************************************************//**
  * HFXO ready notification callback for internal use with power manager

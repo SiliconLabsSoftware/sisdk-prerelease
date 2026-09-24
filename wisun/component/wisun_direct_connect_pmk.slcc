@@ -9,7 +9,8 @@ quality: "production"
 root_path: "wisun/./plugin"
 
 requires:
-- name: "a_wisun_stack"
+- name: "psa_crypto_hmac"
+- name: "psa_crypto_sha1"
 
 provides:
 - name: "wisun_direct_connect_pmk"
@@ -28,6 +29,11 @@ config_file:
 - path: "config/sl_wisun_direct_connect_pmk_config.h"
 
 template_contribution:
+- name: psa_key_slots
+  value:
+    name: psa_key_slots_wisun_direct_connect_pmk
+    count: 1
+  unless: [wisun_crypto]
 - name: event_handler
   value:
     event: internal_app_init

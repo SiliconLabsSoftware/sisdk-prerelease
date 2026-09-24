@@ -34,8 +34,10 @@ requires:
 
 recommends:
 - id: "wisun_stack_library"
+  unless: [wisun_dc_client_library]
   vendor: silabs
 - id: "wisun_stack_ffn"
+  unless: [wisun_dc_client_library]
   vendor: silabs
 - id: "rail_lib_singleprotocol"
   vendor: silabs

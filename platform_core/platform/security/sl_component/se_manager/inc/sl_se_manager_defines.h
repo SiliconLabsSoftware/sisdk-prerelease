@@ -583,7 +583,11 @@ extern "C" {
 /// @{
 /// @addtogroup sl_se_memory_region_utils
 /// @{
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302)
+#define SL_SE_MAX_CODE_REGIONS           4 ///< The maximum number of code regions available on the device.
+#else
 #define SL_SE_MAX_CODE_REGIONS           8 ///< The maximum number of code regions available on the device.
+#endif
 ///< The number of available code regions may be different on future devices.
 /// @} (end addtogroup sl_se_memory_region_utils)
 /// @} (end addtogroup sl_se_manager_extmem)

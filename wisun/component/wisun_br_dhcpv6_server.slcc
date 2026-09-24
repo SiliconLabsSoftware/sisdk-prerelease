@@ -3,7 +3,7 @@ label: DHCPv6 Server for Wi-SUN Border Router
 description: >
   Implements a DHCPv6 server for WI-SUN SoC Border Router.
 package: wisun
-category: Wi-SUN|Application|Wi-SUN BR CLI
+category: Wi-SUN|Application|Wi-SUN Border Router CLI
 quality: production
 
 

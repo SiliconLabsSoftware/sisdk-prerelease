@@ -40,12 +40,14 @@
 /***************************************************************************//**
  * Initializes the DMA for the given UART instance.
  *
- * @param[in]  uart_handle Handle to UART.
+ * @param[in]  uart_handle  Handle to UART.
+ * @param[in]  async_config Async configuration.
  *
  * @return @ref SL_STATUS_OK if successful.
  *         Error code otherwise.
  ******************************************************************************/
-sl_status_t sli_uart_async_init(sl_uart_handle_t *uart_handle);
+sl_status_t sli_uart_async_init(sl_uart_handle_t *uart_handle,
+                                const sl_uart_async_config_t *async_config);
 
 /***************************************************************************//**
  * Frees the DMA channel and de-initializes the DMA for the given UART instance.
