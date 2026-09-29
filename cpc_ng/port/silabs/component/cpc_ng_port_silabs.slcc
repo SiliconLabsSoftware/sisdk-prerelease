@@ -1,0 +1,28 @@
+id: cpc_ng_port_silabs
+package: cpc_ng
+description: |
+  Silicon Labs EFX platform port for CPC-NG. Provides the platform-specific
+  atomic and timer implementations used by the CPC-NG core.
+category: Services|CPC-NG|Port
+quality: experimental
+label: CPC-NG Port - Silicon Labs
+ui_hints:
+  visibility: never
+root_path: cpc_ng/port/silabs
+metadata:
+  sbom:
+    license: Zlib
+include:
+- path: inc
+  file_list:
+  - path: cpc_atomic.h
+  - path: sli_cpc_timer_types.h
+source:
+- path: src/sli_cpc_timer.c
+provides:
+- name: cpc_ng_port
+- name: cpc_ng_port_silabs
+requires:
+- name: sleeptimer
+- name: atomic
+- name: sl_core

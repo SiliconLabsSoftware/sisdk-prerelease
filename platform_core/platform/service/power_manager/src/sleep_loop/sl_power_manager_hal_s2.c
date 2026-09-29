@@ -57,6 +57,7 @@
 #endif
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /*******************************************************************************
  *********************************   DEFINES   *********************************
@@ -389,6 +390,13 @@ void EMU_EM23PresleepHook(void)
   }
   // Clear HFXO IEN RDY before entering sleep to prevent HFXO HW requests from waking up the system
   HFXO0->IEN_CLR = HFXO_IEN_RDY;
+
+#if defined(SL_POWER_MANAGER_ENABLE_LFXO_EM2_CTUNE_COMPENSATION) \
+  && (SL_POWER_MANAGER_ENABLE_LFXO_EM2_CTUNE_COMPENSATION == 1)  \
+  && defined(_LFXO_CAL_CAPTUNE_MASK)
+  // Lower LFXO CTUNE last so the write stays nearest the WFI.
+  sli_clock_manager_compensate_lfxo_em2_ctune();
+#endif
 }
 #endif
 
@@ -405,6 +413,15 @@ void EMU_EM23PresleepHook(void)
  ******************************************************************************/
 void EMU_EM23PostsleepHook(void)
 {
+#if defined(SL_POWER_MANAGER_ENABLE_LFXO_EM2_CTUNE_COMPENSATION) \
+  && (SL_POWER_MANAGER_ENABLE_LFXO_EM2_CTUNE_COMPENSATION == 1)  \
+  && defined(_LFXO_CAL_CAPTUNE_MASK)
+  // Restore LFXO CTUNE first so the write stays nearest the WFI and before any
+  // early return below. sl_power_manager_sleep() keeps interrupts masked until
+  // after this hook returns.
+  sli_clock_manager_restore_lfxo_em2_ctune();
+#endif
+
   // Re enable HFXO IEN RDY since it was disabled in EMU_EM23PresleepHook
   HFXO0->IEN_SET = HFXO_IEN_RDY;
 

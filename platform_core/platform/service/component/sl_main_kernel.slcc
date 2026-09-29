@@ -58,7 +58,11 @@ description: |
    sl_main_start_task_should_continue() returns false by default to stop the start
    task after the initialization process is done. It can be redefined by the user
    to allow the start task to continue executing after the initialization process is
-   done. Keep in mind that this function is called in the templated main function
+   done. When using FreeRTOS heap_3 on Series 3 devices, set
+   SL_MAIN_START_TASK_ALLOCATE_SHORT_TERM to 0 before reusing the start task,
+   so that its TCB and stack use long-term allocations. Baremetal emulation
+   reuses the start task and therefore requires this setting.
+   Keep in mind that this function is called in the templated main function
    provided by sl_main, if you removed the call to `sl_main_start_task_should_continue`
    in your main function then re-implementing this function will have no effect.
 

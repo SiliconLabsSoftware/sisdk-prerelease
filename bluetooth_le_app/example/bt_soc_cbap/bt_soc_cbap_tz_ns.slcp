@@ -20,12 +20,12 @@ component:
   - id: gatt_configuration
   - id: gatt_service_device_information_override
   - id: bluetooth_feature_legacy_advertiser
+  - id: bluetooth_feature_connection
   - id: bluetooth_feature_connection_role_central
   - id: bluetooth_feature_connection_role_peripheral
   - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
   - id: bluetooth_feature_legacy_scanner
-  - id: bluetooth_feature_sm
   - id: bluetooth_feature_system
   - id: in_place_ota_dfu
   - id: rail_util_pti
@@ -45,13 +45,8 @@ component:
 source:
   - path: app.c
 
-include:
-  - path: .
-    file_list:
-      - path: app.h
-
 config_file:
-  - path: config/cbap_config.h
+  - path: config/app_config.h
   - override:
       component: gatt_configuration
       file_id: gatt_configuration_file_id
@@ -89,8 +84,6 @@ configuration:
     value: "0"
   - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: "0"
-  - name: APP_LOG_LEVEL_FILTER_THRESHOLD
-    value: APP_LOG_LEVEL_INFO
 
 template_contribution:
   # Offset secure application if bootloader is used

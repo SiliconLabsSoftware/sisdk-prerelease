@@ -2,8 +2,8 @@
 - id: brd2711a_config
 - label: brd2711a config
 - description: Configuration files for BRD2711A
-- package: boards
 - category: Platform|Board|Config
+- package: boards
 - quality: production
 - metadata:
     sbom:

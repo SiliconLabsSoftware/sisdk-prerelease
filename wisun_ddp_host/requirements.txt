@@ -1,0 +1,15 @@
+# REST API server
+pylink-square
+pyasn1
+cryptography
+flask>=2.0.0
+flask-socketio>=5.0.0
+eventlet>=0.33.0
+waitress>=2.1.0
+openapi-core
+
+# REST API examples
+requests
+
+# Testing
+pytest

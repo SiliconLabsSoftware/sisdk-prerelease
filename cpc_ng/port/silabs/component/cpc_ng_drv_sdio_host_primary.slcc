@@ -1,0 +1,24 @@
+id: cpc_ng_drv_sdio_host_primary
+package: cpc_ng
+description: Instantiable SDIO-host driver for a CPC-NG Primary device.
+category: Services|CPC-NG|Driver|Primary Device
+quality: internal
+label: CPC-NG Primary - SDIO Host
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/silabs
+instantiable:
+  prefix: instance
+config_file:
+- path: config/series3/sl_cpc_drv_sdio_host_{{instance}}_config.h
+  file_id: cpc_ng_drv_sdio_host_config
+provides:
+- name: cpc_ng_drv_sdio_host_primary
+- name: cpc_ng_primary_drv_instance
+requires:
+- name: cpc_ng_drv_sdio_host
+- name: cpc_ng_primary
+template_contribution:
+- name: cpc_ng_drv_sdio_host_instances
+  value: "{{instance}}"

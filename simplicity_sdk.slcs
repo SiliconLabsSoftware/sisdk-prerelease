@@ -7,12 +7,12 @@ supplier: Silicon Laboratories, Inc.
 component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
-- path: bluetooth_mesh_srtest/component
 - path: bluetooth_common/component
-- path: bluetooth_le/component
-- path: bluetooth_mesh/component
 - path: bluetooth_le_controller/component
+- path: bluetooth_mesh/component
+- path: bluetooth_le/component
 - path: bluetooth_mesh_stack/component
+- path: bluetooth_mesh_srtest/component
 - path: bluetooth_le_internal/component
 - path: bluetooth_apploader/component
 - path: bluetooth_le_host/component
@@ -46,6 +46,10 @@ component_path:
 - path: cpc_extra/cpc-gpio/component
 - path: cpc_extra/cpc-nvm3/component
 - path: cpc_extra/iostream-cpc/component
+- path: cpc_ng/component
+- path: cpc_ng/port/mock/component
+- path: cpc_ng/port/silabs/component
+- path: cpc_ng_tests/component
 - path: cpc_tests/component
 - path: cpc/component
 - path: delta_dfu/component
@@ -143,14 +147,14 @@ toolchain_mapping: toolchains.slct
 documentation:
 - docset: machine-learning
   version: 3.1.0
-- docset: amazon_freertos_test_suite_internal
-  version: 1.0.0
 - docset: amazon_expresslink_sdk_internal
   version: 1.0.0
-- docset: aws_sdk
-  version: 3.1.0
+- docset: amazon_freertos_test_suite_internal
+  version: 1.0.0
 - docset: aws_sdk_202412_00
   version: "202412.0.0"
+- docset: aws_sdk
+  version: 3.1.0
 - docset: azure_freertos_middleware
   version: 1.1.0
 - docset: bluetooth_le_siwx91x
@@ -158,7 +162,7 @@ documentation:
 - docset: btmesh-service-api
   version: 12.0.0
 - docset: gecko-platform
-  version: 6.1.0
+  version: 6.2.0
 - docset: mcu-bootloader
   version: 3.4.0
 - docset: multiprotocol
@@ -210,8 +214,8 @@ documentation:
 - docset: zigbee
   version: 9.2.0
 upgrade_manifest:
-- path: bluetooth_le/upgrade.slcu
 - path: bluetooth_mesh/upgrade.slcu
+- path: bluetooth_le/upgrade.slcu
 - path: bluetooth_mesh_stack/component/upgrade.slcu
 - path: bluetooth_le_host/component/upgrade.slcu
 - path: connect_stack/component/upgrade.slcu

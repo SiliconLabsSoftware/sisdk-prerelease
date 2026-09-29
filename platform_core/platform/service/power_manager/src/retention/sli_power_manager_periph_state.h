@@ -92,8 +92,14 @@ typedef struct sli_power_manager_periph_state_mgmt {
  ******************************************************************************/
 
 // Compile-time bitmaps from retention config.
-extern const uint32_t sli_pm_retained_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS];
+extern const uint32_t sli_pm_retained_default_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS];
 extern const uint32_t sli_pm_restore_on_wakeup_default_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS];
+
+// Mutable copy of the compile-time retained set. Updated by
+// sl_power_manager_enable_peripheral_retention() and
+// sl_power_manager_disable_peripheral_retention().
+// Mutable retained peripherals mask modified by sl_power_manager_enable_peripheral_retention().
+extern uint32_t sli_pm_retained_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS];
 
 // Mutable retained peripherals restore-on-wakeup mask modified by sl_power_manager_set_peripheral_retention_strategy().
 extern uint32_t sli_pm_restore_on_wakeup_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS];

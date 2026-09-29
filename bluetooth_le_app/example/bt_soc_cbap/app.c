@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Core application logic.
+ * @brief Certificate Based Authentication and Pairing application source
  *******************************************************************************
  * # License
  * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
@@ -28,17 +28,19 @@
  *
  ******************************************************************************/
 #include <stdio.h>
+#include <stdint.h>
 #include <stdbool.h>
-#include "sl_bluetooth.h"
-#include "gatt_db.h"
+#include <string.h>
 #include "app_assert.h"
 #include "app_log.h"
 #include "app_timer.h"
 #include "sl_simple_led_instances.h"
-#include "sl_bt_cbap.h"
-#include "cbap_config.h"
-#include "app.h"
 #include "sl_main_init.h"
+#include "sl_bt_api.h"
+#include "sl_bluetooth_connection_config.h"
+#include "gatt_db.h"
+#include "sl_bt_cbap.h"
+#include "app_config.h"
 
 #if SL_BT_CONFIG_MAX_CONNECTIONS < 1
   #error At least 1 connection has to be enabled!
@@ -46,82 +48,82 @@
 
 // -----------------------------------------------------------------------------
 // GATT
+//
+// The CBAP component runs the authentication and the pairing, and owns the
+// characteristics of the CBAP service. What it achieves is a connection in
+// security mode 1, level 4: encrypted with an authenticated key. That protects
+// the characteristics of the local GATT database which require an authenticated
+// and encrypted connection, and nothing else. A characteristic that is
+// readable or writable without security stays accessible to every device that
+// connects, no matter whether it passed CBAP or not.
+//
+// The Digital characteristic of the Automation IO service demonstrates the
+// difference. It requires an authenticated and encrypted connection, so it can
+// only be written once CBAP has succeeded, which is how the two devices blink
+// the LED of each other. Keep this in mind when adding characteristics to
+// gatt_configuration.btconf: CBAP does not protect them by itself, their own
+// security requirements do.
 
-// Reference to the CBAP service.
-static uint32_t cbap_service_handle = HANDLE_NOT_INITIALIZED;
-static const uint8_t cbap_service_uuid[] = { CBAP_SERVICE_UUID };
+/// Service UUID lengths as they appear in an advertisement
+#define UUID_16_LEN                   2
+#define UUID_128_LEN                  16
 
-// Reference to the CBAP characteristics.
-static characteristic_128_ref_t cbap_characteristics[] = {
-  {
-    .handle = HANDLE_NOT_INITIALIZED,
-    .uuid = { CENTRAL_CERT_CHAR_UUID }
-  },
-  {
-    .handle = HANDLE_NOT_INITIALIZED,
-    .uuid = { PERIPHERAL_CERT_CHAR_UUID }
-  },
-  {
-    .handle = HANDLE_NOT_INITIALIZED,
-    .uuid = { CENTRAL_OOB_CHAR_UUID }
-  },
-  {
-    .handle = HANDLE_NOT_INITIALIZED,
-    .uuid = { PERIPHERAL_OOB_CHAR_UUID }
-  }
-};
+/// GAP advertising data types carrying service UUIDs
+/// Incomplete List of 16-bit Service Class UUIDs
+#define GAP_INCOMPLETE_16B_UUID       0x02
+/// Complete List of 16-bit Service Class UUIDs
+#define GAP_COMPLETE_16B_UUID         0x03
+/// Incomplete List of 128-bit Service Class UUIDs
+#define GAP_INCOMPLETE_128B_UUID      0x06
+/// Complete List of 128-bit Service Class UUIDs
+#define GAP_COMPLETE_128B_UUID        0x07
 
-// Device role
-static sl_bt_connection_role_t role = ROLE;
+// UUID of the CBAP service, advertised by a device that supports CBAP
+static const uint8_t cbap_service_uuid[] = { SL_BT_CBAP_SERVICE_UUID };
 
-// -----------------------------------------------------------------------------
-// States
-
-// State of the peripheral device
-static peripheral_state_t peripheral_state = (peripheral_state_t)0;
-// State of the central device
-static central_state_t central_state = (central_state_t)0;
-// Pointing to the characteristic that shall be discovered next
-static characteristics_t char_state = (characteristics_t)0;
-
-#define IS_PERIPHERAL_IN_PROGRESS (peripheral_state != (peripheral_state_t)0)
-#define IS_CENTRAL_IN_PROGRESS    (central_state != (central_state_t)0)
+// Value written to the Digital characteristic to turn the LED on and off
+#define LED_ON                 0x01
+#define LED_OFF                0x00
 
 // -----------------------------------------------------------------------------
-// Connections
+// Role
 
-// The connection handle and the Bluetooth address of the remote device we have CBAP in progress with
-static conn_properties_t candidate_device;
-// Array for holding properties of the trusted connections
-static conn_properties_t trusted_devices[SL_BT_CONFIG_MAX_CONNECTIONS];
+// Bluetooth role of this device. It decides whether the device advertises and
+// waits for a central device, or scans for a peripheral device to connect to.
+static sl_bt_connection_role_t role = CONNECTION_ROLE;
 
-// Clears candidate device.
-static void clear_connection_info(void);
-// Adds the candidate device to the trusted devices array.
-static void save_connection_info(void);
-// Finds next available connection slot.
-static int next_available_connection(void);
-// Logs the connection handle and the Bluetooth address of the trusted devices.
-static void print_trusted_devices(void);
+#define IS_CENTRAL             (role == sl_bt_connection_role_central)
 
 // -----------------------------------------------------------------------------
-// Advertising
+// Advertising and scanning
 
-// The advertising set handle allocated from Bluetooth stack.
+// The advertising set handle allocated from Bluetooth stack
 static uint8_t advertising_set_handle = SL_BT_INVALID_ADVERTISING_SET_HANDLE;
 
-// -----------------------------------------------------------------------------
-// Scanning
+// Advertising interval in 0.625 ms units
+#define ADV_INTERVAL_MS        100
+#define ADV_INTERVAL_UNITS     ((ADV_INTERVAL_MS) * 8 / 5)
+
+// True while the device is advertising or scanning
+static bool discovery_active = false;
+
+// True after the central requested a connection and before the stack reports
+// connection_opened. This flag is required because CBAP cannot report itself
+// busy during this short period.
+static bool connection_open_pending = false;
 
 // Should we search for a specified peripheral device or not
 static bool peripheral_target_defined = ADDR_ENABLE;
 // Target device Bluetooth address
 static bd_addr peripheral_target_addr;
 
-// Convert address string to address data bytes.
-static bool decode_address(char *addess_str, bd_addr *address);
+// Start advertising or scanning, depending on the Bluetooth role.
+static void start_discovery(void);
+// Stop advertising or scanning, depending on the Bluetooth role.
+static void stop_discovery(void);
 // Examine a scan report and decide if a connection should be established.
-bool check_scan_report(sl_bt_evt_scanner_legacy_advertisement_report_t *scan_report);
+static bool check_scan_report(
+  const sl_bt_evt_scanner_legacy_advertisement_report_t *report);
 // Search for a Service UUID in scan report.
 static bool find_service_in_advertisement(const uint8_t *scan_data,
                                           uint8_t scan_data_len,
@@ -129,83 +131,81 @@ static bool find_service_in_advertisement(const uint8_t *scan_data,
                                           uint8_t uuid_len);
 
 // -----------------------------------------------------------------------------
-// Certificates
+// Connections
 
-// Device certificate send flags
-static uint32_t dev_cert_sending_progression = 0;
-static bool device_cert_sent = false;
+// Number of open connections, authenticated by CBAP or not
+static uint8_t open_connections = 0;
 
-// Certificate buffer (able to hold a certificate in DER format)
-static uint8_t device_certificate_der[SL_BT_CBAP_CERTIFICATE_MAX_SIZE] = { 0 };
-static size_t device_certificate_der_len = 0;
+// Properties of the connections that completed the CBAP procedure
+static sl_bt_cbap_conn_t trusted_devices[SL_BT_CONFIG_MAX_CONNECTIONS];
 
-// Remote certificate which was sent over GATT in DER format
-static uint8_t remote_certificate_der[SL_BT_CBAP_CERTIFICATE_MAX_SIZE] = { 0 };
-static uint32_t remote_certificate_der_len = 0;
-static bool remote_cert_arrived = false;
+// Bluetooth addresses of the devices that failed the CBAP procedure. The
+// application does not start a new procedure with them.
+static bd_addr disallowlist[DISALLOWLIST_SIZE];
+// Number of valid entries in disallowlist
+static uint8_t disallowlist_len = 0;
 
-// Out-Of-Band data
-static uint8_t signed_device_oob_data[SIGNED_OOB_DATA_LEN];
-static size_t signed_device_oob_len = 0;
+// Report the outcome of a CBAP procedure. Called by the CBAP component.
+static void on_cbap_result(sl_bt_cbap_conn_t conn, sl_status_t sc);
+// Add an authenticated connection to the trusted devices array.
+static void add_trusted_device(sl_bt_cbap_conn_t conn);
+// Remove a closed connection from the trusted devices array.
+static void remove_trusted_device(uint8_t connection);
+// Log the connection handle and the Bluetooth address of the trusted devices.
+static void print_trusted_devices(void);
+// Remember a device that failed the CBAP procedure.
+static void add_to_disallowlist(bd_addr address);
+// True if the device failed the CBAP procedure before.
+static bool is_disallowed(bd_addr address);
 
 // -----------------------------------------------------------------------------
-// Timers
-#define STATE_TIMEOUT                 5000 // ms
-#define LED_TIMEOUT                   500 // ms
-#define CALLBACK_DATA                 (void *)NULL // Callback has no parameters
+// LED
 
-// Timer handles
-static app_timer_t state_timer;
+// Time the LED is kept on to indicate a successful CBAP procedure
+#define LED_BLINK_TIME_MS      500
+
+// Timer handle of the LED
 static app_timer_t led_timer;
 
-// Timer Callbacks
-static void state_machine_timeout_cb(app_timer_t *handle, void *data);
+// Turn the LED on for LED_BLINK_TIME_MS to indicate a successful procedure.
+static void blink_led(void);
+// Timer callback turning the LED off.
 static void led_timer_cb(app_timer_t *handle, void *data);
 
-// Start timer for state machine timeout checking
-#define STATE_TIMEOUT_START()                                                                                            \
-  do {                                                                                                                   \
-    sl_status_t timeout_start_status;                                                                                    \
-    timeout_start_status = app_timer_start(&state_timer, STATE_TIMEOUT, state_machine_timeout_cb, CALLBACK_DATA, false); \
-    app_assert_status(timeout_start_status);                                                                             \
-  } while (0)
-// Stop timer for state machine timeout checking
-#define STATE_TIMEOUT_STOP()                            \
-  do {                                                  \
-    sl_status_t timeout_stop_status;                    \
-    timeout_stop_status = app_timer_stop(&state_timer); \
-    app_assert_status(timeout_stop_status);             \
-  } while (0)
-
 // -----------------------------------------------------------------------------
-// Error handling
+// Bluetooth addresses
 
-// Handle CBAP process errors
-static void on_error(void);
-// Reset CBAP process states, flags and timers
-static void app_reset(void);
+// Length of a Bluetooth address printed as a string, with the terminator
+#define ADDR_STR_LEN           18
+
+// Print a Bluetooth address into a buffer of ADDR_STR_LEN bytes.
+static void format_address(bd_addr address, char *buffer);
+// Convert an address string to address data bytes.
+static bool decode_address(const char *address_str, bd_addr *address);
 
 /**************************************************************************//**
  * Application Init.
  *****************************************************************************/
 void app_init(void)
 {
-  // Initialize CBAP component and dependencies
   sl_status_t sc;
-  sc = sl_bt_cbap_init();
-  app_assert_status(sc);
-  app_log_info("CBAP initialized. Certificate chain verified." APP_LOG_NL);
 
-  // Initialize candidate device data
-  clear_connection_info();
+  app_assert(role == sl_bt_connection_role_peripheral
+             || role == sl_bt_connection_role_central,
+             "Invalid Bluetooth role!");
 
-  // Initialize connection array
+  // Mark every trusted device slot free.
   for (uint8_t i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
-    trusted_devices[i].connection_handle = SL_BT_INVALID_CONNECTION_HANDLE;
-    for (uint8_t j = 0; j < sizeof(bd_addr); j++) {
-      trusted_devices[i].address.addr[j] = 0xFF;
-    }
+    trusted_devices[i].handle = SL_BT_INVALID_CONNECTION_HANDLE;
+    memset(trusted_devices[i].address.addr, 0xff, sizeof(bd_addr));
   }
+
+  // Hand the CBAP procedure over to the component. It authenticates every
+  // device that connects and reports the outcome through the callback. The
+  // responsibility of the application is to open a connection (one at a time)
+  // and to handle CBAP success or failure (disallowlist).
+  sc = sl_bt_cbap_init(on_cbap_result, IS_CENTRAL);
+  app_assert_status(sc);
 
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application init code here!                         //
@@ -234,687 +234,147 @@ void app_process_action(void)
 void sl_bt_on_event(sl_bt_msg_t *evt)
 {
   sl_status_t sc;
+
   switch (SL_BT_MSG_ID(evt->header)) {
     // -------------------------------
     // This event indicates the device has started and the radio is ready.
     // Do not call any stack command before receiving this boot event!
     case sl_bt_evt_system_boot_id:
-      switch (role) {
-        case sl_bt_connection_role_peripheral:
-          app_log_info("Peripheral role selected." APP_LOG_NL);
-          // Create an advertising set.
-          sc = sl_bt_advertiser_create_set(&advertising_set_handle);
-          app_assert_status(sc);
+      if (IS_CENTRAL) {
+        app_log_info("Central connection role selected." APP_LOG_NL);
 
-          // Generate data for advertising
-          sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle, sl_bt_advertiser_general_discoverable);
-          app_assert_status(sc);
-
-          // Set advertising interval to 100ms.
-          sc = sl_bt_advertiser_set_timing(
-            advertising_set_handle,
-            160, // min. adv. interval (milliseconds * 1.6)
-            160, // max. adv. interval (milliseconds * 1.6)
-            0,   // adv. duration
-            0);  // max. num. adv. events
-          app_assert_status(sc);
-
-          // Request OOB data from both device
-          sc = sl_bt_sm_configure(SL_BT_SM_CONFIGURATION_OOB_FROM_BOTH_DEVICES_REQUIRED,
-                                  sl_bt_sm_io_capability_noinputnooutput);
-          app_assert_status(sc);
-
-          // Start advertising and enable connections.
-          sc = sl_bt_legacy_advertiser_start(advertising_set_handle, sl_bt_legacy_advertiser_connectable);
-          app_assert_status(sc);
-          app_log_info("Advertising started." APP_LOG_NL);
-          break;
-
-        case sl_bt_connection_role_central:
-          app_log_info("Central role selected." APP_LOG_NL);
-
-          // If defined, get target address
-          if (peripheral_target_defined) {
-            if (decode_address(ADDR, &peripheral_target_addr)) {
-              app_log_info("Searching for %02X:%02X:%02X:%02X:%02X:%02X. " APP_LOG_NL,
-                           peripheral_target_addr.addr[5],
-                           peripheral_target_addr.addr[4],
-                           peripheral_target_addr.addr[3],
-                           peripheral_target_addr.addr[2],
-                           peripheral_target_addr.addr[1],
-                           peripheral_target_addr.addr[0]);
-            } else {
-              peripheral_target_defined = false;
-              app_log_error("Reading target address failed. Searching for any " \
-                            "device advertising the CBAP Service." APP_LOG_NL);
-            }
+        if (peripheral_target_defined) {
+          if (decode_address(ADDR, &peripheral_target_addr)) {
+            char addr_str[ADDR_STR_LEN];
+            format_address(peripheral_target_addr, addr_str);
+            app_log_info("Searching for %s." APP_LOG_NL, addr_str);
           } else {
-            app_log_info("Searching for any device advertising the CBAP Service." APP_LOG_NL);
+            // decode_address() has logged why. Fall back to accepting any
+            // device that advertises the CBAP service.
+            peripheral_target_defined = false;
           }
+        }
 
-          // Start scanning
-          sc = sl_bt_scanner_start(sl_bt_scanner_scan_phy_1m, sl_bt_scanner_discover_generic);
-          app_assert_status(sc);
-          app_log_info("Scanning started." APP_LOG_NL);
-          break;
+        if (!peripheral_target_defined) {
+          app_log_info("Searching for any device advertising the CBAP " \
+                       "Service." APP_LOG_NL);
+        }
+      } else {
+        app_log_info("Peripheral connection role selected." APP_LOG_NL);
 
-        default:
-          app_assert_status_f(SL_STATUS_INVALID_STATE, "Invalid role!");
-          break;
+        // Create an advertising set and fill it with data generated from the
+        // local GATT database. The CBAP service is marked as advertised, so
+        // its UUID gets into the advertisement, which is what a central device
+        // running this example scans for.
+        sc = sl_bt_advertiser_create_set(&advertising_set_handle);
+        app_assert_status(sc);
+
+        sc = sl_bt_legacy_advertiser_generate_data(
+          advertising_set_handle,
+          sl_bt_advertiser_general_discoverable);
+        app_assert_status(sc);
+
+        sc = sl_bt_advertiser_set_timing(advertising_set_handle,
+                                         ADV_INTERVAL_UNITS, // min. interval
+                                         ADV_INTERVAL_UNITS, // max. interval
+                                         0,                  // duration
+                                         0);                 // max. num. events
+        app_assert_status(sc);
       }
+
+      start_discovery();
       break;
 
     // -------------------------------
-    // This event is generated when an advertisement packet or a scan response is received from a responder
+    // This event is generated when an advertisement packet or a scan response
+    // is received from a responder. Only a central device scans, so only a
+    // central device gets here.
     case sl_bt_evt_scanner_legacy_advertisement_report_id:
-      if (role == sl_bt_connection_role_central) {
-        // Filter for connectable scannable undirected advertisements
-        if ((evt->data.evt_scanner_legacy_advertisement_report.event_flags
-             == (SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE | SL_BT_SCANNER_EVENT_FLAG_SCANNABLE))
-            && check_scan_report(&evt->data.evt_scanner_legacy_advertisement_report)) {
-          // Target device found. Stop scanning.
-          sc = sl_bt_scanner_stop();
-          app_assert_status(sc);
+      if (!check_scan_report(
+            &evt->data.evt_scanner_legacy_advertisement_report)) {
+        break;
+      }
 
-          // Connect to device
-          sc = sl_bt_connection_open(evt->data.evt_scanner_legacy_advertisement_report.address,
-                                     evt->data.evt_scanner_legacy_advertisement_report.address_type,
-                                     sl_bt_gap_phy_1m,
-                                     NULL);
-          app_assert_status(sc);
-        }
+      // The component serves a single CBAP procedure at a time, so stop
+      // scanning before the connection is opened.
+      stop_discovery();
+
+      connection_open_pending = true;
+      sc = sl_bt_connection_open(
+        evt->data.evt_scanner_legacy_advertisement_report.address,
+        evt->data.evt_scanner_legacy_advertisement_report.address_type,
+        sl_bt_gap_phy_1m,
+        NULL);
+      if (sc != SL_STATUS_OK) {
+        connection_open_pending = false;
+        app_log_error("Failed to open connection: 0x%04lx" APP_LOG_NL, sc);
+        start_discovery();
       }
       break;
 
     // -------------------------------
     // This event indicates that a new connection was opened.
     case sl_bt_evt_connection_opened_id:
-      app_log_info("Connection opened." APP_LOG_NL);
+      connection_open_pending = false;
+      open_connections++;
+      app_log_info("Connection %d opened." APP_LOG_NL,
+                   evt->data.evt_connection_opened.connection);
 
-      // Store data of the candidate device
-      candidate_device.connection_handle = evt->data.evt_connection_opened.connection;
-      candidate_device.address = evt->data.evt_connection_opened.address;
+      // The component has started the CBAP procedure with this device already,
+      // and it can only serve one at a time. Stop advertising, and the
+      // scanning of a central device that did not get here from a scan report.
+      stop_discovery();
 
-      // Check if there is a connection with this device already
-      for (int i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
-        if (memcmp(evt->data.evt_connection_opened.address.addr, trusted_devices[i].address.addr, sizeof(bd_addr)) == 0) {
-          on_error();
-          break;
-        }
+      if (evt->data.evt_connection_opened.bonding
+          != SL_BT_INVALID_BONDING_HANDLE) {
+        app_log_error("Devices are already bonded and CBAP does not support " \
+                      "bonding." APP_LOG_NL);
       }
 
-      if (IS_PERIPHERAL_IN_PROGRESS || IS_CENTRAL_IN_PROGRESS) {
-        on_error();
-        break;
+      // A peripheral device cannot filter out a disallowlisted device before
+      // it connects, so it refuses the connection here instead.
+      if (is_disallowed(evt->data.evt_connection_opened.address)) {
+        app_log_error("The remote device failed the CBAP procedure before. " \
+                      "Closing connection." APP_LOG_NL);
+        sc = sl_bt_connection_close(
+          evt->data.evt_connection_opened.connection);
+        app_log_status_error(sc);
       }
-
-      if (evt->data.evt_connection_opened.bonding != SL_BT_INVALID_BONDING_HANDLE) {
-        app_log_warning("Devices are already bonded." APP_LOG_NL);
-      }
-
-      if (role == sl_bt_connection_role_central) {
-        // Discover CBAP service on the peripheral device
-        sc = sl_bt_gatt_discover_primary_services_by_uuid(candidate_device.connection_handle,
-                                                          sizeof(cbap_service_uuid),
-                                                          (const uint8_t *)cbap_service_uuid);
-        app_assert_status(sc);
-        central_state = CENTRAL_DISCOVER_SERVICES;
-        app_log_info("Discovering services." APP_LOG_NL);
-      }
-
-      STATE_TIMEOUT_START();
-      app_log_info("CBAP procedure start." APP_LOG_NL);
       break;
 
     // -------------------------------
     // This event indicates that a connection was closed.
     case sl_bt_evt_connection_closed_id:
-      app_log_info("Connection closed." APP_LOG_NL);
+      app_log_info("Connection %d closed." APP_LOG_NL,
+                   evt->data.evt_connection_closed.connection);
 
-      // Remove connection from the connection array if present
-      for (int i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
-        if (trusted_devices[i].connection_handle == evt->data.evt_connection_closed.connection) {
-          trusted_devices[i].connection_handle = SL_BT_INVALID_CONNECTION_HANDLE;
-          for (uint8_t j = 0; j < sizeof(bd_addr); j++) {
-            trusted_devices[i].address.addr[j] = 0xff;
-          }
-          app_log_info("Trusted device [%d] removed." APP_LOG_NL, evt->data.evt_connection_closed.connection);
-        }
+      if (open_connections > 0) {
+        open_connections--;
       }
+      remove_trusted_device(evt->data.evt_connection_closed.connection);
 
-      // Clean up if CBAP procedure was aborted
-      if (IS_PERIPHERAL_IN_PROGRESS || IS_CENTRAL_IN_PROGRESS) {
-        on_error();
-      } else {
-        app_reset();
-      }
-      break;
-
-    //--------------------------------
-    // Triggered whenever the connection parameters are changed
-    case sl_bt_evt_connection_parameters_id:
-      if (evt->data.evt_connection_parameters.connection != candidate_device.connection_handle) {
-        break;
-      }
-
-      app_log_debug("Security mode: %d" APP_LOG_NL, evt->data.evt_connection_parameters.security_mode);
-
-      if (role == sl_bt_connection_role_peripheral) {
-        if (evt->data.evt_connection_parameters.security_mode > sl_bt_connection_mode1_level1
-            && peripheral_state != PERIPHERAL_CENTRAL_OOB_OK) {
-          app_log_error("The central device increased the security level with no CBAP." APP_LOG_NL);
-          on_error();
-          break;
-        }
-
-        if (evt->data.evt_connection_parameters.security_mode == sl_bt_connection_mode1_level4) {
-          peripheral_state = PERIPHERAL_DONE;
-
-          app_log_info("CBAP procedure complete." APP_LOG_NL);
-          save_connection_info();
-          clear_connection_info();
-          print_trusted_devices();
-
-          app_reset();
-        }
-      } else if (role == sl_bt_connection_role_central) {
-        if (evt->data.evt_connection_parameters.security_mode > sl_bt_connection_mode1_level1
-            && central_state != CENTRAL_INCREASE_SECURITY) {
-          app_log_error("Security level has been increased with no CBAP." APP_LOG_NL);
-          on_error();
-          break;
-        }
-
-        if (evt->data.evt_connection_parameters.security_mode == sl_bt_connection_mode1_level4) {
-          central_state = CENTRAL_DONE;
-          app_log_info("CBAP procedure complete." APP_LOG_NL);
-
-          // Blink LED on peripheral
-          uint8_t data_sent = 0x01;
-          sc = sl_bt_gatt_write_characteristic_value(candidate_device.connection_handle,
-                                                     gattdb_aio_digital_out,
-                                                     sizeof(data_sent),
-                                                     &data_sent);
-          app_assert_status(sc);
-
-          save_connection_info();
-          clear_connection_info();
-          print_trusted_devices();
-
-          app_reset();
-        }
-      }
-      break;
-
-    // -------------------------------
-    // This event is generated when a new service is discovered
-    case sl_bt_evt_gatt_service_id:
-      if (evt->data.evt_gatt_characteristic.connection != candidate_device.connection_handle) {
-        break;
-      }
-
-      if (role == sl_bt_connection_role_central) {
-        if (cbap_service_handle == HANDLE_NOT_INITIALIZED) {
-          // Save service handle for future reference
-          cbap_service_handle = evt->data.evt_gatt_service.service;
-          app_log_debug("Service handle found: %d" APP_LOG_NL, (int)cbap_service_handle);
-        }
-      }
-      break;
-
-    // -------------------------------
-    // This event is generated when a new characteristic is discovered
-    case sl_bt_evt_gatt_characteristic_id:
-      if (evt->data.evt_gatt_characteristic.connection != candidate_device.connection_handle) {
-        break;
-      }
-
-      if (role == sl_bt_connection_role_central) {
-        if (cbap_characteristics[char_state].handle == HANDLE_NOT_INITIALIZED) {
-          // Save characteristic handle for future reference
-          cbap_characteristics[char_state].handle = evt->data.evt_gatt_characteristic.characteristic;
-          app_log_debug("Characteristic handle found: %d" APP_LOG_NL, cbap_characteristics[char_state].handle);
-        }
-      }
-      break;
-
-    // -------------------------------
-    // This event is generated when a characteristic value was received
-    case sl_bt_evt_gatt_characteristic_value_id:
-      if (evt->data.evt_gatt_characteristic.connection != candidate_device.connection_handle) {
-        break;
-      }
-
-      if (role == sl_bt_connection_role_central) {
-        if (central_state == CENTRAL_GET_PERIPHERAL_CERT) {
-          memcpy(&remote_certificate_der[remote_certificate_der_len],
-                 &evt->data.evt_gatt_characteristic_value.value.data[1],
-                 evt->data.evt_gatt_characteristic_value.value.len - 1);
-          remote_certificate_der_len += evt->data.evt_gatt_characteristic_value.value.len - 1;
-          sc = sl_bt_gatt_send_characteristic_confirmation(evt->data.evt_gatt_characteristic_value.connection);
-          app_assert_status(sc);
-          if (evt->data.evt_gatt_characteristic_value.value.data[0] == 0) {
-            // Last chunk stop indication
-            sc = sl_bt_gatt_set_characteristic_notification(candidate_device.connection_handle,
-                                                            cbap_characteristics[CHAR_PERIPHERAL_CERT].handle,
-                                                            sl_bt_gatt_disable);
-            app_assert_status(sc);
-
-            remote_cert_arrived = true;
-            central_state = CENTRAL_SEND_CENTRAL_CERT;
-            app_log_info("Sending certificate." APP_LOG_NL);
-            STATE_TIMEOUT_START();
-
-            sc = sl_bt_cbap_process_remote_cert(remote_certificate_der, remote_certificate_der_len);
-            if (sc == SL_STATUS_OK) {
-              app_log_info("Remote certificate verified." APP_LOG_NL);
-            } else {
-              app_log_error("Remote certificate verification failed." APP_LOG_NL);
-              on_error();
-              break;
-            }
-          }
-        } else if (central_state == CENTRAL_GET_PERIPHERAL_OOB) {
-          aes_key_128 remote_random;
-          aes_key_128 remote_confirm;
-          uint8_t remote_oob_signature[OOB_SIGNATURE_LEN];
-          memcpy(&remote_random, &evt->data.evt_gatt_characteristic_value.value.data[0], sizeof(aes_key_128));
-          memcpy(&remote_confirm, &evt->data.evt_gatt_characteristic_value.value.data[16], sizeof(aes_key_128));
-          memcpy(&remote_oob_signature, &evt->data.evt_gatt_server_user_write_request.value.data[32], OOB_SIGNATURE_LEN);
-          sc = sl_bt_gatt_send_characteristic_confirmation(evt->data.evt_gatt_characteristic_value.connection);
-          app_assert_status(sc);
-          central_state = CENTRAL_SEND_OOB;
-          app_log_info("Sending OOB data." APP_LOG_NL);
-          STATE_TIMEOUT_START();
-          sc = sl_bt_gatt_set_characteristic_notification(candidate_device.connection_handle,
-                                                          cbap_characteristics[CHAR_PERIPHERAL_OOB].handle,
-                                                          sl_bt_gatt_disable);
-          app_assert_status(sc);
-
-          app_log_debug("Remote OOB data:" APP_LOG_NL);
-          app_log_hexdump_debug(&remote_random, sizeof(aes_key_128));
-          app_log_debug(APP_LOG_NL);
-          app_log_hexdump_debug(&remote_confirm, sizeof(aes_key_128));
-          app_log_debug(APP_LOG_NL);
-          app_log_debug("Remote OOB signature:" APP_LOG_NL);
-          app_log_hexdump_debug(&remote_oob_signature, OOB_SIGNATURE_LEN);
-          app_log_debug(APP_LOG_NL);
-
-          sc = sl_bt_cbap_verify_remote_oob_data(remote_random.data, remote_confirm.data, remote_oob_signature);
-          app_assert_status(sc);
-          app_log_info("Remote OOB data verified." APP_LOG_NL);
-          sc = sl_bt_sm_set_remote_oob(1, remote_random, remote_confirm);
-          app_assert_status(sc);
-          sc = sl_bt_cbap_destroy_key();
-          app_assert_status(sc);
-        }
-      }
+      // A connection slot became free. Discovery only resumes when no other
+      // connection is being established and CBAP is not authenticating one.
+      start_discovery();
       break;
 
     // -------------------------------
     // This event indicates that the value of an attribute in the local GATT
     // database was changed by a remote GATT client.
     case sl_bt_evt_gatt_server_attribute_value_id:
-      if (role == sl_bt_connection_role_peripheral
-          && gattdb_aio_digital_out == evt->data.evt_gatt_server_characteristic_status.characteristic) {
-        // The value of the gattdb_aio_digital_out characteristic was changed.
-        uint8_t data_recv;
-        size_t data_recv_len;
-
-        // Read characteristic value.
-        sc = sl_bt_gatt_server_read_attribute_value(gattdb_aio_digital_out,
-                                                    0,
-                                                    sizeof(data_recv),
-                                                    &data_recv_len,
-                                                    &data_recv);
-        (void)data_recv_len;
-        app_log_status_error(sc);
-
-        if (sc != SL_STATUS_OK) {
-          break;
-        }
-
-        if (data_recv == 0x00) {
-          // Turn off LED.
-          sl_led_turn_off(SL_SIMPLE_LED_INSTANCE(0));
-          app_log_info("LED off." APP_LOG_NL);
-        } else {
-          // Blink LED.
-          sl_led_turn_on(SL_SIMPLE_LED_INSTANCE(0));
-          app_log_info("LED on." APP_LOG_NL);
-          sc = app_timer_start(&led_timer, LED_TIMEOUT, led_timer_cb, CALLBACK_DATA, false);
-          app_assert_status(sc);
-        }
-      }
-      break;
-
-    //--------------------------------
-    // Indicates that a remote GATT client is attempting to write a value of an attribute into the local GATT database
-    case sl_bt_evt_gatt_server_user_write_request_id:
-      if (evt->data.evt_connection_parameters.connection != candidate_device.connection_handle) {
+      if (evt->data.evt_gatt_server_attribute_value.attribute
+          != gattdb_aio_digital_out
+          || evt->data.evt_gatt_server_attribute_value.value.len == 0) {
         break;
       }
 
-      if (role == sl_bt_connection_role_peripheral) {
-        // Set default response parameters.
-        sc = SL_STATUS_BT_ATT_WRITE_REQUEST_REJECTED;
-        // Receiving Certificate from central device
-        if (evt->data.evt_gatt_server_user_write_request.characteristic == gattdb_central_cert) {
-          if (remote_cert_arrived == false) {
-            // First byte indicates that it is a last packet or not
-            memcpy(&remote_certificate_der[remote_certificate_der_len],
-                   &evt->data.evt_gatt_server_user_write_request.value.data[1],
-                   evt->data.evt_gatt_server_user_write_request.value.len - 1);
-            remote_certificate_der_len += evt->data.evt_gatt_server_user_write_request.value.len - 1;
-            sc = SL_STATUS_OK;
-            if (evt->data.evt_gatt_server_user_write_request.value.data[0] == 0) {
-              // Last packet of the remote cert arrived
-              app_log_info("Getting certificate from central." APP_LOG_NL);
-              remote_cert_arrived = true;
-              sc = sl_bt_cbap_process_remote_cert(remote_certificate_der, remote_certificate_der_len);
-              if (sc == SL_STATUS_OK) {
-                app_assert(peripheral_state == PERIPHERAL_IDLE, "Unexpected peripheral state.");
-                peripheral_state = PERIPHERAL_CENTRAL_CERT_OK;
-                app_log_info("Remote certificate verified." APP_LOG_NL);
-                STATE_TIMEOUT_START();
-              } else {
-                app_log_error("Remote certificate verification failed." APP_LOG_NL);
-                on_error();
-                break;
-              }
-            }
-            // Map status code to a valid attribute error.
-            if (SL_STATUS_OK != sc) {
-              sc = SL_STATUS_BT_ATT_WRITE_REQUEST_REJECTED;
-            }
-          } else {
-            sc = SL_STATUS_BT_ATT_PROCEDURE_ALREADY_IN_PROGRESS;
-          }
-          sl_bt_gatt_server_send_user_write_response(evt->data.evt_gatt_server_user_write_request.connection,
-                                                     evt->data.evt_gatt_server_user_write_request.characteristic,
-                                                     (uint8_t)sc);
-        }
-        // Receiving OOB data from central device
-        else if (evt->data.evt_gatt_server_user_write_request.characteristic == gattdb_central_oob ) {
-          app_log_info("Getting OOB data from central." APP_LOG_NL);
-          aes_key_128 remote_random;
-          aes_key_128 remote_confirm;
-          uint8_t remote_oob_signature[OOB_SIGNATURE_LEN];
-          memcpy(&remote_random, &evt->data.evt_gatt_server_user_write_request.value.data[0], sizeof(remote_random));
-          memcpy(&remote_confirm, &evt->data.evt_gatt_server_user_write_request.value.data[16], sizeof(remote_confirm));
-          memcpy(&remote_oob_signature, &evt->data.evt_gatt_server_user_write_request.value.data[32], OOB_SIGNATURE_LEN);
-
-          sc = sl_bt_gatt_server_send_user_write_response(evt->data.evt_gatt_server_user_write_request.connection,
-                                                          evt->data.evt_gatt_server_user_write_request.characteristic,
-                                                          SL_STATUS_OK);
-          app_assert_status(sc);
-
-          app_log_debug("Remote OOB data:" APP_LOG_NL);
-          app_log_hexdump_debug(&remote_random, sizeof(aes_key_128));
-          app_log_debug(APP_LOG_NL);
-          app_log_hexdump_debug(&remote_confirm, sizeof(aes_key_128));
-          app_log_debug(APP_LOG_NL);
-          app_log_debug("Remote OOB signature:" APP_LOG_NL);
-          app_log_hexdump_debug(&remote_oob_signature, OOB_SIGNATURE_LEN);
-          app_log_debug(APP_LOG_NL);
-
-          sc = sl_bt_cbap_verify_remote_oob_data(remote_random.data, remote_confirm.data, remote_oob_signature);
-          app_assert_status(sc);
-          app_log_info("Remote OOB data verified." APP_LOG_NL);
-          sc = sl_bt_sm_set_remote_oob(1, remote_random, remote_confirm);
-          app_assert_status(sc);
-          sc = sl_bt_cbap_destroy_key();
-          app_assert_status(sc);
-
-          app_assert(peripheral_state == PERIPHERAL_CENTRAL_CERT_OK, "Unexpected peripheral state.");
-          peripheral_state = PERIPHERAL_CENTRAL_OOB_OK;
-          app_log_info("Remote OOB data verified." APP_LOG_NL);
-          STATE_TIMEOUT_START();
-        }
-      }
-      break;
-
-    //--------------------------------
-    // Indicates either that a local Client Characteristic Configuration descriptor was changed by the remote GATT
-    // client, or that a confirmation from the remote GATT client was received upon a successful reception of the
-    // indication
-    case sl_bt_evt_gatt_server_characteristic_status_id:
-      if (evt->data.evt_connection_parameters.connection != candidate_device.connection_handle) {
-        break;
-      }
-
-      if (role == sl_bt_connection_role_peripheral) {
-        if (gattdb_peripheral_cert == evt->data.evt_gatt_server_characteristic_status.characteristic) {
-          sc = sl_bt_cbap_get_certificate(SL_BT_CBAP_PSA_DEVICE_CERT,
-                                          device_certificate_der,
-                                          &device_certificate_der_len,
-                                          sizeof(device_certificate_der));
-          app_assert_status(sc);
-
-          if (sl_bt_gatt_server_client_config == (sl_bt_gatt_server_characteristic_status_flag_t)evt->data.evt_gatt_server_characteristic_status.status_flags
-              && sl_bt_gatt_indication == (sl_bt_gatt_client_config_flag_t)evt->data.evt_gatt_server_characteristic_status.client_config_flags
-              && device_cert_sent == false) {
-            uint8_t buff[CERT_IND_CHUNK_LEN + 1];
-            uint8_t len = 0;
-            if (device_certificate_der_len > CERT_IND_CHUNK_LEN) {
-              buff[0] = 1;
-              len = CERT_IND_CHUNK_LEN + 1;
-            } else {
-              // The whole certificate fits into a single chunk.
-              buff[0] = 0;
-              len = (uint8_t)device_certificate_der_len + 1;
-              device_cert_sent = true;
-            }
-            memcpy(&buff[1], device_certificate_der, len - 1);
-            dev_cert_sending_progression += len - 1;
-            sc = sl_bt_gatt_server_send_indication(candidate_device.connection_handle,
-                                                   gattdb_peripheral_cert,
-                                                   len,
-                                                   buff);
-            app_assert_status(sc);
-          }
-          // Sending Peripheral certificate to Central device
-          else if (sl_bt_gatt_server_confirmation == (sl_bt_gatt_server_characteristic_status_flag_t)evt->data.evt_gatt_server_characteristic_status.status_flags
-                   && device_cert_sent == false) {
-            uint32_t remaining = device_certificate_der_len - dev_cert_sending_progression;
-            uint8_t buff[CERT_IND_CHUNK_LEN + 1];
-            uint8_t len = 0;
-            if (remaining > CERT_IND_CHUNK_LEN) {
-              buff[0] = 1;
-              len = CERT_IND_CHUNK_LEN + 1;
-            } else {
-              // Send last chunk
-              buff[0] = 0;
-              len = remaining + 1;
-              device_cert_sent = true;
-            }
-            memcpy(&buff[1], &device_certificate_der[dev_cert_sending_progression], len - 1);
-            dev_cert_sending_progression += len - 1;
-            sc = sl_bt_gatt_server_send_indication(candidate_device.connection_handle,
-                                                   gattdb_peripheral_cert,
-                                                   len,
-                                                   buff);
-            app_assert_status(sc);
-          }
-        }
-        // Sending Peripheral OOB data to Central device
-        else if (gattdb_peripheral_oob == evt->data.evt_gatt_server_characteristic_status.characteristic
-                 && sl_bt_gatt_server_client_config == (sl_bt_gatt_server_characteristic_status_flag_t)evt->data.evt_gatt_server_characteristic_status.status_flags
-                 && sl_bt_gatt_indication == (sl_bt_gatt_client_config_flag_t)evt->data.evt_gatt_server_characteristic_status.client_config_flags) {
-          aes_key_128 device_random;
-          aes_key_128 device_confirm;
-          // Generate device oob data and send over GATT
-          sc = sl_bt_sm_set_oob(1, &device_random, &device_confirm);
-          app_assert_status(sc);
-
-          app_log_debug("Device OOB Data:" APP_LOG_NL);
-          app_log_hexdump_debug(&device_random, OOB_RANDOM_LEN);
-          app_log_debug(APP_LOG_NL);
-          app_log_hexdump_debug(&device_confirm, OOB_RANDOM_LEN);
-          app_log_debug(APP_LOG_NL);
-
-          sc = sl_bt_cbap_sign_device_oob_data(device_random.data,
-                                               device_confirm.data,
-                                               signed_device_oob_data,
-                                               &signed_device_oob_len);
-          app_assert_status(sc);
-
-          app_log_debug("Device OOB Signature:" APP_LOG_NL);
-          app_log_hexdump_debug(&signed_device_oob_data[OOB_DATA_LEN], OOB_SIGNATURE_LEN);
-          app_log_debug(APP_LOG_NL);
-
-          sc = sl_bt_gatt_server_send_indication(candidate_device.connection_handle,
-                                                 gattdb_peripheral_oob,
-                                                 signed_device_oob_len,
-                                                 signed_device_oob_data);
-          app_assert_status(sc);
-        }
-      }
-      break;
-
-    // -------------------------------
-    // This event is generated for various procedure completions, e.g. when a
-    // write procedure is completed, or service discovery is completed
-    case sl_bt_evt_gatt_procedure_completed_id:
-      if (evt->data.evt_connection_parameters.connection != candidate_device.connection_handle) {
-        break;
-      }
-
-      if (role == sl_bt_connection_role_central) {
-        // Check result
-        if (evt->data.evt_gatt_procedure_completed.result != 0) {
-          app_log_error("GATT procedure completed error. Connection: %d. Error: 0x%04x." APP_LOG_NL,
-                        evt->data.evt_gatt_procedure_completed.connection,
-                        evt->data.evt_gatt_procedure_completed.result);
-          on_error();
-          break;
-        }
-
-        switch (central_state) {
-          case CENTRAL_DISCOVER_SERVICES: {
-            // Continue by finding the characteristics under the CBAP service.
-            char_state = (characteristics_t)0; // Start with the first characteristic
-            sc = sl_bt_gatt_discover_characteristics_by_uuid(evt->data.evt_gatt_procedure_completed.connection,
-                                                             cbap_service_handle,
-                                                             sizeof(cbap_characteristics[char_state].uuid),
-                                                             (const uint8_t *)cbap_characteristics[char_state].uuid);
-            app_assert_status(sc);
-            central_state = CENTRAL_DISCOVER_CHARACTERISTICS;
-            app_log_info("Discovering characteristics." APP_LOG_NL);
-            STATE_TIMEOUT_START();
-            break;
-          }
-
-          case CENTRAL_DISCOVER_CHARACTERISTICS: {
-            char_state++;
-            if (char_state < CHAR_NUM) {
-              // Find the next characteristic
-              sc = sl_bt_gatt_discover_characteristics_by_uuid(evt->data.evt_gatt_procedure_completed.connection,
-                                                               cbap_service_handle,
-                                                               sizeof(cbap_characteristics[char_state].uuid),
-                                                               (const uint8_t *)cbap_characteristics[char_state].uuid);
-              app_assert_status(sc);
-            } else {
-              // Get Peripheral certificates
-              sc = sl_bt_gatt_set_characteristic_notification(evt->data.evt_gatt_procedure_completed.connection,
-                                                              cbap_characteristics[CHAR_PERIPHERAL_CERT].handle,
-                                                              sl_bt_gatt_indication);
-              app_assert_status(sc);
-              central_state = CENTRAL_GET_PERIPHERAL_CERT;
-              app_log_info("Getting certificate from peripheral." APP_LOG_NL);
-              STATE_TIMEOUT_START();
-            }
-            break;
-          }
-
-          case CENTRAL_SEND_CENTRAL_CERT: {
-            if (!device_cert_sent) {
-              sc = sl_bt_cbap_get_certificate(SL_BT_CBAP_PSA_DEVICE_CERT,
-                                              device_certificate_der,
-                                              &device_certificate_der_len,
-                                              sizeof(device_certificate_der));
-              app_assert_status(sc);
-
-              uint32_t remaining = device_certificate_der_len - dev_cert_sending_progression;
-              uint8_t buff[CERT_IND_CHUNK_LEN + 1];
-              uint8_t len = 0;
-
-              if (remaining > CERT_IND_CHUNK_LEN) {
-                buff[0] = 1;
-                memcpy(&buff[1], &device_certificate_der[dev_cert_sending_progression], CERT_IND_CHUNK_LEN);
-                dev_cert_sending_progression += CERT_IND_CHUNK_LEN;
-                len = CERT_IND_CHUNK_LEN + 1;
-              } else {
-                // Last chunk
-                buff[0] = 0;
-                memcpy(&buff[1], &device_certificate_der[dev_cert_sending_progression], remaining);
-                len = remaining + 1;
-                device_cert_sent = true;
-              }
-              sc = sl_bt_gatt_write_characteristic_value(candidate_device.connection_handle,
-                                                         cbap_characteristics[CHAR_CENTRAL_CERT].handle,
-                                                         len,
-                                                         buff);
-              app_assert_status(sc);
-            } else {
-              // If certificate exchange completed get OOB data. Enable indication.
-              sc = sl_bt_gatt_set_characteristic_notification(evt->data.evt_gatt_procedure_completed.connection,
-                                                              cbap_characteristics[CHAR_PERIPHERAL_OOB].handle,
-                                                              sl_bt_gatt_indication);
-              app_assert_status(sc);
-              aes_key_128 device_random;
-              aes_key_128 device_confirm;
-              // Generate device oob data and send over GATT
-              sc = sl_bt_sm_set_oob(1, &device_random, &device_confirm);
-              app_assert_status(sc);
-
-              app_log_debug("Device OOB Data:" APP_LOG_NL);
-              app_log_hexdump_debug(&device_random, OOB_RANDOM_LEN);
-              app_log_debug(APP_LOG_NL);
-              app_log_hexdump_debug(&device_confirm, OOB_RANDOM_LEN);
-              app_log_debug(APP_LOG_NL);
-
-              sc = sl_bt_cbap_sign_device_oob_data(device_random.data,
-                                                   device_confirm.data,
-                                                   signed_device_oob_data,
-                                                   &signed_device_oob_len);
-              app_assert_status(sc);
-
-              app_log_debug("Device OOB Signature:" APP_LOG_NL);
-              app_log_hexdump_debug(&signed_device_oob_data[OOB_DATA_LEN], OOB_SIGNATURE_LEN);
-              app_log_debug(APP_LOG_NL);
-
-              central_state = CENTRAL_GET_PERIPHERAL_OOB;
-              app_log_info("Getting OOB data from peripheral." APP_LOG_NL);
-              STATE_TIMEOUT_START();
-            }
-            break;
-          }
-
-          case CENTRAL_SEND_OOB: {
-            sc = sl_bt_gatt_write_characteristic_value(candidate_device.connection_handle,
-                                                       cbap_characteristics[CHAR_CENTRAL_OOB].handle,
-                                                       signed_device_oob_len,
-                                                       signed_device_oob_data);
-            app_assert_status(sc);
-
-            // Request OOB data from both device
-            sc = sl_bt_sm_configure(SL_BT_SM_CONFIGURATION_OOB_FROM_BOTH_DEVICES_REQUIRED,
-                                    sl_bt_sm_io_capability_noinputnooutput);
-            app_assert_status(sc);
-            sc = sl_bt_sm_increase_security(candidate_device.connection_handle);
-            app_assert_status(sc);
-
-            central_state = CENTRAL_INCREASE_SECURITY;
-            app_log_info("Increasing security level." APP_LOG_NL);
-            STATE_TIMEOUT_START();
-            break;
-          }
-
-          default: {
-            break;
-          }
-        }
+      // The Digital characteristic requires an authenticated and encrypted
+      // connection, so only a device that passed CBAP can get here.
+      if (evt->data.evt_gatt_server_attribute_value.value.data[0] == LED_OFF) {
+        sl_led_turn_off(SL_SIMPLE_LED_INSTANCE(0));
+        app_log_info("LED off." APP_LOG_NL);
+      } else {
+        blink_led();
       }
       break;
 
@@ -930,190 +390,174 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 }
 
 /**************************************************************************//**
- * Handle CBAP process errors.
+ * Report the outcome of a CBAP procedure.
+ *
+ * On success the connection is encrypted with an authenticated key, so the
+ * secured characteristics of the remote device become accessible. On failure
+ * the component has already requested the connection to be closed.
+ *
+ * @param[in] conn Connection handle and address of the remote device.
+ * @param[in] sc SL_STATUS_OK if the procedure succeeded, error code otherwise.
  *****************************************************************************/
-static void on_error(void)
+static void on_cbap_result(sl_bt_cbap_conn_t conn, sl_status_t sc)
 {
-  if (candidate_device.connection_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
-    app_log_error("CBAP procedure was aborted for connection %d." APP_LOG_NL, candidate_device.connection_handle);
+  char addr_str[ADDR_STR_LEN];
+  format_address(conn.address, addr_str);
 
-    (void)sl_bt_connection_close(candidate_device.connection_handle);
-    clear_connection_info();
-  }
-
-  app_reset();
-}
-
-/***************************************************************************//**
- * Reset CBAP process states, flags and timers.
- ******************************************************************************/
-static void app_reset(void)
-{
-  sl_status_t sc;
-  STATE_TIMEOUT_STOP(); // Make sure timer is stopped
-  candidate_device.connection_handle = SL_BT_INVALID_CONNECTION_HANDLE; // Clear connection handle
-
-  // Reset states
-  peripheral_state = (peripheral_state_t)0;
-  central_state = (central_state_t)0;
-  char_state = (characteristics_t)0;
-
-  // Reset flags
-  remote_cert_arrived = false;
-  device_cert_sent = false;
-  remote_certificate_der_len = 0;
-  dev_cert_sending_progression = 0;
-
-  if (next_available_connection() != -1) {
-    switch (role) {
-      case sl_bt_connection_role_peripheral:
-        // Restart advertising and enable connections
-        sc = sl_bt_legacy_advertiser_start(advertising_set_handle, sl_bt_legacy_advertiser_connectable);
-        if (sc == SL_STATUS_OK) {
-          app_log_info("Advertising started." APP_LOG_NL);
-        }
-        break;
-
-      case sl_bt_connection_role_central:
-        // Start scanning
-        sc = sl_bt_scanner_start(sl_bt_scanner_scan_phy_1m, sl_bt_scanner_discover_generic);
-        if (sc == SL_STATUS_OK) {
-          app_log_info("Scanning started." APP_LOG_NL);
-        }
-        break;
-
-      default:
-        app_assert_status_f(SL_STATUS_INVALID_STATE, "Invalid role!");
-        break;
+  if (sc != SL_STATUS_OK) {
+    if (sc == SL_STATUS_BT_CTRL_CONNECTION_FAILED_TO_BE_ESTABLISHED) {
+      // A device can reboot and start a new connection before its peer has
+      // released the old one. No CBAP data was exchanged, so this is a
+      // retryable link-layer race, not an authentication failure.
+      app_log_warning("Connection to %s was not established; retrying." \
+                      APP_LOG_NL,
+                      addr_str);
+      return;
     }
-  } else {
-    app_log_warning("Maximum number of connections reached (SL_BT_CONFIG_MAX_CONNECTIONS: %d)." APP_LOG_NL,
-                    SL_BT_CONFIG_MAX_CONNECTIONS);
-  }
-}
 
-/**************************************************************************//**
- * Clears candidate device.
- *****************************************************************************/
-static void clear_connection_info(void)
-{
-  candidate_device.connection_handle = SL_BT_INVALID_CONNECTION_HANDLE;
-  for (uint8_t i = 0; i < sizeof(bd_addr); i++) {
-    candidate_device.address.addr[i] = 0xff;
-  }
-}
+    app_log_error("CBAP procedure with %s failed: 0x%04lx" APP_LOG_NL,
+                  addr_str,
+                  sc);
 
-/**************************************************************************//**
- * Adds the candidate device to the trusted devices array.
- *****************************************************************************/
-static void save_connection_info(void)
-{
-  int index = next_available_connection();
-  if (index == -1) {
-    app_log_error("Maximum number of connections reached (SL_BT_CONFIG_MAX_CONNECTIONS: %d)." APP_LOG_NL,
-                  SL_BT_CONFIG_MAX_CONNECTIONS);
+    // Do not authenticate this device again. Advertising or scanning is
+    // restarted once the connection the component closed is gone.
+    add_to_disallowlist(conn.address);
     return;
   }
 
-  // Save connection parameters
-  trusted_devices[index].connection_handle = candidate_device.connection_handle;
-  trusted_devices[index].address = candidate_device.address;
-  app_log_info("Trusted device [%d] added." APP_LOG_NL, trusted_devices[index].connection_handle);
+  app_log_info("CBAP procedure with %s succeeded." APP_LOG_NL, addr_str);
+  add_trusted_device(conn);
+  print_trusted_devices();
+
+  // The success is indicated on the peripheral device only, by the central
+  // device writing its Digital characteristic. The write is only permitted over
+  // the authenticated connection that CBAP has just created, which makes the
+  // blink the proof of the outcome. Both devices run this example, so the
+  // attribute handle of the local database is valid on the remote one too.
+  if (IS_CENTRAL) {
+    uint8_t led_state = LED_ON;
+    sl_status_t write_sc;
+
+    write_sc = sl_bt_gatt_write_characteristic_value(
+      conn.handle,
+      gattdb_aio_digital_out,
+      sizeof(led_state),
+      &led_state);
+    app_log_status_error(write_sc);
+  }
+
+  // The component is free again, so another device can be authenticated.
+  start_discovery();
 }
 
 /**************************************************************************//**
- * Finds next available connection slot.
+ * Start advertising or scanning, depending on the Bluetooth role.
+ *
+ * Both are the way to a new CBAP procedure, and the component serves one at a
+ * time. Do not begin another one while a connection is opening or CBAP owns a
+ * candidate connection.
  *****************************************************************************/
-static int next_available_connection(void)
+static void start_discovery(void)
 {
-  for (int i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
-    if (trusted_devices[i].connection_handle == SL_BT_INVALID_CONNECTION_HANDLE) {
-      return i;
-    }
+  sl_status_t sc;
+
+  if (discovery_active
+      || connection_open_pending
+      || sl_bt_cbap_is_procedure_in_progress()) {
+    return;
   }
-  return -1;
+
+  if (open_connections >= SL_BT_CONFIG_MAX_CONNECTIONS) {
+    app_log_warning("Maximum number of connections reached " \
+                    "(SL_BT_CONFIG_MAX_CONNECTIONS: %d)." APP_LOG_NL,
+                    SL_BT_CONFIG_MAX_CONNECTIONS);
+    return;
+  }
+
+  if (IS_CENTRAL) {
+    sc = sl_bt_scanner_start(sl_bt_scanner_scan_phy_1m,
+                             sl_bt_scanner_discover_generic);
+    app_assert_status(sc);
+    app_log_info("Scanning started." APP_LOG_NL);
+  } else {
+    sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
+                                       sl_bt_legacy_advertiser_connectable);
+    app_assert_status(sc);
+    app_log_info("Advertising started." APP_LOG_NL);
+  }
+
+  discovery_active = true;
 }
 
 /**************************************************************************//**
- * Logs the connection handle and the Bluetooth address of the trusted devices.
+ * Stop advertising or scanning, depending on the Bluetooth role.
  *****************************************************************************/
-static void print_trusted_devices(void)
+static void stop_discovery(void)
 {
-  bool found = false;
-  app_log_info("List of trusted connections:" APP_LOG_NL);
+  sl_status_t sc;
 
-  for (int i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
-    if (trusted_devices[i].connection_handle != SL_BT_INVALID_CONNECTION_HANDLE) {
-      found = true;
-      app_log_info("  Connection handle: %d  Address: %02X:%02X:%02X:%02X:%02X:%02X" APP_LOG_NL,
-                   trusted_devices[i].connection_handle,
-                   trusted_devices[i].address.addr[5],
-                   trusted_devices[i].address.addr[4],
-                   trusted_devices[i].address.addr[3],
-                   trusted_devices[i].address.addr[2],
-                   trusted_devices[i].address.addr[1],
-                   trusted_devices[i].address.addr[0]);
-    }
+  if (!discovery_active) {
+    return;
   }
 
-  if (!found) {
-    app_log_info("  None." APP_LOG_NL);
+  if (IS_CENTRAL) {
+    sc = sl_bt_scanner_stop();
+  } else {
+    // The stack stops connectable advertising on its own when a connection is
+    // opened, so this can fail without anything being wrong.
+    sc = sl_bt_advertiser_stop(advertising_set_handle);
   }
-}
+  app_log_status_error(sc);
 
-/**************************************************************************//**
- * Convert address string to address data bytes.
- * @param[in] addess_str Address string
- * @param[out] address Bluetooth address byte array
- * @return true if operation was successful
- *****************************************************************************/
-static bool decode_address(char *addess_str, bd_addr *address)
-{
-  uint8_t retval;
-  unsigned int address_cache[sizeof(bd_addr)];
-
-  retval = sscanf(addess_str, "%02X:%02X:%02X:%02X:%02X:%02X",
-                  &address_cache[5],
-                  &address_cache[4],
-                  &address_cache[3],
-                  &address_cache[2],
-                  &address_cache[1],
-                  &address_cache[0]);
-
-  if (retval != sizeof(bd_addr)) {
-    app_log_error("Invalid Bluetooth address." APP_LOG_NL);
-    return false;
-  }
-
-  for (uint8_t i = 0; i < sizeof(bd_addr); i++) {
-    address->addr[i] = (uint8_t)(address_cache[i]);
-  }
-  return true;
+  discovery_active = false;
 }
 
 /**************************************************************************//**
  * Examine a scan report and decide if a connection should be established.
- * @param[in] scan_report Scan report coming from the Bluetooth stack event.
- * return true if a connection should be established with the device.
+ *
+ * @param[in] report Scan report coming from the Bluetooth stack event.
+ * @return true if a connection should be established with the device.
  *****************************************************************************/
-bool check_scan_report(sl_bt_evt_scanner_legacy_advertisement_report_t *scan_report)
+static bool check_scan_report(
+  const sl_bt_evt_scanner_legacy_advertisement_report_t *report)
 {
-  // Check if there is a connection with this device already
-  for (int i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
-    if (memcmp(scan_report->address.addr, trusted_devices[i].address.addr, sizeof(bd_addr)) == 0) {
+  // Reports that were queued before the scanner was stopped can still arrive.
+  // Acting on them would open a second connection behind the back of the CBAP
+  // component, so only the reports of an active scan are considered.
+  if (!discovery_active) {
+    return false;
+  }
+
+  // Only a connectable advertisement is worth a connection attempt.
+  if ((report->event_flags & SL_BT_SCANNER_EVENT_FLAG_CONNECTABLE) == 0) {
+    return false;
+  }
+
+  // Skip the devices that failed the CBAP procedure before.
+  if (is_disallowed(report->address)) {
+    return false;
+  }
+
+  // Skip the devices we are connected to already.
+  for (uint8_t i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
+    if (memcmp(report->address.addr,
+               trusted_devices[i].address.addr,
+               sizeof(bd_addr)) == 0) {
       return false;
     }
   }
 
-  // If target defined, check the address
+  // If a target device is configured, only that one is accepted.
   if (peripheral_target_defined
-      && memcmp(scan_report->address.addr, peripheral_target_addr.addr, sizeof(bd_addr)) != 0) {
-    return false; // Target device is defined but with different address.
+      && memcmp(report->address.addr,
+                peripheral_target_addr.addr,
+                sizeof(bd_addr)) != 0) {
+    return false;
   }
 
-  // Look for CBAP service in advertisement packets
-  return find_service_in_advertisement(scan_report->data.data,
-                                       scan_report->data.len,
+  // Look for the CBAP service in the advertisement packet.
+  return find_service_in_advertisement(report->data.data,
+                                       report->data.len,
                                        cbap_service_uuid,
                                        sizeof(cbap_service_uuid));
 }
@@ -1132,69 +576,238 @@ static bool find_service_in_advertisement(const uint8_t *scan_data,
                                           const uint8_t *uuid,
                                           uint8_t uuid_len)
 {
-  uint8_t ad_field_length;
-  uint8_t ad_field_type;
-  uint8_t i = 0;
+  uint16_t i = 0;
 
-  while (i < scan_data_len) {
-    // Parse advertisement packet
-    ad_field_length = scan_data[i];  // Not counting the length byte itself
-    ad_field_type = scan_data[i + 1];
-    if ((uuid_len == UUID_16_LEN && (ad_field_type == GAP_INCOMPLETE_16B_UUID
-                                     || ad_field_type == GAP_COMPLETE_16B_UUID))
-        || (uuid_len == UUID_128_LEN && (ad_field_type == GAP_INCOMPLETE_128B_UUID
-                                         || ad_field_type == GAP_COMPLETE_128B_UUID))) {
-      // Packet containing the list of complete/incomplete 16/128-bit services found.
-      // Loop through the UUID list
-      uint8_t j = 2;
-      while (j < ad_field_length + 1) {
-        // Compare payload.
+  // An advertising data field is at least a length and a type byte long.
+  while (i + 1 < scan_data_len) {
+    uint8_t ad_field_length = scan_data[i]; // Length byte itself not counted
+    uint8_t ad_field_type = scan_data[i + 1];
+
+    // A malformed packet could claim a field longer than the data received.
+    if (i + ad_field_length + 1 > scan_data_len) {
+      break;
+    }
+
+    if ((uuid_len == UUID_16_LEN
+         && (ad_field_type == GAP_INCOMPLETE_16B_UUID
+             || ad_field_type == GAP_COMPLETE_16B_UUID))
+        || (uuid_len == UUID_128_LEN
+            && (ad_field_type == GAP_INCOMPLETE_128B_UUID
+                || ad_field_type == GAP_COMPLETE_128B_UUID))) {
+      // A list of complete or incomplete service UUIDs was found. Loop through
+      // the UUIDs that fit into the field.
+      uint16_t j = 2;
+      while (j + uuid_len <= ad_field_length + 1) {
         if (memcmp(&scan_data[i + j], uuid, uuid_len) == 0) {
           return true;
         }
-        // Advance to the next UUID
         j += uuid_len;
       }
     }
-    // Advance to the next packet
+
+    // Advance to the next field.
     i += ad_field_length + 1;
   }
+
   return false;
 }
 
 /**************************************************************************//**
- * Timer Callback.
- * @param[in] handle pointer to handle instance
- * @param[in] data pointer to input data
+ * Add an authenticated connection to the trusted devices array.
+ *
+ * @param[in] conn Connection handle and address of the remote device.
  *****************************************************************************/
-static void state_machine_timeout_cb(app_timer_t *handle, void *data)
+static void add_trusted_device(sl_bt_cbap_conn_t conn)
 {
-  (void)handle;
-  (void)data;
+  for (uint8_t i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
+    if (trusted_devices[i].handle == SL_BT_INVALID_CONNECTION_HANDLE) {
+      trusted_devices[i] = conn;
+      app_log_info("Trusted device [%d] added." APP_LOG_NL, conn.handle);
+      return;
+    }
+  }
 
-  app_log_error("State machine timeout." APP_LOG_NL);
-  on_error();
+  // There are as many slots as connections the stack can keep open, so a
+  // device that got this far always has one.
+  app_assert(false, "The trusted devices array is full!");
 }
 
 /**************************************************************************//**
- * Timer Callback.
- * @param[in] handle pointer to handle instance
- * @param[in] data pointer to input data
+ * Remove a closed connection from the trusted devices array.
+ *
+ * @param[in] connection Handle of the connection that was closed.
+ *****************************************************************************/
+static void remove_trusted_device(uint8_t connection)
+{
+  for (uint8_t i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
+    if (trusted_devices[i].handle == connection) {
+      trusted_devices[i].handle = SL_BT_INVALID_CONNECTION_HANDLE;
+      memset(trusted_devices[i].address.addr, 0xff, sizeof(bd_addr));
+      app_log_info("Trusted device [%d] removed." APP_LOG_NL, connection);
+    }
+  }
+}
+
+/**************************************************************************//**
+ * Log the connection handle and the Bluetooth address of the trusted devices.
+ *****************************************************************************/
+static void print_trusted_devices(void)
+{
+  bool found = false;
+
+  app_log_info("List of trusted connections:" APP_LOG_NL);
+
+  for (uint8_t i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
+    if (trusted_devices[i].handle != SL_BT_INVALID_CONNECTION_HANDLE) {
+      char addr_str[ADDR_STR_LEN];
+
+      found = true;
+      format_address(trusted_devices[i].address, addr_str);
+      app_log_info("  Connection handle: %d  Address: %s" APP_LOG_NL,
+                   trusted_devices[i].handle,
+                   addr_str);
+    }
+  }
+
+  if (!found) {
+    app_log_info("  None." APP_LOG_NL);
+  }
+}
+
+/**************************************************************************//**
+ * Remember a device that failed the CBAP procedure.
+ *
+ * @param[in] address Bluetooth address of the remote device.
+ *****************************************************************************/
+static void add_to_disallowlist(bd_addr address)
+{
+  char addr_str[ADDR_STR_LEN];
+
+  // A disallowlisted device that connects again fails the procedure again, so
+  // the same address can be reported more than once.
+  if (is_disallowed(address)) {
+    return;
+  }
+
+  app_assert(disallowlist_len < DISALLOWLIST_SIZE,
+             "The disallowlist is full (DISALLOWLIST_SIZE: %d)!",
+             DISALLOWLIST_SIZE);
+
+  disallowlist[disallowlist_len] = address;
+  disallowlist_len++;
+
+  format_address(address, addr_str);
+  app_log_info("Device %s added to the disallowlist (%d/%d)." APP_LOG_NL,
+               addr_str,
+               disallowlist_len,
+               DISALLOWLIST_SIZE);
+}
+
+/**************************************************************************//**
+ * True if the device failed the CBAP procedure before.
+ *
+ * @param[in] address Bluetooth address of the remote device.
+ * @return true if the device is on the disallowlist.
+ *****************************************************************************/
+static bool is_disallowed(bd_addr address)
+{
+  for (uint8_t i = 0; i < disallowlist_len; i++) {
+    if (memcmp(address.addr, disallowlist[i].addr, sizeof(bd_addr)) == 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**************************************************************************//**
+ * Turn the LED on for LED_BLINK_TIME_MS to indicate a successful procedure.
+ *****************************************************************************/
+static void blink_led(void)
+{
+  sl_status_t sc;
+
+  sl_led_turn_on(SL_SIMPLE_LED_INSTANCE(0));
+  app_log_info("LED on." APP_LOG_NL);
+
+  sc = app_timer_start(&led_timer,
+                       LED_BLINK_TIME_MS,
+                       led_timer_cb,
+                       (void *)NULL, // Callback has no parameters
+                       false);
+  app_assert_status(sc);
+}
+
+/**************************************************************************//**
+ * Timer callback turning the LED off.
+ *
+ * @param[in] handle Pointer to handle instance
+ * @param[in] data Pointer to input data
  *****************************************************************************/
 static void led_timer_cb(app_timer_t *handle, void *data)
 {
+  sl_status_t sc;
+  uint8_t led_state = LED_OFF;
+
   (void)handle;
   (void)data;
 
-  // Update local GATT
-  sl_status_t sc;
-  uint8_t data_sent = 0x00;
+  // Keep the local GATT database in sync with the state of the LED.
   sc = sl_bt_gatt_server_write_attribute_value(gattdb_aio_digital_out,
-                                               0,
-                                               sizeof(data_sent),
-                                               &data_sent);
-  app_assert_status(sc);
+                                               0, // offset
+                                               sizeof(led_state),
+                                               &led_state);
+  app_log_status_error(sc);
 
   sl_led_turn_off(SL_SIMPLE_LED_INSTANCE(0));
   app_log_info("LED off." APP_LOG_NL);
+}
+
+/**************************************************************************//**
+ * Print a Bluetooth address into a buffer of ADDR_STR_LEN bytes.
+ *
+ * @param[in] address Bluetooth address byte array
+ * @param[out] buffer Buffer of at least ADDR_STR_LEN bytes
+ *****************************************************************************/
+static void format_address(bd_addr address, char *buffer)
+{
+  (void)snprintf(buffer, ADDR_STR_LEN, "%02X:%02X:%02X:%02X:%02X:%02X",
+                 address.addr[5],
+                 address.addr[4],
+                 address.addr[3],
+                 address.addr[2],
+                 address.addr[1],
+                 address.addr[0]);
+}
+
+/**************************************************************************//**
+ * Convert an address string to address data bytes.
+ *
+ * @param[in] address_str Address string
+ * @param[out] address Bluetooth address byte array
+ * @return true if operation was successful
+ *****************************************************************************/
+static bool decode_address(const char *address_str, bd_addr *address)
+{
+  int retval;
+  unsigned int address_cache[sizeof(bd_addr)];
+
+  retval = sscanf(address_str, "%02X:%02X:%02X:%02X:%02X:%02X",
+                  &address_cache[5],
+                  &address_cache[4],
+                  &address_cache[3],
+                  &address_cache[2],
+                  &address_cache[1],
+                  &address_cache[0]);
+
+  if (retval != (int)sizeof(bd_addr)) {
+    app_log_error("Invalid Bluetooth address: %s" APP_LOG_NL, address_str);
+    return false;
+  }
+
+  for (uint8_t i = 0; i < sizeof(bd_addr); i++) {
+    address->addr[i] = (uint8_t)(address_cache[i]);
+  }
+
+  return true;
 }

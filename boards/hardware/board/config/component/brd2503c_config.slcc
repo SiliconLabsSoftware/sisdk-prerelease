@@ -2,8 +2,8 @@
 - id: brd2503c_config
 - label: brd2503c config
 - description: Configuration files for BRD2503C
-- package: boards
 - category: Platform|Board|Config
+- package: boards
 - quality: evaluation
 - metadata:
     sbom:
@@ -289,11 +289,6 @@
       vendor: silabs
     path: brd2503c/sl_i2cspm_sensor_config.h
   - override:
-      component: icm20648_driver
-      file_id: icm20648_config
-      vendor: silabs
-    path: brd2503c/sl_icm20648_config.h
-  - override:
       component: iostream_eusart
       file_id: iostream_eusart_config
       instance: exp
@@ -355,16 +350,6 @@
       instance: led0
       vendor: silabs
     path: brd2503c/sl_pwm_init_led0_config.h
-  - override:
-      component: rail_util_pti
-      file_id: rail_util_pti_config
-      vendor: silabs
-    path: brd2503c/sl_rail_util_pti_config.h
-  - override:
-      component: sl_rail_util_pti
-      file_id: rail_util_pti_config
-      vendor: silabs
-    path: brd2503c/sl_rail_util_pti_config.h
   - override:
       component: simple_button
       file_id: simple_button_config

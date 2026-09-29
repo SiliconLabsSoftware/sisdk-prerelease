@@ -20,21 +20,44 @@
 #define SERIAL_API_PERIPHERAL_NO                 0
 #endif
 
-// USART0 TX on PA08
+/**
+ * TX on PA08 for most boards, PD02 for BRD4204A.
+ */
 #ifndef SERIAL_API_TX_PORT
+#if defined(ZW_BOARD_BRD4204A)
+#define SERIAL_API_TX_PORT                       SL_GPIO_PORT_D
+#else
 #define SERIAL_API_TX_PORT                       SL_GPIO_PORT_A
-#endif
-#ifndef SERIAL_API_TX_PIN
-#define SERIAL_API_TX_PIN                        8
-#endif
+#endif /* !defined(ZW_BOARD_BRD4204A) */
+#endif /* !defined(SERIAL_API_TX_PORT) */
 
-// USART0 RX on PA09
+#ifndef SERIAL_API_TX_PIN
+#if defined(ZW_BOARD_BRD4204A)
+#define SERIAL_API_TX_PIN                        2
+#else
+#define SERIAL_API_TX_PIN                        8
+#endif /* !defined(ZW_BOARD_BRD4204A) */
+#endif /* !defined(SERIAL_API_TX_PIN) */
+
+/**
+ * RX on PA09 for most boards, PD03 for BRD4204A.
+ */
 #ifndef SERIAL_API_RX_PORT
+#if defined(ZW_BOARD_BRD4204A)
+#define SERIAL_API_RX_PORT                       SL_GPIO_PORT_D
+#else
 #define SERIAL_API_RX_PORT                       SL_GPIO_PORT_A
-#endif
+#endif /* !defined(ZW_BOARD_BRD4204A) */
+#endif /* !defined(SERIAL_API_RX_PORT) */
+
 #ifndef SERIAL_API_RX_PIN
+#if defined(ZW_BOARD_BRD4204A)
+#define SERIAL_API_RX_PIN                        3
+#else
 #define SERIAL_API_RX_PIN                        9
-#endif
+#endif /* !defined(ZW_BOARD_BRD4204A) */
+#endif /* !defined(SERIAL_API_RX_PIN) */
+
 // [USART_SERIAL_API]$
 
 // <<< sl:end pin_tool >>>

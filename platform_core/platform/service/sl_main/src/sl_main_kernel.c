@@ -30,6 +30,12 @@
 #include "sl_event_handler.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
+#include "em_device.h"
+#if defined(_SILICON_LABS_32B_SERIES_3) \
+  && defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT) \
+  && defined(SL_CATALOG_FREERTOS_HEAP_3_PRESENT)
+#include "sli_freertos_heap_3.h"
+#endif
 #include "sl_assert.h"
 #include "sl_main_init.h"
 #include "sl_main_start_task_config.h"
@@ -78,7 +84,21 @@ void sli_main_kernel_start_task_initialize(void)
     .priority   = osPriorityRealtime7,
   };
 
+#if defined(_SILICON_LABS_32B_SERIES_3)               \
+  && defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)      \
+  && defined(SL_CATALOG_FREERTOS_HEAP_3_PRESENT)     \
+  && defined(SL_MAIN_START_TASK_ALLOCATE_SHORT_TERM) \
+  && (SL_MAIN_START_TASK_ALLOCATE_SHORT_TERM == 1)
+  sli_freertos_heap_3_set_short_term_allocations(true);
+#endif
   start_task_id = osThreadNew(&start_task_handler, NULL, &thread_attribute);
+#if defined(_SILICON_LABS_32B_SERIES_3)               \
+  && defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)      \
+  && defined(SL_CATALOG_FREERTOS_HEAP_3_PRESENT)     \
+  && defined(SL_MAIN_START_TASK_ALLOCATE_SHORT_TERM) \
+  && (SL_MAIN_START_TASK_ALLOCATE_SHORT_TERM == 1)
+  sli_freertos_heap_3_set_short_term_allocations(false);
+#endif
   EFM_ASSERT(start_task_id != NULL);
 }
 

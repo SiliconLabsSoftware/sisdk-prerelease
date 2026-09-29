@@ -204,6 +204,9 @@ sl_status_t sl_power_manager_init(void)
     sli_power_manager_debug_init();
   #endif
     sli_power_manager_em_transition_event_list_init();
+#if defined(SLI_POWER_MANAGER_SLEEP_HOOKS_ENABLED)
+    sli_power_manager_sleep_hook_list_init();
+#endif
 
 #if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
     // If lowest energy mode is not restricted to EM1, determine and set lowest energy mode
@@ -286,6 +289,12 @@ __NO_INLINE void sl_power_manager_sleep(void)
       update_em1_requirement(false);
       requirement_on_em1_added = false;
     }
+
+#if defined(SLI_POWER_MANAGER_SLEEP_HOOKS_ENABLED)
+    if (requirement_em1 == 0) {
+      sli_power_manager_invoke_sleep_entry_hooks();
+    }
+#endif
 
     lowest_em = get_lowest_em();
     evaluate_wakeup(lowest_em);
@@ -427,6 +436,10 @@ __NO_INLINE void sl_power_manager_sleep(void)
 
 #if defined(SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN) && (SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN == 1)
   sli_power_manager_implement_execution_mode_on_wakeup();
+#endif
+
+#if defined(SLI_POWER_MANAGER_SLEEP_HOOKS_ENABLED)
+  sli_power_manager_invoke_sleep_exit_hooks();
 #endif
 
   // Indicate back to EM0
@@ -1204,5 +1217,23 @@ uint8_t sl_power_manager_get_peripheral_retention_strategy(const sl_peripheral_t
 {
   (void)peripheral;
   return 0xFFu;
+}
+
+uint8_t sl_power_manager_get_peripheral_retention(const sl_peripheral_t peripheral)
+{
+  (void)peripheral;
+  return 0xFFu;
+}
+
+sl_status_t sl_power_manager_disable_peripheral_retention(const sl_peripheral_t peripheral)
+{
+  (void)peripheral;
+  return SL_STATUS_NOT_SUPPORTED;
+}
+
+sl_status_t sl_power_manager_enable_peripheral_retention(const sl_peripheral_t peripheral)
+{
+  (void)peripheral;
+  return SL_STATUS_NOT_SUPPORTED;
 }
 #endif

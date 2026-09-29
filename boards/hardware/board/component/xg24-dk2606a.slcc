@@ -17,10 +17,10 @@
   - name: SL_KIT_NAME
     value: '"XG24-DK2606A"'
   - name: SL_KIT_REV
-    value: '"A01"'
+    value: '"A02"'
 - tag:
   - kit:opn:xG24-DK2606A
   - kit:pn:DK2606
   - kit:variant:A
-  - kit:revision:A01
+  - kit:revision:A02
 - root_path: boards

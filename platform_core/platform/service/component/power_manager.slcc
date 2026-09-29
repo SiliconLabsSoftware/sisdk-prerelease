@@ -51,6 +51,8 @@ provides:
 requires:
 - name: power_manager_core
 - name: power_manager_handler
+- name: power_manager_sleep_hooks
+  condition: [device_series_3]
 recommends:
 - id: power_manager_handler_implementation
   vendor: silabs

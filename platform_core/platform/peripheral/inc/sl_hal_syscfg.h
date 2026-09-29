@@ -181,12 +181,10 @@ typedef struct {
 #if defined(SL_TRUSTZONE_NONSECURE)
 uint32_t sl_hal_syscfg_read_chip_rev(void);
 #else  // !SL_TRUSTZONE_NONSECURE
-#if !defined(FPGA)
 __INLINE uint32_t sl_hal_syscfg_read_chip_rev(void)
 {
   return SYSCFG->CHIPREV;
 }
-#endif
 #endif  // !SL_TRUSTZONE_NONSECURE
 #endif
 
@@ -195,7 +193,6 @@ __INLINE uint32_t sl_hal_syscfg_read_chip_rev(void)
 void sl_hal_syscfg_set_systicextclken_cfgsystic(void);
 void sl_hal_syscfg_clear_systicextclken_cfgsystic(void);
 #else  // !SL_TRUSTZONE_NONSECURE
-#if !defined(FPGA)
 /***************************************************************************//**
  * Enables the external clock for the SysTick timer.
  ******************************************************************************/
@@ -206,7 +203,6 @@ __INLINE void sl_hal_syscfg_set_systicextclken_cfgsystic(void)
   SYSCFG->CPU[TARGET_HOST_CPU].CFGSYSTIC = (SYSCFG->CPU[TARGET_HOST_CPU].CFGSYSTIC | _SYSCFG_CFGSYSTIC_SYSTICEXTCLKEN_MASK);
 #else
   SYSCFG->CFGSYSTIC = (SYSCFG->CFGSYSTIC | _SYSCFG_CFGSYSTIC_SYSTICEXTCLKEN_MASK);
-#endif
 #endif
 }
 

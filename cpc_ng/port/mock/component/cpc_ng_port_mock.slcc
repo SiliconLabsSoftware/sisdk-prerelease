@@ -1,0 +1,23 @@
+id: cpc_ng_port_mock
+package: cpc_ng
+description: Mock port
+category: Services|CPC-NG|Port
+quality: internal
+label: CPC-NG Port - Silicon Labs
+ui_hints:
+  visibility: never
+root_path: cpc_ng/port/mock
+metadata:
+  sbom:
+    license: Zlib
+include:
+- path: inc
+  file_list:
+  - path: cpc_atomic.h
+  - path: sli_cpc_timer_types.h
+source:
+- path: src/mock_cpc_timer.c
+- path: src/mock_cpc_timer.h
+provides:
+- name: cpc_ng_port
+- name: cpc_ng_port_mock

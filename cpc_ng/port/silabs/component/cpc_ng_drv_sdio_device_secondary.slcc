@@ -1,0 +1,26 @@
+id: cpc_ng_drv_sdio_device_secondary
+package: cpc_ng
+description: Instantiable SDIO-device driver for a CPC-NG Secondary device.
+category: Services|CPC-NG|Driver|Secondary Device
+quality: internal
+label: CPC-NG Secondary - SDIO Device
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/silabs
+instantiable:
+  prefix: instance
+config_file:
+- path: config/series3/sl_cpc_drv_sdio_device_{{instance}}_config.h
+  file_id: cpc_ng_drv_sdio_device_config
+provides:
+- name: cpc_ng_drv_sdio_device_secondary
+- name: cpc_ng_secondary_drv_instance
+requires:
+- name: cpc_ng_drv_sdio_device
+- name: cpc_ng_secondary
+template_contribution:
+- name: cpc_ng_drv_sdio_device_instances
+  value: "{{instance}}"
+- name: cpc_ng_drv_sdio_device_role_secondary
+  value: "{{instance}}"

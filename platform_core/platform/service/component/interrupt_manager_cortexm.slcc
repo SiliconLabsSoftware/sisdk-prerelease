@@ -24,6 +24,8 @@ provides:
   condition: [device_cortexm]
 requires:
 - name: device_cortexm
+- name: interrupt_manager_irq_access
+  condition: [device_generic_family_sixx381]
 define:
 - name: CMSIS_NVIC_VIRTUAL
 - name: CMSIS_NVIC_VIRTUAL_HEADER_FILE

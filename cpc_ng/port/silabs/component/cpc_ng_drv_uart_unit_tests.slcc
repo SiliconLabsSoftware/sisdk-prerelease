@@ -1,0 +1,40 @@
+id: cpc_ng_drv_uart_unit_tests
+package: cpc_ng
+description: |
+  Unity tests that inject wire bytes on the CPC-NG UART driver RX path.
+category: Services|CPC-NG
+quality: internal
+label: CPC-NG UART Driver Unit Tests
+ui_hints:
+  visibility: never
+root_path: cpc_ng/port/silabs
+source:
+- path: ../../src/unit/frame.c
+- path: ../../src/unit/frame.h
+- path: ../../src/unit/unity_assert.c
+- path: ../../src/unit/unity_assert.h
+- path: src/unit/uart/crc.c
+- path: src/unit/uart/harness/loopback.c
+- path: src/unit/uart/harness/loopback.h
+- path: src/unit/uart/harness/uart.c
+- path: src/unit/uart/harness/uart.h
+- path: src/unit/uart/resync.c
+provides:
+- name: cpc_ng_drv_uart_unit_tests
+requires:
+- name: cpc_ng
+- name: iostream
+- name: sl_assert
+- name: test_framework_unity_fixture_app
+- name: toolchain_gcc_warnings_are_errors
+- name: toolchain_gcc_warnings_undef
+define:
+- name: DEBUG_EFM_USER
+template_contribution:
+- name: unity_test_group
+  value: cpc_drv_uart_crc
+- name: unity_test_group
+  value: cpc_drv_uart_resync
+toolchain_settings:
+- option: gcc_compiler_option
+  value: -Wall -Wextra -Wpointer-arith

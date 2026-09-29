@@ -28,11 +28,11 @@ requires:
 - name: emlib_wdog
   condition: [device_has_wdog]
 recommends:
-- name: log
+- id: log
   vendor: silabs
-- name: log_backend_iostream
+- id: log_backend_iostream
   vendor: silabs
-- name: log_backend_systemview
+- id: log_backend_systemview
   vendor: silabs
 root_path: platform_core/platform/service/sl_crash_manager
 config_file:

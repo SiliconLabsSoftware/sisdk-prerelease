@@ -2,8 +2,8 @@
 - id: brd2503a_config
 - label: brd2503a config
 - description: Configuration files for BRD2503A
-- package: boards
 - category: Platform|Board|Config
+- package: boards
 - quality: production
 - metadata:
     sbom:

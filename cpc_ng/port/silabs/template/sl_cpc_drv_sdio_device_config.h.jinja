@@ -1,0 +1,49 @@
+#ifndef SL_CPC_DRV_SDIO_DEVICE_CONFIG_H
+#define SL_CPC_DRV_SDIO_DEVICE_CONFIG_H
+
+{% for instance in cpc_ng_drv_sdio_device_instances %}
+#include "sl_cpc_drv_sdio_device_{{ instance }}_config.h"
+
+// Queue sizes
+#define SL_CPC_DRV_SDIO_RX_QUEUE_SIZE                SL_CPC_DRV_SDIO_{{ instance | upper }}_RX_QUEUE_SIZE
+#define SL_CPC_DRV_SDIO_TX_QUEUE_SIZE                SL_CPC_DRV_SDIO_{{ instance | upper }}_TX_QUEUE_SIZE
+
+// Frame pool sizes
+#define SL_CPC_DRV_SDIO_DEVICE_RX_FRAME_POOL_COUNT   SL_CPC_DRV_SDIO_DEVICE_{{ instance|upper }}_RX_FRAME_POOL_COUNT
+#define SL_CPC_DRV_SDIO_DEVICE_TX_FRAME_POOL_COUNT   SL_CPC_DRV_SDIO_DEVICE_{{ instance|upper }}_TX_FRAME_POOL_COUNT
+
+// SDIO device configuration
+#define SL_CPC_DRV_SDIO_FUNCTION_NUM                 SL_CPC_DRV_SDIO_{{ instance | upper }}_FUNCTION_NUM
+#define SL_CPC_DRV_SDIO_BLOCK_SIZE                   SL_CPC_DRV_SDIO_{{ instance | upper }}_BLOCK_SIZE
+#define SL_CPC_DRV_SDIO_HOST_1V8_ONLY                SL_CPC_DRV_SDIO_{{ instance | upper }}_HOST_1V8_ONLY
+#define SL_CPC_DRV_SDIO_SPEED_MODE                   SL_CPC_DRV_SDIO_{{ instance | upper }}_SPEED_MODE
+
+// Peripheral and pins
+#define SL_CPC_DRV_SDIO_PERIPHERAL                   SL_CPC_DRV_SDIO_{{ instance | upper }}_PERIPHERAL
+#define SL_CPC_DRV_SDIO_PERIPHERAL_NO                SL_CPC_DRV_SDIO_{{ instance | upper }}_PERIPHERAL_NO
+
+#define SL_CPC_DRV_SDIO_SCLK_PORT                    SL_CPC_DRV_SDIO_{{ instance | upper }}_SCLK_PORT
+#define SL_CPC_DRV_SDIO_SCLK_PIN                     SL_CPC_DRV_SDIO_{{ instance | upper }}_SCLK_PIN
+
+#define SL_CPC_DRV_SDIO_CMD_PORT                     SL_CPC_DRV_SDIO_{{ instance | upper }}_CMD_PORT
+#define SL_CPC_DRV_SDIO_CMD_PIN                      SL_CPC_DRV_SDIO_{{ instance | upper }}_CMD_PIN
+
+#define SL_CPC_DRV_SDIO_DAT0_PORT                    SL_CPC_DRV_SDIO_{{ instance | upper }}_DAT0_PORT
+#define SL_CPC_DRV_SDIO_DAT0_PIN                     SL_CPC_DRV_SDIO_{{ instance | upper }}_DAT0_PIN
+
+#define SL_CPC_DRV_SDIO_DAT1_PORT                    SL_CPC_DRV_SDIO_{{ instance | upper }}_DAT1_PORT
+#define SL_CPC_DRV_SDIO_DAT1_PIN                     SL_CPC_DRV_SDIO_{{ instance | upper }}_DAT1_PIN
+
+#define SL_CPC_DRV_SDIO_DAT2_PORT                    SL_CPC_DRV_SDIO_{{ instance | upper }}_DAT2_PORT
+#define SL_CPC_DRV_SDIO_DAT2_PIN                     SL_CPC_DRV_SDIO_{{ instance | upper }}_DAT2_PIN
+
+#define SL_CPC_DRV_SDIO_DAT3_PORT                    SL_CPC_DRV_SDIO_{{ instance | upper }}_DAT3_PORT
+#define SL_CPC_DRV_SDIO_DAT3_PIN                     SL_CPC_DRV_SDIO_{{ instance | upper }}_DAT3_PIN
+
+#if defined(SL_CPC_DRV_SDIO_{{ instance | upper }}_CD_PORT) && defined(SL_CPC_DRV_SDIO_{{ instance | upper }}_CD_PIN)
+#define SL_CPC_DRV_SDIO_CD_PORT                      SL_CPC_DRV_SDIO_{{ instance | upper }}_CD_PORT
+#define SL_CPC_DRV_SDIO_CD_PIN                       SL_CPC_DRV_SDIO_{{ instance | upper }}_CD_PIN
+#endif
+{% endfor %}
+
+#endif /* SL_CPC_DRV_SDIO_DEVICE_CONFIG_H */

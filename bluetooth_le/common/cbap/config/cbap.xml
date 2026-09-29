@@ -1,0 +1,60 @@
+<gatt>
+  <!--CBAP Service-->
+  <service advertise="true" name="CBAP Service" requirement="mandatory" sourceId="" type="primary" uuid="d8818cc6-8147-414d-918e-dd40d0285610">
+    <informativeText>Abstract: Service for Certificate Authentication and Pairing. </informativeText>
+
+    <!--Batch Certificate Server-->
+    <characteristic const="false" id="batch_cert_server" name="Batch Certificate Server" sourceId="" uuid="31186937-191a-402e-81b5-9e8e5b3d4ce9">
+      <informativeText/>
+      <value length="0" type="user" variable_length="false"/>
+      <properties>
+        <indicate authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+
+    <!--Batch Certificate Client-->
+    <characteristic const="false" id="batch_cert_client" name="Batch Certificate Client" sourceId="" uuid="315fd0f9-08aa-4a69-b6bd-daf6a2f325ca">
+      <informativeText/>
+      <value length="0" type="user" variable_length="false"/>
+      <properties>
+        <write authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+
+    <!--Device Certificate Server-->
+    <characteristic const="false" id="device_cert_server" name="Device Certificate Server" sourceId="" uuid="bb980811-8ce7-48c3-9b64-dc9bcea6ef16">
+      <informativeText/>
+      <value length="0" type="user" variable_length="false"/>
+      <properties>
+        <indicate authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+
+    <!--Device Certificate Client-->
+    <characteristic const="false" id="device_cert_client" name="Device Certificate Client" sourceId="" uuid="0cf6da9e-16f5-4fc9-99a2-ad4d84fd5066">
+      <informativeText/>
+      <value length="0" type="user" variable_length="false"/>
+      <properties>
+        <write authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+
+    <!--Out-Of-Band Data Server-->
+    <characteristic const="false" id="oob_data_server" name="Out-Of-Band Data Server" sourceId="" uuid="c05c6ccd-c4e4-4def-90a1-08fbe00f901c">
+      <informativeText/>
+      <value length="0" type="user" variable_length="false"/>
+      <properties>
+        <read authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+
+    <!--Out-Of-Band Data Client-->
+    <characteristic const="false" id="oob_data_client" name="Out-Of-Band Data Client" sourceId="" uuid="e8d35751-897d-4e2c-8ab6-cd85ebf1192c">
+      <informativeText/>
+      <value length="0" type="user" variable_length="false"/>
+      <properties>
+        <write authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+  </service>
+</gatt>

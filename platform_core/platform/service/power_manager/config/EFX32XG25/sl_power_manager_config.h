@@ -51,6 +51,14 @@
 #define SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP   0
 #endif
 
+// <q SL_POWER_MANAGER_ENABLE_LFXO_EM2_CTUNE_COMPENSATION> Enable LFXO EM2 CTUNE compensation
+// <i> Lowers LFXO CAPTUNE on EM2/EM3 entry and restores it on wake-up.
+// <i> Use this if LFXO-based timekeeping drifts between EM0 and EM2.
+// <i> Default: 0
+#ifndef SL_POWER_MANAGER_ENABLE_LFXO_EM2_CTUNE_COMPENSATION
+#define SL_POWER_MANAGER_ENABLE_LFXO_EM2_CTUNE_COMPENSATION  0
+#endif
+
 // <e SL_POWER_MANAGER_DEBUG> Enable debugging feature
 // <i> Enable or disable debugging features (trace the different modules that have requirements).
 // <i> Default: 0

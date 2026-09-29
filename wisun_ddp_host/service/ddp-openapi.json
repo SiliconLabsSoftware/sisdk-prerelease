@@ -1,0 +1,624 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DDP API",
+    "version": "1.0.0",
+    "description": "Dynamic Data Provisioning API"
+  },
+  "components": {
+    "schemas": {
+      "DeviceMacAddress": {
+        "type": "object",
+        "required": ["mac_address"],
+        "properties": {
+          "mac_address": {
+            "type": "string",
+            "minLength": 16,
+            "maxLength": 16,
+            "description": "MAC address of the device",
+            "example": "0cae5ffffe6d50c9"
+          }
+        }
+      },
+      "DeviceType": {
+        "type": "object",
+        "required": ["device_type"],
+        "properties": {
+          "device_type": {
+            "type": "string",
+            "enum": ["router", "border_router"],
+            "description": "Device type",
+            "example": "router"
+          }
+        }
+      },
+      "CertificatePath": {
+        "type": "object",
+        "required": ["cert_path"],
+        "properties": {
+          "cert_path": {
+            "type": "string",
+            "description": "Path to the certificate file",
+            "example": "certificate.pem"
+          }
+        }
+      },
+      "CertificateId": {
+        "type": "object",
+        "required": ["cert_id"],
+        "properties": {
+          "cert_id": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1048575,
+            "description": "NVM3 Object ID of the certificate",
+            "example": 100
+          }
+        }
+      },
+      "KeyPath": {
+        "type": "object",
+        "properties": {
+          "key_path": {
+            "type": "string",
+            "description": "Path to the private key file if any",
+            "example": "key.pem"
+          }
+        }
+      },
+      "KeyId": {
+        "type": "object",
+        "required": ["key_id"],
+        "properties": {
+          "key_id": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295,
+            "description": "PSA Key ID of the private key",
+            "example": 100
+          }
+        }
+      },
+      "OemCompany": {
+        "type": "object",
+        "required": ["oem_company"],
+        "properties": {
+          "oem_company": {
+            "type": "string",
+            "description": "OEM company name",
+            "example": "Silicon Labs"
+          }
+        }
+      },
+      "OemCountry": {
+        "type": "object",
+        "required": ["oem_country"],
+        "properties": {
+          "oem_country": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 2,
+            "description": "OEM country code (ISO 3166-1 alpha-2)",
+            "example": "FR"
+          }
+        }
+      },
+      "OemHwType": {
+        "type": "object",
+        "required": ["oem_hwtype"],
+        "properties": {
+          "oem_hwtype": {
+            "type": "string",
+            "description": "OEM hardware type",
+            "example": "1.3.6.1.4.1.39873.1"
+          }
+        }
+      },
+      "CertificateKeyPair": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CertificatePath"
+          },
+          {
+            "$ref": "#/components/schemas/KeyPath"
+          }
+        ]
+      },
+      "NvmCertificate": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CertificatePath"
+          },
+          {
+            "$ref": "#/components/schemas/CertificateId"
+          }
+        ]
+      },
+      "NvmKey": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/KeyPath"
+          },
+          {
+            "$ref": "#/components/schemas/KeyId"
+          }
+        ]
+      },
+      "PkiChainLength": {
+        "type": "object",
+        "required": ["chain_length"],
+        "properties": {
+          "chain_length": {
+            "type": "integer",
+            "enum": [1, 2, 3],
+            "description": "Length of CA chain.\n- `1`: root\n- `2`: root + MICA\n- `3`: root + MCA + MICA",
+            "example": 3
+          }
+        }
+      },
+      "PkiInformation": {
+        "type": "object",
+        "required": ["root"],
+        "properties": {
+          "root": {
+            "description": "Root CA",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CertificatePath"
+              },
+              {
+                "$ref": "#/components/schemas/KeyPath"
+              }
+            ]
+          },
+          "mca": {
+            "description": "Manufacturer CA. Present if chain length is 3.",
+            "$ref": "#/components/schemas/CertificatePath"
+          },
+          "mica": {
+            "description": "Manufacturing Issuing CA. Present if chain length is >= 2.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CertificatePath"
+              },
+              {
+                "$ref": "#/components/schemas/KeyPath"
+              }
+            ]
+          }
+        }
+      },
+      "JlinkParameters": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["jlink_serial"],
+            "properties": {
+              "jlink_serial": {
+              "type": "integer",
+              "description": "Serial number of the J-Link USB adapter",
+              "example": 440334570
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["jlink_host"],
+            "properties": {
+              "jlink_host": {
+                "type": "string",
+                "description": "Host name or IP address of the J-Link TCP/IP adapter",
+                "example": "jlink440334570.silabs.com"
+              }
+            }
+          }
+        ]
+      },
+      "NvmParameters": {
+        "type": "object",
+        "properties": {
+          "nvm3_start_addr": {
+            "type": "integer",
+            "description": "Start address of NVM3 in flash",
+            "example": 135217152
+          },
+          "nvm3_size": {
+            "type": "integer",
+            "description": "Size of NVM3 in bytes",
+            "example": 40960
+          }
+        }
+      },
+      "DdpAppParameters": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["ddp_app_path"],
+            "properties": {
+              "ddp_app_path": {
+                "type": "string",
+                "description": "Path to the DDP RAM application binary file",
+                "example": "wisun_soc_ddp_ram.bin"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["ddp_app_board"],
+            "properties": {
+              "ddp_app_board": {
+                "type": "string",
+                "description": "Board name of a pre-built DDP RAM application",
+                "example": "brd2705a"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/pki/ca": {
+      "get": {
+        "description": "Returns CAs of the current PKI if any",
+        "operationId": "getPki",
+        "responses": {
+          "200": {
+            "description": "Request was successfully processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PkiInformation"
+                    }
+                  ],
+                  "unevaluatedProperties": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Request failed because PKI does not exist"
+          }
+        }
+      }
+    },
+    "/pki/ca/create": {
+      "post": {
+        "description": "Generates a new set of CAs to the current directory",
+        "operationId": "createPki",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/OemCompany"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OemCountry"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PkiChainLength"
+                  }
+                ],
+                "unevaluatedProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request was successfully processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/PkiInformation"
+                    }
+                  ],
+                  "unevaluatedProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed due to syntax errors"
+          },
+          "422": {
+            "description": "Request failed due to validation failures"
+          }
+        }
+      }
+    },
+    "/pki/ca/import": {
+      "post": {
+        "description": "Takes a copy of existing CAs and stores them to the current directory",
+        "operationId": "importPki",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PkiInformation"
+                  }
+                ],
+                "unevaluatedProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request was successfully processed"
+          },
+          "400": {
+            "description": "Request failed due to syntax errors"
+          },
+          "422": {
+            "description": "Request failed due to validation failures"
+          }
+        }
+      }
+    },
+    "/pki/certificate": {
+      "get": {
+        "description": "Returns existing certificate-key pair for a device if any",
+        "operationId": "getCertificate",
+        "parameters": [
+          {
+            "name": "mac_address",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 16,
+              "description": "MAC address of the device",
+              "example": "0cae5ffffe6d50c9"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request was successfully processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/CertificateKeyPair"
+                    }
+                  ],
+                  "unevaluatedProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed due to syntax errors"
+          },
+          "404": {
+            "description": "Request failed because a certificate-key pair does not exist for the device"
+          }
+        }
+      }
+    },
+    "/pki/certificate/host": {
+      "post": {
+        "description": "Generates a certificate-key pair on host",
+        "operationId": "createCertificateOnHost",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/DeviceMacAddress"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DeviceType"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OemHwType"
+                  }
+                ],
+                "unevaluatedProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request was successfully processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/CertificateKeyPair"
+                    }
+                  ],
+                  "unevaluatedProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed due to syntax errors"
+          },
+          "422": {
+            "description": "Request failed due to validation failures"
+          }
+        }
+      }
+    },
+    "/pki/certificate/device": {
+      "post": {
+        "description": "Generates a certificate-key pair on device",
+        "operationId": "createCertificateOnDevice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/JlinkParameters"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DdpAppParameters"
+                  },
+                  {
+                    "$ref": "#/components/schemas/NvmParameters"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DeviceType"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DeviceMacAddress"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CertificateId"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KeyId"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OemHwType"
+                  }
+                ],
+                "unevaluatedProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request was successfully processed"
+          },
+          "400": {
+            "description": "Request failed due to syntax errors"
+          },
+          "404": {
+            "description": "Request failed because the device wasn't found"
+          },
+          "422": {
+            "description": "Request failed due to validation failures"
+          }
+        }
+      }
+    },
+    "/device/info": {
+      "post": {
+        "description": "Retrieves device information",
+        "operationId": "getDevice",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/JlinkParameters"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DdpAppParameters"
+                  }
+                ],
+                "unevaluatedProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request was successfully processed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/NvmParameters"
+                    },
+                    {
+                      "$ref": "#/components/schemas/DeviceMacAddress"
+                    }
+                  ],
+                  "unevaluatedProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Request failed due to syntax errors"
+          },
+          "404": {
+            "description": "Request failed because the device wasn't found"
+          }
+        }
+      }
+    },
+    "/device/storage": {
+      "post": {
+        "description": "Saves certificates and private keys to the device",
+        "operationId": "storeToDevice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/JlinkParameters"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DdpAppParameters"
+                  },
+                  {
+                    "$ref": "#/components/schemas/NvmParameters"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "keys": {
+                        "type": "array",
+                        "description": "List of private keys to save",
+                        "items": {
+                          "$ref": "#/components/schemas/NvmKey"
+                        }
+                      },
+                      "certificates": {
+                        "type": "array",
+                        "description": "List of certificates to save",
+                        "items": {
+                          "$ref": "#/components/schemas/NvmCertificate"
+                        }
+                      }
+                    }
+                  }
+                ],
+                "unevaluatedProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request was successfully processed"
+          },
+          "400": {
+            "description": "Request failed due to syntax errors"
+          },
+          "404": {
+            "description": "Request failed because the device wasn't found"
+          },
+          "422": {
+            "description": "Request failed due to validation failures"
+          }
+        }
+      }
+    }
+  }
+}

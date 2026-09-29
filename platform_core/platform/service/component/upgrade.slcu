@@ -72,3 +72,10 @@ upgrade:
         description: >
           SL_POWER_MANAGER_INIT_EMU_EM4_PIN_RETENTION_MODE moved from
           sl_power_manager_config.h to sl_power_manager_em4_config.h.
+  - sdk:
+      id: platform_core
+      version: "1.2.0"
+    configuration:
+      - script: platform_core/platform/service/component/upgrade_configuration_sl_main.lua
+        description: >
+          Set new SL_MAIN_START_TASK_ALLOCATE_SHORT_TERM config to 0 for existing apps.

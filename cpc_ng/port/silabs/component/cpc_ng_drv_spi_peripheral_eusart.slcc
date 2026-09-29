@@ -1,0 +1,40 @@
+id: cpc_ng_drv_spi_peripheral_eusart
+package: cpc_ng
+description: Shared SPI-peripheral (EUSART) physical-link driver for CPC-NG. Role-specific instances are provided by the CPC-NG Secondary SPI component.
+category: Services|CPC-NG|Driver
+quality: internal
+label: CPC-NG - SPI Peripheral (EUSART)
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/silabs
+source:
+- path: src/sl_cpc_drv_spi_peripheral.c
+include:
+- path: inc
+  file_list:
+  - path: sl_cpc_drv_spi_peripheral.h
+provides:
+- name: cpc_ng_drv_spi_peripheral_eusart
+requires:
+- name: clock_manager_runtime
+- name: cpc_ng
+- name: cpc_ng_port_silabs
+- name: dmadrv
+- name: hal_generic_eusart
+- name: hal_generic_gpio
+- name: hal_generic_prs
+- name: hal_gpio
+- name: slist
+- name: status
+template_file:
+- path: template/sl_cpc_drv_spi_peripheral_config.h.jinja
+template_contribution:
+- name: event_handler
+  value:
+    event: cpc_drv_instances_start_buses
+    handler: sl_cpc_drv_spi_peripheral_instances_start_buses
+- name: cpc_ng_spi_periph_type
+  value: eusart

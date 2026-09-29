@@ -1,0 +1,34 @@
+id: cpc_ng_drv_mock
+package: cpc_ng
+description: Mock generic driver for CPC.
+category: Services|CPC-NG|Driver
+quality: internal
+label: CPC-NG - Mock
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/mock
+instantiable:
+  prefix: instance
+config_file:
+- path: config/sl_cpc_drv_mock_{{instance}}_config.h
+  file_id: cpc_ng_drv_mock_config
+source:
+- path: src/sl_cpc_drv_mock.c
+include:
+- path: inc
+  file_list:
+  - path: sl_cpc_drv_mock.h
+requires:
+- name: cpc_ng
+- name: cpc_ng_port_mock
+provides:
+- name: cpc_ng_drv_mock
+  # Satisfy role components without selecting a real HW driver; tests use sl_cpc_drv_mock.
+- name: cpc_ng_primary_drv_instance
+- name: cpc_ng_secondary_drv_instance
+template_contribution:
+- name: cpc_ng_drv_mock_instances
+  value: "{{instance}}"

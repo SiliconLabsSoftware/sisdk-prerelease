@@ -1075,23 +1075,23 @@ sdk_extension:
   id: bluetooth_apploader
   version: 11.2.0-alpha.62
 - vendor: silabs
-  id: security_tfm
-  version: 1.2.0
+  id: realtime_locationing
+  version: 12.0.0-alpha.6
 - vendor: silabs
   id: usb
   version: 1.8.0
 - vendor: silabs
-  id: realtime_locationing
-  version: 12.0.0-alpha.5
+  id: security_tfm
+  version: 1.2.0
 - vendor: silabs
   id: boards
   version: 1.2.0
 - vendor: silabs
-  id: mbedtls
-  version: 1.2.0
-- vendor: silabs
   id: cmsis_dsp
   version: 1.16.3
+- vendor: silabs
+  id: mbedtls
+  version: 1.2.0
 - vendor: silabs
   id: bootloader
   version: 3.4.0
@@ -1105,11 +1105,11 @@ sdk_extension:
   id: freertos
   version: 1.2.0
 - vendor: silabs
-  id: delta_dfu
-  version: 1.1.0
-- vendor: silabs
   id: security_sxsymcrypt
   version: 1.2.0
+- vendor: silabs
+  id: delta_dfu
+  version: 1.1.0
 - vendor: silabs
   id: coremark
   version: 1.1.0

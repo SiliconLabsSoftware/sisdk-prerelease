@@ -125,6 +125,10 @@ SL_ENUM(sl_clock_branch_t) {
   SL_CLOCK_BRANCH_ADC0CLK,       ///< ADC0CLK Clock Branch
   SL_CLOCK_BRANCH_ADC1CLK,       ///< ADC1CLK Clock Branch
   SL_CLOCK_BRANCH_LEDSINK0CLK,   ///< LEDSINK0CLK Clock Branch
+  SL_CLOCK_BRANCH_ADCHS0CLK,     ///< ADCHS0CLK Clock Branch
+  SL_CLOCK_BRANCH_ADCHS1CLK,     ///< ADCHS1CLK Clock Branch
+  SL_CLOCK_BRANCH_ADCHS2CLK,     ///< ADCHS2CLK Clock Branch
+  SL_CLOCK_BRANCH_ADCHS3CLK,     ///< ADCHS3CLK Clock Branch
   SL_CLOCK_BRANCH_INVALID        ///< INVALID Clock Branch
 };
 #endif
@@ -188,6 +192,18 @@ SL_ENUM(sl_clock_branch_t) {
 
 /// Define for ADC1 peripheral bus clock pointer.
 #define SL_BUS_CLOCK_ADC1 (&SL_BUS_CLOCK_ADC1_VALUE)
+
+/// Define for ADCHS0 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_ADCHS0 (&SL_BUS_CLOCK_ADCHS0_VALUE)
+
+/// Define for ADCHS1 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_ADCHS1 (&SL_BUS_CLOCK_ADCHS1_VALUE)
+
+/// Define for ADCHS2 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_ADCHS2 (&SL_BUS_CLOCK_ADCHS2_VALUE)
+
+/// Define for ADCHS3 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_ADCHS3 (&SL_BUS_CLOCK_ADCHS3_VALUE)
 
 /// Define for AGC peripheral bus clock pointer.
 #define SL_BUS_CLOCK_AGC (&SL_BUS_CLOCK_AGC_VALUE)
@@ -549,6 +565,18 @@ extern const uint32_t SL_BUS_CLOCK_ADC0_VALUE;
 
 // External declaration for ADC1 peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_ADC1_VALUE;
+
+// External declaration for ADCHS0 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_ADCHS0_VALUE;
+
+// External declaration for ADCHS1 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_ADCHS1_VALUE;
+
+// External declaration for ADCHS2 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_ADCHS2_VALUE;
+
+// External declaration for ADCHS3 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_ADCHS3_VALUE;
 
 // External declaration for AGC peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_AGC_VALUE;

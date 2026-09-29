@@ -117,6 +117,22 @@ typedef struct {
   const sl_power_manager_em_transition_event_info_t *info;  ///< Handle event info.
 } sl_power_manager_em_transition_event_handle_t;
 
+/***************************************************************************//**
+ * Typedef for the user supplied sleep hook callback function.
+ *
+ * Used for both sleep entry (before the energy mode decision) and sleep exit.
+ * The same function may be registered for both.
+ * A NULL callback means a hook is not registered.
+ ******************************************************************************/
+typedef void (*sl_power_manager_on_sleep_hook_t)(void);
+
+/// @brief Struct representing a sleep hook handle
+typedef struct {
+  sl_slist_node_t node;                                     ///< List node.
+  sl_power_manager_on_sleep_hook_t on_sleep_entry;          ///< Sleep entry callback, or NULL.
+  sl_power_manager_on_sleep_hook_t on_sleep_exit;           ///< Sleep exit callback, or NULL.
+} sl_power_manager_sleep_hook_handle_t;
+
 /// On ISR Exit Hook answer
 SL_ENUM(sl_power_manager_on_isr_exit_t) {
   SL_POWER_MANAGER_IGNORE = (1UL << 0UL),     ///< The module did not trigger an ISR and it doesn't want to contribute to the decision
@@ -275,6 +291,55 @@ void sl_power_manager_subscribe_em_transition_event(sl_power_manager_em_transiti
  * @note  An EFM_ASSERT is thrown if the handle is not found.
  ******************************************************************************/
 void sl_power_manager_unsubscribe_em_transition_event(sl_power_manager_em_transition_event_handle_t *event_handle);
+
+/***************************************************************************//**
+ * Registers sleep entry and/or sleep exit callbacks.
+ *
+ * @param hook_handle  Hook handle (no initialization needed).
+ *
+ * @param on_sleep_entry  Function called before the energy mode decision when
+ *                        EM2 or lower is a candidate, or NULL if unused.
+ *                        Skipped when an EM1 requirement is already present.
+ *
+ * @param on_sleep_exit  Function called after sleep or NULL if unused.
+ *
+ * Usage example:
+ *
+ * ```c
+ * sl_power_manager_sleep_hook_handle_t hook_handle;
+ *
+ * void my_sleep_entry_callback(void)
+ * {
+ *   [...]
+ * }
+ *
+ * void my_sleep_exit_callback(void)
+ * {
+ *   [...]
+ * }
+ *
+ * void main(void)
+ * {
+ *   sl_power_manager_init();
+ *   sl_power_manager_subscribe_sleep_hook(&hook_handle,
+ *                                         my_sleep_entry_callback,
+ *                                         my_sleep_exit_callback);
+ * }
+ * ```
+ ******************************************************************************/
+void sl_power_manager_subscribe_sleep_hook(sl_power_manager_sleep_hook_handle_t *hook_handle,
+                                           sl_power_manager_on_sleep_hook_t     on_sleep_entry,
+                                           sl_power_manager_on_sleep_hook_t     on_sleep_exit);
+
+/***************************************************************************//**
+ * Unregisters a sleep hook handle.
+ *
+ * @param hook_handle  Hook handle which must be unregistered (must have been
+ *                     registered previously).
+ *
+ * @note Unregistering a handle that is not in the list has no effect.
+ ******************************************************************************/
+void sl_power_manager_unsubscribe_sleep_hook(sl_power_manager_sleep_hook_handle_t *hook_handle);
 
 /***************************************************************************//**
  * Get configurable overhead value for early restore time in Sleeptimer ticks
@@ -475,6 +540,41 @@ sl_status_t sl_power_manager_set_peripheral_retention_strategy(const sl_peripher
  *         or 0xFFu if the peripheral is NULL or not found).
  ******************************************************************************/
 uint8_t sl_power_manager_get_peripheral_retention_strategy(const sl_peripheral_t peripheral);
+
+/***************************************************************************//**
+ * Gets whether Power Manager software retention is enabled for a peripheral.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return 1 if software retention is enabled (save/restore active),
+ *         0 if software retention is disabled or SL_PM_<PERIPHERAL>_RETAINED == 0,
+ *         0xFFu if the peripheral is NULL or not found.
+ ******************************************************************************/
+ uint8_t sl_power_manager_get_peripheral_retention(const sl_peripheral_t peripheral);
+
+/***************************************************************************//**
+ * Disables Power Manager save/restore for a peripheral.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return SL_STATUS_OK if retention was disabled successfully.
+ *         SL_STATUS_INVALID_PARAMETER if the peripheral is NULL or
+ *         SL_PM_<PERIPHERAL>_RETAINED == 0.
+ *         SL_STATUS_NOT_SUPPORTED if retention is not supported.
+ ******************************************************************************/
+sl_status_t sl_power_manager_disable_peripheral_retention(const sl_peripheral_t peripheral);
+
+/***************************************************************************//**
+ * Enables Power Manager save/restore for a peripheral.
+ *
+ * @param peripheral  A pointer to peripheral.
+ *
+ * @return SL_STATUS_OK if retention was enabled successfully.
+ *         SL_STATUS_INVALID_PARAMETER if the peripheral is NULL or
+ *         SL_PM_<PERIPHERAL>_RETAINED == 0.
+ *         SL_STATUS_NOT_SUPPORTED if retention is not supported.
+ ******************************************************************************/
+sl_status_t sl_power_manager_enable_peripheral_retention(const sl_peripheral_t peripheral);
 /** @} (end addtogroup power_manager) */
 
 #ifdef __cplusplus
@@ -646,6 +746,17 @@ uint8_t sl_power_manager_get_peripheral_retention_strategy(const sl_peripheral_t
 * ## EM4 Sleep
 *
 * See @ref power_manager_em4 for EM4 entry and pin retention APIs.
+*
+* ## LFXO EM2 CTUNE compensation (Series 2)
+*
+* On Series 2 devices, LFXO-based timekeeping can drift between EM0 and EM2.
+* When this matters for your application, enable
+* `SL_POWER_MANAGER_ENABLE_LFXO_EM2_CTUNE_COMPENSATION` in the Power Manager
+* component configuration. Power Manager then asks Clock Manager to lower LFXO
+* CAPTUNE by four steps immediately before EM2/EM3 entry and to restore the
+* saved value on wake-up.
+* The compensation is disabled by default and applies only when LFXO is running.
+* Override the step count at compile time with `LFXO_CTUNE_EM2_OFFSET`.
 *
 * ## Update Power Manager after runtime clock changes
 *

@@ -49,7 +49,7 @@
 #define SL_DEVICE_INIT_HFXO_PRECISION      50
 
 // <o SL_DEVICE_INIT_HFXO_CTUNE> CTUNE <0-255>
-// <i> Default: 123
+// <i> Default: 140
 #define SL_DEVICE_INIT_HFXO_CTUNE          123
 
 // <<< end of configuration section >>>

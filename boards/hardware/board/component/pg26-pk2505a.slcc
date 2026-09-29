@@ -17,10 +17,10 @@
   - name: SL_KIT_NAME
     value: '"PG26-PK2505A"'
   - name: SL_KIT_REV
-    value: '"A00"'
+    value: '"A01"'
 - tag:
   - kit:opn:PG26-PK2505A
   - kit:pn:PK2505
   - kit:variant:A
-  - kit:revision:A00
+  - kit:revision:A01
 - root_path: boards

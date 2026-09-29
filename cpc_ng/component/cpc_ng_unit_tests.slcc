@@ -1,0 +1,64 @@
+id: cpc_ng_unit_tests
+package: cpc_ng
+description: Unity unit tests for the CPC-NG core (API, buffers, control, endpoints, scatter-gather).
+category: Tests|CPC-NG|Unit
+quality: internal
+label: CPC-NG Unit Tests
+ui_hints:
+  visibility: never
+source:
+- path: src/unit/api.c
+- path: src/unit/buf.c
+- path: src/unit/control.c
+- path: src/unit/ep_ref_cnt.c
+- path: src/unit/expect.c
+- path: src/unit/expect.h
+- path: src/unit/fixture.c
+- path: src/unit/fixture.h
+- path: src/unit/frame.c
+- path: src/unit/frame.h
+- path: src/unit/reset.c
+- path: src/unit/scatter_gather.c
+- path: src/unit/syn.c
+- path: src/unit/unity_assert.c
+- path: src/unit/unity_assert.h
+- path: src/unit/window.c
+provides:
+- name: cpc_ng_unit_tests
+requires:
+- name: cpc_ng
+- name: cpc_ng_drv_mock
+- name: cpc_ng_primary
+- name: cpc_ng_secondary
+- name: iostream
+- name: iostream_retarget_stdio
+- name: iostream_stdlib_config
+- name: sl_assert
+- name: test_framework_unity_fixture_app
+  # Toolchain
+- name: toolchain_gcc_warnings_are_errors
+- name: toolchain_gcc_warnings_undef
+define:
+- name: DEBUG_EFM_USER
+template_contribution:
+  # Unit test framework contributions
+- name: unity_test_group
+  value: cpc_api
+- name: unity_test_group
+  value: cpc_buf
+- name: unity_test_group
+  value: cpc_control
+- name: unity_test_group
+  value: cpc_reset
+- name: unity_test_group
+  value: cpc_syn
+- name: unity_test_group
+  value: cpc_ep_ref_cnt
+- name: unity_test_group
+  value: cpc_window
+- name: unity_test_group
+  value: cpc_scatter_gather
+toolchain_settings:
+- option: gcc_compiler_option
+  value: -Wall -Wextra -Wpointer-arith
+root_path: cpc_ng

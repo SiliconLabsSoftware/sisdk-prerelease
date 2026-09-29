@@ -10,14 +10,29 @@ metadata:
 quality: experimental
 root_path: bluetooth_le/common/cbap
 include:
-- path: .
+- path: inc
   file_list:
   - path: sl_bt_cbap.h
+  - path: sli_bt_cbap.h
+config_file:
+- path: config/sl_bt_cbap_config.h
+- path: config/cbap.xml
+  directory: btconf
 source:
-- path: sl_bt_cbap.c
+- path: src/sl_bt_cbap_crypto.c
+- path: src/sl_bt_cbap_ble.c
 requires:
+- name: app_assert
+- name: app_timer
+- name: bluetooth_stack
+- name: bluetooth_feature_connection
+- name: bluetooth_feature_gatt
+- name: bluetooth_feature_gatt_server
+- name: bluetooth_feature_sm
+- name: bluetooth_feature_system
 - name: cbap_key_id
 - name: component_catalog
+- name: gatt_configuration
 - name: nvm3_lib
 - name: nvm3_default
 - name: mbedtls_asn1
@@ -37,3 +52,13 @@ requires:
 - name: psa_crypto_sha1
 provides:
 - name: cbap
+template_contribution:
+- name: event_handler
+  value:
+    event: internal_app_init
+    include: sli_bt_cbap.h
+    handler: sli_bt_cbap_crypto_init
+- name: bluetooth_on_event
+  value:
+    include: sli_bt_cbap.h
+    function: sli_bt_cbap_on_event

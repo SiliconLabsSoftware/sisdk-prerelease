@@ -188,6 +188,18 @@ __WEAK const uint32_t SL_DMA_SIGNAL_ADC0_SCAN_VALUE = 0xFFFFFFFF;
 // Weak declaration for ADC1 SCAN DMA Signal
 __WEAK const uint32_t SL_DMA_SIGNAL_ADC1_SCAN_VALUE = 0xFFFFFFFF;
 
+// Weak declaration for ADCHS0 SCAN DMA Signal
+__WEAK const uint32_t SL_DMA_SIGNAL_ADCHS0_SCAN_VALUE = 0xFFFFFFFF;
+
+// Weak declaration for ADCHS1 SCAN DMA Signal
+__WEAK const uint32_t SL_DMA_SIGNAL_ADCHS1_SCAN_VALUE = 0xFFFFFFFF;
+
+// Weak declaration for ADCHS2 SCAN DMA Signal
+__WEAK const uint32_t SL_DMA_SIGNAL_ADCHS2_SCAN_VALUE = 0xFFFFFFFF;
+
+// Weak declaration for ADCHS3 SCAN DMA Signal
+__WEAK const uint32_t SL_DMA_SIGNAL_ADCHS3_SCAN_VALUE = 0xFFFFFFFF;
+
 // Weak declaration for IADC0 SCAN DMA Signal
 __WEAK const uint32_t SL_DMA_SIGNAL_IADC0_SCAN_VALUE = 0xFFFFFFFF;
 // Weak declaration for IADC0 SINGLE DMA Signal

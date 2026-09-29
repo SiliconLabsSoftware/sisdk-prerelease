@@ -42,6 +42,14 @@ extern "C" {
 #endif
 
 /*******************************************************************************
+ *********************************   DEFINES   *********************************
+ ******************************************************************************/
+#if defined(SL_CATALOG_POWER_MANAGER_SLEEP_HOOKS_PRESENT) \
+  && !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
+#define SLI_POWER_MANAGER_SLEEP_HOOKS_ENABLED
+#endif
+
+/*******************************************************************************
  ******************************   HOOK REFERENCES   ****************************
  ******************************************************************************/
 
@@ -170,6 +178,28 @@ void sli_power_manager_em23_flash_power_down_enable_fast_wakeup(bool enable);
  * Initializes energy mode transition list.
  ******************************************************************************/
 void sli_power_manager_em_transition_event_list_init(void);
+
+#if defined(SLI_POWER_MANAGER_SLEEP_HOOKS_ENABLED)
+/***************************************************************************//**
+ * Initializes sleep hook list.
+ ******************************************************************************/
+void sli_power_manager_sleep_hook_list_init(void);
+
+/***************************************************************************//**
+ * Invoke sleep entry hooks.
+ *
+ * @note No-op if the sleep entry hook phase already ran and the matching
+ *       sleep exit hooks have not yet run.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+void sli_power_manager_invoke_sleep_entry_hooks(void);
+
+/***************************************************************************//**
+ * Invoke sleep exit hooks when the sleep entry hook phase ran.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+void sli_power_manager_invoke_sleep_exit_hooks(void);
+#endif
 
 /***************************************************************************//**
  * Notify subscribers about energy mode transition.

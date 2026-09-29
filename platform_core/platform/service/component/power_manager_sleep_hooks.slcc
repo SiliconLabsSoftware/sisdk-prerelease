@@ -1,0 +1,19 @@
+id: power_manager_sleep_hooks
+label: 'Power Manager: Sleep Hooks'
+package: platform_core
+description: |
+  Enable sleep entry and sleep exit hook subscriptions.
+category: Services|Power Manager
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/service/power_manager
+provides:
+- name: power_manager_sleep_hooks
+requires:
+- name: power_manager_core
+- name: component_catalog
+template_contribution:
+- name: component_catalog
+  value: power_manager_sleep_hooks

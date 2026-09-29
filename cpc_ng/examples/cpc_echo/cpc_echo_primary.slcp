@@ -1,0 +1,29 @@
+project_name: cpc_echo_primary
+package: cpc_ng
+description: |
+  Primary (Host MCU) echo client using the CPC transport layer.
+  Connects to cpc_echo_secondary on endpoint 90 and ping-pongs a fixed payload.
+category: Examples|CPC-NG
+quality: experimental
+component:
+  # CPC
+  - id: cpc_ng_primary
+  # Platform
+  - id: clock_manager
+  - id: device_manager
+  - id: freertos
+  - id: sl_main
+  - id: iostream_retarget_stdio
+  - id: iostream_swo
+source:
+  - path: primary/app.c
+define:
+  - name: DEBUG_EFM
+configuration:
+  # Keep the sl_main start task after init at a normal priority (not realtime).
+  - name: SL_MAIN_ENABLE_START_TASK_PRIORITY_CHANGE
+    value: 1
+  - name: SL_MAIN_START_TASK_PRIORITY
+    value: osPriorityNormal
+readme:
+  - path: README.md

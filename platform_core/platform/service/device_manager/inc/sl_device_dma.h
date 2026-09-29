@@ -308,6 +308,18 @@ SL_ENUM(sl_dma_ctrl_block_size_t) {
 /// Define for ADC3 SCAN DMA Signal.
 #define SL_DMA_SIGNAL_ADC3_SCAN (&SL_DMA_SIGNAL_ADC3_SCAN_VALUE)
 
+/// Define for ADCHS0 SCAN DMA Signal.
+#define SL_DMA_SIGNAL_ADCHS0_SCAN (&SL_DMA_SIGNAL_ADCHS0_SCAN_VALUE)
+
+/// Define for ADCHS1 SCAN DMA Signal.
+#define SL_DMA_SIGNAL_ADCHS1_SCAN (&SL_DMA_SIGNAL_ADCHS1_SCAN_VALUE)
+
+/// Define for ADCHS2 SCAN DMA Signal.
+#define SL_DMA_SIGNAL_ADCHS2_SCAN (&SL_DMA_SIGNAL_ADCHS2_SCAN_VALUE)
+
+/// Define for ADCHS3 SCAN DMA Signal.
+#define SL_DMA_SIGNAL_ADCHS3_SCAN (&SL_DMA_SIGNAL_ADCHS3_SCAN_VALUE)
+
 /// Define for IADC0 SCAN DMA Signal.
 #define SL_DMA_SIGNAL_IADC0_SCAN (&SL_DMA_SIGNAL_IADC0_SCAN_VALUE)
 /// Define for IADC0 SINGLE DMA Signal.
@@ -645,6 +657,18 @@ extern const uint32_t SL_DMA_SIGNAL_ADC2_SCAN_VALUE;
 
 // External declaration for ADC3 SCAN DMA Signal
 extern const uint32_t SL_DMA_SIGNAL_ADC3_SCAN_VALUE;
+
+// External declaration for ADCHS0 SCAN DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_ADCHS0_SCAN_VALUE;
+
+// External declaration for ADCHS1 SCAN DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_ADCHS1_SCAN_VALUE;
+
+// External declaration for ADCHS2 SCAN DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_ADCHS2_SCAN_VALUE;
+
+// External declaration for ADCHS3 SCAN DMA Signal
+extern const uint32_t SL_DMA_SIGNAL_ADCHS3_SCAN_VALUE;
 
 // External declaration for IADC0 SCAN DMA Signal
 extern const uint32_t SL_DMA_SIGNAL_IADC0_SCAN_VALUE;

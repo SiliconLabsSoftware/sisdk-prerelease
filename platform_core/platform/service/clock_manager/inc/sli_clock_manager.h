@@ -301,6 +301,25 @@ bool sli_clock_manager_clock_mode_is_rf_friendly(void);
 
 #endif // defined (SL_CLOCK_MANAGER_SYSCLK_OSPI_DYNAMIC_CFG_EN) && (SL_CLOCK_MANAGER_SYSCLK_OSPI_DYNAMIC_CFG_EN == 1)
 
+#if defined(_LFXO_CAL_CAPTUNE_MASK)
+/***************************************************************************//**
+ * Lower LFXO CAPTUNE before EM2/EM3 when LFXO is running.
+ *
+ * No-op when LFXO is not enabled and ready. The step count defaults to 4 and can
+ * be overridden at compile time with LFXO_CTUNE_EM2_OFFSET.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+void sli_clock_manager_compensate_lfxo_em2_ctune(void);
+
+/***************************************************************************//**
+ * Restore the LFXO CAPTUNE saved by sli_clock_manager_compensate_lfxo_em2_ctune().
+ *
+ * No-op when compensation was skipped or LFXO is no longer running.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+void sli_clock_manager_restore_lfxo_em2_ctune(void);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

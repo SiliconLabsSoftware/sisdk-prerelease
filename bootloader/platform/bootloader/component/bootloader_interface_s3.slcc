@@ -7,8 +7,9 @@ description: >
   btl_interface_bootloadinfo vs btl_interface_bootloadinfo_single, and whether
   sl_app_properties comes from btl_main or app_properties.c) are selected by the project
   graph. Host or test apps that need btl_storage_bootloadinfo.c should require
-  btl_interface_bootloadinfo explicitly. Contributes btl_core_cfg.h (file_id btl_core_config)
-  for Series-3 interface and parser code (including app-only projects without btl_core).
+  btl_interface_bootloadinfo explicitly. When btl_core is absent, this component contributes
+  btl_core_cfg.h (file_id btl_core_config), which is required by the Series-3 interface and
+  parser code in application-only projects.
 category: Platform|Bootloader
 quality: production
 ui_hints:
@@ -42,6 +43,7 @@ recommends:
 config_file:
 - path: platform/bootloader/series3/config/device_series_3/btl_core_cfg.h
   file_id: btl_core_config
+  unless: [btl_core]
 
 template_contribution:
 - name: bootloader_interface_enable

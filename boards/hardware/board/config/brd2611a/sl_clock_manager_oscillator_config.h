@@ -80,7 +80,7 @@
 #endif
 
 // <o SL_CLOCK_MANAGER_HFXO_CTUNE> CTUNE <0-255>
-// <d> 123
+// <d> 140
 #ifndef SL_CLOCK_MANAGER_HFXO_CTUNE
 #define SL_CLOCK_MANAGER_HFXO_CTUNE    123
 #endif
@@ -216,7 +216,7 @@
 #endif
 
 // <o SL_CLOCK_MANAGER_LFXO_CTUNE> CTUNE <0-127>
-// <d> 41
+// <d> 63
 #ifndef SL_CLOCK_MANAGER_LFXO_CTUNE
 #define SL_CLOCK_MANAGER_LFXO_CTUNE    41
 #endif

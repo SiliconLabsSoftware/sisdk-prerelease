@@ -1,0 +1,30 @@
+id: cpc_ng_drv_spi_peripheral_eusart_secondary
+package: cpc_ng
+description: Instantiable SPI-peripheral (EUSART) driver for a CPC-NG Secondary device.
+category: Services|CPC-NG|Driver|Secondary Device
+quality: internal
+label: CPC-NG Secondary - SPI Peripheral (EUSART)
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/silabs
+instantiable:
+  prefix: instance
+config_file:
+- path: config/series2/sl_cpc_drv_spi_peripheral_eusart_{{instance}}_config.h
+  file_id: cpc_ng_drv_spi_peripheral_eusart_config
+  condition: [device_series_2]
+- path: config/series3/sl_cpc_drv_spi_peripheral_eusart_{{instance}}_config.h
+  file_id: cpc_ng_drv_spi_peripheral_eusart_config
+  condition: [device_series_3]
+provides:
+- name: cpc_ng_drv_spi_peripheral_eusart_secondary
+- name: cpc_ng_secondary_drv_instance
+requires:
+- name: cpc_ng_drv_spi_peripheral_eusart
+- name: cpc_ng_secondary
+template_contribution:
+- name: cpc_ng_drv_spi_peripheral_instances
+  value: "{{instance}}"
+- name: cpc_ng_drv_spi_peripheral_role_secondary
+  value: "{{instance}}"

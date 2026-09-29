@@ -60,6 +60,10 @@
 
 // Events subscribers lists
 static sl_slist_node_t *power_manager_em_transition_event_list = NULL;
+#if defined(SLI_POWER_MANAGER_SLEEP_HOOKS_ENABLED)
+static sl_slist_node_t *power_manager_sleep_hook_list = NULL;
+static bool sleep_entry_hook_invoked = false;
+#endif
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -170,12 +174,112 @@ void sl_power_manager_unsubscribe_em_transition_event(sl_power_manager_em_transi
 }
 
 /***************************************************************************//**
+ * Registers sleep entry and/or sleep exit callbacks.
+ ******************************************************************************/
+void sl_power_manager_subscribe_sleep_hook(sl_power_manager_sleep_hook_handle_t *hook_handle,
+                                           sl_power_manager_on_sleep_hook_t     on_sleep_entry,
+                                           sl_power_manager_on_sleep_hook_t     on_sleep_exit)
+{
+#if defined(SLI_POWER_MANAGER_SLEEP_HOOKS_ENABLED)
+  CORE_DECLARE_IRQ_STATE;
+
+  hook_handle->on_sleep_entry = on_sleep_entry;
+  hook_handle->on_sleep_exit = on_sleep_exit;
+  CORE_ENTER_CRITICAL();
+  sl_slist_push(&power_manager_sleep_hook_list, &hook_handle->node);
+  CORE_EXIT_CRITICAL();
+#else
+  (void)hook_handle;
+  (void)on_sleep_entry;
+  (void)on_sleep_exit;
+#endif
+}
+
+/***************************************************************************//**
+ * Unregisters a sleep hook handle.
+ ******************************************************************************/
+void sl_power_manager_unsubscribe_sleep_hook(sl_power_manager_sleep_hook_handle_t *hook_handle)
+{
+#if defined(SLI_POWER_MANAGER_SLEEP_HOOKS_ENABLED)
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
+  sl_slist_remove(&power_manager_sleep_hook_list, &hook_handle->node);
+  CORE_EXIT_CRITICAL();
+#else
+  (void)hook_handle;
+#endif
+}
+
+/***************************************************************************//**
  * Initializes energy mode transition list.
  ******************************************************************************/
 void sli_power_manager_em_transition_event_list_init(void)
 {
   sl_slist_init(&power_manager_em_transition_event_list);
 }
+
+#if defined(SLI_POWER_MANAGER_SLEEP_HOOKS_ENABLED)
+/***************************************************************************//**
+ * Initializes sleep hook list.
+ ******************************************************************************/
+void sli_power_manager_sleep_hook_list_init(void)
+{
+  sl_slist_init(&power_manager_sleep_hook_list);
+  sleep_entry_hook_invoked = false;
+}
+
+/***************************************************************************//**
+ * Invoke sleep entry hooks.
+ *
+ * @note No-op if the sleep entry hook phase already ran and the matching
+ *       sleep exit hooks have not yet run.
+ ******************************************************************************/
+void sli_power_manager_invoke_sleep_entry_hooks(void)
+{
+  sl_power_manager_sleep_hook_handle_t *handle;
+
+  if (sleep_entry_hook_invoked == true) {
+    return;
+  }
+
+  sleep_entry_hook_invoked = true;
+
+  if (power_manager_sleep_hook_list == NULL) {
+    return;
+  }
+
+  SL_SLIST_FOR_EACH_ENTRY(power_manager_sleep_hook_list, handle, sl_power_manager_sleep_hook_handle_t, node) {
+    if (handle->on_sleep_entry != NULL) {
+      handle->on_sleep_entry();
+    }
+  }
+}
+
+/***************************************************************************//**
+ * Invoke sleep exit hooks when the sleep entry hook phase ran.
+ ******************************************************************************/
+void sli_power_manager_invoke_sleep_exit_hooks(void)
+{
+  sl_power_manager_sleep_hook_handle_t *handle;
+
+  if (sleep_entry_hook_invoked == false) {
+    return;
+  }
+
+  sleep_entry_hook_invoked = false;
+
+  if (power_manager_sleep_hook_list == NULL) {
+    return;
+  }
+
+  SL_SLIST_FOR_EACH_ENTRY(power_manager_sleep_hook_list, handle, sl_power_manager_sleep_hook_handle_t, node) {
+    if (handle->on_sleep_exit != NULL) {
+      handle->on_sleep_exit();
+    }
+  }
+}
+#endif
 
 /***************************************************************************//**
  * Notify subscribers about energy mode transition.

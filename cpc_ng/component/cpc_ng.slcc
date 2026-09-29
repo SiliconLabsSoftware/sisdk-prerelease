@@ -1,0 +1,121 @@
+id: cpc_ng
+package: cpc_ng
+description: |
+  CPC-NG (Co-Processor Communication, Next Generation) allows for communication
+  between a Primary and a Secondary device using a single physical link such as
+  UART, SPI or SDIO. Both devices can have multiple endpoints that both produce
+  and consume data and CPC-NG will handle the multiplexing/demultiplexing of the
+  data to the target.
+
+  CPC-NG is a redesign of the original CPC stack, which remains available in the
+  separate "cpc" package under Services|Co-Processor Communication. CPC-NG exposes
+  a new public API built around buses, endpoints, frames and application-owned
+  buffers with scatter-gather reception, so it is not a drop-in replacement: a
+  project uses either CPC-NG or the original CPC stack, not both.
+
+  This component provides the core CPC-NG functionality and protocol
+  implementation. The device role (Primary or Secondary) and the physical link
+  driver are selected through separate CPC-NG components.
+category: Services|CPC-NG
+quality: experimental
+label: CPC-NG - Co-Processor Communication Next Generation
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+config_file:
+- path: config/sl_cpc_config.h
+  file_id: cpc_ng_config
+- path: config/sl_cpc_kernel_config.h
+  file_id: cpc_ng_kernel_config
+include:
+- path: inc
+  file_list:
+  - path: sl_cpc.h
+  - path: sl_cpc_buf.h
+  - path: sl_cpc_bus.h
+  - path: sl_cpc_ep.h
+  - path: sl_cpc_frame.h
+  - path: sl_cpc_msgq.h
+  - path: sl_cpc_version.h
+  - path: sli_cpc_types.h
+  # CPC-3421: tests should not include internal headers.
+- path: src
+  file_list:
+  - path: sli_cpc_assert.h
+  - path: sli_cpc_atomic.h
+  - path: sli_cpc_log.h
+  - path: sli_cpc_panic.h
+  - path: sli_cpc_timer.h
+source:
+- path: src/sl_cpc_weak_prototypes.h
+- path: src/sli_cpc.c
+- path: src/sli_cpc.h
+- path: src/sli_cpc_assert.h
+- path: src/sli_cpc_atomic.h
+- path: src/sli_cpc_bootloader.h
+- path: src/sli_cpc_buf.c
+- path: src/sli_cpc_bus.c
+- path: src/sli_cpc_bus.h
+- path: src/sli_cpc_control.c
+- path: src/sli_cpc_control.h
+- path: src/sli_cpc_crc.c
+- path: src/sli_cpc_crc.h
+- path: src/sli_cpc_debug.h
+- path: src/sli_cpc_dispatcher.c
+- path: src/sli_cpc_dispatcher.h
+- path: src/sli_cpc_drv.h
+- path: src/sli_cpc_endianness.h
+- path: src/sli_cpc_ep.h
+- path: src/sli_cpc_frame.c
+- path: src/sli_cpc_frame.h
+- path: src/sli_cpc_frame_list.h
+- path: src/sli_cpc_hdr.h
+- path: src/sli_cpc_list.h
+- path: src/sli_cpc_log.h
+- path: src/sli_cpc_memory.c
+- path: src/sli_cpc_memory.h
+- path: src/sli_cpc_msgq.c
+- path: src/sli_cpc_panic.c
+- path: src/sli_cpc_panic.h
+- path: src/sli_cpc_timer.h
+- path: src/sli_cpc_utils.h
+provides:
+- name: cpc_ng
+conflicts:
+- name: cpc_core
+requires:
+- name: cpc_ng_port
+- name: cmsis_core
+- name: component_catalog
+- name: hal_emu
+- name: sl_string
+- name: power_manager
+- name: memory_manager
+template_contribution:
+- name: component_catalog
+  value: cpc_ng
+- name: event_handler
+  value:
+    event: service_init
+    include: sl_cpc_drv_instances.h
+    handler: sl_cpc_drv_instances_init
+  priority: 10000
+- name: event
+  value:
+    id: cpc_drv_instances_start_buses
+    function:
+      name: sl_cpc_drv_instances_start_buses
+      return: void
+- name: event_handler
+  value:
+    event: service_init
+    include: sl_cpc_drv_instances.h
+    handler: sl_cpc_drv_instances_start_buses
+  priority: 10001
+template_file:
+- path: template/sl_cpc_bus_instances.h.jinja
+- path: template/sl_cpc_drv_instances.c.jinja
+- path: template/sl_cpc_drv_instances.h.jinja
+root_path: cpc_ng

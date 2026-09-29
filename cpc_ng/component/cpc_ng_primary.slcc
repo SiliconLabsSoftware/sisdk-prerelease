@@ -1,0 +1,27 @@
+id: cpc_ng_primary
+package: cpc_ng
+description: |
+  This component implements the CPC-NG Primary (host) role. It provides
+  primary-specific control-plane initialization and system management so this
+  device can open endpoints and communicate with a CPC-NG Secondary. The
+  physical link is selected by a CPC-NG Primary driver instance.
+
+  This is the next-generation stack. It requires the CPC-NG core and is not
+  compatible with the original "cpc" package.
+category: Services|CPC-NG|Primary Device
+quality: experimental
+label: CPC-NG Primary Device
+metadata:
+  sbom:
+    license: Zlib
+source:
+- path: src/sli_cpc_control_primary.c
+provides:
+- name: cpc_ng_primary
+requires:
+- name: cpc_ng
+- name: cpc_ng_primary_drv_instance
+template_contribution:
+- name: component_catalog
+  value: cpc_ng_primary
+root_path: cpc_ng

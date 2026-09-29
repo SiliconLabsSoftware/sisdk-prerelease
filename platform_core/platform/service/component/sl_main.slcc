@@ -10,9 +10,15 @@ provides:
 - name: sl_main
 root_path: platform_core/platform/service/sl_main/
 config_file:
-- path: config/sl_main_start_task_config.h
+- path: config/series2/sl_main_start_task_config.h
   file_id: main_start_task_config
-  condition: [kernel]
+  condition: [kernel, device_series_2]
+- path: config/series2/sl_main_start_task_config.h
+  file_id: main_start_task_config
+  condition: [kernel, device_si91x]
+- path: config/series3/sl_main_start_task_config.h
+  file_id: main_start_task_config
+  condition: [kernel, device_series_3]
 requires:
 - name: interrupt_manager
   condition: [device_efx]

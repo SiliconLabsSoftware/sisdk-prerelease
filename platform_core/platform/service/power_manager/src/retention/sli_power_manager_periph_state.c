@@ -38,6 +38,7 @@
 #include "sl_device_clock.h"
 #include "sl_core.h"
 #include "sl_compiler.h"
+#include "sl_common.h"
 #include "em_device.h"
 #include <string.h>
 
@@ -68,6 +69,12 @@ static uint8_t sli_ppu_bit_to_periph_index[SLI_POWER_MANAGER_MAX_PPU_BITS];
 
 // CLKEN state backup buffer.
 SLI_CLKEN_DECLARE_BACKUP_BUF(sli_clken_state);
+
+// Runtime retained-peripherals mask. Defaults to sli_pm_retained_default_mask in init.
+uint32_t sli_pm_retained_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS] SL_ATTRIBUTE_SECTION(".noinit");
+
+// Runtime restore-on-wakeup mask. Defaults to sli_pm_restore_on_wakeup_default_mask in init.
+uint32_t sli_pm_restore_on_wakeup_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS] SL_ATTRIBUTE_SECTION(".noinit");
 
 /*******************************************************************************
  ***************************  LOCAL FUNCTIONS   ********************************
@@ -143,6 +150,41 @@ static void init_ppu_bit_mapping_table(void)
   }
 }
 
+/***************************************************************************//**
+ * Updates the peripheral retention mask.
+ ******************************************************************************/
+sl_status_t update_peripheral_retention_mask(const sl_peripheral_t peripheral, bool enable)
+{
+  if (peripheral == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  uint8_t ppu_bit = find_ppu_bit_from_base(peripheral->base);
+  if (ppu_bit >= SLI_POWER_MANAGER_MAX_PPU_BITS) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (!SLI_PM_BITMAP_IS_BIT_SET(sli_pm_retained_default_mask, ppu_bit)) {
+    // Peripheral not compile-time retained.
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+  if (enable) {
+    SLI_PM_BITMAP_SET(sli_pm_retained_mask, ppu_bit);
+  } else {
+    SLI_PM_BITMAP_CLR(sli_pm_retained_mask, ppu_bit);
+    if (!(SLI_PM_BITMAP_IS_BIT_SET(sli_pm_restore_on_wakeup_mask, ppu_bit))) {
+      // Clear PPUACCESSGATE bit to un-gate this peripheral.
+      SLI_PM_PPUACCESSGATE_CLR(SLI_PM_BITMAP_WORD(ppu_bit)) = SLI_PM_BITMAP_MASK(ppu_bit);
+    }
+  }
+  CORE_EXIT_CRITICAL();
+
+  return SL_STATUS_OK;
+}
+
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -151,6 +193,10 @@ void sli_power_manager_periph_state_init(void)
   memcpy(sli_pm_restore_on_wakeup_mask,
          sli_pm_restore_on_wakeup_default_mask,
          sizeof(sli_pm_restore_on_wakeup_mask));
+
+  memcpy(sli_pm_retained_mask,
+         sli_pm_retained_default_mask,
+         sizeof(sli_pm_retained_mask));
 
   init_ppu_bit_mapping_table();
 }
@@ -172,7 +218,8 @@ void sli_power_manager_save_peripherals(void)
       uint8_t ppu_bit = (w * 32u) + bit_pos;
 
       uint8_t periph_idx = sli_ppu_bit_to_periph_index[ppu_bit];
-      if (periph_idx != SLI_POWER_MANAGER_INVALID_PERIPH_INDEX) {
+      if ((periph_idx != SLI_POWER_MANAGER_INVALID_PERIPH_INDEX)
+          && SLI_PM_BITMAP_IS_BIT_SET(sli_pm_retained_mask, ppu_bit)) {
         EFM_ASSERT(periph_idx < sli_power_manager_periph_count);
 
         sli_power_manager_periph_state_mgmt_t *entry = &sli_power_manager_periph[periph_idx];
@@ -219,7 +266,7 @@ void sli_power_manager_restore_peripherals(void)
 
   // Process each word: narrow to retained, restore on-wakeup, gate on-demand.
   for (uint8_t w = 0u; w < SLI_PM_SMU_REG_COUNT; w++) {
-    // Narrow to retained peripherals only.
+    // Narrow to peripherals with runtime retention enabled.
     reset_periph_bitmap[w] &= sli_pm_retained_mask[w];
 
     uint32_t bits = reset_periph_bitmap[w];
@@ -284,7 +331,9 @@ bool sl_power_manager_get_peripheral_dirty_state(const sl_peripheral_t periphera
   }
 
   uint8_t ppu_bit = find_ppu_bit_from_base(peripheral->base);
-  EFM_ASSERT(ppu_bit < SLI_POWER_MANAGER_MAX_PPU_BITS);
+  if (ppu_bit >= SLI_POWER_MANAGER_MAX_PPU_BITS) {
+    return false;
+  }
 
   uint8_t reg = SLI_PM_BITMAP_WORD(ppu_bit);
   CORE_DECLARE_IRQ_STATE;
@@ -310,6 +359,10 @@ bool sli_power_manager_busfault_restore_periph(uint32_t bfar_address)
   }
 
   uint8_t ppu_bit = entry->ppu_bit;
+  if (!SLI_PM_BITMAP_IS_BIT_SET(sli_pm_retained_mask, ppu_bit)) {
+    return false;
+  }
+
   uint8_t reg = SLI_PM_BITMAP_WORD(ppu_bit);
   uint32_t mask = SLI_PM_BITMAP_MASK(ppu_bit);
   bool bus_clock_was_enabled = true;
@@ -420,7 +473,9 @@ sl_status_t sl_power_manager_clear_peripheral_dirty_state(const sl_peripheral_t 
   }
 
   uint8_t ppu_bit = find_ppu_bit_from_base(peripheral->base);
-  EFM_ASSERT(ppu_bit < SLI_POWER_MANAGER_MAX_PPU_BITS);
+  if (ppu_bit >= SLI_POWER_MANAGER_MAX_PPU_BITS) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
 
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
@@ -450,9 +505,11 @@ sl_status_t sl_power_manager_set_peripheral_retention_strategy(const sl_peripher
   }
 
   uint8_t ppu_bit = find_ppu_bit_from_base(peripheral->base);
-  EFM_ASSERT(ppu_bit < SLI_POWER_MANAGER_MAX_PPU_BITS);
+  if (ppu_bit >= SLI_POWER_MANAGER_MAX_PPU_BITS) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
 
-  if (!SLI_PM_BITMAP_IS_BIT_SET(sli_pm_retained_mask, ppu_bit)) {
+  if (!SLI_PM_BITMAP_IS_BIT_SET(sli_pm_retained_default_mask, ppu_bit)) {
     return SL_STATUS_INVALID_PARAMETER; // Peripheral not retained.
   }
 
@@ -483,12 +540,16 @@ uint8_t sl_power_manager_get_peripheral_retention_strategy(const sl_peripheral_t
   }
 
   uint8_t ppu_bit = find_ppu_bit_from_base(peripheral->base);
-  EFM_ASSERT(ppu_bit < SLI_POWER_MANAGER_MAX_PPU_BITS);
-
-  if (SLI_PM_BITMAP_IS_BIT_SET(sli_pm_restore_on_wakeup_mask, ppu_bit)) {
-    return SL_PM_RETENTION_STRATEGY_ON_WAKEUP;
+  if (ppu_bit >= SLI_POWER_MANAGER_MAX_PPU_BITS) {
+    return 0xFFu;
   }
-  return SL_PM_RETENTION_STRATEGY_ON_DEMAND;
+
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+  bool on_wakeup = SLI_PM_BITMAP_IS_BIT_SET(sli_pm_restore_on_wakeup_mask, ppu_bit);
+  CORE_EXIT_CRITICAL();
+
+  return on_wakeup ? SL_PM_RETENTION_STRATEGY_ON_WAKEUP : SL_PM_RETENTION_STRATEGY_ON_DEMAND;
 }
 
 /***************************************************************************//**
@@ -506,10 +567,67 @@ uint8_t sli_power_manager_get_peripheral_default_retention_strategy(const sl_per
   }
 
   uint8_t ppu_bit = find_ppu_bit_from_base(peripheral->base);
-  EFM_ASSERT(ppu_bit < SLI_POWER_MANAGER_MAX_PPU_BITS);
+  if (ppu_bit >= SLI_POWER_MANAGER_MAX_PPU_BITS) {
+    return 0xFFu;
+  }
 
   if (SLI_PM_BITMAP_IS_BIT_SET(sli_pm_restore_on_wakeup_default_mask, ppu_bit)) {
     return SL_PM_RETENTION_STRATEGY_ON_WAKEUP;
   }
   return SL_PM_RETENTION_STRATEGY_ON_DEMAND;
+}
+
+/***************************************************************************//**
+ * Gets whether Power Manager software retention is enabled for a peripheral.
+ *
+ * @param[in]  peripheral Peripheral to query.
+ *
+ * @return 1 if software retention is enabled, 0 if disabled or not compile-time
+ *         retained, 0xFFu if the peripheral is NULL.
+ ******************************************************************************/
+uint8_t sl_power_manager_get_peripheral_retention(const sl_peripheral_t peripheral)
+{
+  if (peripheral == NULL) {
+    return 0xFFu;
+  }
+
+  uint8_t ppu_bit = find_ppu_bit_from_base(peripheral->base);
+  if (ppu_bit >= SLI_POWER_MANAGER_MAX_PPU_BITS) {
+    return 0xFFu;
+  }
+
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+  bool retained = SLI_PM_BITMAP_IS_BIT_SET(sli_pm_retained_mask, ppu_bit);
+  CORE_EXIT_CRITICAL();
+
+  return retained ? 1u : 0u;
+}
+
+/***************************************************************************//**
+ * Disables Power Manager save/restore for a peripheral.
+ *
+ * @param[in]  peripheral Peripheral to exclude from save/restore.
+ *
+ * @return SL_STATUS_OK if retention was disabled successfully.
+ *         SL_STATUS_INVALID_PARAMETER if the peripheral is NULL or
+ *         SL_PM_<PERIPHERAL>_RETAINED == 0.
+ ******************************************************************************/
+sl_status_t sl_power_manager_disable_peripheral_retention(const sl_peripheral_t peripheral)
+{
+  return update_peripheral_retention_mask(peripheral, false);
+}
+
+/***************************************************************************//**
+ * Enables Power Manager save/restore for a peripheral.
+ *
+ * @param[in]  peripheral Peripheral to include in save/restore.
+ *
+ * @return SL_STATUS_OK if retention was enabled successfully.
+ *         SL_STATUS_INVALID_PARAMETER if the peripheral is NULL or
+ *         SL_PM_<PERIPHERAL>_RETAINED == 0.
+ ******************************************************************************/
+sl_status_t sl_power_manager_enable_peripheral_retention(const sl_peripheral_t peripheral)
+{
+  return update_peripheral_retention_mask(peripheral, true);
 }

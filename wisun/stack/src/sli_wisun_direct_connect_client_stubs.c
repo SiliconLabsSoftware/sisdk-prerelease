@@ -58,6 +58,11 @@ void sli_wisun_dc_client_restart_link_lifetime(void)
   // Empty stub
 }
 
+void sli_wisun_dc_client_handle_ns_tx_result(bool success)
+{
+  (void)success;
+}
+
 // Requests
 
 sl_status_t sli_wisun_dc_client_start(void)

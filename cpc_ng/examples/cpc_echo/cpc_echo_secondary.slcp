@@ -1,0 +1,27 @@
+project_name: cpc_echo_secondary
+package: cpc_ng
+description: |
+  Secondary (co-processor) echo application using the CPC transport layer.
+  Pairs with cpc_echo_primary on a Host MCU and echoes payloads on endpoint 90.
+category: Examples|CPC-NG
+quality: experimental
+component:
+  # CPC
+  - id: cpc_ng_secondary
+  # Platform
+  - id: clock_manager
+  - id: device_manager
+  - id: freertos
+  - id: sl_main
+source:
+  - path: secondary/app.c
+define:
+  - name: DEBUG_EFM
+configuration:
+  # Keep the sl_main start task after init at a normal priority (not realtime).
+  - name: SL_MAIN_ENABLE_START_TASK_PRIORITY_CHANGE
+    value: 1
+  - name: SL_MAIN_START_TASK_PRIORITY
+    value: osPriorityNormal
+readme:
+  - path: README.md

@@ -1,0 +1,39 @@
+id: cpc_ng_drv_sdio_host
+package: cpc_ng
+description: Shared SDIO-host physical-link driver for CPC-NG. Role-specific instances are provided by the CPC-NG Primary SDIO Host component.
+category: Services|CPC-NG|Driver
+quality: internal
+label: CPC-NG - SDIO Host
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/silabs
+configuration:
+- name: SL_CLOCK_MANAGER_SDHC0CLK_SOURCE
+  value: SL_CLOCK_MANAGER_REFCLK_SOCPLL_FREQPLAN_100MHZ
+source:
+- path: src/sl_cpc_drv_sdio_host.c
+include:
+- path: inc
+  file_list:
+  - path: sl_cpc_drv_sdio_host.h
+provides:
+- name: cpc_ng_drv_sdio_host
+requires:
+- name: clock_manager_runtime
+- name: cpc_ng
+- name: cpc_ng_port_silabs
+- name: device_manager
+- name: hal_gpio
+- name: hal_sdhc
+- name: sdhc
+- name: status
+template_file:
+- path: template/sl_cpc_drv_sdio_host_config.h.jinja
+template_contribution:
+- name: event_handler
+  value:
+    event: cpc_drv_instances_start_buses
+    handler: sl_cpc_drv_sdio_host_instances_start_buses

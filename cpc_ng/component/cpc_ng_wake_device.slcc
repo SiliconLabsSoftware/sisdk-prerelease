@@ -1,0 +1,28 @@
+id: cpc_ng_wake_device
+package: cpc_ng
+description: |
+  CPC-NG wake functionality. This component wakes the device from sleep when a
+  message is received on the bus. Without it, the device must stay in EM1 so the
+  bus remains ready to receive data from the host. The host must drive the
+  configured wake pin.
+category: Services|CPC-NG|Internal
+quality: experimental
+label: CPC-NG Device Wake
+config_file:
+- path: config/sl_cpc_wake_config.h
+  file_id: cpc_ng_wake_device_config
+conflicts:
+- name: cpc_ng_wake_host
+source:
+- path: src/sli_cpc_wake.c
+- path: src/sli_cpc_wake.h
+provides:
+- name: cpc_ng_wake_device
+requires:
+- name: cpc_ng_secondary
+- name: gpio
+- name: power_manager
+template_contribution:
+- name: component_catalog
+  value: cpc_ng_wake_device
+root_path: cpc_ng

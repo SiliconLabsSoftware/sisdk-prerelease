@@ -16,6 +16,7 @@ provides:
 - name: clock_manager_runtime_hal_s3
 requires:
 - name: device_series_3
+- name: clock_manager_selection
 - name: status
 - name: enum
 - name: gpio

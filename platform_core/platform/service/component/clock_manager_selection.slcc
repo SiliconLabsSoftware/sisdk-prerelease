@@ -1,0 +1,22 @@
+id: clock_manager_selection
+label: Clock Manager Runtime Selection
+package: platform_core
+description: >
+  Internal helper for the Clock Manager Runtime to select which clock
+  resources and clock branches the runtime may act on.
+category: Services|Clock Manager
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+provides:
+- name: clock_manager_selection
+requires:
+- name: clock_manager_runtime_hal
+root_path: platform_core/platform/service/clock_manager
+include:
+- path: src
+  file_list:
+  - path: sli_clock_manager_selection.h

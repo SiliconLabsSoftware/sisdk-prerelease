@@ -39,7 +39,13 @@ This application enables provisioning the device with data, required by the Cert
   * To use the CA chain we created above:
 
         python provision.py --ca_config script/ca_configs/ca_chain_full_config.yaml
-  * For testing purposes, you can use the bundled demo CA chain. In this case, just omit this argument:
+  * If you wish to create a one-way (asymmetrical) authentication setup - instead of the mutual (symmetrical) authentication - you can also use these prepared configurations. For the verifier role:
+
+        python provision.py --ca_config script/ca_configs/ca_chain_verifier_config.yaml
+  * And for the prover role:
+
+        python provision.py --ca_config script/ca_configs/ca_chain_prover_config.yaml
+  * For testing purposes, you can use the bundled demo CA chain and just upload the whole chain (full). In this case, just omit this argument:
 
         python provision.py
 
@@ -66,9 +72,9 @@ The xG22 chip family does not have the necessary RAM size to run this applicatio
 - you need to flash (program) the device with this application before running the provisioning script.
 - the provisioning will happen through serial (VCOM) communication instead of RTT.
 
-Please refer to the help message of the provisioning script to see how you the serial connection can be configured.
+Please refer to the help message of the provisioning script to see how the serial connection can be configured.
 
-> Note: In this case, the Flash will be overwritten with the provisioning application, therefore the target firmware needs to be re-programmed.
+> Note: In this case, the Flash will be overwritten with the provisioning application, therefore the target firmware (CBAP) needs to be re-programmed.
 
 ## Resources
 

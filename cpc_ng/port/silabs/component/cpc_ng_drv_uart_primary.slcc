@@ -1,0 +1,24 @@
+id: cpc_ng_drv_uart_primary
+package: cpc_ng
+description: Instantiable UART driver for a CPC-NG Primary device.
+category: Services|CPC-NG|Driver|Primary Device
+quality: experimental
+label: CPC-NG Primary - UART
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/silabs
+instantiable:
+  prefix: instance
+config_file:
+- path: config/sl_cpc_drv_uart_{{instance}}_config.h
+  file_id: cpc_ng_drv_uart_config
+provides:
+- name: cpc_ng_drv_uart_primary
+- name: cpc_ng_primary_drv_instance
+requires:
+- name: cpc_ng_drv_uart
+- name: cpc_ng_primary
+template_contribution:
+- name: cpc_ng_drv_uart_instances
+  value: "{{instance}}"

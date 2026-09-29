@@ -56,11 +56,11 @@
   - name: SL_BOARD_NAME
     value: '"BRD2610A"'
   - name: SL_BOARD_REV
-    value: '"A07"'
+    value: '"A08"'
 - tag:
   - board:pn:BRD2610
   - board:variant:A
-  - board:revision:A07
+  - board:revision:A08
   - board:device:bgm241sd22vna
   - hardware:has:vcom
   - hardware:has:vcom:vcom_hardware_flowcontrol

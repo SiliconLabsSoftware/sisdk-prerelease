@@ -1,0 +1,34 @@
+id: cpc_ng_drv_uart
+package: cpc_ng
+description: Shared UART physical-link driver for CPC-NG. Role-specific instances are provided by the CPC-NG Primary and Secondary UART components.
+category: Services|CPC-NG|Driver
+quality: experimental
+label: CPC-NG - UART
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/silabs
+source:
+- path: src/sl_cpc_drv_uart.c
+include:
+- path: inc
+  file_list:
+  - path: sl_cpc_drv_uart.h
+provides:
+- name: cpc_ng_drv_uart
+requires:
+- name: clock_manager_runtime
+- name: cpc_ng
+- name: cpc_ng_port_silabs
+- name: emlib_ldma
+  condition: [device_series_2]
+- name: hal_ldma
+  condition: [device_series_3]
+- name: iostream_uart
+template_contribution:
+- name: event_handler
+  value:
+    event: cpc_drv_instances_start_buses
+    handler: sl_cpc_drv_uart_instances_start_buses

@@ -1,0 +1,30 @@
+id: cpc_ng_wake_host
+package: cpc_ng
+description: |
+  CPC (Co-Processor Communication) host wake functionality. This component
+  lets the device sleep while the host has nothing to send. The wake pin is
+  asserted before frames are submitted to the driver and transmission is held
+  back until the device acknowledges that it is awake over the control
+  endpoint. The pin is released once everything queued has been sent.
+
+  The host itself is currently assumed to be always on.
+category: Services|CPC-NG|Internal
+quality: experimental
+label: CPC-NG Host Wake
+config_file:
+- path: config/sl_cpc_wake_config.h
+  file_id: cpc_ng_wake_host_config
+conflicts:
+- name: cpc_ng_wake_device
+source:
+- path: src/sli_cpc_wake.c
+- path: src/sli_cpc_wake.h
+provides:
+- name: cpc_ng_wake_host
+requires:
+- name: cpc_ng_primary
+- name: gpio
+template_contribution:
+- name: component_catalog
+  value: cpc_ng_wake_host
+root_path: cpc_ng

@@ -241,6 +241,7 @@ const app_enum_t app_wisun_conn_status_enum[] = {
   { "Acquire PAN Config", SL_WISUN_JOIN_STATE_ACQUIRE_PAN_CONFIG },
   { "Configure Routing", SL_WISUN_JOIN_STATE_CONFIGURE_ROUTING },
   { "Operational", SL_WISUN_JOIN_STATE_OPERATIONAL },
+  { "Disconnecting", SL_WISUN_JOIN_STATE_DISCONNECTING },
   { NULL, 0 }
 };
 

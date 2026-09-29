@@ -26,4 +26,8 @@ provides:
 - name: zw_appshw_serialapi
 requires:
 - name: zw_appshw
+define:
+  # BRD4204A routes VCOM USART0 to PD02/PD03 (other Z-Wave boards use PA08/PA09).
+- name: ZW_BOARD_BRD4204A
+  condition: [brd4204a]
 root_path: zwave

@@ -46,6 +46,24 @@
 #endif
 
 /*******************************************************************************
+ *****************************   DEFINES   *************************************
+ ******************************************************************************/
+ #if defined(_LFXO_CAL_CAPTUNE_MASK)
+ // Lower CAPTUNE by this many steps for EM2/EM3. Override with -DLFXO_CTUNE_EM2_OFFSET.
+ #ifndef LFXO_CTUNE_EM2_OFFSET
+ #define LFXO_CTUNE_EM2_OFFSET  4u
+ #endif
+ // Max internal capacitance tuning value (20 pF).
+ #define LFXO_CTUNE_MAX         0x4fu
+ 
+/*******************************************************************************
+ ***************************   LOCAL VARIABLES   *******************************
+ ******************************************************************************/
+
+ static uint32_t lfxo_ctune_saved;
+ static bool lfxo_ctune_compensated = false;
+
+/*******************************************************************************
  ***************************   LOCAL FUNCTIONS   *******************************
  ******************************************************************************/
 
@@ -855,6 +873,83 @@ void sli_clock_manager_hal_process_hfxo_startup_time_measurement(void)
 {
   // Not supported on Series 2.
 }
+
+/***************************************************************************//**
+ * Return true when LFXO is enabled and ready.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+static bool lfxo_is_running(void)
+{
+#if defined(CMU_CLKEN0_LFXO)
+  CMU->CLKEN0_SET = CMU_CLKEN0_LFXO;
+#endif
+
+  return ((LFXO->STATUS & _LFXO_STATUS_RDY_MASK) != 0u)
+         && ((LFXO->STATUS & _LFXO_STATUS_ENS_MASK) != 0u);
+}
+
+/***************************************************************************//**
+ * Set CAPTUNE with one LFXO->CAL write.
+ *
+ * Waits for SYNCBUSY before the write. No post-write SYNCBUSY wait is required
+ * for this workaround.
+ ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+static void lfxo_ctune_set(uint32_t ctune)
+{
+  uint32_t reg;
+
+  if (ctune > LFXO_CTUNE_MAX) {
+    ctune = LFXO_CTUNE_MAX;
+  }
+
+  reg = (LFXO->CAL & ~_LFXO_CAL_CAPTUNE_MASK) | (ctune << _LFXO_CAL_CAPTUNE_SHIFT);
+
+  while (LFXO->SYNCBUSY != 0u) {
+    // Wait for SYNCBUSY to clear
+  }
+
+  LFXO->CAL = reg;
+}
+
+/***************************************************************************//**
+ * Lower LFXO CAPTUNE before EM2/EM3 when LFXO is running.
+ ******************************************************************************/
+void sli_clock_manager_compensate_lfxo_em2_ctune(void)
+{
+  uint32_t em2_ctune;
+
+  if (!lfxo_is_running()) {
+    lfxo_ctune_compensated = false;
+    return;
+  }
+
+  lfxo_ctune_saved = (LFXO->CAL & _LFXO_CAL_CAPTUNE_MASK) >> _LFXO_CAL_CAPTUNE_SHIFT;
+  em2_ctune = (lfxo_ctune_saved >= LFXO_CTUNE_EM2_OFFSET)
+              ? (lfxo_ctune_saved - LFXO_CTUNE_EM2_OFFSET)
+              : 0u;
+  lfxo_ctune_set(em2_ctune);
+  lfxo_ctune_compensated = true;
+}
+
+/***************************************************************************//**
+ * Restore the LFXO CAPTUNE saved before EM2/EM3.
+ ******************************************************************************/
+void sli_clock_manager_restore_lfxo_em2_ctune(void)
+{
+  if (!lfxo_ctune_compensated) {
+    return;
+  }
+
+  lfxo_ctune_compensated = false;
+
+  if (!lfxo_is_running()) {
+    return;
+  }
+
+  lfxo_ctune_set(lfxo_ctune_saved);
+}
+#endif
 
 /***************************************************************************//**
  * Sets LFXO frequency tuning control.

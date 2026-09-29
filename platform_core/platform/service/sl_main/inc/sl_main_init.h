@@ -58,6 +58,13 @@
  * \a SL_MAIN_START_TASK_STACK_SIZE_BYTES allows to configure the stack size for
  *    the start task. The default value of 4096 bytes.
  *
+ * \a SL_MAIN_START_TASK_ALLOCATE_SHORT_TERM selects the allocation type for
+ *    the start task's TCB and stack when using FreeRTOS heap_3 on Series 3
+ *    devices. Keep the default value of 1 when the task exits after
+ *    initialization. Set it to 0 when sl_main_start_task_should_continue() is
+ *    reimplemented to keep the task running. Baremetal emulation reuses the
+ *    start task and therefore requires a value of 0.
+ *
  * \a SL_MAIN_ENABLE_START_TASK_PRIORITY_CHANGE allows the start task to change it's
  *    priority after the initialization process is done.
  *
@@ -117,12 +124,15 @@
  *  sl_main_kernel_start() is called automatically by the main re-target
  *  from main_retarget.c. Users should not call this API themselves.
  *
- *  sl_main_start_task_should_continue() returns false by default to stop the start
- *  task after the initialization process is done. It can be redefined by the user
- *  to allow the start task to continue executing after the initialization process is
- *  done. Keep in mind that this function is called in the templated main function
- *  provided by sl_main, if you removed the call to `sl_main_start_task_should_continue`
- *  in your main function then re-implementing this function will have no effect.
+ *  sl_main_start_task_should_continue() returns false by default to stop the
+ *  start task after the initialization process is done. It can be redefined by
+ *  the user to allow the start task to continue executing. When using
+ *  FreeRTOS heap_3 on Series 3 devices, set
+ *  SL_MAIN_START_TASK_ALLOCATE_SHORT_TERM to 0 before reusing the start task
+ *  so that its TCB and stack use long-term allocations. Baremetal emulation
+ *  reuses the start task and therefore requires this setting. If the templated
+ *  main or the call to this function is removed, reimplementing this function
+ *  has no effect.
  *
  *      @note By default, when using Micrium OS, the start task's resources - such as
  *            its stack and Task Control Block (TCB) - are not released upon task exit,
@@ -249,7 +259,7 @@ void app_init_pre_clock(void);
 void app_init_early(void);
 
 /******************************************************************************
- * @brief User-defined function for application initialization after platform 
+ * @brief User-defined function for application initialization after platform
  * and initialization.
  *
  * @details This function is called from sl_main_second_stage_init():
