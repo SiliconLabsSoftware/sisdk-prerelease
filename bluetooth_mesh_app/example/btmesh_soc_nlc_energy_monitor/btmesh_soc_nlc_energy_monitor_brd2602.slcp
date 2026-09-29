@@ -1,10 +1,9 @@
-project_name: btmesh_soc_sensor_thermometer
+project_name: btmesh_soc_nlc_energy_monitor
 package: bluetooth_mesh_app
-label: Bluetooth Mesh - SoC Sensor Thermometer
+label: Bluetooth Mesh - NLC Energy Monitor
 description: >-
-  This example demonstrates the Bluetooth Mesh Sensor Server Model and Sensor
-  Setup Server Model. It measures temperature and sends the measurement data
-  to a remote device (e.g., btmesh_soc_sensor_client).
+  An out-of-the-box Software Demo where the device acts as a mock Energy Monitor
+  in a Networked Lighting Control (NLC) system. The application can also be used with the Sensor Client example.
 
 category: Bluetooth Mesh Examples
 quality: production
@@ -19,17 +18,17 @@ filter:
 
 component:
   - id: app_assert
+  - id: app_button_press
   - id: app_log
   - id: app_timer
-  - id: app_button_press
   - id: btmesh_event_log
   - id: btmesh_factory_reset
   - id: btmesh_lpn
+  - id: btmesh_nlc_energy_monitor
   - id: btmesh_provisionee
   - id: btmesh_provisioning_decorator
   - id: btmesh_proxy
   - id: btmesh_remote_provisioning_server
-  - id: btmesh_sensor_server
   - id: btmesh_stack_gatt_prov_bearer
   - id: btmesh_stack_relay
   - id: btmesh_iv_update
@@ -39,15 +38,11 @@ component:
   - id: clock_manager
   - id: device_init
   - id: gatt_service_device_information_override
-  - id: i2cspm
-    instance:
-      - sensor
   - id: iostream_eusart
     instance:
       - vcom
   - id: mpu
   - id: rail_util_pti
-  - id: sensor_rht
   - id: simple_button_recommended_instance
   - id: simple_led_recommended_instance
   - id: sl_main
@@ -58,7 +53,6 @@ component:
 
 source:
   - path: app.c
-  - path: app_bm.c
   - path: app_out_log.c
   - path: local_cli_commands.c
 
@@ -80,36 +74,26 @@ config_file:
     directory: btmeshconf
 
 readme:
-  - path: ../../documentation/example/btmesh_soc_sensor_thermometer/readme.md
+  - path: ../../documentation/example/btmesh_soc_nlc_energy_monitor/readme.md
 
 other_file:
-  - path: ../../documentation/example/btmesh_soc_sensor_thermometer/readme_img0.png
-  - path: ../../documentation/example/btmesh_soc_sensor_thermometer/readme_img1.png
-  - path: ../../documentation/example/btmesh_soc_sensor_thermometer/readme_img2.png
-  - path: ../../documentation/example/btmesh_soc_sensor_thermometer/readme_img3.png
-  - path: ../../documentation/example/btmesh_soc_sensor_thermometer/readme_img4.png
-  - path: ../../documentation/example/btmesh_soc_sensor_thermometer/readme_img5.png
-  - path: ../../documentation/example/btmesh_soc_sensor_thermometer/readme_img6.png
-  - path: ../../documentation/example/btmesh_soc_sensor_thermometer/readme_img7.png
-  - path: ../../documentation/example/btmesh_soc_sensor_thermometer/readme_img8.png
+  - path: ../../documentation/example/btmesh_soc_nlc_energy_monitor/readme_img0.png
+  - path: ../../documentation/example/btmesh_soc_nlc_energy_monitor/readme_img1.png
+  - path: ../../documentation/example/btmesh_soc_nlc_energy_monitor/readme_img2.png
+  - path: ../../documentation/example/btmesh_soc_nlc_energy_monitor/readme_img3.png
+  - path: ../../documentation/example/btmesh_soc_nlc_energy_monitor/readme_img6.png
+  - path: ../../documentation/example/btmesh_soc_nlc_energy_monitor/readme_img7.png
+  - path: ../../documentation/example/btmesh_soc_nlc_energy_monitor/readme_img8.png
+  - path: ../../documentation/example/btmesh_soc_nlc_energy_monitor/readme_img9.png
+  - path: ../../documentation/example/btmesh_soc_nlc_energy_monitor/readme_img10.png
 
 configuration:
   - name: EMDRV_DMADRV_DMA_CH_COUNT
-    value: 4
+    value: 2
   - name: APP_LOG_LEVEL
     value: "APP_LOG_LEVEL_INFO"
   - name: NVM3_DEFAULT_CACHE_SIZE
     value: 100
-  - name: SL_BOARD_ENABLE_SENSOR_LIGHT
-    value: "1"
-    condition:
-      - "veml6035_driver"
-      - "i2cspm"
-  - name: SL_BOARD_ENABLE_SENSOR_RHT
-    value: "1"
-    condition:
-      - "si70xx_driver"
-      - "i2cspm"
   - name: SL_BOARD_ENABLE_VCOM
     value: "1"
     condition:
@@ -143,7 +127,7 @@ post_build:
 tag:
   - hardware:board_only
   - prebuilt_demo
-  - hwfilter:board:brd2602a
+  - hwfilter:board:board:pn:BRD2602
   - hwfilter:device:device_generic_family_efr32xg27
 
 ui_hints:

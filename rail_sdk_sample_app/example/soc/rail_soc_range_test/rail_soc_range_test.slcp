@@ -128,6 +128,7 @@ configuration:
 # ------------------------------------ CLI -------------------------------------
   - name: SL_CLI_EXAMPLE_TASK_STACK_SIZE
     value: 250
+    unless: [device_series_3]
   - name: SL_CLI_INPUT_BUFFER_SIZE
     value: 64
   - name: SL_CLI_NUM_HISTORY_BYTES
