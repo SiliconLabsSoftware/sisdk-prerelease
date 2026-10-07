@@ -35,7 +35,7 @@ class Phy_Studio_Base_Curl(IPhy): #PHYS_Studio_Base_Bobcat):
 
 
     def PHY_Studio_2450M_2GFSK_1Mbps_500K(self, model, phy_name=None):
-        phy = self._makePhy(model, model.profiles.Base, readable_name='915M 2GFSK 2Mbps 500K', phy_name=phy_name)
+        phy = self._makePhy(model, model.profiles.Base, readable_name='2450M 2GFSK 1Mbps 500K', phy_name=phy_name)
 
         # Start with the base function
         self.Studio_2GFSK_base(phy, model)
@@ -46,6 +46,8 @@ class Phy_Studio_Base_Curl(IPhy): #PHYS_Studio_Base_Bobcat):
 
         # Add band-specific parameters
         phy.profile_inputs.base_frequency_hz.value = 2450000000
+
+        phy.profile_inputs.demod_select.value = model.vars.demod_select.var_enum.TRECS_VITERBI
 
         phy.profile_inputs.rx_xtal_error_ppm.value = 20
         phy.profile_inputs.tx_xtal_error_ppm.value = 20
@@ -68,6 +70,8 @@ class Phy_Studio_Base_Curl(IPhy): #PHYS_Studio_Base_Bobcat):
         # Add band-specific parameters
         phy.profile_inputs.base_frequency_hz.value = 2450000000
 
+        phy.profile_inputs.demod_select.value = model.vars.demod_select.var_enum.TRECS_VITERBI
+
         phy.profile_inputs.rx_xtal_error_ppm.value = 20
         phy.profile_inputs.tx_xtal_error_ppm.value = 20
 
@@ -89,10 +93,11 @@ class Phy_Studio_Base_Curl(IPhy): #PHYS_Studio_Base_Bobcat):
         # Add band-specific parameters
         phy.profile_inputs.base_frequency_hz.value = 2450000000
 
+        phy.profile_inputs.demod_select.value = model.vars.demod_select.var_enum.TRECS_VITERBI
+        
         phy.profile_inputs.rx_xtal_error_ppm.value = 20
         phy.profile_inputs.tx_xtal_error_ppm.value = 20
 
         self._set_xtal_frequency(phy, 40000000)
 
         return phy
-

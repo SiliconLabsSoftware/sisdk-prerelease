@@ -2040,7 +2040,7 @@
 </entry><entry thead="no"><para>5  </para>
 </entry></row>
 <row>
-<entry thead="no" class="message-name"><para><ref refid="group__sl__bt__cs_1gabfd25cc7bc8b068882498998c44299af" kindref="member">cmd_cs_create_config</ref> </para>
+<entry thead="no" class="message-name"><para><ref refid="group__sl__bt__cs_1gabc94b89bded7f8a2bd8699f3ccc36361" kindref="member">cmd_cs_create_config</ref> </para>
 </entry><entry thead="no"><para>0x59 </para>
 </entry><entry thead="no"><para>0x02 </para>
 </entry><entry thead="no"><para>27  </para>
@@ -2187,7 +2187,7 @@
 <entry thead="no" colspan="4" class="msg-type-header"><para>Commands  </para>
 </entry></row>
 <row>
-<entry thead="no" class="message-name"><para><ref refid="group__sl__bt__cs__test_1gaa66d7b45664c0c2e0b99db3946802ab2" kindref="member">cmd_cs_test_start</ref> </para>
+<entry thead="no" class="message-name"><para><ref refid="group__sl__bt__cs__test_1gae28661ce6552b209fab4b228666dd042" kindref="member">cmd_cs_test_start</ref> </para>
 </entry><entry thead="no"><para>0x5a </para>
 </entry><entry thead="no"><para>0x00 </para>
 </entry><entry thead="no"><para>30  </para>

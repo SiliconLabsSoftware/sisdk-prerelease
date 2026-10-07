@@ -7,15 +7,15 @@ supplier: Silicon Laboratories, Inc.
 component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
-- path: bluetooth_le/component
-- path: bluetooth_apploader/component
+- path: bluetooth_common/component
 - path: bluetooth_mesh_stack/component
 - path: bluetooth_mesh/component
+- path: bluetooth_apploader/component
 - path: bluetooth_le_host/component
-- path: bluetooth_common/component
-- path: bluetooth_le_controller/component
 - path: bluetooth_mesh_srtest/component
 - path: bluetooth_le_internal/component
+- path: bluetooth_le/component
+- path: bluetooth_le_controller/component
 - path: boards/hardware/board/config/component
 - path: boards/hardware/board/component
 - path: boards/hardware/driver/component
@@ -103,11 +103,11 @@ component_path:
 - path: printf/component
 - path: proprietary_default_radio_confs/.
 - path: protocol_user_sequencer_internal/component/protocol_user_sequencer_internal
+- path: rail/component
 - path: rail_library/component/rail_library
 - path: rail_library_chips_internal/component/rail_library_chips_internal
 - path: rail_library_internal/component/rail_library_internal
 - path: rail_library_alpha_chips/component/rail_library_alpha_chips
-- path: rail/component
 - path: realtime_locationing/component
 - path: rtos_benchmark_internal/component
 - path: rv2_framework_internal/component
@@ -214,10 +214,10 @@ documentation:
 - docset: zigbee
   version: 9.2.0
 upgrade_manifest:
-- path: bluetooth_le/upgrade.slcu
 - path: bluetooth_mesh_stack/component/upgrade.slcu
 - path: bluetooth_mesh/upgrade.slcu
 - path: bluetooth_le_host/component/upgrade.slcu
+- path: bluetooth_le/upgrade.slcu
 - path: connect_stack/component/upgrade.slcu
 - path: cpc/upgrade.slcu
 - path: multiprotocol/component/upgrade.slcu

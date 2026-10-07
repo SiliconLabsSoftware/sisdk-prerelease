@@ -275,22 +275,7 @@ autoselected_components:
   id: freertos_kernel_cortexm
 - package: mbedtls
   vendor: silabs
-  id: mbedtls_adjust_config
-- package: mbedtls
-  vendor: silabs
-  id: mbedtls_crypto_platform_api
-- package: mbedtls
-  vendor: silabs
   id: mbedtls_source
-- package: mbedtls
-  vendor: silabs
-  id: mbedtls_source_builtin
-- package: mbedtls
-  vendor: silabs
-  id: psa_crypto_adjust_config
-- package: mbedtls
-  vendor: silabs
-  id: psa_crypto_api
 - package: mbedtls
   vendor: silabs
   id: psa_crypto_common_source
@@ -300,6 +285,15 @@ autoselected_components:
 - package: mbedtls
   vendor: silabs
   id: psa_its_source
+- package: mbedtls
+  vendor: silabs
+  id: tf_psa_crypto_api
+- package: mbedtls
+  vendor: silabs
+  id: tf_psa_crypto_config
+- package: mbedtls
+  vendor: silabs
+  id: tf_psa_crypto_mbedtls
 - package: multiprotocol
   vendor: silabs
   id: ot_ble_cli
@@ -544,16 +538,7 @@ autoselected_components:
   id: mbedtls_asn1_write
 - package: platform_core
   vendor: silabs
-  id: mbedtls_base64
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_ccm
-- package: platform_core
-  vendor: silabs
   id: mbedtls_cipher
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_cipher_cbc
 - package: platform_core
   vendor: silabs
   id: mbedtls_cmac
@@ -565,22 +550,10 @@ autoselected_components:
   id: mbedtls_core
 - package: platform_core
   vendor: silabs
-  id: mbedtls_dtls
-- package: platform_core
-  vendor: silabs
   id: mbedtls_ecc
 - package: platform_core
   vendor: silabs
-  id: mbedtls_ecc_secp192r1
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_ecc_secp224r1
-- package: platform_core
-  vendor: silabs
   id: mbedtls_ecc_secp256r1
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_ecdh
 - package: platform_core
   vendor: silabs
   id: mbedtls_ecdsa
@@ -601,28 +574,22 @@ autoselected_components:
   id: mbedtls_jpake
 - package: platform_core
   vendor: silabs
+  id: mbedtls_key_exchange_ecdhe_ecdsa
+- package: platform_core
+  vendor: silabs
+  id: mbedtls_key_exchange_ecjpake
+- package: platform_core
+  vendor: silabs
   id: mbedtls_mpi
 - package: platform_core
   vendor: silabs
   id: mbedtls_oid
 - package: platform_core
   vendor: silabs
-  id: mbedtls_pem
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_pem_parse
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_pem_write
-- package: platform_core
-  vendor: silabs
   id: mbedtls_pk
 - package: platform_core
   vendor: silabs
   id: mbedtls_pk_parse
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_pk_write
 - package: platform_core
   vendor: silabs
   id: mbedtls_platform_dynamic_memory_allocation_config_default
@@ -634,40 +601,34 @@ autoselected_components:
   id: mbedtls_sha256
 - package: platform_core
   vendor: silabs
-  id: mbedtls_slcrypto
+  id: mbedtls_ssl_client
 - package: platform_core
   vendor: silabs
-  id: mbedtls_slcrypto_driver
+  id: mbedtls_ssl_cookie
+- package: platform_core
+  vendor: silabs
+  id: mbedtls_ssl_dtls_anti_replay
+- package: platform_core
+  vendor: silabs
+  id: mbedtls_ssl_dtls_hello_verify
+- package: platform_core
+  vendor: silabs
+  id: mbedtls_ssl_proto_dtls
+- package: platform_core
+  vendor: silabs
+  id: mbedtls_ssl_proto_tls12
+- package: platform_core
+  vendor: silabs
+  id: mbedtls_ssl_server
+- package: platform_core
+  vendor: silabs
+  id: mbedtls_ssl_tls
 - package: platform_core
   vendor: silabs
   id: mbedtls_threading_alt_cmsis_rtos2
 - package: platform_core
   vendor: silabs
-  id: mbedtls_tls
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_tls_server
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_x509
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_x509_create
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_x509_crl_parse
-- package: platform_core
-  vendor: silabs
   id: mbedtls_x509_crt_parse
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_x509_crt_write
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_x509_csr_parse
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_x509_csr_write
 - package: platform_core
   vendor: silabs
   id: mbedtls_x509_use
@@ -745,9 +706,6 @@ autoselected_components:
   id: psa_crypto_ccm
 - package: platform_core
   vendor: silabs
-  id: psa_crypto_cipher_cbc
-- package: platform_core
-  vendor: silabs
   id: psa_crypto_cipher_ecb
 - package: platform_core
   vendor: silabs
@@ -761,12 +719,6 @@ autoselected_components:
 - package: platform_core
   vendor: silabs
   id: psa_crypto_ecc
-- package: platform_core
-  vendor: silabs
-  id: psa_crypto_ecc_secp192r1
-- package: platform_core
-  vendor: silabs
-  id: psa_crypto_ecc_secp224r1
 - package: platform_core
   vendor: silabs
   id: psa_crypto_ecc_secp256r1
@@ -812,6 +764,9 @@ autoselected_components:
 - package: platform_core
   vendor: silabs
   id: psa_driver_common
+- package: platform_core
+  vendor: silabs
+  id: psa_driver_dispatch
 - package: platform_core
   vendor: silabs
   id: psa_its
@@ -881,6 +836,9 @@ autoselected_components:
 - package: platform_core
   vendor: silabs
   id: sli_protocol_crypto
+- package: platform_core
+  vendor: silabs
+  id: sli_psa_driver_contexts
 - package: platform_core
   vendor: silabs
   id: sli_psec_common
@@ -1083,6 +1041,12 @@ sdk_extension:
   id: segger
   version: 1.2.0
 - vendor: silabs
+  id: bluetooth_apploader
+  version: 11.2.0-alpha.93
+- vendor: silabs
+  id: mbedtls
+  version: 4.1.0
+- vendor: silabs
   id: micriumos
   version: 6.2.0
 - vendor: silabs
@@ -1092,20 +1056,23 @@ sdk_extension:
   id: bluetooth_le
   version: 11.2.0
 - vendor: silabs
-  id: bluetooth_le_controller
-  version: 11.2.0-alpha.67
+  id: security_libcryptosoc
+  version: 1.2.0
 - vendor: silabs
-  id: common_15_4
+  id: unity_test_framework
   version: 1.2.0
 - vendor: silabs
   id: platform_core
   version: 1.2.0
 - vendor: silabs
-  id: bluetooth_apploader
-  version: 11.2.0-alpha.67
+  id: bluetooth_common
+  version: 1.2.0-alpha.93
 - vendor: silabs
-  id: realtime_locationing
-  version: 12.0.0-alpha.6
+  id: common_15_4
+  version: 1.2.0
+- vendor: silabs
+  id: bluetooth_le_host
+  version: 11.2.0-alpha.93
 - vendor: silabs
   id: usb
   version: 1.8.0
@@ -1116,17 +1083,20 @@ sdk_extension:
   id: boards
   version: 1.2.0
 - vendor: silabs
+  id: bgapi_protocol
+  version: 11.2.0-alpha.93
+- vendor: silabs
   id: cmsis_dsp
   version: 1.16.3
-- vendor: silabs
-  id: mbedtls
-  version: 1.2.0
 - vendor: silabs
   id: bootloader
   version: 3.4.0
 - vendor: silabs
   id: cpc
   version: 4.10.0
+- vendor: silabs
+  id: realtime_locationing
+  version: 12.0.0-alpha.9
 - vendor: silabs
   id: printf
   version: 1.2.0
@@ -1140,14 +1110,11 @@ sdk_extension:
   id: security_sxsymcrypt
   version: 1.2.0
 - vendor: silabs
-  id: bluetooth_le_host
-  version: 11.2.0-alpha.67
-- vendor: silabs
   id: coremark
   version: 1.1.0
 - vendor: silabs
-  id: bluetooth_common
-  version: 1.2.0-alpha.67
+  id: bluetooth_le_controller
+  version: 11.2.0-alpha.93
 - vendor: silabs
   id: rail_library
   version: 3.2.0
@@ -1158,15 +1125,6 @@ sdk_extension:
   id: multiprotocol
   version: 1.2.0
 - vendor: silabs
-  id: security_libcryptosoc
-  version: 1.1.0
-- vendor: silabs
   id: cmsis
   version: 1.2.0
-- vendor: silabs
-  id: bgapi_protocol
-  version: 11.2.0-alpha.67
-- vendor: silabs
-  id: unity_test_framework
-  version: 1.1.0
 

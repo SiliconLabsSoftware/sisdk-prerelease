@@ -13,6 +13,6 @@ var group__sl__bt__cs__test =
       [ "sl_bt_cs_test_sounding_sequence_marker_2", "group__sl__bt__cs__test.html#gga33230168dbb19ffd8cb4f2579e82c16da37cff30910f83663e2f78dee2d40798b", null ],
       [ "sl_bt_cs_test_sounding_sequence_marker_round_robin", "group__sl__bt__cs__test.html#gga33230168dbb19ffd8cb4f2579e82c16da619778e33723264d7eeabd1826060c4d", null ]
     ] ],
-    [ "sl_bt_cs_test_start", "group__sl__bt__cs__test.html#gaa66d7b45664c0c2e0b99db3946802ab2", null ],
+    [ "sl_bt_cs_test_start", "group__sl__bt__cs__test.html#gae28661ce6552b209fab4b228666dd042", null ],
     [ "sl_bt_cs_test_end", "group__sl__bt__cs__test.html#gab5af1068c11f2652091144188451c3b1", null ]
 ];

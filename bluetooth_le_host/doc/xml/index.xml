@@ -154,7 +154,7 @@
     <member refid="structsl__bt__evt__cs__config__complete__s_1a28c25227e048ce9ad638a9b45571c38b" kind="variable"><name>channel_selection_type</name></member>
     <member refid="structsl__bt__evt__cs__config__complete__s_1af0a43e94c534b39cb31bc03542073311" kind="variable"><name>ch3c_shape</name></member>
     <member refid="structsl__bt__evt__cs__config__complete__s_1a39abf6bc849e29c14ff444f175740ad2" kind="variable"><name>ch3c_jump</name></member>
-    <member refid="structsl__bt__evt__cs__config__complete__s_1a414493fd436b863c737c67d20e7701b2" kind="variable"><name>reserved</name></member>
+    <member refid="structsl__bt__evt__cs__config__complete__s_1a7f14d0a39f348178974a619bf1d71637" kind="variable"><name>cs_enhancements</name></member>
     <member refid="structsl__bt__evt__cs__config__complete__s_1a08368feec576ebf7d4d7b2a59f5e8faf" kind="variable"><name>t_ip1_time</name></member>
     <member refid="structsl__bt__evt__cs__config__complete__s_1a112ebb35bf97364875faeedf17a377d3" kind="variable"><name>t_ip2_time</name></member>
     <member refid="structsl__bt__evt__cs__config__complete__s_1acd04c7e8fdcecf00dfe627a18e387a74" kind="variable"><name>t_fcs_time</name></member>
@@ -1873,7 +1873,7 @@
     <member refid="group__sl__bt__coex_1gac9a999d3200c7426e38be561b609bc8c" kind="function"><name>sl_bt_coex_get_counters</name></member>
     <member refid="group__sl__bt__cs_1ga1a9836693912844643f9d19c292a81ce" kind="function"><name>sl_bt_cs_security_enable</name></member>
     <member refid="group__sl__bt__cs_1gafffbe85e1a062397e80c702ec792bf40" kind="function"><name>sl_bt_cs_set_default_settings</name></member>
-    <member refid="group__sl__bt__cs_1gabfd25cc7bc8b068882498998c44299af" kind="function"><name>sl_bt_cs_create_config</name></member>
+    <member refid="group__sl__bt__cs_1gabc94b89bded7f8a2bd8699f3ccc36361" kind="function"><name>sl_bt_cs_create_config</name></member>
     <member refid="group__sl__bt__cs_1ga3e87a4164f6020acadda0d41e2137325" kind="function"><name>sl_bt_cs_remove_config</name></member>
     <member refid="group__sl__bt__cs_1gaa88b3a2d98f2204122e08031c2f5f9fd" kind="function"><name>sl_bt_cs_set_channel_classification</name></member>
     <member refid="group__sl__bt__cs_1ga45623207ae15789c3b2a90876d38b625" kind="function"><name>sl_bt_cs_set_procedure_parameters</name></member>
@@ -1886,7 +1886,7 @@
     <member refid="group__sl__bt__cs_1ga980aaeacdecec62c35335dd2ceb39727" kind="function"><name>sl_bt_cs_handover_create_sync</name></member>
     <member refid="group__sl__bt__cs_1ga3757cf65977fcfec697aa5229ec953ed" kind="function"><name>sl_bt_cs_handover_enable_procedure</name></member>
     <member refid="group__sl__bt__cs_1ga8166fe81e523a4fa446c954a87a548bc" kind="function"><name>sl_bt_cs_handover_remove_procedure</name></member>
-    <member refid="group__sl__bt__cs__test_1gaa66d7b45664c0c2e0b99db3946802ab2" kind="function"><name>sl_bt_cs_test_start</name></member>
+    <member refid="group__sl__bt__cs__test_1gae28661ce6552b209fab4b228666dd042" kind="function"><name>sl_bt_cs_test_start</name></member>
     <member refid="group__sl__bt__cs__test_1gab5af1068c11f2652091144188451c3b1" kind="function"><name>sl_bt_cs_test_end</name></member>
     <member refid="group__sl__bt__l2cap_1gab8c1a8f13e15e1511d6db2dca0bc6e5c" kind="function"><name>sl_bt_l2cap_open_le_channel</name></member>
     <member refid="group__sl__bt__l2cap_1ga4e2fcca3a491c716b71584567667e095" kind="function"><name>sl_bt_l2cap_send_le_channel_open_response</name></member>
@@ -3350,7 +3350,7 @@
     <member refid="group__sl__bt__cs_1ggae36bfcc29d4bffeae51b5c6ee64eea9ba90c8ebd75ef08d64a37e69ca397b2ac5" kind="enumvalue"><name>sl_bt_cs_snr_control_adjustment_not_applied</name></member>
     <member refid="group__sl__bt__cs_1ga1a9836693912844643f9d19c292a81ce" kind="function"><name>sl_bt_cs_security_enable</name></member>
     <member refid="group__sl__bt__cs_1gafffbe85e1a062397e80c702ec792bf40" kind="function"><name>sl_bt_cs_set_default_settings</name></member>
-    <member refid="group__sl__bt__cs_1gabfd25cc7bc8b068882498998c44299af" kind="function"><name>sl_bt_cs_create_config</name></member>
+    <member refid="group__sl__bt__cs_1gabc94b89bded7f8a2bd8699f3ccc36361" kind="function"><name>sl_bt_cs_create_config</name></member>
     <member refid="group__sl__bt__cs_1ga3e87a4164f6020acadda0d41e2137325" kind="function"><name>sl_bt_cs_remove_config</name></member>
     <member refid="group__sl__bt__cs_1gaa88b3a2d98f2204122e08031c2f5f9fd" kind="function"><name>sl_bt_cs_set_channel_classification</name></member>
     <member refid="group__sl__bt__cs_1ga45623207ae15789c3b2a90876d38b625" kind="function"><name>sl_bt_cs_set_procedure_parameters</name></member>
@@ -3445,7 +3445,7 @@
     <member refid="group__sl__bt__cs__test_1gga33230168dbb19ffd8cb4f2579e82c16dadc361fee95c4269ef72152fc17d5d7e4" kind="enumvalue"><name>sl_bt_cs_test_sounding_sequence_marker_1</name></member>
     <member refid="group__sl__bt__cs__test_1gga33230168dbb19ffd8cb4f2579e82c16da37cff30910f83663e2f78dee2d40798b" kind="enumvalue"><name>sl_bt_cs_test_sounding_sequence_marker_2</name></member>
     <member refid="group__sl__bt__cs__test_1gga33230168dbb19ffd8cb4f2579e82c16da619778e33723264d7eeabd1826060c4d" kind="enumvalue"><name>sl_bt_cs_test_sounding_sequence_marker_round_robin</name></member>
-    <member refid="group__sl__bt__cs__test_1gaa66d7b45664c0c2e0b99db3946802ab2" kind="function"><name>sl_bt_cs_test_start</name></member>
+    <member refid="group__sl__bt__cs__test_1gae28661ce6552b209fab4b228666dd042" kind="function"><name>sl_bt_cs_test_start</name></member>
     <member refid="group__sl__bt__cs__test_1gab5af1068c11f2652091144188451c3b1" kind="function"><name>sl_bt_cs_test_end</name></member>
     <member refid="group__sl__bt__cs__test_1ga9402e24cbe4b765d9b6ac4e759dbcb2d" kind="define"><name>sl_bt_cmd_cs_test_start_id</name></member>
     <member refid="group__sl__bt__cs__test_1ga1fe4b9d53825f41be92ee9036c435850" kind="define"><name>sl_bt_cmd_cs_test_end_id</name></member>

@@ -35,30 +35,15 @@
 #include "zigbee_direct_tlv.h"
 #include "zigbee_direct_common.h"
 #include "zigbee_direct_session_key_negotiation.h"
-#include "mbedtls/sha256.h"
-#include "mbedtls/aes.h"
-#include "mbedtls/md.h"
+#include "psa/crypto.h"
 #include "sl_bt_rtos_adaptation.h"
 #include "sl_custom_token_header.h"
 #include "stack/config/sl_zigbee_token_defines.h"
-
-#include <mbedtls/build_info.h>
-
-#include "mbedtls/ccm.h"
-
-#if  !defined(MBEDTLS_CCM_C)
-  #error Must enable mbedTLS CCM module
-#endif
-
-#if !defined(MBEDTLS_AES_C)
-  #error Must enable mbedTLS AES module
-#endif
 
 #define ZIGBEE_DIRECT_NONCE_LENGTH 13
 #define ZIGBEE_DIRECT_AUTH_DATA_LENGTH 34
 #define ZIGBEE_DIRECT_MIC_LENGTH 4
 #define ZIGBEE_DIRECT_DECRYPT_OVERHEAD (SL_ZIGBEE_DIRECT_COUNTER_SIZE + ZIGBEE_DIRECT_MIC_LENGTH)
-#define ENCRYPTION_KEYBITS (ENCRYPTION_BLOCK_SIZE * 8)
 #define UUID_SIZE 16
 
 #define ZIGBEE_DIRECT_SECURITY_LEVEL_ENC_MIC32 0x05
@@ -67,12 +52,13 @@
 #define ZIGBEE_DIRECT_ADMIN_KEY_DERIVATION_BYTE 0x04
 #define ZIGBEE_DIRECT_ANONYMOUS_JOIN_TIMEOUT_INVALID 0xFFFFFF
 
+#define ZIGBEE_DIRECT_CCM_ALG PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, ZIGBEE_DIRECT_MIC_LENGTH)
+
 uint32_t sl_zigbee_direct_anonymous_join_timeout_sec;
 uint8_t sli_zigbee_direct_interface_state = 0x01;
 uint32_t outgoing_counter = 1;
 uint32_t incoming_counter = 0;
-static mbedtls_ccm_context ccm_zigbee_direct_Ctx;
-static mbedtls_ccm_context ccm_zigbee_direct_Ctx_encrypt;
+static psa_key_id_t sli_zigbee_direct_ccm_key_id = 0;
 
 uint8_t zigbee_direct_session_key[SL_ZIGBEE_ENCRYPTION_KEY_SIZE];
 extern sl_zigbee_direct_dlk_public_key_tlv_t ourPointTlv;
@@ -225,16 +211,31 @@ static void sli_zigbee_direct_extract_uuids_from_handle(uint16_t handle, uint8_t
 
 sl_status_t sli_zigbee_direct_security_init()
 {
+  psa_status_t status;
+  psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+
   sl_zigbee_app_debug_print("Session Key:");
   for (uint8_t i = 0; i < SL_ZIGBEE_ENCRYPTION_KEY_SIZE; i++) {
     sl_zigbee_app_debug_print(" %02X", zigbee_direct_session_key[i]);
   }
   sl_zigbee_app_debug_println("");
 
-  if (mbedtls_ccm_setkey(&ccm_zigbee_direct_Ctx, MBEDTLS_CIPHER_ID_AES, zigbee_direct_session_key, ENCRYPTION_KEYBITS) != 0) {
-    return SL_STATUS_FAIL;
+  if (sli_zigbee_direct_ccm_key_id != 0) {
+    (void)psa_destroy_key(sli_zigbee_direct_ccm_key_id);
+    sli_zigbee_direct_ccm_key_id = 0;
   }
-  if (mbedtls_ccm_setkey(&ccm_zigbee_direct_Ctx_encrypt, MBEDTLS_CIPHER_ID_AES, zigbee_direct_session_key, ENCRYPTION_KEYBITS) != 0) {
+
+  psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+  psa_set_key_algorithm(&attributes, ZIGBEE_DIRECT_CCM_ALG);
+  psa_set_key_type(&attributes, PSA_KEY_TYPE_AES);
+  psa_set_key_bits(&attributes, SL_ZIGBEE_ENCRYPTION_KEY_SIZE * 8);
+
+  status = psa_import_key(&attributes,
+                          zigbee_direct_session_key,
+                          SL_ZIGBEE_ENCRYPTION_KEY_SIZE,
+                          &sli_zigbee_direct_ccm_key_id);
+  psa_reset_key_attributes(&attributes);
+  if (status != PSA_SUCCESS) {
     return SL_STATUS_FAIL;
   }
 
@@ -250,6 +251,13 @@ sl_status_t sli_zigbee_direct_security_encrypt_packet(sl_802154_long_addr_t sour
   uint8_t authData[ZIGBEE_DIRECT_AUTH_DATA_LENGTH];
   uint8_t service_uuid[UUID_SIZE];
   uint8_t characteristic_uuid[UUID_SIZE];
+  uint8_t ciphertext_and_tag[255 + ZIGBEE_DIRECT_MIC_LENGTH];
+  size_t output_length = 0;
+  psa_status_t status;
+
+  if (sli_zigbee_direct_ccm_key_id == 0 || dataLen > 255) {
+    return SL_STATUS_FAIL;
+  }
 
   sli_zigbee_direct_extract_uuids_from_handle(handle, service_uuid, characteristic_uuid);
 
@@ -266,18 +274,23 @@ sl_status_t sli_zigbee_direct_security_encrypt_packet(sl_802154_long_addr_t sour
   memcpy(&authData[UUID_SIZE + 1], characteristic_uuid, UUID_SIZE); // 3. Characteristic UUID (byte 17-32)
   authData[ZIGBEE_DIRECT_AUTH_DATA_LENGTH - 1] = 0x00; // Characteristic Instance (SHALL be 0)
 
-  if (mbedtls_ccm_encrypt_and_tag(&ccm_zigbee_direct_Ctx_encrypt,
-                                  dataLen,
-                                  nonce,
-                                  ZIGBEE_DIRECT_NONCE_LENGTH,
-                                  authData,
-                                  ZIGBEE_DIRECT_AUTH_DATA_LENGTH,
-                                  encryptData,
-                                  encryptData,
-                                  encryptData + dataLen,
-                                  ZIGBEE_DIRECT_MIC_LENGTH) != 0) {
+  status = psa_aead_encrypt(sli_zigbee_direct_ccm_key_id,
+                            ZIGBEE_DIRECT_CCM_ALG,
+                            nonce,
+                            ZIGBEE_DIRECT_NONCE_LENGTH,
+                            authData,
+                            ZIGBEE_DIRECT_AUTH_DATA_LENGTH,
+                            encryptData,
+                            dataLen,
+                            ciphertext_and_tag,
+                            sizeof(ciphertext_and_tag),
+                            &output_length);
+  if (status != PSA_SUCCESS || output_length != (size_t)(dataLen + ZIGBEE_DIRECT_MIC_LENGTH)) {
     return SL_STATUS_FAIL;
   }
+
+  memcpy(encryptData, ciphertext_and_tag, dataLen);
+  memcpy(encryptData + dataLen, ciphertext_and_tag + dataLen, ZIGBEE_DIRECT_MIC_LENGTH);
   sl_util_store_low_high_int32u(&encryptData[-SL_ZIGBEE_DIRECT_COUNTER_SIZE], outgoing_counter++);
 
   return SL_STATUS_OK;
@@ -285,12 +298,20 @@ sl_status_t sli_zigbee_direct_security_encrypt_packet(sl_802154_long_addr_t sour
 
 bool sli_zigbee_direct_security_decrypt_packet(sl_802154_long_addr_t sourceEui, uint8_t *decryptData, uint16_t dataLen, uint16_t handle)
 {
-  int ret;
+  psa_status_t status;
   uint8_t nonce[ZIGBEE_DIRECT_NONCE_LENGTH];
   uint8_t authData[ZIGBEE_DIRECT_AUTH_DATA_LENGTH];
   uint8_t service_uuid[UUID_SIZE];
   uint8_t characteristic_uuid[UUID_SIZE];
+  uint8_t plaintext[255];
+  size_t output_length = 0;
   uint32_t counter_from_packet;
+  uint16_t ciphertext_len;
+
+  if (sli_zigbee_direct_ccm_key_id == 0 || dataLen <= ZIGBEE_DIRECT_DECRYPT_OVERHEAD
+      || (dataLen - ZIGBEE_DIRECT_DECRYPT_OVERHEAD) > 255) {
+    return false;
+  }
 
   sli_zigbee_direct_extract_uuids_from_handle(handle, service_uuid, characteristic_uuid);
 
@@ -314,21 +335,25 @@ bool sli_zigbee_direct_security_decrypt_packet(sl_802154_long_addr_t sourceEui, 
   memcpy(&authData[UUID_SIZE + 1], characteristic_uuid, UUID_SIZE);
   authData[ZIGBEE_DIRECT_AUTH_DATA_LENGTH - 1] = 0x00; // Characteristic Instance (SHALL be 0)
 
-  ret = mbedtls_ccm_auth_decrypt(&ccm_zigbee_direct_Ctx,
-                                 dataLen - ZIGBEE_DIRECT_DECRYPT_OVERHEAD,
-                                 nonce,
-                                 ZIGBEE_DIRECT_NONCE_LENGTH,
-                                 authData,
-                                 ZIGBEE_DIRECT_AUTH_DATA_LENGTH,
-                                 &decryptData[SL_ZIGBEE_DIRECT_COUNTER_SIZE],
-                                 decryptData,
-                                 &decryptData[dataLen - ZIGBEE_DIRECT_MIC_LENGTH],
-                                 ZIGBEE_DIRECT_MIC_LENGTH);
-  if (ret != 0) {
-    sl_zigbee_core_debug_println("Error from mbed TLS: %08X", ret);
+  ciphertext_len = dataLen - SL_ZIGBEE_DIRECT_COUNTER_SIZE;
+  status = psa_aead_decrypt(sli_zigbee_direct_ccm_key_id,
+                            ZIGBEE_DIRECT_CCM_ALG,
+                            nonce,
+                            ZIGBEE_DIRECT_NONCE_LENGTH,
+                            authData,
+                            ZIGBEE_DIRECT_AUTH_DATA_LENGTH,
+                            &decryptData[SL_ZIGBEE_DIRECT_COUNTER_SIZE],
+                            ciphertext_len,
+                            plaintext,
+                            sizeof(plaintext),
+                            &output_length);
+  if (status != PSA_SUCCESS
+      || output_length != (size_t)(dataLen - ZIGBEE_DIRECT_DECRYPT_OVERHEAD)) {
+    sl_zigbee_core_debug_println("Error from PSA AEAD decrypt: %08X", (unsigned int)status);
     return false;
   }
 
+  memcpy(decryptData, plaintext, output_length);
   return true;
 }
 
@@ -367,82 +392,99 @@ static int sli_zigbee_direct_calculate_mac_tag_value(bool useKC_2_U, uint8_t *ou
       return SL_STATUS_OK;
     }
   } else {
-    const mbedtls_md_info_t *md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-    mbedtls_md_context_t ctx;
+    psa_status_t psa_status;
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_key_id_t hmac_key_id = 0;
+    psa_mac_operation_t mac_op = PSA_MAC_OPERATION_INIT;
+    size_t mac_length = 0;
 
-    mbedtls_md_init(&ctx);
-
-    ret = mbedtls_md_setup(&ctx, md_info, 1);
-
-    if (ret == 0) {
-      ret = sl_zigbee_sec_man_export_transient_key_by_eui(sl_zvd_eui,
-                                                          &context,
-                                                          &plaintext_key,
-                                                          &metadata);
+    ret = sl_zigbee_sec_man_export_transient_key_by_eui(sl_zvd_eui,
+                                                        &context,
+                                                        &plaintext_key,
+                                                        &metadata);
+    if (ret != 0) {
+      return ret;
     }
-    if (ret == 0) {
-      sl_zigbee_core_debug_print("Session key: ");
-      sl_zigbee_af_print_zigbee_key((const uint8_t*)&(plaintext_key.key));
-      sl_zigbee_core_debug_println("");
-      memcpy(zigbee_direct_session_key, &plaintext_key, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
-      ret = mbedtls_md_hmac_starts(&ctx, (const unsigned char *)&plaintext_key, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
+
+    sl_zigbee_core_debug_print("Session key: ");
+    sl_zigbee_af_print_zigbee_key((const uint8_t*)&(plaintext_key.key));
+    sl_zigbee_core_debug_println("");
+    memcpy(zigbee_direct_session_key, &plaintext_key, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
+
+    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_SIGN_MESSAGE);
+    psa_set_key_algorithm(&attributes, PSA_ALG_HMAC(PSA_ALG_SHA_256));
+    psa_set_key_type(&attributes, PSA_KEY_TYPE_HMAC);
+    psa_set_key_bits(&attributes, SL_ZIGBEE_ENCRYPTION_KEY_SIZE * 8);
+
+    psa_status = psa_import_key(&attributes,
+                                (const uint8_t *)&plaintext_key,
+                                SL_ZIGBEE_ENCRYPTION_KEY_SIZE,
+                                &hmac_key_id);
+    psa_reset_key_attributes(&attributes);
+    if (psa_status != PSA_SUCCESS) {
+      return (int)psa_status;
     }
-    if (ret == 0) {
+
+    psa_status = psa_mac_sign_setup(&mac_op, hmac_key_id, PSA_ALG_HMAC(PSA_ALG_SHA_256));
+    if (psa_status == PSA_SUCCESS) {
       if (useKC_2_U) {
-        ret = mbedtls_md_hmac_update(&ctx, (const unsigned char *)"KC_2_U", 6);
+        psa_status = psa_mac_update(&mac_op, (const uint8_t *)"KC_2_U", 6);
       } else {
-        ret = mbedtls_md_hmac_update(&ctx, (const unsigned char *)"KC_2_V", 6);
+        psa_status = psa_mac_update(&mac_op, (const uint8_t *)"KC_2_V", 6);
       }
     }
-    if (ret == 0) {
-      ret = mbedtls_md_hmac_update(&ctx, sl_zigbee_get_eui64(), EUI64_SIZE);
+    if (psa_status == PSA_SUCCESS) {
+      psa_status = psa_mac_update(&mac_op, sl_zigbee_get_eui64(), EUI64_SIZE);
       sl_zigbee_core_debug_print("ZDD EUI: ");
       sl_zigbee_af_print_little_endian_eui64(sl_zigbee_get_eui64());
       sl_zigbee_core_debug_println("");
     }
-    if (ret == 0) {
-      ret = mbedtls_md_hmac_update(&ctx, &ourPointTlv.value[EUI64_SIZE], DLK_ECC_COORDINATE_SIZE);
+    if (psa_status == PSA_SUCCESS) {
+      psa_status = psa_mac_update(&mac_op, &ourPointTlv.value[EUI64_SIZE], DLK_ECC_COORDINATE_SIZE);
       sl_zigbee_core_debug_print("ZDD Point X: ");
       for (uint8_t i = 0; i < DLK_ECC_COORDINATE_SIZE; i++) {
         sl_zigbee_core_debug_print(" %02X", ourPointTlv.value[EUI64_SIZE + i]);
       }
       sl_zigbee_core_debug_println("");
     }
-
-    if (ret == 0) {
-      ret = mbedtls_md_hmac_update(&ctx, &ourPointTlv.value[EUI64_SIZE + DLK_ECC_COORDINATE_SIZE], DLK_ECC_COORDINATE_SIZE);
+    if (psa_status == PSA_SUCCESS) {
+      psa_status = psa_mac_update(&mac_op, &ourPointTlv.value[EUI64_SIZE + DLK_ECC_COORDINATE_SIZE], DLK_ECC_COORDINATE_SIZE);
       sl_zigbee_core_debug_print("ZDD Point Y: ");
       for (uint8_t i = 0; i < DLK_ECC_COORDINATE_SIZE; i++) {
         sl_zigbee_core_debug_print(" %02X", ourPointTlv.value[EUI64_SIZE + DLK_ECC_COORDINATE_SIZE + i]);
       }
       sl_zigbee_core_debug_println("");
     }
-    if (ret == 0) {
-      ret = mbedtls_md_hmac_update(&ctx, sl_zvd_eui, EUI64_SIZE);
+    if (psa_status == PSA_SUCCESS) {
+      psa_status = psa_mac_update(&mac_op, sl_zvd_eui, EUI64_SIZE);
       sl_zigbee_core_debug_print("ZVD EUI: ");
       sl_zigbee_af_print_little_endian_eui64(sl_zvd_eui);
       sl_zigbee_core_debug_println("");
     }
-    if (ret == 0) {
-      ret = mbedtls_md_hmac_update(&ctx, sl_zvd_public_point_x, DLK_ECC_COORDINATE_SIZE);
+    if (psa_status == PSA_SUCCESS) {
+      psa_status = psa_mac_update(&mac_op, sl_zvd_public_point_x, DLK_ECC_COORDINATE_SIZE);
       sl_zigbee_core_debug_print("ZVD Point X: ");
       for (uint8_t i = 0; i < DLK_ECC_COORDINATE_SIZE; i++) {
         sl_zigbee_core_debug_print(" %02X", sl_zvd_public_point_x[i]);
       }
       sl_zigbee_core_debug_println("");
     }
-    if (ret == 0) {
-      ret = mbedtls_md_hmac_update(&ctx, sl_zvd_public_point_y, DLK_ECC_COORDINATE_SIZE);
+    if (psa_status == PSA_SUCCESS) {
+      psa_status = psa_mac_update(&mac_op, sl_zvd_public_point_y, DLK_ECC_COORDINATE_SIZE);
       sl_zigbee_core_debug_print("ZVD Point Y: ");
       for (uint8_t i = 0; i < DLK_ECC_COORDINATE_SIZE; i++) {
         sl_zigbee_core_debug_print(" %02X", sl_zvd_public_point_y[i]);
       }
       sl_zigbee_core_debug_println("");
     }
-    if (ret == 0) {
-      ret = mbedtls_md_hmac_finish(&ctx, output);
+    if (psa_status == PSA_SUCCESS) {
+      psa_status = psa_mac_sign_finish(&mac_op, output, 32, &mac_length);
+    } else {
+      (void)psa_mac_abort(&mac_op);
     }
-    mbedtls_md_free(&ctx);
+
+    (void)psa_destroy_key(hmac_key_id);
+    ret = (psa_status == PSA_SUCCESS) ? 0 : (int)psa_status;
   }
   return ret;
 }

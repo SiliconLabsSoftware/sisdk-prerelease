@@ -18,11 +18,10 @@ requires:
 - name: zigbee_direct_stack_interface
 - name: zigbee_zcl_framework_core
 - name: bluetooth_stack
-- name: mbedtls_ccm
-- name: mbedtls_md5
-- name: psa_crypto_md5
+- name: psa_crypto
+- name: psa_crypto_aes
+- name: psa_crypto_ccm
 - name: psa_crypto_sha256
-- name: mbedtls_hash
 - name: psa_crypto_hmac
 - name: zigbee_network_steering
 - name: zigbee_packet_handoff

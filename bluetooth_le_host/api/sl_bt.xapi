@@ -3103,7 +3103,7 @@
                 <param datatype="uint8" name="channel_selection_type" type="uint8"/>
                 <param datatype="uint8" name="ch3c_shape" type="uint8"/>
                 <param datatype="uint8" name="ch3c_jump" type="uint8"/>
-                <param datatype="uint8" name="reserved" type="uint8"/>
+                <param datatype="uint8" name="cs_enhancements" type="uint8"/>
             </params>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
@@ -3276,7 +3276,7 @@
                 <param datatype="uint8" name="channel_selection_type" type="uint8"/>
                 <param datatype="uint8" name="ch3c_shape" type="uint8"/>
                 <param datatype="uint8" name="ch3c_jump" type="uint8"/>
-                <param datatype="uint8" name="reserved" type="uint8"/>
+                <param datatype="uint8" name="cs_enhancements" type="uint8"/>
                 <param datatype="uint8" name="t_ip1_time" type="uint8"/>
                 <param datatype="uint8" name="t_ip2_time" type="uint8"/>
                 <param datatype="uint8" name="t_fcs_time" type="uint8"/>
@@ -3474,7 +3474,7 @@
                 <param datatype="uint8" name="t_pm_time" type="uint8"/>
                 <param datatype="uint8" name="t_sw_time" type="uint8"/>
                 <param datatype="uint8" name="tone_antenna_config" type="uint8"/>
-                <param datatype="uint8" name="reserved" type="uint8"/>
+                <param datatype="uint8" name="cs_enhancements" type="uint8"/>
                 <param datatype="uint8" name="snr_control_initiator" type="uint8"/>
                 <param datatype="uint8" name="snr_control_reflector" type="uint8"/>
                 <param datatype="uint16" name="drbg_nonce" type="uint16"/>

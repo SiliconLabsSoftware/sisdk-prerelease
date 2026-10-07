@@ -219,8 +219,8 @@ Functions</h2></td></tr>
 <tr class="separator:ga1a9836693912844643f9d19c292a81ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafffbe85e1a062397e80c702ec792bf40" id="r_gafffbe85e1a062397e80c702ec792bf40"><td class="memItemLeft" align="right" valign="top">sl_status_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sl__bt__cs.html#gafffbe85e1a062397e80c702ec792bf40">sl_bt_cs_set_default_settings</a> (uint8_t connection, uint8_t initiator_status, uint8_t reflector_status, uint8_t antenna_identifier, int8_t max_tx_power)</td></tr>
 <tr class="separator:gafffbe85e1a062397e80c702ec792bf40"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gabfd25cc7bc8b068882498998c44299af" id="r_gabfd25cc7bc8b068882498998c44299af"><td class="memItemLeft" align="right" valign="top">sl_status_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sl__bt__cs.html#gabfd25cc7bc8b068882498998c44299af">sl_bt_cs_create_config</a> (uint8_t connection, uint8_t config_id, uint8_t create_context, uint8_t main_mode_type, uint8_t sub_mode_type, uint8_t min_main_mode_steps, uint8_t max_main_mode_steps, uint8_t main_mode_repetition, uint8_t mode_calibration_steps, uint8_t role, uint8_t rtt_type, uint8_t cs_sync_phy, const <a class="el" href="structsl__bt__cs__channel__map__t.html">sl_bt_cs_channel_map_t</a> *channel_map, uint8_t channel_map_repetition, uint8_t channel_selection_type, uint8_t ch3c_shape, uint8_t ch3c_jump, uint8_t reserved)</td></tr>
-<tr class="separator:gabfd25cc7bc8b068882498998c44299af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gabc94b89bded7f8a2bd8699f3ccc36361" id="r_gabc94b89bded7f8a2bd8699f3ccc36361"><td class="memItemLeft" align="right" valign="top">sl_status_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sl__bt__cs.html#gabc94b89bded7f8a2bd8699f3ccc36361">sl_bt_cs_create_config</a> (uint8_t connection, uint8_t config_id, uint8_t create_context, uint8_t main_mode_type, uint8_t sub_mode_type, uint8_t min_main_mode_steps, uint8_t max_main_mode_steps, uint8_t main_mode_repetition, uint8_t mode_calibration_steps, uint8_t role, uint8_t rtt_type, uint8_t cs_sync_phy, const <a class="el" href="structsl__bt__cs__channel__map__t.html">sl_bt_cs_channel_map_t</a> *channel_map, uint8_t channel_map_repetition, uint8_t channel_selection_type, uint8_t ch3c_shape, uint8_t ch3c_jump, uint8_t cs_enhancements)</td></tr>
+<tr class="separator:gabc94b89bded7f8a2bd8699f3ccc36361"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3e87a4164f6020acadda0d41e2137325" id="r_ga3e87a4164f6020acadda0d41e2137325"><td class="memItemLeft" align="right" valign="top">sl_status_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sl__bt__cs.html#ga3e87a4164f6020acadda0d41e2137325">sl_bt_cs_remove_config</a> (uint8_t connection, uint8_t config_id)</td></tr>
 <tr class="separator:ga3e87a4164f6020acadda0d41e2137325"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa88b3a2d98f2204122e08031c2f5f9fd" id="r_gaa88b3a2d98f2204122e08031c2f5f9fd"><td class="memItemLeft" align="right" valign="top">sl_status_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__sl__bt__cs.html#gaa88b3a2d98f2204122e08031c2f5f9fd">sl_bt_cs_set_channel_classification</a> (const <a class="el" href="structsl__bt__cs__channel__map__t.html">sl_bt_cs_channel_map_t</a> *channel_map)</td></tr>
@@ -636,8 +636,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gabfd25cc7bc8b068882498998c44299af" name="gabfd25cc7bc8b068882498998c44299af"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gabfd25cc7bc8b068882498998c44299af">&#9670;&#160;</a></span>sl_bt_cs_create_config()</h2>
+<a id="gabc94b89bded7f8a2bd8699f3ccc36361" name="gabc94b89bded7f8a2bd8699f3ccc36361"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gabc94b89bded7f8a2bd8699f3ccc36361">&#9670;&#160;</a></span>sl_bt_cs_create_config()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -748,7 +748,7 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>reserved</em>&#160;</td>
+          <td class="paramname"><em>cs_enhancements</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -847,7 +847,10 @@ Functions</h2></td></tr>
 <li><b>Range:</b> 2 to 8 </li>
 </ul>
 </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">reserved</td><td>Reserved for future use.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cs_enhancements</td><td>This value is a bitmask of flags to indicate which CS enhancements are to be used during the CS procedure. Flags:<ul>
+<li><b>0x01, bit 0:</b> Reflector Inline PCT Transfer</li>
+</ul>
+</td></tr>
   </table>
   </dd>
 </dl>

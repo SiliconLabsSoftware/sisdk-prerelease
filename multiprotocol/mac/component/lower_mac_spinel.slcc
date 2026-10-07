@@ -8,7 +8,8 @@ provides:
 - name: lower_mac_spinel
 
 requires:
-- name: mbedtls_random
+- name: psa_crypto
+- name: psa_crypto_aes
 - name: spinel_host_interface_implementation
 - name: ot_headers
 - name: ot_lower_mac_spinel

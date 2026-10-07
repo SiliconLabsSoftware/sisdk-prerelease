@@ -471,7 +471,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="14888" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="14888" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="14895" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="14895" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1gafffbe85e1a062397e80c702ec792bf40" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -567,12 +567,12 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="14929" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="14929" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="14936" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="14936" declcolumn="13"/>
       </memberdef>
-      <memberdef kind="function" id="group__sl__bt__cs_1gabfd25cc7bc8b068882498998c44299af" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="group__sl__bt__cs_1gabc94b89bded7f8a2bd8699f3ccc36361" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_cs_create_config</definition>
-        <argsstring>(uint8_t connection, uint8_t config_id, uint8_t create_context, uint8_t main_mode_type, uint8_t sub_mode_type, uint8_t min_main_mode_steps, uint8_t max_main_mode_steps, uint8_t main_mode_repetition, uint8_t mode_calibration_steps, uint8_t role, uint8_t rtt_type, uint8_t cs_sync_phy, const sl_bt_cs_channel_map_t *channel_map, uint8_t channel_map_repetition, uint8_t channel_selection_type, uint8_t ch3c_shape, uint8_t ch3c_jump, uint8_t reserved)</argsstring>
+        <argsstring>(uint8_t connection, uint8_t config_id, uint8_t create_context, uint8_t main_mode_type, uint8_t sub_mode_type, uint8_t min_main_mode_steps, uint8_t max_main_mode_steps, uint8_t main_mode_repetition, uint8_t mode_calibration_steps, uint8_t role, uint8_t rtt_type, uint8_t cs_sync_phy, const sl_bt_cs_channel_map_t *channel_map, uint8_t channel_map_repetition, uint8_t channel_selection_type, uint8_t ch3c_shape, uint8_t ch3c_jump, uint8_t cs_enhancements)</argsstring>
         <name>sl_bt_cs_create_config</name>
         <param>
           <type>uint8_t</type>
@@ -644,7 +644,7 @@
         </param>
         <param>
           <type>uint8_t</type>
-          <declname>reserved</declname>
+          <declname>cs_enhancements</declname>
         </param>
         <briefdescription>
         </briefdescription>
@@ -859,10 +859,13 @@
 </parameteritem>
 <parameteritem>
 <parameternamelist>
-<parametername direction="in">reserved</parametername>
+<parametername direction="in">cs_enhancements</parametername>
 </parameternamelist>
 <parameterdescription>
-<para>Reserved for future use.</para>
+<para>This value is a bitmask of flags to indicate which CS enhancements are to be used during the CS procedure. Flags:<itemizedlist>
+<listitem><para><bold>0x01, bit 0:</bold> Reflector Inline PCT Transfer</para>
+</listitem></itemizedlist>
+</para>
 </parameterdescription>
 </parameteritem>
 </parameterlist>
@@ -875,7 +878,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15048" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15048" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15057" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15057" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1ga3e87a4164f6020acadda0d41e2137325" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -925,7 +928,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15088" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15088" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15097" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15097" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1gaa88b3a2d98f2204122e08031c2f5f9fd" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -966,7 +969,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15118" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15118" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15127" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15127" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1ga45623207ae15789c3b2a90876d38b625" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1210,7 +1213,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15211" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15211" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15220" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15220" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1ga2d98ac43233c5db0d7903400b2cadd2e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1276,7 +1279,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15262" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15262" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15271" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15271" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1ga76ba2c01277740fd6844392fedc571aa" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1318,7 +1321,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15279" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15279" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15288" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15288" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1ga179e5b1dd30a811c3d3f53c64acf9e47" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1675,7 +1678,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15409" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15409" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15418" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15418" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1ga8c0052901c17a4c427f2b25d3c484bc7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1708,7 +1711,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15444" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15444" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15453" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15453" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1ga2ba75f26352698b6c8cb752c16b342f7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1786,7 +1789,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15463" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15463" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15472" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15472" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1ga7be074a19c9a267769c4325feeb4b720" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1852,7 +1855,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15487" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15487" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15496" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15496" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1ga980aaeacdecec62c35335dd2ceb39727" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -1906,7 +1909,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15505" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15505" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15514" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15514" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1ga3757cf65977fcfec697aa5229ec953ed" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -2004,7 +2007,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15536" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15536" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15545" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15545" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs_1ga8166fe81e523a4fa446c954a87a548bc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -2046,7 +2049,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15554" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15554" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15563" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15563" declcolumn="13"/>
       </memberdef>
     </sectiondef>
     <sectiondef kind="define">

@@ -160,6 +160,22 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
   </descriptors>
+  <descriptors name="rail_soc_railtest_series3_btc" label="RAIL - SoC RAILtest" description="The RAILtest application provides a simple tool for testing the radio and the functionality of the RAIL library via CLI. For more advanced usage, developers must write software against the RAIL library and create a custom radio configuration.
+">
+    <properties key="namespace" value="template.uc"/>
+    <properties key="keywords" value="universal\ configurator"/>
+    <properties key="solutionReferenceId" value="rail_app.example.soc.rail_soc_railtest.rail_soc_railtest_series3_btc.slcp"/>
+    <properties key="projectFilePaths" value="example/soc/rail_soc_railtest/rail_soc_railtest_series3_btc.slcp"/>
+    <properties key="readmeFiles" value="documentation/example/rail_soc_railtest_btc/readme.md"/>
+    <properties key="boardCompatibility" value="com.silabs.board.none"/>
+    <properties key="partCompatibility" value=""/>
+    <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
+    <properties key="toolchainCompatibility" value="gcc iar llvm"/>
+    <properties key="category" value="RAIL Examples"/>
+    <properties key="quality" value="PRODUCTION"/>
+    <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
+    <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|RAIL"/>
+  </descriptors>
   <descriptors name="rail_soc_range_test" label="RAIL - SoC Range Test" description="The Range Test application, running on Micrium OS RTOS and multiprotocol RAIL, demonstrates the over-the-air range of the EFR32. It serves as both a transmitter and a receiver, with adjustable packet length and transmission options. Output power can be set from -15 dBm to +20 dBm. In Rx Mode, it inspects received packets based on device IDs, displaying Packet Error Rate, Bit Error Rate, and RSSI. The CLI can also be used for configuration. Note: Avoid powering the boards from a coin cell due to higher current consumption during continuous radio usage, particularly in Rx Mode. For portability, consider using a USB power bank instead.
 ">
     <properties key="namespace" value="template.uc"/>

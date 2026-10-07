@@ -362,24 +362,6 @@ autoselected_components:
   id: freertos_kernel_cortexm
 - package: mbedtls
   vendor: silabs
-  id: mbedtls_adjust_config
-- package: mbedtls
-  vendor: silabs
-  id: mbedtls_crypto_platform_api
-- package: mbedtls
-  vendor: silabs
-  id: mbedtls_source
-- package: mbedtls
-  vendor: silabs
-  id: mbedtls_source_builtin
-- package: mbedtls
-  vendor: silabs
-  id: psa_crypto_adjust_config
-- package: mbedtls
-  vendor: silabs
-  id: psa_crypto_api
-- package: mbedtls
-  vendor: silabs
   id: psa_crypto_common_source
 - package: mbedtls
   vendor: silabs
@@ -387,6 +369,15 @@ autoselected_components:
 - package: mbedtls
   vendor: silabs
   id: psa_its_source
+- package: mbedtls
+  vendor: silabs
+  id: tf_psa_crypto_api
+- package: mbedtls
+  vendor: silabs
+  id: tf_psa_crypto_config
+- package: mbedtls
+  vendor: silabs
+  id: tf_psa_crypto_mbedtls
 - package: multiprotocol
   vendor: silabs
   id: sl_dmp_ui_stub
@@ -658,16 +649,7 @@ autoselected_components:
   id: mbedtls_config
 - package: platform_core
   vendor: silabs
-  id: mbedtls_core
-- package: platform_core
-  vendor: silabs
   id: mbedtls_platform_dynamic_memory_allocation_config_default
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_slcrypto
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_slcrypto_driver
 - package: platform_core
   vendor: silabs
   id: mbedtls_threading_alt_cmsis_rtos2
@@ -772,6 +754,9 @@ autoselected_components:
   id: psa_driver_common
 - package: platform_core
   vendor: silabs
+  id: psa_driver_dispatch
+- package: platform_core
+  vendor: silabs
   id: psa_its
 - package: platform_core
   vendor: silabs
@@ -839,6 +824,9 @@ autoselected_components:
 - package: platform_core
   vendor: silabs
   id: sli_protocol_crypto
+- package: platform_core
+  vendor: silabs
+  id: sli_psa_driver_contexts
 - package: platform_core
   vendor: silabs
   id: sli_psec_common
@@ -1109,41 +1097,50 @@ sdk_extension:
   id: segger
   version: 1.2.0
 - vendor: silabs
+  id: bluetooth_apploader
+  version: 11.2.0-alpha.93
+- vendor: silabs
+  id: mbedtls
+  version: 4.1.0
+- vendor: silabs
   id: micriumos
   version: 6.2.0
 - vendor: silabs
   id: bluetooth_le
   version: 11.2.0
 - vendor: silabs
-  id: bluetooth_le_controller
-  version: 11.2.0-alpha.67
+  id: unity_test_framework
+  version: 1.2.0
 - vendor: silabs
-  id: platform_core
+  id: security_libcryptosoc
   version: 1.2.0
 - vendor: silabs
   id: common_15_4
   version: 1.2.0
 - vendor: silabs
+  id: bluetooth_common
+  version: 1.2.0-alpha.93
+- vendor: silabs
+  id: platform_core
+  version: 1.2.0
+- vendor: silabs
   id: zigbee
   version: 9.2.0
 - vendor: silabs
-  id: bluetooth_apploader
-  version: 11.2.0-alpha.67
-- vendor: silabs
-  id: usb
-  version: 1.8.0
+  id: bluetooth_le_host
+  version: 11.2.0-alpha.93
 - vendor: silabs
   id: security_tfm
   version: 1.2.0
 - vendor: silabs
-  id: realtime_locationing
-  version: 12.0.0-alpha.6
+  id: usb
+  version: 1.8.0
 - vendor: silabs
   id: boards
   version: 1.2.0
 - vendor: silabs
-  id: mbedtls
-  version: 1.2.0
+  id: bgapi_protocol
+  version: 11.2.0-alpha.93
 - vendor: silabs
   id: cmsis_dsp
   version: 1.16.3
@@ -1160,36 +1157,27 @@ sdk_extension:
   id: freertos
   version: 1.2.0
 - vendor: silabs
-  id: security_sxsymcrypt
-  version: 1.2.0
+  id: realtime_locationing
+  version: 12.0.0-alpha.9
 - vendor: silabs
   id: delta_dfu
   version: 1.1.0
 - vendor: silabs
-  id: bluetooth_le_host
-  version: 11.2.0-alpha.67
+  id: security_sxsymcrypt
+  version: 1.2.0
 - vendor: silabs
   id: coremark
   version: 1.1.0
 - vendor: silabs
+  id: bluetooth_le_controller
+  version: 11.2.0-alpha.93
+- vendor: silabs
   id: rail_library
   version: 3.2.0
-- vendor: silabs
-  id: bluetooth_common
-  version: 1.2.0-alpha.67
 - vendor: silabs
   id: multiprotocol
   version: 1.2.0
 - vendor: silabs
-  id: security_libcryptosoc
-  version: 1.1.0
-- vendor: silabs
   id: cmsis
   version: 1.2.0
-- vendor: silabs
-  id: bgapi_protocol
-  version: 11.2.0-alpha.67
-- vendor: silabs
-  id: unity_test_framework
-  version: 1.1.0
 

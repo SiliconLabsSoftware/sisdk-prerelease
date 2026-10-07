@@ -13929,7 +13929,14 @@ PACKSTRUCT( struct sl_bt_evt_cs_config_complete_s
                                                       in each rising and falling
                                                       sequence
                                                         - <b>Range:</b> 3 to 8 */
-  uint8_t                reserved;               /**< Reserved for future use. */
+  uint8_t                cs_enhancements;        /**< This value is a bitmask of
+                                                      flags to indicate which CS
+                                                      enhancements are to be
+                                                      used during the CS
+                                                      procedure. Flags:
+                                                        - <b>0x01, bit 0:</b>
+                                                          Reflector Inline PCT
+                                                          Transfer */
   uint8_t                t_ip1_time;             /**< Interlude time in
                                                       microseconds between the
                                                       RTT packets. Values: 0x0A,
@@ -15036,7 +15043,9 @@ sl_status_t sl_bt_cs_set_default_settings(uint8_t connection,
  * @param[in] ch3c_jump Number of channels skipped in each rising and falling
  *   sequence.
  *     - <b>Range:</b> 2 to 8
- * @param[in] reserved Reserved for future use.
+ * @param[in] cs_enhancements This value is a bitmask of flags to indicate which
+ *   CS enhancements are to be used during the CS procedure. Flags:
+ *     - <b>0x01, bit 0:</b> Reflector Inline PCT Transfer
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -15062,7 +15071,7 @@ sl_status_t sl_bt_cs_create_config(uint8_t connection,
                                    uint8_t channel_selection_type,
                                    uint8_t ch3c_shape,
                                    uint8_t ch3c_jump,
-                                   uint8_t reserved);
+                                   uint8_t cs_enhancements);
 
 /***************************************************************************//**
  *
@@ -15728,7 +15737,9 @@ typedef struct sl_bt_evt_cs_test_end_completed_s sl_bt_evt_cs_test_end_completed
  * @param[in] tone_antenna_config Antenna Configuration Index used during
  *   antenna switching
  *     - <b>Range:</b> 0 to 7
- * @param[in] reserved Reserved for future use.
+ * @param[in] cs_enhancements Indicates which CS enhancements to be used during
+ *   the CS procedure.
+ *     - <b>0x01:</b> Reflector Inline PCT Transfer
  * @param[in] snr_control_initiator Enum @ref sl_bt_cs_snr_control_adjustment_t.
  *   The Signal Noise Ratio (SNR) control adjustment for the CS_SYNC
  *   transmissions of the initiator. Values:
@@ -15778,7 +15789,7 @@ sl_status_t sl_bt_cs_test_start(uint8_t main_mode_type,
                                 uint8_t t_pm_time,
                                 uint8_t t_sw_time,
                                 uint8_t tone_antenna_config,
-                                uint8_t reserved,
+                                uint8_t cs_enhancements,
                                 uint8_t snr_control_initiator,
                                 uint8_t snr_control_reflector,
                                 uint16_t drbg_nonce,
