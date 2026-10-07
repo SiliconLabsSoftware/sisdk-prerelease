@@ -26,3 +26,6 @@ toolchain_settings:
 - option: preinclude
   value: sl_gcc_preinclude.h
   condition: [toolchain_gcc]
+documentation:
+  docset: gecko-platform
+  document: platform-common/common

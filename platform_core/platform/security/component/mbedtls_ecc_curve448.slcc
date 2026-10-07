@@ -5,6 +5,8 @@ description: >-
   This component enables support for usage of the Curve448 elliptic curve with Mbed TLS.
 category: Platform|Security|Mbed TLS|Elliptic Curves
 quality: production
+ui_hints:
+  visibility: never
 
 provides:
 - name: mbedtls_ecc_curve448
@@ -17,7 +19,7 @@ requires:
   condition: [psa_crypto]
 
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_ECP_DP_CURVE448_ENABLED
 - name: mbedtls_mpi_max
   value: 56

@@ -51,6 +51,30 @@ extern "C" {
 
 /***************************************************************************//**
  * @brief
+ *   Initialize the Silicon Labs platform integration of PSA Crypto.
+ *
+ * @return
+ *   This function must be called by an application before using any
+ *   PSA Crypto functions. This function will make sure that the platform hooks
+ *   PSA Crypto are configured to ensure correct runtime behavior.
+ ******************************************************************************/
+void sl_psa_crypto_init(void);
+
+#if defined(MBEDTLS_ENTROPY_HARDWARE_ALT)
+/***************************************************************************//**
+ * \brief           Entropy poll callback for a hardware source
+ *
+ * \warning         This is not provided by Mbed TLS!
+ *                  See \c MBEDTLS_ENTROPY_HARDWARE_ALT in mbedtls_config.h.
+ *
+ * \note            This must accept NULL as its first argument.
+ ******************************************************************************/
+int mbedtls_hardware_poll(void *data,
+                          unsigned char *output, size_t len, size_t *olen);
+#endif
+
+/***************************************************************************//**
+ * @brief
  *   Set the location attribute of a key in PSA Crypto according to a given
  *   persistence level, and a preferred location. If the preferred location is
  *   not available, perhaps because the device does not support this location,
@@ -172,6 +196,44 @@ psa_status_t sl_psa_key_derivation_single_shot(
   mbedtls_svc_key_id_t *key_out);
 
 /** @} */ // end defgroup sl_psa_key_derivation
+
+/***************************************************************************//**
+ * \defgroup sl_psa_pake PAKE
+ *  @brief PAKE extensions to the PSA Crypto API
+ *  @{
+ ******************************************************************************/
+
+/**
+ * \brief Derive the EC J-PAKE TLS premaster secret from a completed PAKE
+ *        operation (Silicon Labs extension).
+ *
+ * Direct export of the Secure Engine implicit key for callers that cannot use
+ * the #PSA_ALG_TLS12_ECJPAKE_TO_PMS key-derivation path (e.g. TF-M veneers).
+ * TLS uses the standard KDF path; on devices with a transparent SE PAKE
+ * driver the key-derivation passthrough returns the 32-byte material without
+ * SHA-256.
+ *
+ * \note Available when the transparent SE PAKE driver is built
+ *       (#SLI_MBEDTLS_DEVICE_HSE and #SLI_PSA_DRIVER_FEATURE_PAKE) and not on
+ *       TrustZone non-secure clients.
+ *
+ * \param[in,out] operation  Active PAKE operation in the computation stage
+ *                           after a finished J-PAKE exchange. Aborted on
+ *                           return.
+ * \param[out] key_buf       Buffer for the premaster secret.
+ * \param key_length         Size of \p key_buf in bytes (must be 32).
+ *
+ * \retval #PSA_SUCCESS
+ * \retval #PSA_ERROR_INVALID_ARGUMENT
+ * \retval #PSA_ERROR_BAD_STATE
+ * \retval #PSA_ERROR_NOT_SUPPORTED
+ * \retval #PSA_ERROR_HARDWARE_FAILURE
+ */
+psa_status_t psa_pake_derive_secret(psa_pake_operation_t *operation,
+                                    uint8_t *key_buf,
+                                    size_t key_length);
+
+/** @} */ // end defgroup sl_psa_pake
 /** @} */ // end defgroup sl_psa_crypto
 
 #ifdef __cplusplus

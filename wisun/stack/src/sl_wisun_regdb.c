@@ -32,9 +32,27 @@
 #include "sl_wisun_types.h"
 #include <stdlib.h>
 
+/**
+ * @brief Channel parameters table
+ * @details This table is a representation of the channel parameters defined in
+ *          the Wi-SUN PHY Technical Profile Specification (TPS) 2V05.
+ *          Ownership is transferred to the application during the project
+ *          generation. The table can then be modified to remove unused
+ *          channel plans or to edit the allowed channels.
+ *          The regulatory domain SL_WISUN_REGULATORY_DOMAIN_APP can be used to
+ *          add custom channel parameters not defined in the PHY TPS.
+ *          These custom channel parameters will be used for any matching explicit
+ *          or custom channel plan configurations.
+ * @note The allowed channels configured in the table below are equivalent to
+ *       the "All PAN Channels" definition in the Wi-SUN FAN Technical Profile
+ *       Specification (TPS). They are used to mitigate the local regulation and
+ *       local coexistence issues. They are not advertised in the Scheduling IEs
+ *       as mandated by the FAN TPS. All the nodes involved in the same network
+ *       must use the same channel configuration.
+ */
 const sl_wisun_chan_params_t chan_params_table[] = {
   /*              operating_class -.                  chan_plan_id -.   chan_spacing_hz -.    ,- chan_count
-  *      regulatory_domain        |     regional_regulation        | chan0_freq_hz      |    |       valid phy_mode_ids         chan_allowed */
+   *      regulatory_domain        |     regional_regulation        | chan0_freq_hz      |    |       valid phy_mode_ids         chan_allowed */
   { SL_WISUN_REGULATORY_DOMAIN_AZ, 1, SL_WISUN_REGULATION_NONE,    48,  915200000,  200000,  64, {  2,  3, 18, 19              }, NULL }, // SL_WISUN_REGULATORY_DOMAIN_AZ and SL_WISUN_REGULATORY_DOMAIN_NZ share the same ID
   { SL_WISUN_REGULATORY_DOMAIN_AZ, 2, SL_WISUN_REGULATION_NONE,    49,  915400000,  400000,  32, {  5,  6,  8, 21, 22, 24      }, NULL },
   { SL_WISUN_REGULATORY_DOMAIN_BZ, 1, SL_WISUN_REGULATION_NONE,     1,  902200000,  200000, 129, {  2,  3, 18, 19, 84, 85, 86, }, "0-25,65-128", },

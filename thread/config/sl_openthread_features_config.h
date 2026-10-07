@@ -250,6 +250,12 @@
 #ifndef OPENTHREAD_CONFIG_MLE_MAX_CHILDREN
 #define OPENTHREAD_CONFIG_MLE_MAX_CHILDREN         10
 #endif
+// <o OPENTHREAD_CONFIG_MLE_CHILD_TIMEOUT_DEFAULT> Default MLE child timeout (seconds)
+// <i>  Default child timeout used when the Thread stack does not override it.
+// <d>  240
+#ifndef OPENTHREAD_CONFIG_MLE_CHILD_TIMEOUT_DEFAULT
+#define OPENTHREAD_CONFIG_MLE_CHILD_TIMEOUT_DEFAULT 240
+#endif
 // </h>
 // <e>  MLE Long Routes extension (experimental)
 #ifndef OPENTHREAD_CONFIG_MLE_LONG_ROUTES_ENABLE

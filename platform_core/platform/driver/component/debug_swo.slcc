@@ -53,3 +53,6 @@ template_contribution:
     event: driver_init
     include: sl_debug_swo.h
     handler: sl_debug_swo_init
+documentation:
+  docset: gecko-platform
+  document: platform-driver/debug-swo

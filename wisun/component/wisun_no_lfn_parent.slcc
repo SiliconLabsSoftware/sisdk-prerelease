@@ -1,0 +1,22 @@
+id: "wisun_no_lfn_parent"
+label: "Wi-SUN no LFN parent"
+package: "wisun"
+category: "Wi-SUN"
+quality: "production"
+description: "Provides stub implementations for LFN parent when the LFN parent library is not used"
+root_path: "wisun/./stack"
+
+ui_hints:
+  visibility: never
+
+provides:
+- name: "wisun_lfn_parent_implementation"
+- name: "wisun_no_lfn_parent"
+
+source:
+- path: "nanostack-mac/source/stubs/fhss_ws_lfn_parent_stubs.c"
+- path: "nanostack-stack/source/stubs/lfn_parent_stubs.c"
+
+metadata:
+  sbom:
+    license: MSLA

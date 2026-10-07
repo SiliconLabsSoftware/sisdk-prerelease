@@ -59,11 +59,6 @@
 
 #if MQTT_TLS_ENABLE
 
-// mbedTLS error: bad client hello (e.g. SNI/hostname or cipher mismatch); value 0x5D80
-#ifndef MBEDTLS_ERR_SSL_BAD_HS_CLIENT_HELLO
-#define MBEDTLS_ERR_SSL_BAD_HS_CLIENT_HELLO (-0x5D80)
-#endif
-
 // Function prototypes for TLS
 static mqtt_tls_context_t *allocate_tls_context(Network *n);
 static void free_tls_context(mqtt_tls_context_t *ctx);
@@ -119,17 +114,6 @@ static void free_tls_context(mqtt_tls_context_t *ctx)
     mqtt_tls_cleanup(ctx);
     free(ctx);
   }
-}
-
-// Hardware entropy function for mbedTLS
-static int mqtt_mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen)
-{
-  (void)data;
-  for (size_t i = 0; i < len; i++) {
-    output[i] = rand() % 256;
-  }
-  *olen = len;
-  return 0;
 }
 
 // Send function for mbedTLS
@@ -197,43 +181,71 @@ static int mqtt_ssl_recv_timeout(void *ctx, unsigned char *buf, size_t len, uint
   return mqtt_ssl_recv(ctx, buf, len);
 }
 
+// Free mbedTLS members allocated/initialized during TLS setup (safe after mbedtls_*_init).
+static void mqtt_tls_free_resources(mqtt_tls_context_t *tls_ctx)
+{
+  if (tls_ctx == NULL) {
+    return;
+  }
+
+  mbedtls_ssl_free(&tls_ctx->ssl);
+  mbedtls_ssl_config_free(&tls_ctx->conf);
+  mbedtls_x509_crt_free(&tls_ctx->cacert);
+  mbedtls_x509_crt_free(&tls_ctx->client_cert);
+  mbedtls_pk_free(&tls_ctx->private_key);
+}
+
+#if defined(MBEDTLS_SSL_PROTO_TLS1_3)
+// True when the configured ciphersuite list contains at least one TLS 1.3 suite.
+// Projects may pin MBEDTLS_SSL_CIPHERSUITES to a fixed list, in which case
+// mbedtls_ssl_list_ciphersuites() returns exactly that list with no filtering.
+// mbedTLS has no public getter for ciphersuite min_tls_version; classify via
+// mbedtls_ssl_ciphersuite_from_id() + the "TLS1-3-" name prefix used in
+// ssl_ciphersuites.c.
+static bool mqtt_tls_list_has_tls13_suite(const int *ciphersuites)
+{
+  for (; ciphersuites != NULL && *ciphersuites != 0; ciphersuites++) {
+    const mbedtls_ssl_ciphersuite_t *info = mbedtls_ssl_ciphersuite_from_id(*ciphersuites);
+    const char *name;
+
+    if (info == NULL) {
+      continue;
+    }
+
+    name = mbedtls_ssl_ciphersuite_get_name(info);
+    if (name != NULL && strncmp(name, "TLS1-3-", 7) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+#endif
+
 // TLS initialization
 static int mqtt_tls_init(mqtt_tls_context_t *tls_ctx, int socket_fd, const char *hostname)
 {
   int ret;
-  const char *pers = "mqtt_client_lwip";
+  static uint8_t psa_crypto_initialized = 0;
+  if (!psa_crypto_initialized) {
+    psa_status_t psa_status = psa_crypto_init();
+    if (psa_status != PSA_SUCCESS) {
+      SL_DEBUG_LOG_V2(ERROR, "psa_crypto_init failed: %ld\r\n", (long)psa_status);
+      return MBEDTLS_ERR_SSL_INTERNAL_ERROR;
+    }
+    psa_crypto_initialized = 1;
+    SL_DEBUG_LOG_V2(INFO, "PSA crypto initialized for MQTT TLS\r\n");
+  }
 
   // Initialize structures
   mbedtls_ssl_init(&tls_ctx->ssl);
   mbedtls_ssl_config_init(&tls_ctx->conf);
   mbedtls_x509_crt_init(&tls_ctx->cacert);
-  mbedtls_entropy_init(&tls_ctx->entropy);
-  mbedtls_ctr_drbg_init(&tls_ctx->ctr_drbg);
+  mbedtls_x509_crt_init(&tls_ctx->client_cert);
+  mbedtls_pk_init(&tls_ctx->private_key);
 
   tls_ctx->socket_fd   = socket_fd;
   tls_ctx->initialized = false;
 
-  // Add entropy source
-  ret = mbedtls_entropy_add_source(&tls_ctx->entropy,
-                                   mqtt_mbedtls_hardware_poll,
-                                   NULL,
-                                   MBEDTLS_ENTROPY_MAX_GATHER,
-                                   MBEDTLS_ENTROPY_SOURCE_STRONG);
-  if (ret != 0) {
-    SL_DEBUG_LOG_V2(ERROR, "mbedtls_entropy_add_source failed: -0x%04x\r\n", (unsigned int)(-ret));
-    return ret;
-  }
-
-  // Simplified entropy setup
-  ret = mbedtls_ctr_drbg_seed(&tls_ctx->ctr_drbg,
-                              mbedtls_entropy_func,
-                              &tls_ctx->entropy,
-                              (const unsigned char *)pers,
-                              strlen(pers));
-  if (ret != 0) {
-    SL_DEBUG_LOG_V2(ERROR, "mbedtls_ctr_drbg_seed failed: -0x%04x\r\n", (unsigned int)(-ret));
-    return ret;
-  }
 
   // Configure SSL with ultra-minimal memory usage
   ret = mbedtls_ssl_config_defaults(&tls_ctx->conf,
@@ -242,8 +254,17 @@ static int mqtt_tls_init(mqtt_tls_context_t *tls_ctx, int socket_fd, const char 
                                     MBEDTLS_SSL_PRESET_DEFAULT);
   if (ret != 0) {
     SL_DEBUG_LOG_V2(ERROR, "mbedtls_ssl_config_defaults failed: -0x%04x\r\n", (unsigned int)(-ret));
+    mqtt_tls_free_resources(tls_ctx);
     return ret;
   }
+
+#if defined(MBEDTLS_SSL_PROTO_TLS1_3)
+  const bool tls13_offered = mqtt_tls_list_has_tls13_suite(mbedtls_ssl_list_ciphersuites());
+  mbedtls_ssl_conf_min_tls_version(&tls_ctx->conf, MBEDTLS_SSL_VERSION_TLS1_2);
+  mbedtls_ssl_conf_max_tls_version(&tls_ctx->conf,
+                                   tls13_offered ? MBEDTLS_SSL_VERSION_TLS1_3 : MBEDTLS_SSL_VERSION_TLS1_2);
+  SL_DEBUG_LOG_V2(INFO, "MQTT TLS min=1.2 max=%s (preset ciphers)\r\n", tls13_offered ? "1.3" : "1.2");
+#endif
 
   // Server certificate verification: REQUIRED when CA is provided, else NONE
   if (tls_ctx->cert_ctx.cacert && tls_ctx->cert_ctx.cacert_len > 0) {
@@ -251,25 +272,55 @@ static int mqtt_tls_init(mqtt_tls_context_t *tls_ctx, int socket_fd, const char 
                                  (const unsigned char *)tls_ctx->cert_ctx.cacert,
                                  tls_ctx->cert_ctx.cacert_len);
     if (ret < 0) {
-      SL_DEBUG_LOG_V2(ERROR, "TLS init: CA certificate parse failed: -0x%04x", (unsigned int)(-ret));
-      mbedtls_x509_crt_free(&tls_ctx->cacert);
-      mbedtls_ssl_free(&tls_ctx->ssl);
-      mbedtls_ssl_config_free(&tls_ctx->conf);
-      mbedtls_entropy_free(&tls_ctx->entropy);
-      mbedtls_ctr_drbg_free(&tls_ctx->ctr_drbg);
+      SL_DEBUG_LOG_V2(ERROR, "TLS init: CA certificate parse failed: -0x%04x\r\n", (unsigned int)(-ret));
+      mqtt_tls_free_resources(tls_ctx);
       return ret;
     }
     mbedtls_ssl_conf_ca_chain(&tls_ctx->conf, &tls_ctx->cacert, NULL);
     mbedtls_ssl_conf_authmode(&tls_ctx->conf, MBEDTLS_SSL_VERIFY_REQUIRED);
-    SL_DEBUG_LOG_V2(INFO, "CA certificate loaded successfully");
+    SL_DEBUG_LOG_V2(INFO, "CA certificate loaded successfully\r\n");
   } else {
     mbedtls_ssl_conf_authmode(&tls_ctx->conf, MBEDTLS_SSL_VERIFY_NONE);
-    SL_DEBUG_LOG_V2(DEBUG, "TLS init: no CA provided - server verification disabled");
+    SL_DEBUG_LOG_V2(DEBUG, "TLS init: no CA provided - server verification disabled\r\n");
   }
 
-  // Configure RNG
-  mbedtls_ssl_conf_rng(&tls_ctx->conf, mbedtls_ctr_drbg_random, &tls_ctx->ctr_drbg);
+  // Mutual TLS: load device certificate + private key when provided (required for AWS IoT)
+  if (tls_ctx->cert_ctx.client_cert && tls_ctx->cert_ctx.client_cert_len > 0 && tls_ctx->cert_ctx.client_key
+      && tls_ctx->cert_ctx.client_key_len > 0) {
+    ret = mbedtls_x509_crt_parse(&tls_ctx->client_cert,
+                                 (const unsigned char *)tls_ctx->cert_ctx.client_cert,
+                                 tls_ctx->cert_ctx.client_cert_len);
+    if (ret < 0) {
+      SL_DEBUG_LOG_V2(ERROR, "TLS init: client certificate parse failed: -0x%04x\r\n", (unsigned int)(-ret));
+      mqtt_tls_free_resources(tls_ctx);
+      return ret;
+    }
 
+    ret = mbedtls_pk_parse_key(&tls_ctx->private_key,
+                               (const unsigned char *)tls_ctx->cert_ctx.client_key,
+                               tls_ctx->cert_ctx.client_key_len,
+                               (const unsigned char *)"",
+                               0);
+    if (ret != 0) {
+      SL_DEBUG_LOG_V2(ERROR, "TLS init: client private key parse failed: -0x%04x\r\n", (unsigned int)(-ret));
+      mqtt_tls_free_resources(tls_ctx);
+      return ret;
+    }
+
+    ret = mbedtls_ssl_conf_own_cert(&tls_ctx->conf, &tls_ctx->client_cert, &tls_ctx->private_key);
+    if (ret != 0) {
+      SL_DEBUG_LOG_V2(ERROR, "TLS init: mbedtls_ssl_conf_own_cert failed: -0x%04x\r\n", (unsigned int)(-ret));
+      mqtt_tls_free_resources(tls_ctx);
+      return ret;
+    }
+    SL_DEBUG_LOG_V2(INFO, "Client certificate and private key loaded for mutual TLS\r\n");
+  } else if ((tls_ctx->cert_ctx.client_cert && tls_ctx->cert_ctx.client_cert_len > 0)
+             || (tls_ctx->cert_ctx.client_key && tls_ctx->cert_ctx.client_key_len > 0)) {
+    SL_DEBUG_LOG_V2(ERROR, "TLS init: both client_cert and client_key are required for mutual TLS\r\n");
+    mqtt_tls_free_resources(tls_ctx);
+    return -1;
+  }
+  
 #if MQTT_TLS_ALPN_ENABLED && defined(MBEDTLS_SSL_ALPN)
   {
     // mbedTLS keeps the pointer to this list, so it must outlive the SSL configuration.
@@ -277,24 +328,19 @@ static int mqtt_tls_init(mqtt_tls_context_t *tls_ctx, int socket_fd, const char 
     ret                                 = mbedtls_ssl_conf_alpn_protocols(&tls_ctx->conf, alpn_protocols);
     if (ret != 0) {
       SL_DEBUG_LOG_V2(ERROR, "mbedtls_ssl_conf_alpn_protocols failed: -0x%04x\r\n", (unsigned int)(-ret));
+      mqtt_tls_free_resources(tls_ctx);
       return ret;
     }
   }
 #endif
 
-  // Note: Optional SSL feature configuration calls removed due to SiSDK mbedTLS limitations
-  // These were used to disable features for memory optimization:
-  // - DTLS handshake timeout configuration (requires MBEDTLS_SSL_PROTO_DTLS support)
-  // - Session tickets disabled (requires MBEDTLS_SSL_SESSION_TICKETS support)
-  // - Renegotiation disabled (requires MBEDTLS_SSL_RENEGOTIATION support)
-  // SiSDK mbedTLS components provide these features in default disabled state
-
   ret = mbedtls_ssl_setup(&tls_ctx->ssl, &tls_ctx->conf);
   if (ret != 0) {
     SL_DEBUG_LOG_V2(ERROR, "mbedtls_ssl_setup failed: -0x%04x\r\n", (unsigned int)(-ret));
-    if (ret == MBEDTLS_ERR_SSL_ALLOC_FAILED) {
+    if (ret == PSA_ERROR_INSUFFICIENT_MEMORY) {
       SL_DEBUG_LOG_V2(ERROR, "SSL setup failed due to memory allocation failure\r\n");
     }
+    mqtt_tls_free_resources(tls_ctx);
     return ret;
   }
 
@@ -304,6 +350,7 @@ static int mqtt_tls_init(mqtt_tls_context_t *tls_ctx, int socket_fd, const char 
     ret = mbedtls_ssl_set_hostname(&tls_ctx->ssl, hostname);
     if (ret != 0) {
       SL_DEBUG_LOG_V2(ERROR, "mbedtls_ssl_set_hostname failed: -0x%04x\r\n", (unsigned int)(-ret));
+      mqtt_tls_free_resources(tls_ctx);
       return ret;
     }
     SL_DEBUG_LOG_V2(DEBUG, "Hostname set successfully\r\n");
@@ -326,17 +373,19 @@ static int mqtt_tls_handshake(mqtt_tls_context_t *tls_ctx)
 
   while ((ret = mbedtls_ssl_handshake(&tls_ctx->ssl)) != 0) {
     if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
-      SL_DEBUG_LOG_V2(ERROR, "TLS handshake failed: -0x%04x", (unsigned int)(-ret));
+      SL_DEBUG_LOG_V2(ERROR, "TLS handshake failed: -0x%04x\r\n", (unsigned int)(-ret));
       if (ret == MBEDTLS_ERR_X509_CERT_VERIFY_FAILED) {
-        SL_DEBUG_LOG_V2(ERROR, "(cert verify failed: CA must sign broker cert; hostname must match cert CN/SAN)");
-      } else if (ret == MBEDTLS_ERR_SSL_BAD_HS_CLIENT_HELLO) {
-        SL_DEBUG_LOG_V2(ERROR, "(SSL error: often SNI/hostname or cipher mismatch)");
+        SL_DEBUG_LOG_V2(ERROR, "(cert verify failed: CA must sign broker cert; hostname must match cert CN/SAN)\r\n");
+#ifdef MBEDTLS_ERR_SSL_CERTIFICATE_VERIFICATION_WITHOUT_HOSTNAME
+      } else if (ret == MBEDTLS_ERR_SSL_CERTIFICATE_VERIFICATION_WITHOUT_HOSTNAME) {
+        SL_DEBUG_LOG_V2(ERROR, "(cert verification without hostname: call NetworkSetTlsHostname())\r\n");
+#endif
       }
       return ret;
     }
   }
 
-  SL_DEBUG_LOG_V2(INFO, "TLS handshake successful");
+  SL_DEBUG_LOG_V2(INFO, "TLS handshake successful\r\n");
   return 0;
 }
 
@@ -345,12 +394,7 @@ static void mqtt_tls_cleanup(mqtt_tls_context_t *tls_ctx)
 {
   if (tls_ctx && tls_ctx->initialized) {
     SL_DEBUG_LOG_V2(DEBUG, "Cleaning up TLS context...\r\n");
-
-    mbedtls_ssl_free(&tls_ctx->ssl);
-    mbedtls_ssl_config_free(&tls_ctx->conf);
-    mbedtls_x509_crt_free(&tls_ctx->cacert);
-    mbedtls_entropy_free(&tls_ctx->entropy);
-    mbedtls_ctr_drbg_free(&tls_ctx->ctr_drbg);
+    mqtt_tls_free_resources(tls_ctx);
     tls_ctx->initialized = false;
   }
 }
@@ -570,7 +614,7 @@ static int mqtt_tcpconnection_handler(Network *n,
     // TLS requires a hostname for SNI and server cert verification; brokers typically reject or fail without it.
     // Returns NETWORK_ERROR_TLS_HOSTNAME_REQUIRED (-4) if not set.
     if (!n->tls_hostname || n->tls_hostname[0] == '\0') {
-      SL_DEBUG_LOG_V2(ERROR, "Error: TLS requires hostname. Call NetworkSetTlsHostname() before NetworkConnect().");
+      SL_DEBUG_LOG_V2(ERROR, "Error: TLS requires hostname. Call NetworkSetTlsHostname() before NetworkConnect().\r\n");
       close(n->socket);
       n->socket = -1;
       return NETWORK_ERROR_TLS_HOSTNAME_REQUIRED;
@@ -579,7 +623,7 @@ static int mqtt_tcpconnection_handler(Network *n,
     // Allocate TLS context for this Network
     n->tls = allocate_tls_context(n);
     if (!n->tls) {
-      SL_DEBUG_LOG_V2(ERROR, "Failed to allocate TLS context");
+      SL_DEBUG_LOG_V2(ERROR, "Failed to allocate TLS context\r\n");
       close(n->socket);
       n->socket = -1;
       return -1;
@@ -588,51 +632,189 @@ static int mqtt_tcpconnection_handler(Network *n,
     // Use hostname set by app via NetworkSetTlsHostname(); must match server cert CN/SAN for verification
     const char *hostname = n->tls_hostname;
     if (mqtt_tls_init(n->tls, n->socket, hostname) != 0) {
-      SL_DEBUG_LOG_V2(ERROR, "TLS initialization failed");
+      SL_DEBUG_LOG_V2(ERROR, "TLS initialization failed\r\n");
       NetworkDisconnect(n);
       return -1;
     }
-    SL_DEBUG_LOG_V2(INFO, "TLS init completed successfully");
+    SL_DEBUG_LOG_V2(INFO, "TLS init completed successfully\r\n");
 
     // CA already loaded and ca_chain set in mqtt_tls_init() before ssl_setup
     SL_DEBUG_LOG_V2(DEBUG,
-                    "CA cert: 0x%lx (len=%u)",
+                    "CA cert: 0x%lx (len=%u)\r\n",
                     (unsigned long)(uintptr_t)n->tls->cert_ctx.cacert,
                     (unsigned int)n->tls->cert_ctx.cacert_len);
     SL_DEBUG_LOG_V2(DEBUG,
-                    "Client cert: 0x%lx (len=%u)",
+                    "Client cert: 0x%lx (len=%u)\r\n",
                     (unsigned long)(uintptr_t)n->tls->cert_ctx.client_cert,
                     (unsigned int)n->tls->cert_ctx.client_cert_len);
     SL_DEBUG_LOG_V2(DEBUG,
-                    "Client key: 0x%lx (len=%u)",
+                    "Client key: 0x%lx (len=%u)\r\n",
                     (unsigned long)(uintptr_t)n->tls->cert_ctx.client_key,
                     (unsigned int)n->tls->cert_ctx.client_key_len);
-    SL_DEBUG_LOG_V2(DEBUG, "TLS certificates configured");
+    SL_DEBUG_LOG_V2(DEBUG, "TLS certificates configured\r\n");
 
     // Perform TLS handshake
     if (mqtt_tls_handshake(n->tls) != 0) {
-      SL_DEBUG_LOG_V2(ERROR, "TLS handshake failed");
+      SL_DEBUG_LOG_V2(ERROR, "TLS handshake failed\r\n");
       NetworkDisconnect(n);
       return -1;
     }
 
-    SL_DEBUG_LOG_V2(INFO, "TLS connection established");
+    SL_DEBUG_LOG_V2(INFO, "TLS connection established\r\n");
 #else
     // TLS requested but not available
-    SL_DEBUG_LOG_V2(ERROR, "ERROR: TLS requested but mbedTLS not available!");
-    SL_DEBUG_LOG_V2(DEBUG, "Compile with mbedTLS libraries to enable TLS support");
+    SL_DEBUG_LOG_V2(ERROR, "ERROR: TLS requested but mbedTLS not available!\r\n");
+    SL_DEBUG_LOG_V2(DEBUG, "Compile with mbedTLS libraries to enable TLS support\r\n");
     close(n->socket);
     n->socket = -1;
     return -1;
 #endif
   } else {
-    SL_DEBUG_LOG_V2(DEBUG, "TCP connection without SSL established");
+    SL_DEBUG_LOG_V2(DEBUG, "TCP connection without SSL established\r\n");
 #ifdef MQTT_TLS_ENABLE
     n->tls = NULL;
 #endif
   }
 
   return 0; // Success
+}
+
+static int sl_paho_mqtt_tcpconnection_handler(Network *n,
+                                              uint8_t flags,
+                                              char *addr,
+                                              uint32_t dst_port,
+                                              uint32_t src_port,
+                                              bool ssl)
+{
+  UNUSED_PARAMETER(src_port);
+  int type               = SOCK_STREAM;
+  int rc                 = -1;
+  bool is_ipv4_requested = (flags & SL_PAHO_NETWORK_FLAG_IPV4) != 0;
+  bool is_ipv6_requested = (flags & SL_PAHO_NETWORK_FLAG_IPV6) != 0;
+
+  if (is_ipv4_requested == is_ipv6_requested) {
+    SL_DEBUG_LOG_V2(ERROR, "[LwIP] sl_paho_network_connect: set exactly one of IPV4/IPV6 flags\r\n");
+    return NETWORK_ERROR_INVALID_FLAGS;
+  }
+
+#ifdef SLI_SI91X_ENABLE_IPV6
+  if (is_ipv4_requested) {
+    struct sockaddr_in server_address = { 0 };
+
+    server_address.sin_family = AF_INET;
+    server_address.sin_port   = htons(dst_port);
+    memcpy(&server_address.sin_addr.s_addr, addr, SL_IPV4_ADDRESS_LENGTH);
+
+    n->socket = socket(AF_INET, type, IPPROTO_TCP);
+    if (n->socket < 0) {
+      SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with bsd error: %d\r\n", errno);
+      return -1;
+    }
+
+    SL_DEBUG_LOG_V2(INFO,
+                    "[LwIP] sl_paho_network_connect: socket=%d, port=%lu, family=IPv4\r\n",
+                    n->socket,
+                    (unsigned long)dst_port);
+    rc = connect(n->socket, (struct sockaddr *)&server_address, sizeof(server_address));
+  } else {
+    struct sockaddr_in6 server_address_v6 = { 0 };
+
+    server_address_v6.sin6_family = AF_INET6;
+    server_address_v6.sin6_port   = htons(dst_port);
+    memcpy(&server_address_v6.sin6_addr, addr, SL_IPV6_ADDRESS_LENGTH);
+
+    n->socket = socket(AF_INET6, type, IPPROTO_TCP);
+    if (n->socket < 0) {
+      SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with bsd error: %d\r\n", errno);
+      return -1;
+    }
+
+    SL_DEBUG_LOG_V2(INFO,
+                    "[LwIP] sl_paho_network_connect: socket=%d, port=%lu, family=IPv6\r\n",
+                    n->socket,
+                    (unsigned long)dst_port);
+    rc = connect(n->socket, (struct sockaddr *)&server_address_v6, sizeof(server_address_v6));
+  }
+#else
+  if (is_ipv6_requested) {
+    SL_DEBUG_LOG_V2(ERROR, "[LwIP] sl_paho_network_connect: IPv6 not available in this build\r\n");
+    return NETWORK_ERROR_INVALID_FLAGS;
+  }
+
+  struct sockaddr_in server_address = { 0 };
+
+  server_address.sin_family = AF_INET;
+  server_address.sin_port   = htons(dst_port);
+  SL_DEBUG_LOG_V2(DEBUG, "Connecting to MQTT broker on port %ld\r\n", dst_port);
+
+  memcpy(&server_address.sin_addr.s_addr, addr, sizeof(server_address.sin_addr.s_addr));
+
+  n->socket = socket(AF_INET, type, IPPROTO_TCP);
+  if (n->socket < 0) {
+    SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with bsd error: %d\r\n", errno);
+    return -1;
+  }
+
+  SL_DEBUG_LOG_V2(INFO,
+                  "[LwIP] sl_paho_network_connect: socket=%d, port=%lu, family=IPv4\r\n",
+                  n->socket,
+                  (unsigned long)dst_port);
+  rc = connect(n->socket, (struct sockaddr *)&server_address, sizeof(server_address));
+#endif
+  if (rc == -1) {
+    SL_DEBUG_LOG_V2(ERROR, "Socket Connect failed with bsd error: %d\r\n", errno);
+    close(n->socket);
+    n->socket = -1;
+    return rc;
+  }
+  SL_DEBUG_LOG_V2(INFO, "Socket connection success\r\n");
+
+  if (ssl) {
+#if MQTT_TLS_ENABLE
+    if (!n->tls_hostname || n->tls_hostname[0] == '\0') {
+      SL_DEBUG_LOG_V2(ERROR, "Error: TLS requires hostname. Call NetworkSetTlsHostname() before connect.\r\n");
+      close(n->socket);
+      n->socket = -1;
+      return NETWORK_ERROR_TLS_HOSTNAME_REQUIRED;
+    }
+
+    n->tls = allocate_tls_context(n);
+    if (!n->tls) {
+      SL_DEBUG_LOG_V2(ERROR, "Failed to allocate TLS context\r\n");
+      close(n->socket);
+      n->socket = -1;
+      return -1;
+    }
+
+    const char *hostname = n->tls_hostname;
+    if (mqtt_tls_init(n->tls, n->socket, hostname) != 0) {
+      SL_DEBUG_LOG_V2(ERROR, "TLS initialization failed\r\n");
+      NetworkDisconnect(n);
+      return -1;
+    }
+    SL_DEBUG_LOG_V2(INFO, "TLS init completed successfully\r\n");
+
+    if (mqtt_tls_handshake(n->tls) != 0) {
+      SL_DEBUG_LOG_V2(ERROR, "TLS handshake failed\r\n");
+      NetworkDisconnect(n);
+      return -1;
+    }
+
+    SL_DEBUG_LOG_V2(INFO, "TLS connection established\r\n");
+#else
+    SL_DEBUG_LOG_V2(ERROR, "ERROR: TLS requested but mbedTLS not available!\r\n");
+    close(n->socket);
+    n->socket = -1;
+    return -1;
+#endif
+  } else {
+    SL_DEBUG_LOG_V2(DEBUG, "TCP connection without SSL established\r\n");
+#ifdef MQTT_TLS_ENABLE
+    n->tls = NULL;
+#endif
+  }
+
+  return 0;
 }
 
 // Initialize the network structure
@@ -692,6 +874,23 @@ int NetworkConnect(Network *n, uint8_t flags, char *addr, int dst_port, int src_
   }
 }
 
+int sl_paho_network_connect(Network *n, uint8_t flags, char *addr, int dst_port, int src_port, bool ssl)
+{
+  if (n == NULL) {
+    return NETWORK_ERROR_NULL_STRUCTURE;
+  }
+
+  if (addr == NULL) {
+    return NETWORK_ERROR_NULL_ADDRESS;
+  }
+
+  if (n->transport_type == MQTT_TRANSPORT_TCP) {
+    return sl_paho_mqtt_tcpconnection_handler(n, flags, addr, dst_port, src_port, ssl);
+  }
+
+  return NETWORK_ERROR_INVALID_TYPE;
+}
+
 // Cleans up and closes the network connection.
 void NetworkDisconnect(Network *n)
 {
@@ -700,29 +899,3 @@ void NetworkDisconnect(Network *n)
   }
   return;
 }
-
-#if MQTT_TLS_ENABLE && !defined(MBEDTLS_PSA_CRYPTO_C)
-// No-op stub for psa_crypto_init to satisfy API linkage when PSA crypto is disabled.
-psa_status_t psa_crypto_init(void)
-{
-  // No-op: PSA crypto core is disabled, so initialization is not needed
-  return PSA_SUCCESS;
-}
-
-// Stub implementation of psa_generate_random that uses external RNG directly, bypassing PSA crypto core when disabled.
-psa_status_t psa_generate_random(uint8_t *output, size_t output_size)
-{
-  size_t output_length = 0;
-  psa_status_t status  = mbedtls_psa_external_get_random(NULL, output, output_size, &output_length);
-
-  if (status != PSA_SUCCESS) {
-    return status;
-  }
-
-  if (output_length != output_size) {
-    return PSA_ERROR_INSUFFICIENT_ENTROPY;
-  }
-
-  return PSA_SUCCESS;
-}
-#endif // MQTT_TLS_ENABLE && !defined(MBEDTLS_PSA_CRYPTO_C)

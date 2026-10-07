@@ -439,13 +439,14 @@ static void handle_state_packet_received(sl_rail_handle_t rail_handle)
   while (rx_packet_handle != SL_RAIL_RX_PACKET_HANDLE_INVALID) {
     // Saving the received packet from the radio buffer to the local buffer
     if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
-      packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
+      sl_status_t packet_assistant_status = sl_packet_assistant_unpack_packet(rail_handle, &packet_info, rx_buffer, &start_of_packet, &packet_size);
+      app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
       // Freeing up the radio buffer
       rail_status = sl_rail_release_rx_packet(rail_handle, rx_packet_handle);
       if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
         app_log_warning("sl_rail_release_rx_packet() error, status: 0x%08" PRIX32 "\n", rail_status);
       }
-      printf_rx_packet(start_of_packet, packet_size);
+      sl_packet_assistant_print_rx_packet(start_of_packet, packet_size);
       app_log_info("On channel %" PRIu16 "\n", rx_channel);
       if (device_mode == M_RELAY) {
         // Relay devices have to forward the received packet
@@ -542,7 +543,8 @@ static void send_prepared_packet(void)
   if (device_mode != M_ENDPOINT) {
     memcpy(out_packet, start_of_packet, packet_size);
   }
-  prepare_packet(rail_handle, out_packet, sizeof(out_packet));
+  sl_status_t packet_assistant_status = sl_packet_assistant_prepare_packet(rail_handle, out_packet, sizeof(out_packet));
+  app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
   sl_rail_start_tx(rail_handle, tx_channel, SL_RAIL_TX_OPTIONS_DEFAULT, NULL);
 }
 

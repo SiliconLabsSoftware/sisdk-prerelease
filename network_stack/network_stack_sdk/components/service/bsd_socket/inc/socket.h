@@ -98,7 +98,7 @@ typedef	__sa_family_t	sa_family_t;	/* sockaddr address family type */
 #define SO_TIMESTAMP	0x0800		///< Timestamps received datagram traffic. This option is not supported in the current release.
 #define SO_BINDANY	0x1000		///< Allows binding to any address. This option is not supported in the current release.
 #define SO_ZEROIZE	0x2000		///< Zeroes out all mbufs sent over the socket. This option is not supported in the current release.
-#define SO_MAX_RETRANSMISSION_TIMEOUT_VALUE 0x3012 ///< Configures max retransmission timeout value. The option value associated with this option name should be a power of 2 between 1 and 128.
+#define SO_MAX_RETRANSMISSION_TIMEOUT_VALUE 0x3012 ///< Maximum TCP retransmission timeout; value must be a power of 2 between 1 and 128.
 /*
  * Additional options, not kept in so_options.
  */
@@ -130,7 +130,7 @@ typedef	__sa_family_t	sa_family_t;	/* sockaddr address family type */
 #define SL_SO_TLS_ALPN                 0x1029  ///< Passes ALPN extension for SSL socket.
 #define SL_SO_MSS                      0x102A  ///< Sets the Maximum Segment Size (MSS) for a socket.
 #define SL_SO_SOCK_VAP_ID              0x102B  ///< Sets the VAP ID for a socket.
-#define SL_SO_MAXRETRY                 0x102C  ///< Sets the maximum number of retries for a socket.
+#define SL_SO_MAXRETRY                 0x102C  ///< Sets the maximum number of TCP TX retransmission attempts.
 #define SL_SO_VERIFY_DOMAIN_NAME       0x102D  ///< Sets expected domain name for TLS certificate verification.
 #define SL_SO_PER_SOCKET_CLOSE         0x102E  ///< Enable per-socket graceful close handling.
 /** @} */
@@ -986,6 +986,7 @@ ssize_t sendto(int socket_id, const void *buf, size_t buf_len, int flags, const 
  *   - @ref SO_RCVTIMEO
  *   - @ref SO_KEEPALIVE
  *   - @ref SO_MAX_RETRANSMISSION_TIMEOUT_VALUE
+ *   - @ref SL_SO_MAXRETRY
  *   - @ref TCP_ULP
  *   - IP_TOS
  *   - @ref SL_SO_CERT_INDEX
@@ -993,6 +994,9 @@ ssize_t sendto(int socket_id, const void *buf, size_t buf_len, int flags, const 
  *   - @ref SL_SO_TLS_SNI
  *   - @ref SL_SO_TLS_ALPN
  *   - @ref SL_SO_VERIFY_DOMAIN_NAME
+ *   - @ref SL_SO_MSS
+ *   - @ref SL_SO_SOCK_VAP_ID
+ *   - @ref SL_SO_PER_SOCKET_CLOSE
  *  
  * @param[in] option_value
  *   A pointer to the buffer containing the value for the option. Most socket-level options utilize an `int` argument for `option_value`. 
@@ -1001,15 +1005,19 @@ ssize_t sendto(int socket_id, const void *buf, size_t buf_len, int flags, const 
  *   | option_name                                       | option_value                         |  description                                                                                                               |
  *   |---------------------------------------------------|--------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
  *   | @ref SO_RCVTIMEO                                  | sl_si91x_time_value                  | Socket Receive timeout. sl_si91x_time_value structure is used to represent time in two parts: seconds and microseconds.    |
- *   | @ref SO_KEEPALIVE                                 | uint16_t                             | Set TCP keepalive in seconds                                                                                               |
- *   | @ref SO_MAX_RETRANSMISSION_TIMEOUT_VALUE          | uint8_t                              | Maximum retransmission timeout value that should be in the power of 2 for TCP in seconds                                   |
- *   | @ref TCP_ULP                                      | uint8_t                              | Supported one of the values from @ref BSD_TLS_OPTION_VALUE                                                       |
- *   | IP_TOS                                            | uint16_t                             | Supported one of the values from @ref BSD_SOCKET_TOS_DEFINES (Values 0-7 are deprecated)                                              |
+ *   | @ref SO_KEEPALIVE                                 | uint16_t                             | TCP keep-alive idle timeout in seconds before keep-alive probes are sent on an inactive connection (default: 1200 seconds) |
+ *   | @ref SO_MAX_RETRANSMISSION_TIMEOUT_VALUE          | uint8_t                              | Maximum TCP retransmission timeout (power of 2, acceptable range is between 1 and 128 seconds)                             |
+ *   | @ref SL_SO_MAXRETRY                               | uint8_t                              | Maximum number of TCP TX retransmission attempts (default: 10)                                                             |
+ *   | @ref TCP_ULP                                      | uint8_t                              | Supported one of the values from @ref BSD_TLS_OPTION_VALUE                                                                 |
+ *   | IP_TOS                                            | uint16_t                             | Supported one of the values from @ref BSD_SOCKET_TOS_DEFINES (Values 0-7 are deprecated)                                   |
  *   | @ref SL_SO_CERT_INDEX                             | uint8_t                              | Supported values for certificate index range from 0 - 3                                                                    |
  *   | @ref SL_SO_HIGH_PERFORMANCE_SOCKET                | BIT(7)                               | Set high performance socket                                                                                                |
  *   | @ref SL_SO_TLS_SNI                                | sl_si91x_socket_type_length_value_t  | Server name indication for the socket                                                                                      |
  *   | @ref SL_SO_TLS_ALPN                               | sl_si91x_socket_type_length_value_t  | Application layer protocol negotiation for the socket                                                                      |
  *   | @ref SL_SO_VERIFY_DOMAIN_NAME                     | uint8_t *                            | Expected domain name for TLS certificate verification; firmware uses this for server certificate CN/SAN check.             |
+ *   | @ref SL_SO_MSS                                    | uint16_t                             | Maximum Segment Size (MSS) for the TCP connection                                                                          |
+ *   | @ref SL_SO_SOCK_VAP_ID                            | uint8_t                              | Specifies the interface on which the socket will operate                                                                   |
+ *   | @ref SL_SO_PER_SOCKET_CLOSE                       | BIT(0)                               | Enable per-socket graceful close handling (TCP; set before connect or listen)                                              |
  * 
  * @param[in] option_length
  *   The length of the option data, in bytes, pointed to by `option_value`.
@@ -1032,8 +1040,25 @@ ssize_t sendto(int socket_id, const void *buf, size_t buf_len, int flags, const 
  * - TLS options alter the next @ref connect() handshake.
  * 
  * @note 
- *   The options `SL_SO_CERT_INDEX`, `SL_SO_HIGH_PERFORMANCE_SOCKET`, `SL_SO_TLS_SNI`, `SL_SO_TLS_ALPN`, and `SL_SO_VERIFY_DOMAIN_NAME` are Silicon Labs specific options.
- * 	 This function is used before the socket is connected.
+ *   The options `SL_SO_CERT_INDEX`, `SL_SO_HIGH_PERFORMANCE_SOCKET`, `SL_SO_TLS_SNI`, `SL_SO_TLS_ALPN`, `SL_SO_MSS`, `SL_SO_SOCK_VAP_ID`, `SL_SO_MAXRETRY`, `SL_SO_VERIFY_DOMAIN_NAME`, and `SL_SO_PER_SOCKET_CLOSE` are Silicon Labs specific options.
+ *   Most of these options must be set before the socket is connected.
+ *
+ * @note TCP keep-alive (@ref SO_KEEPALIVE):
+ * - Applies when the TCP connection is idle (no peer activity that refreshes the keep-alive timer). Keep-alive probes check whether the peer is still reachable.
+ * - Configures the idle time (in seconds) before the first TCP keep-alive packet is sent. The default is 1200 seconds.
+ * - If the peer does not respond, the NWP retries keep-alive with fixed defaults of 10 retries at 10-second intervals (not configurable via this API).
+ * - Remote termination on silent peer loss occurs after: initial idle time + (retries × retry interval).
+ *   For example, with idle time set to 20 seconds: 20 + (10 × 10) = 120 seconds until remote termination.
+ * - Keep-alive does not cover TCP transmit (TX) failures on unacknowledged sends; use @ref SL_SO_MAXRETRY / @ref SO_MAX_RETRANSMISSION_TIMEOUT_VALUE for that.
+ *
+ * @note TCP transmit (TX) retransmission (@ref SL_SO_MAXRETRY, @ref SO_MAX_RETRANSMISSION_TIMEOUT_VALUE):
+ * - Applies to TCP transmit (TX): when sent data is not acknowledged, the NWP retransmits until the peer ACKs or retries are exhausted.
+ * - @ref SL_SO_MAXRETRY configures the maximum number of TCP retransmission attempts. If not set, the default is 10.
+ * - @ref SO_MAX_RETRANSMISSION_TIMEOUT_VALUE configures the maximum retransmission timeout in seconds. The value must be a power of 2 between 1 and 128. If not set, the NWP default is 1 second.
+ * - The wait between retransmissions grows exponentially (doubles each retry) and is capped by @ref SO_MAX_RETRANSMISSION_TIMEOUT_VALUE.
+ * - With the default cap of 1 second, each wait stays about 1 second, so remote termination on unacked TX is roughly @ref SL_SO_MAXRETRY seconds (for example, 10 retries ≈ 10 s).
+ * - With a higher cap, waits double until the cap is hit. For example, with @ref SO_MAX_RETRANSMISSION_TIMEOUT_VALUE = 16 and 10 retries:
+ *   1 → 2 → 4 → 8 → 16 → 16 → 16 → 16 → 16 → 16 seconds (about 111 s total until remote termination).
  *
  * @see getsockopt(), connect(), socket()
  *

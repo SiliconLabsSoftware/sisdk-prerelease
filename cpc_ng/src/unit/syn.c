@@ -18,11 +18,13 @@
 #include "../sli_cpc.h"
 #include "../sli_cpc_bus.h"
 #include "../sli_cpc_ep.h"
+#include "../sli_cpc_frame.h"
 #include "../sli_cpc_hdr.h"
 #include "../sli_cpc_memory.h"
 #include "sl_cpc_buf.h"
 #include "sl_cpc_bus_instances.h"
 #include "sl_cpc_drv_mock.h"
+#include "sl_cpc_drv_mock_default_config.h"
 
 #include "../../port/mock/src/mock_cpc_timer.h"
 #include "expect.h"
@@ -135,6 +137,94 @@ TEST(cpc_syn, listen_then_handshake_completes)
   sl_cpc_ep_close(&ep);
   cpc_test_pump();
 
+  cpc_test_ep_discard(&ep);
+}
+
+/**
+ * @brief OPEN+SYN defers via PEND_SYN when the TX frame pool is empty.
+ *
+ * Sequence:
+ *   1. listen(), steal N-1 TX slots, hold the last with a deferred TX-complete RST
+ *      (no-ACK, so TX-complete returns it to the pool).
+ *   2. Inject peer SYN — reply allocation fails, PEND_SYN is armed, state stays OPEN.
+ *   3. Completing the held TX returns the slot via process_transmit_complete;
+ *      process_pending_flags retries the SYN reply on the same bus wake.
+ *   4. Deferred SYN-ACK is transmitted; endpoint moves to SYN_RCVD and clears PEND_SYN.
+ */
+TEST(cpc_syn, listen_syn_reply_defers_when_tx_pool_exhausted)
+{
+  sl_cpc_frame_t *frames[SL_CPC_DRV_MOCK_DEFAULT_TX_FRAME_POOL_COUNT - 1U];
+  size_t frame_count = 0;
+  sl_status_t status;
+  sl_cpc_ep_t ep;
+  size_t i;
+
+  status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, cpc_test_event_cb, NULL);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
+
+  status = sl_cpc_ep_listen(&ep, g_bus);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
+  TEST_ASSERT_EQUAL(SLI_CPC_STATE_OPEN, ep.state);
+
+  mock_cpc_drv_set_defer_tx_complete(sl_cpc_drv_mock_default, true);
+
+  for (i = 0; i < SL_CPC_DRV_MOCK_DEFAULT_TX_FRAME_POOL_COUNT - 1U; i++) {
+    frames[i] = sli_cpc_frame_new(g_bus, false);
+    TEST_ASSERT_NOT_NULL(frames[i]);
+    frame_count++;
+  }
+
+  // Occupy the last pool slot with a no-ACK RST held in the driver.
+  sli_cpc_send_reset_frame(g_bus, CPC_TEST_EP_ID);
+  cpc_test_pump();
+  TEST_ASSERT_EQUAL(1, mock_cpc_drv_held_tx_count(sl_cpc_drv_mock_default));
+  TEST_ASSERT_NULL(sli_cpc_frame_new(g_bus, false));
+  TEST_ASSERT_OUTGOING({
+    .flags = CPC_EXPECT_FLAG_RESET,
+    .len = 0,
+    .dst = CPC_TEST_EP_ID,
+    .seq = 0,
+    .ack = 0,
+    .wnd = 0,
+  });
+
+  TEST_INJECT_FRAME({
+    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+    .len = CPC_TEST_PEER_MTU,
+    .dst = CPC_TEST_EP_ID,
+    .seq = CPC_TEST_PEER_SYN_SEQ,
+    .ack = 0,
+    .wnd = CPC_TEST_PEER_RX_WND,
+  });
+
+  cpc_test_pump();
+
+  TEST_ASSERT_EQUAL(SLI_CPC_STATE_OPEN, ep.state);
+  TEST_ASSERT_BITS_HIGH(SLI_CPC_EP_FLAG_PEND_SYN, ep.flags);
+  TEST_ASSERT_EQUAL_UINT16(CPC_TEST_PEER_MTU, ep.remote_mtu);
+  TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_SYN_SEQ + 1U, ep.ack);
+
+  mock_cpc_drv_set_defer_tx_complete(sl_cpc_drv_mock_default, false);
+  TEST_ASSERT_EQUAL(1, mock_cpc_drv_complete_held_tx(sl_cpc_drv_mock_default, 1));
+
+  TEST_ASSERT_OUTGOING({
+    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+    .len = CPC_TEST_RX_SIZE,
+    .dst = CPC_TEST_EP_ID,
+    .seq = -1,
+    .ack = (int)(CPC_TEST_PEER_SYN_SEQ + 1U),
+    .wnd = 0,
+  });
+
+  TEST_ASSERT_EQUAL(SLI_CPC_STATE_SYN_RCVD, ep.state);
+  TEST_ASSERT_BITS_LOW(SLI_CPC_EP_FLAG_PEND_SYN, ep.flags);
+
+  for (i = 0; i < frame_count; i++) {
+    sli_cpc_frame_free(frames[i]);
+  }
+
+  sl_cpc_ep_close(&ep);
+  cpc_test_pump();
   cpc_test_ep_discard(&ep);
 }
 
@@ -1279,6 +1369,7 @@ TEST(cpc_syn, duplicate_final_ack_in_connected_is_ignored)
 TEST_GROUP_RUNNER(cpc_syn)
 {
   RUN_TEST_CASE(cpc_syn, listen_then_handshake_completes);
+  RUN_TEST_CASE(cpc_syn, listen_syn_reply_defers_when_tx_pool_exhausted);
   RUN_TEST_CASE(cpc_syn, connect_then_handshake_completes);
   RUN_TEST_CASE(cpc_syn, connect_then_immediate_write_after_syn_ack);
   RUN_TEST_CASE(cpc_syn, connect_then_reset_notifies_error);

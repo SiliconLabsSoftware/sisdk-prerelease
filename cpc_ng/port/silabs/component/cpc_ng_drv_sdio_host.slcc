@@ -28,7 +28,7 @@ requires:
 - name: device_manager
 - name: hal_gpio
 - name: hal_sdhc
-- name: sdhc
+- name: sdhc_core
 - name: status
 template_file:
 - path: template/sl_cpc_drv_sdio_host_config.h.jinja

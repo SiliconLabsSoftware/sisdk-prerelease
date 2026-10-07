@@ -22,7 +22,10 @@ recommends:
   vendor: silabs
 
 config_file:
+  # Base leaf defaults; CSL config includes this then overrides neighbor table size.
+  # Listed here so -cp project generation copies it beside the CSL config header.
 - path: stack/config/component_config/sl_zigbee_pro_leaf_stack_config.h
+- path: stack/config/component_config/sl_zigbee_pro_leaf_stack_with_csl_config.h
 
 validation_helper:
   # NCP doesn't have DEVICE_TYPE before it connects to Host

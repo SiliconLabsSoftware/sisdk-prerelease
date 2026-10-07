@@ -1,0 +1,31 @@
+id: tf_psa_crypto_config
+package: mbedtls
+label: TF PSA Crypto Configuration file
+description: >-
+  This component provides the TF PSA Crypto config file.
+category: Platform|Security|PSA Crypto
+quality: production
+ui_hints:
+  visibility: never
+provides:
+- name: tf_psa_crypto_config
+
+include:
+- path: include
+  file_list:
+  - path: tf-psa-crypto/build_info.h
+  - path: tf-psa-crypto/private/crypto_adjust_config_auto_enabled.h
+  - path: tf-psa-crypto/private/crypto_adjust_config_derived.h
+  - path: tf-psa-crypto/private/crypto_adjust_config_dependencies.h
+  - path: tf-psa-crypto/private/crypto_adjust_config_key_pair_types.h
+  - path: tf-psa-crypto/private/crypto_adjust_config_support.h
+  - path: tf-psa-crypto/private/crypto_adjust_config_synonyms.h
+  - path: tf-psa-crypto/version.h
+- path: drivers/builtin/include
+  file_list:
+  - path: mbedtls/private/crypto_adjust_config_tweak_builtins.h
+
+metadata:
+  sbom:
+    reference: tf_psa_crypto_sbom
+root_path: mbedtls/tf-psa-crypto

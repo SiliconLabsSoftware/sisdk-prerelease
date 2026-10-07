@@ -389,7 +389,7 @@ void sl_rail_test_internal_app_init(void)
     txData[i] = i;
   }
 
-#if defined(SL_CATALOG_RAIL_UTIL_THERMISTOR_PRESENT)
+#if defined(SL_CATALOG_RAIL_UTIL_THERMISTOR_PRESENT) && RAIL_SUPPORTS_HFXO_COMPENSATION
   RAIL_ConfigHFXOCompensation(railHandle, &compensationConfig);
 #endif
 

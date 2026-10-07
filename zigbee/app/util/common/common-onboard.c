@@ -22,7 +22,12 @@
 #include "stack/include/sl_zigbee.h"
 #include "hal/hal.h"
 #if !defined(SL_ZIGBEE_TEST)
+#if defined(__has_include)
+#if __has_include("sl_mbedtls.h")
 #include "sl_mbedtls.h"
+#define SL_ZIGBEE_HAS_SL_MBEDTLS 1
+#endif
+#endif
 #endif
 #include "serial/serial.h"
 #include "app/util/common/common.h"
@@ -58,10 +63,8 @@ void initialize_sl_zigbee_stack_t(void)
   //Initialize the hal
   halInit();
 
-  #if !defined(SL_ZIGBEE_TEST)
-  // This function must be called by an application before using any mbedTLS
-  // functions. This function will make sure that the platform hooks in mbedTLS
-  // are configured to ensure correct runtime behavior.
+  #if defined(SL_ZIGBEE_HAS_SL_MBEDTLS)
+  // Legacy platforms: configure mbedTLS platform hooks before use.
   sl_mbedtls_init();
   #endif
 

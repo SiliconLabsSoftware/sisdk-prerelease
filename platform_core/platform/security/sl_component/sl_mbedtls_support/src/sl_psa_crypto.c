@@ -29,11 +29,52 @@
  ******************************************************************************/
 
 #include "sl_psa_crypto.h"
-
 #include "sli_psa_driver_features.h"
+#include "sl_assert.h"
+#include "tf-psa-crypto/build_info.h"
+#if !defined(SL_TRUSTZONE_NONSECURE)
+#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+#include "sl_se_manager.h"
+#endif
+#if defined(CRYPTOACC_PRESENT) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+  #include "cryptoacc_management.h"
+#endif
+#endif // #if !defined(SL_TRUSTZONE_NONSECURE)
+
+#if defined(MBEDTLS_THREADING_ALT) && defined(MBEDTLS_THREADING_C)
+#include "mbedtls/threading.h"
+#endif // defined(MBEDTLS_THREADING_ALT) && defined(MBEDTLS_THREADING_C)
 
 // -----------------------------------------------------------------------------
 // Global functions
+
+void sl_psa_crypto_init(void)
+{
+#if !defined(SL_TRUSTZONE_NONSECURE)
+
+#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
+  /* Initialize the SE Manager including the SE lock.
+     No need for critical region here since sl_se_init implements one. */
+  sl_status_t ret;
+  ret = sl_se_init();
+  EFM_ASSERT(ret == SL_STATUS_OK);
+#endif
+
+#if defined(CRYPTOACC_PRESENT) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+  // Set up SCA countermeasures in hardware
+  cryptoacc_initialize_countermeasures();
+#endif // SILICON_LABS_32B_SERIES_2_CONFIG > 2
+
+#endif // #if !defined(SL_TRUSTZONE_NONSECURE)
+
+#if defined(MBEDTLS_THREADING_ALT) && defined(MBEDTLS_THREADING_C)
+  THREADING_setup();
+  #if defined(MBEDTLS_THREADING_TEST)
+  mbedtls_test_thread_set_alt(&THREADING_ThreadCreate,
+                              &THREADING_ThreadJoin);
+  #endif //MBEDTLS_THREADING_TEST
+#endif // #if defined(MBEDTLS_THREADING_ALT) && defined(MBEDTLS_THREADING_C)
+}
 
 void sl_psa_set_key_lifetime_with_location_preference(
   psa_key_attributes_t *attributes,
@@ -88,8 +129,7 @@ psa_key_location_t sl_psa_get_most_secure_key_location(void)
 // body from the TFM NS interface (tfm_crypto_func_api.c), which marshals the
 // call through the NSC veneer to the secure side.
 
-#if defined(MBEDTLS_PSA_CRYPTO_DRIVERS) && !defined(SL_TRUSTZONE_NONSECURE)
-
+#if SL_PSA_DRIVERS_ENABLED && !defined(SL_TRUSTZONE_NONSECURE)
 #include "sl_psa_values.h"
 #include "psa_crypto_core.h"
 #include "psa_crypto_slot_management.h"
@@ -120,7 +160,6 @@ psa_status_t sl_psa_key_derivation_single_shot(
   psa_status_t unlock_status = PSA_ERROR_CORRUPTION_DETECTED;
   psa_key_slot_t *input_key_slot = NULL;
   psa_key_slot_t *output_key_slot = NULL;
-  psa_se_drv_table_entry_t *driver = NULL;
   *key_out = MBEDTLS_SVC_KEY_ID_INIT;
   size_t storage_size = 0;
 
@@ -134,8 +173,8 @@ psa_status_t sl_psa_key_derivation_single_shot(
     return status;
   }
 
-  status = psa_start_key_creation(PSA_KEY_CREATION_DERIVE, key_out_attributes,
-                                  &output_key_slot, &driver);
+  status = psa_start_key_creation(key_out_attributes,
+                                  &output_key_slot);
   if (status != PSA_SUCCESS) {
     goto exit;
   }
@@ -232,15 +271,88 @@ psa_status_t sl_psa_key_derivation_single_shot(
   exit:
 
   if (status == PSA_SUCCESS) {
-    status = psa_finish_key_creation(output_key_slot, driver, key_out);
+    status = psa_finish_key_creation(output_key_slot, key_out);
   }
   if (status != PSA_SUCCESS) {
-    psa_fail_key_creation(output_key_slot, driver);
+    psa_fail_key_creation(output_key_slot);
   }
 
   unlock_status = psa_unregister_read(input_key_slot);
 
   return (status == PSA_SUCCESS) ? unlock_status : status;
 }
+#endif /* SL_PSA_DRIVERS_ENABLED && !SL_TRUSTZONE_NONSECURE */
 
-#endif /* MBEDTLS_PSA_CRYPTO_DRIVERS && !SL_TRUSTZONE_NONSECURE */
+// -----------------------------------------------------------------------------
+// EC J-PAKE PMS export (Silicon Labs extension)
+//
+// Declared in psa/crypto_extra.h for TF-M / direct callers. TLS uses the
+// standard PSA_ALG_TLS12_ECJPAKE_TO_PMS path; the SE transparent key-derivation
+// driver passes through 32-byte SE implicit key material.
+
+#if defined(SLI_MBEDTLS_DEVICE_HSE)       \
+  && defined(SLI_PSA_DRIVER_FEATURE_PAKE) \
+  && !defined(SL_TRUSTZONE_NONSECURE)
+
+#include "sli_se_transparent_functions.h"
+
+/* Must match psa_crypto_driver_wrappers.h */
+#ifndef SLI_SE_TRANSPARENT_DRIVER_ID
+#define SLI_SE_TRANSPARENT_DRIVER_ID (4)
+#endif
+
+psa_status_t psa_pake_derive_secret(psa_pake_operation_t *operation,
+                                    uint8_t *key_buf,
+                                    size_t key_length)
+{
+  psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+  psa_status_t abort_status = PSA_ERROR_CORRUPTION_DETECTED;
+  size_t key_output_length = 0;
+
+  if ((operation == NULL) || (key_buf == NULL) || (key_length == 0)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (operation->MBEDTLS_PRIVATE(stage) != PSA_PAKE_OPERATION_STAGE_COMPUTATION) {
+    status = PSA_ERROR_BAD_STATE;
+    goto exit;
+  }
+
+  if (PSA_ALG_IS_JPAKE(operation->MBEDTLS_PRIVATE(alg))) {
+    psa_jpake_computation_stage_t *computation_stage =
+      &operation->MBEDTLS_PRIVATE(computation_stage).MBEDTLS_PRIVATE(jpake);
+    if (computation_stage->MBEDTLS_PRIVATE(round) != PSA_JPAKE_FINISHED) {
+      status = PSA_ERROR_BAD_STATE;
+      goto exit;
+    }
+  } else {
+    status = PSA_ERROR_NOT_SUPPORTED;
+    goto exit;
+  }
+
+  if (operation->MBEDTLS_PRIVATE(id) != SLI_SE_TRANSPARENT_DRIVER_ID) {
+    status = PSA_ERROR_BAD_STATE;
+    goto exit;
+  }
+
+  status = sli_se_transparent_pake_get_implicit_key(
+    &operation->MBEDTLS_PRIVATE(data).MBEDTLS_PRIVATE(ctx).sli_se_transparent_ctx,
+    key_buf,
+    key_length,
+    &key_output_length);
+
+  if ((status != PSA_SUCCESS) || (key_output_length != key_length)) {
+    if (status == PSA_SUCCESS) {
+      status = PSA_ERROR_HARDWARE_FAILURE;
+    }
+    goto exit;
+  }
+
+  status = PSA_SUCCESS;
+
+  exit:
+  abort_status = psa_pake_abort(operation);
+  return (status == PSA_SUCCESS) ? abort_status : status;
+}
+
+#endif /* SLI_MBEDTLS_DEVICE_HSE && SLI_PSA_DRIVER_FEATURE_PAKE && !NS */

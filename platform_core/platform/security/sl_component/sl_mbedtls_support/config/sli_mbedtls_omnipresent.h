@@ -40,63 +40,9 @@
 #endif
 
 // -----------------------------------------------------------------------------
-// Non-volatile seed function headers
-
-#if defined(MBEDTLS_PLATFORM_NV_SEED_ALT)
-
-// Provide the NV seed function signatures since we have no specific header
-// for them.
-
-#include <stddef.h>
-#ifdef __cplusplus
-extern "C" {
-#endif
-int sli_nv_seed_read(unsigned char *buf, size_t buf_len);
-int sli_nv_seed_write(unsigned char *buf, size_t buf_len);
-#ifdef __cplusplus
-}
-#endif
-#endif // MBEDTLS_PLATFORM_NV_SEED_ALT
-
-// -----------------------------------------------------------------------------
-// Platform macros
-
-#if defined(MBEDTLS_PLATFORM_CALLOC_MACRO) && defined(MBEDTLS_PLATFORM_FREE_MACRO)
-
-// By default MBEDTLS_PLATFORM_CALLOC_MACRO and MBEDTLS_PLATFORM_FREE_MACRO are
-// defined in mbedtls_platform_dynamic_memory_allocation_config_default.slcc.
-// Alternative implementations can configure MBEDTLS_PLATFORM_CALLOC_MACRO and
-// MBEDTLS_PLATFORM_FREE_MACRO to use other platform specific implementations.
-// Alternatively some use cases may select runtime initialisation in the
-// application by explicitly calling mbedtls_platform_set_calloc_free() by
-// selecting mbedtls_platform_dynamic_memory_allocation_config_init_runtime.
-
-#include <stddef.h>
-#ifdef __cplusplus
-extern "C" {
-#endif
-extern void *MBEDTLS_PLATFORM_CALLOC_MACRO(size_t n, size_t size);
-extern void MBEDTLS_PLATFORM_FREE_MACRO(void *ptr);
-#ifdef __cplusplus
-}
-#endif
-#endif // MBEDTLS_PLATFORM_CALLOC_MACRO && MBEDTLS_PLATFORM_FREE_MACRO
-
-// -----------------------------------------------------------------------------
 // Device differentiation logic
 
 #if defined(CRYPTO_PRESENT)
-
-  #define SLI_MBEDTLS_DEVICE_S1
-
-  #if !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_95)
-    #define SLI_MBEDTLS_DEVICE_S1_WITH_TRNG
-  #endif
-
-  #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_89)
-// The TRNG may possibly not work depending on the die revision.
-    #define SLI_MBEDTLS_DEVICE_S1_WITH_TRNG_ERRATA
-  #endif
 
 #elif defined(SEMAILBOX_PRESENT) && defined(_SILICON_LABS_32B_SERIES_2)
 

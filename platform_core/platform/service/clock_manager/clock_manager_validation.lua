@@ -324,6 +324,13 @@ if sysclk_source.value == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL" and socpll_enable ~= ni
     nil,
     nil)
 end
+if sysclk_source.value == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL0" and socpll_enable ~= nil and socpll_enable.value == "0" then
+  validation.error(
+    "SYSCLK source branch is configured on SOCPLL0, but SL_CLOCK_MANAGER_SOCPLL_EN is disabled",
+    validation.target_for_defines({"SL_CLOCK_MANAGER_SYSCLK_SOURCE"}),
+    nil,
+    nil)
+end
 
 -- EM01GRACLK
 if em01grpaclk_source.value == "CMU_EM01GRPACLKCTRL_CLKSEL_HFXO" and (hfxo_enable.value == "0" or hfxo_enable.value == "SL_CLOCK_MANAGER_HFXO_EN_DISABLE") then
@@ -610,7 +617,7 @@ if is_sixx301 then
   device_thresholds = {
     sysclk_min = 2000000,      -- 2MHz
     sysclk_max = 150000000,    -- 150MHz
-    hclk_min = 2000000,        -- 2MHz  
+    hclk_min = 2000000,        -- 2MHz
     hclk_max = 150000000,      -- 150MHz
     pclk_min = 2000000,        -- 2MHz
     pclk_max = 75000000,       -- 75MHz
@@ -647,14 +654,14 @@ local function calculate_and_validate_clocks()
   -- SYSCLK frequency calculation --
   local sysclk_freq
   local sysclk_source_val = sysclk_source.value
-  
+
   if sysclk_source_val == "SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE" then
     if hf_default_clock_source.value == "SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE_AUTO" then
       hf_default_clock_source = slc.config("SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE_AUTO")
     end
     sysclk_source_val = hf_default_clock_source.value
   end
-  
+
   if sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_FSRCO" or sysclk_source_val == "SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE_FSRCO" then
     sysclk_freq = 20000000
   elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL" or sysclk_source_val == "SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE_HFRCODPLL" then
@@ -667,7 +674,7 @@ local function calculate_and_validate_clocks()
     sysclk_freq = tonumber(hfxo_freq.value)
   elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_CLKIN0" then
     sysclk_freq = tonumber(clkin0_freq.value)
-  elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL" then
+  elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL" or sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL0" then
     sysclk_freq = tonumber(socpll_freq.value)
   elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_RFFPLL0SYS" then
     sysclk_freq = tonumber(rffpll_freq.value)
@@ -681,7 +688,7 @@ local function calculate_and_validate_clocks()
   end
 
   -- SYSCLK validation
-  if (device_thresholds.sysclk_min and sysclk_freq < device_thresholds.sysclk_min) or 
+  if (device_thresholds.sysclk_min and sysclk_freq < device_thresholds.sysclk_min) or
      (device_thresholds.sysclk_max and sysclk_freq > device_thresholds.sysclk_max) then
     local min_text = device_thresholds.sysclk_min and string.format("%gMHz", device_thresholds.sysclk_min/1000000) or "no minimum"
     local max_text = device_thresholds.sysclk_max and string.format("%gMHz", device_thresholds.sysclk_max/1000000) or "no maximum"
@@ -700,7 +707,7 @@ local function calculate_and_validate_clocks()
   local hclk_divider_val = tonumber(string.match(hclk_divider.value, "%d+"))
   local hclk_freq = sysclk_freq / hclk_divider_val
 
-  if (device_thresholds.hclk_min and hclk_freq < device_thresholds.hclk_min) or 
+  if (device_thresholds.hclk_min and hclk_freq < device_thresholds.hclk_min) or
      (device_thresholds.hclk_max and hclk_freq > device_thresholds.hclk_max) then
     local min_text = device_thresholds.hclk_min and string.format("%gMHz", device_thresholds.hclk_min/1000000) or "no minimum"
     local max_text = device_thresholds.hclk_max and string.format("%gMHz", device_thresholds.hclk_max/1000000) or "no maximum"
@@ -734,8 +741,8 @@ local function calculate_and_validate_clocks()
       end
     end
   end
-  
-  if (device_thresholds.pclk_min and pclk_freq < device_thresholds.pclk_min) or 
+
+  if (device_thresholds.pclk_min and pclk_freq < device_thresholds.pclk_min) or
      (device_thresholds.pclk_max and pclk_freq > device_thresholds.pclk_max) then
     local min_text = device_thresholds.pclk_min and string.format("%gMHz", device_thresholds.pclk_min/1000000) or "no minimum"
     local max_text = device_thresholds.pclk_max and string.format("%gMHz", device_thresholds.pclk_max/1000000) or "no maximum"
@@ -756,7 +763,7 @@ local function calculate_and_validate_clocks()
     local lspclk_freq = pclk_freq / lspclk_divider_val
     if lspclk_freq < device_thresholds.lspclk_min or lspclk_freq > device_thresholds.lspclk_max then
       validation.warning(
-        string.format("Unsupported LSPCLK frequency. It should be between %gMHz and %gMHz", 
+        string.format("Unsupported LSPCLK frequency. It should be between %gMHz and %gMHz",
           device_thresholds.lspclk_min/1000000, device_thresholds.lspclk_max/1000000),
         validation.target_for_defines({"SL_CLOCK_MANAGER_LSPCLK_DIVIDER"}),
         nil,

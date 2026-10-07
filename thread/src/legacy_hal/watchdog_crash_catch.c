@@ -508,8 +508,10 @@ static void capture_stack_returns_and_pc(HalCrashInfoType *c,
     }
 }
 
-// Platform WM starve callback path: capture crash context at LWM and request
-// RESET_WATCHDOG_CAUGHT so diagnostic prints PC/stack on the following boot.
+// Platform WM starve callback path: capture crash context at LWM; hardware WDOG
+// reset prints PC via diagnostic on the following boot (RESET_WATCHDOG_EXPIRED).
+// Interrupts stay enabled (no INTERRUPTS_OFF): return from the WARN IRQ so the
+// HW watchdog counter can reach full timeout and reset the chip.
 static inline void starve_capture(void)
 {
     HalCrashInfoType *c           = &halCrashInfo;
@@ -520,8 +522,6 @@ static inline void starve_capture(void)
     const uint32_t   *sEnd        = NULL;
     const uint32_t   *stackBottom = NULL;
     const uint32_t   *stackTop    = NULL;
-
-    INTERRUPTS_OFF();
 
     frame = find_preempted_exception_frame(msp, psp);
     capture_crash_scb_registers(c);
@@ -543,8 +543,7 @@ static inline void starve_capture(void)
     setup_stack_scan_window(c, sp, &stackBottom, &stackTop);
     capture_stack_returns_and_pc(c, frame, psp, sp, sEnd, stackBottom, stackTop);
 
-    __set_MSP((uint32_t)(uintptr_t)_CSTACK_SEGMENT_END);
-    halInternalSysReset(RESET_WATCHDOG_CAUGHT);
+    halWatchdogLwmCaptureMark(c->PC);
 }
 
 // Watchdog Manager starve callback entry point.

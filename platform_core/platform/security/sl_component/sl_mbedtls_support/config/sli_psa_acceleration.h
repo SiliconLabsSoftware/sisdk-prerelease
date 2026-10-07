@@ -31,6 +31,8 @@
 #ifndef SLI_PSA_ACCELERATION_H
 #define SLI_PSA_ACCELERATION_H
 
+#include "sli_mbedtls_omnipresent.h"
+
 // -------------------------------------
 // Hash
 
@@ -87,6 +89,10 @@
 
 #define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_KEY_PAIR
 #define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_PUBLIC_KEY
+#define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_KEY_PAIR_BASIC
+#define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_KEY_PAIR_IMPORT
+#define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_KEY_PAIR_EXPORT
+#define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_KEY_PAIR_GENERATE
 #define MBEDTLS_PSA_ACCEL_ECC_SECP_R1_192
 #define MBEDTLS_PSA_ACCEL_ECC_SECP_R1_256
 
@@ -116,6 +122,10 @@
 // Key agreement
 
 #define MBEDTLS_PSA_ACCEL_ALG_ECDH
+
+#if defined(SLI_MBEDTLS_DEVICE_HSE)
+  #define MBEDTLS_PSA_ACCEL_ALG_JPAKE
+#endif
 
 // -------------------------------------
 // Signature

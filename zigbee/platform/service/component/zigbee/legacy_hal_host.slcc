@@ -30,7 +30,7 @@ include:
   file_list:
   - path: micro_host.h
   - path: crc.h
-  - path: random.h
+  - path: sl_zigbee_random.h
   - path: platform-header.h
   - path: hal.h
   - path: hal/hal.h

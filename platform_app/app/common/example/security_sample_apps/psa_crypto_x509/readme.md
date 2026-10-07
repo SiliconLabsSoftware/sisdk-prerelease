@@ -16,7 +16,7 @@ Demonstrates how to create CSRs, build a root-and-device X.509 certificate chain
 
 ## Purpose / Scope
 
-This example uses the PSA Crypto API together with Mbed TLS to build and verify a two-level X.509 certificate chain on the supported device. Private ECDSA keys are kept as **opaque PSA keys** — bound to a PSA key ID and accessed through `mbedtls_pk_setup_opaque()` — so Mbed TLS performs signing and verification through PSA without ever seeing the private bytes in cleartext. On HSE-equipped devices the example can also sign the device certificate with the **built-in private device (attestation) key** stored in the SE.
+This example uses the PSA Crypto API together with Mbed TLS to build and verify a two-level X.509 certificate chain on the supported device. Private ECDSA keys are kept as **opaque PSA keys** — bound to a PSA key ID and accessed through `mbedtls_pk_wrap_psa()` — so Mbed TLS performs signing and verification through PSA without ever seeing the private bytes in cleartext. On HSE-equipped devices the example can also sign the device certificate with the **built-in private device (attestation) key** stored in the SE.
 
 The CRYPTO engine in the device accelerates the X.509 API functions of Mbed TLS, and the example redirects standard I/O to the kit's VCOM port. On devices that support it, the example counts the number of clock cycles spent in each operation and prints the results on the console. Cycle measurement can be disabled by defining `PSA_CRYPTO_PRINT=0` (default is `1`) in the project's preprocessor settings, and certificate dumping can be disabled by defining `PSA_CRYPTO_PRINT_CERT=0` (default is `1`).
 
@@ -87,7 +87,7 @@ CSR write/parse: `mbedtls_x509write_csr_init`, `mbedtls_x509write_csr_set_md_alg
 
 Certificate write/parse/verify: `mbedtls_x509write_crt_init`, `mbedtls_x509write_crt_set_issuer_key`, `mbedtls_x509write_crt_set_subject_key`, `mbedtls_x509write_crt_set_issuer_name`, `mbedtls_x509write_crt_set_subject_name`, `mbedtls_x509write_crt_set_version`, `mbedtls_x509write_crt_set_md_alg`, `mbedtls_x509write_crt_set_serial_raw`, `mbedtls_x509write_crt_set_validity`, `mbedtls_x509write_crt_set_basic_constraints`, `mbedtls_x509write_crt_set_key_usage`, `mbedtls_x509write_crt_set_ns_cert_type`, `mbedtls_x509write_crt_set_subject_key_identifier`, `mbedtls_x509write_crt_set_authority_key_identifier`, `mbedtls_x509write_crt_pem`, `mbedtls_x509_crt_init`, `mbedtls_x509_crt_parse`, `mbedtls_x509_crt_verify`, `mbedtls_x509write_crt_free`, `mbedtls_x509_crt_free`.
 
-Opaque-key glue and supporting helpers: `mbedtls_pk_init`, `mbedtls_pk_setup_opaque`, `mbedtls_pk_free`, `mbedtls_mpi_init`, `mbedtls_mpi_read_string`, `mbedtls_mpi_free`.
+Opaque-key glue and supporting helpers: `mbedtls_pk_init`, `mbedtls_pk_wrap_psa`, `mbedtls_pk_free`.
 
 ### Entropy and PRNG
 

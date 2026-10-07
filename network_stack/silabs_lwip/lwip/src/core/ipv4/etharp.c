@@ -854,6 +854,24 @@ etharp_cleanup_netif(struct netif *netif)
   }
 }
 
+#if SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_ETHARP_ONDEMAND_TIMER
+/**
+ * Link-down ARP: stop on-demand timer on last link only.
+ * ARP table cleared by netif_set_down → etharp_cleanup_netif.
+ */
+void
+sli_etharp_cleanup_on_link_down(struct netif *netif)
+{
+  LWIP_ASSERT_CORE_LOCKED();
+  LWIP_ERROR("sli_etharp_cleanup_on_link_down: invalid netif", netif != NULL, return);
+
+  /* etharp_timer_stop: stop on-demand ARP timer on last link. */
+  if (!sli_netif_other_netif_is_up_link_up(netif)) {
+    etharp_timer_stop();
+  }
+}
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_ETHARP_ONDEMAND_TIMER */
+
 /**
  * Finds (stable) ethernet/IP address pair from ARP table
  * using interface and IP address index.

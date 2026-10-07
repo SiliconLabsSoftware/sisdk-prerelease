@@ -36,7 +36,7 @@
 // -------------------------------------
 // Includes
 
-#include <mbedtls/build_info.h>
+#include "tf-psa-crypto/build_info.h"
 
 #if defined(MBEDTLS_PSA_CRYPTO_STORAGE_C) && !defined(MBEDTLS_PSA_ITS_FILE_C)
 
@@ -131,7 +131,7 @@ void sli_its_acquire_mutex(void)
     if (!its_mutex_inited) {
       // The ITS mutex needs to be recursive since the same thread may need
       // to acquire it more than one time.
-      THREADING_SetRecursive(&its_mutex);
+      THREADING_SetRecursive(&its_mutex.MBEDTLS_PRIVATE(mutex));
       mbedtls_mutex_init(&its_mutex);
       its_mutex_inited = true;
     }
@@ -2291,6 +2291,9 @@ psa_status_t psa_its_set_v1(psa_storage_uid_t uid,
   if ((data_length != 0U) && (p_data == NULL)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
+  if ((data_length > NVM3_MAX_OBJECT_SIZE)) {
+    return PSA_ERROR_STORAGE_FAILURE;
+  }
 
   if (create_flags != PSA_STORAGE_FLAG_WRITE_ONCE
       && create_flags != PSA_STORAGE_FLAG_NONE
@@ -2341,8 +2344,7 @@ psa_status_t psa_its_set_v1(psa_storage_uid_t uid,
   its_file_meta->flags = create_flags;
 
   if (data_length != 0U) {
-    memcpy(its_file_buffer + sizeof(sl_its_file_meta_v1_t), ((uint8_t*)
-                                                             p_data), data_length);
+    memcpy((void *)(its_file_buffer + sizeof(sl_its_file_meta_v1_t)), p_data, data_length);
   }
 
   status = nvm3_writeData(nvm3_defaultHandle,

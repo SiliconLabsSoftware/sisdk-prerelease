@@ -74,6 +74,10 @@ template_contribution:
   value: 24576
   condition: [device_sdid_250]
   unless: [apploader, trustzone_secure, trustzone_nonsecure, test_btl_core]
+- name: bootloader_size
+  value: 24576
+  condition: [device_sdid_265]
+  unless: [apploader, trustzone_secure, trustzone_nonsecure, test_btl_core]
 metadata:
   sbom:
     license: MSLA

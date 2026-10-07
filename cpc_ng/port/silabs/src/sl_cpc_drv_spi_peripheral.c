@@ -432,7 +432,7 @@ static uint32_t spi_drv_write(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames);
 static uint32_t spi_drv_get_available_write_frame_slots(sl_cpc_bus_t *bus);
 static void spi_drv_on_rx_frame_free(sl_cpc_bus_t *bus);
 
-SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_caps, 4);
+SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_spi_peripheral_caps, 4);
 
 static void get_local_capabilities(sl_cpc_bus_t *bus, const void **caps_p, uint16_t *caps_size_p)
 {

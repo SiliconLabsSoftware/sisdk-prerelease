@@ -33,13 +33,16 @@
 
 #include "mbedtls.hpp"
 
+#include <mbedtls/debug.h>
+#include <mbedtls/platform.h>
+#include <mbedtls/ssl.h>
+#include <mbedtls/threading.h>
 #if (MBEDTLS_VERSION_NUMBER < 0x04000000)
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
+#else
+#include <psa/crypto.h>
 #endif
-#include <mbedtls/debug.h>
-#include <mbedtls/platform.h>
-#include <mbedtls/threading.h>
 
 #ifdef MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
 #include <mbedtls/pem.h>
@@ -203,6 +206,64 @@ int MbedTls::CryptoSecurePrng(void *, unsigned char *aBuffer, size_t aSize)
 }
 
 #endif // OPENTHREAD_FTD || OPENTHREAD_MTD
+
+EcJpakePassword::EcJpakePassword(void)
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000) && defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
+    : mKeyId(MBEDTLS_SVC_KEY_ID_INIT)
+#endif
+{
+}
+
+void EcJpakePassword::Clear(void)
+{
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000) && defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
+    if (!mbedtls_svc_key_id_is_null(mKeyId))
+    {
+        psa_destroy_key(mKeyId);
+        mKeyId = MBEDTLS_SVC_KEY_ID_INIT;
+    }
+#endif
+}
+
+int EcJpakePassword::Set(mbedtls_ssl_context &aSsl, const uint8_t *aPassword, size_t aLength)
+{
+#if defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_status_t         status;
+    int                  rval;
+
+    Clear();
+
+    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_DERIVE);
+    psa_set_key_algorithm(&attributes, PSA_ALG_JPAKE(PSA_ALG_SHA_256));
+    psa_set_key_type(&attributes, PSA_KEY_TYPE_PASSWORD);
+
+    status = psa_import_key(&attributes, aPassword, aLength, &mKeyId);
+    if (status != PSA_SUCCESS)
+    {
+        mKeyId = MBEDTLS_SVC_KEY_ID_INIT;
+        return MBEDTLS_ERR_SSL_HW_ACCEL_FAILED;
+    }
+
+    rval = mbedtls_ssl_set_hs_ecjpake_password_opaque(&aSsl, mKeyId);
+    if (rval != 0)
+    {
+        Clear();
+    }
+
+    return rval;
+#else
+    return mbedtls_ssl_set_hs_ecjpake_password(&aSsl, aPassword, aLength);
+#endif
+#else
+    OT_UNUSED_VARIABLE(aSsl);
+    OT_UNUSED_VARIABLE(aPassword);
+    OT_UNUSED_VARIABLE(aLength);
+
+    return MBEDTLS_ERR_SSL_FEATURE_UNAVAILABLE;
+#endif
+}
 
 } // namespace Crypto
 } // namespace ot

@@ -10,11 +10,18 @@ provides:
 - name: ot_mbedtls
 requires:
 - name: ot_crypto_ecdsa
-- name: mbedtls_dtls
+- name: mbedtls_ssl_proto_dtls
+- name: mbedtls_ssl_client
+- name: mbedtls_ssl_server
+- name: mbedtls_ssl_dtls_hello_verify
+- name: mbedtls_ssl_cookie
+- name: mbedtls_ssl_dtls_anti_replay
+- name: mbedtls_key_exchange_ecdhe_ecdsa
 - name: mbedtls_jpake
+  # TLS EC J-PAKE ciphersuite / set_hs_ecjpake_password(_opaque) APIs.
+- name: mbedtls_key_exchange_ecjpake
 - name: mbedtls_ecc_secp256r1
 - name: mbedtls_cmac
-- name: mbedtls_tls_server
 recommends:
 - id: ot_crypto_ecdsa_deterministic
   vendor: silabs

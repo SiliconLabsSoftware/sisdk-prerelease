@@ -1,0 +1,24 @@
+id: cpc_ng_wake
+package: cpc_ng
+description: Shared CPC-NG wake implementation. Instantiable host and device wake components select role and GPIO per instance.
+category: Services|CPC-NG|Internal
+quality: experimental
+label: CPC-NG Wake
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+source:
+- path: src/sli_cpc_wake.c
+- path: src/sli_cpc_wake.h
+provides:
+- name: cpc_ng_wake
+requires:
+- name: cpc_ng
+- name: gpio
+- name: power_manager
+template_contribution:
+- name: component_catalog
+  value: cpc_ng_wake
+root_path: cpc_ng

@@ -3,10 +3,6 @@
 #ifndef SLI_MBEDTLS_CONFIG_AUTOGEN_H
 #define SLI_MBEDTLS_CONFIG_AUTOGEN_H
 
-{% if mbedtls_mpi_max is defined %}
-#define MBEDTLS_MPI_MAX_SIZE  {{mbedtls_mpi_max|max}}
-{% endif %}
-
 {% for c in mbedtls_config -%}
 #define {{c}}
 {% endfor %}

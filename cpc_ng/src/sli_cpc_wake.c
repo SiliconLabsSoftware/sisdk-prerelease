@@ -29,7 +29,6 @@
  ******************************************************************************/
 
 #include "sl_assert.h"
-#include "sl_cpc_wake_config.h"
 #include "sl_gpio.h"
 #include "sl_power_manager.h"
 
@@ -49,7 +48,7 @@
 static void wake_dispatcher_fnct(void *context)
 {
   sli_cpc_wake_device_t *wake = context;
-  sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, wake);
+  sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, wake.device);
 
   if (bus->ctrl.ep.bus == NULL) {
     SLI_CPC_PANIC("Failed to send wake ACK, no ep found");
@@ -61,7 +60,6 @@ static void wake_dispatcher_fnct(void *context)
 static void wake_irq_cb(uint8_t int_no, void *context)
 {
   sli_cpc_wake_device_t *wake = context;
-  sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, wake);
   sl_status_t status;
   bool wake_val;
 
@@ -84,7 +82,7 @@ static void wake_irq_cb(uint8_t int_no, void *context)
       wake->active = true;
     }
 
-    sli_cpc_dispatcher_push(&wake->dispatcher_handle, wake_dispatcher_fnct, bus);
+    sli_cpc_dispatcher_push(&wake->dispatcher_handle, wake_dispatcher_fnct, wake);
   } else if (wake->active) {
     // Host has removed its wakeup assertion, allow the core to enter sleep on idle.
     sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
@@ -112,16 +110,16 @@ static bool is_wake_ack_frame(const sli_cpc_hdr_t *hdr)
 /******************************************************************************/
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-sl_status_t sli_cpc_wake_device_init(sli_cpc_wake_device_t *wake)
+sl_status_t sli_cpc_wake_device_init(sli_cpc_wake_device_t *wake, sl_gpio_t pin)
 {
-  sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, wake);
+  sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, wake.device);
   sl_status_t status;
 
   sli_cpc_dispatcher_init_handle(&wake->dispatcher_handle, bus);
   sli_cpc_dispatcher_set_pre(&wake->dispatcher_handle);
 
   wake->int_no = SL_GPIO_INTERRUPT_UNAVAILABLE;
-  wake->pin = (sl_gpio_t){.port = SL_CPC_WAKE_PORT, .pin = SL_CPC_WAKE_PIN};
+  wake->pin = pin;
   wake->active = false;
 
   status = sl_gpio_set_pin_direction(&wake->pin, SL_GPIO_PIN_DIRECTION_IN);
@@ -170,11 +168,11 @@ void sli_cpc_wake_device_deinit(sli_cpc_wake_device_t *wake)
 #endif
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-sl_status_t sli_cpc_wake_host_init(sli_cpc_wake_host_t *wake)
+sl_status_t sli_cpc_wake_host_init(sli_cpc_wake_host_t *wake, sl_gpio_t pin)
 {
   sl_status_t status;
 
-  wake->pin = (sl_gpio_t){.port = SL_CPC_WAKE_PORT, .pin = SL_CPC_WAKE_PIN};
+  wake->pin = pin;
   wake->state = SLI_CPC_WAKE_STATE_SLEEP_ALLOWED;
 
   // Configure de-asserted. The pin is only driven once there is something to
@@ -239,7 +237,7 @@ void sli_cpc_wake_allow_device_sleep(sli_cpc_wake_host_t *wake)
 
 void sli_cpc_wake_handle_rx(sli_cpc_wake_host_t *wake, const sli_cpc_hdr_t *hdr)
 {
-  sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, wake);
+  sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, wake.host);
 
   if (wake->state != SLI_CPC_WAKE_STATE_WAITING_ACK) {
     // A frame received while sleep is allowed was sent by a device that woke up

@@ -74,13 +74,17 @@ source:
   unless: [trustzone_nonsecure]
 
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PSA_CRYPTO_STORAGE_C
 
 - name: psa_its_files
   value:
     name: psa_its_files_minimum
     count: 1
+
+  # Add a component catalog entry to allow build-time detection of PSA ITS presence
+- name: component_catalog
+  value: psa_its
 
 documentation:
   url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-its

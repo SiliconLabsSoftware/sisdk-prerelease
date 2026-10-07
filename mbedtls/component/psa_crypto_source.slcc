@@ -1,62 +1,152 @@
 id: psa_crypto_source
 package: mbedtls
-label: Source Code
-description: PSA Crypto implementation sources (future TF-PSA-Crypto core/). Secure / Unaware only.
+label: PSA Crypto Source Code
+description: This component includes the PSA Crypto library source code files.
 category: Platform|Security|PSA Crypto
 quality: production
 ui_hints:
   visibility: never
+# Paths are relative to tf-psa-crypto/, not the mbedtls package root.
+conflicts:
+- name: tz_secure_key_library_ns
 provides:
 - name: psa_crypto_source
-conflicts:
-- name: trustzone_nonsecure
+requires:
+- name: psa_crypto_common_source
+- name: tf_psa_crypto_mbedtls
 source:
-- path: cipher.c
-- path: cipher_wrap.c
-- path: psa_crypto.c
-- path: psa_crypto_aead.c
-- path: psa_crypto_cipher.c
-- path: psa_crypto_driver_wrappers_no_static.c
-- path: psa_crypto_slot_management.c
-- path: psa_crypto_storage.c
-- path: psa_crypto_ecp.c
-- path: psa_crypto_ffdh.c
-- path: psa_crypto_hash.c
-- path: psa_crypto_mac.c
-- path: psa_crypto_pake.c
-- path: psa_crypto_rsa.c
-- path: psa_crypto_se.c
-- path: psa_its_file.c
-  condition:
-  - native
+- path: core/psa_crypto.c
+- path: core/psa_crypto_random.c
+- path: core/psa_crypto_slot_management.c
+- path: core/psa_crypto_storage.c
+- path: core/psa_its_file.c
+- path: core/psa_util.c
+- path: core/tf_psa_crypto_version.c
+- path: drivers/builtin/src/aes.c
+- path: drivers/builtin/src/bignum_core.c
+- path: drivers/builtin/src/bignum.c
+- path: drivers/builtin/src/block_cipher.c
+- path: drivers/builtin/src/ccm.c
+- path: drivers/builtin/src/chacha20.c
+- path: drivers/builtin/src/chachapoly.c
+- path: drivers/builtin/src/cipher_wrap.c
+- path: drivers/builtin/src/cipher.c
+- path: drivers/builtin/src/cmac.c
+- path: drivers/builtin/src/ctr_drbg.c
+- path: drivers/builtin/src/ecdsa.c
+- path: drivers/builtin/src/ecjpake.c
+- path: drivers/builtin/src/ecp_curves.c
+- path: drivers/builtin/src/ecp_curves_new.c
+- path: drivers/builtin/src/ecp.c
+- path: drivers/builtin/src/entropy.c
+- path: drivers/builtin/src/entropy_poll.c
+- path: drivers/builtin/src/gcm.c
+- path: drivers/builtin/src/hmac_drbg.c
+- path: drivers/builtin/src/md5.c
+- path: drivers/builtin/src/poly1305.c
+- path: drivers/builtin/src/psa_crypto_aead.c
+- path: drivers/builtin/src/psa_crypto_cipher.c
+- path: drivers/builtin/src/psa_crypto_ecp.c
+- path: drivers/builtin/src/psa_crypto_ffdh.c
+- path: drivers/builtin/src/psa_crypto_hash.c
+- path: drivers/builtin/src/psa_crypto_mac.c
+- path: drivers/builtin/src/psa_crypto_pake.c
+- path: drivers/builtin/src/psa_crypto_rsa.c
+- path: drivers/builtin/src/psa_crypto_xof.c
+- path: drivers/builtin/src/psa_util_internal.c
+- path: drivers/builtin/src/rsa.c
+- path: drivers/builtin/src/rsa_alt_helpers.c
+- path: drivers/builtin/src/sha1.c
+- path: drivers/builtin/src/sha256.c
+- path: drivers/builtin/src/sha3.c
+- path: drivers/builtin/src/sha512.c
+
 include:
-- path: .
+- path: core
   file_list:
-  - path: aesni.h
+  - path: alignment.h
   - path: check_crypto_config.h
-  - path: cipher_wrap.h
-  - path: md_wrap.h
-  - path: md_psa.h
-  - path: pk_wrap.h
-  - path: psa_crypto_aead.h
-  - path: psa_crypto_cipher.h
   - path: psa_crypto_core.h
   - path: psa_crypto_core_common.h
-  - path: psa_crypto_driver_wrappers.h
+  - path: psa_crypto_invasive.h
+  - path: psa_crypto_its.h
+  - path: psa_crypto_random.h
+  - path: psa_crypto_random_impl.h
+  - path: psa_crypto_slot_management.h
+  - path: psa_crypto_storage.h
+  - path: tf_psa_crypto_check_config.h
+  - path: tf_psa_crypto_common.h
+  - path: tf_psa_crypto_platform_requirements.h
+- path: dispatch
+  file_list:
   - path: psa_crypto_driver_wrappers_no_static.h
+- path: drivers/builtin/src
+  file_list:
+  - path: aesce.h
+  - path: aesni.h
+  - path: block_cipher_internal.h
+  - path: bignum_core.h
+  - path: bignum_internal.h
+  - path: bignum_mod.h
+  - path: bignum_mod_raw.h
+  - path: bn_mul.h
+  - path: chacha20_neon.h
+  - path: cipher_invasive.h
+  - path: cipher_wrap.h
+  - path: ctr.h
+  - path: ecp_invasive.h
+  - path: entropy_poll.h
+  - path: md_psa.h
+  - path: psa_crypto_aead.h
+  - path: psa_crypto_cipher.h
   - path: psa_crypto_ecp.h
   - path: psa_crypto_ffdh.h
   - path: psa_crypto_hash.h
-  - path: psa_crypto_invasive.h
-  - path: psa_crypto_its.h
   - path: psa_crypto_mac.h
   - path: psa_crypto_pake.h
-  - path: psa_crypto_random_impl.h
   - path: psa_crypto_rsa.h
-  - path: psa_crypto_se.h
-  - path: psa_crypto_slot_management.h
-  - path: psa_crypto_storage.h
+  - path: psa_crypto_xof.h
+  - path: psa_util_internal.h
+  - path: rsa_alt_helpers.h
+  - path: rsa_internal.h
+- path: drivers/builtin/include
+  file_list:
+  - path: mbedtls/private_access.h
+  - path: mbedtls/private/aes.h
+  - path: mbedtls/private/aria.h
+  - path: mbedtls/private/bignum.h
+  - path: mbedtls/private/block_cipher.h
+  - path: mbedtls/private/camellia.h
+  - path: mbedtls/private/ccm.h
+  - path: mbedtls/private/cmac.h
+  - path: mbedtls/private/chachapoly.h
+  - path: mbedtls/private/chacha20.h
+  - path: mbedtls/private/cipher.h
+  - path: mbedtls/private/config_adjust_test_accelerators.h
+  - path: mbedtls/private/crypto_adjust_config_enable_builtins.h
+  - path: mbedtls/private/crypto_adjust_config_tweak_builtins.h
+  - path: mbedtls/private/crypto_builtin_key_derivation.h
+  - path: mbedtls/private/crypto_builtin_composites.h
+  - path: mbedtls/private/crypto_builtin_primitives.h
+  - path: mbedtls/private/ctr_drbg.h
+  - path: mbedtls/private/ecdsa.h
+  - path: mbedtls/private/ecp.h
+  - path: mbedtls/private/ecjpake.h
+  - path: mbedtls/private/entropy.h
+  - path: mbedtls/private/error_common.h
+  - path: mbedtls/private/gcm.h
+  - path: mbedtls/private/hmac_drbg.h
+  - path: mbedtls/private/md5.h
+  - path: mbedtls/private/pkcs5.h
+  - path: mbedtls/private/poly1305.h
+  - path: mbedtls/private/ripemd160.h
+  - path: mbedtls/private/rsa.h
+  - path: mbedtls/private/sha1.h
+  - path: mbedtls/private/sha256.h
+  - path: mbedtls/private/sha3.h
+  - path: mbedtls/private/sha512.h
+
 metadata:
   sbom:
-    reference: mbedtls_sbom
-root_path: mbedtls/library
+    reference: tf_psa_crypto_sbom
+root_path: mbedtls/tf-psa-crypto

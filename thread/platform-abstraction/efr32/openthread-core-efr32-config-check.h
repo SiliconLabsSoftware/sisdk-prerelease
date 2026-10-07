@@ -49,10 +49,6 @@
     "One of the following must be defined: RADIO_CONFIG_915MHZ_OQPSK_SUPPORT, RADIO_CONFIG_SUBGHZ_SUPPORT or RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT"
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_1)
-#error "EFR32 Series 1 parts are not supported."
-#endif
-
 #if SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE && OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
 #error "SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE is incompatible with multi-instance builds."
 #endif

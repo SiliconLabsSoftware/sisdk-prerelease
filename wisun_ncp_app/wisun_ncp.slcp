@@ -15,6 +15,8 @@ component:
   - id: wisun_stack_debug
   - id: wisun_stack_lfn
   - id: wisun_stack_ffn
+  - id: wisun_lfn_parent
+    condition: [wisun_stack_ffn]
   - id: wisun_default_radioconf
   - id: sl_main
   - id: device_init
@@ -47,6 +49,7 @@ define:
     value: 1500
   - name: SL_WSNCP_MAX_TIMEOUT_COUNT
     value: 1000
+  - name: SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_2026_12
 
 configuration:
   # CPC Interface Configuration

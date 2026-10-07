@@ -98,6 +98,9 @@ config_file:
 - path: apps/sl_rail_test/config/efr32xg29/sl_rail_test_config.h
   condition:
   - device_sdid_240
+- path: apps/sl_rail_test/config/efr32xg2a/sl_rail_test_config.h
+  condition:
+  - device_sdid_245
 - path: apps/sl_rail_test/config/efr32xg2d/sl_rail_test_config.h
   condition:
   - device_sdid_260
@@ -154,6 +157,11 @@ include:
   - path: railtest_response_print_mapping.h
   condition:
   - kernel
+- path: protocol/btc
+  file_list:
+  - path: sl_rail_btc.h
+  condition:
+  - device_has_btcphy
 
 source:
 - path: apps/sl_rail_test/app_main.c
@@ -165,6 +173,9 @@ source:
 
 - path: apps/sl_rail_test/app_ci/autoack_ci.c
 - path: apps/sl_rail_test/app_ci/ble_ci.c
+- path: apps/sl_rail_test/app_ci/btc_ci.c
+  condition:
+  - device_has_btcphy
 - path: apps/sl_rail_test/app_ci/channel_hopping_ci.c
 - path: apps/sl_rail_test/app_ci/radio_config_ci.c
 - path: apps/sl_rail_test/app_ci/timer_ci.c
@@ -1614,6 +1625,117 @@ template_contribution:
 
 - name: cli_command
   value:
+    name: _________________
+    handler: cliSeparatorHack
+  condition:
+  - device_has_btcphy
+
+- name: cli_command
+  value:
+    name: ____BTC_Mode____
+    handler: cliSeparatorHack
+  condition:
+  - device_has_btcphy
+
+- name: cli_command
+  value:
+    name: BTC_Init
+    handler: BTC_Init
+    help: Init BTC
+    argument:
+    - type: uint32
+      help: AccessCode1
+    - type: uint32
+      help: AccessCode2
+    - type: uint8
+      help: bdAddr5
+  condition:
+  - device_has_btcphy
+
+- name: cli_command
+  value:
+    name: BTC_SetWhitening
+    handler: BTC_SetWhitening
+    help: Set BTC whitening seed
+    argument:
+    - type: uint8
+      help: Whitening seed
+  condition:
+  - device_has_btcphy
+
+- name: cli_command
+  value:
+    name: setBtcMode
+    handler: btcEnable
+    help: Control BTC mode.
+    argument:
+    - type: uint8
+      help: 0=Disable 1=Enable
+  condition:
+  - device_has_btcphy
+
+- name: cli_command
+  value:
+    name: BTC_Prepare
+    handler: BTC_Prepare
+    help: Prepare BTC TX/RX
+    argument:
+    - type: uint8
+      help: TX or RX 0=TX 1=RX
+    - type: uint8
+      help: Packet type according to sl_rail_btc_packet_type_t enum 0=ID 1=NULL 2=POLL 3=FHS 4=DH1 5=DH3 6=DH5 7=DM1 8=DM3 9=DM5 10=2-DH1 11=2-DH3 12=2-DH5 13=3-DH1 14=3-DH3 15=3-DH5 16=HV1 17=HV2 18=HV3 19=DV 20=EV3 21=EV4 22=EV5 23=2-EV3 24=2-EV5 25=3-EV3 26=3-EV5 27=AUX1
+    - type: uint16
+      help: Payload length in bytes
+    - type: uint8
+      help: Encryption 0=OFF 1=E0 2=AES
+  condition:
+  - device_has_btcphy
+
+- name: cli_command
+  value:
+    name: BTC_setE0Encryption
+    handler: BTC_setE0Encryption
+    help: Configure BTC E0 encryption using hardcoded values (master_clock=0x40034be, enc_key=0x4af08722 0xd03190ba 0x534c0d78 0x633a15e0, bd_addr=0x56947f2c 0x1b0f, key_length=12)
+  condition:
+  - device_has_btcphy
+
+- name: cli_command
+  value:
+    name: BTC_setAESEncryption
+    handler: BTC_setAESEncryption
+    help: Configure BTC AES encryption using hardcoded values (aes_key_bytes=0x89678967 0x89678967 0x45234523 0x45234523, aes_iv=0x66778899 0xaabbccdd, day_count_and_dir=0, zero_len_acl_w=0, aes_pld_cntr=0x00bc614e 0)
+  condition:
+  - device_has_btcphy
+
+- name: cli_command
+  value:
+    name: BTC_setAESEncryptionNonce
+    handler: BTC_setAESEncryptionNonce
+    help: Configure BTC AES encryption nonce using hardcoded values (aes_iv=0x66778899 0xaabbccdd, day_count_and_dir=0, aes_pld_cntr=0x00bc614e 0)
+  condition:
+  - device_has_btcphy
+
+- name: cli_command
+  value:
+    name: BTC_setE0MasterClock
+    handler: BTC_setE0MasterClock
+    help: Set BTC E0 Master Clock using hardcoded value (master_clock=0x40034be)
+  condition:
+  - device_has_btcphy
+
+- name: cli_command
+  value:
+    name: BTC_configureContinuousTx
+    handler: BTC_configureContinuousTx
+    help: Configure BTC continuous Tx
+    argument:
+    - type: uint8
+      help: rate 0=Disabled 1=BDR 2=EDR2 3=EDR3
+  condition:
+  - device_has_btcphy
+
+- name: cli_command
+  value:
     name: _______________
     handler: cliSeparatorHack
 
@@ -2251,6 +2373,17 @@ template_contribution:
       help: The amount of ppm to compensate
   condition:
   - device_sdid_220
+
+- name: cli_command
+  value:
+    name: compensateHFXO
+    handler: compensateHFXO
+    help: Apply the temperature compensation using latest thermistor measurement\n                    if no parameter is given.
+    argument:
+    - type: int8opt
+      help: The amount of ppm to compensate
+  condition:
+  - device_generic_family_sixx353
 
 - name: cli_command
   value:

@@ -1112,11 +1112,11 @@ sdk_extension:
   id: micriumos
   version: 6.2.0
 - vendor: silabs
-  id: bluetooth_le_controller
-  version: 11.2.0-alpha.62
-- vendor: silabs
   id: bluetooth_le
   version: 11.2.0
+- vendor: silabs
+  id: bluetooth_le_controller
+  version: 11.2.0-alpha.67
 - vendor: silabs
   id: platform_core
   version: 1.2.0
@@ -1124,14 +1124,11 @@ sdk_extension:
   id: common_15_4
   version: 1.2.0
 - vendor: silabs
-  id: bluetooth_apploader
-  version: 11.2.0-alpha.62
-- vendor: silabs
   id: zigbee
   version: 9.2.0
 - vendor: silabs
-  id: realtime_locationing
-  version: 12.0.0-alpha.6
+  id: bluetooth_apploader
+  version: 11.2.0-alpha.67
 - vendor: silabs
   id: usb
   version: 1.8.0
@@ -1139,14 +1136,17 @@ sdk_extension:
   id: security_tfm
   version: 1.2.0
 - vendor: silabs
+  id: realtime_locationing
+  version: 12.0.0-alpha.6
+- vendor: silabs
   id: boards
+  version: 1.2.0
+- vendor: silabs
+  id: mbedtls
   version: 1.2.0
 - vendor: silabs
   id: cmsis_dsp
   version: 1.16.3
-- vendor: silabs
-  id: mbedtls
-  version: 1.2.0
 - vendor: silabs
   id: bootloader
   version: 3.4.0
@@ -1154,17 +1154,20 @@ sdk_extension:
   id: cpc
   version: 4.10.0
 - vendor: silabs
+  id: printf
+  version: 1.2.0
+- vendor: silabs
   id: freertos
   version: 1.2.0
 - vendor: silabs
-  id: printf
+  id: security_sxsymcrypt
   version: 1.2.0
 - vendor: silabs
   id: delta_dfu
   version: 1.1.0
 - vendor: silabs
-  id: security_sxsymcrypt
-  version: 1.2.0
+  id: bluetooth_le_host
+  version: 11.2.0-alpha.67
 - vendor: silabs
   id: coremark
   version: 1.1.0
@@ -1172,23 +1175,20 @@ sdk_extension:
   id: rail_library
   version: 3.2.0
 - vendor: silabs
+  id: bluetooth_common
+  version: 1.2.0-alpha.67
+- vendor: silabs
   id: multiprotocol
   version: 1.2.0
 - vendor: silabs
   id: security_libcryptosoc
   version: 1.1.0
 - vendor: silabs
-  id: bgapi_protocol
-  version: 11.2.0-alpha.62
-- vendor: silabs
-  id: bluetooth_common
-  version: 1.2.0-alpha.62
-- vendor: silabs
   id: cmsis
   version: 1.2.0
 - vendor: silabs
-  id: bluetooth_le_host
-  version: 11.2.0-alpha.62
+  id: bgapi_protocol
+  version: 11.2.0-alpha.67
 - vendor: silabs
   id: unity_test_framework
   version: 1.1.0

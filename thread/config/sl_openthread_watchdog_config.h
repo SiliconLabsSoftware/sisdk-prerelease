@@ -37,7 +37,7 @@
 
 // <q SL_OPENTHREAD_WATCHDOG_CRASH_CATCH_ENABLE> Enable watchdog warn crash catch
 // <i> Registers sl_watchdog_manager_set_starve_callback() so platform WM HAL
-// <i> (WDOG WARN IRQ) invokes ot_crash_handler for RESET_WATCHDOG_CAUGHT (LWM).
+// <i> (WDOG WARN IRQ) captures halCrashInfo at LWM; HW reset prints PC on EXPIRED.
 // <i> Set SL_WATCHDOG_MANAGER_WARNING_TIME in sl_watchdog_manager_config.h.
 // <d> 1
 #define SL_OPENTHREAD_WATCHDOG_CRASH_CATCH_ENABLE 1

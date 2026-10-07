@@ -45,22 +45,23 @@
 #include "utils/code_utils.h"
 
 #include "em_device.h"
+#include <mbedtls/version.h>
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+#include <mbedtls/pk.h>
+#include <psa/crypto.h>
+#else
 #include <mbedtls/ecdsa.h>
 #include <mbedtls/ecp.h>
 #include <mbedtls/md.h>
 #include <mbedtls/pk.h>
-#include "mbedtls/psa_util.h"
-#if defined(_SILICON_LABS_32B_SERIES_2)
-#include "em_system.h"
-#else
-#include "sl_hal_system.h"
 #endif
+#include "platform-efr32.h"
 #include "sl_memory_manager.h"
 #include "sl_psa_crypto.h"
 #include "sl_status.h"
 #include "sli_psa_crypto.h"
+#include "mbedtls/psa_util.h"
 
-#define PERSISTENCE_KEY_ID_USED_MAX (7)
 #define MAX_HMAC_KEY_SIZE (32)
 
 // Buffer size for exporting an IKM key (80 bytes is the maximum size for a SHA-256 key).
@@ -339,60 +340,31 @@ static otError mapPsaStatusToOtError(psa_status_t status)
     return error;
 }
 
-#if defined(SEMAILBOX_PRESENT) && !defined(SL_TRUSTZONE_NONSECURE)
-static bool shouldWrap(psa_key_attributes_t *key_attr)
-{
-    psa_key_location_t keyLocation = PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(key_attr));
-    psa_key_type_t     keyType     = psa_get_key_type(key_attr);
-
-    return ((keyLocation != SL_PSA_KEY_LOCATION_WRAPPED) && (keyType != PSA_KEY_TYPE_HMAC));
-}
-
-static void checkAndWrapKeys(void)
-{
-    for (int index = 1; index <= PERSISTENCE_KEY_ID_USED_MAX; index++)
-    {
-        otCryptoKeyRef       key_ref  = OPENTHREAD_CONFIG_PSA_ITS_NVM_OFFSET + index;
-        psa_key_attributes_t key_attr = PSA_KEY_ATTRIBUTES_INIT;
-
-        // If there is a key present in the location..
-        if (sl_sec_man_get_key_attributes(key_ref, &key_attr) == PSA_SUCCESS)
-        {
-            if (shouldWrap(&key_attr))
-            {
-                // Wrap the key..
-                otCryptoKeyRef     dst_key_ref = key_ref;
-                psa_key_lifetime_t key_lifetime =
-                    PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_PERSISTENCE_DEFAULT,
-                                                                   SL_PSA_KEY_LOCATION_WRAPPED);
-
-                psa_set_key_lifetime(&key_attr, key_lifetime);
-                sl_sec_man_copy_key(key_ref, &key_attr, &dst_key_ref);
-            }
-        }
-    }
-}
-#endif // SEMAILBOX_PRESENT && !SL_TRUSTZONE_NONSECURE
-
-void otPlatCryptoInit(void)
-{
-#if defined(SEMAILBOX_PRESENT) && !defined(SL_TRUSTZONE_NONSECURE)
-    if (sl_psa_get_most_secure_key_location() == SL_PSA_KEY_LOCATION_WRAPPED)
-    {
-        checkAndWrapKeys();
-    }
-#endif
-}
-
 static otError extractPrivateKeyFromDer(uint8_t *aPrivateKey, const uint8_t *aDer, uint8_t aDerLen)
 {
-    otError              error = OT_ERROR_NONE;
-    mbedtls_pk_context   pk;
+    otError            error = OT_ERROR_NONE;
+    mbedtls_pk_context pk;
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+    mbedtls_svc_key_id_t keyId       = MBEDTLS_SVC_KEY_ID_INIT;
+    psa_key_attributes_t attributes  = PSA_KEY_ATTRIBUTES_INIT;
+    size_t               exportedLen = 0;
+#else
     mbedtls_ecp_keypair *keyPair;
     int                  ret;
+#endif
 
     mbedtls_pk_init(&pk);
 
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+    otEXPECT_ACTION(mbedtls_pk_parse_key(&pk, aDer, aDerLen, NULL, 0) == 0, error = OT_ERROR_PARSE);
+    otEXPECT_ACTION(mbedtls_pk_get_psa_attributes(&pk, PSA_KEY_USAGE_EXPORT, &attributes) == 0,
+                    error = OT_ERROR_FAILED);
+    otEXPECT_ACTION(mbedtls_pk_import_into_psa(&pk, &attributes, &keyId) == 0, error = OT_ERROR_FAILED);
+    otEXPECT_ACTION(psa_export_key(keyId, aPrivateKey, SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE, &exportedLen)
+                        == PSA_SUCCESS,
+                    error = OT_ERROR_FAILED);
+    otEXPECT_ACTION(exportedLen == SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE, error = OT_ERROR_FAILED);
+#else
     otEXPECT_ACTION(mbedtls_pk_setup(&pk, mbedtls_pk_info_from_type(MBEDTLS_PK_ECKEY)) == 0, error = OT_ERROR_FAILED);
 
 #if (MBEDTLS_VERSION_NUMBER >= 0x03000000)
@@ -413,8 +385,16 @@ static otError extractPrivateKeyFromDer(uint8_t *aPrivateKey, const uint8_t *aDe
     ret = mbedtls_ecp_write_key(keyPair, aPrivateKey, SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE);
 #endif
     otEXPECT_ACTION(ret == 0, error = OT_ERROR_FAILED);
+#endif
 
 exit:
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+    if (!mbedtls_svc_key_id_is_null(keyId))
+    {
+        psa_destroy_key(keyId);
+    }
+    psa_reset_key_attributes(&attributes);
+#endif
     mbedtls_pk_free(&pk);
     return error;
 }

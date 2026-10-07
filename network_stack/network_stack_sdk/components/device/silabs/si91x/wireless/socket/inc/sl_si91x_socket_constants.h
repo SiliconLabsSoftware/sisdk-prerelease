@@ -53,8 +53,10 @@
 #define SLI_DEFAULT_STREAM_MSS_SIZE_IPV6   1440
 #define SLI_DEFAULT_DATAGRAM_MSS_SIZE_IPV6 1452
 
-#define SLI_MAX_TCP_RETRY_COUNT         10   //Default value for TCP retry count, Internal use, not configurable
-#define SLI_DEFAULT_TCP_KEEP_ALIVE_TIME 1200 //Default value for TCP keep alive time, Internal use, not configurable
+#define SLI_MAX_TCP_RETRY_COUNT \
+  10 // Host fallback when SL_SO_MAXRETRY or SL_SI91X_SO_MAXRETRY is not set. Do not edit this macro.
+#define SLI_DEFAULT_TCP_KEEP_ALIVE_TIME \
+  1200 // Host fallback when SO_KEEPALIVE or SL_SI91X_SO_TCP_KEEPALIVE is not set. Do not edit this macro.
 
 #define SLI_SI91X_CERT_INDEX_0 0
 #define SLI_SI91X_CERT_INDEX_1 1
@@ -96,27 +98,28 @@
  * @ingroup SI91X_SOCKET_FUNCTIONS
  * @{ 
  */
-#define SL_SI91X_SO_RCVTIME                          20 ///< Enable receive timeout
-#define SL_SI91X_SO_TCP_KEEPALIVE                    26 ///< To configure the TCP keep alive
-#define SL_SI91X_SO_HIGH_PERFORMANCE_SOCKET          38 ///< To configure the high performance socket
-#define SL_SI91X_SO_CERT_INDEX                       46 ///< To enable set certificate index
-#define SL_SI91X_SO_SSL_ENABLE                       37 ///< To enable SSL
-#define SL_SI91X_SO_SSL_V_1_0_ENABLE                 42 ///< To enable SSL 1.0
-#define SL_SI91X_SO_SSL_V_1_1_ENABLE                 43 ///< To enable SSL 1.1
-#define SL_SI91X_SO_SSL_V_1_2_ENABLE                 44 ///< To enable SSL 1.2
-#define SL_SI91x_SO_TCP_ACK_INDICATION               45 ///< To enable TCP ACK indication feature
-#define SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE 48 ///< to configure max retransmission timeout value
-#define SL_SI91X_IP_TOS                              48 ///< To configure TOS
-#define SL_SI91X_SO_SSL_V_1_3_ENABLE                 49 ///< To enable SSL 1.3
-#define SL_SI91X_SO_MAXRETRY                         24 ///< To enable max TCP retry count
-#define SL_SI91X_SO_MSS                              40 ///< To configure the TCP MSS
-#define SL_SI91X_SO_SOCK_VAP_ID                      25 ///< To configure the socket VAP ID
-#define SL_SI91X_SO_TLS_SNI                          47 ///< To configure the TLS SNI extension
-#define SL_SI91X_SO_TLS_ALPN                         50 ///< To configure the TLS ALPN extension
-#define SL_SI91X_SO_DTLS_ENABLE                      51 ///< To enable DTLS
-#define SL_SI91X_SO_DTLS_V_1_0_ENABLE                52 ///< To enable DTLS 1.0
-#define SL_SI91X_SO_DTLS_V_1_2_ENABLE                53 ///< To enable DTLS 1.2
-#define SL_SI91X_SO_PER_SOCKET_CLOSE                 54 ///< Enable per-socket graceful close handling
+#define SL_SI91X_SO_RCVTIME                 20 ///< Enable receive timeout
+#define SL_SI91X_SO_TCP_KEEPALIVE           26 ///< To configure the TCP keep alive
+#define SL_SI91X_SO_HIGH_PERFORMANCE_SOCKET 38 ///< To configure the high performance socket
+#define SL_SI91X_SO_CERT_INDEX              46 ///< To enable set certificate index
+#define SL_SI91X_SO_SSL_ENABLE              37 ///< To enable SSL
+#define SL_SI91X_SO_SSL_V_1_0_ENABLE        42 ///< To enable SSL 1.0
+#define SL_SI91X_SO_SSL_V_1_1_ENABLE        43 ///< To enable SSL 1.1
+#define SL_SI91X_SO_SSL_V_1_2_ENABLE        44 ///< To enable SSL 1.2
+#define SL_SI91x_SO_TCP_ACK_INDICATION      45 ///< To enable TCP ACK indication feature
+#define SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE \
+  48                                     ///< Maximum TCP retransmission timeout (power of 2, 1-128 seconds)
+#define SL_SI91X_IP_TOS               48 ///< To configure TOS
+#define SL_SI91X_SO_SSL_V_1_3_ENABLE  49 ///< To enable SSL 1.3
+#define SL_SI91X_SO_MAXRETRY          24 ///< Maximum number of TCP TX retransmission attempts
+#define SL_SI91X_SO_MSS               40 ///< To configure the TCP MSS
+#define SL_SI91X_SO_SOCK_VAP_ID       25 ///< To configure the socket VAP ID
+#define SL_SI91X_SO_TLS_SNI           47 ///< To configure the TLS SNI extension
+#define SL_SI91X_SO_TLS_ALPN          50 ///< To configure the TLS ALPN extension
+#define SL_SI91X_SO_DTLS_ENABLE       51 ///< To enable DTLS
+#define SL_SI91X_SO_DTLS_V_1_0_ENABLE 52 ///< To enable DTLS 1.0
+#define SL_SI91X_SO_DTLS_V_1_2_ENABLE 53 ///< To enable DTLS 1.2
+#define SL_SI91X_SO_PER_SOCKET_CLOSE  54 ///< Enable per-socket graceful close handling
 /** @} */
 
 /**

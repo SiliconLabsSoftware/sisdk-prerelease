@@ -480,7 +480,7 @@ int16_t sl_rail_sdk_ieee802154_pack_data_frame(sl_rail_sdk_ieee802154_std_t std,
 
   switch (std) {
     case SL_RAIL_SDK_IEEE802154_STD_IEEE802154_2P4GHZ:
-      ret_val = sl_rail_sdk_802154_packet_pack_data_frame(&frame->mhr_config,
+      ret_val = sl_rail_sdk_802154_packet_pack_std_frame(&frame->mhr_config,
                                                           frame->payload_size,
                                                           frame->payload,
                                                           frame_size,
@@ -488,7 +488,7 @@ int16_t sl_rail_sdk_ieee802154_pack_data_frame(sl_rail_sdk_ieee802154_std_t std,
       break;
     case SL_RAIL_SDK_IEEE802154_STD_IEEE802154G_863MHZ:
     case SL_RAIL_SDK_IEEE802154_STD_IEEE802154G_915MHZ:
-      ret_val = sl_rail_sdk_802154_packet_pack_g_opt_data_frame(frame->phr_config,
+      ret_val = sl_rail_sdk_802154_packet_pack_g_opt_frame(frame->phr_config,
                                                                 &frame->mhr_config,
                                                                 frame->payload_size,
                                                                 frame->payload,
@@ -518,11 +518,11 @@ int16_t sl_rail_sdk_ieee802154_unpack_data_frame(sl_rail_sdk_ieee802154_std_t st
 
   switch (std) {
     case SL_RAIL_SDK_IEEE802154_STD_IEEE802154_2P4GHZ:
-      frame->payload = sl_rail_sdk_802154_packet_unpack_data_frame(&frame->mhr_config,
+      frame->payload = sl_rail_sdk_802154_packet_unpack_std_frame(&frame->mhr_config,
                                                                    &frame->payload_size,
                                                                    frame_buffer);
       if (frame->payload == NULL) {
-        app_log_warning("sl_rail_sdk_802154_packet_unpack_data_frame failed");
+        app_log_warning("sl_rail_sdk_802154_packet_unpack_std_frame failed");
         status = SL_RAIL_SDK_IEEE802154_ERROR;
         break;
       }
@@ -535,7 +535,7 @@ int16_t sl_rail_sdk_ieee802154_unpack_data_frame(sl_rail_sdk_ieee802154_std_t st
 
       // checks the size of the received payload
       if (frame->payload_size > max_payload_size) {
-        app_log_warning("sl_rail_sdk_802154_packet_unpack_data_frame failed: Corrupted frame received: payload is too large.");
+        app_log_warning("sl_rail_sdk_802154_packet_unpack_std_frame failed: Corrupted frame received: payload is too large.");
         status = SL_RAIL_SDK_IEEE802154_ERROR;
         break;
       }
@@ -543,14 +543,14 @@ int16_t sl_rail_sdk_ieee802154_unpack_data_frame(sl_rail_sdk_ieee802154_std_t st
       break;
     case SL_RAIL_SDK_IEEE802154_STD_IEEE802154G_863MHZ:
     case SL_RAIL_SDK_IEEE802154_STD_IEEE802154G_915MHZ:
-      frame->payload = sl_rail_sdk_802154_packet_unpack_g_opt_data_frame(
+      frame->payload = sl_rail_sdk_802154_packet_unpack_g_opt_frame(
         &frame->phr_config,
         &frame->mhr_config,
         &frame->payload_size,
         frame_buffer);
 
       if (frame->payload == NULL) {
-        app_log_warning("sl_rail_sdk_802154_packet_unpack_data_frame failed");
+        app_log_warning("sl_rail_sdk_802154_packet_unpack_g_opt_frame failed");
         status = SL_RAIL_SDK_IEEE802154_ERROR;
         break;
       }
@@ -570,7 +570,7 @@ int16_t sl_rail_sdk_ieee802154_unpack_data_frame(sl_rail_sdk_ieee802154_std_t st
 
       // checks the size of the received payload
       if (frame->payload_size > max_payload_size) {
-        app_log_warning("sl_rail_sdk_802154_packet_unpack_data_frame failed: Corrupted frame received: payload is too large.");
+        app_log_warning("sl_rail_sdk_802154_packet_unpack_g_opt_frame failed: Corrupted frame received: payload is too large.");
         status = SL_RAIL_SDK_IEEE802154_ERROR;
         break;
       }

@@ -43,8 +43,14 @@
 #include "sli_cpc_log.h"
 #include "sli_cpc_utils.h"
 
-static sl_status_t secondary_init(sli_cpc_control_t *ctrl, sl_cpc_bus_t *bus)
+static sl_cpc_bus_t *to_bus(sli_cpc_control_t *ctrl)
 {
+  return container_of(ctrl, sl_cpc_bus_t, ctrl);
+}
+
+static sl_status_t secondary_init(sli_cpc_control_t *ctrl)
+{
+  sl_cpc_bus_t *bus = to_bus(ctrl);
   sl_status_t status;
 
   status = sli_cpc_control_init(ctrl);
@@ -232,7 +238,7 @@ respond:
 static sl_status_t on_phy_capabilities_request(sli_cpc_control_t *ctrl, const sl_cpc_buf_t *buf)
 {
   sli_cpc_ctrl_status_t resp_status;
-  sl_cpc_bus_t *bus = ctrl->ep.bus;
+  sl_cpc_bus_t *bus = to_bus(ctrl);
   const void *device_cap_local;
   uint8_t *device_cap = NULL;
   uint16_t resp_len = 0;
@@ -316,12 +322,13 @@ static sl_status_t secondary_on_response(sli_cpc_control_t *ctrl, const sl_cpc_b
 
 static void secondary_on_send_done(sli_cpc_control_t *ctrl, const sl_cpc_ep_event_t *event)
 {
+  sl_cpc_bus_t *bus = to_bus(ctrl);
   sli_cpc_ctrl_type_t ctrl_type = (sli_cpc_ctrl_type_t)(uintptr_t)event->send_done.arg;
 
   if (ctrl_type == SLI_CPC_CTRL_TYPE_BUS_ENABLE) {
     SLI_CPC_LOG_DEBUG("secondary init sequence completed");
     ctrl->initialized = true;
-    sli_cpc_bus_signal_event(ctrl->ep.bus, SLI_CPC_SIGNAL_SYSTEM);
+    sli_cpc_bus_signal_event(bus, SLI_CPC_SIGNAL_SYSTEM);
   }
 }
 
@@ -354,12 +361,13 @@ static void secondary_on_error(sli_cpc_control_t *ctrl, sl_status_t status)
 
 static void secondary_on_closed(sli_cpc_control_t *ctrl)
 {
+  sl_cpc_bus_t *bus = to_bus(ctrl);
   sl_cpc_ep_t *ep = &ctrl->ep;
   sl_status_t status;
 
   // Re-listen only — do not send another startup RESET (that would abort the
   // primary's recovery SYN in a loop).
-  status = sli_cpc_ep_attach(ep, ep->bus);
+  status = sli_cpc_ep_attach(ep, bus);
   if (status != SL_STATUS_OK) {
     SLI_CPC_PANIC("on_closed: attach failed: 0x%lx", (unsigned long)status);
   }

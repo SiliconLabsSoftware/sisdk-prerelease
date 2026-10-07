@@ -132,7 +132,8 @@ __STATIC_INLINE void lockBootloaderArea(void)
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) 
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
 __STATIC_INLINE void configureSMUToDefault(void)
 {
 #if defined(CMU_CLKEN1_SMU)
@@ -165,14 +166,15 @@ __STATIC_INLINE void configureSMUToDefault(void)
   CMU->CLKEN1_CLR = CMU_CLKEN1_SMU;
 #endif
 }
-#endif // BOOTLOADER_APPLOADER || _SILICON_LABS_32B_SERIES_2_CONFIG_[5,6,8,9,13,11]
+#endif // BOOTLOADER_APPLOADER || _SILICON_LABS_32B_SERIES_2_CONFIG_[5,6,8,9,13,11,14]
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
 __STATIC_INLINE void configureSMU(void)
 {
 #if defined(CMU_CLKEN1_SMU)
@@ -201,7 +203,7 @@ __STATIC_INLINE void configureSMU(void)
   CMU->CLKEN1_CLR = CMU_CLKEN1_SMU;
 #endif
 }
-#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_[5,6,8,9,13,11]
+#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_[5,6,8,9,13,11,14]
 
 void HardFault_Handler(void)
 {
@@ -522,9 +524,10 @@ void SystemInit2(void)
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) 
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
   configureSMU();
-#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_[5,6,8,9,13,11]
+#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_[5,6,8,9,13,11,14]
 
 #if defined(TEST_BOOTLOADER_RAM_CLEAN_UP)
   ram_clean_up_test();
@@ -696,7 +699,8 @@ void SystemInit2(void)
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
-    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
     configureSMUToDefault();
 #endif
     // Set vector table to application's table

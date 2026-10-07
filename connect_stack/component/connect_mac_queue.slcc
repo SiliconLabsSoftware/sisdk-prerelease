@@ -1,9 +1,14 @@
 id: "connect_mac_queue"
 label: "MAC Queue"
 package: "connect_stack"
+description: "Provides MAC queue functionality. If this plugin is enabled, the application is able to send multiple packets in bursts, whereas if this plugin is not included, only one packet at the time can be submitted to the Connect Stack."
 category: "Connect"
 quality: "production"
-description: "Provides MAC queue functionality. If this plugin is enabled, the application is able to send multiple packets in bursts, whereas if this plugin is not included, only one packet at the time can be submitted to the Connect Stack."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: customizing-applications-with-connect-v3x/02-components
 provides:
 - name: "connect_mac_queue"
 requires:

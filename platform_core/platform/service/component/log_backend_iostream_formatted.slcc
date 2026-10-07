@@ -20,7 +20,6 @@ provides:
 - name: log_backend
 - name: log_backend_iostream_impl
 - name: log_backend_iostream_formatted
-  condition: [device_si91x]
 requires:
 - name: iostream_recommended_console
 - name: log

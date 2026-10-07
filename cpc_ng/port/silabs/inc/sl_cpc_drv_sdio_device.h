@@ -9,7 +9,7 @@
 #include "sl_cpc_bus.h"
 #include "sli_cpc_drv.h"
 
-struct sli_cpc_drv_caps {
+struct sli_cpc_drv_sdio_device_caps {
   uint8_t max_aggregation;
 };
 
@@ -19,8 +19,8 @@ typedef struct sl_cpc_drv_sdio_device_config {
 
 typedef struct sl_cpc_drv_sdio_device {
   sl_cpc_bus_t bus;
-  struct sli_cpc_drv_caps local_caps;
-  struct sli_cpc_drv_caps remote_caps;
+  struct sli_cpc_drv_sdio_device_caps local_caps;
+  struct sli_cpc_drv_sdio_device_caps remote_caps;
 } sl_cpc_drv_sdio_device_t;
 
 /***************************************************************************/ /**

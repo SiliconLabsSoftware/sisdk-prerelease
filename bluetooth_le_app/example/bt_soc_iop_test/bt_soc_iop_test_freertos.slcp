@@ -106,7 +106,7 @@ configuration:
     condition:
       - app_ota_dfu
   - name: SL_BT_APP_OTA_DFU_CONFIG_STACK
-    value: "2048"
+    value: "4096"
     condition:
       - app_ota_dfu
       - device_series_2

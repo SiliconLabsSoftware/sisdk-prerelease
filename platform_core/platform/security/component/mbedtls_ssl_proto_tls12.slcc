@@ -5,11 +5,20 @@ description: >-
   This component enable support for the TLS 1.2 protocol in Mbed TLS.
 category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
+
+# This component is part of the Mbed TLS upper layers (SSL, X509, etc).
+# In the TZ Secure Key Library use case, the Mbed TLS upper layers lives
+# in the TZ NonSecure application, and is not not allowed to be included
+# in the secure library.
+conflicts:
+- name: tz_secure_key_library_s
+
 provides:
 - name: mbedtls_ssl_proto_tls12
 - name: mbedtls_ssl_proto
   allow_multiple: true
 requires:
+- name: mbedtls_core
   # TLS 1.2 requires SHA-256 or SHA-384 (running handshake hash) 
 - name: psa_crypto_hash
   # TLS 1.2 requires a MBEDTLS_KEY_EXCHANGE_xxxx

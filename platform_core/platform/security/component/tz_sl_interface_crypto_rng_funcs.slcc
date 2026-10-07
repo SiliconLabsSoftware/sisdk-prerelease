@@ -20,9 +20,6 @@ template_contribution:
 - name: tfm_interface_func
   value: tfm_crypto_generate_key_custom
 
-- name: tfm_interface_func
-  value: tfm_crypto_generate_key_ext
-
 metadata:
   sbom:
     license: Zlib

@@ -27,10 +27,15 @@ config_file:
   file_id: fem_util_config
   condition:
   - device_sdid_220
+- path: plugin/fem_util/config/efr32xg2a/sl_fem_util_config.h
+  file_id: fem_util_config
+  condition:
+  - device_sdid_245
 - path: plugin/fem_util/config/sl_fem_util_config.h
   file_id: fem_util_config
   unless:
   - device_sdid_220
+  - device_sdid_245
 include:
 - path: plugin/fem_util
   file_list:

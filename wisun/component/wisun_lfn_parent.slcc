@@ -1,0 +1,40 @@
+id: "wisun_lfn_parent"
+label: "Wi-SUN LFN parent (Library)"
+package: "wisun"
+category: "Wi-SUN"
+quality: "production"
+description: "Provide Wi-SUN LFN parent library"
+root_path: "wisun/./stack"
+
+requires:
+- name: "a_wisun_stack"
+
+provides:
+- name: "wisun_lfn_parent_implementation"
+- name: "wisun_lfn_parent"
+
+library:
+- path: "libwisun_lfn_parent_efr32xg2x_gcc_debug.a"
+  condition: [toolchain_gcc, wisun_stack_debug]
+- path: "libwisun_lfn_parent_efr32xg2x_iar_debug.a"
+  condition: [toolchain_iar, wisun_stack_debug]
+- path: "libwisun_lfn_parent_efr32xg2x_llvm_debug.a"
+  condition: [toolchain_llvm, wisun_stack_debug]
+
+- path: "libwisun_lfn_parent_efr32xg2x_gcc_release.a"
+  condition: [toolchain_gcc]
+  unless: [wisun_stack_debug]
+- path: "libwisun_lfn_parent_efr32xg2x_iar_release.a"
+  condition: [toolchain_iar]
+  unless: [wisun_stack_debug]
+- path: "libwisun_lfn_parent_efr32xg2x_llvm_release.a"
+  condition: [toolchain_llvm]
+  unless: [wisun_stack_debug]
+
+template_contribution:
+- name: component_catalog
+  value: wisun_lfn_parent
+
+metadata:
+  sbom:
+    license: MSLA

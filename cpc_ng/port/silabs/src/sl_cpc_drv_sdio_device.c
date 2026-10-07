@@ -182,7 +182,7 @@ static sl_status_t sdio_drv_start_rx(sl_cpc_bus_t *bus);
 static uint32_t sdio_drv_write(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames);
 static void cpc_drv_sdio_on_rx_frame_free(sl_cpc_bus_t *bus);
 
-SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_caps, 1);
+SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_sdio_device_caps, 1);
 
 static void get_local_capabilities(sl_cpc_bus_t *bus, const void **caps_p, uint16_t *caps_size_p)
 {
@@ -502,7 +502,6 @@ static void sdio_drv_pin_init(void)
     {.port = SL_CPC_DRV_SDIO_DAT2_PORT, .pin = SL_CPC_DRV_SDIO_DAT2_PIN},
     {.port = SL_CPC_DRV_SDIO_DAT3_PORT, .pin = SL_CPC_DRV_SDIO_DAT3_PIN},
   };
-  uint8_t max_drive;
 
   // Enable bus clock for GPIO.
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
@@ -526,12 +525,8 @@ static void sdio_drv_pin_init(void)
   gpio = (sl_gpio_t){.port = SL_CPC_DRV_SDIO_SCLK_PORT, .pin = SL_CPC_DRV_SDIO_SCLK_PIN};
   sl_hal_gpio_set_pin_mode(&gpio, SL_GPIO_MODE_INPUT, 1);
 
-  // Maximum drive strength is required to meet the host setup time at high bus
-  // frequencies.
-  max_drive = (uint8_t)(_HSIO_P_DRVSTRENGTH_DRVSTRENGTH0_MASK >> _HSIO_P_DRVSTRENGTH_DRVSTRENGTH0_SHIFT);
   for (size_t i = 0; i < SL_ARRAY_SIZE(driven_pins); i++) {
     sl_hal_gpio_set_pin_mode(&driven_pins[i], SL_GPIO_MODE_PUSH_PULL, 1);
-    sl_hal_gpio_set_drive_strength(&driven_pins[i], max_drive);
   }
 }
 

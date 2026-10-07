@@ -7,6 +7,22 @@
 #define {{c}}
 {% endfor %}
 
+{% if psa_crypto_config_trustzone_secure is defined %}
+#if defined(SL_TRUSTZONE_SECURE)
+{% for c in psa_crypto_config_trustzone_secure -%}
+  #define {{c}}
+{% endfor %}
+#endif // SL_TRUSTZONE_SECURE
+{% endif %}
+
+{% if psa_crypto_config_trustzone_nonsecure is defined %}
+#if defined(SL_TRUSTZONE_NONSECURE)
+{% for c in psa_crypto_config_trustzone_nonsecure -%}
+  #define {{c}}
+{% endfor %}
+#endif // SL_TRUSTZONE_NONSECURE
+{% endif %}
+
 {%- set key_slot_names = psa_key_slots | map(attribute='name') | list %}
 {%- if 'psa_key_slots_btmesh_stack' in key_slot_names %}
 #include "sl_btmesh_config.h"

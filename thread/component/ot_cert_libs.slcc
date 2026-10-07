@@ -19,196 +19,100 @@ recommends:
 - id: ot_diags_stubs
   vendor: silabs
 library:
-- path: libs/libsl_ot_stack_ftd_efr32mg21_gcc.a
+- path: libs/build/gcc/cortex-m33/sl-openthread-cert-library/Release/libsl_ot_stack_ftd.a
   condition:
   - toolchain_gcc
-  - device_sdid_200
+  - cortexm33
   - ot_stack_ftd
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
   - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_ftd_efr32mg21_llvm.a
-  condition:
-  - toolchain_llvm
-  - device_sdid_200
-  - ot_stack_ftd
-  unless:
-  - ot_coap_cert_libs
-  - ot_multi_instance_cert_libs
-  - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_mtd_efr32mg21_gcc.a
+- path: libs/build/gcc/cortex-m33/sl-openthread-cert-library/Release/libsl_ot_stack_mtd.a
   condition:
   - toolchain_gcc
-  - device_sdid_200
+  - cortexm33
   - ot_stack_mtd
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
   - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_mtd_efr32mg21_llvm.a
-  condition:
-  - toolchain_llvm
-  - device_sdid_200
-  - ot_stack_mtd
-  unless:
-  - ot_coap_cert_libs
-  - ot_multi_instance_cert_libs
-  - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_tcp_efr32mg21_gcc.a
+- path: libs/build/gcc/cortex-m33/sl-openthread-cert-library/Release/libsl_ot_stack_tcp.a
   condition:
   - toolchain_gcc
-  - device_sdid_200
+  - cortexm33
   unless:
   - ot_stack_tcp_stubs
-- path: libs/libsl_ot_stack_tcp_efr32mg21_llvm.a
-  condition:
-  - toolchain_llvm
-  - device_sdid_200
-  unless:
-  - ot_stack_tcp_stubs
-- path: libs/libsl_ot_stack_ftd_efr32mg24_gcc.a
+- path: libs/build/gcc/cortex-m55/sl-openthread-cert-library/Release/libsl_ot_stack_ftd.a
   condition:
   - toolchain_gcc
-  - device_sdid_215
+  - cortexm55
   - ot_stack_ftd
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
   - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_ftd_efr32mg24_llvm.a
+- path: libs/build/gcc/cortex-m55/sl-openthread-cert-library/Release/libsl_ot_stack_mtd.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+  - ot_stack_mtd
+  unless:
+  - ot_coap_cert_libs
+  - ot_multi_instance_cert_libs
+  - ot_multicast_cert_libs
+- path: libs/build/gcc/cortex-m55/sl-openthread-cert-library/Release/libsl_ot_stack_tcp.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+  unless:
+  - ot_stack_tcp_stubs
+- path: libs/build/llvm/cortex-m33/sl-openthread-cert-library/Release/libsl_ot_stack_ftd.a
   condition:
   - toolchain_llvm
-  - device_sdid_215
+  - cortexm33
   - ot_stack_ftd
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
   - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_mtd_efr32mg24_gcc.a
+- path: libs/build/llvm/cortex-m33/sl-openthread-cert-library/Release/libsl_ot_stack_mtd.a
   condition:
-  - toolchain_gcc
-  - device_sdid_215
+  - toolchain_llvm
+  - cortexm33
   - ot_stack_mtd
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
   - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_mtd_efr32mg24_llvm.a
+- path: libs/build/llvm/cortex-m33/sl-openthread-cert-library/Release/libsl_ot_stack_tcp.a
   condition:
   - toolchain_llvm
-  - device_sdid_215
-  - ot_stack_mtd
-  unless:
-  - ot_coap_cert_libs
-  - ot_multi_instance_cert_libs
-  - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_tcp_efr32mg24_gcc.a
-  condition:
-  - toolchain_gcc
-  - device_sdid_215
+  - cortexm33
   unless:
   - ot_stack_tcp_stubs
-- path: libs/libsl_ot_stack_tcp_efr32mg24_llvm.a
+- path: libs/build/llvm/cortex-m55/sl-openthread-cert-library/Release/libsl_ot_stack_ftd.a
   condition:
   - toolchain_llvm
-  - device_sdid_215
-  unless:
-  - ot_stack_tcp_stubs
-- path: libs/libsl_ot_stack_ftd_efr32mg26_gcc.a
-  condition:
-  - toolchain_gcc
-  - device_sdid_225
+  - cortexm55
   - ot_stack_ftd
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
   - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_ftd_efr32mg26_llvm.a
+- path: libs/build/llvm/cortex-m55/sl-openthread-cert-library/Release/libsl_ot_stack_mtd.a
   condition:
   - toolchain_llvm
-  - device_sdid_225
-  - ot_stack_ftd
-  unless:
-  - ot_coap_cert_libs
-  - ot_multi_instance_cert_libs
-  - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_mtd_efr32mg26_gcc.a
-  condition:
-  - toolchain_gcc
-  - device_sdid_225
+  - cortexm55
   - ot_stack_mtd
   unless:
   - ot_coap_cert_libs
   - ot_multi_instance_cert_libs
   - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_mtd_efr32mg26_llvm.a
+- path: libs/build/llvm/cortex-m55/sl-openthread-cert-library/Release/libsl_ot_stack_tcp.a
   condition:
   - toolchain_llvm
-  - device_sdid_225
-  - ot_stack_mtd
-  unless:
-  - ot_coap_cert_libs
-  - ot_multi_instance_cert_libs
-  - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_tcp_efr32mg26_gcc.a
-  condition:
-  - toolchain_gcc
-  - device_sdid_225
-  unless:
-  - ot_stack_tcp_stubs
-- path: libs/libsl_ot_stack_tcp_efr32mg26_llvm.a
-  condition:
-  - toolchain_llvm
-  - device_sdid_225
-  unless:
-  - ot_stack_tcp_stubs
-- path: libs/libsl_ot_stack_ftd_simg301_gcc.a
-  condition:
-  - toolchain_gcc
-  - device_generic_family_sixx301
-  - ot_stack_ftd
-  unless:
-  - ot_coap_cert_libs
-  - ot_multi_instance_cert_libs
-  - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_ftd_simg301_llvm.a
-  condition:
-  - toolchain_llvm
-  - device_generic_family_sixx301
-  - ot_stack_ftd
-  unless:
-  - ot_coap_cert_libs
-  - ot_multi_instance_cert_libs
-  - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_mtd_simg301_gcc.a
-  condition:
-  - toolchain_gcc
-  - device_generic_family_sixx301
-  - ot_stack_mtd
-  unless:
-  - ot_coap_cert_libs
-  - ot_multi_instance_cert_libs
-  - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_mtd_simg301_llvm.a
-  condition:
-  - toolchain_llvm
-  - device_generic_family_sixx301
-  - ot_stack_mtd
-  unless:
-  - ot_coap_cert_libs
-  - ot_multi_instance_cert_libs
-  - ot_multicast_cert_libs
-- path: libs/libsl_ot_stack_tcp_simg301_gcc.a
-  condition:
-  - toolchain_gcc
-  - device_generic_family_sixx301
-  unless:
-  - ot_stack_tcp_stubs
-- path: libs/libsl_ot_stack_tcp_simg301_llvm.a
-  condition:
-  - toolchain_llvm
-  - device_generic_family_sixx301
+  - cortexm55
   unless:
   - ot_stack_tcp_stubs
 documentation:

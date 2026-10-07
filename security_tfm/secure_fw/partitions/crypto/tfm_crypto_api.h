@@ -146,8 +146,6 @@ psa_status_t tfm_crypto_encode_id_and_owner(psa_key_id_t key_id,
 #define LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API \
     X(tfm_crypto_get_key_attributes)          \
     X(tfm_crypto_reset_key_attributes)        \
-    X(tfm_crypto_open_key)                    \
-    X(tfm_crypto_close_key)                   \
     X(tfm_crypto_import_key)                  \
     X(tfm_crypto_destroy_key)                 \
     X(tfm_crypto_export_key)                  \

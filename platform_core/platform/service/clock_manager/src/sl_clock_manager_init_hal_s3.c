@@ -954,21 +954,28 @@ FUNCTION_SCOPE void init_hfrco_dpll(uint8_t hfrcodpll_num)
 
     EFM_ASSERT(dpll != NULL);
 
-    status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_DEVINFO);
-    EFM_ASSERT(status == SL_STATUS_OK);
-
     // Retrieve HFRCO calibration from DEVINFO data.
     switch (CLOCK_MANAGER_HFRCO_BAND(hfrcodpll_num)) {
       case 38000000:
         freq_cal = sl_hal_system_get_hfrco_default_calibration();
         break;
 
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
       case 100000000:
+#else
       case 140000000:
+#endif
         freq_cal = sl_hal_system_get_hfrco_speed_calibration();
         break;
+
       default:
-        EFM_ASSERT(false);
+#if !defined(SL_CATALOG_CLOCK_MANAGER_PTE_PRESENT) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
+        CORE_ATOMIC_SECTION(
+          // Since SE Command is necessary to get the calibration value, and sl_se_init() is not yet called,
+          // we need to enter atomic mode to prevent the SE Command from being interrupted.
+          freq_cal = sl_hal_system_get_hfrcodpll_band_calibration(CLOCK_MANAGER_HFRCO_BAND(hfrcodpll_num));
+          )
+#endif
         break;
     }
     EFM_ASSERT((freq_cal != 0UL) && (freq_cal != UINT32_MAX));

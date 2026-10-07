@@ -63,6 +63,12 @@
 // Crash info live in noinit RAM segment that is not modified during startup.
 NO_INIT(HalCrashInfoType halCrashInfo);
 
+// LWM capture signature live in noinit RAM segment that is not modified during startup.
+NO_INIT(uint32_t halWatchdogLwmCaptureSignature);
+
+// LWM capture PC live in noinit RAM segment that is not modified during startup.
+NO_INIT(uint32_t halWatchdogLwmCapturePc);
+
 //------------------------------------------------------------------------------
 // Preprocessor definitions
 
@@ -138,6 +144,152 @@ static const char nameStrings[] = "R0\0R1\0R2\0R3\0"
 static uint16_t savedResetCause;
 static HalAssertInfoType savedAssertInfo;
 
+static void logCfsrBits(const HalCrashInfoType *crash,
+                        uint8_t               firstBit,
+                        uint8_t               endBit)
+{
+  const uint8_t numFaults =
+      (uint8_t)(sizeof(cfsrBits) / sizeof(cfsrBits[0]));
+  const uint8_t wordBits = (uint8_t)(sizeof(crash->cfsr.word) * 8U);
+
+  if (endBit > numFaults)
+  {
+    endBit = numFaults;
+  }
+
+  if (endBit > wordBits)
+  {
+    endBit = wordBits;
+  }
+
+  for (uint8_t bit = firstBit; bit < endBit; bit++)
+  {
+    if ((((crash->cfsr.word >> bit) & 1U) != 0U) && (cfsrBits[bit][0] != '\0'))
+    {
+      otLogCritPlat("CFSR.%s", cfsrBits[bit]);
+    }
+  }
+}
+
+static void logWatchdogExpired(const HalCrashInfoType *crash)
+{
+  if (!halWatchdogLwmCaptureIsValid())
+  {
+    otLogCritPlat("Reset cause: Watchdog expired, no reliable extra information");
+    return;
+  }
+
+  otLogCritPlat("Reset cause: WDG expired PC=%08lx", crash->PC);
+  halWatchdogLwmCaptureClear();
+}
+
+static void logHardFault(const HalCrashInfoType *crash)
+{
+  otLogCritPlat("Reset cause: Hard Fault");
+
+  if (crash->hfsr.bits.VECTTBL)
+  {
+    otLogCritPlat("HFSR.VECTTBL: error reading vector table for an exception");
+  }
+
+  if (crash->hfsr.bits.FORCED)
+  {
+    otLogCritPlat("HFSR.FORCED: configurable fault could not activate");
+  }
+
+  if (crash->hfsr.bits.DEBUGEVT)
+  {
+    otLogCritPlat("HFSR.DEBUGEVT: fault related to debug - e.g., executed BKPT");
+  }
+}
+
+static void logMemoryFault(const HalCrashInfoType *crash)
+{
+  otLogCritPlat("Reset cause: Memory Management Fault");
+
+  if (crash->cfsr.bits.DACCVIOL || crash->cfsr.bits.IACCVIOL)
+  {
+    otLogCritPlat("Instruction address: %4lx", crash->PC);
+  }
+
+  if (crash->cfsr.bits.MMARVALID)
+  {
+    otLogCritPlat("Illegal access address: %4lx", crash->faultAddress);
+  }
+
+  logCfsrBits(crash, SCB_CFSR_MEMFAULTSR_Pos, SCB_CFSR_MEMFAULTSR_Pos + 8U);
+}
+
+static void logBusFault(const HalCrashInfoType *crash)
+{
+  otLogCritPlat("Reset cause: Bus Fault");
+  otLogCritPlat("Instruction address: %4lx", crash->PC);
+
+  if (crash->cfsr.bits.IMPRECISERR)
+  {
+    otLogCritPlat("Address is of an instruction after bus fault occurred, not the cause.");
+  }
+
+  if (crash->cfsr.bits.BFARVALID)
+  {
+    otLogCritPlat("Illegal access address: %4lx", crash->faultAddress);
+  }
+
+  logCfsrBits(crash, SCB_CFSR_BUSFAULTSR_Pos, SCB_CFSR_USGFAULTSR_Pos);
+
+  if ((crash->cfsr.word & 0xFFU) == 0U)
+  {
+    otLogCritPlat("CFSR.(none) load or store at an illegal address");
+  }
+}
+
+static void logUsageFault(const HalCrashInfoType *crash)
+{
+  otLogCritPlat("Reset cause: Usage Fault");
+  otLogCritPlat("Instruction address: %4lx", crash->PC);
+
+  logCfsrBits(crash,
+              SCB_CFSR_USGFAULTSR_Pos,
+              (uint8_t)(sizeof(crash->cfsr.word) * 8U));
+}
+
+static bool halInternalIsTextThumbPc(uint32_t pc)
+{
+  if ((pc & 1U) == 0U)
+  {
+    return false;
+  }
+
+  const uintptr_t addr = (uintptr_t)pc;
+
+  return (addr >= (uintptr_t)_TEXT_SEGMENT_BEGIN) && (addr < (uintptr_t)_TEXT_SEGMENT_END);
+}
+
+void halWatchdogLwmCaptureMark(uint32_t pc)
+{
+  if (!halInternalIsTextThumbPc(pc))
+  {
+    halWatchdogLwmCaptureClear();
+    return;
+  }
+
+  halWatchdogLwmCapturePc         = pc;
+  halWatchdogLwmCaptureSignature = HAL_WATCHDOG_LWM_CAPTURE_SIGNATURE;
+}
+
+bool halWatchdogLwmCaptureIsValid(void)
+{
+  return (halWatchdogLwmCaptureSignature == HAL_WATCHDOG_LWM_CAPTURE_SIGNATURE)
+         && halInternalIsTextThumbPc(halWatchdogLwmCapturePc)
+         && halInternalIsTextThumbPc(halCrashInfo.PC);
+}
+
+void halWatchdogLwmCaptureClear(void)
+{
+  halWatchdogLwmCaptureSignature = 0U;
+  halWatchdogLwmCapturePc        = 0U;
+}
+
 //------------------------------------------------------------------------------
 // Functions
 
@@ -203,86 +355,50 @@ void halPrintCrashData(uint8_t port)
 
 void halPrintCrashDetails(uint8_t port)
 {
+  const HalCrashInfoType *crash = &halCrashInfo;
+
   (void)port;
 
-  HalCrashInfoType *c = &halCrashInfo;
-  uint16_t reason = savedResetCause;
-  uint8_t bit;
-  const uint8_t numFaults = sizeof(cfsrBits) / sizeof(cfsrBits[0]);
-
-  // RESET_* are defined in `reset-def.h`
-  switch (reason) {
+  switch (savedResetCause) {
     case RESET_WATCHDOG_EXPIRED:
-      otLogCritPlat("Reset cause: Watchdog expired, no reliable extra information");
+      logWatchdogExpired(crash);
       break;
+
     case RESET_WATCHDOG_CAUGHT:
-      otLogCritPlat("Reset cause: Watchdog caught with enhanced info");
-      otLogCritPlat("Instruction address: %4lx", (unsigned long)c->PC);
+      otLogCritPlat(
+          "Reset cause: Watchdog caught with enhanced info");
+      otLogCritPlat("Instruction address: %4lx",
+                    crash->PC);
       break;
+
     case RESET_CRASH_ASSERT:
       otLogCritPlat("Reset cause: Assert %s:%ld",
-                         c->data.assertInfo.file, (long)c->data.assertInfo.line);
+                    crash->data.assertInfo.file,
+                    (long)crash->data.assertInfo.line);
       break;
+
     case RESET_FAULT_HARD:
-      otLogCritPlat("Reset cause: Hard Fault");
-      if (c->hfsr.bits.VECTTBL) {
-        otLogCritPlat(                           "HFSR.VECTTBL: error reading vector table for an exception");
-      }
-      if (c->hfsr.bits.FORCED) {
-        otLogCritPlat(                           "HFSR.FORCED: configurable fault could not activate");
-      }
-      if (c->hfsr.bits.DEBUGEVT) {
-        otLogCritPlat(                           "HFSR.DEBUGEVT: fault related to debug - e.g., executed BKPT");
-      }
+      logHardFault(crash);
       break;
+
     case RESET_FAULT_MEM:
-      otLogCritPlat("Reset cause: Memory Management Fault");
-      if (c->cfsr.bits.DACCVIOL || c->cfsr.bits.IACCVIOL) {
-        otLogCritPlat("Instruction address: %4lx", (unsigned long)c->PC);
-      }
-      if (c->cfsr.bits.MMARVALID) {
-        otLogCritPlat("Illegal access address: %4lx", (unsigned long)c->faultAddress);
-      }
-      for (bit = SCB_CFSR_MEMFAULTSR_Pos; bit < (SCB_CFSR_MEMFAULTSR_Pos + 8); bit++) {
-        if ((c->cfsr.word & (1 << bit)) && (*cfsrBits[bit] != '\0')) {
-          otLogCritPlat("CFSR.%s", cfsrBits[bit]);
-        }
-      }
+      logMemoryFault(crash);
       break;
+
     case RESET_FAULT_BUS:
-      otLogCritPlat("Reset cause: Bus Fault");
-      otLogCritPlat("Instruction address: %4lx", (unsigned long)c->PC);
-      if (c->cfsr.bits.IMPRECISERR) {
-        otLogCritPlat(                           "Address is of an instruction after bus fault occurred, not the cause.");
-      }
-      if (c->cfsr.bits.BFARVALID) {
-        otLogCritPlat("Illegal access address: %4lx",
-                           (unsigned long)c->faultAddress);
-      }
-      for (bit = SCB_CFSR_BUSFAULTSR_Pos; bit < SCB_CFSR_USGFAULTSR_Pos; bit++) {
-        if (((c->cfsr.word >> bit) & 1U) && (*cfsrBits[bit] != '\0')) {
-          otLogCritPlat("CFSR.%s", cfsrBits[bit]);
-        }
-      }
-      if ((c->cfsr.word & 0xFF) == 0) {
-        otLogCritPlat("CFSR.(none) load or store at an illegal address");
-      }
+      logBusFault(crash);
       break;
+
     case RESET_FAULT_USAGE:
-      otLogCritPlat("Reset cause: Usage Fault");
-      otLogCritPlat("Instruction address: %4lx", (unsigned long)c->PC);
-      for (bit = SCB_CFSR_USGFAULTSR_Pos;
-           (bit < numFaults) && (bit < (sizeof(c->cfsr.word) * 8));
-           bit++) {
-        if (((c->cfsr.word >> bit) & 1U) && (*cfsrBits[bit] != '\0')) {
-          otLogCritPlat("CFSR.%s", cfsrBits[bit]);
-        }
-      }
+      logUsageFault(crash);
       break;
+
     case RESET_FAULT_DBGMON:
       otLogCritPlat("Reset cause: Debug Monitor Fault");
-      otLogCritPlat("Instruction address: %4lx", (unsigned long)c->PC);
+      otLogCritPlat("Instruction address: %4lx",
+                    crash->PC);
       break;
+
     default:
       break;
   }
@@ -477,6 +593,12 @@ void halInternalClassifyReset(void)
   // If the last reset was due to an assert, save the assert info.
   if (savedResetCause == RESET_CRASH_ASSERT) {
     savedAssertInfo = halCrashInfo.data.assertInfo;
+  }
+
+  // Drop any LWM PC capture left over from a prior starvation that did not end
+  // in RESET_WATCHDOG_EXPIRED (e.g. assert or pin reset between LWM and HW WDOG).
+  if (savedResetCause != RESET_WATCHDOG_EXPIRED) {
+    halWatchdogLwmCaptureClear();
   }
 }
 

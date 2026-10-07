@@ -13,6 +13,8 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: never
 root_path: "rail/component/sl_rail_sdk_ble_support"
 provides:
 - name: sl_rail_sdk_ble_support
@@ -66,4 +68,3 @@ template_contribution:
   value: sl_rail_sdk_util_ble_protocol
 - name: component_catalog
   value: sl_rail_sdk_util_ble_init
-

@@ -88,10 +88,6 @@
     #include "cortexm3/diagnostic.h"
 #endif
 
-#if !defined(SL_ZIGBEE_TEST)
-#include "sl_mbedtls.h"
-#endif // SL_ZIGBEE_TEST
-
 #include "stack/security/packet-validate.h"
 
 #include "stack/security/security.h"

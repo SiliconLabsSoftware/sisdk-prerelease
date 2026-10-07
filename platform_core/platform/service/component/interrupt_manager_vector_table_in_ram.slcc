@@ -16,4 +16,7 @@ requires:
 template_contribution:
 - name: component_catalog
   value: interrupt_manager_vector_table_in_ram
+documentation:
+  docset: gecko-platform
+  document: platform-service/interrupt-manager
 root_path: platform_core

@@ -53,32 +53,53 @@
 
 // <h> Watchdog Manager Configuration
 
+// Default WDOG clock source values (must match sl_watchdog_manager_clock_source_t).
+#define SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE_HCLKDIV1024  0
+#define SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE_LFRCO        1
+#define SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE_LFXO         2
+#define SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE_ULFRCO       3
+
+// <o SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE> Default WDOG clock source
+// <i> Applied on first watchdog manager HAL init when the device has a WDOG
+// <i> CLKSEL register. Programs CMU WDOGxCLKCTRL rather than keeping the Clock
+// <i> Manager / reset default (often HCLK/1024).
+// <i> Default LFRCO so a given SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD has a similar
+// <i> wall-clock duration across Series 2 and Series 3, independent of SYSCLK.
+// <i> Ignored on devices without WDOG CLKSEL.
+// <SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE_HCLKDIV1024=> HCLK / 1024
+// <SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE_LFRCO=> LFRCO
+// <SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE_LFXO=> LFXO
+// <SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE_ULFRCO=> ULFRCO
+// <d> SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE_LFRCO
+#ifndef SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE
+#define SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE \
+  SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE_LFRCO
+#endif
+
 // <o SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD> Timeout period
-// <i> The timeout period is specified in number of CPU cycles (HCLK/1024).
-// <i> The hardware watchdog will reset the system if not fed within this period.
-// <i> All enabled software watchdogs must be fed to feed the hardware watchdog.
-// <i> Choose a period that is longer than the longest expected interval between
-// <i> feeds from any software watchdog.
-// <i> Note: The actual timeout in seconds depends on the CPU frequency and the
-// <i> HCLK prescaler configured by the clock manager. For example, at 38.4 MHz
-// <i> CPU frequency with prescaler 1, 256M cycles equals approximately 6.8 seconds.
+// <i> Tick count selected by the WDOG peripheral.
+// <i> The wall-clock timeout depends on SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE
+// <i> (or a runtime clock override) and that clock's frequency:
+// <i> - HCLKDIV1024: ticks of HCLK/1024 (scales with SYSCLK).
+// <i> - LFRCO / LFXO / ULFRCO: ticks of the LF clock (time-based, independent of SYSCLK).
+// <i> The hardware watchdog resets the system if all enabled software watchdogs are not fed within this period.
 // <i> Default: SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_256M (longest timeout)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_9K=> 9K CPU Cycles (~0.24 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_17K=> 17K CPU Cycles (~0.45 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_33K=> 33K CPU Cycles (~0.88 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_65K=> 65K CPU Cycles (~1.7 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_129K=> 129K CPU Cycles (~3.4 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_257K=> 257K CPU Cycles (~6.9 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_513K=> 513K CPU Cycles (~13.7 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_1M=> 1M CPU Cycles (~26.7 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_2M=> 2M CPU Cycles (~53.5 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_4M=> 4M CPU Cycles (~107 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_8M=> 8M CPU Cycles (~214 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_16M=> 16M CPU Cycles (~427 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_32M=> 32M CPU Cycles (~854 ms @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_64M=> 64M CPU Cycles (~1.7 s @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_128M=> 128M CPU Cycles (~3.4 s @ 38.4 MHz)
-// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_256M=> 256M CPU Cycles (~6.8 s @ 38.4 MHz)
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_9K=> 9K ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_17K=> 17K ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_33K=> 33K ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_65K=> 65K ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_129K=> 129K ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_257K=> 257K ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_513K=> 513K ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_1M=> 1M ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_2M=> 2M ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_4M=> 4M ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_8M=> 8M ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_16M=> 16M ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_32M=> 32M ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_64M=> 64M ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_128M=> 128M ticks
+// <SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_256M=> 256M ticks
 #define SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_256M
 
 // <o SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS> Maximum number of software watchdogs

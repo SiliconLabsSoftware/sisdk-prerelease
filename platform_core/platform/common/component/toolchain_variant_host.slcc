@@ -16,4 +16,7 @@ provides:
 toolchain_settings:
 - option: device_type
   value: host
+documentation:
+  docset: gecko-platform
+  document: platform-common/common
 root_path: platform_core

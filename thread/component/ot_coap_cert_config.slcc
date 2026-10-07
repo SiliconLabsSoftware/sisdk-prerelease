@@ -1,0 +1,22 @@
+id: ot_coap_cert_config
+label: OpenThread CoAP Certification Config
+package: thread
+category: OpenThread|Certification
+quality: production
+description: >
+  Compile definitions for producing and linking with OpenThread CoAP certification libraries.
+provides:
+- name: ot_coap_cert_config
+define:
+- name: OPENTHREAD_CONFIG_COAP_API_ENABLE
+  value: "1"
+- name: OPENTHREAD_CONFIG_COAP_OBSERVE_API_ENABLE
+  value: "1"
+- name: OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
+  value: "1"
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: BSD-3-Clause
+root_path: thread

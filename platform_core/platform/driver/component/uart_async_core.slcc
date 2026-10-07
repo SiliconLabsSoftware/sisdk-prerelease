@@ -5,7 +5,7 @@ description: >
   Internal UART async driver component meant for users that do not wish to have their UART instance
   declared statically.
 category: Platform|Driver|UART
-quality: experimental
+quality: production
 ui_hints:
   visibility: never
 metadata:
@@ -25,6 +25,7 @@ requires:
 - name: memory_manager
 - name: sleeptimer
 - name: uart_core
+- name: uart_lld
 template_contribution:
 - name: component_catalog
   value: uart_async

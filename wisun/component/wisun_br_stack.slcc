@@ -29,6 +29,7 @@ requires:
 - name: "event_queue_task"
 - name: "wisun_lxpm_implementation"
 - name: "wisun_dc_server_implementation"
+- name: "wisun_lfn_parent"
 
 recommends:
 - id: "wisun_dc_client_stubs"

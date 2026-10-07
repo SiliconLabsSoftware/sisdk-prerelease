@@ -11,21 +11,16 @@
   "uart": cpc_ng_drv_uart_instances,
 } -%}
 
-{% for drv_name, drv_instances in drv_instances_dict.items() -%}
-{% if drv_instances|count > 0 -%}
+{% for drv_name, drv_instances in drv_instances_dict.items() if drv_instances|count > 0 %}
 #include "sl_cpc_drv_{{ drv_name }}.h"
-{%- endif %}
-{%- endfor %}
+{% endfor %}
 
-{% for drv_name, drv_instances in drv_instances_dict.items() -%}
-{% if drv_instances|count > 0 -%}
+{% for drv_name, drv_instances in drv_instances_dict.items() if drv_instances|count > 0 %}
 #define SL_CPC_DRV_{{ drv_name|upper }}_INSTANCES_COUNT {{ drv_instances|count }}
-{%- endif %}
-
-{% for instance in drv_instances -%}
+{% for instance in drv_instances %}
 #define sl_cpc_drv_{{ drv_name }}_{{ instance }} (&sl_cpc_drv_{{ drv_name }}_instances[{{ loop.index0 }}])
-{%- endfor %}
-{%- endfor %}
+{% endfor %}
+{% endfor %}
 
 /***************************************************************************/ /**
  * Initialize all CPC driver instances.
@@ -35,10 +30,8 @@
  ******************************************************************************/
 sl_status_t sl_cpc_drv_instances_init(void);
 
-{% for drv_name, drv_instances_role in drv_instances_dict.items() -%}
-{% if drv_instances_role|count > 0 -%}
+{% for drv_name, drv_instances in drv_instances_dict.items() if drv_instances|count > 0 %}
 void sl_cpc_drv_{{ drv_name }}_instances_start_buses(void);
-{%- endif %}
-{%- endfor %}
+{% endfor %}
 
 #endif /* SL_CPC_DRV_INSTANCES_H */

@@ -142,6 +142,7 @@ source:
 - path: mac/mac_beacon.cpp
 - path: mac/mac_filter.cpp
 - path: mac/mac_frame.cpp
+- path: mac/mac_header_ie.cpp
 - path: mac/mac_links.cpp
 - path: mac/mac_ltvs.cpp
 - path: mac/mac_types.cpp
@@ -209,7 +210,9 @@ source:
 - path: radio/ble_secure.cpp
 - path: radio/radio.cpp
 - path: radio/radio_callbacks.cpp
+- path: radio/radio_frame.cpp
 - path: radio/radio_platform.cpp
+- path: radio/radio_types.cpp
 - path: radio/trel_interface.cpp
 - path: radio/trel_link.cpp
 - path: radio/trel_packet.cpp

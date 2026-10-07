@@ -6,20 +6,15 @@ description: >
   underlying peripheral signals (TX, RX, CTS, RTS) and interrupt handlers in
   per-instance configuration so users can configure pin routing through the
   pin tool. Generated instances are initialized by sl_uart_init_instances()
-  (automatically when sl_main is present).
+  (automatically when sl_main is present). Add the uart_eusart or uart_usart  component to support the selected peripheral type.
 category: Platform|Driver|UART
-quality: experimental
+quality: production
 metadata:
   sbom:
     license: Zlib
 root_path: platform_core/platform/driver/uart/
 instantiable:
   prefix: inst
-provides:
-- name: uart
-  allow_multiple: true
-- name: uart_instance
-  allow_multiple: true
 requires:
 - name: uart_core
 config_file:
@@ -31,3 +26,8 @@ template_file:
 template_contribution:
 - name: uart_instances
   value: '{{instance}}'
+- name: event_handler
+  value:
+    event: driver_init
+    include: sl_uart_instances.h
+    handler: sl_uart_instances_init

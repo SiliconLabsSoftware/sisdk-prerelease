@@ -199,7 +199,7 @@ sl_status_t sli_cpc_control_on_unknown_request(sli_cpc_control_t *ctrl, const sl
  * @brief Bus control operations.
  */
 typedef struct sli_cpc_control_ops {
-  sl_status_t (*init)(sli_cpc_control_t *ctrl, sl_cpc_bus_t *bus);
+  sl_status_t (*init)(sli_cpc_control_t *ctrl);
   void (*deinit)(sli_cpc_control_t *ctrl);
   void (*on_connected)(sli_cpc_control_t *ctrl);
   void (*on_error)(sli_cpc_control_t *ctrl, sl_status_t status);

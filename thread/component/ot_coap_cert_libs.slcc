@@ -10,96 +10,50 @@ provides:
 - name: ot_coap_cert_libs
 requires:
 - name: ot_cert_libs
+- name: ot_coap_cert_config
 recommends:
 - id: ot_cert_libs
   vendor: silabs
-define:
-- name: OPENTHREAD_CONFIG_COAP_API_ENABLE
-  value: 1
-- name: OPENTHREAD_CONFIG_COAP_OBSERVE_API_ENABLE
-  value: 1
-- name: OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
-  value: 1
 library:
-- path: libs/libsl_ot_stack_ftd_coap_efr32mg21_gcc.a
+- path: libs/build/gcc/cortex-m33/sl-openthread-cert-library/Release/libsl_ot_stack_ftd_coap.a
   condition:
   - toolchain_gcc
-  - device_sdid_200
+  - cortexm33
   - ot_stack_ftd
-- path: libs/libsl_ot_stack_ftd_coap_efr32mg21_llvm.a
-  condition:
-  - toolchain_llvm
-  - device_sdid_200
-  - ot_stack_ftd
-- path: libs/libsl_ot_stack_mtd_coap_efr32mg21_gcc.a
+- path: libs/build/gcc/cortex-m33/sl-openthread-cert-library/Release/libsl_ot_stack_mtd_coap.a
   condition:
   - toolchain_gcc
-  - device_sdid_200
+  - cortexm33
   - ot_stack_mtd
-- path: libs/libsl_ot_stack_mtd_coap_efr32mg21_llvm.a
-  condition:
-  - toolchain_llvm
-  - device_sdid_200
-  - ot_stack_mtd
-- path: libs/libsl_ot_stack_ftd_coap_efr32mg24_gcc.a
+- path: libs/build/gcc/cortex-m55/sl-openthread-cert-library/Release/libsl_ot_stack_ftd_coap.a
   condition:
   - toolchain_gcc
-  - device_sdid_215
+  - cortexm55
   - ot_stack_ftd
-- path: libs/libsl_ot_stack_ftd_coap_efr32mg24_llvm.a
-  condition:
-  - toolchain_llvm
-  - device_sdid_215
-  - ot_stack_ftd
-- path: libs/libsl_ot_stack_mtd_coap_efr32mg24_gcc.a
+- path: libs/build/gcc/cortex-m55/sl-openthread-cert-library/Release/libsl_ot_stack_mtd_coap.a
   condition:
   - toolchain_gcc
-  - device_sdid_215
+  - cortexm55
   - ot_stack_mtd
-- path: libs/libsl_ot_stack_mtd_coap_efr32mg24_llvm.a
+- path: libs/build/llvm/cortex-m33/sl-openthread-cert-library/Release/libsl_ot_stack_ftd_coap.a
   condition:
   - toolchain_llvm
-  - device_sdid_215
-  - ot_stack_mtd
-- path: libs/libsl_ot_stack_ftd_coap_efr32mg26_gcc.a
-  condition:
-  - toolchain_gcc
-  - device_sdid_225
+  - cortexm33
   - ot_stack_ftd
-- path: libs/libsl_ot_stack_ftd_coap_efr32mg26_llvm.a
+- path: libs/build/llvm/cortex-m33/sl-openthread-cert-library/Release/libsl_ot_stack_mtd_coap.a
   condition:
   - toolchain_llvm
-  - device_sdid_225
-  - ot_stack_ftd
-- path: libs/libsl_ot_stack_mtd_coap_efr32mg26_gcc.a
-  condition:
-  - toolchain_gcc
-  - device_sdid_225
+  - cortexm33
   - ot_stack_mtd
-- path: libs/libsl_ot_stack_mtd_coap_efr32mg26_llvm.a
+- path: libs/build/llvm/cortex-m55/sl-openthread-cert-library/Release/libsl_ot_stack_ftd_coap.a
   condition:
   - toolchain_llvm
-  - device_sdid_225
-  - ot_stack_mtd
-- path: libs/libsl_ot_stack_ftd_coap_simg301_gcc.a
-  condition:
-  - toolchain_gcc
-  - device_generic_family_sixx301
+  - cortexm55
   - ot_stack_ftd
-- path: libs/libsl_ot_stack_ftd_coap_simg301_llvm.a
+- path: libs/build/llvm/cortex-m55/sl-openthread-cert-library/Release/libsl_ot_stack_mtd_coap.a
   condition:
   - toolchain_llvm
-  - device_generic_family_sixx301
-  - ot_stack_ftd
-- path: libs/libsl_ot_stack_mtd_coap_simg301_gcc.a
-  condition:
-  - toolchain_gcc
-  - device_generic_family_sixx301
-  - ot_stack_mtd
-- path: libs/libsl_ot_stack_mtd_coap_simg301_llvm.a
-  condition:
-  - toolchain_llvm
-  - device_generic_family_sixx301
+  - cortexm55
   - ot_stack_mtd
 documentation:
   docset: openthread

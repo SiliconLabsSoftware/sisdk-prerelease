@@ -22,4 +22,6 @@ toolchain_settings:
   value: -fno-builtin-memcpy
 - option: llvm_linker_option
   value: -Wl,--wrap=memcpy
-
+documentation:
+  docset: gecko-platform
+  document: platform-common/common

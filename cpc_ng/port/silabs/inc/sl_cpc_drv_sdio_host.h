@@ -13,28 +13,38 @@
 #include "sl_cpc_bus.h"                  /* sl_cpc_bus_t */
 #include "sl_cpc_drv_sdio_host_config.h" /* SL_CPC_DRV_SDIO_HOST_RX_FRAME_POOL_COUNT */
 #include "sl_cpc_ep.h"                   /* SL_CPC_EP_MAX_PAYLOAD_SIZE */
+#include "sl_gpio.h"                     /* sl_gpio_t */
 #include "sli_cpc_types.h"               /* sli_cpc_dispatcher_handle_t, sli_cpc_frame_list_t */
 
 /** Maximum SDIO block size supported by the host driver flush buffer. */
 #define SL_CPC_DRV_SDIO_HOST_MAX_BLOCK_SIZE 512
 
-typedef enum {
-  ADMA_IDLE,
-  ADMA_RECEIVE,
-  ADMA_TRANSMIT,
-} adma_state_t;
+typedef enum sli_cpc_drv_sdio_host_adma_state {
+  SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE,
+  SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_RECEIVE,
+  SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_TRANSMIT,
+} sli_cpc_drv_sdio_host_adma_state_t;
 
-struct sli_cpc_drv_caps {
+struct sli_cpc_drv_sdio_host_caps {
   uint8_t max_aggregation;
 };
 
 /** @brief SDIO host CPC driver configuration. */
 typedef struct sl_cpc_drv_sdio_host_config {
-  sl_sdhc_sdio_handle_t *sdio_handle;
+  sl_peripheral_t peripheral;
+  sl_gpio_t clk;
+  sl_gpio_t cmd;
+  sl_gpio_t dat0;
+  sl_gpio_t dat1;
+  sl_gpio_t dat2;
+  sl_gpio_t dat3;
+  uint32_t base_clock_freq_hz;
+  sl_sdhc_bus_voltage_t bus_voltage;
+  sl_sdhc_slot_type_t slot_type;
+  sl_sdhc_cd_source_t card_detect_source;
   uint8_t function_num;
   uint16_t block_size;
   sl_sdhc_clock_frequency_t max_sd_freq;
-  sl_sdhc_bus_width_t max_bus_width;
   sl_sdhc_speed_mode_t max_speed_mode;
 } sl_cpc_drv_sdio_host_config_t;
 
@@ -47,11 +57,11 @@ struct sdio_hdr_block {
 typedef struct sl_cpc_drv_sdio_host {
   sl_cpc_bus_t bus;
 
-  sl_sdhc_sdio_handle_t *sdio_handle;
+  sl_sdhc_sdio_handle_t sdio_handle;
   uint8_t function_num;
   uint16_t block_size;
-  struct sli_cpc_drv_caps local_caps;
-  struct sli_cpc_drv_caps remote_caps;
+  struct sli_cpc_drv_sdio_host_caps local_caps;
+  struct sli_cpc_drv_sdio_host_caps remote_caps;
 
   // TX: frames waiting for header / payload / completion notify.
   sli_cpc_frame_list_t tx_header_pending_frames;
@@ -69,7 +79,7 @@ typedef struct sl_cpc_drv_sdio_host {
   sli_cpc_frame_list_t rx_free_frames;
 
   // RX: ADMA state.
-  adma_state_t adma_state;
+  sli_cpc_drv_sdio_host_adma_state_t adma_state;
 
   // Card interrupt pending, used to defer CARDINT servicing out of ISR.
   bool card_int_pending;

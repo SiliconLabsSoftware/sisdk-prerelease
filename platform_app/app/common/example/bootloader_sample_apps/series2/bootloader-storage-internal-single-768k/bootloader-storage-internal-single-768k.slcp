@@ -101,6 +101,13 @@ configuration:
   - name: SLOT0_START
     value: 134594560
     condition: [device_sdid_250]
+  ## device_sdid_265 ##
+  - name: BTL_STORAGE_BASE_ADDRESS
+    value: 134594560
+    condition: [device_sdid_265]
+  - name: SLOT0_START
+    value: 134594560
+    condition: [device_sdid_265]
 tag:
   - hardware:device:flash:768
 

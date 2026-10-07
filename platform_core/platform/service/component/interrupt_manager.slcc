@@ -50,3 +50,6 @@ template_contribution:
 define:
 - name: SL_CODE_COMPONENT_INTERRUPT_MANAGER
   value: interrupt_manager
+documentation:
+  docset: gecko-platform
+  document: platform-service/interrupt-manager

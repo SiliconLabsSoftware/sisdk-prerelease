@@ -18,15 +18,15 @@ ui_hints:
   visibility: never
 provides:
 - name: psa_crypto_api_nonsecure
+- name: psa_crypto_api
 # Symmetric with mbedtls `psa_crypto_api` which conflicts trustzone_nonsecure;
 # this NS counterpart must not be loaded on secure or unaware builds.
 conflicts:
 - name: trustzone_secure
 - name: trustzone_unaware
 requires:
-- name: psa_crypto_adjust_config
-- name: mbedtls_crypto_platform_api
 - name: psa_crypto_config
+- name: tf_psa_crypto_mbedtls
 include:
 - path: interface/include
   file_list:
@@ -34,6 +34,7 @@ include:
   - path: psa/crypto_client_struct.h
   - path: psa/crypto_compat.h
   - path: psa/crypto_driver_contexts_composites.h
+  - path: psa/crypto_driver_contexts_key_derivation.h
   - path: psa/crypto_driver_contexts_primitives.h
   - path: psa/crypto_extra.h
   - path: psa/crypto_platform.h
@@ -41,6 +42,8 @@ include:
   - path: psa/crypto_struct.h
   - path: psa/crypto_types.h
   - path: psa/crypto_values.h
+- path: interface/include/psa
+
 metadata:
   sbom:
     reference: tfm_sbom

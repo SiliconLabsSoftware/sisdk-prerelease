@@ -8,11 +8,15 @@ quality: production
 provides:
 - name: psa_crypto_config
 
+requires:
+- name: tf_psa_crypto_config
+
 include:
 
 - path: config
   file_list:
   - path: sli_psa_acceleration.h
+  - path: sli_mbedtls_omnipresent.h
   - path: sli_psa_tfm_translation.h
     condition: [tz_secure_key_library_s]
   - path: sli_psa_tfm_translation.h
@@ -43,25 +47,46 @@ template_file:
 config_file:
 - path: config/template/psa_crypto_config.h
   file_id: psa_crypto_config
+  condition: [trustzone_unaware]
+
+- path: config/template/sl_psa_trustzone_config.h
+  file_id: psa_crypto_config
+  export: true
+  condition: [trustzone_nonsecure]
+
+    # The secure bootloader will need sl_psa_trustzone_config.h
+- path: config/template/sl_psa_trustzone_config.h
+  file_id: psa_crypto_config
+  unless: [tz_secure_key_library_s, trustzone_nonsecure, trustzone_unaware]
+
+- path: config/template/sl_psa_driver_config.h
+  file_id: sl_psa_driver_config
     # We use tz_secure_key_library_s instead of trustzone_secure since the
     # secure bootloader will need this file to build.
   unless: [tz_secure_key_library_s, trustzone_nonsecure]
-- path: config/template/psa_crypto_config.h
-  file_id: psa_crypto_config
+- path: config/template/sl_psa_driver_config.h
+  file_id: sl_psa_driver_config
   export: true
   condition: [trustzone_nonsecure]
 
 define:
 
-- name: MBEDTLS_PSA_CRYPTO_CONFIG_FILE
+- name: TF_PSA_CRYPTO_CONFIG_FILE
   value: "<psa_crypto_config.h>"
+  condition: [trustzone_unaware]
+- name: TF_PSA_CRYPTO_CONFIG_FILE
+  value: "<sl_psa_trustzone_config.h>"
+  condition: [trustzone_nonsecure]
+- name: TF_PSA_CRYPTO_CONFIG_FILE
+  value: "<sl_psa_trustzone_config.h>"
+  condition: [trustzone_secure]
 
 - name: SLI_PSA_CONFIG_AUTOGEN_OVERRIDE_FILE
   value: "<sli_psa_config_se_cpc_primary.h>"
   condition: [se_cpc_primary]
 
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PSA_CRYPTO_CONFIG
 
   # When defining MBEDTLS_PSA_CRYPTO_CONFIG, we are responsible for setting
@@ -134,12 +159,6 @@ template_contribution:
 - name: psa_crypto_config
   value: PSA_WANT_KEY_TYPE_CHACHA20 1
   condition: [mbedtls_chachapoly]
-- name: psa_crypto_config
-  value: PSA_WANT_ECC_SECP_R1_192 1
-  condition: [mbedtls_ecc_secp192r1]
-- name: psa_crypto_config
-  value: PSA_WANT_ECC_SECP_R1_224 1
-  condition: [mbedtls_ecc_secp224r1]
 - name: psa_crypto_config
   value: PSA_WANT_ECC_SECP_R1_256 1
   condition: [mbedtls_ecc_secp256r1]

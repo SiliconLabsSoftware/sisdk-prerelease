@@ -10,6 +10,8 @@ ui_hints:
   visibility: never
 requires:
 - name: cmsis_rtos2_port
+- name: mbedtls_config
+- name: psa_crypto_config
 - name: sli_psec_osal
   condition: [kernel]
 
@@ -23,27 +25,27 @@ include:
   - path: threading_alt.h
 
 template_contribution:
-- name: mbedtls_config_trustzone_nonsecure
+- name: psa_crypto_config_trustzone_nonsecure
   value: MBEDTLS_THREADING_C
   condition: [trustzone_nonsecure]
 
-- name: mbedtls_config_trustzone_nonsecure
+- name: psa_crypto_config_trustzone_nonsecure
   value: MBEDTLS_THREADING_ALT
   condition: [trustzone_nonsecure]
 
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_THREADING_C
   condition: [trustzone_unaware]
 
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_THREADING_ALT
   condition: [trustzone_unaware]
 
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_THREADING_C
   condition: [device_si91x]
 
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_THREADING_ALT
   condition: [device_si91x]
 

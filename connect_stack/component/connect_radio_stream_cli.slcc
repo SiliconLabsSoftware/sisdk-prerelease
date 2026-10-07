@@ -1,9 +1,14 @@
 id: "connect_radio_stream_cli"
 label: "Radio Stream (Cli)"
 package: "connect_stack"
+description: "This component provides Radio Stream CLI commands."
 category: "Connect"
 quality: "production"
-description: "This component provides Radio Stream CLI commands."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: connect-stack-api/radio-stream
 provides:
 - name: "connect_radio_stream_cli"
 requires:
@@ -12,7 +17,6 @@ requires:
 - name: "connect_debug_print"
 source:
 - path: "stack-cli/radio-stream-cli.c"
-
 template_contribution:
 - name: cli_command
   value:

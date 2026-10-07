@@ -15,7 +15,8 @@ config_file:
   file_id: cpc_ng_drv_sdio_device_config
 provides:
 - name: cpc_ng_drv_sdio_device_secondary
-- name: cpc_ng_secondary_drv_instance
+- name: cpc_ng_drv_secondary_instance
+  allow_multiple: true
 requires:
 - name: cpc_ng_drv_sdio_device
 - name: cpc_ng_secondary

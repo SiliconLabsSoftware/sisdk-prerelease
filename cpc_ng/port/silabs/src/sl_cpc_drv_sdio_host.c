@@ -1,6 +1,10 @@
 /***************************************************************************/ /**
  * @file
  * @brief CPC Host SDIO Driver implementation.
+ *
+ * @warning Ensure SDHC has bus access to the memory where CPC headers and
+ *          payloads reside. ADMA descriptors that point to unreachable regions
+ *          will not transfer data.
  *******************************************************************************
  * # License
  * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
@@ -60,7 +64,6 @@
 #define SDIO_CARD_INT_EN_REG_ADDR 0x09U   ///< FN1 interrupt enable.
 #define SDIO_CARD_DATA_READY_FLAG 0x01U   ///< INT_ID/EN: read-data-ready (RDDATRDY).
 #define SDIO_XFER_COUNT_REG_ADDR 0x0CU    ///< FN1 advertised CMD53 transfer length.
-#define SDIO_CCCR_CARD_CAP_E4MI 0x20U     ///< CCCR Card Cap bit5 (E4MI).
 #define SDIO_CLOCK_WAKE_REG_ADDR 0x18000U ///< FN0 auto clock-wake (DAT1 card IRQ).
 #define SL_CPC_DRV_SDIO_FUNCTION_0 0U     ///< FN0 function number.
 
@@ -79,7 +82,7 @@ static_assert(SL_CPC_DRV_SDIO_HOST_RX_FRAME_POOL_COUNT >= CPC_SDIO_DEFAULT_AGGRE
  ******************************  TYPES *****************************************
  ******************************************************************************/
 
-SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_caps, 1);
+SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_sdio_host_caps, 1);
 
 /*******************************************************************************
  ****************************** PRIVATE FUNCTIONS ******************************
@@ -121,10 +124,13 @@ static void primary_sdio_init_pins(const sl_sdhc_sdio_handle_t *sdio_handle)
  *
  * ADMA descriptors should be prepared before calling this function.
  * The ADMA cannot be refilled mid-transfer.
+ *
+ * @note Descriptor addresses (headers, payloads, flush) must point to memory
+ *       that SDHC can access on the system bus.
  ******************************************************************************/
-static void transfer_start(sl_cpc_drv_sdio_host_t *drv, adma_state_t next_state, size_t xfer_len, bool is_write)
+static void transfer_start(sl_cpc_drv_sdio_host_t *drv, sli_cpc_drv_sdio_host_adma_state_t next_state, size_t xfer_len,
+                           bool is_write)
 {
-  sl_sdhc_sdio_adma_config_t adma_config;
   sl_status_t status;
   uint32_t block_count;
   MCU_DECLARE_IRQ_STATE;
@@ -137,20 +143,21 @@ static void transfer_start(sl_cpc_drv_sdio_host_t *drv, adma_state_t next_state,
   MCU_ATOMIC_STORE(drv->adma_state, next_state);
 
   // xfer.buffer is required by the SDHC API even for ADMA (null-check); descriptors carry the SG list.
-  memset(&adma_config, 0, sizeof(adma_config));
-  adma_config.xfer.func_num = drv->function_num;
-  adma_config.xfer.reg_addr = 0U;
-  adma_config.xfer.xfer_mode = SL_SDHC_SDIO_BLOCK_MODE_FIXED_ADDR;
-  adma_config.xfer.buffer = (uint8_t *)&drv->sdio_hdr_block;
-  adma_config.xfer.data_timeout_ms = 1000U;
-  adma_config.descriptor_table = drv->frame_descriptors;
-  adma_config.xfer.size = block_count;
-  adma_config.enable_dma_interrupt = true;
+  const sl_sdhc_sdio_adma_config_t adma_config = {
+    .xfer.func_num = drv->function_num,
+    .xfer.reg_addr = 0U,
+    .xfer.xfer_mode = SL_SDHC_SDIO_BLOCK_MODE_FIXED_ADDR,
+    .xfer.buffer = &drv->sdio_hdr_block,
+    .xfer.data_timeout_ms = 1000U,
+    .descriptor_table = drv->frame_descriptors,
+    .xfer.size = block_count,
+    .enable_dma_interrupt = true,
+  };
 
   if (is_write) {
-    status = sl_sdhc_sdio_write_extended_adma(drv->sdio_handle, &adma_config);
+    status = sl_sdhc_sdio_write_extended_adma(&drv->sdio_handle, &adma_config);
   } else {
-    status = sl_sdhc_sdio_read_extended_adma(drv->sdio_handle, &adma_config);
+    status = sl_sdhc_sdio_read_extended_adma(&drv->sdio_handle, &adma_config);
   }
 
   if (status != SL_STATUS_OK) {
@@ -159,7 +166,7 @@ static void transfer_start(sl_cpc_drv_sdio_host_t *drv, adma_state_t next_state,
 
     // Nothing reached the bus, so undo what was staged for this CMD53.
     MCU_ENTER_ATOMIC();
-    if (next_state == ADMA_TRANSMIT) {
+    if (next_state == SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_TRANSMIT) {
       // Frames are queued for completion notification; requeue them instead so
       // the next start_pending_tx() retries and they are never reported as sent.
       sli_cpc_frame_list_extend(&drv->tx_header_pending_frames, &drv->tx_pending_xfer_complete_frames);
@@ -167,7 +174,7 @@ static void transfer_start(sl_cpc_drv_sdio_host_t *drv, adma_state_t next_state,
       // on_card_interrupt() already acked FN1 INT_ID; re-latch so it retries.
       drv->card_int_pending = true;
     }
-    drv->adma_state = ADMA_IDLE;
+    drv->adma_state = SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE;
     MCU_EXIT_ATOMIC();
   }
 }
@@ -224,15 +231,15 @@ static void adma_tx_prepare_payload_descriptors(sl_cpc_drv_sdio_host_t *drv, siz
       xfer_len += ALIGNED_PAYLOAD_SIZE(payload_len);
 
       if (aligned_len > 0U) {
-        drv->frame_descriptors[idx++] = SL_HAL_SDHC_DMA_DESCRIPTOR_XFER_DMA_INTERRUPT(payload, aligned_len);
+        drv->frame_descriptors[idx++] = SL_HAL_SDHC_DMA_DESCRIPTOR_XFER(payload, aligned_len);
       }
 
       if (unaligned_len > 0U) {
         SLI_CPC_ASSERT(dword_idx < CPC_DRV_SDIO_DESC_COUNT);
         drv->unaligned_payload_pool[dword_idx] = 0;
         memcpy(&drv->unaligned_payload_pool[dword_idx], &payload[aligned_len], unaligned_len);
-        drv->frame_descriptors[idx++] = SL_HAL_SDHC_DMA_DESCRIPTOR_XFER_DMA_INTERRUPT(
-          &drv->unaligned_payload_pool[dword_idx], sizeof(drv->unaligned_payload_pool[dword_idx]));
+        drv->frame_descriptors[idx++] = SL_HAL_SDHC_DMA_DESCRIPTOR_XFER(&drv->unaligned_payload_pool[dword_idx],
+                                                                        sizeof(drv->unaligned_payload_pool[dword_idx]));
         dword_idx++;
       }
     }
@@ -245,7 +252,7 @@ static void adma_tx_prepare_payload_descriptors(sl_cpc_drv_sdio_host_t *drv, siz
 
     sli_cpc_frame_list_extend(&drv->tx_header_pending_frames, &drv->tx_payload_pending_frames);
     if (prepared == 0U) {
-      MCU_ATOMIC_STORE(drv->adma_state, ADMA_IDLE);
+      MCU_ATOMIC_STORE(drv->adma_state, SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE);
       return;
     }
     drv->sdio_hdr_block.frame_count = (uint8_t)prepared;
@@ -261,7 +268,7 @@ static void adma_tx_prepare_payload_descriptors(sl_cpc_drv_sdio_host_t *drv, siz
       SLI_CPC_LOG_ERROR("TX - No descriptor slot for flush");
       return;
     }
-    drv->frame_descriptors[idx++] = SL_HAL_SDHC_DMA_DESCRIPTOR_XFER_DMA_END_INTERRUPT(drv->flush_buff, flush_len);
+    drv->frame_descriptors[idx++] = SL_HAL_SDHC_DMA_DESCRIPTOR_XFER_END_INTERRUPT(drv->flush_buff, flush_len);
     xfer_len += flush_len;
   } else {
     // Last payload/header descriptor must End so the host ADMA engine completes.
@@ -269,7 +276,7 @@ static void adma_tx_prepare_payload_descriptors(sl_cpc_drv_sdio_host_t *drv, siz
     drv->frame_descriptors[idx - 1U].xfer.end_ifs = 1U;
   }
 
-  transfer_start(drv, ADMA_TRANSMIT, xfer_len, true);
+  transfer_start(drv, SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_TRANSMIT, xfer_len, true);
 }
 
 /***************************************************************************/ /**
@@ -310,7 +317,7 @@ static void adma_tx_prepare_header_descriptors(sl_cpc_drv_sdio_host_t *drv, size
     // Add header descriptor (ADMA requires 4-byte-aligned buffer addresses).
     SLI_CPC_ASSERT(((uintptr_t)sli_cpc_frame_get_header(frame) % SL_CPC_BUF_MIN_ALIGNMENT) == 0U);
     drv->frame_descriptors[idx++]
-      = SL_HAL_SDHC_DMA_DESCRIPTOR_XFER_DMA_INTERRUPT(sli_cpc_frame_get_header(frame), SLI_CPC_HEADER_SIZE);
+      = SL_HAL_SDHC_DMA_DESCRIPTOR_XFER(sli_cpc_frame_get_header(frame), SLI_CPC_HEADER_SIZE);
 
     // Push the frame to the payload pending list.
     sli_cpc_frame_list_push_back(&drv->tx_payload_pending_frames, frame);
@@ -318,7 +325,7 @@ static void adma_tx_prepare_header_descriptors(sl_cpc_drv_sdio_host_t *drv, size
 
   drv->sdio_hdr_block.frame_count = (uint8_t)sli_cpc_frame_list_get_len(&drv->tx_payload_pending_frames);
   if (drv->sdio_hdr_block.frame_count == 0U) {
-    MCU_ATOMIC_STORE(drv->adma_state, ADMA_IDLE);
+    MCU_ATOMIC_STORE(drv->adma_state, SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE);
     return;
   }
 
@@ -330,11 +337,11 @@ static void adma_tx_prepare_header_descriptors(sl_cpc_drv_sdio_host_t *drv, size
  ******************************************************************************/
 static void adma_tx_prepare_frame_count(sl_cpc_drv_sdio_host_t *drv)
 {
-  adma_state_t state;
+  sli_cpc_drv_sdio_host_adma_state_t state;
   size_t idx = 0;
 
   MCU_ATOMIC_LOAD(state, drv->adma_state);
-  SLI_CPC_ASSERT(state == ADMA_TRANSMIT);
+  SLI_CPC_ASSERT(state == SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_TRANSMIT);
 
   // Initialize the header block.
   memset(&drv->sdio_hdr_block, 0, sizeof(struct sdio_hdr_block));
@@ -358,11 +365,11 @@ static void start_pending_tx(sl_cpc_drv_sdio_host_t *drv)
   MCU_DECLARE_IRQ_STATE;
 
   MCU_ENTER_ATOMIC();
-  if (drv->adma_state == ADMA_IDLE && !drv->card_int_pending
+  if (drv->adma_state == SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE && !drv->card_int_pending
       && !sli_cpc_frame_list_empty(&drv->tx_header_pending_frames)) {
     // Claim ADMA before leaving the critical section so another context cannot
     // start a second transfer from the same pending queue.
-    drv->adma_state = ADMA_TRANSMIT;
+    drv->adma_state = SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_TRANSMIT;
     start_tx = true;
   }
   MCU_EXIT_ATOMIC();
@@ -456,15 +463,15 @@ static void adma_rx_start(sl_cpc_drv_sdio_host_t *drv)
   MCU_DECLARE_IRQ_STATE;
 
   // Claim ADMA for RX under IRQ lock, matching start_pending_tx(), so TX cannot
-  // race into the window between the idle check and ADMA_RECEIVE.
+  // race into the window between the idle check and SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_RECEIVE.
   MCU_ENTER_ATOMIC();
-  if (drv->adma_state != ADMA_IDLE) {
+  if (drv->adma_state != SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE) {
     // Defer until ADMA is idle; card_int_pending re-enters on_card_interrupt.
     drv->card_int_pending = true;
     MCU_EXIT_ATOMIC();
     return;
   }
-  drv->adma_state = ADMA_RECEIVE;
+  drv->adma_state = SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_RECEIVE;
   MCU_EXIT_ATOMIC();
 
   // Defer CMD53 until a free RX frame exists so we never DMA a frame we
@@ -472,28 +479,28 @@ static void adma_rx_start(sl_cpc_drv_sdio_host_t *drv)
   MCU_ATOMIC_SECTION(no_free = sli_cpc_frame_list_empty(&drv->rx_free_frames);)
   if (no_free) {
     MCU_ENTER_ATOMIC();
-    drv->adma_state = ADMA_IDLE;
+    drv->adma_state = SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE;
     drv->card_int_pending = true;
     MCU_EXIT_ATOMIC();
     SLI_CPC_LOG_WARN("RX - no free frame; deferring CMD53");
     return;
   }
 
-  sl_sdhc_sdio_xfer_params_t xfer = {
+  const sl_sdhc_sdio_xfer_params_t xfer = {
     .func_num = drv->function_num,
     .reg_addr = SDIO_XFER_COUNT_REG_ADDR, // 0x0C
     .xfer_mode = SL_SDHC_SDIO_BYTE_MODE_INCR_ADDR,
-    .buffer = (uint8_t *)&xfer_len,
+    .buffer = &xfer_len,
     .size = sizeof(xfer_len),
     .data_timeout_ms = 1000U,
   };
 
   // Read transfer length
-  status = sl_sdhc_sdio_read_extended_blocking(drv->sdio_handle, &xfer);
+  status = sl_sdhc_sdio_read_extended_blocking(&drv->sdio_handle, &xfer);
   if (status != SL_STATUS_OK) {
     SLI_CPC_LOG_ERROR("Failed to read transfer length: 0x%lx", (unsigned long)status);
     MCU_ENTER_ATOMIC();
-    drv->adma_state = ADMA_IDLE;
+    drv->adma_state = SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE;
     drv->card_int_pending = true;
     MCU_EXIT_ATOMIC();
     return;
@@ -504,7 +511,7 @@ static void adma_rx_start(sl_cpc_drv_sdio_host_t *drv)
     SLI_CPC_LOG_ERROR("Transfer length is 0");
     // Transfer length is 0, don't start the transfer, try later.
     MCU_ENTER_ATOMIC();
-    drv->adma_state = ADMA_IDLE;
+    drv->adma_state = SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE;
     drv->card_int_pending = true;
     MCU_EXIT_ATOMIC();
     return;
@@ -515,7 +522,7 @@ static void adma_rx_start(sl_cpc_drv_sdio_host_t *drv)
     SLI_CPC_LOG_ERROR("RX - xfer_len %lu below minimum frame size %lu", (unsigned long)xfer_len,
                       (unsigned long)(sizeof(struct sdio_hdr_block) + SLI_CPC_HEADER_SIZE));
     MCU_ENTER_ATOMIC();
-    drv->adma_state = ADMA_IDLE;
+    drv->adma_state = SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE;
     drv->card_int_pending = true;
     MCU_EXIT_ATOMIC();
     return;
@@ -526,7 +533,7 @@ static void adma_rx_start(sl_cpc_drv_sdio_host_t *drv)
     SLI_CPC_LOG_ERROR("RX - xfer_len %lu exceeds bounce buffer %lu", (unsigned long)xfer_len,
                       (unsigned long)sizeof(drv->rx_buffer));
     MCU_ENTER_ATOMIC();
-    drv->adma_state = ADMA_IDLE;
+    drv->adma_state = SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE;
     drv->card_int_pending = true;
     MCU_EXIT_ATOMIC();
     return;
@@ -537,7 +544,7 @@ static void adma_rx_start(sl_cpc_drv_sdio_host_t *drv)
   drv->rx_xfer_len = xfer_len;
 
   drv->frame_descriptors[0] = SL_HAL_SDHC_DMA_DESCRIPTOR_XFER_DMA_END_INTERRUPT(drv->rx_buffer, xfer_len);
-  transfer_start(drv, ADMA_RECEIVE, (size_t)xfer_len, false);
+  transfer_start(drv, SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_RECEIVE, (size_t)xfer_len, false);
 }
 
 /***************************************************************************/ /**
@@ -556,7 +563,7 @@ static void on_card_interrupt(void *arg)
   // Atomically claim a pending RX while ADMA is idle so an ISR latch
   // between the check and clear cannot be dropped.
   MCU_ENTER_ATOMIC();
-  if (drv->card_int_pending && drv->adma_state == ADMA_IDLE) {
+  if (drv->card_int_pending && drv->adma_state == SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE) {
     drv->card_int_pending = false;
     claimed = true;
   }
@@ -569,19 +576,19 @@ static void on_card_interrupt(void *arg)
 
   // Ack FN1 INT_ID when present. After a deferred resume INT_ID may already
   // be clear; xfer_len is then the source of truth in adma_rx_start().
-  status = sl_sdhc_sdio_read_byte(drv->sdio_handle, drv->function_num, SDIO_CARD_INT_ID_REG_ADDR, &int_id);
+  status = sl_sdhc_sdio_read_byte(&drv->sdio_handle, drv->function_num, SDIO_CARD_INT_ID_REG_ADDR, &int_id);
   if (status != SL_STATUS_OK) {
     SLI_CPC_LOG_ERROR("Card INT_ID read failed: 0x%lx", (unsigned long)status);
     MCU_ATOMIC_SECTION(drv->card_int_pending = true;)
   } else {
     if (int_id != 0U) {
-      (void)sl_sdhc_sdio_write_byte(drv->sdio_handle, drv->function_num, SDIO_CARD_INT_ID_REG_ADDR, int_id);
+      (void)sl_sdhc_sdio_write_byte(&drv->sdio_handle, drv->function_num, SDIO_CARD_INT_ID_REG_ADDR, int_id);
     }
     adma_rx_start(drv);
   }
 
   // Always re-arm (clearing CARDINTSTS clears STSENA).
-  (void)sl_sdhc_sdio_enable_card_interrupt(drv->sdio_handle);
+  (void)sl_sdhc_sdio_enable_card_interrupt(&drv->sdio_handle);
 
   // adma_rx_start may re-latch on transient failure; retry from thread context.
 
@@ -613,20 +620,20 @@ static sl_status_t alloc_rx_frame_to_free_list(sl_cpc_drv_sdio_host_t *drv)
  ******************************************************************************/
 static void adma_irq_handler(sl_cpc_drv_sdio_host_t *drv)
 {
-  adma_state_t state;
+  sli_cpc_drv_sdio_host_adma_state_t state;
   bool pending;
 
   MCU_ATOMIC_LOAD(state, drv->adma_state);
   switch (state) {
-    case ADMA_IDLE:
+    case SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE:
       break;
 
-    case ADMA_RECEIVE:
-      MCU_ATOMIC_STORE(drv->adma_state, ADMA_IDLE);
+    case SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_RECEIVE:
+      MCU_ATOMIC_STORE(drv->adma_state, SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE);
       adma_rx_parse_bounce(drv);
       // Re-arm the level-triggered source. A still-asserted DAT1 generates
       // another CARDINT event; do not synthesize a poll here.
-      sl_sdhc_sdio_enable_card_interrupt(drv->sdio_handle);
+      sl_sdhc_sdio_enable_card_interrupt(&drv->sdio_handle);
       MCU_ATOMIC_LOAD(pending, drv->card_int_pending);
       if (pending) {
         sli_cpc_dispatcher_push(&drv->card_irq_dispatcher, on_card_interrupt, drv);
@@ -636,15 +643,15 @@ static void adma_irq_handler(sl_cpc_drv_sdio_host_t *drv)
       start_pending_tx(drv);
       break;
 
-    case ADMA_TRANSMIT:
+    case SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_TRANSMIT:
       // Publish the idle state before waking CPC. A newly submitted frame
       // must be able to start immediately rather than becoming stranded.
-      MCU_ATOMIC_STORE(drv->adma_state, ADMA_IDLE);
+      MCU_ATOMIC_STORE(drv->adma_state, SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE);
       sli_cpc_bus_notify_tx_data_by_drv(&drv->bus, &drv->tx_pending_xfer_complete_frames);
 
       // Re-arm only. If DAT1 is asserted, hardware raises CARDINT and the
       // event callback latches it asynchronously.
-      sl_sdhc_sdio_enable_card_interrupt(drv->sdio_handle);
+      sl_sdhc_sdio_enable_card_interrupt(&drv->sdio_handle);
       MCU_ATOMIC_LOAD(pending, drv->card_int_pending);
       if (pending) {
         sli_cpc_dispatcher_push(&drv->card_irq_dispatcher, on_card_interrupt, drv);
@@ -706,46 +713,67 @@ static void cpc_drv_sdio_event_cb(sl_sdhc_sdio_handle_t *sdio_handle, sl_sdhc_ev
 static void cpc_drv_sdio_error_cb(sl_sdhc_sdio_handle_t *sdio_handle, sl_sdhc_error_bit_t error_bits,
                                   uint32_t r5_response, void *user_data)
 {
-  sl_cpc_drv_sdio_host_t *drv = user_data;
+  (void)sdio_handle;
   (void)error_bits;
   (void)r5_response;
-
-  drv->sdio_handle = sdio_handle;
+  (void)user_data;
 
   SLI_CPC_LOG_ERROR("Error callback: 0x%lx", (unsigned long)error_bits);
 }
 
 static sl_status_t init_hw(sl_cpc_drv_sdio_host_t *drv, const sl_cpc_drv_sdio_host_config_t *cfg)
 {
-  sl_sdhc_sdio_init_params_t sdio_init_params;
   sl_status_t status;
   uint8_t func_mask;
-  uint8_t card_cap;
   uint8_t int_id;
 
-  sl_sdhc_sdio_callbacks_t callbacks = {
+  const sl_sdhc_sdio_callbacks_t callbacks = {
     .transfer_complete = cpc_drv_sdio_xfer_complete_cb,
     .event = cpc_drv_sdio_event_cb,
     .error = cpc_drv_sdio_error_cb,
     .user_data = drv,
   };
 
+  const sl_sdhc_init_params_t sdhc_init = {
+    .sdhc_peripheral = cfg->peripheral,
+    .gpio_config = {
+      .clk = cfg->clk,
+      .cmd = cfg->cmd,
+      .dat0 = cfg->dat0,
+      .dat1 = cfg->dat1,
+      .dat2 = cfg->dat2,
+      .dat3 = cfg->dat3,
+      .card_detect = { .port = SL_SDHC_GPIO_PORT_UNUSED, .pin = SL_SDHC_GPIO_PIN_UNUSED },
+      .write_protect = { .port = SL_SDHC_GPIO_PORT_UNUSED, .pin = SL_SDHC_GPIO_PIN_UNUSED },
+    },
+    .base_clock_freq_hz = cfg->base_clock_freq_hz,
+    .bus_voltage = cfg->bus_voltage,
+    .slot_type = cfg->slot_type,
+    .card_detect_source = cfg->card_detect_source,
+    .timeout_clk_unit = SL_SDHC_TIMEOUT_CLK_UNIT_MHZ,
+    .timeout_clk_freq = 1,
+  };
+
   SLI_CPC_LOG_INFO("HW Init");
 
-  if (drv->sdio_handle == NULL) {
-    return SL_STATUS_NOT_INITIALIZED;
+  status = sl_sdhc_sdio_host_init(&drv->sdio_handle, &sdhc_init);
+  if (status != SL_STATUS_OK) {
+    SLI_CPC_LOG_ERROR("SDHC host init failed: 0x%lx", (unsigned long)status);
+    return status;
   }
 
-  primary_sdio_init_pins(drv->sdio_handle);
+  primary_sdio_init_pins(&drv->sdio_handle);
 
-  // Enable the SD bus power (requires SDHC clock already running; EN is set in
-  sl_hal_sdhc_enable_bus_power(sli_sdhc_get_base_addr(drv->sdio_handle->sdhc_controller.sdhc_peripheral));
+  // Enable the SD bus power. Host init already enables SDHC0CLK.
+  sl_hal_sdhc_enable_bus_power(sli_sdhc_get_base_addr(drv->sdio_handle.sdhc_controller.sdhc_peripheral));
 
-  sdio_init_params.max_sd_freq = cfg->max_sd_freq;
-  sdio_init_params.max_bus_width = cfg->max_bus_width;
-  sdio_init_params.max_speed_mode = cfg->max_speed_mode;
+  const sl_sdhc_sdio_init_params_t sdio_init_params = {
+    .max_sd_freq = cfg->max_sd_freq,
+    .max_bus_width = SL_SDHC_BUS_WIDTH_4BIT_MODE,
+    .max_speed_mode = cfg->max_speed_mode,
+  };
 
-  status = sl_sdhc_sdio_init(drv->sdio_handle, &sdio_init_params);
+  status = sl_sdhc_sdio_init(&drv->sdio_handle, &sdio_init_params);
   if (status != SL_STATUS_OK) {
     SLI_CPC_LOG_ERROR("Card init failed: 0x%lx", (unsigned long)status);
     return status;
@@ -755,68 +783,55 @@ static sl_status_t init_hw(sl_cpc_drv_sdio_host_t *drv, const sl_cpc_drv_sdio_ho
 
   // sl_sdhc_sdio_init already arms host CARDINT. Mask it while enabling CCCR
   // IENM/FN1 INT_EN — otherwise DAT1 can assert mid-CMD52 and time out (0x7).
-  SDHCCORE_TypeDef *sdhc_base = sli_sdhc_get_base_addr(drv->sdio_handle->sdhc_controller.sdhc_peripheral);
+  SDHCCORE_TypeDef *sdhc_base = sli_sdhc_get_base_addr(drv->sdio_handle.sdhc_controller.sdhc_peripheral);
 
   sl_hal_sdhc_disable_normal_interrupt_status(sdhc_base, SDHCCORE_NORMALINTSTS_CARDINTSTS);
   sl_hal_sdhc_disable_normal_interrupt_signal(sdhc_base, SDHCCORE_NORMALINTSTS_CARDINTSTS);
 
-  status = sl_sdhc_sdio_register_callbacks(drv->sdio_handle, &callbacks);
+  status = sl_sdhc_sdio_register_callbacks(&drv->sdio_handle, &callbacks);
   if (status != SL_STATUS_OK) {
     SLI_CPC_LOG_ERROR("Register callbacks failed: 0x%lx", (unsigned long)status);
     return status;
   }
 
-  status = sl_sdhc_sdio_enable_functions(drv->sdio_handle, func_mask, true);
+  status = sl_sdhc_sdio_enable_functions(&drv->sdio_handle, func_mask, true);
   if (status != SL_STATUS_OK) {
     SLI_CPC_LOG_ERROR("Function enable failed: 0x%lx", (unsigned long)status);
     return status;
   }
 
-  status = sl_sdhc_sdio_enable_function_interrupts(drv->sdio_handle, func_mask, true);
+  status = sl_sdhc_sdio_enable_function_interrupts(&drv->sdio_handle, func_mask, true);
   if (status != SL_STATUS_OK) {
     SLI_CPC_LOG_ERROR("Function interrupts enable failed: 0x%lx", (unsigned long)status);
     return status;
   }
 
-  status = sl_sdhc_sdio_write_byte(drv->sdio_handle, drv->function_num, SDIO_CARD_INT_EN_REG_ADDR,
+  status = sl_sdhc_sdio_write_byte(&drv->sdio_handle, drv->function_num, SDIO_CARD_INT_EN_REG_ADDR,
                                    SDIO_CARD_DATA_READY_FLAG);
   if (status != SL_STATUS_OK) {
     SLI_CPC_LOG_ERROR("FN1 INT_EN write failed: 0x%lx", (unsigned long)status);
     return status;
   }
 
-  status = sl_sdhc_sdio_set_block_size(drv->sdio_handle, drv->function_num, drv->block_size);
+  status = sl_sdhc_sdio_set_block_size(&drv->sdio_handle, drv->function_num, drv->block_size);
   if (status != SL_STATUS_OK) {
     SLI_CPC_LOG_ERROR("Block size set failed: 0x%lx", (unsigned long)status);
     return status;
   }
 
-  status = sl_sdhc_sdio_read_byte(drv->sdio_handle, drv->function_num, SL_SDHC_CCCR_CARD_CAP, &card_cap);
-  if (status != SL_STATUS_OK) {
-    SLI_CPC_LOG_ERROR("Card cap read failed: 0x%lx", (unsigned long)status);
-    return status;
-  }
-
-  status = sl_sdhc_sdio_write_byte(drv->sdio_handle, drv->function_num, SL_SDHC_CCCR_CARD_CAP,
-                                   (uint8_t)(card_cap | SDIO_CCCR_CARD_CAP_E4MI));
-  if (status != SL_STATUS_OK) {
-    SLI_CPC_LOG_ERROR("E4MI enable failed: 0x%lx", (unsigned long)status);
-    return status;
-  }
-
-  status = sl_sdhc_sdio_write_byte(drv->sdio_handle, SL_CPC_DRV_SDIO_FUNCTION_0, SDIO_CLOCK_WAKE_REG_ADDR, 0x01U);
+  status = sl_sdhc_sdio_write_byte(&drv->sdio_handle, SL_CPC_DRV_SDIO_FUNCTION_0, SDIO_CLOCK_WAKE_REG_ADDR, 0x01U);
   if (status != SL_STATUS_OK) {
     SLI_CPC_LOG_ERROR("Clock wake enable failed: 0x%lx", (unsigned long)status);
     return status;
   }
 
-  status = sl_sdhc_sdio_enable_card_interrupt(drv->sdio_handle);
+  status = sl_sdhc_sdio_enable_card_interrupt(&drv->sdio_handle);
   if (status != SL_STATUS_OK) {
     SLI_CPC_LOG_ERROR("Card interrupt enable failed: 0x%lx", (unsigned long)status);
     return status;
   }
 
-  status = sl_sdhc_sdio_read_byte(drv->sdio_handle, drv->function_num, SDIO_CARD_INT_ID_REG_ADDR, &int_id);
+  status = sl_sdhc_sdio_read_byte(&drv->sdio_handle, drv->function_num, SDIO_CARD_INT_ID_REG_ADDR, &int_id);
   if (status != SL_STATUS_OK) {
     SLI_CPC_LOG_ERROR("Post-init FN1 INT_ID read failed: 0x%lx", (unsigned long)status);
   }
@@ -833,9 +848,9 @@ static inline sl_cpc_drv_sdio_host_t *to_drv(sl_cpc_bus_t *bus)
 static sl_status_t cpc_drv_sdio_init(sl_cpc_bus_t *bus)
 {
   sl_cpc_drv_sdio_host_t *drv = to_drv(bus);
-  SDHCCORE_TypeDef *sdhc_base = sli_sdhc_get_base_addr(drv->sdio_handle->sdhc_controller.sdhc_peripheral);
+  SDHCCORE_TypeDef *sdhc_base = sli_sdhc_get_base_addr(drv->sdio_handle.sdhc_controller.sdhc_peripheral);
 
-  MCU_ATOMIC_STORE(drv->adma_state, ADMA_IDLE);
+  MCU_ATOMIC_STORE(drv->adma_state, SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE);
   MCU_ATOMIC_STORE(drv->card_int_pending, false);
   drv->rx_xfer_len = 0U;
 
@@ -977,7 +992,7 @@ sl_status_t sl_cpc_drv_sdio_host_init(sl_cpc_drv_sdio_host_t *drv, const sl_cpc_
 
   sl_status_t status;
 
-  if (cfg == NULL || bus_cfg == NULL || cfg->sdio_handle == NULL) {
+  if (cfg == NULL || bus_cfg == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -986,7 +1001,6 @@ sl_status_t sl_cpc_drv_sdio_host_init(sl_cpc_drv_sdio_host_t *drv, const sl_cpc_
   }
 
   memset(drv, 0, sizeof(*drv));
-  drv->sdio_handle = cfg->sdio_handle;
   drv->function_num = cfg->function_num;
   drv->block_size = cfg->block_size;
 

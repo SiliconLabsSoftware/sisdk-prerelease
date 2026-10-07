@@ -57,7 +57,7 @@ extern "C" {
  * @note
  *   Depending on the function arguments, the MVP implementation can calculate
  *   the dot product in different ways that may effect the rounding errors.
- *   If the same input vectors are calculated with different memory alignmen,
+ *   If the same input vectors are calculated with different memory alignment,
  *   the results may not be identical.
  *
  * @param[in] input_a Input vector a.

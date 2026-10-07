@@ -31,7 +31,9 @@ include:
   - path: config/test/btl_config_library.h
 requires:
 - name: bootloader_interface_common
-- name: mbedtls_cipher_ctr
+- name: se_manager_mailbox
+- name: psa_vse_driver
+  condition: [device_has_cryptoacc]
 provides:
 - name: bootloader_aes_sha_ecdsa_common
   condition: [device_series_2]

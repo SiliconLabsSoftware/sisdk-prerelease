@@ -16,7 +16,6 @@ provides:
 - name: log_backend
 - name: log_backend_iostream_impl
 - name: log_backend_iostream_compact
-  condition: [device_si91x]
 requires:
 - name: iostream_recommended_console
 - name: log

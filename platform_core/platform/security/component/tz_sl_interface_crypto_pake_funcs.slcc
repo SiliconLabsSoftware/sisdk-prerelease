@@ -16,9 +16,6 @@ template_contribution:
   value: tfm_crypto_pake_setup
 
 - name: tfm_interface_func
-  value: tfm_crypto_pake_set_password_key
-
-- name: tfm_interface_func
   value: tfm_crypto_pake_set_user
 
 - name: tfm_interface_func
@@ -34,7 +31,7 @@ template_contribution:
   value: tfm_crypto_pake_input
 
 - name: tfm_interface_func
-  value: tfm_crypto_pake_get_implicit_key
+  value: tfm_crypto_pake_get_shared_key
 
 - name: tfm_interface_func
   value: tfm_crypto_pake_derive_secret

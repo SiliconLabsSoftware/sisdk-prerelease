@@ -151,10 +151,41 @@
 
 // </h>
 
+// <h> Miscellaneous configuration
+
+// <q SL_MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS> Assume all buffers passed to PSA functions are owned exclusively by the PSA function.
+// <i> Default: 1
+// <i> This option is enabled assuming all buffers passed to any PSA function reside
+// <i> in memory that is accessible only to the PSA function during its execution.
+// <i> This improves performance by avoiding extra buffer copies, reducing memory
+// <i> usage and allocation overhead. However, it is NOT the most secure option and
+// <i> should only be enabled if all buffers passed to PSA functions are exclusively
+// <i> accessible to PSA and never shared with untrusted code.
+// <i> This option MUST be disabled whenever buffer arguments are in memory shared
+// <i> with an untrusted party, for example where arguments to PSA calls are passed
+// <i> across a trust boundary, e.g. if TrustZone is enabled, and the PSA Crypto core
+// <i> is placed in the Secure domain.
+#define SL_MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS 1
+
+// <q SL_PSA_DRIVERS_ENABLED> Enable Silicon Labs' PSA Crypto drivers.
+// <i> Default: 1
+// <i> Enable PSA drivers for hardware acceleration and secure key handling.
+#define SL_PSA_DRIVERS_ENABLED 1
+
+// </h>
+
 // <<< end of configuration section >>>
 
 // -----------------------------------------------------------------------------
 // Sub-files
+
+#include "sli_mbedtls_omnipresent.h"
+
+#if SL_PSA_DRIVERS_ENABLED
+  #include "sli_psa_acceleration.h"
+#endif
+
+#include "sl_psa_driver_config.h"
 
 #if defined(SLI_PSA_CONFIG_AUTOGEN_OVERRIDE_FILE)
   #include SLI_PSA_CONFIG_AUTOGEN_OVERRIDE_FILE
@@ -166,10 +197,54 @@
   #include "sli_psa_tfm_translation.h"
 #endif
 
-#if SL_MBEDTLS_DRIVERS_ENABLED
-  #include "sli_psa_acceleration.h"
+#include "sli_psa_builtin_config_autogen.h"
+
+// set MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS if SL_MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS is enabled
+#if SL_MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS
+  #define MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS
 #endif
 
-#include "sli_psa_builtin_config_autogen.h"
+// -----------------------------------------------------------------------------
+// Non-volatile seed function headers
+
+#if defined(MBEDTLS_PLATFORM_NV_SEED_ALT)
+
+// Provide the NV seed function signatures since we have no specific header
+// for them.
+
+#include <stddef.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+int sli_nv_seed_read(unsigned char *buf, size_t buf_len);
+int sli_nv_seed_write(unsigned char *buf, size_t buf_len);
+#ifdef __cplusplus
+}
+#endif
+#endif // MBEDTLS_PLATFORM_NV_SEED_ALT
+
+// -----------------------------------------------------------------------------
+// Platform macros
+
+#if defined(MBEDTLS_PLATFORM_CALLOC_MACRO) && defined(MBEDTLS_PLATFORM_FREE_MACRO)
+
+// By default MBEDTLS_PLATFORM_CALLOC_MACRO and MBEDTLS_PLATFORM_FREE_MACRO are
+// defined in mbedtls_platform_dynamic_memory_allocation_config_default.slcc.
+// Alternative implementations can configure MBEDTLS_PLATFORM_CALLOC_MACRO and
+// MBEDTLS_PLATFORM_FREE_MACRO to use other platform specific implementations.
+// Alternatively some use cases may select runtime initialisation in the
+// application by explicitly calling mbedtls_platform_set_calloc_free() by
+// selecting mbedtls_platform_dynamic_memory_allocation_config_init_runtime.
+
+#include <stddef.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern void *MBEDTLS_PLATFORM_CALLOC_MACRO(size_t n, size_t size);
+extern void MBEDTLS_PLATFORM_FREE_MACRO(void *ptr);
+#ifdef __cplusplus
+}
+#endif
+#endif // MBEDTLS_PLATFORM_CALLOC_MACRO && MBEDTLS_PLATFORM_FREE_MACRO
 
 #endif // PSA_CRYPTO_CONFIG_H

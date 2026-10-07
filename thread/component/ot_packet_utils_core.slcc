@@ -17,7 +17,9 @@ include:
 - path: platform-abstraction/efr32/mac
   file_list:
   - path: key-storage-policy.hpp
+  - path: mac-key-types.hpp
   - path: tx-aes-ccm.hpp
+  - path: tx-aes-ccm-api.hpp
   - path: tx-security-level.hpp
   - path: tx-aes-ccm-lpwaes.hpp
   - path: sli-crypto-key-desc.hpp

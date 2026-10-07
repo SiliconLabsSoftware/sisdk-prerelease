@@ -13,17 +13,17 @@
   "uart": cpc_ng_drv_uart_instances,
 } -%}
 
-{% for drv_name, drv_instances in drv_instances_dict.items() -%}
-{% for instance in drv_instances -%}
+{% for drv_name, drv_instances in drv_instances_dict.items() %}
+{% for instance in drv_instances %}
+{% set _ = bus_instances.append("sl_cpc_bus_" ~ drv_name ~ "_" ~ instance) %}
 #define sl_cpc_bus_{{ drv_name }}_{{ instance }} (sl_cpc_drv_{{ drv_name }}_get_bus(sl_cpc_drv_{{ drv_name }}_{{ instance }}))
-{%- set _ = bus_instances.append("sl_cpc_bus_" ~ drv_name ~ "_" ~ instance) %}
-{%- endfor %}
-{%- endfor %}
+{% endfor %}
+{% endfor %}
 
 #define SL_CPC_BUS_INSTANCES_COUNT {{ bus_instances|count }}
 
-{% if bus_instances|count > 0 -%}
+{% if bus_instances|count > 0 %}
 #define g_bus {{ bus_instances|first }}
-{%- endif %}
+{% endif %}
 
 #endif /* SL_CPC_BUS_INSTANCES_H */

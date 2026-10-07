@@ -167,9 +167,6 @@
     sli_tz_key_check_plan_t plan = { false, false, false, false, false };
 
     switch (function_id) {
-#if defined(SLI_TZ_HAS_TFM_CRYPTO_CLOSE_KEY_SID)
-      case TFM_CRYPTO_CLOSE_KEY_SID:
-#endif
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_DESTROY_KEY_SID)
       case TFM_CRYPTO_DESTROY_KEY_SID:
 #endif
@@ -252,20 +249,6 @@
         plan.check_packed_key_id = true;
         break;
 
-#if defined(SLI_TZ_HAS_TFM_CRYPTO_OPEN_KEY_SID)
-      case TFM_CRYPTO_OPEN_KEY_SID:
-        plan.explicit_sid = true;
-        plan.check_invec1_key_id = true;
-        break;
-#endif
-
-#if defined(SLI_TZ_HAS_TFM_CRYPTO_PAKE_SET_PASSWORD_KEY_SID)
-      case TFM_CRYPTO_PAKE_SET_PASSWORD_KEY_SID:
-        plan.explicit_sid = true;
-        plan.check_invec1_key_id = true;
-        break;
-#endif
-
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_IMPORT_KEY_SID)
       case TFM_CRYPTO_IMPORT_KEY_SID:
 #endif
@@ -275,17 +258,11 @@
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_GENERATE_KEY_CUSTOM_SID)
       case TFM_CRYPTO_GENERATE_KEY_CUSTOM_SID:
 #endif
-#if defined(SLI_TZ_HAS_TFM_CRYPTO_GENERATE_KEY_EXT_SID)
-      case TFM_CRYPTO_GENERATE_KEY_EXT_SID:
-#endif
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_SID)
       case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_SID:
 #endif
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_CUSTOM_SID)
       case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_CUSTOM_SID:
-#endif
-#if defined(SLI_TZ_HAS_TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_EXT_SID)
-      case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_EXT_SID:
 #endif
         plan.explicit_sid = true;
         plan.check_attr1_key_id = true;
@@ -428,8 +405,8 @@
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_PAKE_INPUT_SID)
       case TFM_CRYPTO_PAKE_INPUT_SID:
 #endif
-#if defined(SLI_TZ_HAS_TFM_CRYPTO_PAKE_GET_IMPLICIT_KEY_SID)
-      case TFM_CRYPTO_PAKE_GET_IMPLICIT_KEY_SID:
+#if defined(SLI_TZ_HAS_TFM_CRYPTO_PAKE_GET_SHARED_KEY_SID)
+      case TFM_CRYPTO_PAKE_GET_SHARED_KEY_SID:
 #endif
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_PAKE_DERIVE_SECRET_SID)
       case TFM_CRYPTO_PAKE_DERIVE_SECRET_SID:

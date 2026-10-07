@@ -44,8 +44,7 @@
 
 #include "ecode.h"
 
-#include "mbedtls/aes.h"
-#include "mbedtls/md.h"
+#include "mbedtls/platform_util.h" // mbedtls_platform_zeroize
 #include "psa/crypto.h"
 #include "psa_crypto_storage.h"
 

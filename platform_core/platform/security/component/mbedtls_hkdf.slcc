@@ -5,6 +5,8 @@ description: >-
   This component provides support for key derivation using HKDF in Mbed TLS.
 category: Platform|Security|Mbed TLS|Key Derivation
 quality: production
+ui_hints:
+  visibility: never
 provides:
 - name: mbedtls_hkdf
 requires:

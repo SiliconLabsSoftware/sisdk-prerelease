@@ -48,8 +48,8 @@ extern "C" {
  * @details
  * The Watchdog Manager provides a software watchdog system that allows
  * monitoring multiple periodic code execution streams. It manages a hardware
- * watchdog peripheral (typically WDOG1) and provides multiple virtual software
- * watchdogs that can be created, fed, enabled, and disabled independently.
+ * watchdog peripheral and provides multiple virtual software watchdogs that can be
+ * created, fed, enabled, and disabled independently.
  *
  * The hardware watchdog is only fed when all enabled software watchdogs have
  * been fed, ensuring that if any monitored code path fails to execute
@@ -81,6 +81,7 @@ extern "C" {
 typedef uint32_t sl_watchdog_handle_t;
 
 /// Hardware watchdog clock source.
+/// Default at init is @c SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE
 typedef enum {
   SL_WATCHDOG_MANAGER_CLOCK_SOURCE_HCLKDIV1024 = 0, ///< HCLK divided by 1024.
   SL_WATCHDOG_MANAGER_CLOCK_SOURCE_LFRCO,           ///< Low-frequency RC oscillator.
@@ -114,7 +115,7 @@ typedef void (*sl_watchdog_manager_starve_callback_t)(
  * @details
  * This function must be called before any other watchdog manager function.
  * It initializes the internal state and configures the hardware watchdog
- * peripheral, but does not start it yet.
+ * peripheral but does not start it yet.
  *
  * @note When returning from this function, the hardware watchdog will not be
  *       started yet. Call sl_watchdog_manager_start() to start it.

@@ -33,9 +33,6 @@ configuration:
   - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: 1
     condition: [iostream_eusart]
-  - name: SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE
-    value: "SL_IOSTREAM_EUSART_UART_FLOW_CTRL_NONE"
-    condition: [iostream_eusart]
 define:
   - name: DEBUG_EFM
 toolchain_settings:

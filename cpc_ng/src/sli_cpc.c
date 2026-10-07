@@ -52,7 +52,7 @@
 #include "sli_cpc_memory.h"
 #include "sli_cpc_panic.h"
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
+#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
 #include "sli_cpc_wake.h"
 #endif
 
@@ -177,6 +177,10 @@ static void process_write_completions(sl_cpc_bus_t *bus);
 static void ep_clear_pend_ack(sl_cpc_ep_t *ep);
 static void ep_set_pend_ack(sl_cpc_ep_t *ep);
 static void ep_flush_pend_ack(sl_cpc_ep_t *ep);
+static void ep_clear_pend_syn(sl_cpc_ep_t *ep);
+static void ep_set_pend_syn(sl_cpc_ep_t *ep);
+static void ep_clear_pend_rst(sl_cpc_ep_t *ep);
+static void ep_set_pend_rst(sl_cpc_ep_t *ep);
 static void ep_clear_pend_wnd_probe(sl_cpc_ep_t *ep);
 static void cancel_scheduled_wnd_probe(sl_cpc_ep_t *ep);
 static void sli_compute_window_probe_timeout(sl_cpc_ep_t *ep);
@@ -184,6 +188,9 @@ static void schedule_wnd_probe(sl_cpc_ep_t *ep);
 static bool ep_needs_wnd_probe(const sl_cpc_ep_t *ep);
 static sl_status_t send_ack_frame(sl_cpc_ep_t *ep);
 static sl_status_t send_wnd_probe_frame(sl_cpc_ep_t *ep);
+static void send_syn_reply(sl_cpc_ep_t *ep, bool signal);
+static void process_pend_syn_flag(sl_cpc_ep_t *ep);
+static void process_pend_rst_flag(sl_cpc_ep_t *ep);
 static void process_pending_flags(sl_cpc_bus_t *bus);
 
 // Retransmission
@@ -333,6 +340,12 @@ static void terminate_ep(sl_cpc_ep_t *ep)
   // Flush any pending ACK before teardown completes so the peer does not wait
   // through retransmit attempts for an ACK that will never come.
   ep_flush_pend_ack(ep);
+
+  // Drop any pending SYN reply
+  ep_clear_pend_syn(ep);
+
+  // Drop any pending RST
+  ep_clear_pend_rst(ep);
 }
 
 /***************************************************************************/ /**
@@ -1165,6 +1178,40 @@ static void ep_clear_pend_ack(sl_cpc_ep_t *ep)
 }
 
 /***************************************************************************/ /**
+ * Mark that a SYN reply could not be sent and should be retried later.
+ *
+ * Set when get_syn_frame() fails while answering an incoming SYN in OPEN.
+ ******************************************************************************/
+static void ep_set_pend_syn(sl_cpc_ep_t *ep)
+{
+  ep->flags |= SLI_CPC_EP_FLAG_PEND_SYN;
+}
+
+/***************************************************************************/ /**
+ * Clear the pending SYN reply flag on an endpoint.
+ ******************************************************************************/
+static void ep_clear_pend_syn(sl_cpc_ep_t *ep)
+{
+  ep->flags &= ~SLI_CPC_EP_FLAG_PEND_SYN;
+}
+
+/***************************************************************************/ /**
+ * Mark that a RST could not be sent and should be retried later.
+ ******************************************************************************/
+static void ep_set_pend_rst(sl_cpc_ep_t *ep)
+{
+  ep->flags |= SLI_CPC_EP_FLAG_PEND_RST;
+}
+
+/***************************************************************************/ /**
+ * Clear the pending RST flag on an endpoint.
+ ******************************************************************************/
+static void ep_clear_pend_rst(sl_cpc_ep_t *ep)
+{
+  ep->flags &= ~SLI_CPC_EP_FLAG_PEND_RST;
+}
+
+/***************************************************************************/ /**
  * Clear the pending window probe flag on an endpoint.
  ******************************************************************************/
 static void ep_clear_pend_wnd_probe(sl_cpc_ep_t *ep)
@@ -1534,7 +1581,9 @@ static void receive_frame(sl_cpc_bus_t *bus, sl_cpc_frame_t *frame)
   address = sli_cpc_header_get_address(hdr);
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-  sli_cpc_wake_handle_rx(&bus->wake, hdr);
+  if (bus->wake_mode == SL_CPC_WAKE_MODE_HOST) {
+    sli_cpc_wake_handle_rx(&bus->wake.host, hdr);
+  }
 #endif
 
   if (sli_cpc_header_is_reset(hdr)) {
@@ -1639,24 +1688,13 @@ static void receive_syn(sl_cpc_bus_t *bus, sl_cpc_ep_t *ep, sl_cpc_frame_t *fram
 {
   const sli_cpc_hdr_t *hdr = sli_cpc_frame_get_header(frame);
   uint16_t address = sli_cpc_header_get_address(hdr);
-  sl_cpc_frame_t *reply;
 
   switch (ep->state) {
     case SLI_CPC_STATE_OPEN:
       ep->ack = sli_cpc_header_get_seq(hdr) + 1;
       ep->remote_mtu = sli_cpc_u16_from_le(hdr->size_le);
 
-      reply = get_syn_frame(ep);
-      if (reply == NULL) {
-        // Couldn't get a TX frame; treat as a transient failure and let the
-        // peer retransmit. Endpoint stays in OPEN.
-        SLI_CPC_LOG_ERROR("OPEN+SYN: out of TX frames replying to ep=%u", (unsigned int)ep->id);
-        break;
-      }
-
-      transmit_frame(bus, reply, false);
-
-      ep_set_state(ep, SLI_CPC_STATE_SYN_RCVD, false);
+      send_syn_reply(ep, false);
       break;
 
     case SLI_CPC_STATE_SYN_SENT:
@@ -1930,16 +1968,27 @@ void sli_cpc_ep_send_ack(sl_cpc_ep_t *ep)
  ******************************************************************************/
 void sli_cpc_send_reset_frame(sl_cpc_bus_t *bus, uint16_t address)
 {
+  sl_cpc_ep_t *ep = sli_cpc_bus_find_ep_from_id(bus, address);
   sl_cpc_frame_t *frame;
   sli_cpc_hdr_t *hdr;
   sl_status_t status;
 
   status = sli_cpc_get_write_command_frame(bus, &frame);
   if (status != SL_STATUS_OK) {
-    // CPC-3374: Defer the RST and retry when a TX frame is available instead of panicking.
     SLI_CPC_DEBUG_TRACE_CORE_TXD_RESET_FRAME_FAULT(bus);
-    SLI_CPC_PANIC("Could not allocate reset frame (status 0x%lx) for ep: %u", (unsigned long)status,
-                  (unsigned int)address);
+    if (ep != NULL) {
+      ep_set_pend_rst(ep);
+    } else {
+      SLI_CPC_LOG_WARN(
+        "Could not allocate reset frame (status 0x%lx) for unallocated ep: %u; "
+        "consider increasing the TX frame pool",
+        (unsigned long)status, (unsigned int)address);
+    }
+    return;
+  }
+
+  if (ep != NULL) {
+    ep_clear_pend_rst(ep);
   }
 
   SLI_CPC_DEBUG_TRACE_CORE_TXD_RESET(bus);
@@ -1957,6 +2006,20 @@ void sli_cpc_send_reset_frame(sl_cpc_bus_t *bus, uint16_t address)
   frame->ep = NULL;
 
   transmit_frame(bus, frame, true);
+}
+
+/***************************************************************************/ /**
+ * Service a pending RST deferred after a TX frame allocation failure.
+ *
+ * @note Caller must hold the endpoint lock.
+ ******************************************************************************/
+static void process_pend_rst_flag(sl_cpc_ep_t *ep)
+{
+  if (!(ep->flags & SLI_CPC_EP_FLAG_PEND_RST)) {
+    return;
+  }
+
+  sli_cpc_send_reset_frame(ep->bus, ep->id);
 }
 
 /***************************************************************************/ /**
@@ -2021,6 +2084,34 @@ static sl_cpc_frame_t *get_syn_frame(sl_cpc_ep_t *ep)
 }
 
 /***************************************************************************/ /**
+ * Reply to an incoming SYN while the endpoint is in OPEN.
+ *
+ * On allocation failure, arms PEND_SYN so process_pending_flags can retry.
+ * On success, clears PEND_SYN, queues the SYN-ACK, and moves to SYN_RCVD.
+ *
+ * @param[in] ep      Listening endpoint in OPEN.
+ * @param[in] signal  Whether to signal the bus after queueing the frame.
+ *
+ * @note Caller must hold the endpoint lock. Endpoint must be in OPEN.
+ ******************************************************************************/
+static void send_syn_reply(sl_cpc_ep_t *ep, bool signal)
+{
+  sl_cpc_frame_t *frame;
+
+  SLI_CPC_ASSERT(ep->state == SLI_CPC_STATE_OPEN);
+
+  frame = get_syn_frame(ep);
+  if (frame == NULL) {
+    ep_set_pend_syn(ep);
+    return;
+  }
+
+  ep_clear_pend_syn(ep);
+  transmit_frame(ep->bus, frame, signal);
+  ep_set_state(ep, SLI_CPC_STATE_SYN_RCVD, false);
+}
+
+/***************************************************************************/ /**
  * Best-effort flush of a pending ACK during endpoint teardown.
  *
  * Unlike process_pend_ack_flag(), the flag is always cleared: the endpoint is
@@ -2050,6 +2141,21 @@ static void process_pend_ack_flag(sl_cpc_ep_t *ep)
   }
 
   sli_cpc_ep_send_ack(ep);
+}
+
+/***************************************************************************/ /**
+ * Service a pending SYN reply deferred after a TX frame allocation failure.
+ *
+ * @note Caller must hold the endpoint lock.
+ ******************************************************************************/
+static void process_pend_syn_flag(sl_cpc_ep_t *ep)
+{
+  if (!(ep->flags & SLI_CPC_EP_FLAG_PEND_SYN)) {
+    return;
+  }
+
+  // signal=true: process_transmit_queue already ran in this process_action.
+  send_syn_reply(ep, true);
 }
 
 /***************************************************************************/ /**
@@ -2115,12 +2221,15 @@ static void process_pending_flags(sl_cpc_bus_t *bus)
     LOCK_EP(ep);
 
     if (!(ep->flags
-          & (SLI_CPC_EP_FLAG_PEND_ACK | SLI_CPC_EP_FLAG_WND_PROBE_SCHEDULED | SLI_CPC_EP_FLAG_PEND_WND_PROBE))) {
+          & (SLI_CPC_EP_FLAG_PEND_ACK | SLI_CPC_EP_FLAG_PEND_SYN | SLI_CPC_EP_FLAG_PEND_RST
+             | SLI_CPC_EP_FLAG_WND_PROBE_SCHEDULED | SLI_CPC_EP_FLAG_PEND_WND_PROBE))) {
       RELEASE_EP(ep);
       continue;
     }
 
     process_pend_ack_flag(ep);
+    process_pend_syn_flag(ep);
+    process_pend_rst_flag(ep);
     process_pend_wnd_probe_schedule_flag(ep);
     process_pend_wnd_probe_flag(ep);
 
@@ -2173,7 +2282,7 @@ static void process_transmit_complete(sl_cpc_bus_t *bus)
     SLI_CPC_DEBUG_TRACE_CORE_TXD_TRANSMIT_COMPLETED(ep->bus);
 #endif
 
-    if (sli_cpc_header_is_ack_requested(sli_cpc_frame_get_header(frame))) {
+    if (is_ep_active(ep) && sli_cpc_header_is_ack_requested(sli_cpc_frame_get_header(frame))) {
       start_retx_timer(ep);
     }
 
@@ -2186,14 +2295,14 @@ drop_cpc_frame:
   }
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-  if (bus->tx_inflight_frame_count == 0) {
+  if (bus->wake_mode == SL_CPC_WAKE_MODE_DEVICE && bus->tx_inflight_frame_count == 0) {
     // Finished sending all the frames, allow the core to enter sleep.
     sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
   }
 #endif
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-  if (bus->tx_inflight_frame_count == 0) {
+  if (bus->wake_mode == SL_CPC_WAKE_MODE_HOST && bus->tx_inflight_frame_count == 0) {
     bool transmit_queue_empty;
 
     LOCK_TRANSMIT_QUEUE(bus);
@@ -2203,7 +2312,7 @@ drop_cpc_frame:
     if (transmit_queue_empty) {
       // Everything has been sent out, the device is free to sleep until we have
       // something else to transmit.
-      sli_cpc_wake_allow_device_sleep(&bus->wake);
+      sli_cpc_wake_allow_device_sleep(&bus->wake.host);
     }
   }
 #endif
@@ -2250,7 +2359,7 @@ static void process_transmit_queue(sl_cpc_bus_t *bus)
   }
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-  if (!sli_cpc_wake_device(&bus->wake)) {
+  if (bus->wake_mode == SL_CPC_WAKE_MODE_HOST && !sli_cpc_wake_device(&bus->wake.host)) {
     // The device is being woken up. The frames stay queued until it signals
     // that it is awake, which schedules another transmit.
     RELEASE_TRANSMIT_QUEUE(bus);
@@ -2292,12 +2401,13 @@ static void process_transmit_queue(sl_cpc_bus_t *bus)
     }
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-    if (bus->tx_inflight_frame_count == 0) {
+    if (bus->wake_mode == SL_CPC_WAKE_MODE_DEVICE && bus->tx_inflight_frame_count == 0) {
       // Sending the first message since we last idle. Prevent the device from sleeping until all
       // coming frames are sent.
       sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
     }
 #endif
+
     bus->tx_inflight_frame_count++;
 
     // CPC-2188: Don't get a ref before the frame is sent over the bus, i.e.: no ref in process re-tx
@@ -2460,16 +2570,23 @@ static void process_expired_retransmit(void *data)
     ep = sli_cpc_frame_get_ep(frame);
 
     LOCK_EP(ep);
-    if (ep->packet_re_transmit_count >= SLI_CPC_RE_TRANSMIT) {
-      // mark the endpoint as being in error
-      ep_set_error(ep, SL_STATUS_TIMEOUT);
-    } else {
-      // RTO(new) = RTO(before retransmission) * 2
-      // with an upper limit at SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS
-      ep->re_transmit_timeout
-        = SL_MIN(ep->re_transmit_timeout * 2, sli_cpc_timer_ms_to_tick(SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS));
+    // The retx timer ISR may have queued this frame before terminate ran. On
+    // RTOS builds another context can call close/terminate while we wait on
+    // LOCK_EP above; by then the ep is CLOSING and clean_tx_queues() can no
+    // longer abort this already-popped frame. Skip retx/error handling unless
+    // the endpoint is still active.
+    if (is_ep_active(ep)) {
+      if (ep->packet_re_transmit_count >= SLI_CPC_RE_TRANSMIT) {
+        // mark the endpoint as being in error
+        ep_set_error(ep, SL_STATUS_TIMEOUT);
+      } else {
+        // RTO(new) = RTO(before retransmission) * 2
+        // with an upper limit at SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS
+        ep->re_transmit_timeout
+          = SL_MIN(ep->re_transmit_timeout * 2, sli_cpc_timer_ms_to_tick(SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS));
 
-      re_transmit_frame(ep, frame);
+        re_transmit_frame(ep, frame);
+      }
     }
 
     // CPC-2188: Need this hack because re_transmit_frame increments the ref_count, and we can't decrement
@@ -2595,6 +2712,7 @@ static void initialize_ep_counters(sl_cpc_ep_t *ep)
   ep->rtt_variation = 0;
   ep->rtt_frame_seq = 0;
   ep->smoothed_rtt = 0;
+  ep->packet_re_transmit_count = 0u;
 
   ep->send_una = 0;
   ep->send_nxt = 0;

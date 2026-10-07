@@ -8,23 +8,24 @@ description: |
   endpoint. The pin is released once everything queued has been sent.
 
   The host itself is currently assumed to be always on.
+
+  Use the same instance name as the CPC driver instance on this bus.
 category: Services|CPC-NG|Internal
 quality: experimental
 label: CPC-NG Host Wake
+instantiable:
+  prefix: instance
 config_file:
-- path: config/sl_cpc_wake_config.h
+- path: config/sl_cpc_wake_{{instance}}_config.h
   file_id: cpc_ng_wake_host_config
-conflicts:
-- name: cpc_ng_wake_device
-source:
-- path: src/sli_cpc_wake.c
-- path: src/sli_cpc_wake.h
 provides:
 - name: cpc_ng_wake_host
 requires:
-- name: cpc_ng_primary
+- name: cpc_ng_wake
 - name: gpio
 template_contribution:
 - name: component_catalog
   value: cpc_ng_wake_host
+- name: cpc_ng_wake_host_instances
+  value: "{{instance}}"
 root_path: cpc_ng

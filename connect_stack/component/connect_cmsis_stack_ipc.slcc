@@ -1,13 +1,11 @@
 id: "connect_cmsis_stack_ipc"
 label: "CMSIS Stack IPC"
 package: "connect_stack"
+description: "Provides an IPC for the Connect stack APIs. If this component is enabled, the stack will be running with CMSIS with the chosen RTOS implementation as a task and the application framework will run as a separate task. APIs are invoked at the application framework using an IPC, similarly stack callbacks are communicated to the application framework task using an IPC. The application can also define up to 3 custom tasks."
 category: "Connect"
 quality: "production"
-description: "Provides an IPC for the Connect stack APIs. If this component is enabled, the stack will be running with CMSIS with the chosen RTOS implementation as a task and the application framework will run as a separate task. APIs are invoked at the application framework using an IPC, similarly stack callbacks are communicated to the application framework task using an IPC. The application can also define up to 3 custom tasks."
-
 ui_hints:
   visibility: never
-
 provides:
 - name: "connect_cmsis_stack_ipc"
 - name: "connect_idle_sleep"
@@ -16,6 +14,11 @@ requires:
 - name: "connect_stack_common"
 - name: "nvm3"
 - name: "connect_csp"
+include:
+- path: "cmsis-stack-ipc"
+  file_list:
+  - path: "cmsis-rtos-support-gen.h"
+  - path: "cmsis-rtos-support.h"
 source:
 - path: "cmsis-stack-ipc/cmsis-rtos-af-task.c"
 - path: "cmsis-stack-ipc/cmsis-rtos-ipc-common.c"
@@ -24,12 +27,6 @@ source:
 
   # OS application hooks: these could be generated in the future.
 - path: "cmsis-stack-ipc/os_app_hooks.c"
-
-include:
-- path: "cmsis-stack-ipc"
-  file_list:
-  - path: "cmsis-rtos-support-gen.h"
-  - path: "cmsis-rtos-support.h"
 config_file:
 - path: "cmsis-stack-ipc/config/cmsis-rtos-ipc-config.h"
 define:

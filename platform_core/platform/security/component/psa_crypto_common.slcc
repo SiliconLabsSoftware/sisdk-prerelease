@@ -18,6 +18,12 @@ requires:
   condition: [trustzone_unaware]
 - name: psa_crypto_common_source
   condition: [trustzone_secure]
+- name: mbedtls_iar_workarounds
+  condition: [toolchain_iar]
+
+template_contribution:
+- name: psa_crypto_config
+  value: MBEDTLS_PSA_CRYPTO_CLIENT
 
 metadata:
   sbom:

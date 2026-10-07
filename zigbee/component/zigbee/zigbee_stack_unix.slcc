@@ -109,7 +109,7 @@ include:
   - path: platform/service/legacy_hal/inc/micro-types.h
   - path: platform/service/legacy_hal/inc/micro.h
   - path: platform/service/legacy_hal/inc/platform-header.h
-  - path: platform/service/legacy_hal/inc/random.h
+  - path: platform/service/legacy_hal/inc/sl_zigbee_random.h
   - path: platform/service/legacy_hal/inc/serial.h
   - path: platform/service/legacy_hal/inc/serial.h
   - path: platform/service/legacy_hal/inc/serial/serial.h
@@ -153,7 +153,7 @@ include:
   - path: rijndael-api-fst.h
   - path: security_unix.h
   - path: platform-header.h
-  - path: random.h
+  - path: sl_zigbee_random.h
 
 - path: platform/common/inc
 

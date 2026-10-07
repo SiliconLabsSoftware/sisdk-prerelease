@@ -14,28 +14,34 @@ provides:
   # specific PSA Crypto function configurations (contributes PSA_WANT_xxx).
 - name: psa_crypto
 
-  # 'mbedtls' is replaced by 'psa_crypto' but still maintained here for backwards
-  # compatibility. New user applications should not depend on it, since it may be
-  # deprecated in a future major release.
-- name: mbedtls
-  condition: [psa_crypto]
+include:
+- path: sl_mbedtls_support/inc
+  file_list:
+  - path: sl_psa_crypto.h
+
+source:
+- path: sl_mbedtls_support/src/sl_psa_crypto.c
+- path: sl_mbedtls_support/src/sli_psa_crypto.c
 
 requires:
 - name: device
   condition: [device_efx]
-- name: mbedtls_core
 - name: psa_crypto_config
 - name: psa_crypto_common
 - name: psa_crypto_source
   condition: [trustzone_unaware]
 - name: psa_crypto_source
   condition: [trustzone_secure]
-- name: psa_driver
+- name: psa_driver_dispatch
   condition: [device_series_2]
-- name: psa_driver
+- name: psa_driver_dispatch
   condition: [device_series_3]
+- name: psa_driver_dispatch
+  condition: [device_si91x]
 - name: sl_si91x_psa_crypto
   condition: [device_si91x]
+- name: mbedtls_iar_workarounds
+  condition: [toolchain_iar]
 
   # Inclusion of source and config components depends on which TZ state we are
   # targeting. For apps that do not make active use of TZ, a dummy state
@@ -51,53 +57,63 @@ requires:
 - name: psa_crypto_trng
   condition: [device_series_3]
 
-include:
-- path: sl_component/sl_mbedtls_support/inc
-  file_list:
-  - path: sl_psa_crypto.h
-
-source:
-- path: sl_component/sl_mbedtls_support/src/sl_psa_crypto.c
-- path: sl_component/sl_mbedtls_support/src/sli_psa_crypto.c
+- name: mbedtls_threading_alt
+  condition: [freertos]
+- name: mbedtls_threading_alt
+  condition: [micriumos]
 
 recommends:
+  # The require + recommend approach is used for allowing alternative user defined
+  # threading configuration.
+- id: mbedtls_threading_alt_cmsis_rtos2
+
   # Assume that projects are TZ unaware unless a state is explicitly included.
+  vendor: silabs
 - id: trustzone_unaware
 
   vendor: silabs
+
 template_contribution:
 
-  # Init of the PSA Crypto core should come after that of Mbed TLS.
-  # Init of PSA Crypto is handled inside of the SKL secure main.
-  # We are not able to provide automated initialization of PSA Crypto if RAIL is
-  # relied on for entropy. This is because we in turn cannot rely on RAIL being
-  # initialized at the time of the service init. The duplicated entries with
-  # different conditions are meant to reflect this.
+  # Initialization steps:
+  # 0. sl_se_init - if se_manager.slcc in included.
+  # 1. sl_psa_crypto_init - the SiLabs specific initialization.
+  # 2. psa_crypto_init - the standard PSA Crypto library initialization.
+  # For TrustZone , initialization of PSA Crypto is handled inside of the SKL secure main.
+  # For native and si91x builds , initialization of PSA Crypto is handled outside the
+  # psa_crypto.slcc component.
 - name: event_handler
   value:
     event: service_init
-    include: psa/crypto.h
-    handler: psa_crypto_init
+    include: sl_psa_crypto.h
+    handler: sl_psa_crypto_init
   priority: 1
-  condition: [trustzone_unaware, psa_crypto_trng]
+  condition: [trustzone_unaware]
   unless: [native, device_si91x]
+
+- name: event_handler
+  value:
+    event: service_init
+    include: sl_psa_crypto.h
+    handler: sl_psa_crypto_init
+  priority: 1
+  condition: [trustzone_nonsecure]
+
 - name: event_handler
   value:
     event: service_init
     include: psa/crypto.h
     handler: psa_crypto_init
-  priority: 1
-  condition: [trustzone_unaware, mbedtls_entropy_nvseed]
-  unless: [rail_lib, native]
+  priority: 2
+  condition: [trustzone_unaware]
+  unless: [native, device_si91x]
 
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PSA_CRYPTO_C
+  condition: [trustzone_unaware]
 
-- name: mbedtls_config
-  value: MBEDTLS_USE_PSA_CRYPTO
-
-- name: mbedtls_config
-  value: MBEDTLS_CIPHER_C
+- name: psa_crypto_config_trustzone_secure
+  value: MBEDTLS_PSA_CRYPTO_C
 
 - name: psa_key_slots
   value:
@@ -114,4 +130,4 @@ documentation:
 metadata:
   sbom:
     license: Zlib
-root_path: platform_core/platform/security
+root_path: platform_core/platform/security/sl_component

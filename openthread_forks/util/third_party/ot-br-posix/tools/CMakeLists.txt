@@ -34,6 +34,7 @@ target_link_libraries(pskc PRIVATE
     otbr-common
     otbr-utils
     mbedtls
+    otbr-mbedtls-memory
 )
 
 add_executable(steering-data
@@ -44,6 +45,7 @@ target_link_libraries(steering-data PRIVATE
     otbr-common
     otbr-utils
     mbedtls
+    otbr-mbedtls-memory
 )
 
 if ($ENV{REFERENCE_DEVICE})

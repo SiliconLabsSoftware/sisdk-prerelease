@@ -952,7 +952,7 @@ sl_status_t sl_wisun_set_lfn_parameters(const sl_wisun_lfn_params_t *params);
  * This function sets the maximum number of LFN children this node can
  * parent. Set @ref sl_wisun_config_neighbor_table accordingly.
  *
- * Available in libraries: Full, FFN (see @ref API_AVAILABILITY)
+ * Available in libraries: LFN Parent+Full, LFN Parent+FFN (see @ref API_AVAILABILITY)
  *****************************************************************************/
 sl_status_t sl_wisun_set_lfn_support(uint8_t lfn_limit);
 
@@ -1508,6 +1508,39 @@ sl_status_t sl_wisun_get_lxpm_group_neighbor_count(const in6_addr_t *group_addre
  * @note Available in libraries: Full, FFN (see @ref API_AVAILABILITY)
  *****************************************************************************/
 sl_status_t sl_wisun_get_lxpm_group_neighbors(const in6_addr_t *group_address, uint8_t *neighbor_count, in6_addr_t *neighbor_addresses);
+
+/**************************************************************************//**
+ * Configure the FFN's unicast listen/sleep schedule for power saving.
+ *
+ * The FFN listens for @p listen_slots consecutive unicast dwell periods,
+ * followed by @p sleep_slots dwell periods during which its radio may be
+ * turned off. This pattern repeats while power saving is active.
+ *
+ * @param[in] listen_slots Number of consecutive unicast dwell periods spent listening.
+ * @param[in] sleep_slots Number of consecutive unicast dwell periods that may be spent sleeping.
+ *
+ * @return SL_STATUS_OK on success.
+ * @return SL_STATUS_INVALID_PARAMETER if @p listen_slots is zero and
+ *         @p sleep_slots is nonzero, or their sum exceeds
+ *         @ref SL_WISUN_FFN_POWER_SAVING_MAX_PERIOD_SLOTS.
+ * @return SL_STATUS_INVALID_STATE if the stack is already started (joining or already joined).
+ * @return SL_STATUS_NOT_AVAILABLE if FFN operation is unavailable.
+ *
+ * Passing 0, 0 or a positive @p listen_slots with zero @p sleep_slots disables power saving.
+ * While both values positive enables the listen/sleep pattern.
+ *
+ * Must be called before @ref sl_wisun_join. The schedule is static until disconnect;
+ * runtime changes are not supported.
+ *
+ * @warning This is a proprietary feature intended only for a homogeneous,
+ * controlled PAN where every possible FFN parent and unicast sender supports
+ * this feature. Legacy or third-party devices may transmit to this FFN while
+ * it may be sleeping, which can cause failed joins, packet loss, and broken
+ * interoperability.
+ *
+ * Available in libraries: Full, FFN (see @ref API_AVAILABILITY)
+ *****************************************************************************/
+sl_status_t sl_wisun_set_ffn_power_saving_schedule(uint8_t listen_slots, uint8_t sleep_slots);
 
 /** @} (end SL_WISUN_API) */
 

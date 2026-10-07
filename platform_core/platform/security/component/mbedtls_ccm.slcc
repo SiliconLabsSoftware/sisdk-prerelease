@@ -6,19 +6,20 @@ description: >-
   in CCM mode for block ciphers using Mbed TLS.
 category: Platform|Security|Mbed TLS|Authenticated Encryption
 quality: production
+ui_hints:
+  visibility: never
 provides:
 - name: mbedtls_ccm
 requires:
 - name: mbedtls_cipher
 - name: mbedtls_block_cipher
-- name: mbedtls_core
 - name: psa_crypto_ccm
   condition: [psa_crypto]
 recommends:
 - id: mbedtls_aes
   vendor: silabs
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_CCM_C
 documentation:
   docset: gecko-platform

@@ -18,5 +18,7 @@ provides:
 template_contribution:
 - name: axip_region1_enabled
   value: 1
-
+documentation:
+  docset: gecko-platform
+  document: platform-common/common
 root_path: platform_core

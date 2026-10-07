@@ -39,7 +39,7 @@ sl_status_t sl_math_mvp_clamp_i8(int8_t *data, size_t num_elements, int8_t min, 
 {
   sl_status_t status;
   size_t remaining = num_elements;
-  const size_t threshold = 160; // non-mvp algorithm is faster bellow this threshold
+  const size_t threshold = 160; // non-mvp algorithm is faster below this threshold
   sli_mvp_program_t *prog = sli_mvp_get_program_area_single();
 
   if ((min == -128) && (max == 127)) {

@@ -30,4 +30,6 @@ template_contribution:
     include: sli_icache_disable.h
     handler: sli_icache_disable
   priority: 1
-
+documentation:
+  docset: gecko-platform
+  document: platform-common/common

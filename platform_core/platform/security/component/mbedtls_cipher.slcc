@@ -12,12 +12,11 @@ provides:
 - name: mbedtls_cipher
 requires:
 - name: mbedtls_block_cipher
-- name: mbedtls_core
 recommends:
 - id: mbedtls_aes
   vendor: silabs
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_CIPHER_C
 metadata:
   sbom:

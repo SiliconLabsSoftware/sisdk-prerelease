@@ -1,7 +1,7 @@
 id: psa_its_source
 package: mbedtls
-label: PSA Persistent Storage Support (ITS) - MbedTLS Sources
-description: This component provides the mbedtls library sources for PSA ITS (Internal  Trusted Storage) API support.
+label: PSA Persistent Storage Support (ITS)
+description: This component provides the sources for PSA ITS (Internal Trusted Storage) API support.
 category: Platform|Security|PSA Crypto
 quality: production
 ui_hints:
@@ -9,7 +9,7 @@ ui_hints:
 provides:
 - name: psa_its_source
 include:
-- path: library
+- path: core
   unless:
   - trustzone_secure
   file_list:
@@ -17,5 +17,5 @@ include:
 
 metadata:
   sbom:
-    reference: mbedtls_sbom
-root_path: mbedtls
+    reference: tf_psa_crypto_sbom
+root_path: mbedtls/tf-psa-crypto

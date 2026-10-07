@@ -18,3 +18,6 @@ include:
 - path: inc
   file_list:
   - path: sli_device_portal.h
+documentation:
+  docset: gecko-platform
+  document: platform-service/device-peripheral

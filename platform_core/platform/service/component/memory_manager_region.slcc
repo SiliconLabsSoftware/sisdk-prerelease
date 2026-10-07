@@ -30,3 +30,6 @@ requires:
 - name: device
   condition: [device_cortexm]
 - name: component_catalog
+documentation:
+  docset: gecko-platform
+  document: platform-service/memory-manager

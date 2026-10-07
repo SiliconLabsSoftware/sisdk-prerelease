@@ -6,18 +6,30 @@ category: Platform|Security|Mbed TLS
 
 description: "This component contains the core files needed for any project using Mbed TLS, as well as common header and source files.\n\nAlgorithms need to be enabled in order to be supported. This is done by including the components corresponding to the wanted primitives, key types, functionality, etc. that live in the different 'Platform|Security|Mbed TLS' subcategories.\n\nBased on the selected sub-components, the Mbed TLS configuration file will be auto-generated and included where necessary."
 
+conflicts:
+- name: tz_secure_key_library_s
+
 provides:
 - name: mbedtls_core
+
+source:
+- path: sl_component/sl_mbedtls_support/src/sli_mbedtls.c
+
+include:
+- path: sl_component/sl_mbedtls_support/inc
+  file_list:
+  - path: sli_mbedtls.h
 
 requires:
 - name: device
   condition: [device_efx]
 
+  # mbedtls_source carries the public TLS/X.509 headers (mbedtls/error.h,
+  # mbedtls/x509.h, ...) plus mbedtls_common.h. Without it, --copy-sources
+  # projects that compile error.c, version_features.c or any x509 suite cannot
+  # resolve their includes.
 - name: mbedtls_source
 - name: mbedtls_config
-
-- name: mbedtls_slcrypto
-  condition: [device_cortexm]
 
   # It's no longer possible to separate PSA Crypto from Mbed TLS now that it's
   # being used under the hood. Mbed TLS does not put effort into guarding
@@ -30,6 +42,9 @@ requires:
   # targeting. For apps that do not make active use of TZ, a dummy state
   # (trustzone_unaware) should be used.
 - name: trustzone_security_state
+
+- name: mbedtls_iar_workarounds
+  condition: [toolchain_iar]
 
 recommends:
   # Assume that projects are TZ unaware unless a state is explicitly included.
@@ -44,4 +59,4 @@ documentation:
 metadata:
   sbom:
     reference: mbedtls_sbom
-root_path: platform_core
+root_path: platform_core/platform/security

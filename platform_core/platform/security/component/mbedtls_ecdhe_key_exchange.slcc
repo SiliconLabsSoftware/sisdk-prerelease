@@ -12,7 +12,7 @@ description: >-
   This component will be replaced by a new set of components including
   mbedtls_key_exchange_ecdhe_psk and mbedtls_key_exchange_ecdhe_ecdsa.
 category: Platform|Security|Mbed TLS|Upper Layer
-quality: evaluation
+quality: deprecated
 
 provides:
 - name: mbedtls_ecdhe_key_exchange

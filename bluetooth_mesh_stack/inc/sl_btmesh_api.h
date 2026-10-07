@@ -178,6 +178,7 @@ extern "C" {
 #define sl_btmesh_cmd_node_clear_provisioning_service_scan_response_id   0x3a140028
 #define sl_btmesh_cmd_node_compare_dcd_id                                0x3b140028
 #define sl_btmesh_cmd_node_set_scan_bond_lookup_id                       0x3d140028
+#define sl_btmesh_cmd_node_set_uuid_transient_id                         0x3e140028
 #define sl_btmesh_rsp_node_init_id                                       0x00140028
 #define sl_btmesh_rsp_node_set_exportable_keys_id                        0x24140028
 #define sl_btmesh_rsp_node_start_unprov_beaconing_id                     0x01140028
@@ -230,6 +231,7 @@ extern "C" {
 #define sl_btmesh_rsp_node_clear_provisioning_service_scan_response_id   0x3a140028
 #define sl_btmesh_rsp_node_compare_dcd_id                                0x3b140028
 #define sl_btmesh_rsp_node_set_scan_bond_lookup_id                       0x3d140028
+#define sl_btmesh_rsp_node_set_uuid_transient_id                         0x3e140028
 
 /**
  * @brief Flags for allowed provisioning algorithms during provisioning, which
@@ -1490,27 +1492,16 @@ sl_status_t sl_btmesh_node_save_replay_protection_list(void);
 
 /***************************************************************************//**
  *
- * Write device UUID into the persistent store. This command must be called
- * before initializing the Bluetooth mesh stack (before @ref sl_btmesh_node_init
- * or @ref sl_btmesh_node_init_oob), otherwise the change will not take effect
- * before a reboot.
- *
- * Ensure that the UUID conforms to the format defined in <a
- * href="https://tools.ietf.org/html/rfc4122">RFC 4122</a>
- *
- * Note that UUID must not be changed when the device is provisioned to a
- * network.
- *
- * Furthermore, ensure that the UUID remains constant if a device has received a
- * firmware update, which requires reprovisioning of the device after the update
- * has been applied (e.g., new elements are added by the update).
+ * Write device UUID into the persistent store. This is a deprecated function.
+ * Please store node UUID outside of NVM3, for example, in a common
+ * manufacturing token and use @ref sl_btmesh_node_set_uuid_transient instead.
  *
  * @param[in] uuid UUID to set
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_btmesh_node_set_uuid(uuid_128 uuid);
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_node_set_uuid(uuid_128 uuid);
 
 /***************************************************************************//**
  *
@@ -2130,6 +2121,35 @@ sl_status_t sl_btmesh_node_compare_dcd(uint8_t page_number,
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_node_set_scan_bond_lookup(uint8_t bond_lookup);
+
+/***************************************************************************//**
+ *
+ * Write device UUID into transient RAM storage. This command must be called
+ * before initializing the Bluetooth mesh stack (before @ref sl_btmesh_node_init
+ * or @ref sl_btmesh_node_init_oob), otherwise the change will not take effect.
+ *
+ * This command is intended to be used when the device UUID is stored outside of
+ * NVM3 persistent storage such as, for example, in a common manufacturing token
+ * or in vendor-defined storage. Since the command sets the UUID in transient
+ * RAM storage it must be issued before every Bluetooth mesh stack
+ * initialization.
+ *
+ * Ensure that the UUID conforms to the format defined in <a
+ * href="https://tools.ietf.org/html/rfc4122">RFC 4122</a>
+ *
+ * Note that UUID must not be changed when the device is provisioned to a
+ * network.
+ *
+ * Furthermore, ensure that the UUID remains constant if a device has received a
+ * firmware update, which requires reprovisioning of the device after the update
+ * has been applied (e.g., new elements are added by the update).
+ *
+ * @param[in] uuid UUID to set
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_set_uuid_transient(uuid_128 uuid);
 
 /** @} */ // end addtogroup sl_btmesh_node
 

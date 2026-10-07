@@ -21,6 +21,10 @@ requires:
 - name: psa_crypto_ecdh
 - name: psa_crypto_ecc_secp256r1
 - name: psa_crypto_pbkdf2_cmac
+  # Thread commissioning uses EC-JPAKE. Prefer PSA PAKE (SE driver on HSE; builtin elsewhere). 
+  # mbedtls_jpake is deprecated and already pulls this when psa_crypto is present; require it explicitly.
+- name: psa_crypto_jpake
+- name: psa_crypto_ccm
 recommends:
 - id: ot_crypto_ecdsa_deterministic
   vendor: silabs

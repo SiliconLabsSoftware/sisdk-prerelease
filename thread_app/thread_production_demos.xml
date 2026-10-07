@@ -180,116 +180,6 @@
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates OpenThread Minimal Thread Device (MTD) Network Co-Processor (NCP) application using CPC (Co-Processor Communication). </description>
 	</demo>
-	<demo name="brd4180a.demo.rcp-spi-802154" label="MultiProtocol (OpenThread + Zigbee) - RCP SPI">
-		<property key="blurb" value="MultiProtocol (OpenThread + Zigbee) - RCP SPI" />
-		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
-		<property key="boardCompatibility" value="brd4180a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/rcp-spi-802154/rcp-spi-802154-brd4180a.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md" />
-		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over SPI. </description>
-	</demo>
-	<demo name="brd4180b.demo.rcp-spi-802154" label="MultiProtocol (OpenThread + Zigbee) - RCP SPI">
-		<property key="blurb" value="MultiProtocol (OpenThread + Zigbee) - RCP SPI" />
-		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
-		<property key="boardCompatibility" value="brd4180b" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/rcp-spi-802154/rcp-spi-802154-brd4180b.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md" />
-		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over SPI. </description>
-	</demo>
-	<demo name="brd4186c.demo.rcp-spi-802154" label="MultiProtocol (OpenThread + Zigbee) - RCP SPI">
-		<property key="blurb" value="MultiProtocol (OpenThread + Zigbee) - RCP SPI" />
-		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
-		<property key="boardCompatibility" value="brd4186c" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/rcp-spi-802154/rcp-spi-802154-brd4186c.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md" />
-		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over SPI. </description>
-	</demo>
-	<demo name="brd4116a.demo.rcp-spi-802154" label="MultiProtocol (OpenThread + Zigbee) - RCP SPI">
-		<property key="blurb" value="MultiProtocol (OpenThread + Zigbee) - RCP SPI" />
-		<property key="partCompatibility" value=".*efr32mg26b410f3200im48.*" />
-		<property key="boardCompatibility" value="brd4116a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/rcp-spi-802154/rcp-spi-802154-brd4116a.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md" />
-		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over SPI. </description>
-	</demo>
-	<demo name="brd4407a.demo.rcp-spi-802154" label="MultiProtocol (OpenThread + Zigbee) - RCP SPI">
-		<property key="blurb" value="MultiProtocol (OpenThread + Zigbee) - RCP SPI" />
-		<property key="partCompatibility" value=".*simg301m104lil.*" />
-		<property key="boardCompatibility" value="brd4407a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/rcp-spi-802154/rcp-spi-802154-brd4407a.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md" />
-		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over SPI. </description>
-	</demo>
-	<demo name="brd4180a.demo.rcp-uart-802154" label="OpenThread Zigbee CMP - RCP UART">
-		<property key="blurb" value="OpenThread Zigbee CMP - RCP UART" />
-		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
-		<property key="boardCompatibility" value="brd4180a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/rcp-uart-802154/rcp-uart-802154-brd4180a.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md" />
-		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over UART. </description>
-	</demo>
-	<demo name="brd4180b.demo.rcp-uart-802154" label="OpenThread Zigbee CMP - RCP UART">
-		<property key="blurb" value="OpenThread Zigbee CMP - RCP UART" />
-		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
-		<property key="boardCompatibility" value="brd4180b" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/rcp-uart-802154/rcp-uart-802154-brd4180b.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md" />
-		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over UART. </description>
-	</demo>
-	<demo name="brd4186c.demo.rcp-uart-802154" label="OpenThread Zigbee CMP - RCP UART">
-		<property key="blurb" value="OpenThread Zigbee CMP - RCP UART" />
-		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
-		<property key="boardCompatibility" value="brd4186c" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/rcp-uart-802154/rcp-uart-802154-brd4186c.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md" />
-		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over UART. </description>
-	</demo>
-	<demo name="brd2703a.demo.rcp-uart-802154" label="OpenThread Zigbee CMP - RCP UART">
-		<property key="blurb" value="OpenThread Zigbee CMP - RCP UART" />
-		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
-		<property key="boardCompatibility" value="brd2703a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/rcp-uart-802154/rcp-uart-802154-brd2703a.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md" />
-		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over UART. </description>
-	</demo>
-	<demo name="brd4116a.demo.rcp-uart-802154" label="OpenThread Zigbee CMP - RCP UART">
-		<property key="blurb" value="OpenThread Zigbee CMP - RCP UART" />
-		<property key="partCompatibility" value=".*efr32mg26b410f3200im48.*" />
-		<property key="boardCompatibility" value="brd4116a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/rcp-uart-802154/rcp-uart-802154-brd4116a.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md" />
-		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over UART. </description>
-	</demo>
-	<demo name="brd4407a.demo.rcp-uart-802154" label="OpenThread Zigbee CMP - RCP UART">
-		<property key="blurb" value="OpenThread Zigbee CMP - RCP UART" />
-		<property key="partCompatibility" value=".*simg301m104lil.*" />
-		<property key="boardCompatibility" value="brd4407a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/rcp-uart-802154/rcp-uart-802154-brd4407a.s37" />
-		<property key="readmeFiles" value="ot-ncp/cpc/README-MP-RCP.md" />
-		<property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over UART. </description>
-	</demo>
 	<demo name="brd4180a.demo.ot-ncp-ftd" label="OpenThread - NCP FTD">
 		<property key="blurb" value="OpenThread - NCP FTD" />
 		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
@@ -500,55 +390,95 @@
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates Thread network formation on Full Thread Device (FTD) for sleepy-demo. </description>
 	</demo>
-	<demo name="brd4180a.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo MTD">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD" />
+	<demo name="brd4180a.demo.sleepy-demo-mtd-em2" label="OpenThread - SoC Sleepy Demo MTD (EM2)">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM2)" />
 		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
 		<property key="boardCompatibility" value="brd4180a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4180a.s37" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em2/sleepy-demo-mtd-em2-brd4180a.s37" />
 		<property key="readmeFiles" value="sleepy-demo/README.md" />
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates Sleepy End Device (SED) behaviour with polling. Using OpenThread Minimal Thread Device (MTD) and low-power EM2 mode. </description>
 	</demo>
-	<demo name="brd4186c.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo MTD">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD" />
+	<demo name="brd4186c.demo.sleepy-demo-mtd-em2" label="OpenThread - SoC Sleepy Demo MTD (EM2)">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM2)" />
 		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
 		<property key="boardCompatibility" value="brd4186c" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4186c.s37" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em2/sleepy-demo-mtd-em2-brd4186c.s37" />
 		<property key="readmeFiles" value="sleepy-demo/README.md" />
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates Sleepy End Device (SED) behaviour with polling. Using OpenThread Minimal Thread Device (MTD) and low-power EM2 mode. </description>
 	</demo>
-	<demo name="brd2703a.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo MTD">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD" />
+	<demo name="brd2703a.demo.sleepy-demo-mtd-em2" label="OpenThread - SoC Sleepy Demo MTD (EM2)">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM2)" />
 		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
 		<property key="boardCompatibility" value="brd2703a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd2703a.s37" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em2/sleepy-demo-mtd-em2-brd2703a.s37" />
 		<property key="readmeFiles" value="sleepy-demo/README.md" />
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates Sleepy End Device (SED) behaviour with polling. Using OpenThread Minimal Thread Device (MTD) and low-power EM2 mode. </description>
 	</demo>
-	<demo name="brd4116a.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo MTD">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD" />
+	<demo name="brd4116a.demo.sleepy-demo-mtd-em2" label="OpenThread - SoC Sleepy Demo MTD (EM2)">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM2)" />
 		<property key="partCompatibility" value=".*efr32mg26b410f3200im48.*" />
 		<property key="boardCompatibility" value="brd4116a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4116a.s37" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em2/sleepy-demo-mtd-em2-brd4116a.s37" />
 		<property key="readmeFiles" value="sleepy-demo/README.md" />
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates Sleepy End Device (SED) behaviour with polling. Using OpenThread Minimal Thread Device (MTD) and low-power EM2 mode. </description>
 	</demo>
-	<demo name="brd4407a.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo MTD">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD" />
+	<demo name="brd4407a.demo.sleepy-demo-mtd-em2" label="OpenThread - SoC Sleepy Demo MTD (EM2)">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM2)" />
 		<property key="partCompatibility" value=".*simg301m104lil.*" />
 		<property key="boardCompatibility" value="brd4407a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4407a.s37" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em2/sleepy-demo-mtd-em2-brd4407a.s37" />
 		<property key="readmeFiles" value="sleepy-demo/README.md" />
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates Sleepy End Device (SED) behaviour with polling. Using OpenThread Minimal Thread Device (MTD) and low-power EM2 mode. </description>
+	</demo>
+	<demo name="brd4180a.demo.sleepy-demo-mtd-em4" label="OpenThread - SoC Sleepy Demo MTD (EM4)">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM4)" />
+		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
+		<property key="boardCompatibility" value="brd4180a" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em4/sleepy-demo-mtd-em4-brd4180a.s37" />
+		<property key="readmeFiles" value="sleepy-demo/README.md" />
+		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates Sleepy End Device (SED) behaviour with EM4 deep sleep. </description>
+	</demo>
+	<demo name="brd4186c.demo.sleepy-demo-mtd-em4" label="OpenThread - SoC Sleepy Demo MTD (EM4)">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM4)" />
+		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
+		<property key="boardCompatibility" value="brd4186c" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em4/sleepy-demo-mtd-em4-brd4186c.s37" />
+		<property key="readmeFiles" value="sleepy-demo/README.md" />
+		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates Sleepy End Device (SED) behaviour with EM4 deep sleep. </description>
+	</demo>
+	<demo name="brd2703a.demo.sleepy-demo-mtd-em4" label="OpenThread - SoC Sleepy Demo MTD (EM4)">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM4)" />
+		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
+		<property key="boardCompatibility" value="brd2703a" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em4/sleepy-demo-mtd-em4-brd2703a.s37" />
+		<property key="readmeFiles" value="sleepy-demo/README.md" />
+		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates Sleepy End Device (SED) behaviour with EM4 deep sleep. </description>
+	</demo>
+	<demo name="brd4116a.demo.sleepy-demo-mtd-em4" label="OpenThread - SoC Sleepy Demo MTD (EM4)">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM4)" />
+		<property key="partCompatibility" value=".*efr32mg26b410f3200im48.*" />
+		<property key="boardCompatibility" value="brd4116a" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em4/sleepy-demo-mtd-em4-brd4116a.s37" />
+		<property key="readmeFiles" value="sleepy-demo/README.md" />
+		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
+		<property key="quality" value="PRODUCTION" />
+		<description>Demonstrates Sleepy End Device (SED) behaviour with EM4 deep sleep. </description>
 	</demo>
 	<demo name="brd4180a.demo.sleepy-demo-ssed" label="OpenThread - SoC Sleepy Demo SSED">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo SSED" />

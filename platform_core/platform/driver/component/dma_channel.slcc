@@ -38,3 +38,6 @@ define:
 template_contribution:
 - name: code_classification_components
   value: dma_channel
+documentation:
+  docset: gecko-platform
+  document: platform-driver/dmadrv

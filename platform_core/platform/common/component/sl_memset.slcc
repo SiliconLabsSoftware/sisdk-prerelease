@@ -22,3 +22,6 @@ toolchain_settings:
   value: -fno-builtin-memset
 - option: llvm_linker_option
   value: -Wl,--wrap=memset
+documentation:
+  docset: gecko-platform
+  document: platform-common/common

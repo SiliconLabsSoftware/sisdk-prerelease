@@ -25,6 +25,8 @@ source:
   condition: ["sl_si91x_internal_stack"]
 - path: MQTTClient-C/src/Si91x/MQTTSi91x_lwip.c
   condition: ["sl_si91x_lwip_stack"]
+- path: MQTTClient-C/src/Si91x/MQTTSi91x_lwip.c
+  condition: ["sl_si91x_network_dual_stack"]
 
 
 
@@ -41,10 +43,20 @@ include:
   file_list:
   - path: MQTTSi91x_lwip.h
     condition: ["sl_si91x_lwip_stack"]
+  - path: MQTTSi91x_lwip.h
+    condition: ["sl_si91x_network_dual_stack"]
   - path: sli_lwip_mqtt_mbedtls_config.h
     condition: ["sl_si91x_lwip_stack"]
+  - path: sli_lwip_mqtt_mbedtls_config.h
+    condition: ["sl_si91x_network_dual_stack"]
+  - path: sli_lwip_mqtt_psa_crypto_config.h
+    condition: ["sl_si91x_lwip_stack"]
+  - path: sli_lwip_mqtt_psa_crypto_config.h
+    condition: ["sl_si91x_network_dual_stack"]
   - path: sli_mqtt_tls_alpn.h
     condition: ["sl_si91x_lwip_stack"]
+  - path: sli_mqtt_tls_alpn.h
+    condition: ["sl_si91x_network_dual_stack"]
 
 - path: MQTTClient-C/src/Si91x
   file_list:
@@ -71,58 +83,158 @@ requires:
   condition: ["sl_si91x_internal_stack"]
 - name: sl_websocket_client
   condition: ["sl_si91x_internal_stack"]
-- name: mbedtls_random
+- name: mbedtls_x509_crt_parse
   condition: ["sl_si91x_lwip_stack"]
-- name: mbedtls_tls
+- name: mbedtls_x509_crt_parse
+  condition: ["sl_si91x_network_dual_stack"]
+- name: psa_crypto_sha256
   condition: ["sl_si91x_lwip_stack"]
-- name: mbedtls_x509
+- name: psa_crypto_sha256
+  condition: ["sl_si91x_network_dual_stack"]
+- name: psa_crypto_sha384
   condition: ["sl_si91x_lwip_stack"]
-- name: mbedtls_source
+- name: psa_crypto_sha384
+  condition: ["sl_si91x_network_dual_stack"]
+- name: psa_crypto_sha512
   condition: ["sl_si91x_lwip_stack"]
+- name: psa_crypto_sha512
+  condition: ["sl_si91x_network_dual_stack"]
+- name: mbedtls_pem_parse
+  condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_pem_parse
+  condition: ["sl_si91x_network_dual_stack"]
+- name: mbedtls_pk_parse
+  condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_pk_parse
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_oid
   condition: ["sl_si91x_lwip_stack"]
-- name: mbedtls_asn1
+- name: mbedtls_oid
+  condition: ["sl_si91x_network_dual_stack"]
+- name: mbedtls_source
   condition: ["sl_si91x_lwip_stack"]
-- name: mbedtls_rsa
+- name: mbedtls_source
+  condition: ["sl_si91x_network_dual_stack"]
+- name: psa_crypto_hmac
   condition: ["sl_si91x_lwip_stack"]
+- name: psa_crypto_hmac
+  condition: ["sl_si91x_network_dual_stack"]
+- name: mbedtls_ssl_tls
+  condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_ssl_tls
+  condition: ["sl_si91x_network_dual_stack"]
+- name: mbedtls_ssl_client
+  condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_ssl_client
+  condition: ["sl_si91x_network_dual_stack"]
+- name: mbedtls_ssl_proto_tls12
+  condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_ssl_proto_tls12
+  condition: ["sl_si91x_network_dual_stack"]
+- name: mbedtls_ssl_keep_peer_certificate
+  condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_ssl_keep_peer_certificate
+  condition: ["sl_si91x_network_dual_stack"]
+- name: mbedtls_x509_use
+  condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_x509_use
+  condition: ["sl_si91x_network_dual_stack"]
 - name: psa_crypto_tls12_prf
   condition: ["sl_si91x_lwip_stack"]
+- name: psa_crypto_tls12_prf
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_cipher
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_cipher
+  condition: ["sl_si91x_network_dual_stack"]
+- name: mbedtls_asn1
+  condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_asn1
+  condition: ["sl_si91x_network_dual_stack"]
+- name: mbedtls_asn1_parse
+  condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_asn1_parse
+  condition: ["sl_si91x_network_dual_stack"]
+- name: mbedtls_key_exchange_ecdhe_ecdsa
+  condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_key_exchange_ecdhe_ecdsa
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_cipher_cbc
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_cipher_cbc
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_ecc
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_ecc
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_ecdsa
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_ecdsa
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_ccm
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_ccm
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_gcm
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_gcm
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_aes
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_aes
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_hash
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_hash
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_md5
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_md5
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_cmac
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_cmac
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_ecdh
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_ecdh
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_sha512
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_sha512
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_sha256
   condition: ["sl_si91x_lwip_stack"]
-- name: mbedtls_debug
+- name: mbedtls_sha256
+  condition: ["sl_si91x_network_dual_stack"]
+- name: mbedtls_ssl_server_name_indication
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_ssl_server_name_indication
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_ecdhe_key_exchange
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_ecdhe_key_exchange
+  condition: ["sl_si91x_network_dual_stack"]
 - name: mbedtls_config
   condition: ["sl_si91x_lwip_stack"]
+- name: mbedtls_config
+  condition: ["sl_si91x_network_dual_stack"]
 
 define:
 - name: MQTT_TLS_ALPN_ENABLED
   value: '0'
 - name: SLI_MQTT_TLS_ALPN_USE_BSD
   value: '1'
+- name: SLI_MBEDTLS_CONFIG_AUTOGEN_OVERRIDE_FILE
+  value: '"sli_lwip_mqtt_mbedtls_config.h"'
+  condition: ["sl_si91x_lwip_stack"]
+- name: TF_PSA_CRYPTO_USER_CONFIG_FILE
+  value: '"sli_lwip_mqtt_psa_crypto_config.h"'
+  condition: ["sl_si91x_lwip_stack"]
+- name: SLI_MBEDTLS_CONFIG_AUTOGEN_OVERRIDE_FILE
+  value: '"sli_lwip_mqtt_mbedtls_config.h"'
+  condition: ["sl_si91x_network_dual_stack"]
+- name: TF_PSA_CRYPTO_USER_CONFIG_FILE
+  value: '"sli_lwip_mqtt_psa_crypto_config.h"'
+  condition: ["sl_si91x_network_dual_stack"]
 root_path: network_stack/paho_mqtt_embedded

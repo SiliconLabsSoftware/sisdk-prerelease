@@ -45,7 +45,13 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <mbedtls/version.h>
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
+#include <mbedtls/private/cmac.h>
+#else
 #include <mbedtls/cmac.h>
+#endif
 
 namespace otbr {
 namespace Psk {

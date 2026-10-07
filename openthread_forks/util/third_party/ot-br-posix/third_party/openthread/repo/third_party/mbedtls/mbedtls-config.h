@@ -33,63 +33,13 @@
 
 #include "openthread-core-config.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <openthread/config.h>
-#include <openthread/platform/logging.h>
-#include <openthread/platform/crypto.h>
+
+#define MBEDTLS_CONFIG_VERSION 0x04010000
 
 // ==============================================================================
-// Cryptographic configuration
-// ==============================================================================
-
-#define MBEDTLS_AES_C
-#if (MBEDTLS_VERSION_NUMBER >= 0x03050000)
-#define MBEDTLS_AES_ONLY_128_BIT_KEY_LENGTH
-#endif
-#define MBEDTLS_AES_ROM_TABLES
-#define MBEDTLS_ASN1_PARSE_C
-#define MBEDTLS_ASN1_WRITE_C
-#define MBEDTLS_BIGNUM_C
-#if (MBEDTLS_VERSION_NUMBER >= 0x03050000)
-#define MBEDTLS_BLOCK_CIPHER_NO_DECRYPT
-#endif
-#define MBEDTLS_CCM_C
-#define MBEDTLS_CIPHER_C
-#define MBEDTLS_CMAC_C
-#define MBEDTLS_CTR_DRBG_C
-#define MBEDTLS_DEPRECATED_REMOVED
-#define MBEDTLS_DEPRECATED_WARNING
-#define MBEDTLS_ECJPAKE_C
-#define MBEDTLS_ECP_C
-#define MBEDTLS_ECP_DP_SECP256R1_ENABLED
-#define MBEDTLS_ECP_NIST_OPTIM
-#define MBEDTLS_ENTROPY_C
-#define MBEDTLS_HAVE_ASM
-#define MBEDTLS_HMAC_DRBG_C
-#define MBEDTLS_MD_C
-#define MBEDTLS_SHA224_C
-#define MBEDTLS_SHA256_C
-#define MBEDTLS_SHA256_SMALLER
-
-#if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE || OPENTHREAD_CONFIG_TLS_ENABLE || OPENTHREAD_CONFIG_ECDSA_ENABLE
-#define MBEDTLS_ECDH_C
-#define MBEDTLS_ECDSA_C
-#endif
-
-#if OPENTHREAD_CONFIG_BLE_TCAT_ENABLE
-#define MBEDTLS_GCM_C
-#endif
-
-#if OPENTHREAD_CONFIG_ECDSA_ENABLE
-#if OPENTHREAD_CONFIG_DETERMINISTIC_ECDSA_ENABLE
-#define MBEDTLS_ECDSA_DETERMINISTIC
-#endif
-#endif
-
-// ==============================================================================
-// SSL configuration
+// SSL / TLS configuration (Mbed TLS 4.x upper layer)
+// Crypto algorithms live in psa-crypto-config.h (TF_PSA_CRYPTO_CONFIG_FILE).
 // ==============================================================================
 
 #define MBEDTLS_SSL_CLI_C
@@ -110,6 +60,7 @@
 #define MBEDTLS_SSL_KEEP_PEER_CERTIFICATE
 #endif
 
+// EC-JPAKE via PSA PAKE (requires PSA_WANT_ALG_JPAKE in psa-crypto-config.h).
 #define MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED
 
 #if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
@@ -133,74 +84,18 @@
 #define MBEDTLS_SSL_CIPHERSUITES         MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
 
 // ==============================================================================
-// x509 & PK configuration
+// X.509 (TLS layer). PK/PEM/BASE64 live in psa-crypto-config.h for Mbed TLS 4.x.
 // ==============================================================================
-
-#define MBEDTLS_OID_C
-#define MBEDTLS_PK_C
-#define MBEDTLS_PK_PARSE_C
-
-#if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE || OPENTHREAD_CONFIG_TLS_ENABLE || OPENTHREAD_CONFIG_ECDSA_ENABLE
-#define MBEDTLS_BASE64_C
-#define MBEDTLS_PEM_PARSE_C
-#endif
 
 #if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE || OPENTHREAD_CONFIG_TLS_ENABLE
 #define MBEDTLS_X509_USE_C
 #define MBEDTLS_X509_CRT_PARSE_C
 #endif
 
-#if OPENTHREAD_CONFIG_ECDSA_ENABLE
-#define MBEDTLS_PK_WRITE_C
-#endif
-
-// ==============================================================================
-// MPI configuration
-// ==============================================================================
-
-#define MBEDTLS_MPI_WINDOW_SIZE            1 /**< Maximum windows size used. */
-#define MBEDTLS_MPI_MAX_SIZE              32 /**< Maximum number of bytes for usable MPIs. */
-
-// ==============================================================================
-// ECP configuration
-// ==============================================================================
-
-#if (MBEDTLS_VERSION_NUMBER < 0x03000000)
-#define MBEDTLS_ECP_MAX_BITS             256 /**< Maximum bit size of groups */
-#endif
-#define MBEDTLS_ECP_WINDOW_SIZE            2 /**< Maximum window size used */
-#define MBEDTLS_ECP_FIXED_POINT_OPTIM      0 /**< Enable fixed-point speed-up */
-
-// ==============================================================================
-// Platform configuration
-// ==============================================================================
-
-#define MBEDTLS_PLATFORM_SNPRINTF_MACRO snprintf
-
-#if OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
-#define MBEDTLS_PLATFORM_STD_CALLOC     otPlatCryptoCAlloc /**< Default allocator to use, can be undefined */
-#define MBEDTLS_PLATFORM_STD_FREE       otPlatCryptoFree   /**< Default free to use, can be undefined */
-#else
-#define MBEDTLS_MEMORY_BUFFER_ALLOC_C
-#endif
-
-#define MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
-#define MBEDTLS_NO_PLATFORM_ENTROPY
-#define MBEDTLS_PLATFORM_C
-#define MBEDTLS_PLATFORM_MEMORY
-#define MBEDTLS_PLATFORM_NO_STD_FUNCTIONS
-#define MBEDTLS_ENTROPY_MAX_SOURCES 1
-
 // Spans multiple lines to avoid being processed by unifdef
 #if defined(\
     MBEDTLS_USER_CONFIG_FILE)
 #include MBEDTLS_USER_CONFIG_FILE
-#endif
-
-#include "mbedtls/version.h"
-#if (MBEDTLS_VERSION_NUMBER < 0x03000000)
-    // Configuration sanity check. Done automatically in Mbed TLS >= 3.0.
-    #include "mbedtls/check_config.h"
 #endif
 
 #endif /* MBEDTLS_CONFIG_H */

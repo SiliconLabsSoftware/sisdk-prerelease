@@ -12,6 +12,11 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: basic
+documentation:
+  docset: rail
+  document: rail-sdk-services/rail-sdk-channel-selector
 root_path: "rail/component/sl_rail_sdk_channel_selector"
 provides:
 - name: sl_rail_sdk_channel_selector
@@ -63,5 +68,3 @@ template_contribution:
     include: "sl_rail_sdk_channel_selector.h"
     handler: "set_configured_channel"
   priority: 2000
-
-

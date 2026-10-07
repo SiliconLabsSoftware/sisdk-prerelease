@@ -20,7 +20,6 @@
 #include <stdbool.h>
 #include "include/security.h"
 
-#include <mbedtls/build_info.h>
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
@@ -93,7 +92,20 @@ void sli_zigbee_aes_decrypt(uint8_t* block, const uint8_t* key)
   assert(status == SL_STATUS_OK);
 }
 
-#elif defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_ECB_NO_PADDING) && defined(PSA_WANT_ALG_ECB_NO_PADDING) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS)
+#else // !SL_CATALOG_SLI_PROTOCOL_CRYPTO_PRESENT
+// Software / PSA-accel paths need Mbed TLS build_info for feature macros.
+#if defined(__has_include)
+#if __has_include(<mbedtls/build_info.h>)
+#include <mbedtls/build_info.h>
+#elif __has_include(<tf-psa-crypto/build_info.h>)
+#include <tf-psa-crypto/build_info.h>
+#endif
+#else
+#include <mbedtls/build_info.h>
+#endif
+
+#if (defined(MBEDTLS_PSA_ACCEL_KEY_TYPE_AES) && defined(MBEDTLS_PSA_ACCEL_ALG_ECB_NO_PADDING) && defined(PSA_WANT_ALG_ECB_NO_PADDING) && defined(MBEDTLS_PSA_CRYPTO_DRIVERS)) \
+  || defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT) || defined(CRYPTO_PRESENT)
 // PSA Crypto driver implementation
 #include "psa/crypto.h"
 
@@ -210,27 +222,74 @@ void sli_zigbee_aes_decrypt(uint8_t* block, const uint8_t* key)
   assert(output_size == SECURITY_BLOCK_SIZE);
 }
 
-#elif defined(MBEDTLS_AES_C)
-#include "mbedtls/aes.h"
+#else
+// Software / host AES via portable PSA Crypto (no legacy mbedtls_aes_* APIs).
+// Mbed TLS 4.x only defines MBEDTLS_AES_C via TF-PSA builtins when PSA_WANT_KEY_TYPE_AES
+// is set; simulation/native builds must use PSA cipher APIs instead.
+#include "psa/crypto.h"
 
-// mbed TLS implementation
-static mbedtls_aes_context aesContext;
-
-#if defined(SL_ZIGBEE_TEST) || defined(SL_CATALOG_ZIGBEE_AES_SOFTWARE_PRESENT)
-// Mbed TLS doesn't seem to provide an easy way to get the key for platforms other than EFR32.
-// Ie. mbedtls_aes_context in mbedtls/aes.h vs. sl_crypto/include/aes_alt.h.
-// For ember test (or host apps) let's just store the key locally to easily provide sli_zigbee_get_key_from_core.
 static uint8_t loadedKey[SL_ZIGBEE_ENCRYPTION_KEY_SIZE] = { 0 };
 
-// Load the passed key into the encryption core.
+static psa_status_t sli_zigbee_psa_aes_ecb(bool encrypt,
+                                           const uint8_t *key,
+                                           const uint8_t *input,
+                                           uint8_t *output)
+{
+  psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+  psa_key_id_t key_id = 0;
+  psa_status_t status;
+  size_t output_length = 0;
+  uint8_t temp[SECURITY_BLOCK_SIZE];
+
+  // Native/simulation does not auto-register psa_crypto_init (unlike device).
+  // Legacy mbedtls_aes_* needed no global init; PSA does. Safe if already inited.
+  status = psa_crypto_init();
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  psa_set_key_type(&attributes, PSA_KEY_TYPE_AES);
+  psa_set_key_bits(&attributes, PSA_BYTES_TO_BITS(SL_ZIGBEE_ENCRYPTION_KEY_SIZE));
+  psa_set_key_algorithm(&attributes, PSA_ALG_ECB_NO_PADDING);
+  psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+
+  status = psa_import_key(&attributes, key, SL_ZIGBEE_ENCRYPTION_KEY_SIZE, &key_id);
+  psa_reset_key_attributes(&attributes);
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  if (encrypt) {
+    status = psa_cipher_encrypt(key_id,
+                                PSA_ALG_ECB_NO_PADDING,
+                                input,
+                                SECURITY_BLOCK_SIZE,
+                                temp,
+                                sizeof(temp),
+                                &output_length);
+  } else {
+    status = psa_cipher_decrypt(key_id,
+                                PSA_ALG_ECB_NO_PADDING,
+                                input,
+                                SECURITY_BLOCK_SIZE,
+                                temp,
+                                sizeof(temp),
+                                &output_length);
+  }
+
+  (void)psa_destroy_key(key_id);
+
+  if (status == PSA_SUCCESS && output_length == SECURITY_BLOCK_SIZE) {
+    memcpy(output, temp, SECURITY_BLOCK_SIZE);
+  } else if (status == PSA_SUCCESS) {
+    status = PSA_ERROR_GENERIC_ERROR;
+  }
+
+  return status;
+}
+
 void sli_util_load_key_into_core(const uint8_t* key)
 {
-  int status = mbedtls_aes_setkey_enc(&aesContext,
-                                      key,
-                                      SECURITY_BLOCK_SIZE * 8U);
-
-  assert(status == 0);
-
   memcpy(loadedKey, key, sizeof(loadedKey));
 }
 
@@ -239,74 +298,59 @@ void sli_zigbee_get_key_from_core(uint8_t* key)
   memcpy(key, loadedKey, sizeof(loadedKey));
 }
 
-#else //SL_ZIGBEE_TEST
-// Load the passed key into the encryption core.
-void sli_util_load_key_into_core(const uint8_t* key)
-{
-  int status = mbedtls_aes_setkey_enc(&aesContext,
-                                      key,
-                                      SECURITY_BLOCK_SIZE * 8U);
-
-  assert(status == 0);
-}
-
-void sli_zigbee_get_key_from_core(uint8_t* key)
-{
-  memcpy(key, aesContext.key, SECURITY_BLOCK_SIZE * sizeof(key[0]));
-}
-#endif
-
 void sli_zigbee_security_hardware_init(void)
 {
-  mbedtls_aes_init(&aesContext);
+  (void)psa_crypto_init();
 }
 
 void sli_util_stand_alone_encrypt_block(uint8_t* block)
 {
-  // Encrypt this block in place with the current key
-  int status = mbedtls_aes_crypt_ecb(&aesContext,
-                                     MBEDTLS_AES_ENCRYPT,
-                                     block,
-                                     block);
-
-  assert(status == 0);
+  psa_status_t status = sli_zigbee_psa_aes_ecb(true, loadedKey, block, block);
+  assert(status == PSA_SUCCESS);
 }
-
-//----------------------------------------------------------------
-// Wrapper for those that just want access to AES.
 
 void sli_zigbee_aes_encrypt(uint8_t* block, const uint8_t* key)
 {
-  int status = mbedtls_aes_setkey_enc(&aesContext,
-                                      key,
-                                      SECURITY_BLOCK_SIZE * 8U);
-
-  assert(status == 0);
-
-  status = mbedtls_aes_crypt_ecb(&aesContext,
-                                 MBEDTLS_AES_ENCRYPT,
-                                 block,
-                                 block);
-
-  assert(status == 0);
+  psa_status_t status = sli_zigbee_psa_aes_ecb(true, key, block, block);
+  assert(status == PSA_SUCCESS);
 }
 
 void sli_zigbee_aes_decrypt(uint8_t* block, const uint8_t* key)
 {
-  int status = mbedtls_aes_setkey_dec(&aesContext,
-                                      key,
-                                      SECURITY_BLOCK_SIZE * 8U);
-
-  assert(status == 0);
-
-  status = mbedtls_aes_crypt_ecb(&aesContext,
-                                 MBEDTLS_AES_DECRYPT,
-                                 block,
-                                 block);
-
-  assert(status == 0);
+  psa_status_t status = sli_zigbee_psa_aes_ecb(false, key, block, block);
+  assert(status == PSA_SUCCESS);
 }
 
-#else
-#error "Stack AES needs either PSA Crypto or MbedTLS AES. Check your crypto configuration."
-#endif
+#if defined(MBEDTLS_PSA_BUILTIN_GET_ENTROPY) || defined(MBEDTLS_PSA_DRIVER_GET_ENTROPY)
+// Some mbedtls package builds omit entropy_poll.c, leaving
+// mbedtls_entropy_poll_platform undefined when GET_ENTROPY is enabled.
+// Weak thin adapter around mbedtls_platform_get_entropy(); ignored if the
+// package already provides a strong mbedtls_entropy_poll_platform.
+#include "mbedtls/platform.h"
+#include "mbedtls/private/entropy.h"
+#include <psa/crypto_driver_random.h>
+
+__attribute__((weak))
+int mbedtls_entropy_poll_platform(void *data, unsigned char *output, size_t len, size_t *olen)
+{
+  size_t estimate_bits = 0;
+  int ret;
+  (void)data;
+
+  /* Same contract as tf-psa-crypto entropy_poll.c: whole buffer is useful. */
+  *olen = len;
+
+  ret = mbedtls_platform_get_entropy(PSA_DRIVER_GET_ENTROPY_FLAGS_NONE,
+                                     &estimate_bits, output, len);
+  if (ret != 0) {
+    return ret;
+  }
+  if (estimate_bits < (8 * len)) {
+    return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
+  }
+  return 0;
+}
+#endif // GET_ENTROPY
+
+#endif // MBEDTLS_PSA_ACCEL... / software PSA
+#endif // SL_CATALOG_SLI_PROTOCOL_CRYPTO_PRESENT

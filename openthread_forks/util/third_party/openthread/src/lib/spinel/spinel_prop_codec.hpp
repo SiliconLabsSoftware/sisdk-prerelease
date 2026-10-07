@@ -294,7 +294,7 @@ otError DecodeDnssdAddressResult(Decoder                  &aDecoder,
                                  uint16_t                 &aCallbackDataLen);
 
 /**
- * Encodes a DNS upstream query or response payload (`CSd` format).
+ * Encodes a DNS upstream query or response payload (`Cd` format).
  *
  * @param[in] aEncoder     A reference to the encoder object.
  * @param[in] aTxnIndex    The transaction index.
@@ -304,12 +304,12 @@ otError DecodeDnssdAddressResult(Decoder                  &aDecoder,
 otError EncodeDnsUpstreamWireMessage(Encoder &aEncoder, uint8_t aTxnIndex, const uint8_t *aData, uint16_t aDataLength);
 
 /**
- * Decodes a DNS upstream query or response payload (`CSd` format).
+ * Decodes a DNS upstream query or response payload (`Cd` format).
  *
  * @param[in]  aDecoder      A reference to the decoder object.
  * @param[out] aTxnIndex     A reference to the transaction index.
  * @param[out] aData         A reference to the pointer to the DNS wire payload.
- * @param[out] aDataLength    A reference to the DNS wire payload length in bytes.
+ * @param[out] aDataLength   A reference to the DNS wire payload length in bytes.
  */
 otError DecodeDnsUpstreamWireMessage(Decoder        &aDecoder,
                                      uint8_t        &aTxnIndex,
@@ -325,7 +325,7 @@ otError DecodeDnsUpstreamWireMessage(Decoder        &aDecoder,
 otError DecodeDnsUpstreamCancel(Decoder &aDecoder, uint8_t &aTxnIndex);
 
 /**
- * Encodes a DNS upstream RDNSS server list (`C6` format).
+ * Encodes a DNS upstream RDNSS server list (`CA(6)` format).
  *
  * @param[in] aEncoder      A reference to the encoder object.
  * @param[in] aServers      IPv6 recursive DNS server addresses.
@@ -334,7 +334,7 @@ otError DecodeDnsUpstreamCancel(Decoder &aDecoder, uint8_t &aTxnIndex);
 otError EncodeDnsUpstreamRdnssServers(Encoder &aEncoder, const otIp6Address *aServers, uint8_t aNumServers);
 
 /**
- * Decodes a DNS upstream RDNSS server list (`C6` format).
+ * Decodes a DNS upstream RDNSS server list (`CA(6)` format).
  *
  * @param[in]  aDecoder      A reference to the decoder object.
  * @param[out] aServers      Output array for IPv6 server addresses.

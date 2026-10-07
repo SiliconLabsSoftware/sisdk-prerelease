@@ -28,7 +28,7 @@
 
 /**
  * @file
- *   sli_crypto_descriptor_t builders for the LPWAES transmit security backend.
+ *   `sli_crypto_descriptor_t` builders for the LPWAES transmit backend.
  */
 
 #include "em_device.h"
@@ -36,25 +36,24 @@
 
 #if defined(LPWAES_PRESENT)
 
-#include <openthread/platform/crypto.h>
-
 #include "sli-crypto-key-desc.hpp"
 
 #if defined(KSU_PRESENT)
 #include <psa/crypto.h>
 
 #include "security_manager.h"
+
 #include "common/debug.hpp"
 #endif
 
-sli_crypto_descriptor_t LpwAesKeyDescFromPlaintext(const otMacKeyMaterial &aRawKey)
+sli_crypto_descriptor_t LpwAesKeyDesc(const MacKeyLiteral &aKey)
 {
     sli_crypto_descriptor_t keyDesc;
 
     keyDesc.engine                           = SLI_CRYPTO_LPWAES;
     keyDesc.yield                            = false;
     keyDesc.location                         = SLI_CRYPTO_KEY_LOCATION_PLAINTEXT;
-    keyDesc.key.plaintext_key.buffer.pointer = const_cast<uint8_t *>(aRawKey.mKeyMaterial.mKey.m8);
+    keyDesc.key.plaintext_key.buffer.pointer = const_cast<uint8_t *>(aKey.mBytes);
     keyDesc.key.plaintext_key.buffer.size    = OT_MAC_KEY_SIZE;
     keyDesc.key.plaintext_key.key_size       = OT_MAC_KEY_SIZE;
 
@@ -63,7 +62,7 @@ sli_crypto_descriptor_t LpwAesKeyDescFromPlaintext(const otMacKeyMaterial &aRawK
 
 #if defined(KSU_PRESENT)
 
-sli_crypto_descriptor_t LpwAesKeyDescFromKsuSlot(const otMacKeyMaterial &aKey)
+sli_crypto_descriptor_t LpwAesKeyDesc(const MacKeyRef &aKey)
 {
     sli_crypto_descriptor_t keyDesc;
     uint8_t                 ksuSlot = 0xFF;
@@ -72,9 +71,9 @@ sli_crypto_descriptor_t LpwAesKeyDescFromKsuSlot(const otMacKeyMaterial &aKey)
     keyDesc.engine = SLI_CRYPTO_LPWAES;
     keyDesc.yield  = false;
 
-    OT_ASSERT(aKey.mKeyMaterial.mKeyRef != 0);
+    OT_ASSERT(aKey.mKeyRef != 0);
 
-    status = sl_sec_man_get_ksu_slot_for_key(aKey.mKeyMaterial.mKeyRef, &ksuSlot);
+    status = sl_sec_man_get_ksu_slot_for_key(aKey.mKeyRef, &ksuSlot);
     OT_ASSERT(status == PSA_SUCCESS);
 
     keyDesc.location     = SLI_CRYPTO_KEY_LOCATION_KSU;

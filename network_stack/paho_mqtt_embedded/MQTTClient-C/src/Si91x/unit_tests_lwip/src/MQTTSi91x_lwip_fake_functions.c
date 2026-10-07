@@ -35,32 +35,14 @@ DEFINE_FAKE_VALUE_FUNC4(ssize_t, lwip_send, int, const void *, size_t, int);
 DEFINE_FAKE_VOID_FUNC1(mbedtls_ssl_config_init, mbedtls_ssl_config *);
 DEFINE_FAKE_VOID_FUNC1(mbedtls_x509_crt_init, mbedtls_x509_crt *);
 DEFINE_FAKE_VOID_FUNC1(mbedtls_ssl_init, mbedtls_ssl_context *);
-DEFINE_FAKE_VOID_FUNC1(mbedtls_entropy_init, mbedtls_entropy_context *);
-DEFINE_FAKE_VOID_FUNC1(mbedtls_ctr_drbg_init, mbedtls_ctr_drbg_context *);
 DEFINE_FAKE_VOID_FUNC1(mbedtls_ssl_free, mbedtls_ssl_context *);
 DEFINE_FAKE_VOID_FUNC1(mbedtls_ssl_config_free, mbedtls_ssl_config *);
 DEFINE_FAKE_VOID_FUNC1(mbedtls_x509_crt_free, mbedtls_x509_crt *);
-DEFINE_FAKE_VOID_FUNC1(mbedtls_entropy_free, mbedtls_entropy_context *);
-DEFINE_FAKE_VOID_FUNC1(mbedtls_ctr_drbg_free, mbedtls_ctr_drbg_context *);
 DEFINE_FAKE_VOID_FUNC3(mbedtls_ssl_conf_dbg, mbedtls_ssl_config *, mbedtls_ssl_debug_cb, void *);
 DEFINE_FAKE_VOID_FUNC1(mbedtls_debug_set_threshold, int);
-DEFINE_FAKE_VALUE_FUNC5(int,
-                        mbedtls_entropy_add_source,
-                        mbedtls_entropy_context *,
-                        mbedtls_entropy_f_source_ptr,
-                        void *,
-                        size_t,
-                        int);
-DEFINE_FAKE_VALUE_FUNC5(int,
-                        mbedtls_ctr_drbg_seed,
-                        mbedtls_ctr_drbg_context *,
-                        mbedtls_ctr_drbg_entropy_cb,
-                        void *,
-                        const unsigned char *,
-                        size_t);
+DEFINE_FAKE_VALUE_FUNC0(psa_status_t, psa_crypto_init);
 DEFINE_FAKE_VALUE_FUNC4(int, mbedtls_ssl_config_defaults, mbedtls_ssl_config *, int, int, int);
 DEFINE_FAKE_VOID_FUNC2(mbedtls_ssl_conf_authmode, mbedtls_ssl_config *, int);
-DEFINE_FAKE_VOID_FUNC3(mbedtls_ssl_conf_rng, mbedtls_ssl_config *, mbedtls_ctr_drbg_entropy_cb, void *);
 DEFINE_FAKE_VOID_FUNC3(mbedtls_ssl_conf_handshake_timeout, mbedtls_ssl_config *, uint32_t, uint32_t);
 DEFINE_FAKE_VOID_FUNC2(mbedtls_ssl_conf_session_tickets, mbedtls_ssl_config *, int);
 DEFINE_FAKE_VOID_FUNC2(mbedtls_ssl_conf_renegotiation, mbedtls_ssl_config *, int);
@@ -77,5 +59,3 @@ DEFINE_FAKE_VOID_FUNC2(mbedtls_ssl_conf_read_timeout, mbedtls_ssl_config *, uint
 DEFINE_FAKE_VALUE_FUNC3(int, mbedtls_ssl_read, mbedtls_ssl_context *, unsigned char *, size_t);
 DEFINE_FAKE_VALUE_FUNC3(int, mbedtls_ssl_write, mbedtls_ssl_context *, const unsigned char *, size_t);
 DEFINE_FAKE_VALUE_FUNC3(int, mbedtls_x509_crt_parse, mbedtls_x509_crt *, const unsigned char *, size_t);
-DEFINE_FAKE_VALUE_FUNC3(int, mbedtls_entropy_func, void *, unsigned char *, size_t);
-DEFINE_FAKE_VALUE_FUNC3(int, mbedtls_ctr_drbg_random, void *, unsigned char *, size_t);

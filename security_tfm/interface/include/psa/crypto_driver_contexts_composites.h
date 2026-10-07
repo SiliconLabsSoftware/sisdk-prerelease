@@ -23,4 +23,8 @@
 /* The Secure library must use the crypto_driver_contexts_composites.h from the mbedtls repo. */
 #include <include/psa/crypto_driver_contexts_composites.h>
 
+#else
+/* Include the context structure definitions for the Mbed TLS software drivers */
+#include "mbedtls/private/crypto_builtin_composites.h"
+
 #endif /* SL_TRUSTZONE_SECURE */

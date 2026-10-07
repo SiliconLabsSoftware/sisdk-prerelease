@@ -39,18 +39,6 @@
 #include "sl_component_catalog.h"
 #endif
 
-#ifdef SL_CATALOG_CLOCK_MANAGER_PRESENT
-#include "sl_clock_manager_oscillator_config.h"
-#else
-#include "sl_device_init_hfxo.h"
-#include "sl_device_init_hfxo_config.h"
-#endif
-
-#if defined(HARDWARE_BOARD_HAS_LFXO) && !defined(SL_CATALOG_CLOCK_MANAGER_PRESENT)
-#include "sl_device_init_lfxo.h"
-#include "sl_device_init_lfxo_config.h"
-#endif
-
 // Use (user defined) application config file to define OpenThread configurations
 #ifdef SL_OPENTHREAD_APPLICATION_CONFIG_FILE
 #include SL_OPENTHREAD_APPLICATION_CONFIG_FILE
@@ -67,7 +55,6 @@
 #endif
 
 #include "board_config.h"
-#include "em_device.h"
 
 /**
  * @def OPENTHREAD_CONFIG_CRYPTO_PLATFORM_CCM_ONE_SHOT_ENABLE
@@ -312,16 +299,9 @@
  *
  * Define how many microseconds ahead should MAC deliver CSL frame to SubMac.
  *
- * For Series-3, we need to account for more ahead time; even though the EnhAck path is entirely in RAM,
- * LPWCRYPTO executes from flash, adding non-deterministic latency on the critical path
- * from MAC timer fire to RAIL scheduled TX submission.
  */
 #ifndef OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US
-#if defined(_SILICON_LABS_32B_SERIES_3)
-#define OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US 15000
-#else
 #define OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US 2000
-#endif
 #endif
 
 /**
@@ -608,11 +588,9 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_CRYPTO_LIB
-#if OPENTHREAD_RADIO
-#define OPENTHREAD_CONFIG_CRYPTO_LIB OPENTHREAD_CONFIG_CRYPTO_LIB_MBEDTLS
-#else
+/* Mbed TLS 4.x moved aes/sha256 headers private; OT radio builds that used
+ * CRYPTO_LIB_MBEDTLS fail on context_size.hpp includes. PSA path avoids those public headers. */
 #define OPENTHREAD_CONFIG_CRYPTO_LIB OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
-#endif
 #endif
 
 /**
@@ -624,140 +602,6 @@
 #ifndef OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
 #define OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT \
     (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
-#endif
-
-/**
- * @def SL_OPENTHREAD_CSL_TX_UNCERTAINTY
- *
- * Uncertainty of scheduling a CSL transmission, in ±10 us units.
- *
- * Note: This value was carefully configured to meet Thread certification
- * requirements for Silicon Labs devices.
- *
- */
-#ifndef SL_OPENTHREAD_CSL_TX_UNCERTAINTY
-#if OPENTHREAD_RADIO || OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
-#define SL_OPENTHREAD_CSL_TX_UNCERTAINTY 175
-#elif OPENTHREAD_FTD
-// Approx. ~128 us. for single CCA + some additional tx uncertainty in testing
-#define SL_OPENTHREAD_CSL_TX_UNCERTAINTY 20
-#else
-// Approx. ~128 us. for single CCA
-//
-// Note: Our SSEDs "schedule" transmissions to their parent in order to know
-// exactly when in the future the data packets go out so they can calculate
-// the accurate CSL phase to send to their parent.
-//
-// The receive windows on the SSEDs scale with this value, so increasing this
-// uncertainty to account for full CCA/CSMA with 0..7 backoffs
-// (see RAIL_CSMA_CONFIG_802_15_4_2003_2p4_GHz_OQPSK_CSMA) will mean that the
-// receive windows can get very long (~ 5ms.)
-//
-// We have updated SSEDs to use a single CCA (RAIL_CSMA_CONFIG_SINGLE_CCA)
-// instead. If they are in very busy channels, CSL won't be reliable anyway.
-#define SL_OPENTHREAD_CSL_TX_UNCERTAINTY 12
-#endif
-#endif
-
-/**
- * @def SL_OPENTHREAD_HFXO_ACCURACY
- *
- * Worst case XTAL accuracy in units of ± ppm. Also used for calculations during CSL operations.
- *
- * @note Platforms may optimize this value based on operational conditions (i.e.: temperature).
- *
- */
-#ifndef SL_OPENTHREAD_HFXO_ACCURACY
-#ifdef SL_CATALOG_CLOCK_MANAGER_PRESENT
-#define SL_OPENTHREAD_HFXO_ACCURACY SL_CLOCK_MANAGER_HFXO_PRECISION
-#else
-#define SL_OPENTHREAD_HFXO_ACCURACY SL_DEVICE_INIT_HFXO_PRECISION
-#endif
-#endif
-
-/**
- * @def SL_OPENTHREAD_LFXO_ACCURACY
- *
- * Worst case XTAL accuracy in units of ± ppm. Also used for calculations during CSL operations.
- *
- * @note Platforms may optimize this value based on operational conditions (i.e.: temperature).
- */
-#ifndef SL_OPENTHREAD_LFXO_ACCURACY
-#if defined(HARDWARE_BOARD_HAS_LFXO)
-#if SL_CATALOG_CLOCK_MANAGER_PRESENT
-#define SL_OPENTHREAD_LFXO_ACCURACY SL_CLOCK_MANAGER_LFXO_PRECISION
-#else
-#define SL_OPENTHREAD_LFXO_ACCURACY SL_DEVICE_INIT_LFXO_PRECISION
-#endif // SL_CATALOG_CLOCK_MANAGER_PRESENT
-#else
-#define SL_OPENTHREAD_LFXO_ACCURACY 0
-#endif // HARDWARE_BOARD_HAS_LFXO
-#endif
-
-/**
- * @def SL_OPENTHREAD_RADIO_CCA_MODE
- *
- * Defines the CCA mode to be used by the platform.
- *
- */
-#ifndef SL_OPENTHREAD_RADIO_CCA_MODE
-#define SL_OPENTHREAD_RADIO_CCA_MODE SL_RAIL_IEEE802154_CCA_MODE_RSSI
-#endif
-
-/**
- * @def SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE
- *
- * Max Private key size supported by ECDSA Crypto handler.
- *
- */
-#ifndef SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE
-#define SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE 32
-#endif
-
-/**
- * @def SL_OPENTHREAD_ENABLE_HOST_WAKE_GPIO
- *
- * Define to 1 to enable the host wakeup GPIO functionality.
- * This feature allows the platform to wake up the host using a GPIO pin.
- *
- * Default value is 0 (disabled).
- */
-#ifndef SL_OPENTHREAD_ENABLE_HOST_WAKE_GPIO
-#define SL_OPENTHREAD_ENABLE_HOST_WAKE_GPIO 0
-#endif
-
-/**
- * @def SL_OPENTHREAD_HOST_WAKEUP_GPIO_PORT
- *
- * Defines the GPIO port for host wakeup.
- *
- */
-
-#ifndef SL_OPENTHREAD_HOST_WAKEUP_GPIO_PORT
-#define SL_OPENTHREAD_HOST_WAKEUP_GPIO_PORT SL_GPIO_PORT_C
-#endif
-
-/**
- * @def SL_OPENTHREAD_HOST_WAKEUP_GPIO_PIN
- *
- * Defines the GPIO pin for host wakeup.
- *
- */
-
-#ifndef SL_OPENTHREAD_HOST_WAKEUP_GPIO_PIN
-#define SL_OPENTHREAD_HOST_WAKEUP_GPIO_PIN 0
-#endif
-
-/**
- * @def SL_OPENTHREAD_HOST_CLEAR_PIN_TIMEOUT_MS
- *
- * Defines the timeout duration (in milliseconds) for clearing the host wakeup GPIO pin.
- *
- * This value specifies the amount of time the system will wait before clearing the host wakeup GPIO pin.
- *
- */
-#ifndef SL_OPENTHREAD_HOST_CLEAR_PIN_TIMEOUT_MS
-#define SL_OPENTHREAD_HOST_CLEAR_PIN_TIMEOUT_MS 10
 #endif
 
 /**

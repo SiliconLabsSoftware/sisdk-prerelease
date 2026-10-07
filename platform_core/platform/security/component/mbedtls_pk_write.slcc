@@ -12,7 +12,7 @@ requires:
 - name: mbedtls_pk
 - name: mbedtls_oid
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PK_WRITE_C
 documentation:
   # No dedicated Public-Key Write API page; Mbed TLS hub for related docs

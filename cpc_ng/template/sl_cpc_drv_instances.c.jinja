@@ -1,6 +1,7 @@
 #include "sl_cpc_drv_instances.h"
 
 #include "sl_assert.h"
+#include "sl_common.h"
 #include "sl_cpc_bus.h"
 #include "sl_status.h"
 
@@ -12,19 +13,22 @@
   "uart": (cpc_ng_drv_uart_instances, cpc_ng_drv_uart_role_secondary),
 } -%}
 
-{% for drv_name, drv_instances_role in drv_instances_dict.items() -%}
-{% for instance in drv_instances_role.0 -%}
+{% for drv_name, drv_instances_role in drv_instances_dict.items() %}
+{% for instance in drv_instances_role.0 %}
 #include "sl_cpc_drv_{{ drv_name }}_{{ instance }}_config.h"
-{%- endfor %}
-{%- endfor %}
+{% endfor %}
+{% endfor %}
 
-{% if cpc_ng_drv_sdio_host_instances|count > 0 -%}
-#include "sl_sdhc_instances.h"
-{%- endif %}
+{% for instance in cpc_ng_wake_device_instances %}
+#include "sl_cpc_wake_{{ instance }}_config.h"
+{% endfor %}
+{% for instance in cpc_ng_wake_host_instances %}
+#include "sl_cpc_wake_{{ instance }}_config.h"
+{% endfor %}
 
-{% if cpc_ng_drv_uart_instances|count > 0 -%}
+{% if cpc_ng_drv_uart_instances|count > 0 %}
 #include "sl_iostream_handles.h"
-{%- endif %}
+{% endif %}
 
 sl_status_t sl_cpc_drv_instances_init(void)
 {
@@ -33,48 +37,81 @@ sl_status_t sl_cpc_drv_instances_init(void)
   {% for instance in cpc_ng_drv_mock_instances -%}
   static const sl_cpc_drv_mock_config_t sl_cpc_drv_mock_{{ instance }}_cfg = {
   };
-  {%- endfor %}
+  {% endfor %}
 
   {% for instance in cpc_ng_drv_sdio_device_instances -%}
   static const sl_cpc_drv_sdio_device_config_t sl_cpc_drv_sdio_device_{{ instance }}_cfg = {
   };
-  {%- endfor %}
+  {% endfor %}
 
   {% for instance in cpc_ng_drv_sdio_host_instances -%}
+  /* SDHCCORE is a CMSIS pointer macro. Hide it so the pin-tool name pastes as a token. */
+#undef SDHCCORE
   const sl_cpc_drv_sdio_host_config_t sl_cpc_drv_sdio_host_{{ instance }}_cfg = {
-    .sdio_handle = sl_sdhc_sdio_{{ instance }}_handle,
-    .function_num = SL_CPC_DRV_SDIO_{{ instance | upper }}_FUNCTION_NUM,
-    .block_size = SL_CPC_DRV_SDIO_{{ instance | upper }}_BLOCK_SIZE,
-    .max_sd_freq = SL_CPC_DRV_SDIO_{{ instance | upper }}_MAX_SD_FREQ,
-    .max_bus_width = SL_CPC_DRV_SDIO_{{ instance | upper }}_MAX_BUS_WIDTH,
-    .max_speed_mode = SL_CPC_DRV_SDIO_{{ instance | upper }}_MAX_SPEED_MODE,
+    .peripheral = SL_CONCAT_PASTER_2(SL_PERIPHERAL_, SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_PERIPHERAL),
+    .clk = { .port = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_CLK_PORT, .pin = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_CLK_PIN },
+    .cmd = { .port = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_CMD_PORT, .pin = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_CMD_PIN },
+    .dat0 = { .port = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_DAT0_PORT, .pin = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_DAT0_PIN },
+    .dat1 = { .port = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_DAT1_PORT, .pin = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_DAT1_PIN },
+    .dat2 = { .port = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_DAT2_PORT, .pin = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_DAT2_PIN },
+    .dat3 = { .port = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_DAT3_PORT, .pin = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_DAT3_PIN },
+    .base_clock_freq_hz = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_BASE_CLOCK_FREQ_HZ,
+    .bus_voltage = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_BUS_VOLTAGE,
+    .slot_type = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_SLOT_TYPE,
+    .card_detect_source = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_CARD_DETECT_SOURCE,
+    .function_num = SL_CPC_DRV_SDIO_{{ instance|upper }}_FUNCTION_NUM,
+    .block_size = SL_CPC_DRV_SDIO_{{ instance|upper }}_BLOCK_SIZE,
+    .max_sd_freq = SL_CPC_DRV_SDIO_{{ instance|upper }}_MAX_SD_FREQ,
+    .max_speed_mode = SL_CPC_DRV_SDIO_{{ instance|upper }}_MAX_SPEED_MODE,
   };
-  {%- endfor %}
+  {% endfor %}
 
   {% for instance in cpc_ng_drv_spi_peripheral_instances -%}
   static const sl_cpc_drv_spi_peripheral_config_t sl_cpc_drv_spi_peripheral_{{ instance }}_cfg = {
   };
-  {%- endfor %}
+  {% endfor %}
 
   {% for instance in cpc_ng_drv_uart_instances -%}
   const sl_cpc_drv_uart_config_t sl_cpc_drv_uart_{{ instance }}_cfg = {
     .iostream = sl_iostream_{{ instance }}_handle,
     .iostream_uart = sl_iostream_uart_{{ instance }}_handle,
   };
-  {%- endfor %}
+  {% endfor %}
 
-  {% for drv_name, drv_instances_role in drv_instances_dict.items() -%}
-  {% for instance in drv_instances_role.0 -%}
+  {% for drv_name, drv_instances_role in drv_instances_dict.items() %}
+  {% for instance in drv_instances_role.0 %}
   static const sl_cpc_bus_config_t sl_cpc_bus_{{ drv_name }}_{{ instance }}_cfg = {
     .is_secondary = {{ (instance in drv_instances_role.1)|string|lower }},
     .rx_frame_pool_count = SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_RX_FRAME_POOL_COUNT,
     .tx_frame_pool_count = SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_TX_FRAME_POOL_COUNT,
+    {%- if instance in cpc_ng_wake_device_instances %}
+    .wake_mode = SL_CPC_WAKE_MODE_DEVICE,
+    .wake_pin = { .port = SL_CPC_WAKE_{{ instance|upper }}_PORT, .pin = SL_CPC_WAKE_{{ instance|upper }}_PIN },
+    {%- elif instance in cpc_ng_wake_host_instances %}
+    .wake_mode = SL_CPC_WAKE_MODE_HOST,
+    .wake_pin = { .port = SL_CPC_WAKE_{{ instance|upper }}_PORT, .pin = SL_CPC_WAKE_{{ instance|upper }}_PIN },
+    {%- endif %}
   };
-  {%- endfor %}
-  {%- endfor %}
+  {% endfor %}
+  {% endfor %}
 
-  {% for drv_name, drv_instances_role in drv_instances_dict.items() -%}
-  {% for instance in drv_instances_role.0 -%}
+{% for wake_inst in cpc_ng_wake_device_instances %}
+{% if wake_inst not in cpc_ng_drv_sdio_device_instances
+      and wake_inst not in cpc_ng_drv_spi_peripheral_instances
+      and wake_inst not in cpc_ng_drv_uart_instances %}
+{{ raise("cpc_ng_wake_device has instance '" ~ wake_inst ~ "' which doesn't match any driver instance") }}
+{% endif %}
+{% endfor %}
+
+{% for wake_inst in cpc_ng_wake_host_instances %}
+{% if wake_inst not in cpc_ng_drv_sdio_host_instances
+      and wake_inst not in cpc_ng_drv_uart_instances %}
+{{ raise("cpc_ng_wake_host has instance '" ~ wake_inst ~ "' which doesn't match any driver instance") }}
+{% endif %}
+{% endfor %}
+
+  {% for drv_name, drv_instances_role in drv_instances_dict.items() %}
+  {% for instance in drv_instances_role.0 %}
   status = sl_cpc_drv_{{ drv_name }}_init(sl_cpc_drv_{{ drv_name }}_{{ instance }},
                                           &sl_cpc_drv_{{ drv_name }}_{{ instance }}_cfg,
                                           &sl_cpc_bus_{{ drv_name }}_{{ instance }}_cfg);
@@ -82,24 +119,22 @@ sl_status_t sl_cpc_drv_instances_init(void)
   if (status != SL_STATUS_OK) {
     return status;
   }
-  {%- endfor %}
-  {%- endfor %}
+  {% endfor %}
+  {% endfor %}
 
   return SL_STATUS_OK;
 }
 
-{% for drv_name, drv_instances_role in drv_instances_dict.items() -%}
-{% if drv_instances_role.0|count > 0 -%}
+{% for drv_name, drv_instances_role in drv_instances_dict.items() if drv_instances_role.0|count > 0 %}
 void sl_cpc_drv_{{ drv_name }}_instances_start_buses(void) {
   sl_status_t status;
 
-  {% for instance in drv_instances_role.0 -%}
+  {% for instance in drv_instances_role.0 %}
   status = sl_cpc_bus_start(sl_cpc_drv_{{ drv_name }}_get_bus(sl_cpc_drv_{{ drv_name }}_{{ instance }}));
   EFM_ASSERT(status == SL_STATUS_OK);
   if (status != SL_STATUS_OK) {
     return;
   }
-  {%- endfor %}
+  {% endfor %}
 }
-{%- endif %}
-{%- endfor %}
+{% endfor %}

@@ -107,7 +107,7 @@ template_contribution:
     event: service_init
     include: sl_se_manager.h
     handler: sl_se_init
-  priority: 1
+  priority: 0
 
 metadata:
   sbom:

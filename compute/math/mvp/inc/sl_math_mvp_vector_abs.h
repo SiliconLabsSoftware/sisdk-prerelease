@@ -48,7 +48,7 @@ extern "C" {
  *   Computes the absolute value of a vector on an element-by-element basis.
  *
  * @details
- *   The output vector can be the same as or differnt to the input vector.
+ *   The output vector can be the same as or different to the input vector.
  *   Maximum vector length is 1M (2^20), and 2M in the 4-byte aligned case.
  *
  * @param[in] input Input vector.

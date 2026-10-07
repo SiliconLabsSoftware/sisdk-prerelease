@@ -21,3 +21,6 @@ include:
 # documentation:
   # docset: gecko-platform
   # document: platform-service/device-manager
+documentation:
+  docset: gecko-platform
+  document: platform-service/device-peripheral

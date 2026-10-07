@@ -16,7 +16,8 @@ requires:
 - name: se_manager
 - name: sli_crypto_ksu_manager
   condition: [device_has_ksu]
-
+- name: mbedtls_asn1_parse
+  condition: [device_series_3, device_has_wificmu]
 
 conflicts:
 - name: tz_secure_key_library_ns
@@ -30,12 +31,14 @@ source:
 - path: src/sli_se_driver_mac.c
 - path: src/sli_se_driver_signature.c
 - path: src/sli_se_driver_cipher.c
+- path: src/sli_se_driver_pake.c
 
   # Transparent drivers
 - path: src/sli_se_transparent_driver_cipher.c
 - path: src/sli_se_transparent_driver_hash.c
 - path: src/sli_se_transparent_driver_aead.c
 - path: src/sli_se_transparent_driver_mac.c
+- path: src/sli_se_transparent_driver_pake.c
 - path: src/sli_se_transparent_key_derivation.c
 
   # Opaque drivers
@@ -52,6 +55,7 @@ include:
   - path: sli_se_driver_key_derivation.h
   - path: sli_se_driver_key_management.h
   - path: sli_se_driver_mac.h
+  - path: sli_se_driver_pake.h
   - path: sli_se_opaque_functions.h
   - path: sli_se_opaque_types.h
   - path: sli_se_transparent_functions.h

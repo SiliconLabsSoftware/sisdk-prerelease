@@ -1314,8 +1314,8 @@
           type: "sl_802154_long_addr_t",
           name: "sender_long_id",
           description: "EUI64 of the sender of the message if the sender chose to
-                        this information in the message. The ::SL_ZIGBEE_APS_OPTION_SOURCE_EUI64 
-                        bit in the options field of the APS frame of the incoming message 
+                        this information in the message. The ::SL_ZIGBEE_APS_OPTION_SOURCE_EUI64
+                        bit in the options field of the APS frame of the incoming message
                         indicates that the EUI64 is present in the message.",
         },
         {
@@ -1383,7 +1383,7 @@
         {
           name: "SL_ZIGBEE_EZSP_CONFIG_PACKET_BUFFER_HEAP_SIZE",
           value: "0x01",
-          description: "The NCP no longer supports configuration of  
+          description: "The NCP no longer supports configuration of
                         packet buffer heap at runtime using this
                         parameter. Packet buffer heap space must be configured
                         using the SL_ZIGBEE_PACKET_BUFFER_HEAP_SIZE macro
@@ -2035,7 +2035,7 @@
           name: "SL_ZIGBEE_EZSP_VALUE_TRANSIENT_DEVICE_TIMEOUT",
           value: "0x43",
           description: "Timeout in milliseconds to store entries in the transient device
-                        table. If the devices are not authenticated before the timeout, 
+                        table. If the devices are not authenticated before the timeout,
                         the entry shall be purged",
         },
         {
@@ -2975,7 +2975,7 @@
           value: "0x00",
           description: "Device is not joined.",
         },
-                {
+        {
           name: "SL_ZIGBEE_DEVICE_TYPE_UNCHANGED",
           value: "0x00",
           description: "Device type has not changed since last join.",
@@ -4405,7 +4405,7 @@
     ## VERSION
     {
       value: "0x0000",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "version",
       description: "The command allows the Host to specify the desired
                     EZSP version and must be sent before any other
@@ -4441,7 +4441,7 @@
     ## GET_CONFIGURATION_VALUE
     {
       value: "0x0052",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getConfigurationValue",
       description: "Reads a configuration value from the NCP.",
       commandArguments: [
@@ -4470,7 +4470,7 @@
     ## SET_CONFIGURATION_VALUE
     {
       value: "0x0053",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "setConfigurationValue",
       description: "Writes a configuration value to the NCP.
                     Configuration values can be modified by the Host
@@ -4506,7 +4506,7 @@
     ## READ_ATTRIBUTE
     {
       value: "0x0108",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "readAttribute",
       description: "Read attribute data on NCP endpoints.",
       commandArguments: [
@@ -4564,7 +4564,7 @@
     ## WRITE_ATTRIBUTE
     {
       value: "0x0109",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "writeAttribute",
       description: "Write attribute data on NCP endpoints.",
       commandArguments: [
@@ -4631,7 +4631,7 @@
     ## ADD_ENDPOINT
     {
       value: "0x0002",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "addEndpoint",
       description: "Configures endpoint information on the NCP. The NCP
                     does not remember these settings after a reset.
@@ -4700,7 +4700,7 @@
     ## SET_POLICY
     {
       value: "0x0055",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "setPolicy",
       description: "Allows the Host to change the policies used by
                     the NCP to make fast decisions.",
@@ -4730,7 +4730,7 @@
     ## GET_POLICY
     {
       value: "0x0056",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getPolicy",
       description: "Allows the Host to read the policies used by the
                     NCP to make fast decisions.",
@@ -4760,7 +4760,7 @@
     ## SEND_PAN_ID_UPDATE
     {
       value: "0x0057",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "sendPanIdUpdate",
       description: "Triggers a pan id update message.",
       commandArguments: [
@@ -4782,7 +4782,7 @@
     ## GET_VALUE
     {
       value: "0x00AA",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getValue",
       description: "Reads a value from the NCP.",
       commandArguments: [
@@ -4819,7 +4819,7 @@
     ## GET_EXTENDED_VALUE
     {
       value: "0x0003",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getExtendedValue",
       description: "Reads a value from the NCP but passes an extra
                     argument specific to the value being retrieved.",
@@ -4864,7 +4864,7 @@
     ## SET_VALUE
     {
       value: "0x00AB",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "setValue",
       description: "Writes a value to the NCP.",
       commandArguments: [
@@ -4899,7 +4899,7 @@
     ## SET_PASSIVE_ACK_CONFIG
     {
       value: "0x0105",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "setPassiveAckConfig",
       description: "Allows the Host to control the broadcast behaviour of a routing device used by
                     the NCP.",
@@ -4950,10 +4950,10 @@
       needGeneratedHandler: "yes",
       commandName: "setPendingNetworkUpdateChannel",
       description: "Set the channel number the device will accept in ZDO Mgmt Network
-                    Update command to change channel. If a ZDO Mgmt Network Update command 
-                    is received by the device specifying a channel that does not match with 
-                    the given channel, the ZDO Mgmt Network Update command will be ignored by the device. 
-                    A value of 0xFF indicates that any channel received in a ZDO Mgmt Network Update 
+                    Update command to change channel. If a ZDO Mgmt Network Update command
+                    is received by the device specifying a channel that does not match with
+                    the given channel, the ZDO Mgmt Network Update command will be ignored by the device.
+                    A value of 0xFF indicates that any channel received in a ZDO Mgmt Network Update
                     command will be accepted which is also the default value set by the stack.",
       commandArguments: [
         {
@@ -5084,7 +5084,7 @@
     ## NOP
     {
       value: "0x0005",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "nop",
       description: "A command which does nothing. The Host can use
                     this to set the sleep mode or to check the status
@@ -5097,7 +5097,7 @@
     ## ECHO
     {
       value: "0x0081",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "echo",
       description: "Variable length data from the Host is echoed back
                     by the NCP. This command has no other effects and
@@ -5133,7 +5133,7 @@
     ## INVALID_COMMAND
     {
       value: "0x0058",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "invalidCommand",
       description: "Indicates that the NCP received an invalid command.",
       responseArguments: [
@@ -5147,7 +5147,7 @@
     ## CALLBACK
     {
       value: "0x0006",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "callback",
       description: "Allows the NCP to respond with a pending callback.",
       commandArguments: [
@@ -5156,7 +5156,7 @@
     ## NO_CALLBACKS
     {
       value: "0x0007",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "noCallbacks",
       description: "Indicates that there are currently no pending
                     callbacks.",
@@ -5166,7 +5166,7 @@
     ## SET_TOKEN
     {
       value: "0x0009",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "setToken",
       description: "Sets a token (8 bytes of non-volatile storage) in
                     the Simulated EEPROM of the NCP.",
@@ -5194,7 +5194,7 @@
     ## GET_TOKEN
     {
       value: "0x000A",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getToken",
       description: "Retrieves a token (8 bytes of non-volatile storage)
                     from the Simulated EEPROM of the NCP.",
@@ -5222,7 +5222,7 @@
     ## GET_MFG_TOKEN
     {
       value: "0x000B",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getMfgToken",
       description: "Retrieves a manufacturing token from the Flash
                     Information Area of the NCP (except for
@@ -5251,7 +5251,7 @@
     ## SET_MFG_TOKEN
     {
       value: "0x000C",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "setMfgToken",
       description: "Sets a manufacturing token in the Customer
                     Information Block (CIB) area of the NCP if that
@@ -5288,7 +5288,7 @@
     ## STACK_TOKEN_CHANGED_HANDLER
     {
       value: "0x000D",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "stackTokenChangedHandler",
       description: "A callback invoked to inform the application that
                     a stack token has changed.",
@@ -5304,7 +5304,7 @@
     ## GET_RANDOM_NUMBER
     {
       value: "0x0049",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getRandomNumber",
       description: "Returns a pseudorandom number.",
       commandArguments: [
@@ -5325,7 +5325,7 @@
     ## SET_TIMER
     {
       value: "0x000E",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "setTimer",
       description: "Sets a timer on the NCP. There are 2 independent
                     timers available for use by the Host. A timer can
@@ -5372,7 +5372,7 @@
     ## GET_TIMER
     {
       value: "0x004E",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getTimer",
       description: "Gets information about a timer. The Host can use
                     this command to find out how much longer it will
@@ -5409,7 +5409,7 @@
     ## TIMER_HANDLER
     {
       value: "0x000F",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "timerHandler",
       description: "A callback from the timer.",
       responseArguments: [
@@ -5423,7 +5423,7 @@
     ## DEBUG_WRITE
     {
       value: "0x0012",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "debugWrite",
       description: "Sends a debug message from the Host to the
                     Network Analyzer utility via the NCP.",
@@ -5459,7 +5459,7 @@
     ## READ_AND_CLEAR_COUNTERS
     {
       value: "0x0065",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "readAndClearCounters",
       description: "Retrieves and clears Ember counters. See the
                     sl_zigbee_counter_type_t enumeration for the counter types.",
@@ -5477,7 +5477,7 @@
     ## READ_COUNTERS
     {
       value: "0x00F1",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "readCounters",
       description: "Retrieves Ember counters. See the sl_zigbee_counter_type_t
                     enumeration for the counter types.",
@@ -5495,7 +5495,7 @@
     ## COUNTER_ROLLOVER_HANDLER
     {
       value: "0x00F2",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "counterRolloverHandler",
       description: "This call is fired when a counter exceeds its
                     threshold",
@@ -5510,9 +5510,9 @@
     ## MUX_INVALID_RX_HANDLER
     {
       value: "0x0062",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "mux_invalid_rx_handler",
-      description: "This call is fired when mux detects an invalid rx case, 
+      description: "This call is fired when mux detects an invalid rx case,
       which would be different rx channels for different protocol contexts,
       when fast cahnnel switching is not enabled",
       responseArguments: [
@@ -5531,7 +5531,7 @@
     ## DELAY_TEST
     {
       value: "0x009D",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "delayTest",
       description: "Used to test that UART flow control is working
                     correctly.",
@@ -5549,7 +5549,7 @@
     ## GET_LIBRARY_STATUS
     {
       value: "0x0001",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getLibraryStatus",
       description: "This retrieves the status of the passed library ID
                     to determine if it is compiled into the stack.",
@@ -5571,7 +5571,7 @@
     ## GET_XNCP_INFO
     {
       value: "0x0013",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getXncpInfo",
       description: "Allows the HOST to know whether the NCP is
                     running the XNCP library. If so, the response
@@ -5603,7 +5603,7 @@
     ## CUSTOM_FRAME
     {
       value: "0x0047",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "customFrame",
       description: "Provides the customer a custom EZSP frame. On the
                     NCP, these frames are only handled if the XNCP
@@ -5644,7 +5644,7 @@
     ## CUSTOM_FRAME_HANDLER
     {
       value: "0x0054",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "customFrameHandler",
       description: "A callback indicating a custom EZSP message has
                     been received.",
@@ -5664,7 +5664,7 @@
     ## GET_EUI64
     {
       value: "0x0026",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getEui64",
       description: "Returns the EUI64 ID of the local node.",
       commandArguments: [
@@ -5680,7 +5680,7 @@
     ## GET_NODE_ID
     {
       value: "0x0027",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getNodeId",
       description: "Returns the 16-bit node ID of the local node.",
       commandArguments: [
@@ -5696,7 +5696,7 @@
     ## GET_PHY_INTERFACE_COUNT
     {
       value: "0x00FC",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getPhyInterfaceCount",
       description: "Returns number of phy interfaces present.",
       commandArguments: [
@@ -5712,7 +5712,7 @@
     ## GET_TRUE_RANDOM_ENTROPY_SOURCE
     {
       value: "0x004F",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getTrueRandomEntropySource",
       description: "Returns the entropy source used for true random number
                     generation.",
@@ -5731,8 +5731,8 @@
       value: "0x003A",
       needGeneratedHandler: "yes",
       commandName: "setupDelayedJoin",
-      description: "Extend a joiner's timeout to wait for the network key 
-                    on the joiner default key timeout is 3 sec, and only 
+      description: "Extend a joiner's timeout to wait for the network key
+                    on the joiner default key timeout is 3 sec, and only
                     values greater equal to 3 sec are accepted.",
       commandArguments: [
         {
@@ -5787,7 +5787,7 @@
       value: "0x012D",
       needGeneratedHandler: "yes",
       commandName: "radioSetSchedulerSliptime",
-      description: "Set the current multiprotocol sliptime",   
+      description: "Set the current multiprotocol sliptime",
       commandArguments: [
         {
           type: "uint32_t",
@@ -5859,7 +5859,7 @@
     ## SET_MANUFACTURER_CODE
     {
       value: "0x0015",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setManufacturerCode",
       description: "Sets the manufacturer code to the specified value.
                     The manufacturer code is one of the fields of the
@@ -5882,7 +5882,7 @@
     ## GET_MANUFACTURER_CODE
     {
       value: "0x00CA",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getManufacturerCode",
       description: "Gets the manufacturer code to the specified value.
                     The manufacturer code is one of the fields of the
@@ -5900,7 +5900,7 @@
     ## SET_POWER_DESCRIPTOR
     {
       value: "0x0016",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setPowerDescriptor",
       description: "Sets the power descriptor to the specified value.
                     The power descriptor is a dynamic value. Therefore,
@@ -5924,7 +5924,7 @@
     ## NETWORK_INIT
     {
       value: "0x0017",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "networkInit",
       description: "Resume network operation after a reboot. The node
                     retains its original type. This should be called on
@@ -5954,7 +5954,7 @@
     ## NETWORK_STATE
     {
       value: "0x0018",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "networkState",
       description: "Returns a value indicating whether the node is
                     joining, joined to, or leaving a network.",
@@ -5972,7 +5972,7 @@
     ## STACK_STATUS_HANDLER
     {
       value: "0x0019",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "stackStatusHandler",
       description: "A callback invoked when the status of the stack
                     changes. If the status parameter equals
@@ -5992,7 +5992,7 @@
     ## START_SCAN
     {
       value: "0x001A",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "startScan",
       description: "This function will start a scan.",
       commandArguments: [
@@ -6049,7 +6049,7 @@
     ## ENERGY_SCAN_RESULT_HANDLER
     {
       value: "0x0048",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "energyScanResultHandler",
       description: "Reports the result of an energy scan for a single
                     channel. The scan is not complete until the
@@ -6070,7 +6070,7 @@
     ## NETWORK_FOUND_HANDLER
     {
       value: "0x001B",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "networkFoundHandler",
       description: "Reports that a network was found as a result of
                     a prior call to startScan. Gives the network
@@ -6098,7 +6098,7 @@
     ## SCAN_COMPLETE_HANDLER
     {
       value: "0x001C",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "scanCompleteHandler",
       description: "Returns the status of the current scan of type
                     SL_ZIGBEE_EZSP_ENERGY_SCAN or SL_ZIGBEE_EZSP_ACTIVE_SCAN. SL_STATUS_OK
@@ -6125,7 +6125,7 @@
     ## UNUSED_PAN_ID_FOUND_HANDLER
     {
       value: "0x00D2",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "unusedPanIdFoundHandler",
       description: "This function returns an unused panID and channel pair
                     found via the find unused panId scan procedure.",
@@ -6145,7 +6145,7 @@
     ## FIND_UNUSED_PAN_ID
     {
       value: "0x00D3",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "findUnusedPanId",
       description: "This function starts a series of scans which will return
                     an available panId.",
@@ -6173,7 +6173,7 @@
     ## STOP_SCAN
     {
       value: "0x001D",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "stopScan",
       description: "Terminates a scan in progress.",
       commandArguments: [
@@ -6190,7 +6190,7 @@
     ## FORM_NETWORK
     {
       value: "0x001E",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "formNetwork",
       description: "Forms a new network by becoming the coordinator.",
       commandArguments: [
@@ -6212,7 +6212,7 @@
     ## JOIN_NETWORK
     {
       value: "0x001F",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "joinNetwork",
       description: "Causes the stack to associate with the network
                     using the specified network parameters. It can take
@@ -6248,7 +6248,7 @@
     ## JOIN_NETWORK_DIRECTLY
     {
       value: "0x003B",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "joinNetworkDirectly",
       description: "Causes the stack to associate with the network
                     using the specified network parameters in the beacon
@@ -6301,7 +6301,7 @@
     ## LEAVE_NETWORK
     {
       value: "0x0020",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "leaveNetwork",
       description: "Causes the stack to leave the current network.
                     This generates a <i>stackStatusHandler</i> callback to
@@ -6327,7 +6327,7 @@
     ## FIND_AND_REJOIN_NETWORK
     {
       value: "0x0021",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "findAndRejoinNetwork",
       description: "The application may call this function when contact
                     with the network has been lost. The most common
@@ -6369,13 +6369,13 @@
         {
           type: "uint8_t",
           name: "reason",
-          description: "A sl_zigbee_rejoin_reason_t variable which 
+          description: "A sl_zigbee_rejoin_reason_t variable which
           could be passed in if there is actually a reason for rejoin, or could be left at 0xFF",
         },
         {
           type: "uint8_t",
           name: "nodeType",
-          description: "The rejoin could be triggered with a different nodeType. 
+          description: "The rejoin could be triggered with a different nodeType.
           This value could be set to 0 or SL_ZIGBEE_DEVICE_TYPE_UNCHANGED if not needed.",
         },
       ],
@@ -6391,7 +6391,7 @@
     ## PERMIT_JOINING
     {
       value: "0x0022",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "permitJoining",
       description: "Tells the stack to allow other nodes to join the
                     network with this node as their parent. Joining is
@@ -6417,7 +6417,7 @@
     ## CHILD_JOIN_HANDLER
     {
       value: "0x0023",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "childJoinHandler",
       description: "Indicates that a child has joined or left.",
       responseArguments: [
@@ -6452,7 +6452,7 @@
     ## ENERGY_SCAN_REQUEST
     {
       value: "0x009C",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "energyScanRequest",
       description: "Sends a ZDO energy scan request. This request may
                     only be sent by the current network manager and
@@ -6498,7 +6498,7 @@
     ## GET_NETWORK_PARAMETERS
     {
       value: "0x0028",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "getNetworkParameters",
       description: "Returns the current network parameters.",
       commandArguments: [
@@ -6526,7 +6526,7 @@
     ## GET_RADIO_PARAMETERS
     {
       value: "0x00FD",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getRadioParameters",
       description: "Returns the current radio parameters based on phy index.",
       commandArguments: [
@@ -6555,7 +6555,7 @@
     ## GET_PARENT_CHILD_PARAMETERS
     {
       value: "0x0029",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "getParentChildParameters",
       description: "Returns information about the children of the local
                     node and the parent of the local node.",
@@ -6586,7 +6586,7 @@
     ## ROUTER_CHILD_COUNT
     {
       value: "0x013B",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "routerChildCount",
       description: "Return the number of router children that the node currently has.",
       commandArguments: [
@@ -6602,7 +6602,7 @@
     ## MAX_CHILD_COUNT
     {
       value: "0x013C",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "maxChildCount",
       description: "Return the maximum number of children for this node.
                     The return value is undefined for nodes that are not joined to a network.",
@@ -6619,7 +6619,7 @@
     ## MAX_ROUTER_CHILD_COUNT
     {
       value: "0x013D",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "maxRouterChildCount",
       description: "Return the maximum number of router children for this node.
                     The return value is undefined for nodes that are not joined to a network.",
@@ -6636,7 +6636,7 @@
     ## GET_PARENT_INCOMING_NWK_FRAME_COUNTER
     {
       value: "0x013E",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getParentIncomingNwkFrameCounter",
       description: "",
       commandArguments: [
@@ -6652,7 +6652,7 @@
     ## SETS_PARENT_INCOMING_NWK_FRAME_COUNTER
     {
       value: "0x013F",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setParentIncomingNwkFrameCounter",
       description: "",
       commandArguments: [
@@ -6673,7 +6673,7 @@
     ## CURRENT_STACK_TASKS
     {
       value: "0x0145",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "currentStackTasks",
       description: "Return a bitmask indicating the stack's current tasks.
                     The mask ::SL_ZIGBEE_HIGH_PRIORITY_TASKS defines which tasks are high
@@ -6697,7 +6697,7 @@
     ## OK_TO_NAP
     {
       value: "0x0146",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "okToNap",
       description: "Indicate whether the stack is currently in a state where
                     there are no high-priority tasks, allowing the device to sleep.
@@ -6720,7 +6720,7 @@
     ## PARENT_TOKEN_SET
     {
       value: "0x0140",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "parentTokenSet",
       description: "Indicate whether the parent token has been set by association.",
       commandArguments: [
@@ -6736,7 +6736,7 @@
     ## OK_TO_HIBERNATE
     {
       value: "0x0141",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "okToHibernate",
       description: "Indicate whether the stack currently has any tasks pending.
                     If no tasks are pending, ::emberTick() does not need to be called until
@@ -6755,7 +6755,7 @@
     ## OK_TO_LONG_POLL
     {
       value: "0x0142",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "okToLongPoll",
       description: "Indicate whether the stack is currently in a state that does not
                     require the application to periodically poll.",
@@ -6772,7 +6772,7 @@
     ## STACK_POWER_DOWN
    {
       value: "0x0143",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "stackPowerDown",
       description: "Calling this function will render all other stack functions except
                     sli_zigbee_stack_stack_power_up() non-functional until the radio is powered back on.",
@@ -6784,7 +6784,7 @@
     ## STACK_POWER_UP
     {
       value: "0x0144",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "stackPowerUp",
       description: "Initialize the radio.  Typically called coming out of deep sleep.
                     For non-sleepy devices, also turns the radio on and leaves it in RX mode.",
@@ -6796,7 +6796,7 @@
     ## GET_CHILD_DATA
     {
       value: "0x004A",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getChildData",
       description: "Returns information about a child of the local
                     node.",
@@ -6827,7 +6827,7 @@
     ## SET_CHILD_DATA
     {
       value: "0x00AC",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setChildData",
       description: "Sets child data to the child table token.",
       commandArguments: [
@@ -6857,7 +6857,7 @@
     ## CHILD_ID
     {
       value: "0x0106",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "childId",
       description: "Convert a child index to a node ID",
       commandArguments: [
@@ -6881,7 +6881,7 @@
     ## CHILD_POWER
     {
       value: "0x0134",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "childPower",
       description: "Return radio power value of the child from the given childIndex",
       commandArguments: [
@@ -6906,7 +6906,7 @@
     ## SET_CHILD_POWER
     {
       value: "0x0135",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setChildPower",
       description: "Set the radio power value for a given child index.",
       commandArguments: [
@@ -6927,7 +6927,7 @@
     ## CHILD_INDEX
     {
       value: "0x0107",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "childIndex",
       description: "Convert a node ID to a child index",
       commandArguments: [
@@ -6950,7 +6950,7 @@
     ## GET_SOURCE_ROUTE_TABLE_TOTAL_SIZE
     {
         value: "0x00C3",
-        needGeneratedHandler : "ezspyes",
+        needGeneratedHandler: "ezspyes",
       commandName: "getSourceRouteTableTotalSize",
         description: "Returns the source route table total size.",
         commandArguments: [
@@ -6967,7 +6967,7 @@
     ## GET_SOURCE_ROUTE_TABLE_FILLED_SIZE
     {
         value: "0x00C2",
-        needGeneratedHandler : "ezspyes",
+        needGeneratedHandler: "ezspyes",
       commandName: "getSourceRouteTableFilledSize",
         description: "Returns the number of filled entries in source route table.",
         commandArguments: [
@@ -6986,7 +6986,7 @@
 
         value: "0x00C1",
 
-        needGeneratedHandler : "ezspyes",
+        needGeneratedHandler: "ezspyes",
         commandName: "getSourceRouteTableEntry",
 
         description: "Returns information about a source route table entry",
@@ -7051,7 +7051,7 @@
     ## GET_NEIGHBOR
     {
       value: "0x0079",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getNeighbor",
       description: "Returns the neighbor table entry at the given
                     index. The number of active neighbors can be
@@ -7086,7 +7086,7 @@
     ## GET_NEIGHBOR_FRAME_COUNTER
     {
       value: "0x003E",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getNeighborFrameCounter",
       description: "Return sl_status_t depending on whether the frame counter of the node is found in the
                     neighbor or child table. This function gets the last received frame counter
@@ -7115,7 +7115,7 @@
     ## SET_NEIGHBOR_FRAME_COUNTER
     {
       value: "0x00AD",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setNeighborFrameCounter",
       description: "Sets the frame counter for the neighbour or child.",
       commandArguments: [
@@ -7142,7 +7142,7 @@
     ## SET_ROUTING_SHORTCUT_THRESHOLD
     {
       value: "0x00D0",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "setRoutingShortcutThreshold",
         description: "Sets the routing shortcut threshold to directly use a neighbor instead of performing routing.",
         commandArguments: [
@@ -7164,7 +7164,7 @@
     ## GET_ROUTING_SHORTCUT_THRESHOLD
     {
     value: "0x00D1",
-    needGeneratedHandler : "ezspyes",
+    needGeneratedHandler: "ezspyes",
     commandName: "getRoutingShortcutThreshold",
     description: "Gets the routing shortcut threshold used to differentiate between directly using a neighbor vs. performing routing.",
     commandArguments: [
@@ -7181,7 +7181,7 @@
     ## NEIGHBOR_COUNT
     {
       value: "0x007A",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "neighborCount",
       description: "Returns the number of active entries in the
                     neighbor table.",
@@ -7199,7 +7199,7 @@
     ## GET_ROUTE_TABLE_ENTRY
     {
       value: "0x007B",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getRouteTableEntry",
       description: "Returns the route table entry at the given index.
                     The route table size can be obtained using the
@@ -7230,7 +7230,7 @@
     ## SET_RADIO_POWER
     {
       value: "0x0099",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setRadioPower",
       description: "Sets the radio output power at which a node is
                     operating. Ember radios have discrete power settings.
@@ -7261,7 +7261,7 @@
     ## SET_RADIO_CHANNEL
     {
       value: "0x009A",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setRadioChannel",
       description: "Sets the channel to use for sending and receiving
                     messages. For a list of available radio channels,
@@ -7288,7 +7288,7 @@
     ## GET_RADIO_CHANNEL
     {
       value: "0x00FF",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getRadioChannel",
       description: "Gets the channel in use for sending and receiving
                     messages.",
@@ -7305,7 +7305,7 @@
     ## SET_RADIO_IEEE_802154_CCA_MODE
     {
       value: "0x0095",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setRadioIeee802154CcaMode",
       description: "Set the configured 802.15.4 CCA mode in the radio.",
       commandArguments: [
@@ -7327,7 +7327,7 @@
     ## SET_CONCENTRATOR
     {
       value: "0x0010",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "setConcentrator",
       description: "Enable/disable concentrator support.",
       commandArguments: [
@@ -7399,7 +7399,7 @@
     ## CONCENTRATOR_START_DISCOVERY
     {
       value: "0x014F",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "concentratorStartDiscovery",
       description: "Starts periodic many-to-one route discovery.
                     Periodic discovery is started by default on bootup,
@@ -7413,7 +7413,7 @@
     ## CONCENTRATOR_STOP_DISCOVERY
     {
       value: "0x0150",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "concentratorStopDiscovery",
       description: "Stops periodic many-to-one route discovery.",
       commandArguments: [
@@ -7424,7 +7424,7 @@
     ## CONCENTRATOR_NOTE_ROUTE_ERROR
     {
       value: "0x0151",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "concentratorNoteRouteError",
       description: "Notes when a route error has occurred.",
       commandArguments: [
@@ -7445,7 +7445,7 @@
     ## SET_BROKEN_ROUTE_ERROR_CODE
         {
           value: "0x0011",
-          needGeneratedHandler : "ezspyes",
+          needGeneratedHandler: "ezspyes",
       commandName: "setBrokenRouteErrorCode",
           description: "Sets the error code that is sent back from a router with a broken route. ",
           commandArguments: [
@@ -7468,7 +7468,7 @@
     ## MULTI_PHY_START
     {
       value: "0x00F8",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "multiPhyStart",
       description: "This causes to initialize the desired radio interface other
                     than native and form a new network by becoming the coordinator
@@ -7513,7 +7513,7 @@
     ## MULTI_PHY_STOP
     {
       value: "0x00F9",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "multiPhyStop",
       description: "This causes to bring down the radio interface other than native.",
       commandArguments: [
@@ -7536,7 +7536,7 @@
     ## MULTI_PHY_SET_RADIO_POWER
     {
       value: "0x00FA",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "multiPhySetRadioPower",
       description: "Sets the radio output power for desired phy interface
                     at which a node is operating. Ember radios have discrete
@@ -7573,7 +7573,7 @@
     ## SEND_LINK_POWER_DELTA_REQUEST
     {
       value: "0x00F7",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "sendLinkPowerDeltaRequest",
       description: "Send Link Power Delta Request from a child to its parent",
       commandArguments: [
@@ -7591,7 +7591,7 @@
     ## MULTI_PHY_SET_RADIO_CHANNEL
     {
       value: "0x00FB",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "multiPhySetRadioChannel",
       description: "Sets the channel for desired phy interface to use
                     for sending and receiving messages. For a list of
@@ -7630,7 +7630,7 @@
     ## GET_DUTY_CYCLE_STATE
     {
       value: "0x0035",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getDutyCycleState",
       description: "Obtains the current duty cycle state.",
       commandArguments: [
@@ -7652,7 +7652,7 @@
     ## SET_DUTY_CYCLE_LIMITS_IN_STACK
     {
       value: "0x0040",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setDutyCycleLimitsInStack",
       description: "Set the current duty cycle limits configuration.
                     The Default limits set by stack if this call is
@@ -7679,7 +7679,7 @@
     ## GET_DUTY_CYCLE_LIMITS
     {
       value: "0x004B",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getDutyCycleLimits",
       description: "Obtains the current duty cycle limits that were previously
                     set by a call to sli_zigbee_stack_set_duty_cycle_limits_in_stack(), or
@@ -7704,7 +7704,7 @@
     ## GET_CURRENT_DUTY_CYCLE
     {
       value: "0x004C",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "getCurrentDutyCycle",
       description: "Returns the duty cycle of the stack's connected children
                     that are being monitored, up to maxDevices. It indicates the
@@ -7741,7 +7741,7 @@
     ## DUTY_CYCLE_HANDLER
     {
       value: "0x004D",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "dutyCycleHandler",
       description: "Callback fires when the duty cycle state has changed",
       responseArguments: [
@@ -7778,9 +7778,9 @@
     ## SET_NUM_BEACONS_TO_STORE
     {
       value: "0x0037",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setNumBeaconsToStore",
-      description: "Configure the number of beacons to store when issuing active scans 
+      description: "Configure the number of beacons to store when issuing active scans
                     for networks.",
       commandArguments: [
         {
@@ -7793,7 +7793,7 @@
         {
           type: "sl_status_t",
           name: "status",
-          description: "SL_STATUS_INVALID_PARAMETER if numBeacons is greater than 
+          description: "SL_STATUS_INVALID_PARAMETER if numBeacons is greater than
                         SL_ZIGBEE_MAX_BEACONS_TO_STORE, otherwise SL_STATUS_OK",
         },
       ],
@@ -7801,7 +7801,7 @@
     ## GET_STORED_BEACON
     {
       value: "0x0004",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getStoredBeacon",
       description: "Fetches the specified beacon in the cache. Beacons are stored in cache
       after issuing an active scan.",
@@ -7829,7 +7829,7 @@
     ## GET_NUM_STORED_BEACONS
     {
       value: "0x0008",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getNumStoredBeacons",
       description: "Returns the number of cached beacons that have been
       collected from a scan.",
@@ -7847,7 +7847,7 @@
     ## CLEAR_STORED_BEACONS
     {
       value: "0x003C",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "clearStoredBeacons",
       description: "Clears all cached beacons that have been collected from a
       scan.",
@@ -7864,7 +7864,7 @@
     ## SET_LOGICAL_AND_RADIO_CHANNEL
     {
       value: "0x00B9",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setLogicalAndRadioChannel",
       description: "This call sets the radio channel in the stack and
                     propagates the information to the hardware.",
@@ -7889,7 +7889,7 @@
       value: "0x0119",
       needGeneratedHandler: "yes",
       commandName: "sleepyToSleepyNetworkStart",
-      description: "Form a new sleepy-to-sleepy network.  If the network is using security, 
+      description: "Form a new sleepy-to-sleepy network.  If the network is using security,
                     the device must call sli_zigbee_stack_set_initial_security_state() first.",
       commandArguments: [
         {
@@ -8090,7 +8090,7 @@
     ## CLEAR_BINDING_TABLE
     {
       value: "0x002A",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "clearBindingTable",
       description: "Deletes all binding table entries.",
       commandArguments: [
@@ -8107,7 +8107,7 @@
     ## SET_BINDING
     {
       value: "0x002B",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "setBinding",
       description: "Sets an entry in the binding table.",
       commandArguments: [
@@ -8134,7 +8134,7 @@
     ## GET_BINDING
     {
       value: "0x002C",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getBinding",
       description: "Gets an entry from the binding table.",
       commandArguments: [
@@ -8161,7 +8161,7 @@
     ## DELETE_BINDING
     {
       value: "0x002D",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "deleteBinding",
       description: "Deletes a binding table entry.",
       commandArguments: [
@@ -8183,7 +8183,7 @@
     ## BINDING_IS_ACTIVE
     {
       value: "0x002E",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "bindingIsActive",
       description: "Indicates whether any messages are currently being
                     sent using this binding table entry. Note that this
@@ -8211,7 +8211,7 @@
     ## GET_BINDING_REMOTE_NODE_ID
     {
       value: "0x002F",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getBindingRemoteNodeId",
       description: "Returns the node ID for the binding's destination,
                     if the ID is known. If a message is sent using
@@ -8244,7 +8244,7 @@
     ## SET_BINDING_REMOTE_NODE_ID
     {
       value: "0x0030",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setBindingRemoteNodeId",
       description: "Set the node ID for the binding's destination. See
                     <i>getBindingRemoteNodeId</i> for a description.",
@@ -8266,7 +8266,7 @@
     ## CLEAR_BINDING_TABLE_ON_LEAVE
     {
       value: "0x006D",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "clearBindingTableOnLeave",
       description: "When enabled, the stack clears the binding table on
                     definitive leave (not leave-with-rejoin), as required
@@ -8284,7 +8284,7 @@
     ## REMOTE_SET_BINDING_HANDLER
     {
       value: "0x0031",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "remoteSetBindingHandler",
       description: "The NCP used the external binding modification
                     policy to decide how to handle a remote set
@@ -8313,7 +8313,7 @@
     ## REMOTE_DELETE_BINDING_HANDLER
     {
       value: "0x0032",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "remoteDeleteBindingHandler",
       description: "The NCP used the external binding modification
                     policy to decide how to handle a remote delete
@@ -8383,7 +8383,7 @@
     ## MAXIMUM_PAYLOAD_LENGTH
     {
       value: "0x0033",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "maximumPayloadLength",
       description: "Returns the maximum size of the payload. The size
                     depends on the security level in use.",
@@ -8400,7 +8400,7 @@
     ## SEND_UNICAST
     {
       value: "0x0034",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "sendUnicast",
       description: "Sends a unicast message as per the ZigBee
                     specification. The message will arrive at its
@@ -8492,7 +8492,7 @@
     ## SEND_BROADCAST
     {
       value: "0x0036",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "sendBroadcast",
       description: "Sends a broadcast message as per the ZigBee
                     specification.",
@@ -8564,9 +8564,9 @@
     ## PROXY_NEXT_BROADCAST_FROM_LONG
     {
       value: "0x0066",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "proxyNextBroadcastFromLong",
-      description: "Sends proxied broadcast message for another node 
+      description: "Sends proxied broadcast message for another node
                     in conjunction with sl_zigbee_proxy_broadcast where a long
                     source is also specified in the NWK frame control.",
       commandArguments: [
@@ -8588,7 +8588,7 @@
     ## SEND_MULTICAST
     {
       value: "0x0038",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "sendMulticast",
       description: "Sends a multicast message to all endpoints that
                     share a specific multicast ID and are within a
@@ -8672,7 +8672,7 @@
     ## SEND_REPLY
     {
       value: "0x0039",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "sendReply",
       description: "Sends a reply to a received unicast message. The
                     <i>incomingMessageHandler</i> callback for the unicast
@@ -8730,7 +8730,7 @@
     ## MESSAGE_SENT_HANDLER
     {
       value: "0x003F",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "messageSentHandler",
       description: "A callback indicating the stack has completed
                     sending a message.",
@@ -8786,7 +8786,7 @@
     ## SEND_MANY_TO_ONE_ROUTE_REQUEST
     {
       value: "0x0041",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "sendManyToOneRouteRequest",
       description: "Sends a route request packet that creates routes
                     from every node in the network back to this node.
@@ -8864,7 +8864,7 @@
     ## POLL_FOR_DATA
     {
       value: "0x0042",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "pollForData",
       description: "Periodically request any pending data from our
                     parent. Setting <i>interval</i> to 0 or <i>units</i>
@@ -8907,7 +8907,7 @@
     ## POLL_COMPLETE_HANDLER
     {
       value: "0x0043",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "pollCompleteHandler",
       description: "Indicates the result of a data poll to the parent
                     of the local node.",
@@ -8928,7 +8928,7 @@
     ## SET_MESSAGE_FLAG
     {
       value: "0x0136",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setMessageFlag",
       description: "Set a flag to indicate that a message is pending for a child.
                     The next time that the child polls, it will be informed that it has
@@ -8953,7 +8953,7 @@
     ## CLEAR_MESSAGE_FLAG
     {
       value: "0x0137",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "clearMessageFlag",
       description: "Clear a flag to indicate that there are no more messages for a
                     child. The next time the child polls, it will be informed that it does not
@@ -8977,7 +8977,7 @@
     ## POLL_HANDLER
     {
       value: "0x0044",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "pollHandler",
       description: "Indicates that the local node received a data poll
                     from a child.",
@@ -8998,7 +8998,7 @@
     ## ADD_CHILD
     {
       value: "0x0138",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "addChild",
       description: "Add a child to the child/neighbor table only on SoC,
                     allowing direct manipulation of these tables by the application.
@@ -9034,7 +9034,7 @@
     ## REMOVE_CHILD
     {
       value: "0x0139",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "removeChild",
       description: "Remove a node from child/neighbor table only on SoC,
                     allowing direct manipulation of these tables by the application.
@@ -9058,7 +9058,7 @@
     ## REMOVE_NEIGHBOR
     {
       value: "0x013A",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "removeNeighbor",
       description: "Remove a neighbor from neighbor table only on SoC,
                     allowing direct manipulation of neighbor table by the application.
@@ -9081,7 +9081,7 @@
     ## INCOMING_MESSAGE_HANDLER
     {
       value: "0x0045",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "incomingMessageHandler",
       description: "A callback indicating a message has been received.",
       responseArguments: [
@@ -9121,7 +9121,7 @@
     ## SET_SOURCE_ROUTE_DISCOVERY_MODE
     {
       value: "0x005A",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "setSourceRouteDiscoveryMode",
       description: "Sets source route discovery(MTORR) mode to on, off, reschedule",
       commandArguments: [
@@ -9143,7 +9143,7 @@
     ## INCOMING_MANY_TO_ONE_ROUTE_REQUEST_HANDLER
     {
       value: "0x007D",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "incomingManyToOneRouteRequestHandler",
       description: "A callback indicating that a many-to-one route to
                     the concentrator with the given short and long id
@@ -9172,7 +9172,7 @@
     ## INCOMING_ROUTE_ERROR_HANDLER
     {
       value: "0x0080",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "incomingRouteErrorHandler",
       description: "A callback invoked when a route error message is
                     received. The error indicates that a problem routing
@@ -9194,7 +9194,7 @@
     ## INCOMING_NETWORK_STATUS_HANDLER
     {
       value: "0x00C4",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "incomingNetworkStatusHandler",
       description: "A callback invoked when a network status/route error
                     message is received. The error
@@ -9216,7 +9216,7 @@
     ## INCOMING_ROUTE_RECORD_HANDLER
     {
       value: "0x0059",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "incomingRouteRecordHandler",
       description: "Reports the arrival of a route record command
                     frame.",
@@ -9260,7 +9260,7 @@
     ## SET_SOURCE_ROUTE
     {
       value: "0x00AE",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "setSourceRoute",
       description: "Supply a source route for the next outgoing
                     message.",
@@ -9295,7 +9295,7 @@
     ## UNICAST_CURRENT_NETWORK_KEY
     {
       value: "0x0050",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "unicastCurrentNetworkKey",
       description: "Send the network key to a destination.",
       commandArguments: [
@@ -9326,7 +9326,7 @@
     ## ADDRESS_TABLE_ENTRY_IS_ACTIVE
     {
       value: "0x005B",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "addressTableEntryIsActive",
       description: "Indicates whether any messages are currently being
                     sent using this address table entry. Note that this
@@ -9355,7 +9355,7 @@
     ## SET_ADDRESS_TABLE_INFO
     {
       value: "0x005C",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setAddressTableInfo",
       description: "Sets the EUI64 and short ID of an address table entry.
                     Usually the application will not need to set the
@@ -9405,7 +9405,7 @@
     ## GET_ADDRESS_TABLE_INFO
     {
       value: "0x005E",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getAddressTableInfo",
       description: "Gets the EUI64 and short ID of an address table entry.",
       commandArguments: [
@@ -9449,7 +9449,7 @@
     ## SET_EXTENDED_TIMEOUT
     {
       value: "0x007E",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setExtendedTimeout",
       description: "Tells the stack whether or not the normal interval
                     between retransmissions of a retried unicast message
@@ -9491,7 +9491,7 @@
     ## GET_EXTENDED_TIMEOUT
     {
       value: "0x007F",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getExtendedTimeout",
       description: "Indicates whether or not the stack will extend the
                     normal interval between retransmissions of a retried
@@ -9517,7 +9517,7 @@
     ## REPLACE_ADDRESS_TABLE_ENTRY
     {
       value: "0x0082",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "replaceAddressTableEntry",
       description: "Replaces the EUI64, short ID and extended timeout
                     setting of an address table entry. The previous
@@ -9593,7 +9593,7 @@
     ## LOOKUP_NODE_ID_BY_EUI64
     {
       value: "0x0060",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "lookupNodeIdByEui64",
       description: "Returns the node ID that corresponds to the
                     specified EUI64. The node ID is found by searching
@@ -9611,7 +9611,7 @@
           name: "status",
           description: "SL_STATUS_OK if the short ID was found,
                         SL_STATUS_FAIL if the short ID is not known.",
-        }, 
+        },
         {
           type: "sl_802154_short_addr_t",
           name: "nodeId",
@@ -9623,7 +9623,7 @@
     ## LOOKUP_EUI64_BY_NODE_ID
     {
       value: "0x0061",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "lookupEui64ByNodeId",
       description: "Returns the EUI64 that corresponds to the specified
                     node ID. The EUI64 is found by searching through
@@ -9652,7 +9652,7 @@
     ## GET_MULTICAST_TABLE_ENTRY
     {
       value: "0x0063",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "getMulticastTableEntry",
       description: "Gets an entry from the multicast table.",
       commandArguments: [
@@ -9679,7 +9679,7 @@
     ## SET_MULTICAST_TABLE_ENTRY
     {
       value: "0x0064",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "setMulticastTableEntry",
       description: "Sets an entry in the multicast table.",
       commandArguments: [
@@ -9706,7 +9706,7 @@
     ## ID_CONFLICT_HANDLER
     {
       value: "0x007C",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "idConflictHandler",
       description: "A callback invoked by the EmberZNet stack when an
                     id conflict is discovered, that is, two different
@@ -9727,7 +9727,7 @@
     ## WRITE_NODE_DATA
     {
       value: "0x00FE",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "writeNodeData",
       description: "Write the current node Id, PAN ID, or Node type to the tokens",
       commandArguments: [
@@ -9749,7 +9749,7 @@
     ## SEND_RAW_MESSAGE
     {
       value: "0x0051",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "sendRawMessage",
       description: "Transmits the given message without modification.
                     The MAC header is assumed to be configured in the
@@ -9789,7 +9789,7 @@
     ## MAC_PASSTHROUGH_MESSAGE_HANDLER
     {
       value: "0x0097",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "macPassthroughMessageHandler",
       description: "A callback invoked by the EmberZNet stack when a
                     MAC passthrough message is received.",
@@ -9820,7 +9820,7 @@
     ## MAC_FILTER_MATCH_MESSAGE_HANDLER
     {
       value: "0x0046",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "macFilterMatchMessageHandler",
       description: "A callback invoked by the EmberZNet stack when a
                     raw MAC message that has matched one of the
@@ -9857,7 +9857,7 @@
     ## RAW_TRANSMIT_COMPLETE_HANDLER
     {
       value: "0x0098",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "rawTransmitCompleteHandler",
       description: "A callback invoked by the EmberZNet stack when the
                     MAC has finished transmitting a raw message.",
@@ -9883,7 +9883,7 @@
     ## SET_MAC_POLL_FAILURE_WAIT_TIME
     {
       value: "0x00F4",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setMacPollFailureWaitTime",
       description: "This function is useful to sleepy end devices.
                     This function will set the retry interval
@@ -9906,7 +9906,7 @@
     ## GET_MAX_MAC_RETRIES
     {
       value: "0x006A",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getMaxMacRetries",
       description: "Returns the maximum number of no-ack retries that will be attempted",
       commandArguments: [
@@ -9922,7 +9922,7 @@
     ## SET_BEACON_CLASSIFICATION_PARAMS
     {
       value: "0x00EF",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setBeaconClassificationParams",
       description: "Sets the priority masks and related variables for choosing the best beacon.",
       commandArguments: [
@@ -9943,7 +9943,7 @@
     ## GET_BEACON_CLASSIFICATION_PARAMS
     {
       value: "0x00F3",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getBeaconClassificationParams",
       description: "Gets the priority masks and related variables for choosing the best beacon.",
       commandArguments: [
@@ -9964,7 +9964,7 @@
     ## PENDING_ACKED_MESSAGES
     {
       value: "0x0121",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "pendingAckedMessages",
       description: "Indicate whether there are pending messages in the APS retry queue.",
       commandArguments: [
@@ -10039,7 +10039,7 @@
     ## SET_INITIAL_SECURITY_STATE
     {
       value: "0x0068",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setInitialSecurityState",
       description: "Sets the security state that will be used by the
                     device when it forms or joins the network. This
@@ -10066,7 +10066,7 @@
     ## GET_CURRENT_SECURITY_STATE
     {
       value: "0x0069",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getCurrentSecurityState",
       description: "Gets the current security state that is being used
                     by a device that is joined in the network.",
@@ -10088,7 +10088,7 @@
     ## SEC_MAN_EXPORT_KEY
     {
       value: "0x0114",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "secManExportKey",
       description: "Exports a key from security manager based on passed context.",
       commandArguments: [
@@ -10115,7 +10115,7 @@
     ## SEC_MAN_IMPORT_KEY
     {
       value: "0x0115",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "secManImportKey",
       description: "Imports a key into security manager based on passed context.",
       commandArguments: [
@@ -10142,7 +10142,7 @@
     ## SWITCH_NETWORK_KEY_HANDLER
     {
       value: "0x006e",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "switchNetworkKeyHandler",
       description: "A callback to inform the application that the
                     Network Key has been updated and the node has been
@@ -10160,7 +10160,7 @@
     ## FIND_KEY_TABLE_ENTRY
     {
       value: "0x0075",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "findKeyTableEntry",
       description: "This function searches through the Key Table and
                     tries to find the entry that matches the passed
@@ -10194,7 +10194,7 @@
     ## SEND_TRUST_CENTER_LINK_KEY
     {
       value: "0x0067",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "sendTrustCenterLinkKey",
       description: "This function sends an APS TransportKey command containing
                     the current trust center link key. The node to which the
@@ -10226,7 +10226,7 @@
     ## ERASE_KEY_TABLE_ENTRY
     {
       value: "0x0076",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "eraseKeyTableEntry",
       description: "This function erases the data in the key table
                     entry at the specified index. If the index is
@@ -10249,7 +10249,7 @@
     ## CLEAR_KEY_TABLE
     {
       value: "0x00B1",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "clearKeyTable",
       description: "This function clears the key table of the current
                     network.",
@@ -10266,7 +10266,7 @@
     ## REQUEST_LINK_KEY
     {
       value: "0x0014",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "requestLinkKey",
       description: "A function to request a Link Key from the Trust
                     Center with another device on the Network
@@ -10311,7 +10311,7 @@
     ## UPDATE_TC_LINK_KEY
     {
       value: "0x006C",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "updateTcLinkKey",
       description: "Requests a new link key from the Trust Center. This
                     function starts by sending a Node Descriptor request to the
@@ -10344,7 +10344,7 @@
     ## ZIGBEE_KEY_ESTABLISHMENT_HANDLER
     {
       value: "0x009B",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "zigbeeKeyEstablishmentHandler",
       description: "This is a callback that indicates the success or
                     failure of an attempt to establish a key with a
@@ -10368,7 +10368,7 @@
     ## CLEAR_TRANSIENT_LINK_KEYS
     {
       value: "0x006B",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "clearTransientLinkKeys",
       description: "Clear all of the transient link keys from RAM.",
       commandArguments: [
@@ -10379,7 +10379,7 @@
     ## SEC_MAN_GET_NETWORK_KEY_INFO
     {
       value: "0x0116",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "secManGetNetworkKeyInfo",
       description: "Retrieve information about the current and alternate network key,
                     excluding their contents.",
@@ -10400,7 +10400,7 @@
     ## SEC_MAN_GET_APS_KEY_INFO
     {
       value: "0x010C",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "secManGetApsKeyInfo",
       description: "Retrieve metadata about an APS link key.  Does not retrieve contents.",
       commandArguments: [
@@ -10427,7 +10427,7 @@
     ##SEC_MAN_IMPORT_LINK_KEY
     {
       value: "0x010E",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "secManImportLinkKey",
       description: "Import an application link key into the key table.",
       commandArguments: [
@@ -10458,7 +10458,7 @@
     ##SEC_MAN_EXPORT_LINK_KEY_BY_INDEX
     {
       value: "0x010F",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "secManExportLinkKeyByIndex",
       description: "Export the link key at given index from the key table.",
       commandArguments: [
@@ -10494,7 +10494,7 @@
     ##SEC_MAN_EXPORT_LINK_KEY_BY_EUI
     {
       value: "0x010D",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "secManExportLinkKeyByEui",
       description: "Export the link key associated with the given EUI from the key table.",
       commandArguments: [
@@ -10519,7 +10519,7 @@
           type: "sl_zigbee_sec_man_key_t",
           name: "plaintext_key",
           description: "The exported key.",
-        },      
+        },
         {
           type: "sl_zigbee_sec_man_aps_key_metadata_t",
           name: "key_data",
@@ -10530,7 +10530,7 @@
     ##SEC_MAN_CHECK_KEY_CONTEXT
     {
       value: "0x0110",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "secManCheckKeyContext",
       description: "Check whether a key context can be used to load a valid key.",
       commandArguments: [
@@ -10722,7 +10722,7 @@
     ## TRUST_CENTER_POST_JOIN_HANDLER
     {
       value: "0x0024",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "trustCenterPostJoinHandler",
       description: "The NCP uses the trust center behavior policy to
                     decide whether to allow a new node to join the
@@ -10765,7 +10765,7 @@
     ## BROADCAST_NEXT_NETWORK_KEY
     {
       value: "0x0073",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "broadcastNextNetworkKey",
       description: "This function broadcasts a new encryption key, but
                     does not tell the nodes in the network to start
@@ -10797,7 +10797,7 @@
     ## BROADCAST_NETWORK_KEY_SWITCH
     {
       value: "0x0074",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "broadcastNetworkKeySwitch",
       description: "This function broadcasts a switch key message to
                     tell all nodes to change to the sequence number of
@@ -10816,7 +10816,7 @@
     ## AES_MMO_HASH
     {
       value: "0x006F",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "aesMmoHash",
       description: "This routine processes the passed chunk of data
                     and updates the hash context based on it. If the
@@ -10864,7 +10864,7 @@
     ## REMOVE_DEVICE
     {
       value: "0x00A8",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "removeDevice",
       description: "This command sends an APS remove device using APS
                     encryption to the destination indicating either to
@@ -10902,7 +10902,7 @@
     ## UNICAST_NWK_KEY_UPDATE
     {
       value: "0x00A9",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "unicastNwkKeyUpdate",
       description: "This command will send a unicast transport key
                     message with a new NWK key to the specified
@@ -10955,7 +10955,7 @@
     ## GENERATE_CBKE_KEYS
     {
       value: "0x00A4",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "generateCbkeKeys",
       description: "This call starts the generation of the ECC
                     Ephemeral Public/Private key pair. When complete it
@@ -10974,7 +10974,7 @@
     ## GENERATE_CBKE_KEYS_HANDLER
     {
       value: "0x009E",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "generateCbkeKeysHandler",
       description: "A callback by the Crypto Engine indicating that a
                     new ephemeral public/private key pair has been
@@ -10998,7 +10998,7 @@
     ## CALCULATE_SMACS
     {
       value: "0x009F",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "calculateSmacs",
       description: "Calculates the SMAC verification keys for both the
                     initiator and responder roles of CBKE using the
@@ -11038,7 +11038,7 @@
     ## CALCULATE_SMACS_HANDLER
     {
       value: "0x00A0",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "calculateSmacsHandler",
       description: "A callback to indicate that the NCP has finished
                     calculating the Secure Message Authentication Codes
@@ -11067,7 +11067,7 @@
     ## GENERATE_CBKE_KEYS283K1
     {
       value: "0x00E8",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "generateCbkeKeys283k1",
       description: "This call starts the generation of the ECC 283k1
                     curve Ephemeral Public/Private key pair. When
@@ -11086,7 +11086,7 @@
     ## GENERATE_CBKE_KEYS_283K1_HANDLER
     {
       value: "0x00E9",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "generateCbkeKeys283k1Handler",
       description: "A callback by the Crypto Engine indicating that a
                     new 283k1 ephemeral public/private key pair has been
@@ -11110,7 +11110,7 @@
     ## CALCULATE_SMACS283K1
     {
       value: "0x00EA",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "calculateSmacs283k1",
       description: "Calculates the SMAC verification keys for both the
                     initiator and responder roles of CBKE for the 283k1
@@ -11151,7 +11151,7 @@
     ## CALCULATE_SMACS_283K1_HANDLER
     {
       value: "0x00EB",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "calculateSmacs283k1Handler",
       description: "A callback to indicate that the NCP has finished
                     calculating the Secure Message Authentication Codes
@@ -11181,7 +11181,7 @@
     ## CLEAR_TEMPORARY_DATA_MAYBE_STORE_LINK_KEY
     {
       value: "0x00A1",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "clearTemporaryDataMaybeStoreLinkKey",
       description: "Clears the temporary data associated with CBKE and
                     the key establishment, most notably the ephemeral
@@ -11209,7 +11209,7 @@
     ## CLEAR_TEMPORARY_DATA_MAYBE_STORE_LINK_KEY283K1
     {
       value: "0x00EE",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "clearTemporaryDataMaybeStoreLinkKey283k1",
       description: "Clears the temporary data associated with CBKE and
                     the key establishment, most notably the ephemeral
@@ -11237,7 +11237,7 @@
     ## GET_CERTIFICATE
     {
       value: "0x00A5",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getCertificate",
       description: "Retrieves the certificate installed on the NCP.",
       commandArguments: [
@@ -11258,7 +11258,7 @@
     ## GET_CERTIFICATE283K1
     {
       value: "0x00EC",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getCertificate283k1",
       description: "Retrieves the 283k certificate installed on the
                     NCP.",
@@ -11280,7 +11280,7 @@
     ## DSA_SIGN
     {
       value: "0x00A6",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "dsaSign",
       description: "LEGACY FUNCTION: This functionality has been
                     replaced by a single bit in the sl_zigbee_aps_frame_t,
@@ -11354,7 +11354,7 @@
     ## DSA_SIGN_HANDLER
     {
       value: "0x00A7",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "dsaSignHandler",
       description: "The handler that returns the results of the
                     signing operation. On success, the signature will be
@@ -11385,7 +11385,7 @@
     ## DSA_VERIFY
     {
       value: "0x00A3",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "dsaVerify",
       description: "Verify that signature of the associated message
                     digest was signed by the private key of the
@@ -11428,7 +11428,7 @@
     ## DSA_VERIFY_HANDLER
     {
       value: "0x0078",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "dsaVerifyHandler",
       description: "This callback is executed by the stack when the
                     DSA verification has completed and has a result. If
@@ -11448,7 +11448,7 @@
     ## DSA_VERIFY_283K1
     {
       value: "0x00B0",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "dsaVerify283k1",
       description: "Verify that signature of the associated message
                     digest was signed by the private key of the
@@ -11491,7 +11491,7 @@
     ## SET_PREINSTALLED_CBKE_DATA
     {
       value: "0x00A2",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setPreinstalledCbkeData",
       description: "Sets the device's CA public key, local certificate,
                     and static private key on the NCP associated with
@@ -11524,7 +11524,7 @@
     ## SAVE_PREINSTALLED_CBKE_DATA283K1
     {
       value: "0x00ED",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "savePreinstalledCbkeData283k1",
       description: "Sets the device's 283k1 curve CA public key, local
                     certificate, and static private key on the NCP
@@ -11561,7 +11561,7 @@
     ## MFGLIB_INTERNAL_START
     {
       value: "0x0083",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "mfglibInternalStart",
       description: "Activate use of mfglib test routines and enables
                     the radio receiver to report packets it receives to
@@ -11589,7 +11589,7 @@
     ## MFGLIB_INTERNAL_END
     {
       value: "0x0084",
-      needGeneratedHandler : "mfglibyes",
+      needGeneratedHandler: "mfglibyes",
       commandName: "mfglibInternalEnd",
       description: "Deactivate use of mfglib test routines; restores
                     the hardware to the state it was in prior to
@@ -11609,7 +11609,7 @@
     ## MFGLIB_INTERNAL_START_TONE
     {
       value: "0x0085",
-      needGeneratedHandler : "mfglibyes",
+      needGeneratedHandler: "mfglibyes",
       commandName: "mfglibInternalStartTone",
       description: "Starts transmitting an unmodulated tone on the
                     currently set channel and power level. Upon
@@ -11632,7 +11632,7 @@
     ## MFGLIB_INTERNAL_STOP_TONE
     {
       value: "0x0086",
-      needGeneratedHandler : "mfglibyes",
+      needGeneratedHandler: "mfglibyes",
       commandName: "mfglibInternalStopTone",
       description: "Stops transmitting tone started by mfglibInternalStartTone().",
       commandArguments: [
@@ -11649,7 +11649,7 @@
     ## MFGLIB_INTERNAL_START_STREAM
     {
       value: "0x0087",
-      needGeneratedHandler : "mfglibyes",
+      needGeneratedHandler: "mfglibyes",
       commandName: "mfglibInternalStartStream",
       description: "Starts transmitting a random stream of characters.
                     This is so that the radio modulation can be
@@ -11668,7 +11668,7 @@
     ## MFGLIB_INTERNAL_STOP_STREAM
     {
       value: "0x0088",
-      needGeneratedHandler : "mfglibyes",
+      needGeneratedHandler: "mfglibyes",
       commandName: "mfglibInternalStopStream",
       description: "Stops transmitting a random stream of characters
                     started by mfglibInternalStartStream().",
@@ -11686,7 +11686,7 @@
     ## MFGLIB_INTERNAL_SEND_PACKET
     {
       value: "0x0089",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "mfglibInternalSendPacket",
       description: "Sends a single packet consisting of the following
                     bytes: packetLength, packetContents[0], ... ,
@@ -11721,7 +11721,7 @@
     ## MFGLIB_INTERNAL_SET_CHANNEL
     {
       value: "0x008a",
-      needGeneratedHandler : "mfglibyes",
+      needGeneratedHandler: "mfglibyes",
       commandName: "mfglibInternalSetChannel",
       description: "Sets the radio channel. Calibration occurs if this
                     is the first time the channel has been used.",
@@ -11745,7 +11745,7 @@
     ## MFGLIB_INTERNAL_GET_CHANNEL
     {
       value: "0x008b",
-      needGeneratedHandler : "mfglibyes",
+      needGeneratedHandler: "mfglibyes",
       commandName: "mfglibInternalGetChannel",
       description: "Returns the current radio channel, as previously
                     set via mfglibInternalSetChannel().",
@@ -11762,7 +11762,7 @@
     ## MFGLIB_INTERNAL_SET_POWER
     {
       value: "0x008c",
-      needGeneratedHandler : "mfglibyes",
+      needGeneratedHandler: "mfglibyes",
       commandName: "mfglibInternalSetPower",
       description: "First select the transmit power mode, and then
                     include a method for selecting the radio transmit
@@ -11798,7 +11798,7 @@
     ## MFGLIB_INTERNAL_GET_POWER
     {
       value: "0x008d",
-      needGeneratedHandler : "mfglibyes",
+      needGeneratedHandler: "mfglibyes",
       commandName: "mfglibInternalGetPower",
       description: "Returns the current radio power setting, as
                     previously set via mfglibInternalSetPower().",
@@ -11816,7 +11816,7 @@
     ## MFGLIB_INTERNAL_RX_HANDLER
     {
       value: "0x008e",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "mfglibRxHandler",
       description: "A callback indicating a packet with a valid CRC
                     has been received.",
@@ -11868,7 +11868,7 @@
     ## LAUNCH_STANDALONE_BOOTLOADER
     {
       value: "0x008f",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "launchStandaloneBootloader",
       description: "Quits the current application and launches the
                     standalone bootloader (if installed) The function
@@ -11878,7 +11878,7 @@
         {
           type: "bool",
           name: "enabled",
-          description: "If true, launch the standalone bootloader. If false, 
+          description: "If true, launch the standalone bootloader. If false,
                         do nothing.",
         },
       ],
@@ -11894,7 +11894,7 @@
     ## SEND_BOOTLOAD_MESSAGE
     {
       value: "0x0090",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "sendBootloadMessage",
       description: "Transmits the given bootload message to a
                     neighboring node using a specific 802.15.4 header
@@ -11938,7 +11938,7 @@
     ## GET_STANDALONE_BOOTLOADER_VERSION_PLAT_MICRO_PHY
     {
       value: "0x0091",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getStandaloneBootloaderVersionPlatMicroPhy",
       description: "Detects if the standalone bootloader is installed,
                     and if so returns the installed version. If not
@@ -11975,7 +11975,7 @@
     ## INCOMING_BOOTLOAD_MESSAGE_HANDLER
     {
       value: "0x0092",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "incomingBootloadMessageHandler",
       description: "A callback invoked by the EmberZNet stack when a
                     bootload message is received.",
@@ -12006,7 +12006,7 @@
     ## BOOTLOAD_TRANSMIT_COMPLETE_HANDLER
     {
       value: "0x0093",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "bootloadTransmitCompleteHandler",
       description: "A callback invoked by the EmberZNet stack when the
                     MAC has finished transmitting a bootload message.",
@@ -12034,7 +12034,7 @@
     ## AES_ENCRYPT
     {
       value: "0x0094",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "aesEncrypt",
       description: "Perform AES encryption on plaintext using key.",
       commandArguments: [
@@ -12060,7 +12060,7 @@
     ## INCOMING_MFG_TEST_MESSAGE_HANDLER
     {
       value: "0x0147",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "incomingMfgTestMessageHandler",
       description: "A callback to be implemented on the Golden Node to process
                     acknowledgements. If you supply a custom version of this handler, you
@@ -12088,7 +12088,7 @@
     ## MFG_TEST_SET_PACKET_MODE
     {
       value: "0x0148",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "mfgTestSetPacketMode",
       description: "A function used on the Golden Node to switch between
                     normal network operation (for testing) and manufacturing
@@ -12118,7 +12118,7 @@
     ## MFG_TEST_SEND_REBOOT_COMMAND
     {
       value: "0x0149",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "mfgTestSendRebootCommand",
       description: "A function used during manufacturing configuration
                     on the Golden Node to send the DUT a reboot command. The usual
@@ -12142,7 +12142,7 @@
     ## MFG_TEST_SEND_EUI64
     {
       value: "0x014A",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "mfgTestSendEui64",
       description: "A function used during manufacturing configuration
                     on the Golden Node to set the DUT's 8-byte EUI ID.
@@ -12168,7 +12168,7 @@
     ## MFG_TEST_SEND_MANUFACTURING_STRING
     {
       value: "0x014B",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "mfgTestSendManufacturingString",
       description: "A function used during manufacturing configuration
                     on the Golden Node to set the DUT's 16-byte configuration string.
@@ -12194,7 +12194,7 @@
     ## MFG_TEST_SEND_RADIO_PARAMETERS
     {
       value: "0x014C",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "mfgTestSendRadioParameters",
       description: "A function used during manufacturing configuration
                     on the Golden Node to set the DUT's radio parameters. This function
@@ -12228,7 +12228,7 @@
     ## MFG_TEST_SEND_COMMAND
     {
       value: "0x014D",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "mfgTestSendCommand",
       description: "A function used in each of the manufacturing
                     configuration API calls. Most implementations will not need
@@ -12272,7 +12272,7 @@
     ## ZLL_NETWORK_OPS
     {
       value: "0x00B2",
-      needGeneratedHandler : "ezspyes",
+      needGeneratedHandler: "ezspyes",
       commandName: "zllNetworkOps",
       description: "A consolidation of ZLL network operations with
                     similar signatures; specifically, forming and joining
@@ -12306,7 +12306,7 @@
     ## ZLL_SET_INITIAL_SECURITY_STATE
     {
       value: "0x00B3",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllSetInitialSecurityState",
       description: "This call will cause the device to setup the
                     security information used in its network. It must
@@ -12336,7 +12336,7 @@
     ## ZLL_SET_SECURITY_STATE_WITHOUT_KEY
     {
       value: "0x00CF",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllSetSecurityStateWithoutKey",
       description: "This call will update ZLL security token information. Unlike
                     sli_zigbee_stack_zll_set_initial_security_state, this can be called while a network is
@@ -12360,7 +12360,7 @@
     ## ZLL_START_SCAN
     {
       value: "0x00B4",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllStartScan",
       description: "This call will initiate a ZLL network scan on all
                     the specified channels.",
@@ -12394,7 +12394,7 @@
     ## ZLL_SET_RX_ON_WHEN_IDLE
     {
       value: "0x00B5",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllSetRxOnWhenIdle",
       description: "This call will change the mode of the radio so
                     that the receiver is on for a specified amount of
@@ -12419,7 +12419,7 @@
     ## ZLL_NETWORK_FOUND_HANDLER
     {
       value: "0x00B6",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "zllNetworkFoundHandler",
       description: "This call is fired when a ZLL network scan finds
                     a ZLL network.",
@@ -12450,7 +12450,7 @@
     ## ZLL_SCAN_COMPLETE_HANDLER
     {
       value: "0x00B7",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "zllScanCompleteHandler",
       description: "This call is fired when a ZLL network scan is
                     complete.",
@@ -12465,7 +12465,7 @@
     ## ZLL_ADDRESS_ASSIGNMENT_HANDLER
     {
       value: "0x00B8",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "zllAddressAssignmentHandler",
       description: "This call is fired when network and group
                     addresses are assigned to a remote mode in a
@@ -12486,7 +12486,7 @@
     ## ZLL_TOUCH_LINK_TARGET_HANDLER
     {
       value: "0x00BB",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "zllTouchLinkTargetHandler",
       description: "This call is fired when the device is a target
                     of a touch link.",
@@ -12501,7 +12501,7 @@
     ## ZLL_GET_TOKENS
     {
       value: "0x00BC",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllGetTokens",
       description: "Get the ZLL tokens.",
       commandArguments: [
@@ -12522,7 +12522,7 @@
     ## ZLL_SET_DATA_TOKEN
     {
       value: "0x00BD",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllSetDataToken",
       description: "Set the ZLL data token.",
       commandArguments: [
@@ -12538,7 +12538,7 @@
     ## ZLL_SET_NON_ZLL_NETWORK
     {
       value: "0x00BF",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllSetNonZllNetwork",
       description: "Set the ZLL data token bitmask to reflect the ZLL
                     network state.",
@@ -12550,7 +12550,7 @@
     ## IS_ZLL_NETWORK
     {
       value: "0x00BE",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "isZllNetwork",
       description: "Is this a ZLL network?",
       commandArguments: [
@@ -12566,7 +12566,7 @@
     ## ZLL_SET_RADIO_IDLE_MODE
     {
       value: "0x00D4",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllSetRadioIdleMode",
       description: "This call sets the radio's default idle power mode.",
       commandArguments: [
@@ -12582,7 +12582,7 @@
     ## ZLL_GET_RADIO_IDLE_MODE
     {
       value: "0x00BA",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllGetRadioIdleMode",
       description: "This call gets the radio's default idle power mode.",
       commandArguments: [
@@ -12598,7 +12598,7 @@
     ## SET_ZLL_NODE_TYPE
     {
       value: "0x00D5",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setZllNodeType",
       description: "This call sets the default node type for a factory new ZLL device.",
       commandArguments: [
@@ -12614,7 +12614,7 @@
     ## SET_ZLL_ADDITIONAL_STATE
     {
       value: "0x00D6",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setZllAdditionalState",
       description: "This call sets additional capability bits in the ZLL state.",
       commandArguments: [
@@ -12630,7 +12630,7 @@
     ## ZLL_OPERATION_IN_PROGRESS
     {
       value: "0x00D7",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllOperationInProgress",
       description: "Is there a ZLL (Touchlink) operation in progress?",
       commandArguments: [
@@ -12646,7 +12646,7 @@
     ## ZLL_RX_ON_WHEN_IDLE_GET_ACTIVE
     {
       value: "0x00D8",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllRxOnWhenIdleGetActive",
       description: "Is the ZLL radio on when idle mode is active?",
       commandArguments: [
@@ -12662,7 +12662,7 @@
     ## ZLL_SCANNING_COMPLETE
     {
       value: "0x00F6",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllScanningComplete",
       description: "Informs the ZLL API that application scanning is complete",
       commandArguments: [
@@ -12673,7 +12673,7 @@
     ## GET_ZLL_PRIMARY_CHANNEL_MASK
     {
       value: "0x00D9",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getZllPrimaryChannelMask",
       description: "Get the primary ZLL (touchlink) channel mask.",
       commandArguments: [
@@ -12689,7 +12689,7 @@
     ## GET_ZLL_SECONDARY_CHANNEL_MASK
     {
       value: "0x00DA",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getZllSecondaryChannelMask",
       description: "Get the secondary ZLL (touchlink) channel mask.",
       commandArguments: [
@@ -12705,7 +12705,7 @@
     ## SET_ZLL_PRIMARY_CHANNEL_MASK
     {
       value: "0x00DB",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setZllPrimaryChannelMask",
       description: "Set the primary ZLL (touchlink) channel mask",
       commandArguments: [
@@ -12721,7 +12721,7 @@
     ## SET_ZLL_SECONDARY_CHANNEL_MASK
     {
       value: "0x00DC",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "setZllSecondaryChannelMask",
       description: "Set the secondary ZLL (touchlink) channel mask.",
       commandArguments: [
@@ -12737,7 +12737,7 @@
     ## ZLL_CLEAR_TOKENS
     {
       value: "0x0025",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "zllClearTokens",
       description: "Clear ZLL stack tokens.",
       commandArguments: [
@@ -13037,7 +13037,7 @@
     ## GP_PROXY_TABLE_PROCESS_GP_PAIRING
     {
       value: "0x00C9",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpProxyTableProcessGpPairing",
       description: "Update the GP Proxy table based on a GP pairing.",
       commandArguments: [
@@ -13103,7 +13103,7 @@
     ## DGP_SEND
     {
       value: "0x00C6",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "dGpSend",
       description: "Adds/removes an entry from the GP Tx Queue.",
       commandArguments: [
@@ -13163,7 +13163,7 @@
     ##GPEP_SENT_HANDLER
     {
       value: "0x00C7",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "dGpSentHandler",
       description: "A callback to the GP endpoint to indicate the
                     result of the GPDF transmission.",
@@ -13185,7 +13185,7 @@
     ## GP_EP_INCOMING_MESSAGE
     {
       value: "0x00C5",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "gpepIncomingMessageHandler",
       description: "A callback invoked by the ZigBee GP stack when
                     a GPDF is received.",
@@ -13193,7 +13193,7 @@
         {
           type: "sl_zigbee_gp_params_t",
           name: "param",
-          description: "GP parameters list represented as a macro for GP endpoint 
+          description: "GP parameters list represented as a macro for GP endpoint
                         incoming message handler and callbacks prototypes.",
         }
       ],
@@ -13202,7 +13202,7 @@
     ## GP_PROXY_TABLE_GET_ENTRY
     {
       value: "0x00C8",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpProxyTableGetEntry",
       description: "Retrieves the proxy table entry stored at the
                     passed index.",
@@ -13231,7 +13231,7 @@
     ## GP_PROXY_TABLE_LOOKUP
     {
       value: "0x00C0",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpProxyTableLookup",
       description: "Finds the index of the passed address in the gp table.",
       commandArguments: [
@@ -13252,7 +13252,7 @@
     ## GP_PROXY_TABLE_REMOVE_ENTRY
     {
       value: "0x005D",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpProxyTableRemoveEntry",
       description: "Removes the proxy table entry stored at the
                     passed index.",
@@ -13269,7 +13269,7 @@
     ##GP_CLEAR_PROXY_TABLE
     {
       value: "0x005F",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpClearProxyTable",
       description: "Clear the entire proxy table",
       commandArguments: [
@@ -13281,7 +13281,7 @@
     ## GP_SINK_TABLE_GET_ENTRY
     {
       value: "0x00DD",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpSinkTableGetEntry",
       description: "Retrieves the sink table entry stored at the
                     passed index.",
@@ -13310,7 +13310,7 @@
     ##GP_SINK_TABLE_LOOKUP
     {
       value: "0x00DE",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpSinkTableLookup",
       description: "Finds the index of the passed address in the gp table.",
       commandArguments: [
@@ -13331,7 +13331,7 @@
     ## GP_SINK_TABLE_SET_ENTRY
     {
       value: "0x00DF",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpSinkTableSetEntry",
       description: "Retrieves the sink table entry stored at the
                     passed index.",
@@ -13360,7 +13360,7 @@
     ## GP_SINK_TABLE_REMOVE_ENTRY
     {
       value: "0x00E0",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpSinkTableRemoveEntry",
       description: "Removes the sink table entry stored at the
                     passed index.",
@@ -13377,7 +13377,7 @@
     ## GP_SINK_TABLE_FIND_OR_ALLOCATE_ENTRY
     {
       value: "0x00E1",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpSinkTableFindOrAllocateEntry",
       description: "Finds or allocates a sink entry",
       commandArguments: [
@@ -13399,7 +13399,7 @@
     ##GP_CLEAR_SINK_TABLE
     {
       value: "0x00E2",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpSinkTableClearAll",
       description: "Clear the entire sink table",
       commandArguments: [
@@ -13410,7 +13410,7 @@
     ## GP_SINK_TABLE_INIT
     {
       value: "0x0070",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpSinkTableInit",
       description: "Iniitializes Sink Table",
       commandArguments: [
@@ -13421,7 +13421,7 @@
     # GP_SINK_TABLE_SET_SECURITY_FRAME_COUNTER
     {
       value: "0x00F5",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpSinkTableSetSecurityFrameCounter",
       description: "Sets security framecounter in the sink table",
       commandArguments: [
@@ -13442,7 +13442,7 @@
     ## GP_SINK_COMMISSION
     {
       value: "0x010A",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "gpSinkCommission",
       description: "Puts the GPS in commissioning mode.",
       commandArguments: [
@@ -13479,7 +13479,7 @@
     ## GP_TRANSLATION_TABLE_CLEAR
     {
       value: "0x010B",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "gpTranslationTableClear",
       description: "Clears all entries within the translation table.",
       commandArguments: [
@@ -13490,7 +13490,7 @@
     ## GP_GET_NUMBER_OF_ACTIVE_ENTRIES
     {
       value: "0x0118",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "gpSinkTableGetNumberOfActiveEntries",
       description: "Return number of active entries in sink table.",
       commandArguments: [
@@ -13570,7 +13570,7 @@
     ##getTokenCount
     {
       value: "0x0100",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getTokenCount",
       description: "Gets the total number of tokens.",
       commandArguments: [
@@ -13586,7 +13586,7 @@
     ##getTokenInfo
     {
       value: "0x0101",
-      needGeneratedHandler : "yes",
+      needGeneratedHandler: "yes",
       commandName: "getTokenInfo",
       description: "Gets the token information for a single token at provided index",
       commandArguments: [
@@ -13614,7 +13614,7 @@
     ##getTokenData
     {
       value: "0x0102",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "getTokenData",
       description: "Gets the token data for a single token with provided key",
       commandArguments: [
@@ -13647,7 +13647,7 @@
     ##setTokenData
     {
       value: "0x0103",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "setTokenData",
       description: "Sets the token data for a single token with provided key",
       commandArguments: [
@@ -13680,7 +13680,7 @@
     ##reset
     {
       value: "0x0104",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "resetNode",
       description: "Reset the node by calling halReboot.",
       commandArguments: [
@@ -13691,7 +13691,7 @@
     ##GP_SECURITY_TEST_VECTORS
     {
       value: "0x0117",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "gpSecurityTestVectors",
       description: "Run GP security test vectors.",
       commandArguments: [
@@ -13708,7 +13708,7 @@
     ##tokenFactoryReset
     {
       value: "0x0077",
-      needGeneratedHandler : "no",
+      needGeneratedHandler: "no",
       commandName: "tokenFactoryReset",
       description: "Factory reset all configured zigbee tokens",
       commandArguments: [
@@ -13737,13 +13737,13 @@
 
   # Ensure generated code includes DHC public types and adapter prototypes when enabled
   ncpCpps: ~,
-  
+
   typedefs: [
     {
       name: "sl_zigbee_dhc_pa_metadata_t",
       description: "Top-level PA calibration metadata.",
       definition: [
-        { 
+        {
           type: "uint8_t",
           name: "version",
           description: "Calibration metadata / dataset version.",
@@ -13769,24 +13769,24 @@
       name: "sl_zigbee_dhc_pa_descriptor_t",
       description: "Descriptor for either a curve (algorithm=0) or table (algorithm=1).",
       definition: [
-        { 
+        {
           type: "uint8_t",
-          name: "algorithm",               
-          description: "0=Curve, 1=Table.", 
+          name: "algorithm",
+          description: "0=Curve, 1=Table.",
         },
-        { 
+        {
           type: "uint8_t",
-          name: "num_segments_or_entries", 
-          description: "9 for curve, 16 for table.", 
+          name: "num_segments_or_entries",
+          description: "9 for curve, 16 for table.",
         },
-        { 
-          type: "int16_t", 
-          name: "min_ddbm",                
+        {
+          type: "int16_t",
+          name: "min_ddbm",
           description: "Minimum ddbm (may be negative).",
         },
-        { 
+        {
           type: "int16_t",
-          name: "max_ddbm",                
+          name: "max_ddbm",
           description: "Maximum ddbm (may be negative).",
         },
       ],
@@ -13795,19 +13795,19 @@
       name: "sl_zigbee_dhc_pa_curve_segment_t",
       description: "One PA curve segment (piecewise linear).",
       definition: [
-        { 
+        {
           type: "uint8_t",
-          name: "maxPowerLevel", 
-          description: "Segment upper bound power level.", 
+          name: "maxPowerLevel",
+          description: "Segment upper bound power level.",
         },
-        { 
-          type: "int32_t", 
-          name: "slope", 
-          description: "Signed slope coefficient.", 
+        {
+          type: "int32_t",
+          name: "slope",
+          description: "Signed slope coefficient.",
         },
-        { 
-          type: "int32_t", 
-          name: "intercept", 
+        {
+          type: "int32_t",
+          name: "intercept",
           description: "Signed intercept coefficient.",
         },
       ],
@@ -13816,20 +13816,20 @@
       name: "sl_zigbee_dhc_pa_curve_t",
       description: "Full PA curve (fixed 9 segments).",
       definition: [
-        { 
-          type: "int16_t", 
-          name: "curve_min_ddbm", 
-          description: "Curve min ddbm.", 
+        {
+          type: "int16_t",
+          name: "curve_min_ddbm",
+          description: "Curve min ddbm.",
         },
-        { 
+        {
           type: "int16_t",
           name: "curve_max_ddbm",
           description: "Curve max ddbm.",
         },
-        { 
-          type: "sl_zigbee_dhc_pa_curve_segment_t[9]", 
-          name: "segments", 
-          description: "Curve segments.", 
+        {
+          type: "sl_zigbee_dhc_pa_curve_segment_t[9]",
+          name: "segments",
+          description: "Curve segments.",
         },
       ],
     },
@@ -13837,63 +13837,63 @@
       name: "sl_zigbee_dhc_pa_table_t",
       description: "Discrete PA table (16 entries).",
       definition: [
-        { 
-          type: "int16_t[16]", 
-          name: "ddbm_values", 
-          description: "Signed ddbm table entries.", 
+        {
+          type: "int16_t[16]",
+          name: "ddbm_values",
+          description: "Signed ddbm table entries.",
         },
       ],
     },
-    { 
-      name: "sl_zigbee_dhc_pa_version_t",   
-      description: "PA dataset version.",   
-      definition: [ 
-        { 
-          type: "uint8_t",  
+    {
+      name: "sl_zigbee_dhc_pa_version_t",
+      description: "PA dataset version.",
+      definition: [
+        {
+          type: "uint8_t",
           name: "pa_version",
           description: "The PA version.",
-        }, 
+        },
       ],
     },
-    { 
-      name: "sl_zigbee_dhc_pa_signature_t", 
-      description: "Standalone PA signature.", 
-      definition: [ 
-        { 
+    {
+      name: "sl_zigbee_dhc_pa_signature_t",
+      description: "Standalone PA signature.",
+      definition: [
+        {
           type: "uint32_t",
           name: "pa_signature",
           description: "The PA signature.",
         },
       ],
     },
-    { 
-      name: "sl_zigbee_dhc_pa_mode_t",      
+    {
+      name: "sl_zigbee_dhc_pa_mode_t",
       description: "PA mode wrapper.",
       definition: [
-        { 
+        {
           type: "uint8_t",
           name: "pa_mode",
           description: "PA mode value.",
         },
       ],
     },
-    { 
-      name: "sl_zigbee_dhc_rssi_offset_t",  
-      description: "RSSI offset wrapper.",   
-      definition: [ 
-        { 
+    {
+      name: "sl_zigbee_dhc_rssi_offset_t",
+      description: "RSSI offset wrapper.",
+      definition: [
+        {
           type: "int8_t",
           name: "rssi_offset",
           description: "RSSI offset value.",
         },
       ],
     },
-    { 
-      name: "sl_zigbee_dhc_ctune_t",        
+    {
+      name: "sl_zigbee_dhc_ctune_t",
       description: "CTUNE wrapper.",
       definition: [
-        { 
-          type: "uint32_t", 
+        {
+          type: "uint32_t",
           name: "ctune",
           description: "CTUNE value.",
         },
@@ -13904,7 +13904,7 @@
   enums: ~,
 
   frames: [
-   
+
     ## READ_PA_DESCRIPTOR
     {
       value: "0x0152",
@@ -13912,20 +13912,20 @@
       commandName: "readPaDescriptor",
       description: "Read descriptor at index.",
       commandArguments: [
-        { 
-          type: "uint8_t", 
-          name: "index", 
+        {
+          type: "uint8_t",
+          name: "index",
           description: "The PA index.",
         },
       ],
       responseArguments: [
-        { 
+        {
           type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
-        { 
-          type: "sl_zigbee_dhc_pa_descriptor_t", 
+        {
+          type: "sl_zigbee_dhc_pa_descriptor_t",
           name: "descriptor",
           description: "The PA descriptor.",
         },
@@ -13938,20 +13938,20 @@
       commandName: "writePaDescriptor",
       description: "Write descriptor at index.",
       commandArguments: [
-        { 
-          type: "uint8_t", 
-          name: "index", 
+        {
+          type: "uint8_t",
+          name: "index",
           description: "The PA index.",
         },
-        { 
-          type: "sl_zigbee_dhc_pa_descriptor_t", 
+        {
+          type: "sl_zigbee_dhc_pa_descriptor_t",
           name: "descriptor",
           description: "The PA descriptor.",
         },
       ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
@@ -13964,25 +13964,25 @@
       commandName: "readPaCurveSegment",
       description: "Read one curve segment (algorithm=0).",
       commandArguments: [
-        { 
+        {
           type: "uint8_t",
-          name: "index", 
+          name: "index",
           description: "The PA index.",
         },
-        { 
-          type: "uint8_t", 
-          name: "segment_index", 
-          description: "The segment index.", 
+        {
+          type: "uint8_t",
+          name: "segment_index",
+          description: "The segment index.",
         },
       ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
-        { 
-          type: "sl_zigbee_dhc_pa_curve_segment_t", 
+        {
+          type: "sl_zigbee_dhc_pa_curve_segment_t",
           name: "segment",
           description: "Read PA Curve segment.",
         },
@@ -13995,24 +13995,24 @@
       commandName: "writePaCurveSegment",
       description: "Write one curve segment (algorithm=0).",
       commandArguments: [
-        { 
-          type: "uint8_t", 
+        {
+          type: "uint8_t",
           name: "index",
           description: "The PA index.",
         },
-        { 
-          type: "uint8_t", 
+        {
+          type: "uint8_t",
           name: "segment_index",
           description: "The segment index.",
         },
-        { 
-          type: "sl_zigbee_dhc_pa_curve_segment_t", 
+        {
+          type: "sl_zigbee_dhc_pa_curve_segment_t",
           name: "segment",
           description: "Write PA Curve segment.",
         },
       ],
       responseArguments: [
-        { 
+        {
           type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
@@ -14026,7 +14026,7 @@
       commandName: "readPaCurve",
       description: "Read full curve for descriptor index (algorithm=0).",
       commandArguments: [
-        { 
+        {
           type: "uint8_t",
           name: "index",
           description: "The PA index.",
@@ -14052,20 +14052,20 @@
       commandName: "writePaCurve",
       description: "Write full curve (algorithm=0).",
       commandArguments: [
-        { 
+        {
           type: "uint8_t",
           name: "index",
           description: "The PA index.",
         },
-        { 
-          type: "sl_zigbee_dhc_pa_curve_t", 
+        {
+          type: "sl_zigbee_dhc_pa_curve_t",
           name: "curve",
           description: "Write PA Curve.",
         },
       ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
@@ -14078,19 +14078,19 @@
       commandName: "readPaTable",
       description: "Read table for descriptor index (algorithm=1).",
       commandArguments: [
-        { 
+        {
           type: "uint8_t",
           name: "index",
           description: "The PA index.",
         },
       ],
       responseArguments: [
-        { 
+        {
           type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
-        { 
+        {
           type: "sl_zigbee_dhc_pa_table_t",
           name: "table",
           description: "Read PA Table.",
@@ -14104,20 +14104,20 @@
       commandName: "writePaTable",
       description: "Write table (algorithm=1).",
       commandArguments: [
-        { 
+        {
           type: "uint8_t",
           name: "index",
           description: "The PA index.",
         },
-        { 
+        {
           type: "sl_zigbee_dhc_pa_table_t",
           name: "table",
           description: "Write PA Table.",
         },
       ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
@@ -14129,16 +14129,16 @@
       needGeneratedHandler: "yes",
       commandName: "readRssiOffset",
       description: "Read RSSI offset.",
-      commandArguments: [ 
+      commandArguments: [
       ],
       responseArguments: [
-        { 
+        {
           type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
-        { 
-          type: "sl_zigbee_dhc_rssi_offset_t", 
+        {
+          type: "sl_zigbee_dhc_rssi_offset_t",
           name: "rssi_offset",
           description: "Read RSSI offset.",
         },
@@ -14151,14 +14151,14 @@
       commandName: "writeRssiOffset",
       description: "Write RSSI offset.",
       commandArguments: [
-        { 
-          type: "sl_zigbee_dhc_rssi_offset_t", 
+        {
+          type: "sl_zigbee_dhc_rssi_offset_t",
           name: "rssi_offset",
           description: "Write RSSI offset.",
         },
       ],
       responseArguments: [
-        { 
+        {
           type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
@@ -14174,13 +14174,13 @@
       commandArguments: [
       ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
-        { 
-          type: "uint16_t", 
+        {
+          type: "uint16_t",
           name: "pa_voltage",
           description: "Read PA voltage.",
         },
@@ -14193,15 +14193,15 @@
       commandName: "writePaVoltage",
       description: "Write PA voltage (keep consistent with metadata).",
       commandArguments: [
-        { 
-          type: "uint16_t", 
+        {
+          type: "uint16_t",
           name: "pa_voltage",
           description: "Write PA voltage.",
         },
       ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
@@ -14213,16 +14213,16 @@
       needGeneratedHandler: "yes",
       commandName: "readPaMode",
       description: "Read PA mode.",
-      commandArguments: [ 
+      commandArguments: [
       ],
       responseArguments: [
-        { 
+        {
           type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
-        { 
-          type: "sl_zigbee_dhc_pa_mode_t", 
+        {
+          type: "sl_zigbee_dhc_pa_mode_t",
           name: "pa_mode",
           description: "Read PA mode.",
         },
@@ -14235,14 +14235,14 @@
       commandName: "writePaMode",
       description: "Write PA mode.",
       commandArguments: [
-        { 
+        {
           type: "sl_zigbee_dhc_pa_mode_t",
           name: "pa_mode",
           description: "PA mode value to write.",
         },
       ],
       responseArguments: [
-        { 
+        {
           type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
@@ -14255,16 +14255,16 @@
       needGeneratedHandler: "yes",
       commandName: "readCtune",
       description: "Read CTUNE value.",
-      commandArguments: [ 
+      commandArguments: [
       ],
       responseArguments: [
-        { 
+        {
           type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
-        { 
-          type: "sl_zigbee_dhc_ctune_t", 
+        {
+          type: "sl_zigbee_dhc_ctune_t",
           name: "ctune",
           description: "Read CTUNE value.",
         },
@@ -14277,15 +14277,15 @@
       commandName: "writeCtune",
       description: "Write CTUNE value.",
       commandArguments: [
-        { 
+        {
           type: "sl_zigbee_dhc_ctune_t",
           name: "ctune",
           description: "Write CTUNE value.",
         },
       ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
@@ -14297,16 +14297,16 @@
       needGeneratedHandler: "yes",
       commandName: "readDhcVersion",
       description: "Read DHC top-level version.",
-      commandArguments: [ 
+      commandArguments: [
       ],
       responseArguments: [
-        { 
+        {
           type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
-        { 
-          type: "uint8_t", 
+        {
+          type: "uint8_t",
           name: "dhc_version",
           description: "Read DHC top-level version.",
         },
@@ -14319,15 +14319,15 @@
       commandName: "writeDhcVersion",
       description: "Write DHC top-level version.",
       commandArguments: [
-        { 
-          type: "uint8_t", 
+        {
+          type: "uint8_t",
           name: "dhc_version",
           description: "Write DHC top-level version.",
         },
       ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
@@ -14342,13 +14342,13 @@
       commandArguments: [
       ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status",
-          description: "An sl_status_t value indicating success or the reason for failure.", 
+          description: "An sl_status_t value indicating success or the reason for failure.",
         },
-        { 
-          type: "sl_zigbee_dhc_pa_version_t", 
+        {
+          type: "sl_zigbee_dhc_pa_version_t",
           name: "pa_version",
           description: "Read PA dataset version.",
         },
@@ -14360,16 +14360,16 @@
       needGeneratedHandler: "yes",
       commandName: "readPaSignature",
       description: "Read PA signature (metadata.signature mirror).",
-      commandArguments: [ 
+      commandArguments: [
       ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status" ,
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
-        { 
-          type: "sl_zigbee_dhc_pa_signature_t", 
+        {
+          type: "sl_zigbee_dhc_pa_signature_t",
           name: "pa_signature",
           description: "Read PA signature (metadata.signature mirror).",
         },
@@ -14382,15 +14382,15 @@
       commandName: "writePaSignature",
       description: "Write PA signature (updates metadata signature).",
       commandArguments: [
-        { 
-          type: "sl_zigbee_dhc_pa_signature_t", 
+        {
+          type: "sl_zigbee_dhc_pa_signature_t",
           name: "pa_signature",
           description: "Write PA signature (updates metadata signature).",
         },
       ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure."
         },
@@ -14404,13 +14404,13 @@
       description: "Read PA calibration metadata.",
       commandArguments: [ ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },
-        { 
-          type: "sl_zigbee_dhc_pa_metadata_t", 
+        {
+          type: "sl_zigbee_dhc_pa_metadata_t",
           name: "metadata",
           description: "Read PA calibration metadata block.",
         }
@@ -14423,15 +14423,15 @@
       commandName: "writePaMetadata",
       description: "Write PA calibration metadata (must precede descriptor/data writes).",
       commandArguments: [
-        { 
+        {
           type: "sl_zigbee_dhc_pa_metadata_t",
           name: "metadata",
           description: "The PA metadata.",
         },
       ],
       responseArguments: [
-        { 
-          type: "sl_status_t", 
+        {
+          type: "sl_status_t",
           name: "status",
           description: "An sl_status_t value indicating success or the reason for failure.",
         },

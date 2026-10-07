@@ -6,13 +6,19 @@ category: Connect
 quality: production
 ui_hints:
   visibility: never
-
 provides:
 - name: connect_csp
-
 requires:
 - name: connect_stack_common
-
+include:
+- path: csp
+  file_list:
+  - path: csp-command-utils.h
+  - path: csp-format.h
+  - path: csp-api-enum-gen.h
+- path: "ncp"
+  file_list:
+  - path: "ncp-security.h"
 source:
 - path: "csp/csp-format.c"
 - path: "csp/csp-command-app.c"
@@ -24,16 +30,6 @@ source:
 - path: "csp/csp-command-callbacks-vncp.c"
 - path: "ncp/ncp-stubs.c"
   unless: [connect_ncp]
-
-include:
-- path: csp
-  file_list:
-  - path: csp-command-utils.h
-  - path: csp-format.h
-  - path: csp-api-enum-gen.h
-- path: "ncp"
-  file_list:
-  - path: "ncp-security.h"
 
 metadata:
   sbom:

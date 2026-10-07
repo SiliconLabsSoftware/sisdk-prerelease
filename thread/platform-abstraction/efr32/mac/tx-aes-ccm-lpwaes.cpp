@@ -37,29 +37,41 @@
 #if defined(LPWAES_PRESENT)
 
 #include SL_OT_MAC_KEY_POLICY_CONFIG_HEADER
+#include "tx-aes-ccm-lpwaes.hpp"
+#include "tx-aes-ccm.hpp"
 
 void sli_ot_process_transmit_aes_ccm_device(otRadioFrame                       &aFrame,
                                             ot::Crypto::AesCcm::Nonce           aNonce,
                                             const uint8_t                       aTagLength,
                                             const ot::Mac::Frame::SecurityLevel aSecurityLevel,
-                                            const otMacKeyMaterial             *aRawKey)
+                                            const MacKeyStoragePolicy::PalKey  &aPalKey)
 {
-    LpwAesTransmitAesCcm::Process(aFrame, aNonce, aTagLength, aSecurityLevel, aRawKey);
+    LpwAesTransmitAesCcm::Process(aFrame, aNonce, aTagLength, aSecurityLevel, aPalKey);
 }
 
-template void LpwAesTransmitAesCcmT<PlaintextMacKeyStoragePolicy>::Process(
-    otRadioFrame                       &aFrame,
-    ot::Crypto::AesCcm::Nonce           aNonce,
-    const uint8_t                       aTagLength,
-    const ot::Mac::Frame::SecurityLevel aSecurityLevel,
-    const otMacKeyMaterial             *aRawKey);
+// Explicit instantiations for each key storage policy compatible with LPWAES.
+template void LpwAesTransmitAesCcmT<LiteralMacKeyStoragePolicy>::Process(
+    otRadioFrame                             &aFrame,
+    ot::Crypto::AesCcm::Nonce                 aNonce,
+    const uint8_t                             aTagLength,
+    const ot::Mac::Frame::SecurityLevel       aSecurityLevel,
+    const LiteralMacKeyStoragePolicy::PalKey &aPalKey);
 
-#if defined(KSU_PRESENT)
+#if (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
+template void LpwAesTransmitAesCcmT<PsaPlaintextMacKeyStoragePolicy>::Process(
+    otRadioFrame                                  &aFrame,
+    ot::Crypto::AesCcm::Nonce                      aNonce,
+    const uint8_t                                  aTagLength,
+    const ot::Mac::Frame::SecurityLevel            aSecurityLevel,
+    const PsaPlaintextMacKeyStoragePolicy::PalKey &aPalKey);
+#endif
+
+#if defined(KSU_PRESENT) && (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
 template void LpwAesTransmitAesCcmT<KsuMacKeyStoragePolicy>::Process(otRadioFrame                       &aFrame,
                                                                      ot::Crypto::AesCcm::Nonce           aNonce,
                                                                      const uint8_t                       aTagLength,
                                                                      const ot::Mac::Frame::SecurityLevel aSecurityLevel,
-                                                                     const otMacKeyMaterial             *aRawKey);
+                                                                     const KsuMacKeyStoragePolicy::PalKey &aPalKey);
 #endif
 
 #endif // defined(LPWAES_PRESENT)

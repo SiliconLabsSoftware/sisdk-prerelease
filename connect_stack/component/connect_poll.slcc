@@ -1,19 +1,24 @@
 id: "connect_poll"
 label: "Poll"
 package: "connect_stack"
+description: "Implements polling for end devices."
 category: "Connect"
 quality: "production"
-description: "Implements polling for end devices."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: connect-stack-api/poll
 provides:
 - name: "connect_poll"
 requires:
 - name: "connect_stack_common"
-source:
-- path: "poll/poll.c"
 include:
 - path: "poll"
   file_list:
   - path: "poll.h"
+source:
+- path: "poll/poll.c"
 config_file:
 - path: "poll/config/poll-config.h"
 template_contribution:
@@ -27,10 +32,6 @@ template_contribution:
     event_handler: "emberAfPluginPollEventHandler"
 - name: component_catalog
   value: connect_poll
-
-documentation:
-  docset: connect-stack
-  document: group-poll
 
 metadata:
   sbom:

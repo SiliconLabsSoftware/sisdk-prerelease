@@ -30,3 +30,6 @@ template_contribution:
   priority: -20
 - name: component_catalog
   value: cycle_counter
+documentation:
+  docset: gecko-platform
+  document: platform-driver/cycle-counter

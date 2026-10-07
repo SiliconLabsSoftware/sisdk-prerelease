@@ -55,28 +55,11 @@
  ******************************************************************************/
 
 // Determine which WDOG instance to use.
-// Priority: WDOG1 > WDOG0.
-#if defined(WDOG_PRESENT) && (WDOG_COUNT > 1)
+#if defined(WDOG_PRESENT) && (WDOG_COUNT > 1) && defined(_CMU_WDOG1CLKCTRL_MASK)
   #define WATCHDOG_PERIPHERAL     WDOG1
   #define WATCHDOG_BUS_CLOCK      SL_BUS_CLOCK_WDOG1
   #define WATCHDOG_IRQN           WDOG1_IRQn
-#elif defined(WDOG_PRESENT) && (WDOG_COUNT == 1)
-  #define WATCHDOG_PERIPHERAL     WDOG0
-  #define WATCHDOG_BUS_CLOCK      SL_BUS_CLOCK_WDOG0
-  #define WATCHDOG_IRQN           WDOG0_IRQn
-#else
-  #warning "No WDOG peripheral available"
-#endif
-
-#if defined(SL_CATALOG_CRASH_MANAGER_COMPONENT_PRESENT)
-  #define SLI_WATCHDOG_MANAGER_CRASH_MANAGER_INTEGRATION  1
-#else
-  #define SLI_WATCHDOG_MANAGER_CRASH_MANAGER_INTEGRATION  0
-#endif
-
-// CMU clock select for the WDOG instance used by the watchdog manager
-#if defined(WDOG_PRESENT) && (WDOG_COUNT > 1) && defined(_CMU_WDOG1CLKCTRL_MASK)
-  #define WATCHDOG_HAS_CLKSEL              1
+  #define WATCHDOG_HAS_CLKSEL     1
   #define WATCHDOG_CLKCTRL_REG             CMU->WDOG1CLKCTRL
   #define WATCHDOG_CLKCTRL_CLKSEL_MASK     _CMU_WDOG1CLKCTRL_CLKSEL_MASK
   #if defined(CMU_WDOG1CLKCTRL_CLKSEL_HCLKDIV1024)
@@ -87,19 +70,19 @@
     (_CMU_WDOG1CLKCTRL_CLKSEL_HCLKDIV1024 << _CMU_WDOG1CLKCTRL_CLKSEL_SHIFT)
   #elif defined(CMU_WDOG1CLKCTRL_CLKSEL_HOSTCPU0CLKDIV1024)
     #define WATCHDOG_CLKSEL_HCLK  CMU_WDOG1CLKCTRL_CLKSEL_HOSTCPU0CLKDIV1024
-    #define WATCHDOG_CLKSEL_HCLK_ALT  CMU_WDOG1CLKCTRL_CLKSEL_HOSTCPU1CLKDIV1024
   #elif defined(_CMU_WDOG1CLKCTRL_CLKSEL_HOSTCPU0CLKDIV1024) \
     && defined(_CMU_WDOG1CLKCTRL_CLKSEL_SHIFT)
     #define WATCHDOG_CLKSEL_HCLK \
     (_CMU_WDOG1CLKCTRL_CLKSEL_HOSTCPU0CLKDIV1024 << _CMU_WDOG1CLKCTRL_CLKSEL_SHIFT)
-    #define WATCHDOG_CLKSEL_HCLK_ALT \
-    (_CMU_WDOG1CLKCTRL_CLKSEL_HOSTCPU1CLKDIV1024 << _CMU_WDOG1CLKCTRL_CLKSEL_SHIFT)
   #endif
   #define WATCHDOG_CLKSEL_LFRCO            CMU_WDOG1CLKCTRL_CLKSEL_LFRCO
   #define WATCHDOG_CLKSEL_LFXO             CMU_WDOG1CLKCTRL_CLKSEL_LFXO
   #define WATCHDOG_CLKSEL_ULFRCO           CMU_WDOG1CLKCTRL_CLKSEL_ULFRCO
-#elif defined(WDOG_PRESENT) && (WDOG_COUNT == 1) && defined(_CMU_WDOG0CLKCTRL_MASK)
-  #define WATCHDOG_HAS_CLKSEL              1
+#elif defined(WDOG_PRESENT) && defined(_CMU_WDOG0CLKCTRL_MASK)
+  #define WATCHDOG_PERIPHERAL     WDOG0
+  #define WATCHDOG_BUS_CLOCK      SL_BUS_CLOCK_WDOG0
+  #define WATCHDOG_IRQN           WDOG0_IRQn
+  #define WATCHDOG_HAS_CLKSEL     1
   #define WATCHDOG_CLKCTRL_REG             CMU->WDOG0CLKCTRL
   #define WATCHDOG_CLKCTRL_CLKSEL_MASK     _CMU_WDOG0CLKCTRL_CLKSEL_MASK
   #if defined(CMU_WDOG0CLKCTRL_CLKSEL_HCLKDIV1024)
@@ -110,31 +93,37 @@
     (_CMU_WDOG0CLKCTRL_CLKSEL_HCLKDIV1024 << _CMU_WDOG0CLKCTRL_CLKSEL_SHIFT)
   #elif defined(CMU_WDOG0CLKCTRL_CLKSEL_HOSTCPU0CLKDIV1024)
     #define WATCHDOG_CLKSEL_HCLK  CMU_WDOG0CLKCTRL_CLKSEL_HOSTCPU0CLKDIV1024
-    #define WATCHDOG_CLKSEL_HCLK_ALT  CMU_WDOG0CLKCTRL_CLKSEL_HOSTCPU1CLKDIV1024
   #elif defined(_CMU_WDOG0CLKCTRL_CLKSEL_HOSTCPU0CLKDIV1024) \
     && defined(_CMU_WDOG0CLKCTRL_CLKSEL_SHIFT)
     #define WATCHDOG_CLKSEL_HCLK \
     (_CMU_WDOG0CLKCTRL_CLKSEL_HOSTCPU0CLKDIV1024 << _CMU_WDOG0CLKCTRL_CLKSEL_SHIFT)
-    #define WATCHDOG_CLKSEL_HCLK_ALT \
-    (_CMU_WDOG0CLKCTRL_CLKSEL_HOSTCPU1CLKDIV1024 << _CMU_WDOG0CLKCTRL_CLKSEL_SHIFT)
   #endif
   #define WATCHDOG_CLKSEL_LFRCO            CMU_WDOG0CLKCTRL_CLKSEL_LFRCO
   #define WATCHDOG_CLKSEL_LFXO             CMU_WDOG0CLKCTRL_CLKSEL_LFXO
   #define WATCHDOG_CLKSEL_ULFRCO           CMU_WDOG0CLKCTRL_CLKSEL_ULFRCO
+#elif defined(WDOG_PRESENT) && (WDOG_COUNT > 1)
+  #define WATCHDOG_PERIPHERAL     WDOG1
+  #define WATCHDOG_BUS_CLOCK      SL_BUS_CLOCK_WDOG1
+  #define WATCHDOG_IRQN           WDOG1_IRQn
+  #define WATCHDOG_HAS_CLKSEL     0
+#elif defined(WDOG_PRESENT)
+  #define WATCHDOG_PERIPHERAL     WDOG0
+  #define WATCHDOG_BUS_CLOCK      SL_BUS_CLOCK_WDOG0
+  #define WATCHDOG_IRQN           WDOG0_IRQn
+  #define WATCHDOG_HAS_CLKSEL     0
 #else
-  #define WATCHDOG_HAS_CLKSEL              0
+  #warning "No WDOG peripheral available"
 #endif
+
+#if defined(SL_CATALOG_CRASH_MANAGER_COMPONENT_PRESENT)
+  #define SLI_WATCHDOG_MANAGER_CRASH_MANAGER_INTEGRATION  1
+#else
+  #define SLI_WATCHDOG_MANAGER_CRASH_MANAGER_INTEGRATION  0
+#endif
+
 #ifndef WATCHDOG_CLKSEL_HCLK
   #undef WATCHDOG_HAS_CLKSEL
   #define WATCHDOG_HAS_CLKSEL              0
-#endif
-#if WATCHDOG_HAS_CLKSEL
-#if defined(WATCHDOG_CLKSEL_HCLK_ALT)
-  #define WATCHDOG_CLKSEL_IS_HCLK(sel) \
-    (((sel) == WATCHDOG_CLKSEL_HCLK) || ((sel) == WATCHDOG_CLKSEL_HCLK_ALT))
-#else
-  #define WATCHDOG_CLKSEL_IS_HCLK(sel)  ((sel) == WATCHDOG_CLKSEL_HCLK)
-#endif
 #endif
 /*******************************************************************************
  *****************************   LOCAL DATA   **********************************
@@ -176,7 +165,8 @@ static void watchdog_starve_irq_handler(void)
 #endif
 }
 
-#if defined(WDOG_COUNT) && (WDOG_COUNT > 1)
+// IRQ vector must match WATCHDOG_PERIPHERAL selection above.
+#if defined(WDOG_PRESENT) && (WDOG_COUNT > 1) && defined(_CMU_WDOG1CLKCTRL_MASK)
 /***************************************************************************//**
  * @brief WDOG1 IRQ vector (overrides weak Default_Handler alias in startup).
  *
@@ -188,7 +178,17 @@ void WDOG1_IRQHandler(void)
 {
   watchdog_starve_irq_handler();
 }
-#elif defined(WDOG_COUNT) && (WDOG_COUNT == 1)
+#elif defined(WDOG_PRESENT) && defined(_CMU_WDOG0CLKCTRL_MASK)
+void WDOG0_IRQHandler(void)
+{
+  watchdog_starve_irq_handler();
+}
+#elif defined(WDOG_PRESENT) && (WDOG_COUNT > 1)
+void WDOG1_IRQHandler(void)
+{
+  watchdog_starve_irq_handler();
+}
+#elif defined(WDOG_PRESENT)
 void WDOG0_IRQHandler(void)
 {
   watchdog_starve_irq_handler();
@@ -268,34 +268,6 @@ static sl_status_t hal_cmu_encode_clock_source(
 }
 
 /***************************************************************************//**
- * @brief Map CMU WDOGxCLKCTRL.CLKSEL value to HAL clock enum.
- *
- * @param[in]  cmu_clksel   CMU CLKSEL bitfield value.
- * @param[out] clock_source HAL clock source.
- *
- * @return SL_STATUS_OK on success.
- * @return SL_STATUS_INVALID_STATE if @p cmu_clksel is not a recognized selection.
- ******************************************************************************/
-static sl_status_t hal_cmu_decode_clock_source(
-  uint32_t cmu_clksel,
-  sli_watchdog_manager_hal_clock_source_t *clock_source)
-{
-  if (WATCHDOG_CLKSEL_IS_HCLK(cmu_clksel)) {
-    *clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_HCLKDIV1024;
-  } else if (cmu_clksel == WATCHDOG_CLKSEL_LFRCO) {
-    *clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_LFRCO;
-  } else if (cmu_clksel == WATCHDOG_CLKSEL_LFXO) {
-    *clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_LFXO;
-  } else if (cmu_clksel == WATCHDOG_CLKSEL_ULFRCO) {
-    *clock_source = SLI_WATCHDOG_MANAGER_HAL_CLK_ULFRCO;
-  } else {
-    return SL_STATUS_INVALID_STATE;
-  }
-
-  return SL_STATUS_OK;
-}
-
-/***************************************************************************//**
  * @brief Write CMU WDOGxCLKCTRL.CLKSEL for the selected HAL clock source.
  *
  * @param[in] clock_source HAL clock source to program.
@@ -319,21 +291,6 @@ static sl_status_t hal_cmu_program_clock_source(
   return SL_STATUS_OK;
 }
 
-/***************************************************************************//**
- * @brief Read CMU WDOGxCLKCTRL.CLKSEL and update hal_clock_source.
- *
- * @details Called on first HAL init only. Does not modify the CMU register.
- *
- * @return SL_STATUS_OK on success.
- * @return SL_STATUS_INVALID_STATE if the CMU CLKSEL value is not recognized.
- ******************************************************************************/
-static sl_status_t hal_cmu_load_clock_source(void)
-{
-  uint32_t cmu_clksel = WATCHDOG_CLKCTRL_REG & WATCHDOG_CLKCTRL_CLKSEL_MASK;
-
-  return hal_cmu_decode_clock_source(cmu_clksel, &hal_clock_source);
-}
-
 #endif // WATCHDOG_HAS_CLKSEL
 
 /*******************************************************************************
@@ -343,9 +300,10 @@ static sl_status_t hal_cmu_load_clock_source(void)
 /***************************************************************************//**
  * @brief Initialize the hardware watchdog.
  *
- * @details On first init, loads the CMU clock source from Clock Manager without
- *          rewriting CLKSEL. On subsequent inits, programs CLKSEL from
- *          hal_clock_source before calling sl_hal_wdog_init().
+ * @details On first init (when CLKSEL is available), programs CMU CLKSEL from
+ *          SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE. On subsequent inits,
+ *          programs CLKSEL from the current HAL clock selection before calling
+ *          sl_hal_wdog_init().
  ******************************************************************************/
 sl_status_t sli_watchdog_manager_hal_init(uint8_t timeout_period)
 {
@@ -361,16 +319,15 @@ sl_status_t sli_watchdog_manager_hal_init(uint8_t timeout_period)
     sl_status_t status = SL_STATUS_OK;
 
     if (!hal_initialized) {
-      // Sync HAL state from clock manager; do not rewrite CMU on first init.
-      status = hal_cmu_load_clock_source();
-      if (status != SL_STATUS_OK) {
-        return status;
-      }
-    } else {
-      status = hal_cmu_program_clock_source(hal_clock_source);
-      if (status != SL_STATUS_OK) {
-        return status;
-      }
+      // Apply platform default clock so PERSEL wall-clock is portable across
+      // boards (not left at Clock Manager / reset HCLKDIV1024 default).
+      hal_clock_source =
+        (sli_watchdog_manager_hal_clock_source_t)SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE;
+    }
+
+    status = hal_cmu_program_clock_source(hal_clock_source);
+    if (status != SL_STATUS_OK) {
+      return status;
     }
   }
 #endif

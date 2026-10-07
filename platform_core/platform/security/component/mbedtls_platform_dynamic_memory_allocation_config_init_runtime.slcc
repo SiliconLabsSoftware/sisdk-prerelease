@@ -15,9 +15,9 @@ provides:
 - name: mbedtls_platform_dynamic_memory_allocation_config_init_runtime
 
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PLATFORM_C
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PLATFORM_MEMORY
 
 documentation:

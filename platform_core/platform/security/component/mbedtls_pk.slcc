@@ -29,7 +29,7 @@ recommends:
 - id: psa_crypto_ecdsa
   vendor: silabs
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PK_C
 documentation:
   # No dedicated Public-Key Core Abstraction Layer page; Mbed TLS hub for related docs

@@ -53,7 +53,7 @@ attest_unregister_initial_attestation_key();
  * \retval  PSA_ATTEST_ERR_GENERAL   Key handle could not be returned.
  */
 enum psa_attest_err_t
-attest_get_signing_key_handle(psa_key_handle_t *key_handle);
+attest_get_signing_key_handle(mbedtls_svc_key_id_t *key_handle);
 
 /**
  * \brief Get the buffer of Instance ID data

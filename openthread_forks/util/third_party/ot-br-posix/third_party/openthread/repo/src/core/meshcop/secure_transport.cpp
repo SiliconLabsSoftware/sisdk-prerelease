@@ -69,6 +69,7 @@ void SecureSession::Init(void)
     MarkAsNotUsed();
     ClearAllBytes(mSsl);
     ClearAllBytes(mConf);
+    mEcJpakePassword.Clear();
 #if defined(MBEDTLS_SSL_SRV_C) && defined(MBEDTLS_SSL_COOKIE_C)
     ClearAllBytes(mCookieCtx);
 #endif
@@ -88,8 +89,14 @@ void SecureSession::FreeMbedtls(void)
         mTransport.mExtension->mEcdheEcdsaInfo.Free();
     }
 #endif
+    mEcJpakePassword.Clear();
     mbedtls_ssl_config_free(&mConf);
     mbedtls_ssl_free(&mSsl);
+}
+
+int SecureSession::SetHsEcJpakePassword(void)
+{
+    return mEcJpakePassword.Set(mSsl, mTransport.mPsk, mTransport.mPskLength);
 }
 
 void SecureSession::SetState(State aState)
@@ -313,7 +320,7 @@ Error SecureSession::Setup(void)
 
     if (mTransport.mCipherSuite == SecureTransport::kEcjpakeWithAes128Ccm8)
     {
-        rval = mbedtls_ssl_set_hs_ecjpake_password(&mSsl, mTransport.mPsk, mTransport.mPskLength);
+        rval = SetHsEcJpakePassword();
         VerifyOrExit(rval == 0);
     }
 
@@ -605,7 +612,7 @@ void SecureSession::Process(void)
 
             if (mTransport.mCipherSuite == SecureTransport::kEcjpakeWithAes128Ccm8)
             {
-                mbedtls_ssl_set_hs_ecjpake_password(&mSsl, mTransport.mPsk, mTransport.mPskLength);
+                (void)SetHsEcJpakePassword();
             }
         }
 
@@ -1127,7 +1134,7 @@ int SecureTransport::Extension::EcdheEcdsaInfo::SetSecureKeys(mbedtls_ssl_config
                                       static_cast<size_t>(mOwnCertLength));
         VerifyOrExit(rval == 0);
 
-#if (MBEDTLS_VERSION_NUMBER >= 0x03000000)
+#if (MBEDTLS_VERSION_NUMBER >= 0x03000000) && (MBEDTLS_VERSION_NUMBER < 0x04000000)
         rval = mbedtls_pk_parse_key(&mPrivateKey, static_cast<const unsigned char *>(mPrivateKeySrc),
                                     static_cast<size_t>(mPrivateKeyLength), nullptr, 0,
                                     Crypto::MbedTls::CryptoSecurePrng, nullptr);

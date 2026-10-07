@@ -110,7 +110,6 @@ public:
      *
      * @param[in]  aInstance  A reference to the OpenThread instance.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     explicit Mac(Instance &aInstance);
 
     /**
@@ -124,7 +123,6 @@ public:
      * This method MUST be called after OpenThread `Instance` is fully initialized (from `Instance::AfterInit()`) and
      * only after `KeyManager` is also fully initialized.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void Init(void);
 
     /**
@@ -139,7 +137,6 @@ public:
      * @retval kErrorNone  Successfully scheduled the Active Scan request.
      * @retval kErrorBusy  Could not schedule the scan (a scan is ongoing or scheduled).
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error ActiveScan(uint32_t aScanChannels, uint16_t aScanDuration, ScanResult::Handler aHandler, void *aContext);
 
     /**
@@ -154,7 +151,6 @@ public:
      * @retval kErrorNone  Accepted the Energy Scan request.
      * @retval kErrorBusy  Could not start the energy scan.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error EnergyScan(uint32_t aScanChannels, uint16_t aScanDuration, EnergyScanHandler aHandler, void *aContext);
 
     /**
@@ -163,7 +159,6 @@ public:
      * @retval TRUE   If IEEE 802.15.4 Beacon transmissions are enabled.
      * @retval FALSE  If IEEE 802.15.4 Beacon transmissions are not enabled.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool IsBeaconEnabled(void) const { return mBeaconsEnabled; }
 
     /**
@@ -171,7 +166,6 @@ public:
      *
      * @param[in]  aEnabled  TRUE to enable IEEE 802.15.4 Beacon transmissions, FALSE otherwise.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetBeaconEnabled(bool aEnabled) { mBeaconsEnabled = aEnabled; }
 
     /**
@@ -180,7 +174,6 @@ public:
      * @retval TRUE   If rx-on-when-idle is enabled.
      * @retval FALSE  If rx-on-when-idle is not enabled.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool GetRxOnWhenIdle(void) const { return mRxOnWhenIdle; }
 
     /**
@@ -188,7 +181,6 @@ public:
      *
      * @param[in]  aRxOnWhenIdle  The rx-on-when-idle mode.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetRxOnWhenIdle(bool aRxOnWhenIdle);
 
     /**
@@ -235,7 +227,6 @@ public:
      *
      * @returns A pointer to the IEEE 802.15.4 Extended Address.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     const ExtAddress &GetExtAddress(void) const { return mLinks.GetExtAddress(); }
 
     /**
@@ -243,7 +234,6 @@ public:
      *
      * @param[in]  aExtAddress  A reference to the IEEE 802.15.4 Extended Address.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetExtAddress(const ExtAddress &aExtAddress) { mLinks.SetExtAddress(aExtAddress); }
 
     /**
@@ -251,7 +241,6 @@ public:
      *
      * @returns The IEEE 802.15.4 Short Address.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     ShortAddress GetShortAddress(void) const { return mLinks.GetShortAddress(); }
 
     /**
@@ -259,7 +248,6 @@ public:
      *
      * @param[in]  aShortAddress  The IEEE 802.15.4 Short Address.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetShortAddress(ShortAddress aShortAddress) { mLinks.SetShortAddress(aShortAddress); }
 
     /**
@@ -267,7 +255,6 @@ public:
      *
      * @returns The alternate short address, or `kShortAddrInvalid` if there is no alternate address.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     ShortAddress GetAlternateShortAddress(void) const { return mLinks.GetAlternateShortAddress(); }
 
     /**
@@ -275,7 +262,6 @@ public:
      *
      * @param[in] aShortAddress   The alternate short address. Use `kShortAddrInvalid` to clear the alternate address.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetAlternateShortAddress(ShortAddress aShortAddress) { mLinks.SetAlternateShortAddress(aShortAddress); }
 
     /**
@@ -283,7 +269,6 @@ public:
      *
      * @returns The IEEE 802.15.4 PAN Channel.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint8_t GetPanChannel(void) const { return mPanChannel; }
 
     /**
@@ -294,7 +279,6 @@ public:
      * @retval kErrorNone          Successfully set the IEEE 802.15.4 PAN Channel.
      * @retval kErrorInvalidArgs   The @p aChannel is not in the supported channel mask.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetPanChannel(uint8_t aChannel);
 
     /**
@@ -310,13 +294,11 @@ public:
      * @retval kErrorNone          Successfully set the temporary channel
      * @retval kErrorInvalidArgs   The @p aChannel is not in the supported channel mask.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetTemporaryChannel(uint8_t aChannel);
 
     /**
      * Clears the use of a previously set temporary channel and adopts the PAN channel.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void ClearTemporaryChannel(void);
 
     /**
@@ -324,7 +306,6 @@ public:
      *
      * @returns The supported channel mask.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     const ChannelMask &GetSupportedChannelMask(void) const { return mSupportedChannelMask; }
 
     /**
@@ -332,7 +313,6 @@ public:
      *
      * @param[in] aMask   The supported channel mask.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetSupportedChannelMask(const ChannelMask &aMask);
 
     /**
@@ -340,7 +320,6 @@ public:
      *
      * @returns The IEEE 802.15.4 PAN ID.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     PanId GetPanId(void) const { return mPanId; }
 
     /**
@@ -348,7 +327,6 @@ public:
      *
      * @param[in]  aPanId  The IEEE 802.15.4 PAN ID.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetPanId(PanId aPanId);
 
     /**
@@ -356,7 +334,6 @@ public:
      *
      * @returns The maximum number of retries during direct transmission.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint8_t GetMaxFrameRetriesDirect(void) const { return mMaxFrameRetriesDirect; }
 
     /**
@@ -364,7 +341,6 @@ public:
      *
      * @param[in]  aMaxFrameRetriesDirect  The maximum number of retries during direct transmission.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetMaxFrameRetriesDirect(uint8_t aMaxFrameRetriesDirect) { mMaxFrameRetriesDirect = aMaxFrameRetriesDirect; }
 
 #if OPENTHREAD_FTD
@@ -373,7 +349,6 @@ public:
      *
      * @returns The maximum number of retries during indirect transmission.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint8_t GetMaxFrameRetriesIndirect(void) const { return mMaxFrameRetriesIndirect; }
 
     /**
@@ -381,7 +356,6 @@ public:
      *
      * @param[in]  aMaxFrameRetriesIndirect  The maximum number of retries during indirect transmission.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetMaxFrameRetriesIndirect(uint8_t aMaxFrameRetriesIndirect)
     {
         mMaxFrameRetriesIndirect = aMaxFrameRetriesIndirect;
@@ -391,13 +365,11 @@ public:
     /**
      * Returns if an active scan is in progress.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool IsActiveScanInProgress(void) const { return IsActiveOrPending(kOperationActiveScan); }
 
     /**
      * Returns if an energy scan is in progress.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool IsEnergyScanInProgress(void) const { return IsActiveOrPending(kOperationEnergyScan); }
 
 #if OPENTHREAD_FTD
@@ -406,7 +378,6 @@ public:
      *
      * @returns TRUE if in middle of an indirect transmission, FALSE otherwise.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool IsPerformingIndirectTransmit(void) const { return (mOperation == kOperationTransmitDataIndirect); }
 #endif
 
@@ -417,7 +388,6 @@ public:
      * receiving of ACK frames. The MAC layer is not in transmit state during transmission of ACK frames or Beacon
      * Requests.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool IsInTransmitState(void) const;
 
     /**
@@ -426,7 +396,6 @@ public:
      * @param[in]  aCallback   The packet capture callback, or `nullptr` to disable packet capture.
      * @param[in]  aContext    A pointer to application-specific context.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetPcapCallback(PcapCallback aCallback, void *aContext) { mLinks.SetPcapCallback(aCallback, aContext); }
 
     /**
@@ -435,7 +404,6 @@ public:
      * @retval true   Promiscuous mode is enabled.
      * @retval false  Promiscuous mode is not enabled.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool IsPromiscuous(void) const { return mPromiscuous; }
 
     /**
@@ -445,13 +413,11 @@ public:
      *
      * @param[in]  aPromiscuous  true to enable promiscuous mode, or false otherwise.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetPromiscuous(bool aPromiscuous);
 
     /**
      * Resets mac counters
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void ResetCounters(void) { ClearAllBytes(mCounters); }
 
     /**
@@ -459,7 +425,6 @@ public:
      *
      * @returns A reference to the MAC counter.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Counters &GetCounters(void) { return mCounters; }
 
 #if OPENTHREAD_CONFIG_MAC_RETRY_SUCCESS_HISTOGRAM_ENABLE
@@ -473,7 +438,6 @@ public:
      *              If the number of retries is larger than the histogram array max size, the last entry
      *              counts all retries at or above the limit.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     const uint32_t *GetDirectRetrySuccessHistogram(uint16_t &aSize) const;
 
 #if OPENTHREAD_FTD
@@ -487,14 +451,12 @@ public:
      *              If the number of retries is larger than the histogram array max size, the last entry
      *              counts all retries at or above the limit.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     const uint32_t *GetIndirectRetrySuccessHistogram(uint16_t &aSize) const;
 #endif
 
     /**
      * Resets MAC retry histogram.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void ResetRetrySuccessHistogram(void) { mRetryHistogram.Clear(); }
 #endif // OPENTHREAD_CONFIG_MAC_RETRY_SUCCESS_HISTOGRAM_ENABLE
 
@@ -503,7 +465,6 @@ public:
      *
      * @returns The noise floor value in dBm.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     int8_t GetNoiseFloor(void) const { return mLinks.GetNoiseFloor(); }
 
     /**
@@ -513,7 +474,6 @@ public:
      *
      * @returns The link margin for @p aRss in dB based on noise floor.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint8_t ComputeLinkMargin(int8_t aRss) const;
 
     /**
@@ -524,7 +484,6 @@ public:
      *
      * @returns The CCA failure rate with maximum value `0xffff` corresponding to 100% failure rate.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint16_t GetCcaFailureRate(void) const { return mCcaSuccessRateTracker.GetFailureRate(); }
 
     /**
@@ -532,7 +491,6 @@ public:
      *
      * @param[in]  aEnable The requested State for the MAC layer. true - Start, false - Stop.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetEnabled(bool aEnable);
 
     /**
@@ -541,13 +499,11 @@ public:
      * @retval true   Link layer is enabled.
      * @retval false  Link layer is not enabled.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool IsEnabled(void) const { return mEnabled; }
 
     /**
      * Clears the Mode2Key stored in PSA ITS.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void ClearMode2Key(void) { mMode2KeyMaterial.Clear(); }
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
@@ -556,7 +512,6 @@ public:
      *
      * @returns CSL channel.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint8_t GetCslChannel(void) const { return mCslChannel; }
 
     /**
@@ -564,7 +519,6 @@ public:
      *
      * @param[in]  aChannel  The CSL channel.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetCslChannel(uint8_t aChannel);
 
     /**
@@ -573,7 +527,6 @@ public:
      * @retval TRUE   If MLE layer is capable of starting CSL.
      * @retval FALSE  If MLE layer is not capable of starting CSL.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetCslCapable(bool aIsCslCapable);
 
     /**
@@ -581,7 +534,6 @@ public:
      *
      * @returns CSL period in units of 10 symbols.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint16_t GetCslPeriod(void) const { return mCslPeriod; }
 
     /**
@@ -592,7 +544,6 @@ public:
      *
      * @returns CSL period in milliseconds.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint32_t GetCslPeriodInMsec(void) const;
 
     /**
@@ -600,7 +551,6 @@ public:
      *
      * @param[in]  aPeriod  The CSL period in 10 symbols.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetCslPeriod(uint16_t aPeriod);
 
     /**
@@ -610,7 +560,6 @@ public:
      *
      * @returns The converted CSL period value in microseconds corresponding to @p aPeriodInTenSymbols.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     static uint32_t CslPeriodToUsec(uint16_t aPeriodInTenSymbols);
 
     /**
@@ -619,7 +568,6 @@ public:
      * @retval TRUE   If CSL is enabled.
      * @retval FALSE  If CSL is not enabled.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool IsCslEnabled(void) const { return mIsCslEnabled; }
 
     /**
@@ -627,7 +575,6 @@ public:
      *
      * @returns The parent CSL accuracy.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     const CslAccuracy &GetCslParentAccuracy(void) const { return mLinks.GetSubMac().GetCslParentAccuracy(); }
 
     /**
@@ -635,7 +582,6 @@ public:
      *
      * @param[in] aCslAccuracy  The parent CSL accuracy.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetCslParentAccuracy(const CslAccuracy &aCslAccuracy)
     {
         mLinks.GetSubMac().SetCslParentAccuracy(aCslAccuracy);
@@ -652,7 +598,6 @@ public:
      *
      * @param[in] aFilterEnabled    TRUE to enable radio filter, FALSE to disable.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetRadioFilterEnabled(bool aFilterEnabled);
 
     /**
@@ -661,7 +606,6 @@ public:
      * @retval TRUE   If the radio filter is enabled.
      * @retval FALSE  If the radio filter is disabled.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool IsRadioFilterEnabled(void) const { return mLinks.GetSubMac().IsRadioFilterEnabled(); }
 #endif
 
@@ -677,7 +621,6 @@ public:
      * @retval  kErrorNone            Successfully set region code.
      * @retval  kErrorNotImplemented  The feature is not implemented.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetRegion(uint16_t aRegionCode);
 
     /**
@@ -692,7 +635,6 @@ public:
      * @retval  kErrorNone            Successfully set region code.
      * @retval  kErrorNotImplemented  The feature is not implemented.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error GetRegion(uint16_t &aRegionCode) const;
 
     /**
@@ -700,7 +642,6 @@ public:
      *
      * @returns wake-up channel.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint8_t GetWakeupChannel(void) const { return mWakeupChannel; }
 
 #if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE || OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
@@ -712,7 +653,6 @@ public:
      * @retval kErrorNone          Successfully set the wake-up channel.
      * @retval kErrorInvalidArgs   The @p aChannel is not in the supported channel mask.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetWakeupChannel(uint8_t aChannel);
 #endif
 
@@ -723,7 +663,6 @@ public:
      * @param[out]  aInterval  A reference to return the wake-up listen interval in microseconds.
      * @param[out]  aDuration  A reference to return the wake-up listen duration in microseconds.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void GetWakeupListenParameters(uint32_t &aInterval, uint32_t &aDuration) const;
 
     /**
@@ -738,7 +677,6 @@ public:
      * @retval kErrorNone          Successfully set the wake-up listen parameters.
      * @retval kErrorInvalidArgs   Configured listen interval is not greater than listen duration.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetWakeupListenParameters(uint32_t aInterval, uint32_t aDuration);
 
     /**
@@ -750,7 +688,6 @@ public:
      * @retval kErrorInvalidArgs   Configured listen interval is not greater than listen duration.
      * @retval kErrorInvalidState  Could not enable/disable listening for wake-up frames.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetWakeupListenEnabled(bool aEnable);
 
     /**
@@ -759,7 +696,6 @@ public:
      * @retval TRUE   If listening for wake-up frames is enabled.
      * @retval FALSE  If listening for wake-up frames is not enabled.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool IsWakeupListenEnabled(void) const { return mWakeupListenEnabled; }
 #endif // OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
 
@@ -870,13 +806,9 @@ private:
     void     FinishOperation(void);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void     PerformNextOperation(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     TxFrame *PrepareBeaconRequest(TxFrames &aTxFrames);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     TxFrame *PrepareBeacon(TxFrames &aTxFrames);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool     ShouldSendBeacon(void) const;
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool     IsJoinable(void) const;
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void     BeginTransmit(void);
@@ -893,36 +825,23 @@ private:
     Error ProcessTxDone(TxFrame &aFrame, RxFrame *aAckFrame, Error &aError);
 #endif
 #if OPENTHREAD_CONFIG_MULTI_RADIO
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error ProcessMultiRadioTxDone(TxFrame &aFrame, Error &aError);
 #endif
 
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error CanScan(void) const;
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void  Scan(Operation aScanOperation, uint32_t aScanChannels, uint16_t aScanDuration);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error UpdateScanChannel(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void  PerformActiveScan(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void  ReportActiveScanResult(const RxFrame *aBeaconFrame);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void  PerformEnergyScan(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void  ReportEnergyScanResult(int8_t aRssi);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void LogFrameRxFailure(const RxFrame *aFrame, Error aError) const;
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void LogFrameTxFailure(const TxFrame &aFrame, Error aError, uint8_t aRetryCount, bool aWillRetx) const;
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void LogBeacon(const char *aActionText) const;
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void LogOperation(OperationAction aAction, Operation aOperation) const;
 
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     static const char *OperationToString(Operation aOperation);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     static const char *OperationActionToString(OperationAction aAction);
 
 #if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE

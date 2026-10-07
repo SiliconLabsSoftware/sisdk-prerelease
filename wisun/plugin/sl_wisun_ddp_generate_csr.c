@@ -17,8 +17,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "mbedtls/build_info.h"
 #include "mbedtls/pk.h"
-#include "mbedtls/psa_util.h"
 #include "mbedtls/x509_csr.h"
 #include "sl_ddp_common.h"
 #include "sl_wisun_ddp_generate_csr.h"
@@ -55,7 +55,7 @@ sl_ddp_status_t sl_wisun_ddp_generate_csr(const uint8_t *input,
 
   // EC key-pair is loaded from PSA since the private key is needed
   // for the signature
-  ret = mbedtls_pk_setup_opaque(&pk, req->key_id);
+  ret = mbedtls_pk_wrap_psa(&pk, req->key_id);
   SL_DDP_ERROR_CHECK_SET_STATUS(ret >= 0, SL_DDP_STATUS_UNKNOWN);
 
   mbedtls_x509write_csr_set_key(&csr, &pk);
@@ -64,8 +64,7 @@ sl_ddp_status_t sl_wisun_ddp_generate_csr(const uint8_t *input,
   mbedtls_x509write_csr_set_md_alg(&csr, MBEDTLS_MD_SHA256);
 
   ret = mbedtls_x509write_csr_der(&csr, rsp->csr,
-                                  output_size - sizeof(*rsp),
-                                  mbedtls_psa_get_random, MBEDTLS_PSA_RANDOM_STATE);
+                                  output_size - sizeof(*rsp));
   SL_DDP_ERROR_CHECK_SET_STATUS(ret >= 0, SL_DDP_STATUS_UNKNOWN);
 
   // mbedtls_x509write_csr_der writes to the END of the buffer,

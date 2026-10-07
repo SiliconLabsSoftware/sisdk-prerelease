@@ -36,10 +36,6 @@
 #include "sl_rail_types.h"
 
 /**
- * \addtogroup rail_sdk_utility
- * @{
- */
-/**
  * \addtogroup sl_rail_sdk_sleep
  * @{
  */
@@ -59,7 +55,7 @@
  *
  * This function sets up the necessary configurations and prepares the RAIL SDK
  * sleep module for operation. It should be called before using any other
- * functions in the sleep module.
+ * functions in the sleep module. Automatically registered on internal_app_init.
  *
  * @return sl_rail_status_t
  *   - SL_RAIL_STATUS_NO_ERROR if initialization was successful.
@@ -69,4 +65,3 @@ sl_rail_status_t sl_rail_sdk_sleep_init(void);
 
 #endif // SL_RAIL_SDK_SLEEP_H
 /** @} */ // end of sl_rail_sdk_sleep group
-/** @} */ // end of utility group

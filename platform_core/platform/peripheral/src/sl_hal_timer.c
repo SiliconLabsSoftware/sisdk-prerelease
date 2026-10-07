@@ -127,7 +127,7 @@ extern __INLINE uint32_t sl_hal_timer_get_pending_interrupts(TIMER_TypeDef *time
 extern __INLINE uint32_t sl_hal_timer_get_enabled_pending_interrupts(TIMER_TypeDef *timer);
 extern __INLINE void sl_hal_timer_set_interrupts(TIMER_TypeDef *timer,
                                                  uint32_t flags);
-#if defined(TIMER_CC_IEN_CCIEN)
+#if defined(TIMER_CC_IEN_CC)
 extern __INLINE void sl_hal_timer_channel_clear_interrupts(TIMER_TypeDef *timer,
                                                            uint8_t channel,
                                                            uint32_t flags);

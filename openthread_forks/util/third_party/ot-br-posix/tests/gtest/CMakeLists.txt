@@ -110,7 +110,10 @@ add_executable(otbr-posix-gtest-unit
 target_include_directories(otbr-posix-gtest-unit
     PRIVATE
         ${OTBR_PROJECT_DIRECTORY}/src
+        ${OPENTHREAD_PROJECT_DIRECTORY}/include
+        ${OPENTHREAD_PROJECT_DIRECTORY}/src
         ${OPENTHREAD_PROJECT_DIRECTORY}/src/core
+        ${OPENTHREAD_PROJECT_DIRECTORY}/src/posix/platform/include
         ${OPENTHREAD_PROJECT_DIRECTORY}/tests/gtest
 )
 target_link_libraries(otbr-posix-gtest-unit
@@ -129,7 +132,10 @@ add_executable(otbr-gtest-host-api
 target_include_directories(otbr-gtest-host-api
     PRIVATE
         ${OTBR_PROJECT_DIRECTORY}/src
+        ${OPENTHREAD_PROJECT_DIRECTORY}/include
+        ${OPENTHREAD_PROJECT_DIRECTORY}/src
         ${OPENTHREAD_PROJECT_DIRECTORY}/src/core
+        ${OPENTHREAD_PROJECT_DIRECTORY}/src/posix/platform/include
         ${OPENTHREAD_PROJECT_DIRECTORY}/tests/gtest
 )
 target_link_libraries(otbr-gtest-host-api

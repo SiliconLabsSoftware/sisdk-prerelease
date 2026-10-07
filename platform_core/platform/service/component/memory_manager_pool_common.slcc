@@ -18,3 +18,6 @@ requires:
 - name: sl_assert
 - name: sl_core
 - name: memory_manager
+documentation:
+  docset: gecko-platform
+  document: platform-service/memory-manager

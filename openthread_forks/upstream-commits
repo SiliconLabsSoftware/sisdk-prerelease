@@ -3,4 +3,4 @@
 # These identify the upstream commits from which Silicon Labs' fork diverges.
 
 openthread=22b2ec2a8
-ot-br-posix=6fde80701
+ot-br-posix=6952a250c

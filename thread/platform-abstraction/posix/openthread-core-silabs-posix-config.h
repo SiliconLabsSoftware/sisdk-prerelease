@@ -83,7 +83,7 @@ sudo INFRA_IF_NAME=eth0 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.4 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DHCP6_PD=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.2.0.0_GitHub-6fde80701 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.2.0.0_GitHub-22b2ec2a8" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.2.0.0_GitHub-6952a250c -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.2.0.0_GitHub-22b2ec2a8" \
      ./script/setup
 
 */
@@ -105,7 +105,7 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOTBR_DNS_UPSTREAM_QUERY=OFF \
                    -DOTBR_NCP_DNS_UPSTREAM=ON \
                    -DOTBR_NCP_DNS_UPSTREAM_BIND_TO_INFRA=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.2.0.0_GitHub-6fde80701 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.2.0.0_GitHub-22b2ec2a8" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.2.0.0_GitHub-6952a250c -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.2.0.0_GitHub-22b2ec2a8" \
      ./script/setup
 
 */
@@ -132,7 +132,7 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOT_CLI_VENDOR_EXTENSION=$THREAD_DIR/platform-abstraction/posix/posix_vendor_cli.cmake \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DHCP6_PD=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-6fde80701 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-22b2ec2a8" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-6952a250c -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-22b2ec2a8" \
      ./script/setup
 
 */
@@ -162,7 +162,7 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOTBR_DNS_UPSTREAM_QUERY=OFF \
                    -DOTBR_NCP_DNS_UPSTREAM=ON \
                    -DOTBR_NCP_DNS_UPSTREAM_BIND_TO_INFRA=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-6fde80701 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-22b2ec2a8" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-6952a250c -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-22b2ec2a8" \
      ./script/setup
 
 */
@@ -367,16 +367,9 @@ sudo INFRA_IF_NAME=eth0 \
  *
  * This value is a higher on the OTBR than the stack default.
  *
- * Security processing is delegated to the RCP. For Series-3, we need to account for more ahead time;
- * even though the EnhAck path is entirely in RAM, LPWCRYPTO executes from flash,
- * adding non-deterministic latency on the critical path from MAC timer fire to RAIL scheduled TX submission.
- * NOTE: This increased ahead time configuration on the host is compatible with both Series-2
- * and Series-3 RCPs because this config only controls when the MAC timer fires.
- * The actual on-air TX time is anchored to an absolute radio timestamp targeting the child's CSL receive window.
- * A Series-2 RCP simply receives the frame with more lead time than it needs.
  */
 #undef OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US
-#define OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US 18000
+#define OPENTHREAD_CONFIG_MAC_CSL_REQUEST_AHEAD_US 5000
 
 /**
  * OPENTHREAD_CONFIG_CSL_TRANSMIT_TIME_AHEAD

@@ -17,3 +17,6 @@ requires:
 template_contribution:
 - name: component_catalog
   value: power_manager_sleep_hooks
+documentation:
+  docset: gecko-platform
+  document: platform-service-power-manager-overview

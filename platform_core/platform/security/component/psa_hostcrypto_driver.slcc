@@ -12,15 +12,12 @@ provides:
 
 requires:
 - name: psa_crypto_common
-- name: mbedtls_core
+- name: psa_driver_common
 - name: sxsymcrypt
 - name: sli_crypto_ksu_manager
   condition: [device_has_semailbox, device_has_ksu]
 
 source:
-  # Common drivers
-- path: src/sli_psa_driver_common.c
-
 - path: src/sli_hostcrypto_transparent_driver_cipher.c
   condition: [device_has_symcrypto]
 - path: src/sli_hostcrypto_transparent_driver_aead.c
@@ -37,8 +34,6 @@ source:
 include:
 - path: inc
   file_list:
-  - path: sli_psa_driver_common.h
-
   - path: sli_hostcrypto_transparent_functions.h
     condition: [device_has_symcrypto]
   - path: sli_hostcrypto_opaque_functions.h

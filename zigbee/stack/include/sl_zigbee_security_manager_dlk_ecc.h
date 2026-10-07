@@ -22,13 +22,14 @@
 #include <stddef.h>
 // NOTE for bool
 #include <stdbool.h>
+#include <stdint.h>
+// NOTE kept for callers that previously got malloc/free via mbedtls headers
+#include <stdlib.h>
 
 #include "sl_zigbee_types.h"
 
 #include "sl_status.h"
 #include "sl_enum.h"
-#include "mbedtls/bignum.h"
-#include "mbedtls/ecp.h"
 
 // NOTE can be optimized by defining a config header and conditionally compiling based on curve/hash config
 
@@ -50,7 +51,7 @@
 // right now it is only supported such that...
 // AES* = (AES-MMO-128, HMAC-AES-MMO-128)
 // SHA* = (SHA-256, HMAC-SHA-256)
-// ECDH = P-256 + (AES* | SHA*)
+// ECDHE-PSK = P-256 + SHA* (PSA)
 // SPEKE = C25519 + (AES-* | SHA*)
 // but there may be other extensions and supported methods in the future s.t.?
 // SPEKE !-> C25519
@@ -66,18 +67,15 @@ typedef struct {
 typedef struct sl_zigbee_sec_man_dlk_ecc_context_t {
   // configuration data
   sl_zb_dlk_ecc_config_t config;
-  // mbedtls values
-  mbedtls_ecp_group ecc_group;    // elliptic curve group
-  mbedtls_mpi d;                  // private key
-  mbedtls_ecp_point Q;            // public-point
-  mbedtls_ecp_point Qp;           // peer's public point
-  mbedtls_mpi x_k;                // common point coordinate
   // array members
   uint8_t psk[DLK_KEY_SIZE];          // byte-array for the pre-shared key
   uint8_t secret[MAX_SHARED_SECRET_LEN];     // byte-array to store the secret value
   uint8_t derived_key[DLK_KEY_SIZE];  // byte-array to store the final link key
   // test vector data
   void *test;
+  // Implementation-private crypto state (heap-allocated in ecc_init; do not access).
+  // Kept as a pointer so IPC/by-value copies of this struct stay small.
+  void *crypto_state;
 } sl_zigbee_sec_man_dlk_ecc_context_t;
 
 /**

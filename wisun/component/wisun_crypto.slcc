@@ -23,9 +23,8 @@ requires:
 - name: "mbedtls_ssl_client"
 - name: "mbedtls_ssl_proto_tls12"
 - name: "mbedtls_key_exchange_ecdhe_ecdsa"
-- name: "mbedtls_ecc_secp256r1"
-- name: "mbedtls_ecdh"
 - name: "mbedtls_pem_parse"
+- name: "mbedtls_nist_kw"
 
 provides:
 - name: "wisun_crypto"

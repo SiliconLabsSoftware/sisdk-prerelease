@@ -3,6 +3,9 @@ package: platform_core
 label: J-PAKE over Elliptic Curves
 description: >-
   This component provides support for Elliptic Curve (EC) J-PAKE in PSA Crypto.
+  On devices with an SE mailbox, the transparent SE PSA driver is used.
+  Elsewhere, the built-in Mbed TLS PAKE (via mbedtls_jpake) is used as a
+  fallback.
 category: Platform|Security|PSA Crypto|Key Exchange
 quality: production
 
@@ -14,9 +17,11 @@ requires:
 - name: psa_crypto_ecc_secp256r1
 - name: psa_crypto_sha256
 
-  # We have not implemented any EC J-PAKE PSA drivers yet, so we need to rely on
-  # the built-in Mbed TLS implementation.
+  # Builtin / classic mbedtls_jpake is only needed where there is no SE PSA
+  # PAKE driver. On HSE (device_has_semailbox) the transparent SE driver
+  # provides EC J-PAKE; MBEDTLS_ECJPAKE_ALT / se_jpake.c are being removed.
 - name: mbedtls_jpake
+  unless: [device_has_semailbox]
 
 template_contribution:
 - name: psa_crypto_config
@@ -28,26 +33,25 @@ template_contribution:
   value: "MBEDTLS_PSA_BUILTIN_ALG_JPAKE 1"
   condition: [mbedtls_jpake]
 
-  # We will assume for now that if EC J-PAKE and (D)TLS are included in a
-  # project together, that means that EC J-PAKE is actually used in (D)TLS.
+  # Assume that if EC J-PAKE and (D)TLS are included together, EC J-PAKE is used
+  # in (D)TLS (driver or builtin). On HSE, TLS PMS comes from the transparent
+  # key-derivation driver under PSA_ALG_TLS12_ECJPAKE_TO_PMS.
+  # psa_pake_derive_secret() remains for TF-M / direct callers when HSE PAKE is
+  # built (declared in sl_psa_crypto.h, implemented in sl_psa_crypto.c).
 - name: psa_crypto_builtin_config
   value: "PSA_WANT_ALG_TLS12_ECJPAKE_TO_PMS 1"
-  condition: [mbedtls_jpake, mbedtls_dtls]
+  condition: [mbedtls_ssl_proto_dtls]
 - name: psa_crypto_builtin_config
   value: "PSA_WANT_ALG_TLS12_ECJPAKE_TO_PMS 1"
-  condition: [mbedtls_jpake, mbedtls_tls]
+  condition: [mbedtls_ssl_tls]
+- name: psa_crypto_builtin_config
+  value: "PSA_WANT_ALG_TLS12_ECJPAKE_TO_PMS 1"
+  condition: [mbedtls_key_exchange_ecjpake]
 
-  # Enable a patch to Mbed TLS which adds a combined EC J-PAKE key agreement +
-  # key derivation for TLS.
-- name: psa_crypto_builtin_config
-  value: "SLI_MBEDTLS_PSA_EC_JPAKE_TLS_WORKAROUND"
-  condition: [mbedtls_jpake, mbedtls_dtls, device_has_semailbox]
-- name: psa_crypto_builtin_config
-  value: "SLI_MBEDTLS_PSA_EC_JPAKE_TLS_WORKAROUND"
-  condition: [mbedtls_jpake, mbedtls_tls, device_has_semailbox]
 documentation:
   # No dedicated EC J-PAKE PSA page; PSA Crypto hub for related docs
   url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/
+
 metadata:
   sbom:
     reference: mbedtls_sbom

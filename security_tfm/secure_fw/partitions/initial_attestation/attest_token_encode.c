@@ -98,7 +98,7 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
                           int32_t cose_alg_id,
                           const struct q_useful_buf *out_buf)
 {
-    psa_key_handle_t key_handle = 0;
+    mbedtls_svc_key_id_t key_handle = 0;
     struct t_cose_key attest_key;
     enum psa_attest_err_t attest_ret;
     enum t_cose_err_t cose_ret;
@@ -237,7 +237,7 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     enum psa_attest_err_t   attest_ret;
     int32_t                 t_cose_options = 0;
     struct t_cose_key attest_key;
-    psa_key_handle_t private_key;
+    mbedtls_svc_key_id_t private_key;
     struct q_useful_buf_c attest_key_id = NULL_Q_USEFUL_BUF_C;
 
     /* Remember some of the configuration values */

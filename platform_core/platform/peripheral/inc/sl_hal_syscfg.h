@@ -204,6 +204,7 @@ __INLINE void sl_hal_syscfg_set_systicextclken_cfgsystic(void)
 #else
   SYSCFG->CFGSYSTIC = (SYSCFG->CFGSYSTIC | _SYSCFG_CFGSYSTIC_SYSTICEXTCLKEN_MASK);
 #endif
+#endif
 }
 
 /***************************************************************************//**
@@ -219,7 +220,6 @@ __INLINE void sl_hal_syscfg_clear_systicextclken_cfgsystic(void)
 #endif
 #endif
 }
-#endif
 #endif  // !SL_TRUSTZONE_NONSECURE
 #endif
 

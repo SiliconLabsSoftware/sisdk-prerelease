@@ -40,6 +40,12 @@
 #include "sli_cpc_ep.h"
 #include "sli_cpc_log.h"
 #include "sli_cpc_panic.h"
+#include "sli_cpc_utils.h"
+
+static sl_cpc_bus_t *to_bus(sli_cpc_control_t *ctrl)
+{
+  return container_of(ctrl, sl_cpc_bus_t, ctrl);
+}
 
 static void primary_on_error(sli_cpc_control_t *ctrl, sl_status_t status)
 {
@@ -53,13 +59,14 @@ static void primary_on_error(sli_cpc_control_t *ctrl, sl_status_t status)
 static void primary_on_closed(sli_cpc_control_t *ctrl)
 {
   sli_cpc_control_primary_t *primary = &ctrl->primary;
+  sl_cpc_bus_t *bus = to_bus(ctrl);
   sl_cpc_ep_t *ep = &ctrl->ep;
   sl_status_t status;
 
   primary->state = SLI_CPC_CONTROL_PRIMARY_STATE_IDLE;
   primary->expected_response_op_id = 0;
 
-  status = sli_cpc_ep_attach(ep, ep->bus);
+  status = sli_cpc_ep_attach(ep, bus);
   if (status != SL_STATUS_OK) {
     SLI_CPC_PANIC("on_closed: attach failed: 0x%lx", (unsigned long)status);
   }
@@ -70,8 +77,9 @@ static void primary_on_closed(sli_cpc_control_t *ctrl)
   }
 }
 
-static sl_status_t primary_init(sli_cpc_control_t *ctrl, sl_cpc_bus_t *bus)
+static sl_status_t primary_init(sli_cpc_control_t *ctrl)
 {
+  sl_cpc_bus_t *bus = to_bus(ctrl);
   sl_status_t status;
 
   status = sli_cpc_control_init(ctrl);
@@ -153,7 +161,7 @@ static sl_status_t send_reset_reason_request(sli_cpc_control_t *ctrl)
 static sl_status_t send_phy_capabilities_request(sli_cpc_control_t *ctrl)
 {
   sli_cpc_control_primary_t *primary = &ctrl->primary;
-  sl_cpc_bus_t *bus = ctrl->ep.bus;
+  sl_cpc_bus_t *bus = to_bus(ctrl);
   const void *local_caps = NULL;
   uint16_t local_caps_len = 0;
   sl_status_t status;
@@ -252,7 +260,7 @@ static sl_status_t on_reset_reason_response(sli_cpc_control_t *ctrl, const sl_cp
 static sl_status_t on_phy_capabilities_response(sli_cpc_control_t *ctrl, const sl_cpc_buf_t *buf)
 {
   const sli_cpc_control_header_t *hdr = sli_cpc_control_header_from_buf(buf);
-  sl_cpc_bus_t *bus = ctrl->ep.bus;
+  sl_cpc_bus_t *bus = to_bus(ctrl);
   sl_status_t status;
   uint16_t caps_len;
   const void *caps;
@@ -277,6 +285,7 @@ static sl_status_t on_phy_capabilities_response(sli_cpc_control_t *ctrl, const s
 
 static sl_status_t on_bus_enable_response(sli_cpc_control_t *ctrl, const sl_cpc_buf_t *buf)
 {
+  sl_cpc_bus_t *bus = to_bus(ctrl);
   const sli_cpc_control_header_t *hdr = sli_cpc_control_header_from_buf(buf);
   sli_cpc_control_primary_t *primary = &ctrl->primary;
 
@@ -295,7 +304,7 @@ static sl_status_t on_bus_enable_response(sli_cpc_control_t *ctrl, const sl_cpc_
 
   SLI_CPC_LOG_DEBUG("primary init sequence completed");
   ctrl->initialized = true;
-  sli_cpc_bus_signal_event(ctrl->ep.bus, SLI_CPC_SIGNAL_SYSTEM);
+  sli_cpc_bus_signal_event(bus, SLI_CPC_SIGNAL_SYSTEM);
 
   return SL_STATUS_OK;
 }

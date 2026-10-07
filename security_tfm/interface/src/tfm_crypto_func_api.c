@@ -65,84 +65,6 @@ void mbedtls_psa_crypto_free( void )
      */
 }
 
-#if defined (MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG) && defined(SL_TRUSTZONE_NONSECURE)
-/* Wrapper function allowing the classic API to use the PSA RNG.
- *
- * `mbedtls_psa_get_random(MBEDTLS_PSA_RANDOM_STATE, ...)` calls
- * `psa_generate_random(...)`. The state parameter is ignored since the
- * PSA API doesn't support passing an explicit state.
- *
- * In the non-external case, psa_generate_random() calls an
- * `mbedtls_xxx_drbg_random` function which has exactly the same signature
- * and semantics as mbedtls_psa_get_random(). As an optimization,
- * instead of doing this back-and-forth between the PSA API and the
- * classic API, psa_crypto_random_impl.h defines `mbedtls_psa_get_random`
- * as a constant function pointer to `mbedtls_xxx_drbg_random`.
- */
-int mbedtls_psa_get_random(void *p_rng,
-                           unsigned char *output,
-                           size_t output_size)
-{
-  /* This function takes a pointer to the RNG state because that's what
-   * classic mbedtls functions using an RNG expect. The PSA RNG manages
-   * its own state internally and doesn't let the caller access that state.
-   * So we just ignore the state parameter, and in practice we'll pass
-   * NULL. */
-  (void) p_rng;
-  psa_status_t status = psa_generate_random(output, output_size);
-  if ( status == PSA_SUCCESS ) {
-    return(0);
-  } else {
-    return(MBEDTLS_ERR_ENTROPY_SOURCE_FAILED);
-  }
-}
-#endif // defined (MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG) && defined(SL_TRUSTZONE_NONSECURE)
-
-psa_status_t psa_open_key(psa_key_id_t id,
-                          psa_key_id_t *key)
-{
-#if defined(TFM_CRYPTO_KEY_MODULE_DISABLED)
-    (void)id;
-    (void)key;
-
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    const struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_OPEN_KEY_SID,
-    };
-    psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-        {.base = &id, .len = sizeof(psa_key_id_t)},
-    };
-    psa_outvec out_vec[] = {
-        {.base = key, .len = sizeof(psa_key_id_t)},
-    };
-
-    return API_DISPATCH(tfm_crypto_open_key,
-                        TFM_CRYPTO_OPEN_KEY);
-#endif
-}
-
-psa_status_t psa_close_key(psa_key_id_t key)
-{
-#if defined(TFM_CRYPTO_KEY_MODULE_DISABLED)
-    (void)key;
-
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    const struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_CLOSE_KEY_SID,
-        .key_id = key,
-    };
-    psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-    };
-
-    return API_DISPATCH_NO_OUTVEC(tfm_crypto_close_key,
-                                  TFM_CRYPTO_CLOSE_KEY);
-#endif
-}
-
 psa_status_t psa_import_key(const psa_key_attributes_t *attributes,
                             const uint8_t *data,
                             size_t data_length,
@@ -1761,41 +1683,6 @@ psa_status_t psa_generate_key_custom(const psa_key_attributes_t *attributes,
 #endif
 }
 
-psa_status_t psa_generate_key_ext(const psa_key_attributes_t *attributes,
-                                  const psa_key_production_parameters_t *params,
-                                  size_t params_data_length,
-                                  psa_key_id_t *key)
-{
-#if defined(TFM_CRYPTO_RNG_MODULE_DISABLED)
-    (void)attributes;
-    (void)params;
-    (void)params_data_length;
-    (void)key;
-
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    psa_status_t status;
-    struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_GENERATE_KEY_EXT_SID,
-    };
-
-    psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-        {.base = attributes, .len = sizeof(psa_key_attributes_t)},
-        {.base = params, .len = sizeof(psa_key_production_parameters_t) + params_data_length}, //verify this.
-    };
-
-    psa_outvec out_vec[] = {
-        {.base = key, .len = sizeof(psa_key_id_t)},
-    };
-
-    status = API_DISPATCH(tfm_crypto_generate_key_ext,
-                          TFM_CRYPTO_GENERATE_KEY_EXT);
-
-    return status;
-#endif
-}
-
 psa_status_t psa_generate_key(const psa_key_attributes_t *attributes,
                               psa_key_id_t *key)
 {
@@ -2345,44 +2232,6 @@ psa_status_t psa_key_derivation_output_key_custom(
 #endif
 }
 
-psa_status_t psa_key_derivation_output_key_ext(
-    const psa_key_attributes_t *attributes,
-    psa_key_derivation_operation_t *operation,
-    const psa_key_production_parameters_t *params,
-    size_t params_data_length,
-    psa_key_id_t *key)
-{
-#if defined(TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED)
-    (void)attributes;
-    (void)operation;
-    (void)params;
-    (void)params_data_length;
-    (void)key;
-
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    psa_status_t status;
-    struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_EXT_SID,
-        .op_handle = operation->handle,
-    };
-
-    psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-        {.base = attributes, .len = sizeof(psa_key_attributes_t)},
-        {.base = params, .len = sizeof(psa_key_production_parameters_t) + params_data_length}, //verify this.
-    };
-
-    psa_outvec out_vec[] = {
-        {.base = key, .len = sizeof(psa_key_id_t)}
-    };
-
-    status = API_DISPATCH(tfm_crypto_key_derivation_output_key_ext,
-                          TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_EXT);
-    return status;
-#endif
-}
-
 psa_status_t psa_key_derivation_output_key(
                                       const psa_key_attributes_t *attributes,
                                       psa_key_derivation_operation_t *operation,
@@ -2625,15 +2474,36 @@ psa_status_t psa_aead_update(psa_aead_operation_t *operation,
 }
 
 psa_status_t psa_pake_setup(psa_pake_operation_t *operation,
-                            const psa_pake_cipher_suite_t *cipher_suite)
+    mbedtls_svc_key_id_t password_key,
+    const psa_pake_cipher_suite_t *cipher_suite)
 {
 #if defined(TFM_CRYPTO_PAKE_MODULE_DISABLED)
     (void)operation;
+    (void)password_key;
     (void)cipher_suite;
 
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
+
+    if (operation == NULL || cipher_suite == NULL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    {
+        psa_pake_primitive_t primitive = psa_pake_cs_get_primitive(cipher_suite);
+
+        if (primitive == 0) {
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
+
+        if (((psa_pake_primitive_type_t)(primitive >> 24)) != PSA_PAKE_PRIMITIVE_TYPE_ECC
+            || psa_pake_cs_get_family(cipher_suite) != PSA_ECC_FAMILY_SECP_R1
+            || psa_pake_cs_get_bits(cipher_suite) != 256) {
+            return PSA_ERROR_NOT_SUPPORTED;
+        }
+    }
+
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_PAKE_SETUP_SID,
         .op_handle = operation->handle,
@@ -2641,6 +2511,7 @@ psa_status_t psa_pake_setup(psa_pake_operation_t *operation,
 
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = &password_key, .len = sizeof(mbedtls_svc_key_id_t)},
         {.base = cipher_suite, .len = sizeof(psa_pake_cipher_suite_t)},
     };
     psa_outvec out_vec[] = {
@@ -2649,33 +2520,6 @@ psa_status_t psa_pake_setup(psa_pake_operation_t *operation,
 
     status = API_DISPATCH(tfm_crypto_pake_setup,
                           TFM_CRYPTO_PAKE_SETUP);
-
-    return status;
-#endif
-}
-
-psa_status_t psa_pake_set_password_key(psa_pake_operation_t *operation,
-                                       mbedtls_svc_key_id_t password)
-{
-#if defined(TFM_CRYPTO_PAKE_MODULE_DISABLED)
-    (void)operation;
-    (void)password;
-
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    psa_status_t status;
-    struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_PAKE_SET_PASSWORD_KEY_SID,
-        .op_handle = operation->handle,
-    };
-
-    psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-        {.base = &password, .len = sizeof(mbedtls_svc_key_id_t)},
-    };
-
-    status = API_DISPATCH_NO_OUTVEC(tfm_crypto_pake_set_password_key,
-                                    TFM_CRYPTO_PAKE_SET_PASSWORD_KEY);
 
     return status;
 #endif
@@ -2693,6 +2537,11 @@ psa_status_t psa_pake_set_user(psa_pake_operation_t *operation,
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
+
+    if (operation == NULL || user_id == NULL || user_id_len == 0) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_PAKE_SET_USER_SID,
         .op_handle = operation->handle,
@@ -2722,6 +2571,11 @@ psa_status_t psa_pake_set_peer(psa_pake_operation_t *operation,
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
+
+    if (operation == NULL || peer_id == NULL || peer_id_len == 0) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_PAKE_SET_PEER_SID,
         .op_handle = operation->handle,
@@ -2749,6 +2603,11 @@ psa_status_t psa_pake_set_role(psa_pake_operation_t *operation,
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
+
+    if (operation == NULL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_PAKE_SET_ROLE_SID,
         .op_handle = operation->handle,
@@ -2782,6 +2641,12 @@ psa_status_t psa_pake_output(psa_pake_operation_t *operation,
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
+
+    if (operation == NULL || output == NULL || output_length == NULL ||
+        output_size == 0) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_PAKE_OUTPUT_SID,
         .op_handle = operation->handle,
@@ -2818,6 +2683,11 @@ psa_status_t psa_pake_input(psa_pake_operation_t *operation,
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
+
+    if (operation == NULL || input == NULL || input_length == 0) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_PAKE_INPUT_SID,
         .op_handle = operation->handle,
@@ -2836,28 +2706,38 @@ psa_status_t psa_pake_input(psa_pake_operation_t *operation,
 #endif
 }
 
-psa_status_t psa_pake_get_implicit_key(psa_pake_operation_t *operation,
-                                       psa_key_derivation_operation_t *output)
+psa_status_t psa_pake_get_shared_key(psa_pake_operation_t *operation,
+                                     const psa_key_attributes_t *attributes,
+                                     mbedtls_svc_key_id_t *key_id)
 {
 #if defined(TFM_CRYPTO_PAKE_MODULE_DISABLED)
     (void)operation;
-    (void)output;
+    (void)attributes;
+    (void)key_id;
 
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
+
+    if (operation == NULL || attributes == NULL || key_id == NULL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_PAKE_GET_IMPLICIT_KEY_SID,
+        .sfn_id = TFM_CRYPTO_PAKE_GET_SHARED_KEY_SID,
         .op_handle = operation->handle,
     };
 
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-        {.base = output, .len = sizeof(psa_key_derivation_operation_t)},
+        {.base = attributes, .len = sizeof(psa_key_attributes_t)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = key_id, .len = sizeof(mbedtls_svc_key_id_t)}
     };
 
-    status = API_DISPATCH_NO_OUTVEC(tfm_crypto_pake_get_implicit_key,
-                                    TFM_CRYPTO_PAKE_GET_IMPLICIT_KEY);
+    status = API_DISPATCH(tfm_crypto_pake_get_shared_key,
+                          TFM_CRYPTO_PAKE_GET_SHARED_KEY);
 
     return status;
 #endif
@@ -2875,6 +2755,11 @@ psa_status_t psa_pake_derive_secret(psa_pake_operation_t *operation,
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
+
+    if (operation == NULL || key_buf == NULL || key_length == 0) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_PAKE_DERIVE_SECRET_SID,
         .op_handle = operation->handle,
@@ -2902,6 +2787,11 @@ psa_status_t psa_pake_abort(psa_pake_operation_t *operation)
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
+
+    if (operation == NULL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_PAKE_ABORT_SID,
         .op_handle = operation->handle,

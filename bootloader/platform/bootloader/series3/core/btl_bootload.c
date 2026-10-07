@@ -227,6 +227,8 @@ SL_WEAK void bootload_applicationCallback(uint32_t offset,
       // Allocate a separate buffer for padding to ensure the input buffer remains intact
       paddedData = (uint8_t *)malloc(paddedSize);
       if (paddedData == NULL) {
+        // Propagate failure; parser checks ctx->retCode after callback returns.
+        ctx->retCode = BOOTLOADER_ERROR_PARSER_UNEXPECTED;
         return;
       }
       memcpy(paddedData, data, length);
@@ -270,6 +272,8 @@ SL_WEAK void bootload_bootloaderCallback(uint32_t address,
     // Allocate a separate buffer for padding to ensure the input buffer remains intact
     paddedData = (uint8_t *)malloc(paddedSize);
     if (paddedData == NULL) {
+      // Propagate failure; parser checks ctx->retCode after callback returns.
+      ctx->retCode = BOOTLOADER_ERROR_PARSER_UNEXPECTED;
       return;
     }
     memcpy(paddedData, data, length);
@@ -310,7 +314,18 @@ bool bootload_checkApplicationPropertiesMagic(void *appProperties)
   // (GetAliasedAddr(0) is FLASH_S_BASE when secure).
   appPropertiesAddr = bootloader_GetAliasedAddr((uint32_t)appProperties);
   flashBase = bootloader_GetAliasedAddr(FLASH_BASE);
-  flashEnd = flashBase + FLASH_SIZE;
+  // External-flash parts have no FLASH_SIZE. Region 1 size from the SE is the
+  // application extent, as with the other Series 3 address checks.
+  sl_se_code_region_config_t region_config = { 0 };
+  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_init_command_context(&cmd_ctx);
+  if (sl_se_code_region_get_config(&cmd_ctx, &region_config, 1U, 1U) != SL_STATUS_OK) {
+    sl_se_deinit_command_context(&cmd_ctx);
+    return false;
+  }
+  sl_se_deinit_command_context(&cmd_ctx);
+  flashEnd = bootloader_GetAliasedAddr((uint32_t)mainBootloaderTable->startOfAppSpace)
+             + region_config.region_size;
   appEndCfg = (uint32_t)mainBootloaderTable->endOfAppSpace;
   if (appEndCfg != 0UL) {
     appEndCfg = bootloader_GetAliasedAddr(appEndCfg);

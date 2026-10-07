@@ -7,10 +7,8 @@ category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
 provides:
 - name: mbedtls_asn1_parse
-requires:
-- name: mbedtls_core
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_ASN1_PARSE_C
 documentation:
   # Asn1_module — Functions to parse ASN.1 data structures

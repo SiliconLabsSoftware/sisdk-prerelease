@@ -1,5 +1,5 @@
 #include PLATFORM_HEADER
-#include "legacy_hal/inc/random.h"
+#include "legacy_hal/inc/sl_zigbee_random.h"
 
 void __init_stack_chk_guard(void);
 

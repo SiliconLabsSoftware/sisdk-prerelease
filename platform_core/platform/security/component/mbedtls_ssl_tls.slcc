@@ -5,9 +5,18 @@ description: >-
   This component Enable the generic SSL/TLS code in Mbed TLS.
 category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
+
+# This component is part of the Mbed TLS upper layers (SSL, X509, etc).
+# In the TZ Secure Key Library use case, the Mbed TLS upper layers lives
+# in the TZ NonSecure application, and is not not allowed to be included
+# in the secure library.
+conflicts:
+- name: tz_secure_key_library_s
+
 provides:
 - name: mbedtls_ssl_tls
 requires:
+- name: mbedtls_core
   # requires MBEDTLS_USE_PSA_CRYPTO ( in psa_crypto )
 - name: psa_crypto
   # requires at least one MBEDTLS_SSL_PROTO_XXX 

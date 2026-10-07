@@ -18,7 +18,7 @@ provides:
 - name: cpc_ng_secondary
 requires:
 - name: cpc_ng
-- name: cpc_ng_secondary_drv_instance
+- name: cpc_ng_drv_secondary_instance
 source:
 - path: src/sli_cpc_control_secondary.c
 template_contribution:

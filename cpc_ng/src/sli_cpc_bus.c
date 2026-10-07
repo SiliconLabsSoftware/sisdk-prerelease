@@ -36,7 +36,7 @@
 #include "sli_cpc_debug.h"
 #include "sli_cpc_frame_list.h"
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT) || defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
+#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
 #include "sli_cpc_wake.h"
 #endif
 
@@ -177,14 +177,35 @@ static void deinit_kernel(const sl_cpc_bus_t *bus)
  * When the CPC wake component is present we hand off to it; otherwise we hold
  * an EM1 requirement so the device doesn't drop into deep sleep.
  ******************************************************************************/
-static sl_status_t init_wake(sl_cpc_bus_t *bus)
+static sl_status_t init_wake(sl_cpc_bus_t *bus, const sl_cpc_bus_config_t *cfg)
 {
+#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
+  bus->wake_mode = cfg->wake_mode;
+
+  switch (cfg->wake_mode) {
+    case SL_CPC_WAKE_MODE_DEVICE:
 #if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-  return sli_cpc_wake_device_init(&bus->wake);
-#elif defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-  return sli_cpc_wake_host_init(&bus->wake);
+      return sli_cpc_wake_device_init(&bus->wake.device, cfg->wake_pin);
+#else
+      return SL_STATUS_NOT_AVAILABLE;
+#endif
+
+    case SL_CPC_WAKE_MODE_HOST:
+#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
+      return sli_cpc_wake_host_init(&bus->wake.host, cfg->wake_pin);
+#else
+      return SL_STATUS_NOT_AVAILABLE;
+#endif
+
+    case SL_CPC_WAKE_MODE_DISABLED:
+    default:
+      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+      return SL_STATUS_OK;
+  }
 #else
   (void)bus;
+  (void)cfg;
+
   sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
 
   return SL_STATUS_OK;
@@ -193,10 +214,22 @@ static sl_status_t init_wake(sl_cpc_bus_t *bus)
 
 static void deinit_wake(sl_cpc_bus_t *bus)
 {
+#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
+  switch (bus->wake_mode) {
+    case SL_CPC_WAKE_MODE_DEVICE:
 #if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-  sli_cpc_wake_device_deinit(&bus->wake);
-#elif defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-  sli_cpc_wake_host_deinit(&bus->wake);
+      sli_cpc_wake_device_deinit(&bus->wake.device);
+#endif
+      break;
+    case SL_CPC_WAKE_MODE_HOST:
+#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
+      sli_cpc_wake_host_deinit(&bus->wake.host);
+#endif
+      break;
+    case SL_CPC_WAKE_MODE_DISABLED:
+      sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+      break;
+  }
 #else
   (void)bus;
 
@@ -240,7 +273,7 @@ static sl_status_t init_early(sl_cpc_bus_t *bus, const sl_cpc_bus_config_t *cfg)
   sli_cpc_dispatcher_init_handle(&bus->callback_dispatcher_handle, bus);
   sli_cpc_dispatcher_init_handle(&bus->retransmit_dispatcher_handle, bus);
 
-  status = init_wake(bus);
+  status = init_wake(bus, cfg);
   if (status != SL_STATUS_OK) {
     goto deinit_mempool;
   }
@@ -373,7 +406,7 @@ sl_status_t sl_cpc_bus_start(sl_cpc_bus_t *bus)
     return status;
   }
 
-  return bus->ctrl.ops->init(&bus->ctrl, bus);
+  return bus->ctrl.ops->init(&bus->ctrl);
 }
 
 /***************************************************************************/ /**

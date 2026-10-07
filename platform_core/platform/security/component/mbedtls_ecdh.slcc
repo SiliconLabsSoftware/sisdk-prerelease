@@ -6,6 +6,8 @@ description: >-
   using Mbed TLS.
 category: Platform|Security|Mbed TLS|Key Exchange
 quality: production
+ui_hints:
+  visibility: never
 provides:
 - name: mbedtls_ecdh
 requires:
@@ -13,7 +15,7 @@ requires:
 - name: psa_crypto_ecdh
   condition: [psa_crypto]
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_ECDH_C
 documentation:
   url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins

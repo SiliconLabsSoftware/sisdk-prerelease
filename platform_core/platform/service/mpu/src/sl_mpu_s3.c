@@ -55,6 +55,14 @@ extern uint32_t __ramfuncs_start__;
 #define RAMFUNC_SECTION_SIZE              (RAMFUNC_SECTION_END - RAMFUNC_SECTION_BEGIN)
 #define RAMFUNC_SECTION_NON_ALIASED_BEGIN ((uint32_t) &__ramfuncs_start__)
 
+// DMEM spill of ramfuncs when ITCM is not enough to fit all ramfuncs. Weak so non-ITCM linkers that
+// omit text_ram_dmem still resolve; size is then zero.
+extern uint32_t __vma_ramfuncs_dmem_start__ __attribute__((weak));
+extern uint32_t __vma_ramfuncs_dmem_end__ __attribute__((weak));
+#define DMEM_RAMFUNC_SPILL_BEGIN          ((uint32_t) &__vma_ramfuncs_dmem_start__)
+#define DMEM_RAMFUNC_SPILL_END            ((uint32_t) &__vma_ramfuncs_dmem_end__)
+#define DMEM_RAMFUNC_SPILL_SIZE           (DMEM_RAMFUNC_SPILL_END - DMEM_RAMFUNC_SPILL_BEGIN)
+
 #if defined(SRAM_ALIAS_BASE)
 #define RAMFUNC_SECTION_IS_IN_SRAM_ALIAS  1
 #else
@@ -68,6 +76,10 @@ extern uint32_t __ramfuncs_start__;
 #define RAMFUNC_SECTION_END               ((uint32_t)(uint32_t *)__section_end("text_ram"))
 #define RAMFUNC_SECTION_SIZE              __section_size("text_ram")
 #define RAMFUNC_SECTION_NON_ALIASED_BEGIN RAMFUNC_SECTION_BEGIN
+// DMEM ramfunc spill not supported in IAR linker scripts yet; stubs keep MPU configure compiling.
+#define DMEM_RAMFUNC_SPILL_BEGIN          (0u)
+#define DMEM_RAMFUNC_SPILL_END            (0u)
+#define DMEM_RAMFUNC_SPILL_SIZE           (0u)
 
 // In the case of IAR, the RAM code is in SRAM non-aliased.
 #define RAMFUNC_SECTION_IS_IN_SRAM_ALIAS  0
@@ -209,14 +221,48 @@ void sl_mpu_disable_execute_from_ram(void)
   sl_mpa_manager_region_t* temp_region_handle = NULL;
 
   #if defined(DMEM_MEM_BASE)
-  // Configure DMEM as fully non-executable.
-  status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-  EFM_ASSERT(status == SL_STATUS_OK);
-  status = sl_mpa_manager_configure_region(temp_region_handle,
-                                           (void*)DMEM_MEM_BASE,
-                                           (size_t)DMEM_MAX_SIZE,
-                                           SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  // Configure DMEM non-executable, with an RX hole for spilled ramfuncs
+  // Do not overlay READ_ONLY on a full-DMEM NX region —
+  // MPA ORs attributes and XN would stick.
+  if (DMEM_RAMFUNC_SPILL_SIZE > 0u) {
+    uint32_t dmem_end = (uint32_t)DMEM_MEM_BASE + (uint32_t)DMEM_MAX_SIZE;
+
+    if (DMEM_RAMFUNC_SPILL_BEGIN > (uint32_t)DMEM_MEM_BASE) {
+      status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
+      EFM_ASSERT(status == SL_STATUS_OK);
+      status = sl_mpa_manager_configure_region(temp_region_handle,
+                                               (void *)DMEM_MEM_BASE,
+                                               (size_t)(DMEM_RAMFUNC_SPILL_BEGIN - (uint32_t)DMEM_MEM_BASE),
+                                               SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
+      EFM_ASSERT(status == SL_STATUS_OK);
+    }
+
+    status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
+    EFM_ASSERT(status == SL_STATUS_OK);
+    status = sl_mpa_manager_configure_region(temp_region_handle,
+                                             (void *)DMEM_RAMFUNC_SPILL_BEGIN,
+                                             (size_t)DMEM_RAMFUNC_SPILL_SIZE,
+                                             SL_MPA_MANAGER_ATTRIBUTE_READ_ONLY);
+    EFM_ASSERT(status == SL_STATUS_OK);
+
+    if (DMEM_RAMFUNC_SPILL_END < dmem_end) {
+      status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
+      EFM_ASSERT(status == SL_STATUS_OK);
+      status = sl_mpa_manager_configure_region(temp_region_handle,
+                                               (void *)DMEM_RAMFUNC_SPILL_END,
+                                               (size_t)(dmem_end - DMEM_RAMFUNC_SPILL_END),
+                                               SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
+      EFM_ASSERT(status == SL_STATUS_OK);
+    }
+  } else {
+    status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
+    EFM_ASSERT(status == SL_STATUS_OK);
+    status = sl_mpa_manager_configure_region(temp_region_handle,
+                                             (void*)DMEM_MEM_BASE,
+                                             (size_t)DMEM_MAX_SIZE,
+                                             SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
+    EFM_ASSERT(status == SL_STATUS_OK);
+  }
   #endif /* defined(DMEM_MEM_BASE) */
 
   #if defined(ITCM_BASE)

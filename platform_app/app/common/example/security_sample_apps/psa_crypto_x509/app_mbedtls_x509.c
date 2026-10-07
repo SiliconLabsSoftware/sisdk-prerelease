@@ -72,8 +72,8 @@ static uint8_t cert_buf[CERT_BUFFER_SIZE];
 /// Root certificate key context
 static mbedtls_pk_context root_cert_key;
 
-/// Root certificate serial number
-static const char root_cert_serial[] = "0001";
+/// Root certificate serial number (big-endian integer 1)
+static const unsigned char root_cert_serial[] = { 0x01 };
 
 /// Root certificate DN (Distinguished Name)
 static const char root_cert_dn[] = "C=US,O=Silicon Labs,CN=Root";
@@ -87,8 +87,8 @@ static const char root_cert_end[] = "21201231235959";
 /// Device certificate key context
 static mbedtls_pk_context device_cert_key;
 
-/// Device certificate serial number
-static const char device_cert_serial[] = "0002";
+/// Device certificate serial number (big-endian integer 2)
+static const unsigned char device_cert_serial[] = { 0x02 };
 
 /// Device certificate DN (Distinguished Name)
 static const char device_cert_dn[] = "C=US,O=Silicon Labs,CN=Device";
@@ -98,9 +98,6 @@ static const char device_cert_start[] = "20200101000000";
 
 /// Device certificate end date
 static const char device_cert_end[] = "20501231235959";
-
-/// MPI structure for serial number
-static mbedtls_mpi serial;
 
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
@@ -128,10 +125,10 @@ psa_status_t init_pk_ctx(bool root, psa_key_id_t id)
 {
   if (root) {
     mbedtls_pk_init(&root_cert_key);
-    print_error_cycle(mbedtls_pk_setup_opaque(&root_cert_key, id));
+    print_error_cycle(mbedtls_pk_wrap_psa(&root_cert_key, id));
   } else {
     mbedtls_pk_init(&device_cert_key);
-    print_error_cycle(mbedtls_pk_setup_opaque(&device_cert_key, id));
+    print_error_cycle(mbedtls_pk_wrap_psa(&device_cert_key, id));
   }
 }
 
@@ -146,9 +143,9 @@ psa_status_t write_csr_pem(bool root)
   } else {
     mbedtls_x509write_csr_set_key(&write_csr, &device_cert_key);
   }
-  // Private key used to sign the CSR when writing it, RNG is handled by PSA
+  // Private key used to sign the CSR when writing it; RNG is handled by PSA
   print_error_cycle(mbedtls_x509write_csr_pem(&write_csr, csr_buf,
-                                              sizeof(csr_buf), NULL, NULL));
+                                              sizeof(csr_buf)));
 }
 
 /***************************************************************************//**
@@ -253,16 +250,11 @@ psa_status_t set_subject_name(bool root)
  ******************************************************************************/
 psa_status_t set_parameters(bool root, mbedtls_md_type_t hash_alg)
 {
+  (void) root;
   mbedtls_x509write_crt_set_version(&write_cert, CERT_VERSION);
   mbedtls_x509write_crt_set_md_alg(&write_cert, hash_alg);
-  mbedtls_mpi_init(&serial);
-
-  // Parse serial number string to MPI
-  if (root) {
-    print_error_cycle(mbedtls_mpi_read_string(&serial, 10, root_cert_serial));
-  } else {
-    print_error_cycle(mbedtls_mpi_read_string(&serial, 10, device_cert_serial));
-  }
+  printf("OK\n");
+  return PSA_SUCCESS;
 }
 
 /***************************************************************************//**
@@ -271,21 +263,15 @@ psa_status_t set_parameters(bool root, mbedtls_md_type_t hash_alg)
 psa_status_t set_serial(bool root)
 {
   if (root) {
-    unsigned char* root_cert_serial_no;
-    root_cert_serial_no = (unsigned char*) root_cert_serial;
-
     print_error_cycle(
       mbedtls_x509write_crt_set_serial_raw(&write_cert,
-                                           root_cert_serial_no,
-                                           sizeof(root_cert_serial_no)));
+                                           root_cert_serial,
+                                           sizeof(root_cert_serial)));
   } else {
-    unsigned char* device_cert_serial_no;
-    device_cert_serial_no = (unsigned char*) device_cert_serial;
-
     print_error_cycle(
       mbedtls_x509write_crt_set_serial_raw(&write_cert,
-                                           device_cert_serial_no,
-                                           sizeof(device_cert_serial_no)));
+                                           device_cert_serial,
+                                           sizeof(device_cert_serial)));
   }
 }
 
@@ -376,7 +362,7 @@ psa_status_t write_crt_pem(void)
 {
   // RNG is handled by PSA
   print_error_cycle(mbedtls_x509write_crt_pem(&write_cert, cert_buf,
-                                              sizeof(cert_buf), NULL, NULL));
+                                              sizeof(cert_buf)));
 }
 
 /***************************************************************************//**
@@ -465,7 +451,6 @@ void free_create_ctx(void)
   mbedtls_x509write_csr_free(&write_csr);
   mbedtls_x509_csr_free(&csr_ctx);
   mbedtls_x509write_crt_free(&write_cert);
-  mbedtls_mpi_free(&serial);
 }
 
 /***************************************************************************//**

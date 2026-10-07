@@ -5,24 +5,25 @@ description: |
   message is received on the bus. Without it, the device must stay in EM1 so the
   bus remains ready to receive data from the host. The host must drive the
   configured wake pin.
+
+  Use the same instance name as the CPC driver instance on this bus.
 category: Services|CPC-NG|Internal
 quality: experimental
 label: CPC-NG Device Wake
+instantiable:
+  prefix: instance
 config_file:
-- path: config/sl_cpc_wake_config.h
+- path: config/sl_cpc_wake_{{instance}}_config.h
   file_id: cpc_ng_wake_device_config
-conflicts:
-- name: cpc_ng_wake_host
-source:
-- path: src/sli_cpc_wake.c
-- path: src/sli_cpc_wake.h
 provides:
 - name: cpc_ng_wake_device
 requires:
-- name: cpc_ng_secondary
+- name: cpc_ng_wake
 - name: gpio
 - name: power_manager
 template_contribution:
 - name: component_catalog
   value: cpc_ng_wake_device
+- name: cpc_ng_wake_device_instances
+  value: "{{instance}}"
 root_path: cpc_ng

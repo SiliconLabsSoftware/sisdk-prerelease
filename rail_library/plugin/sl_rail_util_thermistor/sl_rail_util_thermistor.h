@@ -53,19 +53,19 @@ typedef struct sl_rail_util_thermistor_coefficients {
   /**
    * Constant term J in the denominator.
    */
-  double j;
+  float j;
   /**
    * Linear coefficient K for ln(R / 1000).
    */
-  double k;
+  float k;
   /**
    * Quadratic coefficient L for ln(R / 1000)^2.
    */
-  double l;
+  float l;
   /**
    * Cubic coefficient M for ln(R / 1000)^3.
    */
-  double m;
+  float m;
 } sl_rail_util_thermistor_coefficients_t;
 
 /**

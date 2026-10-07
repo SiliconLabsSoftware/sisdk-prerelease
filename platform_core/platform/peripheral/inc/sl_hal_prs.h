@@ -216,8 +216,10 @@ sl_status_t sl_hal_prs_get_free_channel(uint8_t *channel,
  * @details
  *   This function searches for the first available async PRS channel,
  *   optionally considering GPIO port constraints. Some devices can only route
- *   specific PRS channels to certain GPIO ports (e.g., async channels 0-5 to
- *   GPIO ports A and B, channels 6-11 to GPIO ports C and D).
+ *   specific PRS channels to certain GPIO ports (e.g., async channels
+ *   SL_HAL_PRS_FIRST_ASYNC_CHANNEL_GPIO_PAB .. SL_HAL_PRS_FIRST_ASYNC_CHANNEL_GPIO_PCD-1
+ *   to GPIO ports A and B, and channels SL_HAL_PRS_FIRST_ASYNC_CHANNEL_GPIO_PCD ..
+ *   SL_HAL_PRS_ASYNC_CHAN_COUNT-1 to GPIO ports C and D).
  *
  *   If gpio_port_pin is provided, the function considers GPIO routing constraints
  *   and returns a channel that can be routed to the specified GPIO port.
@@ -283,8 +285,9 @@ void sl_hal_prs_connect_channel_consumer(uint8_t channel,
  *  There are certain restrictions to where a PRS channel can be routed. Consult
  *  the datasheet of the device to see if the selected @p channel is routable
  *  to the requested gpio @p port . Some devices for instance can only route
- *  the async channels 0-5 on GPIO pins PAx and PBx while async channels 6-11
- *  can only be routed to GPIO pins PCx and PDx. It applies for sync/async
+ *  async channels below SL_HAL_PRS_FIRST_ASYNC_CHANNEL_GPIO_PCD on GPIO pins
+ *  PAx and PBx while higher async channels (through SL_HAL_PRS_ASYNC_CHAN_COUNT-1) can
+ *  only be routed to GPIO pins PCx and PDx. It applies for sync/async
  *  channels.
  *
  * @param[in] channel

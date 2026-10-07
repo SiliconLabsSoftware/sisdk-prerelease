@@ -1,16 +1,18 @@
 id: "connect_mailbox_client"
 label: "Mailbox Client"
 package: "connect_stack"
+description: "Implements the client side of the Connect mailbox protocol. It provides APIs for submitting and retrieving messages to/from a mailbox server."
 category: "Connect|Mailbox"
 quality: "production"
-description: "Implements the client side of the Connect mailbox protocol. It provides APIs for submitting and retrieving messages to/from a mailbox server."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: connect-stack-api/mailbox-client
 provides:
 - name: "connect_mailbox_client"
 requires:
 - name: "connect_stack_common"
-source:
-- path: "mailbox/mailbox-client/mailbox-client.c"
-- path: "mailbox/mailbox-client/mailbox-client-cb.c"
 include:
 - path: "mailbox"
   file_list:
@@ -19,6 +21,9 @@ include:
 - path: "mailbox/mailbox-client"
   file_list:
   - path: "mailbox-client.h"
+source:
+- path: "mailbox/mailbox-client/mailbox-client.c"
+- path: "mailbox/mailbox-client/mailbox-client-cb.c"
 config_file:
 - path: "mailbox/mailbox-client/config/mailbox-client-config.h"
 template_contribution:
@@ -40,10 +45,6 @@ template_contribution:
     event_handler: "emAfPluginMailboxClientEventHandler"
 - name: component_catalog
   value: connect_mailbox_client
-
-documentation:
-  docset: connect-stack
-  document: group-mailbox-client
 
 metadata:
   sbom:

@@ -194,6 +194,10 @@ TEST(cpc_ep_ref_cnt, connect_then_close_waits_for_driver_tx_complete)
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSED, ep.state);
   TEST_ASSERT_BIT_HIGH(SL_CPC_EP_EVENT_CLOSED, cpc_test_event_mask);
 
+  // In-flight TX complete must not re-arm the retx timer on a closing endpoint.
+  TEST_ASSERT_EQUAL(0, mock_cpc_timer_count_running());
+  TEST_ASSERT_FALSE(mock_cpc_timer_has_pending());
+
   cpc_test_ep_discard(&ep);
 }
 
@@ -279,15 +283,15 @@ TEST(cpc_ep_ref_cnt, close_on_recv_still_sends_ack)
  * @brief sli_cpc_ep_send_ack defers via PEND_ACK when the TX frame pool is empty.
  *
  * Sequence:
- *   1. Exhaust the TX frame pool.
- *   2. send_ack fails and arms PEND_ACK.
- *   3. Free one frame and signal the bus.
- *   4. TEST_ASSERT_OUTGOING waits until the deferred ACK is transmitted.
- *   5. PEND_ACK is cleared once the ACK has been sent.
+ *   1. Steal N-1 TX pool slots and hold the last with a deferred TX-complete ACK.
+ *   2. A second send_ack fails and arms PEND_ACK.
+ *   3. Completing the held TX returns the slot via process_transmit_complete;
+ *      process_pending_flags retries the deferred ACK on the same bus wake.
+ *   4. PEND_ACK is cleared once the ACK has been sent.
  */
 TEST(cpc_ep_ref_cnt, send_ack_defers_when_tx_pool_exhausted)
 {
-  sl_cpc_frame_t *frames[SL_CPC_DRV_MOCK_DEFAULT_TX_FRAME_POOL_COUNT];
+  sl_cpc_frame_t *frames[SL_CPC_DRV_MOCK_DEFAULT_TX_FRAME_POOL_COUNT - 1U];
   const uint8_t peer_seq = CPC_TEST_PEER_SYN_SEQ + 1U;
   size_t frame_count = 0;
   sl_cpc_buf_t *rx_buf;
@@ -309,21 +313,34 @@ TEST(cpc_ep_ref_cnt, send_ack_defers_when_tx_pool_exhausted)
 
   ep.ack = peer_seq;
 
-  for (i = 0; i < SL_CPC_DRV_MOCK_DEFAULT_TX_FRAME_POOL_COUNT; i++) {
+  mock_cpc_drv_set_defer_tx_complete(sl_cpc_drv_mock_default, true);
+
+  for (i = 0; i < SL_CPC_DRV_MOCK_DEFAULT_TX_FRAME_POOL_COUNT - 1U; i++) {
     frames[i] = sli_cpc_frame_new(g_bus, false);
     TEST_ASSERT_NOT_NULL(frames[i]);
     frame_count++;
   }
+
+  // Occupy the last pool slot with a no-ACK frame held in the driver.
+  sli_cpc_ep_send_ack(&ep);
+  cpc_test_pump();
+  TEST_ASSERT_EQUAL(1, mock_cpc_drv_held_tx_count(sl_cpc_drv_mock_default));
   TEST_ASSERT_NULL(sli_cpc_frame_new(g_bus, false));
+  TEST_ASSERT_OUTGOING({
+    .flags = 0,
+    .len = 0,
+    .dst = CPC_TEST_EP_ID,
+    .seq = 0,
+    .ack = (int)peer_seq,
+    .wnd = 1,
+  });
 
   sli_cpc_ep_send_ack(&ep);
   TEST_ASSERT_TRUE((ep.flags & SLI_CPC_EP_FLAG_PEND_ACK) != 0);
 
-  frame_count--;
-  sli_cpc_frame_free(frames[frame_count]);
-  frames[frame_count] = NULL;
-
-  sli_cpc_bus_signal_event(g_bus, SLI_CPC_SIGNAL_SYSTEM);
+  // Next TX should complete immediately so the deferred ACK is not held again.
+  mock_cpc_drv_set_defer_tx_complete(sl_cpc_drv_mock_default, false);
+  TEST_ASSERT_EQUAL(1, mock_cpc_drv_complete_held_tx(sl_cpc_drv_mock_default, 1));
 
   TEST_ASSERT_OUTGOING({
     .flags = 0,

@@ -39,9 +39,9 @@ requires:
 - name: psa_crypto_trng
   condition: [device_series_3]
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_ENTROPY_HARDWARE_ALT
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_ENTROPY_RAIL_PRESENT
   condition: [rail_lib]
 documentation:

@@ -53,7 +53,7 @@ extern "C" {
  *   aligned, the function will operate twice as fast using MVP complex
  *   processing.
  *   Maximum vector length is 1M (2^20) elements in the 4-byte aligned case,
- *   and 512K when oen or more of the complex vectors are 2-byte aligned.
+ *   and 512K when one or more of the complex vectors are 2-byte aligned.
  *
  * @param[in] input_a The complex vector, input A.
  * @param[in] input_b The real vector, input B.

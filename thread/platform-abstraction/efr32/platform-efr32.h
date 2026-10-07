@@ -28,7 +28,8 @@
 
 /**
  * @file
- *   This file includes the platform-specific initializers.
+ *   This file includes the platform-specific initializers and PAL
+ *   compile-time configuration.
  *
  */
 
@@ -41,21 +42,172 @@ extern "C" {
 
 #include <openthread/instance.h>
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+
 #include "em_device.h"
+
+#if defined(_SILICON_LABS_32B_SERIES_1)
+#error "EFR32 Series 1 parts are not supported."
+#endif
+
 #if defined(_SILICON_LABS_32B_SERIES_2)
 #include "em_system.h"
 #else
 #include "sl_hal_system.h"
 #endif
 
+#ifdef SL_CATALOG_CLOCK_MANAGER_PRESENT
+#include "sl_clock_manager_oscillator_config.h"
+#else
+#include "sl_device_init_hfxo.h"
+#include "sl_device_init_hfxo_config.h"
+#endif
+
+#if defined(HARDWARE_BOARD_HAS_LFXO) && !defined(SL_CATALOG_CLOCK_MANAGER_PRESENT)
+#include "sl_device_init_lfxo.h"
+#include "sl_device_init_lfxo_config.h"
+#endif
+
+/**
+ * @def SL_OPENTHREAD_CSL_TX_UNCERTAINTY
+ *
+ * Uncertainty of scheduling a CSL transmission, in ±10 us units.
+ *
+ * Note: This value was carefully configured to meet Thread certification
+ * requirements for Silicon Labs devices.
+ *
+ */
+#ifndef SL_OPENTHREAD_CSL_TX_UNCERTAINTY
+#if OPENTHREAD_RADIO || OPENTHREAD_CONFIG_REFERENCE_DEVICE_ENABLE
+#define SL_OPENTHREAD_CSL_TX_UNCERTAINTY 175
+#elif OPENTHREAD_FTD
+// Approx. ~128 us. for single CCA + some additional tx uncertainty in testing
+#define SL_OPENTHREAD_CSL_TX_UNCERTAINTY 20
+#else
+// Approx. ~128 us. for single CCA
+//
+// Note: Our SSEDs "schedule" transmissions to their parent in order to know
+// exactly when in the future the data packets go out so they can calculate
+// the accurate CSL phase to send to their parent.
+//
+// The receive windows on the SSEDs scale with this value, so increasing this
+// uncertainty to account for full CCA/CSMA with 0..7 backoffs
+// (see RAIL_CSMA_CONFIG_802_15_4_2003_2p4_GHz_OQPSK_CSMA) will mean that the
+// receive windows can get very long (~ 5ms.)
+//
+// We have updated SSEDs to use a single CCA (RAIL_CSMA_CONFIG_SINGLE_CCA)
+// instead. If they are in very busy channels, CSL won't be reliable anyway.
+#define SL_OPENTHREAD_CSL_TX_UNCERTAINTY 12
+#endif
+#endif
+
+/**
+ * @def SL_OPENTHREAD_HFXO_ACCURACY
+ *
+ * Worst case XTAL accuracy in units of ± ppm. Also used for calculations during CSL operations.
+ *
+ * @note Platforms may optimize this value based on operational conditions (i.e.: temperature).
+ *
+ */
+#ifndef SL_OPENTHREAD_HFXO_ACCURACY
+#ifdef SL_CATALOG_CLOCK_MANAGER_PRESENT
+#define SL_OPENTHREAD_HFXO_ACCURACY SL_CLOCK_MANAGER_HFXO_PRECISION
+#else
+#define SL_OPENTHREAD_HFXO_ACCURACY SL_DEVICE_INIT_HFXO_PRECISION
+#endif
+#endif
+
+/**
+ * @def SL_OPENTHREAD_LFXO_ACCURACY
+ *
+ * Worst case XTAL accuracy in units of ± ppm. Also used for calculations during CSL operations.
+ *
+ * @note Platforms may optimize this value based on operational conditions (i.e.: temperature).
+ */
+#ifndef SL_OPENTHREAD_LFXO_ACCURACY
+#if defined(HARDWARE_BOARD_HAS_LFXO)
+#if SL_CATALOG_CLOCK_MANAGER_PRESENT
+#define SL_OPENTHREAD_LFXO_ACCURACY SL_CLOCK_MANAGER_LFXO_PRECISION
+#else
+#define SL_OPENTHREAD_LFXO_ACCURACY SL_DEVICE_INIT_LFXO_PRECISION
+#endif // SL_CATALOG_CLOCK_MANAGER_PRESENT
+#else
+#define SL_OPENTHREAD_LFXO_ACCURACY 0
+#endif // HARDWARE_BOARD_HAS_LFXO
+#endif
+
+/**
+ * @def SL_OPENTHREAD_RADIO_CCA_MODE
+ *
+ * Defines the CCA mode to be used by the platform.
+ *
+ */
+#ifndef SL_OPENTHREAD_RADIO_CCA_MODE
+#define SL_OPENTHREAD_RADIO_CCA_MODE SL_RAIL_IEEE802154_CCA_MODE_RSSI
+#endif
+
+/**
+ * @def SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE
+ *
+ * Max Private key size supported by ECDSA Crypto handler.
+ *
+ */
+#ifndef SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE
+#define SL_OPENTHREAD_ECDSA_PRIVATE_KEY_SIZE 32
+#endif
+
+/**
+ * @def SL_OPENTHREAD_ENABLE_HOST_WAKE_GPIO
+ *
+ * Define to 1 to enable the host wakeup GPIO functionality.
+ * This feature allows the platform to wake up the host using a GPIO pin.
+ *
+ * Default value is 0 (disabled).
+ */
+#ifndef SL_OPENTHREAD_ENABLE_HOST_WAKE_GPIO
+#define SL_OPENTHREAD_ENABLE_HOST_WAKE_GPIO 0
+#endif
+
+/**
+ * @def SL_OPENTHREAD_HOST_WAKEUP_GPIO_PORT
+ *
+ * Defines the GPIO port for host wakeup.
+ *
+ */
+
+#ifndef SL_OPENTHREAD_HOST_WAKEUP_GPIO_PORT
+#define SL_OPENTHREAD_HOST_WAKEUP_GPIO_PORT SL_GPIO_PORT_C
+#endif
+
+/**
+ * @def SL_OPENTHREAD_HOST_WAKEUP_GPIO_PIN
+ *
+ * Defines the GPIO pin for host wakeup.
+ *
+ */
+
+#ifndef SL_OPENTHREAD_HOST_WAKEUP_GPIO_PIN
+#define SL_OPENTHREAD_HOST_WAKEUP_GPIO_PIN 0
+#endif
+
+/**
+ * @def SL_OPENTHREAD_HOST_CLEAR_PIN_TIMEOUT_MS
+ *
+ * Defines the timeout duration (in milliseconds) for clearing the host wakeup GPIO pin.
+ *
+ * This value specifies the amount of time the system will wait before clearing the host wakeup GPIO pin.
+ *
+ */
+#ifndef SL_OPENTHREAD_HOST_CLEAR_PIN_TIMEOUT_MS
+#define SL_OPENTHREAD_HOST_CLEAR_PIN_TIMEOUT_MS 10
+#endif
+
 #include "sl_rail.h"
 
 #include "alarm.h"
 #include "uart.h"
-
-#ifdef SL_COMPONENT_CATALOG_PRESENT
-#include "sl_component_catalog.h"
-#endif // SL_COMPONENT_CATALOG_PRESENT
 
 #ifndef SL_CATALOG_KERNEL_PRESENT
 #define sl_ot_rtos_task_can_access_pal() (true)

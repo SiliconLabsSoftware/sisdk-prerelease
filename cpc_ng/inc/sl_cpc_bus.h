@@ -49,7 +49,8 @@
 #endif
 #endif
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT) || defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
+#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
+#include "sl_gpio.h"
 #include "sli_cpc_wake.h"
 #endif
 
@@ -86,11 +87,24 @@ typedef struct sli_cpc_control {
 #endif
 } sli_cpc_control_t;
 
+#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
+/** @brief Per-bus CPC wake mode. */
+typedef enum {
+  SL_CPC_WAKE_MODE_DISABLED,
+  SL_CPC_WAKE_MODE_DEVICE,
+  SL_CPC_WAKE_MODE_HOST,
+} sl_cpc_wake_mode_t;
+#endif
+
 /** @brief Bus configuration. */
 typedef struct sl_cpc_bus_config {
   bool is_secondary;
   uint16_t rx_frame_pool_count;
   uint16_t tx_frame_pool_count;
+#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
+  sl_cpc_wake_mode_t wake_mode;
+  sl_gpio_t wake_pin;
+#endif
 } sl_cpc_bus_config_t;
 
 /**
@@ -116,11 +130,16 @@ typedef struct sl_cpc_bus {
 
   sli_cpc_dispatcher_context_t dispatcher;
 
-  // Currently not instantiable, see CPC-3443
+#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
+  sl_cpc_wake_mode_t wake_mode;
+  union {
+#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+    sli_cpc_wake_device_t device;
+#endif
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-  sli_cpc_wake_host_t wake;
-#elif defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-  sli_cpc_wake_device_t wake;
+    sli_cpc_wake_host_t host;
+#endif
+  } wake;
 #endif
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)

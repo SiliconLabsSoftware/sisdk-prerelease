@@ -92,7 +92,13 @@ void sl_hal_sysrtc_init(const sl_hal_sysrtc_init_t *init)
   }
 
   // Set configuration.
+#if defined(_SYSRTC_CFG_DEBUGRUN0_MASK) && defined(_SYSRTC_CFG_DEBUGRUN1_MASK)
+  SYSRTC_INST->CFG = init->enable_debug_run
+                     ? (SYSRTC_CFG_DEBUGRUN0 | SYSRTC_CFG_DEBUGRUN1)
+                     : 0UL;
+#else
   SYSRTC_INST->CFG = (init->enable_debug_run ? 1UL : 0UL) << _SYSRTC_CFG_DEBUGRUN_SHIFT;
+#endif
   SL_PRINT_STRING_DEBUG("debug_run=%d, %d\r\n",
                         (int)init->enable_debug_run,
                         (int)__LINE__);
@@ -252,7 +258,6 @@ static void sli_hal_sysrtc_manual_reset(void)
   SYSRTC_INST->CFG = _SYSRTC_CFG_RESETVALUE;
 }
 #endif // !SYSRTC_SWRST_SWRST
-
 
 /** @} (end addtogroup sysrtc) */
 #endif /* defined(SYSRTC_COUNT) && (SYSRTC_COUNT > 0) */

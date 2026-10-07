@@ -36,6 +36,19 @@
 
 #include <string.h>
 
+#include <mbedtls/version.h>
+
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+// Soft-crypto primitives that remain legacy in OT; ECDSA uses PSA below.
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
+#include <mbedtls/md.h>
+#include <mbedtls/pk.h>
+#include <mbedtls/private/aes.h>
+#include <mbedtls/private/ccm.h>
+#include <mbedtls/private/cmac.h>
+#include <mbedtls/private/sha256.h>
+#include <psa/crypto.h>
+#else
 #include <mbedtls/aes.h>
 #include <mbedtls/ccm.h>
 #include <mbedtls/cmac.h>
@@ -45,7 +58,7 @@
 #include <mbedtls/md.h>
 #include <mbedtls/pk.h>
 #include <mbedtls/sha256.h>
-#include <mbedtls/version.h>
+#endif
 
 #include <openthread/instance.h>
 #include <openthread/platform/crypto.h>
@@ -58,6 +71,7 @@
 #include "common/new.hpp"
 #include "crypto/ecdsa.hpp"
 #include "crypto/hmac_sha256.hpp"
+#include "crypto/mbedtls.hpp"
 #include "crypto/storage.hpp"
 #include "instance/instance.hpp"
 
@@ -73,10 +87,12 @@ using namespace Crypto;
 #endif
 
 #if OPENTHREAD_FTD || OPENTHREAD_MTD
+#if (MBEDTLS_VERSION_NUMBER < 0x04000000)
 static mbedtls_ctr_drbg_context sCtrDrbgContext;
 static mbedtls_entropy_context  sEntropyContext;
 #ifndef OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
 static constexpr uint16_t kEntropyMinThreshold = 16;
+#endif
 #endif
 #endif
 
@@ -85,9 +101,45 @@ OT_TOOL_WEAK void *otPlatCryptoCAlloc(size_t aNum, size_t aSize) { return otPlat
 OT_TOOL_WEAK void  otPlatCryptoFree(void *aPtr) { otPlatFree(aPtr); }
 #endif
 
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000) && defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
+// Weak so Silicon Labs psa_crypto_trng (sli_psa_trng.c) can override on device.
+// Host/simulation has no TRNG and links this fallback via otPlatEntropyGet().
+extern "C" OT_TOOL_WEAK psa_status_t mbedtls_psa_external_get_random(mbedtls_psa_external_random_context_t *aContext,
+                                                                     uint8_t                               *aOutput,
+                                                                     size_t                                 aOutputSize,
+                                                                     size_t *aOutputLength)
+{
+    OT_UNUSED_VARIABLE(aContext);
+
+    size_t remaining = aOutputSize;
+    size_t offset    = 0;
+
+    while (remaining > 0)
+    {
+        uint16_t chunk = (remaining > UINT16_MAX) ? UINT16_MAX : static_cast<uint16_t>(remaining);
+
+        if (otPlatEntropyGet(aOutput + offset, chunk) != OT_ERROR_NONE)
+        {
+            return PSA_ERROR_INSUFFICIENT_ENTROPY;
+        }
+
+        offset += chunk;
+        remaining -= chunk;
+    }
+
+    *aOutputLength = aOutputSize;
+    return PSA_SUCCESS;
+}
+#endif
+
 OT_TOOL_WEAK void otPlatCryptoInit(void)
 {
-    // Intentionally empty.
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+    // PSA Crypto is required for Mbed TLS 4.x / TF-PSA-Crypto (including EC-JPAKE).
+    psa_status_t status = psa_crypto_init();
+    OT_ASSERT(status == PSA_SUCCESS);
+    OT_UNUSED_VARIABLE(status);
+#endif
 }
 
 // AES  Implementation
@@ -221,7 +273,14 @@ OT_TOOL_WEAK otError otPlatCryptoHmacSha256Init(otCryptoContext *aContext)
     context = static_cast<mbedtls_md_context_t *>(aContext->mContext);
     mbedtls_md_init(context);
     mdInfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+    VerifyOrExit(mdInfo != nullptr, error = kErrorFailed);
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+    // Mbed TLS 4.x: hmac flag removed from mbedtls_md_setup(); use hmac_setup.
+    VerifyOrExit((mbedtls_md_setup(context, mdInfo, 0) == 0), error = kErrorFailed);
+    VerifyOrExit((mbedtls_md_hmac_setup(context, mdInfo) == 0), error = kErrorFailed);
+#else
     VerifyOrExit((mbedtls_md_setup(context, mdInfo, 1) == 0), error = kErrorFailed);
+#endif
 
 exit:
     return error;
@@ -504,6 +563,7 @@ exit:
 }
 
 #ifndef OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
+#if (MBEDTLS_VERSION_NUMBER < 0x04000000)
 
 static int handleMbedtlsEntropyPoll(void *aData, unsigned char *aOutput, size_t aInLen, size_t *aOutLen)
 {
@@ -520,10 +580,16 @@ exit:
     return rval;
 }
 
+#endif // (MBEDTLS_VERSION_NUMBER < 0x04000000)
 #endif // OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
 
 OT_TOOL_WEAK void otPlatCryptoRandomInit(void)
 {
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+    psa_status_t status = psa_crypto_init();
+    OT_ASSERT(status == PSA_SUCCESS);
+    OT_UNUSED_VARIABLE(status);
+#else
     mbedtls_entropy_init(&sEntropyContext);
 
 #ifndef OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
@@ -536,21 +602,254 @@ OT_TOOL_WEAK void otPlatCryptoRandomInit(void)
     int rval = mbedtls_ctr_drbg_seed(&sCtrDrbgContext, mbedtls_entropy_func, &sEntropyContext, nullptr, 0);
     OT_ASSERT(rval == 0);
     OT_UNUSED_VARIABLE(rval);
+#endif
 }
 
 OT_TOOL_WEAK void otPlatCryptoRandomDeinit(void)
 {
+#if (MBEDTLS_VERSION_NUMBER < 0x04000000)
     mbedtls_entropy_free(&sEntropyContext);
     mbedtls_ctr_drbg_free(&sCtrDrbgContext);
+#endif
 }
 
 OT_TOOL_WEAK otError otPlatCryptoRandomGet(uint8_t *aBuffer, uint16_t aSize)
 {
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+    return (psa_generate_random(aBuffer, aSize) == PSA_SUCCESS) ? OT_ERROR_NONE : OT_ERROR_FAILED;
+#else
     return ot::Crypto::MbedTls::MapError(
         mbedtls_ctr_drbg_random(&sCtrDrbgContext, static_cast<unsigned char *>(aBuffer), static_cast<size_t>(aSize)));
+#endif
 }
 
 #if OPENTHREAD_CONFIG_ECDSA_ENABLE
+
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+
+namespace {
+
+/**
+ * Copy a SEC1 EC private-key DER and strip leading 0x00 bytes from the
+ * privateKey OCTET STRING down to 32 bytes (P-256). PSA import requires an
+ * exact-length key; OpenSSL-style SEC1 encodings often include a pad byte.
+ */
+static bool PrepareEcdsaKeyDerForParse(const uint8_t *aDer, uint8_t aDerLen, uint8_t *aOut, uint8_t &aOutLen)
+{
+    constexpr uint8_t kP256KeyBytes = 32;
+
+    if (aDerLen < 8 || aDerLen > OT_CRYPTO_ECDSA_MAX_DER_SIZE)
+    {
+        return false;
+    }
+
+    memcpy(aOut, aDer, aDerLen);
+    aOutLen = aDerLen;
+
+    // SEQUENCE with short-form length only (OT ECDSA DERs are well under 128).
+    if (aOut[0] != 0x30 || (aOut[1] & 0x80) != 0)
+    {
+        return true;
+    }
+
+    uint8_t seqLen    = aOut[1];
+    size_t  headerLen = 2;
+
+    if (headerLen + seqLen != aOutLen)
+    {
+        return true;
+    }
+
+    size_t p = headerLen;
+
+    // version INTEGER
+    if (p + 2 > aOutLen || aOut[p] != 0x02)
+    {
+        return true;
+    }
+
+    p += 2 + aOut[p + 1];
+
+    // privateKey OCTET STRING (short-form length)
+    if (p + 2 > aOutLen || aOut[p] != 0x04 || (aOut[p + 1] & 0x80) != 0)
+    {
+        return true;
+    }
+
+    uint8_t octLen     = aOut[p + 1];
+    size_t  octContent = p + 2;
+
+    if (octContent + octLen > aOutLen || octLen <= kP256KeyBytes || aOut[octContent] != 0x00)
+    {
+        return true;
+    }
+
+    size_t strip = 0;
+
+    while (octLen - strip > kP256KeyBytes && aOut[octContent + strip] == 0x00)
+    {
+        strip++;
+    }
+
+    if (strip == 0)
+    {
+        return true;
+    }
+
+    memmove(aOut + octContent, aOut + octContent + strip, aOutLen - (octContent + strip));
+    aOut[p + 1] = static_cast<uint8_t>(octLen - strip);
+    aOut[1]     = static_cast<uint8_t>(seqLen - strip);
+    aOutLen     = static_cast<uint8_t>(aOutLen - strip);
+
+    return true;
+}
+
+static int ParseEcdsaKeyPairDer(mbedtls_pk_context *aPk, const otPlatCryptoEcdsaKeyPair *aKeyPair)
+{
+    uint8_t der[OT_CRYPTO_ECDSA_MAX_DER_SIZE];
+    uint8_t derLen;
+
+    if (!PrepareEcdsaKeyDerForParse(aKeyPair->mDerBytes, aKeyPair->mDerLength, der, derLen))
+    {
+        return MBEDTLS_ERR_PK_KEY_INVALID_FORMAT;
+    }
+
+    return mbedtls_pk_parse_key(aPk, der, derLen, nullptr, 0);
+}
+
+} // namespace
+
+OT_TOOL_WEAK otError otPlatCryptoEcdsaGenerateKey(otPlatCryptoEcdsaKeyPair *aKeyPair)
+{
+    Error                error      = kErrorNone;
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    mbedtls_svc_key_id_t keyId      = MBEDTLS_SVC_KEY_ID_INIT;
+    mbedtls_pk_context   pk;
+    psa_status_t         status;
+    int                  ret;
+
+    mbedtls_pk_init(&pk);
+
+    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_EXPORT | PSA_KEY_USAGE_SIGN_HASH | PSA_KEY_USAGE_VERIFY_HASH);
+    psa_set_key_algorithm(&attributes, MBEDTLS_PK_ALG_ECDSA(PSA_ALG_SHA_256));
+    psa_set_key_type(&attributes, PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1));
+    psa_set_key_bits(&attributes, 256);
+
+    status = psa_generate_key(&attributes, &keyId);
+    VerifyOrExit(status == PSA_SUCCESS, error = kErrorFailed);
+
+    ret = mbedtls_pk_copy_from_psa(keyId, &pk);
+    VerifyOrExit(ret == 0, error = MbedTls::MapError(ret));
+
+    ret = mbedtls_pk_write_key_der(&pk, aKeyPair->mDerBytes, OT_CRYPTO_ECDSA_MAX_DER_SIZE);
+    VerifyOrExit(ret > 0, error = MbedTls::MapError(ret));
+
+    aKeyPair->mDerLength = static_cast<uint8_t>(ret);
+    memmove(aKeyPair->mDerBytes, aKeyPair->mDerBytes + OT_CRYPTO_ECDSA_MAX_DER_SIZE - aKeyPair->mDerLength,
+            aKeyPair->mDerLength);
+
+exit:
+    psa_destroy_key(keyId);
+    psa_reset_key_attributes(&attributes);
+    mbedtls_pk_free(&pk);
+
+    return error;
+}
+
+OT_TOOL_WEAK otError otPlatCryptoEcdsaGetPublicKey(const otPlatCryptoEcdsaKeyPair *aKeyPair,
+                                                   otPlatCryptoEcdsaPublicKey     *aPublicKey)
+{
+    Error              error = kErrorNone;
+    mbedtls_pk_context pk;
+    uint8_t            buffer[1 + OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE];
+    size_t             bufLen = 0;
+    int                ret;
+
+    mbedtls_pk_init(&pk);
+
+    ret = ParseEcdsaKeyPairDer(&pk, aKeyPair);
+    VerifyOrExit(ret == 0, error = kErrorParse);
+
+    ret = mbedtls_pk_write_pubkey_psa(&pk, buffer, sizeof(buffer), &bufLen);
+    VerifyOrExit(ret == 0, error = MbedTls::MapError(ret));
+    OT_ASSERT(bufLen == sizeof(buffer));
+
+    memcpy(aPublicKey->m8, buffer + 1, OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE);
+
+exit:
+    mbedtls_pk_free(&pk);
+    return error;
+}
+
+OT_TOOL_WEAK otError otPlatCryptoEcdsaSign(const otPlatCryptoEcdsaKeyPair *aKeyPair,
+                                           const otPlatCryptoSha256Hash   *aHash,
+                                           otPlatCryptoEcdsaSignature     *aSignature)
+{
+    Error                error      = kErrorNone;
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    mbedtls_svc_key_id_t keyId      = MBEDTLS_SVC_KEY_ID_INIT;
+    mbedtls_pk_context   pk;
+    psa_status_t         status;
+    size_t               signatureLen;
+    int                  ret;
+
+    mbedtls_pk_init(&pk);
+
+    ret = ParseEcdsaKeyPairDer(&pk, aKeyPair);
+    VerifyOrExit(ret == 0, error = kErrorParse);
+
+    ret = mbedtls_pk_get_psa_attributes(&pk, PSA_KEY_USAGE_SIGN_HASH, &attributes);
+    VerifyOrExit(ret == 0, error = MbedTls::MapError(ret));
+
+    ret = mbedtls_pk_import_into_psa(&pk, &attributes, &keyId);
+    VerifyOrExit(ret == 0, error = MbedTls::MapError(ret));
+
+    status = psa_sign_hash(keyId, MBEDTLS_PK_ALG_ECDSA(PSA_ALG_SHA_256), aHash->m8, Sha256::Hash::kSize, aSignature->m8,
+                           OT_CRYPTO_ECDSA_SIGNATURE_SIZE, &signatureLen);
+    VerifyOrExit(status == PSA_SUCCESS, error = kErrorFailed);
+    OT_ASSERT(signatureLen == OT_CRYPTO_ECDSA_SIGNATURE_SIZE);
+
+exit:
+    psa_destroy_key(keyId);
+    psa_reset_key_attributes(&attributes);
+    mbedtls_pk_free(&pk);
+
+    return error;
+}
+
+OT_TOOL_WEAK otError otPlatCryptoEcdsaVerify(const otPlatCryptoEcdsaPublicKey *aPublicKey,
+                                             const otPlatCryptoSha256Hash     *aHash,
+                                             const otPlatCryptoEcdsaSignature *aSignature)
+{
+    Error                error      = kErrorNone;
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    mbedtls_svc_key_id_t keyId      = MBEDTLS_SVC_KEY_ID_INIT;
+    psa_status_t         status;
+    uint8_t              buffer[1 + OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE];
+
+    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_VERIFY_HASH);
+    psa_set_key_algorithm(&attributes, MBEDTLS_PK_ALG_ECDSA(PSA_ALG_SHA_256));
+    psa_set_key_type(&attributes, PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1));
+    psa_set_key_bits(&attributes, 256);
+
+    buffer[0] = 0x04;
+    memcpy(buffer + 1, aPublicKey->m8, OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE);
+
+    status = psa_import_key(&attributes, buffer, sizeof(buffer), &keyId);
+    VerifyOrExit(status == PSA_SUCCESS, error = kErrorFailed);
+
+    status = psa_verify_hash(keyId, MBEDTLS_PK_ALG_ECDSA(PSA_ALG_SHA_256), aHash->m8, Sha256::Hash::kSize,
+                             aSignature->m8, OT_CRYPTO_ECDSA_SIGNATURE_SIZE);
+    VerifyOrExit(status == PSA_SUCCESS, error = kErrorSecurity);
+
+exit:
+    psa_destroy_key(keyId);
+    psa_reset_key_attributes(&attributes);
+
+    return error;
+}
+
+#else // MBEDTLS_VERSION_NUMBER >= 0x04000000
 
 OT_TOOL_WEAK otError otPlatCryptoEcdsaGenerateKey(otPlatCryptoEcdsaKeyPair *aKeyPair)
 {
@@ -716,6 +1015,8 @@ exit:
 
     return error;
 }
+
+#endif // MBEDTLS_VERSION_NUMBER >= 0x04000000
 
 #endif // #if OPENTHREAD_CONFIG_ECDSA_ENABLE
 

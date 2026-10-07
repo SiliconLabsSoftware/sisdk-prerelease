@@ -37,3 +37,6 @@ template_contribution:
     include: sl_event_system.h
     handler: sl_event_system_init
   priority: -8900
+documentation:
+  docset: gecko-platform
+  document: platform-common/event-system

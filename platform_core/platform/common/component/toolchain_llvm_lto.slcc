@@ -37,4 +37,7 @@ template_contribution:
   - toolchain_lto_disable
   - toolchain_llvm_lto_disable
   - toolchain_gcc_lto_disable
+documentation:
+  docset: gecko-platform
+  document: platform-common/common
 root_path: platform_core

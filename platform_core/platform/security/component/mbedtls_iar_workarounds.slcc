@@ -1,0 +1,44 @@
+id: mbedtls_iar_workarounds
+package: platform_core
+label: Mbed TLS / TF-PSA-Crypto IAR workarounds
+description: >-
+  Suppress known IAR diagnostics originating in mbedtls 4.1 / TF-PSA-Crypto
+  sources. Project-wide --diag_suppress is temporary; prefer upstream fixes or
+  per-TU pragmas when available.
+category: Platform|Security|Mbed TLS
+quality: production
+ui_hints:
+  visibility: never
+provides:
+- name: mbedtls_iar_workarounds
+
+toolchain_settings:
+  # TODO(PSEC-7459): Pe1215 — tf_psa_crypto_platform_requirements.h defines
+  # __STDC_WANT_LIB_EXT1__ 1, which opts into C11 Annex K. IAR DLIB then
+  # deprecates classic memset/memcpy. Remove once upstream adds an IAR guard
+  # mirroring the existing MSVC _CRT_SECURE_NO_DEPRECATE handling in
+  # mbedtls_platform_requirements.h.
+- option: iar_compiler_option
+  value: --diag_suppress=Pe1215
+  # TODO(PSEC-7459): Pe546 — PSA core goto-exit paradigm declares variables
+  # between a goto and its label. Historical fix lived in
+  # 035_PSEC_4179_fix_IAR_warnings_bypass_initialization.diff (hoist decls /
+  # scope blocks). Re-apply as upstreamable scope-block fixes later.
+- option: iar_compiler_option
+  value: --diag_suppress=Pe546
+  # TODO(PSEC-7459): Pa217 — bit-field state:2 adjacent to non-bit-field
+  # block_number in crypto_builtin_key_derivation.h (Mbed-TLS#10651). Historical
+  # patch 132_PSEC_7166_fix_IAR_warnings.diff moved #pragma diag_suppress=Pa217
+  # to .c access sites (header pragmas were no-ops). Prefer upstream struct
+  # reorder / widen, or restore per-TU pragmas.
+- option: iar_compiler_option
+  value: --diag_suppress=Pa217
+  # TODO(PSEC-7757): Pe111: psa_crypto.c, code is left unreachable in certain configurations.
+  # Contribute fix to the upstream and remove this workaround
+- option: iar_compiler_option
+  value: --diag_suppress=Pe111
+
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core

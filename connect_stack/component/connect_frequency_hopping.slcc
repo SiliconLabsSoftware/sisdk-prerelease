@@ -1,9 +1,14 @@
 id: "connect_frequency_hopping"
 label: "Frequency Hopping"
 package: "connect_stack"
+description: "Implements frequency hopping based on FCC specifications. A companion component can be installed to add frequency hopping CLI commands."
 category: "Connect"
 quality: "production"
-description: "Implements frequency hopping based on FCC specifications. A companion component can be installed to add frequency hopping CLI commands."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: architecture-of-connect-v3x/04-connect-stack-layers
 provides:
 - name: "connect_frequency_hopping"
 requires:
@@ -18,10 +23,6 @@ config_file:
 template_contribution:
 - name: component_catalog
   value: connect_frequency_hopping
-
-documentation:
-  docset: connect-stack
-  document: group-frequency-hopping
 
 metadata:
   sbom:

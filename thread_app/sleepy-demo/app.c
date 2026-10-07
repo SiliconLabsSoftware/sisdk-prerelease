@@ -101,7 +101,6 @@ void sl_ot_cli_init(void)
 void app_init(void)
 {
     sleepyInit();
-    /* EM4 wake: Mle::Restore() already reloads network config from NVM. */
     if (!sleepyEm4IsWakeFromEm4())
     {
         setNetworkConfiguration();

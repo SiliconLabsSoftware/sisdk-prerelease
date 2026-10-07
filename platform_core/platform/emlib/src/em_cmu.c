@@ -90,7 +90,8 @@
 #define CMU_MAX_FREQ_0WS_1V1              40000000UL
 
 #define CMU_MAX_FREQ_0WS_1V0              20000000UL
-#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10)
 #define CMU_MAX_FREQ_0WS_1V1              25000000UL
 #define CMU_MAX_FREQ_1WS_1V1              50000000UL
 #define CMU_MAX_FREQ_2WS_1V1              75000000UL
@@ -1065,7 +1066,9 @@ uint32_t CMU_ClockFreqGet(CMU_Clock_TypeDef clock)
     case cmuClock_USART1:
 #endif
 #endif
+#if I2C_COUNT > 1
     case cmuClock_I2C1:
+#endif
 #if I2C_COUNT > 2
     case cmuClock_I2C2:
 #endif
@@ -1074,7 +1077,12 @@ uint32_t CMU_ClockFreqGet(CMU_Clock_TypeDef clock)
 #endif
     case cmuClock_PRS:
     case cmuClock_GPIO:
+#if GPCRC_COUNT > 1
+    case cmuClock_GPCRC0:
+    case cmuClock_GPCRC1:
+#else
     case cmuClock_GPCRC:
+#endif
     case cmuClock_LDMAXBAR:
     case cmuClock_SYSCFG:
     case cmuClock_DCDC:
@@ -3143,7 +3151,7 @@ void CMU_RFFPLLInit(const CMU_RFFPLL_Init_TypeDef *pllInit)
   }
 
   if (pllInit->regLock) {
-    RFFPLL0->LOCK = ~USBPLL_LOCK_LOCKKEY_UNLOCK;
+    RFFPLL0->LOCK = ~RFFPLL_LOCK_LOCKKEY_UNLOCK;
   }
 }
 #endif

@@ -21,10 +21,6 @@
  *  http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf
  */
 
-#include <mbedtls/build_info.h>
-
-#include "mbedtls/platform_util.h"
-#include "mbedtls/md.h"
 #include <string.h>
 
 #include "security/sha/btl_sha256.h"
@@ -60,11 +56,11 @@ int sha_x_update(SHA_Type_t algo, const unsigned char *data, size_t data_len, ui
       countersize = 64 / 32;
       break;
     default:
-      return MBEDTLS_ERR_MD_FEATURE_UNAVAILABLE;
+      return BOOTLOADER_ERROR_SECURITY_INVALID_OPTION;
   }
 
   if ( data_len == 0 ) {
-    return 0;
+    return BOOTLOADER_OK;
   }
 
   if (counter[0] < blocksize) {
@@ -80,7 +76,7 @@ int sha_x_update(SHA_Type_t algo, const unsigned char *data, size_t data_len, ui
           state_in = (uint8_t*)init_state_sha256;
           break;
         default:
-          return MBEDTLS_ERR_MD_FEATURE_UNAVAILABLE;
+          return BOOTLOADER_ERROR_SECURITY_INVALID_OPTION;
       }
     }
   } else {
@@ -123,7 +119,7 @@ int sha_x_update(SHA_Type_t algo, const unsigned char *data, size_t data_len, ui
     memcpy( (void *) (buffer + left), data, data_len);
   }
 
-  return 0;
+  return BOOTLOADER_OK;
 }
 
 int sha_x_finish(SHA_Type_t algo, uint8_t* state, unsigned char *buffer, uint32_t* counter, unsigned char *output)
@@ -138,7 +134,7 @@ int sha_x_finish(SHA_Type_t algo, uint8_t* state, unsigned char *buffer, uint32_
       countersize = 64 / 32;
       break;
     default:
-      return MBEDTLS_ERR_MD_FEATURE_UNAVAILABLE;
+      return BOOTLOADER_ERROR_SECURITY_INVALID_OPTION;
   }
 
   // Convert counter value to bits, and put in big-endian array
@@ -164,7 +160,7 @@ int sha_x_finish(SHA_Type_t algo, uint8_t* state, unsigned char *buffer, uint32_
 
   memcpy(output, state, outputsize);
 
-  return 0;
+  return BOOTLOADER_OK;
 }
 
 void btl_sha256_init(btl_sha256_context *ctx)
@@ -178,7 +174,7 @@ int btl_sha256_starts_ret(btl_sha256_context *ctx, int is224)
   ctx->total[0] = 0;
   ctx->total[1] = 0;
 
-  return 0;
+  return BOOTLOADER_OK;
 }
 
 int btl_sha256_update_ret(btl_sha256_context *ctx,

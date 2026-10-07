@@ -22,4 +22,7 @@ template_contribution:
   value: power_manager_deepsleep
 conflicts:
 - name: device_generic_family_sixx301
+documentation:
+  docset: gecko-platform
+  document: platform-service-power-manager-overview
 root_path: platform_core

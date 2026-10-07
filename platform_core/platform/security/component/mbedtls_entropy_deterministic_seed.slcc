@@ -16,15 +16,15 @@ provides:
 requires:
 - name: device_series_3
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_ENTROPY_NV_SEED
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_PLATFORM_C
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_PLATFORM_NV_SEED_ALT
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_PLATFORM_STD_NV_SEED_READ sli_nv_seed_read
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_PLATFORM_STD_NV_SEED_WRITE sli_nv_seed_write
 metadata:
   sbom:

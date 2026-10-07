@@ -49,7 +49,7 @@ Example — UART VCOM on `BRD4186C`:
 mkdir -p build/secondary && cd build/secondary
 $(slt where slc-cli)/slc generate ../../cpc_echo_secondary.slcp -d . \
   --slconf ../../user.slconf \
-  --with brd4186c,cpc_ng_drv_uart_secondary:vcom,cpc_ng_wake_device
+  --with brd4186c,cpc_ng_drv_uart_secondary:vcom
 
 mkdir -p build/primary && cd build/primary
 $(slt where slc-cli)/slc generate ../../cpc_echo_primary.slcp -d . \
@@ -63,12 +63,12 @@ Example — SDIO on `BRD6360A`:
 mkdir -p build/secondary && cd build/secondary
 $(slt where slc-cli)/slc generate ../../cpc_echo_secondary.slcp -d . \
   --slconf ../../user.slconf \
-  --with brd6360a,cpc_ng_drv_sdio_device_secondary:instance,cpc_ng_wake_device
+  --with brd6360a,cpc_ng_drv_sdio_device_secondary:instance
 
 mkdir -p build/primary && cd build/primary
 $(slt where slc-cli)/slc generate ../../cpc_echo_primary.slcp -d . \
   --slconf ../../user.slconf \
-  --with brd6360a,sdhc:instance,cpc_ng_drv_sdio_host_primary:instance
+  --with brd6360a,cpc_ng_drv_sdio_host_primary:instance
 ```
 
 Either side can be flashed first; the primary retries connect until the secondary is listening.

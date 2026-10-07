@@ -36,6 +36,7 @@
 #include <inttypes.h>
 #include "sl_core.h"
 #include "sl_rail.h"
+#include "sl_status.h"
 #include "sl_component_catalog.h"
 #if defined(SL_CATALOG_RADIO_CONFIG_SIMPLE_RAIL_SINGLEPHY_PRESENT)
 #include "sl_rail_util_init.h"
@@ -111,6 +112,11 @@ typedef struct error_flags_t {
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
+/*******************************************************************************
+ * @brief Select the packet assistant packer/unpacker for the current PHY.
+ ******************************************************************************/
+static void select_packet_assistant_phy(void);
+
 /*******************************************************************************
  * @brief Modify the currently configured fixed frame length in bytes.
  ******************************************************************************/
@@ -387,30 +393,32 @@ SL_WEAK range_test_packet_t* get_start_of_payload_for_standard(uint8_t* received
 /******************************************************************************
  * The API helps to unpack the received packet, point to the payload and returns the length.
  *****************************************************************************/
-SL_WEAK uint16_t unpack_packet(sl_rail_handle_t rail_handle, uint8_t *rx_destination, const sl_rail_rx_packet_info_t *packet_information, uint8_t **start_of_payload)
+SL_WEAK sl_status_t sl_packet_assistant_unpack_packet(sl_rail_handle_t rail_handle, const sl_rail_rx_packet_info_t *packet_information, uint8_t *rx_buffer, uint8_t **start_of_payload, uint16_t *payload_size)
 {
-  sl_rail_status_t result = sl_rail_copy_rx_packet(rail_handle, rx_destination, packet_information);
+  sl_rail_status_t result = sl_rail_copy_rx_packet(rail_handle, rx_buffer, packet_information);
   if (result != SL_RAIL_STATUS_NO_ERROR) {
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
     app_log_warning("sl_rail_copy_rx_packet failed with error: 0x%08" PRIX32 "\n", result);
 #endif
   }
-  *start_of_payload = rx_destination;
-  return packet_information->packet_bytes;
+  *start_of_payload = rx_buffer;
+  *payload_size = packet_information->packet_bytes;
+  return SL_STATUS_OK;
 }
 
 /******************************************************************************
  * The API prepares the packet for sending and load it in the RAIL TX FIFO
  *****************************************************************************/
-SL_WEAK void prepare_packet(sl_rail_handle_t rail_handle, uint8_t *out_data, uint16_t length)
+SL_WEAK sl_status_t sl_packet_assistant_prepare_packet(sl_rail_handle_t rail_handle, uint8_t *payload, uint16_t length)
 {
   // Check if write fifo has written all bytes
   uint16_t bytes_written_in_fifo = 0;
-  bytes_written_in_fifo = sl_rail_write_tx_fifo(rail_handle, out_data, length, true);
+  bytes_written_in_fifo = sl_rail_write_tx_fifo(rail_handle, payload, length, true);
   app_assert(bytes_written_in_fifo == length,
              "sl_rail_write_tx_fifo() failed to write in fifo (%" PRIu16 " bytes instead of %" PRIu16 " bytes)\n",
              bytes_written_in_fifo,
              length);
+  return SL_STATUS_OK;
 }
 
 SL_WEAK void prepare_ieee802154_data_frame(uint16_t packet_number, uint8_t *tx_buffer)
@@ -534,6 +542,7 @@ void set_power_level_to_max(bool init)
       rail_handle,
       (const sl_rail_channel_config_t *)channelConfigs[range_test_settings.current_phy], NULL
       );
+    select_packet_assistant_phy();
     uint16_t channel_first = sl_rail_get_first_channel(
       rail_handle,
       (const sl_rail_channel_config_t *)channelConfigs[range_test_settings.current_phy]
@@ -828,7 +837,10 @@ bool receive_measurement(void)
       rx_packet = get_start_of_payload_for_standard(rx_buffer);
     } else {
       uint8_t *start_of_packet = 0;
-      (void)unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
+      uint16_t packet_size = 0;
+      sl_status_t packet_assistant_status = sl_packet_assistant_unpack_packet(rail_handle, &packet_info, rx_buffer, &start_of_packet, &packet_size);
+      app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
+      (void)packet_size;
       rail_status = sl_rail_release_rx_packet(rail_handle, rx_packet_handle);
       rx_packet = (range_test_packet_t*) start_of_packet;
     }
@@ -1082,6 +1094,7 @@ void send_service_packet(void)
 #if defined(SL_CATALOG_RADIO_CONFIG_SIMPLE_RAIL_SINGLEPHY_PRESENT)
   sl_rail_config_channels(rail_handle,
                           (const sl_rail_channel_config_t *)channelConfigs[range_test_settings.current_phy], NULL);
+  select_packet_assistant_phy();
   set_power_level_to_max(false);
 #endif
   range_test_settings_payload_length_tmp = range_test_settings.payload_length;
@@ -1113,7 +1126,8 @@ void send_service_packet(void)
   tx_data->payload_length = range_test_settings_payload_length_tmp;
   tx_data->tx_power = range_test_settings.tx_power;
 
-  prepare_packet(rail_handle, tx_buffer, tx_length);
+  sl_status_t packet_assistant_status = sl_packet_assistant_prepare_packet(rail_handle, tx_buffer, tx_length);
+  app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
   temp_channel = range_test_settings.channel;
   rail_status = sl_rail_start_tx(rail_handle, range_test_settings.service_channel, SL_RAIL_TX_OPTIONS_DEFAULT, NULL);
   if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
@@ -1127,6 +1141,7 @@ void send_service_packet(void)
 #if defined(SL_CATALOG_RADIO_CONFIG_SIMPLE_RAIL_SINGLEPHY_PRESENT)
   sl_rail_config_channels(rail_handle,
                           (const sl_rail_channel_config_t *)channelConfigs[range_test_settings.current_phy], NULL);
+  select_packet_assistant_phy();
   set_power_level_to_max(false);
 #endif
   menu_set_std_phy(false);
@@ -1150,6 +1165,7 @@ void receive_service_packet(void)
 #if defined(SL_CATALOG_RADIO_CONFIG_SIMPLE_RAIL_SINGLEPHY_PRESENT)
   sl_rail_config_channels(rail_handle,
                           (const sl_rail_channel_config_t *)channelConfigs[range_test_settings.current_phy], NULL);
+  select_packet_assistant_phy();
   set_power_level_to_max(false);
 #endif
   set_all_radio_handlers_to_idle();
@@ -1182,10 +1198,8 @@ void undo_service_config(void)
   sl_rail_handle_t rail_handle = get_current_rail_handler();
   sl_rail_config_channels(rail_handle,
                           (const sl_rail_channel_config_t *)channelConfigs[range_test_settings.current_phy], NULL);
+  select_packet_assistant_phy();
   set_power_level_to_max(false);
-#endif
-#if defined(SL_CATALOG_RAIL_PACKET_ASSISTANT_PRESENT)
-  update_assistant_pointers(range_test_settings.current_phy);
 #endif
 
   update_tx_power();
@@ -1223,7 +1237,10 @@ bool service_packet_received(void)
       rx_packet = get_start_of_payload_for_standard(rx_buffer);
       start_of_packet = (uint8_t*) rx_packet;
     } else {
-      (void)unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
+      uint16_t packet_size = 0;
+      sl_status_t packet_assistant_status = sl_packet_assistant_unpack_packet(rail_handle, &packet_info, rx_buffer, &start_of_packet, &packet_size);
+      app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
+      (void)packet_size;
       sl_rail_release_rx_packet(rail_handle, rx_packet_handle);
       rx_packet = (range_test_packet_t*) start_of_packet;
     }
@@ -1259,6 +1276,17 @@ bool service_packet_received(void)
 //                          Static Function Definitions
 // -----------------------------------------------------------------------------
 /*******************************************************************************
+ * @brief Select the packet assistant packer/unpacker for the current PHY.
+ ******************************************************************************/
+static void select_packet_assistant_phy(void)
+{
+#if defined(SL_CATALOG_RAIL_PACKET_ASSISTANT_PRESENT)
+  sl_status_t packet_assistant_status = sl_packet_assistant_select_phy(range_test_settings.current_phy);
+  app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant_select_phy failed\n");
+#endif
+}
+
+/*******************************************************************************
  * @brief Stops RX and TX and set custom rail handler to IDLE
  ******************************************************************************/
 void set_custom_handler_to_idle(void)
@@ -1280,7 +1308,7 @@ static void set_fixed_length(sl_rail_handle_t rail_handle, uint16_t length)
 {
   if (!is_current_phy_standard()) {
 #ifdef  SL_CATALOG_RAIL_PACKET_ASSISTANT_PRESENT
-    update_assistant_pointers(range_test_settings.current_phy);
+    select_packet_assistant_phy();
     if (channelConfigs[range_test_settings.current_phy]->configs[0].stackInfo == NULL) {
       sl_rail_set_fixed_length(rail_handle, length);
     } else {
@@ -1362,7 +1390,8 @@ static void send_packet(uint16_t packet_number)
     tx_length = range_test_settings.payload_length;
   }
 
-  prepare_packet(rail_handle, tx_buffer, tx_length);
+  sl_status_t packet_assistant_status = sl_packet_assistant_prepare_packet(rail_handle, tx_buffer, tx_length);
+  app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
 
   if (!set_tx_failed) {
 #if defined(SL_CATALOG_KERNEL_PRESENT)

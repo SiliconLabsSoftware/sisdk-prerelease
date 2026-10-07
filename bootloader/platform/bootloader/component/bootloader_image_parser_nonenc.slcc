@@ -24,6 +24,7 @@ provides:
 requires:
 - name: bootloader_interface_common
 - name: btl_util_header
+- name: se_manager_mailbox
 - name: bootloader_crc
 - name: bootloader_aes_sha_ecdsa
 - name: bootloader_token_management

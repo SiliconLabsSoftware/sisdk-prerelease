@@ -1,5 +1,5 @@
 package: zigbee
-description: Software AES wrapper using the mbed TLS.
+description: Software AES wrapper using PSA Crypto.
 label: AES (Software)
 quality: production
 id: zigbee_aes_software
@@ -8,7 +8,19 @@ provides:
 - name: zigbee_aes
 - name: zigbee_aes_software
 requires:
+- name: psa_crypto
+- name: psa_crypto_aes
+- name: psa_crypto_cipher_ecb
+  # This component is used on native/simulation/host only (not Series 2/3 HW AES).
+  # psa_crypto pulls TRNG (EXTERNAL_RNG) only on device; software PSA needs CTR-DRBG
+  # and the Silabs PSA driver feature headers used by mbedtls PSA wrappers.
 - name: mbedtls_aes
+- name: mbedtls_random
+- name: psa_driver_common
+  # Platform psa_crypto only requires psa_driver_dispatch for Series 2/3/si91x.
+  # Native/simulation still builds psa_crypto_source (psa_crypto.c), which needs
+  # psa_crypto_driver_wrappers.h from this component.
+- name: psa_driver_dispatch
 
 include:
 - path: stack/platform/micro
@@ -24,21 +36,13 @@ validation_helper:
 source:
 - path: stack/framework/aes-ecb.c
 
-define:
-- name: MBEDTLS_PLATFORM_FREE_MACRO
-  value: free
-  unless: [zigbee_stack_unix]
-- name: MBEDTLS_PLATFORM_CALLOC_MACRO
-  value: calloc
-  unless: [zigbee_stack_unix]
-- name: MBEDTLS_PLATFORM_C
-  unless: [zigbee_stack_unix]
-- name: MBEDTLS_PLATFORM_MEMORY
-  unless: [zigbee_stack_unix]
-
 template_contribution:
 - name: component_catalog
   value: zigbee_aes_software
+- name: psa_crypto_builtin_config
+  value: MBEDTLS_PSA_BUILTIN_ALG_ECB_NO_PADDING 1
+- name: psa_crypto_builtin_config
+  value: MBEDTLS_PSA_BUILTIN_GET_ENTROPY
 documentation:
   docset: zigbee
   document: zigbee-af-api/zigbee-security-manager

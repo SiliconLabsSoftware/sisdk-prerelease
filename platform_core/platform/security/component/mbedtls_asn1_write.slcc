@@ -9,9 +9,8 @@ provides:
 - name: mbedtls_asn1_write
 requires:
 - name: mbedtls_asn1_parse
-- name: mbedtls_core
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_ASN1_WRITE_C
 documentation:
   # No dedicated ASN.1 Writer page; Mbed TLS hub for related docs

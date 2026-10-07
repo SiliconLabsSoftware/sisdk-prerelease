@@ -37,9 +37,9 @@
 #include <openthread/platform/entropy.h>
 #include "utils/code_utils.h"
 
-#if OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
-
 #include "security_manager.h"
+
+#if OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
 
 void otPlatCryptoRandomInit(void)
 {
@@ -63,30 +63,21 @@ otError otPlatCryptoRandomGet(uint8_t *aBuffer, uint16_t aSize)
 exit:
     return error;
 }
-#else
-// The mbedtls_hardware_poll() function is meant for internal use by Mbed TLS
-// and is not declared in any external header files. We will therefore declare
-// it as an extern function here.
-extern int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen);
 
+#endif // OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
+
+/* Always provide otPlatEntropyGet — radio/RCP and some OT core paths
+ * call it even when CRYPTO_LIB_PSA is selected (mbedtls 4.x). */
 otError otPlatEntropyGet(uint8_t *aOutput, uint16_t aOutputLength)
 {
-    otError error     = OT_ERROR_NONE;
-    size_t  outputLen = 0;
+    otError      error = OT_ERROR_NONE;
+    psa_status_t status;
 
     otEXPECT_ACTION(aOutput, error = OT_ERROR_INVALID_ARGS);
 
-    for (size_t partialLen = 0; outputLen < aOutputLength; outputLen += partialLen)
-    {
-        const uint16_t remaining = aOutputLength - outputLen;
-        partialLen               = 0;
-
-        // Non-zero return values for mbedtls_hardware_poll() signify an error has occurred
-        otEXPECT_ACTION(0 == mbedtls_hardware_poll(NULL, &aOutput[outputLen], remaining, &partialLen),
-                        error = OT_ERROR_FAILED);
-    }
+    status = sl_sec_man_get_random(aOutput, aOutputLength);
+    otEXPECT_ACTION((status == PSA_SUCCESS), error = OT_ERROR_FAILED);
 
 exit:
     return error;
 }
-#endif

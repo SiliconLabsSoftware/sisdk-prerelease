@@ -148,9 +148,15 @@ template_contribution:
   value: 0x08000000
   condition:
   - device_sdid_250     # XG2B
+- name: bootloader_flash_addr
+  value: 0x08000000
+  condition:
+  - device_sdid_265     # XG2E
 - name: bootloader_main_size
   value: 0x5000
 
+- name: default_stack_size_override
+  value: 2048
 toolchain_settings:
 - option: gcc_compiler_option
   value: -std=gnu99

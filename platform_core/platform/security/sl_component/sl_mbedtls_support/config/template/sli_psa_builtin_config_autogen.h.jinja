@@ -7,4 +7,8 @@
 #define {{c}}
 {% endfor %}
 
+{% if mbedtls_mpi_max is defined %}
+#define MBEDTLS_MPI_MAX_SIZE  {{mbedtls_mpi_max|max}}
+{% endif %}
+
 #endif // SLI_PSA_BUILTIN_CONFIG_AUTOGEN_H

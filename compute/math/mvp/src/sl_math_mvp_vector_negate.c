@@ -136,11 +136,11 @@ sl_status_t sl_math_mvp_vector_negate_f16(const float16_t *input,
 
   // Program array controllers.
   MVP->ARRAY[0].DIM0CFG = MVP->ARRAY[1].DIM0CFG =
-    data_type << _MVP_ARRAYDIM0CFG_BASETYPE_SHIFT;
+                            data_type << _MVP_ARRAYDIM0CFG_BASETYPE_SHIFT;
   MVP->ARRAY[0].DIM1CFG = MVP->ARRAY[1].DIM1CFG =
-    ((rows - 1) << _MVP_ARRAYDIM1CFG_SIZE_SHIFT) | (cols << _MVP_ARRAYDIM1CFG_STRIDE_SHIFT);
+                            ((rows - 1) << _MVP_ARRAYDIM1CFG_SIZE_SHIFT) | (cols << _MVP_ARRAYDIM1CFG_STRIDE_SHIFT);
   MVP->ARRAY[0].DIM2CFG = MVP->ARRAY[1].DIM2CFG =
-    ((cols - 1) << _MVP_ARRAYDIM2CFG_SIZE_SHIFT) | (1 << _MVP_ARRAYDIM2CFG_STRIDE_SHIFT);
+                            ((cols - 1) << _MVP_ARRAYDIM2CFG_SIZE_SHIFT) | (1 << _MVP_ARRAYDIM2CFG_STRIDE_SHIFT);
   MVP->ARRAY[0].ADDRCFG = (sli_mvp_addr_reg_t)input;
   MVP->ARRAY[1].ADDRCFG = (sli_mvp_addr_reg_t)output;
 
@@ -169,12 +169,12 @@ sl_status_t sl_math_mvp_vector_negate_f16(const float16_t *input,
     // Handle the remainder.
     // Program array controllers.
     MVP->ARRAY[2].DIM0CFG = MVP->ARRAY[3].DIM0CFG =
-      //Note: The remainder can be any size, cannot utilize parallel execution.
-      SLI_MVP_DATATYPE_BINARY16 << _MVP_ARRAYDIM0CFG_BASETYPE_SHIFT;
+                              //Note: The remainder can be any size, cannot utilize parallel execution.
+                              SLI_MVP_DATATYPE_BINARY16 << _MVP_ARRAYDIM0CFG_BASETYPE_SHIFT;
     MVP->ARRAY[2].DIM1CFG = MVP->ARRAY[3].DIM1CFG =
-      0;
+                              0;
     MVP->ARRAY[2].DIM2CFG = MVP->ARRAY[3].DIM2CFG =
-      ((len_remainder - 1) << _MVP_ARRAYDIM2CFG_SIZE_SHIFT) | (1 << _MVP_ARRAYDIM2CFG_STRIDE_SHIFT);
+                              ((len_remainder - 1) << _MVP_ARRAYDIM2CFG_SIZE_SHIFT) | (1 << _MVP_ARRAYDIM2CFG_STRIDE_SHIFT);
     MVP->ARRAY[2].ADDRCFG = (sli_mvp_addr_reg_t)&input[ofs_remainder];
     MVP->ARRAY[3].ADDRCFG = (sli_mvp_addr_reg_t)&output[ofs_remainder];
 
@@ -183,12 +183,12 @@ sl_status_t sl_math_mvp_vector_negate_f16(const float16_t *input,
 
     // Program instructions.
     MVP->INSTR[1].CFG0 = SLI_MVP_ALUIN_A(SLI_MVP_R0, SLI_MVP_ALUIN_REALNEGATE | SLI_MVP_ALUIN_IMAGNEGATE)
-                        | SLI_MVP_ALU_Z(SLI_MVP_R1);
+                         | SLI_MVP_ALU_Z(SLI_MVP_R1);
     MVP->INSTR[1].CFG1 = SLI_MVP_LOAD(0, SLI_MVP_R0, SLI_MVP_ARRAY(2), SLI_MVP_INCRDIM_WIDTH)
-                        | SLI_MVP_STORE(SLI_MVP_R1, SLI_MVP_ARRAY(3), SLI_MVP_INCRDIM_WIDTH);
+                         | SLI_MVP_STORE(SLI_MVP_R1, SLI_MVP_ARRAY(3), SLI_MVP_INCRDIM_WIDTH);
     MVP->INSTR[1].CFG2 = (SLI_MVP_OP(COPY) << _MVP_INSTRCFG2_ALUOP_SHIFT)
-                        | MVP_INSTRCFG2_LOOP2BEGIN
-                        | MVP_INSTRCFG2_LOOP2END;
+                         | MVP_INSTRCFG2_LOOP2BEGIN
+                         | MVP_INSTRCFG2_LOOP2END;
 
     // Move the next instruction index
     last_instruction_idx += 1;

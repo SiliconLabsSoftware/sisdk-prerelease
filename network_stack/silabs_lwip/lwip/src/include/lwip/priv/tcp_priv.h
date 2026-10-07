@@ -581,6 +581,11 @@ void tcp_timer_needed(void);
 
 void tcp_netif_ip_addr_changed(const ip_addr_t* old_addr, const ip_addr_t* new_addr);
 
+#if SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_TCP_DYNAMIC_TIMER
+/** Abort active + drop TIME-WAIT PCBs on this netif. */
+void sli_tcp_cleanup_on_link_down(struct netif *netif);
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_TCP_DYNAMIC_TIMER */
+
 #if TCP_QUEUE_OOSEQ
 void tcp_free_ooseq(struct tcp_pcb *pcb);
 #endif

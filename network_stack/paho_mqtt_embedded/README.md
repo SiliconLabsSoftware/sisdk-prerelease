@@ -12,6 +12,7 @@ the client on SiWx91x devices. Specifically:
   - `MQTTSi91x_lwip.[ch]` — transport over the LwIP network stack
   - `MQTTSi91x_dual_stack.[ch]` — dual-stack (offload + LwIP) transport
   - `sli_lwip_mqtt_mbedtls_config.h` — mbedTLS configuration for secure MQTT
+  - `sli_lwip_mqtt_psa_crypto_config.h` — PSA configuration for secure MQTT
   - `unit_tests/` and `unit_tests_lwip/` — host-based unit tests for the port
 
 ## Documentation

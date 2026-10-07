@@ -176,9 +176,6 @@ static uint8_t     sLastLqi         = 0;
 static int8_t      sLastRssi        = 0;
 otExtAddress       sExtAddress[RADIO_EXT_ADDR_COUNT];
 
-#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
-#define IEEE802154_2015_ENH_ACK_TIMING_RX_TO_TX_US 256
-#endif
 #define CSL_CSMA_BACKOFF_TIME_IN_US 150
 sl_rail_csma_config_t csmaConfig    = SL_RAIL_CSMA_CONFIG_802_15_4_2003_2P4_GHZ_OQPSK_CSMA;
 sl_rail_csma_config_t cslCsmaConfig = SL_RAIL_CSMA_CONFIG_SINGLE_CCA;
@@ -739,6 +736,7 @@ void sli_ot_radio_events_handle_phy_stack_event(sl_rail_util_ieee802154_stack_ev
 }
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_ot_radio_events_process_callback(sl_rail_handle_t aRailHandle, sl_rail_events_t aEvents)
 {
     // Process RX sync detection events first
@@ -862,6 +860,7 @@ void sli_ot_radio_events_process_callback(sl_rail_handle_t aRailHandle, sl_rail_
     }
 }
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_ot_radio_events_process_tx_events(sl_rail_events_t aEvents)
 {
     if (aEvents & SL_RAIL_EVENT_TX_PACKET_SENT)
@@ -894,6 +893,7 @@ void sli_ot_radio_events_process_rx_events(sl_rail_events_t aEvents)
     OT_UNUSED_VARIABLE(aEvents);
 }
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_ot_radio_events_process_scheduled_tx_events(sl_rail_events_t aEvents)
 {
     if (aEvents & SL_RAIL_EVENT_TX_SCHEDULED_TX_STARTED)
@@ -906,6 +906,7 @@ void sli_ot_radio_events_process_scheduled_tx_events(sl_rail_events_t aEvents)
     }
 }
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_ot_radio_events_process_scheduled_rx_events(sl_rail_events_t aEvents)
 {
     if (aEvents & SL_RAIL_EVENT_RX_SCHEDULED_RX_STARTED)
@@ -919,6 +920,7 @@ void sli_ot_radio_events_process_scheduled_rx_events(sl_rail_events_t aEvents)
     }
 }
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
 void sli_ot_radio_events_process_ack_events(sl_rail_events_t aEvents)
 {
     if (aEvents & SL_RAIL_EVENT_TXACK_PACKET_SENT)
@@ -2233,7 +2235,9 @@ void packetReceivedCallback(void)
             SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ENDED,
             static_cast<uint32_t>(sli_ot_radio_interface_rail_is_receiving_frame()));
 
-        if (txWaitingForAck()
+        // FLAG_WAITING_FOR_ACK is set only after the data frame is sent; without
+        // it, a matching Imm-Ack during CCA/CSMA can falsely complete the TX.
+        if (txWaitingForAck() && getInternalFlag(FLAG_WAITING_FOR_ACK)
             && (sReceiveAck.frame.mPsdu[IEEE802154_DSN_OFFSET] == sCurrentTxPacket->frame.mPsdu[IEEE802154_DSN_OFFSET]))
         {
             otEXPECT_ACTION(validatePacketTimestamp(&packetDetails, length), dropPacket = true);

@@ -1,5 +1,5 @@
 /***************************************************************************//**
- * @file RAIL_SDK_SIMPLE_assistance.h
+ * @file sl_rail_sdk_simple_assistance.h
  * @brief Simple RAIL Assistance Component
  *******************************************************************************
  * # License
@@ -53,9 +53,15 @@
 #include "sl_simple_led_instances.h"
 #endif
 
+/**
+ * \addtogroup rail_sdk_simple_assistance
+ * @{
+ */
+
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 #if !defined(SL_CATALOG_APP_LOG_PRESENT)
 #if defined(SL_CATALOG_PRINTF_PRESENT)
 #define app_log_info(...)    printf(__VA_ARGS__)
@@ -86,6 +92,7 @@
   } while (0)
 #endif
 #endif
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -94,34 +101,37 @@
 // -----------------------------------------------------------------------------
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
-/******************************************************************************
- * An API for toggling the dedicated receive LED on the board.
- *****************************************************************************/
+
+/**
+ * @brief Toggles the dedicated receive LED on the board.
+ */
 void toggle_receive_led(void);
 
-/******************************************************************************
- * An API for setting the dedicated receive LED on the board.
- *****************************************************************************/
+/**
+ * @brief Turns on the dedicated receive LED on the board.
+ */
 void set_receive_led(void);
 
-/******************************************************************************
- * An API for clearing the dedicated receive LED on the board.
- *****************************************************************************/
+/**
+ * @brief Turns off the dedicated receive LED on the board.
+ */
 void clear_receive_led(void);
 
-/******************************************************************************
- * An API for toggling the dedicated send LED on the board.
- *****************************************************************************/
+/**
+ * @brief Toggles the dedicated transmit LED on the board.
+ */
 void toggle_send_led(void);
 
-/******************************************************************************
- * An API for setting the dedicated send LED on the board.
- *****************************************************************************/
+/**
+ * @brief Turns on the dedicated transmit LED on the board.
+ */
 void set_send_led(void);
 
-/******************************************************************************
- * An API for clearing the dedicated send LED on the board.
- *****************************************************************************/
+/**
+ * @brief Turns off the dedicated transmit LED on the board.
+ */
 void clear_send_led(void);
+
+/** @} */ // end of rail_sdk_simple_assistance group
 
 #endif // RAIL_SDK_SIMPLE_ASSISTANCE_H

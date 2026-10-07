@@ -28,12 +28,14 @@
 
 /**
  * @file
- *   Shared transmit AES-CCM orchestration (nonce generation and backend dispatch).
+ *   Transmit AES-CCM orchestration shared by RADIOAES and LPWAES backends.
  */
 
 #include <openthread-core-config.h>
 
-#include "sl_packet_utils.h"
+#include SL_OT_MAC_KEY_POLICY_CONFIG_HEADER
+#include "mac-key-types.hpp"
+#include "tx-aes-ccm-api.hpp"
 #include "tx-aes-ccm.hpp"
 
 #include "common/code_utils.hpp"
@@ -42,16 +44,14 @@
 
 using namespace ot;
 
-extern "C" {
-
-otError sli_ot_process_transmit_aes_ccm(otRadioFrame           *aFrame,
-                                        const otExtAddress     *aExtAddress,
-                                        const otMacKeyMaterial *aRawKey)
+otError sli_ot_process_transmit_aes_ccm(otRadioFrame                      *aFrame,
+                                        const otExtAddress                *aExtAddress,
+                                        const MacKeyStoragePolicy::PalKey *aPalKey)
 {
 #if (OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION < OT_THREAD_VERSION_1_2))
     OT_UNUSED_VARIABLE(aFrame);
     OT_UNUSED_VARIABLE(aExtAddress);
-    OT_UNUSED_VARIABLE(aRawKey);
+    OT_UNUSED_VARIABLE(aPalKey);
 
     return OT_ERROR_NONE;
 #else
@@ -63,6 +63,7 @@ otError sli_ot_process_transmit_aes_ccm(otRadioFrame           *aFrame,
     Mac::TxFrame             &txFrame = *static_cast<Mac::TxFrame *>(aFrame);
 
     VerifyOrExit(txFrame.GetSecurityEnabled());
+    VerifyOrExit(aPalKey != nullptr, error = OT_ERROR_INVALID_ARGS);
 
     SuccessOrExit(error = txFrame.GetSecurityLevel(securityLevel));
     SuccessOrExit(error = txFrame.GetFrameCounter(frameCounter));
@@ -78,7 +79,7 @@ otError sli_ot_process_transmit_aes_ccm(otRadioFrame           *aFrame,
                        frameCounter,
                        static_cast<uint8_t>(securityLevel));
 
-        sli_ot_process_transmit_aes_ccm_device(txFrame, nonce, tagLength, securityLevel, aRawKey);
+        sli_ot_process_transmit_aes_ccm_device(txFrame, nonce, tagLength, securityLevel, *aPalKey);
     }
 
     txFrame.SetIsSecurityProcessed(true);
@@ -87,5 +88,3 @@ exit:
     return error;
 #endif // OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION < OT_THREAD_VERSION_1_2)
 }
-
-} // extern "C"

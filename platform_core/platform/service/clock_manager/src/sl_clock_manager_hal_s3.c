@@ -1506,14 +1506,26 @@ static sl_status_t get_high_frequency_branch_precision(sl_clock_branch_t clock_b
           return_status = SL_STATUS_NOT_AVAILABLE;
           break;
 
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL) || defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
 #if (SOCPLL_OUTPUT_COUNT == 3)
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL)
         case CMU_SYSCLKCTRL_CLKSEL_SOCPLL:
+#endif
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
+        case CMU_SYSCLKCTRL_CLKSEL_SOCPLL0:
+#endif
           return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_SOCPLL0_OUT1, precision);
           break;
 #else
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL)
         case CMU_SYSCLKCTRL_CLKSEL_SOCPLL:
+#endif
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
+        case CMU_SYSCLKCTRL_CLKSEL_SOCPLL0:
+#endif
           return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_SOCPLL0, precision);
           break;
+#endif
 #endif
 
 #if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL1)
@@ -2358,9 +2370,9 @@ sl_status_t sli_clock_manager_hal_set_rc_oscillator_calibration(sl_oscillator_t 
 #if defined(_LFRCO_CAL_FREQTRIM_MASK) && !defined(SLI_CLOCK_MANAGER_RUNTIME_LFRCO)
     case SL_OSCILLATOR_LFRCO:
 #endif
-#if !defined(SLI_CLOCK_MANAGER_RUNTIME_HFRCO0) \
-  || !defined(SLI_CLOCK_MANAGER_RUNTIME_HFRCOEM23) \
-  || (defined(_LFRCO_CAL_FREQTRIM_MASK) && !defined(SLI_CLOCK_MANAGER_RUNTIME_LFRCO))
+#if !defined(SLI_CLOCK_MANAGER_RUNTIME_HFRCO0)       \
+    || !defined(SLI_CLOCK_MANAGER_RUNTIME_HFRCOEM23) \
+    || (defined(_LFRCO_CAL_FREQTRIM_MASK) && !defined(SLI_CLOCK_MANAGER_RUNTIME_LFRCO))
     // Reachable only when the runtime may not program this RC oscillator.
     EFM_ASSERT(false);
     return SL_STATUS_FAIL;
@@ -3073,7 +3085,13 @@ sl_status_t sli_clock_manager_hal_set_sysclk_source(sl_oscillator_t source)
         while ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0) ;
 #endif
       }
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL)
       CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_SOCPLL;
+#elif defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
+      CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_SOCPLL0;
+#else
+#error "Unsupported SOCPLL clock source"
+#endif
       SOCPLL0->CTRL_CLR = SOCPLL_CTRL_FORCEEN;
       break;
 
@@ -3136,14 +3154,26 @@ sl_status_t sli_clock_manager_hal_get_sysclk_source(sl_oscillator_t *source)
     case  CMU_SYSCLKCTRL_CLKSEL_CLKIN0:
       *source = SL_OSCILLATOR_CLKIN0;
       break;
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL) || defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
 #if (SOCPLL_OUTPUT_COUNT == 3)
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL)
     case  CMU_SYSCLKCTRL_CLKSEL_SOCPLL:
+#endif
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
+    case  CMU_SYSCLKCTRL_CLKSEL_SOCPLL0:
+#endif
       *source = SL_OSCILLATOR_SOCPLL0_OUT1;
       break;
 #else
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL)
     case  CMU_SYSCLKCTRL_CLKSEL_SOCPLL:
+#endif
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
+    case  CMU_SYSCLKCTRL_CLKSEL_SOCPLL0:
+#endif
       *source = SL_OSCILLATOR_SOCPLL0;
       break;
+#endif
 #endif
 #if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL1)
     case  CMU_SYSCLKCTRL_CLKSEL_SOCPLL1:

@@ -32,7 +32,6 @@
 #include "core/btl_util.h"
 MISRAC_DISABLE
 #include "sli_se_manager_mailbox.h"
-#include "sli_se_manager_internal.h"
 MISRAC_ENABLE
 #endif
 

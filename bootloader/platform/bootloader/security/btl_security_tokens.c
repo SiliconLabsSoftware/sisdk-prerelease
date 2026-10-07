@@ -15,12 +15,64 @@
  *
  ******************************************************************************/
 #include "btl_security_tokens.h"
+#include "api/btl_errorcode.h"
 #include "em_device.h"
+#include <stdbool.h>
 
 #if defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_APP_PROPERTIES) \
   && (BOOTLOADER_USE_SYMMETRIC_KEY_FROM_APP_PROPERTIES == 1)
 extern const ApplicationProperties_t sl_app_properties;
 #endif
+
+#if defined(SEMAILBOX_PRESENT)
+
+#include "sli_se_manager_mailbox.h"
+
+#if defined(BOOTLOADER_FALLBACK_LEGACY_KEY) && (BOOTLOADER_FALLBACK_LEGACY_KEY == 1)
+
+static sli_se_mailbox_response_t btl_se_probe_immutable_boot_pubkey(void)
+{
+  uint32_t se_platform_pubKey[16];
+
+  sli_se_mailbox_command_t command = SLI_SE_MAILBOX_COMMAND_DEFAULT(
+    SLI_SE_COMMAND_READ_PUBKEY | SLI_SE_KEY_TYPE_BOOT);
+  sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(se_platform_pubKey, 64U);
+  sli_se_mailbox_command_add_output(&command, &out);
+  sli_se_mailbox_execute_command(&command);
+
+  volatile sli_se_mailbox_response_t response = sli_se_mailbox_read_response();
+  return response;
+}
+
+static bool btl_se_should_fallback_to_legacy_key(sli_se_mailbox_response_t response)
+{
+  switch (response) {
+    case SLI_SE_RESPONSE_NOT_INITIALIZED:
+    case SLI_SE_RESPONSE_INTERNAL_ERROR:
+    case SLI_SE_RESPONSE_CRYPTO_ERROR:
+      return true;
+
+    case SLI_SE_RESPONSE_OK:
+    case SLI_SE_RESPONSE_INVALID_COMMAND:
+    case SLI_SE_RESPONSE_AUTHORIZATION_ERROR:
+    case SLI_SE_RESPONSE_INVALID_SIGNATURE:
+    case SLI_SE_RESPONSE_BUS_ERROR:
+    case SLI_SE_RESPONSE_INVALID_PARAMETER:
+    case SLI_SE_RESPONSE_ABORT:
+    case SLI_SE_RESPONSE_SELFTEST_ERROR:
+#if defined(SLI_VSE_MAILBOX_COMMAND_SUPPORTED)
+    case SLI_SE_RESPONSE_MAILBOX_INVALID:
+#endif
+      return false;
+
+    default:
+      return true;
+  }
+}
+
+#endif // BOOTLOADER_FALLBACK_LEGACY_KEY
+
+#endif // SEMAILBOX_PRESENT
 
 const uint8_t* btl_getSignedBootloaderKeyXPtr(void)
 {
@@ -29,13 +81,8 @@ const uint8_t* btl_getSignedBootloaderKeyXPtr(void)
 #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
   CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
 #endif
-  uint8_t se_platform_pubKey[64];
-  sl_se_command_context_t cmd_ctx = { 0u };
-  sl_status_t ret = sl_se_read_pubkey(&cmd_ctx,
-                                      SL_SE_KEY_TYPE_IMMUTABLE_BOOT,
-                                      &se_platform_pubKey,
-                                      64);
-  if (ret == SL_STATUS_FAIL || ret == SL_STATUS_NOT_INITIALIZED) {
+  if (btl_se_should_fallback_to_legacy_key(btl_se_probe_immutable_boot_pubkey())
+      != false) {
     return (const uint8_t*)(LOCKBITS_BASE + PUBKEY_OFFSET_X);
   } else {
     return NULL;
@@ -56,13 +103,8 @@ const uint8_t* btl_getSignedBootloaderKeyYPtr(void)
 #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
   CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
 #endif
-  uint8_t se_platform_pubKey[64];
-  sl_se_command_context_t cmd_ctx = { 0u };
-  sl_status_t ret = sl_se_read_pubkey(&cmd_ctx,
-                                      SL_SE_KEY_TYPE_IMMUTABLE_BOOT,
-                                      &se_platform_pubKey,
-                                      64);
-  if (ret == SL_STATUS_FAIL || ret == SL_STATUS_NOT_INITIALIZED) {
+  if (btl_se_should_fallback_to_legacy_key(btl_se_probe_immutable_boot_pubkey())
+      != false) {
     return (const uint8_t*)(LOCKBITS_BASE + PUBKEY_OFFSET_Y);
   } else {
     return NULL;

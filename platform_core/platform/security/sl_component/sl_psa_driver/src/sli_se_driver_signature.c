@@ -45,13 +45,9 @@
 #include "sl_se_manager_signature.h"
 
 #if defined(SLI_PSA_DRIVER_FEATURE_RSA_SIGN) && defined(SLI_SE_SUPPORTS_RSA)
-// Private mbedtls headers for DER-encoded RSA key parsing. The SE wants raw
-// modulus/exponent buffers, so we use mbedtls to load the PSA representation
-// and then re-export the components into the SE layout.
-#include "psa_crypto_rsa.h"
-#include "mbedtls/rsa.h"
-#include "mbedtls/bignum.h"
-#include "mbedtls/platform.h"   // mbedtls_free()
+// PSA transparent RSA keys are PKCS#1 DER. The SE wants raw N||D / N||E, so
+// parse DER with the public ASN.1 API (Mbed TLS 4 removed mbedtls_rsa_export*).
+#include "mbedtls/asn1.h"
 #endif
 
 #include <string.h>
@@ -271,6 +267,133 @@ static psa_status_t rsa_se_key_type_for_bits(size_t key_bits,
 }
 
 /**
+ * @brief Parse a positive ASN.1 INTEGER via public mbedtls_asn1_get_integer().
+ *
+ * On success, @p value points into the input buffer at the unsigned big-endian
+ * value (DER sign padding stripped).
+ */
+static psa_status_t rsa_der_get_positive_integer(unsigned char **p,
+                                                 const unsigned char *end,
+                                                 const uint8_t **value,
+                                                 size_t *value_len)
+{
+  unsigned char *head = NULL;
+  size_t length = 0;
+
+  if (mbedtls_asn1_get_integer(p, end, &head, &length) != 0) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  *value = head;
+  *value_len = length;
+  return PSA_SUCCESS;
+}
+
+/**
+ * @brief Copy a big-endian integer into a fixed-width buffer (left-padded with zeros).
+ */
+static psa_status_t rsa_copy_be_padded(uint8_t *dst,
+                                       size_t dst_len,
+                                       const uint8_t *src,
+                                       size_t src_len)
+{
+  if (src_len > dst_len) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+  memset(dst, 0, dst_len);
+  memcpy(dst + (dst_len - src_len), src, src_len);
+  return PSA_SUCCESS;
+}
+
+/**
+ * @brief Extract N, E, and optionally D from a PSA transparent RSA key buffer.
+ *
+ * @p key_buffer is PKCS#1 DER: RSAPrivateKey for key pairs, RSAPublicKey for
+ * public keys.
+ */
+static psa_status_t rsa_der_extract_components(psa_key_type_t key_type,
+                                               const uint8_t *key_buffer,
+                                               size_t key_buffer_size,
+                                               bool need_private_exponent,
+                                               const uint8_t **n,
+                                               size_t *n_len,
+                                               const uint8_t **e,
+                                               size_t *e_len,
+                                               const uint8_t **d,
+                                               size_t *d_len)
+{
+  unsigned char *p = (unsigned char *)key_buffer;
+  const unsigned char *end = key_buffer + key_buffer_size;
+  size_t seq_len = 0;
+  psa_status_t status;
+
+  *n = NULL;
+  *e = NULL;
+  *d = NULL;
+  *n_len = 0;
+  *e_len = 0;
+  *d_len = 0;
+
+  if ((key_buffer == NULL) || (key_buffer_size == 0U)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+  if (!PSA_KEY_TYPE_IS_RSA(key_type)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (mbedtls_asn1_get_tag(&p, end, &seq_len,
+                           MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE) != 0) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+  if (end != (p + seq_len)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (PSA_KEY_TYPE_IS_KEY_PAIR(key_type)) {
+    int version = 0;
+
+    if (mbedtls_asn1_get_int(&p, end, &version) != 0) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    if (version != 0) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    status = rsa_der_get_positive_integer(&p, end, n, n_len);
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
+    status = rsa_der_get_positive_integer(&p, end, e, e_len);
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
+    if (need_private_exponent) {
+      status = rsa_der_get_positive_integer(&p, end, d, d_len);
+      if (status != PSA_SUCCESS) {
+        return status;
+      }
+    }
+  } else if (PSA_KEY_TYPE_IS_RSA(key_type)
+             && PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
+    if (need_private_exponent) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    status = rsa_der_get_positive_integer(&p, end, n, n_len);
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
+    status = rsa_der_get_positive_integer(&p, end, e, e_len);
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
+  } else {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  return PSA_SUCCESS;
+}
+
+/**
  * @brief Build an SE key descriptor for an RSA sign or verify operation
  *        from a PSA-encoded key buffer.
  *
@@ -292,81 +415,71 @@ static psa_status_t build_rsa_se_key_desc(
   sl_se_key_descriptor_t *key_desc,
   size_t *key_size_out)
 {
-  mbedtls_rsa_context *rsa = NULL;
-  psa_status_t status = mbedtls_psa_rsa_load_representation(
-    psa_get_key_type(attributes),
-    key_buffer,
-    key_buffer_size,
-    &rsa);
+  const uint8_t *n = NULL;
+  const uint8_t *e = NULL;
+  const uint8_t *d = NULL;
+  size_t n_len = 0;
+  size_t e_len = 0;
+  size_t d_len = 0;
+  psa_key_type_t key_type = psa_get_key_type(attributes);
+  psa_status_t status;
+
+  status = rsa_der_extract_components(key_type,
+                                      key_buffer,
+                                      key_buffer_size,
+                                      for_private_key,
+                                      &n, &n_len,
+                                      &e, &e_len,
+                                      &d, &d_len);
   if (status != PSA_SUCCESS) {
     return status;
   }
 
-  size_t key_size = mbedtls_rsa_get_len(rsa);
+  if (PSA_BYTES_TO_BITS(n_len) > PSA_VENDOR_RSA_MAX_KEY_BITS) {
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  if ((n_len == 0U) || (n_len > SLI_SE_DRIVER_RSA_MAX_MODULUS_BYTES)
+      || (e_len == 0U) || (e_len > n_len)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+  if (for_private_key && ((d_len == 0U) || (d_len > n_len))) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  const size_t key_size = n_len;
   sl_se_key_type_t se_type;
   status = rsa_se_key_type_for_bits(PSA_BYTES_TO_BITS(key_size), &se_type);
   if (status != PSA_SUCCESS) {
-    goto cleanup;
+    return status;
   }
 
-  mbedtls_mpi e_mpi;
-  mbedtls_mpi_init(&e_mpi);
-  int ret = mbedtls_rsa_export(rsa, NULL, NULL, NULL, NULL, &e_mpi);
-  if (ret != 0) {
-    mbedtls_mpi_free(&e_mpi);
-    status = PSA_ERROR_INVALID_ARGUMENT;
-    goto cleanup;
-  }
-
-  const size_t e_mpi_bytes = mbedtls_mpi_size(&e_mpi);
-  if (e_mpi_bytes == 0 || e_mpi_bytes > key_size) {
-    mbedtls_mpi_free(&e_mpi);
-    status = PSA_ERROR_INVALID_ARGUMENT;
-    goto cleanup;
-  }
-
-  const bool use_short_exponent = (e_mpi_bytes <= 4U);
+  const bool use_short_exponent = (e_len <= 4U);
 
   if (for_private_key) {
-    if (se_key_buf_size < 2 * key_size) {
-      mbedtls_mpi_free(&e_mpi);
-      status = PSA_ERROR_BUFFER_TOO_SMALL;
-      goto cleanup;
+    if (se_key_buf_size < (2U * key_size)) {
+      return PSA_ERROR_BUFFER_TOO_SMALL;
     }
-    ret = mbedtls_rsa_export_raw(rsa,
-                                 se_key_buf, key_size,
-                                 NULL, 0, NULL, 0,
-                                 se_key_buf + key_size, key_size,
-                                 NULL, 0);
-    mbedtls_mpi_free(&e_mpi);
-    if (ret != 0) {
-      // D is not present (e.g. the caller passed a public key type).
-      status = PSA_ERROR_INVALID_ARGUMENT;
-      goto cleanup;
+    status = rsa_copy_be_padded(se_key_buf, key_size, n, n_len);
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
+    status = rsa_copy_be_padded(se_key_buf + key_size, key_size, d, d_len);
+    if (status != PSA_SUCCESS) {
+      return status;
     }
   } else {
     const size_t e_slot = use_short_exponent ? 4U : key_size;
-    if (se_key_buf_size < key_size + e_slot) {
-      mbedtls_mpi_free(&e_mpi);
-      status = PSA_ERROR_BUFFER_TOO_SMALL;
-      goto cleanup;
+    if (se_key_buf_size < (key_size + e_slot)) {
+      return PSA_ERROR_BUFFER_TOO_SMALL;
     }
-    ret = mbedtls_rsa_export_raw(rsa,
-                                 se_key_buf, key_size,
-                                 NULL, 0, NULL, 0, NULL, 0,
-                                 NULL, 0);
-    if (ret != 0) {
-      mbedtls_mpi_free(&e_mpi);
-      status = PSA_ERROR_INVALID_ARGUMENT;
-      goto cleanup;
+    status = rsa_copy_be_padded(se_key_buf, key_size, n, n_len);
+    if (status != PSA_SUCCESS) {
+      return status;
     }
-    ret = mbedtls_mpi_write_binary(&e_mpi,
-                                   se_key_buf + key_size,
-                                   e_slot);
-    mbedtls_mpi_free(&e_mpi);
-    if (ret != 0) {
-      status = PSA_ERROR_INVALID_ARGUMENT;
-      goto cleanup;
+    status = rsa_copy_be_padded(se_key_buf + key_size, e_slot, e, e_len);
+    if (status != PSA_SUCCESS) {
+      return status;
     }
   }
 
@@ -383,10 +496,7 @@ static psa_status_t build_rsa_se_key_desc(
   key_desc->storage.location.buffer.size = se_key_buf_size;
   *key_size_out = key_size;
 
-cleanup:
-  mbedtls_rsa_free(rsa);
-  mbedtls_free(rsa);
-  return status;
+  return PSA_SUCCESS;
 }
 
 /**
@@ -454,6 +564,13 @@ static psa_status_t sli_se_sign_message(
     // mbedtls software fallback handles it.
     if (psa_get_key_type(attributes) != PSA_KEY_TYPE_RSA_KEY_PAIR) {
       return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    {
+      size_t bits = psa_get_key_bits(attributes);
+      if ((bits != 2048U) && (bits != 3072U) && (bits != 4096U)) {
+        return PSA_ERROR_NOT_SUPPORTED;
+      }
     }
 
     sl_se_rsa_padding_t padding;
@@ -883,6 +1000,13 @@ static psa_status_t sli_se_verify_message(
   // both RSA_KEY_PAIR and RSA_PUBLIC_KEY.
   if (PSA_KEY_TYPE_IS_RSA(psa_get_key_type(attributes))) {
     #if defined(SLI_SE_SUPPORTS_RSA)
+    {
+      size_t bits = psa_get_key_bits(attributes);
+      if ((bits != 2048U) && (bits != 3072U) && (bits != 4096U)) {
+        return PSA_ERROR_NOT_SUPPORTED;
+      }
+    }
+
     sl_se_rsa_padding_t padding;
     psa_status = rsa_padding_for_alg(alg, &padding);
     if (psa_status != PSA_SUCCESS) {

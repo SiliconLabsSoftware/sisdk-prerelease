@@ -9,7 +9,7 @@
 #include "sl_cpc_bus.h"
 #include "sli_cpc_drv.h"
 
-struct sli_cpc_drv_caps {
+struct sli_cpc_drv_spi_peripheral_caps {
   uint8_t max_speed_le[4];
 };
 
@@ -19,7 +19,7 @@ typedef struct sl_cpc_drv_spi_peripheral_config {
 
 typedef struct sl_cpc_drv_spi_peripheral {
   sl_cpc_bus_t bus;
-  struct sli_cpc_drv_caps local_caps;
+  struct sli_cpc_drv_spi_peripheral_caps local_caps;
 } sl_cpc_drv_spi_peripheral_t;
 
 /***************************************************************************/ /**

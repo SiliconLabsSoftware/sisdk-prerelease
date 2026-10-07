@@ -204,7 +204,8 @@ SL_ENUM_GENERIC(CMU_HFRCODPLLFreq_TypeDef, uint32_t) {
   cmuHFRCODPLLFreq_10M0Hz           = 10000000U,        /**< 10MHz RC band. */
   cmuHFRCODPLLFreq_20M0Hz           = 20000000U,        /**< 20MHz RC band. */
 #endif
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)
   cmuHFRCODPLLFreq_100M0Hz          = 100000000U,       /**< 100MHz RC band. */
 #endif
   cmuHFRCODPLLFreq_UserDefined      = 0,
@@ -403,8 +404,15 @@ SL_ENUM_GENERIC(CMU_Clock_TypeDef, uint32_t) {
   cmuClock_RADIOAES = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                       | (_CMU_CLKEN0_RADIOAES_SHIFT << CMU_EN_BIT_POS),         /**< RADIOAES clock. */
 #endif
+#if GPCRC_COUNT > 1
+  cmuClock_GPCRC0 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
+                   | (_CMU_CLKEN0_GPCRC0_SHIFT << CMU_EN_BIT_POS),              /**< GPCRC0 clock. */
+  cmuClock_GPCRC1 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
+                   | (_CMU_CLKEN1_GPCRC1_SHIFT << CMU_EN_BIT_POS),              /**< GPCRC1 clock. */
+#else
   cmuClock_GPCRC = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                    | (_CMU_CLKEN0_GPCRC_SHIFT << CMU_EN_BIT_POS),               /**< GPCRC clock. */
+#endif
   cmuClock_TIMER0 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                     | (_CMU_CLKEN0_TIMER0_SHIFT << CMU_EN_BIT_POS),             /**< TIMER0 clock. */
   cmuClock_TIMER1 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)

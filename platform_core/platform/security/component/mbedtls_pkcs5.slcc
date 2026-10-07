@@ -6,13 +6,13 @@ description: >-
   This component enables the implementation of PBES2- and PBKDF2 algorithms from
   RSA Labratories' PKCS #5 specification.
 category: Platform|Security|Mbed TLS|Password-Based Cryptography
+ui_hints:
+  visibility: never
 
 provides:
 - name: mbedtls_pkcs5
 
 requires:
-- name: mbedtls_core
-- name: mbedtls_error
 - name: mbedtls_cipher
 - name: mbedtls_hmac
 - name: mbedtls_asn1
@@ -24,7 +24,7 @@ conflicts:
 - name: tz_secure_key_library_ns
 
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_PKCS5_C
 documentation:
   url: https://docs.silabs.com/gecko-platform/latest/platform-security-api/sl-psa-key-derivation

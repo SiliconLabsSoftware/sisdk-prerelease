@@ -97,6 +97,8 @@ template_contribution:
   value: 0x8000
 - name: bootloader_flash_addr
   value: 0x1000000
+- name: default_stack_size_override
+  value: 16384
 toolchain_settings:
 - option: optimize
   value: size

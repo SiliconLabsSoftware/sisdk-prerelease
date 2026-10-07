@@ -390,6 +390,7 @@ static void handle_receive_state(sl_rail_handle_t rail_handle)
   sl_rail_status_t rail_status;
   // Packet size for the RX packet
   uint16_t packet_size;
+  sl_status_t packet_assistant_status;
 
   // Incoming packet?
   if (rail_packet_received) {
@@ -410,7 +411,8 @@ static void handle_receive_state(sl_rail_handle_t rail_handle)
       app_log_error("sl_rail_get_rx_packet_info() error: packet too long\n");
       packet_size = RX_BUFFER_LENGTH;
     } else {
-      packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
+      packet_assistant_status = sl_packet_assistant_unpack_packet(rail_handle, &packet_info, rx_buffer, &start_of_packet, &packet_size);
+      app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
     }
     // Packet processed, app is now ready to sleep
     app_ready_to_sleep = true;
@@ -423,7 +425,7 @@ static void handle_receive_state(sl_rail_handle_t rail_handle)
       slave_rx_burst_id = start_of_packet[0];
       // Print packet if requested
       if (rx_requested) {
-        printf_rx_packet(start_of_packet, packet_size);
+        sl_packet_assistant_print_rx_packet(start_of_packet, packet_size);
       }
       // RX bookkeeping & update LCD
       toggle_receive_led();
@@ -524,7 +526,8 @@ static sl_rail_status_t send_tx_packet(sl_rail_handle_t rail_handle)
 {
   // Status indicator of the RAIL API calls
   sl_rail_status_t rail_status;
-  prepare_packet(rail_handle, out_packet, sizeof(out_packet));
+  sl_status_t packet_assistant_status = sl_packet_assistant_prepare_packet(rail_handle, out_packet, sizeof(out_packet));
+  app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
 
   rail_status = sl_rail_start_tx(rail_handle, get_selected_channel(), SL_RAIL_TX_OPTIONS_DEFAULT, NULL);
 

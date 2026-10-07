@@ -6,6 +6,14 @@ description: >-
   by the error.h file.
 category: Platform|Security|Mbed TLS|Utilities
 quality: production
+
+# This component is part of the Mbed TLS upper layers (SSL, X509, etc).
+# In the TZ Secure Key Library use case, the Mbed TLS upper layers lives
+# in the TZ NonSecure application, and is not not allowed to be included
+# in the secure library.
+conflicts:
+- name: tz_secure_key_library_s
+
 source:
 - path: platform/security/sl_component/sl_mbedtls_support/src/error.c
 provides:

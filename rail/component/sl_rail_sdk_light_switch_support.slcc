@@ -7,6 +7,8 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: never
 root_path: "rail/component/sl_rail_sdk_light_switch_support"
 include:
 - path: ""
@@ -19,7 +21,3 @@ provides:
 
 requires:
 - name: "device_has_radio"
-
-#-------- Hides Component for user in Studio ---------
-ui_hints:
-  visibility: never

@@ -33,7 +33,7 @@
 #include "button.h"
 #include "crc.h"
 
-#include "random.h"
+#include "sl_zigbee_random.h"
 #if defined(SL_CATALOG_TOKEN_MANAGER_PRESENT) && !defined(SL_ZIGBEE_TEST)
 #if !defined(EZSP_HOST) && !defined(SL_ZIGBEE_TEST) && !defined(ZIGBEE_STACK_ON_HOST)
 #include "sl_token_api.h"

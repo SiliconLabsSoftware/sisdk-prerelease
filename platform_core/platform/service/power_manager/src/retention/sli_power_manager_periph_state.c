@@ -185,6 +185,22 @@ sl_status_t update_peripheral_retention_mask(const sl_peripheral_t peripheral, b
   return SL_STATUS_OK;
 }
 
+#if defined(_EMU_PWRSTATUS_DIGDOMOFF_MASK)
+/***************************************************************************//**
+ * Clears sticky EMU PWRSTATUS DIGDOMOFF flags after peripheral restore.
+ ******************************************************************************/
+static void clear_emu_digdomoff_status(void)
+{
+#if defined(_EMU_PWRREQ_CMDCLR_SHIFT)
+  EMU_CFGNS->PWRREQ_SET = EMU_PWRREQ_CMDCLR;
+#elif defined(_EMU_CMD_DIGDOMOFFCLR_SHIFT)
+  EMU->CMD_SET = EMU_CMD_DIGDOMOFFCLR;
+#else
+#error EMU PWRSTATUS DIGDOMOFF clear mechanism not defined for this device
+#endif
+}
+#endif
+
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -308,6 +324,11 @@ void sli_power_manager_restore_peripherals(void)
       SLI_PM_PPUDIRTY_CLR(w) = restored_bits;
     }
   }
+
+  // Clear the power domain off status bits.
+#if defined(_EMU_PWRSTATUS_DIGDOMOFF_MASK)
+  clear_emu_digdomoff_status();
+#endif
 
   // Restore the CMU clock enable state.
   sli_clken_state_save_restore(CMU_BASE, &sli_clken_state, false);

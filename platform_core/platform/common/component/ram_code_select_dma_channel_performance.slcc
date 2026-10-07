@@ -17,4 +17,7 @@ template_contribution:
 - name: code_classification_standard_selections
   value: dmachannelperf
   condition: [device_series_3]
+documentation:
+  docset: gecko-platform
+  document: platform-common/common
 root_path: platform_core

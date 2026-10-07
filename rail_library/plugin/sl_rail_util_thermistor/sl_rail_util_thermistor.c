@@ -42,10 +42,10 @@
 #if (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
 // Defaults from RF_temperature_compensation_Rev_1p9 slide 44.
 static sl_rail_util_thermistor_coefficients_t thermistorCoefficients = {
-  .j = 0.002310296,
-  .k = 0.000215353,
-  .l = 0.0000024537,
-  .m = 0.0,
+  .j = 0.002310296f,
+  .k = 0.000215353f,
+  .l = 0.0000024537f,
+  .m = 0.0f,
 };
 
 // Local fallback used if the RFHAL coefficient resolver is unavailable.
@@ -117,15 +117,15 @@ RAIL_Status_t RAIL_ConvertThermistorImpedance(RAIL_Handle_t railHandle,
   // Temperature(C) = 1 / (J + K*ln(R/1000) + L*ln(R/1000)^2
   //                    + M*ln(R/1000)^3) - 273.15
   // Use float/logf so soft-float and DP-hard builds avoid double log() and its
-  // large libm tables. Public Steinhart coeffs remain double; cast at use.
+  // large libm tables.
   float logParam = (float)thermistorImpedance / 1000.0f;
   float impedanceLn = logf(logParam);
   float impedanceLn2 = impedanceLn * impedanceLn;
   float impedanceLn3 = impedanceLn2 * impedanceLn;
-  float denominator = (float)thermistorCoefficients.j
-                      + ((float)thermistorCoefficients.k * impedanceLn)
-                      + ((float)thermistorCoefficients.l * impedanceLn2)
-                      + ((float)thermistorCoefficients.m * impedanceLn3);
+  float denominator = thermistorCoefficients.j
+                      + (thermistorCoefficients.k * impedanceLn)
+                      + (thermistorCoefficients.l * impedanceLn2)
+                      + (thermistorCoefficients.m * impedanceLn3);
   if ((denominator == 0.0f) || !isfinite(denominator)) {
     return RAIL_STATUS_INVALID_PARAMETER;
   }

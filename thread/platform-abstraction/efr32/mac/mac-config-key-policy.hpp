@@ -28,7 +28,17 @@
 
 /**
  * @file
- *   IEEE 802.15.4 MAC configuration key policy definitions.
+ *   IEEE 802.15.4 MAC key storage policy selection.
+ *
+ *   Picks the compile-time `MacKeyStoragePolicy` based on the crypto engine
+ *   present and OpenThread crypto lib configuration:
+ *
+ *     RADIOAES + PSA          -> `PsaPlaintextMacKeyStoragePolicy`
+ *     RADIOAES + non-PSA      -> `LiteralMacKeyStoragePolicy`
+ *     LPWAES  + PSA + KSU     -> `KsuMacKeyStoragePolicy`
+ *     LPWAES  + PSA (no KSU)  -> `PsaPlaintextMacKeyStoragePolicy`
+ *     LPWAES  + non-PSA       -> `LiteralMacKeyStoragePolicy`
+ *     (no radio AES engine)   -> `LiteralMacKeyStoragePolicy` (unused)
  */
 
 #ifndef MAC_CONFIG_KEY_POLICY_HPP_
@@ -36,21 +46,35 @@
 
 #include <openthread-core-config.h>
 
+#include "em_device.h"
+
 #include "key-storage-policy.hpp"
 
 #if defined(RADIOAES_PRESENT)
-using MacKeyStoragePolicy = PlaintextMacKeyStoragePolicy;
+
+#if (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
+using MacKeyStoragePolicy = PsaPlaintextMacKeyStoragePolicy;
+#else
+using MacKeyStoragePolicy = LiteralMacKeyStoragePolicy;
+#endif
 
 #elif defined(LPWAES_PRESENT)
+
 #include "tx-aes-ccm-lpwaes.hpp"
 
 #if defined(KSU_PRESENT) && (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
 using MacKeyStoragePolicy = KsuMacKeyStoragePolicy;
+#elif (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
+using MacKeyStoragePolicy = PsaPlaintextMacKeyStoragePolicy;
 #else
-using MacKeyStoragePolicy = PlaintextMacKeyStoragePolicy;
+using MacKeyStoragePolicy = LiteralMacKeyStoragePolicy;
 #endif
 
 using LpwAesTransmitAesCcm = LpwAesTransmitAesCcmT<MacKeyStoragePolicy>;
+
+#else
+
+using MacKeyStoragePolicy = LiteralMacKeyStoragePolicy;
 
 #endif // RADIOAES_PRESENT / LPWAES_PRESENT
 

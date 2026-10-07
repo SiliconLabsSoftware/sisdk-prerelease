@@ -36,7 +36,11 @@
 
 #include "openthread-core-config.h"
 
+#include <mbedtls/ssl.h>
 #include <mbedtls/version.h>
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000) && defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
+#include <psa/crypto.h>
+#endif
 
 #include <openthread/instance.h>
 
@@ -97,6 +101,41 @@ public:
      * @retval kErrorNone   Successfully filled buffer with random values.
      */
     static int CryptoSecurePrng(void *aContext, unsigned char *aBuffer, size_t aSize);
+#endif
+};
+
+/**
+ * Holds mbedtls-version-specific state for setting an EC-JPAKE password on an
+ * `mbedtls_ssl_context` (plaintext API on < 4.x, PSA opaque password on 4.x).
+ *
+ * Callers (e.g. MeshCoP secure transport) use this type without branching on
+ * mbedtls version or calling PSA APIs directly.
+ */
+class EcJpakePassword : private NonCopyable
+{
+public:
+    EcJpakePassword(void);
+    ~EcJpakePassword(void) { Clear(); }
+
+    /**
+     * Releases any PSA key held for the EC-JPAKE password (no-op on mbedtls < 4).
+     */
+    void Clear(void);
+
+    /**
+     * Configures @p aSsl to use @p aPassword for the EC-JPAKE handshake.
+     *
+     * @param[in,out] aSsl       SSL context for the handshake.
+     * @param[in]     aPassword  Password / PSK bytes.
+     * @param[in]     aLength    Length of @p aPassword.
+     *
+     * @returns 0 on success, or an mbedtls error code.
+     */
+    int Set(mbedtls_ssl_context &aSsl, const uint8_t *aPassword, size_t aLength);
+
+private:
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000) && defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
+    mbedtls_svc_key_id_t mKeyId;
 #endif
 };
 

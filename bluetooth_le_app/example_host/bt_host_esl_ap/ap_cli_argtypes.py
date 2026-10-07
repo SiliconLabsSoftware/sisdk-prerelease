@@ -154,7 +154,7 @@ def date_type(arg_value):
 
 
 def data_type(arg_value):
-    pat = re.compile(r"((0(?i)[x])?(?i)[0-9a-f]{1,32})")
+    pat = re.compile(r"^(0x)?[0-9a-f]{1,32}$", re.IGNORECASE)
     if not pat.match(arg_value):
         raise argparse.ArgumentTypeError("Invalid data type for vendor opcode command.")
     return arg_value

@@ -27,8 +27,6 @@ requires:
 - name: memory_manager
 - name: freertos_heap_3_arch
 template_contribution:
-- name: component_catalog
-  value: freertos_heap_3
 - name: rte_components
   value: RTE_RTOS_FreeRTOS_HEAP_3
 root_path: freertos

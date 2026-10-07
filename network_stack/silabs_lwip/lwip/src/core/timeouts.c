@@ -88,7 +88,9 @@ const struct lwip_cyclic_timer lwip_cyclic_timers[] = {
   {ARP_TMR_INTERVAL, HANDLER(etharp_tmr)},
 #endif /* LWIP_ARP && !SL_LWIP_ETHARP_ONDEMAND_TIMER */
 #if LWIP_DHCP
+#if !(SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DHCP_ONDEMAND_TIMER)
   {DHCP_COARSE_TIMER_MSECS, HANDLER(dhcp_coarse_tmr)},
+#endif /* !(SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DHCP_ONDEMAND_TIMER) */
 #if !SL_LWIP_DHCP_ONDEMAND_TIMER
   {DHCP_FINE_TIMER_MSECS, HANDLER(dhcp_fine_tmr)},
 #endif /* !SL_LWIP_DHCP_ONDEMAND_TIMER */

@@ -1269,12 +1269,6 @@ sl_status_t sli_create_and_send_socket_request(int socketIdIndex, int type, cons
 
   sli_apply_socket_create_response_fields(si91x_bsd_socket, socket_create_response, type);
 
-  // If socket is already bound to an local address and port, there is no need to copy it again.
-  if (si91x_bsd_socket->state == BOUND) {
-    sli_buffer_manager_free_buffer(buffer);
-    return SL_STATUS_OK;
-  }
-
   // Free the buffer
   sli_buffer_manager_free_buffer(buffer);
 
@@ -2019,6 +2013,13 @@ sl_status_t sli_si91x_send_socket_data(sli_si91x_socket_t *si91x_socket,
                                               SLI_BUFFER_MANAGER_ALLOCATION_TYPE_DEDICATED,
                                               SLI_WIFI_ALLOCATE_COMMAND_BUFFER_WAIT_TIME,
                                               (sli_buffer_t)&packet);
+  // Socket send maps TX-pool exhaustion (SL_STATUS_ALLOCATION_FAILED / 0x19) to
+  // ENOBUFS ("try again later" in the BSD send() docs). Return that status
+  // without an ERROR-tagged PRINT_ERROR_LOGS line. Other allocate failures
+  // still go through VERIFY_STATUS_AND_RETURN.
+  if (status == SL_STATUS_ALLOCATION_FAILED) {
+    return status;
+  }
   VERIFY_STATUS_AND_RETURN(status);
 
   // Enter atomic section to safely access the queue

@@ -1,0 +1,32 @@
+id: mbedtls_pkcs7
+package: platform_core
+quality: production
+label: PKCS#7
+description: >-
+  This component enables support for using PKCS #7-formatted signatures.
+category: Platform|Security|Mbed TLS|Password-Based Cryptography
+ui_hints:
+  visibility: never
+
+provides:
+- name: mbedtls_pkcs7
+
+requires:
+- name: mbedtls_asn1_parse
+- name: mbedtls_pk_parse
+- name: mbedtls_x509_crt_parse
+- name: mbedtls_x509_crl_parse
+- name: mbedtls_oid
+
+template_contribution:
+- name: mbedtls_config
+  value: MBEDTLS_PKCS7_C
+- name: psa_crypto_config
+  value: MBEDTLS_MD_C
+
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-api/sl-psa-key-derivation
+metadata:
+  sbom:
+    reference: mbedtls_sbom
+root_path: platform_core

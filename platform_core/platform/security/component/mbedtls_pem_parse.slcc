@@ -10,9 +10,8 @@ provides:
 requires:
 - name: mbedtls_cipher
 - name: mbedtls_base64
-- name: mbedtls_core
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PEM_PARSE_C
 documentation:
   # No dedicated PEM Parsing page; Mbed TLS hub for related docs

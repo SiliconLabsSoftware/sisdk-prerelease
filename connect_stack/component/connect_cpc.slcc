@@ -6,21 +6,16 @@ category: Services|Co-Processor Communication
 quality: production
 ui_hints:
   visibility: never
-
 provides:
 - name: connect_cpc
-
 requires:
 - name: cpc_secondary
-
 include:
 - path: "ncp"
   file_list:
   - path: "ncp-cpc-interface.h"
-
 source:
 - path: "ncp/ncp-cpc-interface.c"
-
 template_contribution:
 - name: event_handler
   value:

@@ -207,7 +207,7 @@ int sl_si91x_socket_async(int family, int type, int protocol, sl_si91x_socket_re
  *   | @ref SL_SI91X_SO_RCVTIME                          | sl_si91x_time_value                       | Socket Receive timeout. sl_si91x_time_value structure is used to represent time in two parts: seconds and microseconds.    |
  *   | @ref SL_SI91X_SO_MAXRETRY                         | uint16_t                                  | Maximum number of TCP TX retransmission attempts (default: 10)                                                             |
  *   | @ref SL_SI91X_SO_MSS                              | uint16_t                                  | Maximum Segment Size (MSS) for the TCP connection                                                                          |
- *   | @ref SL_SI91X_SO_TCP_KEEPALIVE                    | uint16_t                                  | TCP keep-alive idle time in seconds (idle connection; default: 1200)                                                       |
+ *   | @ref SL_SI91X_SO_TCP_KEEPALIVE                    | uint16_t                                  | TCP keep-alive idle timeout in seconds before keep-alive probes are sent on an inactive connection (default: 1200 seconds) |
  *   | @ref SL_SI91X_SO_HIGH_PERFORMANCE_SOCKET          | BIT(7)                                    | Set high performance socket                                                                                                |
  *   | @ref SL_SI91X_SO_SSL_ENABLE                       | SL_SI91X_ENABLE_TLS                       | Enable TLS/SSL                                                                                                             |
  *   | @ref SL_SI91X_SO_SSL_V_1_0_ENABLE                 | SL_SI91X_ENABLE_TLS \| SL_SI91X_TLS_V_1_0 | Enable TLS v1.0                                                                                                            |
@@ -218,7 +218,7 @@ int sl_si91x_socket_async(int family, int type, int protocol, sl_si91x_socket_re
  *   | @ref SL_SI91X_SO_CERT_INDEX                       | uint8_t                                   | Certificate index                                                                                                          |
  *   | @ref SL_SI91X_SO_TLS_SNI                          | sl_si91x_socket_type_length_value_t       | Server Name Indication (SNI)                                                                                               |
  *   | @ref SL_SI91X_SO_TLS_ALPN                         | sl_si91x_socket_type_length_value_t       | Application-Layer Protocol Negotiation (ALPN)                                                                              |
- *   | @ref SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE | uint8_t                                   | Maximum retransmission timeout value for TCP                                                                               |
+ *   | @ref SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE | uint8_t                                   | Maximum TCP retransmission timeout (power of 2, acceptable range is between 1 and 128 seconds)                             |
  *   | @ref SL_SI91X_SO_PER_SOCKET_CLOSE                 | BIT(0)                                    | Enable per-socket graceful close handling                                                                                  |
  *
  * @param[in] option_len 
@@ -254,7 +254,7 @@ int sl_si91x_socket_async(int family, int type, int protocol, sl_si91x_socket_re
  * The value of the option SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE should be a power of 2 between 1 and 128.
  *
  * @note TCP keep-alive (@ref SL_SI91X_SO_TCP_KEEPALIVE):
- * - Applies when the TCP connection is idle (no peer activity that refreshes the keep-alive timer). Keep-alive packet check whether the peer is still reachable.
+ * - Applies when the TCP connection is idle (no peer activity that refreshes the keep-alive timer). Keep-alive probes check whether the peer is still reachable.
  * - Configures the idle time (in seconds) before the first TCP keep-alive packet is sent. The default is 1200 seconds.
  * - If the peer does not respond, the NWP retries keep-alive with fixed defaults of 10 retries at 10-second intervals (not configurable via this API).
  * - Remote termination on silent peer loss occurs after: initial idle time + (retries × retry interval).

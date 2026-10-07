@@ -165,7 +165,7 @@ include:
   - path: mac-types.h
   - path: multi-mac.h
   - path: mac-multi-network.h
-  - path: scan.h
+  - path: sl-mac-scan-15.4.h
   - path: upper-mac.h
   - path: lower-mac-common.h
 - path: util/silicon_labs/silabs_core/

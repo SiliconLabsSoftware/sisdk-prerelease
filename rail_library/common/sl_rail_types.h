@@ -3316,7 +3316,7 @@ typedef struct sl_rail_phy_info {
    * CS RTT digital delay from the radio configurator, S32.4 (1/16 ns).
    * Available when phy info version is 22 or greater.
    */
-  uint32_t cs_rtt_dig_delay;
+  int32_t cs_rtt_dig_delay;
 } sl_rail_phy_info_t;
 #endif // DOXYGEN_UNDOCUMENTED
 

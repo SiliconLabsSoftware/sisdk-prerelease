@@ -51,6 +51,7 @@
 #include "sl_core.h"
 #include "sl_rail_sdk_light_switch_support.h"
 #include "sl_rail_sdk_packet_assistant.h"
+#include "app_assert.h"
 #include "sl_rail_sdk_fifo_size_config.h"
 #include "sl_rail_sdk_channel_selector.h"
 #include "sl_code_classification.h"
@@ -434,7 +435,8 @@ static void transmit_packet(sl_rail_handle_t rail_handle)
   // Send out a light bulb toggle command
   set_command_type(&out_packet[DEMO_CONTROL_PAYLOAD_BYTE], CMD_TYPE_LIGHT_TOGGLE);
   set_switch_state_in_payload();
-  prepare_packet(rail_handle, out_packet, sizeof(out_packet));
+  sl_status_t packet_assistant_status = sl_packet_assistant_prepare_packet(rail_handle, out_packet, sizeof(out_packet));
+  app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
   rail_status = sl_rail_start_tx(rail_handle, get_selected_channel(), SL_RAIL_TX_OPTIONS_DEFAULT, NULL);
   if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
     app_log_warning("sl_rail_start_tx() result: 0x%08" PRIX32 "\n ", rail_status);
@@ -451,7 +453,9 @@ static void save_received_packet(sl_rail_handle_t rail_handle)
   while (rx_packet_handle != SL_RAIL_RX_PACKET_HANDLE_INVALID) {
     sl_rail_get_rx_packet_details(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &rxPacketDetails);
     if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
-      uint16_t packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
+      uint16_t packet_size = 0;
+      sl_status_t packet_assistant_status = sl_packet_assistant_unpack_packet(rail_handle, &packet_info, rx_buffer, &start_of_packet, &packet_size);
+      app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
       if (packet_size == 0) {
         app_log_warning("Packet size is: %" PRIu16, packet_size);
       }

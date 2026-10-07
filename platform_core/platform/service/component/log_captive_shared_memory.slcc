@@ -1,0 +1,25 @@
+id: log_captive_shared_memory
+label: Log Captive Shared-Memory
+package: platform_core
+description: >
+  Single-writer captive shared-memory Logger ring primitives. Subsystem adapters
+  own storage, serialization, notification, and lifecycle.
+category: Services|Log
+quality: experimental
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: log_captive_shared_memory
+requires:
+- name: log_none
+root_path: platform_core/platform/service/sl_log
+include:
+- path: inc
+  file_list:
+  - path: sl_log_captive_ring.h
+source:
+- path: src/sl_log_captive_ring.c
+template_contribution:
+- name: component_catalog
+  value: log_captive_shared_memory

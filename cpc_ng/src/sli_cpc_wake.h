@@ -87,7 +87,7 @@ extern "C" {
  *
  * @return SL_STATUS_OK if successful, otherwise an error code.
  ******************************************************************************/
-sl_status_t sli_cpc_wake_device_init(sli_cpc_wake_device_t *wake);
+sl_status_t sli_cpc_wake_device_init(sli_cpc_wake_device_t *wake, sl_gpio_t pin);
 
 /***************************************************************************/ /**
  * Deinitialize the wake up functionality.
@@ -107,7 +107,7 @@ void sli_cpc_wake_device_deinit(sli_cpc_wake_device_t *wake);
  *
  * @return SL_STATUS_OK if successful, otherwise an error code.
  ******************************************************************************/
-sl_status_t sli_cpc_wake_host_init(sli_cpc_wake_host_t *wake);
+sl_status_t sli_cpc_wake_host_init(sli_cpc_wake_host_t *wake, sl_gpio_t pin);
 
 /***************************************************************************/ /**
  * Deinitialize the wake up functionality.

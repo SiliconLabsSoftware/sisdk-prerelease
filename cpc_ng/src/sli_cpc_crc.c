@@ -119,33 +119,3 @@ uint16_t sli_cpc_get_crc_sw(const uint8_t *buffer, size_t buffer_length)
 
   return crc;
 }
-
-uint16_t sli_cpc_get_crc_sw_with_security(const uint8_t *buffer, size_t buffer_length, const uint8_t *security_tag,
-                                          size_t security_tag_length)
-{
-  uint16_t crc = 0;
-
-  while (buffer_length--) {
-    crc = compute_crc16_byte(crc, *buffer++);
-  }
-
-  while (security_tag_length--) {
-    crc = compute_crc16_byte(crc, *security_tag++);
-  }
-
-  return crc;
-}
-
-/***************************************************************************/ /**
- * Validates CRC-16 (XMODEM) on given buffer. Software implementation.
- ******************************************************************************/
-bool sli_cpc_validate_crc_sw(const uint8_t *buffer, size_t buffer_length, uint16_t expected_crc)
-{
-  uint16_t crc = 0;
-
-  while (buffer_length--) {
-    crc = compute_crc16_byte(crc, *buffer++);
-  }
-
-  return (crc == expected_crc);
-}

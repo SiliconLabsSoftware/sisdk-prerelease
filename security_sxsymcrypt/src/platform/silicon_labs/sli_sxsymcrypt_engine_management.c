@@ -111,6 +111,7 @@ sl_status_t sli_sxsymcrypt_init_locks(void)
     }
   }
 #endif
+#if !defined(SLI_SKIP_SX_INTERRUPTS)
   EFM_ASSERT(sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_SYMCRYPTO) == SL_STATUS_OK);
 #if !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(SIXG300XIWIFI74000XFULL_FPGA)
   EFM_ASSERT(sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LPWAES) == SL_STATUS_OK);
@@ -119,6 +120,7 @@ sl_status_t sli_sxsymcrypt_init_locks(void)
   EFM_ASSERT(sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_SYMCRYPTO) == SL_STATUS_OK);
 #if !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(SIXG300XIWIFI74000XFULL_FPGA)
   EFM_ASSERT(sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_LPWAES) == SL_STATUS_OK);
+#endif
 #endif
   return ret;
 }

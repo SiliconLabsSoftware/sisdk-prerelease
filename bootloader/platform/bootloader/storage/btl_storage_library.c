@@ -33,7 +33,6 @@
 #if defined(BTL_PARSER_SUPPORT_DELTA_DFU)
 #include "btl_delta_dfu_cfg.h"
 #include "btl_crc32.h"
-#include "common.h"
 #include "ddfu/patch.h"
 #include "core/btl_reset.h"
 #include "btl_reset_info.h"
@@ -137,7 +136,9 @@ static void dummyCallback(uint32_t address,
                           uint8_t  *data,
                           size_t   length,
                           void     *context);
-
+#if defined(BTL_PARSER_SUPPORT_DELTA_DFU) && (BTL_DELTA_DFU_EXTRACT_TO_RAM)
+static void storage_freeDeltaPatchRam(BootloaderParserContext_t *context);
+#endif
 // --------------------------------
 // Storage Info
 
@@ -668,6 +669,28 @@ bool calc_CRC(uint32_t newFwCRC, struct callback_streams *user_ctx)
 
 #endif //BTL_PARSER_SUPPORT_DELTA_DFU
 
+#if defined(BTL_PARSER_SUPPORT_DELTA_DFU) && (BTL_DELTA_DFU_EXTRACT_TO_RAM)
+// deltaPatchAddress is the slot flash address until the patch is copied to RAM.
+// Only the RAM copy is heap-allocated and must be freed on success, failure, or abort.
+static void storage_freeDeltaPatchRam(BootloaderParserContext_t *context)
+{
+  uint32_t patchAddr = context->parserContext.deltaPatchAddress;
+
+  if (patchAddr == 0U) {
+    return;
+  }
+
+  BootloaderStorageSlot_t slot;
+  if (storage_getSlotInfo(context->slotId, &slot) == BOOTLOADER_OK
+      && patchAddr == slot.address) {
+    return;
+  }
+
+  free((void *)patchAddr);
+  context->parserContext.deltaPatchAddress = 0U;
+}
+#endif
+
 // --------------------------------
 // Bootloading Functions
 
@@ -755,8 +778,7 @@ static bool bootloadFromSlot(BootloaderParserContext_t         *context,
           //Not enough space in slot. Reset with appropriate reset reason
           //Free up the RAM buffer if RAM based patch extraction is enabled
         #if (BTL_DELTA_DFU_EXTRACT_TO_RAM)
-          free((void*)context->parserContext.deltaPatchAddress);
-          context->parserContext.deltaPatchAddress = 0U;
+          storage_freeDeltaPatchRam(context);
         #endif
           reset_resetWithReason(BOOTLOADER_RESET_REASON_NO_SLOT_SPACE);
         }
@@ -765,8 +787,7 @@ static bool bootloadFromSlot(BootloaderParserContext_t         *context,
 
       #if (BTL_DELTA_DFU_EXTRACT_TO_RAM)
         //Free up the RAM buffer once the patch is applied
-        free((void*)context->parserContext.deltaPatchAddress);
-        context->parserContext.deltaPatchAddress = 0U;
+        storage_freeDeltaPatchRam(context);
       #endif
       
       if (ddfu_stat != DDFU_PATCH_STATUS_OK) {
@@ -806,8 +827,7 @@ static bool bootloadFromSlot(BootloaderParserContext_t         *context,
   } else {
   #if defined(BTL_PARSER_SUPPORT_DELTA_DFU) && (BTL_DELTA_DFU_EXTRACT_TO_RAM)
   // Parsing did not complete or image is not verified; free the RAM buffer
-  free((void *)context->parserContext.deltaPatchAddress);
-  context->parserContext.deltaPatchAddress = 0U;
+  storage_freeDeltaPatchRam(context);
   #endif
 
   #if defined(BTL_PARSER_SUPPORT_DELTA_DFU)
