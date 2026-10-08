@@ -3373,6 +3373,19 @@ static inline psa_status_t psa_driver_wrapper_xof_abort(
                         plaintext, plaintext_length,
                         ciphertext, ciphertext_size, ciphertext_length ) );
 #else
+            (void)key_buffer;
+            (void)key_buffer_size;
+            (void)alg;
+            (void)nonce;
+            (void)nonce_length;
+            (void)additional_data;
+            (void)additional_data_length;
+            (void)plaintext;
+            (void)plaintext_length;
+            (void)ciphertext;
+            (void)ciphertext_size;
+            (void)ciphertext_length;
+            (void)status;
             return( PSA_ERROR_NOT_SUPPORTED );
 #endif
 
@@ -3556,6 +3569,19 @@ static inline psa_status_t psa_driver_wrapper_aead_decrypt(
                         ciphertext, ciphertext_length,
                         plaintext, plaintext_size, plaintext_length ) );
 #else
+            (void)key_buffer;
+            (void)key_buffer_size;
+            (void)alg;
+            (void)nonce;
+            (void)nonce_length;
+            (void)additional_data;
+            (void)additional_data_length;
+            (void)ciphertext;
+            (void)ciphertext_length;
+            (void)plaintext;
+            (void)plaintext_size;
+            (void)plaintext_length;
+            (void)status;
             return( PSA_ERROR_NOT_SUPPORTED );
 #endif
 
@@ -3717,6 +3743,11 @@ static inline psa_status_t psa_driver_wrapper_aead_encrypt_setup(
                         alg );
             return( status );
 #else
+            (void)operation;
+            (void)key_buffer;
+            (void)key_buffer_size;
+            (void)alg;
+            (void)status;
             return( PSA_ERROR_NOT_SUPPORTED );
 #endif
 
@@ -3854,6 +3885,11 @@ static inline psa_status_t psa_driver_wrapper_aead_decrypt_setup(
                         alg );
             return( status );
 #else
+            (void)operation;
+            (void)key_buffer;
+            (void)key_buffer_size;
+            (void)alg;
+            (void)status;
             return( PSA_ERROR_NOT_SUPPORTED );
 #endif
 

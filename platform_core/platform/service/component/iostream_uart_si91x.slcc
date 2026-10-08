@@ -21,4 +21,7 @@ requires:
 template_contribution:
 - name: iostream_uart_instances_si91x
   value: '{{instance}}'
+documentation:
+  docset: gecko-platform
+  document: platform-service/iostream-uart
 root_path: platform_core

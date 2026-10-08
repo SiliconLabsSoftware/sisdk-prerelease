@@ -41,3 +41,6 @@ template_contribution:
 define:
 - name: SL_CODE_COMPONENT_GPIO
   value: gpio
+documentation:
+  docset: gecko-platform
+  document: platform-driver/gpio

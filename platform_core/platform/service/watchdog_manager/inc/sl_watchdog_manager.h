@@ -388,7 +388,8 @@ sl_status_t sl_watchdog_manager_set_clock_source(
  * The function works by comparing the faulty handle from the previous reset
  * with newly created watchdogs. When a match is found during
  * sl_watchdog_manager_create(), a debug message is logged with the watchdog
- * UID.
+ * UID. Use sl_watchdog_manager_retrieve_faulty_uid() to read the UID directly
+ * without relying on handle recreation.
  *
  * @param[out] handle     Pointer to variable that will receive the handle of
  *                        the first faulty watchdog. Must not be NULL.
@@ -410,6 +411,35 @@ sl_status_t sl_watchdog_manager_set_clock_source(
  *       are reused across resets. This is acceptable for debugging purposes.
  ******************************************************************************/
 sl_status_t sl_watchdog_manager_retrieve_faulty(sl_watchdog_handle_t *handle);
+
+/***************************************************************************//**
+ * @brief Retrieve the UID of the watchdog that caused a reset.
+ *
+ * @details
+ * After a reset caused by watchdog expiration, this function can be called to
+ * retrieve the UID of the first software watchdog that was not fed.
+ *
+ * This function uses the same no_init state as
+ * sl_watchdog_manager_retrieve_faulty() and must be called before
+ * sl_watchdog_manager_init().
+ *
+ * @param[out] watchdog_uid Pointer to variable that will receive the UID of
+ *                          the first faulty watchdog. Must not be NULL.
+ *
+ * @return SL_STATUS_OK if successful and a faulty watchdog was found.
+ * @return SL_STATUS_NULL_POINTER if watchdog_uid is NULL.
+ * @return SL_STATUS_NOT_AVAILABLE if the reset was not caused by a watchdog.
+ * @return SL_STATUS_INVALID_STATE if this function is called after
+ *         sl_watchdog_manager_init().
+ *
+ * @note This function MUST be called before sl_watchdog_manager_init() to
+ *       retrieve information from the previous reset.
+ *
+ * @note This function reads but does not clear the EMU reset-cause register.
+ *       The application (or another service) is responsible for calling
+ *       sl_hal_emu_clear_reset_cause() when the reset cause has been consumed.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_retrieve_faulty_uid(uint32_t *watchdog_uid);
 
 /***************************************************************************//**
  * @brief Registers a callback for hardware watchdog starvation.

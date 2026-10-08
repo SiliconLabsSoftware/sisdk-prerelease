@@ -59,7 +59,7 @@ typedef enum _sli_engine_idx {
 } sli_engine_id_t;
 
 #define INVALID_ENGINE(engine) \
-  (((engine) != SLI_CRYPTO_LPWAES) && ((engine) != SLI_CRYPTO_HOSTSYMCRYPTO))
+        (((engine) != SLI_CRYPTO_LPWAES) && ((engine) != SLI_CRYPTO_HOSTSYMCRYPTO))
 
 sl_status_t sli_crypto_countermeasure_reseed(sli_crypto_engine_t engine, sli_crypto_seed_t *seed)
 {
@@ -596,14 +596,16 @@ sl_status_t sli_crypto_ctr(sli_crypto_descriptor_t *key_descriptor,
 }
 
 /***************************************************************************//**
- * @brief          CCM buffer authenticated decryption optimized for BLE
+ * @brief          CCM buffer authenticated decryption optimized for BLE with
+ *                 a configurable MIC length
  ******************************************************************************/
-sl_status_t sli_crypto_ccm_auth_decrypt_ble(sli_crypto_descriptor_t     *key_descriptor,
-                                            unsigned char               *data,
-                                            size_t                      length,
-                                            const unsigned char         *iv,
-                                            unsigned char               header,
-                                            unsigned char               *tag)
+sl_status_t sli_crypto_ccm_auth_decrypt_ble_with_tag_len(sli_crypto_descriptor_t *key_descriptor,
+                                                         unsigned char           *data,
+                                                         size_t                  length,
+                                                         const unsigned char     *iv,
+                                                         unsigned char            header,
+                                                         unsigned char           *tag,
+                                                         size_t                  tag_len)
 {
   EFM_ASSERT(key_descriptor != NULL);
   EFM_ASSERT(data != NULL);
@@ -623,18 +625,36 @@ sl_status_t sli_crypto_ccm_auth_decrypt_ble(sli_crypto_descriptor_t     *key_des
                         &header,
                         1,
                         tag,
-                        4);
+                        tag_len);
+}
+
+sl_status_t sli_crypto_ccm_auth_decrypt_ble(sli_crypto_descriptor_t     *key_descriptor,
+                                            unsigned char               *data,
+                                            size_t                      length,
+                                            const unsigned char         *iv,
+                                            unsigned char               header,
+                                            unsigned char               *tag)
+{
+  return sli_crypto_ccm_auth_decrypt_ble_with_tag_len(key_descriptor,
+                                                      data,
+                                                      length,
+                                                      iv,
+                                                      header,
+                                                      tag,
+                                                      4);
 }
 
 /***************************************************************************//**
- * @brief          CCM buffer encryption optimized for BLE
+ * @brief          CCM buffer encryption optimized for BLE with a configurable
+ *                 MIC length
  ******************************************************************************/
-sl_status_t sli_crypto_ccm_encrypt_and_tag_ble(sli_crypto_descriptor_t     *key_descriptor,
-                                               unsigned char               *data,
-                                               size_t                      length,
-                                               const unsigned char         *iv,
-                                               unsigned char               header,
-                                               unsigned char               *tag)
+sl_status_t sli_crypto_ccm_encrypt_and_tag_ble_with_tag_len(sli_crypto_descriptor_t *key_descriptor,
+                                                            unsigned char           *data,
+                                                            size_t                  length,
+                                                            const unsigned char     *iv,
+                                                            unsigned char            header,
+                                                            unsigned char           *tag,
+                                                            size_t                  tag_len)
 {
   EFM_ASSERT(key_descriptor != NULL);
   EFM_ASSERT(data != NULL);
@@ -654,7 +674,23 @@ sl_status_t sli_crypto_ccm_encrypt_and_tag_ble(sli_crypto_descriptor_t     *key_
                         &header,
                         1,
                         tag,
-                        4);
+                        tag_len);
+}
+
+sl_status_t sli_crypto_ccm_encrypt_and_tag_ble(sli_crypto_descriptor_t     *key_descriptor,
+                                               unsigned char               *data,
+                                               size_t                      length,
+                                               const unsigned char         *iv,
+                                               unsigned char               header,
+                                               unsigned char               *tag)
+{
+  return sli_crypto_ccm_encrypt_and_tag_ble_with_tag_len(key_descriptor,
+                                                         data,
+                                                         length,
+                                                         iv,
+                                                         header,
+                                                         tag,
+                                                         4);
 }
 
 /***************************************************************************//**

@@ -37,7 +37,6 @@
 #include "sl_cpc.h"
 #include "sl_cpc_frame.h"
 #include "sli_cpc_assert.h"
-#include "sli_cpc_crc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,17 +64,6 @@ static inline void sli_cpc_frame_init(sl_cpc_frame_t *frame)
 static inline sli_cpc_hdr_t *sli_cpc_frame_get_header(sl_cpc_frame_t *frame)
 {
   return &frame->hdr;
-}
-
-/**
- * @brief Compute payload checksum in software.
- *
- * @param[in] buf Buffer.
- * @return The computed checksum.
- */
-static inline uint16_t sli_cpc_get_csum_payload(const sl_cpc_buf_t *buf)
-{
-  return sli_cpc_get_crc_sw(buf->ptr, buf->len);
 }
 
 /**

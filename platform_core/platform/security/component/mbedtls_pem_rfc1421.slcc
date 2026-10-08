@@ -1,0 +1,24 @@
+id: mbedtls_pem_rfc1421
+package: platform_core
+label: PEM RFC1421 Parse
+description: >-
+  This component adds optional support for reading password-encrypted PEM
+  (Proc-Type: 4,ENCRYPTED) with mbedtls_pem_read_buffer. It enables the MD5,
+  AES, and CBC configuration required by the Mbed TLS PEM implementation.
+  Not required for standard base64-wrapped PEM.
+category: Platform|Security|Mbed TLS|Upper Layer
+quality: production
+provides:
+- name: mbedtls_pem_rfc1421
+requires:
+- name: mbedtls_pem_parse
+- name: mbedtls_aes
+- name: mbedtls_cipher_cbc
+- name: psa_crypto_md5
+documentation:
+  # No dedicated PEM Parsing page; Mbed TLS hub for related docs
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
+metadata:
+  sbom:
+    reference: mbedtls_sbom
+root_path: platform_core

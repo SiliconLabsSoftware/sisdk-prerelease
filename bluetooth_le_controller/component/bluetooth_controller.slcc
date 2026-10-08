@@ -37,6 +37,9 @@ requires:
 - name: bluetooth_controller_libraries_x353
   condition:
   - device_generic_family_sixx353
+- name: bluetooth_controller_libraries_x302
+  condition:
+  - device_generic_family_sixx302
 - name: bluetooth_controller_libraries_250
   condition:
   - device_sdid_250

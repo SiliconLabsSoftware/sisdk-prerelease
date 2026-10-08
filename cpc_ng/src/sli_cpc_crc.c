@@ -98,12 +98,13 @@ __STATIC_INLINE uint16_t compute_crc16_byte(uint16_t crc, uint8_t new_byte)
 /***************************************************************************/ /**
  * Computes CRC-16 XMODEM on given buffer. Software implementation.
  ******************************************************************************/
-uint16_t sli_cpc_get_crc_sw(const uint8_t *buffer, size_t buffer_length)
+uint16_t sli_cpc_crc(const void *ptr, size_t len)
 {
+  const uint8_t *data = ptr;
   uint16_t crc = 0;
 
-  while (buffer_length--) {
-    crc = compute_crc16_byte(crc, *buffer++);
+  while (len--) {
+    crc = compute_crc16_byte(crc, *data++);
   }
 
 #ifdef CPC_TEST_WITH_INVALID_CRC

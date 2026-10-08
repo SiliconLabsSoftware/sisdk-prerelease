@@ -31,3 +31,6 @@ template_contribution:
     event: driver_init
     include: sl_uart_instances.h
     handler: sl_uart_instances_init
+documentation:
+  docset: gecko-platform
+  document: platform-driver/uartdrv

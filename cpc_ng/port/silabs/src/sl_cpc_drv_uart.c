@@ -455,7 +455,7 @@ static sl_status_t cpc_drv_uart_init_payload_tx_ops(sl_cpc_frame_t *frame, cpc_d
   }
 
   if (!frame->payload_csum_is_valid) {
-    frame->payload_csum = sli_cpc_get_csum_payload(frame->payload);
+    frame->payload_csum = sli_cpc_crc_buf(frame->payload);
     frame->payload_csum_is_valid = true;
   }
 
@@ -646,7 +646,7 @@ static sl_status_t cpc_drv_uart_send_frame(sl_cpc_frame_t *frame)
   // Copy the raw header
   memcpy(ops.header->hdr, sli_cpc_frame_get_header(frame), SLI_CPC_HEADER_SIZE);
 
-  sli_cpc_u16_to_le(sli_cpc_get_crc_sw(ops.header->hdr, SLI_CPC_HEADER_SIZE), ops.header->hdr_crc);
+  sli_cpc_u16_to_le(sli_cpc_crc(ops.header->hdr, SLI_CPC_HEADER_SIZE), ops.header->hdr_crc);
 
   status = cpc_drv_uart_init_payload_tx_ops(frame, &ops);
   if (status != SL_STATUS_OK) {
@@ -1022,7 +1022,7 @@ static cpc_drv_uart_hdr_sync_result_t cpc_drv_uart_hdr_block_sync_step(cpc_drv_u
 
   // Full block aligned on sync — validate the header CRC.
   hdr = &rx_ctx->hdr_block[1];
-  computed_crc = sli_cpc_get_crc_sw(hdr, SLI_CPC_HEADER_SIZE);
+  computed_crc = sli_cpc_crc(hdr, SLI_CPC_HEADER_SIZE);
   received_crc = sli_cpc_u16_from_le(&rx_ctx->hdr_block[1U + SLI_CPC_HEADER_SIZE]);
   if (computed_crc != received_crc) {
     SLI_CPC_LOG_DEBUG("[UART] Invalid header CRC, resyncing, computed=0x%04x received=0x%04x", computed_crc,
@@ -1207,7 +1207,7 @@ static bool extract_payload_crc(cpc_drv_uart_rx_ctx_t *rx_ctx)
   }
 
   received_crc = sli_cpc_u16_from_le(rx_ctx->crc_buf);
-  computed_crc = sli_cpc_get_csum_payload(frame->payload);
+  computed_crc = sli_cpc_crc_buf(frame->payload);
   frame->payload_csum = received_crc;
   frame->payload_csum_is_valid = computed_crc == received_crc;
   if (!frame->payload_csum_is_valid) {

@@ -1344,7 +1344,9 @@ void otPlatRadioSetPanId(otInstance *aInstance, uint16_t aPanId)
 
     otEXPECT(sl_ot_rtos_task_can_access_pal());
     otLogInfoPlat("PANID=%X index=%u", aPanId, panIndex);
+#if RADIO_CONFIG_SRC_MATCH_SHORT_ENTRY_NUM || RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM
     utilsSoftSrcMatchSetPanId(aInstance, aPanId);
+#endif
 
     status = sli_ot_radio_interface_rail_set_pan_id(aPanId, panIndex);
     OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
@@ -2006,6 +2008,7 @@ static bool writeIeee802154EnhancedAck(sl_rail_handle_t          aRailHandle,
 
     (void)otMacFrameGetSrcAddr(&receivedFrame, &aSrcAddress);
 
+#if RADIO_CONFIG_SRC_MATCH_SHORT_ENTRY_NUM || RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM
     if (instance != nullptr && sli_ot_radio_interface_is_src_match_enabled()
         && (aSrcAddress.mType != OT_MAC_ADDRESS_TYPE_NONE))
     {
@@ -2013,6 +2016,7 @@ static bool writeIeee802154EnhancedAck(sl_rail_handle_t          aRailHandle,
                                ? (utilsSoftSrcMatchExtFindEntry(instance, &aSrcAddress.mAddress.mExtAddress) >= 0)
                                : (utilsSoftSrcMatchShortFindEntry(instance, aSrcAddress.mAddress.mShortAddress) >= 0));
     }
+#endif
 
     // Generate our IE header.
     // Write IE data for enhanced ACK (link metrics + allocate bytes for CSL)
@@ -2099,8 +2103,10 @@ void dataRequestCommandCallback(sl_rail_handle_t aRailHandle)
 {
 #define MAX_EXPECTED_BYTES (2U + 2U + 1U) // PHR + FCF + DSN
 
-    uint8_t                  receivedPsdu[IEEE802154_MAX_LENGTH];
-    uint8_t                  pktOffset = PHY_HEADER_SIZE;
+    uint8_t receivedPsdu[IEEE802154_MAX_LENGTH];
+#if RADIO_CONFIG_SRC_MATCH_SHORT_ENTRY_NUM || RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM
+    uint8_t pktOffset = PHY_HEADER_SIZE;
+#endif
     uint8_t                  initialPktReadBytes;
     sl_rail_rx_packet_info_t packetInfo;
     uint32_t                 rxCallbackTimestamp = otPlatAlarmMicroGetNow();
@@ -2109,6 +2115,7 @@ void dataRequestCommandCallback(sl_rail_handle_t aRailHandle)
     // ACK-requesting CMD or DATA frame have been received and we
     // can do a frame pending check.  We must also figure out what
     // kind of ACK is being requested -- Immediate or Enhanced.
+    // Frame pending lookup is not needed in MTD.
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
     if (writeIeee802154EnhancedAck(aRailHandle, &packetInfo, rxCallbackTimestamp, &initialPktReadBytes, receivedPsdu))
@@ -2117,12 +2124,13 @@ void dataRequestCommandCallback(sl_rail_handle_t aRailHandle)
         // generating an enhanced ACK.
         return;
     }
-#else
+#elif RADIO_CONFIG_SRC_MATCH_SHORT_ENTRY_NUM || RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM
     OT_UNUSED_VARIABLE(rxCallbackTimestamp);
     initialPktReadBytes =
         readInitialPacketData(&packetInfo, MAX_EXPECTED_BYTES, pktOffset + 2, receivedPsdu, MAX_EXPECTED_BYTES);
 #endif
 
+#if RADIO_CONFIG_SRC_MATCH_SHORT_ENTRY_NUM || RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM
     // Calculate frame pending for immediate-ACK
     // If not, RAIL will send an immediate ACK, but we need to do FP lookup.
     sl_rail_status_t status = SL_RAIL_STATUS_NO_ERROR;
@@ -2178,6 +2186,7 @@ exit:
     {
         OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
     }
+#endif // RADIO_CONFIG_SRC_MATCH_SHORT_ENTRY_NUM || RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM
 }
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)

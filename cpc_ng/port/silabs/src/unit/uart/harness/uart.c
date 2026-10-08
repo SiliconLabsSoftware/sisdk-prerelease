@@ -268,7 +268,7 @@ size_t encode_uart_frame(uint8_t *out, size_t out_capacity, const cpc_frame_expe
   out[0] = (uint8_t)TEST_UART_PREAMBLE;
   memcpy(&out[1], &hdr, SLI_CPC_HEADER_SIZE);
 
-  header_crc = sli_cpc_get_crc_sw(&out[1], SLI_CPC_HEADER_SIZE);
+  header_crc = sli_cpc_crc(&out[1], SLI_CPC_HEADER_SIZE);
   sli_cpc_u16_to_le(header_crc, &out[1U + SLI_CPC_HEADER_SIZE]);
 
   if (payload_length == 0U) {
@@ -277,7 +277,7 @@ size_t encode_uart_frame(uint8_t *out, size_t out_capacity, const cpc_frame_expe
 
   memcpy(&out[TEST_UART_HEADER_BLOCK_SIZE], frame->payload, payload_length);
 
-  payload_crc = sli_cpc_get_crc_sw(frame->payload, payload_length);
+  payload_crc = sli_cpc_crc(frame->payload, payload_length);
   sli_cpc_u16_to_le(payload_crc, &out[TEST_UART_HEADER_BLOCK_SIZE + payload_length]);
 
   return total_length;

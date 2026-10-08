@@ -1,0 +1,20 @@
+id: sli_psa_driver_feature_p192r1
+package: platform_core
+label: PSA driver P-192 (secp192r1)
+description: >-
+  Hidden component that enables Silicon Labs PSA driver support for
+  the P-192 (secp192r1) elliptic curve.
+category: Platform|Security|PSA Crypto|Elliptic Curves
+quality: production
+ui_hints:
+  visibility: never
+provides:
+- name: sli_psa_driver_feature_p192r1
+requires:
+- name: psa_crypto_ecc
+define:
+- name: SLI_PSA_WANT_ECC_SECP_R1_192
+metadata:
+  sbom:
+    reference: mbedtls_sbom
+root_path: platform_core

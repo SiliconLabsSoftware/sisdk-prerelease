@@ -34,6 +34,8 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
+
+#include "sl_cpc_buf.h"
 #include "sl_status.h"
 
 #ifdef __cplusplus
@@ -41,14 +43,25 @@ extern "C" {
 #endif
 
 /***************************************************************************/ /**
- * Computes CRC-16 XMODEM on given buffer. Software implementation.
+ * Computes CRC-16 XMODEM on given data. Software implementation.
  *
- * @param buffer Pointer to the buffer on which the CRC must be computed.
- * @param buffer_length Length of the buffer, in bytes.
+ * @param ptr Pointer to the data to compute the CRC on.
+ * @param len Length of the data, in bytes.
  *
  * @return CRC value.
  ******************************************************************************/
-uint16_t sli_cpc_get_crc_sw(const uint8_t *buffer, size_t buffer_length);
+uint16_t sli_cpc_crc(const void *ptr, size_t len);
+
+/**
+ * @brief Compute the CRC of the bytes in a CPC buffer.
+ *
+ * @param[in] buf Buffer.
+ * @return The computed CRC.
+ */
+static inline uint16_t sli_cpc_crc_buf(const sl_cpc_buf_t *buf)
+{
+  return sli_cpc_crc(buf->ptr, buf->len);
+}
 
 #ifdef __cplusplus
 }

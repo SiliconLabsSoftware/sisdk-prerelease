@@ -57,8 +57,10 @@ requires:
 - name: psa_crypto_trng
   condition: [device_series_3]
 
+  # 91x and native cannot use mbedtls_threading_alt, only require it for freertos
+  # if device is an EFx device.
 - name: mbedtls_threading_alt
-  condition: [freertos]
+  condition: [freertos, device_efx]
 - name: mbedtls_threading_alt
   condition: [micriumos]
 

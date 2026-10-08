@@ -148,7 +148,9 @@ typedef enum {
   /// Heap usage
   SL_WISUN_STATISTICS_TYPE_HEAP       = 6,
   /// LXPM statistics
-  SL_WISUN_STATISTICS_TYPE_LXPM       = 7
+  SL_WISUN_STATISTICS_TYPE_LXPM       = 7,
+  /// DMP statistics
+  SL_WISUN_STATISTICS_TYPE_DMP        = 8,
 } sl_wisun_statistics_type_t;
 
 /// Enumerations for regulatory domain
@@ -580,6 +582,18 @@ typedef struct {
   uint32_t tx_relay;
 } sl_wisun_statistics_lxpm_t;
 
+/// DMP statistics
+typedef struct {
+  /// Number of TX scheduler interruptions
+  uint32_t scheduler_tx_interrupted_count;
+  /// Number of CCA scheduler interruptions
+  uint32_t scheduler_cca_interrupted_count;
+  /// Number of scheduler tasks failed calls
+  uint32_t scheduler_task_fail_count;
+  /// Number of scheduler internal errors
+  uint32_t scheduler_internal_error_count;
+} sl_wisun_statistics_dmp_t;
+
 /// Statistics
 typedef union {
   /// PHY/RF statistics
@@ -598,6 +612,8 @@ typedef union {
   sl_wisun_statistics_heap_t heap;
   /// LXPM statistics
   sl_wisun_statistics_lxpm_t lxpm;
+  /// DMP statistics
+  sl_wisun_statistics_dmp_t dmp;
 } sl_wisun_statistics_t;
 
 /// FAN1.0 PHY configuration

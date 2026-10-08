@@ -2,8 +2,8 @@
 - id: ZGM230SA27HGN_config
 - label: ZGM230SA27HGN config
 - description: Configuration files for ZGM230SA27HGN
-- package: platform_core
 - category: Platform|Device|ZGM23|Config
+- package: platform_core
 - quality: production
 - metadata:
     sbom:
@@ -47,10 +47,5 @@
   - override:
       component: rail_util_pa
       file_id: rail_util_pa_config
-      vendor: silabs
-    path: ZGM230SA27HGN/sl_rail_util_pa_config.h
-  - override:
-      component: sl_rail_util_pa
-      file_id: sl_rail_util_pa_config
       vendor: silabs
     path: ZGM230SA27HGN/sl_rail_util_pa_config.h

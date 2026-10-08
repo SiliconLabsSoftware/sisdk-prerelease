@@ -18,9 +18,6 @@ include:
 - path: inc
   file_list:
   - path: sl_device_uart.h
-# documentation:
-  # docset: gecko-platform
-  # document: platform-service/device-manager
 documentation:
   docset: gecko-platform
   document: platform-service/device-peripheral

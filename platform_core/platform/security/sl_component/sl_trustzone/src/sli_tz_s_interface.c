@@ -38,8 +38,6 @@
   #include "tz_service_config_autogen.h"
 #endif
 
-#include "psa/crypto_types.h"
-
 #include "sli_tz_iovec_check.h"
 #include "sli_tz_s_interface.h"
 #if defined(SL_CATALOG_PSA_CRYPTO_KEY_PROTECTION_PRESENT)
@@ -49,12 +47,12 @@
 
 #include "sl_assert.h"
 
-#include "tfm_crypto_defs.h"
 #include "psa/client.h"
+#include "sli_tz_funcs_sids_autogen.h"
 
 #if defined(TZ_SERVICE_PSA_CRYPTO_PRESENT)
+  #include "tfm_crypto_defs.h"
   #include "sli_tz_service_psa_crypto.h"
-  #include "sli_tz_funcs_sids_autogen.h"
 #endif
 #include "sli_tz_service_syscfg.h"
 #if defined(TZ_SERVICE_NVM3_PRESENT) || defined(TZ_SERVICE_PSA_ITS_PRESENT)

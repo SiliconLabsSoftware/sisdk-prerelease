@@ -2,8 +2,8 @@
 - id: brd4400b_config
 - label: brd4400b config
 - description: Configuration files for BRD4400B
-- package: boards
 - category: Platform|Board|Config
+- package: boards
 - quality: production
 - metadata:
     sbom:
@@ -1468,6 +1468,13 @@
       instance: exp
       vendor: silabs
     path: brd4400b_brd4002b/sl_cpc_drv_uart_usart_exp_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+      vendor: silabs
+    path: brd4400b_brd4002b/sl_device_init_hfxo_config.h
   - condition:
     - brd4002b
     override:

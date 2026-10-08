@@ -2,8 +2,8 @@
 - id: MGM240LD22VIF_config
 - label: MGM240LD22VIF config
 - description: Configuration files for MGM240LD22VIF
-- package: platform_core
 - category: Platform|Device|MGM24|Config
+- package: platform_core
 - quality: production
 - metadata:
     sbom:
@@ -40,10 +40,5 @@
   - override:
       component: rail_util_pa
       file_id: rail_util_pa_config
-      vendor: silabs
-    path: MGM240LD22VIF/sl_rail_util_pa_config.h
-  - override:
-      component: sl_rail_util_pa
-      file_id: sl_rail_util_pa_config
       vendor: silabs
     path: MGM240LD22VIF/sl_rail_util_pa_config.h

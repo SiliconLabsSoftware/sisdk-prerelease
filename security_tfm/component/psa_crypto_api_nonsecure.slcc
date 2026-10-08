@@ -27,6 +27,7 @@ conflicts:
 requires:
 - name: psa_crypto_config
 - name: tf_psa_crypto_mbedtls
+- name: psa_crypto_common
 include:
 - path: interface/include
   file_list:

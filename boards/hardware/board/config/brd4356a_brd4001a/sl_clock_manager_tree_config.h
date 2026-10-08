@@ -3,7 +3,7 @@
  * @brief Clock Manager - Clock Tree configuration file.
  *******************************************************************************
  * # License
- * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -45,6 +45,7 @@
 #define SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE_LFRCO        0xFC
 #define SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE_LFXO         0xFB
 #define SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE_ULFRCO       0xFA
+#define SL_CLOCK_MANAGER_DEFAULT_EUSART0_LF_CLOCK_SOURCE      CMU_EUSART0CLKCTRL_CLKSEL_EM23GRPACLK
 
 #if defined(SL_CATALOG_RAIL_LIB_PRESENT)
 #define SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE_AUTO         SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE_HFXO
@@ -79,7 +80,6 @@
 #endif
 
 // <h> System Clock Branch Settings
-
 // <o SL_CLOCK_MANAGER_SYSCLK_SOURCE> Clock Source Selection for SYSCLK branch
 //   <SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE=> DEFAULT_HF
 //   <CMU_SYSCLKCTRL_CLKSEL_FSRCO=> FSRCO
@@ -127,7 +127,7 @@
 #define SL_CLOCK_MANAGER_TRACECLK_SOURCE    CMU_TRACECLKCTRL_CLKSEL_SYSCLK
 #endif
 
-// <o SL_CLOCK_MANAGER_TRACECLK_DIVIDER> TRACECLK branch Divider
+// <o SL_CLOCK_MANAGER_TRACECLK_DIVIDER> TRACECLK branch divider
 //   <CMU_TRACECLKCTRL_PRESC_DIV1=> DIV1
 //   <CMU_TRACECLKCTRL_PRESC_DIV2=> DIV2
 //   <CMU_TRACECLKCTRL_PRESC_DIV3=> DIV3
@@ -137,7 +137,6 @@
 #ifndef SL_CLOCK_MANAGER_TRACECLK_DIVIDER
 #define SL_CLOCK_MANAGER_TRACECLK_DIVIDER    CMU_TRACECLKCTRL_PRESC_DIV1
 #endif
-
 // </h>
 
 // <h> High Frequency Clock Branches Settings
@@ -180,7 +179,6 @@
 // </h>
 
 // <h> Low Frequency Clock Branches Settings
-
 // <o SL_CLOCK_MANAGER_EM23GRPACLK_SOURCE> Clock Source Selection for EM23GRPACLK branch
 //   <SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE=> DEFAULT_LF
 //   <CMU_EM23GRPACLKCTRL_CLKSEL_LFRCO=> LFRCO
@@ -225,11 +223,11 @@
 #ifndef SL_CLOCK_MANAGER_WDOG0CLK_SOURCE
 #define SL_CLOCK_MANAGER_WDOG0CLK_SOURCE    SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE
 #endif
-
 // </h>
 
 // <h> Mixed Frequency Clock Branch Settings
 // <o SL_CLOCK_MANAGER_EUSART0CLK_SOURCE> Clock Source Selection for EUSART0CLK branch
+//   <SL_CLOCK_MANAGER_DEFAULT_EUSART0_LF_CLOCK_SOURCE=> LF_DEFAULT
 //   <CMU_EUSART0CLKCTRL_CLKSEL_DISABLED=> DISABLED
 //   <CMU_EUSART0CLKCTRL_CLKSEL_EM01GRPACLK=> EM01GRPACLK
 //   <CMU_EUSART0CLKCTRL_CLKSEL_EM23GRPACLK=> EM23GRPACLK
@@ -249,6 +247,7 @@
 #define SL_CLOCK_MANAGER_SYSTICKCLK_SOURCE    0
 #endif
 // </h>
+
 // </h>
 
 #endif /* SL_CLOCK_MANAGER_TREE_CONFIG_H */

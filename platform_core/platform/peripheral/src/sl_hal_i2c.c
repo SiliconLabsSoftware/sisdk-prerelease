@@ -101,19 +101,20 @@ extern __INLINE sl_i2c_fifo_threshold_t sl_hal_i2c_get_rx_fifo_threshold(const I
  * Initializes the I2C Peripheral.
  ******************************************************************************/
 void sl_hal_i2c_init(I2C_TypeDef *i2c,
-                     sl_i2c_operating_mode_t  mode)
+                     sl_i2c_operating_mode_t mode)
 {
   // Make sure the module exists on the selected chip.
   SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
-
-  // Reset the i2c peripheral.
-  sl_hal_i2c_reset(i2c);
 
   // Wait for synchronization to complete.
   sl_hal_i2c_wait_sync(i2c);
 
   // Leader or follower mode configuration.
-  i2c->CTRL_SET = (mode << _I2C_CTRL_SLAVE_SHIFT);
+  i2c->CTRL_CLR = I2C_CTRL_SLAVE;
+  sl_hal_i2c_wait_sync(i2c);
+  if (mode == SL_I2C_FOLLOWER_MODE) {
+    i2c->CTRL_SET = I2C_CTRL_SLAVE;
+  }
   SL_PRINT_STRING_DEBUG("mode=%d\r\n",
     (int)mode);
 }
@@ -196,7 +197,10 @@ void sl_hal_i2c_set_clock_frequency(I2C_TypeDef *i2c,
   sl_hal_i2c_wait_sync(i2c);
 
   // Set clhr mode.
-  i2c->CTRL_SET = clhr << _I2C_CTRL_CLHR_SHIFT;
+  i2c->CTRL_CLR = _I2C_CTRL_CLHR_MASK;
+  sl_hal_i2c_wait_sync(i2c);
+  i2c->CTRL_SET = ((uint32_t)clhr << _I2C_CTRL_CLHR_SHIFT) & _I2C_CTRL_CLHR_MASK;
+  sl_hal_i2c_wait_sync(i2c);
 
   // Check the minumum HF peripheral clock.
   if (i2c->CTRL & I2C_CTRL_SLAVE) {

@@ -237,6 +237,7 @@ sl_status_t sl_wisun_set_device_private_key(uint16_t key_options,
  *   - #SL_WISUN_STATISTICS_TYPE_NETWORK: 6LoWPAN/IP stack statistics
  *   - #SL_WISUN_STATISTICS_TYPE_REGULATION: Regional regulation statistics
  *   - #SL_WISUN_STATISTICS_TYPE_HEAP: Heap usage statistics
+ *   - #SL_WISUN_STATISTICS_TYPE_DMP: DMP specific statistics
  * @param[out] statistics Set of statistics read
  * @return SL_STATUS_OK if successful, an error code otherwise.
  *

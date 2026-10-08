@@ -1520,7 +1520,7 @@ static sl_status_t spi_drv_read_data(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *fr
 
   SLI_CPC_FRAME_LIST_FOR_EACH(&rx_pending_frames, frame)
   {
-    computed_payload_csum = sli_cpc_get_csum_payload(frame->payload);
+    computed_payload_csum = sli_cpc_crc_buf(frame->payload);
     frame->payload_csum_is_valid = computed_payload_csum == frame->payload_csum;
   }
 
@@ -1561,7 +1561,7 @@ static uint32_t spi_drv_write(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames)
   SLI_CPC_FRAME_LIST_FOR_EACH(frames, frame)
   {
     if (!frame->payload_csum_is_valid) {
-      frame->payload_csum = sli_cpc_get_csum_payload(frame->payload);
+      frame->payload_csum = sli_cpc_crc_buf(frame->payload);
       frame->payload_csum_is_valid = true;
     }
   }
@@ -1902,7 +1902,7 @@ static void prime_dma_for_transmission(void)
   header = sli_cpc_frame_get_header(frame);
   memcpy(&current_tx_header[0], header, SLI_CPC_HEADER_SIZE);
 
-  header_csum = sli_cpc_get_crc_sw(&current_tx_header[0], SLI_CPC_HEADER_SIZE);
+  header_csum = sli_cpc_crc(&current_tx_header[0], SLI_CPC_HEADER_SIZE);
 
   current_tx_header[SLI_CPC_HEADER_SIZE] = header_csum & 0xFF;
   current_tx_header[SLI_CPC_HEADER_SIZE + 1] = header_csum >> 8;
@@ -2115,7 +2115,7 @@ static void end_of_header_xfer(void)
     // GPCRC's autoInit is enabled, having read the GPCRC->DATA register restarted the GPCRC
     computed_crc = (uint16_t)GPCRC->DATAREV;
 #else
-    computed_crc = sli_cpc_get_crc_sw(current_rx_header, SLI_CPC_HEADER_SIZE);
+    computed_crc = sli_cpc_crc(current_rx_header, SLI_CPC_HEADER_SIZE);
 #endif
 
     received_crc = (uint16_t)(current_rx_header[SLI_CPC_HEADER_SIZE] | current_rx_header[SLI_CPC_HEADER_SIZE + 1] << 8);

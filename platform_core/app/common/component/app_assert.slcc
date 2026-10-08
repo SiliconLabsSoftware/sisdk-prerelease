@@ -25,3 +25,6 @@ requires:
 template_contribution:
 - name: component_catalog
   value: app_assert
+documentation:
+  docset: gecko-platform
+  document: platform-common/assert

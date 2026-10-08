@@ -64,4 +64,7 @@ source:
 - path: platform/service/legacy_hal/src/token_legacy.c
   condition: [device_series_2]
   unless: [zigbee_stack_common, connect_stack_common]
+documentation:
+  docset: gecko-platform
+  document: platform-service/token-manager
 root_path: platform_core

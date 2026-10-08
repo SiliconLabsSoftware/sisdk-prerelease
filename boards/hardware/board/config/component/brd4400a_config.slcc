@@ -2,8 +2,8 @@
 - id: brd4400a_config
 - label: brd4400a config
 - description: Configuration files for BRD4400A
-- package: boards
 - category: Platform|Board|Config
+- package: boards
 - quality: production
 - metadata:
     sbom:

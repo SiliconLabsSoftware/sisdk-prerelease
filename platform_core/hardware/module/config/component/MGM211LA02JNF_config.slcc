@@ -2,8 +2,8 @@
 - id: MGM211LA02JNF_config
 - label: MGM211LA02JNF config
 - description: Configuration files for MGM211LA02JNF
-- package: platform_core
 - category: Platform|Device|MGM21|Config
+- package: platform_core
 - quality: production
 - metadata:
     sbom:
@@ -40,10 +40,5 @@
   - override:
       component: rail_util_pa
       file_id: rail_util_pa_config
-      vendor: silabs
-    path: MGM211LA02JNF/sl_rail_util_pa_config.h
-  - override:
-      component: sl_rail_util_pa
-      file_id: sl_rail_util_pa_config
       vendor: silabs
     path: MGM211LA02JNF/sl_rail_util_pa_config.h

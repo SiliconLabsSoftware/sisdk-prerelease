@@ -324,9 +324,9 @@ if sysclk_source.value == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL" and socpll_enable ~= ni
     nil,
     nil)
 end
-if sysclk_source.value == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL0" and socpll_enable ~= nil and socpll_enable.value == "0" then
+if sysclk_source.value == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1" and socpll_enable ~= nil and socpll_enable.value == "0" then
   validation.error(
-    "SYSCLK source branch is configured on SOCPLL0, but SL_CLOCK_MANAGER_SOCPLL_EN is disabled",
+    "SYSCLK source branch is configured on SOCPLL0, but SL_CLOCK_MANAGER_SOCPLL0_EN is disabled",
     validation.target_for_defines({"SL_CLOCK_MANAGER_SYSCLK_SOURCE"}),
     nil,
     nil)
@@ -674,7 +674,7 @@ local function calculate_and_validate_clocks()
     sysclk_freq = tonumber(hfxo_freq.value)
   elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_CLKIN0" then
     sysclk_freq = tonumber(clkin0_freq.value)
-  elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL" or sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL0" then
+  elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL" or sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1" then
     sysclk_freq = tonumber(socpll_freq.value)
   elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_RFFPLL0SYS" then
     sysclk_freq = tonumber(rffpll_freq.value)

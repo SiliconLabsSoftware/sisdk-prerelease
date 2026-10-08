@@ -169,6 +169,8 @@ include:
 - path: src
   file_list:
   - path: sli_clock_manager_init_hal.h
+  - path: sli_clock_manager_socpll.h
+    condition: [device_has_socpll]
 define:
   # The Auto-Band feature requires the existence of a radio configuration file.
   # If this symbol is not defined, Auto-Band will be ignored and 9xx band used.

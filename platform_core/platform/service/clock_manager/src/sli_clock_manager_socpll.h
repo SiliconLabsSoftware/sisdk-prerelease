@@ -1,0 +1,403 @@
+/***************************************************************************//**
+ * @file
+ * @brief Clock Manager SOCPLL configuration derivation.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
+#ifndef SLI_CLOCK_MANAGER_SOCPLL_H
+#define SLI_CLOCK_MANAGER_SOCPLL_H
+
+#include "sl_clock_manager_tree_config.h"
+#include "sl_clock_manager_oscillator_config.h"
+#include "em_device.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*******************************************************************************
+ ********************************  MACROS   ************************************
+ ******************************************************************************/
+
+// Derives, for each SOCPLLn instance with SOCCLK0/1/2 outputs:
+//   SL_CLOCK_MANAGER_SOCPLLn_REFCLK, _REFCLK_FREQ, _FRACTIONAL_EN, _DIVN, _DIVF,
+//   _COMMON_FREQ (after OUTDIVIN) and _FREQ0/1/2 (after the output dividers).
+// When DIVN is provided (advanced settings or FREQPLAN), the frequencies are
+// computed from DIVN/DIVF. Otherwise DIVN/DIVF are derived from the DCO
+// frequency SL_CLOCK_MANAGER_SOCPLLn_FREQ.
+#if defined(SOCPLL_PRESENT) && defined(_SOCPLL_SOCCLK0_MASK)
+
+// Fdco = Fref * (DIVN + 2 + DIVF / 1024).
+// DIVN and DIVF come from the same rounded ratio so that a fraction rounding
+// up to 1024 carries into DIVN instead of overflowing DIVF.
+#define SLI_CLOCK_MANAGER_SOCPLL_CALC_RATIO_X1024(dco_freq, ref_freq) \
+  ((1024ULL * (dco_freq) + (ref_freq) / 2ULL) / (ref_freq))
+#define SLI_CLOCK_MANAGER_SOCPLL_CALC_DIVN(dco_freq, ref_freq) \
+  (SLI_CLOCK_MANAGER_SOCPLL_CALC_RATIO_X1024((dco_freq), (ref_freq)) / 1024ULL - 2ULL)
+#define SLI_CLOCK_MANAGER_SOCPLL_CALC_DIVF(dco_freq, ref_freq) \
+  (SLI_CLOCK_MANAGER_SOCPLL_CALC_RATIO_X1024((dco_freq), (ref_freq)) % 1024ULL)
+
+#define SLI_CLOCK_MANAGER_SOCPLL_CALC_DCO_FREQ(ref_freq, divn, divf) \
+  ((1ULL * (ref_freq) * ((divn) + 2ULL)) + ((1ULL * (ref_freq) * (divf)) / 1024ULL))
+
+// DIVF is ignored by the hardware in integer-N mode.
+#define SLI_CLOCK_MANAGER_SOCPLL_CALC_COMMON_FREQ(ref_freq, frac_en, divn, divf, outdivin) \
+  (SLI_CLOCK_MANAGER_SOCPLL_CALC_DCO_FREQ((ref_freq), (divn), ((frac_en) ? (divf) : 0ULL)) / ((outdivin) + 1ULL))
+
+#define SLI_CLOCK_MANAGER_SOCPLL_CALC_OUTPUT_FREQ(common_freq, out_div) \
+  ((common_freq) / ((out_div) + 2ULL))
+
+#define SLI_CLOCK_MANAGER_SOCPLL_CALC_REFCLK_FREQ(refclk) \
+  (((refclk) == SOCPLL_CTRL_REFCLKSEL_REF_HFRCO) ? SL_CLOCK_MANAGER_HFRCO_BAND : SL_CLOCK_MANAGER_HFXO_FREQ)
+
+#if defined(SL_CATALOG_RAIL_LIB_PRESENT) || (defined(SL_CLOCK_MANAGER_HFXO_EN) && (SL_CLOCK_MANAGER_HFXO_EN == 1))
+#define SLI_CLOCK_MANAGER_SOCPLL_AUTO_REFCLK  SOCPLL_CTRL_REFCLKSEL_REF_HFXO
+#else
+#define SLI_CLOCK_MANAGER_SOCPLL_AUTO_REFCLK  SOCPLL_CTRL_REFCLKSEL_REF_HFRCO
+#endif
+
+// SOCPLL0
+#if defined(SL_CLOCK_MANAGER_SOCPLL0_EN) && (SL_CLOCK_MANAGER_SOCPLL0_EN == 1)
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_REFCLK)
+#define SL_CLOCK_MANAGER_SOCPLL0_REFCLK         SLI_CLOCK_MANAGER_SOCPLL_AUTO_REFCLK
+#endif
+#if defined(SOCPLL_CTRL_REFCLKSEL_REF_EXTCLK) && (SL_CLOCK_MANAGER_SOCPLL0_REFCLK == SOCPLL_CTRL_REFCLKSEL_REF_EXTCLK)
+#error "External Clock is not supported as SOCPLL0 reference clock."
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_REFCLK_FREQ)
+#define SL_CLOCK_MANAGER_SOCPLL0_REFCLK_FREQ    SLI_CLOCK_MANAGER_SOCPLL_CALC_REFCLK_FREQ(SL_CLOCK_MANAGER_SOCPLL0_REFCLK)
+#endif
+#if (SL_CLOCK_MANAGER_SOCPLL0_REFCLK_FREQ < 34000000) || (SL_CLOCK_MANAGER_SOCPLL0_REFCLK_FREQ > 44000000)
+#error "SOCPLL0 reference clock frequency must be between 34MHz and 44MHz."
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_FRACTIONAL_EN)
+#define SL_CLOCK_MANAGER_SOCPLL0_FRACTIONAL_EN  1
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_DIVN)
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_FREQ)
+#error "SOCPLL0 requires either SL_CLOCK_MANAGER_SOCPLL0_FREQ or SL_CLOCK_MANAGER_SOCPLL0_DIVN."
+#endif
+#define SL_CLOCK_MANAGER_SOCPLL0_DIVN           SLI_CLOCK_MANAGER_SOCPLL_CALC_DIVN(SL_CLOCK_MANAGER_SOCPLL0_FREQ, SL_CLOCK_MANAGER_SOCPLL0_REFCLK_FREQ)
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_DIVF)
+#define SL_CLOCK_MANAGER_SOCPLL0_DIVF           SLI_CLOCK_MANAGER_SOCPLL_CALC_DIVF(SL_CLOCK_MANAGER_SOCPLL0_FREQ, SL_CLOCK_MANAGER_SOCPLL0_REFCLK_FREQ)
+#endif
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_DIVF)
+#define SL_CLOCK_MANAGER_SOCPLL0_DIVF           0
+#endif
+#define SL_CLOCK_MANAGER_SOCPLL0_COMMON_FREQ    SLI_CLOCK_MANAGER_SOCPLL_CALC_COMMON_FREQ(SL_CLOCK_MANAGER_SOCPLL0_REFCLK_FREQ,   \
+                                                                                          SL_CLOCK_MANAGER_SOCPLL0_FRACTIONAL_EN, \
+                                                                                          SL_CLOCK_MANAGER_SOCPLL0_DIVN,          \
+                                                                                          SL_CLOCK_MANAGER_SOCPLL0_DIVF,          \
+                                                                                          SL_CLOCK_MANAGER_SOCPLL0_OUTDIVIN)
+#define SL_CLOCK_MANAGER_SOCPLL0_FREQ0          SLI_CLOCK_MANAGER_SOCPLL_CALC_OUTPUT_FREQ(SL_CLOCK_MANAGER_SOCPLL0_COMMON_FREQ, SL_CLOCK_MANAGER_SOCPLL0_OUT0_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL0_FREQ1          SLI_CLOCK_MANAGER_SOCPLL_CALC_OUTPUT_FREQ(SL_CLOCK_MANAGER_SOCPLL0_COMMON_FREQ, SL_CLOCK_MANAGER_SOCPLL0_OUT1_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL0_FREQ2          SLI_CLOCK_MANAGER_SOCPLL_CALC_OUTPUT_FREQ(SL_CLOCK_MANAGER_SOCPLL0_COMMON_FREQ, SL_CLOCK_MANAGER_SOCPLL0_OUT2_DIV)
+#else
+// Disabled instance: values keep the per-instance dispatch macros and the
+// runtime configuration variables valid.
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_REFCLK)
+#define SL_CLOCK_MANAGER_SOCPLL0_REFCLK         SOCPLL_CTRL_REFCLKSEL_REF_HFRCO
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_REFCLK_FREQ)
+#define SL_CLOCK_MANAGER_SOCPLL0_REFCLK_FREQ    0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_FRACTIONAL_EN)
+#define SL_CLOCK_MANAGER_SOCPLL0_FRACTIONAL_EN  0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_DIVN)
+#define SL_CLOCK_MANAGER_SOCPLL0_DIVN           0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_DIVF)
+#define SL_CLOCK_MANAGER_SOCPLL0_DIVF           0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_OUTDIVIN)
+#define SL_CLOCK_MANAGER_SOCPLL0_OUTDIVIN       0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_OUT0_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL0_OUT0_DIV       0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_OUT1_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL0_OUT1_DIV       0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_OUT2_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL0_OUT2_DIV       0
+#endif
+#define SL_CLOCK_MANAGER_SOCPLL0_COMMON_FREQ    0
+#define SL_CLOCK_MANAGER_SOCPLL0_FREQ0          0
+#define SL_CLOCK_MANAGER_SOCPLL0_FREQ1          0
+#define SL_CLOCK_MANAGER_SOCPLL0_FREQ2          0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL0_EN_OPEN_LOOP)
+#define SL_CLOCK_MANAGER_SOCPLL0_EN_OPEN_LOOP   0
+#endif
+
+// SOCPLL1
+#if defined(SOCPLL1)
+#if defined(SL_CLOCK_MANAGER_SOCPLL1_EN) && (SL_CLOCK_MANAGER_SOCPLL1_EN == 1)
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_REFCLK)
+#define SL_CLOCK_MANAGER_SOCPLL1_REFCLK         SLI_CLOCK_MANAGER_SOCPLL_AUTO_REFCLK
+#endif
+#if defined(SOCPLL_CTRL_REFCLKSEL_REF_EXTCLK) && (SL_CLOCK_MANAGER_SOCPLL1_REFCLK == SOCPLL_CTRL_REFCLKSEL_REF_EXTCLK)
+#error "External Clock is not supported as SOCPLL1 reference clock."
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_REFCLK_FREQ)
+#define SL_CLOCK_MANAGER_SOCPLL1_REFCLK_FREQ    SLI_CLOCK_MANAGER_SOCPLL_CALC_REFCLK_FREQ(SL_CLOCK_MANAGER_SOCPLL1_REFCLK)
+#endif
+#if (SL_CLOCK_MANAGER_SOCPLL1_REFCLK_FREQ < 34000000) || (SL_CLOCK_MANAGER_SOCPLL1_REFCLK_FREQ > 44000000)
+#error "SOCPLL1 reference clock frequency must be between 34MHz and 44MHz."
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_FRACTIONAL_EN)
+#define SL_CLOCK_MANAGER_SOCPLL1_FRACTIONAL_EN  1
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_DIVN)
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_FREQ)
+#error "SOCPLL1 requires either SL_CLOCK_MANAGER_SOCPLL1_FREQ or SL_CLOCK_MANAGER_SOCPLL1_DIVN."
+#endif
+#define SL_CLOCK_MANAGER_SOCPLL1_DIVN           SLI_CLOCK_MANAGER_SOCPLL_CALC_DIVN(SL_CLOCK_MANAGER_SOCPLL1_FREQ, SL_CLOCK_MANAGER_SOCPLL1_REFCLK_FREQ)
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_DIVF)
+#define SL_CLOCK_MANAGER_SOCPLL1_DIVF           SLI_CLOCK_MANAGER_SOCPLL_CALC_DIVF(SL_CLOCK_MANAGER_SOCPLL1_FREQ, SL_CLOCK_MANAGER_SOCPLL1_REFCLK_FREQ)
+#endif
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_DIVF)
+#define SL_CLOCK_MANAGER_SOCPLL1_DIVF           0
+#endif
+#define SL_CLOCK_MANAGER_SOCPLL1_COMMON_FREQ    SLI_CLOCK_MANAGER_SOCPLL_CALC_COMMON_FREQ(SL_CLOCK_MANAGER_SOCPLL1_REFCLK_FREQ,   \
+                                                                                          SL_CLOCK_MANAGER_SOCPLL1_FRACTIONAL_EN, \
+                                                                                          SL_CLOCK_MANAGER_SOCPLL1_DIVN,          \
+                                                                                          SL_CLOCK_MANAGER_SOCPLL1_DIVF,          \
+                                                                                          SL_CLOCK_MANAGER_SOCPLL1_OUTDIVIN)
+#define SL_CLOCK_MANAGER_SOCPLL1_FREQ0          SLI_CLOCK_MANAGER_SOCPLL_CALC_OUTPUT_FREQ(SL_CLOCK_MANAGER_SOCPLL1_COMMON_FREQ, SL_CLOCK_MANAGER_SOCPLL1_OUT0_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL1_FREQ1          SLI_CLOCK_MANAGER_SOCPLL_CALC_OUTPUT_FREQ(SL_CLOCK_MANAGER_SOCPLL1_COMMON_FREQ, SL_CLOCK_MANAGER_SOCPLL1_OUT1_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL1_FREQ2          SLI_CLOCK_MANAGER_SOCPLL_CALC_OUTPUT_FREQ(SL_CLOCK_MANAGER_SOCPLL1_COMMON_FREQ, SL_CLOCK_MANAGER_SOCPLL1_OUT2_DIV)
+#else
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_REFCLK)
+#define SL_CLOCK_MANAGER_SOCPLL1_REFCLK         SOCPLL_CTRL_REFCLKSEL_REF_HFRCO
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_REFCLK_FREQ)
+#define SL_CLOCK_MANAGER_SOCPLL1_REFCLK_FREQ    0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_FRACTIONAL_EN)
+#define SL_CLOCK_MANAGER_SOCPLL1_FRACTIONAL_EN  0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_DIVN)
+#define SL_CLOCK_MANAGER_SOCPLL1_DIVN           0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_DIVF)
+#define SL_CLOCK_MANAGER_SOCPLL1_DIVF           0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_OUTDIVIN)
+#define SL_CLOCK_MANAGER_SOCPLL1_OUTDIVIN       0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_OUT0_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL1_OUT0_DIV       0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_OUT1_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL1_OUT1_DIV       0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_OUT2_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL1_OUT2_DIV       0
+#endif
+#define SL_CLOCK_MANAGER_SOCPLL1_COMMON_FREQ    0
+#define SL_CLOCK_MANAGER_SOCPLL1_FREQ0          0
+#define SL_CLOCK_MANAGER_SOCPLL1_FREQ1          0
+#define SL_CLOCK_MANAGER_SOCPLL1_FREQ2          0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL1_EN_OPEN_LOOP)
+#define SL_CLOCK_MANAGER_SOCPLL1_EN_OPEN_LOOP   0
+#endif
+#endif // SOCPLL1
+
+// SOCPLL2
+#if defined(SOCPLL2)
+#if defined(SL_CLOCK_MANAGER_SOCPLL2_EN) && (SL_CLOCK_MANAGER_SOCPLL2_EN == 1)
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_REFCLK)
+#define SL_CLOCK_MANAGER_SOCPLL2_REFCLK         SLI_CLOCK_MANAGER_SOCPLL_AUTO_REFCLK
+#endif
+#if defined(SOCPLL_CTRL_REFCLKSEL_REF_EXTCLK) && (SL_CLOCK_MANAGER_SOCPLL2_REFCLK == SOCPLL_CTRL_REFCLKSEL_REF_EXTCLK)
+#error "External Clock is not supported as SOCPLL2 reference clock."
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_REFCLK_FREQ)
+#define SL_CLOCK_MANAGER_SOCPLL2_REFCLK_FREQ    SLI_CLOCK_MANAGER_SOCPLL_CALC_REFCLK_FREQ(SL_CLOCK_MANAGER_SOCPLL2_REFCLK)
+#endif
+#if (SL_CLOCK_MANAGER_SOCPLL2_REFCLK_FREQ < 34000000) || (SL_CLOCK_MANAGER_SOCPLL2_REFCLK_FREQ > 44000000)
+#error "SOCPLL2 reference clock frequency must be between 34MHz and 44MHz."
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_FRACTIONAL_EN)
+#define SL_CLOCK_MANAGER_SOCPLL2_FRACTIONAL_EN  1
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_DIVN)
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_FREQ)
+#error "SOCPLL2 requires either SL_CLOCK_MANAGER_SOCPLL2_FREQ or SL_CLOCK_MANAGER_SOCPLL2_DIVN."
+#endif
+#define SL_CLOCK_MANAGER_SOCPLL2_DIVN           SLI_CLOCK_MANAGER_SOCPLL_CALC_DIVN(SL_CLOCK_MANAGER_SOCPLL2_FREQ, SL_CLOCK_MANAGER_SOCPLL2_REFCLK_FREQ)
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_DIVF)
+#define SL_CLOCK_MANAGER_SOCPLL2_DIVF           SLI_CLOCK_MANAGER_SOCPLL_CALC_DIVF(SL_CLOCK_MANAGER_SOCPLL2_FREQ, SL_CLOCK_MANAGER_SOCPLL2_REFCLK_FREQ)
+#endif
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_DIVF)
+#define SL_CLOCK_MANAGER_SOCPLL2_DIVF           0
+#endif
+#define SL_CLOCK_MANAGER_SOCPLL2_COMMON_FREQ    SLI_CLOCK_MANAGER_SOCPLL_CALC_COMMON_FREQ(SL_CLOCK_MANAGER_SOCPLL2_REFCLK_FREQ,   \
+                                                                                          SL_CLOCK_MANAGER_SOCPLL2_FRACTIONAL_EN, \
+                                                                                          SL_CLOCK_MANAGER_SOCPLL2_DIVN,          \
+                                                                                          SL_CLOCK_MANAGER_SOCPLL2_DIVF,          \
+                                                                                          SL_CLOCK_MANAGER_SOCPLL2_OUTDIVIN)
+#define SL_CLOCK_MANAGER_SOCPLL2_FREQ0          SLI_CLOCK_MANAGER_SOCPLL_CALC_OUTPUT_FREQ(SL_CLOCK_MANAGER_SOCPLL2_COMMON_FREQ, SL_CLOCK_MANAGER_SOCPLL2_OUT0_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL2_FREQ1          SLI_CLOCK_MANAGER_SOCPLL_CALC_OUTPUT_FREQ(SL_CLOCK_MANAGER_SOCPLL2_COMMON_FREQ, SL_CLOCK_MANAGER_SOCPLL2_OUT1_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL2_FREQ2          SLI_CLOCK_MANAGER_SOCPLL_CALC_OUTPUT_FREQ(SL_CLOCK_MANAGER_SOCPLL2_COMMON_FREQ, SL_CLOCK_MANAGER_SOCPLL2_OUT2_DIV)
+#else
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_REFCLK)
+#define SL_CLOCK_MANAGER_SOCPLL2_REFCLK         SOCPLL_CTRL_REFCLKSEL_REF_HFRCO
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_REFCLK_FREQ)
+#define SL_CLOCK_MANAGER_SOCPLL2_REFCLK_FREQ    0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_FRACTIONAL_EN)
+#define SL_CLOCK_MANAGER_SOCPLL2_FRACTIONAL_EN  0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_DIVN)
+#define SL_CLOCK_MANAGER_SOCPLL2_DIVN           0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_DIVF)
+#define SL_CLOCK_MANAGER_SOCPLL2_DIVF           0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_OUTDIVIN)
+#define SL_CLOCK_MANAGER_SOCPLL2_OUTDIVIN       0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_OUT0_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL2_OUT0_DIV       0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_OUT1_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL2_OUT1_DIV       0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_OUT2_DIV)
+#define SL_CLOCK_MANAGER_SOCPLL2_OUT2_DIV       0
+#endif
+#define SL_CLOCK_MANAGER_SOCPLL2_COMMON_FREQ    0
+#define SL_CLOCK_MANAGER_SOCPLL2_FREQ0          0
+#define SL_CLOCK_MANAGER_SOCPLL2_FREQ1          0
+#define SL_CLOCK_MANAGER_SOCPLL2_FREQ2          0
+#endif
+#if !defined(SL_CLOCK_MANAGER_SOCPLL2_EN_OPEN_LOOP)
+#define SL_CLOCK_MANAGER_SOCPLL2_EN_OPEN_LOOP   0
+#endif
+#endif // SOCPLL2
+
+// Without runtime configuration, the SLI_ names used by the dispatch macros
+// resolve to the compile-time values. SOCPLL0 uses the unnumbered SLI_ names
+// shared with single-output SOCPLL devices.
+#if !defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
+#define SLI_CLOCK_MANAGER_SOCPLL_EN              SL_CLOCK_MANAGER_SOCPLL0_EN
+#define SLI_CLOCK_MANAGER_SOCPLL_FREQ            SL_CLOCK_MANAGER_SOCPLL0_COMMON_FREQ
+#define SLI_CLOCK_MANAGER_SOCPLL_REFCLK          SL_CLOCK_MANAGER_SOCPLL0_REFCLK
+#define SLI_CLOCK_MANAGER_SOCPLL_REFCLK_FREQ     SL_CLOCK_MANAGER_SOCPLL0_REFCLK_FREQ
+#define SLI_CLOCK_MANAGER_SOCPLL_FRACTIONAL_EN   SL_CLOCK_MANAGER_SOCPLL0_FRACTIONAL_EN
+#define SLI_CLOCK_MANAGER_SOCPLL_DIVN            SL_CLOCK_MANAGER_SOCPLL0_DIVN
+#define SLI_CLOCK_MANAGER_SOCPLL_DIVF            SL_CLOCK_MANAGER_SOCPLL0_DIVF
+#define SLI_CLOCK_MANAGER_SOCPLL_EN_OPEN_LOOP    SL_CLOCK_MANAGER_SOCPLL0_EN_OPEN_LOOP
+#if defined(SOCPLL1)
+#define SLI_CLOCK_MANAGER_SOCPLL1_EN             SL_CLOCK_MANAGER_SOCPLL1_EN
+#define SLI_CLOCK_MANAGER_SOCPLL1_FREQ           SL_CLOCK_MANAGER_SOCPLL1_COMMON_FREQ
+#define SLI_CLOCK_MANAGER_SOCPLL1_REFCLK         SL_CLOCK_MANAGER_SOCPLL1_REFCLK
+#define SLI_CLOCK_MANAGER_SOCPLL1_REFCLK_FREQ    SL_CLOCK_MANAGER_SOCPLL1_REFCLK_FREQ
+#define SLI_CLOCK_MANAGER_SOCPLL1_FRACTIONAL_EN  SL_CLOCK_MANAGER_SOCPLL1_FRACTIONAL_EN
+#define SLI_CLOCK_MANAGER_SOCPLL1_DIVN           SL_CLOCK_MANAGER_SOCPLL1_DIVN
+#define SLI_CLOCK_MANAGER_SOCPLL1_DIVF           SL_CLOCK_MANAGER_SOCPLL1_DIVF
+#define SLI_CLOCK_MANAGER_SOCPLL1_EN_OPEN_LOOP   SL_CLOCK_MANAGER_SOCPLL1_EN_OPEN_LOOP
+#endif
+#if defined(SOCPLL2)
+#define SLI_CLOCK_MANAGER_SOCPLL2_EN             SL_CLOCK_MANAGER_SOCPLL2_EN
+#define SLI_CLOCK_MANAGER_SOCPLL2_FREQ           SL_CLOCK_MANAGER_SOCPLL2_COMMON_FREQ
+#define SLI_CLOCK_MANAGER_SOCPLL2_REFCLK         SL_CLOCK_MANAGER_SOCPLL2_REFCLK
+#define SLI_CLOCK_MANAGER_SOCPLL2_REFCLK_FREQ    SL_CLOCK_MANAGER_SOCPLL2_REFCLK_FREQ
+#define SLI_CLOCK_MANAGER_SOCPLL2_FRACTIONAL_EN  SL_CLOCK_MANAGER_SOCPLL2_FRACTIONAL_EN
+#define SLI_CLOCK_MANAGER_SOCPLL2_DIVN           SL_CLOCK_MANAGER_SOCPLL2_DIVN
+#define SLI_CLOCK_MANAGER_SOCPLL2_DIVF           SL_CLOCK_MANAGER_SOCPLL2_DIVF
+#define SLI_CLOCK_MANAGER_SOCPLL2_EN_OPEN_LOOP   SL_CLOCK_MANAGER_SOCPLL2_EN_OPEN_LOOP
+#endif
+#endif // !SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION
+
+#elif defined(SOCPLL_PRESENT)
+
+// Single-output SOCPLL: SOCPLL_FREQ = REFCLK_FREQ * (DIVN + 2 + DIVF / 1024) / 6.
+#if !defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION) \
+  && defined(SL_CLOCK_MANAGER_SOCPLL_EN) && (SL_CLOCK_MANAGER_SOCPLL_EN == 1)
+#if defined(SL_CLOCK_MANAGER_SOCPLL_ADVANCED_SETTINGS) && (SL_CLOCK_MANAGER_SOCPLL_ADVANCED_SETTINGS == 0)
+#if defined(SL_CATALOG_RAIL_LIB_PRESENT) || (defined(SL_CLOCK_MANAGER_HFXO_EN) && (SL_CLOCK_MANAGER_HFXO_EN == 1))
+#define SL_CLOCK_MANAGER_SOCPLL_REFCLK        SOCPLL_CTRL_REFCLKSEL_REF_HFXO
+#else
+#define SL_CLOCK_MANAGER_SOCPLL_REFCLK        SOCPLL_CTRL_REFCLKSEL_REF_HFRCO
+#endif
+#endif // SL_CLOCK_MANAGER_SOCPLL_ADVANCED_SETTINGS
+#endif
+
+#if defined(SL_CLOCK_MANAGER_SOCPLL_EN) \
+  && ((SL_CLOCK_MANAGER_SOCPLL_EN == 1) || defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION))
+#if (SL_CLOCK_MANAGER_SOCPLL_REFCLK == SOCPLL_CTRL_REFCLKSEL_REF_HFXO)
+#define SL_CLOCK_MANAGER_SOCPLL_REFCLK_FREQ   SL_CLOCK_MANAGER_HFXO_FREQ
+#elif (SL_CLOCK_MANAGER_SOCPLL_REFCLK == SOCPLL_CTRL_REFCLKSEL_REF_HFRCO)
+#define SL_CLOCK_MANAGER_SOCPLL_REFCLK_FREQ   SL_CLOCK_MANAGER_HFRCO_BAND
+#elif (SL_CLOCK_MANAGER_SOCPLL_REFCLK == SOCPLL_CTRL_REFCLKSEL_REF_EXTCLK)
+#error External Clock is not supported as SOCPLL reference clock
+#endif
+
+#if (SL_CLOCK_MANAGER_SOCPLL_REFCLK_FREQ < 34000000) || (SL_CLOCK_MANAGER_SOCPLL_REFCLK_FREQ > 44000000)
+#error SOCPLL reference clock frequency must be between 34MHz and 44MHz
+#endif
+
+#ifndef SL_CLOCK_MANAGER_SOCPLL_FRACTIONAL_EN
+#define SL_CLOCK_MANAGER_SOCPLL_FRACTIONAL_EN 1
+#endif
+
+// SL_CLOCK_MANAGER_SOCPLL_DIVN is rounded down and SL_CLOCK_MANAGER_SOCPLL_DIVF is rounded to the closest integer.
+#ifndef SL_CLOCK_MANAGER_SOCPLL_DIVN
+#define SL_CLOCK_MANAGER_SOCPLL_DIVN          (6ULL * SL_CLOCK_MANAGER_SOCPLL_FREQ / SL_CLOCK_MANAGER_SOCPLL_REFCLK_FREQ - 2ULL)
+#endif
+#ifndef SL_CLOCK_MANAGER_SOCPLL_DIVF
+#define SL_CLOCK_MANAGER_SOCPLL_DIVF          ((6ULL * 1024ULL * SL_CLOCK_MANAGER_SOCPLL_FREQ + SL_CLOCK_MANAGER_SOCPLL_REFCLK_FREQ / 2ULL) / SL_CLOCK_MANAGER_SOCPLL_REFCLK_FREQ - 1024ULL * (SL_CLOCK_MANAGER_SOCPLL_DIVN + 2ULL))
+#endif
+#endif // SL_CLOCK_MANAGER_SOCPLL_EN
+
+#if !defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION) \
+  && defined(SL_CLOCK_MANAGER_SOCPLL_EN) && (SL_CLOCK_MANAGER_SOCPLL_EN == 1)
+#define SLI_CLOCK_MANAGER_SOCPLL_EN            SL_CLOCK_MANAGER_SOCPLL_EN
+#define SLI_CLOCK_MANAGER_SOCPLL_FREQ          SL_CLOCK_MANAGER_SOCPLL_FREQ
+#define SLI_CLOCK_MANAGER_SOCPLL_REFCLK        SL_CLOCK_MANAGER_SOCPLL_REFCLK
+#define SLI_CLOCK_MANAGER_SOCPLL_REFCLK_FREQ   SL_CLOCK_MANAGER_SOCPLL_REFCLK_FREQ
+#define SLI_CLOCK_MANAGER_SOCPLL_FRACTIONAL_EN SL_CLOCK_MANAGER_SOCPLL_FRACTIONAL_EN
+#define SLI_CLOCK_MANAGER_SOCPLL_DIVN          SL_CLOCK_MANAGER_SOCPLL_DIVN
+#define SLI_CLOCK_MANAGER_SOCPLL_DIVF          SL_CLOCK_MANAGER_SOCPLL_DIVF
+#endif
+
+#endif // SOCPLL_PRESENT
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // SLI_CLOCK_MANAGER_SOCPLL_H

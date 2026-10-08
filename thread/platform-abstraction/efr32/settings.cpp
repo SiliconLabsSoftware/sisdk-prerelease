@@ -59,7 +59,9 @@ extern "C" {
 constexpr uint32_t NVM3KEY_DOMAIN_OPENTHREAD = 0x20000U;
 
 // Indexed key types are only supported for kKeyChildInfo (=='child table').
-constexpr int NUM_INDEXED_SETTINGS = OPENTHREAD_CONFIG_MLE_MAX_CHILDREN;
+// MTD sets MLE_MAX_CHILDREN=0; non-indexed keys (active/pending dataset, …)
+// still need at least one NVM3 index slot (0).
+constexpr int NUM_INDEXED_SETTINGS = (OPENTHREAD_CONFIG_MLE_MAX_CHILDREN > 0) ? OPENTHREAD_CONFIG_MLE_MAX_CHILDREN : 1;
 
 // List size used when enumerating nvm3 keys.
 constexpr unsigned char ENUM_NVM3_KEY_LIST_SIZE = 4;

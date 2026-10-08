@@ -2,8 +2,8 @@
 - id: brd4331a_config
 - label: brd4331a config
 - description: Configuration files for BRD4331A
-- package: boards
 - category: Platform|Board|Config
+- package: boards
 - quality: production
 - metadata:
     sbom:
@@ -301,26 +301,12 @@
       vendor: silabs
     path: brd4331a_brd4002a/btl_euart_driver_cfg.h
   - condition:
-    - brd4002b
-    override:
-      component: bootloader_euart_driver
-      file_id: btl_euart_driver_cfg
-      vendor: silabs
-    path: brd4331a_brd4002b/btl_euart_driver_cfg.h
-  - condition:
     - brd4002a
     override:
       component: bootloader_gpio_activation
       file_id: btl_gpio_activation_cfg
       vendor: silabs
     path: brd4331a_brd4002a/btl_gpio_activation_cfg.h
-  - condition:
-    - brd4002b
-    override:
-      component: bootloader_gpio_activation
-      file_id: btl_gpio_activation_cfg
-      vendor: silabs
-    path: brd4331a_brd4002b/btl_gpio_activation_cfg.h
   - condition:
     - brd4002a
     override:
@@ -329,13 +315,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/btl_uart_driver_cfg.h
   - condition:
-    - brd4002b
-    override:
-      component: bootloader_uart_driver
-      file_id: btl_uart_driver_cfg
-      vendor: silabs
-    path: brd4331a_brd4002b/btl_uart_driver_cfg.h
-  - condition:
     - brd4002a
     override:
       component: clock_manager
@@ -343,26 +322,12 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_clock_manager_oscillator_config.h
   - condition:
-    - brd4002b
-    override:
-      component: clock_manager
-      file_id: clock_manager_oscillator_config
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_clock_manager_oscillator_config.h
-  - condition:
     - brd4002a
     override:
       component: clock_manager
       file_id: clock_manager_tree_config
       vendor: silabs
     path: brd4331a_brd4002a/sl_clock_manager_tree_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: clock_manager
-      file_id: clock_manager_tree_config
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_clock_manager_tree_config.h
   - condition:
     - brd4002a
     override:
@@ -372,14 +337,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_cpc_drv_uart_eusart_mikroe_config.h
   - condition:
-    - brd4002b
-    override:
-      component: cpc_primary_driver_uart_eusart
-      file_id: cpc_drv_uart_eusart_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_cpc_drv_uart_eusart_mikroe_config.h
-  - condition:
     - brd4002a
     override:
       component: cpc_primary_driver_uart_usart
@@ -387,14 +344,6 @@
       instance: mikroe
       vendor: silabs
     path: brd4331a_brd4002a/sl_cpc_drv_uart_usart_mikroe_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: cpc_primary_driver_uart_usart
-      file_id: cpc_drv_uart_usart_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_cpc_drv_uart_usart_mikroe_config.h
   - condition:
     - brd4002a
     override:
@@ -404,14 +353,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_cpc_drv_secondary_spi_usart_mikroe_config.h
   - condition:
-    - brd4002b
-    override:
-      component: cpc_secondary_driver_spi_usart
-      file_id: cpc_drv_secondary_spi_usart_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_cpc_drv_secondary_spi_usart_mikroe_config.h
-  - condition:
     - brd4002a
     override:
       component: cpc_secondary_driver_uart_eusart
@@ -419,14 +360,6 @@
       instance: vcom
       vendor: silabs
     path: brd4331a_brd4002a/sl_cpc_drv_uart_eusart_vcom_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: cpc_secondary_driver_uart_eusart
-      file_id: cpc_drv_uart_eusart_config
-      instance: vcom
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_cpc_drv_uart_eusart_vcom_config.h
   - condition:
     - brd4002a
     override:
@@ -436,14 +369,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_cpc_drv_uart_eusart_mikroe_config.h
   - condition:
-    - brd4002b
-    override:
-      component: cpc_secondary_driver_uart_eusart
-      file_id: cpc_drv_uart_eusart_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_cpc_drv_uart_eusart_mikroe_config.h
-  - condition:
     - brd4002a
     override:
       component: cpc_secondary_driver_uart_usart
@@ -451,14 +376,6 @@
       instance: vcom
       vendor: silabs
     path: brd4331a_brd4002a/sl_cpc_drv_uart_usart_vcom_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_uart_usart_config
-      instance: vcom
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_cpc_drv_uart_usart_vcom_config.h
   - condition:
     - brd4002a
     override:
@@ -468,14 +385,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_cpc_drv_uart_usart_mikroe_config.h
   - condition:
-    - brd4002b
-    override:
-      component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_uart_usart_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_cpc_drv_uart_usart_mikroe_config.h
-  - condition:
     - brd4002a
     override:
       component: device_init_hfxo
@@ -483,26 +392,12 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_device_init_hfxo_config.h
   - condition:
-    - brd4002b
-    override:
-      component: device_init_hfxo
-      file_id: device_init_hfxo_config
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_device_init_hfxo_config.h
-  - condition:
     - brd4002a
     override:
       component: device_init_lfxo
       file_id: device_init_lfxo_config
       vendor: silabs
     path: brd4331a_brd4002a/sl_device_init_lfxo_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: device_init_lfxo
-      file_id: device_init_lfxo_config
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_device_init_lfxo_config.h
   - condition:
     - brd4002a
     override:
@@ -512,14 +407,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_i2c_mikroe_config.h
   - condition:
-    - brd4002b
-    override:
-      component: i2c
-      file_id: i2c_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_i2c_mikroe_config.h
-  - condition:
     - brd4002a
     override:
       component: i2c
@@ -527,14 +414,6 @@
       instance: qwiic
       vendor: silabs
     path: brd4331a_brd4002a/sl_i2c_qwiic_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: i2c
-      file_id: i2c_config
-      instance: qwiic
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_i2c_qwiic_config.h
   - condition:
     - brd4002a
     override:
@@ -544,14 +423,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_i2cspm_mikroe_config.h
   - condition:
-    - brd4002b
-    override:
-      component: i2cspm
-      file_id: i2cspm_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_i2cspm_mikroe_config.h
-  - condition:
     - brd4002a
     override:
       component: i2cspm
@@ -559,14 +430,6 @@
       instance: qwiic
       vendor: silabs
     path: brd4331a_brd4002a/sl_i2cspm_qwiic_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: i2cspm
-      file_id: i2cspm_config
-      instance: qwiic
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_i2cspm_qwiic_config.h
   - condition:
     - brd4002a
     override:
@@ -576,14 +439,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_iostream_eusart_mikroe_config.h
   - condition:
-    - brd4002b
-    override:
-      component: iostream_eusart
-      file_id: iostream_eusart_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_iostream_eusart_mikroe_config.h
-  - condition:
     - brd4002a
     override:
       component: iostream_eusart
@@ -591,14 +446,6 @@
       instance: vcom
       vendor: silabs
     path: brd4331a_brd4002a/sl_iostream_eusart_vcom_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: iostream_eusart
-      file_id: iostream_eusart_config
-      instance: vcom
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_iostream_eusart_vcom_config.h
   - condition:
     - brd4002a
     override:
@@ -608,14 +455,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_iostream_usart_mikroe_config.h
   - condition:
-    - brd4002b
-    override:
-      component: iostream_usart
-      file_id: iostream_usart_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_iostream_usart_mikroe_config.h
-  - condition:
     - brd4002a
     override:
       component: iostream_usart
@@ -623,14 +462,6 @@
       instance: vcom
       vendor: silabs
     path: brd4331a_brd4002a/sl_iostream_usart_vcom_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: iostream_usart
-      file_id: iostream_usart_config
-      instance: vcom
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_iostream_usart_vcom_config.h
   - condition:
     - brd4002a
     override:
@@ -640,14 +471,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_pwm_init_led0_config.h
   - condition:
-    - brd4002b
-    override:
-      component: pwm
-      file_id: pwm_config
-      instance: led0
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_pwm_init_led0_config.h
-  - condition:
     - brd4002a
     override:
       component: pwm
@@ -655,14 +478,6 @@
       instance: mikroe
       vendor: silabs
     path: brd4331a_brd4002a/sl_pwm_init_mikroe_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: pwm
-      file_id: pwm_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_pwm_init_mikroe_config.h
   - condition:
     - brd4002a
     override:
@@ -672,14 +487,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_simple_button_btn0_config.h
   - condition:
-    - brd4002b
-    override:
-      component: simple_button
-      file_id: simple_button_config
-      instance: btn0
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_simple_button_btn0_config.h
-  - condition:
     - brd4002a
     override:
       component: simple_led
@@ -688,27 +495,12 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_simple_led_led0_config.h
   - condition:
-    - brd4002b
-    override:
-      component: simple_led
-      file_id: simple_led_config
-      instance: led0
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_simple_led_led0_config.h
-  - condition:
     - brd4002a
     override:
       component: sl_rail_util_pti
       file_id: rail_util_pti_config
       vendor: silabs
     path: brd4331a_brd4002a/sl_rail_util_pti_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: sl_rail_util_pti
-      file_id: rail_util_pti_config
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_rail_util_pti_config.h
   - condition:
     - brd4002a
     override:
@@ -718,14 +510,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_spidrv_mikroe_config.h
   - condition:
-    - brd4002b
-    override:
-      component: spidrv
-      file_id: spidrv_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_spidrv_mikroe_config.h
-  - condition:
     - brd4002a
     override:
       component: spidrv_usart
@@ -733,14 +517,6 @@
       instance: mikroe
       vendor: silabs
     path: brd4331a_brd4002a/sl_spidrv_usart_mikroe_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: spidrv_usart
-      file_id: spidrv_usart_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_spidrv_usart_mikroe_config.h
   - condition:
     - brd4002a
     override:
@@ -750,14 +526,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_uartdrv_eusart_mikroe_config.h
   - condition:
-    - brd4002b
-    override:
-      component: uartdrv_eusart
-      file_id: uartdrv_eusart_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_uartdrv_eusart_mikroe_config.h
-  - condition:
     - brd4002a
     override:
       component: uartdrv_eusart
@@ -765,14 +533,6 @@
       instance: vcom
       vendor: silabs
     path: brd4331a_brd4002a/sl_uartdrv_eusart_vcom_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: uartdrv_eusart
-      file_id: uartdrv_eusart_config
-      instance: vcom
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_uartdrv_eusart_vcom_config.h
   - condition:
     - brd4002a
     override:
@@ -782,14 +542,6 @@
       vendor: silabs
     path: brd4331a_brd4002a/sl_uartdrv_usart_mikroe_config.h
   - condition:
-    - brd4002b
-    override:
-      component: uartdrv_usart
-      file_id: uartdrv_usart_config
-      instance: mikroe
-      vendor: silabs
-    path: brd4331a_brd4002b/sl_uartdrv_usart_mikroe_config.h
-  - condition:
     - brd4002a
     override:
       component: uartdrv_usart
@@ -797,6 +549,254 @@
       instance: vcom
       vendor: silabs
     path: brd4331a_brd4002a/sl_uartdrv_usart_vcom_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: bootloader_euart_driver
+      file_id: btl_euart_driver_cfg
+      vendor: silabs
+    path: brd4331a_brd4002b/btl_euart_driver_cfg.h
+  - condition:
+    - brd4002b
+    override:
+      component: bootloader_gpio_activation
+      file_id: btl_gpio_activation_cfg
+      vendor: silabs
+    path: brd4331a_brd4002b/btl_gpio_activation_cfg.h
+  - condition:
+    - brd4002b
+    override:
+      component: bootloader_uart_driver
+      file_id: btl_uart_driver_cfg
+      vendor: silabs
+    path: brd4331a_brd4002b/btl_uart_driver_cfg.h
+  - condition:
+    - brd4002b
+    override:
+      component: clock_manager
+      file_id: clock_manager_oscillator_config
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_clock_manager_oscillator_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: clock_manager
+      file_id: clock_manager_tree_config
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_clock_manager_tree_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: cpc_primary_driver_uart_eusart
+      file_id: cpc_drv_uart_eusart_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_cpc_drv_uart_eusart_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: cpc_primary_driver_uart_usart
+      file_id: cpc_drv_uart_usart_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_cpc_drv_uart_usart_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: cpc_secondary_driver_spi_usart
+      file_id: cpc_drv_secondary_spi_usart_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_cpc_drv_secondary_spi_usart_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: cpc_secondary_driver_uart_eusart
+      file_id: cpc_drv_uart_eusart_config
+      instance: vcom
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_cpc_drv_uart_eusart_vcom_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: cpc_secondary_driver_uart_eusart
+      file_id: cpc_drv_uart_eusart_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_cpc_drv_uart_eusart_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: cpc_secondary_driver_uart_usart
+      file_id: cpc_drv_uart_usart_config
+      instance: vcom
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_cpc_drv_uart_usart_vcom_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: cpc_secondary_driver_uart_usart
+      file_id: cpc_drv_uart_usart_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_cpc_drv_uart_usart_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_device_init_hfxo_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: device_init_lfxo
+      file_id: device_init_lfxo_config
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_device_init_lfxo_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: i2c
+      file_id: i2c_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_i2c_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: i2c
+      file_id: i2c_config
+      instance: qwiic
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_i2c_qwiic_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: i2cspm
+      file_id: i2cspm_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_i2cspm_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: i2cspm
+      file_id: i2cspm_config
+      instance: qwiic
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_i2cspm_qwiic_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: iostream_eusart
+      file_id: iostream_eusart_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_iostream_eusart_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: iostream_eusart
+      file_id: iostream_eusart_config
+      instance: vcom
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_iostream_eusart_vcom_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: iostream_usart
+      file_id: iostream_usart_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_iostream_usart_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: iostream_usart
+      file_id: iostream_usart_config
+      instance: vcom
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_iostream_usart_vcom_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: pwm
+      file_id: pwm_config
+      instance: led0
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_pwm_init_led0_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: pwm
+      file_id: pwm_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_pwm_init_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: btn0
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_simple_button_btn0_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: led0
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_simple_led_led0_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: sl_rail_util_pti
+      file_id: rail_util_pti_config
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_rail_util_pti_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: spidrv
+      file_id: spidrv_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_spidrv_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: spidrv_usart
+      file_id: spidrv_usart_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_spidrv_usart_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: uartdrv_eusart
+      file_id: uartdrv_eusart_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_uartdrv_eusart_mikroe_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: uartdrv_eusart
+      file_id: uartdrv_eusart_config
+      instance: vcom
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_uartdrv_eusart_vcom_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: uartdrv_usart
+      file_id: uartdrv_usart_config
+      instance: mikroe
+      vendor: silabs
+    path: brd4331a_brd4002b/sl_uartdrv_usart_mikroe_config.h
   - condition:
     - brd4002b
     override:

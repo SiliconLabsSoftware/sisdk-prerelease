@@ -2,8 +2,8 @@
 - id: MGM240SA22VNA_config
 - label: MGM240SA22VNA config
 - description: Configuration files for MGM240SA22VNA
-- package: platform_core
 - category: Platform|Device|MGM24|Config
+- package: platform_core
 - quality: production
 - metadata:
     sbom:
@@ -47,10 +47,5 @@
   - override:
       component: rail_util_pa
       file_id: rail_util_pa_config
-      vendor: silabs
-    path: MGM240SA22VNA/sl_rail_util_pa_config.h
-  - override:
-      component: sl_rail_util_pa
-      file_id: sl_rail_util_pa_config
       vendor: silabs
     path: MGM240SA22VNA/sl_rail_util_pa_config.h

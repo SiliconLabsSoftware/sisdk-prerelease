@@ -41,3 +41,6 @@ template_contribution:
   value: log_default_ring_buffer
 - name: component_catalog
   value: log_formatted_output
+documentation:
+  docset: gecko-platform
+  document: platform-service/iostream

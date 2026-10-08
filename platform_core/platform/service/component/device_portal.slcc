@@ -12,12 +12,9 @@ metadata:
 provides:
 - name: device_portal
 requires:
-- name: enum
+- name: device
+- name: device_portal_hal
 root_path: platform_core/platform/service/device_manager
-include:
-- path: inc
-  file_list:
-  - path: sli_device_portal.h
 documentation:
   docset: gecko-platform
   document: platform-service/device-peripheral

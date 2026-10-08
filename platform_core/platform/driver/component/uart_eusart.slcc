@@ -22,3 +22,6 @@ requires:
 template_contribution:
 - name: component_catalog
   value: uart_eusart
+documentation:
+  docset: gecko-platform
+  document: platform-driver/uartdrv

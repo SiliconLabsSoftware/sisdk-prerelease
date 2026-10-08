@@ -12,3 +12,6 @@ provides:
 - name: iostream_recommended_console
 requires:
 - name: iostream_console_support
+documentation:
+  docset: gecko-platform
+  document: platform-service/iostream

@@ -491,6 +491,8 @@ static void snapshot_itcm_retention(sli_memory_monitor_retention_t *itcm)
  ******************************************************************************/
 static void log_em2_retention_snapshot(const sli_memory_monitor_em2_t *em2)
 {
+#if ((SL_MEMORY_MANAGER_LOG_LEVEL_COMPILE_TIME <= SL_LOG_CONFIG_LEVEL_DEBUG) \
+  && (SL_LOG_CONFIG_LEVEL_COMPILE_TIME <= SL_LOG_CONFIG_LEVEL_DEBUG))
   SLI_MEMORY_MANAGER_LOG_DEBUG(
     "monitor_em2_snapshot() DMEM: retained_banks=%u total_banks=%u retained_size=%u used_size=%u",
     (uint32_t)em2->dmem.retained_banks,
@@ -515,6 +517,10 @@ static void log_em2_retention_snapshot(const sli_memory_monitor_em2_t *em2)
     (uint32_t)em2->itcm.retained_size,
     (uint32_t)em2->itcm.used_size);
 #endif
+#else
+  (void)em2;
+#endif  // ((SL_MEMORY_MANAGER_LOG_LEVEL_COMPILE_TIME <= SL_LOG_CONFIG_LEVEL_DEBUG)
+  //   && (SL_LOG_CONFIG_LEVEL_COMPILE_TIME <= SL_LOG_CONFIG_LEVEL_DEBUG))
 }
 
 /***************************************************************************//**
