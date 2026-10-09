@@ -42,7 +42,6 @@ provides:
 - name: bootloader_core_secure_base
 
 requires:
-- name: memory_manager
 - name: btl_util_header
 - name: bootloader_interface_common
 - name: emlib

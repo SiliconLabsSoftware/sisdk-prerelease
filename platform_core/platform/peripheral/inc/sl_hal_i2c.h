@@ -330,11 +330,7 @@ __INLINE void sl_hal_i2c_auto_ack(I2C_TypeDef *i2c,
   sl_hal_i2c_wait_sync(i2c);
 
   // Enable or Disable Auto Ack.
-  if(enable) {
-    i2c->CTRL_SET = I2C_CTRL_AUTOACK;
-  } else {
-    i2c->CTRL_CLR = I2C_CTRL_AUTOACK;
-  }
+  i2c->CTRL  = (enable << _I2C_CTRL_AUTOACK_SHIFT);
 }
 
 /***************************************************************************//**
@@ -592,8 +588,7 @@ __INLINE void sl_hal_i2c_set_tx_fifo_threshold(I2C_TypeDef *i2c,
   SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Configure the TX FIFO.
-  i2c->CTRL_CLR = _I2C_CTRL_TXFIL_MASK;
-  i2c->CTRL_SET = ((uint32_t)threshold_value << _I2C_CTRL_TXFIL_SHIFT) & _I2C_CTRL_TXFIL_MASK;
+  i2c->CTRL_SET = (threshold_value << _I2C_CTRL_TXFIL_SHIFT);
 }
 
 /***************************************************************************//**
@@ -626,8 +621,7 @@ __INLINE void sl_hal_i2c_set_rx_fifo_threshold(I2C_TypeDef *i2c,
   SL_LOG_DEBUG_ASSERT(SL_HAL_I2C_REF_VALID(i2c));
 
   // Configure the TX FIFO.
-  i2c->CTRL_CLR = _I2C_CTRL_RXFIL_MASK;
-  i2c->CTRL_SET = ((uint32_t)threshold_value << _I2C_CTRL_RXFIL_SHIFT) & _I2C_CTRL_RXFIL_MASK;
+  i2c->CTRL_SET = (threshold_value << _I2C_CTRL_RXFIL_SHIFT);
 }
 
 /***************************************************************************//**

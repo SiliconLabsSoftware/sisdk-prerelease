@@ -91,11 +91,12 @@ define:
   value: "0"
 - name: SX_KEYREF_MAX_ID
   value: "32"
-  condition: [device_series_3]
-  unless: [device_has_wificmu]
+  condition: [device_generic_family_sixx301]
 - name: SX_KEYREF_MAX_ID
   value: "48"
-  condition: [device_series_3, device_has_wificmu]
+  condition: [device_generic_family_sixx353]
+
+  
   # Silicon Labs defeature list
 - name: _SILICON_LABS_DEFEATURE_SHA3
 

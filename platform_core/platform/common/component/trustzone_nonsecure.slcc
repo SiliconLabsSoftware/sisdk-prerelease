@@ -19,6 +19,3 @@ requires:
 template_contribution:
 - name: trustzone_nonsecure
   value: 1
-documentation:
-  docset: gecko-platform
-  document: platform-security-api

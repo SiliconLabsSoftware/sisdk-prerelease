@@ -38,9 +38,7 @@
 #endif
 #include "sl_status.h"
 #include "sl_log_helper.h"
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250) \
-  || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_265)
-#include "em_chip.h"
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250)
 #include "em_cmu.h"
 #endif
 /***************************************************************************//**
@@ -303,10 +301,12 @@ void sl_hal_system_init(void)
   }
 #endif
 
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250) \
-  || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_265)
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250)
+
   // Enable ICache out of reset.
-  sli_chip_enable_icache();
+  CMU->CLKEN1_SET = _CMU_CLKEN1_ICACHE0_MASK;
+  ICACHE0->CTRL_CLR = _ICACHE_CTRL_CACHEDIS_MASK;
+  CMU->CLKEN1_CLR = _CMU_CLKEN1_ICACHE0_MASK;
 
   CMU->CLKEN0_SET = _CMU_CLKEN0_HFRCO0_MASK;
 
@@ -316,6 +316,7 @@ void sl_hal_system_init(void)
   }
 
   CMU->CLKEN0_CLR = _CMU_CLKEN0_HFRCO0_MASK;
+
 #endif
   SL_PRINT_STRING_INFO("system init\r\n");
 }

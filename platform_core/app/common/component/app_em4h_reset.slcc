@@ -31,6 +31,3 @@ template_contribution:
   priority: -9980
 - name: component_catalog
   value: app_em4h_reset
-documentation:
-  docset: gecko-platform
-  document: platform-common/common

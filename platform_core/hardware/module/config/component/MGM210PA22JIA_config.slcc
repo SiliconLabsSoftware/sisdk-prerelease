@@ -2,8 +2,8 @@
 - id: MGM210PA22JIA_config
 - label: MGM210PA22JIA config
 - description: Configuration files for MGM210PA22JIA
-- category: Platform|Device|MGM21|Config
 - package: platform_core
+- category: Platform|Device|MGM21|Config
 - quality: production
 - metadata:
     sbom:
@@ -43,7 +43,17 @@
       vendor: silabs
     path: MGM210PA22JIA/sl_rail_util_pa_config.h
   - override:
+      component: sl_rail_util_pa
+      file_id: sl_rail_util_pa_config
+      vendor: silabs
+    path: MGM210PA22JIA/sl_rail_util_pa_config.h
+  - override:
       component: rail_util_rf_path
+      file_id: rail_util_rf_path_config
+      vendor: silabs
+    path: MGM210PA22JIA/sl_rail_util_rf_path_config.h
+  - override:
+      component: sl_rail_util_rf_path
       file_id: rail_util_rf_path_config
       vendor: silabs
     path: MGM210PA22JIA/sl_rail_util_rf_path_config.h

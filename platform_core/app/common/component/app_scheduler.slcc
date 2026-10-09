@@ -67,6 +67,3 @@ template_contribution:
     event: sleep_on_isr_exit
     include: app_scheduler.h
     handler: app_scheduler_sleep_on_isr_exit
-documentation:
-  docset: gecko-platform
-  document: platform-service/sleeptimer

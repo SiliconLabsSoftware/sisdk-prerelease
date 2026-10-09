@@ -17,10 +17,10 @@
   - name: SL_KIT_NAME
     value: '"XG28-RB4401C"'
   - name: SL_KIT_REV
-    value: '"A03"'
+    value: '"A02"'
 - tag:
   - kit:opn:xG28-RB4401C
   - kit:pn:RB4401
   - kit:variant:C
-  - kit:revision:A03
+  - kit:revision:A02
 - root_path: boards

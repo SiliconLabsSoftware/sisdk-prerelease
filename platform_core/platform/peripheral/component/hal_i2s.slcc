@@ -29,7 +29,4 @@ requires:
 - name: enum
 - name: clock_manager_runtime
 - name: log_none
-documentation:
-  docset: gecko-platform
-  document: platform-service/device-peripheral
 root_path: platform_core/platform/peripheral

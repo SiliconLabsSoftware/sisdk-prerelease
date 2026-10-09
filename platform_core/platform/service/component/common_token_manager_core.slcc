@@ -72,7 +72,4 @@ template_contribution:
     handler: sl_token_manager_init
   priority: 9900
   unless: [se_firmware_unavailable]
-documentation:
-  docset: gecko-platform
-  document: platform-service/token-manager
 root_path: platform_core

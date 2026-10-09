@@ -30,6 +30,3 @@ requires:
 define:
 - name: SL_CODE_COMPONENT_GPIO_PERIPHERAL_PIN_LATCHING
   value: gpio_peripheral_pin_latching
-documentation:
-  docset: gecko-platform
-  document: platform-driver/gpio

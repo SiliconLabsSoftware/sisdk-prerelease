@@ -81,10 +81,6 @@ static volatile uint32_t sw_pending_callback_mask = 0U;
 static bool is_handle_queued(sli_portal_request_handle_t *handle)
 {
   for (uint8_t scan_domain = SLI_PORTAL_DOMAIN_HOSTBASE; scan_domain < SLI_PORTAL_DOMAIN_MAX; scan_domain++) {
-    if (!SLI_PORTAL_DOMAIN_SUPPORTED((sli_portal_domain_t)scan_domain)) {
-      continue;
-    }
-
     sli_portal_request_handle_t *curr = pending_handle_head[scan_domain];
     while (curr != NULL) {
       if (curr == handle) {
@@ -131,10 +127,6 @@ static void deliver_callback_list(sli_portal_request_handle_t *list)
  ******************************************************************************/
 static void deliver_domain_callbacks(sli_portal_domain_t domain)
 {
-  if (!SLI_PORTAL_DOMAIN_SUPPORTED(domain)) {
-    return;
-  }
-
   sli_portal_request_handle_t *list = pending_handle_head[domain];
 
   if (list == NULL) {
@@ -188,7 +180,7 @@ sl_status_t sli_portal_request_domain_powerup(sli_portal_domain_t domain)
   CORE_DECLARE_IRQ_STATE;
 
   // Validate power domain
-  if (!SLI_PORTAL_DOMAIN_SUPPORTED(domain)) {
+  if (domain >= SLI_PORTAL_DOMAIN_MAX) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -227,7 +219,7 @@ sl_status_t sli_portal_request_domain_powerup_with_notif(sli_portal_domain_t dom
   }
 
   // Validate power domain
-  if (!SLI_PORTAL_DOMAIN_SUPPORTED(domain)) {
+  if (domain >= SLI_PORTAL_DOMAIN_MAX) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -303,7 +295,7 @@ sl_status_t sli_portal_request_domain_powerdown(sli_portal_domain_t domain)
   CORE_DECLARE_IRQ_STATE;
 
   // Validate power domain
-  if (!SLI_PORTAL_DOMAIN_SUPPORTED(domain)) {
+  if (domain >= SLI_PORTAL_DOMAIN_MAX) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -348,7 +340,7 @@ sl_status_t sli_portal_request_domain_powerdown(sli_portal_domain_t domain)
 bool sli_portal_is_domain_ready(sli_portal_domain_t domain)
 {
   // Validate power domain
-  if (!SLI_PORTAL_DOMAIN_SUPPORTED(domain)) {
+  if (domain >= SLI_PORTAL_DOMAIN_MAX) {
     return false;
   }
 
@@ -373,11 +365,9 @@ bool sli_portal_is_domain_ready(sli_portal_domain_t domain)
  ******************************************************************************/
 static void portal_irq_handler(void)
 {
-  uint32_t hw_irq_mask = sli_hal_portal_get_active_domain_interrupt_mask() & SLI_PORTAL_DOMAIN_MASK;
-  uint32_t sw_pending_mask = sw_pending_callback_mask & SLI_PORTAL_DOMAIN_MASK;
-  uint32_t callback_service_mask = (hw_irq_mask | sw_pending_mask)
-                                   & pending_callback_mask
-                                   & SLI_PORTAL_DOMAIN_MASK;
+  uint32_t hw_irq_mask = sli_hal_portal_get_active_domain_interrupt_mask();
+  uint32_t sw_pending_mask = sw_pending_callback_mask;
+  uint32_t callback_service_mask = (hw_irq_mask | sw_pending_mask) & pending_callback_mask;
 
   // Clear only the software-pended domains that are actually being serviced.
   // Any callback that queues new work will set a new bit and pend the IRQ again.

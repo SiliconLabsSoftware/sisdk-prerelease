@@ -23,6 +23,3 @@ source:
 template_contribution:
 - name: component_catalog
   value: log_captive_shared_memory
-documentation:
-  docset: gecko-platform
-  document: platform-service/iostream

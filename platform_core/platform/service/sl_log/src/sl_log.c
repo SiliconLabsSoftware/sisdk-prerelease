@@ -637,45 +637,6 @@ sl_status_t  sl_log_init_stage2(void) {
   return SL_STATUS_OK;
 }
 
-sl_status_t sli_log_ingest_captive_event(const sl_log_event_t *event)
-{
-  sl_log_event_t local;
-
-  if (event == NULL) {
-    return SL_STATUS_NULL_POINTER;
-  }
-
-  /*
-   * Refuse remote events until stage2. flush_early_logs() back-dates every
-   * record still sitting in the early buffer from the Host clock, which would
-   * overwrite a remote timestamp with a Host one. Rejecting here is cheap and
-   * lossless: the captive transport leaves the record in its own ring, does
-   * not acknowledge it, and retries.
-   */
-  if (!sli_log_init_stage2_done) {
-    return SL_STATUS_NOT_READY;
-  }
-
-  /* Neither the timestamp source nor the backend transport is usable. */
-  if (log_suspended) {
-    return SL_STATUS_NOT_READY;
-  }
-
-  /*
-   * Copy verbatim. Every field was produced on the remote core, including the
-   * runtime level already encoded in flags, so nothing here rebuilds or
-   * reinterprets the record.
-   */
-  local = *event;
-
-#if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE == SL_LOG_CONFIG_MODE_CONSOLE)) \
-  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
-  return sl_log_backend_write(&local, READ_INDEX_DEFAULT, EVENT_COUNT_DEFAULT);
-#else
-  return log_write_to_ring_buffer(&local, sizeof(local));
-#endif
-}
-
 /**
  * @brief Send a log event with no arguments
  *

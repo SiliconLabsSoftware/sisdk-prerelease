@@ -64,10 +64,6 @@
 #ifndef OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 #define OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE   0
 #endif
-// <q>  CSL (Coordinated Sampled Listening) Transmitter
-#ifndef OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
-#define OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE 1
-#endif
 // <o SL_OPENTHREAD_CSL_TX_UNCERTAINTY> CSL Scheduling Uncertainty (±10 us units) <12..999:1>
 // <i> Left unchanged the value will be set to 175 for RCPs, 20 for FTDs, and 12 for MTDs
 #ifndef SL_OPENTHREAD_CSL_TX_UNCERTAINTY

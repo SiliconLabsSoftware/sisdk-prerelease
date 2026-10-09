@@ -78,34 +78,6 @@ sl_status_t sli_crypto_ccm_auth_decrypt_ble(sli_crypto_descriptor_t     *key_des
                                             unsigned char               header,
                                             unsigned char               *tag);
 
-#if defined(_SILICON_LABS_32B_SERIES_3)
-/***************************************************************************//**
- * @brief                CCM buffer authenticated decryption optimized for BLE
- *                       with a configurable MIC length
- *
- * @param key_descriptor AES key descriptor
- * @param data           Input/output buffer of payload data of BLE packet
- * @param length         length of input data
- * @param iv             nonce (initialization vector)
- *                       must be 13 bytes
- * @param header         header of BLE packet (1 byte)
- * @param tag            authentication tag of BLE packet
- * @param tag_len        length of authentication tag in bytes
- *
- * @return               SL_STATUS_OK if successful and authenticated,
- *                       SL_STATUS_INVALID_SIGNATURE if tag does not match payload,
- *                       relevant status code on other error
- ******************************************************************************/
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLI_CRYPTO, SL_CODE_CLASS_TIME_CRITICAL)
-sl_status_t sli_crypto_ccm_auth_decrypt_ble_with_tag_len(sli_crypto_descriptor_t *key_descriptor,
-                                                         unsigned char           *data,
-                                                         size_t                  length,
-                                                         const unsigned char     *iv,
-                                                         unsigned char            header,
-                                                         unsigned char           *tag,
-                                                         size_t                  tag_len);
-#endif
-
 /***************************************************************************//**
  * @brief                CCM buffer encryption optimized for BLE
  *
@@ -126,32 +98,6 @@ sl_status_t sli_crypto_ccm_encrypt_and_tag_ble(sli_crypto_descriptor_t     *key_
                                                const unsigned char         *iv,
                                                unsigned char               header,
                                                unsigned char               *tag);
-
-#if defined(_SILICON_LABS_32B_SERIES_3)
-/***************************************************************************//**
- * @brief                CCM buffer encryption optimized for BLE with a
- *                       configurable MIC length
- *
- * @param key_descriptor AES key descriptor
- * @param data           Input/output buffer of payload data of BLE packet
- * @param length         length of input data
- * @param iv             nonce (initialization vector)
- *                       must be 13 bytes
- * @param header         header of BLE packet (1 byte)
- * @param tag            buffer where the authentication tag will be written
- * @param tag_len        length of authentication tag in bytes
- *
- * @return               SL_STATUS_OK if successful, relevant status code on error
- ******************************************************************************/
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SLI_CRYPTO, SL_CODE_CLASS_TIME_CRITICAL)
-sl_status_t sli_crypto_ccm_encrypt_and_tag_ble_with_tag_len(sli_crypto_descriptor_t *key_descriptor,
-                                                            unsigned char           *data,
-                                                            size_t                  length,
-                                                            const unsigned char     *iv,
-                                                            unsigned char            header,
-                                                            unsigned char           *tag,
-                                                            size_t                  tag_len);
-#endif
 
 /***************************************************************************//**
  * @brief                CCM buffer authenticated decryption optimized for Zigbee

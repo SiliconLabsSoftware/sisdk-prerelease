@@ -39,6 +39,3 @@ template_contribution:
   value: 1
 - name: log_compact_output_enable
   value: 1
-documentation:
-  docset: gecko-platform
-  document: platform-service/iostream

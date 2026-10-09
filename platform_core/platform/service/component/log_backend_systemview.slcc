@@ -37,6 +37,3 @@ template_contribution:
   value: 1
 - name: component_catalog
   value: log_backend_systemview
-documentation:
-  docset: gecko-platform
-  document: platform-service/iostream

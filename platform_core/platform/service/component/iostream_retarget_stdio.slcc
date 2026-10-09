@@ -19,7 +19,4 @@ requires:
 template_contribution:
 - name: component_catalog
   value: retarget_stdio
-documentation:
-  docset: gecko-platform
-  document: platform-service/iostream-stdlib-cfg
 root_path: platform_core

@@ -105,6 +105,3 @@ template_contribution:
     include: app_button_press.h
     handler: app_button_press_check_wakeup_cause
   priority: -9981   # Invoke before EM4H-Reset's app_unlatch_pin_retention
-documentation:
-  docset: gecko-platform
-  document: platform-driver/button

@@ -17,43 +17,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "sl_log.h"
-#include "sl_status.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * @brief Accept an event that was already produced, stamped and filtered on
- *        another core.
- *
- * Entry point for captive-core Logger transports. The event arrives complete:
- * a remote core assigned its @c timestamp, @c epoch, @c event_id, @c args,
- * @c arg_count, @c core_id, @c flags and @c version, and already applied its
- * own runtime filter. This function stores that record verbatim and changes no
- * field of it.
- *
- * In particular it does not restamp the time. The producing core keeps its own
- * timebase, so a Host timestamp would misrepresent when the event happened and
- * would break ordering against the other records of the same remote core.
- * Neither does it re-apply the Host runtime level: the record was filtered
- * where it was produced, and making a shared consumer cursor depend on an
- * unrelated Host-local setting would silently strand remote records.
- *
- * @param[in] event Fully populated remote event. Copied by value.
- *
- * @return SL_STATUS_OK             stored in Host-owned Logger memory.
- *         SL_STATUS_NULL_POINTER   @p event is NULL.
- *         SL_STATUS_NOT_READY      the Logger cannot take remote events yet,
- *                                  or is suspended. The caller must retry and
- *                                  must not treat the event as consumed.
- *         SL_STATUS_NOT_AVAILABLE  Host Logger storage is full.
- *
- * @note Acceptance means the event reached Host-owned Logger memory, not that
- *       a backend has transmitted it.
- */
-sl_status_t sli_log_ingest_captive_event(const sl_log_event_t *event);
 
 /**
  * @brief Mark the logger as suspended or resumed.

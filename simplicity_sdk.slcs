@@ -7,14 +7,14 @@ supplier: Silicon Laboratories, Inc.
 component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
-- path: bluetooth_le_host/component
-- path: bluetooth_le_controller/component
-- path: bluetooth_common/component
 - path: bluetooth_mesh_stack/component
 - path: bluetooth_mesh/component
-- path: bluetooth_apploader/component
+- path: bluetooth_common/component
+- path: bluetooth_le_controller/component
 - path: bluetooth_mesh_srtest/component
 - path: bluetooth_le_internal/component
+- path: bluetooth_le_host/component
+- path: bluetooth_apploader/component
 - path: bluetooth_le/component
 - path: boards/hardware/board/config/component
 - path: boards/hardware/board/component
@@ -24,12 +24,12 @@ component_path:
 - path: boards_internal/hardware/board/component
 - path: boards_internal/hardware/board/config/component
 - path: boards_internal/platform/common/component
-- path: bootloader/platform/common/component
-- path: bootloader/platform/bootloader/component
-- path: bootloader/platform/bootloader/series3/component
 - path: bootloader_internal/platform/common/component
 - path: bootloader_internal/platform/bootloader/component
 - path: bootloader_internal/platform/bootloader/series3/component
+- path: bootloader/platform/common/component
+- path: bootloader/platform/bootloader/component
+- path: bootloader/platform/bootloader/series3/component
 - path: cmsis_dsp/component
 - path: cmsis/component
 - path: cmsis_nn/component
@@ -56,8 +56,8 @@ component_path:
 - path: freertos/component
 - path: freertos_internal/component
 - path: mbedtls/component
-- path: micriumos/platform/micrium_os/component
 - path: micriumos_internal/platform/micrium_os/component
+- path: micriumos/platform/micrium_os/component
 - path: multiprotocol/component
 - path: multiprotocol/mac/component
 - path: network_stack/network_stack_sdk/components/device/silabs/si91x/wireless/asynchronous_socket
@@ -67,6 +67,20 @@ component_path:
 - path: network_stack/network_stack_sdk/components/service/sl_websocket_client
 - path: openthread_forks/component_stack
 - path: network_stack/paho_mqtt_embedded/component
+- path: platform_core/app/common/component
+- path: platform_core/util/plugin/component
+- path: platform_core/hardware/driver/component
+- path: platform_core/platform/peripheral/component
+- path: platform_core/platform/common/component
+- path: platform_core/platform/driver/component
+- path: platform_core/platform/emlib/component
+- path: platform_core/util/silicon_labs/silabs_core/component
+- path: platform_core/platform/service/component
+- path: platform_core/platform/emdrv/component
+- path: platform_core/platform/Device/component
+- path: platform_core/hardware/module/config/component
+- path: platform_core/platform/middleware/glib/component
+- path: platform_core/platform/security/component
 - path: platform_core_internal/app/common/component
 - path: platform_core_internal/platform/common/component
 - path: platform_core_internal/platform/service/component
@@ -83,20 +97,6 @@ component_path:
 - path: platform_core_internal/hardware/kit/common/component
 - path: platform_core_internal/hardware/board/component
 - path: platform_core_internal/hardware/board/config/component
-- path: platform_core/app/common/component
-- path: platform_core/util/plugin/component
-- path: platform_core/hardware/driver/component
-- path: platform_core/platform/peripheral/component
-- path: platform_core/platform/common/component
-- path: platform_core/platform/driver/component
-- path: platform_core/platform/emlib/component
-- path: platform_core/util/silicon_labs/silabs_core/component
-- path: platform_core/platform/service/component
-- path: platform_core/platform/emdrv/component
-- path: platform_core/platform/Device/component
-- path: platform_core/hardware/module/config/component
-- path: platform_core/platform/middleware/glib/component
-- path: platform_core/platform/security/component
 - path: platform_riscv_internal/platform/rvlib/component
 - path: platform_riscv_internal/platform/service/component
 - path: platform_riscv_internal/platform/common/component
@@ -111,8 +111,8 @@ component_path:
 - path: realtime_locationing/component
 - path: rtos_benchmark_internal/component
 - path: rv2_framework_internal/component
-- path: security_tfm/component
 - path: security_sxsymcrypt/component
+- path: security_tfm/component
 - path: security_libcryptosoc/component
 - path: segger/component
 - path: network_stack/silabs_lwip/component
@@ -214,9 +214,9 @@ documentation:
 - docset: zigbee
   version: 9.2.0
 upgrade_manifest:
-- path: bluetooth_le_host/component/upgrade.slcu
 - path: bluetooth_mesh_stack/component/upgrade.slcu
 - path: bluetooth_mesh/upgrade.slcu
+- path: bluetooth_le_host/component/upgrade.slcu
 - path: bluetooth_le/upgrade.slcu
 - path: connect_stack/component/upgrade.slcu
 - path: cpc/upgrade.slcu

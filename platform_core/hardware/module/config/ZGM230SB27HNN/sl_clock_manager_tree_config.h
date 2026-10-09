@@ -3,7 +3,7 @@
  * @brief Clock Manager - Clock Tree configuration file.
  *******************************************************************************
  * # License
- * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2025 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -80,6 +80,7 @@
 #endif
 
 // <h> System Clock Branch Settings
+
 // <o SL_CLOCK_MANAGER_SYSCLK_SOURCE> Clock Source Selection for SYSCLK branch
 //   <SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE=> DEFAULT_HF
 //   <CMU_SYSCLKCTRL_CLKSEL_FSRCO=> FSRCO
@@ -117,7 +118,7 @@
 // </h>
 
 // <h> Trace Clock Branches Settings
-// <o SL_CLOCK_MANAGER_TRACECLK_DIVIDER> TRACECLK branch divider
+// <o SL_CLOCK_MANAGER_TRACECLK_DIVIDER> TRACECLK branch Divider
 //   <CMU_TRACECLKCTRL_PRESC_DIV1=> DIV1
 //   <CMU_TRACECLKCTRL_PRESC_DIV2=> DIV2
 //   <CMU_TRACECLKCTRL_PRESC_DIV4=> DIV4
@@ -126,6 +127,7 @@
 #ifndef SL_CLOCK_MANAGER_TRACECLK_DIVIDER
 #define SL_CLOCK_MANAGER_TRACECLK_DIVIDER    CMU_TRACECLKCTRL_PRESC_DIV1
 #endif
+
 // </h>
 
 // <h> High Frequency Clock Branches Settings
@@ -181,6 +183,7 @@
 // </h>
 
 // <h> Low Frequency Clock Branches Settings
+
 // <o SL_CLOCK_MANAGER_EM23GRPACLK_SOURCE> Clock Source Selection for EM23GRPACLK branch
 //   <SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE=> DEFAULT_LF
 //   <CMU_EM23GRPACLKCTRL_CLKSEL_LFRCO=> LFRCO
@@ -243,7 +246,7 @@
 //   <CMU_LCDCLKCTRL_CLKSEL_LFRCO=> LFRCO
 //   <CMU_LCDCLKCTRL_CLKSEL_LFXO=> LFXO
 //   <CMU_LCDCLKCTRL_CLKSEL_ULFRCO=> ULFRCO
-// <i> Selection of the Clock source for LCDCLK
+// <i> Selection of the Clock source for LDCCLK
 // <d> SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE
 #ifndef SL_CLOCK_MANAGER_LCDCLK_SOURCE
 #define SL_CLOCK_MANAGER_LCDCLK_SOURCE    SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE
@@ -258,6 +261,7 @@
 #ifndef SL_CLOCK_MANAGER_PCNT0CLK_SOURCE
 #define SL_CLOCK_MANAGER_PCNT0CLK_SOURCE    CMU_PCNT0CLKCTRL_CLKSEL_EM23GRPACLK
 #endif
+
 // </h>
 
 // <h> Mixed Frequency Clock Branch Settings
@@ -294,8 +298,8 @@
 #ifndef SL_CLOCK_MANAGER_VDAC0CLK_SOURCE
 #define SL_CLOCK_MANAGER_VDAC0CLK_SOURCE    CMU_VDAC0CLKCTRL_CLKSEL_EM01GRPACLK
 #endif
-// </h>
 
+// </h>
 // </h>
 
 #endif /* SL_CLOCK_MANAGER_TREE_CONFIG_H */

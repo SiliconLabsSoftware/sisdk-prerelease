@@ -15,6 +15,3 @@ template_file:
 - path: example_signing_key.pem
 - path: example_signing_pubkey.pem
 - path: example-key-aes-ccm.txt
-documentation:
-  docset: gecko-platform
-  document: platform-common/common

@@ -16,7 +16,4 @@ include:
   unless: [trustzone_nonsecure]
 provides:
 - name: nvm3_hal_crypto
-documentation:
-  docset: gecko-platform
-  document: platform-driver/nvm3
 root_path: platform_core

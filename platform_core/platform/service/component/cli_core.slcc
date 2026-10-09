@@ -71,6 +71,3 @@ template_contribution:
   priority: 1
 - name: component_catalog
   value: cli
-documentation:
-  docset: gecko-platform
-  document: platform-service-cli-overview

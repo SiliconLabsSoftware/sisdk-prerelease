@@ -44,6 +44,3 @@ template_contribution:
   value:
     include: sl_iostream_vuart.h
     handler: sl_iostream_instance_vuart_info
-documentation:
-  docset: gecko-platform
-  document: platform-service/iostream-vuart

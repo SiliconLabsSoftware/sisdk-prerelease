@@ -23,13 +23,6 @@
   - name: hardware_board_has_rgb
   - name: hardware_board_has_vcom
   - name: hardware_board_has_vcom_hardware_flowcontrol
-  - name: hardware_board_has_led0
-  - name: hardware_board_has_led1
-  - name: hardware_board_has_led2
-  - name: hardware_board_has_led3
-  - name: hardware_board_has_led4
-  - name: hardware_board_has_btn0
-  - name: hardware_board_has_btn1
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_exp_5
   - name: hardware_board_has_exp_7
@@ -48,13 +41,20 @@
   - name: hardware_board_has_spi
   - name: hardware_board_has_uart
   - name: hardware_board_has_i2c
-  - name: hardware_board_has_exclusive_button_led
   - name: hardware_board_supports_rf_band_868
   - name: hardware_board_supports_rf_band_914
   - name: hardware_board_supports_rf_band_924
   - name: hardware_board_supports_3_rf_bands
   - name: hardware_board_default_rf_band
   - name: hardware_board_default_rf_band_868
+  - name: hardware_board_has_led0
+  - name: hardware_board_has_led1
+  - name: hardware_board_has_led2
+  - name: hardware_board_has_led3
+  - name: hardware_board_has_led4
+  - name: hardware_board_has_btn0
+  - name: hardware_board_has_btn1
+  - name: hardware_board_has_exclusive_button_led
 - recommends:
   - id: brd4002b
     vendor: silabs

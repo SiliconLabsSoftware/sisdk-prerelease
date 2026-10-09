@@ -2,14 +2,13 @@ id: mbedtls_pem_parse
 package: platform_core
 label: PEM Parsing
 description: >-
-  This component provides support for reading standard base64-wrapped PEM
-  formatted keys and certificates in Mbed TLS. Password-encrypted PEM is not
-  included; add mbedtls_pem_rfc1421 for that.
+  This component provides support for reading PEM formatted keys and certificates in Mbed TLS.
 category: Platform|Security|Mbed TLS|Upper Layer
 quality: production
 provides:
 - name: mbedtls_pem_parse
 requires:
+- name: mbedtls_cipher
 - name: mbedtls_base64
 template_contribution:
 - name: psa_crypto_config

@@ -16,7 +16,4 @@ config_file:
   unless: [trustzone_secure]
 provides:
 - name: nvm3_default_config
-documentation:
-  docset: gecko-platform
-  document: platform-driver/nvm3default
 root_path: platform_core

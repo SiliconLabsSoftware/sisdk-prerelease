@@ -64,16 +64,6 @@
 #ifndef OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 #define OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE   1
 #endif
-// <q>  CSL (Coordinated Sampled Listening) Transmitter
-// <i>  Parent only: schedules CSL transmissions to sleepy children.
-// <i>  An MTD is a CSL receiver, so the transmitter is off. FTD default is on.
-#ifndef OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
-#if OPENTHREAD_MTD
-#define OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE 0
-#else
-#define OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE 1
-#endif
-#endif
 // <o SL_OPENTHREAD_CSL_TX_UNCERTAINTY> CSL Scheduling Uncertainty (±10 us units) <12..999:1>
 // <i> Left unchanged the value will be set to 175 for RCPs, 20 for FTDs, and 12 for MTDs
 #ifndef SL_OPENTHREAD_CSL_TX_UNCERTAINTY
@@ -255,15 +245,10 @@
 // </e>
 // <h> MLE Children
 // <o OPENTHREAD_CONFIG_MLE_MAX_CHILDREN>  Maximum number of Thread children supported by the device
-#ifndef OPENTHREAD_CONFIG_MLE_MAX_CHILDREN
-#if OPENTHREAD_MTD
-// <d>  0
-#define OPENTHREAD_CONFIG_MLE_MAX_CHILDREN         0
-#else
 // <i>  Default is 10. Used by the Thread stack to configure the size of child table.
 // <d>  10
+#ifndef OPENTHREAD_CONFIG_MLE_MAX_CHILDREN
 #define OPENTHREAD_CONFIG_MLE_MAX_CHILDREN         10
-#endif
 #endif
 // <o OPENTHREAD_CONFIG_MLE_CHILD_TIMEOUT_DEFAULT> Default MLE child timeout (seconds)
 // <i>  Default child timeout used when the Thread stack does not override it.
@@ -441,14 +426,9 @@
 // <h>  Radio Driver RX buffers
 // <o SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT>  Maximum number of RX buffers
 // <i>  The maximum number of RX buffers to use in the radio driver.
-#ifndef SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
-// <d>  8
-#if OPENTHREAD_MTD
-#define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT       8
-#else
 // <d>  16
+#ifndef SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
 #define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT       16
-#endif
 #endif
 // </h>
 // </h>

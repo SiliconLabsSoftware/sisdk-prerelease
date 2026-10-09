@@ -266,15 +266,12 @@
 // -------------------------------------
 // Elliptic curve cryptography
 
-// P-192 is no longer supported by PSA Crypto / Mbed TLS 4.x.
-// Silicon Labs hardware still supports it through the internal
-// SLI_PSA_WANT_ECC_SECP_R1_192 enablement path.
 #if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC)     \
   || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT)   \
   || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT)   \
   || defined (PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE) \
   || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))        \
-  && defined(SLI_PSA_WANT_ECC_SECP_R1_192)
+  && defined(PSA_WANT_ECC_SECP_R1_192)
   #define SLI_PSA_DRIVER_FEATURE_ECC
   #define SLI_PSA_DRIVER_FEATURE_SECPR1
   #define SLI_PSA_DRIVER_FEATURE_P192R1

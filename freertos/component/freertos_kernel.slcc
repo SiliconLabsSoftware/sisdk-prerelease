@@ -63,9 +63,6 @@ include:
   - path: stack_macros.h
   - path: StackMacros.h
   - path: stream_buffer.h
-  - path: sli_freertos_heap_3.h
-    condition:
-    - device_series_3
   - path: task.h
   - path: timers.h
 provides:

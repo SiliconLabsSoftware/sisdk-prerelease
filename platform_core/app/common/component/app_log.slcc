@@ -51,6 +51,3 @@ validation_library:
   name: autonumber_common
 validation_helper:
 - path: app_log_validation.lua
-documentation:
-  docset: gecko-platform
-  document: platform-service/iostream

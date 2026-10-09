@@ -20,25 +20,4 @@ requires:
 - name: emlib_common
 conflicts:
 - name: device_series_3
-documentation:
-  docset: gecko-platform
-  document:
-  - page: platform-peripheral-efr32xg21/syscfg
-    condition: [device_sdid_200]
-  - page: platform-peripheral-efr32xg22/syscfg
-    condition: [device_sdid_205]
-  - page: platform-peripheral-efr32xg23/syscfg
-    condition: [device_sdid_210]
-  - page: platform-peripheral-efr32xg24/syscfg
-    condition: [device_sdid_215]
-  - page: platform-peripheral-efr32xg25/syscfg
-    condition: [device_sdid_220]
-  - page: platform-peripheral-efr32xg26/syscfg
-    condition: [device_sdid_225]
-  - page: platform-peripheral-efr32xg27/syscfg
-    condition: [device_sdid_230]
-  - page: platform-peripheral-efr32xg28/syscfg
-    condition: [device_sdid_235]
-  - page: platform-peripheral-efr32xg29/syscfg
-    condition: [device_sdid_240]
 root_path: platform_core/platform/emlib

@@ -72,23 +72,4 @@ requires:
   condition: [device_has_wdog]
 conflicts:
 - name: device_series_3
-documentation:
-  docset: gecko-platform
-  document:
-  - page: platform-emlib-efr32xg21/system
-    condition: [device_sdid_200]
-  - page: platform-emlib-efr32xg22/system
-    condition: [device_sdid_205]
-  - page: platform-emlib-efr32xg23/system
-    condition: [device_sdid_210]
-  - page: platform-emlib-efr32xg24/system
-    condition: [device_sdid_215]
-  - page: platform-emlib-efr32xg26/system
-    condition: [device_sdid_225]
-  - page: platform-emlib-efr32xg27/system
-    condition: [device_sdid_230]
-  - page: platform-emlib-efr32xg28/system
-    condition: [device_sdid_235]
-  - page: platform-emlib-efr32xg29/system
-    condition: [device_sdid_240]
 root_path: platform_core/platform/emlib

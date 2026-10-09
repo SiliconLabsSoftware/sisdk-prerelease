@@ -2,8 +2,8 @@
 - id: brd4401c_config
 - label: brd4401c config
 - description: Configuration files for BRD4401C
-- category: Platform|Board|Config
 - package: boards
+- category: Platform|Board|Config
 - quality: production
 - metadata:
     sbom:

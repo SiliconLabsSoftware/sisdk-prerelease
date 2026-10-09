@@ -21,7 +21,4 @@ requires:
 - name: cmsis_core
 - name: hal_common
 - name: enum
-documentation:
-  docset: gecko-platform
-  document: platform-common/common
 root_path: platform_core/platform/peripheral

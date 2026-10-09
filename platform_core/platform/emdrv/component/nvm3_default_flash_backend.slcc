@@ -15,7 +15,4 @@ source:
   unless: [trustzone_nonsecure, trustzone_secure]
 provides:
 - name: nvm3_default_backend
-documentation:
-  docset: gecko-platform
-  document: platform-driver/nvm3default
 root_path: platform_core

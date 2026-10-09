@@ -12,7 +12,4 @@ metadata:
 provides:
 - name: trustzone_unaware
 - name: trustzone_security_state
-documentation:
-  docset: gecko-platform
-  document: platform-security-api
 root_path: platform_core

@@ -13,7 +13,4 @@ provides:
 - name: nvm3_optimization_disable
 requires:
 - name: device_efx
-documentation:
-  docset: gecko-platform
-  document: platform-driver/nvm3
 root_path: platform_core

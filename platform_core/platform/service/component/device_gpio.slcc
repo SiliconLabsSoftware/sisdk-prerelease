@@ -20,6 +20,6 @@ include:
 - path: inc
   file_list:
   - path: sl_device_gpio.h
-documentation:
-  docset: gecko-platform
-  document: platform-service/device-gpio
+# documentation:
+  # docset: gecko-platform
+  # document: platform-service/device-manager

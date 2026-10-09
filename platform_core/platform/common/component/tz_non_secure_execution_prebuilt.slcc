@@ -24,6 +24,3 @@ provides:
 requires:
 - name: device_has_deepsleep_retention
 - name: tz_non_secure_execution
-documentation:
-  docset: gecko-platform
-  document: platform-security-api

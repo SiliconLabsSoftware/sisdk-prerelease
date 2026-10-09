@@ -2,8 +2,8 @@
 - id: MGM240L022RNF_config
 - label: MGM240L022RNF config
 - description: Configuration files for MGM240L022RNF
-- category: Platform|Device|MGM24|Config
 - package: platform_core
+- category: Platform|Device|MGM24|Config
 - quality: production
 - metadata:
     sbom:
@@ -47,5 +47,10 @@
   - override:
       component: rail_util_pa
       file_id: rail_util_pa_config
+      vendor: silabs
+    path: MGM240L022RNF/sl_rail_util_pa_config.h
+  - override:
+      component: sl_rail_util_pa
+      file_id: sl_rail_util_pa_config
       vendor: silabs
     path: MGM240L022RNF/sl_rail_util_pa_config.h

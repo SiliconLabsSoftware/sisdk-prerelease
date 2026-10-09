@@ -19,7 +19,4 @@ requires:
 - name: glib
 provides:
 - name: demo_ui
-documentation:
-  docset: gecko-platform
-  document: platform-middleware/glib
 root_path: platform_core

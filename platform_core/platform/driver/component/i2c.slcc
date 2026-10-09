@@ -41,6 +41,3 @@ requires:
 template_contribution:
 - name: i2c_instances
   value: "{{instance}}"
-documentation:
-  docset: gecko-platform
-  document: platform-driver/i2c

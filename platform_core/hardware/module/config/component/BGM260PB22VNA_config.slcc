@@ -2,8 +2,8 @@
 - id: BGM260PB22VNA_config
 - label: BGM260PB22VNA config
 - description: Configuration files for BGM260PB22VNA
-- category: Platform|Device|BGM26|Config
 - package: platform_core
+- category: Platform|Device|BGM26|Config
 - quality: production
 - metadata:
     sbom:
@@ -47,5 +47,10 @@
   - override:
       component: rail_util_pa
       file_id: rail_util_pa_config
+      vendor: silabs
+    path: BGM260PB22VNA/sl_rail_util_pa_config.h
+  - override:
+      component: sl_rail_util_pa
+      file_id: sl_rail_util_pa_config
       vendor: silabs
     path: BGM260PB22VNA/sl_rail_util_pa_config.h

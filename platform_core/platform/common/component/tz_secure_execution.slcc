@@ -26,6 +26,3 @@ define:
 metadata:
   sbom:
     license: Zlib
-documentation:
-  docset: gecko-platform
-  document: platform-security-api

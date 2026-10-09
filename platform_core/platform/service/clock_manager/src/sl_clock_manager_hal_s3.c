@@ -49,7 +49,10 @@
 #include "sl_component_catalog.h"
 #endif
 #if defined(SL_CATALOG_CLOCK_MANAGER_PRESENT)
-#include "sli_clock_manager_init_hal.h"
+#include "sl_clock_manager_oscillator_config.h"
+#if defined(FREQPLAN_PRESENT)
+#include "sli_clock_manager_init_hal_freqplan.h"
+#endif
 #endif
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sli_sleeptimer.h"
@@ -73,6 +76,12 @@
 #define HFXO_CTUNE_DELTA 40
 #else
 #define HFXO_CTUNE_DELTA 0
+#endif
+
+#if defined(SOCPLL_COUNT) && (SOCPLL_COUNT == 1)
+#define SOCPLL_OUTPUT_COUNT 1
+#else
+#define SOCPLL_OUTPUT_COUNT 3
 #endif
 
 #if defined(SL_CATALOG_CLOCK_MANAGER_PERPLL1_RUNTIME_CONFIG_PRESENT)
@@ -159,8 +168,7 @@ static sl_status_t get_mixed_frequency_branch_precision(sl_clock_branch_t clock_
 static sl_status_t get_reference_clock_branch_precision(sl_clock_branch_t clock_branch,
                                                         uint16_t *precision);
 
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)  \
-  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302) \
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
   || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
 static bool ext_flash_clk_source_depends_on_hfxo(sl_oscillator_t source)
 {
@@ -173,26 +181,19 @@ static bool ext_flash_clk_source_depends_on_hfxo(sl_oscillator_t source)
       return true;
 #endif
 
-#if defined(CMU_OSPI0CLKCTRL_CLKSEL_HFRCODPLL)
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
     case SL_OSCILLATOR_HFRCODPLL:
       return ((DPLL0->STATUS & DPLL_STATUS_ENS) != 0)
              && ((CMU->DPLLREFCLKCTRL & _CMU_DPLLREFCLKCTRL_CLKSEL_MASK)
                  == CMU_DPLLREFCLKCTRL_CLKSEL_HFXO);
-#endif
 
-#if defined(CMU_OSPI0CLKCTRL_CLKSEL_SOCPLL0SOCCLK0) \
-  || defined(CMU_QSPI0CLKCTRL_CLKSEL_SOCPLL0SOCCLK0)
+    case SL_OSCILLATOR_SOCPLL0:
     case SL_OSCILLATOR_SOCPLL0_OUT0:
     {
       uint32_t refclksel = SOCPLL0->CTRL & _SOCPLL_CTRL_REFCLKSEL_MASK;
       return (refclksel == SOCPLL_CTRL_REFCLKSEL_REF_HFXO)
              || (refclksel == SOCPLL_CTRL_REFCLKSEL_DEFAULT_HFXO);
     }
-#endif
-
-#if defined(CMU_QSPI0CLKCTRL_CLKSEL_QSPIHFRCO0)
-    case SL_OSCILLATOR_QSPIHFRCODPLL:
-      return true;
 #endif
 
     default:
@@ -207,7 +208,7 @@ static sl_status_t hfxo_tuning_set_flash_clk(sl_oscillator_t oscillator)
 {
 #if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
   return sli_clock_manager_hal_set_ext_flash_clk(oscillator);
-#elif defined(_CMU_OSPI0CLKCTRL_CLKSEL_MASK)
+#else
   uint32_t clksel;
   CORE_DECLARE_IRQ_STATE;
 
@@ -224,8 +225,9 @@ static sl_status_t hfxo_tuning_set_flash_clk(sl_oscillator_t oscillator)
       clksel = CMU_OSPI0CLKCTRL_CLKSEL_HFXO;
       break;
 
+    case SL_OSCILLATOR_SOCPLL0:
     case SL_OSCILLATOR_SOCPLL0_OUT0:
-      clksel = CMU_OSPI0CLKCTRL_CLKSEL_SOCPLL0SOCCLK0;
+      clksel = CMU_OSPI0CLKCTRL_CLKSEL_SOCPLL0;
       break;
 
     default:
@@ -234,34 +236,6 @@ static sl_status_t hfxo_tuning_set_flash_clk(sl_oscillator_t oscillator)
 
   CORE_ENTER_ATOMIC();
   CMU->OSPI0CLKCTRL = (CMU->OSPI0CLKCTRL & ~_CMU_OSPI0CLKCTRL_CLKSEL_MASK)
-                      | clksel;
-  CORE_EXIT_ATOMIC();
-
-  return SL_STATUS_OK;
-#else
-  uint32_t clksel;
-  CORE_DECLARE_IRQ_STATE;
-
-  switch (oscillator) {
-    case SL_OSCILLATOR_FSRCO:
-    case SL_OSCILLATOR_FSRCO40:
-      clksel = CMU_QSPI0CLKCTRL_CLKSEL_FSRCO40;
-      break;
-
-    case SL_OSCILLATOR_SOCPLL0_OUT0:
-      clksel = CMU_QSPI0CLKCTRL_CLKSEL_SOCPLL0SOCCLK0;
-      break;
-
-    case SL_OSCILLATOR_QSPIHFRCODPLL:
-      clksel = CMU_QSPI0CLKCTRL_CLKSEL_QSPIHFRCO0;
-      break;
-
-    default:
-      return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  CORE_ENTER_ATOMIC();
-  CMU->QSPI0CLKCTRL = (CMU->QSPI0CLKCTRL & ~_CMU_QSPI0CLKCTRL_CLKSEL_MASK)
                       | clksel;
   CORE_EXIT_ATOMIC();
 
@@ -298,7 +272,7 @@ static sl_status_t hfxo_tuning_restore_flash(sl_oscillator_t ext_flash_source,
   }
 
   uint32_t ready_mask = HFXO_STATUS_RDY | HFXO_STATUS_ENS;
-#if !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
   bool socpll0_temp_forceen = false;
 #endif
 
@@ -313,10 +287,11 @@ static sl_status_t hfxo_tuning_restore_flash(sl_oscillator_t ext_flash_source,
     /* Wait for HFXO to become ready before restoring the flash clock source. */
   }
 
-#if !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
-  if ((ext_flash_source == SL_OSCILLATOR_SOCPLL0_OUT0)
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+  if (((ext_flash_source == SL_OSCILLATOR_SOCPLL0)
+       || (ext_flash_source == SL_OSCILLATOR_SOCPLL0_OUT0))
       && ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0)) {
-    // QSPI0/OSPI0 can be SOCPLL0's only consumer. Force it on until it is ready so
+    // OSPI0 can be SOCPLL0's only consumer. Force it on until it is ready so
     // the flash clock can be switched back to SOCPLL0.
     SOCPLL0->CTRL_SET = SOCPLL_CTRL_FORCEEN;
     while ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0) {
@@ -333,7 +308,7 @@ static sl_status_t hfxo_tuning_restore_flash(sl_oscillator_t ext_flash_source,
     }
   }
 
-#if !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
   if (socpll0_temp_forceen) {
     SOCPLL0->CTRL_CLR = SOCPLL_CTRL_FORCEEN;
   }
@@ -416,11 +391,7 @@ sl_status_t sli_clock_manager_hal_get_oscillator_frequency(sl_oscillator_t oscil
       *frequency = SystemULFRCOClockGet();
       break;
 
-#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL)
-    case SL_OSCILLATOR_SOCPLL0:
-      *frequency = SystemSOCPLLClockGet(0, 0);
-      break;
-#elif defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1)
+#if (SOCPLL_OUTPUT_COUNT == 3)
     case SL_OSCILLATOR_SOCPLL0_OUT0:
       *frequency = SystemSOCPLLClockGet(0, 0);
       break;
@@ -431,6 +402,10 @@ sl_status_t sli_clock_manager_hal_get_oscillator_frequency(sl_oscillator_t oscil
 
     case SL_OSCILLATOR_SOCPLL0_OUT2:
       *frequency = SystemSOCPLLClockGet(0, 2);
+      break;
+#else
+    case SL_OSCILLATOR_SOCPLL0:
+      *frequency = SystemSOCPLLClockGet(0, 0);
       break;
 #endif
 
@@ -513,7 +488,7 @@ sl_status_t sli_clock_manager_hal_get_oscillator_precision(sl_oscillator_t oscil
       }
       break;
 
-#if defined(_SOCPLL_SOCCLK0_MASK)
+#if (SOCPLL_OUTPUT_COUNT == 3)
     case SL_OSCILLATOR_SOCPLL0_OUT0:
     case SL_OSCILLATOR_SOCPLL0_OUT1:
     case SL_OSCILLATOR_SOCPLL0_OUT2:
@@ -1531,18 +1506,30 @@ static sl_status_t get_high_frequency_branch_precision(sl_clock_branch_t clock_b
           return_status = SL_STATUS_NOT_AVAILABLE;
           break;
 
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL) || defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
+#if (SOCPLL_OUTPUT_COUNT == 3)
 #if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL)
         case CMU_SYSCLKCTRL_CLKSEL_SOCPLL:
-          return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_SOCPLL0, precision);
-          break;
-#elif defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1)
-        case CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1:
+#endif
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
+        case CMU_SYSCLKCTRL_CLKSEL_SOCPLL0:
+#endif
           return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_SOCPLL0_OUT1, precision);
           break;
+#else
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL)
+        case CMU_SYSCLKCTRL_CLKSEL_SOCPLL:
+#endif
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
+        case CMU_SYSCLKCTRL_CLKSEL_SOCPLL0:
+#endif
+          return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_SOCPLL0, precision);
+          break;
+#endif
 #endif
 
-#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL1SOCCLK1)
-        case CMU_SYSCLKCTRL_CLKSEL_SOCPLL1SOCCLK1:
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL1)
+        case CMU_SYSCLKCTRL_CLKSEL_SOCPLL1:
           return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_SOCPLL1_OUT1, precision);
           break;
 #endif
@@ -2413,8 +2400,7 @@ sl_status_t sli_clock_manager_hal_set_hfxo_calibration(uint32_t val)
   bool disondemand = false;
   sl_status_t status = SL_STATUS_OK;
 
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)  \
-  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302) \
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
   || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
   sl_oscillator_t ext_flash_source;
   uint32_t hfxo_ctrl_backup = HFXO0->CTRL;
@@ -2431,8 +2417,7 @@ sl_status_t sli_clock_manager_hal_set_hfxo_calibration(uint32_t val)
   // Make sure HFXO is disabled.
   EFM_ASSERT((HFXO0->STATUS & HFXO_STATUS_ENS) == 0);
   if ((HFXO0->STATUS & HFXO_STATUS_ENS) != 0) {
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)    \
-    || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302) \
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
     || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
     status = hfxo_tuning_restore_flash(ext_flash_source, hfxo_ctrl_backup);
     if (status != SL_STATUS_OK) {
@@ -2460,8 +2445,7 @@ sl_status_t sli_clock_manager_hal_set_hfxo_calibration(uint32_t val)
     HFXO0->CTRL_CLR = HFXO_CTRL_DISONDEMAND;
   }
 
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)  \
-  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302) \
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
   || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
   status = hfxo_tuning_restore_flash(ext_flash_source, hfxo_ctrl_backup);
 #endif
@@ -2514,8 +2498,7 @@ static sl_status_t hfxo_set_ctune(uint32_t ctune, bool log_result)
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)  \
-  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302) \
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
   || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
   sl_oscillator_t ext_flash_source;
   uint32_t hfxo_ctrl_backup = HFXO0->CTRL;
@@ -2548,8 +2531,7 @@ static sl_status_t hfxo_set_ctune(uint32_t ctune, bool log_result)
     HFXO0->LOCK = ~HFXO_LOCK_LOCKKEY_UNLOCK;
   }
 
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)  \
-  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302) \
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
   || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
   status = hfxo_tuning_restore_flash(ext_flash_source, hfxo_ctrl_backup);
 #endif
@@ -2618,8 +2600,7 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune)
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)  \
-  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302) \
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
   || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
   sl_oscillator_t ext_flash_source;
 
@@ -2658,8 +2639,7 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune)
     }
   }
 
-#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)  \
-  || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302) \
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
   || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
   sl_status_t restore_status = hfxo_tuning_restore_flash(ext_flash_source, hfxo_ctrl_backup);
   if (status == SL_STATUS_OK) {
@@ -3090,37 +3070,44 @@ sl_status_t sli_clock_manager_hal_set_sysclk_source(sl_oscillator_t source)
       CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_CLKIN0;
       break;
 
-#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL)
-    case SL_OSCILLATOR_SOCPLL0:
-      if ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0) {
-        SOCPLL0->CTRL_SET = SOCPLL_CTRL_FORCEEN;
-        while ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0) ;
-      }
-      CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_SOCPLL;
-      SOCPLL0->CTRL_CLR = SOCPLL_CTRL_FORCEEN;
-      break;
-#elif defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1)
+#if (SOCPLL_OUTPUT_COUNT == 3)
     case SL_OSCILLATOR_SOCPLL0_OUT1:
+#else
+    case SL_OSCILLATOR_SOCPLL0:
+#endif
       if ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0) {
         SOCPLL0->CTRL_SET = SOCPLL_CTRL_FORCEEN;
+#if defined(_SOCPLL_CTRL1_ENOPENLOOP_MASK)
         if ((SOCPLL0->CTRL1 & SOCPLL_CTRL1_ENOPENLOOP) == 0) {
           while ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0) ;
         }
+#else
+        while ((SOCPLL0->STATUS & SOCPLL_STATUS_RDY) == 0) ;
+#endif
       }
-      CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1;
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL)
+      CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_SOCPLL;
+#elif defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
+      CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_SOCPLL0;
+#else
+#error "Unsupported SOCPLL clock source"
+#endif
       SOCPLL0->CTRL_CLR = SOCPLL_CTRL_FORCEEN;
       break;
-#endif
 
-#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL1SOCCLK1)
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL1)
     case SL_OSCILLATOR_SOCPLL1_OUT1:
       if ((SOCPLL1->STATUS & SOCPLL_STATUS_RDY) == 0) {
         SOCPLL1->CTRL_SET = SOCPLL_CTRL_FORCEEN;
+#if defined(_SOCPLL_CTRL1_ENOPENLOOP_MASK)
         if ((SOCPLL1->CTRL1 & SOCPLL_CTRL1_ENOPENLOOP) == 0) {
           while ((SOCPLL1->STATUS & SOCPLL_STATUS_RDY) == 0) ;
         }
+#else
+        while ((SOCPLL1->STATUS & SOCPLL_STATUS_RDY) == 0) ;
+#endif
       }
-      CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_SOCPLL1SOCCLK1;
+      CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_SOCPLL1;
       SOCPLL1->CTRL_CLR = SOCPLL_CTRL_FORCEEN;
       break;
 #endif
@@ -3167,17 +3154,29 @@ sl_status_t sli_clock_manager_hal_get_sysclk_source(sl_oscillator_t *source)
     case  CMU_SYSCLKCTRL_CLKSEL_CLKIN0:
       *source = SL_OSCILLATOR_CLKIN0;
       break;
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL) || defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
+#if (SOCPLL_OUTPUT_COUNT == 3)
 #if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL)
     case  CMU_SYSCLKCTRL_CLKSEL_SOCPLL:
-      *source = SL_OSCILLATOR_SOCPLL0;
-      break;
-#elif defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1)
-    case  CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1:
+#endif
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
+    case  CMU_SYSCLKCTRL_CLKSEL_SOCPLL0:
+#endif
       *source = SL_OSCILLATOR_SOCPLL0_OUT1;
       break;
+#else
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL)
+    case  CMU_SYSCLKCTRL_CLKSEL_SOCPLL:
 #endif
-#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL1SOCCLK1)
-    case  CMU_SYSCLKCTRL_CLKSEL_SOCPLL1SOCCLK1:
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL0)
+    case  CMU_SYSCLKCTRL_CLKSEL_SOCPLL0:
+#endif
+      *source = SL_OSCILLATOR_SOCPLL0;
+      break;
+#endif
+#endif
+#if defined(CMU_SYSCLKCTRL_CLKSEL_SOCPLL1)
+    case  CMU_SYSCLKCTRL_CLKSEL_SOCPLL1:
       *source = SL_OSCILLATOR_SOCPLL1_OUT1;
       break;
 #endif
@@ -3302,7 +3301,7 @@ sl_status_t sli_clock_manager_hal_get_ext_flash_clk(sl_oscillator_t *oscillator)
 
   *oscillator = current_qspi_reference_clock;
   return SL_STATUS_OK;
-#elif defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+#elif defined (_SILICON_LABS_32B_SERIES_3_CONFIG_353)
   switch (CMU->OSPI0CLKCTRL & _CMU_OSPI0CLKCTRL_CLKSEL_MASK) {
     case CMU_OSPI0CLKCTRL_CLKSEL_DISABLED:
       *oscillator = SL_OSCILLATOR_INVALID;
@@ -3312,7 +3311,7 @@ sl_status_t sli_clock_manager_hal_get_ext_flash_clk(sl_oscillator_t *oscillator)
       *oscillator = SL_OSCILLATOR_FSRCO;
       break;
 
-    case CMU_OSPI0CLKCTRL_CLKSEL_SOCPLL0SOCCLK0:
+    case CMU_OSPI0CLKCTRL_CLKSEL_SOCPLL0:
       *oscillator = SL_OSCILLATOR_SOCPLL0_OUT0;
       break;
 
@@ -3322,29 +3321,6 @@ sl_status_t sli_clock_manager_hal_get_ext_flash_clk(sl_oscillator_t *oscillator)
 
     case CMU_OSPI0CLKCTRL_CLKSEL_HFXO:
       *oscillator = SL_OSCILLATOR_HFXO;
-      break;
-
-    default:
-      return SL_STATUS_INVALID_STATE;
-  }
-
-  return SL_STATUS_OK;
-#elif defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302)
-  switch (CMU->QSPI0CLKCTRL & _CMU_QSPI0CLKCTRL_CLKSEL_MASK) {
-    case CMU_QSPI0CLKCTRL_CLKSEL_DISABLED:
-      *oscillator = SL_OSCILLATOR_INVALID;
-      break;
-
-    case CMU_QSPI0CLKCTRL_CLKSEL_FSRCO40:
-      *oscillator = SL_OSCILLATOR_FSRCO40;
-      break;
-
-    case CMU_QSPI0CLKCTRL_CLKSEL_SOCPLL0SOCCLK0:
-      *oscillator = SL_OSCILLATOR_SOCPLL0_OUT0;
-      break;
-
-    case CMU_QSPI0CLKCTRL_CLKSEL_QSPIHFRCO0:
-      *oscillator = SL_OSCILLATOR_QSPIHFRCODPLL;
       break;
 
     default:

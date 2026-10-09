@@ -47,8 +47,8 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // DEFINES
 
-/// Validation of portal power domain index.
-#define SLI_PORTAL_VALIDATE_DOMAIN(domain)  SLI_PORTAL_DOMAIN_SUPPORTED(domain)
+/// Validation of portal power domain.
+#define SLI_PORTAL_VALIDATE_DOMAIN(domain)  ((domain) < SLI_PORTAL_DOMAIN_MAX)
 
 /***************************************************************************//**
  * @addtogroup portal PORTAL - Power Request and Acknowledgement
@@ -285,9 +285,13 @@ __STATIC_INLINE uint32_t sli_hal_portal_get_active_domain_interrupt_mask(void)
  *  @note The Host could also use an IRQ instead of polling, controlled via
  *        PORTAL->HOSTIF and PORTAL->HOSTIEN registers.
  *
- *  The set of power domains and their HOSTCTRL bit positions is device-specific.
- *  See sli_device_portal.h for the enumerators on the selected part, and use
- *  SLI_PORTAL_DOMAIN_SUPPORTED() to check whether a domain is supported.
+ *  The register interface supports the following power domains:
+ *  - PD1HOSTBASE (bit 0): HOSTBASE power domain
+ *  - PD1HOSTNPU (bit 1): HOSTNPU power domain
+ *  - PD1LPW0 (bit 2): LPW0 power domain
+ *  - PD1WIFI0BASE (bit 3): WIFI0BASE power domain
+ *  - PD1WIFI0MODEM11B (bit 4): WIFI0MODEM11B power domain
+ *  - PD1WIFI0OFDM (bit 5): WIFI0OFDM power domain
  *
  *@n @section portal_example Example
  *  @code{.c}

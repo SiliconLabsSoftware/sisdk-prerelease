@@ -71,9 +71,8 @@ void sli_watchdog_manager_micrium_install_task_sw_hook(void);
  *
  * @details
  * Stores the first unfed enabled watchdog handle in no-init state so that
- * after a watchdog-triggered reset, sl_watchdog_manager_retrieve_faulty() and
- * sl_watchdog_manager_retrieve_faulty_uid() can report which watchdog caused
- * the reset. Called internally when the manager
+ * after a watchdog-triggered reset, sl_watchdog_manager_retrieve_faulty() can
+ * report which watchdog caused the reset. Called internally when the manager
  * detects that not all enabled watchdogs have been fed in time.
  ******************************************************************************/
 void sli_watchdog_manager_record_state(void);

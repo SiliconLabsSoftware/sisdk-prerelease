@@ -2,8 +2,8 @@
 - id: brd4337a_config
 - label: brd4337a config
 - description: Configuration files for BRD4337A
-- category: Platform|Board|Config
 - package: boards
+- category: Platform|Board|Config
 - quality: production
 - metadata:
     sbom:
@@ -341,12 +341,26 @@
       vendor: silabs
     path: brd4337a_brd4002a/btl_euart_driver_cfg.h
   - condition:
+    - brd4002b
+    override:
+      component: bootloader_euart_driver
+      file_id: btl_euart_driver_cfg
+      vendor: silabs
+    path: brd4337a_brd4002b/btl_euart_driver_cfg.h
+  - condition:
     - brd4002a
     override:
       component: bootloader_ezsp_gpio_activation
       file_id: ezsp_gpio_activation_cfg
       vendor: silabs
     path: brd4337a_brd4002a/btl_ezsp_gpio_activation_cfg.h
+  - condition:
+    - brd4002b
+    override:
+      component: bootloader_ezsp_gpio_activation
+      file_id: ezsp_gpio_activation_cfg
+      vendor: silabs
+    path: brd4337a_brd4002b/btl_ezsp_gpio_activation_cfg.h
   - condition:
     - brd4002a
     override:
@@ -355,12 +369,26 @@
       vendor: silabs
     path: brd4337a_brd4002a/btl_gpio_activation_cfg.h
   - condition:
+    - brd4002b
+    override:
+      component: bootloader_gpio_activation
+      file_id: btl_gpio_activation_cfg
+      vendor: silabs
+    path: brd4337a_brd4002b/btl_gpio_activation_cfg.h
+  - condition:
     - brd4002a
     override:
       component: bootloader_uart_driver
       file_id: btl_uart_driver_cfg
       vendor: silabs
     path: brd4337a_brd4002a/btl_uart_driver_cfg.h
+  - condition:
+    - brd4002b
+    override:
+      component: bootloader_uart_driver
+      file_id: btl_uart_driver_cfg
+      vendor: silabs
+    path: brd4337a_brd4002b/btl_uart_driver_cfg.h
   - condition:
     - brd4002a
     override:
@@ -369,12 +397,26 @@
       vendor: silabs
     path: brd4337a_brd4002a/sl_clock_manager_oscillator_config.h
   - condition:
+    - brd4002b
+    override:
+      component: clock_manager
+      file_id: clock_manager_oscillator_config
+      vendor: silabs
+    path: brd4337a_brd4002b/sl_clock_manager_oscillator_config.h
+  - condition:
     - brd4002a
     override:
       component: clock_manager
       file_id: clock_manager_tree_config
       vendor: silabs
     path: brd4337a_brd4002a/sl_clock_manager_tree_config.h
+  - condition:
+    - brd4002b
+    override:
+      component: clock_manager
+      file_id: clock_manager_tree_config
+      vendor: silabs
+    path: brd4337a_brd4002b/sl_clock_manager_tree_config.h
   - condition:
     - brd4002a
     override:
@@ -384,294 +426,6 @@
       vendor: silabs
     path: brd4337a_brd4002a/sl_cpc_gpio_expander_gpio_btn0_config.h
   - condition:
-    - brd4002a
-    override:
-      component: cpc_gpio_expander_gpio_instance
-      file_id: cpc_gpio_expander_gpio_config
-      instance: btn1
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_cpc_gpio_expander_gpio_btn1_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: cpc_primary_driver_uart_eusart
-      file_id: cpc_drv_uart_eusart_config
-      instance: exp
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_cpc_drv_uart_eusart_exp_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: cpc_primary_driver_uart_usart
-      file_id: cpc_drv_uart_usart_config
-      instance: exp
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_cpc_drv_uart_usart_exp_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: cpc_secondary_driver_uart_eusart
-      file_id: cpc_drv_uart_eusart_config
-      instance: vcom
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_cpc_drv_uart_eusart_vcom_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: cpc_secondary_driver_uart_eusart
-      file_id: cpc_drv_uart_eusart_config
-      instance: exp
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_cpc_drv_uart_eusart_exp_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_uart_usart_config
-      instance: vcom
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_cpc_drv_uart_usart_vcom_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: cpc_secondary_driver_uart_usart
-      file_id: cpc_drv_uart_usart_config
-      instance: exp
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_cpc_drv_uart_usart_exp_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: device_init_hfxo
-      file_id: device_init_hfxo_config
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_device_init_hfxo_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: emlib_gpio_simple_init
-      file_id: emlib_gpio_simple_init_config_file_id
-      instance: exp_7
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_emlib_gpio_init_exp_7_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: emlib_gpio_simple_init
-      file_id: emlib_gpio_simple_init_config_file_id
-      instance: exp_9
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_emlib_gpio_init_exp_9_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: emlib_gpio_simple_init
-      file_id: emlib_gpio_simple_init_config_file_id
-      instance: exp_12
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_emlib_gpio_init_exp_12_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: emlib_gpio_simple_init
-      file_id: emlib_gpio_simple_init_config_file_id
-      instance: exp_14
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_emlib_gpio_init_exp_14_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: hal_gpio_simple_init
-      file_id: hal_gpio_simple_init_config_file_id
-      instance: exp_7
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_hal_gpio_init_exp_7_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: hal_gpio_simple_init
-      file_id: hal_gpio_simple_init_config_file_id
-      instance: exp_9
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_hal_gpio_init_exp_9_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: hal_gpio_simple_init
-      file_id: hal_gpio_simple_init_config_file_id
-      instance: exp_12
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_hal_gpio_init_exp_12_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: hal_gpio_simple_init
-      file_id: hal_gpio_simple_init_config_file_id
-      instance: exp_14
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_hal_gpio_init_exp_14_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: iostream_eusart
-      file_id: iostream_eusart_config
-      instance: exp
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_iostream_eusart_exp_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: iostream_eusart
-      file_id: iostream_eusart_config
-      instance: vcom
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_iostream_eusart_vcom_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: iostream_usart
-      file_id: iostream_usart_config
-      instance: exp
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_iostream_usart_exp_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: iostream_usart
-      file_id: iostream_usart_config
-      instance: vcom
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_iostream_usart_vcom_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: pwm
-      file_id: pwm_config
-      instance: led0
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_pwm_init_led0_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: pwm
-      file_id: pwm_config
-      instance: led1
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_pwm_init_led1_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: simple_button
-      file_id: simple_button_config
-      instance: btn0
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_simple_button_btn0_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: simple_button
-      file_id: simple_button_config
-      instance: btn1
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_simple_button_btn1_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: simple_led
-      file_id: simple_led_config
-      instance: led0
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_simple_led_led0_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: simple_led
-      file_id: simple_led_config
-      instance: led1
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_simple_led_led1_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: sl_rail_util_pti
-      file_id: rail_util_pti_config
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_rail_util_pti_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: uartdrv_eusart
-      file_id: uartdrv_eusart_config
-      instance: exp
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_uartdrv_eusart_exp_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: uartdrv_eusart
-      file_id: uartdrv_eusart_config
-      instance: vcom
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_uartdrv_eusart_vcom_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: uartdrv_usart
-      file_id: uartdrv_usart_config
-      instance: exp
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_uartdrv_usart_exp_config.h
-  - condition:
-    - brd4002a
-    override:
-      component: uartdrv_usart
-      file_id: uartdrv_usart_config
-      instance: vcom
-      vendor: silabs
-    path: brd4337a_brd4002a/sl_uartdrv_usart_vcom_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: bootloader_euart_driver
-      file_id: btl_euart_driver_cfg
-      vendor: silabs
-    path: brd4337a_brd4002b/btl_euart_driver_cfg.h
-  - condition:
-    - brd4002b
-    override:
-      component: bootloader_ezsp_gpio_activation
-      file_id: ezsp_gpio_activation_cfg
-      vendor: silabs
-    path: brd4337a_brd4002b/btl_ezsp_gpio_activation_cfg.h
-  - condition:
-    - brd4002b
-    override:
-      component: bootloader_gpio_activation
-      file_id: btl_gpio_activation_cfg
-      vendor: silabs
-    path: brd4337a_brd4002b/btl_gpio_activation_cfg.h
-  - condition:
-    - brd4002b
-    override:
-      component: bootloader_uart_driver
-      file_id: btl_uart_driver_cfg
-      vendor: silabs
-    path: brd4337a_brd4002b/btl_uart_driver_cfg.h
-  - condition:
-    - brd4002b
-    override:
-      component: clock_manager
-      file_id: clock_manager_oscillator_config
-      vendor: silabs
-    path: brd4337a_brd4002b/sl_clock_manager_oscillator_config.h
-  - condition:
-    - brd4002b
-    override:
-      component: clock_manager
-      file_id: clock_manager_tree_config
-      vendor: silabs
-    path: brd4337a_brd4002b/sl_clock_manager_tree_config.h
-  - condition:
     - brd4002b
     override:
       component: cpc_gpio_expander_gpio_instance
@@ -679,6 +433,14 @@
       instance: btn0
       vendor: silabs
     path: brd4337a_brd4002b/sl_cpc_gpio_expander_gpio_btn0_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: cpc_gpio_expander_gpio_instance
+      file_id: cpc_gpio_expander_gpio_config
+      instance: btn1
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_cpc_gpio_expander_gpio_btn1_config.h
   - condition:
     - brd4002b
     override:
@@ -688,6 +450,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_cpc_gpio_expander_gpio_btn1_config.h
   - condition:
+    - brd4002a
+    override:
+      component: cpc_primary_driver_uart_eusart
+      file_id: cpc_drv_uart_eusart_config
+      instance: exp
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_cpc_drv_uart_eusart_exp_config.h
+  - condition:
     - brd4002b
     override:
       component: cpc_primary_driver_uart_eusart
@@ -695,6 +465,14 @@
       instance: exp
       vendor: silabs
     path: brd4337a_brd4002b/sl_cpc_drv_uart_eusart_exp_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: cpc_primary_driver_uart_usart
+      file_id: cpc_drv_uart_usart_config
+      instance: exp
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_cpc_drv_uart_usart_exp_config.h
   - condition:
     - brd4002b
     override:
@@ -704,6 +482,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_cpc_drv_uart_usart_exp_config.h
   - condition:
+    - brd4002a
+    override:
+      component: cpc_secondary_driver_uart_eusart
+      file_id: cpc_drv_uart_eusart_config
+      instance: vcom
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_cpc_drv_uart_eusart_vcom_config.h
+  - condition:
     - brd4002b
     override:
       component: cpc_secondary_driver_uart_eusart
@@ -711,6 +497,14 @@
       instance: vcom
       vendor: silabs
     path: brd4337a_brd4002b/sl_cpc_drv_uart_eusart_vcom_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: cpc_secondary_driver_uart_eusart
+      file_id: cpc_drv_uart_eusart_config
+      instance: exp
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_cpc_drv_uart_eusart_exp_config.h
   - condition:
     - brd4002b
     override:
@@ -720,6 +514,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_cpc_drv_uart_eusart_exp_config.h
   - condition:
+    - brd4002a
+    override:
+      component: cpc_secondary_driver_uart_usart
+      file_id: cpc_drv_uart_usart_config
+      instance: vcom
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_cpc_drv_uart_usart_vcom_config.h
+  - condition:
     - brd4002b
     override:
       component: cpc_secondary_driver_uart_usart
@@ -727,6 +529,14 @@
       instance: vcom
       vendor: silabs
     path: brd4337a_brd4002b/sl_cpc_drv_uart_usart_vcom_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: cpc_secondary_driver_uart_usart
+      file_id: cpc_drv_uart_usart_config
+      instance: exp
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_cpc_drv_uart_usart_exp_config.h
   - condition:
     - brd4002b
     override:
@@ -736,12 +546,27 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_cpc_drv_uart_usart_exp_config.h
   - condition:
+    - brd4002a
+    override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_device_init_hfxo_config.h
+  - condition:
     - brd4002b
     override:
       component: device_init_hfxo
       file_id: device_init_hfxo_config
       vendor: silabs
     path: brd4337a_brd4002b/sl_device_init_hfxo_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: emlib_gpio_simple_init
+      file_id: emlib_gpio_simple_init_config_file_id
+      instance: exp_7
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_emlib_gpio_init_exp_7_config.h
   - condition:
     - brd4002b
     override:
@@ -751,6 +576,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_emlib_gpio_init_exp_7_config.h
   - condition:
+    - brd4002a
+    override:
+      component: emlib_gpio_simple_init
+      file_id: emlib_gpio_simple_init_config_file_id
+      instance: exp_9
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_emlib_gpio_init_exp_9_config.h
+  - condition:
     - brd4002b
     override:
       component: emlib_gpio_simple_init
@@ -758,6 +591,14 @@
       instance: exp_9
       vendor: silabs
     path: brd4337a_brd4002b/sl_emlib_gpio_init_exp_9_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: emlib_gpio_simple_init
+      file_id: emlib_gpio_simple_init_config_file_id
+      instance: exp_12
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_emlib_gpio_init_exp_12_config.h
   - condition:
     - brd4002b
     override:
@@ -767,6 +608,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_emlib_gpio_init_exp_12_config.h
   - condition:
+    - brd4002a
+    override:
+      component: emlib_gpio_simple_init
+      file_id: emlib_gpio_simple_init_config_file_id
+      instance: exp_14
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_emlib_gpio_init_exp_14_config.h
+  - condition:
     - brd4002b
     override:
       component: emlib_gpio_simple_init
@@ -774,6 +623,14 @@
       instance: exp_14
       vendor: silabs
     path: brd4337a_brd4002b/sl_emlib_gpio_init_exp_14_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: hal_gpio_simple_init
+      file_id: hal_gpio_simple_init_config_file_id
+      instance: exp_7
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_hal_gpio_init_exp_7_config.h
   - condition:
     - brd4002b
     override:
@@ -783,6 +640,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_hal_gpio_init_exp_7_config.h
   - condition:
+    - brd4002a
+    override:
+      component: hal_gpio_simple_init
+      file_id: hal_gpio_simple_init_config_file_id
+      instance: exp_9
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_hal_gpio_init_exp_9_config.h
+  - condition:
     - brd4002b
     override:
       component: hal_gpio_simple_init
@@ -790,6 +655,14 @@
       instance: exp_9
       vendor: silabs
     path: brd4337a_brd4002b/sl_hal_gpio_init_exp_9_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: hal_gpio_simple_init
+      file_id: hal_gpio_simple_init_config_file_id
+      instance: exp_12
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_hal_gpio_init_exp_12_config.h
   - condition:
     - brd4002b
     override:
@@ -799,6 +672,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_hal_gpio_init_exp_12_config.h
   - condition:
+    - brd4002a
+    override:
+      component: hal_gpio_simple_init
+      file_id: hal_gpio_simple_init_config_file_id
+      instance: exp_14
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_hal_gpio_init_exp_14_config.h
+  - condition:
     - brd4002b
     override:
       component: hal_gpio_simple_init
@@ -806,6 +687,14 @@
       instance: exp_14
       vendor: silabs
     path: brd4337a_brd4002b/sl_hal_gpio_init_exp_14_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: iostream_eusart
+      file_id: iostream_eusart_config
+      instance: exp
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_iostream_eusart_exp_config.h
   - condition:
     - brd4002b
     override:
@@ -815,6 +704,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_iostream_eusart_exp_config.h
   - condition:
+    - brd4002a
+    override:
+      component: iostream_eusart
+      file_id: iostream_eusart_config
+      instance: vcom
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_iostream_eusart_vcom_config.h
+  - condition:
     - brd4002b
     override:
       component: iostream_eusart
@@ -822,6 +719,14 @@
       instance: vcom
       vendor: silabs
     path: brd4337a_brd4002b/sl_iostream_eusart_vcom_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: iostream_usart
+      file_id: iostream_usart_config
+      instance: exp
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_iostream_usart_exp_config.h
   - condition:
     - brd4002b
     override:
@@ -831,6 +736,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_iostream_usart_exp_config.h
   - condition:
+    - brd4002a
+    override:
+      component: iostream_usart
+      file_id: iostream_usart_config
+      instance: vcom
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_iostream_usart_vcom_config.h
+  - condition:
     - brd4002b
     override:
       component: iostream_usart
@@ -838,6 +751,14 @@
       instance: vcom
       vendor: silabs
     path: brd4337a_brd4002b/sl_iostream_usart_vcom_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: pwm
+      file_id: pwm_config
+      instance: led0
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_pwm_init_led0_config.h
   - condition:
     - brd4002b
     override:
@@ -847,6 +768,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_pwm_init_led0_config.h
   - condition:
+    - brd4002a
+    override:
+      component: pwm
+      file_id: pwm_config
+      instance: led1
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_pwm_init_led1_config.h
+  - condition:
     - brd4002b
     override:
       component: pwm
@@ -854,6 +783,14 @@
       instance: led1
       vendor: silabs
     path: brd4337a_brd4002b/sl_pwm_init_led1_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: btn0
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_simple_button_btn0_config.h
   - condition:
     - brd4002b
     override:
@@ -863,6 +800,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_simple_button_btn0_config.h
   - condition:
+    - brd4002a
+    override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: btn1
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_simple_button_btn1_config.h
+  - condition:
     - brd4002b
     override:
       component: simple_button
@@ -870,6 +815,14 @@
       instance: btn1
       vendor: silabs
     path: brd4337a_brd4002b/sl_simple_button_btn1_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: led0
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_simple_led_led0_config.h
   - condition:
     - brd4002b
     override:
@@ -879,6 +832,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_simple_led_led0_config.h
   - condition:
+    - brd4002a
+    override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: led1
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_simple_led_led1_config.h
+  - condition:
     - brd4002b
     override:
       component: simple_led
@@ -887,12 +848,27 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_simple_led_led1_config.h
   - condition:
+    - brd4002a
+    override:
+      component: sl_rail_util_pti
+      file_id: rail_util_pti_config
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_rail_util_pti_config.h
+  - condition:
     - brd4002b
     override:
       component: sl_rail_util_pti
       file_id: rail_util_pti_config
       vendor: silabs
     path: brd4337a_brd4002b/sl_rail_util_pti_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: uartdrv_eusart
+      file_id: uartdrv_eusart_config
+      instance: exp
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_uartdrv_eusart_exp_config.h
   - condition:
     - brd4002b
     override:
@@ -902,6 +878,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_uartdrv_eusart_exp_config.h
   - condition:
+    - brd4002a
+    override:
+      component: uartdrv_eusart
+      file_id: uartdrv_eusart_config
+      instance: vcom
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_uartdrv_eusart_vcom_config.h
+  - condition:
     - brd4002b
     override:
       component: uartdrv_eusart
@@ -910,6 +894,14 @@
       vendor: silabs
     path: brd4337a_brd4002b/sl_uartdrv_eusart_vcom_config.h
   - condition:
+    - brd4002a
+    override:
+      component: uartdrv_usart
+      file_id: uartdrv_usart_config
+      instance: exp
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_uartdrv_usart_exp_config.h
+  - condition:
     - brd4002b
     override:
       component: uartdrv_usart
@@ -917,6 +909,14 @@
       instance: exp
       vendor: silabs
     path: brd4337a_brd4002b/sl_uartdrv_usart_exp_config.h
+  - condition:
+    - brd4002a
+    override:
+      component: uartdrv_usart
+      file_id: uartdrv_usart_config
+      instance: vcom
+      vendor: silabs
+    path: brd4337a_brd4002a/sl_uartdrv_usart_vcom_config.h
   - condition:
     - brd4002b
     override:

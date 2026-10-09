@@ -42,26 +42,13 @@
 #include "em_gpio.h"
 #endif
 
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250)
+#include "em_cmu.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250) \
-  || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_265)
-/***************************************************************************//**
- * Enable instruction cache out of reset.
- *
- * @note FOR INTERNAL USE ONLY.
- ******************************************************************************/
-__STATIC_INLINE void sli_chip_enable_icache(void)
-{
-  CMU->CLKEN1_SET = _CMU_CLKEN1_ICACHE0_MASK;
-  ICACHE0->CTRL_CLR = _ICACHE_CTRL_CACHEDIS_MASK;
-  CMU->CLKEN1_CLR = _CMU_CLKEN1_ICACHE0_MASK;
-}
-#endif
-/** @endcond */
 
 /***************************************************************************//**
  * @addtogroup chip CHIP - Chip Errata Workarounds
@@ -429,10 +416,11 @@ __STATIC_INLINE void CHIP_Init(void)
   }
 #endif
 
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250) \
-  || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_265)
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250)
   // Enable ICache out of reset.
-  sli_chip_enable_icache();
+  CMU->CLKEN1_SET = _CMU_CLKEN1_ICACHE0_MASK;
+  ICACHE0->CTRL_CLR = _ICACHE_CTRL_CACHEDIS_MASK;
+  CMU->CLKEN1_CLR = _CMU_CLKEN1_ICACHE0_MASK;
 #endif
 }
 

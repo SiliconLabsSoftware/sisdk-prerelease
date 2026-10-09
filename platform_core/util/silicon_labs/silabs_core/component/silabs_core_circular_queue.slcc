@@ -24,7 +24,4 @@ provides:
 define:
 - name: CIRCULAR_QUEUE_USE_LOCAL_CONFIG_HEADER
   value: "1"
-documentation:
-  docset: gecko-platform
-  document: platform-common/slist
 root_path: platform_core

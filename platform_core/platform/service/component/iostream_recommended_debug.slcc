@@ -14,7 +14,4 @@ requires:
 recommends:
 - id: iostream_debug
   vendor: silabs
-documentation:
-  docset: gecko-platform
-  document: platform-service/iostream
 root_path: platform_core
