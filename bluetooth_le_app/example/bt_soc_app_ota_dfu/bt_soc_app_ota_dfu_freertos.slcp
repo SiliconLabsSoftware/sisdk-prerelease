@@ -78,7 +78,7 @@ configuration:
     condition:
       - psa_crypto
   - name: SL_BT_APP_OTA_DFU_CONFIG_STACK
-    value: "2048"
+    value: "4096"
     condition:
       - device_series_2
 
