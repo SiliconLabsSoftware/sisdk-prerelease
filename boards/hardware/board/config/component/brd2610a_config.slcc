@@ -201,11 +201,6 @@
       vendor: silabs
     path: brd2610a/sl_rail_util_pti_config.h
   - override:
-      component: sl_rail_util_rf_switch
-      file_id: sl_rail_util_rf_switch_config
-      vendor: silabs
-    path: brd2610a/sl_rail_util_rf_switch_config.h
-  - override:
       component: uartdrv_eusart
       file_id: uartdrv_eusart_config
       instance: vcom

@@ -433,8 +433,8 @@ extern "C" {
 
 /// Boolean to indicate whether the selected chip supports configuring an
 /// external RF switch for BLE antenna switching (antenna-to-pin mapping,
-/// optional VDD power-gating, and control pins that follow radio activity).
-/// Enabled on EFR32xG24 (bobcat) only for now.
+/// optional VDD power-gating, and idle-low behavior). Enabled on EFR32xG24
+/// (bobcat) only for now.
 #if (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)
 #define SL_RAIL_SUPPORTS_RF_SWITCH 1
 #else

@@ -16,7 +16,7 @@
 #include "sl_rail_ble.h"
 #include "sl_rail_util_rf_switch.h"
 
-static sl_rail_rf_switch_config_t cliRfSwitchConfig;
+static sl_rail_ble_rf_switch_config_t cliRfSwitchConfig;
 
 void CI_setCsAntGpioPattern(sl_cli_command_arg_t *args)
 {
@@ -46,10 +46,10 @@ void CI_setCsAntGpioPattern(sl_cli_command_arg_t *args)
   }
   cliRfSwitchConfig.use_antenna_gpio_pattern = true;
 
-  // Apply the (accumulated) RF switch config; preserves any VDD set via
+  // Apply the (accumulated) RF switch config; preserves any VDD/idle set via
   // setCsRfSwitch.
-  sl_rail_status_t status = sl_rail_config_rf_switch(SL_RAIL_EFR32_HANDLE,
-                                                     &cliRfSwitchConfig);
+  sl_rail_status_t status = sl_rail_ble_config_rf_switch(SL_RAIL_EFR32_HANDLE,
+                                                         &cliRfSwitchConfig);
   if (status != SL_RAIL_STATUS_NO_ERROR) {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "Unable to configure RF switch antenna pattern.");
     return;
@@ -68,42 +68,44 @@ void CI_setCsRfSwitch(sl_cli_command_arg_t *args)
     return;
   }
 
-  // Update VDD in the persistent config, preserving any antenna pattern
+  // Update VDD/idle in the persistent config, preserving any antenna pattern
   // previously set via setCsAntGpioPattern.
-  cliRfSwitchConfig.vdd_enable =
+  cliRfSwitchConfig.idle_control_pins_low =
     (sl_cli_get_argument_uint8(args, 0) != 0U);
+  cliRfSwitchConfig.vdd_enable =
+    (sl_cli_get_argument_uint8(args, 1) != 0U);
   cliRfSwitchConfig.vdd_pin.gpio_port = 0U;
   cliRfSwitchConfig.vdd_pin.gpio_pin = 0U;
   cliRfSwitchConfig.vdd_settle_time_us =
-    SL_RAIL_RF_SWITCH_VDD_SETTLE_TIME_US_DEFAULT;
+    SL_RAIL_BLE_RF_SWITCH_VDD_SETTLE_TIME_US_DEFAULT;
   cliRfSwitchConfig.vdd_prs_signal =
-    SL_RAIL_RF_SWITCH_VDD_PRS_SIGNAL_PAEN_OR_LNAEN;
+    SL_RAIL_BLE_RF_SWITCH_VDD_PRS_SIGNAL_PAEN_OR_LNAEN;
 
   if (cliRfSwitchConfig.vdd_enable) {
-    if (sl_cli_get_argument_count(args) < 4) {
+    if (sl_cli_get_argument_count(args) < 5) {
       responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "VDD requires port, pin, and settle time.");
       return;
     }
-    cliRfSwitchConfig.vdd_pin.gpio_port = sl_cli_get_argument_uint8(args, 1);
-    cliRfSwitchConfig.vdd_pin.gpio_pin = sl_cli_get_argument_uint8(args, 2);
+    cliRfSwitchConfig.vdd_pin.gpio_port = sl_cli_get_argument_uint8(args, 2);
+    cliRfSwitchConfig.vdd_pin.gpio_pin = sl_cli_get_argument_uint8(args, 3);
     if (cliRfSwitchConfig.vdd_pin.gpio_pin > 15U) {
       responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "Invalid VDD GPIO pin.");
       return;
     }
-    cliRfSwitchConfig.vdd_settle_time_us = sl_cli_get_argument_uint8(args, 3);
-    if (sl_cli_get_argument_count(args) > 4) {
-      uint8_t vddPrsSignal = sl_cli_get_argument_uint8(args, 4);
-      if (vddPrsSignal > (uint8_t)SL_RAIL_RF_SWITCH_VDD_PRS_SIGNAL_TX_OR_RX_ACTIVE) {
+    cliRfSwitchConfig.vdd_settle_time_us = sl_cli_get_argument_uint8(args, 4);
+    if (sl_cli_get_argument_count(args) > 5) {
+      uint8_t vddPrsSignal = sl_cli_get_argument_uint8(args, 5);
+      if (vddPrsSignal > (uint8_t)SL_RAIL_BLE_RF_SWITCH_VDD_PRS_SIGNAL_TX_OR_RX_ACTIVE) {
         responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "Invalid VDD PRS signal.");
         return;
       }
       cliRfSwitchConfig.vdd_prs_signal =
-        (sl_rail_rf_switch_vdd_prs_signal_t)vddPrsSignal;
+        (sl_rail_ble_rf_switch_vdd_prs_signal_t)vddPrsSignal;
     }
   }
 
-  sl_rail_status_t status = sl_rail_config_rf_switch(SL_RAIL_EFR32_HANDLE,
-                                                     &cliRfSwitchConfig);
+  sl_rail_status_t status = sl_rail_ble_config_rf_switch(SL_RAIL_EFR32_HANDLE,
+                                                         &cliRfSwitchConfig);
   if (status != SL_RAIL_STATUS_NO_ERROR) {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "Unable to configure RF switch.");
     return;
