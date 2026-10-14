@@ -12,14 +12,10 @@
  ******************************************************************************/
 
 #include "sl_rail.h"
+#include "sl_rail_ble.h"
 #include "sl_rail_util_rf_switch.h"
 #include "sl_rail_util_rf_switch_config.h"
 #include "em_common.h"
-
-bool sl_rail_util_rf_switch_config_allowed(void)
-{
-  return sl_rail_rf_switch_can_reconfigure(SL_RAIL_EFR32_HANDLE);
-}
 
 // A custom antenna-to-pin pattern is requested when the type is not NONE.
 #if (SL_RAIL_UTIL_RF_SWITCH_ANTENNA_GPIO_PATTERN_TYPE \

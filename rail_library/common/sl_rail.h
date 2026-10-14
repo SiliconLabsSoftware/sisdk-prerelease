@@ -36,7 +36,6 @@
 
 // Get the RAIL-specific structures and types
 #include "sl_rail_types.h"
-#include "sl_rail_features.h"
 #include "sl_rail_assert_error_codes.h"
 
 #ifdef __cplusplus
@@ -568,45 +567,6 @@ sl_rail_status_t sl_rail_config_antenna(sl_rail_handle_t rail_handle,
  */
 sl_rail_status_t sl_rail_get_rf_path(sl_rail_handle_t rail_handle,
                                      sl_rail_antenna_sel_t *p_rf_path);
-
-/**
- * Configure an external RF switch used for antenna switching: the antenna-to-pin
- * mapping, and optional VDD power-gating and idle behavior.
- *
- * @param[in] rail_handle A real RAIL instance handle.
- * @param[in] p_rf_switch_config A pointer to the RF switch configuration.
- * @return Status code indicating success of the function call.
- *
- * @note Use the compile time symbol \ref SL_RAIL_SUPPORTS_RF_SWITCH to check
- *   whether the platform supports this feature.
- *
- * @note The antenna-switch control GPIO(s) are configured through \ref
- *   sl_rail_ble_config_aox_antenna(); this API layers the antenna-to-pin
- *   mapping (\ref sl_rail_ble_rf_switch_config_t::antenna_gpio_pattern) and the
- *   optional VDD power-gating / idle-low behavior on top. Once called, the
- *   switch is applied for any BLE TX/RX (VDD follows PA/LNA or TX/RX and the
- *   control pins select the default antenna), not only Channel Sounding. When
- *   CS is also used, configure the switch before calling sl_rail_ble_enable_cs()
- *   (documented in sl_rail_ble.h).
- *
- * @warning This API is not supported if GPIO is configured as a secure
- *   peripheral and will return \ref SL_RAIL_STATUS_INVALID_CALL.
- */
-#if SL_RAIL_SUPPORTS_RF_SWITCH || defined(DOXYGEN)
-sl_rail_status_t sl_rail_ble_config_rf_switch(sl_rail_handle_t rail_handle,
-                                              const sl_rail_ble_rf_switch_config_t *p_rf_switch_config);
-
-/**
- * Check whether the external RF switch configuration can be changed.
- *
- * @param[in] rail_handle A real RAIL instance handle.
- * @return True if the RF switch can be reconfigured, false otherwise.
- *
- * @note Use the compile time symbol \ref SL_RAIL_SUPPORTS_RF_SWITCH to check
- *   whether the platform supports this feature.
- */
-bool sl_rail_rf_switch_can_reconfigure(sl_rail_handle_t rail_handle);
-#endif // SL_RAIL_SUPPORTS_RF_SWITCH || defined(DOXYGEN)
 
 /** @} */ // end of group Antenna_Control
 
