@@ -51,11 +51,11 @@
 #include "sl_power_manager.h"
 #endif
 
-#if defined(SL_CATALOG_UART_EUSART_PRESENT)
+#if defined(EUART_PRESENT) || defined(EUSART_PRESENT)
 #include "sli_uart_eusart.h"
 #endif
 
-#if defined(SL_CATALOG_UART_USART_PRESENT)
+#if defined(USART_PRESENT)
 #include "sli_uart_usart.h"
 #endif
 
@@ -162,10 +162,7 @@ sl_status_t sl_uart_init(sl_uart_handle_t *uart_handle,
   EFM_ASSERT(uart_handle != NULL);
   EFM_ASSERT(pin_config != NULL);
 
-  status = sli_uart_init_core(uart_handle, uart, pin_config);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
+  sli_uart_init_core(uart_handle, uart, pin_config);
 
   #if defined(SL_CATALOG_UART_ASYNC_PRESENT)
   if (async_config != NULL) {
@@ -654,49 +651,44 @@ void sl_uart_disable_tx_complete_interrupt(sl_uart_handle_t *uart_handle)
 /*******************************************************************************
  **************************   INTERNAL FUNCTIONS   *****************************
  ******************************************************************************/
-sl_status_t sli_uart_init_core(sl_uart_handle_t *uart_handle, sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
+void sli_uart_init_core(sl_uart_handle_t *uart_handle, sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config)
 {
-  const sli_uart_ops_t *ops;
-
   EFM_ASSERT(uart_handle != NULL);
   EFM_ASSERT(uart != NULL);
   EFM_ASSERT(pin_config != NULL);
 
-  switch (sl_device_peripheral_get_serial_ip_type(uart)) {
-    #if defined(SL_CATALOG_UART_EUSART_PRESENT)
-    #if defined(EUART_PRESENT)
-    case SL_PERIPHERAL_SERIAL_TYPE_EUSART:
-      ops = &sli_uart_euart_ops;
-      break;
-    #elif defined(EUSART_PRESENT)
-    case SL_PERIPHERAL_SERIAL_TYPE_EUSART:
-      ops = &sli_uart_eusart_ops;
-      break;
-    #endif
-    #endif
-    #if defined(SL_CATALOG_UART_USART_PRESENT)
-    case SL_PERIPHERAL_SERIAL_TYPE_USART:
-      ops = &sli_uart_usart_ops;
-      break;
-    #endif
-    default:
-      return SL_STATUS_NOT_SUPPORTED;
-  }
-
-  memset(uart_handle, 0, sizeof(*uart_handle));
+  memset(uart_handle, 0, sizeof(sl_uart_handle_t));
 
   uart_handle->uart = uart;
   uart_handle->pin_config = *pin_config;
-  uart_handle->ops = ops;
 
-  return SL_STATUS_OK;
+  switch (sl_device_peripheral_get_serial_ip_type(uart)) {
+    #if defined(EUART_PRESENT)
+    case SL_PERIPHERAL_SERIAL_TYPE_EUSART:
+      uart_handle->ops = &sli_uart_euart_ops;
+      break;
+    #elif defined(EUSART_PRESENT)
+    case SL_PERIPHERAL_SERIAL_TYPE_EUSART:
+      uart_handle->ops = &sli_uart_eusart_ops;
+      break;
+    #endif
+    #if defined(USART_PRESENT)
+    case SL_PERIPHERAL_SERIAL_TYPE_USART:
+      uart_handle->ops = &sli_uart_usart_ops;
+      break;
+    #endif
+    default:
+      EFM_ASSERT(false);
+      uart_handle->ops = NULL;
+      return;
+  }
 }
 
 void sli_uart_deinit_core(sl_uart_handle_t *uart_handle)
 {
   EFM_ASSERT(uart_handle != NULL);
 
-  memset(uart_handle, 0, sizeof(*uart_handle));
+  memset(uart_handle, 0, sizeof(sl_uart_handle_t));
 }
 
 void sli_uart_deinit_peripheral(sl_uart_handle_t *uart_handle)

@@ -27,6 +27,4 @@ requires:
 - name: sl_assert
 provides:
 - name: dma_descriptor_allocator
-documentation:
-  docset: gecko-platform
-  document: platform-driver/dmadrv
+

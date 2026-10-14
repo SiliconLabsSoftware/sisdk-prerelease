@@ -21,11 +21,13 @@
  *  http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf
  */
 
+#include <mbedtls/build_info.h>
 #include "em_device.h"
 
 #if defined(SEMAILBOX_PRESENT)
 #include "sli_se_manager_mailbox.h"
 #include "security/sha/btl_sha256.h"
+#include "mbedtls/error.h"
 
 int sha_x_process(SHA_Type_t algo,
                   uint8_t* state_in,
@@ -51,7 +53,7 @@ int sha_x_process(SHA_Type_t algo,
     iv_in.length |= 32;
     iv_out.length |= 32;
   } else {
-    return BOOTLOADER_ERROR_SECURITY_INVALID_OPTION;
+    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
   }
 
   sli_se_mailbox_command_add_input(&command, &iv_in);
@@ -59,13 +61,13 @@ int sha_x_process(SHA_Type_t algo,
   sli_se_mailbox_command_add_output(&command, &iv_out);
 
   sli_se_mailbox_execute_command(&command);
-  volatile sli_se_mailbox_response_t res = sli_se_mailbox_read_response();
+  sli_se_mailbox_response_t res = sli_se_mailbox_read_response();
 
   if (res == SLI_SE_RESPONSE_OK) {
-    return BOOTLOADER_OK;
+    return 0;
+  } else {
+    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
   }
-
-  return BOOTLOADER_ERROR_SECURITY_REJECTED;
 }
 
 #endif // #if defined(SEMAILBOX_PRESENT)

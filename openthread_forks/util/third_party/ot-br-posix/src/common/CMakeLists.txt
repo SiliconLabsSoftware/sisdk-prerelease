@@ -45,11 +45,6 @@ add_library(otbr-common
     types.hpp
 )
 
-# Always-linked into executables that need mbedtls platform alloc symbols.
-add_library(otbr-mbedtls-memory OBJECT
-    mbedtls_memory_stubs.cpp
-)
-
 target_link_libraries(otbr-common
     PUBLIC otbr-config
 )

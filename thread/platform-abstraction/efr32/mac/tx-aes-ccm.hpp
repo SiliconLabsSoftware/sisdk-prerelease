@@ -35,17 +35,13 @@
 #define TX_AES_CCM_HPP_
 
 #include <openthread/platform/radio.h>
-
 #include "crypto/aes_ccm.hpp"
 #include "mac/mac_frame.hpp"
-
-#include SL_OT_MAC_KEY_POLICY_CONFIG_HEADER
-#include "mac-key-types.hpp"
 
 void sli_ot_process_transmit_aes_ccm_device(otRadioFrame                       &aFrame,
                                             ot::Crypto::AesCcm::Nonce           aNonce,
                                             const uint8_t                       aTagLength,
                                             const ot::Mac::Frame::SecurityLevel aSecurityLevel,
-                                            const MacKeyStoragePolicy::PalKey  &aPalKey);
+                                            const otMacKeyMaterial             *aRawKey);
 
 #endif // TX_AES_CCM_HPP_

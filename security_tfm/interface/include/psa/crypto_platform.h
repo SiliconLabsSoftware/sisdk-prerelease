@@ -1,7 +1,14 @@
+
+/*
+ * Copyright (c) 2023, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
 /**
  * \file psa/crypto_platform.h
  *
- * \brief PSA cryptography module: Mbed TLS platform definitions
+ * \brief PSA cryptography module: TF-M platform definitions
  *
  * \note This file may not be included directly. Applications must
  * include psa/crypto.h.
@@ -12,10 +19,6 @@
  * cryptography module, implementers should take care to ensure that
  * the definitions that are exposed to applications match what the
  * module implements.
- */
-/*
- *  Copyright The Mbed TLS Contributors
- *  SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
  */
 
 #if defined(SL_TRUSTZONE_SECURE)
@@ -31,7 +34,15 @@
 #ifndef PSA_CRYPTO_PLATFORM_H
 #define PSA_CRYPTO_PLATFORM_H
 #include "mbedtls/private_access.h"
-#include "tf-psa-crypto/build_info.h"
+
+/*
+ * Include the build-time configuration information header. Here, we do not
+ * include `"mbedtls/build_info.h"` directly but `"psa/build_info.h"`, which
+ * is basically just an alias to it. This is to ease the maintenance of the
+ * TF-PSA-Crypto repository which has a different build system and
+ * configuration.
+ */
+#include "psa/build_info.h"
 
 /* PSA requires several types which C99 provides in stdint.h. */
 #include <stdint.h>
@@ -91,7 +102,6 @@ typedef struct {
 } mbedtls_psa_external_random_context_t;
 #endif /* MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG */
 
-#if defined(MBEDTLS_PSA_CRYPTO_CLIENT) && !defined(MBEDTLS_PSA_CRYPTO_C)
 /** The type of the client handle used in context structures
  *
  * When a client view of the multipart context structures is required,
@@ -99,7 +109,7 @@ typedef struct {
  * context which contains the actual data.
  */
 typedef uint32_t mbedtls_psa_client_handle_t;
-#endif
 
 #endif /* PSA_CRYPTO_PLATFORM_H */
+
 #endif /* SL_TRUSTZONE_SECURE */

@@ -56,6 +56,3 @@ template_contribution:
   value: crash_manager_component
 - name: crash_manager_enable
   value: 1
-documentation:
-  docset: gecko-platform
-  document: platform-service/diagnostics

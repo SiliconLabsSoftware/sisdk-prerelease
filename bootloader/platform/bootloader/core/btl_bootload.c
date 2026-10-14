@@ -28,6 +28,7 @@
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 MISRAC_DISABLE
 #include "sli_se_manager_mailbox.h"
+#include "sli_se_manager_internal.h"
 MISRAC_ENABLE
 #endif
 

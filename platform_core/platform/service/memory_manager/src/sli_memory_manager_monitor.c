@@ -43,10 +43,6 @@
 #include "sl_power_manager.h"
 #endif
 
-#if defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT)
-#include "sli_memory_manager_log.h"
-#endif
-
 // -----------------------------------------------------------------------------
 // DMEM bank defines for EM2 retention measurement.
 // These must match the definitions in the retention control HAL.
@@ -111,16 +107,12 @@ static sli_memory_monitor_em2_t monitor_em2;
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) \
   && defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT)
 
-/// True after an EM2-entry capture; cleared once the snapshot is logged on wake.
-static bool log_em2_snapshot_after_wake;
-
 static void on_em_transition(sl_power_manager_em_t from,
                              sl_power_manager_em_t to);
 
 static sl_power_manager_em_transition_event_handle_t em_event_handle;
 static const sl_power_manager_em_transition_event_info_t em_event_info = {
-  .event_mask = SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM2
-                | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM2,
+  .event_mask = SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM2,
   .on_event   = on_em_transition,
 };
 
@@ -481,43 +473,6 @@ static void snapshot_itcm_retention(sli_memory_monitor_retention_t *itcm)
 #endif // SL_CATALOG_MEMORY_MANAGER_ITCM_PRESENT
 
 /***************************************************************************//**
- * Log EM2 retention snapshot fields at DEBUG level.
- *
- * Emits one line per populated region (DMEM always; DTCM and ITCM when
- * present on the device). Automatic EM2 capture logs on LEAVING_EM2 (after
- * sl_log resumes); explicit @ref sli_memory_monitor_refresh_em2() logs here.
- *
- * @param[in] em2  Snapshot structure populated by capture_em2_snapshot().
- ******************************************************************************/
-static void log_em2_retention_snapshot(const sli_memory_monitor_em2_t *em2)
-{
-  SLI_MEMORY_MANAGER_LOG_DEBUG(
-    "monitor_em2_snapshot() DMEM: retained_banks=%u total_banks=%u retained_size=%u used_size=%u",
-    (uint32_t)em2->dmem.retained_banks,
-    (uint32_t)em2->dmem.total_banks,
-    (uint32_t)em2->dmem.retained_size,
-    (uint32_t)em2->dmem.used_size);
-
-#if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
-  SLI_MEMORY_MANAGER_LOG_DEBUG(
-    "monitor_em2_snapshot() DTCM: retained_banks=%u total_banks=%u retained_size=%u used_size=%u",
-    (uint32_t)em2->dtcm.retained_banks,
-    (uint32_t)em2->dtcm.total_banks,
-    (uint32_t)em2->dtcm.retained_size,
-    (uint32_t)em2->dtcm.used_size);
-#endif
-
-#if defined(SL_CATALOG_MEMORY_MANAGER_ITCM_PRESENT)
-  SLI_MEMORY_MANAGER_LOG_DEBUG(
-    "monitor_em2_snapshot() ITCM: retained_banks=%u total_banks=%u retained_size=%u used_size=%u",
-    (uint32_t)em2->itcm.retained_banks,
-    (uint32_t)em2->itcm.total_banks,
-    (uint32_t)em2->itcm.retained_size,
-    (uint32_t)em2->itcm.used_size);
-#endif
-}
-
-/***************************************************************************//**
  * Capture full EM2 retention worst-case snapshot.
  *
  * Reads DMEM, DTCM, and ITCM retention state and updates the snapshot.
@@ -561,23 +516,19 @@ static void capture_em2_snapshot(sli_memory_monitor_em2_t *em2)
 /***************************************************************************//**
  * Called by the Power Manager on energy mode transitions.
  *
- * On EM2 entry, captures a worst-case retention snapshot at sleep entry.
- * On wake (LEAVING_EM2), logs that snapshot once sl_log has resumed.
+ * When the target mode is EM2, captures a worst-case retention snapshot
+ * at the actual moment of sleep entry.
  *
- * @param[in] from  Energy mode being left.
+ * @param[in] from  Energy mode being left (unused).
  * @param[in] to    Energy mode being entered.
  ******************************************************************************/
 static void on_em_transition(sl_power_manager_em_t from,
                              sl_power_manager_em_t to)
 {
-  if ((from <= SL_POWER_MANAGER_EM1) && (to >= SL_POWER_MANAGER_EM2)) {
+  (void)from;
+
+  if (to == SL_POWER_MANAGER_EM2) {
     capture_em2_snapshot(&monitor_em2);
-    log_em2_snapshot_after_wake = true;
-  } else if ((from >= SL_POWER_MANAGER_EM2) && (to <= SL_POWER_MANAGER_EM1)) {
-    if (log_em2_snapshot_after_wake && monitor_em2.valid) {
-      log_em2_retention_snapshot(&monitor_em2);
-    }
-    log_em2_snapshot_after_wake = false;
   }
 }
 
@@ -672,6 +623,5 @@ void sli_memory_monitor_refresh_em2(void)
 {
 #if defined(SL_CATALOG_BANK_RETENTION_CONTROL_PRESENT)
   capture_em2_snapshot(&monitor_em2);
-  log_em2_retention_snapshot(&monitor_em2);
 #endif
 }

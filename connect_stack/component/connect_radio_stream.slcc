@@ -1,14 +1,9 @@
 id: "connect_radio_stream"
 label: "Radio Stream"
 package: "connect_stack"
-description: "Implements radio stream function for RF validation."
 category: "Connect"
 quality: "production"
-ui_hints:
-  visibility: basic
-documentation:
-  docset: connect-stack
-  document: connect-stack-api/radio-stream
+description: "Implements radio stream function for RF validation."
 provides:
 - name: "connect_radio_stream"
 requires:
@@ -20,6 +15,10 @@ recommends:
 template_contribution:
 - name: component_catalog
   value: connect_radio_stream
+
+documentation:
+  docset: connect-stack
+  document: group-radio_stream
 
 metadata:
   sbom:

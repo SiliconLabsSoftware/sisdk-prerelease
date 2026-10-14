@@ -25,7 +25,7 @@
 #include "stack/internal/inc/raw-message-internal-def.h"
 
 #include  "mac-phy.h"
-#include  "sl-mac-scan-15.4.h"
+#include  "scan.h"
 
 // -----------------------------------------------------------------------------
 // Weak implementation of public Callback sl_zigbee_af_incoming_message_cb

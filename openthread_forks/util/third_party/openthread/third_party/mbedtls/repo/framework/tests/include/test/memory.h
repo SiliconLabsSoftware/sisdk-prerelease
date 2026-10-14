@@ -12,8 +12,7 @@
 #ifndef TEST_MEMORY_H
 #define TEST_MEMORY_H
 
-#include "build_info.h"
-
+#include "mbedtls/build_info.h"
 #include "mbedtls/platform.h"
 #include "test/helpers.h"
 

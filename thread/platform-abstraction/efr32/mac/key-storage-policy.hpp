@@ -28,52 +28,40 @@
 
 /**
  * @file
- *   MAC key storage policies for the radio security key lifecycle.
+ *   MAC key storage policies for radio security key lifecycle.
  *
- *   Each policy is a `KeyStoragePolicy<StackKey, PalKey>` instantiation and
- *   exposes:
- *     `StackKey`     — key material as the stack hands it to the PAL.
- *     `StackKeyList` — `MacKeyList<StackKey>` for PREV/CURRENT/NEXT slots.
- *     `PalKey`       — key material as the PAL keeps it for the HW CCM engine.
- *     `PalKeyList`   — `MacKeyList<PalKey>` for PREV/CURRENT/NEXT slots.
- *     `InstallKeys` writes a `StackKeyList` into a released `PalKeyList`;
- *     returns `OT_ERROR_INVALID_STATE` if the target is not released, and
- *     rolls back on install failure.
- *     `ReleaseKeys` frees the resources owned by `PalKeyList`.
+ *   PlaintextMacKeyStoragePolicy — PSA-exported plaintext key buffers.
+ *   KsuMacKeyStoragePolicy        — keys copied into the Key Storage Unit.
  *
- *   `StackKey::From()` converts an `otMacKeyMaterial` (as delivered by
- *   `otPlatRadioSetMacKey()`) into a `StackKey`.
+ *   Callers must ReleaseKeys() any previously prepared material before
+ *   replacing the key array and calling PrepareKeys() again.
+ *
+ *   LPWAES transmit builds sli_crypto_descriptor_t values separately via
+ *   sli-crypto-key-desc.hpp.
  */
 
 #ifndef KEY_STORAGE_POLICY_HPP_
 #define KEY_STORAGE_POLICY_HPP_
 
-#include <openthread/error.h>
+#include <openthread/platform/radio.h>
 
-#include "mac-key-types.hpp"
-
-template <typename StackKeyType, typename PalKeyType> class KeyStoragePolicy
+class PlaintextMacKeyStoragePolicy
 {
 public:
-    static constexpr size_t kMacKeyCount = kMacKeyPalCount;
+    static constexpr size_t kMacKeyCount = 3;
 
-    using StackKey     = StackKeyType;
-    using PalKey       = PalKeyType;
-    using StackKeyList = MacKeyList<StackKey>;
-    using PalKeyList   = MacKeyList<PalKey>;
-
-    static otError InstallKeys(const StackKeyList &aStackKeys, PalKeyList &aPalKeys);
-    static void    ReleaseKeys(PalKeyList &aPalKeys);
+    static void PrepareKeys(const otMacKeyMaterial (&aKeys)[kMacKeyCount], otMacKeyMaterial (&aRawKeys)[kMacKeyCount]);
+    static void ReleaseKeys(const otMacKeyMaterial (&aKeys)[kMacKeyCount]);
 };
 
-/// Non-PSA builds: PAL and stack both use plaintext key bytes.
-using LiteralMacKeyStoragePolicy = KeyStoragePolicy<MacKeyLiteral, MacKeyLiteral>;
+class KsuMacKeyStoragePolicy
+{
+public:
+    static constexpr size_t kMacKeyCount = 3;
 
-/// PSA build, no KSU: stack holds a PSA key ref, PAL exports it to plaintext.
-using PsaPlaintextMacKeyStoragePolicy = KeyStoragePolicy<MacKeyRef, MacKeyLiteral>;
-
-/// PSA + KSU: each stack PSA key ref is copied into a dedicated KSU slot,
-/// and the PAL keeps the KSU slot's key ref.
-using KsuMacKeyStoragePolicy = KeyStoragePolicy<MacKeyRef, MacKeyRef>;
+    static void PrepareKeys(otMacKeyMaterial (&aKeys)[kMacKeyCount],
+                            const otMacKeyMaterial (&aRawKeys)[kMacKeyCount]); // unused
+    static void ReleaseKeys(const otMacKeyMaterial (&aKeys)[kMacKeyCount]);
+};
 
 #endif // KEY_STORAGE_POLICY_HPP_

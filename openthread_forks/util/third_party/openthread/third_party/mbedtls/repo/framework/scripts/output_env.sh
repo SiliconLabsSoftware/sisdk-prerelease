@@ -126,9 +126,6 @@ echo
 print_version "valgrind" "--version" ""
 echo
 
-print_version "ctags" "--version" "" "head -n 1"
-echo
-
 print_version "gdb" "--version" "" "head -n 1"
 echo
 

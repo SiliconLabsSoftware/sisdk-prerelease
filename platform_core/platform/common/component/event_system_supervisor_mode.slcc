@@ -13,6 +13,3 @@ provides:
 template_contribution:
 - name: component_catalog
   value: event_system_supervisor_mode
-documentation:
-  docset: gecko-platform
-  document: platform-common/event-system

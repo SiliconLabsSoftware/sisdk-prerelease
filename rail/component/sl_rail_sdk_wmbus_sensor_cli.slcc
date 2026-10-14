@@ -7,8 +7,6 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
-ui_hints:
-  visibility: never
 root_path: "rail/component/sl_rail_sdk_wmbus_sensor_cli"
 
 provides:
@@ -43,3 +41,6 @@ template_contribution:
 #---------------- Component Catalog ------------------
 - name: component_catalog
   value: sl_rail_sdk_wmbus_sensor_cli
+#-------- Hides Component for user in Studio ---------
+ui_hints:
+  visibility: never

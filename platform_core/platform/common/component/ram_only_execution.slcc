@@ -26,6 +26,3 @@ conflicts:
 - name: btl_core
 define:
 - name: SL_RAM_LINKER
-documentation:
-  docset: gecko-platform
-  document: platform-common/common

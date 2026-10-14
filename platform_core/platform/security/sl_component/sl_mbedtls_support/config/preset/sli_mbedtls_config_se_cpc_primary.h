@@ -627,6 +627,7 @@
  */
 /* Short Weierstrass curves (supporting ECP, ECDH, ECDSA) */
 #define MBEDTLS_ECP_DP_SECP192R1_ENABLED
+#define MBEDTLS_ECP_DP_SECP224R1_ENABLED
 #define MBEDTLS_ECP_DP_SECP256R1_ENABLED
 #define MBEDTLS_ECP_DP_SECP384R1_ENABLED
 #define MBEDTLS_ECP_DP_SECP521R1_ENABLED
@@ -1156,15 +1157,17 @@
  */
 //#define MBEDTLS_PSA_CRYPTO_CLIENT
 
-/** \def SL_PSA_DRIVERS_ENABLED
+/** \def MBEDTLS_PSA_CRYPTO_DRIVERS
  *
- * Enable the Silicon Labs PSA Crypto drivers in the dispatch layer. When set
- * to 0, PSA Crypto is built software-only, without any Silicon Labs hardware
- * driver entry points.
+ * Enable support for the experimental PSA crypto driver interface.
  *
  * Requires: MBEDTLS_PSA_CRYPTO_C
+ *
+ * \warning This interface is experimental. We intend to maintain backward
+ *          compatibility with application code that relies on drivers,
+ *          but the driver interfaces may change without notice.
  */
-#define SL_PSA_DRIVERS_ENABLED 1
+ #define MBEDTLS_PSA_CRYPTO_DRIVERS
 
 /** \def MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
  *
@@ -2675,8 +2678,8 @@
  * Enable dynamic secure element support in the Platform Security Architecture
  * cryptography API.
  *
- * \deprecated This feature is deprecated. Please switch to the PSA
- *             cryptoprocessor driver interface (#SL_PSA_DRIVERS_ENABLED).
+ * \deprecated This feature is deprecated. Please switch to the driver
+ *             interface enabled by #MBEDTLS_PSA_CRYPTO_DRIVERS.
  *
  * Module:  library/psa_crypto_se.c
  *

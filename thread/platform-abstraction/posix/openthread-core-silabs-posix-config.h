@@ -83,7 +83,7 @@ sudo INFRA_IF_NAME=eth0 \
      OTBR_OPTIONS="-DOT_THREAD_VERSION=1.4 \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DHCP6_PD=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.2.0.0_GitHub-6952a250c -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.2.0.0_GitHub-22b2ec2a8" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.2.0.0_GitHub-6fde80701 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.2.0.0_GitHub-22b2ec2a8" \
      ./script/setup
 
 */
@@ -105,7 +105,7 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOTBR_DNS_UPSTREAM_QUERY=OFF \
                    -DOTBR_NCP_DNS_UPSTREAM=ON \
                    -DOTBR_NCP_DNS_UPSTREAM_BIND_TO_INFRA=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.2.0.0_GitHub-6952a250c -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.2.0.0_GitHub-22b2ec2a8" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.2.0.0_GitHub-6fde80701 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.2.0.0_GitHub-22b2ec2a8" \
      ./script/setup
 
 */
@@ -132,7 +132,7 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOT_CLI_VENDOR_EXTENSION=$THREAD_DIR/platform-abstraction/posix/posix_vendor_cli.cmake \
                    -DOT_PLATFORM_CONFIG=openthread-core-silabs-posix-config.h \
                    -DOTBR_DHCP6_PD=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-6952a250c -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-22b2ec2a8" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-6fde80701 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-22b2ec2a8" \
      ./script/setup
 
 */
@@ -162,7 +162,7 @@ sudo INFRA_IF_NAME=eth0 \
                    -DOTBR_DNS_UPSTREAM_QUERY=OFF \
                    -DOTBR_NCP_DNS_UPSTREAM=ON \
                    -DOTBR_NCP_DNS_UPSTREAM_BIND_TO_INFRA=ON \
-                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-6952a250c -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-22b2ec2a8" \
+                   -DOTBR_NAME=SL-OPENTHREAD-BR -DOTBR_VERSION=3.1.0.0_GitHub-6fde80701 -DOT_PACKAGE_NAME=SL-OPENTHREAD -DOT_PACKAGE_VERSION=3.1.0.0_GitHub-22b2ec2a8" \
      ./script/setup
 
 */

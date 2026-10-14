@@ -35,20 +35,7 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include "sl_rail_types.h"
-#include "sl_common.h"
 #include "stdbool.h"
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-// Fallback if the platform package does not yet define this deprecation tag.
-#ifndef SL_DEPRECATED_API_SDK_2026_12
-#ifdef SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_2026_12
-#define SL_DEPRECATED_API_SDK_2026_12
-#else
-#define SL_DEPRECATED_API_SDK_2026_12 __attribute__((deprecated))
-#endif
-#endif
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
 /*
  * IEEE 802.15.4/g
  * -----------------
@@ -107,8 +94,6 @@
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #define SL_RAIL_SDK_802154_PACKET_OK                  (0)
 #define SL_RAIL_SDK_802154_PACKET_ERROR               (-1)
@@ -204,20 +189,7 @@
                                                    + SL_RAIL_SDK_IEEE802154_MHR_FCF_LENGTH \
                                                    + SL_RAIL_SDK_IEEE802154_MHR_SEQ_NUM_LENGTH)
 
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
-/**
- * \addtogroup rail_sdk_packet_asm
- * @{
- */
-
-/**************************************************************************//**
- * @addtogroup rail_sdk_packet_asm_types Type definitions
- * @ingroup rail_sdk_packet_asm
- * @{
- *****************************************************************************/
-
-/** @brief MAC header (MHR) fields for IEEE 802.15.4 and 802.15.4 data frames. */
+/// MHR field of MAC frame
 typedef struct {
   uint16_t frame_control;               //!< FCF (Frame Control Frame)
   uint8_t sequence_number;              //!< sequence number
@@ -226,7 +198,6 @@ typedef struct {
   uint16_t source_address;              //!< Source address (short address)
 } sl_rail_sdk_802154_packet_mhr_frame_t;
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 /*
    BLE
  */
@@ -254,45 +225,41 @@ typedef struct {
 #define SL_RAIL_SDK_BLE_HEADER_LEN_BASE                        (0x0E)
 #define SL_RAIL_SDK_BLE_PAYLOAD_LEN_MIN                        (0x06) // Minimum payload
 #define SL_RAIL_SDK_BLE_PAYLOAD_LEN_MAX                        (0x25) // Maximum payload
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
-/** @brief BLE advertising packet length type. */
+// Packet size type
 typedef uint8_t sl_rail_sdk_ble_packet_size_t;
 
 /// No padding in the structures
 #pragma pack(1)
-/** @brief BLE advertising channel PDU header (type and length). */
+/// BLE Header
 typedef struct {
-  uint8_t type;   //!< PDU type field.
-  uint8_t length; //!< PDU length field.
+  uint8_t type;
+  uint8_t length;
 } ble_advertising_channel_pdu_header_t;
 
-/** @brief BLE advertising flags AD structure. */
+/// BLE flags
 typedef struct {
-  uint8_t length;           //!< AD structure length.
-  uint8_t advertising_type; //!< AD type (flags).
-  uint8_t flags;            //!< BLE flags value.
+  uint8_t length;
+  uint8_t advertising_type;
+  uint8_t flags;
 } ble_advertising_flags_t;
 
-/** @brief BLE manufacturer-specific AD structure with application payload. */
+/// BLE manufacture specific parts
 typedef struct {
-  uint8_t length;           //!< AD structure length.
-  uint8_t advertising_type; //!< AD type (manufacturer specific).
-  uint16_t company_id;      //!< Company identifier.
-  uint8_t version;          //!< Manufacturer-specific version byte.
-  uint8_t payload[SL_RAIL_SDK_BLE_PAYLOAD_LEN_MAX]; //!< Application payload.
+  uint8_t length;
+  uint8_t advertising_type;
+  uint16_t company_id;
+  uint8_t version;
+  uint8_t payload[SL_RAIL_SDK_BLE_PAYLOAD_LEN_MAX]; ///> Payload of the Data Frame
 } ble_advertising_manufacture_specific_t;
 
-/** @brief Complete BLE non-connectable advertising packet used by RAIL SDK samples. */
 typedef struct {
-  ble_advertising_channel_pdu_header_t header; //!< Advertising channel PDU header.
-  uint8_t advAddr[6];                            //!< Advertiser address.
-  ble_advertising_flags_t flags;                 //!< Flags AD structure.
-  ble_advertising_manufacture_specific_t manufactSpec; //!< Manufacturer-specific AD structure.
+  ble_advertising_channel_pdu_header_t header;
+  uint8_t advAddr[6];
+  ble_advertising_flags_t flags;
+  ble_advertising_manufacture_specific_t manufactSpec;
 } sl_rail_sdk_ble_advertising_packet_t;
 #pragma pack()
-
-/** @} (end rail_sdk_packet_asm_types) */
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -302,7 +269,7 @@ typedef struct {
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
 /**************************************************************************//**
- * This function packs a complete IEEE 802.15.4g frame (PHY + MAC): PHR + MHR + payload.
+ * This function packs the IEEE 802.15.4g frame.
  *
  * @param[in] phr_cfg             PHR config/information for IEEE 802.15.4g
  * @param[in] *mhr_cfg            MHR configuration
@@ -314,15 +281,15 @@ typedef struct {
  * @retval SL_RAIL_SDK_802154_PACKET_OK if the process has been successful.
  * @retval SL_RAIL_SDK_802154_PACKET_ERROR if the process has been failed.
  *****************************************************************************/
-int16_t sl_rail_sdk_802154_packet_pack_g_opt_frame(uint8_t phr_cfg,
-                                                   sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
-                                                   uint16_t payload_size,
-                                                   void *payload,
-                                                   uint16_t *frame_size,
-                                                   uint8_t *frame_buffer);
+int16_t sl_rail_sdk_802154_packet_pack_g_opt_data_frame(uint8_t phr_cfg,
+                                                        sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
+                                                        uint16_t payload_size,
+                                                        void *payload,
+                                                        uint16_t *frame_size,
+                                                        uint8_t *frame_buffer);
 
 /**************************************************************************//**
- * This function packs a complete standard IEEE 802.15.4 frame (PHY + MAC): PHR + MHR + payload.
+ * This function packs the IEEE 802.15.4 frame.
  *
  * @param[in] *mhr_cfg            MHR configuration
  * @param[in] payload_size        payload size
@@ -333,14 +300,14 @@ int16_t sl_rail_sdk_802154_packet_pack_g_opt_frame(uint8_t phr_cfg,
  * @retval SL_RAIL_SDK_802154_PACKET_OK if the process has been successful.
  * @retval SL_RAIL_SDK_802154_PACKET_ERROR if the process has been failed.
  *****************************************************************************/
-int16_t sl_rail_sdk_802154_packet_pack_std_frame(const sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
-                                                 uint16_t payload_size,
-                                                 void *payload,
-                                                 uint16_t *frame_size,
-                                                 uint8_t *frame_buffer);
+int16_t sl_rail_sdk_802154_packet_pack_data_frame(const sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
+                                                  uint16_t payload_size,
+                                                  void *payload,
+                                                  uint16_t *frame_size,
+                                                  uint8_t *frame_buffer);
 
 /**************************************************************************//**
- * This function packs an IEEE 802.15.4 SUN OFDM PPDU (PHR + payload).
+ * This function packs the IEEE 802.15.4 Wi-SUN OFDM frame.
  *
  * @param[in] rate                5 bits wide, The Rate field (RA4-RA0) specifies the data rate of the payload and is equal to the numerical value of the MCS
  * @param[in] scrambler           2 bits wide, The Scrambler field (S1-S0) specifies the scrambling seed
@@ -352,35 +319,17 @@ int16_t sl_rail_sdk_802154_packet_pack_std_frame(const sl_rail_sdk_802154_packet
  * @retval SL_RAIL_SDK_802154_PACKET_OK if the process has been successful.
  * @retval SL_RAIL_SDK_802154_PACKET_ERROR if the process has been failed.
  *****************************************************************************/
-int16_t sl_rail_sdk_802154_packet_pack_ofdm_ppdu(uint8_t rate,
-                                                 uint8_t scrambler,
-                                                 uint16_t payload_size,
-                                                 const uint8_t *payload,
-                                                 uint16_t *frame_size,
-                                                 uint8_t *frame_buffer);
+int16_t sl_rail_sdk_802154_packet_pack_ofdm_data_frame(uint8_t rate,
+                                                       uint8_t scrambler,
+                                                       uint16_t payload_size,
+                                                       const uint8_t *payload,
+                                                       uint16_t *frame_size,
+                                                       uint8_t *frame_buffer);
 
 /**************************************************************************//**
- * Pack SUN OFDM PHR bytes only (payload is supplied separately for TX).
+ * This function packs the IEEE 802.15.4 Wi-SUN FSK with 2byte PHR frame.
  *
- * @param[in] rate                OFDM rate / MCS (5 bits)
- * @param[in] scrambler           Scrambler seed (2 bits)
- * @param[in] payload_size        Payload length in bytes
- * @param[out] phr_buffer         Buffer for PHR bytes (4 bytes)
- * @param[out] phr_size           Number of PHR bytes written
- *
- * @retval SL_RAIL_SDK_802154_PACKET_OK on success
- * @retval SL_RAIL_SDK_802154_PACKET_ERROR on invalid argument
- *****************************************************************************/
-int16_t sl_rail_sdk_802154_packet_pack_ofdm_phr(uint8_t rate,
-                                                uint8_t scrambler,
-                                                uint16_t payload_size,
-                                                uint8_t *phr_buffer,
-                                                uint8_t *phr_size);
-
-/**************************************************************************//**
- * This function packs an IEEE 802.15.4 SUN FSK PPDU (2-byte PHR + payload).
- *
- * @param[in] fcsType             0 = 4-byte FCS, 1 = 2-byte FCS
+ * @param[in] fcsType             FCS is on/off
  * @param[in] whitening           Whitening is on/off
  * @param[in] payload_size        payload size
  * @param[in] *payload            payload
@@ -390,33 +339,35 @@ int16_t sl_rail_sdk_802154_packet_pack_ofdm_phr(uint8_t rate,
  * @retval SL_RAIL_SDK_802154_PACKET_OK if the process has been successful.
  * @retval SL_RAIL_SDK_802154_PACKET_ERROR if the process has been failed.
  *****************************************************************************/
-int16_t sl_rail_sdk_802154_packet_pack_sunfsk_ppdu(uint8_t fcsType,
-                                                   uint8_t whitening,
-                                                   uint16_t payload_size,
-                                                   const uint8_t *payload,
-                                                   uint16_t *frame_size,
-                                                   uint8_t *frame_buffer);
+int16_t sl_rail_sdk_802154_packet_pack_sunfsk_2bytes_data_frame(uint8_t fcsType,
+                                                                uint8_t whitening,
+                                                                uint16_t payload_size,
+                                                                const uint8_t *payload,
+                                                                uint16_t *frame_size,
+                                                                uint8_t *frame_buffer);
 
 /**************************************************************************//**
- * Pack SUN FSK PHR bytes only (payload is supplied separately for TX).
+ * This function packs the IEEE 802.15.4 Wi-SUN FSK with 4byte PHR frame.
  *
- * @param[in] fcsType             0 = 4-byte FCS, 1 = 2-byte FCS
- * @param[in] whitening           Whitening on/off
- * @param[in] payload_size        Payload length in bytes
- * @param[out] phr_buffer         Buffer for PHR bytes
- * @param[out] phr_size           Number of PHR bytes written (2)
+ * @param[in] fcsType             FCS is on/off
+ * @param[in] whitening           Whitening is on/off
+ * @param[in] payload_size        payload size
+ * @param[in] *payload            payload
+ * @param[out] *frame_size        frame_size that is calculated
+ * @param[out] *frame_buffer      buffer of packed frame
  *
- * @retval SL_RAIL_SDK_802154_PACKET_OK on success
- * @retval SL_RAIL_SDK_802154_PACKET_ERROR on invalid argument
+ * @retval SL_RAIL_SDK_802154_PACKET_OK if the process has been successful.
+ * @retval SL_RAIL_SDK_802154_PACKET_ERROR if the process has been failed.
  *****************************************************************************/
-int16_t sl_rail_sdk_802154_packet_pack_sunfsk_phr(uint8_t fcsType,
-                                                  uint8_t whitening,
-                                                  uint16_t payload_size,
-                                                  uint8_t *phr_buffer,
-                                                  uint8_t *phr_size);
+int16_t sl_rail_sdk_802154_packet_pack_sunfsk_4bytes_data_frame(uint8_t fcsType,
+                                                                uint8_t whitening,
+                                                                uint16_t payload_size,
+                                                                const uint8_t *payload,
+                                                                uint16_t *frame_size,
+                                                                uint8_t *frame_buffer);
 
 /**************************************************************************//**
- * This function packs an IEEE 802.15.4 SUN OQPSK PPDU (PHR + payload).
+ * This function packs the IEEE 802.15.4 SUN OQPSK frame.
  *
  * @param[in] spreadingMode       spreading mode
  * @param[in] rateMode            rate mode: 2 bits wide
@@ -428,33 +379,15 @@ int16_t sl_rail_sdk_802154_packet_pack_sunfsk_phr(uint8_t fcsType,
  * @retval SL_RAIL_SDK_802154_PACKET_OK if the process has been successful.
  * @retval SL_RAIL_SDK_802154_PACKET_ERROR if the process has been failed.
  *****************************************************************************/
-int16_t sl_rail_sdk_802154_packet_pack_oqpsk_ppdu(bool spreadingMode,
-                                                  uint8_t rateMode,
-                                                  uint16_t payload_size,
-                                                  const uint8_t *payload,
-                                                  uint16_t *frame_size,
-                                                  uint8_t *frame_buffer);
+int16_t sl_rail_sdk_802154_packet_pack_oqpsk_data_frame(bool spreadingMode,
+                                                        uint8_t rateMode,
+                                                        uint16_t payload_size,
+                                                        const uint8_t *payload,
+                                                        uint16_t *frame_size,
+                                                        uint8_t *frame_buffer);
 
 /**************************************************************************//**
- * Pack SUN OQPSK PHR bytes only (payload is supplied separately for TX).
- *
- * @param[in] spreadingMode       Spreading mode
- * @param[in] rateMode            Rate mode (2 bits)
- * @param[in] payload_size        Payload length in bytes
- * @param[out] phr_buffer         Buffer for PHR bytes
- * @param[out] phr_size           Number of PHR bytes written (4)
- *
- * @retval SL_RAIL_SDK_802154_PACKET_OK on success
- * @retval SL_RAIL_SDK_802154_PACKET_ERROR on invalid argument
- *****************************************************************************/
-int16_t sl_rail_sdk_802154_packet_pack_oqpsk_phr(bool spreadingMode,
-                                                 uint8_t rateMode,
-                                                 uint16_t payload_size,
-                                                 uint8_t *phr_buffer,
-                                                 uint8_t *phr_size);
-
-/**************************************************************************//**
- * This function unpacks a complete IEEE 802.15.4g frame (PHY + MAC): PHR + MHR + payload.
+ * This function unpacks the received packet to get IEEE 802.15.4g frame.
  *
  * @param[out] *phr_cfg           PHR config/information for IEEE 802.15.4g
  * @param[out] *mhr_cfg           MHR configuration
@@ -463,13 +396,13 @@ int16_t sl_rail_sdk_802154_packet_pack_oqpsk_phr(bool spreadingMode,
  *
  * @return pointer of the payload
  *****************************************************************************/
-uint8_t *sl_rail_sdk_802154_packet_unpack_g_opt_frame(uint8_t *phr_cfg,
-                                                      sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
-                                                      uint16_t *payload_size,
-                                                      uint8_t *frame_buffer);
+uint8_t *sl_rail_sdk_802154_packet_unpack_g_opt_data_frame(uint8_t *phr_cfg,
+                                                           sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
+                                                           uint16_t *payload_size,
+                                                           uint8_t *frame_buffer);
 
 /**************************************************************************//**
- * This function unpacks a complete standard IEEE 802.15.4 frame (PHY + MAC): PHR + MHR + payload.
+ * This function unpacks the received packet to get IEEE 802.15.4 frame.
  *
  * @param[out] *mhr_cfg           MHR configuration
  * @param[out] *payload_size      payload size
@@ -477,15 +410,15 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_g_opt_frame(uint8_t *phr_cfg,
  *
  * @return pointer of the payload
  *****************************************************************************/
-uint8_t *sl_rail_sdk_802154_packet_unpack_std_frame(sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
-                                                    uint16_t *payload_size,
-                                                    uint8_t *frame_buffer);
+uint8_t *sl_rail_sdk_802154_packet_unpack_data_frame(sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
+                                                     uint16_t *payload_size,
+                                                     uint8_t *frame_buffer);
 
 /**************************************************************************//**
- * This function unpacks a received IEEE 802.15.4 SUN FSK PPDU (2-byte PHR).
+ * This function unpacks the received packet to get IEEE 802.15.4 FSK with 2byte PHR frame.
  *
  * @param[in] *packet_information   packet information
- * @param[out] *fcsType             0 = 4-byte FCS, 1 = 2-byte FCS
+ * @param[out] *fcsType             FCS is on/off
  * @param[out] *whitening           whitening is on/off
  * @param[out] *payload_size        payload size
  * @param[in] *frame_buffer         buffer of packed frame
@@ -493,14 +426,31 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_std_frame(sl_rail_sdk_802154_packet_mh
  * @return pointer of the payload
  * @return NULL on error
  *****************************************************************************/
-uint8_t *sl_rail_sdk_802154_packet_unpack_sunfsk_ppdu(const sl_rail_rx_packet_info_t *packet_information,
-                                                      uint8_t *fcsType,
-                                                      uint8_t *whitening,
-                                                      uint16_t *payload_size,
-                                                      uint8_t *frame_buffer);
+uint8_t *sl_rail_sdk_802154_packet_unpack_sunfsk_2byte_data_frame(const sl_rail_rx_packet_info_t *packet_information,
+                                                                  uint8_t *fcsType,
+                                                                  uint8_t *whitening,
+                                                                  uint16_t *payload_size,
+                                                                  uint8_t *frame_buffer);
 
 /**************************************************************************//**
- * This function unpacks a received IEEE 802.15.4 SUN OFDM PPDU.
+ * This function unpacks the received packet to get IEEE 802.15.4 FSK with 4byte PHR frame.
+ *
+ * @param[in] *packet_information   packet information
+ * @param[out] *fcsType             FCS is on/off
+ * @param[out] *whitening           whitening is on/off
+ * @param[out] *payload_size        payload size
+ * @param[in] *frame_buffer         buffer of packed frame
+ *
+ * @return pointer of the payload
+ * @return NULL on error
+ *****************************************************************************/
+uint8_t *sl_rail_sdk_802154_packet_unpack_sunfsk_4byte_data_frame(const sl_rail_rx_packet_info_t *packet_information,
+                                                                  uint8_t *fcsType,
+                                                                  uint8_t *whitening,
+                                                                  uint16_t *payload_size,
+                                                                  uint8_t *frame_buffer);
+/**************************************************************************//**
+ * This function unpacks the received packet to get IEEE 802.15.4 OFDM frame.
  *
  * @param[in] *packet_information   packet information
  * @param[out] *rate                5 bits wide, The Rate field (RA4-RA0) specifies the data rate of the payload and is equal to the numerical value of the MCS
@@ -511,14 +461,14 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_sunfsk_ppdu(const sl_rail_rx_packet_in
  * @return pointer of the payload
  * @return NULL on error
  *****************************************************************************/
-uint8_t *sl_rail_sdk_802154_packet_unpack_ofdm_ppdu(const sl_rail_rx_packet_info_t *packet_information,
-                                                    uint8_t *rate,
-                                                    uint8_t *scrambler,
-                                                    uint16_t *payload_size,
-                                                    uint8_t *frame_buffer);
+uint8_t *sl_rail_sdk_802154_packet_unpack_ofdm_data_frame(const sl_rail_rx_packet_info_t *packet_information,
+                                                          uint8_t *rate,
+                                                          uint8_t *scrambler,
+                                                          uint16_t *payload_size,
+                                                          uint8_t *frame_buffer);
 
 /**************************************************************************//**
- * This function unpacks a received IEEE 802.15.4 SUN OQPSK PPDU.
+ * This function unpacks the received packet to get IEEE 802.15.4 SUN OQPSK frame.
  *
  * @param[in] *packet_information   packet information
  * @param[out] *spreadingMode       spreading mode
@@ -529,11 +479,11 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_ofdm_ppdu(const sl_rail_rx_packet_info
  * @return pointer of the payload
  * @return NULL on error
  *****************************************************************************/
-uint8_t *sl_rail_sdk_802154_packet_unpack_oqpsk_ppdu(const sl_rail_rx_packet_info_t *packet_information,
-                                                     bool *spreadingMode,
-                                                     uint8_t *rateMode,
-                                                     uint16_t *payload_size,
-                                                     uint8_t *frame_buffer);
+uint8_t *sl_rail_sdk_802154_packet_unpack_oqpsk_data_frame(const sl_rail_rx_packet_info_t *packet_information,
+                                                           bool *spreadingMode,
+                                                           uint8_t *rateMode,
+                                                           uint16_t *payload_size,
+                                                           uint8_t *frame_buffer);
 
 /**************************************************************************//**
  * Pack the tx data buffer to get BLE advertising packet frame.
@@ -570,8 +520,8 @@ void sl_rail_sdk_ble_copy_packet_from_buff(sl_rail_sdk_ble_advertising_packet_t 
 /**************************************************************************//**
  * Get BLE packet pointer from data buffer
  *
- * @param[in] data            received packet data
- * @return Pointer to the BLE advertising packet in @p data.
+ * @param[in] *rx_data            received packet data
+ *
  *****************************************************************************/
 extern sl_rail_sdk_ble_advertising_packet_t *sl_rail_sdk_ble_get_packet(uint8_t *data);
 
@@ -588,9 +538,9 @@ void sl_rail_sdk_ble_copy_payload(sl_rail_sdk_ble_advertising_packet_t *packet,
                                   const sl_rail_sdk_ble_packet_size_t payload_length);
 
 /**************************************************************************//**
- * This function packs an IEEE 802.15.4 SideWalk FSK PPDU (2-byte PHR + payload).
+ * This function packs the IEEE 802.15.4 SideWalk FSK with 2byte PHR frame.
  *
- * @param[in] fcsType             0 = 4-byte FCS, 1 = 2-byte FCS
+ * @param[in] fcsType             FCS is on/off
  * @param[in] whitening           Whitening is on/off
  * @param[in] payload_size        payload size
  * @param[in] *payload            payload
@@ -600,36 +550,18 @@ void sl_rail_sdk_ble_copy_payload(sl_rail_sdk_ble_advertising_packet_t *packet,
  * @retval SL_RAIL_SDK_802154_PACKET_OK if the process has been successful.
  * @retval SL_RAIL_SDK_802154_PACKET_ERROR if the process has been failed.
  *****************************************************************************/
-int16_t sl_rail_sdk_802154_packet_pack_sidewalk_ppdu(uint8_t fcsType,
-                                                     uint8_t whitening,
-                                                     uint16_t payload_size,
-                                                     const uint8_t *payload,
-                                                     uint16_t *frame_size,
-                                                     uint8_t *frame_buffer);
+int16_t sl_rail_sdk_802154_packet_pack_sidewalk_data_frame(uint8_t fcsType,
+                                                           uint8_t whitening,
+                                                           uint16_t payload_size,
+                                                           const uint8_t *payload,
+                                                           uint16_t *frame_size,
+                                                           uint8_t *frame_buffer);
 
 /**************************************************************************//**
- * Pack SideWalk FSK PHR bytes only (payload is supplied separately for TX).
- *
- * @param[in] fcsType             0 = 4-byte FCS, 1 = 2-byte FCS
- * @param[in] whitening           Whitening on/off
- * @param[in] payload_size        Payload length in bytes
- * @param[out] phr_buffer         Buffer for PHR bytes
- * @param[out] phr_size           Number of PHR bytes written (2)
- *
- * @retval SL_RAIL_SDK_802154_PACKET_OK on success
- * @retval SL_RAIL_SDK_802154_PACKET_ERROR on invalid argument
- *****************************************************************************/
-int16_t sl_rail_sdk_802154_packet_pack_sidewalk_phr(uint8_t fcsType,
-                                                    uint8_t whitening,
-                                                    uint16_t payload_size,
-                                                    uint8_t *phr_buffer,
-                                                    uint8_t *phr_size);
-
-/**************************************************************************//**
- * This function unpacks a received IEEE 802.15.4 SideWalk FSK PPDU (2-byte PHR).
+ * This function unpacks the received packet to get IEEE 802.15.4 SideWalk FSK with 2byte PHR frame.
  *
  * @param[in] *packet_information   packet information
- * @param[out] *fcsType             0 = 4-byte FCS, 1 = 2-byte FCS
+ * @param[out] *fcsType             FCS is on/off
  * @param[out] *whitening           whitening is on/off
  * @param[out] *payload_size        payload size
  * @param[in] *frame_buffer         buffer of packed frame
@@ -637,14 +569,14 @@ int16_t sl_rail_sdk_802154_packet_pack_sidewalk_phr(uint8_t fcsType,
  * @return pointer of the payload
  * @return NULL on error
  *****************************************************************************/
-uint8_t *sl_rail_sdk_802154_packet_unpack_sidewalk_ppdu(const sl_rail_rx_packet_info_t *packet_information,
-                                                        uint8_t *fcsType,
-                                                        uint8_t *whitening,
-                                                        uint16_t *payload_size,
-                                                        uint8_t *frame_buffer);
+uint8_t *sl_rail_sdk_802154_packet_unpack_sidewalk_data_frame(const sl_rail_rx_packet_info_t *packet_information,
+                                                              uint8_t *fcsType,
+                                                              uint8_t *whitening,
+                                                              uint16_t *payload_size,
+                                                              uint8_t *frame_buffer);
 
 /**************************************************************************//**
- * This function packs a standard IEEE 802.15.4 PPDU with a 1-byte PHR.
+ * This function packs the IEEE 802.15.4 Long Range with 1byte PHR frame.
  *
  * @param[in] payload_size        payload size
  * @param[in] *payload            payload
@@ -654,110 +586,54 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_sidewalk_ppdu(const sl_rail_rx_packet_
  * @retval SL_RAIL_SDK_802154_PACKET_OK if the process has been successful.
  * @retval SL_RAIL_SDK_802154_PACKET_ERROR if the process has been failed.
  *****************************************************************************/
-int16_t sl_rail_sdk_802154_packet_pack_std_1byte_phr_ppdu(uint16_t payload_size,
-                                                          const uint8_t *payload,
-                                                          uint16_t *frame_size,
+int16_t sl_rail_sdk_802154_packet_pack_longrange_data_frame(uint16_t payload_size,
+                                                            const uint8_t *payload,
+                                                            uint16_t *frame_size,
+                                                            uint8_t *frame_buffer);
+
+/**************************************************************************//**
+ * This function unpacks the received packet to get IEEE 802.15.4 Long Range with 1byte PHR frame.
+ *
+ * @param[in] *packet_information   packet information
+ * @param[out] *payload_size        payload size
+ * @param[in] *frame_buffer         buffer of packed frame
+ *
+ * @return pointer of the payload
+ * @return NULL on error
+ *****************************************************************************/
+uint8_t *sl_rail_sdk_802154_packet_unpack_longrange_data_frame(const sl_rail_rx_packet_info_t *packet_information,
+                                                               uint16_t *payload_size,
+                                                               uint8_t *frame_buffer);
+
+/**************************************************************************//**
+ * This function packs the IEEE 802.15.4 BPSK with 1byte PHR frame.
+ *
+ * @param[in] payload_size        payload size
+ * @param[in] *payload            payload
+ * @param[out] *frame_size        frame_size that is calculated
+ * @param[out] *frame_buffer      buffer of packed frame
+ *
+ * @retval SL_RAIL_SDK_802154_PACKET_OK if the process has been successful.
+ * @retval SL_RAIL_SDK_802154_PACKET_ERROR if the process has been failed.
+ *****************************************************************************/
+int16_t sl_rail_sdk_802154_packet_pack_bpsk_data_frame(uint16_t payload_size,
+                                                       const uint8_t *payload,
+                                                       uint16_t *frame_size,
+                                                       uint8_t *frame_buffer);
+
+/**************************************************************************//**
+ * This function unpacks the received packet to get IEEE 802.15.4 BPSK with 1byte PHR frame.
+ *
+ * @param[in] *packet_information   packet information
+ * @param[out] *payload_size        payload size
+ * @param[in] *frame_buffer         buffer of packed frame
+ *
+ * @return pointer of the payload
+ * @return NULL on error
+ *****************************************************************************/
+uint8_t *sl_rail_sdk_802154_packet_unpack_bpsk_data_frame(const sl_rail_rx_packet_info_t *packet_information,
+                                                          uint16_t *payload_size,
                                                           uint8_t *frame_buffer);
-
-/**************************************************************************//**
- * Pack a standard IEEE 802.15.4 1-byte PHR (payload supplied separately for TX).
- *
- * @param[in] payload_size        Payload length in bytes
- * @param[out] phr_buffer         Buffer for PHR bytes
- * @param[out] phr_size           Number of PHR bytes written (1)
- *
- * @retval SL_RAIL_SDK_802154_PACKET_OK on success
- * @retval SL_RAIL_SDK_802154_PACKET_ERROR on invalid argument
- *****************************************************************************/
-int16_t sl_rail_sdk_802154_packet_pack_std_1byte_phr(uint16_t payload_size,
-                                                     uint8_t *phr_buffer,
-                                                     uint8_t *phr_size);
-
-/**************************************************************************//**
- * This function unpacks a standard IEEE 802.15.4 PPDU with a 1-byte PHR.
- *
- * @param[in] *packet_information   packet information
- * @param[out] *payload_size        payload size
- * @param[in] *frame_buffer         buffer of packed frame
- *
- * @return pointer of the payload
- * @return NULL on error
- *****************************************************************************/
-uint8_t *sl_rail_sdk_802154_packet_unpack_std_1byte_phr_ppdu(const sl_rail_rx_packet_info_t *packet_information,
-                                                             uint16_t *payload_size,
-                                                             uint8_t *frame_buffer);
-
-/**************************************************************************//**
- * This function packs an IEEE 802.15.4 BPSK PPDU (1-byte PHR + payload).
- *
- * @param[in] payload_size        payload size
- * @param[in] *payload            payload
- * @param[out] *frame_size        frame_size that is calculated
- * @param[out] *frame_buffer      buffer of packed frame
- *
- * @retval SL_RAIL_SDK_802154_PACKET_OK if the process has been successful.
- * @retval SL_RAIL_SDK_802154_PACKET_ERROR if the process has been failed.
- *****************************************************************************/
-static inline int16_t sl_rail_sdk_802154_packet_pack_bpsk_ppdu(uint16_t payload_size,
-                                                               const uint8_t *payload,
-                                                               uint16_t *frame_size,
-                                                               uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_pack_std_1byte_phr_ppdu(payload_size, payload, frame_size, frame_buffer);
-}
-
-/**************************************************************************//**
- * This function unpacks an IEEE 802.15.4 BPSK PPDU (1-byte PHR).
- *
- * @param[in] *packet_information   packet information
- * @param[out] *payload_size        payload size
- * @param[in] *frame_buffer         buffer of packed frame
- *
- * @return pointer of the payload
- * @return NULL on error
- *****************************************************************************/
-static inline uint8_t *sl_rail_sdk_802154_packet_unpack_bpsk_ppdu(const sl_rail_rx_packet_info_t *packet_information,
-                                                                  uint16_t *payload_size,
-                                                                  uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_unpack_std_1byte_phr_ppdu(packet_information, payload_size, frame_buffer);
-}
-
-/**************************************************************************//**
- * This function packs an IEEE 802.15.4 Long Range PPDU (1-byte PHR + payload).
- *
- * @param[in] payload_size        payload size
- * @param[in] *payload            payload
- * @param[out] *frame_size        frame_size that is calculated
- * @param[out] *frame_buffer      buffer of packed frame
- *
- * @retval SL_RAIL_SDK_802154_PACKET_OK if the process has been successful.
- * @retval SL_RAIL_SDK_802154_PACKET_ERROR if the process has been failed.
- *****************************************************************************/
-static inline int16_t sl_rail_sdk_802154_packet_pack_longrange_ppdu(uint16_t payload_size,
-                                                                   const uint8_t *payload,
-                                                                   uint16_t *frame_size,
-                                                                   uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_pack_std_1byte_phr_ppdu(payload_size, payload, frame_size, frame_buffer);
-}
-
-/**************************************************************************//**
- * This function unpacks an IEEE 802.15.4 Long Range PPDU (1-byte PHR).
- *
- * @param[in] *packet_information   packet information
- * @param[out] *payload_size        payload size
- * @param[in] *frame_buffer         buffer of packed frame
- *
- * @return pointer of the payload
- * @return NULL on error
- *****************************************************************************/
-static inline uint8_t *sl_rail_sdk_802154_packet_unpack_longrange_ppdu(const sl_rail_rx_packet_info_t *packet_information,
-                                                                      uint16_t *payload_size,
-                                                                      uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_unpack_std_1byte_phr_ppdu(packet_information, payload_size, frame_buffer);
-}
 
 /**************************************************************************//**
  * Get Payload pointer
@@ -778,192 +654,5 @@ extern  uint8_t
  *****************************************************************************/
 extern  sl_rail_sdk_ble_packet_size_t
 sl_rail_sdk_ble_get_payload_len(const sl_rail_sdk_ble_advertising_packet_t *packet);
-
-/** @} */ // end of rail_sdk_packet_asm
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_pack_g_opt_frame() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline int16_t sl_rail_sdk_802154_packet_pack_g_opt_data_frame(uint8_t phr_cfg,
-                                                                      sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
-                                                                      uint16_t payload_size,
-                                                                      void *payload,
-                                                                      uint16_t *frame_size,
-                                                                      uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_pack_g_opt_frame(phr_cfg, mhr_cfg, payload_size,
-                                                   payload, frame_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_pack_std_frame() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline int16_t sl_rail_sdk_802154_packet_pack_data_frame(const sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
-                                                                uint16_t payload_size,
-                                                                void *payload,
-                                                                uint16_t *frame_size,
-                                                                uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_pack_std_frame(mhr_cfg, payload_size, payload,
-                                                 frame_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_pack_ofdm_ppdu() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline int16_t sl_rail_sdk_802154_packet_pack_ofdm_data_frame(uint8_t rate,
-                                                                     uint8_t scrambler,
-                                                                     uint16_t payload_size,
-                                                                     const uint8_t *payload,
-                                                                     uint16_t *frame_size,
-                                                                     uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_pack_ofdm_ppdu(rate, scrambler, payload_size,
-                                                  payload, frame_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_pack_sunfsk_ppdu() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline int16_t sl_rail_sdk_802154_packet_pack_sunfsk_2bytes_data_frame(uint8_t fcsType,
-                                                                              uint8_t whitening,
-                                                                              uint16_t payload_size,
-                                                                              const uint8_t *payload,
-                                                                              uint16_t *frame_size,
-                                                                              uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_pack_sunfsk_ppdu(fcsType, whitening, payload_size,
-                                                    payload, frame_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_pack_oqpsk_ppdu() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline int16_t sl_rail_sdk_802154_packet_pack_oqpsk_data_frame(bool spreadingMode,
-                                                                      uint8_t rateMode,
-                                                                      uint16_t payload_size,
-                                                                      const uint8_t *payload,
-                                                                      uint16_t *frame_size,
-                                                                      uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_pack_oqpsk_ppdu(spreadingMode, rateMode, payload_size,
-                                                   payload, frame_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_unpack_g_opt_frame() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline uint8_t *sl_rail_sdk_802154_packet_unpack_g_opt_data_frame(uint8_t *phr_cfg,
-                                                                         sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
-                                                                         uint16_t *payload_size,
-                                                                         uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_unpack_g_opt_frame(phr_cfg, mhr_cfg, payload_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_unpack_std_frame() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline uint8_t *sl_rail_sdk_802154_packet_unpack_data_frame(sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
-                                                                   uint16_t *payload_size,
-                                                                   uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_unpack_std_frame(mhr_cfg, payload_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_unpack_sunfsk_ppdu() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline uint8_t *sl_rail_sdk_802154_packet_unpack_sunfsk_2byte_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                                                uint8_t *fcsType,
-                                                                                uint8_t *whitening,
-                                                                                uint16_t *payload_size,
-                                                                                uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_unpack_sunfsk_ppdu(packet_information, fcsType, whitening,
-                                                      payload_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_unpack_ofdm_ppdu() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline uint8_t *sl_rail_sdk_802154_packet_unpack_ofdm_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                                        uint8_t *rate,
-                                                                        uint8_t *scrambler,
-                                                                        uint16_t *payload_size,
-                                                                        uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_unpack_ofdm_ppdu(packet_information, rate, scrambler,
-                                                    payload_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_unpack_oqpsk_ppdu() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline uint8_t *sl_rail_sdk_802154_packet_unpack_oqpsk_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                                         bool *spreadingMode,
-                                                                         uint8_t *rateMode,
-                                                                         uint16_t *payload_size,
-                                                                         uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_unpack_oqpsk_ppdu(packet_information, spreadingMode, rateMode,
-                                                     payload_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_pack_sidewalk_ppdu() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline int16_t sl_rail_sdk_802154_packet_pack_sidewalk_data_frame(uint8_t fcsType,
-                                                                         uint8_t whitening,
-                                                                         uint16_t payload_size,
-                                                                         const uint8_t *payload,
-                                                                         uint16_t *frame_size,
-                                                                         uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_pack_sidewalk_ppdu(fcsType, whitening, payload_size,
-                                                      payload, frame_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_unpack_sidewalk_ppdu() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline uint8_t *sl_rail_sdk_802154_packet_unpack_sidewalk_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                                            uint8_t *fcsType,
-                                                                            uint8_t *whitening,
-                                                                            uint16_t *payload_size,
-                                                                            uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_unpack_sidewalk_ppdu(packet_information, fcsType, whitening,
-                                                        payload_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_pack_bpsk_ppdu() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline int16_t sl_rail_sdk_802154_packet_pack_bpsk_data_frame(uint16_t payload_size,
-                                                                       const uint8_t *payload,
-                                                                       uint16_t *frame_size,
-                                                                       uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_pack_bpsk_ppdu(payload_size, payload, frame_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_unpack_bpsk_ppdu() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline uint8_t *sl_rail_sdk_802154_packet_unpack_bpsk_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                                          uint16_t *payload_size,
-                                                                          uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_unpack_bpsk_ppdu(packet_information, payload_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_pack_longrange_ppdu() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline int16_t sl_rail_sdk_802154_packet_pack_longrange_data_frame(uint16_t payload_size,
-                                                                           const uint8_t *payload,
-                                                                           uint16_t *frame_size,
-                                                                           uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_pack_longrange_ppdu(payload_size, payload, frame_size, frame_buffer);
-}
-
-/// @deprecated Use \ref sl_rail_sdk_802154_packet_unpack_longrange_ppdu() instead.
-SL_DEPRECATED_API_SDK_2026_12
-static inline uint8_t *sl_rail_sdk_802154_packet_unpack_longrange_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                                             uint16_t *payload_size,
-                                                                             uint8_t *frame_buffer)
-{
-  return sl_rail_sdk_802154_packet_unpack_longrange_ppdu(packet_information, payload_size, frame_buffer);
-}
-
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 #endif // SL_RAIL_SDK_PACKET_ASM_H

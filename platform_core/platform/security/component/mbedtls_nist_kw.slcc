@@ -11,10 +11,17 @@ provides:
 - name: mbedtls_nist_kw
 
 requires:
-- name: psa_crypto_cipher_ecb
+- name: mbedtls_core
+- name: mbedtls_cipher
+- name: mbedtls_aes
+
+# This module uses the Cipher abstraction layer, which has not been 'Use PSA' 
+# enabled.
+conflicts:
+- name: tz_secure_key_library_ns
 
 template_contribution:
-- name: psa_crypto_config
+- name: mbedtls_config
   value: MBEDTLS_NIST_KW_C
 documentation:
   url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/

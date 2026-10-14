@@ -390,95 +390,55 @@
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates Thread network formation on Full Thread Device (FTD) for sleepy-demo. </description>
 	</demo>
-	<demo name="brd4180a.demo.sleepy-demo-mtd-em2" label="OpenThread - SoC Sleepy Demo MTD (EM2)">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM2)" />
+	<demo name="brd4180a.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo MTD">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD" />
 		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
 		<property key="boardCompatibility" value="brd4180a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em2/sleepy-demo-mtd-em2-brd4180a.s37" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4180a.s37" />
 		<property key="readmeFiles" value="sleepy-demo/README.md" />
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates Sleepy End Device (SED) behaviour with polling. Using OpenThread Minimal Thread Device (MTD) and low-power EM2 mode. </description>
 	</demo>
-	<demo name="brd4186c.demo.sleepy-demo-mtd-em2" label="OpenThread - SoC Sleepy Demo MTD (EM2)">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM2)" />
+	<demo name="brd4186c.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo MTD">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD" />
 		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
 		<property key="boardCompatibility" value="brd4186c" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em2/sleepy-demo-mtd-em2-brd4186c.s37" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4186c.s37" />
 		<property key="readmeFiles" value="sleepy-demo/README.md" />
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates Sleepy End Device (SED) behaviour with polling. Using OpenThread Minimal Thread Device (MTD) and low-power EM2 mode. </description>
 	</demo>
-	<demo name="brd2703a.demo.sleepy-demo-mtd-em2" label="OpenThread - SoC Sleepy Demo MTD (EM2)">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM2)" />
+	<demo name="brd2703a.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo MTD">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD" />
 		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
 		<property key="boardCompatibility" value="brd2703a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em2/sleepy-demo-mtd-em2-brd2703a.s37" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd2703a.s37" />
 		<property key="readmeFiles" value="sleepy-demo/README.md" />
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates Sleepy End Device (SED) behaviour with polling. Using OpenThread Minimal Thread Device (MTD) and low-power EM2 mode. </description>
 	</demo>
-	<demo name="brd4116a.demo.sleepy-demo-mtd-em2" label="OpenThread - SoC Sleepy Demo MTD (EM2)">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM2)" />
+	<demo name="brd4116a.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo MTD">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD" />
 		<property key="partCompatibility" value=".*efr32mg26b410f3200im48.*" />
 		<property key="boardCompatibility" value="brd4116a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em2/sleepy-demo-mtd-em2-brd4116a.s37" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4116a.s37" />
 		<property key="readmeFiles" value="sleepy-demo/README.md" />
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates Sleepy End Device (SED) behaviour with polling. Using OpenThread Minimal Thread Device (MTD) and low-power EM2 mode. </description>
 	</demo>
-	<demo name="brd4407a.demo.sleepy-demo-mtd-em2" label="OpenThread - SoC Sleepy Demo MTD (EM2)">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM2)" />
+	<demo name="brd4407a.demo.sleepy-demo-mtd" label="OpenThread - SoC Sleepy Demo MTD">
+		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD" />
 		<property key="partCompatibility" value=".*simg301m104lil.*" />
 		<property key="boardCompatibility" value="brd4407a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em2/sleepy-demo-mtd-em2-brd4407a.s37" />
+		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd/sleepy-demo-mtd-brd4407a.s37" />
 		<property key="readmeFiles" value="sleepy-demo/README.md" />
 		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
 		<property key="quality" value="PRODUCTION" />
 		<description>Demonstrates Sleepy End Device (SED) behaviour with polling. Using OpenThread Minimal Thread Device (MTD) and low-power EM2 mode. </description>
-	</demo>
-	<demo name="brd4180a.demo.sleepy-demo-mtd-em4" label="OpenThread - SoC Sleepy Demo MTD (EM4)">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM4)" />
-		<property key="partCompatibility" value=".*efr32mg21a020f1024im32.*" />
-		<property key="boardCompatibility" value="brd4180a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em4/sleepy-demo-mtd-em4-brd4180a.s37" />
-		<property key="readmeFiles" value="sleepy-demo/README.md" />
-		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Sleepy End Device (SED) behaviour with EM4 deep sleep. </description>
-	</demo>
-	<demo name="brd4186c.demo.sleepy-demo-mtd-em4" label="OpenThread - SoC Sleepy Demo MTD (EM4)">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM4)" />
-		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
-		<property key="boardCompatibility" value="brd4186c" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em4/sleepy-demo-mtd-em4-brd4186c.s37" />
-		<property key="readmeFiles" value="sleepy-demo/README.md" />
-		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Sleepy End Device (SED) behaviour with EM4 deep sleep. </description>
-	</demo>
-	<demo name="brd2703a.demo.sleepy-demo-mtd-em4" label="OpenThread - SoC Sleepy Demo MTD (EM4)">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM4)" />
-		<property key="partCompatibility" value=".*efr32mg24b210f1536im48.*" />
-		<property key="boardCompatibility" value="brd2703a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em4/sleepy-demo-mtd-em4-brd2703a.s37" />
-		<property key="readmeFiles" value="sleepy-demo/README.md" />
-		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Sleepy End Device (SED) behaviour with EM4 deep sleep. </description>
-	</demo>
-	<demo name="brd4116a.demo.sleepy-demo-mtd-em4" label="OpenThread - SoC Sleepy Demo MTD (EM4)">
-		<property key="blurb" value="OpenThread - SoC Sleepy Demo MTD (EM4)" />
-		<property key="partCompatibility" value=".*efr32mg26b410f3200im48.*" />
-		<property key="boardCompatibility" value="brd4116a" />
-		<property key="imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/thread_app/demos/sleepy-demo-mtd-em4/sleepy-demo-mtd-em4-brd4116a.s37" />
-		<property key="readmeFiles" value="sleepy-demo/README.md" />
-		<property key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Thread" />
-		<property key="quality" value="PRODUCTION" />
-		<description>Demonstrates Sleepy End Device (SED) behaviour with EM4 deep sleep. </description>
 	</demo>
 	<demo name="brd4180a.demo.sleepy-demo-ssed" label="OpenThread - SoC Sleepy Demo SSED">
 		<property key="blurb" value="OpenThread - SoC Sleepy Demo SSED" />

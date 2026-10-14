@@ -31,7 +31,7 @@
 #ifndef SLI_PSA_DRIVER_FEATURES_H
 #define SLI_PSA_DRIVER_FEATURES_H
 
-#include "tf-psa-crypto/build_info.h"
+#include "mbedtls/build_info.h"
 
 // -----------------------------------------------------------------------------
 // Feature inclusion (available AND requested)
@@ -63,8 +63,13 @@
 
 #if defined(SLI_MBEDTLS_DEVICE_HSE)           \
   || defined(SLI_MBEDTLS_DEVICE_VSE)          \
+  || defined(SLI_MBEDTLS_DEVICE_S1_WITH_TRNG) \
   || defined(SLI_MBEDTLS_DEVICE_SI91X)
   #define SLI_PSA_DRIVER_FEATURE_TRNG
+#endif
+
+#if defined(SLI_MBEDTLS_DEVICE_S1_WITH_TRNG_ERRATA)
+  #define SLI_PSA_DRIVER_FEATURE_TRNG_ERRATA_HANDLING
 #endif
 
 // -------------------------------------
@@ -382,15 +387,6 @@
 #endif
 
 // -------------------------------------
-// PAKE
-
-#if defined(PSA_WANT_ALG_JPAKE) && defined(MBEDTLS_PSA_ACCEL_ALG_JPAKE) \
-  && defined(SLI_MBEDTLS_DEVICE_HSE)
-  #define SLI_PSA_DRIVER_FEATURE_PAKE
-  #define SLI_PSA_DRIVER_FEATURE_JPAKE
-#endif
-
-// -------------------------------------
 // Signature
 
 #if defined(PSA_WANT_ALG_ECDSA) && defined(MBEDTLS_PSA_ACCEL_ALG_ECDSA) \
@@ -406,10 +402,10 @@
 #endif
 
 // RSA signature (sign/verify-message) on SE-equipped devices where the SE
-// firmware supports RSA. Transparent PSA RSA key buffers are PKCS#1 DER; the
-// SE driver parses them with mbedtls ASN.1 APIs and builds raw N||D / N||E
-// for the mailbox. mbedtls software fallback still handles
-// PSA_ALG_RSA_PSS_ANY_SALT on verify (fixed salt length only in the SE API).
+// firmware supports RSA. Requires the mbedtls RSA builtin to be compiled in,
+// both for DER key parsing (mbedtls_psa_rsa_load_representation) and as the
+// software fallback for PSA_ALG_RSA_PSS_ANY_SALT on verify (which the SE
+// cannot service directly since it takes a fixed salt length).
 #if defined(SLI_MBEDTLS_DEVICE_HSE)                                 \
   && ((defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN)                      \
        && defined(MBEDTLS_PSA_BUILTIN_ALG_RSA_PKCS1V15_SIGN))       \

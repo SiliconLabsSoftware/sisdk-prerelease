@@ -5,8 +5,6 @@ description: >-
   This component provides support for XTS cipher modes in mbed TLS.
 category: Platform|Security|Mbed TLS|Encryption
 quality: production
-ui_hints:
-  visibility: never
 provides:
 - name: mbedtls_cipher_xts
 requires:
@@ -15,7 +13,7 @@ recommends:
 - id: mbedtls_aes
   vendor: silabs
 template_contribution:
-- name: psa_crypto_builtin_config
+- name: mbedtls_config
   value: MBEDTLS_CIPHER_MODE_XTS
 documentation:
   url: https://docs.silabs.com/gecko-platform/4.4.7/platform-security/crypto-types

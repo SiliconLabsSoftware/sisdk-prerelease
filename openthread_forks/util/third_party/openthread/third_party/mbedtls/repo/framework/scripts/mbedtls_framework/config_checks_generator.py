@@ -10,7 +10,6 @@ See framework/docs/architecture/config-check-framework.md for information.
 import argparse
 import enum
 import os
-import posixpath
 import re
 import sys
 import textwrap
@@ -257,9 +256,7 @@ def generate_header_files(branch_data: BranchData,
     """Generate the header files to include before and after *config.h."""
     for position in Position:
         generator = HeaderGenerator(branch_data, position)
-        # Make sure to output a path with / even on Windows, so that
-        # it can be consumed by tools such as CMake.
-        yield posixpath.join(directory, generator.output_file_name())
+        yield os.path.join(directory, generator.output_file_name())
         if not list_only:
             generator.write(directory)
 
@@ -283,7 +280,7 @@ def main(branch_data: BranchData) -> None:
     parser.add_argument('--list-for-cmake', action='store_true',
                         help='List generated files in CMake-friendly format and exit')
     parser.add_argument('output_directory', metavar='DIR', nargs='?',
-                        default=posixpath.join(root, branch_data.header_directory),
+                        default=os.path.join(root, branch_data.header_directory),
                         help='output file location (default: %(default)s)')
     options = parser.parse_args()
     list_only = options.list or options.list_for_cmake

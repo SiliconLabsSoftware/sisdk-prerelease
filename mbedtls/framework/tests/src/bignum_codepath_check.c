@@ -5,7 +5,6 @@
  *  SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
  */
 
-#include "test_common.h"
 #include "test/bignum_codepath_check.h"
 #include "bignum_core_invasive.h"
 

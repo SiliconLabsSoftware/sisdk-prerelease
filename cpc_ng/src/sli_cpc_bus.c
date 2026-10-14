@@ -406,7 +406,7 @@ sl_status_t sl_cpc_bus_start(sl_cpc_bus_t *bus)
     return status;
   }
 
-  return bus->ctrl.ops->init(&bus->ctrl);
+  return bus->ctrl.ops->init(&bus->ctrl, bus);
 }
 
 /***************************************************************************/ /**

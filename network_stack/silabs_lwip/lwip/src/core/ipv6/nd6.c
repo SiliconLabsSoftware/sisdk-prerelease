@@ -2932,9 +2932,8 @@ nd6_clear_ipv6_core(struct netif *netif)
 }
 
 /** Clean up ND6 state on link-down and stop the global timer if unused. */
-#if SL_LWIP_LINK_DOWN_CLEANUP
 void
-sli_nd6_cleanup_on_link_down(struct netif *netif)
+nd6_cleanup_on_link_down(struct netif *netif)
 {
   LWIP_ASSERT_CORE_LOCKED();
 
@@ -2942,14 +2941,13 @@ sli_nd6_cleanup_on_link_down(struct netif *netif)
   nd6_clear_ipv6_core(netif);
 
   /* Keep the global ND6 timer alive while any other netif remains active. */
-  if (sli_netif_other_netif_is_up_link_up(netif)) {
+  if (netif_other_netif_is_up_link_up(netif)) {
     return;
   }
 
   nd6_timer_active = 0;
   sys_untimeout(nd6_tmr, NULL);
 }
-#endif /* SL_LWIP_LINK_DOWN_CLEANUP */
 
 /** Start ND6 dynamic timer when link comes up. */
 void

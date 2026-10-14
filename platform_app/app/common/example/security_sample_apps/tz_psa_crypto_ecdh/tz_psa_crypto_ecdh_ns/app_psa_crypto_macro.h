@@ -43,7 +43,7 @@
     if (ret == PSA_SUCCESS) {                                             \
       printf("PSA_SUCCESS");                                              \
     } else {                                                              \
-      printf("PSA_ERROR: %" PRId32, (int32_t)ret);                        \
+      printf("PSA_ERROR: %d", ret);                                      \
     }                                                                     \
                                                                           \
     (void)sl_clock_manager_get_clock_branch_frequency(SL_CLOCK_BRANCH_HCLK, \
@@ -71,7 +71,7 @@
     if (ret == PSA_SUCCESS) {       \
       printf("OK\n");               \
     } else {                        \
-      printf("Failed: %" PRId32 "\n", (int32_t)ret); \
+      printf("Failed: %d\n", ret); \
     }                               \
     return ret;                     \
   } while (0)

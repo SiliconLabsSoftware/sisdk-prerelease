@@ -39,16 +39,12 @@
 #include "sli_protocol_crypto.h"
 #include "tx-security-level.hpp"
 
-#include SL_OT_MAC_KEY_POLICY_CONFIG_HEADER
-#include "mac-key-types.hpp"
-#include "tx-aes-ccm.hpp"
-
-#include <openthread/platform/radio.h>
 #include "common/code_utils.hpp"
 #include "common/const_cast.hpp"
 #include "common/debug.hpp"
 #include "crypto/aes_ccm.hpp"
 #include "mac/mac_frame.hpp"
+#include "openthread/platform/radio.h"
 
 using namespace ot;
 
@@ -326,7 +322,7 @@ void sli_ot_process_transmit_aes_ccm_device(otRadioFrame                       &
                                             Crypto::AesCcm::Nonce               aNonce,
                                             const uint8_t                       aTagLength,
                                             const ot::Mac::Frame::SecurityLevel aSecurityLevel,
-                                            const MacKeyStoragePolicy::PalKey  &aPalKey)
+                                            const otMacKeyMaterial             *aRawKey)
 {
     Mac::TxFrame       &txFrame = static_cast<Mac::TxFrame &>(aFrame);
     Mac::Frame::Lengths lengths;
@@ -340,7 +336,7 @@ void sli_ot_process_transmit_aes_ccm_device(otRadioFrame                       &
 
     TxSecurityProcessing handler;
 
-    handler.SetKey(aPalKey.mBytes);
+    handler.SetKey(aRawKey->mKeyMaterial.mKey.m8);
     handler.Init(lengths.mHeader,
                  payloadLength,
                  aTagLength,

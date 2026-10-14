@@ -45,11 +45,15 @@
 #define MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
 #include "FreeRTOS.h"
+#include "em_device.h"
 #include "sl_memory_manager.h"
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
 #endif
 #include "task.h"
+#if defined(_SILICON_LABS_32B_SERIES_3)
+#include "sli_freertos_heap_3.h"
+#endif
 
 #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
 
@@ -65,18 +69,75 @@
  * - Can be disabled by adding the freertos_heap_3_dtcm_first_bypass component.
  */
 #if defined(SL_CATALOG_FREERTOS_HEAP_3_DTCM_FIRST_BYPASS_PRESENT)
-  /* Explicit bypass of DTCM-first allocation via component */
+/* Explicit bypass of DTCM-first allocation via component */
   #define SL_FREERTOS_HEAP_3_DTCM_FIRST_EN  0
 #elif defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT) && !defined(DMEMCACHE_PRESENT)
-  /* Default to enabled when DTCM is available and DMEMCACHE is not present */
+/* Default to enabled when DTCM is available and DMEMCACHE is not present */
   #define SL_FREERTOS_HEAP_3_DTCM_FIRST_EN  1
 #else
-  /* DTCM not available or DMEMCACHE is present - DTCM-first allocation disabled */
+/* DTCM not available or DMEMCACHE is present - DTCM-first allocation disabled */
   #define SL_FREERTOS_HEAP_3_DTCM_FIRST_EN  0
 #endif
 
 /*-----------------------------------------------------------*/
 
+#if defined(_SILICON_LABS_32B_SERIES_3)
+/* Used only by startup code around synchronous, non-ISR task creation. */
+static bool sli_freertos_heap_3_short_term_allocations = false;
+
+void sli_freertos_heap_3_set_short_term_allocations(bool enabled)
+{
+  sli_freertos_heap_3_short_term_allocations = enabled;
+}
+/*-----------------------------------------------------------*/
+
+static void * prvPortMalloc(size_t xWantedSize, uint8_t block_type)
+{
+  void * pvReturn = NULL;
+
+  vTaskSuspendAll();
+  {
+#if (SL_FREERTOS_HEAP_3_DTCM_FIRST_EN == 1)
+    /* Try to allocate from DTCM heap first for better CPU access performance */
+    sl_memory_heap_t *dtcm_heap = sl_memory_manager_get_dtcm_heap();
+    if (dtcm_heap != NULL) {
+      (void)sl_memory_heap_alloc(dtcm_heap, xWantedSize, block_type, &pvReturn);
+    }
+#endif
+
+    /* Fall back to general-purpose heap if DTCM allocation failed or unavailable */
+    if (pvReturn == NULL) {
+      if (block_type == BLOCK_TYPE_SHORT_TERM) {
+        (void)sl_memory_alloc(xWantedSize, block_type, &pvReturn);
+      } else {
+        pvReturn = sl_malloc(xWantedSize);
+      }
+    }
+
+    traceMALLOC(pvReturn, xWantedSize);
+  }
+  ( void ) xTaskResumeAll();
+
+    #if (configUSE_MALLOC_FAILED_HOOK == 1)
+  {
+    if ( pvReturn == NULL ) {
+      vApplicationMallocFailedHook();
+    }
+  }
+    #endif
+
+  return pvReturn;
+}
+/*-----------------------------------------------------------*/
+
+void * pvPortMalloc(size_t xWantedSize)
+{
+  return prvPortMalloc(xWantedSize,
+                       sli_freertos_heap_3_short_term_allocations
+                       ? BLOCK_TYPE_SHORT_TERM
+                       : BLOCK_TYPE_LONG_TERM);
+}
+#else
 void * pvPortMalloc(size_t xWantedSize)
 {
   void * pvReturn = NULL;
@@ -110,6 +171,7 @@ void * pvPortMalloc(size_t xWantedSize)
 
   return pvReturn;
 }
+#endif
 /*-----------------------------------------------------------*/
 
 void vPortFree(void * pv)

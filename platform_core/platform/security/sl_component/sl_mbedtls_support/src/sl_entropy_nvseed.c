@@ -28,14 +28,23 @@
  *
  ******************************************************************************/
 
-#include <tf-psa-crypto/build_info.h>
+#include <mbedtls/build_info.h>
 
 #if defined(MBEDTLS_PLATFORM_NV_SEED_ALT)
 
 #include <string.h>
 #include "em_device.h"
 #include "nvm3_default.h"
-#include "psa/crypto.h"
+#include "mbedtls/entropy.h"
+#include "mbedtls/platform.h"
+
+#if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
+  #include "mbedtls/sha512.h"
+#elif defined(MBEDTLS_ENTROPY_SHA256_ACCUMULATOR)
+  #include "mbedtls/sha256.h"
+#else
+  #error "NV seed entropy requested, but no entropy accumulator available"
+#endif
 
 // -----------------------------------------------------------------------------
 // Defines
@@ -60,7 +69,7 @@ static int sli_nv_seed_init(void)
   if ( sli_nv_seed_has_been_opened == 0 ) {
     Ecode_t nvm3_status = nvm3_initDefault();
     if ( nvm3_status != ECODE_NVM3_OK ) {
-      return PSA_ERROR_DATA_INVALID;
+      return MBEDTLS_ERR_ENTROPY_FILE_IO_ERROR;
     }
     sli_nv_seed_has_been_opened = 1;
   }
@@ -72,45 +81,69 @@ static int sli_nv_seed_init(void)
 // data area (containing serial number, calibration data, etc) and the entire RAM content.
 static int sli_nv_seed_generate(uint8_t *buffer, size_t requested_length)
 {
-  psa_status_t status = PSA_ERROR_GENERIC_ERROR;
-  psa_hash_operation_t hash_operation = PSA_HASH_OPERATION_INIT;
-  uint8_t hash_buffer[PSA_HASH_LENGTH(MBEDTLS_PSA_CRYPTO_RNG_HASH)];
-  size_t hash_length;
+  int ret;
+  #if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
+  uint8_t hash_buffer[64];
+  mbedtls_sha512_context ctx;
+  mbedtls_sha512_init(&ctx);
 
-  status = psa_hash_setup(&hash_operation, MBEDTLS_PSA_CRYPTO_RNG_HASH);
-  if (status != PSA_SUCCESS) {
+  ret = mbedtls_sha512_starts(&ctx, 0);
+  if (ret != 0) {
     goto exit;
   }
-
   // Device info
-  status = psa_hash_update(&hash_operation, (const unsigned char *)DEVINFO, sizeof(DEVINFO_TypeDef));
-  if (status != PSA_SUCCESS) {
+  ret = mbedtls_sha512_update(&ctx, (const unsigned char *)DEVINFO, sizeof(DEVINFO_TypeDef));
+  if (ret != 0) {
     goto exit;
   }
- 
   // SRAM
-  status = psa_hash_update(&hash_operation, (const unsigned char *)SRAM_BASE, SRAM_SIZE);
-  if (status != PSA_SUCCESS) {
+  ret = mbedtls_sha512_update(&ctx, (const unsigned char *)SRAM_BASE, SRAM_SIZE);
+  if (ret != 0) {
     goto exit;
   }
-
-  status = psa_hash_finish(&hash_operation, hash_buffer, sizeof(hash_buffer), &hash_length);
-  if (status != PSA_SUCCESS) {
+  ret = mbedtls_sha512_finish(&ctx, hash_buffer);
+  if (ret != 0) {
     goto exit;
   }
+  #else
+  uint8_t hash_buffer[32];
+  mbedtls_sha256_context ctx;
+  mbedtls_sha256_init(&ctx);
 
-  if (hash_length < requested_length) {
-    status = PSA_ERROR_BUFFER_TOO_SMALL;
+  ret = mbedtls_sha256_starts(&ctx, 0);
+  if (ret != 0) {
     goto exit;
+  }
+  // Device info
+  ret = mbedtls_sha256_update(&ctx, (const unsigned char *)DEVINFO, sizeof(DEVINFO_TypeDef));
+  if (ret != 0) {
+    goto exit;
+  }
+  // SRAM
+  ret = mbedtls_sha256_update(&ctx, (const unsigned char *)SRAM_BASE, SRAM_SIZE);
+  if (ret != 0) {
+    goto exit;
+  }
+  ret = mbedtls_sha256_finish(&ctx, hash_buffer);
+  if (ret != 0) {
+    goto exit;
+  }
+  #endif
+  if (sizeof(hash_buffer) < requested_length) {
+    ret = MBEDTLS_ERR_ENTROPY_FILE_IO_ERROR;
   }
 
   exit:
-  psa_hash_abort(&hash_operation);
+  #if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
+  mbedtls_sha512_free(&ctx);
+  #else
+  mbedtls_sha256_free(&ctx);
+  #endif
 
-  if (status == PSA_SUCCESS) {
+  if (ret == 0) {
     memcpy(buffer, hash_buffer, requested_length);
   }
-  return status;
+  return ret;
 }
 
 // -----------------------------------------------------------------------------
@@ -150,14 +183,14 @@ int sli_nv_seed_read(unsigned char *buf, size_t buf_len)
     /* Fail safe when the NV seed is not large enough to satisfy the
      * polling function from the entropy module. */
     if ( buf_len > obj_len ) {
-      return PSA_ERROR_DATA_INVALID;
+      return MBEDTLS_ERR_ENTROPY_FILE_IO_ERROR;
     }
 
     /* Read the requested amount of data from the seed */
     nvm3_status = nvm3_readPartialData(nvm3_defaultHandle, SLI_NV_SEED_NVM3_ID,
                                        buf, 0, buf_len);
     if ( nvm3_status != ECODE_NVM3_OK ) {
-      return PSA_ERROR_DATA_INVALID;
+      return MBEDTLS_ERR_ENTROPY_FILE_IO_ERROR;
     }
 
     return buf_len;
@@ -165,7 +198,7 @@ int sli_nv_seed_read(unsigned char *buf, size_t buf_len)
     /* Generate a device-unique seed on first run */
     return sli_nv_seed_generate(buf, buf_len);
   } else {
-    return PSA_ERROR_DATA_INVALID;
+    return MBEDTLS_ERR_ENTROPY_FILE_IO_ERROR;
   }
 }
 
@@ -191,7 +224,7 @@ int sli_nv_seed_write(unsigned char *buf, size_t buf_len)
   if ( nvm3_status == ECODE_NVM3_OK ) {
     return buf_len;
   } else {
-    return PSA_ERROR_DATA_INVALID;
+    return MBEDTLS_ERR_ENTROPY_FILE_IO_ERROR;
   }
 }
 

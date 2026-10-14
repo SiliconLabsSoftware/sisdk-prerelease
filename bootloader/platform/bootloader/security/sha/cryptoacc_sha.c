@@ -23,6 +23,8 @@
  *  http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf
  */
 
+#include <mbedtls/build_info.h>
+
 #include "em_device.h"
 
 #if defined(CRYPTOACC_PRESENT)
@@ -30,6 +32,7 @@
 #include "sx_hash.h"
 #include "sx_errors.h"
 #include "security/sha/btl_sha256.h"
+#include "mbedtls/error.h"
 #include <string.h>
 
 int sha_x_process(SHA_Type_t algo,
@@ -52,7 +55,7 @@ int sha_x_process(SHA_Type_t algo,
       state.len   = SHA256_STATESIZE;
       break;
     default:
-      return BOOTLOADER_ERROR_SECURITY_INVALID_OPTION;
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
   }
 
   data_in.addr    = (uint8_t*)blockdata;
@@ -63,17 +66,17 @@ int sha_x_process(SHA_Type_t algo,
 
   status = cryptoacc_management_acquire();
   if (status != 0) {
-    return BOOTLOADER_ERROR_SECURITY_REJECTED;
+    return status;
   }
   sx_ret = sx_hash_update_blk(hash_fct, state, data_in);
   cryptoacc_management_release();
 
   if (sx_ret == CRYPTOLIB_SUCCESS) {
     memcpy(state_out, statebuf, state.len);
-    return BOOTLOADER_OK;
+    return 0;
+  } else {
+    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
   }
-
-  return BOOTLOADER_ERROR_SECURITY_REJECTED;
 }
 
 #endif // #if defined(CRYPTOACC_PRESENT)

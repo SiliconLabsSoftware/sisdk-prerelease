@@ -48,10 +48,9 @@
 
 #if OPENTHREAD_CONFIG_TLS_ENABLE
 #include <mbedtls/debug.h>
-#include <mbedtls/ssl.h>
-#include "crypto/mbedtls.hpp"
-#if (MBEDTLS_VERSION_NUMBER < 0x04000000) && (MBEDTLS_VERSION_NUMBER >= 0x03000000)
+#if (MBEDTLS_VERSION_NUMBER >= 0x03000000) && (MBEDTLS_VERSION_NUMBER < 0x04000000)
 #include <mbedtls/ecjpake.h>
+#include "crypto/mbedtls.hpp"
 #endif
 #endif
 
@@ -266,7 +265,6 @@ exit:
 #if OPENTHREAD_CONFIG_TLS_ENABLE
         if (mUseTls)
         {
-            mEcJpakePassword.Clear();
             mbedtls_ssl_config_free(&mSslConfig);
             mbedtls_ssl_free(&mSslContext);
 
@@ -304,7 +302,6 @@ template <> otError TcpExample::Process<Cmd("deinit")>(Arg aArgs[])
 #if OPENTHREAD_CONFIG_TLS_ENABLE
     if (mUseTls)
     {
-        mEcJpakePassword.Clear();
         mbedtls_ssl_config_free(&mSslConfig);
         mbedtls_ssl_free(&mSslContext);
 
@@ -1210,10 +1207,11 @@ void TcpExample::PrepareTlsHandshake(void)
         OutputLine("mbedtls_ssl_set_hostname returned %d", rv);
     }
 
-    rv = mEcJpakePassword.Set(mSslContext, reinterpret_cast<const uint8_t *>(sEcjpakePassword), sEcjpakePasswordLength);
+    rv = mbedtls_ssl_set_hs_ecjpake_password(&mSslContext, reinterpret_cast<const unsigned char *>(sEcjpakePassword),
+                                             sEcjpakePasswordLength);
     if (rv != 0)
     {
-        OutputLine("EcJpakePassword::Set returned %d", rv);
+        OutputLine("mbedtls_ssl_set_hs_ecjpake_password returned %d", rv);
     }
 
     mbedtls_ssl_set_bio(&mSslContext, &mEndpointAndCircularSendBuffer, otTcpMbedTlsSslSendCallback,

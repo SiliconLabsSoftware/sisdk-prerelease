@@ -10,8 +10,7 @@
  *  SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
  */
 
-#include "test_common.h"
-
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
 #include <test/bignum_helpers.h>
 
 #if defined(MBEDTLS_BIGNUM_C)
@@ -19,12 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if !defined(MBEDTLS_VERSION_MAJOR) || MBEDTLS_VERSION_MAJOR >= 4
-#include <mbedtls/private/bignum.h>
-#else
 #include <mbedtls/bignum.h>
-#endif
-
 #include <bignum_core.h>
 #include <bignum_mod.h>
 #include <bignum_mod_raw.h>
@@ -77,7 +71,6 @@ int mbedtls_test_read_mpi_core(mbedtls_mpi_uint **pX, size_t *plimbs,
 
 exit:
     mbedtls_free(*pX);
-    *pX = NULL;
     return MBEDTLS_ERR_MPI_BAD_INPUT_DATA;
 }
 

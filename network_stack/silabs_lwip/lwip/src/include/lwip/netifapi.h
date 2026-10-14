@@ -105,12 +105,12 @@ err_t netifapi_netif_index_to_name(u8_t index, char *name);
   * @see netif_set_link_down()
   */
 #define netifapi_netif_set_link_down(n) netifapi_netif_common(n, netif_set_link_down, NULL)
-#if SL_LWIP_LINK_DOWN_CLEANUP
+#if SL_LWIP_ADAPTIVE_TIMERS
 /** @ingroup netifapi_netif
   * @see netif_stop_timers()
   */
 #define netifapi_netif_stop_timers(n)    netifapi_netif_common(n, netif_stop_timers, NULL)
-#endif /* SL_LWIP_LINK_DOWN_CLEANUP */
+#endif /* SL_LWIP_ADAPTIVE_TIMERS */
 
 /**
  * @defgroup netifapi_dhcp4 DHCPv4

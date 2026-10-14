@@ -182,7 +182,7 @@ static sl_status_t sdio_drv_start_rx(sl_cpc_bus_t *bus);
 static uint32_t sdio_drv_write(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames);
 static void cpc_drv_sdio_on_rx_frame_free(sl_cpc_bus_t *bus);
 
-SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_sdio_device_caps, 1);
+SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_caps, 1);
 
 static void get_local_capabilities(sl_cpc_bus_t *bus, const void **caps_p, uint16_t *caps_size_p)
 {

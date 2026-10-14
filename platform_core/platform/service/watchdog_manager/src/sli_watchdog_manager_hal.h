@@ -117,9 +117,7 @@ typedef enum {
  *
  * Configuration includes:
  * - Timeout period (WDOG.CFG.PERSEL)
- * - CMU WDOG clock source from SL_WATCHDOG_MANAGER_DEFAULT_CLOCK_SOURCE on
- *   first init (when CLKSEL is available); subsequent inits keep the current
- *   HAL clock selection
+ * - CMU WDOG clock source on re-init (first init loads Clock Manager selection)
  * - EM1RUN setting (if available)
  * - Disabling interrupts (if available)
  *

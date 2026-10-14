@@ -11,7 +11,6 @@ component:
   - id: "wisun_stack_debug"
   - id: "wisun_stack_lfn"
   - id: "wisun_stack_ffn"
-  - id: "wisun_lfn_parent"
   - id: "wisun_default_radioconf"
   - id: "wisun_keychain"
   - id: "wisun_silabs_certificates"

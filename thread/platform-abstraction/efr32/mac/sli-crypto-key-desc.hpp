@@ -28,20 +28,20 @@
 
 /**
  * @file
- *   `sli_crypto_descriptor_t` builders for the LPWAES transmit backend.
+ *   sli_crypto_descriptor_t builders for the LPWAES transmit backend.
  */
 
 #ifndef SLI_CRYPTO_KEY_DESC_HPP_
 #define SLI_CRYPTO_KEY_DESC_HPP_
 
-#include "em_device.h"
-#include "mac-key-types.hpp"
+#include <openthread/platform/radio.h>
+
 #include "sli_crypto.h"
 
-sli_crypto_descriptor_t LpwAesKeyDesc(const MacKeyLiteral &aKey);
+sli_crypto_descriptor_t LpwAesKeyDescFromPlaintext(const otMacKeyMaterial &aRawKey);
 
 #if defined(KSU_PRESENT)
-sli_crypto_descriptor_t LpwAesKeyDesc(const MacKeyRef &aKey);
+sli_crypto_descriptor_t LpwAesKeyDescFromKsuSlot(const otMacKeyMaterial &aKey);
 #endif
 
 #endif // SLI_CRYPTO_KEY_DESC_HPP_

@@ -63,11 +63,13 @@ public:
      *
      * @param[in]   aInstance   A reference to the OpenThread instance.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     explicit LinkRaw(Instance &aInstance);
 
     /**
      * Initializes the states of the raw link-layer.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void Init(void);
 
     /**
@@ -75,6 +77,7 @@ public:
      *
      * @returns true if enabled, false otherwise.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool IsEnabled(void) const { return mReceiveDoneCallback != nullptr; }
 
     /**
@@ -88,6 +91,7 @@ public:
      * @retval kErrorFailed          The radio could not be enabled/disabled.
      * @retval kErrorNone            Successfully enabled/disabled raw link.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetReceiveDone(otLinkRawReceiveDone aCallback);
 
     /**
@@ -95,6 +99,7 @@ public:
      *
      * @returns The radio capability bit vector.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Radio::Capabilities GetCaps(void) const { return mSubMac.GetCaps(); }
 
     /**
@@ -147,6 +152,7 @@ public:
      *
      * @returns short address.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     ShortAddress GetShortAddress(void) const { return mSubMac.GetShortAddress(); }
 
     /**
@@ -157,6 +163,7 @@ public:
      * @retval kErrorNone            If successful.
      * @retval kErrorInvalidState    If the raw link-layer isn't enabled.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetShortAddress(ShortAddress aShortAddress);
 
     /**
@@ -167,6 +174,7 @@ public:
      * @retval kErrorNone            If successful.
      * @retval kErrorInvalidState    If the raw link-layer isn't enabled.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetAlternateShortAddress(ShortAddress aShortAddress);
 
     /**
@@ -174,6 +182,7 @@ public:
      *
      * @returns PANID.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     PanId GetPanId(void) const { return mPanId; }
 
     /**
@@ -184,6 +193,7 @@ public:
      * @retval kErrorNone            If successful.
      * @retval kErrorInvalidState    If the raw link-layer isn't enabled.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetPanId(PanId aPanId);
 
     /**
@@ -191,6 +201,7 @@ public:
      *
      * @returns Current receiving channel.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint8_t GetChannel(void) const { return mReceiveChannel; }
 
     /**
@@ -198,6 +209,7 @@ public:
      *
      * @param[in]  aChannel     The channel to use for receiving.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetChannel(uint8_t aChannel);
 
     /**
@@ -205,6 +217,7 @@ public:
      *
      * @returns A reference to the extended address.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     const ExtAddress &GetExtAddress(void) const { return mSubMac.GetExtAddress(); }
 
     /**
@@ -215,6 +228,7 @@ public:
      * @retval kErrorNone            If successful.
      * @retval kErrorInvalidState    If the raw link-layer isn't enabled.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetExtAddress(const ExtAddress &aExtAddress);
 
     /**
@@ -228,6 +242,7 @@ public:
      * @retval kErrorNone            If successful.
      * @retval kErrorInvalidState    If the raw link-layer isn't enabled.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetMode1MacKeys(uint8_t aKeyIndex, const Key &aPrevKey, const Key &aCurKey, const Key &aNextKey);
 
     /**
@@ -240,6 +255,7 @@ public:
      * @retval kErrorNone            If successful.
      * @retval kErrorInvalidState    If the raw link-layer isn't enabled.
      */
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error SetMacFrameCounter(uint32_t aFrameCounter, bool aSetIfLarger);
 
 private:
@@ -250,6 +266,7 @@ private:
     void InvokeTransmitDone(TxFrame &aFrame, RxFrame *aAckFrame, Error aError);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void InvokeEnergyScanDone(int8_t aEnergyScanMaxRssi);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
 // #if OT_SHOULD_LOG_AT(OT_LOG_LEVEL_INFO)
 // Avoid including log.hpp
 #if ((OPENTHREAD_CONFIG_LOG_OUTPUT != OPENTHREAD_CONFIG_LOG_OUTPUT_NONE) \

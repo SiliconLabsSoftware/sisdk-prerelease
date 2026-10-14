@@ -1,14 +1,9 @@
 id: "connect_frequency_hopping_cli"
 label: "Frequency Hopping (Cli)"
 package: "connect_stack"
-description: "This component provides frequency hopping CLI commands."
 category: "Connect"
 quality: "production"
-ui_hints:
-  visibility: basic
-documentation:
-  docset: connect-stack
-  document: architecture-of-connect-v3x/04-connect-stack-layers
+description: "This component provides frequency hopping CLI commands."
 provides:
 - name: "connect_frequency_hopping_cli"
 requires:
@@ -17,6 +12,7 @@ requires:
 - name: "connect_debug_print"
 source:
 - path: "stack-cli/stack-cli.c"
+
 template_contribution:
 - name: cli_command
   value:

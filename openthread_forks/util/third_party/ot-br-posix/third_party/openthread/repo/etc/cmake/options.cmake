@@ -368,9 +368,7 @@ ot_int_option(OT_VENDOR_OUI OPENTHREAD_CONFIG_NET_DIAG_VENDOR_OUI "set the vendo
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 if(NOT OT_EXTERNAL_MBEDTLS)
-    # Mbed TLS 4.x: TLS (mbedtls) + X.509 (mbedx509) + TF-PSA-Crypto (tfpsacrypto).
-    # Historical name mbedcrypto maps to tfpsacrypto.
-    set(OT_MBEDTLS mbedtls mbedx509 tfpsacrypto)
+    set(OT_MBEDTLS mbedtls mbedcrypto)
     target_compile_definitions(ot-config INTERFACE "OPENTHREAD_CONFIG_ENABLE_BUILTIN_MBEDTLS=1")
 else()
     set(OT_MBEDTLS ${OT_EXTERNAL_MBEDTLS})

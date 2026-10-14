@@ -19,8 +19,7 @@ config_file:
   condition: [device_series_3]
 provides:
 - name: cpc_ng_drv_spi_peripheral_eusart_secondary
-- name: cpc_ng_drv_secondary_instance
-  allow_multiple: true
+- name: cpc_ng_secondary_drv_instance
 requires:
 - name: cpc_ng_drv_spi_peripheral_eusart
 - name: cpc_ng_secondary

@@ -176,8 +176,9 @@ SL_ENUM(sl_clock_branch_t) {
 /// Define for INVALID peripheral bus clock pointer.
 #define SL_BUS_CLOCK_INVALID (0)
 
-/// Define for when the peripheral exists but the current
-/// context does not own it.
+/// Sentinel bus-clock VALUE payload: the peripheral exists but the current
+/// context does not own it. Unused 32-bit value distinct from 0 and
+/// 0xFFFFFFFF (the weak fallback for clocks absent on this device).
 #define SL_BUS_CLOCK_NOT_OWNED_VALUE (0xFFFFFFFEUL)
 
 /// Define for ACMP0 peripheral bus clock pointer.

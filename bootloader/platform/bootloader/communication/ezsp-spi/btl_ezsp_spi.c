@@ -55,12 +55,11 @@ int32_t communication_main(void)
     .application = { 0 }
   };
 
-  // Zero-init so parser_init() can safely release any heap left from a prior parse
-  ParserContext_t parserContext = { 0 };
-  DecryptContext_t decryptContext = { 0 };
-  AuthContext_t authContext = { 0 };
+  ParserContext_t parserContext;
+  DecryptContext_t decryptContext;
+  AuthContext_t authContext;
 #if defined(_SILICON_LABS_32B_SERIES_3)
-  AuthContext_t secondaryAuthContext = { 0 };
+  AuthContext_t secondaryAuthContext;
   parser_init(&parserContext,
               &decryptContext,
               &authContext,

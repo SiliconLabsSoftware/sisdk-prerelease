@@ -330,8 +330,7 @@ void transmit_packet(sl_rail_handle_t rail_handle)
     set_light_state(&out_packet[DEMO_CONTROL_PAYLOAD_BYTE], light.is_light_on);
   }
   set_light_state_in_payload();
-  sl_status_t packet_assistant_status = sl_packet_assistant_prepare_packet(rail_handle, out_packet, sizeof(out_packet));
-  app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
+  prepare_packet(rail_handle, out_packet, sizeof(out_packet));
   rail_status = sl_rail_start_tx(rail_handle, get_selected_channel(), SL_RAIL_TX_OPTIONS_DEFAULT, NULL);
   if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
     app_log_warning("sl_rail_start_tx() result: 0x%08" PRIX32 " ", rail_status);
@@ -395,9 +394,7 @@ static void save_received_packet(sl_rail_handle_t rail_handle)
   rx_packet_handle = sl_rail_get_rx_packet_info(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &packet_info);
   while (rx_packet_handle != SL_RAIL_RX_PACKET_HANDLE_INVALID) {
     if (packet_info.packet_bytes <= SL_RAIL_SDK_RX_FIFO_SIZE) {
-      uint16_t packet_size = 0;
-      sl_status_t packet_assistant_status = sl_packet_assistant_unpack_packet(rail_handle, &packet_info, rx_buffer, &start_of_packet, &packet_size);
-      app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
+      uint16_t packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
       if (packet_size == 0) {
         app_log_warning("Received packet size is :%" PRIu16, packet_size);
       }

@@ -21,8 +21,9 @@
 #include "sl_bluetooth_config.h"
 #include "sl_bluetooth_external_bondingdb_config.h"
 #include "sli_bt_external_bondingdb_config.h"
+#include MBEDTLS_CONFIG_FILE  // For MBEDTLS_PSA_CRYPTO_STORAGE_C
 
-#if (SL_BT_CONFIG_EXTERNAL_LOCAL_IRK == 0) && !defined SL_CATALOG_PSA_ITS_PRESENT
+#if (SL_BT_CONFIG_EXTERNAL_LOCAL_IRK == 0) && !defined MBEDTLS_PSA_CRYPTO_STORAGE_C
 #error "Component psa_its is required when external local IRK is not used"
 #endif
 

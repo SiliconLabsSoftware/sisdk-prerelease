@@ -20,7 +20,4 @@ template_contribution:
   value: 1
 - name: axip_region0_flash_size_overhead
   value: 4096
-documentation:
-  docset: gecko-platform
-  document: platform-common/common
 root_path: platform_core

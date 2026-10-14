@@ -28,87 +28,36 @@
 
 /**
  * @file
- *   Plaintext MAC key storage policy implementations.
+ *   Plaintext MAC key storage policy implementation.
  */
 
 #include <openthread-core-config.h>
 
-#include <string.h>
+#if (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
 
 #include "key-storage-policy.hpp"
 
-#include "utils/code_utils.h"
+#include "common/debug.hpp"
 
 #include <openthread/platform/crypto.h>
 
-namespace {
-
-bool IsReleased(const MacKeyList<MacKeyLiteral> &aPalKeys)
+void PlaintextMacKeyStoragePolicy::PrepareKeys(const otMacKeyMaterial (&aKeys)[kMacKeyCount],
+                                               otMacKeyMaterial (&aRawKeys)[kMacKeyCount])
 {
-    for (const MacKeyLiteral &key : aPalKeys)
-    {
-        for (uint8_t byte : key.mBytes)
-        {
-            if (byte != 0)
-            {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-} // namespace
-
-template <> void LiteralMacKeyStoragePolicy::ReleaseKeys(PalKeyList &aPalKeys)
-{
-    memset(aPalKeys, 0, sizeof(aPalKeys));
-}
-
-template <> otError LiteralMacKeyStoragePolicy::InstallKeys(const StackKeyList &aStackKeys, PalKeyList &aPalKeys)
-{
-    otError error = OT_ERROR_NONE;
-
-    otEXPECT_ACTION(IsReleased(aPalKeys), error = OT_ERROR_INVALID_STATE);
-
     for (size_t i = 0; i < kMacKeyCount; i++)
     {
-        aPalKeys[i] = aStackKeys[i];
+        size_t        keyLen = 0;
+        const otError error  = otPlatCryptoExportKey(aKeys[i].mKeyMaterial.mKeyRef,
+                                                    aRawKeys[i].mKeyMaterial.mKey.m8,
+                                                    sizeof(aRawKeys[i].mKeyMaterial.mKey.m8),
+                                                    &keyLen);
+        OT_ASSERT(error == OT_ERROR_NONE);
     }
-
-exit:
-    return error;
 }
 
-#if (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
-
-template <> void PsaPlaintextMacKeyStoragePolicy::ReleaseKeys(PalKeyList &aPalKeys)
+void PlaintextMacKeyStoragePolicy::ReleaseKeys(const otMacKeyMaterial (&aKeys)[kMacKeyCount])
 {
-    memset(aPalKeys, 0, sizeof(aPalKeys));
-}
-
-template <> otError PsaPlaintextMacKeyStoragePolicy::InstallKeys(const StackKeyList &aStackKeys, PalKeyList &aPalKeys)
-{
-    otError error = OT_ERROR_NONE;
-
-    otEXPECT_ACTION(IsReleased(aPalKeys), error = OT_ERROR_INVALID_STATE);
-
-    for (size_t i = 0; i < kMacKeyCount; i++)
-    {
-        size_t keyLen = 0;
-
-        error = otPlatCryptoExportKey(aStackKeys[i].mKeyRef, aPalKeys[i].mBytes, OT_MAC_KEY_SIZE, &keyLen);
-        otEXPECT(error == OT_ERROR_NONE);
-        otEXPECT_ACTION(keyLen == OT_MAC_KEY_SIZE, error = OT_ERROR_FAILED);
-    }
-
-exit:
-    // Roll back partial install; aPalKeys is untouched on OT_ERROR_INVALID_STATE.
-    if (error != OT_ERROR_NONE && error != OT_ERROR_INVALID_STATE)
-    {
-        ReleaseKeys(aPalKeys);
-    }
-    return error;
+    OT_UNUSED_VARIABLE(aKeys);
 }
 
 #endif // OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA

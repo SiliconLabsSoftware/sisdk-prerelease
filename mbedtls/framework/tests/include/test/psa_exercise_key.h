@@ -9,7 +9,6 @@
 #ifndef PSA_EXERCISE_KEY_H
 #define PSA_EXERCISE_KEY_H
 
-#include "build_info.h"
 #include "test/helpers.h"
 #include "test/psa_crypto_helpers.h"
 
@@ -17,10 +16,7 @@
 
 #if defined(MBEDTLS_PK_C)
 #include <mbedtls/pk.h>
-#if defined(MBEDTLS_PK_HAVE_PRIVATE_HEADER)
-#include <mbedtls/private/pk_private.h>
-#endif /* MBEDTLS_PK_HAVE_PRIVATE_HEADER */
-#endif /* MBEDTLS_PK_C */
+#endif
 
 /** \def KNOWN_SUPPORTED_HASH_ALG
  *

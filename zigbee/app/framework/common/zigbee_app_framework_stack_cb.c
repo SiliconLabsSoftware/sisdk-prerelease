@@ -22,7 +22,7 @@
 #endif
 
 #include  "mac-phy.h"
-#include  "sl-mac-scan-15.4.h"
+#include  "scan.h"
 //for privileged callback handlers
 #include "stack/internal/inc/internal-callbacks-patch.h"
 

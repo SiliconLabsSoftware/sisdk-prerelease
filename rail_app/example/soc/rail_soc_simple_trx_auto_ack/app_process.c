@@ -279,8 +279,7 @@ static void handle_packet_transmission(sl_rail_handle_t rail_handle)
   /// Status indicator of the RAIL API calls
   sl_rail_status_t rail_status;
 
-  sl_status_t packet_assistant_status = sl_packet_assistant_prepare_packet(rail_handle, out_packet, sizeof(out_packet));
-  app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
+  prepare_packet(rail_handle, out_packet, sizeof(out_packet));
   rail_status = sl_rail_start_tx(rail_handle, get_selected_channel(), SL_RAIL_TX_OPTION_WAIT_FOR_ACK, NULL);
   if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
     app_log_warning("sl_rail_start_tx() result: 0x%08" PRIX32 "\n ", rail_status);
@@ -333,7 +332,6 @@ static void handle_received_packet(sl_rail_handle_t rail_handle)
 
     uint8_t *start_of_packet = 0;
     uint16_t packet_size = 0;
-    sl_status_t packet_assistant_status;
     // Check the packet status if this RX is an ACK for our last TX
     if (packet_details.is_ack) {
       toggle_send_led();
@@ -342,8 +340,7 @@ static void handle_received_packet(sl_rail_handle_t rail_handle)
       if (packet_info.packet_bytes > RX_BUFFER_LENGTH) {
         app_log_error("sl_rail_get_rx_packet_info() error: packet too long\n");
       } else {
-        packet_assistant_status = sl_packet_assistant_unpack_packet(rail_handle, &packet_info, rx_buffer, &start_of_packet, &packet_size);
-        app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
+        packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
       }
     }
     rail_status = sl_rail_release_rx_packet(rail_handle, rx_packet_handle);
@@ -353,7 +350,7 @@ static void handle_received_packet(sl_rail_handle_t rail_handle)
     if (packet_details.is_ack) {
       app_log_info("ACK was received\n");
     } else if (rx_requested) {
-      sl_packet_assistant_print_rx_packet(start_of_packet, packet_size);
+      printf_rx_packet(start_of_packet, packet_size);
     }
   }
 }

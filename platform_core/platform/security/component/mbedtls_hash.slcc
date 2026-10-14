@@ -13,11 +13,12 @@ provides:
 - name: mbedtls_hash
 requires:
 - name: mbedtls_hash_function
+- name: mbedtls_core
 recommends:
 - id: mbedtls_sha256
   vendor: silabs
 template_contribution:
-- name: psa_crypto_config
+- name: mbedtls_config
   value: MBEDTLS_MD_C
 metadata:
   sbom:
