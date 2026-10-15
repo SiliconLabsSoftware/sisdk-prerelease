@@ -23,10 +23,18 @@ config_file:
   condition:
   - device_sdid_220
   file_id: rail_util_sfm_sequencer_config
+- path: plugin/sl_rail_util_sfm_sequencer/config/efr32xg25/sl_rail_util_sfm_sequencer_config.h
+  condition:
+  - device_sdid_245
+  file_id: rail_util_sfm_sequencer_config
 source:
 - path: plugin/sl_rail_util_sfm_sequencer/sl_rail_util_sfm_sequencer.c
   condition:
   - device_sdid_220
+- path: plugin/sl_rail_util_sfm_sequencer/sl_rail_util_sfm_sequencer.c
+  condition:
+  - device_sdid_245
+
 template_contribution:
 - name: component_catalog
   value: sl_rail_util_sfm_sequencer

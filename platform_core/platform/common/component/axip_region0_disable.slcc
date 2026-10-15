@@ -15,4 +15,7 @@ metadata:
 provides:
 - name: axip_region0
 - name: axip_region0_disable
+documentation:
+  docset: gecko-platform
+  document: platform-common/common
 root_path: platform_core

@@ -166,6 +166,7 @@ static cpu_context_t cpu_context SL_ATTRIBUTE_SECTION(".noinit");
 
 #if defined(__CORTEX_M) && (__CORTEX_M >= 3U)
 static debug_trace_context_t debug_trace_context SL_ATTRIBUTE_SECTION(".noinit");
+static bool tpiu_context_saved = false;
 #endif
 
 /// Stack state for RESUME macro (no function call, no stack use)
@@ -581,8 +582,12 @@ void sli_power_manager_save_debug_trace_context(void)
 {
   save_dwt_context(&debug_trace_context.dwt);
   save_core_debug_context(&debug_trace_context.core_debug);
-  save_tpiu_context(&debug_trace_context.tpiu);
   save_itm_context(&debug_trace_context.itm);
+
+  tpiu_context_saved = ((debug_trace_context.itm.tcr & ITM_TCR_ITMENA_Msk) != 0U);
+  if (tpiu_context_saved) {
+    save_tpiu_context(&debug_trace_context.tpiu);
+  }
 }
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
@@ -590,7 +595,9 @@ void sli_power_manager_restore_debug_trace_context(void)
 {
   restore_core_debug_context(&debug_trace_context.core_debug);
   restore_dwt_context(&debug_trace_context.dwt);
-  restore_tpiu_context(&debug_trace_context.tpiu);
+  if (tpiu_context_saved) {
+    restore_tpiu_context(&debug_trace_context.tpiu);
+  }
   restore_itm_context(&debug_trace_context.itm);
 }
 #endif

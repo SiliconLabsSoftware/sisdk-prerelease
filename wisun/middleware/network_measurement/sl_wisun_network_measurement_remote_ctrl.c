@@ -107,6 +107,10 @@
 #define SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_REMOTE_ADDR_STR      "options.remote_addr"
 /// Arg options duration str
 #define SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_DURATION_STR         "options.duration"
+/// Arg options buffer_length str
+#define SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_BUFFER_LENGTH_STR    "options.buffer_length"
+/// Arg options socket_buffer_size str
+#define SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_SOCKET_BUFFER_SIZE_STR "options.socket_buffer_size"
 /// Arg options interval str
 #define SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_INTERVAL_STR         "options.interval"
 
@@ -142,6 +146,8 @@
     - bandwidth\n\
     - duration\n\
     - interval\n\
+    - buffer_length\n\
+    - socket_buffer_size\n\
   Example: iperf set options.bandwidth 10000\n\n\
   Start iPerf command: iperf <client|server>\n\n\
   Get iPerf results: iperf get <text|json>\n"
@@ -658,6 +664,16 @@ static sl_wisun_coap_packet_t * _parse_iperf(const sl_wisun_coap_packet_t * cons
                         SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_INTERVAL_STR,
                         SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
       _options.interval_ms = (uint16_t)atoi(iperf_cmd.arg3);
+      resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
+    } else if (!strncmp(iperf_cmd.arg2,
+                        SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_BUFFER_LENGTH_STR,
+                        SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
+      _options.buf_len = (uint16_t)atoi(iperf_cmd.arg3);
+      resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
+    } else if (!strncmp(iperf_cmd.arg2,
+                        SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_SOCKET_BUFFER_SIZE_STR,
+                        SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
+      _options.socket_buffer_size = (uint16_t)atoi(iperf_cmd.arg3);
       resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
     } else {
       resp_packet = _build_response_packet(&_resp_iperf_set_failed, req_packet);

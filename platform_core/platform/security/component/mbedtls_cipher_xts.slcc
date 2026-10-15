@@ -5,6 +5,8 @@ description: >-
   This component provides support for XTS cipher modes in mbed TLS.
 category: Platform|Security|Mbed TLS|Encryption
 quality: production
+ui_hints:
+  visibility: never
 provides:
 - name: mbedtls_cipher_xts
 requires:

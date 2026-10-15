@@ -9,6 +9,8 @@ quality: "evaluation"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: never
 root_path: "rail/component/sl_rail_sdk_statistic_cli"
 
 provides:
@@ -35,6 +37,3 @@ template_contribution:
 #---------------- Component Catalog ------------------
 - name: component_catalog
   value: rail_sdk_rail_statistic_cli
-#-------- Hides Component for user in Studio ---------
-ui_hints:
-  visibility: never

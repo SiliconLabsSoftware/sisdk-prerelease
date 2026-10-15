@@ -28,8 +28,21 @@
  *
  ******************************************************************************/
 
+/**
+ * @addtogroup connect_ecdh_key_exchange
+ * @brief Sets of API for Connect ECDH Key Exchange component
+ *
+ * This component provides a network key exchange between two devices using
+ * Platform Security Architecture (PSA) crypto. It uses Elliptic Curve
+ * Diffie-Hellman to derive a shared secret over an insecure channel.
+ *
+ * @{
+ */
+
 #ifndef SL_CONNECT_ECDH_KEY_EXCHANGE_H_
 #define SL_CONNECT_ECDH_KEY_EXCHANGE_H_
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include "psa/crypto.h"
 #include "sl_connect_ecdh_key_exchange_config.h"
@@ -63,6 +76,8 @@ enum {
   SL_CONNECT_ECDH_KEY_EXCHANGE_STATE_REQUEST_KEY,
   SL_CONNECT_ECDH_KEY_EXCHANGE_STATE_SEND_KEY,
 };
+
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 /**************************************************************************//**
  * Initializes the PSA crypto system
@@ -101,10 +116,10 @@ psa_status_t sl_connect_ecdh_key_exchange_export_public_key(
 /**************************************************************************//**
  * Generates shared key from the private key and the peer public key.
  *
- * @param[in]  private_key_id           ID of the previously generated key pair
+ * @param[in]  key_id                   ID of the previously generated key pair
  * @param[in]  peer_public_key          Peer public key
  * @param[in]  peer_public_key_length   Length of the peer public key
- * @param[out] shared_key_id            Shared key ID
+ * @param[out] hkdf_key_id              Shared key ID
  *
  * @return If success PSA_SUCCESS, otherwise PSA error code
  *****************************************************************************/
@@ -118,8 +133,8 @@ psa_status_t sl_connect_ecdh_key_exchange_generate_shared_key(
  * Encrypts a message with the provided key and generates the initial vector to
  * apply on the decrypt side.
  *
- * Note:  AES supports only 16 bytes of data to encrypt/decrypt. If the data to
- *        encrypt is not multiple of 16 bytes the encryption will fail.
+ * @note AES supports only 16 bytes of data to encrypt/decrypt. If the data to
+ *       encrypt is not a multiple of 16 bytes the encryption will fail.
  *
  * @param[in]  key_id               Shared key ID used to encrypt the data
  * @param[in]  plain_text           Data to encrypt
@@ -127,7 +142,7 @@ psa_status_t sl_connect_ecdh_key_exchange_generate_shared_key(
  * @param[out] cipher_text          Encrypted data
  * @param[in]  cipher_text_size     Buffer size of the encrypted data
  * @param[out] cipher_text_length   Length of the encrypted data
- * @param[out] iv_text              Initial vector
+ * @param[out] iv                   Initial vector
  * @param[in]  iv_size              Buffer size of the initial vector
  * @param[out] iv_length            Length of the initial vector
  *
@@ -148,7 +163,7 @@ psa_status_t sl_connect_ecdh_key_exchange_encrypt_message(
  * Decrypts a message with the provided key and initial vector.
  *
  * @param[in]  key_id               Shared key ID used to encrypt the data
- * @param[in]  iv_text              Initial vector
+ * @param[in]  iv                   Initial vector
  * @param[in]  iv_length            Length of the initial vector
  * @param[in]  cipher_text          Encrypted data
  * @param[in]  cipher_text_length   Length of the encrypted data
@@ -180,17 +195,17 @@ psa_status_t sl_connect_ecdh_key_exchange_destroy_key(psa_key_id_t key_id);
 /**************************************************************************//**
  * Set the device's PAN ID
  *
- * @param PAN ID
- * @returns None
+ * @param[in] new_id PAN ID to set
  *****************************************************************************/
 void sl_connect_ecdh_key_exchange_set_pan_id(uint16_t new_id);
 
 /**************************************************************************//**
  * Get the device's PAN ID
  *
- * @param None
- * @returns PAN_ID
+ * @return The device's PAN ID
  *****************************************************************************/
 uint16_t sl_connect_ecdh_key_exchange_get_pan_id(void);
+
+/** @} */
 
 #endif /* SL_CONNECT_ECDH_KEY_EXCHANGE_H_ */

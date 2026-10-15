@@ -287,7 +287,7 @@ BootloaderStorageImplementationInformation_t getDeviceInfo(void)
     case NUMONYX_8M_DEVICE:
       return numonyx8MInfo;
 #endif
-#if defined(BTL_STORAGE_SPIFLASH_NUMONYX_M25P16s) && (BTL_STORAGE_SPIFLASH_NUMONYX_M25P16s == 1)
+#if defined(BTL_STORAGE_SPIFLASH_NUMONYX_M25P16) && (BTL_STORAGE_SPIFLASH_NUMONYX_M25P16 == 1)
     case NUMONYX_16M_DEVICE:
       return numonyx16MInfo;
 #endif

@@ -27,6 +27,9 @@ template_contribution:
 - name: psa_crypto_builtin_config
   value: "MBEDTLS_PSA_BUILTIN_ALG_CHACHA20_POLY1305 1"
   condition: [mbedtls_chachapoly]
+- name: psa_crypto_builtin_config
+  value: "MBEDTLS_PSA_BUILTIN_AEAD 1"
+  condition: [mbedtls_chachapoly]
 - name: psa_crypto_config
   value: PSA_WANT_KEY_TYPE_CHACHA20 1
 - name: psa_crypto_builtin_config

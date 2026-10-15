@@ -11,9 +11,9 @@ requires:
 - name: mbedtls_ecdsa
 - name: mbedtls_hash
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_ECDSA_DETERMINISTIC
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_HMAC_DRBG_C
 documentation:
   # No dedicated Deterministic ECDSA page; Mbed TLS hub for related docs

@@ -1,7 +1,7 @@
 id: aws_iot_mqtt_platform
 package: aws_sdk_202412_00
 description: >
-  Everest Series3 LwIP TLS transport platform layer for AWS IoT C-SDK coreMQTT
+  siwx3xx  LwIP TLS transport platform layer for AWS IoT C-SDK coreMQTT
 label: AWS IoT MQTT Platform (LwIP)
 category: Third Party
 quality: production

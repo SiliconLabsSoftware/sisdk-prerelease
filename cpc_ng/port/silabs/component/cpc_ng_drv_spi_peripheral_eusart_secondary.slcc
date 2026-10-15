@@ -10,21 +10,25 @@ metadata:
 root_path: cpc_ng/port/silabs
 instantiable:
   prefix: instance
+source:
+- path: src/sl_cpc_drv_spi_peripheral_eusart.c
 config_file:
-- path: config/series2/sl_cpc_drv_spi_peripheral_eusart_{{instance}}_config.h
+- path: config/sl_cpc_drv_spi_peripheral_eusart_{{instance}}_config.h
   file_id: cpc_ng_drv_spi_peripheral_eusart_config
-  condition: [device_series_2]
-- path: config/series3/sl_cpc_drv_spi_peripheral_eusart_{{instance}}_config.h
-  file_id: cpc_ng_drv_spi_peripheral_eusart_config
-  condition: [device_series_3]
 provides:
 - name: cpc_ng_drv_spi_peripheral_eusart_secondary
-- name: cpc_ng_secondary_drv_instance
+- name: cpc_ng_drv_secondary_instance
+  allow_multiple: true
 requires:
-- name: cpc_ng_drv_spi_peripheral_eusart
+- name: cpc_ng_drv_spi_peripheral
 - name: cpc_ng_secondary
+- name: hal_eusart
 template_contribution:
-- name: cpc_ng_drv_spi_peripheral_instances
+- name: cpc_ng_drv_spi_peripheral_eusart_instances
   value: "{{instance}}"
-- name: cpc_ng_drv_spi_peripheral_role_secondary
+- name: cpc_ng_drv_spi_peripheral_eusart_role_secondary
   value: "{{instance}}"
+- name: event_handler
+  value:
+    event: cpc_drv_instances_start_buses
+    handler: sl_cpc_drv_spi_peripheral_eusart_instances_start_buses

@@ -90,9 +90,8 @@ static void buf_chain_scatter(sl_cpc_buf_t *head, const void *src, size_t len)
 /*                          Captured TX packet queue                          */
 /******************************************************************************/
 
-static mock_cpc_tx_packet_t *capture_packet(sl_cpc_frame_t *frame)
+static mock_cpc_tx_packet_t *capture_packet(const sl_cpc_frame_t *frame)
 {
-  const sli_cpc_hdr_t *cpc_hdr = sli_cpc_frame_get_header(frame);
   const sl_cpc_buf_t *payload = frame->payload;
   size_t payload_size = payload ? payload->tot_len : 0;
 
@@ -104,7 +103,7 @@ static mock_cpc_tx_packet_t *capture_packet(sl_cpc_frame_t *frame)
   }
 
   packet->node.node = NULL;
-  packet->header = *cpc_hdr;
+  packet->header = frame->hdr;
   if (payload_size) {
     buf_chain_gather(payload, packet->payload, payload_size);
   }
@@ -311,6 +310,7 @@ sl_status_t sl_cpc_drv_mock_init(sl_cpc_drv_mock_t *drv, const sl_cpc_drv_mock_c
 void mock_cpc_drv_deinit(sl_cpc_drv_mock_t *drv)
 {
   SLI_CPC_ASSERT(drv != NULL);
+  SLI_CPC_ASSERT(drv->hw_init_count > 0);
 
   // Release any captured packets the test never consumed.
   tx_queue_drain(drv);
@@ -407,7 +407,7 @@ void mock_cpc_drv_inject_frame(unsigned int lineno, sl_cpc_drv_mock_t *drv, cons
   sl_cpc_frame_t *frame = sli_cpc_frame_new(&drv->bus, true);
   UNITY_TEST_ASSERT_NOT_NULL(frame, lineno, "mock_cpc_drv_inject_frame: RX frame pool exhausted");
 
-  sli_cpc_hdr_t *hdr = sli_cpc_frame_get_header(frame);
+  sli_cpc_hdr_t *hdr = &frame->hdr;
 
   frame_to_header(&normalized, hdr);
 

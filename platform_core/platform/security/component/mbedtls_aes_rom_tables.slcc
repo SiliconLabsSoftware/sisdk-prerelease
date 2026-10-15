@@ -1,0 +1,29 @@
+id: mbedtls_aes_rom_tables
+package: platform_core
+label: AES Block Cipher ROM Tables
+description: >-
+  This component enables the builtin AES software implementation in
+  TF-PSA-Crypto to use precomputed AES tables stored in ROM/Flash
+
+  Tradeoff: Using precomputed ROM tables reduces RAM usage by ~8kb
+  (or ~2kb if MBEDTLS_AES_FEWER_TABLES is used) and reduces the
+  initialization time before the first AES operation can be performed.
+  It comes at the cost of additional ~8kb ROM use (resp. ~2kb if
+  MBEDTLS_AES_FEWER_TABLES below is used), and potentially degraded
+  performance if ROM access is slower than RAM access.
+
+category: Platform|Security|Mbed TLS|Encryption
+quality: production
+provides:
+- name: mbedtls_aes_rom_tables
+requires:
+- name: mbedtls_aes
+template_contribution:
+- name: psa_crypto_builtin_config
+  value: MBEDTLS_AES_ROM_TABLES
+documentation:
+  url: https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/crypto__config_8h/#c.MBEDTLS_AES_ROM_TABLES
+metadata:
+  sbom:
+    reference: mbedtls_sbom
+root_path: platform_core

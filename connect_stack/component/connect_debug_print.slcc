@@ -1,9 +1,14 @@
 id: "connect_debug_print"
 label: "Debug Print"
 package: "connect_stack"
+description: "Provides APIs for adding serial debugging capability."
 category: "Connect"
 quality: "production"
-description: "Provides APIs for adding serial debugging capability."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: customizing-applications-with-connect-v3x/02-components
 provides:
 - name: "connect_debug_print"
 requires:

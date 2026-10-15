@@ -9,6 +9,8 @@ provides:
 - name: radio_priority_configurator
   allow_multiple: true
 
+documentation:
+  url: https://docs.silabs.com/ssv6ug/latest/ssv6-configure-project/radio-priority-configurator
 metadata:
   sbom:
     license: MSLA

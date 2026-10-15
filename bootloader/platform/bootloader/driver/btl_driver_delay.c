@@ -19,6 +19,7 @@
 #include "btl_driver_util.h"
 #if defined(_SILICON_LABS_32B_SERIES_3)
 #include "sl_hal_timer.h"
+#include "btl_driver_cmu.h"
 #else
 #include "em_timer.h"
 #endif
@@ -54,7 +55,9 @@ void delay_init(void)
   CMU->CTRL |= CMU_CTRL_HFPERCLKEN;
   CMU->HFPERCLKEN0 |= CMU_HFPERCLKEN0_TIMER0;
 #endif
-#if defined(_CMU_CLKEN0_MASK)
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  btl_driver_enable_timer0_clock();
+#elif defined(CMU_CLKEN0_TIMER0)
   CMU->CLKEN0_SET = CMU_CLKEN0_TIMER0;
 #endif
 

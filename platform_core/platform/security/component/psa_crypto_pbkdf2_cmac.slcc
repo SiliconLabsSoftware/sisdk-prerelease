@@ -11,6 +11,8 @@ provides:
 
 requires:
 - name: psa_crypto
+  # Unaccelerated PBKDF2-AES-CMAC-PRF-128 depends on AES and CMAC.
+- name: psa_crypto_aes
 - name: psa_crypto_cmac
 
 template_contribution:

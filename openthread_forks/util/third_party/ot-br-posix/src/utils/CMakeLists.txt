@@ -43,5 +43,11 @@ add_library(otbr-utils
 target_link_libraries(otbr-utils PUBLIC
     otbr-common
     otbr-posix
+    ot-config
     mbedtls
 )
+
+# Mbed TLS 4.x ships crypto as tfpsacrypto; 3.x uses mbedcrypto (often via mbedtls).
+if(TARGET tfpsacrypto)
+    target_link_libraries(otbr-utils PUBLIC tfpsacrypto)
+endif()

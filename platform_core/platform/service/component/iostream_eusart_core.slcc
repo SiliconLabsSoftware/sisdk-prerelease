@@ -36,3 +36,7 @@ requires:
 - name: hal_generic_eusart
 - name: atomic
 - name: slist
+- name: gpio_peripheral_pin_latching
+  condition: [device_has_no_deepsleep_retention]
+- name: power_manager_sleep_hooks
+  condition: [power_manager]

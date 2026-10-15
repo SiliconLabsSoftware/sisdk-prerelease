@@ -282,6 +282,7 @@ SL_ENUM(sl_clock_manager_export_clock_source_t) {
   SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_SOCPLL2,    ///< Export Clock Source SOCPLL2
   SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_PERPLL0,    ///< Export Clock Source PERPLL0
   SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_PERPLL1,    ///< Export Clock Source PERPLL1
+  SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_FSRCO40,    ///< Export Clock Source FSRCO40
 };
 
 /// Export clock output selection.

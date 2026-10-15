@@ -47,3 +47,6 @@ conflicts:
   condition: [device_series_3]
 - name: memory_manager
   condition: [device_si91x]
+documentation:
+  docset: gecko-platform
+  document: platform-service/memory-manager

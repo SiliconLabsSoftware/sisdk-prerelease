@@ -35,3 +35,6 @@ requires:
 template_contribution:
 - name: component_catalog
   value: cmsis_os_common
+documentation:
+  docset: gecko-platform
+  document: platform-common/common

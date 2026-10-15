@@ -537,6 +537,72 @@ void sli_si91x_handle_websocket(sli_si91x_socket_create_request_t *socket_create
   }
 }
 
+int sli_si91x_prepare_recv_wire_flags(int flags, uint8_t wire_flags[SLI_SI91X_4BYTE_FIELD_SIZE])
+{
+  uint32_t value = 0;
+
+#if SL_SI91X_SOCKETS_ENABLE_RECV_FLAGS
+  if ((flags & ~MSG_PEEK) != 0) {
+    SLI_SET_ERROR_AND_RETURN(EOPNOTSUPP);
+  }
+  value = (uint32_t)flags;
+#else
+  if (flags != 0) {
+    SLI_SET_ERROR_AND_RETURN(EOPNOTSUPP);
+  }
+#endif
+
+  memcpy(wire_flags, &value, sizeof(value));
+  return 0;
+}
+
+sl_status_t sli_si91x_get_socket_bytes_available(uint8_t firmware_socket_id, uint32_t *available_bytes)
+{
+  sl_status_t status;
+  sl_wifi_buffer_t *response_buffer = NULL;
+  uint8_t socket_id                 = firmware_socket_id;
+
+  if (available_bytes == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  status = sli_wifi_send_command(SLI_WIFI_REQ_SOCKET_BYTES_AVAILABLE,
+                                 SLI_SI91X_SOCKET_CMD,
+                                 &socket_id,
+                                 sizeof(socket_id),
+                                 SLI_WIFI_WAIT_FOR_COMMAND_RESPONSE,
+                                 NULL,
+                                 (void **)&response_buffer);
+  if (status != SL_STATUS_OK) {
+    if (response_buffer != NULL) {
+      sli_buffer_manager_free_buffer(response_buffer);
+    }
+    return status;
+  }
+
+  const sl_wifi_system_packet_t *packet = sli_wifi_host_get_buffer_data(response_buffer, 0, NULL);
+  if (packet == NULL) {
+    sli_buffer_manager_free_buffer(response_buffer);
+    return SL_STATUS_FAIL;
+  }
+
+  const uint16_t payload_length = (uint16_t)(packet->length & 0x0FFF);
+  if (payload_length < sizeof(sli_si91x_rsp_socket_bytes_available_t)) {
+    sli_buffer_manager_free_buffer(response_buffer);
+    return SL_STATUS_FAIL;
+  }
+
+  const sli_si91x_rsp_socket_bytes_available_t *response = (const sli_si91x_rsp_socket_bytes_available_t *)packet->data;
+  if (response->socket_id != firmware_socket_id) {
+    sli_buffer_manager_free_buffer(response_buffer);
+    return SL_STATUS_FAIL;
+  }
+  memcpy(available_bytes, &response->available_bytes, sizeof(*available_bytes));
+
+  sli_buffer_manager_free_buffer(response_buffer);
+  return SL_STATUS_OK;
+}
+
 sl_status_t sl_si91x_config_socket(sl_si91x_socket_config_t socket_config)
 {
   sl_status_t status = SL_STATUS_OK;
@@ -1268,12 +1334,6 @@ sl_status_t sli_create_and_send_socket_request(int socketIdIndex, int type, cons
   }
 
   sli_apply_socket_create_response_fields(si91x_bsd_socket, socket_create_response, type);
-
-  // If socket is already bound to an local address and port, there is no need to copy it again.
-  if (si91x_bsd_socket->state == BOUND) {
-    sli_buffer_manager_free_buffer(buffer);
-    return SL_STATUS_OK;
-  }
 
   // Free the buffer
   sli_buffer_manager_free_buffer(buffer);
@@ -2019,6 +2079,13 @@ sl_status_t sli_si91x_send_socket_data(sli_si91x_socket_t *si91x_socket,
                                               SLI_BUFFER_MANAGER_ALLOCATION_TYPE_DEDICATED,
                                               SLI_WIFI_ALLOCATE_COMMAND_BUFFER_WAIT_TIME,
                                               (sli_buffer_t)&packet);
+  // Socket send maps TX-pool exhaustion (SL_STATUS_ALLOCATION_FAILED / 0x19) to
+  // ENOBUFS ("try again later" in the BSD send() docs). Return that status
+  // without an ERROR-tagged PRINT_ERROR_LOGS line. Other allocate failures
+  // still go through VERIFY_STATUS_AND_RETURN.
+  if (status == SL_STATUS_ALLOCATION_FAILED) {
+    return status;
+  }
   VERIFY_STATUS_AND_RETURN(status);
 
   // Enter atomic section to safely access the queue

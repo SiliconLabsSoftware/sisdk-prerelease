@@ -4777,7 +4777,7 @@ sl_status_t sl_bt_cs_create_config(uint8_t connection,
                                    uint8_t channel_selection_type,
                                    uint8_t ch3c_shape,
                                    uint8_t ch3c_jump,
-                                   uint8_t reserved)
+                                   uint8_t cs_enhancements)
 {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
@@ -4804,7 +4804,7 @@ sl_status_t sl_bt_cs_create_config(uint8_t connection,
     cmd->data.cmd_cs_create_config.channel_selection_type = channel_selection_type;
     cmd->data.cmd_cs_create_config.ch3c_shape = ch3c_shape;
     cmd->data.cmd_cs_create_config.ch3c_jump = ch3c_jump;
-    cmd->data.cmd_cs_create_config.reserved = reserved;
+    cmd->data.cmd_cs_create_config.cs_enhancements = cs_enhancements;
     sl_bt_host_handle_command();
 
     return rsp->data.rsp_cs_create_config.result;
@@ -5177,7 +5177,7 @@ sl_status_t sl_bt_cs_test_start(uint8_t main_mode_type,
                                 uint8_t t_pm_time,
                                 uint8_t t_sw_time,
                                 uint8_t tone_antenna_config,
-                                uint8_t reserved,
+                                uint8_t cs_enhancements,
                                 uint8_t snr_control_initiator,
                                 uint8_t snr_control_reflector,
                                 uint16_t drbg_nonce,
@@ -5215,7 +5215,7 @@ sl_status_t sl_bt_cs_test_start(uint8_t main_mode_type,
     cmd->data.cmd_cs_test_start.t_pm_time = t_pm_time;
     cmd->data.cmd_cs_test_start.t_sw_time = t_sw_time;
     cmd->data.cmd_cs_test_start.tone_antenna_config = tone_antenna_config;
-    cmd->data.cmd_cs_test_start.reserved = reserved;
+    cmd->data.cmd_cs_test_start.cs_enhancements = cs_enhancements;
     cmd->data.cmd_cs_test_start.snr_control_initiator = snr_control_initiator;
     cmd->data.cmd_cs_test_start.snr_control_reflector = snr_control_reflector;
     cmd->data.cmd_cs_test_start.drbg_nonce = drbg_nonce;

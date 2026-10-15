@@ -134,6 +134,26 @@ void dhcp_stop(struct netif *netif);
 void dhcp_release_and_stop(struct netif *netif);
 void dhcp_inform(struct netif *netif);
 void dhcp_network_changed_link_up(struct netif *netif);
+#if SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DHCP_ONDEMAND_TIMER
+/**
+ * Link-down: dhcp_release_and_stop + dhcp_cleanup (free client).
+ * Stop coarse on last link.
+ * App contract: after link-up, call dhcp_start() again to allocate a new client
+ * and restart negotiation (and to restart the global coarse timer).
+ * Link-up alone does not restart DHCP or the coarse timer.
+ */
+void sli_dhcp_cleanup_on_link_down(struct netif *netif);
+/** Start global DHCP coarse timer. Idempotent. Called from dhcp_start(). */
+void sli_dhcp_coarse_timer_start(void);
+/** Stop global DHCP coarse timer (last-link cleanup). */
+void sli_dhcp_coarse_timer_stop(void);
+/** On-demand coarse timeout callback (re-arms every DHCP_COARSE_TIMER_MSECS while active). */
+void dhcp_coarse_timeout_cb(void *arg);
+#if LWIP_TESTMODE
+/** True if global on-demand DHCP coarse timer is scheduled. */
+int sli_dhcp_coarse_timer_is_active(void);
+#endif /* LWIP_TESTMODE */
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DHCP_ONDEMAND_TIMER */
 
 u8_t dhcp_supplied_address(const struct netif *netif);
 /* to be called every minute */

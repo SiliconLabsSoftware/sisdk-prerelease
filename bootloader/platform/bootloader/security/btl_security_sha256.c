@@ -42,7 +42,7 @@ void btl_initSha256(void *ctx)
 }
 
 /** Push data into the SHA algorithm. If the data is not a full SHA block,
- *  mbedTLS will buffer until it has a full one.
+ *  the implementation buffers until it has a full one.
  */
 void btl_updateSha256(void *ctx, const void *data, size_t length)
 {

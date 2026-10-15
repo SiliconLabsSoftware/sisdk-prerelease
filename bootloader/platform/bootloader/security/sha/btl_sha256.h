@@ -19,6 +19,11 @@
 #ifndef BTL_SHA256_H
 #define BTL_SHA256_H
 
+#include <stddef.h>
+#include <stdint.h>
+
+#include "api/btl_errorcode.h"
+
 /***************************************************************************//**
  * @addtogroup Components
  * @{
@@ -27,9 +32,9 @@
  * @addtogroup SHA256
  * @brief SHA-256 Cryptography Library
  * @details
- *   This file includes an alternative implementation of the standard
- *   mbed TLS SHA using hardware accelerator incorporated in MCU devices from
- *   Silicon Labs.
+ *   Hardware-accelerated SHA-256 for Silicon Labs bootloader. Returns
+ *   @ref BOOTLOADER_OK on success, or a code from
+ *   @ref BOOTLOADER_ERROR_SECURITY_BASE on failure.
  * @{
  ******************************************************************************/
 /// Context Variable type for SHA-256 Cryptography
@@ -60,7 +65,7 @@ void btl_sha256_init(btl_sha256_context *ctx);
  * \param ctx      context to be initialized
  * \param is224    0 = use SHA256, 1 = use SHA224
  *
- * \return         \c 0 if successful
+ * \return         @ref BOOTLOADER_OK if successful
  *
  */
 int btl_sha256_starts_ret(btl_sha256_context *ctx, int is224);
@@ -72,7 +77,7 @@ int btl_sha256_starts_ret(btl_sha256_context *ctx, int is224);
  * \param input    buffer holding the  data
  * \param ilen     length of the input data
  *
- * \return         \c 0 if successful
+ * \return         @ref BOOTLOADER_OK if successful
  *
  */
 int btl_sha256_update_ret(btl_sha256_context *ctx, const unsigned char *input, size_t ilen);
@@ -83,7 +88,8 @@ int btl_sha256_update_ret(btl_sha256_context *ctx, const unsigned char *input, s
  * \param ctx      SHA-256 context
  * \param output   SHA-224/256 checksum result
  *
- * \return         \c 0 if successful
+ * \return         @ref BOOTLOADER_OK if successful, else a code from
+ *                 @ref BOOTLOADER_ERROR_SECURITY_BASE.
  *
  */
 int btl_sha256_finish_ret(btl_sha256_context *ctx, unsigned char output[32]);
@@ -100,7 +106,8 @@ int btl_sha256_finish_ret(btl_sha256_context *ctx, unsigned char output[32]);
  * \param[in] blockdata     Pointer to the block(s) of data
  * \param[out] state_out    Pointer to block of memory to store state
  * \param num_blocks        Number of SHA blocks in data block
- * \returns                 Zero on success. Negative error code on failure.
+ * \returns                 @ref BOOTLOADER_OK on success, else a code from
+ *                          @ref BOOTLOADER_ERROR_SECURITY_BASE.
  */
 int sha_x_process(SHA_Type_t algo,
                   uint8_t* state_in,
@@ -127,7 +134,8 @@ int sha_x_process(SHA_Type_t algo,
  *                          to later be used for hash finalization. For first use, initialize
  *                          with zeroes.
  * \param[in] data_len      Length to data to add to hash
- * \returns                 Zero on success. Negative error code on failure.
+ * \returns                 @ref BOOTLOADER_OK on success, else a code from
+ *                          @ref BOOTLOADER_ERROR_SECURITY_BASE.
  */
 int sha_x_update(SHA_Type_t algo,
                  const unsigned char *data,
@@ -154,7 +162,8 @@ int sha_x_update(SHA_Type_t algo,
  *                          to later be used for hash finalization. For first use, initialize
  *                          with zeroes.
  * \param[out] output       Pointer to the destination of the hash.
- * \returns                 Zero on success. Negative error code on failure.
+ * \returns                 @ref BOOTLOADER_OK on success, else a code from
+ *                          @ref BOOTLOADER_ERROR_SECURITY_BASE.
  */
 int sha_x_finish(SHA_Type_t algo,
                  uint8_t* state,

@@ -42,9 +42,6 @@ template_contribution:
   value: tfm_crypto_key_derivation_output_key_custom
 
 - name: tfm_interface_func
-  value: tfm_crypto_key_derivation_output_key_ext
-
-- name: tfm_interface_func
   value: tfm_crypto_key_derivation_abort
 
 - name: tfm_interface_func

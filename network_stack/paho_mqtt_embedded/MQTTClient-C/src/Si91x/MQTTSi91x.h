@@ -33,6 +33,11 @@
 #define NETWORK_ERROR_NULL_STRUCTURE           -1 // Error: NULL network structure
 #define NETWORK_ERROR_NULL_ADDRESS             -2 // Error: NULL address
 #define NETWORK_ERROR_INVALID_TYPE             -3 // Error: Invalid transport type
+#define NETWORK_ERROR_INVALID_FLAGS            -5 // Error: sl_paho_network_connect flags invalid
+
+// Address family for sl_paho_network_connect; set exactly one (distinct bits).
+#define SL_PAHO_NETWORK_FLAG_IPV4 (1U << 0)
+#define SL_PAHO_NETWORK_FLAG_IPV6 (1U << 1)
 
 // MQTT TLS Configuration
 #ifndef MQTT_TLS_AVAILABLE
@@ -150,6 +155,40 @@ void NetworkInit(Network *n);
  * - The `addr` parameter must point to a valid IP address string.
  */
 int NetworkConnect(Network *n, uint8_t flags, char *addr, int dst_port, int src_port, bool ssl);
+
+/**
+ * @brief Establishes a TCP connection to the MQTT broker with explicit IPv4/IPv6 selection.
+ *
+ * @param[in] n         Pointer to the initialized Network structure.
+ * @param[in] flags     Address family: set exactly one of `SL_PAHO_NETWORK_FLAG_IPV4` or
+ *                      `SL_PAHO_NETWORK_FLAG_IPV6`.
+ * @param[in] addr      Pointer to raw broker IP octets (4 bytes for IPv4, 16 bytes for IPv6).
+ * @param[in] dst_port  Destination port of the MQTT broker.
+ * @param[in] src_port  Source port for the connection.
+ * @param[in] ssl       Boolean flag to enable/disable SSL for the connection.
+ *
+ * @return
+ * - `0` on success.
+ * - `NETWORK_ERROR_NULL_STRUCTURE (-1)` if the `Network` structure is `NULL`.
+ * - `NETWORK_ERROR_NULL_ADDRESS (-2)` if the `addr` is `NULL`.
+ * - `NETWORK_ERROR_INVALID_TYPE (-3)` if the `transport_type` is not TCP.
+ * - `NETWORK_ERROR_INVALID_FLAGS (-5)` if neither or both of IPV4/IPV6 are set, or if IPV6
+ *   is requested on an IPv4-only build.
+ * - Transport-specific error codes for connection failures.
+ *
+ * @details
+ * - Prefer this API over NetworkConnect when the application must choose the MQTT TCP socket
+ *   family on dual-IP builds.
+ * - SSL can be enabled for secure connections by setting the `ssl` parameter to `true`.
+ * - When `MQTT_TLS_ALPN_ENABLED` is set to `1`, ALPN is configured automatically during
+ *   TCP connection setup (after socket creation and TLS enable, before connect).
+ *   Set `MQTT_TLS_ALPN_PROTOCOL` to the broker's ALPN name (e.g. `"mqtt"` for Mosquitto on port 443).
+ *
+ * @note
+ * - Ensure that the `Network` structure is initialized using `NetworkInit` before calling this function.
+ * - WebSocket transport is not supported by this API; use NetworkConnect for WebSocket.
+ */
+int sl_paho_network_connect(Network *n, uint8_t flags, char *addr, int dst_port, int src_port, bool ssl);
 
 /**
  * @brief Cleans up and closes the network connection.

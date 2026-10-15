@@ -47,6 +47,8 @@ requires:
   condition: [power_manager]
 - name: sl_rail_util_sfm_sequencer
   condition: [device_sdid_220]
+- name: sl_rail_util_sfm_sequencer
+  condition: [device_sdid_245]
 - name: sl_rail_util_ble_cs
   condition: [hardware_board_supports_cs]
 - name: sl_rail_util_load_devinfo

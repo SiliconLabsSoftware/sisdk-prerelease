@@ -1,0 +1,34 @@
+id: cpc_ng_drv_spi_peripheral
+package: cpc_ng
+description: |
+  Shared SPI-peripheral physical-link driver.
+  Peripheral-specific (USART/EUSART) instances are provided by the corresponding
+  SPI secondary components.
+category: Services|CPC-NG|Driver|Secondary Device
+quality: internal
+label: CPC-NG Secondary - SPI Peripheral
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/silabs
+source:
+- path: src/sl_cpc_drv_spi_peripheral.c
+- path: src/sli_cpc_drv_spi_peripheral.h
+include:
+- path: inc
+  file_list:
+  - path: sl_cpc_drv_spi_peripheral.h
+provides:
+- name: cpc_ng_drv_spi_peripheral
+requires:
+- name: clock_manager_runtime
+- name: cpc_ng
+- name: cpc_ng_port_silabs
+- name: dmadrv
+- name: hal_gpio
+- name: hal_prs
+- name: hal_ldma
+- name: slist
+- name: status

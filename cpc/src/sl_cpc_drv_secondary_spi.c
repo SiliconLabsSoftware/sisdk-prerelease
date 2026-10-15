@@ -32,6 +32,8 @@
 #include "stdio.h"
 #endif
 
+#include <assert.h>
+
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
 #endif
@@ -92,6 +94,11 @@
 #if (SL_CPC_DRV_SPI_RX_BUFFER_MAX_COUNT < 3)
 #error  Invalid configuration SL_CPC_DRV_SPI_RX_BUFFER_MAX_COUNT must be at least 3
 #endif
+
+// The driver pre-allocates one RX buffer handle per queue entry from the
+// CPC RX buffer pool, so the queue cannot be larger than that pool.
+static_assert(SL_CPC_DRV_SPI_RX_QUEUE_SIZE <= SL_CPC_RX_BUFFER_MAX_COUNT,
+              "Invalid configuration SL_CPC_DRV_SPI_INSTANCE_RX_QUEUE_SIZE must be <= SL_CPC_RX_BUFFER_MAX_COUNT");
 
 // LDMA (Series 2: LDMA, Series 3: LDMA(0))
 #if defined(_SILICON_LABS_32B_SERIES_2)

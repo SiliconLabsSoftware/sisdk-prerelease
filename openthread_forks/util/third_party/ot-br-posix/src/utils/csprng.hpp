@@ -36,9 +36,6 @@
 
 #include <common/types.hpp>
 
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
-
 namespace otbr {
 
 class Csprng
@@ -63,10 +60,7 @@ public:
 
 private:
     Csprng(void);
-    ~Csprng(void);
-
-    mbedtls_entropy_context  mEntropyContext;
-    mbedtls_ctr_drbg_context mCtrDrbgContext;
+    ~Csprng(void) = default;
 
     bool mInitialized;
 };

@@ -87,15 +87,15 @@ typedef struct radio_info {
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
 /**************************************************************************//**
- * API to get the PHY's FCS setting of the given channel.
- * @return PHY's FCS setting of the given channel
+ * API to get the PHY's FCS type of the given channel.
+ * @return PHY's FCS type: 0 = 4-byte FCS, 1 = 2-byte FCS
  *****************************************************************************/
 uint8_t get_fsk_fcs_type(void);
 
 /**************************************************************************//**
  * API to set the WiSUN FSK FCS type field of the packet header.
  *
- * @param[in] new_fsk_fcs_type New fcs_type to set
+ * @param[in] new_fsk_fcs_type New FCS type to set (0 = 4-byte, 1 = 2-byte)
  *****************************************************************************/
 void set_fsk_fcs_type(uint8_t new_fsk_fcs_type);
 

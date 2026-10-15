@@ -100,9 +100,19 @@ extern uint32_t __ResetReasonStart__[];
 // Global Variables
 // -----------------------------------------------------------------------------
 
-// Place RAM vector table in dedicated .ram_vector_table section (regular RAM)
+// Place RAM vector table in dedicated .ram_vector_table section (regular RAM).
+// VTOR requires the start address to be aligned to the next power of two >= the
+// table size
+#define BTL_RAM_VECTOR_TABLE_BYTES  ((TOTAL_INTERRUPTS) * 4)
+#define BTL_RAM_VECTOR_TABLE_ALIGN               \
+  (BTL_RAM_VECTOR_TABLE_BYTES <= 512  ? 512  :   \
+   BTL_RAM_VECTOR_TABLE_BYTES <= 1024 ? 1024 :   \
+   BTL_RAM_VECTOR_TABLE_BYTES <= 2048 ? 2048 : 4096)
+#if BTL_RAM_VECTOR_TABLE_BYTES > 4096
+#error "Bootloader RAM vector table exceeds 4096 bytes; not supported on this build."
+#endif
 tVectorEntry ramVectorTable[TOTAL_INTERRUPTS]
-  __attribute__((section(".ram_vector_table"), aligned(512)));
+  __attribute__((section(".ram_vector_table"), aligned(BTL_RAM_VECTOR_TABLE_ALIGN)));
 
 // -----------------------------------------------------------------------------
 // Function Declarations

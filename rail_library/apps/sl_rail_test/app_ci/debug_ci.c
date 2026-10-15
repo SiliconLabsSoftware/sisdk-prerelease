@@ -842,6 +842,17 @@ void resetChip(sl_cli_command_arg_t *args)
   // output garbage characters
   serialWaitForTxIdle();
 
+#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 353) && !defined(FPGA) \
+  && (!defined(SL_WIFI_COMPONENT_INCLUDED) || (SL_WIFI_COMPONENT_INCLUDED == 0))
+  // Avoid ~16 s SE watchdog recovery when Wi-Fi is off but its clock is enabled.
+  // PGEVEREST-4485 needs this clock during power-down; clear it only once Wi-Fi is off.
+  // TODO: Remove when Platform provides a supported reset sequence.
+  __disable_irq(); // Keep interrupts from changing host power state before reset.
+  if ((EMU_CFGNS->PWRSTATUS & EMU_PWRSTATUS_DIGDOMSTATUS_PD1WIFI0BASE) == 0U) {
+    CMU->WIFICLKCTRL_CLR = CMU_WIFICLKCTRL_CLKEN;
+  }
+#endif
+
   // Use the NVIC to reset the chip
   NVIC_SystemReset();
 }

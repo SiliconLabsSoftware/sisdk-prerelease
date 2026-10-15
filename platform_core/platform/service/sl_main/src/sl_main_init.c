@@ -38,6 +38,10 @@
 #include "sl_component_catalog.h"
 #endif
 
+#if defined(SL_CATALOG_BLISS_INIT_PRESENT)
+#include "sl_bliss_init.h"
+#endif
+
 #if defined(SL_CATALOG_LOG_COMPONENT_PRESENT)
 #include "sl_log.h"
 #endif
@@ -266,6 +270,11 @@ void sl_main_second_stage_init(void)
 void sl_main_init(void)
 {
   SLI_METRIC_EVENT_HANDLER_START();
+
+#if defined(SL_CATALOG_BLISS_INIT_PRESENT)
+  sl_bliss_init();
+  SLI_METRIC_EVENT_HANDLER_SAVE("sl_bliss_init");
+#endif
 
 #if defined(SL_CATALOG_SEGGER_RTT_PRESENT)
   SEGGER_RTT_Init();

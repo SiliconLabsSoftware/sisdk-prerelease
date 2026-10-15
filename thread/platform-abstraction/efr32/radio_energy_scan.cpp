@@ -111,6 +111,7 @@ private:
     InstanceState  mInstance;
     ExecutionState mExecution;
     uint16_t       mChannel;
+    bool           mSampleTimerPending;
 
 public:
     // Constructors
@@ -140,6 +141,10 @@ public:
     void        processEnergyReading();
     void        incrementFrameCounter();
     void        completeScan();
+
+    // A sample timer is pending when the next reading has been armed.
+    void setSampleTimerPending(bool pending);
+    bool hasSampleTimerPending() const;
 };
 
 // Per-instance scan storage
@@ -262,12 +267,25 @@ uint16_t getSymbolDurationUs(void)
 
 sl_rail_status_t scheduleNextReading(EnergyScan *scan, uint16_t symbols)
 {
+    sl_rail_status_t status = SL_RAIL_STATUS_INVALID_PARAMETER;
+
+    otEXPECT(scan != nullptr);
+
+    scan->setSampleTimerPending(false);
+
     sli_ot_radio_interface_cancel_timer(&rail_timer);
-    return sli_ot_radio_interface_set_timer(&rail_timer,
-                                            symbols * getSymbolDurationUs(),
-                                            SL_RAIL_TIME_DELAY,
-                                            timer_handler,
-                                            scan);
+    status = sli_ot_radio_interface_set_timer(&rail_timer,
+                                              symbols * getSymbolDurationUs(),
+                                              SL_RAIL_TIME_DELAY,
+                                              timer_handler,
+                                              scan);
+    if ((status == SL_RAIL_STATUS_NO_ERROR) && scan->isInProgress())
+    {
+        scan->setSampleTimerPending(true);
+    }
+
+exit:
+    return status;
 }
 
 // Common implementation for both sync and async scans
@@ -284,27 +302,27 @@ exit:
     return status;
 }
 
-// Finalize the energy scan when all readings are complete.
-// Reports the result and re-enables frame detection.
+// Mark the scan completed. The object stays alive.
+// Async scans are reported and deleted by sli_ot_energy_scan_process.
+// Sync scans are deleted by the caller after it reads the result.
 void finalizeEnergyScan(EnergyScan *scan)
 {
     sl_rail_status_t status;
 
     otEXPECT(scan != nullptr);
 
-    // Energy scan complete, report RSSI value
     scan->completeScan();
-
-    // Report completion for async scans only
-    // Sync scans will call this after extracting the result
-    if (scan->isAsynchronous())
-    {
-        processCompletion(scan);
-    }
+    sli_ot_radio_interface_cancel_timer(&rail_timer);
 
     // Re-enable frame detection
     status =
         sli_ot_radio_interface_config_rx_options(SL_RAIL_RX_OPTION_DISABLE_FRAME_DETECTION, SL_RAIL_RX_OPTIONS_NONE);
+
+    if (scan->isAsynchronous())
+    {
+        otSysEventSignalPending();
+    }
+
     otEXPECT(status == SL_RAIL_STATUS_NO_ERROR);
 
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
@@ -322,7 +340,9 @@ void timer_handler(struct sl_rail_multi_timer *tmr, sl_rail_time_t expectedTimeO
     OT_UNUSED_VARIABLE(expectedTimeOfEvent);
 
     EnergyScan *scan = static_cast<EnergyScan *>(cbArg);
+
     otEXPECT(scan != nullptr);
+    otEXPECT(scan->isInProgress());
 
     // Process the current energy reading
     scan->processEnergyReading();
@@ -330,17 +350,23 @@ void timer_handler(struct sl_rail_multi_timer *tmr, sl_rail_time_t expectedTimeO
     // Increment frame counter after processing this reading
     scan->incrementFrameCounter();
 
-    // Determine next action based on remaining readings
     if (scan->hasMoreReadings())
     {
-        // More readings needed - schedule next reading
-        scheduleNextReading(scan, SYMBOLS_PER_ENERGY_READING);
+        sl_rail_status_t status;
+        status = scheduleNextReading(scan, SYMBOLS_PER_ENERGY_READING);
+        // A late timer runs the callback and still returns success. Any other
+        // status is unexpected. When asserts are compiled out, fall through
+        // and finish the scan so it does not stay InProgress with no timer.
+        OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
+
+        // The callback may already have finished this scan, or armed the next sample.
+        if (!scan->isInProgress() || scan->hasSampleTimerPending())
+        {
+            goto exit;
+        }
     }
-    else
-    {
-        // All readings complete - finalize scan
-        finalizeEnergyScan(scan);
-    }
+
+    finalizeEnergyScan(scan);
 
 exit:
     return;
@@ -364,6 +390,7 @@ EnergyScan::EnergyScan(otInstance *instance, uint16_t channel, sl_rail_time_t du
     mExecution.frameCounter    = 0;
     mExecution.frameCounterMax = duration / (getSymbolDurationUs() * SYMBOLS_PER_ENERGY_READING);
     mExecution.maxReading      = ENERGY_SCAN_MIN_RSSI;
+    mSampleTimerPending        = false;
 
     // Make sure we perform at least one reading
     if (mExecution.frameCounterMax == 0)
@@ -439,7 +466,7 @@ bool EnergyScan::hasMoreReadings() const
 sl_status_t EnergyScan::start()
 {
     sl_rail_status_t status        = SL_RAIL_STATUS_NO_ERROR;
-    sl_status_t      result        = SL_STATUS_OK;
+    sl_status_t      result        = SL_STATUS_FAIL;
     efr32BandConfig *config        = nullptr;
     efr32BandConfig *currentConfig = nullptr;
 
@@ -459,23 +486,29 @@ sl_status_t EnergyScan::start()
     // Disable frame detection during energy scan
     status = sli_ot_radio_interface_config_rx_options(SL_RAIL_RX_OPTION_DISABLE_FRAME_DETECTION,
                                                       SL_RAIL_RX_OPTION_DISABLE_FRAME_DETECTION);
-    otEXPECT_ACTION(status == SL_RAIL_STATUS_NO_ERROR, result = SL_STATUS_FAIL);
 
-    otEXPECT_ACTION(sli_ot_radio_interface_set_rx((uint8_t)mChannel) == OT_ERROR_NONE, result = SL_STATUS_FAIL);
+    otEXPECT(status == SL_RAIL_STATUS_NO_ERROR);
 
-    // Schedule initial timer for first sample:
-    // sync scan finishes after this single sample
-    // async scan reschedules in timer_handler
-    status = scheduleNextReading(this, SYMBOLS_PER_ENERGY_READING);
-    otEXPECT_ACTION(status == SL_RAIL_STATUS_NO_ERROR, result = SL_STATUS_FAIL);
+    otEXPECT(sli_ot_radio_interface_set_rx((uint8_t)mChannel) == OT_ERROR_NONE);
 
-    // Mark scan as in progress only after successful initialization
+    // Mark scan as in progress before scheduling the first reading so that synchronous call return wont cause issues
     mInstance.status = EnergyScanStatus::InProgress;
+
+    status = scheduleNextReading(this, SYMBOLS_PER_ENERGY_READING);
+    OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
+
+    if (isCompleted() || hasSampleTimerPending())
+    {
+        result = SL_STATUS_OK;
+    }
 
 exit:
     if (result != SL_STATUS_OK)
     {
         mInstance.status = EnergyScanStatus::Idle;
+
+        // Re-enable frame detection
+        sli_ot_radio_interface_config_rx_options(SL_RAIL_RX_OPTION_DISABLE_FRAME_DETECTION, SL_RAIL_RX_OPTIONS_NONE);
     }
 
     return result;
@@ -511,6 +544,17 @@ void EnergyScan::completeScan()
 {
     mInstance.resultDbm = mExecution.maxReading;
     mInstance.status    = EnergyScanStatus::Completed;
+    setSampleTimerPending(false);
+}
+
+void EnergyScan::setSampleTimerPending(bool pending)
+{
+    mSampleTimerPending = pending;
+}
+
+bool EnergyScan::hasSampleTimerPending() const
+{
+    return mSampleTimerPending;
 }
 
 //------------------------------------------------------------------------------
@@ -599,11 +643,10 @@ sl_status_t sli_ot_energy_scan(otInstance    *aInstance,
     otEXPECT_ACTION(sEnergyScans[index] == nullptr, status = SL_STATUS_BUSY);
 
     // Create and start synchronous scan for the specified instance
-    scan   = new EnergyScan(aInstance, aChannel, aAveragingTimeUs, false);
-    status = startEnergyScan(scan);
-    otEXPECT(status == SL_STATUS_OK);
-
+    scan                = new EnergyScan(aInstance, aChannel, aAveragingTimeUs, false);
     sEnergyScans[index] = scan;
+    status              = startEnergyScan(scan);
+    otEXPECT(status == SL_STATUS_OK);
 
     // Wait for completion and get the result
     status = waitForSyncScanCompletion(scan, aResult);
@@ -615,11 +658,6 @@ sl_status_t sli_ot_energy_scan(otInstance    *aInstance,
 exit:
     if (status != SL_STATUS_OK)
     {
-        if (scan != nullptr && sEnergyScans[index] != scan)
-        {
-            delete scan;
-            scan = nullptr;
-        }
         sli_ot_energy_scan_deinit_instance(aInstance);
     }
 
@@ -635,22 +673,15 @@ sl_status_t sli_ot_energy_scan_async(otInstance *aInstance, uint16_t aChannel, s
 
     otEXPECT_ACTION(sEnergyScans[index] == nullptr, status = SL_STATUS_BUSY);
 
-    // Create and start asynchronous scan
-    // Only set per-instance pointer when start is successful
-    scan   = new EnergyScan(aInstance, aChannel, aAveragingTimeUs, true);
-    status = startEnergyScan(scan);
-    otEXPECT(status == SL_STATUS_OK);
-
+    // Publish the scan before start so a callback during the first arm can see it.
+    scan                = new EnergyScan(aInstance, aChannel, aAveragingTimeUs, true);
     sEnergyScans[index] = scan;
+    status              = startEnergyScan(scan);
+    otEXPECT(status == SL_STATUS_OK);
 
 exit:
     if (status != SL_STATUS_OK)
     {
-        if (scan != nullptr && sEnergyScans[index] != scan)
-        {
-            delete scan;
-            scan = nullptr;
-        }
         sli_ot_energy_scan_deinit_instance(aInstance);
     }
 

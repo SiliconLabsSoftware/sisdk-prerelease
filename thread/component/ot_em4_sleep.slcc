@@ -1,0 +1,32 @@
+id: ot_em4_sleep
+label: OpenThread EM4 Sleep
+package: thread
+category: OpenThread|Platform
+quality: evaluation
+description: >
+  Series 2 EM4 deep sleep with BURTC. Requires EM4GRPACLK sourced from ULFRCO
+  and a single OpenThread instance. After a request, EM4 entry is attempted on
+  the next Power Manager EM2 transition.
+
+provides:
+- name: ot_em4_sleep
+
+requires:
+- name: device_series_2
+- name: ot_platform_abstraction
+- name: power_manager
+- name: hal_burtc
+- name: clock_manager_runtime
+
+template_contribution:
+- name: component_catalog
+  value: ot_em4_sleep
+
+include:
+- path: platform-abstraction/efr32
+  file_list:
+  - path: em4_sleep.h
+
+source:
+- path: platform-abstraction/efr32/em4_sleep.c
+root_path: thread

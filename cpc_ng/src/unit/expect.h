@@ -57,65 +57,66 @@ mock_cpc_tx_packet_t *test_pop_outgoing(unsigned int lineno, uint32_t timeout, s
 mock_cpc_tx_packet_t *test_pop_outgoing_payload(unsigned int lineno, uint32_t timeout, sl_cpc_drv_mock_t *drv,
                                                 const cpc_frame_expect_t expect);
 
-/// Default polling budget for `TEST_ASSERT_OUTGOING` and `TEST_POP_OUTGOING`.
+/// Default polling budget for @ref TEST_ASSERT_OUTGOING and @ref TEST_POP_OUTGOING.
 #define TEST_ASSERT_OUTGOING_DEFAULT_TIMEOUT 10
 
 /**
- * @brief Convenience macro: assert the next outgoing frame matches the `cpc_expect_t`.
+ * @brief Assert the next outgoing frame on @p bus matches the expect.
+ *
+ * @p bus is any CPC bus owned by a mock driver (e.g. @ref CPC_TEST_MOCK_BUS).
+ * The mock drv is recovered via @ref sl_cpc_drv_mock_from_bus.
  *
  * Example:
  * @code
- *   TEST_ASSERT_OUTGOING({
+ *   TEST_ASSERT_OUTGOING(bus, {
  *     .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_RESET,
  *   });
  * @endcode
  */
-#define TEST_ASSERT_OUTGOING(...)                                                               \
-  test_assert_outgoing(__LINE__, TEST_ASSERT_OUTGOING_DEFAULT_TIMEOUT, sl_cpc_drv_mock_default, \
+#define TEST_ASSERT_OUTGOING(bus, ...)                                                                \
+  test_assert_outgoing(__LINE__, TEST_ASSERT_OUTGOING_DEFAULT_TIMEOUT, sl_cpc_drv_mock_from_bus(bus), \
                        (cpc_frame_expect_t)__VA_ARGS__)
 
 /**
- * @brief Convenience macro: wait for, assert, and return the next outgoing
- *        frame.
+ * @brief Wait for, assert, and return the next outgoing frame on @p bus.
  *
- * Mirrors `TEST_ASSERT_OUTGOING` but yields the captured packet so the
+ * Mirrors @ref TEST_ASSERT_OUTGOING but yields the captured packet so the
  * caller can inspect it (e.g. to read a sequence number for crafting an
  * injected ACK). The caller owns the returned packet and must free it
  * with `mock_cpc_tx_packet_free()`.
  */
-#define TEST_POP_OUTGOING(...)                                                               \
-  test_pop_outgoing(__LINE__, TEST_ASSERT_OUTGOING_DEFAULT_TIMEOUT, sl_cpc_drv_mock_default, \
+#define TEST_POP_OUTGOING(bus, ...)                                                                \
+  test_pop_outgoing(__LINE__, TEST_ASSERT_OUTGOING_DEFAULT_TIMEOUT, sl_cpc_drv_mock_from_bus(bus), \
                     (cpc_frame_expect_t)__VA_ARGS__)
 
 /**
- * @brief Wait for the next non-empty outgoing frame, skipping standalone ACKs.
+ * @brief Wait for the next non-empty outgoing frame on @p bus, skipping
+ *        standalone ACKs.
  *
- * Uses the same timeout budget as `TEST_POP_OUTGOING` for both waiting on
- * the driver and discarding zero-payload frames.
+ * Uses the same timeout budget as @ref TEST_POP_OUTGOING for both waiting
+ * on the driver and discarding zero-payload frames.
  */
-#define TEST_POP_OUTGOING_PAYLOAD(...)                                                               \
-  test_pop_outgoing_payload(__LINE__, TEST_ASSERT_OUTGOING_DEFAULT_TIMEOUT, sl_cpc_drv_mock_default, \
+#define TEST_POP_OUTGOING_PAYLOAD(bus, ...)                                                                \
+  test_pop_outgoing_payload(__LINE__, TEST_ASSERT_OUTGOING_DEFAULT_TIMEOUT, sl_cpc_drv_mock_from_bus(bus), \
                             (cpc_frame_expect_t)__VA_ARGS__)
 
-#define TEST_ASSERT_DRV_PENDING_TX(_count) \
-  TEST_ASSERT_EQUAL(_count, mock_cpc_drv_pending_tx_count(sl_cpc_drv_mock_default))
+#define TEST_ASSERT_DRV_PENDING_TX(bus, count) \
+  TEST_ASSERT_EQUAL(count, mock_cpc_drv_pending_tx_count(sl_cpc_drv_mock_from_bus(bus)))
 
 /**
- * @brief Inject a CPC frame into the mock driver as if it had been received
- *        from the wire.
+ * @brief Inject a CPC frame on @p bus as if it had been received from the wire.
  *
- * Takes the same designated-initializer syntax as `TEST_ASSERT_OUTGOING`:
+ * Takes the same designated-initializer syntax as @ref TEST_ASSERT_OUTGOING:
  * the caller supplies the braces, the macro wraps them into a
- * `cpc_frame_expect_t` compound literal. Uses the test's `sl_cpc_drv_mock_default`
- * global.
+ * `cpc_frame_expect_t` compound literal.
  *
  * Example -- acknowledge a frame the test just observed:
  * @code
- *   TEST_INJECT_FRAME({ .ack = 1 });
+ *   TEST_INJECT_FRAME(bus, { .ack = 1 });
  * @endcode
  */
-#define TEST_INJECT_FRAME(...) \
-  mock_cpc_drv_inject_frame(__LINE__, sl_cpc_drv_mock_default, &(cpc_frame_expect_t)__VA_ARGS__)
+#define TEST_INJECT_FRAME(bus, ...) \
+  mock_cpc_drv_inject_frame(__LINE__, sl_cpc_drv_mock_from_bus(bus), &(cpc_frame_expect_t)__VA_ARGS__)
 
 #ifdef __cplusplus
 }

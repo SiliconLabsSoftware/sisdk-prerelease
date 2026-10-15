@@ -20,22 +20,21 @@
 #include "../sli_cpc_endianness.h"
 #include "../sli_cpc_ep.h"
 #include "../sli_cpc_hdr.h"
-#include "sl_cpc_bus_instances.h"
 #include "sl_cpc_drv_mock.h"
 
 #include "../../port/mock/src/mock_cpc_timer.h"
 #include "expect.h"
 #include "fixture.h"
 
-#define TEST_POP_CONTROL_PAYLOAD() \
-  TEST_POP_OUTGOING_PAYLOAD({      \
-    .flags = -1,                   \
-    .len = -1,                     \
-    .dst = SL_CPC_EP_ID_CONTROL,   \
-    .seq = -1,                     \
-    .ack = -1,                     \
-    .wnd = -1,                     \
-  })
+#define TEST_POP_CONTROL_PAYLOAD(bus)                             \
+  TEST_POP_OUTGOING_PAYLOAD((bus), {                              \
+                                     .flags = -1,                 \
+                                     .len = -1,                   \
+                                     .dst = SL_CPC_EP_ID_CONTROL, \
+                                     .seq = -1,                   \
+                                     .ack = -1,                   \
+                                     .wnd = -1,                   \
+                                   })
 
 TEST_GROUP(cpc_control);
 
@@ -65,7 +64,7 @@ static uint16_t pack_control_command(uint8_t *out, size_t out_cap, uint8_t type,
   sli_cpc_control_header_set_payload_size(&command->header, payload_len);
   sli_cpc_control_header_set_op_id(&command->header, request_op_id);
   sli_cpc_control_header_set_type(&command->header, type);
-  sli_cpc_control_header_set_status(&command->header, status);
+  command->header.status = status;
 
   if (payload_len > 0) {
     TEST_ASSERT_NOT_NULL(payload);
@@ -95,31 +94,33 @@ static void assert_control_type(const sli_cpc_control_header_t *hdr, uint8_t typ
  *
  * @return Sequence number of the DUT SYN (used to derive subsequent seq/ack).
  */
-static uint8_t complete_primary_control_handshake(void)
+static uint8_t complete_primary_control_handshake(sl_cpc_bus_t *bus)
 {
-  mock_cpc_tx_packet_t *dut_syn = TEST_POP_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
-    .len = sizeof(g_bus->ctrl.rx_data),
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = -1,
-    .ack = -1,
-    .wnd = -1,
-  });
-  uint8_t our_syn_seq = sli_cpc_header_get_seq(&dut_syn->header);
+  mock_cpc_tx_packet_t *dut_syn;
+
+  dut_syn = TEST_POP_OUTGOING(bus, {
+                                     .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                                     .len = sizeof(bus->ctrl.rx_data),
+                                     .dst = SL_CPC_EP_ID_CONTROL,
+                                     .seq = -1,
+                                     .ack = -1,
+                                     .wnd = -1,
+                                   });
+  uint8_t our_syn_seq = dut_syn->header.seq;
 
   mock_cpc_tx_packet_free(&dut_syn);
 
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
-    .len = CPC_TEST_PEER_MTU,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = CPC_TEST_PEER_SYN_SEQ,
-    .ack = (int)(our_syn_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                           .len = CPC_TEST_PEER_MTU,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = CPC_TEST_PEER_SYN_SEQ,
+                           .ack = (int)(our_syn_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                         });
 
   // Process peer SYN-ACK and enter CONNECTED (starts the control init sequence).
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   return our_syn_seq;
 }
@@ -129,49 +130,49 @@ static uint8_t complete_primary_control_handshake(void)
  *
  * Consumes the startup RESET first. Returns the DUT SYN sequence number.
  */
-static uint8_t complete_secondary_control_handshake(void)
+static uint8_t complete_secondary_control_handshake(sl_cpc_bus_t *bus)
 {
   mock_cpc_tx_packet_t *dut_syn;
   uint8_t our_syn_seq;
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_RESET,
-    .len = 0,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = -1,
-    .ack = -1,
-    .wnd = -1,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_RESET,
+                              .len = 0,
+                              .dst = SL_CPC_EP_ID_CONTROL,
+                              .seq = -1,
+                              .ack = -1,
+                              .wnd = -1,
+                            });
 
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
-    .len = CPC_TEST_PEER_MTU,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = CPC_TEST_PEER_SYN_SEQ,
-    .ack = 0,
-    .wnd = CPC_TEST_PEER_RX_WND,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                           .len = CPC_TEST_PEER_MTU,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = CPC_TEST_PEER_SYN_SEQ,
+                           .ack = 0,
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                         });
 
-  dut_syn = TEST_POP_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
-    .len = sizeof(g_bus->ctrl.rx_data),
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = -1,
-    .ack = (int)(CPC_TEST_PEER_SYN_SEQ + 1U),
-    .wnd = -1,
-  });
-  our_syn_seq = sli_cpc_header_get_seq(&dut_syn->header);
+  dut_syn = TEST_POP_OUTGOING(bus, {
+                                     .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                                     .len = sizeof(bus->ctrl.rx_data),
+                                     .dst = SL_CPC_EP_ID_CONTROL,
+                                     .seq = -1,
+                                     .ack = (int)(CPC_TEST_PEER_SYN_SEQ + 1U),
+                                     .wnd = -1,
+                                   });
+  our_syn_seq = dut_syn->header.seq;
   mock_cpc_tx_packet_free(&dut_syn);
 
-  TEST_INJECT_FRAME({
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = (int)(CPC_TEST_PEER_SYN_SEQ + 1U),
-    .ack = (int)(our_syn_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = (int)(CPC_TEST_PEER_SYN_SEQ + 1U),
+                           .ack = (int)(our_syn_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                         });
 
   // Process peer's final handshake ACK and enter CONNECTED.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   return our_syn_seq;
 }
@@ -179,97 +180,97 @@ static uint8_t complete_secondary_control_handshake(void)
 /**
  * @brief Connect primary control.
  */
-static void start_primary_control_connected(void)
+static void start_primary_control_connected(sl_cpc_bus_t *bus)
 {
   mock_cpc_tx_packet_t *packet;
   sl_status_t status;
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  complete_primary_control_handshake();
+  complete_primary_control_handshake(bus);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   mock_cpc_tx_packet_free(&packet);
   // Submit standalone ACK left on the TX queue after the handshake request.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 }
 
 /**
  * @brief Connect secondary control.
  */
-static void start_secondary_control_connected(void)
+static void start_secondary_control_connected(sl_cpc_bus_t *bus)
 {
   sl_status_t status;
 
-  cpc_test_set_role_secondary();
+  cpc_test_set_role_secondary(bus);
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  complete_secondary_control_handshake();
+  complete_secondary_control_handshake(bus);
   // Submit standalone ACK left on the TX queue after the handshake.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 }
 
 /**
  * @brief Init and mark a user endpoint as already CONNECTED on the test bus.
  */
-static void open_connected_user_ep(sl_cpc_ep_t *ep, uint8_t id)
+static void open_connected_user_ep(sl_cpc_ep_t *ep, sl_cpc_bus_t *bus, uint8_t id)
 {
   sl_status_t status;
 
   status = sl_cpc_ep_init(ep, id, CPC_TEST_RX_SIZE, cpc_test_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  status = cpc_test_set_ep_connected(ep, g_bus, 1U, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, CPC_TEST_PEER_MTU,
+  status = cpc_test_set_ep_connected(ep, bus, 1U, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, CPC_TEST_PEER_MTU,
                                      CPC_TEST_PEER_RX_WND);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CONNECTED, ep->state);
-  TEST_ASSERT_TRUE((ep->flags & SLI_CPC_EP_FLAG_OPENED) != 0);
+  TEST_ASSERT_BITS_HIGH(SLI_CPC_EP_FLAG_OPENED, ep->flags);
 }
 
 /**
  * @brief Peer RESET on the control EP; pump through on_closed and user ERROR.
  */
-static void trigger_control_close_via_reset(void)
+static void trigger_control_close_via_reset(sl_cpc_bus_t *bus)
 {
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_RESET,
-    .len = 0,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = 0,
-    .ack = 0,
-    .wnd = 0,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_RESET,
+                           .len = 0,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = 0,
+                           .ack = 0,
+                           .wnd = 0,
+                         });
   // Process peer RESET: terminate control EP.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Finish control CLOSED / on_closed (error active users, re-attach).
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Drain any follow-up processing from teardown.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 }
 
 /**
  * @brief Finish primary reconnect so the recovery SYN is ACKed and returned to the TX pool.
  */
-static void finish_primary_control_reconnect(void)
+static void finish_primary_control_reconnect(sl_cpc_bus_t *bus)
 {
   mock_cpc_tx_packet_t *packet;
 
-  complete_primary_control_handshake();
+  complete_primary_control_handshake(bus);
 
   // Discard the PROTOCOL_VERSION request queued by on_connected.
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   mock_cpc_tx_packet_free(&packet);
   // Submit standalone ACK left on the TX queue after the handshake request.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 }
 
 /******************************************************************************/
@@ -280,11 +281,13 @@ static void finish_primary_control_reconnect(void)
  * @brief Primary happy path: full init sequence through bus bring-up.
  *
  * Exercises PROTOCOL_VERSION → RESET_REASON → PHY_CAPABILITIES → BUS_ENABLE,
- * asserting !g_bus->initialized and !g_bus->ctrl.initialized after each step, and that
+ * asserting !bus->initialized and !bus->ctrl.initialized after each step, and that
  * both flags are raised only after the final BUS_ENABLE response is processed.
  */
 TEST(cpc_control, primary_init_sequence)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   uint8_t ctrl_payload[sizeof(sli_cpc_control_header_t) + 16];
   sli_cpc_protocol_version_response_t version_resp;
   const sli_cpc_protocol_version_request_t *req;
@@ -298,19 +301,19 @@ TEST(cpc_control, primary_init_sequence)
   uint8_t peer_seq;
   uint8_t dut_seq;
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
-  TEST_ASSERT_FALSE(g_bus->initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
 
-  our_syn_seq = complete_primary_control_handshake();
+  our_syn_seq = complete_primary_control_handshake(bus);
   peer_seq = (uint8_t)(CPC_TEST_PEER_SYN_SEQ + 1U);
   dut_seq = (uint8_t)(our_syn_seq + 1U);
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
   // PROTOCOL_VERSION request
-  packet = TEST_POP_CONTROL_PAYLOAD();
-  TEST_ASSERT_EQUAL_UINT8(dut_seq, sli_cpc_header_get_seq(&packet->header));
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
+  TEST_ASSERT_EQUAL_UINT8(dut_seq, packet->header.seq);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION, false);
   TEST_ASSERT_EQUAL_UINT16(sizeof(sli_cpc_protocol_version_request_t), sli_cpc_control_header_get_payload_size(hdr));
@@ -325,25 +328,25 @@ TEST(cpc_control, primary_init_sequence)
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload),
                                   (uint8_t)(SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION | SLI_CPC_CTRL_TYPE_RESPONSE_FLAG),
                                   request_op_id, SLI_CPC_CTRL_STATUS_OK, &version_resp, sizeof(version_resp));
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   peer_seq++;
   dut_seq++;
   // Process PROTOCOL_VERSION response and advance to RESET_REASON request.
-  cpc_test_pump();
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  cpc_test_pump(bus);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
   // RESET_REASON request
-  packet = TEST_POP_CONTROL_PAYLOAD();
-  TEST_ASSERT_EQUAL_UINT8(dut_seq, sli_cpc_header_get_seq(&packet->header));
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
+  TEST_ASSERT_EQUAL_UINT8(dut_seq, packet->header.seq);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_RESET_REASON, false);
   TEST_ASSERT_EQUAL_UINT16(0, sli_cpc_control_header_get_payload_size(hdr));
@@ -354,25 +357,25 @@ TEST(cpc_control, primary_init_sequence)
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload),
                                   (uint8_t)(SLI_CPC_CTRL_TYPE_RESET_REASON | SLI_CPC_CTRL_TYPE_RESPONSE_FLAG),
                                   request_op_id, SLI_CPC_CTRL_STATUS_OK, &reset_resp, sizeof(reset_resp));
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   peer_seq++;
   dut_seq++;
   // Process RESET_REASON response and advance to PHY_CAPABILITIES request.
-  cpc_test_pump();
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  cpc_test_pump(bus);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
   // PHY_CAPABILITIES request (empty caps is fine)
-  packet = TEST_POP_CONTROL_PAYLOAD();
-  TEST_ASSERT_EQUAL_UINT8(dut_seq, sli_cpc_header_get_seq(&packet->header));
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
+  TEST_ASSERT_EQUAL_UINT8(dut_seq, packet->header.seq);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_PHY_CAPABILITIES, false);
   request_op_id = sli_cpc_control_header_get_op_id(hdr);
@@ -381,25 +384,25 @@ TEST(cpc_control, primary_init_sequence)
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload),
                                   (uint8_t)(SLI_CPC_CTRL_TYPE_PHY_CAPABILITIES | SLI_CPC_CTRL_TYPE_RESPONSE_FLAG),
                                   request_op_id, SLI_CPC_CTRL_STATUS_OK, NULL, 0);
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   peer_seq++;
   dut_seq++;
   // Process PHY_CAPABILITIES response and advance to BUS_ENABLE request.
-  cpc_test_pump();
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  cpc_test_pump(bus);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
   // BUS_ENABLE request
-  packet = TEST_POP_CONTROL_PAYLOAD();
-  TEST_ASSERT_EQUAL_UINT8(dut_seq, sli_cpc_header_get_seq(&packet->header));
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
+  TEST_ASSERT_EQUAL_UINT8(dut_seq, packet->header.seq);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_BUS_ENABLE, false);
   TEST_ASSERT_EQUAL_UINT16(0, sli_cpc_control_header_get_payload_size(hdr));
@@ -409,46 +412,48 @@ TEST(cpc_control, primary_init_sequence)
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload),
                                   (uint8_t)(SLI_CPC_CTRL_TYPE_BUS_ENABLE | SLI_CPC_CTRL_TYPE_RESPONSE_FLAG),
                                   request_op_id, SLI_CPC_CTRL_STATUS_OK, NULL, 0);
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
-  // Process BUS_ENABLE response: sets g_bus->ctrl.initialized during RX.
-  cpc_test_pump();
-  TEST_ASSERT_TRUE(g_bus->ctrl.initialized);
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
+  // Process BUS_ENABLE response: sets bus->ctrl.initialized during RX.
+  cpc_test_pump(bus);
+  TEST_ASSERT_TRUE(bus->ctrl.initialized);
   // Process process_bus_initialized.
-  cpc_test_pump();
-  TEST_ASSERT_TRUE(g_bus->initialized);
+  cpc_test_pump(bus);
+  TEST_ASSERT_TRUE(bus->initialized);
 
   // ACK the final response so tear-down does not leave frames in retx.
-  TEST_INJECT_FRAME({
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = (int)(peer_seq + 1U),
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = (int)(peer_seq + 1U),
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                         });
   // Process peer ACK of the final control response.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Submit standalone ACK queued when the BUS_ENABLE response was processed.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 }
 
 /**
  * @brief Secondary happy path: peer-driven init sequence through bus bring-up.
  *
- * Exercises the responder-side init chain, asserting !g_bus->initialized and
- * !g_bus->ctrl.initialized after each step. Control initialized is set from
+ * Exercises the responder-side init chain, asserting !bus->initialized and
+ * !bus->ctrl.initialized after each step. Control initialized is set from
  * send_done on the BUS_ENABLE response, not on RX as on the primary.
  */
 TEST(cpc_control, secondary_init_sequence)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   uint8_t ctrl_payload[sizeof(sli_cpc_control_header_t) + 16];
   sli_cpc_protocol_version_request_t version_req;
   const sli_cpc_control_header_t *hdr;
@@ -460,45 +465,45 @@ TEST(cpc_control, secondary_init_sequence)
   uint8_t peer_seq;
   uint8_t dut_seq;
 
-  cpc_test_set_role_secondary();
+  cpc_test_set_role_secondary(bus);
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
-  TEST_ASSERT_FALSE(g_bus->initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
 
-  our_syn_seq = complete_secondary_control_handshake();
+  our_syn_seq = complete_secondary_control_handshake(bus);
   // Ack-only third leg does not take sequence space (no ACK_REQ), so the next
   // reliable peer frame still uses the seq that completed the handshake.
   peer_seq = (uint8_t)(CPC_TEST_PEER_SYN_SEQ + 1U);
   dut_seq = (uint8_t)(our_syn_seq + 1U);
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
   // PROTOCOL_VERSION request → response
   version_req.version_major = SL_CPC_VERSION_MAJOR;
   version_req.version_minor = SL_CPC_VERSION_MINOR;
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload), SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION, request_op_id,
                                   SLI_CPC_CTRL_STATUS_OK, &version_req, sizeof(version_req));
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = dut_seq,
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = dut_seq,
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   peer_seq++;
   // Process PROTOCOL_VERSION request and send the response.
-  cpc_test_pump();
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  cpc_test_pump(bus);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
-  TEST_ASSERT_EQUAL_UINT8(dut_seq, sli_cpc_header_get_seq(&packet->header));
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
+  TEST_ASSERT_EQUAL_UINT8(dut_seq, packet->header.seq);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION, true);
-  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_OK, sli_cpc_control_header_get_status(hdr));
+  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_OK, hdr->status);
   TEST_ASSERT_EQUAL_UINT16(request_op_id, sli_cpc_control_header_get_op_id(hdr));
   const sli_cpc_protocol_version_response_t *resp
     = (const sli_cpc_protocol_version_response_t *)((const sli_cpc_control_command_t *)packet->payload)->data;
@@ -511,26 +516,26 @@ TEST(cpc_control, secondary_init_sequence)
   // RESET_REASON request → response
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload), SLI_CPC_CTRL_TYPE_RESET_REASON, request_op_id,
                                   SLI_CPC_CTRL_STATUS_OK, NULL, 0);
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = dut_seq,
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = dut_seq,
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   peer_seq++;
   // Process RESET_REASON request and send the response.
-  cpc_test_pump();
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  cpc_test_pump(bus);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
-  TEST_ASSERT_EQUAL_UINT8(dut_seq, sli_cpc_header_get_seq(&packet->header));
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
+  TEST_ASSERT_EQUAL_UINT8(dut_seq, packet->header.seq);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_RESET_REASON, true);
-  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_OK, sli_cpc_control_header_get_status(hdr));
+  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_OK, hdr->status);
   TEST_ASSERT_EQUAL_UINT16(sizeof(sli_cpc_reset_reason_response_t), sli_cpc_control_header_get_payload_size(hdr));
   mock_cpc_tx_packet_free(&packet);
   dut_seq++;
@@ -539,26 +544,26 @@ TEST(cpc_control, secondary_init_sequence)
   // PHY_CAPABILITIES request → response
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload), SLI_CPC_CTRL_TYPE_PHY_CAPABILITIES, request_op_id,
                                   SLI_CPC_CTRL_STATUS_OK, NULL, 0);
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = dut_seq,
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = dut_seq,
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   peer_seq++;
   // Process PHY_CAPABILITIES request and send the response.
-  cpc_test_pump();
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  cpc_test_pump(bus);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
-  TEST_ASSERT_EQUAL_UINT8(dut_seq, sli_cpc_header_get_seq(&packet->header));
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
+  TEST_ASSERT_EQUAL_UINT8(dut_seq, packet->header.seq);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_PHY_CAPABILITIES, true);
-  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_OK, sli_cpc_control_header_get_status(hdr));
+  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_OK, hdr->status);
   mock_cpc_tx_packet_free(&packet);
   dut_seq++;
   request_op_id++;
@@ -566,40 +571,40 @@ TEST(cpc_control, secondary_init_sequence)
   // BUS_ENABLE request → response → initialized on TX complete
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload), SLI_CPC_CTRL_TYPE_BUS_ENABLE, request_op_id,
                                   SLI_CPC_CTRL_STATUS_OK, NULL, 0);
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = dut_seq,
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = dut_seq,
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   // Process BUS_ENABLE request and send the response.
-  cpc_test_pump();
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  cpc_test_pump(bus);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
-  TEST_ASSERT_EQUAL_UINT8(dut_seq, sli_cpc_header_get_seq(&packet->header));
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
+  TEST_ASSERT_EQUAL_UINT8(dut_seq, packet->header.seq);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_BUS_ENABLE, true);
-  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_OK, sli_cpc_control_header_get_status(hdr));
+  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_OK, hdr->status);
   mock_cpc_tx_packet_free(&packet);
 
-  TEST_INJECT_FRAME({
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = (int)(peer_seq + 1U),
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = (int)(peer_seq + 1U),
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                         });
 
   // Peer ACK queues BUS_ENABLE response write-completion (send_done not yet run).
-  cpc_test_pump();
-  // send_done sets g_bus->ctrl.initialized; process_bus_initialized can raise g_bus->initialized.
-  cpc_test_pump();
-  TEST_ASSERT_TRUE(g_bus->ctrl.initialized);
-  TEST_ASSERT_TRUE(g_bus->initialized);
+  cpc_test_pump(bus);
+  // send_done sets bus->ctrl.initialized; process_bus_initialized can raise bus->initialized.
+  cpc_test_pump(bus);
+  TEST_ASSERT_TRUE(bus->ctrl.initialized);
+  TEST_ASSERT_TRUE(bus->initialized);
 }
 
 /**
@@ -611,48 +616,50 @@ TEST(cpc_control, secondary_init_sequence)
  */
 TEST(cpc_control, primary_recovers_from_reset_during_syn)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   mock_cpc_tx_packet_t *dut_syn;
   const sl_cpc_ep_t *ep;
   sl_status_t status;
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
-  TEST_ASSERT_FALSE(g_bus->initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
 
   // First active-open SYN from primary control.
-  dut_syn = TEST_POP_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
-    .len = sizeof(g_bus->ctrl.rx_data),
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = -1,
-    .ack = -1,
-    .wnd = -1,
-  });
+  dut_syn = TEST_POP_OUTGOING(bus, {
+                                     .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                                     .len = sizeof(bus->ctrl.rx_data),
+                                     .dst = SL_CPC_EP_ID_CONTROL,
+                                     .seq = -1,
+                                     .ack = -1,
+                                     .wnd = -1,
+                                   });
   mock_cpc_tx_packet_free(&dut_syn);
   // Let the first SYN sit outstanding before the peer RESET arrives.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   // Peer RESET aborts the handshake (secondary startup does this).
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_RESET,
-    .len = 0,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = 0,
-    .ack = 0,
-    .wnd = 0,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_RESET,
+                           .len = 0,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = 0,
+                           .ack = 0,
+                           .wnd = 0,
+                         });
   // Process peer RESET and tear down the outstanding SYN handshake.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   // Primary control reconnects and completes a fresh SYN handshake.
-  complete_primary_control_handshake();
+  complete_primary_control_handshake(bus);
 
   // Submit standalone ACK left on the TX queue after the handshake.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  ep = sli_cpc_bus_find_ep_from_id(g_bus, SL_CPC_EP_ID_CONTROL);
+  ep = sli_cpc_bus_find_ep_from_id(bus, SL_CPC_EP_ID_CONTROL);
   TEST_ASSERT_NOT_NULL(ep);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CONNECTED, ep->state);
 }
@@ -667,62 +674,64 @@ TEST(cpc_control, primary_recovers_from_reset_during_syn)
  */
 TEST(cpc_control, primary_recovers_from_syn_retransmit_timeout)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   mock_cpc_tx_packet_t *dut_syn;
   const sl_cpc_ep_t *ep;
   sl_status_t status;
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
-  TEST_ASSERT_FALSE(g_bus->initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
 
   // First active-open SYN from primary control; leave it unacked.
-  dut_syn = TEST_POP_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
-    .len = sizeof(g_bus->ctrl.rx_data),
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = -1,
-    .ack = -1,
-    .wnd = -1,
-  });
+  dut_syn = TEST_POP_OUTGOING(bus, {
+                                     .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                                     .len = sizeof(bus->ctrl.rx_data),
+                                     .dst = SL_CPC_EP_ID_CONTROL,
+                                     .seq = -1,
+                                     .ack = -1,
+                                     .wnd = -1,
+                                   });
   mock_cpc_tx_packet_free(&dut_syn);
-  cpc_test_pump();
-  cpc_test_wait_retx_timer();
+  cpc_test_pump(bus);
+  cpc_test_wait_retx_timer(bus);
 
   // Exhaust the retransmit retries: each expiry retransmits the outstanding SYN.
   for (unsigned int i = 0; i < SLI_CPC_RE_TRANSMIT; i++) {
     TEST_ASSERT_TRUE_MESSAGE(mock_cpc_timer_fire_next(), "Expected retransmit timer to be armed");
-    cpc_test_pump();
+    cpc_test_pump(bus);
 
-    TEST_ASSERT_OUTGOING({
-      .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
-      .len = sizeof(g_bus->ctrl.rx_data),
-      .dst = SL_CPC_EP_ID_CONTROL,
-      .seq = -1,
-      .ack = -1,
-      .wnd = -1,
-    });
-    cpc_test_wait_retx_timer();
+    TEST_ASSERT_OUTGOING(bus, {
+                                .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                                .len = sizeof(bus->ctrl.rx_data),
+                                .dst = SL_CPC_EP_ID_CONTROL,
+                                .seq = -1,
+                                .ack = -1,
+                                .wnd = -1,
+                              });
+    cpc_test_wait_retx_timer(bus);
   }
 
   // Final expiry: packet_re_transmit_count >= SLI_CPC_RE_TRANSMIT -> TIMEOUT.
   TEST_ASSERT_TRUE_MESSAGE(mock_cpc_timer_fire_next(), "Expected final retransmit timer to be armed");
   // Process timeout: terminate EP and notify ERROR (primary_on_error closes).
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Finish close / re-attach / connect so a fresh SYN is queued.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
   // Primary control reconnects and completes a fresh SYN handshake.
-  complete_primary_control_handshake();
+  complete_primary_control_handshake(bus);
 
   // Submit standalone ACK left on the TX queue after the handshake.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  ep = sli_cpc_bus_find_ep_from_id(g_bus, SL_CPC_EP_ID_CONTROL);
+  ep = sli_cpc_bus_find_ep_from_id(bus, SL_CPC_EP_ID_CONTROL);
   TEST_ASSERT_NOT_NULL(ep);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CONNECTED, ep->state);
 }
@@ -736,6 +745,8 @@ TEST(cpc_control, primary_recovers_from_syn_retransmit_timeout)
  */
 TEST(cpc_control, primary_recovers_from_version_negotiation_failure)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   uint8_t ctrl_payload[sizeof(sli_cpc_control_header_t) + 16];
   const sli_cpc_control_header_t *hdr;
   mock_cpc_tx_packet_t *packet;
@@ -747,16 +758,16 @@ TEST(cpc_control, primary_recovers_from_version_negotiation_failure)
   uint8_t peer_seq;
   uint8_t dut_seq;
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
-  TEST_ASSERT_FALSE(g_bus->initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
 
-  our_syn_seq = complete_primary_control_handshake();
+  our_syn_seq = complete_primary_control_handshake(bus);
   peer_seq = (uint8_t)(CPC_TEST_PEER_SYN_SEQ + 1U);
   dut_seq = (uint8_t)(our_syn_seq + 1U);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
-  TEST_ASSERT_EQUAL_UINT8(dut_seq, sli_cpc_header_get_seq(&packet->header));
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
+  TEST_ASSERT_EQUAL_UINT8(dut_seq, packet->header.seq);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION, false);
   request_op_id = sli_cpc_control_header_get_op_id(hdr);
@@ -766,52 +777,52 @@ TEST(cpc_control, primary_recovers_from_version_negotiation_failure)
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload),
                                   (uint8_t)(SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION | SLI_CPC_CTRL_TYPE_RESPONSE_FLAG),
                                   request_op_id, SLI_CPC_CTRL_STATUS_NOT_SUPPORTED, NULL, 0);
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   // Process the failed response: close control EP and start reconnect.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Finish close / re-attach / connect so a fresh SYN is queued.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   // Drain the ACK flushed on close for the rejected PROTOCOL_VERSION response.
-  TEST_ASSERT_OUTGOING({
-    .flags = 0,
-    .len = 0,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = 0,
-    .ack = (int)(peer_seq + 1U),
-    .wnd = -1,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = 0,
+                              .len = 0,
+                              .dst = SL_CPC_EP_ID_CONTROL,
+                              .seq = 0,
+                              .ack = (int)(peer_seq + 1U),
+                              .wnd = -1,
+                            });
 
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
   // Reconnect and restart the init sequence from PROTOCOL_VERSION.
-  our_syn_seq = complete_primary_control_handshake();
+  our_syn_seq = complete_primary_control_handshake(bus);
   dut_seq = (uint8_t)(our_syn_seq + 1U);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
-  TEST_ASSERT_EQUAL_UINT8(dut_seq, sli_cpc_header_get_seq(&packet->header));
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
+  TEST_ASSERT_EQUAL_UINT8(dut_seq, packet->header.seq);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION, false);
   mock_cpc_tx_packet_free(&packet);
 
   // Submit standalone ACK left on the TX queue after the handshake/request.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  ep = sli_cpc_bus_find_ep_from_id(g_bus, SL_CPC_EP_ID_CONTROL);
+  ep = sli_cpc_bus_find_ep_from_id(bus, SL_CPC_EP_ID_CONTROL);
   TEST_ASSERT_NOT_NULL(ep);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CONNECTED, ep->state);
-  TEST_ASSERT_FALSE(g_bus->initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
 }
 
 /**
@@ -823,6 +834,8 @@ TEST(cpc_control, primary_recovers_from_version_negotiation_failure)
  */
 TEST(cpc_control, primary_recovers_from_bus_enable_failure)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   uint8_t ctrl_payload[sizeof(sli_cpc_control_header_t) + 16];
   sli_cpc_protocol_version_response_t version_resp;
   sli_cpc_reset_reason_response_t reset_resp;
@@ -836,15 +849,15 @@ TEST(cpc_control, primary_recovers_from_bus_enable_failure)
   uint8_t peer_seq;
   uint8_t dut_seq;
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
-  TEST_ASSERT_FALSE(g_bus->initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
 
-  our_syn_seq = complete_primary_control_handshake();
+  our_syn_seq = complete_primary_control_handshake(bus);
   peer_seq = (uint8_t)(CPC_TEST_PEER_SYN_SEQ + 1U);
   dut_seq = (uint8_t)(our_syn_seq + 1U);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   hdr = control_hdr_from_tx(packet);
   request_op_id = sli_cpc_control_header_get_op_id(hdr);
   mock_cpc_tx_packet_free(&packet);
@@ -854,21 +867,21 @@ TEST(cpc_control, primary_recovers_from_bus_enable_failure)
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload),
                                   (uint8_t)(SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION | SLI_CPC_CTRL_TYPE_RESPONSE_FLAG),
                                   request_op_id, SLI_CPC_CTRL_STATUS_OK, &version_resp, sizeof(version_resp));
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   peer_seq++;
   dut_seq++;
   // Process PROTOCOL_VERSION response and advance to RESET_REASON request.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   hdr = control_hdr_from_tx(packet);
   request_op_id = sli_cpc_control_header_get_op_id(hdr);
   mock_cpc_tx_packet_free(&packet);
@@ -877,21 +890,21 @@ TEST(cpc_control, primary_recovers_from_bus_enable_failure)
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload),
                                   (uint8_t)(SLI_CPC_CTRL_TYPE_RESET_REASON | SLI_CPC_CTRL_TYPE_RESPONSE_FLAG),
                                   request_op_id, SLI_CPC_CTRL_STATUS_OK, &reset_resp, sizeof(reset_resp));
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   peer_seq++;
   dut_seq++;
   // Process RESET_REASON response and advance to PHY_CAPABILITIES request.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   hdr = control_hdr_from_tx(packet);
   request_op_id = sli_cpc_control_header_get_op_id(hdr);
   mock_cpc_tx_packet_free(&packet);
@@ -899,21 +912,21 @@ TEST(cpc_control, primary_recovers_from_bus_enable_failure)
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload),
                                   (uint8_t)(SLI_CPC_CTRL_TYPE_PHY_CAPABILITIES | SLI_CPC_CTRL_TYPE_RESPONSE_FLAG),
                                   request_op_id, SLI_CPC_CTRL_STATUS_OK, NULL, 0);
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   peer_seq++;
   dut_seq++;
   // Process PHY_CAPABILITIES response and advance to BUS_ENABLE request.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_BUS_ENABLE, false);
   request_op_id = sli_cpc_control_header_get_op_id(hdr);
@@ -922,51 +935,51 @@ TEST(cpc_control, primary_recovers_from_bus_enable_failure)
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload),
                                   (uint8_t)(SLI_CPC_CTRL_TYPE_BUS_ENABLE | SLI_CPC_CTRL_TYPE_RESPONSE_FLAG),
                                   request_op_id, SLI_CPC_CTRL_STATUS_NOT_SUPPORTED, NULL, 0);
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   // Process the failed BUS_ENABLE response: close control EP and start reconnect.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Finish close / re-attach / connect so a fresh SYN is queued.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   // Drain the ACK flushed on close for the rejected BUS_ENABLE response.
-  TEST_ASSERT_OUTGOING({
-    .flags = 0,
-    .len = 0,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = 0,
-    .ack = (int)(peer_seq + 1U),
-    .wnd = -1,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = 0,
+                              .len = 0,
+                              .dst = SL_CPC_EP_ID_CONTROL,
+                              .seq = 0,
+                              .ack = (int)(peer_seq + 1U),
+                              .wnd = -1,
+                            });
 
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
-  our_syn_seq = complete_primary_control_handshake();
+  our_syn_seq = complete_primary_control_handshake(bus);
   dut_seq = (uint8_t)(our_syn_seq + 1U);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
-  TEST_ASSERT_EQUAL_UINT8(dut_seq, sli_cpc_header_get_seq(&packet->header));
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
+  TEST_ASSERT_EQUAL_UINT8(dut_seq, packet->header.seq);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION, false);
   mock_cpc_tx_packet_free(&packet);
 
   // Submit standalone ACK left on the TX queue after the reconnect handshake.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  ep = sli_cpc_bus_find_ep_from_id(g_bus, SL_CPC_EP_ID_CONTROL);
+  ep = sli_cpc_bus_find_ep_from_id(bus, SL_CPC_EP_ID_CONTROL);
   TEST_ASSERT_NOT_NULL(ep);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CONNECTED, ep->state);
-  TEST_ASSERT_FALSE(g_bus->initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
 }
 
 /**
@@ -977,6 +990,8 @@ TEST(cpc_control, primary_recovers_from_bus_enable_failure)
  */
 TEST(cpc_control, primary_ignores_unmatched_control_response_op_id)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   uint8_t ctrl_payload[sizeof(sli_cpc_control_header_t) + 16];
   sli_cpc_protocol_version_response_t version_resp;
   const sli_cpc_control_header_t *hdr;
@@ -988,14 +1003,14 @@ TEST(cpc_control, primary_ignores_unmatched_control_response_op_id)
   uint8_t peer_seq;
   uint8_t dut_seq;
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  our_syn_seq = complete_primary_control_handshake();
+  our_syn_seq = complete_primary_control_handshake(bus);
   peer_seq = (uint8_t)(CPC_TEST_PEER_SYN_SEQ + 1U);
   dut_seq = (uint8_t)(our_syn_seq + 1U);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   hdr = control_hdr_from_tx(packet);
   request_op_id = sli_cpc_control_header_get_op_id(hdr);
   mock_cpc_tx_packet_free(&packet);
@@ -1005,52 +1020,52 @@ TEST(cpc_control, primary_ignores_unmatched_control_response_op_id)
   ctrl_len = pack_control_command(
     ctrl_payload, sizeof(ctrl_payload), (uint8_t)(SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION | SLI_CPC_CTRL_TYPE_RESPONSE_FLAG),
     (uint16_t)(request_op_id + 100U), SLI_CPC_CTRL_STATUS_OK, &version_resp, sizeof(version_resp));
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   // Process the unmatched response; primary_on_response ignores it.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  packet = TEST_POP_OUTGOING({
-    .flags = -1,
-    .len = 0,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = -1,
-    .ack = -1,
-    .wnd = -1,
-  });
+  packet = TEST_POP_OUTGOING(bus, {
+                                    .flags = -1,
+                                    .len = 0,
+                                    .dst = SL_CPC_EP_ID_CONTROL,
+                                    .seq = -1,
+                                    .ack = -1,
+                                    .wnd = -1,
+                                  });
   mock_cpc_tx_packet_free(&packet);
 
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload),
                                   (uint8_t)(SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION | SLI_CPC_CTRL_TYPE_RESPONSE_FLAG),
                                   request_op_id, SLI_CPC_CTRL_STATUS_OK, &version_resp, sizeof(version_resp));
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = (int)(peer_seq + 1U),
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = (int)(peer_seq + 1U),
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   // Process the matching PROTOCOL_VERSION response and advance to RESET_REASON.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_RESET_REASON, false);
   mock_cpc_tx_packet_free(&packet);
 
   // Submit standalone ACK left on the TX queue after the RESET_REASON request.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 }
 
 /**
@@ -1062,6 +1077,8 @@ TEST(cpc_control, primary_ignores_unmatched_control_response_op_id)
  */
 TEST(cpc_control, truncated_control_command_closes_ep_and_primary_reconnects)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   uint8_t ctrl_payload[sizeof(sli_cpc_control_header_t)];
   sli_cpc_control_command_t *command = (sli_cpc_control_command_t *)ctrl_payload;
   const sli_cpc_control_header_t *hdr;
@@ -1074,87 +1091,87 @@ TEST(cpc_control, truncated_control_command_closes_ep_and_primary_reconnects)
   uint8_t peer_seq;
   uint8_t dut_seq;
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  our_syn_seq = complete_primary_control_handshake();
+  our_syn_seq = complete_primary_control_handshake(bus);
   peer_seq = (uint8_t)(CPC_TEST_PEER_SYN_SEQ + 1U);
   dut_seq = (uint8_t)(our_syn_seq + 1U);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   hdr = control_hdr_from_tx(packet);
   request_op_id = sli_cpc_control_header_get_op_id(hdr);
   mock_cpc_tx_packet_free(&packet);
   // Submit standalone ACK left on the TX queue after the PROTOCOL_VERSION request.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   memset(ctrl_payload, 0, sizeof(ctrl_payload));
   sli_cpc_control_header_set_payload_size(&command->header, 32U);
   sli_cpc_control_header_set_op_id(&command->header, request_op_id);
   sli_cpc_control_header_set_type(&command->header, SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION);
-  sli_cpc_control_header_set_status(&command->header, SLI_CPC_CTRL_STATUS_OK);
+  command->header.status = SLI_CPC_CTRL_STATUS_OK;
   ctrl_len = (uint16_t)sizeof(ctrl_payload);
 
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = dut_seq,
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = dut_seq,
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   // Process the truncated frame: close control EP and start reconnect.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Finish close / re-attach / connect so a fresh SYN is queued.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   // Drain the ACK flushed on close for the truncated control frame.
-  TEST_ASSERT_OUTGOING({
-    .flags = 0,
-    .len = 0,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = 0,
-    .ack = (int)(peer_seq + 1U),
-    .wnd = -1,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = 0,
+                              .len = 0,
+                              .dst = SL_CPC_EP_ID_CONTROL,
+                              .seq = 0,
+                              .ack = (int)(peer_seq + 1U),
+                              .wnd = -1,
+                            });
 
-  packet = TEST_POP_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
-    .len = sizeof(g_bus->ctrl.rx_data),
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = -1,
-    .ack = -1,
-    .wnd = -1,
-  });
-  our_syn_seq = sli_cpc_header_get_seq(&packet->header);
+  packet = TEST_POP_OUTGOING(bus, {
+                                    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                                    .len = sizeof(bus->ctrl.rx_data),
+                                    .dst = SL_CPC_EP_ID_CONTROL,
+                                    .seq = -1,
+                                    .ack = -1,
+                                    .wnd = -1,
+                                  });
+  our_syn_seq = packet->header.seq;
   mock_cpc_tx_packet_free(&packet);
 
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
-    .len = CPC_TEST_PEER_MTU,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = CPC_TEST_PEER_SYN_SEQ,
-    .ack = (int)(our_syn_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                           .len = CPC_TEST_PEER_MTU,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = CPC_TEST_PEER_SYN_SEQ,
+                           .ack = (int)(our_syn_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                         });
 
   // Process peer SYN-ACK and enter CONNECTED after reconnect.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  ep = sli_cpc_bus_find_ep_from_id(g_bus, SL_CPC_EP_ID_CONTROL);
+  ep = sli_cpc_bus_find_ep_from_id(bus, SL_CPC_EP_ID_CONTROL);
   TEST_ASSERT_NOT_NULL(ep);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CONNECTED, ep->state);
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   mock_cpc_tx_packet_free(&packet);
 
   // Submit standalone ACK left on the TX queue after the reconnect handshake.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 }
 
 /**
@@ -1166,81 +1183,83 @@ TEST(cpc_control, truncated_control_command_closes_ep_and_primary_reconnects)
  */
 TEST(cpc_control, secondary_recovers_without_startup_reset)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   mock_cpc_tx_packet_t *dut_syn;
   const sl_cpc_ep_t *ep;
   uint8_t our_syn_seq;
   sl_status_t status;
 
-  cpc_test_set_role_secondary();
+  cpc_test_set_role_secondary(bus);
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  complete_secondary_control_handshake();
+  complete_secondary_control_handshake(bus);
 
-  ep = sli_cpc_bus_find_ep_from_id(g_bus, SL_CPC_EP_ID_CONTROL);
+  ep = sli_cpc_bus_find_ep_from_id(bus, SL_CPC_EP_ID_CONTROL);
   TEST_ASSERT_NOT_NULL(ep);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CONNECTED, ep->state);
 
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_RESET,
-    .len = 0,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = 0,
-    .ack = 0,
-    .wnd = 0,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_RESET,
+                           .len = 0,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = 0,
+                           .ack = 0,
+                           .wnd = 0,
+                         });
 
   // Process peer RESET: close control EP and re-listen.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Finish on_closed attach/listen recovery.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  TEST_ASSERT_NULL(mock_cpc_drv_pop_tx_packet(sl_cpc_drv_mock_default));
+  TEST_ASSERT_NULL(mock_cpc_drv_pop_tx_packet(sl_cpc_drv_mock_from_bus(bus)));
 
-  ep = sli_cpc_bus_find_ep_from_id(g_bus, SL_CPC_EP_ID_CONTROL);
+  ep = sli_cpc_bus_find_ep_from_id(bus, SL_CPC_EP_ID_CONTROL);
   TEST_ASSERT_NOT_NULL(ep);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_OPEN, ep->state);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
 
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
-    .len = CPC_TEST_PEER_MTU,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = CPC_TEST_PEER_SYN_SEQ,
-    .ack = 0,
-    .wnd = CPC_TEST_PEER_RX_WND,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                           .len = CPC_TEST_PEER_MTU,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = CPC_TEST_PEER_SYN_SEQ,
+                           .ack = 0,
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                         });
 
-  dut_syn = TEST_POP_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
-    .len = sizeof(g_bus->ctrl.rx_data),
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = -1,
-    .ack = (int)(CPC_TEST_PEER_SYN_SEQ + 1U),
-    .wnd = -1,
-  });
-  our_syn_seq = sli_cpc_header_get_seq(&dut_syn->header);
+  dut_syn = TEST_POP_OUTGOING(bus, {
+                                     .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                                     .len = sizeof(bus->ctrl.rx_data),
+                                     .dst = SL_CPC_EP_ID_CONTROL,
+                                     .seq = -1,
+                                     .ack = (int)(CPC_TEST_PEER_SYN_SEQ + 1U),
+                                     .wnd = -1,
+                                   });
+  our_syn_seq = dut_syn->header.seq;
   mock_cpc_tx_packet_free(&dut_syn);
 
-  TEST_INJECT_FRAME({
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = (int)(CPC_TEST_PEER_SYN_SEQ + 1U),
-    .ack = (int)(our_syn_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = (int)(CPC_TEST_PEER_SYN_SEQ + 1U),
+                           .ack = (int)(our_syn_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                         });
 
   // Process peer's final handshake ACK and enter CONNECTED.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  ep = sli_cpc_bus_find_ep_from_id(g_bus, SL_CPC_EP_ID_CONTROL);
+  ep = sli_cpc_bus_find_ep_from_id(bus, SL_CPC_EP_ID_CONTROL);
   TEST_ASSERT_NOT_NULL(ep);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CONNECTED, ep->state);
 
   // Submit standalone ACK left on the TX queue after the handshake.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 }
 
 /**
@@ -1253,6 +1272,8 @@ TEST(cpc_control, secondary_recovers_without_startup_reset)
  */
 TEST(cpc_control, secondary_protocol_version_replies_with_own_version)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   uint8_t ctrl_payload[sizeof(sli_cpc_control_header_t) + 16];
   sli_cpc_protocol_version_request_t version_req;
   const sli_cpc_control_header_t *hdr;
@@ -1264,46 +1285,46 @@ TEST(cpc_control, secondary_protocol_version_replies_with_own_version)
   uint8_t peer_seq;
   uint8_t dut_seq;
 
-  cpc_test_set_role_secondary();
+  cpc_test_set_role_secondary(bus);
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  our_syn_seq = complete_secondary_control_handshake();
+  our_syn_seq = complete_secondary_control_handshake(bus);
   peer_seq = (uint8_t)(CPC_TEST_PEER_SYN_SEQ + 1U);
   dut_seq = (uint8_t)(our_syn_seq + 1U);
 
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload), SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION, request_op_id,
                                   SLI_CPC_CTRL_STATUS_OK, NULL, 0);
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = dut_seq,
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = dut_seq,
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   // Process the invalid empty PROTOCOL_VERSION request and send the response.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION, true);
-  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_INVALID_PARAMETER, sli_cpc_control_header_get_status(hdr));
-  TEST_ASSERT_EQUAL_UINT8(dut_seq, sli_cpc_header_get_seq(&packet->header));
+  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_INVALID_PARAMETER, hdr->status);
+  TEST_ASSERT_EQUAL_UINT8(dut_seq, packet->header.seq);
   mock_cpc_tx_packet_free(&packet);
 
-  TEST_INJECT_FRAME({
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                         });
   peer_seq++;
   dut_seq++;
   // ACK the first response so the next reply can be transmitted (wnd=1).
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   request_op_id++;
 
@@ -1311,22 +1332,22 @@ TEST(cpc_control, secondary_protocol_version_replies_with_own_version)
   version_req.version_minor = SL_CPC_VERSION_MINOR;
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload), SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION, request_op_id,
                                   SLI_CPC_CTRL_STATUS_OK, &version_req, sizeof(version_req));
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)dut_seq,
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)dut_seq,
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   // Process a well-formed request with a different major version.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, SLI_CPC_CTRL_TYPE_PROTOCOL_VERSION, true);
-  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_OK, sli_cpc_control_header_get_status(hdr));
+  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_OK, hdr->status);
   TEST_ASSERT_EQUAL_UINT16(sizeof(sli_cpc_protocol_version_response_t), sli_cpc_control_header_get_payload_size(hdr));
   const sli_cpc_protocol_version_response_t *resp
     = (const sli_cpc_protocol_version_response_t *)((const sli_cpc_control_command_t *)packet->payload)->data;
@@ -1335,9 +1356,9 @@ TEST(cpc_control, secondary_protocol_version_replies_with_own_version)
   mock_cpc_tx_packet_free(&packet);
 
   // Submit standalone ACK left on the TX queue after the response.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 }
 
 /**
@@ -1348,6 +1369,8 @@ TEST(cpc_control, secondary_protocol_version_replies_with_own_version)
  */
 TEST(cpc_control, secondary_unknown_control_request_responds_not_supported)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   uint8_t ctrl_payload[sizeof(sli_cpc_control_header_t) + 16];
   const uint16_t unknown_request_op_id = 42U;
   const sli_cpc_control_header_t *hdr;
@@ -1358,40 +1381,40 @@ TEST(cpc_control, secondary_unknown_control_request_responds_not_supported)
   uint8_t peer_seq;
   uint8_t dut_seq;
 
-  cpc_test_set_role_secondary();
+  cpc_test_set_role_secondary(bus);
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  our_syn_seq = complete_secondary_control_handshake();
+  our_syn_seq = complete_secondary_control_handshake(bus);
   peer_seq = (uint8_t)(CPC_TEST_PEER_SYN_SEQ + 1U);
   dut_seq = (uint8_t)(our_syn_seq + 1U);
 
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload), 0x7FU, unknown_request_op_id,
                                   SLI_CPC_CTRL_STATUS_OK, NULL, 0);
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = dut_seq,
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = dut_seq,
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   // Process the unknown request and send the NOT_SUPPORTED response.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, 0x7FU, true);
-  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_NOT_SUPPORTED, sli_cpc_control_header_get_status(hdr));
+  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_NOT_SUPPORTED, hdr->status);
   TEST_ASSERT_EQUAL_UINT16(unknown_request_op_id, sli_cpc_control_header_get_op_id(hdr));
   mock_cpc_tx_packet_free(&packet);
 
   // Submit standalone ACK left on the TX queue after the response.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 }
 
 /**
@@ -1403,6 +1426,8 @@ TEST(cpc_control, secondary_unknown_control_request_responds_not_supported)
  */
 TEST(cpc_control, unknown_control_request_responds_not_supported)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   uint8_t ctrl_payload[sizeof(sli_cpc_control_header_t) + 16];
   const uint16_t unknown_request_op_id = 99U;
   const sli_cpc_control_header_t *hdr;
@@ -1413,41 +1438,41 @@ TEST(cpc_control, unknown_control_request_responds_not_supported)
   uint8_t peer_seq;
   uint8_t dut_seq;
 
-  status = TEST_CPC_BUS_START();
+  status = TEST_CPC_BUS_START(bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  our_syn_seq = complete_primary_control_handshake();
+  our_syn_seq = complete_primary_control_handshake(bus);
   peer_seq = (uint8_t)(CPC_TEST_PEER_SYN_SEQ + 1U);
   dut_seq = (uint8_t)(our_syn_seq + 1U);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   mock_cpc_tx_packet_free(&packet);
 
   ctrl_len = pack_control_command(ctrl_payload, sizeof(ctrl_payload), 0x7FU, unknown_request_op_id,
                                   SLI_CPC_CTRL_STATUS_OK, NULL, 0);
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = ctrl_len,
-    .dst = SL_CPC_EP_ID_CONTROL,
-    .seq = peer_seq,
-    .ack = (int)(dut_seq + 1U),
-    .wnd = CPC_TEST_PEER_RX_WND,
-    .payload = ctrl_payload,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = ctrl_len,
+                           .dst = SL_CPC_EP_ID_CONTROL,
+                           .seq = peer_seq,
+                           .ack = (int)(dut_seq + 1U),
+                           .wnd = CPC_TEST_PEER_RX_WND,
+                           .payload = ctrl_payload,
+                         });
   // Process the unknown request and send the NOT_SUPPORTED response.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  packet = TEST_POP_CONTROL_PAYLOAD();
+  packet = TEST_POP_CONTROL_PAYLOAD(bus);
   hdr = control_hdr_from_tx(packet);
   assert_control_type(hdr, 0x7FU, true);
-  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_NOT_SUPPORTED, sli_cpc_control_header_get_status(hdr));
+  TEST_ASSERT_EQUAL_UINT8(SLI_CPC_CTRL_STATUS_NOT_SUPPORTED, hdr->status);
   TEST_ASSERT_EQUAL_UINT16(unknown_request_op_id, sli_cpc_control_header_get_op_id(hdr));
   mock_cpc_tx_packet_free(&packet);
 
   // Submit standalone ACK left on the TX queue after the response.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   // Recycle that ACK's TX-complete so the TX pool is clean at tear-down.
-  cpc_test_pump();
+  cpc_test_pump(bus);
 }
 
 /**
@@ -1458,37 +1483,39 @@ TEST(cpc_control, unknown_control_request_responds_not_supported)
  */
 TEST(cpc_control, primary_control_closes_connected_user_endpoints)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   sl_cpc_ep_t user_ep_a;
   sl_cpc_ep_t user_ep_b;
 
-  start_primary_control_connected();
-  g_bus->initialized = true;
-  g_bus->ctrl.initialized = true;
+  start_primary_control_connected(bus);
+  bus->initialized = true;
+  bus->ctrl.initialized = true;
 
-  open_connected_user_ep(&user_ep_a, CPC_TEST_EP_ID);
-  open_connected_user_ep(&user_ep_b, CPC_TEST_EP_ID + 1U);
+  open_connected_user_ep(&user_ep_a, bus, CPC_TEST_EP_ID);
+  open_connected_user_ep(&user_ep_b, bus, CPC_TEST_EP_ID + 1U);
 
   cpc_test_event_reset();
-  trigger_control_close_via_reset();
+  trigger_control_close_via_reset(bus);
 
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSING, user_ep_a.state);
-  TEST_ASSERT_TRUE((user_ep_a.flags & SLI_CPC_EP_FLAG_OPENED) != 0);
+  TEST_ASSERT_BITS_HIGH(SLI_CPC_EP_FLAG_OPENED, user_ep_a.flags);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSING, user_ep_b.state);
-  TEST_ASSERT_TRUE((user_ep_b.flags & SLI_CPC_EP_FLAG_OPENED) != 0);
+  TEST_ASSERT_BITS_HIGH(SLI_CPC_EP_FLAG_OPENED, user_ep_b.flags);
   TEST_ASSERT_BIT_HIGH(SL_CPC_EP_EVENT_ERROR, cpc_test_event_mask);
   TEST_ASSERT_BIT_LOW(SL_CPC_EP_EVENT_CLOSED, cpc_test_event_mask);
 
   sl_cpc_ep_close(&user_ep_a);
   sl_cpc_ep_close(&user_ep_b);
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSED, user_ep_a.state);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSED, user_ep_b.state);
   TEST_ASSERT_BIT_HIGH(SL_CPC_EP_EVENT_CLOSED, cpc_test_event_mask);
 
-  finish_primary_control_reconnect();
+  finish_primary_control_reconnect(bus);
 
   cpc_test_ep_discard(&user_ep_a);
   cpc_test_ep_discard(&user_ep_b);
@@ -1502,34 +1529,36 @@ TEST(cpc_control, primary_control_closes_connected_user_endpoints)
  */
 TEST(cpc_control, primary_control_close_leaves_deferred_user_endpoints)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   sl_cpc_ep_t user_ep;
   sl_status_t status;
 
-  start_primary_control_connected();
-  TEST_ASSERT_FALSE(g_bus->initialized);
+  start_primary_control_connected(bus);
+  TEST_ASSERT_FALSE(bus->initialized);
 
   status = sl_cpc_ep_init(&user_ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, cpc_test_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  status = sl_cpc_ep_listen(&user_ep, g_bus);
+  status = sl_cpc_ep_listen(&user_ep, bus);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSED, user_ep.state);
-  TEST_ASSERT_TRUE((user_ep.flags & SLI_CPC_EP_FLAG_OPENED) != 0);
+  TEST_ASSERT_BITS_HIGH(SLI_CPC_EP_FLAG_OPENED, user_ep.flags);
 
   cpc_test_event_reset();
-  trigger_control_close_via_reset();
+  trigger_control_close_via_reset(bus);
 
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSED, user_ep.state);
-  TEST_ASSERT_TRUE((user_ep.flags & SLI_CPC_EP_FLAG_OPENED) != 0);
+  TEST_ASSERT_BITS_HIGH(SLI_CPC_EP_FLAG_OPENED, user_ep.flags);
   TEST_ASSERT_BIT_LOW(SL_CPC_EP_EVENT_CLOSED, cpc_test_event_mask);
 
-  finish_primary_control_reconnect();
+  finish_primary_control_reconnect(bus);
 
   sl_cpc_ep_close(&user_ep);
   // Deliver CLOSED so discard can deinit.
-  cpc_test_pump();
+  cpc_test_pump(bus);
   cpc_test_ep_discard(&user_ep);
 }
 
@@ -1541,33 +1570,35 @@ TEST(cpc_control, primary_control_close_leaves_deferred_user_endpoints)
  */
 TEST(cpc_control, secondary_control_closes_connected_user_endpoints)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   const sl_cpc_ep_t *ctrl_ep;
   sl_cpc_ep_t user_ep;
 
-  start_secondary_control_connected();
-  g_bus->initialized = true;
-  g_bus->ctrl.initialized = true;
+  start_secondary_control_connected(bus);
+  bus->initialized = true;
+  bus->ctrl.initialized = true;
 
-  open_connected_user_ep(&user_ep, CPC_TEST_EP_ID);
+  open_connected_user_ep(&user_ep, bus, CPC_TEST_EP_ID);
 
   cpc_test_event_reset();
-  trigger_control_close_via_reset();
+  trigger_control_close_via_reset(bus);
 
-  TEST_ASSERT_FALSE(g_bus->initialized);
-  TEST_ASSERT_FALSE(g_bus->ctrl.initialized);
+  TEST_ASSERT_FALSE(bus->initialized);
+  TEST_ASSERT_FALSE(bus->ctrl.initialized);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSING, user_ep.state);
-  TEST_ASSERT_TRUE((user_ep.flags & SLI_CPC_EP_FLAG_OPENED) != 0);
+  TEST_ASSERT_BITS_HIGH(SLI_CPC_EP_FLAG_OPENED, user_ep.flags);
   TEST_ASSERT_BIT_HIGH(SL_CPC_EP_EVENT_ERROR, cpc_test_event_mask);
   TEST_ASSERT_BIT_LOW(SL_CPC_EP_EVENT_CLOSED, cpc_test_event_mask);
 
   // Secondary re-listens without emitting another startup RESET.
-  TEST_ASSERT_NULL(mock_cpc_drv_pop_tx_packet(sl_cpc_drv_mock_default));
-  ctrl_ep = sli_cpc_bus_find_ep_from_id(g_bus, SL_CPC_EP_ID_CONTROL);
+  TEST_ASSERT_NULL(mock_cpc_drv_pop_tx_packet(sl_cpc_drv_mock_from_bus(bus)));
+  ctrl_ep = sli_cpc_bus_find_ep_from_id(bus, SL_CPC_EP_ID_CONTROL);
   TEST_ASSERT_NOT_NULL(ctrl_ep);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_OPEN, ctrl_ep->state);
 
   sl_cpc_ep_close(&user_ep);
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSED, user_ep.state);
   TEST_ASSERT_BIT_HIGH(SL_CPC_EP_EVENT_CLOSED, cpc_test_event_mask);

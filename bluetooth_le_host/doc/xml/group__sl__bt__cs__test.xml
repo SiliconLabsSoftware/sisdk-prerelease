@@ -60,7 +60,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15578" column="1" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15579" bodyend="15599"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15587" column="1" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15588" bodyend="15608"/>
       </memberdef>
       <memberdef kind="enum" id="group__sl__bt__cs__test_1ga33230168dbb19ffd8cb4f2579e82c16d" prot="public" static="no" strong="no">
         <type></type>
@@ -99,14 +99,14 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15604" column="1" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15605" bodyend="15617"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15613" column="1" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15614" bodyend="15626"/>
       </memberdef>
     </sectiondef>
     <sectiondef kind="func">
-      <memberdef kind="function" id="group__sl__bt__cs__test_1gaa66d7b45664c0c2e0b99db3946802ab2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+      <memberdef kind="function" id="group__sl__bt__cs__test_1gae28661ce6552b209fab4b228666dd042" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sl_bt_cs_test_start</definition>
-        <argsstring>(uint8_t main_mode_type, uint8_t sub_mode_type, uint8_t main_mode_repetition, uint8_t mode_calibration_steps, uint8_t role, uint8_t rtt_type, uint8_t cs_sync_phy, uint8_t antenna_selection, const sl_bt_cs_subevent_length_t *subevent_len, uint16_t subevent_interval, uint8_t max_num_subevents, int8_t tx_power, uint8_t t_ip1_time, uint8_t t_ip2_time, uint8_t t_fcs_time, uint8_t t_pm_time, uint8_t t_sw_time, uint8_t tone_antenna_config, uint8_t reserved, uint8_t snr_control_initiator, uint8_t snr_control_reflector, uint16_t drbg_nonce, uint8_t channel_map_repetition, uint16_t override_config, size_t override_parameters_len, const uint8_t *override_parameters)</argsstring>
+        <argsstring>(uint8_t main_mode_type, uint8_t sub_mode_type, uint8_t main_mode_repetition, uint8_t mode_calibration_steps, uint8_t role, uint8_t rtt_type, uint8_t cs_sync_phy, uint8_t antenna_selection, const sl_bt_cs_subevent_length_t *subevent_len, uint16_t subevent_interval, uint8_t max_num_subevents, int8_t tx_power, uint8_t t_ip1_time, uint8_t t_ip2_time, uint8_t t_fcs_time, uint8_t t_pm_time, uint8_t t_sw_time, uint8_t tone_antenna_config, uint8_t cs_enhancements, uint8_t snr_control_initiator, uint8_t snr_control_reflector, uint16_t drbg_nonce, uint8_t channel_map_repetition, uint16_t override_config, size_t override_parameters_len, const uint8_t *override_parameters)</argsstring>
         <name>sl_bt_cs_test_start</name>
         <param>
           <type>uint8_t</type>
@@ -182,7 +182,7 @@
         </param>
         <param>
           <type>uint8_t</type>
-          <declname>reserved</declname>
+          <declname>cs_enhancements</declname>
         </param>
         <param>
           <type>uint8_t</type>
@@ -437,10 +437,13 @@
 </parameteritem>
 <parameteritem>
 <parameternamelist>
-<parametername direction="in">reserved</parametername>
+<parametername direction="in">cs_enhancements</parametername>
 </parameternamelist>
 <parameterdescription>
-<para>Reserved for future use. </para>
+<para>Indicates which CS enhancements to be used during the CS procedure.<itemizedlist>
+<listitem><para><bold>0x01:</bold> Reflector Inline PCT Transfer </para>
+</listitem></itemizedlist>
+</para>
 </parameterdescription>
 </parameteritem>
 <parameteritem>
@@ -518,7 +521,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15763" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15763" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15774" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15774" declcolumn="13"/>
       </memberdef>
       <memberdef kind="function" id="group__sl__bt__cs__test_1gab5af1068c11f2652091144188451c3b1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
@@ -535,13 +538,13 @@
 <para><simplesect kind="return"><para>SL_STATUS_OK if successful. Error code otherwise.</para>
 </simplesect>
 <bold>Events</bold> <itemizedlist>
-<listitem><para><ref refid="group__sl__bt__evt__cs__test__end__completed" kindref="compound">sl_bt_evt_cs_test_end_completed</ref> - Triggered when local controller has stopped the CS procedure started with the <ref refid="group__sl__bt__cs__test_1gaa66d7b45664c0c2e0b99db3946802ab2" kindref="member">sl_bt_cs_test_start</ref> command. </para>
+<listitem><para><ref refid="group__sl__bt__evt__cs__test__end__completed" kindref="compound">sl_bt_evt_cs_test_end_completed</ref> - Triggered when local controller has stopped the CS procedure started with the <ref refid="group__sl__bt__cs__test_1gae28661ce6552b209fab4b228666dd042" kindref="member">sl_bt_cs_test_start</ref> command. </para>
 </listitem></itemizedlist>
 </para>
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15805" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15805" declcolumn="13"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15816" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" declline="15816" declcolumn="13"/>
       </memberdef>
     </sectiondef>
     <sectiondef kind="define">
@@ -554,7 +557,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15570" column="9" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15570" bodyend="-1"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15579" column="9" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15579" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__cs__test_1ga1fe4b9d53825f41be92ee9036c435850" prot="public" static="no">
         <name>sl_bt_cmd_cs_test_end_id</name>
@@ -565,7 +568,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15571" column="9" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15571" bodyend="-1"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15580" column="9" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15580" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__cs__test_1ga8a7dacabe7d4db9530a293c377048ac5" prot="public" static="no">
         <name>sl_bt_rsp_cs_test_start_id</name>
@@ -576,7 +579,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15572" column="9" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15572" bodyend="-1"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15581" column="9" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15581" bodyend="-1"/>
       </memberdef>
       <memberdef kind="define" id="group__sl__bt__cs__test_1gae19bde7d61dfa39d5c94414622eafa01" prot="public" static="no">
         <name>sl_bt_rsp_cs_test_end_id</name>
@@ -587,7 +590,7 @@
         </detaileddescription>
         <inbodydescription>
         </inbodydescription>
-        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15573" column="9" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15573" bodyend="-1"/>
+        <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" line="15582" column="9" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/build/native/ble_bgapi/inc/sl_bt_api.h" bodystart="15582" bodyend="-1"/>
       </memberdef>
     </sectiondef>
     <briefdescription>

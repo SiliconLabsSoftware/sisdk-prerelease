@@ -112,6 +112,11 @@ err_t            dns_gethostbyname_addrtype(const char *hostname, ip_addr_t *add
                                    dns_found_callback found, void *callback_arg,
                                    u8_t dns_addrtype);
 
+#if SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DNS_ONDEMAND_TIMER
+struct netif;
+/** Last-link: fail pending queries, clear table, stop DNS timer. */
+void             sli_dns_cleanup_on_link_down(struct netif *netif);
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DNS_ONDEMAND_TIMER */
 
 #if DNS_LOCAL_HOSTLIST
 size_t         dns_local_iterate(dns_found_callback iterator_fn, void *iterator_arg);

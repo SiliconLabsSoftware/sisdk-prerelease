@@ -62,6 +62,7 @@ typedef struct {
 /// No-init state for preserving data across resets.
 typedef struct {
   uint32_t faulty_handle; ///< Handle of watchdog that caused reset.
+  uint32_t faulty_uid;    ///< UID of watchdog that caused reset.
   uint32_t magic;         ///< Magic number to validate data.
   bool valid;             ///< Whether the data is valid.
 } watchdog_manager_noinit_state_t;
@@ -193,6 +194,7 @@ static void record_faulty_watchdog(void)
     for (uint32_t i = 0; i < SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS; i++) {
       if (unfed_mask & (1u << i)) {
         noinit_state.faulty_handle = i;  // Store bit position, not bitmask.
+        noinit_state.faulty_uid = manager_state.watchdog_uids[i];
         noinit_state.magic = WATCHDOG_MANAGER_MAGIC;
         noinit_state.valid = true;
         break;
@@ -746,14 +748,10 @@ sl_status_t sl_watchdog_manager_set_clock_source(
 }
 
 /***************************************************************************//**
- * Retrieve faulty watchdog from previous reset.
+ * Validate no-init state for post-reset faulty watchdog retrieval.
  ******************************************************************************/
-sl_status_t sl_watchdog_manager_retrieve_faulty(sl_watchdog_handle_t *handle)
+static sl_status_t retrieve_faulty_validate(void)
 {
-  if (handle == NULL) {
-    return SL_STATUS_NULL_POINTER;
-  }
-
   // This must be called before init.
   if (manager_state.initialized) {
     return SL_STATUS_INVALID_STATE;
@@ -787,9 +785,49 @@ sl_status_t sl_watchdog_manager_retrieve_faulty(sl_watchdog_handle_t *handle)
     return SL_STATUS_NOT_AVAILABLE;
   }
 
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Retrieve faulty watchdog handlefrom previous reset.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_retrieve_faulty(sl_watchdog_handle_t *handle)
+{
+  sl_status_t status;
+
+  if (handle == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  status = retrieve_faulty_validate();
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
   *handle = noinit_state.faulty_handle;
 
   // Keep noinit_state valid so we can log when the watchdog is recreated.
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Retrieve faulty watchdog UID from previous reset.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_retrieve_faulty_uid(uint32_t *watchdog_uid)
+{
+  sl_status_t status;
+
+  if (watchdog_uid == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  status = retrieve_faulty_validate();
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  *watchdog_uid = noinit_state.faulty_uid;
 
   return SL_STATUS_OK;
 }

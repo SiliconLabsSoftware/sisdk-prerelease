@@ -92,7 +92,7 @@ typedef struct sl_cpc_frame {
 #endif
 
   /// Payload checksum.
-  uint16_t payload_csum;
+  uint8_t payload_csum_le[2];
 
   /// RX validity / TX cached-state for payload checksum.
   bool payload_csum_is_valid;

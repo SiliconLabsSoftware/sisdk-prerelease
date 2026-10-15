@@ -19,8 +19,6 @@
 #include "../sli_cpc_hdr.h"
 #include "../sli_cpc_memory.h"
 #include "../sli_cpc_timer.h"
-#include "sl_cpc_bus_instances.h"
-#include "sl_cpc_drv_mock.h"
 
 #include "../../port/mock/src/mock_cpc_timer.h"
 #include "expect.h"
@@ -46,6 +44,8 @@ TEST_TEAR_DOWN(cpc_window)
  */
 TEST(cpc_window, three_payloads_transmit_as_window_opens)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   static const uint8_t payloads[3][TEST_PAYLOAD_SIZE] = {
     {0x01, 0x02, 0x03, 0x04},
     {0x11, 0x12, 0x13, 0x14},
@@ -59,7 +59,7 @@ TEST(cpc_window, three_payloads_transmit_as_window_opens)
   status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, cpc_test_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  status = cpc_test_set_ep_connected(&ep, g_bus, first_payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE,
+  status = cpc_test_set_ep_connected(&ep, bus, first_payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE,
                                      CPC_TEST_PEER_MTU, 0U);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
   TEST_ASSERT_EQUAL_UINT8(0, ep.send_wnd);
@@ -68,122 +68,122 @@ TEST(cpc_window, three_payloads_transmit_as_window_opens)
     TEST_WRITE_PAYLOAD(&ep, payloads[i], TEST_PAYLOAD_SIZE);
   }
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   // The schedule window probe should be armed
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
-  TEST_ASSERT_EQUAL(0, mock_cpc_drv_pending_tx_count(sl_cpc_drv_mock_default));
+  TEST_ASSERT_DRV_PENDING_TX(bus, 0);
 
   TEST_ASSERT_TRUE(mock_cpc_timer_fire_next());
 
   // Window Probe
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)first_payload_seq,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = 0,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = (int)first_payload_seq,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                            });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
-  TEST_ASSERT_EQUAL(0, mock_cpc_drv_pending_tx_count(sl_cpc_drv_mock_default));
+  TEST_ASSERT_DRV_PENDING_TX(bus, 0);
 
   // Our SYN+ACK advertised a window of 0, now advertise a window of 2. Expect
   // the core to send the next two payloads that were queued just above.
-  TEST_INJECT_FRAME({
-    .dst = CPC_TEST_EP_ID,
-    .seq = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .ack = first_payload_seq + 1,
-    .wnd = 2,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = CPC_TEST_PEER_SYN_SEQ + 1U,
+                           .ack = first_payload_seq + 1,
+                           .wnd = 2,
+                         });
 
-  cpc_test_pump();
-  cpc_test_wait_retx_timer();
+  cpc_test_pump(bus);
+  cpc_test_wait_retx_timer(bus);
 
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
-  TEST_ASSERT_EQUAL(2, mock_cpc_drv_pending_tx_count(sl_cpc_drv_mock_default));
+  TEST_ASSERT_DRV_PENDING_TX(bus, 2);
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = TEST_PAYLOAD_SIZE,
-    .dst = CPC_TEST_EP_ID,
-    .seq = first_payload_seq + 1,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payloads[0],
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = TEST_PAYLOAD_SIZE,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = first_payload_seq + 1,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payloads[0],
+                            });
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = TEST_PAYLOAD_SIZE,
-    .dst = CPC_TEST_EP_ID,
-    .seq = first_payload_seq + 2U,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payloads[1],
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = TEST_PAYLOAD_SIZE,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = first_payload_seq + 2U,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payloads[1],
+                            });
 
   // Advertise a 0 window that acks the two previous payload.
   // As the window is 0, and the window probe is not yet implemented
   // the endpoint should not have transmitted the third payload nor
   // armed the retransmit timer, as the frame hasn't been transmitted
-  TEST_INJECT_FRAME({
-    .dst = CPC_TEST_EP_ID,
-    .seq = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .ack = first_payload_seq + 3U,
-    .wnd = 0,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = CPC_TEST_PEER_SYN_SEQ + 1U,
+                           .ack = first_payload_seq + 3U,
+                           .wnd = 0,
+                         });
 
   // Let the core process this ack
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   // The schedule window probe should be armed as the window is 0.
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
-  TEST_ASSERT_EQUAL(0, mock_cpc_drv_pending_tx_count(sl_cpc_drv_mock_default));
+  TEST_ASSERT_DRV_PENDING_TX(bus, 0);
 
   TEST_ASSERT_TRUE(mock_cpc_timer_fire_next());
 
   // Window Probe
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = first_payload_seq + 3,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = 0,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = first_payload_seq + 3,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                            });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
-  TEST_ASSERT_EQUAL(0, mock_cpc_drv_pending_tx_count(sl_cpc_drv_mock_default));
+  TEST_ASSERT_DRV_PENDING_TX(bus, 0);
 
   // Reopen the window for the next payload
-  TEST_INJECT_FRAME({
-    .dst = CPC_TEST_EP_ID,
-    .seq = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .ack = first_payload_seq + 4U,
-    .wnd = 1,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = CPC_TEST_PEER_SYN_SEQ + 1U,
+                           .ack = first_payload_seq + 4U,
+                           .wnd = 1,
+                         });
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = TEST_PAYLOAD_SIZE,
-    .dst = CPC_TEST_EP_ID,
-    .seq = first_payload_seq + 4U,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payloads[2],
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = TEST_PAYLOAD_SIZE,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = first_payload_seq + 4U,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payloads[2],
+                            });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   sl_cpc_ep_close(&ep);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   cpc_test_ep_discard(&ep);
 }
@@ -199,6 +199,8 @@ TEST(cpc_window, three_payloads_transmit_as_window_opens)
  */
 TEST(cpc_window, retransmit_shrinks_available_window)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   static const uint8_t payloads[3][TEST_PAYLOAD_SIZE] = {
     {0x01, 0x02, 0x03, 0x04},
     {0x11, 0x12, 0x13, 0x14},
@@ -213,7 +215,7 @@ TEST(cpc_window, retransmit_shrinks_available_window)
   status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, cpc_test_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  status = cpc_test_set_ep_connected(&ep, g_bus, first_payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE,
+  status = cpc_test_set_ep_connected(&ep, bus, first_payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE,
                                      CPC_TEST_PEER_MTU, 3U);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
   TEST_ASSERT_EQUAL_UINT8(3, ep.send_wnd);
@@ -222,47 +224,47 @@ TEST(cpc_window, retransmit_shrinks_available_window)
   TEST_WRITE_PAYLOAD(&ep, payloads[0], TEST_PAYLOAD_SIZE);
   TEST_WRITE_PAYLOAD(&ep, payloads[1], TEST_PAYLOAD_SIZE);
 
-  cpc_test_pump();
-  cpc_test_wait_retx_timer();
+  cpc_test_pump(bus);
+  cpc_test_wait_retx_timer(bus);
 
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
 
   // first payload: seq=our_seq + 1
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = TEST_PAYLOAD_SIZE,
-    .dst = CPC_TEST_EP_ID,
-    .seq = our_seq + 1U,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payloads[0],
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = TEST_PAYLOAD_SIZE,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = our_seq + 1U,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payloads[0],
+                            });
 
   // second payload: seq=our_seq + 2
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = TEST_PAYLOAD_SIZE,
-    .dst = CPC_TEST_EP_ID,
-    .seq = our_seq + 2U,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payloads[1],
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = TEST_PAYLOAD_SIZE,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = our_seq + 2U,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payloads[1],
+                            });
 
   // Let the retransmit timer fire, the first frame should be retransmitted
   TEST_ASSERT_TRUE_MESSAGE(mock_cpc_timer_fire_next(), "Expected retransmit timer to be armed");
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   // Retransmit the first payload: seq=our_seq + 1
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = TEST_PAYLOAD_SIZE,
-    .dst = CPC_TEST_EP_ID,
-    .seq = our_seq + 1U,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payloads[0],
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = TEST_PAYLOAD_SIZE,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = our_seq + 1U,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payloads[0],
+                            });
 
   // This is the actual core of the test. We simulate a device that has
   // received the three frames (2 original transmissions + 1 retranmission)
@@ -279,14 +281,14 @@ TEST(cpc_window, retransmit_shrinks_available_window)
   // shrinking. For retransmission, it's not yet clear if they should honor
   // this new window information or not, but for new frame, they should
   // obviously not be transmitted.
-  TEST_INJECT_FRAME({
-    .dst = CPC_TEST_EP_ID,
-    .seq = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .ack = our_seq + 2U,
-    .wnd = 1,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = CPC_TEST_PEER_SYN_SEQ + 1U,
+                           .ack = our_seq + 2U,
+                           .wnd = 1,
+                         });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   // A wrap around is even more interesting as the available window is
   // essentially una + window - nxt, 255 + 1 - 0 here, so we make sure that
@@ -301,12 +303,12 @@ TEST(cpc_window, retransmit_shrinks_available_window)
 
   // force process action to run and make sure
   // that the core hasn't send the payload
-  cpc_test_pump();
-  TEST_ASSERT_EQUAL(0, mock_cpc_drv_pending_tx_count(sl_cpc_drv_mock_default));
+  cpc_test_pump(bus);
+  TEST_ASSERT_DRV_PENDING_TX(bus, 0);
 
   sl_cpc_ep_close(&ep);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   cpc_test_ep_discard(&ep);
 }
@@ -317,40 +319,41 @@ TEST(cpc_window, retransmit_shrinks_available_window)
  */
 TEST(cpc_window, probe_not_sent_until_schedule_timer_fires)
 {
-  static const uint8_t payload[TEST_PAYLOAD_SIZE] = {0x01, 0x02, 0x03, 0x04};
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
 
+  static const uint8_t payload[TEST_PAYLOAD_SIZE] = {0x01, 0x02, 0x03, 0x04};
   const uint8_t first_payload_seq = 1U;
-  sl_cpc_ep_t ep;
   sl_status_t status;
+  sl_cpc_ep_t ep;
 
   status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, cpc_test_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  status = cpc_test_set_ep_connected(&ep, g_bus, first_payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE,
+  status = cpc_test_set_ep_connected(&ep, bus, first_payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE,
                                      CPC_TEST_PEER_MTU, 0U);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
   TEST_WRITE_PAYLOAD(&ep, payload, TEST_PAYLOAD_SIZE);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
-  TEST_ASSERT_EQUAL(0, mock_cpc_drv_pending_tx_count(sl_cpc_drv_mock_default));
+  TEST_ASSERT_DRV_PENDING_TX(bus, 0);
 
   TEST_ASSERT_TRUE(mock_cpc_timer_fire_next());
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)first_payload_seq,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = 0,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = (int)first_payload_seq,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                            });
 
   sl_cpc_ep_close(&ep);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   cpc_test_ep_discard(&ep);
 }
@@ -370,64 +373,65 @@ static uint32_t test_next_timer_delay_ms(void)
  */
 TEST(cpc_window, probe_schedule_backoff_doubles_after_probe_sent)
 {
-  static const uint8_t payload[TEST_PAYLOAD_SIZE] = {0x01, 0x02, 0x03, 0x04};
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
 
-  const uint8_t first_payload_seq = 1U;
+  static const uint8_t payload[TEST_PAYLOAD_SIZE] = {0x01, 0x02, 0x03, 0x04};
   const uint8_t peer_seq = CPC_TEST_PEER_SYN_SEQ + 1U;
-  sl_cpc_ep_t ep;
+  const uint8_t first_payload_seq = 1U;
   sl_status_t status;
+  sl_cpc_ep_t ep;
 
   status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, cpc_test_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  status = cpc_test_set_ep_connected(&ep, g_bus, first_payload_seq, peer_seq, CPC_TEST_RX_SIZE, CPC_TEST_PEER_MTU, 0U);
+  status = cpc_test_set_ep_connected(&ep, bus, first_payload_seq, peer_seq, CPC_TEST_RX_SIZE, CPC_TEST_PEER_MTU, 0U);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
   TEST_WRITE_PAYLOAD(&ep, payload, TEST_PAYLOAD_SIZE);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_UINT32_WITHIN(2U, SLI_CPC_INIT_WINDOW_PROBE_TIMEOUT_MS, test_next_timer_delay_ms());
 
   TEST_ASSERT_TRUE(mock_cpc_timer_fire_next());
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)first_payload_seq,
-    .ack = (int)peer_seq,
-    .wnd = 0,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = 0,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = (int)first_payload_seq,
+                              .ack = (int)peer_seq,
+                              .wnd = 0,
+                            });
 
-  TEST_INJECT_FRAME({
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)peer_seq,
-    .ack = first_payload_seq + 1U,
-    .wnd = 0,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = (int)peer_seq,
+                           .ack = first_payload_seq + 1U,
+                           .wnd = 0,
+                         });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  TEST_ASSERT_EQUAL(0, mock_cpc_drv_pending_tx_count(sl_cpc_drv_mock_default));
+  TEST_ASSERT_DRV_PENDING_TX(bus, 0);
   TEST_ASSERT_TRUE(mock_cpc_timer_has_pending());
 
   TEST_ASSERT_UINT32_WITHIN(2U, SLI_CPC_INIT_WINDOW_PROBE_TIMEOUT_MS * 2U, test_next_timer_delay_ms());
 
   TEST_ASSERT_TRUE(mock_cpc_timer_fire_next());
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = first_payload_seq + 1U,
-    .ack = (int)peer_seq,
-    .wnd = 0,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = 0,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = first_payload_seq + 1U,
+                              .ack = (int)peer_seq,
+                              .wnd = 0,
+                            });
 
   sl_cpc_ep_close(&ep);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   cpc_test_ep_discard(&ep);
 }
@@ -438,61 +442,62 @@ TEST(cpc_window, probe_schedule_backoff_doubles_after_probe_sent)
  */
 TEST(cpc_window, max_window_probes_errors_endpoint)
 {
-  static const uint8_t payload[TEST_PAYLOAD_SIZE] = {0x01, 0x02, 0x03, 0x04};
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
 
-  const uint8_t first_payload_seq = 1U;
+  static const uint8_t payload[TEST_PAYLOAD_SIZE] = {0x01, 0x02, 0x03, 0x04};
   const uint8_t peer_seq = CPC_TEST_PEER_SYN_SEQ + 1U;
+  const uint8_t first_payload_seq = 1U;
   uint8_t probe_seq = first_payload_seq;
-  sl_cpc_ep_t ep;
   sl_status_t status;
+  sl_cpc_ep_t ep;
 
   status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, cpc_test_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  status = cpc_test_set_ep_connected(&ep, g_bus, first_payload_seq, peer_seq, CPC_TEST_RX_SIZE, CPC_TEST_PEER_MTU, 0U);
+  status = cpc_test_set_ep_connected(&ep, bus, first_payload_seq, peer_seq, CPC_TEST_RX_SIZE, CPC_TEST_PEER_MTU, 0U);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
   TEST_WRITE_PAYLOAD(&ep, payload, TEST_PAYLOAD_SIZE);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   for (unsigned int i = 0; i < SLI_CPC_WINDOW_PROBE_MAX; i++) {
     TEST_ASSERT_TRUE(mock_cpc_timer_fire_next());
 
-    TEST_ASSERT_OUTGOING({
-      .flags = CPC_EXPECT_FLAG_ACK_REQ,
-      .len = 0,
-      .dst = CPC_TEST_EP_ID,
-      .seq = (int)probe_seq,
-      .ack = (int)peer_seq,
-      .wnd = 0,
-    });
+    TEST_ASSERT_OUTGOING(bus, {
+                                .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                                .len = 0,
+                                .dst = CPC_TEST_EP_ID,
+                                .seq = (int)probe_seq,
+                                .ack = (int)peer_seq,
+                                .wnd = 0,
+                              });
 
     probe_seq++;
 
-    TEST_INJECT_FRAME({
-      .dst = CPC_TEST_EP_ID,
-      .seq = (int)peer_seq,
-      .ack = (int)probe_seq,
-      .wnd = 0,
-    });
+    TEST_INJECT_FRAME(bus, {
+                             .dst = CPC_TEST_EP_ID,
+                             .seq = (int)peer_seq,
+                             .ack = (int)probe_seq,
+                             .wnd = 0,
+                           });
 
-    cpc_test_pump();
+    cpc_test_pump(bus);
   }
 
   TEST_ASSERT_EQUAL_UINT8(SLI_CPC_WINDOW_PROBE_MAX, ep.wnd_probe.count);
   TEST_ASSERT_TRUE(mock_cpc_timer_has_pending());
 
   TEST_ASSERT_TRUE(mock_cpc_timer_fire_next());
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSING, ep.state);
   TEST_ASSERT_BIT_HIGH(SL_CPC_EP_EVENT_ERROR, cpc_test_event_mask);
-  TEST_ASSERT_EQUAL(0, mock_cpc_drv_pending_tx_count(sl_cpc_drv_mock_default));
+  TEST_ASSERT_DRV_PENDING_TX(bus, 0);
 
   sl_cpc_ep_close(&ep);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   cpc_test_ep_discard(&ep);
 }

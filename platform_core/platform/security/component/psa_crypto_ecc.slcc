@@ -19,6 +19,8 @@ category: Platform|Security|PSA Crypto|Elliptic Curves
 
 provides:
 - name: psa_crypto_ecc
+- name: psa_public_key
+  allow_multiple: true
 
 requires:
 - name: psa_crypto
@@ -60,9 +62,6 @@ template_contribution:
   value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR_GENERATE 1"
   condition: [mbedtls_ecc]
 
-- name: mbedtls_config
-  value: MBEDTLS_ECP_C
-  condition: [mbedtls_uses_psa_crypto]
 metadata:
   sbom:
     reference: mbedtls_sbom

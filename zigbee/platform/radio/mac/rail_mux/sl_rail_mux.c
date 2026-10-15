@@ -756,7 +756,6 @@ sl_status_t sli_rail_mux_lock_radio(sl_rail_handle_t railHandle)
   return ret_val;
 }
 
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_MUX_15_4, SL_CODE_CLASS_TIME_CRITICAL)
 sl_status_t sli_rail_mux_unlock_radio(sl_rail_handle_t railHandle)
 {
   RAIL_MUX_DECLARE_IRQ_STATE;
@@ -1242,7 +1241,6 @@ sl_rail_status_t sl_rail_mux_is_valid_channel(sl_rail_handle_t railHandle, uint1
   return sl_rail_is_valid_channel(mux_rail_handle, channel);
 }
 
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_MUX_15_4, SL_CODE_CLASS_TIME_CRITICAL)
 int16_t sl_rail_mux_get_rssi(sl_rail_handle_t railHandle, sl_rail_time_t  waitTimeout)
 {
   (void)railHandle;
@@ -1250,7 +1248,6 @@ int16_t sl_rail_mux_get_rssi(sl_rail_handle_t railHandle, sl_rail_time_t  waitTi
   return sl_rail_get_rssi(mux_rail_handle, waitTimeout);
 }
 
-SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_MUX_15_4, SL_CODE_CLASS_TIME_CRITICAL)
 uint32_t sl_rail_mux_get_symbol_rate(sl_rail_handle_t railHandle)
 {
   (void)railHandle;
@@ -2178,6 +2175,7 @@ static void fn_update_802154_address_filtering_table(void)
   }
 }
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_RAIL_MUX_15_4, SL_CODE_CLASS_TIME_CRITICAL)
 HIDDEN void fn_timer_callback(struct sl_rail_multi_timer *tmr,
                               sl_rail_time_t expectedTimeOfEvent,
                               void *cbArg)

@@ -4,6 +4,7 @@ from pyradioconfig.parts.common.profiles.profile_common import buildCrcInputs, b
     buildFrameInputs, buildFrameOutputs, buildCrcOutputs, buildWhiteOutputs, buildFecOutputs, build_ircal_sw_vars
 from pyradioconfig.parts.common.profiles.profile_modem import buildModemAdvancedInputs, buildModemInfoOutputs, \
     buildRailOutputs
+from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfile
 from pyradioconfig.parts.common.profiles.curl_regs import build_modem_regs_curl
 from pyradioconfig.parts.curl.ip_collector.ip_collector_curl import IPCollector_Curl
 
@@ -124,10 +125,12 @@ class ProfileBaseCurl(ProfileBaseLion):
         self.make_optional_input(profile, model.vars.shaping_filter_param, "modem",
                                  readable_name="Shaping Filter Parameter (BT or R)", value_limit_min=0.3,
                                  value_limit_max=1.5, fractional_digits=2, default=0.5)
+        
 
     def build_advanced_profile_inputs(self, model, profile):
         self.make_linked_io(profile, model.vars.lo_injection_side, "Advanced",
                             readable_name="Injection side")
+        self.make_linked_io(profile, model.vars.demod_select, 'Advanced', readable_name="Demod Selection")
 
     def build_hidden_profile_inputs(self, model, profile):
 
@@ -139,11 +142,11 @@ class ProfileBaseCurl(ProfileBaseLion):
         self.make_hidden_input(profile, model.vars.input_decimation_filter_allow_dec8, "modem",
                                    readable_name="1=Allow input decimation filter decimate by 8 in cost function",
                                    value_limit_min=0, value_limit_max=1)
-        self.make_hidden_input(profile, model.vars.demod_select, 'Advanced', readable_name="Demod Selection")
         self.make_hidden_input(profile, model.vars.hadm_enable, 'modem', readable_name="Enable HADM")
         self.make_hidden_input(profile, model.vars.adc_clock_mode, "modem",
                                    readable_name="ADC Clock Mode (XO vs VCO)")
         self.make_hidden_input(profile, model.vars.adc_rate_mode, 'Advanced', readable_name="ADC Rate Mode")
+
     
     def build_deprecated_profile_inputs(self, model, profile):
         pass

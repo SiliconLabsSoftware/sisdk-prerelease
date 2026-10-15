@@ -8,6 +8,7 @@ quality: "production"
 
 component:
 - id: "wisun_br_stack"
+- id: "wisun_lfn_parent"
 - id: "wisun_default_phy"
 - id: "wisun_configuration"
 - id: "wisun_stack_debug"

@@ -29,3 +29,6 @@ requires:
 - name: memory_manager_pool_common
 define:
 - name: SL_MEMORY_POOL_POWER_AWARE
+documentation:
+  docset: gecko-platform
+  document: platform-service/memory-manager

@@ -38,3 +38,6 @@ toolchain_settings:
   value: -Wl,--undefined=_Znwj -Wl,--undefined=_Znaj -Wl,--undefined=_ZnwjRKSt9nothrow_t -Wl,--undefined=_ZnajRKSt9nothrow_t -Wl,--undefined=_ZnwjSt11align_val_t -Wl,--undefined=_ZnajSt11align_val_t -Wl,--undefined=_ZnwjSt11align_val_tRKSt9nothrow_t -Wl,--undefined=_ZnajSt11align_val_tRKSt9nothrow_t
 - option: llvm_linker_option
   value: -Wl,--undefined=_Znwj -Wl,--undefined=_Znaj -Wl,--undefined=_ZnwjRKSt9nothrow_t -Wl,--undefined=_ZnajRKSt9nothrow_t -Wl,--undefined=_ZnwjSt11align_val_t -Wl,--undefined=_ZnajSt11align_val_t -Wl,--undefined=_ZnwjSt11align_val_tRKSt9nothrow_t -Wl,--undefined=_ZnajSt11align_val_tRKSt9nothrow_t
+documentation:
+  docset: gecko-platform
+  document: platform-service/memory-manager

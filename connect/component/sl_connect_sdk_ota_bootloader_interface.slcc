@@ -1,8 +1,10 @@
 id: "sl_connect_sdk_ota_bootloader_interface"
 label: "OTA Bootloader Interface"
-package: "connect_app"
+package: "connect"
 category: "Connect"
 quality: "production"
+ui_hints:
+  visibility: basic
 metadata:
   sbom:
     license: Zlib
@@ -34,3 +36,7 @@ template_contribution:
   value:
     callback_type: "init"
     function_name: "emberAfPluginBootloaderInterfaceSleep"
+
+documentation:
+  docset: connect-stack
+  document: customizing-applications-with-connect-v3x/02-components

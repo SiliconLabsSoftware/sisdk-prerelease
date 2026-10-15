@@ -43,10 +43,16 @@ provides:
 - name: rail_supports_subghz_band
   condition:
   - device_sdid_235
+- name: rail_supports_subghz_band
+  condition:
+  - device_sdid_245
 
 - name: rail_supports_ofdm_pa
   condition:
   - device_sdid_220
+- name: rail_supports_ofdm_pa
+  condition:
+  - device_sdid_245
 
 - name: rail_supports_addr_filter_address_bit_mask
   condition:
@@ -66,6 +72,9 @@ provides:
 - name: rail_supports_addr_filter_address_bit_mask
   condition:
   - device_sdid_235
+- name: rail_supports_addr_filter_address_bit_mask
+  condition:
+  - device_sdid_245
 
 - name: rail_supports_addr_filter_mask
   condition:
@@ -111,6 +120,9 @@ provides:
 - name: rail_supports_tx_repeat_start_to_start
   condition:
   - device_sdid_235
+- name: rail_supports_tx_repeat_start_to_start
+  condition:
+  - device_sdid_245
 
 - name: rail_supports_dual_sync_words
   condition:
@@ -135,10 +147,16 @@ provides:
 - name: rail_supports_external_thermistor
   condition:
   - device_sdid_235
+- name: rail_supports_tx_repeat_start_to_start
+  condition:
+  - device_sdid_245
 
 - name: rail_supports_hfxo_compensation
   condition:
   - device_sdid_220
+- name: rail_supports_hfxo_compensation
+  condition:
+  - device_sdid_245
 
 - name: rail_supports_auxadc
   condition:
@@ -155,6 +173,9 @@ provides:
 - name: rail_supports_auxadc
   condition:
   - device_sdid_235
+- name: rail_supports_auxadc
+  condition:
+  - device_sdid_245
 
 - name: rail_supports_precision_lfrco
   condition:
@@ -184,6 +205,9 @@ provides:
 - name: rail_supports_vdet
   condition:
   - device_sdid_220
+- name: rail_supports_vdet
+  condition:
+  - device_sdid_245
 
 - name: rail_supports_protocol_ble
   condition:
@@ -404,6 +428,9 @@ provides:
 - name: rail_supports_dbm_powersetting_mapping_table
   condition:
   - device_sdid_220
+- name: rail_supports_dbm_powersetting_mapping_table
+  condition:
+  - device_sdid_245
 
 - name: rail_wmbus_supports_simultaneous_t_c_rx
   condition:
@@ -438,6 +465,9 @@ provides:
 - name: rail_supports_sq_phy
   condition:
   - device_sdid_235
+- name: rail_supports_sq_phy
+  condition:
+  - device_sdid_245
 
 - name: rail_zwave_supports_region_pti
   condition:
@@ -485,10 +515,16 @@ provides:
 - name: rail_supports_rssi_detect_threshold
   condition:
   - device_sdid_220
+- name: rail_supports_rssi_detect_threshold
+  condition:
+  - device_sdid_245
 
 - name: rail_supports_thermal_protection
   condition:
   - device_sdid_220
+- name: rail_supports_thermal_protection
+  condition:
+  - device_sdid_245
 
 - name: rail_supports_fast_rx2rx
   condition:
@@ -505,4 +541,7 @@ provides:
 - name: rail_supports_fast_rx2rx
   condition:
   - device_sdid_235
+- name: rail_supports_fast_rx2rx
+  condition:
+  - device_sdid_245
 root_path: rail_library

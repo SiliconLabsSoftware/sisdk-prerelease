@@ -21,6 +21,7 @@
 #include "em_cmu.h"
 #elif (_SILICON_LABS_32B_SERIES == 3)
 #include "sl_hal_gpio.h"
+#include "btl_driver_cmu.h"
 #endif
 #include "btl_debug_cfg.h"
 
@@ -43,12 +44,13 @@ static uint32_t util_get_trace_clock_freq(void)
 
 void btl_debugInit(void)
 {
-//Below variable is supported for Cortex-M4,M33
-#if ((__CORTEX_M == 4) || (__CORTEX_M == 33))
+#if ((__CORTEX_M == 4) || (__CORTEX_M == 33) || (__CORTEX_M == 55))
   uint32_t tpiu_prescaler_val;
 #endif
 
-#if defined(_CMU_CLKEN0_MASK)
+#if (_SILICON_LABS_32B_SERIES == 3)
+  btl_driver_enable_gpio_clock();
+#elif defined(_CMU_CLKEN0_MASK)
   CMU->CLKEN0_SET = CMU_CLKEN0_GPIO;
 #endif
 
@@ -75,7 +77,7 @@ void btl_debugInit(void)
 #if defined(_CMU_TRACECLKCTRL_CLKSEL_MASK)
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_230) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_235) \
   || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_240) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_260) \
-  || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250)
+  || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_250) || defined(_SILICON_LABS_GECKO_INTERNAL_SDID_265)
   /* Select SYSCLK as source for TRACECLK */
   CMU_CLOCK_SELECT_SET(TRACECLK, SYSCLK);
 #else
@@ -110,8 +112,7 @@ void btl_debugInit(void)
 #error Unknown device family!
 #endif
 
-//Below registers are supported for Cortex-M3,M4,M33
-#if ((__CORTEX_M == 4) || (__CORTEX_M == 33))
+#if ((__CORTEX_M == 4) || (__CORTEX_M == 33) || (__CORTEX_M == 55))
   // Enable trace in core debug
   CoreDebug->DHCSR |= 1UL;
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;

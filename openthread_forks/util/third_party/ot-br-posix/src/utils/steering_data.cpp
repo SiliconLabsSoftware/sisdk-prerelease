@@ -29,7 +29,13 @@
 #include "utils/steering_data.hpp"
 
 #include <assert.h>
+#include <mbedtls/version.h>
+#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
+#include <mbedtls/private/sha256.h>
+#else
 #include <mbedtls/sha256.h>
+#endif
 
 #include "utils/crc16.hpp"
 

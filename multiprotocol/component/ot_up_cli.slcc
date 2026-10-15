@@ -145,6 +145,8 @@ template_contribution:
     - type: int8
       help: Transmit power in dBm
     help: set radio TX power (dBm)
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/concurrent-mp-soc/02-concurrent-multiprotocol-cmp-sample-application-z3-light-ot-ftd
 metadata:
   sbom:
     license: MSLA

@@ -144,8 +144,11 @@ void sli_uart_reset(sl_uart_handle_t *uart_handle);
  * @param[in]  uart_handle Handle to UART.
  * @param[in]  uart UART peripheral to use with this handle.
  * @param[in]  pin_config Pointer to the pin assignment for the specified UART.
+ *
+ * @return SL_STATUS_OK if successful. SL_STATUS_NOT_SUPPORTED if the
+ *         peripheral's UART backend is not present in the project.
  ******************************************************************************/
-void sli_uart_init_core(sl_uart_handle_t *uart_handle, sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config);
+sl_status_t sli_uart_init_core(sl_uart_handle_t *uart_handle, sl_peripheral_t uart, const sl_uart_pin_config_t *pin_config);
 
 /***************************************************************************//**
  * De-initializes the core of the driver for the given UART instance.

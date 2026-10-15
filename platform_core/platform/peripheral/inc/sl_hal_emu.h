@@ -425,9 +425,10 @@ SL_ENUM(sl_hal_emu_dcdc_drive_speed_t) {
 SL_ENUM(sl_hal_emu_dcdc_peak_current_t) {
 #if defined(_DCDC_EM23CTRL0_IPKVAL_Load5mA)
   SL_HAL_EMU_DCDC_PEAK_CURRENT_LOAD_5MA     = _DCDC_EM23CTRL0_IPKVAL_Load5mA,    ///< Load 5mA, peak current 90mA.
-#endif
-#if defined(_DCDC_EM23CTRL0_IPKVAL_LOAD5MA)
+#elif defined(_DCDC_EM23CTRL0_IPKVAL_LOAD5MA)
   SL_HAL_EMU_DCDC_PEAK_CURRENT_LOAD_5MA     = _DCDC_EM23CTRL0_IPKVAL_LOAD5MA,    ///< Load 5mA, peak current 90mA.
+#elif defined(_DCDC_EM23CTRL0_IPKVAL_DEFAULT)
+  SL_HAL_EMU_DCDC_PEAK_CURRENT_LOAD_5MA     = _DCDC_EM23CTRL0_IPKVAL_DEFAULT,    ///< Default peak current in EM2/3.
 #endif
 #if defined(_DCDC_EM23CTRL0_IPKVAL_Load10mA)
   SL_HAL_EMU_DCDC_PEAK_CURRENT_LOAD_10MA    = _DCDC_EM23CTRL0_IPKVAL_Load10mA,   ///< Load 10mA, peak current 150mA.

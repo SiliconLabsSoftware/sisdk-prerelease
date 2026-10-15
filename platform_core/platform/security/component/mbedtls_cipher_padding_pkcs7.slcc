@@ -5,6 +5,8 @@ description: >-
   This component provides support for PKCS#7 padding for cipher modes. Currently only CBC is supported.
 category: Platform|Security|Mbed TLS|Encryption
 quality: production
+ui_hints:
+  visibility: never
 provides:
 - name: mbedtls_cipher_padding_pkcs7
 requires:
@@ -12,8 +14,10 @@ requires:
 - name: psa_crypto_cipher_cbc_pkcs7
   condition: [psa_crypto]
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_CIPHER_PADDING_PKCS7
+- name: psa_crypto_builtin_config
+  value: MBEDTLS_CIPHER_MODE_WITH_PADDING
 documentation:
   url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:

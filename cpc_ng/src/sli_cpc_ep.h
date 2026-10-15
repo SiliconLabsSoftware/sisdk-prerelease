@@ -41,6 +41,8 @@
 extern "C" {
 #endif
 
+/// Pending RST deferred on TX allocation failure
+#define SLI_CPC_EP_FLAG_PEND_RST (SL_DEF_BIT(0))
 /// has pending ACK
 #define SLI_CPC_EP_FLAG_PEND_ACK (SL_DEF_BIT(1))
 /// has pending RX window probe
@@ -53,6 +55,8 @@ extern "C" {
 #define SLI_CPC_EP_FLAG_CONNECT (SL_DEF_BIT(5))
 /// Control endpoint; skipped by deferred listen/connect completion
 #define SLI_CPC_EP_FLAG_CONTROL (SL_DEF_BIT(6))
+/// Pending SYN reply (OPEN -> SYN-ACK) deferred on TX allocation failure
+#define SLI_CPC_EP_FLAG_PEND_SYN (SL_DEF_BIT(7))
 
 /**
  * @brief Take a reference on an endpoint so it cannot reach CLOSED while held.

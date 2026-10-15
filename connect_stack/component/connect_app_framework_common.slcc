@@ -1,25 +1,30 @@
 id: "connect_app_framework_common"
 label: "Application Framework Common"
 package: "connect_stack"
+description: "Declares all the required application framework globals, initializes the Connect stack and dispatches stack callbacks calls as needed to the application components."
 category: "Connect"
 quality: "production"
-description: "Declares all the required application framework globals, initializes the Connect stack and dispatches stack callbacks calls as needed to the application components."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: connect-stack-api/app-framework-common
 provides:
 - name: "connect_app_framework_common"
 requires:
 - name: "device_init"
 - name: "connect_stack_common"
 - name: "sleeptimer"
-source:
-- path: "app-framework-common/app_framework_common.c"
-- path: "app-framework-common/app_framework_common_cb.c"
-- path: "app-framework-common/app_framework_stack_cb.c"
-- path: "app-framework-common/app_framework_sleep.c"
 include:
 - path: "app-framework-common"
   file_list:
   - path: "app_framework_common.h"
   - path: "app_framework_callback.h"
+source:
+- path: "app-framework-common/app_framework_common.c"
+- path: "app-framework-common/app_framework_common_cb.c"
+- path: "app-framework-common/app_framework_stack_cb.c"
+- path: "app-framework-common/app_framework_sleep.c"
 template_file:
 - path: "app-framework-common/template/callback_dispatcher.h.jinja"
 - path: "app-framework-common/template/callback_dispatcher.c.jinja"
@@ -87,10 +92,6 @@ template_contribution:
     handler: connect_app_framework_tick
   unless:
   - cmsis_rtos2
-
-documentation:
-  docset: connect-stack
-  document: group-app-framework-common
 
 metadata:
   sbom:

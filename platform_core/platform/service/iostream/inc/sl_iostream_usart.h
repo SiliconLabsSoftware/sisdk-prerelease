@@ -86,11 +86,11 @@ extern "C" {
  *   system can go to a lower energy mode if allowed.
  *
  *   On the receive side, a requirement on EM1 is added if the application can receive
- *   data asynchronously. Meaning that the system can receive data when the MCU is into
- *   a sleep mode(will always be EM1 to allow the reception). Otherwise, If the system
- *   doesn't expect to receive anything, no requirement is added and the system can go
- *   to the lowest Energy mode allowed. You can control this behavior using a
- *   configuration per instance, see the following configuration:
+ *   data asynchronously, meaning that the system can receive data when the MCU is in
+ *   sleep mode (will always be EM1 to allow the reception). Otherwise, if the system
+ *   does not expect to receive anything, no requirement is added and the UART is
+ *   disabled before EM2 entry and restored after wake. You can control this behavior
+ *   using a configuration per instance, see the following configuration:
  *
  *       SL_IOSTREAM_USART_<instance_name>_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
  *

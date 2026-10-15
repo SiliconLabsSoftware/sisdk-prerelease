@@ -34,44 +34,65 @@
 #include <stdint.h>
 #include "sl_status.h"
 
-/**************************************************************************//**
- * Simple CPC Init
- *****************************************************************************/
+/**
+ * \addtogroup rail_sdk_extension
+ * @{
+ */
+/**
+ * \addtogroup rail_sdk_simple_cpc
+ * @{
+ */
+
+/**
+ * @brief Initializes Simple CPC for RAIL NCP projects.
+ */
 void sl_rail_sdk_simple_cpc_init(void);
 
-/**************************************************************************//**
- * Step function (used in CPC mode)
- *****************************************************************************/
+/**
+ * @brief Services CPC in baremetal applications.
+ */
 void sl_rail_sdk_simple_cpc_step(void);
 
-/**************************************************************************//**
- * Transmit function
- *****************************************************************************/
+/**
+ * @brief Transmits a buffer over CPC.
+ *
+ * @param[in] len Length of the data in bytes.
+ * @param[in] data Pointer to the payload to transmit.
+ */
 void sl_rail_sdk_simple_cpc_transmit(uint32_t len, const uint8_t *data);
 
-/**************************************************************************//**
- * Transmit completed callback
- *****************************************************************************/
+/**
+ * @brief Callback invoked when a CPC transmit completes.
+ *
+ * @param[in] status Result of the transmit operation.
+ */
 void sl_rail_sdk_simple_cpc_transmit_cb(sl_status_t status);
 
-/**************************************************************************//**
- * Receive function (used in UART mode)
- *****************************************************************************/
+/**
+ * @brief Polls CPC for received data.
+ */
 void sl_rail_sdk_simple_cpc_receive(void);
 
-/**************************************************************************//**
- * Receive completed callback
- *****************************************************************************/
+/**
+ * @brief Callback invoked when CPC data is received.
+ *
+ * @param[in] status Result of the receive operation.
+ * @param[in] len Length of the received data in bytes.
+ * @param[in] data Pointer to the received payload.
+ */
 void sl_rail_sdk_simple_cpc_receive_cb(sl_status_t status, uint32_t len, uint8_t *data);
 
-/**************************************************************************//**
- * OS initialization function - if the OS is present
- *****************************************************************************/
+/**
+ * @brief Initializes the OS task that services CPC when a kernel is present.
+ */
 void sl_rail_sdk_simple_cpc_os_task_init(void);
 
-/**************************************************************************//**
- * Function to trigger the OS task to proceed - if the OS is present
- *****************************************************************************/
+/**
+ * @brief Notifies the CPC OS task to run when a kernel is present.
+ */
 void sl_rail_sdk_simple_cpc_os_task_proceed(void);
+
+/** @} */ // end of rail_sdk_simple_cpc group
+/** @} */ // end of extension group
 
 #endif // SL_RAIL_SIMPLE_CPC_H

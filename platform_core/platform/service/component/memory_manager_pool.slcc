@@ -26,3 +26,6 @@ requires:
 - name: sl_core
 - name: memory_manager
 - name: memory_manager_pool_common
+documentation:
+  docset: gecko-platform
+  document: platform-service/memory-manager

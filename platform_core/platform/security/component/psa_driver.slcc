@@ -12,6 +12,7 @@ provides:
 - name: psa_driver
 
 requires:
+- name: sli_psa_driver_contexts
 - name: psa_driver_common
 - name: psa_se_driver
   condition: [device_has_semailbox, trustzone_unaware]
@@ -41,13 +42,6 @@ recommends:
 
   vendor: silabs
 template_contribution:
-- name: mbedtls_config
-  value: MBEDTLS_PSA_CRYPTO_DRIVERS
-  condition: [device_series_2]
-- name: mbedtls_config
-  value: MBEDTLS_PSA_CRYPTO_DRIVERS
-  condition: [device_series_3]
-
 - name: psa_crypto_builtin_config
   value: MBEDTLS_PSA_BUILTIN_ALG_HMAC 1
   condition: [device_series_2, mbedtls_sha512]

@@ -59,7 +59,9 @@ extern "C" {
 constexpr uint32_t NVM3KEY_DOMAIN_OPENTHREAD = 0x20000U;
 
 // Indexed key types are only supported for kKeyChildInfo (=='child table').
-constexpr int NUM_INDEXED_SETTINGS = OPENTHREAD_CONFIG_MLE_MAX_CHILDREN;
+// MTD sets MLE_MAX_CHILDREN=0; non-indexed keys (active/pending dataset, …)
+// still need at least one NVM3 index slot (0).
+constexpr int NUM_INDEXED_SETTINGS = (OPENTHREAD_CONFIG_MLE_MAX_CHILDREN > 0) ? OPENTHREAD_CONFIG_MLE_MAX_CHILDREN : 1;
 
 // List size used when enumerating nvm3 keys.
 constexpr unsigned char ENUM_NVM3_KEY_LIST_SIZE = 4;
@@ -304,7 +306,7 @@ static sl_status_t addSetting(uint16_t key, const uint8_t *value, uint16_t value
     otEXPECT_ACTION((value != nullptr) && (valueLength != 0), status = SL_STATUS_INVALID_PARAMETER);
 
     // Iterate from first to last instance key for this key, looking for the first available slot
-    while (idx < SettingsKey::getLastIndex() && availableIndex == false)
+    while (idx <= SettingsKey::getLastIndex() && availableIndex == false)
     {
         settingsKey = SettingsKey(aInstance, key, idx);
         if (isNvm3ObjectEmpty(settingsKey))
@@ -483,6 +485,11 @@ void ResetState()
     sInstanceCount  = 0;
     sNvm3OpenedByOT = false;
     memset(nvm3_defaultHandle, 0, sizeof(nvm3_Handle_t));
+}
+
+int GetNumIndexedSettings()
+{
+    return NUM_INDEXED_SETTINGS;
 }
 } // namespace Settings
 } // namespace Testing

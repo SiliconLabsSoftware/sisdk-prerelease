@@ -960,7 +960,8 @@ __WEAK const sl_peripheral_dma_val_t sl_peripheral_dma_val_ldma0 = {  .base = 0x
                                                                       .nbr_channel = 0,
                                                                       .nbr_sync = 0,
                                                                       .dual_destination_map = 0x0,
-                                                                      .rule_based_interleaving_map = 0x0 };
+                                                                      .rule_based_interleaving_map = 0x0,
+                                                                      .retained_channel_map = 0 };
 
 #if defined(__ICCARM__)
 // Disable IAR multiple typedefs declaration warning.

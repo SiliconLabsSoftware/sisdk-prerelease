@@ -21,6 +21,41 @@
 
 #include "stack/include/sl_zigbee_security_manager_dlk_ecc.h"
 
+#include "mbedtls/build_info.h"
+#if defined(MBEDTLS_VERSION_MAJOR) && (MBEDTLS_VERSION_MAJOR >= 4)
+#ifndef MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS
+#define MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS
+#endif
+#include "mbedtls/private/bignum.h"
+#include "mbedtls/private/ecp.h"
+#else
+#include "mbedtls/bignum.h"
+#include "mbedtls/ecp.h"
+#endif
+#include "psa/crypto.h"
+
+typedef struct {
+  mbedtls_ecp_group ecc_group;    // elliptic curve group
+  mbedtls_mpi d;                  // private key
+  mbedtls_ecp_point Q;            // public-point
+  mbedtls_ecp_point Qp;           // peer's public point
+  mbedtls_mpi x_k;                // common point X coordinate
+
+  // ECDHE-PSK (PSA / P-256)
+  psa_key_id_t psa_private_key_id;
+  bool psa_key_valid;
+  uint8_t our_public_key[DLK_ECC_P256_PUBLIC_KEY_SIZE];
+  uint8_t peer_public_key[DLK_ECC_P256_PUBLIC_KEY_SIZE];
+  // Zigbee ECDHE expand/export uses little-endian shared X
+  uint8_t shared_x_le[DLK_ECC_COORDINATE_SIZE];
+} sli_zigbee_dlk_ecc_crypto_state_t;
+
+static inline sli_zigbee_dlk_ecc_crypto_state_t *
+sli_zigbee_dlk_ecc_get_crypto_state(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
+{
+  return (sli_zigbee_dlk_ecc_crypto_state_t *)dlk_ecc_ctx->crypto_state;
+}
+
 /**
  * @brief checks if given ecc operation, curve, and hash are valid
  */
@@ -52,4 +87,28 @@ sl_status_t sli_zb_sec_man_ecc_import_peer_public_key(sl_zigbee_sec_man_dlk_ecc_
                                                       const uint8_t *public_key_buff,
                                                       size_t public_key_len);
 
-#endif // SL_ZIGBEE_SECURITY_MANAGER_DLK_ECC_H
+/**
+ * @brief exports the shared x-coordinate (little-endian) for debug/test use
+ * @param dlk_ecc_ctx a pointer to the context containing the computed shared secret coordinate
+ * @param shared_x_out destination buffer for DLK_ECC_COORDINATE_SIZE bytes
+ * @param shared_x_len size of shared_x_out in bytes
+ * @return status indicating whether export succeeded
+ */
+sl_status_t sli_zb_sec_man_ecc_export_shared_x(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx,
+                                               uint8_t *shared_x_out,
+                                               size_t shared_x_len);
+
+/**
+ * @brief maps a low-level mbedtls return code to an sl_status_t
+ * @param crypto_ret return code from an underlying mbedtls operation
+ * @return specific sl_status_t where possible (parameter/key/alloc/support), else FAIL
+ */
+sl_status_t sli_zb_sec_man_ecc_map_crypto_status(int crypto_ret);
+
+/**
+ * @brief maps a PSA status code to an sl_status_t
+ * @return specific sl_status_t where possible (parameter/key/alloc/support), else FAIL
+ */
+sl_status_t sli_zb_sec_man_ecc_map_psa_status(psa_status_t psa_status);
+
+#endif // SLI_ZIGBEE_SECURITY_MANAGER_DLK_ECC_H

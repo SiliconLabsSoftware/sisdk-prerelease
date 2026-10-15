@@ -93,7 +93,7 @@ extern "C" {
 
 /// Boolean to indicate whether the selected chip supports OFDM PA.
 /// See also runtime refinement \ref sl_rail_supports_ofdm_pa().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5 || _SILICON_LABS_32B_SERIES_2_CONFIG == 10)
 #define SL_RAIL_SUPPORTS_OFDM_PA 1
 #else
 #define SL_RAIL_SUPPORTS_OFDM_PA 0
@@ -191,6 +191,7 @@ extern "C" {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14) \
@@ -203,7 +204,8 @@ extern "C" {
 
 /// Boolean to indicate whether the selected chip supports HFXO compensation.
 /// See also runtime refinement \ref sl_rail_supports_hfxo_compensation().
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10) \
   || (_SILICON_LABS_32B_SERIES_3_CONFIG == 353))
 #define SL_RAIL_SUPPORTS_HFXO_COMPENSATION SL_RAIL_SUPPORTS_EXTERNAL_THERMISTOR
 #else
@@ -218,6 +220,7 @@ extern "C" {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
@@ -277,7 +280,7 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports the
 /// VDET voltage measurement feature.
 /// See also runtime refinement \ref sl_rail_supports_vdet().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5 || _SILICON_LABS_32B_SERIES_2_CONFIG == 10)
 #define SL_RAIL_SUPPORTS_VDET 1
 #else
 #define SL_RAIL_SUPPORTS_VDET 0
@@ -566,7 +569,8 @@ extern "C" {
 /// See also runtime refinement \ref
 /// sl_rail_ieee802154_supports_g_mode_switch().
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10))
 #define SL_RAIL_IEEE802154_SUPPORTS_G_MODE_SWITCH \
   SL_RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868  // limit to Sub-GHz for now
 #else
@@ -632,7 +636,7 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports dual PA configs for mode switch
 /// or concurrent mode.
 /// See also runtime refinement \ref sl_rail_ieee802154_supports_dual_pa_config().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10)
 #define SL_RAIL_IEEE802154_SUPPORTS_DUAL_PA_CONFIG 1
 #else
 #define SL_RAIL_IEEE802154_SUPPORTS_DUAL_PA_CONFIG 0
@@ -650,8 +654,8 @@ extern "C" {
 /// This feature is available when the configuration for Silicon Labs Series 3
 /// devices is set to 1, enabling the use of a unified Power Amplifier (PA) interface
 /// across different configurations.
-#if ((_SILICON_LABS_32B_SERIES == 2)           \
-  && (_SILICON_LABS_32B_SERIES_2_CONFIG != 5)) \
+#if ((_SILICON_LABS_32B_SERIES == 2)                                                      \
+  && (_SILICON_LABS_32B_SERIES_2_CONFIG != 5 && _SILICON_LABS_32B_SERIES_2_CONFIG != 10)) \
   || (_SILICON_LABS_32B_SERIES_3_CONFIG >= 300)
 #define SL_RAIL_SUPPORTS_COMMON_PA_INTERFACE SL_RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE
 #else
@@ -692,8 +696,9 @@ extern "C" {
 /// Wi-SUN
 /// See also runtime refinement \ref
 /// sl_rail_supports_protocol_wi_sun().
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define SL_RAIL_SUPPORTS_PROTOCOL_WI_SUN 1
 #else
@@ -822,8 +827,9 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports
 /// configurable RSSI threshold set by \ref sl_rail_set_rssi_detect_threshold().
 /// See also runtime refinement \ref sl_rail_supports_rssi_detect_threshold().
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define SL_RAIL_SUPPORTS_RSSI_DETECT_THRESHOLD (1U)
 #else
@@ -833,7 +839,7 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports
 /// thermal protection set by \ref sl_rail_config_thermal_protection().
 /// See also runtime refinement \ref sl_rail_supports_thermal_protection().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10)
   #define SL_RAIL_SUPPORTS_THERMAL_PROTECTION  (1U)
 #else
   #define SL_RAIL_SUPPORTS_THERMAL_PROTECTION  (0U)
@@ -851,7 +857,7 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports collision detection
 /// enabled by \ref SL_RAIL_RX_OPTION_ENABLE_COLLISION_DETECTION
 /// See also runtime refinement \ref sl_rail_supports_collision_detection().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10)
   #define SL_RAIL_SUPPORTS_COLLISION_DETECTION  (1U)
 #else
   #define SL_RAIL_SUPPORTS_COLLISION_DETECTION  (0U)
@@ -881,7 +887,7 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports automatic prs LNA
 /// bypass for external FEM.
 /// See also runtime refinement \ref sl_rail_supports_prs_lna_bypass().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10)
   #define SL_RAIL_SUPPORTS_PRS_LNA_BYPASS (1U)
 #else
   #define SL_RAIL_SUPPORTS_PRS_LNA_BYPASS (0U)

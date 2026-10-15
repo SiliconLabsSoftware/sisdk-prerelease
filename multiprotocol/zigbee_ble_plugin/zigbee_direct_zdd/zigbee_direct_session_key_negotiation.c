@@ -35,13 +35,14 @@
 #include "stack/include/sl_zigbee_dlk_negotiation.h"
 #include "stack/include/zigbee-security-manager.h"
 #include "stack/include/sl_zigbee_security_manager_dlk_ecc.h"
+#include "sli_zigbee_security_manager_dlk_ecc.h"
 #include "stack/include/zigbee-device-stack.h"
 #include "zigbee_direct_session_key_negotiation.h"
 #include "zigbee_direct_zdd_config.h"
 #include "app/util/zigbee-framework/zigbee-device-common.h"
 #include "sl_custom_token_header.h"
 #include "app/framework/security/af-security.h"
-#include "mbedtls/sha256.h"
+#include "psa/crypto.h"
 #include "stack/config/sl_zigbee_token_defines.h"
 
 #ifndef SL_ZIGBEE_DIRECT_ZDD_DEFAULT_PASSCODE
@@ -201,11 +202,18 @@ static sl_status_t sli_zigbee_direct_p256_expand_shared_secret(sl_zigbee_sec_man
 
   uint8_t buffer[DLK_ECC_COORDINATE_SIZE + SL_ZIGBEE_ENCRYPTION_KEY_SIZE + EUI64_SIZE + DLK_ECC_P256_PUBLIC_KEY_SIZE + EUI64_SIZE + DLK_ECC_P256_PUBLIC_KEY_SIZE];
   int buffLen = DLK_ECC_COORDINATE_SIZE + SL_ZIGBEE_ENCRYPTION_KEY_SIZE + EUI64_SIZE + DLK_ECC_P256_PUBLIC_KEY_SIZE + EUI64_SIZE + DLK_ECC_P256_PUBLIC_KEY_SIZE;
-  int ret;
+  sl_status_t status;
 
-  ret = mbedtls_mpi_write_binary(&ctx->x_k, buffer, DLK_ECC_COORDINATE_SIZE);
-  if (ret != 0) {
-    return ret;
+  // DLK crypto state is opaque; export_shared_x returns little-endian.
+  // ZDD P-256 expand historically hashed the shared X in big-endian.
+  status = sli_zb_sec_man_ecc_export_shared_x(ctx, buffer, DLK_ECC_COORDINATE_SIZE);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+  for (size_t i = 0; i < (DLK_ECC_COORDINATE_SIZE / 2); i++) {
+    uint8_t tmp = buffer[i];
+    buffer[i] = buffer[DLK_ECC_COORDINATE_SIZE - 1U - i];
+    buffer[DLK_ECC_COORDINATE_SIZE - 1U - i] = tmp;
   }
 
   if (EUI64_TO_UINT64_LE(sl_zigbee_get_eui64()) > EUI64_TO_UINT64_LE(sl_zvd_eui)) {
@@ -223,8 +231,20 @@ static sl_status_t sli_zigbee_direct_p256_expand_shared_secret(sl_zigbee_sec_man
   }
   memcpy(buffer + DLK_ECC_COORDINATE_SIZE + EUI64_SIZE + DLK_ECC_P256_PUBLIC_KEY_SIZE + EUI64_SIZE + DLK_ECC_P256_PUBLIC_KEY_SIZE, ctx->psk, SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
 
-  ret = mbedtls_sha256(buffer, buffLen, ctx->secret, 0);
-  return ret;
+  {
+    psa_status_t psa_status;
+    size_t hash_length = 0;
+    psa_status = psa_hash_compute(PSA_ALG_SHA_256,
+                                  buffer,
+                                  (size_t)buffLen,
+                                  ctx->secret,
+                                  32,
+                                  &hash_length);
+    if (psa_status != PSA_SUCCESS || hash_length != 32) {
+      return (sl_status_t)psa_status;
+    }
+  }
+  return SL_STATUS_OK;
 }
 
 sl_status_t sli_zigbee_direct_handle_incoming_dlk_negotiation_request(uint8_t messageLength,

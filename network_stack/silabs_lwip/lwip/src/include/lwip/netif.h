@@ -489,12 +489,18 @@ void netif_set_link_up(struct netif *netif);
 void netif_set_link_down(struct netif *netif);
 /** Ask if a link is up */
 #define netif_is_link_up(netif) (((netif)->flags & NETIF_FLAG_LINK_UP) ? (u8_t)1 : (u8_t)0)
-#if SL_LWIP_ADAPTIVE_TIMERS
-/** Ask if any other netif is admin-up and link-up. */
-u8_t netif_other_netif_is_up_link_up(struct netif *skip_netif);
-/** Stop ND6/MLD6 timers without changing link state. */
+#if SL_LWIP_LINK_DOWN_CLEANUP
+/**
+ * Return 1 if another netif (other than skip) is admin-up and link-up.
+ * Used as the last-link gate for global on-demand timers.
+ */
+u8_t sli_netif_other_netif_is_up_link_up(struct netif *skip_netif);
+/**
+ * Run per-module link-down cleanup without changing link/admin flags.
+ * Must run with TCPIP core lock held (or via netifapi_netif_stop_timers).
+ */
 void netif_stop_timers(struct netif *netif);
-#endif /* SL_LWIP_ADAPTIVE_TIMERS */
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP */
 
 #if LWIP_NETIF_LINK_CALLBACK
 void netif_set_link_callback(struct netif *netif, netif_status_callback_fn link_callback);

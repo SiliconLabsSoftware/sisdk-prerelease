@@ -30,3 +30,6 @@ define:
 template_contribution:
 - name: tz_non_secure_execution_source
   value: 1
+documentation:
+  docset: gecko-platform
+  document: platform-security-api

@@ -1,11 +1,6 @@
 id: "sl_rail_sdk_simple_assistance"
 label: "Simple Assistance"
 package: "rail_sdk"
-category: "RAIL-SDK|Utility"
-quality: "production"
-metadata:
-  sbom:
-    license: Zlib
 description: >
   This component provides fine-grained control over the dedicated LEDs on the
   board, as well as essential logging functionality.
@@ -14,6 +9,16 @@ description: >
   analyzing the behavior of your system.
   Whether you want to indicate reception or transmission, this component
   provides the necessary functionality along with robust logging capabilities.
+category: "RAIL-SDK|Utility"
+quality: "production"
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: basic
+documentation:
+  docset: rail
+  document: rail-sdk-services/rail-sdk-simple-assistance
 root_path: "rail/component/sl_rail_sdk_simple_assistance"
 
 requires:

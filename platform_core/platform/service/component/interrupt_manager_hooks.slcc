@@ -20,3 +20,6 @@ requires:
 template_contribution:
 - name: component_catalog
   value: interrupt_manager_hooks
+documentation:
+  docset: gecko-platform
+  document: platform-service/interrupt-manager

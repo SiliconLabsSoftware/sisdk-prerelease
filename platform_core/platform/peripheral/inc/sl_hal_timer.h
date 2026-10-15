@@ -1601,7 +1601,7 @@ __INLINE void sl_hal_timer_set_interrupts(TIMER_TypeDef *timer,
   timer->IF_SET = flags;
 }
 
-#if defined(TIMER_CC_IEN_CCIEN)
+#if defined(TIMER_CC_IEN_CC)
 /***************************************************************************//**
  * @brief
  *   Clear one or more pending TIMER compare/capture channel interrupts.
@@ -1778,7 +1778,7 @@ __INLINE void sl_hal_timer_channel_set_interrupts(TIMER_TypeDef *timer,
 
   timer->CC_SET[channel].IF = flags;
 }
-#endif // defined(TIMER_CC_IEN_CCIEN)
+#endif // defined(TIMER_CC_IEN_CC)
 /** @} (end addtogroup timer) */
 
 #ifdef __cplusplus

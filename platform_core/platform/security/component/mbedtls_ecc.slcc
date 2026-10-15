@@ -15,7 +15,6 @@ provides:
 requires:
 - name: mbedtls_ecc_curve
 - name: mbedtls_mpi
-- name: mbedtls_core
 - name: mbedtls_random
 - name: psa_crypto_ecc
   condition: [psa_crypto]
@@ -23,8 +22,14 @@ recommends:
 - id: mbedtls_ecc_secp256r1
   vendor: silabs
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_ECP_C
+- name: psa_crypto_builtin_config
+  value: MBEDTLS_ECP_WINDOW_SIZE 2
+- name: psa_crypto_builtin_config
+  value: MBEDTLS_ECP_FIXED_POINT_OPTIM 0
+- name: psa_crypto_builtin_config
+  value: MBEDTLS_ECP_NIST_OPTIM
 metadata:
   sbom:
     reference: mbedtls_sbom

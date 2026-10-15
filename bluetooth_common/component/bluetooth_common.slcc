@@ -20,6 +20,7 @@ source:
 - path: "src/sli_bluetooth_common_config.c"
 requires:
 - name: bluetooth_common_libraries
+- name: memory_manager
 recommends:
 - id: "bluetooth_common_libraries_release"
   vendor: silabs

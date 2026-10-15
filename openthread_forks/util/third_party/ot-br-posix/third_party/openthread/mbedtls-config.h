@@ -29,84 +29,61 @@
 #ifndef OTBR_MBEDTLS_CONFIG_H_
 #define OTBR_MBEDTLS_CONFIG_H_
 
+#define MBEDTLS_CONFIG_VERSION 0x04010000
+
+// ==============================================================================
+// SSL / TLS (Mbed TLS 4.x upper layer).
+// Crypto algorithms live in OpenThread's psa-crypto-config.h
+// (TF_PSA_CRYPTO_CONFIG_FILE), not in this file.
+//
+// Version notes (gate on MBEDTLS_CONFIG_VERSION; version.h cannot be included
+// from inside this config without a circular include via build_info.h):
+// - MBEDTLS_SSL_EXPORT_KEYS removed in 4.x (always enabled).
+// - MBEDTLS_SSL_MAX_CONTENT_LEN removed in 4.x; use IN/OUT_CONTENT_LEN.
+// ==============================================================================
+
 #define MBEDTLS_DEBUG_C
 
-// Not supported on MIPS
-#ifndef __mips__
-#define MBEDTLS_HAVE_ASM
-#endif
-
-#define MBEDTLS_AES_ROM_TABLES
-#define MBEDTLS_ECP_DP_SECP256R1_ENABLED
-#define MBEDTLS_ECP_NIST_OPTIM
-#define MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED
-#define MBEDTLS_SSL_MAX_FRAGMENT_LENGTH
-#define MBEDTLS_SSL_PROTO_TLS1_2
-#define MBEDTLS_SSL_PROTO_DTLS
-#define MBEDTLS_SSL_DTLS_ANTI_REPLAY
-#define MBEDTLS_SSL_DTLS_HELLO_VERIFY
-#define MBEDTLS_SSL_EXPORT_KEYS
-#define MBEDTLS_SSL_KEEP_PEER_CERTIFICATE
-
-#define MBEDTLS_AES_C
-#define MBEDTLS_ASN1_PARSE_C
-#define MBEDTLS_ASN1_WRITE_C
-#define MBEDTLS_BIGNUM_C
-#define MBEDTLS_CAN_ECDH
-#define MBEDTLS_CCM_C
-#define MBEDTLS_CIPHER_C
-#define MBEDTLS_CTR_DRBG_C
-#define MBEDTLS_CMAC_C
-#define MBEDTLS_ECJPAKE_C
-#define MBEDTLS_ECP_C
-#define MBEDTLS_ENTROPY_C
-#define MBEDTLS_HMAC_DRBG_C
-#define MBEDTLS_MD_C
-#define MBEDTLS_OID_C
-#define MBEDTLS_PK_C
-#define MBEDTLS_PK_HAVE_ECC_KEYS
-#define MBEDTLS_PK_PARSE_C
-#define MBEDTLS_SHA256_C
-#define MBEDTLS_SHA256_SMALLER
-#define MBEDTLS_SSL_COOKIE_C
 #define MBEDTLS_SSL_CLI_C
 #define MBEDTLS_SSL_SRV_C
 #define MBEDTLS_SSL_TLS_C
+#define MBEDTLS_SSL_COOKIE_C
+#define MBEDTLS_SSL_DTLS_ANTI_REPLAY
+#define MBEDTLS_SSL_DTLS_HELLO_VERIFY
+#if !defined(MBEDTLS_CONFIG_VERSION) || (MBEDTLS_CONFIG_VERSION < 0x04000000)
+#define MBEDTLS_SSL_EXPORT_KEYS
+#endif
+#define MBEDTLS_SSL_KEEP_PEER_CERTIFICATE
+#define MBEDTLS_SSL_MAX_FRAGMENT_LENGTH
+#define MBEDTLS_SSL_PROTO_TLS1_2
+#define MBEDTLS_SSL_PROTO_DTLS
 
-// Enable CoAPS PSK support
+// EC-JPAKE via PSA PAKE (requires PSA_WANT_ALG_JPAKE in psa-crypto-config.h).
+#define MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED
+
+// CoAPS PSK / ECDHE-ECDSA
 #define MBEDTLS_KEY_EXCHANGE_PSK_ENABLED
-
-// Enable CoAPS ECDSA support
-#define MBEDTLS_BASE64_C
-#define MBEDTLS_ECDH_C
-#define MBEDTLS_ECDSA_C
 #define MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
-#define MBEDTLS_ECDSA_DETERMINISTIC
-#define MBEDTLS_OID_C
-#define MBEDTLS_PEM_PARSE_C
-#define MBEDTLS_PK_CAN_ECDSA_SIGN
-#define MBEDTLS_PK_WRITE_C
+
+#if !defined(MBEDTLS_CONFIG_VERSION) || (MBEDTLS_CONFIG_VERSION < 0x04000000)
+#define MBEDTLS_SSL_MAX_CONTENT_LEN 900
+#else
+#define MBEDTLS_SSL_IN_CONTENT_LEN  900
+#define MBEDTLS_SSL_OUT_CONTENT_LEN 900
+#endif
+#define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
+
+// ==============================================================================
+// X.509 (TLS layer). PK/PEM/BASE64 live in psa-crypto-config.h.
+// ==============================================================================
 
 #define MBEDTLS_X509_USE_C
 #define MBEDTLS_X509_CRT_PARSE_C
 #define MBEDTLS_X509_CRL_PARSE_C
 #define MBEDTLS_X509_CSR_PARSE_C
 
-#define MBEDTLS_NET_C
-#define MBEDTLS_TIMING_C
-
-#define MBEDTLS_AES_ROM_TABLES
-
-#define MBEDTLS_ECP_MAX_BITS 256
-#define MBEDTLS_MPI_MAX_SIZE 32
-#define MBEDTLS_SSL_MAX_CONTENT_LEN 900
-
-#define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
-
-#include "mbedtls/version.h"
-#if (MBEDTLS_VERSION_NUMBER < 0x03000000)
-    // Configuration sanity check. Done automatically in Mbed TLS >= 3.0.
-    #include "mbedtls/check_config.h"
+#if defined(MBEDTLS_USER_CONFIG_FILE)
+#include MBEDTLS_USER_CONFIG_FILE
 #endif
 
 #endif // OTBR_MBEDTLS_CONFIG_H_

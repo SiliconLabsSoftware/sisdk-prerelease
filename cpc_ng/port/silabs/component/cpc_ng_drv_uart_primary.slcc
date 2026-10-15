@@ -15,7 +15,8 @@ config_file:
   file_id: cpc_ng_drv_uart_config
 provides:
 - name: cpc_ng_drv_uart_primary
-- name: cpc_ng_primary_drv_instance
+- name: cpc_ng_drv_primary_instance
+  allow_multiple: true
 requires:
 - name: cpc_ng_drv_uart
 - name: cpc_ng_primary

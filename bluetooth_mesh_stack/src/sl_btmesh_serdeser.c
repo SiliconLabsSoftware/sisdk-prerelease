@@ -26,7 +26,7 @@
 
 static int16_t int16_from_buf(const uint8_t *ptr)
 {
-  return ((int16_t)ptr[0]) | ((int16_t)ptr[1] << 8);
+  return (int16_t)(((int16_t)ptr[0]) | ((int16_t)ptr[1] << 8));
 }
 
 static void int16_to_buf(uint8_t *ptr, int16_t n)
@@ -37,7 +37,7 @@ static void int16_to_buf(uint8_t *ptr, int16_t n)
 
 static uint16_t uint16_from_buf(const uint8_t *ptr)
 {
-  return ((uint16_t)ptr[0]) | ((uint16_t)ptr[1] << 8);
+  return (uint16_t)(((uint16_t)ptr[0]) | ((uint16_t)ptr[1] << 8));
 }
 
 static void uint16_to_buf(uint8_t *ptr, uint16_t n)
@@ -426,8 +426,8 @@ sl_status_t mesh_lib_deserialize_request(struct mesh_generic_request *req,
       req->property.id = uint16_from_buf(&msg_buf[msg_off]);
       msg_off += 2;
       req->property.buffer = msg_buf;
-      req->property.offset = msg_off;
-      req->property.length = msg_len - msg_off;
+      req->property.offset = (uint16_t)msg_off;
+      req->property.length = (uint16_t)(msg_len - msg_off);
       break;
 
     case mesh_generic_request_property_admin:
@@ -439,8 +439,8 @@ sl_status_t mesh_lib_deserialize_request(struct mesh_generic_request *req,
       msg_off += 2;
       req->property.access = msg_buf[msg_off++];
       req->property.buffer = msg_buf;
-      req->property.offset = msg_off;
-      req->property.length = msg_len - msg_off;
+      req->property.offset = (uint16_t)msg_off;
+      req->property.length = (uint16_t)(msg_len - msg_off);
       break;
 
     case mesh_generic_request_property_manuf:
@@ -1100,8 +1100,8 @@ sl_status_t mesh_lib_deserialize_state(struct mesh_generic_state *current,
       msg_off += 2;
       current->property.access = msg_buf[msg_off++];
       current->property.buffer = msg_buf;
-      current->property.offset = msg_off;
-      current->property.length = msg_len - msg_off;
+      current->property.offset = (uint16_t)msg_off;
+      current->property.length = (uint16_t)(msg_len - msg_off);
       *has_target = 0;
       break;
 
@@ -1114,8 +1114,8 @@ sl_status_t mesh_lib_deserialize_state(struct mesh_generic_state *current,
       }
       current->kind = kind;
       current->property_list.buffer = msg_buf;
-      current->property_list.offset = msg_off;
-      current->property_list.length = msg_len - msg_off;
+      current->property_list.offset = (uint16_t)msg_off;
+      current->property_list.length = (uint16_t)(msg_len - msg_off);
       *has_target = 0;
       break;
 

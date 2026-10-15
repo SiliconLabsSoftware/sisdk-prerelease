@@ -18,7 +18,7 @@ requires:
 
 template_contribution:
 - name: psa_crypto_config
-  value: PSA_WANT_ALG_RSA_OEAP 1
+  value: PSA_WANT_ALG_RSA_OAEP 1
 metadata:
   sbom:
     reference: mbedtls_sbom

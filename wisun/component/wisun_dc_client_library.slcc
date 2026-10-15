@@ -12,9 +12,12 @@ ui_hints:
 requires:
 - name: "wisun_stack"
 - name: "wisun_lxpm_implementation"
+- name: "wisun_lfn_parent_implementation"
 
 recommends:
 - id: "wisun_lxpm_stubs"
+  vendor: silabs
+- id: "wisun_no_lfn_parent"
 
   vendor: silabs
 conflicts:

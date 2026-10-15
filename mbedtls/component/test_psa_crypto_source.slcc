@@ -1,0 +1,69 @@
+id: test_psa_crypto_source
+label: Test dependencies for running PSA Crypto unit tests (Source)
+package: mbedtls
+description: Utility component providing PSA Crypto test suites dependencies.
+category: unittest|mbedtls
+quality: production
+ui_hints:
+  visibility: never
+provides:
+- name: test_psa_crypto_source
+requires:
+- name: test_psa_framework_source
+- name: psa_crypto_common_source
+source:
+- path: tests/src/psa_test_wrappers.c
+include:
+- path: core
+  file_list:
+  - path: psa_crypto_core.h
+  - path: psa_crypto_slot_management.h
+- path: drivers/builtin/include
+  file_list:
+  - path: mbedtls/private_access.h
+  - path: mbedtls/private/aes.h
+  - path: mbedtls/private/bignum.h
+  - path: mbedtls/private/block_cipher.h
+  - path: mbedtls/private/camellia.h
+  - path: mbedtls/private/ccm.h
+  - path: mbedtls/private/cmac.h
+  - path: mbedtls/private/chachapoly.h
+  - path: mbedtls/private/chacha20.h
+  - path: mbedtls/private/cipher.h
+  - path: mbedtls/private/crypto_adjust_config_enable_builtins.h
+  - path: mbedtls/private/crypto_adjust_config_tweak_builtins.h
+  - path: mbedtls/private/crypto_builtin_key_derivation.h
+  - path: mbedtls/private/crypto_builtin_composites.h
+  - path: mbedtls/private/crypto_builtin_primitives.h
+  - path: mbedtls/private/ctr_drbg.h
+  - path: mbedtls/private/ecdsa.h
+  - path: mbedtls/private/ecp.h
+  - path: mbedtls/private/ecjpake.h
+  - path: mbedtls/private/entropy.h
+  - path: mbedtls/private/error_common.h
+  - path: mbedtls/private/gcm.h
+  - path: mbedtls/private/hmac_drbg.h
+  - path: mbedtls/private/md5.h
+  - path: mbedtls/private/poly1305.h
+  - path: mbedtls/private/ripemd160.h
+  - path: mbedtls/private/rsa.h
+  - path: mbedtls/private/sha1.h
+  - path: mbedtls/private/sha256.h
+  - path: mbedtls/private/sha3.h
+  - path: mbedtls/private/sha512.h
+- path: drivers/builtin/src
+  file_list:
+  - path: bignum_core.h
+  - path: bignum_core_invasive.h
+  - path: bignum_mod.h
+  - path: bignum_mod_raw.h
+- path: tests/include
+  file_list:
+  - path: test/psa_test_wrappers.h
+- path: tests/include/test
+  file_list:
+  - path: mbedtls/build_info.h
+metadata:
+  sbom:
+    reference: tf_psa_crypto_sbom
+root_path: mbedtls/tf-psa-crypto

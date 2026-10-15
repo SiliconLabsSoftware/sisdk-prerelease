@@ -28,8 +28,8 @@
 //rail ieee 802.15.4
 #include  "sl_rail_ieee802154.h"
 
-//mbedtls
-#include "mbedtls/ccm.h"
+// PSA Crypto (CCM AEAD)
+#include "psa/crypto.h"
 
 // Common defines
 #define FAILED  (-1)

@@ -110,7 +110,7 @@ static bool is_wake_ack_frame(const sli_cpc_hdr_t *hdr)
 /******************************************************************************/
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-sl_status_t sli_cpc_wake_device_init(sli_cpc_wake_device_t *wake, sl_gpio_t pin)
+sl_status_t sli_cpc_wake_device_init(sli_cpc_wake_device_t *wake)
 {
   sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, wake.device);
   sl_status_t status;
@@ -119,7 +119,6 @@ sl_status_t sli_cpc_wake_device_init(sli_cpc_wake_device_t *wake, sl_gpio_t pin)
   sli_cpc_dispatcher_set_pre(&wake->dispatcher_handle);
 
   wake->int_no = SL_GPIO_INTERRUPT_UNAVAILABLE;
-  wake->pin = pin;
   wake->active = false;
 
   status = sl_gpio_set_pin_direction(&wake->pin, SL_GPIO_PIN_DIRECTION_IN);
@@ -168,11 +167,10 @@ void sli_cpc_wake_device_deinit(sli_cpc_wake_device_t *wake)
 #endif
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-sl_status_t sli_cpc_wake_host_init(sli_cpc_wake_host_t *wake, sl_gpio_t pin)
+sl_status_t sli_cpc_wake_host_init(sli_cpc_wake_host_t *wake)
 {
   sl_status_t status;
 
-  wake->pin = pin;
   wake->state = SLI_CPC_WAKE_STATE_SLEEP_ALLOWED;
 
   // Configure de-asserted. The pin is only driven once there is something to

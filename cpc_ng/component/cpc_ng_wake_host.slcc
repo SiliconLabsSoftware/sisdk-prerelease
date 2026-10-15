@@ -13,11 +13,6 @@ description: |
 category: Services|CPC-NG|Internal
 quality: experimental
 label: CPC-NG Host Wake
-instantiable:
-  prefix: instance
-config_file:
-- path: config/sl_cpc_wake_{{instance}}_config.h
-  file_id: cpc_ng_wake_host_config
 provides:
 - name: cpc_ng_wake_host
 requires:
@@ -26,6 +21,4 @@ requires:
 template_contribution:
 - name: component_catalog
   value: cpc_ng_wake_host
-- name: cpc_ng_wake_host_instances
-  value: "{{instance}}"
 root_path: cpc_ng

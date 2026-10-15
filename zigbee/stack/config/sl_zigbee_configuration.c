@@ -26,7 +26,7 @@
 #include "stack/include/sl_zigbee.h"
 #include "stack/include/message.h" // Required for packetHandlers
 #include "mac-child.h" // unified-mac
-#include "scan.h" // Required for PG_CH_BITMASK32
+#include "sl-mac-scan-15.4.h" // Required for PG_CH_BITMASK32
 #include "stack/include/sl_zigbee_types_internal.h"
 #include "stack/internal/inc/raw-message-internal-def.h"
 

@@ -41,7 +41,7 @@ include:
 - path: platform/service/legacy_hal/inc/
   file_list:
   - path: crc.h
-  - path: random.h
+  - path: sl_zigbee_random.h
   - path: hal.h
   - path: hal/hal.h
   - path: micro_host.h

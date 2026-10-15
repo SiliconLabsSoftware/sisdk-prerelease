@@ -1,0 +1,21 @@
+id: tf_psa_crypto_sbom
+package: mbedtls
+label: TF-PSA-Crypto Software Bill of Materials
+description: This component defines license and other SBOM metadata
+category: Platform|Security|PSA Crypto
+quality: production
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    id: tf_psa_crypto_sbom
+    license: "Apache-2.0"
+    upstream:
+      name: "TF-PSA-Crypto"
+      version: "1.1.0"
+      supplier: "Trusted Firmware"
+      url: "https://github.com/Mbed-TLS/TF-PSA-Crypto.git"
+      comment: >
+        The TF-PSA-Crypto repository provides an implementation of
+        the PSA Cryptography API version 1.2  https://arm-software.github.io/psa-api/crypto/1.2/
+root_path: mbedtls/tf-psa-crypto

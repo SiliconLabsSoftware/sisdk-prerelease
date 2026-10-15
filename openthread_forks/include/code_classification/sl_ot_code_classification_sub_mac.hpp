@@ -136,7 +136,6 @@ public:
          *
          * @param[in]  aInstance  A reference to the OpenThread instance.
          */
-        SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
         explicit Callbacks(Instance &aInstance);
 
         /**
@@ -220,7 +219,6 @@ public:
      *
      * @param[in]  aInstance  A reference to the OpenThread instance.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     explicit SubMac(Instance &aInstance);
 
     /**
@@ -228,10 +226,8 @@ public:
      *
      * @returns The capability bit vector (see `Radio::Capability` definitions).
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Capabilities GetRadioCaps(void) const { return mRadioCaps; }
 
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
 #if OPENTHREAD_FTD || OPENTHREAD_MTD
     /**
      * Gets the capabilities provided by `SubMac` layer.
@@ -248,7 +244,6 @@ public:
      *
      * @param[in] aPanId  The PAN ID.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetPanId(PanId aPanId);
 
     /**
@@ -256,7 +251,6 @@ public:
      *
      * @returns The short address.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     ShortAddress GetShortAddress(void) const { return mShortAddress; }
 
     /**
@@ -264,7 +258,6 @@ public:
      *
      * @param[in] aShortAddress   The short address.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetShortAddress(ShortAddress aShortAddress);
 
     /**
@@ -272,7 +265,6 @@ public:
      *
      * @returns The alternate short address, or `kShortAddrInvalid` if there is no alternate address.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     ShortAddress GetAlternateShortAddress(void) const { return mAlternateShortAddress; }
 
     /**
@@ -280,7 +272,6 @@ public:
      *
      * @param[in] aShortAddress   The short address. Use `kShortAddrInvalid` to clear it.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetAlternateShortAddress(ShortAddress aShortAddress);
 
     /**
@@ -288,7 +279,6 @@ public:
      *
      * @returns A reference to the extended address.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     const ExtAddress &GetExtAddress(void) const { return mExtAddress; }
 
     /**
@@ -296,7 +286,6 @@ public:
      *
      * @param[in] aExtAddress  The extended address.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetExtAddress(const ExtAddress &aExtAddress);
 
     /**
@@ -305,7 +294,6 @@ public:
      * @param[in]  aCallback   The packet capture callback, or `nullptr` to disable packet capture.
      * @param[in]  aContext    A pointer to application-specific context.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetPcapCallback(PcapCallback aCallback, void *aContext) { mPcapCallback.Set(aCallback, aContext); }
 
     /**
@@ -322,7 +310,6 @@ public:
      * @retval kErrorNone     Successfully enabled.
      * @retval kErrorFailed   The radio could not be enabled.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error Enable(void);
 
     /**
@@ -330,7 +317,6 @@ public:
      *
      * @retval kErrorNone     Successfully disabled the radio.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error Disable(void);
 
     /**
@@ -391,7 +377,6 @@ public:
      *
      * @returns Number of transmit retries.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint8_t GetTransmitRetries(void) const { return mTransmitRetries; }
 
     /**
@@ -399,7 +384,6 @@ public:
      *
      * @returns The RSSI in dBm when it is valid. `Radio::kInvalidRssi` when RSSI is invalid.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     int8_t GetRssi(void) const;
 
     /**
@@ -421,7 +405,6 @@ public:
      *
      * @returns The noise floor value in dBm.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     int8_t GetNoiseFloor(void) const;
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
@@ -433,7 +416,6 @@ public:
      * @param[in]  aShortAddr The short source address of CSL receiver's peer.
      * @param[in]  aExtAddr   The extended source address of CSL receiver's peer.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetCslParams(uint16_t aPeriod, uint8_t aChannel, ShortAddress aShortAddr, const ExtAddress &aExtAddr);
 
     /**
@@ -441,7 +423,6 @@ public:
      *
      * @returns The parent CSL accuracy.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     const CslAccuracy &GetCslParentAccuracy(void) const { return mCslParentAccuracy; }
 
     /**
@@ -449,7 +430,6 @@ public:
      *
      * @param[in] aCslAccuracy  The parent CSL accuracy.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetCslParentAccuracy(const CslAccuracy &aCslAccuracy) { mCslParentAccuracy = aCslAccuracy; }
 
 #endif // OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
@@ -461,7 +441,6 @@ public:
      *
      * @returns A reference to the requested MAC key.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     const KeyMaterial &GetMacKey(KeyTrio::Type aType) const { return mKeyTrio.GetKey(aType); }
 
     /**
@@ -472,13 +451,11 @@ public:
      * @param[in] aCurKey     The current MAC key.
      * @param[in] aNextKey    The next MAC key.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
      void SetMode1MacKeys(uint8_t aKeyIndex, const Key &aPrevKey, const Key &aCurKey, const Key &aNextKey);
 
     /**
      * Clears the stored MAC keys.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void ClearMacKeys(void) { mKeyTrio.Clear(); }
 
     /**
@@ -486,7 +463,6 @@ public:
      *
      * @returns The current MAC frame counter value.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     uint32_t GetFrameCounter(void) const { return mFrameCounter; }
 
     /**
@@ -496,7 +472,6 @@ public:
      * @param[in] aSetIfLarger   If `true`, set only if the new value @p aFrameCounter is larger than the current value.
      *                           If `false`, set the new value independent of the current value.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetFrameCounter(uint32_t aFrameCounter, bool aSetIfLarger);
 
 #if OPENTHREAD_CONFIG_MAC_FILTER_ENABLE
@@ -509,7 +484,6 @@ public:
      *
      * @param[in] aFilterEnabled    TRUE to enable radio filter, FALSE to disable.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SetRadioFilterEnabled(bool aFilterEnabled) { mRadioFilterEnabled = aFilterEnabled; }
 
     /**
@@ -518,7 +492,6 @@ public:
      * @retval TRUE   If the radio filter is enabled.
      * @retval FALSE  If the radio filter is disabled.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool IsRadioFilterEnabled(void) const { return mRadioFilterEnabled; }
 #endif
 
@@ -531,7 +504,6 @@ public:
      * @param[in]  aDuration  The wake-up listen duration in microseconds.
      * @param[in]  aChannel   The wake-up channel.
      */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void UpdateWakeupListening(bool aEnable, uint32_t aInterval, uint32_t aDuration, uint8_t aChannel);
 #endif
 
@@ -626,10 +598,8 @@ private:
         OPENTHREAD_CONFIG_CSL_TRANSMIT_TIME_AHEAD + kCcaSampleInterval + Radio::kHeaderShrDuration;
 #endif
 
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void Init(void);
 
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool RadioSupports(Capability aCapability) const { return (mRadioCaps & aCapability) != 0; }
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool ShouldHandle(Capability aCapability) const;
@@ -646,7 +616,6 @@ private:
 
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void ProcessTransmitSecurity(void);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void ReprocessSecurityForRetx(TxFrame &aFrame);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void SignalFrameCounterUsed(uint32_t aFrameCounter, uint8_t aKeyIndex);
@@ -678,7 +647,6 @@ private:
 
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void               SetState(State aState);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     static const char *StateToString(State aState);
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE || OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
@@ -691,7 +659,6 @@ private:
 #endif
 
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void     CslInit(void);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void     RestartCslTimerAfterSyncUpdate(void);
@@ -712,18 +679,15 @@ private:
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     bool     IsCslEnabled(void) const { return mCslPeriod > 0; }
 #if OPENTHREAD_CONFIG_MAC_CSL_DEBUG_ENABLE
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void LogReceived(RxFrame *aFrame);
 #endif
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void HandleCslReceiveAt(uint32_t aTimeAhead, uint32_t aTimeAfter);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void HandleCslReceiveOrSleep(uint32_t aTimeAhead, uint32_t aTimeAfter);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void LogCslWindow(uint32_t aWinStart, uint32_t aWinDuration);
 #endif
 #if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void        WedInit(void);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void        HandleWedTimer(void);

@@ -31,16 +31,16 @@ component:
   # radio config
   - id: radio_config_simple_rail_singlephy
   # railtest
-  - id: rail_test_core
+  - id: sl_rail_test_core
   # rail util
-  - id: rail_util_init
+  - id: sl_rail_util_init
     instance: [inst0]
-  - id: rail_util_ant_div
-  - id: rail_util_dma
-  - id: rail_util_pti
-  - id: rail_util_rf_path
-  - id: rail_util_rssi
-  - id: rail_util_built_in_phys
+  - id: sl_rail_util_ant_div
+  - id: sl_rail_util_dma
+  - id: sl_rail_util_pti
+  - id: sl_rail_util_rf_path
+  - id: sl_rail_util_rssi
+  - id: sl_rail_util_built_in_phys
   - id: component_catalog
   - id: se_manager
 
@@ -255,6 +255,7 @@ tag:
   - hwfilter:ram:29k
   - hwfilter:flash:253k
   - hwfilter:device:device_series_3
+  - hwfilter:!device:device_has_btcphy
 
 filter:
   - name: Wireless Technology

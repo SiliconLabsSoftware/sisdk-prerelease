@@ -251,11 +251,12 @@ static sl_status_t aes_ccm_radio(bool                encrypt,
   // Setup ver_failed output buffer and initialize it in case of decryption to an invalid value
   volatile uint8_t ver_failed[AES_BLOCK_BYTES] = {[0 ... AES_BLOCK_BYTES - 1] = 0xFF };
 
-  // Calculate padding bytes. Since the accelerator expects to see the AESPAYLOAD data type
-  // at least once during the operation, ensure that we're emitting a padding block in case
-  // no input data is present.
+  // Authentication-only CCM must not feed a dummy AESPAYLOAD block. Header/AAD
+  // input is already present, so omit the payload descriptors when length is 0.
+  const bool has_data = (length > 0);
+  const bool fetch_tag = (!encrypt && tag_length > 0);
   size_t header_pad_bytes = (AES_BLOCK_BYTES - ((header_length + add_length) % AES_BLOCK_BYTES)) % AES_BLOCK_BYTES;
-  size_t data_pad_bytes = (length > 0 ? (AES_BLOCK_BYTES - (length % AES_BLOCK_BYTES)) % AES_BLOCK_BYTES : 16);
+  size_t data_pad_bytes = (AES_BLOCK_BYTES - (length % AES_BLOCK_BYTES)) % AES_BLOCK_BYTES;
 
   // Fetchers
 
@@ -275,25 +276,27 @@ static sl_status_t aes_ccm_radio(bool                encrypt,
                      | DMA_SG_TAG_SETINVALIDBYTES(AES_BLOCK_BYTES - tag_length)
   };
 
-  // Data input. Can be zero-length, in which case we'll issue a bogus descriptor instead.
+  // Data input. Only referenced when length is greater than 0.
   sli_radioaes_dma_descr_t ccm_desc_fetcher_data = {
-    .address       = (uint32_t) (length > 0 ? data_in : ver_failed),
-    .nextDescr     = (uint32_t) ((encrypt || tag_length == 0) ? DMA_AXI_DESCR_END_POINTER : &ccm_desc_fetcher_tag),
-    .lengthAndIrq  = (uint32_t) (length > 0 ? length : data_pad_bytes)
+    .address       = (uint32_t) data_in,
+    .nextDescr     = (uint32_t) (fetch_tag ? &ccm_desc_fetcher_tag : DMA_AXI_DESCR_END_POINTER),
+    .lengthAndIrq  = (uint32_t) length
                      | BLOCK_S_INCR_ADDR
                      | BLOCK_S_REALIGN_DATA,
     .tag           = DMA_SG_ENGINESELECT_BA411E
                      | DMA_SG_TAG_ISDATA
                      | DMA_SG_TAG_DATATYPE_AESPAYLOAD
-                     | ((encrypt || tag_length == 0) ? DMA_SG_TAG_ISLAST : 0)
+                     | (fetch_tag ? 0 : DMA_SG_TAG_ISLAST)
                      | DMA_SG_TAG_SETINVALIDBYTES(data_pad_bytes),
   };
 
   // Possible CCM AAD block (concatenated with the header). Can be zero-length, in which case
-  // this descriptor should not be referenced but rather bypassed to data.
+  // this descriptor should not be referenced but rather bypassed to data, tag, or the end.
   sli_radioaes_dma_descr_t ccm_desc_fetcher_add = {
     .address       = (uint32_t) add_data,
-    .nextDescr     = (uint32_t) &ccm_desc_fetcher_data,
+    .nextDescr     = (uint32_t) (has_data ? &ccm_desc_fetcher_data
+                                 : (fetch_tag ? &ccm_desc_fetcher_tag
+                                    : DMA_AXI_DESCR_END_POINTER)),
     .lengthAndIrq  = (uint32_t) add_length
                      | BLOCK_S_INCR_ADDR
                      | BLOCK_S_REALIGN_DATA,
@@ -301,12 +304,16 @@ static sl_status_t aes_ccm_radio(bool                encrypt,
                      | DMA_SG_TAG_ISDATA
                      | DMA_SG_TAG_DATATYPE_AESHEADER
                      | DMA_SG_TAG_SETINVALIDBYTES(header_pad_bytes)
+                     | ((!has_data && !fetch_tag) ? DMA_SG_TAG_ISLAST : 0)
   };
 
-  // Header input block. Always present.
+  // Header input block. Always present and may be the last input descriptor.
   sli_radioaes_dma_descr_t ccm_desc_fetcher_header = {
     .address       = (uint32_t) header,
-    .nextDescr     = (uint32_t) (add_length > 0 ? &ccm_desc_fetcher_add : &ccm_desc_fetcher_data),
+    .nextDescr     = (uint32_t) (add_length > 0 ? &ccm_desc_fetcher_add
+                                 : (has_data ? &ccm_desc_fetcher_data
+                                    : (fetch_tag ? &ccm_desc_fetcher_tag
+                                       : DMA_AXI_DESCR_END_POINTER))),
     .lengthAndIrq  = (uint32_t) header_length
                      | BLOCK_S_INCR_ADDR
                      | (add_length > 0 ? 0 : BLOCK_S_REALIGN_DATA),
@@ -314,6 +321,7 @@ static sl_status_t aes_ccm_radio(bool                encrypt,
                      | DMA_SG_TAG_ISDATA
                      | DMA_SG_TAG_DATATYPE_AESHEADER
                      | (add_length > 0 ? 0 : DMA_SG_TAG_SETINVALIDBYTES(header_pad_bytes))
+                     | ((add_length == 0 && !has_data && !fetch_tag) ? DMA_SG_TAG_ISLAST : 0)
   };
 
   // Key input block. Always present.
@@ -358,7 +366,7 @@ static sl_status_t aes_ccm_radio(bool                encrypt,
     .lengthAndIrq  = (uint32_t) tag_length
   };
 
-  // Data padding output. There's guaranteed always at least one of data or data padding.
+  // Data padding output. Only referenced when payload data needs padding.
   sli_radioaes_dma_descr_t ccm_desc_pusher_data_padding = {
     .address       = (uint32_t) NULL,
     .nextDescr     = (uint32_t) (tag_length > 0 ? &ccm_desc_pusher_tag : DMA_AXI_DESCR_END_POINTER),
@@ -367,7 +375,7 @@ static sl_status_t aes_ccm_radio(bool                encrypt,
   };
 
   // Data (ciphertext/plaintext) output. Pointer can be NULL, in which case we tell the
-  // DMA to discard the data.
+  // DMA to discard the data. Only referenced when length is greater than 0.
   sli_radioaes_dma_descr_t ccm_desc_pusher_data = {
     .address       = (uint32_t) data_out,
     .nextDescr     = (uint32_t) (data_pad_bytes > 0 ? &ccm_desc_pusher_data_padding : (tag_length > 0 ? &ccm_desc_pusher_tag : DMA_AXI_DESCR_END_POINTER)),
@@ -376,9 +384,12 @@ static sl_status_t aes_ccm_radio(bool                encrypt,
   };
 
   // Discard all AAD input (which is reflected back to the output). There's guaranteed always a header.
+  // Authentication-only CCM skips the payload pushers and proceeds directly to the tag.
   sli_radioaes_dma_descr_t ccm_desc_pusher_header_add = {
     .address       = (uint32_t) NULL,
-    .nextDescr     = (uint32_t) (length > 0 ? &ccm_desc_pusher_data : &ccm_desc_pusher_data_padding),
+    .nextDescr     = (uint32_t) (has_data ? &ccm_desc_pusher_data
+                                 : (tag_length > 0 ? &ccm_desc_pusher_tag
+                                    : DMA_AXI_DESCR_END_POINTER)),
     .lengthAndIrq  = (uint32_t) (header_length + add_length + header_pad_bytes)
                      | DMA_AXI_DESCR_DISCARD
   };

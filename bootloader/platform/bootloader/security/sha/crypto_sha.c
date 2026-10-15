@@ -22,12 +22,9 @@
  *  http://csrc.nist.gov/publications/fips/fips180-2/fips180-2.pdf
  */
 
-#include <mbedtls/build_info.h>
-
 #include "em_device.h"
 
 #if defined(CRYPTO_PRESENT)
-#include "mbedtls/error.h"
 #include "em_crypto.h"
 #include "em_core.h"
 #include "crypto_management.h"
@@ -50,7 +47,8 @@ int sha_x_process(SHA_Type_t algo,
       crypto->CTRL = CRYPTO_CTRL_SHA_SHA2;
       break;
     default:
-      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+      crypto_management_release(crypto);
+      return BOOTLOADER_ERROR_SECURITY_INVALID_OPTION;
   }
 
   crypto->WAC      = 0;
@@ -122,7 +120,7 @@ int sha_x_process(SHA_Type_t algo,
     ((uint32_t*)state_out)[i] = __REV(((uint32_t*)state_out)[i]);
   }
 
-  return 0;
+  return BOOTLOADER_OK;
 }
 
 #endif // #if defined(CRYPTO_PRESENT)

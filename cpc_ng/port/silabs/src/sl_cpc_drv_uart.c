@@ -79,7 +79,6 @@ static_assert(SL_CPC_EP_MAX_PAYLOAD_SIZE <= (2U * CPC_DRV_UART_LDMA_DESCRIPTOR_M
 typedef struct cpc_drv_uart_tx_op {
   sl_slist_node_t node;
   sli_iostream_write_async_op_t op;
-  uint8_t crc_le[SLI_CPC_DRV_UART_CRC_SIZE];
   bool write_completed;
 } cpc_drv_uart_tx_op_t;
 
@@ -108,7 +107,6 @@ typedef struct {
   uint8_t hdr_block[SLI_CPC_DRV_UART_HEADER_BLOCK_SIZE];
   uint16_t hdr_block_count;
   uint32_t flush_bytes_remaining;
-  uint8_t crc_buf[SLI_CPC_DRV_UART_CRC_SIZE];
   uint16_t index;
 } cpc_drv_uart_rx_ctx_t;
 
@@ -455,7 +453,7 @@ static sl_status_t cpc_drv_uart_init_payload_tx_ops(sl_cpc_frame_t *frame, cpc_d
   }
 
   if (!frame->payload_csum_is_valid) {
-    frame->payload_csum = sli_cpc_get_csum_payload(frame->payload);
+    sli_cpc_u16_to_le(sli_cpc_crc_buf(frame->payload), frame->payload_csum_le);
     frame->payload_csum_is_valid = true;
   }
 
@@ -464,9 +462,8 @@ static sl_status_t cpc_drv_uart_init_payload_tx_ops(sl_cpc_frame_t *frame, cpc_d
     return SL_STATUS_NO_MORE_RESOURCE;
   }
 
-  sli_cpc_u16_to_le(frame->payload_csum, ops->payload_crc_op->crc_le);
-  status = sli_iostream_init_async_write_op(&ops->payload_crc_op->op, ops->payload_crc_op->crc_le,
-                                            SLI_CPC_DRV_UART_CRC_SIZE, &cpc_drv_uart_on_tx_complete, NULL);
+  status = sli_iostream_init_async_write_op(&ops->payload_crc_op->op, frame->payload_csum_le,
+                                            sizeof(frame->payload_csum_le), &cpc_drv_uart_on_tx_complete, NULL);
   if (status != SL_STATUS_OK) {
     SLI_CPC_LOG_ERROR("[UART] Failed to init payload CRC write: 0x%lx", (unsigned long)status);
     return status;
@@ -644,9 +641,9 @@ static sl_status_t cpc_drv_uart_send_frame(sl_cpc_frame_t *frame)
   ops.header->preamble = SLI_CPC_DRV_UART_PREAMBLE;
 
   // Copy the raw header
-  memcpy(ops.header->hdr, sli_cpc_frame_get_header(frame), SLI_CPC_HEADER_SIZE);
+  memcpy(ops.header->hdr, &frame->hdr, SLI_CPC_HEADER_SIZE);
 
-  sli_cpc_u16_to_le(sli_cpc_get_crc_sw(ops.header->hdr, SLI_CPC_HEADER_SIZE), ops.header->hdr_crc);
+  sli_cpc_u16_to_le(sli_cpc_crc(ops.header->hdr, SLI_CPC_HEADER_SIZE), ops.header->hdr_crc);
 
   status = cpc_drv_uart_init_payload_tx_ops(frame, &ops);
   if (status != SL_STATUS_OK) {
@@ -861,7 +858,7 @@ static bool cpc_drv_uart_flush_bytes(cpc_drv_uart_rx_ctx_t *rx_ctx)
 /***************************************************************************/ /**
  * Count payload/CRC bytes still unread on UART for an abandoned frame.
  ******************************************************************************/
-static size_t cpc_drv_uart_count_flush_bytes(const cpc_drv_uart_rx_ctx_t *rx_ctx, sl_cpc_frame_t *frame)
+static size_t cpc_drv_uart_count_flush_bytes(const cpc_drv_uart_rx_ctx_t *rx_ctx, const sl_cpc_frame_t *frame)
 {
   const sli_cpc_hdr_t *hdr;
   size_t payload_remaining;
@@ -872,7 +869,7 @@ static size_t cpc_drv_uart_count_flush_bytes(const cpc_drv_uart_rx_ctx_t *rx_ctx
     return 0;
   }
 
-  hdr = sli_cpc_frame_get_header(frame);
+  hdr = &frame->hdr;
   payload_size = sli_cpc_header_get_payload_size(hdr);
 
   // Header CRC passed but the frame is being abandoned before payload RX.
@@ -1022,7 +1019,7 @@ static cpc_drv_uart_hdr_sync_result_t cpc_drv_uart_hdr_block_sync_step(cpc_drv_u
 
   // Full block aligned on sync — validate the header CRC.
   hdr = &rx_ctx->hdr_block[1];
-  computed_crc = sli_cpc_get_crc_sw(hdr, SLI_CPC_HEADER_SIZE);
+  computed_crc = sli_cpc_crc(hdr, SLI_CPC_HEADER_SIZE);
   received_crc = sli_cpc_u16_from_le(&rx_ctx->hdr_block[1U + SLI_CPC_HEADER_SIZE]);
   if (computed_crc != received_crc) {
     SLI_CPC_LOG_DEBUG("[UART] Invalid header CRC, resyncing, computed=0x%04x received=0x%04x", computed_crc,
@@ -1081,8 +1078,8 @@ static bool cpc_drv_uart_deliver_header_block(cpc_drv_uart_rx_ctx_t *rx_ctx)
   frame = rx_ctx->frame;
   hdr = &rx_ctx->hdr_block[1];
   // Copy the decoded CPC header out of the wire buffer.
-  memcpy(sli_cpc_frame_get_header(frame), hdr, SLI_CPC_HEADER_SIZE);
-  payload_size = sli_cpc_header_get_payload_size(sli_cpc_frame_get_header(frame));
+  memcpy(&frame->hdr, hdr, SLI_CPC_HEADER_SIZE);
+  payload_size = sli_cpc_header_get_payload_size(&frame->hdr);
 
   status = sli_cpc_alloc_rx_payload(s_bus, frame);
 
@@ -1150,7 +1147,7 @@ static bool extract_payload(cpc_drv_uart_rx_ctx_t *rx_ctx)
   size_t bytes_read = 0;
   sl_status_t status;
 
-  payload_length = sli_cpc_header_get_payload_size(sli_cpc_frame_get_header(frame));
+  payload_length = sli_cpc_header_get_payload_size(&frame->hdr);
 
   status
     = sl_iostream_read(to_drv(s_bus)->iostream, &payload[rx_ctx->index], payload_length - rx_ctx->index, &bytes_read);
@@ -1189,8 +1186,8 @@ static bool extract_payload_crc(cpc_drv_uart_rx_ctx_t *rx_ctx)
   uint16_t received_crc;
   sl_status_t status;
 
-  status = sl_iostream_read(to_drv(s_bus)->iostream, rx_ctx->crc_buf + rx_ctx->index,
-                            SLI_CPC_DRV_UART_CRC_SIZE - rx_ctx->index, &bytes_read);
+  status = sl_iostream_read(to_drv(s_bus)->iostream, frame->payload_csum_le + rx_ctx->index,
+                            sizeof(frame->payload_csum_le) - rx_ctx->index, &bytes_read);
   switch (status) {
     case SL_STATUS_OK:
       break;
@@ -1202,13 +1199,12 @@ static bool extract_payload_crc(cpc_drv_uart_rx_ctx_t *rx_ctx)
   }
 
   rx_ctx->index += bytes_read;
-  if (rx_ctx->index != SLI_CPC_DRV_UART_CRC_SIZE) {
+  if (rx_ctx->index != sizeof(frame->payload_csum_le)) {
     return false;
   }
 
-  received_crc = sli_cpc_u16_from_le(rx_ctx->crc_buf);
-  computed_crc = sli_cpc_get_csum_payload(frame->payload);
-  frame->payload_csum = received_crc;
+  computed_crc = sli_cpc_crc_buf(frame->payload);
+  received_crc = sli_cpc_u16_from_le(frame->payload_csum_le);
   frame->payload_csum_is_valid = computed_crc == received_crc;
   if (!frame->payload_csum_is_valid) {
     SLI_CPC_LOG_DEBUG("[UART] Invalid payload CRC, computed=0x%04x received=0x%04x", computed_crc, received_crc);

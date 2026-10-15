@@ -31,12 +31,6 @@
 // <i> Enable support for RFC 6066 max_fragment_length extension in SSL.
 #define SL_MBEDTLS_SSL_MAX_FRAGMENT_LENGTH  1
 
-// <q SL_MBEDTLS_SSL_EXPORT_KEYS> Enable support for exporting key block and master secret.
-// <i> Default: 1
-// <i> Enable support for exporting key block and master secret.
-// <i> This is required for certain users of TLS, e.g. EAP-TLS.
-#define SL_MBEDTLS_SSL_EXPORT_KEYS  1
-
 // <q SL_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED> Enable the PSK based ciphersuite modes in SSL / TLS.
 // <i> Default: 0
 // <i> Enable the PSK based ciphersuite modes in SSL / TLS.
@@ -67,20 +61,6 @@
 // <i> Enable parsing of the compressed curves.
 #define SL_MBEDTLS_ECP_ENABLE_COMPRESSED_CURVE_PARSING 0
 
-// <q SL_MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS> Assume all buffers passed to PSA functions are owned exclusively by the PSA function.
-// <i> Default: 0
-// <i> When this option is disabled, PSA functions will internally copy or stage
-// <i> buffer arguments into memory regions under PSA’s exclusive control. This
-// <i> ensures that untrusted code cannot access or modify buffers while a PSA
-// <i> operation is in progress, providing stronger isolation and security across
-// <i> trust boundaries (e.g. when using TrustZone).
-// <i> The trade-off is additional memory use and allocation overhead, and potential
-// <i> performance impact due to extra buffer copies.
-// <i> This option SHOULD be disabled whenever buffer arguments might be located in
-// <i> memory shared with untrusted code, or whenever PSA calls cross a trust
-// <i> boundary and isolation is required.
-#define SL_MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS 0
-
 // </h>
 
 // <h> RSA configuration
@@ -90,16 +70,6 @@
 // <i> Disable use of the Chinese Remainder Theorem for RSA private key
 // <i> computations.
 #define SL_MBEDTLS_RSA_NO_CRT 0
-
-// </h>
-
-// <h> Miscellaneous configuration
-
-// <q SL_MBEDTLS_DRIVERS_ENABLED> Enable Silicon Labs' Mbed TLS- and PSA Crypto drivers.
-// <i> Default: 1
-// <i> Enable drivers for hardware acceleration (Mbed TLS and PSA Crypto) and
-// <i> secure key handling (PSA Crypto).
-#define SL_MBEDTLS_DRIVERS_ENABLED 1
 
 // </h>
 
@@ -116,11 +86,7 @@
 
 #include "sli_mbedtls_omnipresent.h"
 
-#if SL_MBEDTLS_DRIVERS_ENABLED
-  #include "sli_mbedtls_acceleration.h"
-#endif
-
-#include "sl_mbedtls_device_config.h"
+#include "sl_psa_driver_config.h"
 
 // Include transformation logic to apply CMSIS-config configuration options to
 // the correct Mbed TLS / PSA Crypto options.

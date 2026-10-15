@@ -23,6 +23,8 @@ template_contribution:
     include: memory_usage.h
     handler: sl_memory_usage_init
   priority: 100
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/zigbee-af-api/memory-usage
 metadata:
   sbom:
     license: MSLA

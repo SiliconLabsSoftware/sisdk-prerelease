@@ -185,7 +185,7 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
   }
 
   // Ephemeral contexts
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   sl_se_key_descriptor_t key_desc = { 0 };
 
   sl_status_t status = sl_se_init_command_context(&cmd_ctx);
@@ -293,7 +293,7 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
       // overwritten inside of sl_se_aes_crypt_ctr() (hence the separation
       // into two calls).
       if ((input_length & 0x0F) > 0) {
-        memcpy(final_block, &input[input_length & ~0x0F], 16);
+        memcpy(final_block, &input[input_length & ~0x0F], input_length & 0x0F);
       }
 
       // Do multi-block operation if applicable.
@@ -350,7 +350,7 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
       // overwritten inside of sl_se_aes_crypt_ctr() (hence the separation
       // into two calls).
       if ((input_length & 0x0F) > 0) {
-        memcpy(final_block, &input[input_length & ~0x0F], 16);
+        memcpy(final_block, &input[input_length & ~0x0F], input_length & 0x0F);
       }
 
       // Do multi-block operation if applicable.
@@ -408,7 +408,11 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
 
       // Use final_block as a temporary storage in order to avoid input being
       // overwritten by the output (in case of buffer overlap).
-      memcpy(final_block, input, 16);
+      if (input_length >= 16) {
+        memcpy(final_block, input, 16);
+      } else {
+        memcpy(final_block, input, input_length);
+      }
 
       // Loop over input data to create output.
       do {
@@ -424,10 +428,20 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
           }
         }
         uint8_t tmp_input_val = final_block[n];
-        final_block[n] = input[16 + input_length - data_length];
+        const size_t index = 16 + input_length - data_length;
+        if (index < input_length) {
+          final_block[n] = input[index];
+        } else {
+          final_block[n] = 0;
+        }
         output[input_length - data_length] = tmp_input_val ^ tmp_buf[n];
         n = (n + 1) & 0x0F;
-      } while (data_length--);
+
+        // Note on the loop variable decrement:
+        // we know that the initial date_length value is always greater than 0,
+        // since input_length is checked for 0 at the beginning of the function.
+        // Hence underflowing the loop variable is impossible.
+      } while (--data_length);
 
       *output_length = input_length;
     }
@@ -646,7 +660,7 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
   }
 
   // Ephemeral contexts.
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   sl_se_key_descriptor_t key_desc = { 0 };
 
   sl_status_t status = sl_se_init_command_context(&cmd_ctx);
@@ -1253,7 +1267,7 @@ psa_status_t sli_se_driver_cipher_update(
   }
 
   // Ephemeral contexts
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
 
   sl_status_t status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
@@ -1668,7 +1682,7 @@ psa_status_t sli_se_driver_cipher_finish(
     case PSA_ALG_CBC_PKCS7:
     {
       // Ephemeral contexts
-      sl_se_command_context_t cmd_ctx = { 0 };
+      sl_se_command_context_t cmd_ctx;
 
       sl_status_t status = sl_se_init_command_context(&cmd_ctx);
       if (status != SL_STATUS_OK) {

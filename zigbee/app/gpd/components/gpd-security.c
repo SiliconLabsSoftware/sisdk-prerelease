@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Routines built on mbedTLS functions used by the GPD.
+ * @brief Routines built on PSA Crypto AEAD (CCM) functions used by the GPD.
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
@@ -16,13 +16,11 @@
  ******************************************************************************/
 #include "gpd-components-common.h"
 
-#if defined(CRYPTO_COUNT)
-  #define MBEDTLS_DEVICE_COUNT CRYPTO_COUNT
-#else
-  #define MBEDTLS_DEVICE_COUNT 1
-#endif
-
 #define NONCE_SIZE                          13
+#define GPD_CCM_KEY_BITS                    128
+#define GPD_CCM_KEY_BYTES                   16
+#define GPD_CCM_MAX_PAYLOAD                 80
+#define GPD_CCM_ALG PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, TAG_SIZE)
 
 #define ZIGBEE_SECURITY_CONTROL               0x05 // For all Tx and Rx for AppId = 0
 #define ZIGBEE_SECURITY_CONTROL_IEEE_RX       0xC5 // For Rx with AppId = 2
@@ -35,39 +33,116 @@ static const uint8_t keyDefaultTCLink[] = {
 
 static uint8_t nonceTx[NONCE_SIZE];
 static uint8_t nonceRx[NONCE_SIZE];
+static psa_key_id_t gpd_ccm_key_id = 0;
 
-static mbedtls_ccm_context mbedtls_device_ctx[MBEDTLS_DEVICE_COUNT];
-static int8_t device_instance = 0;
-
-static int8_t gpdMbedtlsEncryptTagKeyWrapper(uint8_t* data,
-                                             uint8_t* encryptedOut,
-                                             uint8_t* mic)
+static int8_t gpd_psa_status_to_result(psa_status_t status)
 {
-  int status = 0;
-  status = mbedtls_ccm_encrypt_and_tag(&mbedtls_device_ctx[device_instance], 16,
-                                       (const unsigned char *)nonceTx, NONCE_SIZE,
-                                       (const unsigned char *)data, 4,
-                                       (const unsigned char *)&data[4], encryptedOut,
-                                       mic, TAG_SIZE);
-  if (status == 0) {
-    return SUCCESS;
-  }
-  return FAILED;
+  return (status == PSA_SUCCESS) ? SUCCESS : FAILED;
 }
 
-static int8_t gpdMbedtlsAuthDecryptKeyWrapper(uint8_t* data,
-                                              uint8_t* decryptedOut)
+static int8_t gpd_ccm_encrypt_and_tag(const uint8_t *nonce,
+                                      const uint8_t *ad,
+                                      size_t ad_len,
+                                      const uint8_t *plaintext,
+                                      size_t plaintext_len,
+                                      uint8_t *ciphertext,
+                                      uint8_t *tag)
 {
-  int status = 0;
-  status = mbedtls_ccm_auth_decrypt(&mbedtls_device_ctx[device_instance], 16,
-                                    (const unsigned char *)nonceRx, NONCE_SIZE,
-                                    (const unsigned char *)data, 4,
-                                    (const unsigned char *)&data[4], decryptedOut,
-                                    (const unsigned char *)&data[20], TAG_SIZE);
-  if (status == 0) {
-    return SUCCESS;
+  uint8_t output[GPD_CCM_MAX_PAYLOAD + TAG_SIZE];
+  size_t output_length = 0;
+  const uint8_t empty = 0;
+  psa_status_t status;
+
+  if (plaintext_len > GPD_CCM_MAX_PAYLOAD) {
+    return FAILED;
   }
-  return FAILED;
+
+  status = psa_aead_encrypt(gpd_ccm_key_id,
+                            GPD_CCM_ALG,
+                            nonce,
+                            NONCE_SIZE,
+                            ad,
+                            ad_len,
+                            (plaintext_len > 0) ? plaintext : &empty,
+                            plaintext_len,
+                            output,
+                            plaintext_len + TAG_SIZE,
+                            &output_length);
+  if (status != PSA_SUCCESS || output_length != (plaintext_len + TAG_SIZE)) {
+    return FAILED;
+  }
+
+  if ((plaintext_len > 0) && (ciphertext != NULL)) {
+    (void)memcpy(ciphertext, output, plaintext_len);
+  }
+  if (tag != NULL) {
+    (void)memcpy(tag, &output[plaintext_len], TAG_SIZE);
+  }
+  return SUCCESS;
+}
+
+static int8_t gpd_ccm_auth_decrypt(const uint8_t *nonce,
+                                   const uint8_t *ad,
+                                   size_t ad_len,
+                                   const uint8_t *ciphertext,
+                                   size_t ciphertext_len,
+                                   const uint8_t *tag,
+                                   uint8_t *plaintext)
+{
+  uint8_t input[GPD_CCM_MAX_PAYLOAD + TAG_SIZE];
+  uint8_t output[GPD_CCM_MAX_PAYLOAD];
+  size_t output_length = 0;
+  psa_status_t status;
+
+  if (ciphertext_len > GPD_CCM_MAX_PAYLOAD) {
+    return FAILED;
+  }
+
+  (void)memcpy(input, ciphertext, ciphertext_len);
+  (void)memcpy(&input[ciphertext_len], tag, TAG_SIZE);
+
+  status = psa_aead_decrypt(gpd_ccm_key_id,
+                            GPD_CCM_ALG,
+                            nonce,
+                            NONCE_SIZE,
+                            ad,
+                            ad_len,
+                            input,
+                            ciphertext_len + TAG_SIZE,
+                            output,
+                            sizeof(output),
+                            &output_length);
+  if (status != PSA_SUCCESS || output_length != ciphertext_len) {
+    return FAILED;
+  }
+
+  (void)memcpy(plaintext, output, ciphertext_len);
+  return SUCCESS;
+}
+
+static int8_t gpdEncryptTagKeyWrapper(uint8_t* data,
+                                      uint8_t* encryptedOut,
+                                      uint8_t* mic)
+{
+  return gpd_ccm_encrypt_and_tag(nonceTx,
+                                 data,
+                                 4,
+                                 &data[4],
+                                 GPD_CCM_KEY_BYTES,
+                                 encryptedOut,
+                                 mic);
+}
+
+static int8_t gpdAuthDecryptKeyWrapper(uint8_t* data,
+                                       uint8_t* decryptedOut)
+{
+  return gpd_ccm_auth_decrypt(nonceRx,
+                              data,
+                              4,
+                              &data[4],
+                              GPD_CCM_KEY_BYTES,
+                              &data[20],
+                              decryptedOut);
 }
 
 void sl_zigbee_gpd_set_fc_into_tx_nonce(uint32_t value)
@@ -82,15 +157,22 @@ void sl_zigbee_gpd_set_fc_into_rx_nonce(uint32_t value)
 
 int8_t sl_zigbee_gpd_mbedtls_ccm_setkey_wraper(const uint8_t* key)
 {
-  int status = 0;
-  status = mbedtls_ccm_setkey(&mbedtls_device_ctx[device_instance],
-                              MBEDTLS_CIPHER_ID_AES,
-                              key,
-                              128);
-  if (status == 0) {
-    return SUCCESS;
+  psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+  psa_status_t status;
+
+  if (gpd_ccm_key_id != 0) {
+    (void)psa_destroy_key(gpd_ccm_key_id);
+    gpd_ccm_key_id = 0;
   }
-  return FAILED;
+
+  psa_set_key_type(&attributes, PSA_KEY_TYPE_AES);
+  psa_set_key_bits(&attributes, GPD_CCM_KEY_BITS);
+  psa_set_key_algorithm(&attributes, GPD_CCM_ALG);
+  psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+
+  status = psa_import_key(&attributes, key, GPD_CCM_KEY_BYTES, &gpd_ccm_key_id);
+  psa_reset_key_attributes(&attributes);
+  return gpd_psa_status_to_result(status);
 }
 
 int8_t sl_zigbee_tag_tx_buff(uint8_t* data,
@@ -98,17 +180,13 @@ int8_t sl_zigbee_tag_tx_buff(uint8_t* data,
                              uint8_t authStart,
                              uint8_t authLength)
 {
-  int status = 0;
-  status = mbedtls_ccm_encrypt_and_tag(&mbedtls_device_ctx[device_instance], 0,
-                                       (const unsigned char *)nonceTx, NONCE_SIZE,
-                                       (const unsigned char *)&(data[authStart]), authLength,
-                                       NULL, NULL, // no encryption input, no output
-                                       (data + length), // mic
-                                       TAG_SIZE);
-  if (status == 0) {
-    return SUCCESS;
-  }
-  return FAILED;
+  return gpd_ccm_encrypt_and_tag(nonceTx,
+                                 &(data[authStart]),
+                                 authLength,
+                                 NULL,
+                                 0,
+                                 NULL,
+                                 (data + length));
 }
 
 int8_t sl_zigbee_encrypt_and_tag_tx_buff(uint8_t* data,
@@ -117,19 +195,20 @@ int8_t sl_zigbee_encrypt_and_tag_tx_buff(uint8_t* data,
                                          uint8_t authStart,
                                          uint8_t authLength)
 {
-  unsigned char tempDataOut[80];
-  int status;
+  uint8_t tempDataOut[GPD_CCM_MAX_PAYLOAD];
+  int8_t status;
 
-  status = mbedtls_ccm_encrypt_and_tag(&mbedtls_device_ctx[device_instance], payloadLength,
-                                       (const unsigned char *)nonceTx, NONCE_SIZE,
-                                       (const unsigned char *)&(data[authStart]), authLength,
-                                       &(data[authStart + authLength]), tempDataOut,
-                                       (data + length), TAG_SIZE);
-  (void) memcpy(&(data[authStart + authLength]), tempDataOut, payloadLength);
-  if (status == 0) {
-    return SUCCESS;
+  status = gpd_ccm_encrypt_and_tag(nonceTx,
+                                   &(data[authStart]),
+                                   authLength,
+                                   &(data[authStart + authLength]),
+                                   payloadLength,
+                                   tempDataOut,
+                                   (data + length));
+  if (status == SUCCESS) {
+    (void)memcpy(&(data[authStart + authLength]), tempDataOut, payloadLength);
   }
-  return FAILED;
+  return status;
 }
 
 int8_t sl_zigbee_gpd_security_encrypt_key(sl_zigbee_gpd_addr_t_t * addr,
@@ -159,7 +238,7 @@ int8_t sl_zigbee_gpd_security_encrypt_key(sl_zigbee_gpd_addr_t_t * addr,
   sl_zigbee_gpd_set_fc_into_tx_nonce(frameCounter);
   // Secure OOB key data with default TC_LK ZA09
   sl_zigbee_gpd_mbedtls_ccm_setkey_wraper(keyDefaultTCLink);
-  return gpdMbedtlsEncryptTagKeyWrapper(data, oobScured, mic);
+  return gpdEncryptTagKeyWrapper(data, oobScured, mic);
 }
 
 #if TEST_KEY_DECRYPTION
@@ -192,7 +271,7 @@ int8_t sl_zigbee_gpd_security_decrypt_key(sl_zigbee_gpd_addr_t_t * addr,
   sl_zigbee_gpd_set_fc_into_rx_nonce(frameCounter);
   // Set security Key with default TC_LK ZA09
   sl_zigbee_gpd_mbedtls_ccm_setkey_wraper(keyDefaultTCLink);
-  return gpdMbedtlsAuthDecryptKeyWrapper(inData, decryptedKey);
+  return gpdAuthDecryptKeyWrapper(inData, decryptedKey);
 }
 
 int8_t sl_zigbee_decrypt_rx_buffer(uint8_t *rxMpdu,
@@ -200,29 +279,32 @@ int8_t sl_zigbee_decrypt_rx_buffer(uint8_t *rxMpdu,
                                    uint8_t encrLength,
                                    uint8_t authLength)
 {
-  int status = 0;
-  uint8_t tempDataOut[80];
-  status = mbedtls_ccm_auth_decrypt(&mbedtls_device_ctx[device_instance], encrLength,
-                                    (const unsigned char *)nonceRx, NONCE_SIZE,
-                                    (const unsigned char *)&rxMpdu[authStart], authLength,
-                                    &rxMpdu[authStart + authLength], tempDataOut,
-                                    (const unsigned char *)&rxMpdu[authStart + authLength + encrLength],
-                                    TAG_SIZE);
+  uint8_t tempDataOut[GPD_CCM_MAX_PAYLOAD];
+  int8_t status;
 
-  (void) memcpy(&rxMpdu[authStart + authLength], tempDataOut, encrLength);
-
-  if (status != 0) {
-    return FAILED;
+  status = gpd_ccm_auth_decrypt(nonceRx,
+                                &rxMpdu[authStart],
+                                authLength,
+                                &rxMpdu[authStart + authLength],
+                                encrLength,
+                                &rxMpdu[authStart + authLength + encrLength],
+                                tempDataOut);
+  if (status == SUCCESS) {
+    (void)memcpy(&rxMpdu[authStart + authLength], tempDataOut, encrLength);
   }
-  return SUCCESS;
+  return status;
 }
 
 void sl_zigbee_gpd_security_init(sl_zigbee_gpd_addr_t_t * addr,
                                  uint8_t* securityKey,
                                  uint32_t frameCounter)
 {
-  device_instance = 0;
-  mbedtls_ccm_init(&mbedtls_device_ctx[device_instance]);
+  (void)psa_crypto_init();
+
+  if (gpd_ccm_key_id != 0) {
+    (void)psa_destroy_key(gpd_ccm_key_id);
+    gpd_ccm_key_id = 0;
+  }
 
   // Initialise nonce bytes to 0
   for (int i = 0; i < NONCE_SIZE; i++) {
@@ -249,6 +331,6 @@ void sl_zigbee_gpd_security_init(sl_zigbee_gpd_addr_t_t * addr,
   // Set the Frane counters in the Nonce
   sl_zigbee_gpd_set_fc_into_tx_nonce(frameCounter);
   sl_zigbee_gpd_set_fc_into_rx_nonce(frameCounter);
-  // Load the key in the CCM context
+  // Load the key into the PSA key store for CCM
   sl_zigbee_gpd_mbedtls_ccm_setkey_wraper(securityKey);
 }

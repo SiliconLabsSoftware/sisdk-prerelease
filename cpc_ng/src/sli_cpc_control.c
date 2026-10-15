@@ -52,6 +52,11 @@
 /*                              Shared helpers                                */
 /******************************************************************************/
 
+static sl_cpc_bus_t *to_bus(sli_cpc_control_t *ctrl)
+{
+  return container_of(ctrl, sl_cpc_bus_t, ctrl);
+}
+
 static bool sli_cpc_control_command_buf_is_valid(const sl_cpc_buf_t *buf)
 {
   const sli_cpc_control_header_t *hdr;
@@ -105,7 +110,7 @@ static sl_status_t send_control_command(sli_cpc_control_t *ctrl, uint8_t type, u
   sli_cpc_control_header_set_payload_size(&control_command->header, tx_len);
   sli_cpc_control_header_set_op_id(&control_command->header, message_id);
   sli_cpc_control_header_set_type(&control_command->header, type);
-  sli_cpc_control_header_set_status(&control_command->header, status);
+  control_command->header.status = status;
 
   if (tx_len > 0) {
     memcpy(control_command->data, tx_data, tx_len);
@@ -356,7 +361,7 @@ sl_status_t sli_cpc_control_init(sli_cpc_control_t *ctrl)
 
 void sli_cpc_control_close(sli_cpc_control_t *ctrl)
 {
-  sl_cpc_bus_t *bus = ctrl->ep.bus;
+  sl_cpc_bus_t *bus = to_bus(ctrl);
 
   sl_cpc_ep_close(&ctrl->ep);
   sli_cpc_bus_process_action(bus);

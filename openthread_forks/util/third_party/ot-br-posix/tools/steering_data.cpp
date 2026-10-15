@@ -31,7 +31,6 @@
  *   This file implements a simple tool to compute pskc.
  */
 
-#include <mbedtls/sha256.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sysexits.h>

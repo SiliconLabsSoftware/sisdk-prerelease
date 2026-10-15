@@ -39,8 +39,6 @@ extern "C" {
 #endif
 
 psa_status_t tfm_crypto_get_key_attributes(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_crypto_open_key(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_crypto_close_key(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_reset_key_attributes(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_import_key(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_destroy_key(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
@@ -93,7 +91,6 @@ psa_status_t tfm_crypto_asymmetric_encrypt(psa_invec *in_vec, size_t in_len, psa
 psa_status_t tfm_crypto_asymmetric_decrypt(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_key_derivation_setup(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_key_derivation_output_key_custom(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_crypto_key_derivation_output_key_ext(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_key_derivation_get_capacity(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_key_derivation_set_capacity(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_key_derivation_input_bytes(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
@@ -108,15 +105,13 @@ psa_status_t tfm_crypto_raw_key_agreement(psa_invec *in_vec, size_t in_len, psa_
 psa_status_t tfm_crypto_generate_random(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_generate_key(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_generate_key_custom(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_crypto_generate_key_ext(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_pake_setup(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_crypto_pake_set_password_key(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_pake_set_user(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_pake_set_peer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_pake_set_role(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_pake_output(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_pake_input(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
-psa_status_t tfm_crypto_pake_get_implicit_key(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+psa_status_t tfm_crypto_pake_get_shared_key(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_pake_derive_secret(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 psa_status_t tfm_crypto_pake_abort(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
 

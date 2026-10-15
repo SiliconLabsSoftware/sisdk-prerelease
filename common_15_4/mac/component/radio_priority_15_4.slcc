@@ -18,6 +18,8 @@ template_contribution:
 - name: component_catalog
   value: radio_priority_15_4
 
+documentation:
+  url: https://docs.silabs.com/ssv6ug/latest/ssv6-configure-project/radio-priority-configurator
 metadata:
   sbom:
     license: MSLA

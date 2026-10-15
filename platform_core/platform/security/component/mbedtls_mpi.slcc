@@ -5,12 +5,12 @@ description: >-
   This component enables the Mbed TLS multi-precision integer (MPI) library.
 category: Platform|Security|Mbed TLS|Utilities
 quality: production
+ui_hints:
+  visibility: never
 provides:
 - name: mbedtls_mpi
-requires:
-- name: mbedtls_core
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_BIGNUM_C
   # Default to support 256 bit MPI numbers. This can be increased by
   # other components when needed.

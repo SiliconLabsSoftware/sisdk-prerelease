@@ -19,6 +19,7 @@
 #include "sl_se_manager.h"
 #include "core/btl_parse.h"
 #include "core/btl_bootload.h"
+#include "btl_driver_cmu.h"
 // -----------------------------------------------------------------------------
 // Static variables
 
@@ -180,7 +181,7 @@ void bootloader_rebootAndInstall(void)
 #endif
 
   // Disable LFRCO.
-  CMU->CLKEN0_SET = CMU_CLKEN0_LFRCO;
+  btl_driver_enable_lfrco_clock();
   LFRCO->CTRL_SET = LFRCO_CTRL_DISONDEMAND;
   LFRCO->CTRL_CLR = LFRCO_CTRL_FORCEEN;
   while ((LFRCO->STATUS & LFRCO_STATUS_ENS) != 0U) {
@@ -192,7 +193,7 @@ void bootloader_rebootAndInstall(void)
 
   // Clear disable on-demand.
   LFRCO->CTRL_CLR = LFRCO_CTRL_DISONDEMAND;
-  CMU->CLKEN0_CLR = CMU_CLKEN0_LFRCO;
+  btl_driver_disable_lfrco_clock();
 
   NVIC_SystemReset();
 }

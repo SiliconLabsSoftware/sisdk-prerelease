@@ -1,8 +1,10 @@
 id: "sl_connect_sdk_ota_bootloader_test_common"
 label: "OTA Bootloader Test Common"
-package: "connect_app"
+package: "connect"
 category: "Connect|Test"
 quality: "production"
+ui_hints:
+  visibility: basic
 metadata:
   sbom:
     license: Zlib
@@ -99,3 +101,7 @@ template_contribution:
     argument:
     - type: uint8
       help: "Image tag id"
+
+documentation:
+  docset: connect-stack
+  document: customizing-applications-with-connect-v3x/02-components

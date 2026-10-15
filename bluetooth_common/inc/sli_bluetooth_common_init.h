@@ -31,6 +31,49 @@ struct sl_bluetooth_common_config {
 };
 
 /**
+ * @brief Function prototype for object initialization.
+ *
+ * Functions of this type are used internally by Bluetooth components to
+ * initialize created objects. Applications must not use the functions directly.
+ *
+ * @param[in] object Pointer to the object to initialize
+ *
+ * @return SL_STATUS_OK if successful, otherwise an error code
+ */
+typedef sl_status_t sli_btcommon_object_init_func_t(void *object);
+
+/**
+ * @brief Function prototype for object deinitialization.
+ *
+ * Functions of this type are used internally by Bluetooth components to
+ * deinitialize created objects. Applications must not use the functions
+ * directly.
+ *
+ * @param[in] object Pointer to the object to deinitialize
+ */
+typedef void sli_btcommon_object_deinit_func_t(void *object);
+
+/**
+ * @brief An opaque handle to object context specification.
+ *
+ * Data structures of this type are used internally by Bluetooth components to
+ * define object contexts. Applications must not use the structures directly.
+ */
+typedef struct sli_btcommon_context sli_btcommon_context_t;
+
+/**
+ * @brief Structure to describe the context and functions for one object type.
+ *
+ * Data structures of this type are used internally by Bluetooth components to
+ * define object types. Applications must not use the structures directly.
+ */
+typedef struct {
+  sli_btcommon_context_t *const *contexts;
+  sli_btcommon_object_init_func_t *const *init;
+  sli_btcommon_object_deinit_func_t *const *deinit;
+} sli_btcommon_object_type_t;
+
+/**
  * @brief Initialize Bluetooth Common buffer memory.
  *
  * @param[in] config Pointer to the configuration structure. If NULL, the

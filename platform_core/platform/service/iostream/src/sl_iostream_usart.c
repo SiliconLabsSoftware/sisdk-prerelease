@@ -41,6 +41,7 @@
 
 #if (defined(SL_CATALOG_POWER_MANAGER_PRESENT))
 #include "sl_power_manager.h"
+#include "sli_iostream_dmadrv.h"
 #endif
 
 #include <string.h>
@@ -66,6 +67,12 @@ static void usart_tx_completed(void *context, bool enable);
 #endif
 
 static sl_status_t usart_deinit(void *context);
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+static sl_status_t usart_suspend(const void *context);
+
+static sl_status_t usart_resume(const void *context);
+#endif
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -95,6 +102,11 @@ sl_status_t sl_iostream_usart_init(sl_iostream_uart_t *iostream_uart,
 
 #endif
   uart_config->uart_periph->deinit = usart_deinit;
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  uart_config->uart_periph->suspend = usart_suspend;
+  uart_config->uart_periph->resume = usart_resume;
+  uart_config->uart_periph->unlatch_pins = NULL;
+#endif
 
   status = sli_iostream_uart_context_init(iostream_uart,
                                           &usart_context->context,
@@ -348,3 +360,56 @@ static sl_status_t usart_deinit(void *context)
 
   return SL_STATUS_OK;
 }
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+/***************************************************************************//**
+ * Suspend USART hardware before EM2.
+ ******************************************************************************/
+static sl_status_t usart_suspend(const void *context)
+{
+  const sl_iostream_uart_context_t *uart_ctx = (const sl_iostream_uart_context_t *)context;
+  const sl_iostream_usart_context_t *usart_context = (const sl_iostream_usart_context_t *)uart_ctx;
+  sl_status_t status;
+
+  // FIFO/shifter only. TX DMA backlog is rejected in sli_iostream_uart_suspend_context().
+  if ((usart_context->usart->STATUS & USART_STATUS_TXENS) != 0U
+      && (usart_context->usart->STATUS & USART_STATUS_TXC) == 0U) {
+    return SL_STATUS_BUSY;
+  }
+
+  status = sli_iostream_dmadrv_pause_transfer(uart_ctx->rx_dma.channel);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  NVIC_DisableIRQ(uart_ctx->uart_periph->rx_irq_number);
+  USART_IntDisable(usart_context->usart, USART_IF_RXDATAV);
+
+  USART_Enable(usart_context->usart, usartDisable);
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Resume USART hardware after sleep (sleep-exit hook).
+ ******************************************************************************/
+static sl_status_t usart_resume(const void *context)
+{
+  const sl_iostream_uart_context_t *uart_ctx = (const sl_iostream_uart_context_t *)context;
+  const sl_iostream_usart_context_t *usart_context = (const sl_iostream_usart_context_t *)uart_ctx;
+  sl_status_t status;
+
+  CMU_ClockEnable(usart_context->clock, true);
+  USART_Enable(usart_context->usart, usartEnable);
+
+  status = sli_iostream_dmadrv_resume_transfer(uart_ctx->rx_dma.channel);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  NVIC_ClearPendingIRQ(uart_ctx->uart_periph->rx_irq_number);
+  NVIC_EnableIRQ(uart_ctx->uart_periph->rx_irq_number);
+
+  return SL_STATUS_OK;
+}
+#endif

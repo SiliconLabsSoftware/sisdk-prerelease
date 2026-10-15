@@ -67,6 +67,7 @@ static int32_t decompressData(uint8_t          *dstBuffer,
                               uint8_t          *srcBuffer,
                               size_t           *srcBufferLen,
                               ELzmaStatus      *status);
+static void lzmaReleaseDecompressor(void);                             
 static void *lzmaAlloc(ISzAllocPtr p, size_t size);
 static void lzmaFree(ISzAllocPtr p, void *address);
 
@@ -94,6 +95,16 @@ static bool firstCallInProgTag;
 
 static ISzAlloc lzmaAllocator = { &lzmaAlloc, &lzmaFree };
 static int allocSeq = 0;
+
+// Release LZMA heap/dict allocations when a tag ends or parsing fails mid-tag.
+// allocSeq tracks whether LzmaDec_Allocate ran; LzmaDec_Free must not run otherwise.
+static void lzmaReleaseDecompressor(void)
+{
+  if (allocSeq > 0) {
+    LzmaDec_Free(&decompressorState, &lzmaAllocator);
+  }
+  allocSeq = 0;
+}
 
 // --------------------------------
 // LZMA Allocators
@@ -304,6 +315,9 @@ int32_t gbl_lzmaEnterProgTag(ParserContext_t *ctx)
   (void) ctx;
   BTL_DEBUG_PRINTLN("LZMA: Enter tag");
 
+  // Drop leftover allocations if a previous compressed tag aborted before exit.
+  lzmaReleaseDecompressor();
+
   // Reset state variables
   memset(&decompressorState, 0, sizeof(CLzmaDec));
   LzmaDec_Construct(&decompressorState);
@@ -342,6 +356,7 @@ int32_t gbl_lzmaParseProgTag(ParserContext_t *ctx,
                                   LZMA_PROPS_SIZE,
                                   &lzmaAllocator);
       if (res != SZ_OK) {
+        lzmaReleaseDecompressor();
         return BOOTLOADER_ERROR_COMPRESSION_MEM;
       }
       LzmaDec_Init(&decompressorState);
@@ -357,6 +372,7 @@ int32_t gbl_lzmaParseProgTag(ParserContext_t *ctx,
       // Input buffer full, decompress the data
       ret = decompressAndFlash(ctx, callbacks, false);
       if (ret != BOOTLOADER_OK) {
+        lzmaReleaseDecompressor();
         return ret;
       }
 
@@ -364,6 +380,7 @@ int32_t gbl_lzmaParseProgTag(ParserContext_t *ctx,
       // much -- need to increase output buffer size compared to input buffer
       // size, or try decompressing again until status != NOT_FINISHED
       if (remainingInputBytes > (INPUT_BUFFER_SIZE - inputBufferPos)) {
+        lzmaReleaseDecompressor();
         return BOOTLOADER_ERROR_COMPRESSION_DATALEN;
       }
     }
@@ -408,6 +425,7 @@ int32_t gbl_lzmaExitProgTag(ParserContext_t *ctx,
   // Finish decompressing remaining data
   ret = decompressAndFlash(ctx, callbacks, true);
   if (ret != BOOTLOADER_OK) {
+    lzmaReleaseDecompressor();
     return ret;
   }
 
@@ -429,6 +447,7 @@ int32_t gbl_lzmaExitProgTag(ParserContext_t *ctx,
                                     0,
                                     ctx);
       if (ctx->retCode != BOOTLOADER_OK) {
+        lzmaReleaseDecompressor();
         return BOOTLOADER_ERROR_PARSER_UNEXPECTED;
       }
     } else if ((ctx->regionId != 0) && (callbacks->applicationCallback != NULL)) {
@@ -440,16 +459,18 @@ int32_t gbl_lzmaExitProgTag(ParserContext_t *ctx,
                                      ctx->regionId,
                                      ctx);
       if (ctx->retCode != BOOTLOADER_OK) {
+        lzmaReleaseDecompressor();
         return BOOTLOADER_ERROR_PARSER_UNEXPECTED;
       }
     }
     if (ret != BOOTLOADER_OK) {
+      lzmaReleaseDecompressor();
       return ret;
     }
   }
 
   // Free decompressor memory (heap and dict allocations)
-  LzmaDec_Free(&decompressorState, &lzmaAllocator);
+  lzmaReleaseDecompressor();
 
   return ret;
 }

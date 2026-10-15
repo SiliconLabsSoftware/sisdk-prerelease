@@ -9,6 +9,11 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: basic
+documentation:
+  docset: rail
+  document: rail-sdk-services/rail-sdk-packet-asm
 root_path: "rail/component/sl_rail_sdk_packet_asm"
 provides:
 - name: sl_rail_sdk_packet_asm
@@ -29,4 +34,3 @@ template_contribution:
 #---------------- Component Catalog ------------------
 - name: component_catalog
   value: rail_sdk_packet_asm
-

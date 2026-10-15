@@ -540,7 +540,7 @@ static inline void uart_async_abort_rx_transfers(sl_uart_handle_t *uart_handle)
 
     // Release the transfer prior to calling the user callback to allow submitting a new transfer
     // from the callback.
-    uint8_t *data = tfer->base.data;
+    void *data = tfer->base.data;
     size_t size = tfer->base.bytes_completed;
     void *user_data = uart_handle->async_rx_cb_user_data;
 
@@ -793,7 +793,7 @@ void sl_uart_async_set_rx_event_callback(sl_uart_handle_t *uart_handle,
  ******************************************************************************/
 sl_status_t sl_uart_async_write(sl_uart_handle_t *uart_handle,
                                 const void *data,
-                                const size_t size)
+                                size_t size)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
@@ -940,7 +940,7 @@ sl_status_t sl_uart_async_abort_tx(sl_uart_handle_t *uart_handle)
   while ((active_tfer = sli_uart_async_tx_transfer_from_node(sl_slist_pop(&list_head)))) {
     // Free the transfer before invoking the callback so it can be reused if the user submits
     // a new transfer from its
-    uint8_t *data = active_tfer->base.data;
+    const void *data = active_tfer->base.data;
     size_t size = active_tfer->base.bytes_completed;
     void *user_data = uart_handle->async_tx_complete_cb_user_data;
 
@@ -980,7 +980,7 @@ bool sl_uart_async_is_tx_active(sl_uart_handle_t *uart_handle)
  ******************************************************************************/
 sl_status_t sl_uart_async_read(sl_uart_handle_t *uart_handle,
                                void *data,
-                               const size_t size)
+                               size_t size)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
   EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));

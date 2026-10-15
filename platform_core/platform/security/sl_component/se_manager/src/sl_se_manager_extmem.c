@@ -317,16 +317,6 @@ sl_status_t sl_se_code_region_close(sl_se_command_context_t *cmd_ctx,
   if (cmd_ctx == NULL || region_idx >= SL_SE_MAX_CODE_REGIONS) {
     return SL_STATUS_INVALID_PARAMETER;
   }
-
-  if (version != 0) {
-    uint32_t se_version = 0;
-    sl_status_t sl_status = sl_se_get_se_version(cmd_ctx, &se_version);
-    if ((sl_status != SL_STATUS_OK) || (se_version <= 0x000301UL)) {
-      // Versions equal or below 0.3.1 does not support setting the code version
-      return SL_STATUS_NOT_SUPPORTED;
-    }
-  }
-
   se_cmd = &cmd_ctx->command;
 
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_CLOSE_CODE_REGION);

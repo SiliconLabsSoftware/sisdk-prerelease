@@ -4319,7 +4319,7 @@ void sli_bt_cli_cs_create_config(sl_cli_command_arg_t *arguments)
   uint8_t channel_selection_type=sl_cli_get_argument_uint8(arguments,14);
   uint8_t ch3c_shape=sl_cli_get_argument_uint8(arguments,15);
   uint8_t ch3c_jump=sl_cli_get_argument_uint8(arguments,16);
-  uint8_t reserved=sl_cli_get_argument_uint8(arguments,17);
+  uint8_t cs_enhancements=sl_cli_get_argument_uint8(arguments,17);
   //return values
   status=sl_bt_cs_create_config(
   connection,
@@ -4339,7 +4339,7 @@ void sli_bt_cli_cs_create_config(sl_cli_command_arg_t *arguments)
   channel_selection_type,
   ch3c_shape,
   ch3c_jump,
-  reserved
+  cs_enhancements
   );
 
     printf("rsp_cs_create_config 0x%lx ",status);
@@ -4681,7 +4681,7 @@ void sli_bt_cli_cs_test_start(sl_cli_command_arg_t *arguments)
   uint8_t t_pm_time=sl_cli_get_argument_uint8(arguments,15);
   uint8_t t_sw_time=sl_cli_get_argument_uint8(arguments,16);
   uint8_t tone_antenna_config=sl_cli_get_argument_uint8(arguments,17);
-  uint8_t reserved=sl_cli_get_argument_uint8(arguments,18);
+  uint8_t cs_enhancements=sl_cli_get_argument_uint8(arguments,18);
   uint8_t snr_control_initiator=sl_cli_get_argument_uint8(arguments,19);
   uint8_t snr_control_reflector=sl_cli_get_argument_uint8(arguments,20);
   uint16_t drbg_nonce=sl_cli_get_argument_uint16(arguments,21);
@@ -4709,7 +4709,7 @@ void sli_bt_cli_cs_test_start(sl_cli_command_arg_t *arguments)
   t_pm_time,
   t_sw_time,
   tone_antenna_config,
-  reserved,
+  cs_enhancements,
   snr_control_initiator,
   snr_control_reflector,
   drbg_nonce,
@@ -5863,7 +5863,7 @@ void sl_bt_cli_on_event(sl_bt_msg_t* evt)
       printf("0x%x ",evt->data.evt_cs_config_complete.channel_selection_type);
       printf("0x%x ",evt->data.evt_cs_config_complete.ch3c_shape);
       printf("0x%x ",evt->data.evt_cs_config_complete.ch3c_jump);
-      printf("0x%x ",evt->data.evt_cs_config_complete.reserved);
+      printf("0x%x ",evt->data.evt_cs_config_complete.cs_enhancements);
       printf("0x%x ",evt->data.evt_cs_config_complete.t_ip1_time);
       printf("0x%x ",evt->data.evt_cs_config_complete.t_ip2_time);
       printf("0x%x ",evt->data.evt_cs_config_complete.t_fcs_time);

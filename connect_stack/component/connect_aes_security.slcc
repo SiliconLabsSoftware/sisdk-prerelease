@@ -1,9 +1,14 @@
 id: "connect_aes_security"
 label: "AES Security"
 package: "connect_stack"
+description: "Provides encryption and authentication functionality based on the AES encryption algorithm (hardware acceleration)."
 category: "Connect"
 quality: "production"
-description: "Provides encryption and authentication functionality based on the AES encryption algorithm (hardware acceleration)."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: customizing-applications-with-connect-v3x/02-components
 provides:
 - name: "connect_aes_security"
 requires:

@@ -28,3 +28,6 @@ include:
 
 source:
 - path: app_scheduler_memory_static.c
+documentation:
+  docset: gecko-platform
+  document: platform-service/memory-manager

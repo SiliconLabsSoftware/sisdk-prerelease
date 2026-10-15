@@ -19,8 +19,6 @@
 #include "../sli_cpc_frame.h"
 #include "../sli_cpc_hdr.h"
 #include "../sli_cpc_memory.h"
-#include "sl_cpc_bus_instances.h"
-#include "sl_cpc_drv_mock.h"
 
 #include "../../port/mock/src/mock_cpc_timer.h"
 #include "expect.h"
@@ -56,10 +54,10 @@ TEST(cpc_scatter_gather, build_buffer_chain_empty_queue_returns_null)
  */
 TEST(cpc_scatter_gather, build_buffer_chain_single_exact_fit)
 {
-  sl_cpc_msgq_t msgq;
-  sl_cpc_buf_t buf;
   sl_cpc_buf_t *out = NULL;
   const size_t mtu = 256;
+  sl_cpc_msgq_t msgq;
+  sl_cpc_buf_t buf;
 
   sl_cpc_msgq_init(&msgq);
 
@@ -82,11 +80,11 @@ TEST(cpc_scatter_gather, build_buffer_chain_single_exact_fit)
  */
 TEST(cpc_scatter_gather, build_buffer_chain_single_partial)
 {
+  const uint16_t payload_len = 100;
+  sl_cpc_buf_t *out = NULL;
+  const size_t mtu = 256;
   sl_cpc_msgq_t msgq;
   sl_cpc_buf_t buf;
-  sl_cpc_buf_t *out = NULL;
-  const uint16_t payload_len = 100;
-  const size_t mtu = 256;
 
   sl_cpc_msgq_init(&msgq);
 
@@ -110,11 +108,11 @@ TEST(cpc_scatter_gather, build_buffer_chain_single_partial)
  */
 TEST(cpc_scatter_gather, build_buffer_chain_two_buffers_exact)
 {
+  sl_cpc_buf_t *out = NULL;
+  const size_t mtu = 256;
   sl_cpc_msgq_t msgq;
   sl_cpc_buf_t buf1;
   sl_cpc_buf_t buf2;
-  sl_cpc_buf_t *out = NULL;
-  const size_t mtu = 256;
 
   sl_cpc_msgq_init(&msgq);
 
@@ -144,12 +142,12 @@ TEST(cpc_scatter_gather, build_buffer_chain_two_buffers_exact)
  */
 TEST(cpc_scatter_gather, build_buffer_chain_two_buffers_partial_tail)
 {
+  const uint16_t payload_len = 300;
+  sl_cpc_buf_t *out = NULL;
+  const size_t mtu = 256;
   sl_cpc_msgq_t msgq;
   sl_cpc_buf_t buf1;
   sl_cpc_buf_t buf2;
-  sl_cpc_buf_t *out = NULL;
-  const uint16_t payload_len = 300;
-  const size_t mtu = 256;
 
   sl_cpc_msgq_init(&msgq);
 
@@ -177,13 +175,13 @@ TEST(cpc_scatter_gather, build_buffer_chain_two_buffers_partial_tail)
  */
 TEST(cpc_scatter_gather, build_buffer_chain_three_buffers_partial_tail)
 {
+  const uint16_t payload_len = 600;
+  sl_cpc_buf_t *out = NULL;
+  const size_t mtu = 256;
   sl_cpc_msgq_t msgq;
   sl_cpc_buf_t buf1;
   sl_cpc_buf_t buf2;
   sl_cpc_buf_t buf3;
-  sl_cpc_buf_t *out = NULL;
-  const uint16_t payload_len = 600;
-  const size_t mtu = 256;
 
   sl_cpc_msgq_init(&msgq);
 
@@ -218,10 +216,10 @@ TEST(cpc_scatter_gather, build_buffer_chain_three_buffers_partial_tail)
  */
 TEST(cpc_scatter_gather, build_buffer_chain_insufficient_buffers_restores_queue)
 {
-  sl_cpc_msgq_t msgq;
-  sl_cpc_buf_t buf;
   sl_cpc_buf_t *out = NULL;
   const size_t mtu = 256;
+  sl_cpc_msgq_t msgq;
+  sl_cpc_buf_t buf;
 
   sl_cpc_msgq_init(&msgq);
 
@@ -256,21 +254,22 @@ static void scatter_gather_event_cb(sl_cpc_ep_t *ep, sl_cpc_ep_event_type_t type
  */
 TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   const uint8_t remote_rx_wnd = 10U;
   const uint16_t remote_mtu = 128U;
   uint8_t payload_large[200];
   uint8_t payload_small[64];
   uint8_t payload_mtu[128];
   uint8_t payload_seq = 1U;
-
-  sl_cpc_ep_t ep;
   sl_cpc_frame_t frame1;
   sl_cpc_frame_t frame2;
   sl_cpc_frame_t frame3;
+  sl_status_t status;
   sl_cpc_buf_t buf1;
   sl_cpc_buf_t buf2;
   sl_cpc_buf_t buf3;
-  sl_status_t status;
+  sl_cpc_ep_t ep;
 
   memset(payload_small, 0x11, sizeof(payload_small));
   memset(payload_mtu, 0x22, sizeof(payload_mtu));
@@ -279,7 +278,7 @@ TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
   status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, scatter_gather_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  status = cpc_test_set_ep_connected(&ep, g_bus, payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, remote_mtu,
+  status = cpc_test_set_ep_connected(&ep, bus, payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, remote_mtu,
                                      remote_rx_wnd);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
@@ -288,27 +287,27 @@ TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
   status = sl_cpc_ep_send(&ep, &buf1, &frame1, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)sizeof(payload_small),
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)payload_seq,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payload_small,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = (ssize_t)sizeof(payload_small),
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = (int)payload_seq,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payload_small,
+                            });
   TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 1U, ep.send_nxt);
 
-  TEST_INJECT_FRAME({
-    .flags = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = 0,
-    .ack = (int)(payload_seq + 1U),
-    .wnd = remote_rx_wnd,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = 0,
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = 0,
+                           .ack = (int)(payload_seq + 1U),
+                           .wnd = remote_rx_wnd,
+                         });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 1, ep.send_una);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 1, ep.send_nxt);
@@ -318,27 +317,27 @@ TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
   status = sl_cpc_ep_send(&ep, &buf2, &frame2, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)sizeof(payload_mtu),
-    .dst = CPC_TEST_EP_ID,
-    .seq = payload_seq + 1,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payload_mtu,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = (ssize_t)sizeof(payload_mtu),
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = payload_seq + 1,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payload_mtu,
+                            });
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 1, ep.send_una);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 2, ep.send_nxt);
 
-  TEST_INJECT_FRAME({
-    .flags = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = 0,
-    .ack = payload_seq + 2,
-    .wnd = remote_rx_wnd,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = 0,
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = 0,
+                           .ack = payload_seq + 2,
+                           .wnd = remote_rx_wnd,
+                         });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 2, ep.send_una);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 2, ep.send_nxt);
@@ -348,33 +347,33 @@ TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
   status = sl_cpc_ep_send(&ep, &buf3, &frame3, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)sizeof(payload_large),
-    .dst = CPC_TEST_EP_ID,
-    .seq = payload_seq + 2,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payload_large,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = (ssize_t)sizeof(payload_large),
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = payload_seq + 2,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payload_large,
+                            });
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 2, ep.send_una);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 4, ep.send_nxt);
 
-  TEST_INJECT_FRAME({
-    .flags = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = 0,
-    .ack = payload_seq + 4,
-    .wnd = remote_rx_wnd,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = 0,
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = 0,
+                           .ack = payload_seq + 4,
+                           .wnd = remote_rx_wnd,
+                         });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 4, ep.send_una);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 4, ep.send_nxt);
 
   sl_cpc_ep_close(&ep);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
   cpc_test_ep_discard(&ep);
 }
 
@@ -383,17 +382,18 @@ TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
  */
 TEST(cpc_scatter_gather, tx_chained_buffers_below_mtu_advances_one_sequence)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   const uint8_t remote_rx_wnd = 10U;
   const uint16_t remote_mtu = 128U;
   const uint8_t payload_seq = 1U;
   const size_t segment_len = 40U;
   const size_t payload_len = 2U * segment_len;
-  uint8_t segment1[40];
-  uint8_t segment2[40];
-
-  sl_cpc_frame_t frame;
   sl_cpc_buf_t buf_head;
   sl_cpc_buf_t buf_tail;
+  uint8_t segment1[40];
+  uint8_t segment2[40];
+  sl_cpc_frame_t frame;
   sl_status_t status;
   sl_cpc_ep_t ep;
 
@@ -407,40 +407,40 @@ TEST(cpc_scatter_gather, tx_chained_buffers_below_mtu_advances_one_sequence)
   status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, scatter_gather_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  status = cpc_test_set_ep_connected(&ep, g_bus, payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, remote_mtu,
+  status = cpc_test_set_ep_connected(&ep, bus, payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, remote_mtu,
                                      remote_rx_wnd);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
   status = sl_cpc_ep_send(&ep, &buf_head, &frame, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)payload_len,
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)payload_seq,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = (ssize_t)payload_len,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = (int)payload_seq,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                            });
   TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 1U, ep.send_nxt);
 
-  TEST_INJECT_FRAME({
-    .flags = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = 0,
-    .ack = (int)(payload_seq + 1U),
-    .wnd = remote_rx_wnd,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = 0,
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = 0,
+                           .ack = (int)(payload_seq + 1U),
+                           .wnd = remote_rx_wnd,
+                         });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 1U, ep.send_una);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + 1U, ep.send_nxt);
 
   sl_cpc_ep_close(&ep);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
   cpc_test_ep_discard(&ep);
 }
 
@@ -450,12 +450,13 @@ TEST(cpc_scatter_gather, tx_chained_buffers_below_mtu_advances_one_sequence)
  */
 TEST(cpc_scatter_gather, tx_payload_partial_ack_is_ignored)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   const uint8_t expected_seq_advance = 2U;
   const uint16_t remote_mtu = 128U;
   const size_t payload_len = 200U;
   uint8_t payload_seq = 1U;
   uint8_t payload[200];
-
   sl_cpc_frame_t frame;
   sl_status_t status;
   sl_cpc_buf_t buf;
@@ -468,27 +469,27 @@ TEST(cpc_scatter_gather, tx_payload_partial_ack_is_ignored)
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
   status
-    = cpc_test_set_ep_connected(&ep, g_bus, payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, remote_mtu, 10U);
+    = cpc_test_set_ep_connected(&ep, bus, payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, remote_mtu, 10U);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
   status = sl_cpc_ep_send(&ep, &buf, &frame, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)payload_len,
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)payload_seq,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = (ssize_t)payload_len,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = (int)payload_seq,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                            });
 
   TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + expected_seq_advance, ep.send_nxt);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  cpc_test_wait_retx_timer();
+  cpc_test_wait_retx_timer(bus);
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
 
   // The core has sent a frame with seq=payload_seq, and this frame spans over
@@ -499,20 +500,21 @@ TEST(cpc_scatter_gather, tx_payload_partial_ack_is_ignored)
   // First, check our partial_ack is sensible, to make sure the test actually
   // tests what it's supposed to.
   uint8_t partial_ack = payload_seq + 1;
+
   TEST_ASSERT_GREATER_THAN_UINT8(ep.send_una, partial_ack);
   TEST_ASSERT_LESS_THAN_UINT8(ep.send_nxt, partial_ack);
 
   // Inject this partial ack. This acks only the first half of the frame,
   // this should be ignored.
-  TEST_INJECT_FRAME({
-    .flags = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = 0,
-    .ack = (int)partial_ack,
-    .wnd = 10,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = 0,
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = 0,
+                           .ack = (int)partial_ack,
+                           .wnd = 10,
+                         });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   // Endpoint state should be the same as before injecting the ack
   TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
@@ -520,17 +522,18 @@ TEST(cpc_scatter_gather, tx_payload_partial_ack_is_ignored)
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
 
   uint8_t complete_ack = payload_seq + expected_seq_advance;
+
   TEST_ASSERT_EQUAL_UINT8(complete_ack, ep.send_nxt);
 
   // Inject full frame ack
-  TEST_INJECT_FRAME({
-    .flags = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = 0,
-    .ack = (int)complete_ack,
-    .wnd = 10,
-  });
-  cpc_test_pump();
+  TEST_INJECT_FRAME(bus, {
+                           .flags = 0,
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = 0,
+                           .ack = (int)complete_ack,
+                           .wnd = 10,
+                         });
+  cpc_test_pump(bus);
 
   // This should be accepted by the core
   TEST_ASSERT_EQUAL_UINT8(ep.send_una, complete_ack);
@@ -539,7 +542,7 @@ TEST(cpc_scatter_gather, tx_payload_partial_ack_is_ignored)
 
   sl_cpc_ep_close(&ep);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
   cpc_test_ep_discard(&ep);
 }
 
@@ -549,14 +552,15 @@ TEST(cpc_scatter_gather, tx_payload_partial_ack_is_ignored)
  */
 TEST(cpc_scatter_gather, tx_two_multi_buffer_frames_single_ack)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   const uint8_t seq_advance_per_frame = 2U;
   const uint8_t remote_rx_wnd = 10U;
-  const uint16_t remote_mtu = 128U;
   const uint8_t payload_seq = 253U;
+  const uint16_t remote_mtu = 128U;
   const size_t payload_len = 200U;
   uint8_t payload1[200];
   uint8_t payload2[200];
-
   sl_cpc_frame_t frame1;
   sl_cpc_frame_t frame2;
   sl_status_t status;
@@ -572,7 +576,7 @@ TEST(cpc_scatter_gather, tx_two_multi_buffer_frames_single_ack)
   status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, scatter_gather_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  status = cpc_test_set_ep_connected(&ep, g_bus, payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, remote_mtu,
+  status = cpc_test_set_ep_connected(&ep, bus, payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, remote_mtu,
                                      remote_rx_wnd);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
@@ -582,50 +586,50 @@ TEST(cpc_scatter_gather, tx_two_multi_buffer_frames_single_ack)
   status = sl_cpc_ep_send(&ep, &buf2, &frame2, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)payload_len,
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)payload_seq,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payload1,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = (ssize_t)payload_len,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = (int)payload_seq,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payload1,
+                            });
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)payload_len,
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)(payload_seq + seq_advance_per_frame),
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payload2,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = (ssize_t)payload_len,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = (int)(payload_seq + seq_advance_per_frame),
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payload2,
+                            });
 
   TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + (2U * seq_advance_per_frame), ep.send_nxt);
 
-  cpc_test_wait_retx_timer();
+  cpc_test_wait_retx_timer(bus);
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
 
-  TEST_INJECT_FRAME({
-    .flags = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = 0,
-    .ack = payload_seq + (2 * seq_advance_per_frame),
-    .wnd = remote_rx_wnd,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = 0,
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = 0,
+                           .ack = payload_seq + (2 * seq_advance_per_frame),
+                           .wnd = remote_rx_wnd,
+                         });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_EQUAL_UINT8(ep.send_nxt, ep.send_una);
   TEST_ASSERT_EQUAL(0, mock_cpc_timer_count_running());
 
   sl_cpc_ep_close(&ep);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
   cpc_test_ep_discard(&ep);
 }
 
@@ -635,18 +639,19 @@ TEST(cpc_scatter_gather, tx_two_multi_buffer_frames_single_ack)
  */
 TEST(cpc_scatter_gather, tx_one_buffer_then_two_buffers_single_ack)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   const size_t single_buffer_payload_len = 64U;
   const size_t two_buffer_payload_len = 200U;
   const uint8_t seq_advance_second = 2U;
   const uint8_t seq_advance_first = 1U;
   const uint8_t remote_rx_wnd = 10U;
-  const uint16_t remote_mtu = 128U;
   const uint8_t payload_seq = 253U;
+  const uint16_t remote_mtu = 128U;
   uint8_t payload2[200];
-  uint8_t payload1[64];
-
   sl_cpc_frame_t frame1;
   sl_cpc_frame_t frame2;
+  uint8_t payload1[64];
   sl_status_t status;
   sl_cpc_buf_t buf1;
   sl_cpc_buf_t buf2;
@@ -660,7 +665,7 @@ TEST(cpc_scatter_gather, tx_one_buffer_then_two_buffers_single_ack)
   status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, scatter_gather_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  status = cpc_test_set_ep_connected(&ep, g_bus, payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, remote_mtu,
+  status = cpc_test_set_ep_connected(&ep, bus, payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, remote_mtu,
                                      remote_rx_wnd);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
@@ -670,50 +675,50 @@ TEST(cpc_scatter_gather, tx_one_buffer_then_two_buffers_single_ack)
   status = sl_cpc_ep_send(&ep, &buf2, &frame2, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)single_buffer_payload_len,
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)payload_seq,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payload1,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = (ssize_t)single_buffer_payload_len,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = (int)payload_seq,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payload1,
+                            });
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)two_buffer_payload_len,
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)(payload_seq + seq_advance_first),
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payload2,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = (ssize_t)two_buffer_payload_len,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = (int)(payload_seq + seq_advance_first),
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payload2,
+                            });
 
   TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + seq_advance_first + seq_advance_second, ep.send_nxt);
 
-  cpc_test_wait_retx_timer();
+  cpc_test_wait_retx_timer(bus);
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
 
-  TEST_INJECT_FRAME({
-    .flags = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = 0,
-    .ack = payload_seq + seq_advance_first + seq_advance_second,
-    .wnd = remote_rx_wnd,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = 0,
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = 0,
+                           .ack = payload_seq + seq_advance_first + seq_advance_second,
+                           .wnd = remote_rx_wnd,
+                         });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_EQUAL_UINT8(ep.send_nxt, ep.send_una);
   TEST_ASSERT_EQUAL(0, mock_cpc_timer_count_running());
 
   sl_cpc_ep_close(&ep);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
   cpc_test_ep_discard(&ep);
 }
 
@@ -723,18 +728,19 @@ TEST(cpc_scatter_gather, tx_one_buffer_then_two_buffers_single_ack)
  */
 TEST(cpc_scatter_gather, tx_two_buffers_then_one_buffer_single_ack)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   const size_t single_buffer_payload_len = 64U;
   const size_t two_buffer_payload_len = 200U;
   const uint8_t seq_advance_second = 1U;
   const uint8_t seq_advance_first = 2U;
   const uint8_t remote_rx_wnd = 10U;
-  const uint16_t remote_mtu = 128U;
   const uint8_t payload_seq = 253U;
+  const uint16_t remote_mtu = 128U;
   uint8_t payload1[200];
-  uint8_t payload2[64];
-
   sl_cpc_frame_t frame1;
   sl_cpc_frame_t frame2;
+  uint8_t payload2[64];
   sl_status_t status;
   sl_cpc_buf_t buf1;
   sl_cpc_buf_t buf2;
@@ -748,7 +754,7 @@ TEST(cpc_scatter_gather, tx_two_buffers_then_one_buffer_single_ack)
   status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, scatter_gather_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  status = cpc_test_set_ep_connected(&ep, g_bus, payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, remote_mtu,
+  status = cpc_test_set_ep_connected(&ep, bus, payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE, remote_mtu,
                                      remote_rx_wnd);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
@@ -758,50 +764,50 @@ TEST(cpc_scatter_gather, tx_two_buffers_then_one_buffer_single_ack)
   status = sl_cpc_ep_send(&ep, &buf2, &frame2, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)two_buffer_payload_len,
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)payload_seq,
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payload1,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = (ssize_t)two_buffer_payload_len,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = (int)payload_seq,
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payload1,
+                            });
 
-  TEST_ASSERT_OUTGOING({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)single_buffer_payload_len,
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)(payload_seq + seq_advance_first),
-    .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
-    .wnd = 0,
-    .payload = payload2,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                              .len = (ssize_t)single_buffer_payload_len,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = (int)(payload_seq + seq_advance_first),
+                              .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
+                              .wnd = 0,
+                              .payload = payload2,
+                            });
 
   TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
   TEST_ASSERT_EQUAL_UINT8(payload_seq + seq_advance_first + seq_advance_second, ep.send_nxt);
 
-  cpc_test_wait_retx_timer();
+  cpc_test_wait_retx_timer(bus);
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
 
-  TEST_INJECT_FRAME({
-    .flags = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = 0,
-    .ack = payload_seq + seq_advance_first + seq_advance_second,
-    .wnd = remote_rx_wnd,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = 0,
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = 0,
+                           .ack = payload_seq + seq_advance_first + seq_advance_second,
+                           .wnd = remote_rx_wnd,
+                         });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
 
   TEST_ASSERT_EQUAL_UINT8(ep.send_nxt, ep.send_una);
   TEST_ASSERT_EQUAL(0, mock_cpc_timer_count_running());
 
   sl_cpc_ep_close(&ep);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
   cpc_test_ep_discard(&ep);
 }
 
@@ -810,14 +816,15 @@ TEST(cpc_scatter_gather, tx_two_buffers_then_one_buffer_single_ack)
  */
 TEST(cpc_scatter_gather, rx_payload_advances_ack_by_buffer_count)
 {
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
   const uint8_t peer_seq = CPC_TEST_PEER_SYN_SEQ + 1U;
   const uint16_t local_mtu = 32;
-  uint8_t rx_data[4][local_mtu];
-  uint8_t payload_small[local_mtu - 16];
   uint8_t payload_large[local_mtu + 16];
+  uint8_t payload_small[local_mtu - 16];
   uint8_t payload_mtu[local_mtu];
+  uint8_t rx_data[4][local_mtu];
   sl_cpc_buf_t rx_bufs[4];
-
   sl_status_t status;
   sl_cpc_ep_t ep;
 
@@ -833,82 +840,82 @@ TEST(cpc_scatter_gather, rx_payload_advances_ack_by_buffer_count)
     sl_cpc_ep_push_recv_buf(&ep, &rx_bufs[i]);
   }
 
-  status = cpc_test_set_ep_connected(&ep, g_bus, 1U, peer_seq, local_mtu, CPC_TEST_PEER_MTU, 10U);
+  status = cpc_test_set_ep_connected(&ep, bus, 1U, peer_seq, local_mtu, CPC_TEST_PEER_MTU, 10U);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
   TEST_ASSERT_EQUAL_UINT8(peer_seq, ep.ack);
 
   // 64-byte payload: consumes one reception buffer.
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)sizeof(payload_small),
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)peer_seq,
-    .ack = 0,
-    .wnd = 0,
-    .payload = payload_small,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = (ssize_t)sizeof(payload_small),
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = (int)peer_seq,
+                           .ack = 0,
+                           .wnd = 0,
+                           .payload = payload_small,
+                         });
 
-  TEST_ASSERT_OUTGOING({
-    .flags = 0,
-    .len = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = 0,
-    .ack = (int)(peer_seq + 1),
-    .wnd = 3,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = 0,
+                              .len = 0,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = 0,
+                              .ack = (int)(peer_seq + 1),
+                              .wnd = 3,
+                            });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
   TEST_ASSERT_EQUAL_UINT8(peer_seq + 1, ep.ack);
 
   // 128-byte payload: consumes one reception buffer.
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)sizeof(payload_mtu),
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)peer_seq + 1,
-    .ack = 0,
-    .wnd = 0,
-    .payload = payload_mtu,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = (ssize_t)sizeof(payload_mtu),
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = (int)peer_seq + 1,
+                           .ack = 0,
+                           .wnd = 0,
+                           .payload = payload_mtu,
+                         });
 
-  TEST_ASSERT_OUTGOING({
-    .flags = 0,
-    .len = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = 0,
-    .ack = (int)(peer_seq + 2U),
-    .wnd = 2,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = 0,
+                              .len = 0,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = 0,
+                              .ack = (int)(peer_seq + 2U),
+                              .wnd = 2,
+                            });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
   TEST_ASSERT_EQUAL_UINT8(peer_seq + 2, ep.ack);
 
   // 200-byte payload: consumes two reception buffers.
-  TEST_INJECT_FRAME({
-    .flags = CPC_EXPECT_FLAG_ACK_REQ,
-    .len = (ssize_t)sizeof(payload_large),
-    .dst = CPC_TEST_EP_ID,
-    .seq = (int)peer_seq + 2,
-    .ack = 0,
-    .wnd = 0,
-    .payload = payload_large,
-  });
+  TEST_INJECT_FRAME(bus, {
+                           .flags = CPC_EXPECT_FLAG_ACK_REQ,
+                           .len = (ssize_t)sizeof(payload_large),
+                           .dst = CPC_TEST_EP_ID,
+                           .seq = (int)peer_seq + 2,
+                           .ack = 0,
+                           .wnd = 0,
+                           .payload = payload_large,
+                         });
 
-  TEST_ASSERT_OUTGOING({
-    .flags = 0,
-    .len = 0,
-    .dst = CPC_TEST_EP_ID,
-    .seq = 0,
-    .ack = (int)(peer_seq + 4),
-    .wnd = 0,
-  });
+  TEST_ASSERT_OUTGOING(bus, {
+                              .flags = 0,
+                              .len = 0,
+                              .dst = CPC_TEST_EP_ID,
+                              .seq = 0,
+                              .ack = (int)(peer_seq + 4),
+                              .wnd = 0,
+                            });
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
   TEST_ASSERT_EQUAL_UINT8(peer_seq + 4, ep.ack);
 
   sl_cpc_ep_close(&ep);
 
-  cpc_test_pump();
+  cpc_test_pump(bus);
   cpc_test_ep_discard(&ep);
 }
 

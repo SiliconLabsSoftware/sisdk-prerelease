@@ -2915,6 +2915,74 @@ tcp_netif_ip_addr_changed(const ip_addr_t *old_addr, const ip_addr_t *new_addr)
   }
 }
 
+#if SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_TCP_DYNAMIC_TIMER
+/**
+ * True if an active or TIME-WAIT PCB is tied to this netif.
+ * These PCBs have a concrete local_ip (set in tcp_connect / accept).
+ */
+static int
+sli_tcp_pcb_belongs_to_netif(const struct tcp_pcb *pcb, struct netif *netif)
+{
+  LWIP_ASSERT("sli_tcp_pcb_belongs_to_netif: invalid pcb", pcb != NULL);
+  LWIP_ASSERT("sli_tcp_pcb_belongs_to_netif: invalid netif", netif != NULL);
+
+  /* tcp_bind_netif / SO_BINDTODEVICE — exclusive. */
+  if (pcb->netif_idx != NETIF_NO_INDEX) {
+    return (pcb->netif_idx == netif_get_index(netif));
+  }
+
+#if LWIP_IPV4
+  if (IP_IS_V4_VAL(pcb->local_ip)) {
+    return ip4_addr_eq(ip_2_ip4(&pcb->local_ip), netif_ip4_addr(netif));
+  }
+#endif /* LWIP_IPV4 */
+#if LWIP_IPV6
+  if (IP_IS_V6_VAL(pcb->local_ip)) {
+    return (netif_get_ip6_addr_match(netif, ip_2_ip6(&pcb->local_ip)) >= 0);
+  }
+#endif /* LWIP_IPV6 */
+
+  return 0;
+}
+
+/**
+ * Walk one PCB list; abort matching PCBs.
+ * Save next before tcp_abort(): abort removes pcb from the list.
+ * Err callbacks must return ERR_ABRT and must not tcp_abort() another PCB on
+ * this list (would invalidate next → use-after-free). Same contract as stock
+ * lwIP tcp_abort(). TIME-WAIT path inside tcp_abandon does not invoke errf.
+ */
+static void
+sli_tcp_cleanup_pcblist_on_link_down(struct tcp_pcb *pcb_list, struct netif *netif)
+{
+  struct tcp_pcb *pcb = pcb_list;
+
+  while (pcb != NULL) {
+    struct tcp_pcb *next = pcb->next;
+    if (sli_tcp_pcb_belongs_to_netif(pcb, netif)) {
+      tcp_abort(pcb);
+    }
+    pcb = next;
+  }
+}
+
+/**
+ * Abort active PCBs and drop TIME-WAIT PCBs on this netif.
+ * Does not walk listen / bound. TCP timer stops later when lists empty.
+ */
+void
+sli_tcp_cleanup_on_link_down(struct netif *netif)
+{
+  LWIP_ASSERT_CORE_LOCKED();
+  LWIP_ERROR("sli_tcp_cleanup_on_link_down: invalid netif", netif != NULL, return);
+
+  /* tcp_abort active PCBs on this netif (RST + ERR_ABRT). */
+  sli_tcp_cleanup_pcblist_on_link_down(tcp_active_pcbs, netif);
+  /* Drop TIME-WAIT PCBs on this netif (no RST). */
+  sli_tcp_cleanup_pcblist_on_link_down(tcp_tw_pcbs, netif);
+}
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_TCP_DYNAMIC_TIMER */
+
 const char *
 tcp_debug_state_str(enum tcp_state s)
 {

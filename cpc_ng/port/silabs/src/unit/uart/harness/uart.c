@@ -165,10 +165,10 @@ static void assert_frame(unsigned int lineno, uint8_t ep_id, const uint8_t *payl
 {
   UNITY_TEST_ASSERT_NOT_NULL(frame, lineno, "TEST_UART_READ_EXPECT: no frame received");
 
-  UNITY_TEST_ASSERT_EQUAL_UINT16(ep_id, sli_cpc_header_get_address(sli_cpc_frame_get_header(frame)), lineno,
+  UNITY_TEST_ASSERT_EQUAL_UINT16(ep_id, sli_cpc_header_get_address(&frame->hdr), lineno,
                                  "TEST_UART_READ_EXPECT: endpoint mismatch");
-  UNITY_TEST_ASSERT_EQUAL_UINT16(payload_length, sli_cpc_header_get_payload_size(sli_cpc_frame_get_header(frame)),
-                                 lineno, "TEST_UART_READ_EXPECT: payload length mismatch");
+  UNITY_TEST_ASSERT_EQUAL_UINT16(payload_length, sli_cpc_header_get_payload_size(&frame->hdr), lineno,
+                                 "TEST_UART_READ_EXPECT: payload length mismatch");
 
   if (payload_length > 0U) {
     UNITY_TEST_ASSERT_NOT_NULL(frame->payload, lineno, "TEST_UART_READ_EXPECT: payload buffer is NULL");
@@ -268,7 +268,7 @@ size_t encode_uart_frame(uint8_t *out, size_t out_capacity, const cpc_frame_expe
   out[0] = (uint8_t)TEST_UART_PREAMBLE;
   memcpy(&out[1], &hdr, SLI_CPC_HEADER_SIZE);
 
-  header_crc = sli_cpc_get_crc_sw(&out[1], SLI_CPC_HEADER_SIZE);
+  header_crc = sli_cpc_crc(&out[1], SLI_CPC_HEADER_SIZE);
   sli_cpc_u16_to_le(header_crc, &out[1U + SLI_CPC_HEADER_SIZE]);
 
   if (payload_length == 0U) {
@@ -277,7 +277,7 @@ size_t encode_uart_frame(uint8_t *out, size_t out_capacity, const cpc_frame_expe
 
   memcpy(&out[TEST_UART_HEADER_BLOCK_SIZE], frame->payload, payload_length);
 
-  payload_crc = sli_cpc_get_crc_sw(frame->payload, payload_length);
+  payload_crc = sli_cpc_crc(frame->payload, payload_length);
   sli_cpc_u16_to_le(payload_crc, &out[TEST_UART_HEADER_BLOCK_SIZE + payload_length]);
 
   return total_length;
@@ -314,8 +314,8 @@ void uart_setup_at(unsigned int lineno)
   UNITY_TEST_ASSERT_EQUAL_INT(SL_STATUS_OK, (int)status, lineno, "uart_setup: loopback_bind failed");
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
-  if (g_bus->thread_id != NULL) {
-    osThreadSuspend(g_bus->thread_id);
+  if (g_bus->kernel.thread_id != NULL) {
+    osThreadSuspend(g_bus->kernel.thread_id);
     s_thread_suspended = true;
   }
 #endif
@@ -340,8 +340,8 @@ void uart_teardown(void)
   }
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
-  if (s_thread_suspended && g_bus->thread_id != NULL) {
-    osThreadResume(g_bus->thread_id);
+  if (s_thread_suspended && g_bus->kernel.thread_id != NULL) {
+    osThreadResume(g_bus->kernel.thread_id);
     s_thread_suspended = false;
   }
 #endif

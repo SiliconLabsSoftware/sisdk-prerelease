@@ -17,6 +17,10 @@ ui_hints:
 source:
 - path: platform/bootloader/series3/api/btl_interface.c
 - path: platform/bootloader/series3/api/btl_interface_storage.c
+include:
+- path: platform/bootloader/series3/driver
+  file_list:
+  - path: btl_driver_cmu.h
 provides:
 - name: bootloader_interface_common
   condition: [device_series_3]

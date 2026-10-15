@@ -6,6 +6,8 @@ category: Platform|Security|Mbed TLS|Message Authentication Codes
 description: >-
   This component provides support for message authentication with the HMAC
   algorithm using Mbed TLS.
+ui_hints:
+  visibility: never
 
 provides:
 - name: mbedtls_hmac

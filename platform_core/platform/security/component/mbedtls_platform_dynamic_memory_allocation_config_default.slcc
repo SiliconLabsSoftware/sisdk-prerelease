@@ -21,13 +21,13 @@ requires:
 - name: memory_manager
 
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PLATFORM_C
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PLATFORM_MEMORY
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PLATFORM_CALLOC_MACRO sl_calloc
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PLATFORM_FREE_MACRO   sl_free
 
 metadata:

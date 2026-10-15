@@ -11,6 +11,8 @@ ui_hints:
 
 provides:
 - name: psa_crypto_rsa
+- name: psa_public_key
+  allow_multiple: true
 
 requires:
 - name: psa_crypto_rsa_size

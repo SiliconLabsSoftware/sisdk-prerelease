@@ -14,3 +14,6 @@ include:
   - path: sl_endianness.h
 provides:
 - name: endianness
+documentation:
+  docset: gecko-platform
+  document: platform-common/common

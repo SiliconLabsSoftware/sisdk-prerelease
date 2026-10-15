@@ -427,7 +427,8 @@ const sl_peripheral_dma_val_t sl_peripheral_dma_val_ldma0 = { .base = LDMA_BASE,
                                                               .nbr_channel = 8,
                                                               .nbr_sync = 8,
                                                               .dual_destination_map = 0,
-                                                              .rule_based_interleaving_map = 0 };
+                                                              .rule_based_interleaving_map = 0,
+                                                              .retained_channel_map = 0xFF };
 #endif
 
 /** @} (end addtogroup device_peripheral_dma) */

@@ -1087,6 +1087,11 @@ typedef struct sl_rail_ble_cs_config {
    * Equivalent AGC STATUS0 register to force.
    */
   uint32_t forced_agc_status0;
+  /**
+   * Indicates whether to have FW compute the FFO for the RTT step
+   * or if it should be manually applied externally.
+   */
+  bool apply_manual_rtt_ffo;
 } sl_rail_ble_cs_config_t;
 
 /**
@@ -1863,17 +1868,42 @@ typedef struct sl_rail_ble_cs_gd_comp_tables {
 } sl_rail_ble_cs_gd_comp_tables_t;
 
 /**
- * CS group delay compensation tables for 0 dbm PA.
+ * CS group delay compensation tables for 0 dbm PA (BLE 1M PHY).
  */
 extern const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_0_dbm_tables;
 /**
- * CS group delay compensation tables for 10 dbm PA.
+ * CS group delay compensation tables for 10 dbm PA (BLE 1M PHY).
  */
 extern const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_10_dbm_tables;
 /**
- * CS group delay compensation tables for 20 dbm PA.
+ * CS group delay compensation tables for 20 dbm PA (BLE 1M PHY).
  */
 extern const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_20_dbm_tables;
+
+/**
+ * CS group delay compensation tables for 0 dbm PA, BLE 1M PHY.
+ */
+extern const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_0_dbm_tables_1m;
+/**
+ * CS group delay compensation tables for 0 dbm PA, BLE 2M PHY.
+ */
+extern const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_0_dbm_tables_2m;
+/**
+ * CS group delay compensation tables for 10 dbm PA, BLE 1M PHY.
+ */
+extern const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_10_dbm_tables_1m;
+/**
+ * CS group delay compensation tables for 10 dbm PA, BLE 2M PHY.
+ */
+extern const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_10_dbm_tables_2m;
+/**
+ * CS group delay compensation tables for 20 dbm PA, BLE 1M PHY.
+ */
+extern const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_20_dbm_tables_1m;
+/**
+ * CS group delay compensation tables for 20 dbm PA, BLE 2M PHY.
+ */
+extern const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_20_dbm_tables_2m;
 
 /**
  * Configure Channel Sounding (CS) functionality.

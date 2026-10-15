@@ -5,6 +5,8 @@ description: >-
   This component provides support for the MD5 hash function using Mbed TLS.
 category: Platform|Security|Mbed TLS|Hashing
 quality: production
+ui_hints:
+  visibility: never
 provides:
 - name: mbedtls_md5
 - name: mbedtls_hash_function
@@ -14,7 +16,7 @@ requires:
 - name: psa_crypto_md5
   condition: [psa_crypto]
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_MD5_C
 documentation:
   url: https://docs.silabs.com/gecko-platform/4.4.7/platform-security/hashing-module

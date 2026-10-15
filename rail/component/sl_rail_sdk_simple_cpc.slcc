@@ -2,7 +2,7 @@ id: sl_rail_sdk_simple_cpc
 label: "Simple CPC for NCP projects"
 package: "rail_sdk"
 description: >
-  The Simple RAIL CPC for NCP projects (SPI) component offers a straightforward
+  The Simple RAIL CPC for NCP projects component offers a straightforward
   communication interface for CPC, utilizing the recommended CPC communication
   method. By integrating a Wireless Gecko (EFR32) System on Chip (SoC) in NCP
   (Network Co-processor) mode into your system, you can create a wireless
@@ -12,6 +12,11 @@ quality: production
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: basic
+documentation:
+  docset: rail
+  document: rail-sdk-services/rail-sdk-simple-cpc
 root_path: rail/component/sl_rail_sdk_simple_cpc
 config_file:
 - path: config/sl_rail_sdk_simple_cpc_config.h

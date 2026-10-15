@@ -12,6 +12,7 @@ requires:
 - name: ot_radio
 - name: ot_platform_abstraction
 - name: ot_mbedtls
+- name: ot_psa_crypto
 recommends:
 - id: ot_platform_abstraction
   vendor: silabs

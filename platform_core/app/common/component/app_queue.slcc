@@ -27,3 +27,6 @@ include:
 
 source:
 - path: app_queue.c
+documentation:
+  docset: gecko-platform
+  document: platform-common/slist

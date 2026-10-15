@@ -57,7 +57,7 @@ typedef struct sl_rail_btc_access_address {
 typedef struct sl_rail_btc_init_config {
   sl_rail_btc_access_address_t access_addr;
   uint8_t bd_addr[6U];
-  uint16_t btc_slot_duration_us; // slot duration used in connected mode
+  uint16_t btc_slot_duration_us; // 625 or 1250 us; 0 selects the build default
 } sl_rail_btc_init_config_t;
 
 typedef struct sl_rail_btc_fh_config {
@@ -67,9 +67,9 @@ typedef struct sl_rail_btc_fh_config {
   uint32_t chl_map0_init;
   uint32_t chl_map1_init;
   uint32_t chl_map2_init;
-  uint32_t master_clk;    // master clock: slot number
-  /* The clock when the id packet is received in the page and page scan states */
-  uint32_t frozen_clk;    // frozen clock: used in page peripheral/central response
+  uint32_t master_clk;    // master BTC clock as a BTC tick count (not a BTC slot index)
+  /* The BTC tick count when the id packet is received in the page and page scan states */
+  uint32_t frozen_clk;    // frozen BTC tick count: used in page peripheral/central response
 } sl_rail_btc_fh_config_t;
 
 typedef struct sl_rail_btc_fh_result {
@@ -114,8 +114,8 @@ typedef struct sl_rail_btc_trx_config {
   sl_rail_btc_special_pkt_t special_pkt_type;  // replaces is_id_pkt and is_dv_pkt
   uint8_t tx_power;         // Transmit Power variable for rail both connected and non_connected
   sl_rail_btc_packet_config_t packet_config;
-  uint32_t clk;             // BD Clock value at which TXRX is expected
-  uint32_t tsf;             // protimer TSF value for TXRX activity
+  uint32_t clk;             // BD clock in BTC ticks at which TXRX is expected
+  uint32_t tsf;             // protimer TSF value for TXRX activity (not BTC tick/slot)
   uint16_t tx_packet_bytes; // needed for EV packets and ACL packets
   sl_rail_btc_rx_pkt_type_esco_pl_lnth_t link_config;
   uint32_t rx_timeout_us;   // timeout used in rx only
@@ -123,7 +123,7 @@ typedef struct sl_rail_btc_trx_config {
 } sl_rail_btc_trx_config_t;
 
 typedef struct sl_rail_btc_e0_encryption_config {
-  uint32_t master_clock;
+  uint32_t master_clock; // E0 master clock as a BTC tick count (not a BTC slot index)
   uint32_t enc_key_0;
   uint32_t enc_key_1;
   uint32_t enc_key_2;
@@ -320,7 +320,7 @@ sl_rail_status_t sl_rail_btc_set_e0_encryption(sl_rail_handle_t rail_handle,
  *   \ref sl_rail_btc_set_e0_encryption.
  *
  * @param[in] rail_handle A real RAIL instance handle.
- * @param[in] master_clock The value to set as master clock.
+ * @param[in] master_clock The value to set as master clock (BTC tick count, not a BTC slot index).
  * @return Status code indicating success of the function call.
  */
 sl_rail_status_t sl_rail_btc_set_e0_master_clock(sl_rail_handle_t rail_handle, uint32_t master_clock);

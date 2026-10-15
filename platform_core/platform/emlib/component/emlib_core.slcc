@@ -35,4 +35,7 @@ conflicts:
 template_contribution:
 - name: component_catalog
   value: emlib_core
+documentation:
+  docset: gecko-platform
+  document: platform-common/atomic
 root_path: platform_core/platform/emlib

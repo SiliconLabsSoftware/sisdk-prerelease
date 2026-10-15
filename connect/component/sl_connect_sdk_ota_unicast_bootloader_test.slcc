@@ -1,8 +1,10 @@
 id: "sl_connect_sdk_ota_unicast_bootloader_test"
 label: "OTA Unicast Bootloader Test"
-package: "connect_app"
+package: "connect"
 category: "Connect|Test"
 quality: "production"
+ui_hints:
+  visibility: basic
 metadata:
   sbom:
     license: Zlib
@@ -64,3 +66,7 @@ template_contribution:
       help: "Scheduled time ahead after which the bootload is to be timed"
     - type: uint16
       help: "Image tag that will be loaded"
+
+documentation:
+  docset: connect-stack
+  document: customizing-applications-with-connect-v3x/02-components

@@ -46,29 +46,30 @@ static void cpc_task(void *arg)
   sl_cpc_bus_t *bus = (sl_cpc_bus_t *)arg;
 
   while (true) {
-    osSemaphoreAcquire(bus->event_signal, osWaitForever);
+    osSemaphoreAcquire(bus->kernel.event_signal, osWaitForever);
     sli_cpc_bus_process_action(bus);
   }
 }
-#endif
 
 /***************************************************************************/ /**
  * Allocate kernel-related resources for a CPC bus.
+ *
+ * @param[in] bus  CPC bus.
  *
  * @retval  SL_STATUS_OK    Resources allocated successfully.
  * @retval  Other sl_status_t if error occurred.
  ******************************************************************************/
 static sl_status_t init_kernel(sl_cpc_bus_t *bus)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
+  struct sl_cpc_bus_kernel *kernel = &bus->kernel;
   sl_status_t status = SL_STATUS_OK;
 
   const osMutexAttr_t ep_list_mutex_attr = {
     .attr_bits = osMutexRecursive,
     .name = "CPC Endpoints List Lock",
 #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
-    .cb_mem = &bus->eps_list_mutex_cb[0],
-    .cb_size = sizeof(bus->eps_list_mutex_cb),
+    .cb_mem = &kernel->eps_list_mutex_cb[0],
+    .cb_size = sizeof(kernel->eps_list_mutex_cb),
 #else
     .cb_mem = NULL,
     .cb_size = 0U,
@@ -79,8 +80,8 @@ static sl_status_t init_kernel(sl_cpc_bus_t *bus)
     .attr_bits = osMutexRecursive,
     .name = "CPC Transmit Queue Lock",
 #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
-    .cb_mem = &bus->transmit_queue_mutex_cb[0],
-    .cb_size = sizeof(bus->transmit_queue_mutex_cb),
+    .cb_mem = &kernel->transmit_queue_mutex_cb[0],
+    .cb_size = sizeof(kernel->transmit_queue_mutex_cb),
 #else
     .cb_mem = NULL,
     .cb_size = 0U,
@@ -89,8 +90,8 @@ static sl_status_t init_kernel(sl_cpc_bus_t *bus)
 
   const osSemaphoreAttr_t event_signal_semaphore_attr = {
 #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
-    .cb_mem = &bus->event_signal_semaphore_cb[0],
-    .cb_size = sizeof(bus->event_signal_semaphore_cb),
+    .cb_mem = &kernel->event_signal_semaphore_cb[0],
+    .cb_size = sizeof(kernel->event_signal_semaphore_cb),
 #else
     .cb_mem = NULL,
     .cb_size = 0U,
@@ -101,10 +102,10 @@ static sl_status_t init_kernel(sl_cpc_bus_t *bus)
     .name = "CPC Bus",
     .priority = SL_CPC_TASK_PRIORITY,
 #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
-    .stack_mem = &bus->thread_stack[0],
-    .stack_size = sizeof(bus->thread_stack),
-    .cb_mem = &bus->thread_cb[0],
-    .cb_size = sizeof(bus->thread_cb),
+    .stack_mem = &kernel->thread_stack[0],
+    .stack_size = sizeof(kernel->thread_stack),
+    .cb_mem = &kernel->thread_cb[0],
+    .cb_size = sizeof(kernel->thread_cb),
 #else
     .stack_mem = NULL,
     .stack_size = 0U,
@@ -113,26 +114,26 @@ static sl_status_t init_kernel(sl_cpc_bus_t *bus)
 #endif // SL_CATALOG_CMSIS_OS_COMMON_PRESENT
   };
 
-  bus->ep_list_lock = osMutexNew(&ep_list_mutex_attr);
-  if (bus->ep_list_lock == 0) {
+  kernel->ep_list_lock = osMutexNew(&ep_list_mutex_attr);
+  if (kernel->ep_list_lock == 0) {
     status = SL_STATUS_ALLOCATION_FAILED;
     goto exit;
   }
 
-  bus->transmit_queue_lock = osMutexNew(&transmit_queue_mutex_attr);
-  if (bus->transmit_queue_lock == 0) {
+  kernel->transmit_queue_lock = osMutexNew(&transmit_queue_mutex_attr);
+  if (kernel->transmit_queue_lock == 0) {
     status = SL_STATUS_ALLOCATION_FAILED;
     goto free_list_lock;
   }
 
-  bus->event_signal = osSemaphoreNew(1, 0u, &event_signal_semaphore_attr);
-  if (bus->event_signal == 0) {
+  kernel->event_signal = osSemaphoreNew(1, 0u, &event_signal_semaphore_attr);
+  if (kernel->event_signal == 0) {
     status = SL_STATUS_ALLOCATION_FAILED;
     goto free_transmit_queue_lock;
   }
 
-  bus->thread_id = osThreadNew(&cpc_task, (void *)bus, &task_attr);
-  if (bus->thread_id == NULL) {
+  kernel->thread_id = osThreadNew(&cpc_task, bus, &task_attr);
+  if (kernel->thread_id == NULL) {
     status = SL_STATUS_ALLOCATION_FAILED;
     goto free_event_signal;
   }
@@ -140,21 +141,16 @@ static sl_status_t init_kernel(sl_cpc_bus_t *bus)
   goto exit;
 
 free_event_signal:
-  osSemaphoreDelete(bus->event_signal);
+  osSemaphoreDelete(kernel->event_signal);
 
 free_transmit_queue_lock:
-  osMutexDelete(bus->transmit_queue_lock);
+  osMutexDelete(kernel->transmit_queue_lock);
 
 free_list_lock:
-  osMutexDelete(bus->ep_list_lock);
+  osMutexDelete(kernel->ep_list_lock);
 
 exit:
   return status;
-#else
-  (void)bus;
-
-  return SL_STATUS_OK;
-#endif // SL_CATALOG_KERNEL_PRESENT
 }
 
 /***************************************************************************/ /**
@@ -162,15 +158,13 @@ exit:
  ******************************************************************************/
 static void deinit_kernel(const sl_cpc_bus_t *bus)
 {
-#if defined(SL_CATALOG_KERNEL_PRESENT)
-  osThreadTerminate(bus->thread_id);
-  osSemaphoreDelete(bus->event_signal);
-  osMutexDelete(bus->transmit_queue_lock);
-  osMutexDelete(bus->ep_list_lock);
-#else
-  (void)bus;
-#endif // SL_CATALOG_KERNEL_PRESENT
+  const struct sl_cpc_bus_kernel *kernel = &bus->kernel;
+  osThreadTerminate(kernel->thread_id);
+  osSemaphoreDelete(kernel->event_signal);
+  osMutexDelete(kernel->transmit_queue_lock);
+  osMutexDelete(kernel->ep_list_lock);
 }
+#endif // SL_CATALOG_KERNEL_PRESENT
 
 /***************************************************************************/ /**
  * Acquire / release the wake source the bus needs to receive bus traffic.
@@ -179,62 +173,80 @@ static void deinit_kernel(const sl_cpc_bus_t *bus)
  ******************************************************************************/
 static sl_status_t init_wake(sl_cpc_bus_t *bus, const sl_cpc_bus_config_t *cfg)
 {
-#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
-  bus->wake_mode = cfg->wake_mode;
+  bool sleep_configured = false;
 
-  switch (cfg->wake_mode) {
-    case SL_CPC_WAKE_MODE_DEVICE:
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-      return sli_cpc_wake_device_init(&bus->wake.device, cfg->wake_pin);
-#else
-      return SL_STATUS_NOT_AVAILABLE;
-#endif
-
-    case SL_CPC_WAKE_MODE_HOST:
-#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-      return sli_cpc_wake_host_init(&bus->wake.host, cfg->wake_pin);
-#else
-      return SL_STATUS_NOT_AVAILABLE;
-#endif
-
-    case SL_CPC_WAKE_MODE_DISABLED:
-    default:
-      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
-      return SL_STATUS_OK;
-  }
-#else
+#if !defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT) && !defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
   (void)bus;
   (void)cfg;
+#endif
 
-  sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
+  bus->wake.host.mode = cfg->wake_out_mode;
+  bus->wake.host.pin = cfg->wake_out_pin;
+
+  if (cfg->wake_out_mode != SL_CPC_WAKE_OUT_DISABLED) {
+    sl_status_t status = sli_cpc_wake_host_init(&bus->wake.host);
+    if (status != SL_STATUS_OK) {
+      return status;
+    }
+  }
+#endif
+
+#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+  bus->wake.device.mode = cfg->power_mode;
+  bus->wake.device.pin = cfg->wake_in_pin;
+  bus->wake.device.response = cfg->wake_in_response;
+
+  if (cfg->power_mode != SL_CPC_POWER_MODE_ALWAYS_ON) {
+    sl_status_t status = sli_cpc_wake_device_init(&bus->wake.device);
+    if (status != SL_STATUS_OK) {
+#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
+      if (cfg->wake_out_mode != SL_CPC_WAKE_OUT_DISABLED) {
+        sli_cpc_wake_host_deinit(&bus->wake.host);
+      }
+#endif
+
+      return status;
+    }
+
+    sleep_configured = true;
+  }
+#endif
+
+  if (!sleep_configured) {
+    // No host/device wake path; keep the core out of deep sleep.
+    sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+  }
 
   return SL_STATUS_OK;
-#endif
 }
 
 static void deinit_wake(sl_cpc_bus_t *bus)
 {
-#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
-  switch (bus->wake_mode) {
-    case SL_CPC_WAKE_MODE_DEVICE:
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-      sli_cpc_wake_device_deinit(&bus->wake.device);
-#endif
-      break;
-    case SL_CPC_WAKE_MODE_HOST:
-#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-      sli_cpc_wake_host_deinit(&bus->wake.host);
-#endif
-      break;
-    case SL_CPC_WAKE_MODE_DISABLED:
-      sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
-      break;
-  }
-#else
-  (void)bus;
+  bool sleep_configured = false;
 
-  sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+#if !defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT) && !defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+  (void)bus;
 #endif
+
+#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
+#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
+  if (bus->wake.host.mode != SL_CPC_WAKE_OUT_DISABLED) {
+    sli_cpc_wake_host_deinit(&bus->wake.host);
+  }
+#endif
+
+#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+  if (bus->wake.device.mode != SL_CPC_POWER_MODE_ALWAYS_ON) {
+    sli_cpc_wake_device_deinit(&bus->wake.device);
+    sleep_configured = true;
+  }
+#endif
+#endif
+
+  if (!sleep_configured) {
+    sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+  }
 }
 
 /***************************************************************************/ /**
@@ -355,10 +367,12 @@ sl_status_t sli_cpc_bus_init(sl_cpc_bus_t *bus, const sl_cpc_bus_config_t *cfg, 
 
   bus->drv_ops = drv_ops;
 
+#if defined(SL_CATALOG_KERNEL_PRESENT)
   status = init_kernel(bus);
   if (status != SL_STATUS_OK) {
     goto exit;
   }
+#endif
 
   status = init_early(bus, cfg);
   if (status != SL_STATUS_OK) {
@@ -375,9 +389,10 @@ sl_status_t sli_cpc_bus_init(sl_cpc_bus_t *bus, const sl_cpc_bus_config_t *cfg, 
 early_deinit:
   deinit_early(bus);
 kernel_deinit:
+#if defined(SL_CATALOG_KERNEL_PRESENT)
   deinit_kernel(bus);
-
 exit:
+#endif
   return status;
 }
 
@@ -388,7 +403,9 @@ void sli_cpc_bus_deinit(sl_cpc_bus_t *bus)
 {
   deinit_late(bus);
   deinit_early(bus);
+#if defined(SL_CATALOG_KERNEL_PRESENT)
   deinit_kernel(bus);
+#endif
 }
 
 /***************************************************************************/ /**
@@ -406,7 +423,7 @@ sl_status_t sl_cpc_bus_start(sl_cpc_bus_t *bus)
     return status;
   }
 
-  return bus->ctrl.ops->init(&bus->ctrl, bus);
+  return bus->ctrl.ops->init(&bus->ctrl);
 }
 
 /***************************************************************************/ /**

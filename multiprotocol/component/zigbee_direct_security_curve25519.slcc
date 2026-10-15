@@ -20,6 +20,8 @@ requires:
 template_contribution:
 - name: component_catalog
   value: zigbee_direct_security_curve25519
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/zigbee-direct/
 metadata:
   sbom:
     license: MSLA

@@ -16,4 +16,7 @@ provides:
 template_contribution:
 - name: component_catalog
   value: custom_main
+documentation:
+  docset: gecko-platform
+  document: platform-service/sl-main
 root_path: platform_core

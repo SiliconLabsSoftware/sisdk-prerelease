@@ -40,3 +40,6 @@ template_contribution:
     include: sli_memory_manager_monitor.h
     handler: sli_memory_monitor_init
   priority: -8000
+documentation:
+  docset: gecko-platform
+  document: platform-service/memory-manager

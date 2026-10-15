@@ -162,13 +162,15 @@ void app_process_action(void)
       rx_packet_handle = sl_rail_get_rx_packet_info(rail_handle, SL_RAIL_RX_PACKET_HANDLE_OLDEST_COMPLETE, &packet_info);
       while (rx_packet_handle != SL_RAIL_RX_PACKET_HANDLE_INVALID) {
         uint8_t *start_of_packet = 0;
-        uint16_t packet_size = unpack_packet(rail_handle, rx_buffer, &packet_info, &start_of_packet);
+        uint16_t packet_size = 0;
+        sl_status_t packet_assistant_status = sl_packet_assistant_unpack_packet(rail_handle, &packet_info, rx_buffer, &start_of_packet, &packet_size);
+        app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
         rail_status = sl_rail_release_rx_packet(rail_handle, rx_packet_handle);
         if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
           app_log_warning("sl_rail_release_rx_packet() result: 0x%08" PRIX32 "\n", rail_status);
         }
         if (rx_requested) {
-          printf_rx_packet(start_of_packet, packet_size);
+          sl_packet_assistant_print_rx_packet(start_of_packet, packet_size);
 #if defined(SL_CATALOG_RAIL_SIMPLE_CPC_PRESENT)
           sl_rail_sdk_simple_cpc_transmit(packet_size, start_of_packet);
 #endif
@@ -199,7 +201,8 @@ void app_process_action(void)
       break;
     case S_IDLE:
       if (tx_requested) {
-        prepare_packet(rail_handle, out_packet, sizeof(out_packet));
+        sl_status_t packet_assistant_status = sl_packet_assistant_prepare_packet(rail_handle, out_packet, sizeof(out_packet));
+        app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant failed\n");
         rail_status = sl_rail_start_tx(rail_handle, get_selected_channel(), SL_RAIL_TX_OPTIONS_DEFAULT, NULL);
         if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
           app_log_warning("sl_rail_start_tx() result: 0x%08" PRIX32 "\n ", rail_status);

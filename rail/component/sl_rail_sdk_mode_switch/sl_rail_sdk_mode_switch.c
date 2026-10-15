@@ -47,7 +47,6 @@
 #include "sl_sleeptimer.h"
 #include "sl_rail_sdk_mode_switch.h"
 #include "sl_status.h"
-#include "sl_rail_sdk_fifo_size_config.h"
 #include "sl_rail_ieee802154.h"
 #include "sl_code_classification.h"
 
@@ -59,7 +58,6 @@
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 #define MSPHR_LENGTH 2U
-#define MS_PACKET_LENGTH 18U
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -108,15 +106,13 @@ volatile uint16_t ms_new_channel = 0xFFFFU;
 static volatile uint16_t current_channel = 0U;
 /// The channel the device returns to from mode switch
 static volatile uint16_t base_channel = 0U;
-/// Buffer of the packet to be sent
-static uint8_t tx_frame_buffer[SL_RAIL_SDK_TX_FIFO_SIZE];
 /// The time in seconds that the device is in the new phy during mode switch
 static volatile uint32_t ms_duration = 0U;
 /// Timer for the mode switch process
 static sl_sleeptimer_timer_handle_t mode_switch_timer;
 /// Radio power
 static sl_rail_tx_power_t power = 140U;
-/// WiSUN FSK packet FCS is on/off
+/// WiSUN FSK packet FCS type: 0 = 4-byte FCS, 1 = 2-byte FCS
 static uint8_t fsk_fcs_type = 0U;
 /// WiSUN FSK packet whitening is on/off
 static uint8_t fsk_whitening = 1U;
@@ -675,14 +671,14 @@ uint16_t unpack_packet(sl_rail_handle_t rail_handle,
   }
   if (modulation == M_2FSK) {
     *start_of_payload
-      = sl_rail_sdk_802154_packet_unpack_sunfsk_2byte_data_frame(packet_information,
+      = sl_rail_sdk_802154_packet_unpack_sunfsk_ppdu(packet_information,
                                                                  &fsk_fcs_type,
                                                                  &fsk_whitening,
                                                                  &payload_size,
                                                                  rx_destination);
   } else if (modulation == M_OFDM) {
     *start_of_payload
-      = sl_rail_sdk_802154_packet_unpack_ofdm_data_frame(packet_information,
+      = sl_rail_sdk_802154_packet_unpack_ofdm_ppdu(packet_information,
                                                          &ofdm_rate,
                                                          &ofdm_scrambler,
                                                          &payload_size,
@@ -715,39 +711,41 @@ void prepare_packet(sl_rail_handle_t rail_handle,
   }
 
   uint16_t bytes_written_in_fifo = 0U;
-  uint16_t packet_size = 0U;
+  uint16_t expected_bytes = 0U;
+  uint8_t phr_buffer[4];
+  uint8_t phr_size = 0U;
 
   if (ms_state == MS_INITIATED) {
-    memcpy(tx_frame_buffer, &ms_phr, sizeof(ms_phr));
-    packet_size = MS_PACKET_LENGTH;
-  } else {
-    if (modulation == M_2FSK) {
-      sl_rail_sdk_802154_packet_pack_sunfsk_2bytes_data_frame(fsk_fcs_type,
-                                                              fsk_whitening,
-                                                              length,
-                                                              out_data,
-                                                              &packet_size,
-                                                              tx_frame_buffer);
-    } else if (modulation == M_OFDM) {
-      sl_rail_sdk_802154_packet_pack_ofdm_data_frame(ofdm_rate,
-                                                     ofdm_scrambler,
-                                                     length,
-                                                     out_data,
-                                                     &packet_size,
-                                                     tx_frame_buffer);
-    } else {
-      app_log_warning("Unkown modulation\n");
+    memcpy(phr_buffer, ms_phr, MSPHR_LENGTH);
+    phr_size = MSPHR_LENGTH;
+  } else if (modulation == M_2FSK) {
+    if (sl_rail_sdk_802154_packet_pack_sunfsk_phr(fsk_fcs_type,
+                                                  fsk_whitening,
+                                                  length,
+                                                  phr_buffer,
+                                                  &phr_size) != SL_RAIL_SDK_802154_PACKET_OK) {
+      return;
     }
+  } else if (modulation == M_OFDM) {
+    if (sl_rail_sdk_802154_packet_pack_ofdm_phr(ofdm_rate,
+                                                ofdm_scrambler,
+                                                length,
+                                                phr_buffer,
+                                                &phr_size) != SL_RAIL_SDK_802154_PACKET_OK) {
+      return;
+    }
+  } else {
+    app_log_warning("Unkown modulation\n");
   }
-  bytes_written_in_fifo = sl_rail_write_tx_fifo(rail_handle,
-                                                tx_frame_buffer,
-                                                packet_size,
-                                                true);
-  app_assert(bytes_written_in_fifo == packet_size,
+
+  bytes_written_in_fifo = sl_rail_write_tx_fifo(rail_handle, phr_buffer, phr_size, true);
+  bytes_written_in_fifo += sl_rail_write_tx_fifo(rail_handle, out_data, length, false);
+  expected_bytes = (uint16_t)phr_size + length;
+  app_assert(bytes_written_in_fifo == expected_bytes,
              "sl_rail_write_tx_fifo() failed to write in fifo"
              "(%" PRIu16 " bytes instead of %" PRIu16 " bytes)\n",
              bytes_written_in_fifo,
-             packet_size);
+             expected_bytes);
 }
 
 /******************************************************************************

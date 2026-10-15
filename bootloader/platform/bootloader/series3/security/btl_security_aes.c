@@ -17,6 +17,7 @@
 
 #include "btl_security_aes.h"
 #include "btl_security_types.h"
+#include "btl_driver_cmu.h"
 
 #include <string.h> // For memory copy functions
 
@@ -30,9 +31,7 @@ void btl_initAesCcm(void          *ctx,
                     const uint8_t *key,
                     unsigned int  keySize)
 {
-#if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
-  CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
-#endif
+  btl_driver_enable_semailbox_clock();
 
   AesCtrContext_t *context = (AesCtrContext_t *)ctx;
 

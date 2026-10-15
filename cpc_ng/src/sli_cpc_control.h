@@ -152,16 +152,6 @@ static inline void sli_cpc_control_header_set_type(sli_cpc_control_header_t *hdr
   hdr->type = type;
 }
 
-static inline uint8_t sli_cpc_control_header_get_status(const sli_cpc_control_header_t *hdr)
-{
-  return hdr->status;
-}
-
-static inline void sli_cpc_control_header_set_status(sli_cpc_control_header_t *hdr, uint8_t status)
-{
-  hdr->status = status;
-}
-
 static inline bool sli_cpc_control_header_is_response(const sli_cpc_control_header_t *hdr)
 {
   return (hdr->type & SLI_CPC_CTRL_TYPE_RESPONSE_FLAG) != 0;
@@ -199,7 +189,7 @@ sl_status_t sli_cpc_control_on_unknown_request(sli_cpc_control_t *ctrl, const sl
  * @brief Bus control operations.
  */
 typedef struct sli_cpc_control_ops {
-  sl_status_t (*init)(sli_cpc_control_t *ctrl, sl_cpc_bus_t *bus);
+  sl_status_t (*init)(sli_cpc_control_t *ctrl);
   void (*deinit)(sli_cpc_control_t *ctrl);
   void (*on_connected)(sli_cpc_control_t *ctrl);
   void (*on_error)(sli_cpc_control_t *ctrl, sl_status_t status);

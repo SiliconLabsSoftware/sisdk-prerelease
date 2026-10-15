@@ -182,7 +182,7 @@ static sl_status_t sdio_drv_start_rx(sl_cpc_bus_t *bus);
 static uint32_t sdio_drv_write(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames);
 static void cpc_drv_sdio_on_rx_frame_free(sl_cpc_bus_t *bus);
 
-SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_caps, 1);
+SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_sdio_device_caps, 1);
 
 static void get_local_capabilities(sl_cpc_bus_t *bus, const void **caps_p, uint16_t *caps_size_p)
 {
@@ -880,8 +880,7 @@ static void adma_rx_start_headers(void)
     MCU_EXIT_ATOMIC();
     SLI_CPC_ASSERT(frame != NULL);
 
-    frame_descriptors[idx++]
-      = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(sli_cpc_frame_get_header(frame), SLI_CPC_HEADER_SIZE);
+    frame_descriptors[idx++] = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(&frame->hdr, SLI_CPC_HEADER_SIZE);
 
     // Push the frame to the payload pending list.
     sli_cpc_frame_list_push_back(&rx_payload_pending_frames, frame);
@@ -952,7 +951,7 @@ static void adma_rx_start_payloads(void)
       return;
     }
 
-    if (!sli_cpc_header_is_size_valid(sli_cpc_frame_get_header(frame))) {
+    if (!sli_cpc_header_is_size_valid(&frame->hdr)) {
       // Invalid header size - discard the frame
       SLI_CPC_LOG_WARN("[SDIO] RX - Invalid header size, flush the whole transfer");
       adma_rx_abort_payload_transfer(frame);
@@ -970,7 +969,7 @@ static void adma_rx_start_payloads(void)
     status = sli_cpc_alloc_rx_payload(s_bus, frame);
 
     // Check if the frame has a payload
-    payload_len = sli_cpc_header_get_payload_size(sli_cpc_frame_get_header(frame));
+    payload_len = sli_cpc_header_get_payload_size(&frame->hdr);
     if (payload_len > 0) {
       if (status == SL_STATUS_OK) {
         // Calculate the transfer length to reach the next 4-byte boundary.
@@ -1067,8 +1066,7 @@ static void adma_tx_prepare_header_descriptors(void)
       return;
     }
 
-    frame_descriptors[idx++]
-      = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(sli_cpc_frame_get_header(frame), SLI_CPC_HEADER_SIZE);
+    frame_descriptors[idx++] = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(&frame->hdr, SLI_CPC_HEADER_SIZE);
 
     // Move frame to pending list to notify completion.
     sli_cpc_frame_list_push_back(&tx_payload_pending_frames, frame);
@@ -1120,7 +1118,7 @@ static void adma_tx_prepare_payload_descriptors(void)
 
     if (frame->payload) {
       uint8_t *payload = frame->payload->ptr;
-      payload_len = sli_cpc_header_get_payload_size(sli_cpc_frame_get_header(frame));
+      payload_len = sli_cpc_header_get_payload_size(&frame->hdr);
 
       // Calculate the unaligned and aligned lengths.
       unaligned_len = payload_len % SL_CPC_BUF_MIN_ALIGNMENT;

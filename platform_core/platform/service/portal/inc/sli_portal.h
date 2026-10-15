@@ -58,13 +58,9 @@ extern "C" {
  *  asserted when the first request is made and cleared only when all requests
  *  for that domain have been released.
  *
- *  Supported power domains:
- *  - PD1HOSTBASE (\a SLI_PORTAL_DOMAIN_HOSTBASE)
- *  - PD1HOSTNPU (\a SLI_PORTAL_DOMAIN_HOSTNPU)
- *  - PD1LPW0 (\a SLI_PORTAL_DOMAIN_LPW0)
- *  - PD1WIFI0BASE (\a SLI_PORTAL_DOMAIN_WIFI0BASE)
- *  - PD1WIFI0MODEM11B (\a SLI_PORTAL_DOMAIN_WIFI0MODEM11B)
- *  - PD1WIFI0OFDM (\a SLI_PORTAL_DOMAIN_WIFI0OFDM)
+ *  Supported power domains are device-specific. See sli_device_portal.h for
+ *  the enumerators available on the selected part, and use
+ *  SLI_PORTAL_DOMAIN_SUPPORTED() to check whether a domain is supported.
  *
  *  ## Initialization
  *
@@ -199,7 +195,7 @@ sl_status_t sli_portal_init(void);
  *                    - SLI_PORTAL_DOMAIN_WIFI0OFDM
  *
  * @return SL_STATUS_OK if successful.
- *         SL_STATUS_INVALID_PARAMETER if domain is out of range.
+ *         SL_STATUS_INVALID_PARAMETER if domain is not supported on this part.
  *
  * @note
  *  - Powers up the requested domain.
@@ -231,7 +227,7 @@ sl_status_t sli_portal_request_domain_powerup(sli_portal_domain_t domain);
  *
  * @return SL_STATUS_OK if successful.
  *         SL_STATUS_NULL_POINTER if handle or notification_function is NULL.
- *         SL_STATUS_INVALID_PARAMETER if domain is out of range.
+ *         SL_STATUS_INVALID_PARAMETER if domain is not supported on this part.
  *         SL_STATUS_ALREADY_EXISTS if handle is already queued.
  *
  * @note
@@ -273,7 +269,7 @@ sl_status_t sli_portal_request_domain_powerup_with_notif(sli_portal_domain_t dom
  *                    - SLI_PORTAL_DOMAIN_WIFI0OFDM
  *
  * @return SL_STATUS_OK if successful.
- *         SL_STATUS_INVALID_PARAMETER if domain is out of range.
+ *         SL_STATUS_INVALID_PARAMETER if domain is not supported on this part.
  *         SL_STATUS_INVALID_STATE if there are no active requests for the domain.
  *
  * @note

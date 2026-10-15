@@ -7,6 +7,7 @@
  *  SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later
  */
 
+#include "test_common.h"
 #include <test/helpers.h>
 #include <test/macros.h>
 #include <test/psa_exercise_key.h>
@@ -18,21 +19,32 @@
 #include <psa/crypto.h>
 
 #include <test/asn1_helpers.h>
-#include <test/psa_crypto_helpers.h>
-#if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-#include "sli_tz_psa_crypto_extra_test.h"
-#else
 #include <psa_crypto_slot_management.h>
-#endif
+#include <test/psa_crypto_helpers.h>
 
 #if defined(MBEDTLS_PK_C)
 #include <pk_internal.h>
 #endif
 #if defined(MBEDTLS_ECP_C)
+
+#if !defined(MBEDTLS_VERSION_MAJOR) || MBEDTLS_VERSION_MAJOR >= 4
+#include <mbedtls/private/ecp.h>
+#else
 #include <mbedtls/ecp.h>
+#endif
+
 #endif
 #if defined(MBEDTLS_RSA_C)
 #include <rsa_internal.h>
+#endif
+
+#if defined(__IAR_SYSTEMS_ICC__)
+/* Suppress a very overeager warning from IAR: it dislikes a forward goto
+ * that bypasses the initialization of a variable, even if that variable
+ * is not used after the jump. (This is perfectly valid C; it would only
+ * be invalid C if jumping into a block from outside that block.)
+ */
+#pragma diag_suppress=Pe546 // transfer of control bypasses initialization
 #endif
 
 #if defined(MBEDTLS_PSA_CRYPTO_SE_C)
@@ -41,26 +53,6 @@ static int lifetime_is_dynamic_secure_element(psa_key_lifetime_t lifetime)
     return PSA_KEY_LIFETIME_GET_LOCATION(lifetime) !=
            PSA_KEY_LOCATION_LOCAL_STORAGE;
 }
-#endif
-
-/* Some test cases does not include headers with MBEDTLS_ATTRIBUTE_UNTERMINATED_STRING.
-   Make sure MBEDTLS_ATTRIBUTE_UNTERMINATED_STRING is defined. */
-#if !defined(MBEDTLS_ATTRIBUTE_UNTERMINATED_STRING)
-/* GCC >= 15 has a warning 'unterminated-string-initialization' which complains if you initialize
- * a string into an array without space for a terminating NULL character. In some places in the
- * codebase this behaviour is intended, so we add the macro MBEDTLS_ATTRIBUTE_UNTERMINATED_STRING
- * to suppress the warning in these places.
- */
-#if defined(__has_attribute)
-#if __has_attribute(nonstring)
-#define MBEDTLS_HAS_ATTRIBUTE_NONSTRING
-#endif /* __has_attribute(nonstring) */
-#endif /* __has_attribute */
-#if defined(MBEDTLS_HAS_ATTRIBUTE_NONSTRING)
-#define MBEDTLS_ATTRIBUTE_UNTERMINATED_STRING __attribute__((nonstring))
-#else
-#define MBEDTLS_ATTRIBUTE_UNTERMINATED_STRING
-#endif /* MBEDTLS_HAS_ATTRIBUTE_NONSTRING */
 #endif
 
 static int check_key_attributes_sanity(mbedtls_svc_key_id_t key,
@@ -1009,7 +1001,7 @@ int mbedtls_test_psa_exported_key_sanity_check(
         TEST_EQUAL(exported_length, PSA_BITS_TO_BYTES(bits));
     } else
 
-#if defined(MBEDTLS_ASN1_PARSE_C) && defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR)
+#if defined(MBEDTLS_ASN1_PARSE_C)
     if (type == PSA_KEY_TYPE_RSA_KEY_PAIR) {
         uint8_t *p = (uint8_t *) exported;
         const uint8_t *end = exported + exported_length;
@@ -1063,18 +1055,16 @@ int mbedtls_test_psa_exported_key_sanity_check(
 
         TEST_ASSERT(exported_length <= PSA_EXPORT_KEY_PAIR_MAX_SIZE);
     } else
-#endif /* MBEDTLS_ASN1_PARSE_C && PSA_WANT_KEY_TYPE_RSA_KEY_PAIR */
+#endif /* MBEDTLS_ASN1_PARSE_C */
 
-#if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)
     if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(type)) {
         /* Just the secret value */
         TEST_EQUAL(exported_length, PSA_BITS_TO_BYTES(bits));
 
         TEST_ASSERT(exported_length <= PSA_EXPORT_KEY_PAIR_MAX_SIZE);
     } else
-#endif /* PSA_WANT_KEY_TYPE_ECC_KEY_PAIR */
 
-#if defined(MBEDTLS_ASN1_PARSE_C) && defined(PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY)
+#if defined(MBEDTLS_ASN1_PARSE_C)
     if (type == PSA_KEY_TYPE_RSA_PUBLIC_KEY) {
         uint8_t *p = (uint8_t *) exported;
         const uint8_t *end = exported + exported_length;
@@ -1102,9 +1092,8 @@ int mbedtls_test_psa_exported_key_sanity_check(
         TEST_ASSERT(exported_length <=
                     PSA_EXPORT_PUBLIC_KEY_MAX_SIZE);
     } else
-#endif /* MBEDTLS_ASN1_PARSE_C && PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY */
+#endif /* MBEDTLS_ASN1_PARSE_C */
 
-#if defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)
     if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(type)) {
 
         TEST_ASSERT(exported_length <=
@@ -1131,7 +1120,6 @@ int mbedtls_test_psa_exported_key_sanity_check(
             TEST_EQUAL(exported[0], 4);
         }
     } else
-#endif /* PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY */
     if (PSA_KEY_TYPE_IS_DH_PUBLIC_KEY(type) || PSA_KEY_TYPE_IS_DH_KEY_PAIR(type)) {
         TEST_ASSERT(exported_length ==
                     PSA_EXPORT_PUBLIC_KEY_OUTPUT_SIZE(type, bits));
@@ -1142,7 +1130,7 @@ int mbedtls_test_psa_exported_key_sanity_check(
         TEST_FAIL("Sanity check not implemented for this key type");
     }
 
-#if defined(PSA_WANT_KEY_TYPE_DES)
+#if defined(MBEDTLS_DES_C)
     if (type == PSA_KEY_TYPE_DES) {
         /* Check the parity bits. */
         unsigned i;
@@ -1157,7 +1145,7 @@ int mbedtls_test_psa_exported_key_sanity_check(
             TEST_ASSERT(bit_count % 2 != 0);
         }
     }
-#endif /* PSA_WANT_KEY_TYPE_DES */
+#endif
 
     return 1;
 
@@ -1186,7 +1174,7 @@ static int exercise_export_key(mbedtls_svc_key_id_t key,
     exported_size = PSA_EXPORT_KEY_OUTPUT_SIZE(
         psa_get_key_type(&attributes),
         psa_get_key_bits(&attributes));
-    TEST_CALLOC_OR_SKIP(exported, exported_size);
+    TEST_CALLOC(exported, exported_size);
 
     status = psa_export_key(key, exported, exported_size, &exported_length);
     if (key_destroyable && status == PSA_ERROR_INVALID_HANDLE) {
@@ -1236,7 +1224,7 @@ static int exercise_export_public_key(mbedtls_svc_key_id_t key,
         exported_size = PSA_EXPORT_KEY_OUTPUT_SIZE(
             psa_get_key_type(&attributes),
             psa_get_key_bits(&attributes));
-        TEST_CALLOC_OR_SKIP(exported, exported_size);
+        TEST_CALLOC(exported, exported_size);
 
         status = psa_export_public_key(key, exported,
                                        exported_size, &exported_length);
@@ -1423,8 +1411,14 @@ int mbedtls_test_key_consistency_psa_pk(mbedtls_svc_key_id_t psa_key,
     size_t pk_public_length = 0;
 
     switch (pk_type) {
-#if defined(MBEDTLS_RSA_C)
+#if defined(MBEDTLS_RSA_C) || defined(MBEDTLS_PK_USE_PSA_RSA_DATA)
         case MBEDTLS_PK_RSA:
+#if defined(MBEDTLS_PK_USE_PSA_RSA_DATA)
+            TEST_ASSERT(PSA_KEY_TYPE_IS_RSA(psa_type));
+            pk_public = pk->pub_raw;
+            pk_public_length = pk->pub_raw_len;
+            break;
+#else /* MBEDTLS_PK_USE_PSA_RSA_DATA */
             TEST_ASSERT(PSA_KEY_TYPE_IS_RSA(psa_type));
             const mbedtls_rsa_context *rsa = mbedtls_pk_rsa(*pk);
             uint8_t *const end = pk_public_buffer + sizeof(pk_public_buffer);
@@ -1434,8 +1428,10 @@ int mbedtls_test_key_consistency_psa_pk(mbedtls_svc_key_id_t psa_key,
             pk_public = cursor;
             pk_public_length = end - pk_public;
             break;
-#endif
+#endif /* MBEDTLS_PK_USE_PSA_RSA_DATA */
+#endif /* MBEDTLS_RSA_C || MBEDTLS_PK_USE_PSA_RSA_DATA */
 
+#if defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)
 #if defined(MBEDTLS_PK_USE_PSA_EC_DATA)
         case MBEDTLS_PK_ECKEY:
         case MBEDTLS_PK_ECKEY_DH:
@@ -1445,9 +1441,7 @@ int mbedtls_test_key_consistency_psa_pk(mbedtls_svc_key_id_t psa_key,
             pk_public = pk->pub_raw;
             pk_public_length = pk->pub_raw_len;
             break;
-#endif /* MBEDTLS_PK_USE_PSA_EC_DATA */
-
-#if defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY) && !defined(MBEDTLS_PK_USE_PSA_EC_DATA)
+#else /* MBEDTLS_PK_USE_PSA_EC_DATA */
         case MBEDTLS_PK_ECKEY:
         case MBEDTLS_PK_ECKEY_DH:
         case MBEDTLS_PK_ECDSA:
@@ -1458,7 +1452,8 @@ int mbedtls_test_key_consistency_psa_pk(mbedtls_svc_key_id_t psa_key,
                            pk_public_buffer, sizeof(pk_public_buffer)), 0);
             pk_public = pk_public_buffer;
             break;
-#endif /* PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY && !MBEDTLS_PK_USE_PSA_EC_DATA */
+#endif /* MBEDTLS_PK_USE_PSA_EC_DATA */
+#endif /* PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY */
 
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
         case MBEDTLS_PK_OPAQUE:

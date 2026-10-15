@@ -1,8 +1,10 @@
 id: "sl_connect_sdk_ota_broadcast_bootloader_test"
 label: "OTA Broadcast Bootloader Test"
-package: "connect_app"
+package: "connect"
 category: "Connect|Test"
 quality: "production"
+ui_hints:
+  visibility: basic
 metadata:
   sbom:
     license: Zlib
@@ -70,3 +72,7 @@ template_contribution:
       help: "Bootload only the nodes with the given image tag"
     - type: uint16
       help: "Target list length"
+
+documentation:
+  docset: connect-stack
+  document: customizing-applications-with-connect-v3x/02-components

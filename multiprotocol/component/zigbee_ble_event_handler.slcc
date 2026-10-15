@@ -34,6 +34,8 @@ template_contribution:
   value:
     callback_type: local_data_init
     function_name: sli_ble_application_init
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/dynamic-multiprotocol-bluetooth-zigbee-sdk-7x-higher/02-working-with-the-zigbee-bluetooth-examples
 metadata:
   sbom:
     license: MSLA

@@ -11,11 +11,12 @@ root_path: cpc_ng/port/silabs
 instantiable:
   prefix: instance
 config_file:
-- path: config/series3/sl_cpc_drv_sdio_device_{{instance}}_config.h
+- path: config/sl_cpc_drv_sdio_device_{{instance}}_config.h
   file_id: cpc_ng_drv_sdio_device_config
 provides:
 - name: cpc_ng_drv_sdio_device_secondary
-- name: cpc_ng_secondary_drv_instance
+- name: cpc_ng_drv_secondary_instance
+  allow_multiple: true
 requires:
 - name: cpc_ng_drv_sdio_device
 - name: cpc_ng_secondary

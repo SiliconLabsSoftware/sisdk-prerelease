@@ -103,8 +103,10 @@ struct netif;
 #if SL_LWIP_ND6_DYNAMIC_TIMER
 void nd6_tmr_init(void);
 void nd6_tmr(void *arg);
-/** Clean up ND6 state when link goes down. */
-void nd6_cleanup_on_link_down(struct netif *netif);
+#if SL_LWIP_LINK_DOWN_CLEANUP
+/** Clear IPv6 core state; stop ND6 timer on last link. */
+void sli_nd6_cleanup_on_link_down(struct netif *netif);
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP */
 /** Start ND6 dynamic timer when link comes up. */
 void nd6_timer_start(void);
 #else

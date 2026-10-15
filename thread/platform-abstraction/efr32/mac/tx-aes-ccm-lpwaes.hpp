@@ -35,44 +35,28 @@
 #define TX_AES_CCM_LPWAES_HPP_
 
 #include "key-storage-policy.hpp"
+#include "mac-key-types.hpp"
 #include "sli-crypto-key-desc.hpp"
 #include "tx-security-level.hpp"
 
 #include "sli_crypto.h"
+#include <openthread/platform/radio.h>
 #include "common/const_cast.hpp"
 #include "common/debug.hpp"
 #include "crypto/aes_ccm.hpp"
 #include "mac/mac_frame.hpp"
-#include "openthread/platform/radio.h"
 
-template <typename KeyStoragePolicy> struct LpwAesKeyDescBuilder;
-
-template <> struct LpwAesKeyDescBuilder<PlaintextMacKeyStoragePolicy>
-{
-    static sli_crypto_descriptor_t Build(const otMacKeyMaterial & /* aKey */, const otMacKeyMaterial &aRawKey)
-    {
-        return LpwAesKeyDescFromPlaintext(aRawKey);
-    }
-};
-
-#if defined(KSU_PRESENT)
-template <> struct LpwAesKeyDescBuilder<KsuMacKeyStoragePolicy>
-{
-    static sli_crypto_descriptor_t Build(const otMacKeyMaterial &aKey, const otMacKeyMaterial & /* aRawKey */)
-    {
-        return LpwAesKeyDescFromKsuSlot(aKey);
-    }
-};
-#endif
-
+/// LPWAES transmit path templated on the compiled MAC key storage policy.
 template <typename KeyStoragePolicy> class LpwAesTransmitAesCcmT
 {
 public:
+    using PalKey = typename KeyStoragePolicy::PalKey;
+
     static void Process(otRadioFrame                       &aFrame,
                         ot::Crypto::AesCcm::Nonce           aNonce,
                         const uint8_t                       aTagLength,
                         const ot::Mac::Frame::SecurityLevel aSecurityLevel,
-                        const otMacKeyMaterial             *aRawKey);
+                        const PalKey                       &aPalKey);
 };
 
 template <typename KeyStoragePolicy>
@@ -80,7 +64,7 @@ void LpwAesTransmitAesCcmT<KeyStoragePolicy>::Process(otRadioFrame              
                                                       ot::Crypto::AesCcm::Nonce           aNonce,
                                                       const uint8_t                       aTagLength,
                                                       const ot::Mac::Frame::SecurityLevel aSecurityLevel,
-                                                      const otMacKeyMaterial             *aRawKey)
+                                                      const PalKey                       &aPalKey)
 {
     ot::Mac::TxFrame       &txFrame = static_cast<ot::Mac::TxFrame &>(aFrame);
     ot::Mac::Frame::Lengths lengths;
@@ -93,8 +77,7 @@ void LpwAesTransmitAesCcmT<KeyStoragePolicy>::Process(otRadioFrame              
     unsigned char *const payloadBytes   = ot::AsNonConst(payload.GetBytes());
     const bool           encryptPayload = TxSecurityLevel::EncryptsPayload(aSecurityLevel);
     const bool includePayloadInCcm      = (payloadLength > 0) && TxSecurityLevel::IncludesPayloadInCcm(aSecurityLevel);
-    const otMacKeyMaterial &aesKey      = *aFrame.mInfo.mTxInfo.mAesKey;
-    sli_crypto_descriptor_t keyDesc     = LpwAesKeyDescBuilder<KeyStoragePolicy>::Build(aesKey, *aRawKey);
+    sli_crypto_descriptor_t keyDesc     = LpwAesKeyDesc(aPalKey);
     sl_status_t             ret;
 
     ret = sli_crypto_ccm(&keyDesc,

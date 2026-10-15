@@ -98,7 +98,12 @@ uint8_t set_selected_phy(uint16_t new_phy)
     (void) sl_rail_util_pa_post_init(sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0), new_pa_mode);
 
 #ifdef SL_CATALOG_RAIL_PACKET_ASSISTANT_PRESENT
-    update_assistant_pointers(selected_phy);
+    sl_status_t packet_assistant_status = sl_packet_assistant_select_phy((uint8_t)selected_phy);
+#if defined(SL_CATALOG_APP_ASSERT_PRESENT)
+    app_assert(packet_assistant_status == SL_STATUS_OK, "sl_packet_assistant_select_phy failed\n");
+#else
+    (void)packet_assistant_status;
+#endif
 #endif
   } else {
 #ifdef SL_CATALOG_APP_LOG_PRESENT

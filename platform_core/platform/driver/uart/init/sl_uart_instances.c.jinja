@@ -45,6 +45,37 @@
 #define SL_UART_PERIPHERAL(periph)        SL_CONCAT_PASTER_2(SL_PERIPHERAL_, periph)
 #define SL_UART_RX_IRQHandler(periph)     SL_CONCAT_PASTER_2(periph, _RX_IRQHandler)
 #define SL_UART_TX_IRQHandler(periph)     SL_CONCAT_PASTER_2(periph, _TX_IRQHandler)
+
+// Low-level driver family a peripheral belongs to. Instance configurations spell their
+// peripheral as a bare token (USART0, EUSART1, ...), so the family is resolved by pasting
+// that token. Only usable where em_device.h is not included, since it redefines those
+// names as typed base pointers.
+#define SL_UART_LLD_EUSART                1
+#define SL_UART_LLD_USART                 2
+
+#define SL_UART_LLD_OF(periph)            SL_CONCAT_PASTER_2(periph, _SL_UART_LLD)
+
+#define EUART0_SL_UART_LLD                SL_UART_LLD_EUSART
+#define EUSART0_SL_UART_LLD               SL_UART_LLD_EUSART
+#define EUSART1_SL_UART_LLD               SL_UART_LLD_EUSART
+#define EUSART2_SL_UART_LLD               SL_UART_LLD_EUSART
+#define EUSART3_SL_UART_LLD               SL_UART_LLD_EUSART
+#define EUSART4_SL_UART_LLD               SL_UART_LLD_EUSART
+#define USART0_SL_UART_LLD                SL_UART_LLD_USART
+#define USART1_SL_UART_LLD                SL_UART_LLD_USART
+#define USART2_SL_UART_LLD                SL_UART_LLD_USART
+{% for instance in uart_instances_it %}
+
+#if SL_UART_LLD_OF(SL_UART_{{ instance | upper }}_PERIPHERAL) == SL_UART_LLD_EUSART \
+  && !defined(SL_CATALOG_UART_EUSART_PRESENT)
+#error "UART instance '{{ instance }}' is configured on an EUSART peripheral. Add the uart_eusart component to the project."
+#endif
+
+#if SL_UART_LLD_OF(SL_UART_{{ instance | upper }}_PERIPHERAL) == SL_UART_LLD_USART \
+  && !defined(SL_CATALOG_UART_USART_PRESENT)
+#error "UART instance '{{ instance }}' is configured on a USART peripheral. Add the uart_usart component to the project."
+#endif
+{% endfor %}
 {% for instance in uart_instances_it %}
 sl_peripheral_t sl_uart_{{ instance }}_peripheral = SL_UART_PERIPHERAL(SL_UART_{{ instance | upper }}_PERIPHERAL);
 sl_uart_handle_t sl_uart_{{ instance }}_handle;

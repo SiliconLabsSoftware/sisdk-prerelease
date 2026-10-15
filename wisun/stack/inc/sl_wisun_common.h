@@ -32,7 +32,9 @@
 #define SL_WISUN_COMMON_H
 
 #include <inttypes.h>
+#include <stdbool.h>
 #include <sl_slist.h>
+#include <stdint.h>
 
 #define CMSIS_RTOS_ERROR_MASK       0x80000000
 
@@ -57,45 +59,35 @@ do {\
   goto error_handler;\
 } while(0)
 
-// Macro for suppressing a warning about pointless integer comparisons
-// since some the limits used in SLI_WISUN_PARAM_CHECK_LIMITS may be
-// the minimum/maximum integer value.
-#ifdef __ICCARM__
-#define SUPPRESS_CHECK_LIMITS_WARNING _Pragma ("diag_suppress=Pa084,Pe186")
-#define RESTORE_CHECK_LIMITS_WARNING _Pragma ("diag_default=Pa084,Pe186")
-#else
-#define SUPPRESS_CHECK_LIMITS_WARNING
-#define RESTORE_CHECK_LIMITS_WARNING
-#endif
-
 /**
- * @brief Helper macro for SLI_WISUN_PARAM_CHECK_LIMITS
+ * @brief Check lower and upper limits for a parameter
  *
- * This macro must not be used alone, it is needed to support limits defined as
- * macros (expand arguments first).
+ * Returns true when the conditions are met, and false when the check fails.
+ * Uses double so both integer and floating-point parameters can be validated
+ * through a single implementation (avoids a unique tr_error string per call site).
+ *
+ * @param param Parameter to check
+ * @param min Minimum value
+ * @param max Maximum value
+ * @param param_name String name of the parameter
+ *
+ * @return True when the conditions are met, false when the check fails
  */
-#define SLI_WISUN_PARAM_CHECK_LIMITS_HELPER(PARAM, MIN, MAX) \
-SUPPRESS_CHECK_LIMITS_WARNING \
-  ({ \
-    bool success = true; \
-    if ((PARAM < MIN) || (PARAM > MAX)) { \
-      tr_error("Invalid value for parameter " #PARAM "(min=" #MIN ", max=" #MAX ")"); \
-      success = false; \
-    } \
-    success; \
-  }) \
-RESTORE_CHECK_LIMITS_WARNING
+bool sli_wisun_param_check_limits(double param, double min, double max, const char *param_name);
 
 /**
  * @brief Check lower and upper limits for a parameter
  *
  * Evaluates to true when the conditions are met, and false when the check fails
  *
- * @param PARAM Parameter to check
+ * @param OBJ Pointer to the object containing the member to check
+ * @param MEMBER Parameter value
  * @param MIN Minimum value
  * @param MAX Maximum value
+ * @param param_name String name of the parameter
  */
-#define SLI_WISUN_PARAM_CHECK_LIMITS(PARAM, ...) SLI_WISUN_PARAM_CHECK_LIMITS_HELPER(PARAM, __VA_ARGS__)
+#define SLI_WISUN_PARAM_CHECK_LIMITS(OBJ, MEMBER, MIN, MAX) \
+  sli_wisun_param_check_limits((double)(OBJ->MEMBER), (double)(MIN), (double)(MAX), DBG_STR(#MEMBER))
 
 uint64_t divide_integer(uint64_t dividend, uint32_t divisor);
 

@@ -12,6 +12,11 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: basic
+documentation:
+  docset: rail
+  document: rail-sdk-services/rail-sdk-packet-assistant
 root_path: "rail/component/sl_rail_sdk_packet_assistant"
 provides:
 - name: sl_rail_sdk_packet_assistant
@@ -69,60 +74,56 @@ template_contribution:
 - name: cli_command
   value:
     group: "packet_assistant"
-    name: get_wisun_fsk_fcs
-    handler: cli_get_wisun_fsk_fcs
-    help: "Get the wisun fsk fcs setting"
+    name: get_sun_fsk_fcs
+    handler: cli_get_sun_fsk_fcs
+    help: "Get the SUN FSK FCS type (0 = 4-byte, 1 = 2-byte)"
   condition:
   - "cli"
-  - "device_supports_wisun"
 - name: cli_command
   value:
     group: "packet_assistant"
-    name: set_wisun_fsk_fcs
-    handler: cli_set_wisun_fsk_fcs
-    help: "Set the wisun fsk rate setting"
+    name: set_sun_fsk_fcs
+    handler: cli_set_sun_fsk_fcs
+    help: "Set the SUN FSK FCS type (0 = 4-byte, 1 = 2-byte)"
+    argument:
+    - type: uint8
+      help: "0 = 4-byte FCS, 1 = 2-byte FCS"
+  condition:
+  - "cli"
+- name: cli_command
+  value:
+    group: "packet_assistant"
+    name: get_sun_fsk_whitening
+    handler: cli_get_sun_fsk_whitening
+    help: "Get the SUN FSK whitening setting"
+  condition:
+  - "cli"
+- name: cli_command
+  value:
+    group: "packet_assistant"
+    name: set_sun_fsk_whitening
+    handler: cli_set_sun_fsk_whitening
+    help: "Set the SUN FSK whitening setting"
     argument:
     - type: uint8
       help: "ON/OFF"
   condition:
   - "cli"
-  - "device_supports_wisun"
 - name: cli_command
   value:
     group: "packet_assistant"
-    name: get_wisun_fsk_whitening
-    handler: cli_get_wisun_fsk_whitening
-    help: "Get the wisun fsk whitening setting"
-  condition:
-  - "cli"
-  - "device_supports_wisun"
-- name: cli_command
-  value:
-    group: "packet_assistant"
-    name: set_wisun_fsk_whitening
-    handler: cli_set_wisun_fsk_whitening
-    help: "Set the wisun fsk whitening setting"
-    argument:
-    - type: uint8
-      help: "ON/OFF"
-  condition:
-  - "cli"
-  - "device_supports_wisun"
-- name: cli_command
-  value:
-    group: "packet_assistant"
-    name: get_wisun_ofdm_scrambler
-    handler: cli_get_wisun_ofdm_scrambler
-    help: "Get the ofdm scrambler setting"
+    name: get_sun_ofdm_scrambler
+    handler: cli_get_sun_ofdm_scrambler
+    help: "Get the SUN OFDM scrambler setting"
   condition:
   - "cli"
   - "device_generic_family_efr32xg25"
 - name: cli_command
   value:
     group: "packet_assistant"
-    name: set_wisun_ofdm_scrambler
-    handler: cli_set_wisun_ofdm_scrambler
-    help: "Set the ofdm scrambler setting, 2 bits wide (0-3)"
+    name: set_sun_ofdm_scrambler
+    handler: cli_set_sun_ofdm_scrambler
+    help: "Set the SUN OFDM scrambler setting, 2 bits wide (0-3)"
     argument:
     - type: uint8
       help: "scrambler value"
@@ -132,18 +133,18 @@ template_contribution:
 - name: cli_command
   value:
     group: "packet_assistant"
-    name: get_wisun_ofdm_rate
-    handler: cli_get_wisun_ofdm_rate
-    help: "Get the ofdm rate setting"
+    name: get_sun_ofdm_rate
+    handler: cli_get_sun_ofdm_rate
+    help: "Get the SUN OFDM rate setting"
   condition:
   - "cli"
   - "device_generic_family_efr32xg25"
 - name: cli_command
   value:
     group: "packet_assistant"
-    name: set_wisun_ofdm_rate
-    handler: cli_set_wisun_ofdm_rate
-    help: "Set the ofdm rate setting"
+    name: set_sun_ofdm_rate
+    handler: cli_set_sun_ofdm_rate
+    help: "Set the SUN OFDM rate setting"
     argument:
     - type: uint8
       help: "rate value 0-6"
@@ -155,49 +156,45 @@ template_contribution:
     group: "packet_assistant"
     name: get_sun_oqpsk_spreading_mode
     handler: cli_get_sun_oqpsk_spreading_mode
-    help: "Get the wisun OQPSK spreading mode setting"
+    help: "Get the SUN OQPSK spreading mode setting"
   condition:
   - "cli"
-  - "device_supports_wisun"
 - name: cli_command
   value:
     group: "packet_assistant"
     name: set_sun_oqpsk_spreading_mode
     handler: cli_set_sun_oqpsk_spreading_mode
-    help: "Set the wisun OQPSK spreading mode setting"
+    help: "Set the SUN OQPSK spreading mode setting"
     argument:
     - type: uint8
       help: "ON/OFF"
   condition:
   - "cli"
-  - "device_supports_wisun"
 - name: cli_command
   value:
     group: "packet_assistant"
     name: get_sun_oqpsk_rate_mode
     handler: cli_get_sun_oqpsk_rate_mode
-    help: "Get the wisun OQPSK rate mode setting"
+    help: "Get the SUN OQPSK rate mode setting"
   condition:
   - "cli"
-  - "device_supports_wisun"
 - name: cli_command
   value:
     group: "packet_assistant"
     name: set_sun_oqpsk_rate_mode
     handler: cli_set_sun_oqpsk_rate_mode
-    help: "Set the wisun OQPSK rate mode setting"
+    help: "Set the SUN OQPSK rate mode setting"
     argument:
     - type: uint8
       help: "value to set data rates and robustness levels (2 bit wide: 0-3)"
   condition:
   - "cli"
-  - "device_supports_wisun"
 - name: cli_command
   value:
     group: "packet_assistant"
     name: get_sidewalk_fcs_type
     handler: cli_get_sidewalk_fcs_type
-    help: "Get the Sidewalk fsk fcs setting"
+    help: "Get the Sidewalk FSK FCS type (0 = 4-byte, 1 = 2-byte)"
   condition:
   - "cli"
 - name: cli_command
@@ -205,10 +202,10 @@ template_contribution:
     group: "packet_assistant"
     name: set_sidewalk_fcs_type
     handler: cli_set_sidewalk_fcs_type
-    help: "Set the Sidewalk fsk rate setting"
+    help: "Set the Sidewalk FSK FCS type (0 = 4-byte, 1 = 2-byte)"
     argument:
     - type: uint8
-      help: "ON/OFF"
+      help: "0 = 4-byte FCS, 1 = 2-byte FCS"
   condition:
   - "cli"
 - name: cli_command
@@ -216,7 +213,7 @@ template_contribution:
     group: "packet_assistant"
     name: get_sidewalk_whitening
     handler: cli_get_sidewalk_whitening
-    help: "Get the Sidewalk whitening setting"
+    help: "Get the Sidewalk FSK whitening setting"
   condition:
   - "cli"
 - name: cli_command
@@ -224,15 +221,102 @@ template_contribution:
     group: "packet_assistant"
     name: set_sidewalk_whitening
     handler: cli_set_sidewalk_whitening
-    help: "Set the Sidewalk whitening setting"
+    help: "Set the Sidewalk FSK whitening setting"
     argument:
     - type: uint8
       help: "ON/OFF"
   condition:
   - "cli"
+  # Deprecated CLI commands
+- name: cli_command
+  value:
+    group: "packet_assistant"
+    name: get_wisun_fsk_fcs
+    handler: cli_get_wisun_fsk_fcs
+    help: "Deprecated: use get_sun_fsk_fcs"
+  condition:
+  - "cli"
+- name: cli_command
+  value:
+    group: "packet_assistant"
+    name: set_wisun_fsk_fcs
+    handler: cli_set_wisun_fsk_fcs
+    help: "Deprecated: use set_sun_fsk_fcs"
+    argument:
+    - type: uint8
+      help: "0 = 4-byte FCS, 1 = 2-byte FCS"
+  condition:
+  - "cli"
+- name: cli_command
+  value:
+    group: "packet_assistant"
+    name: get_wisun_fsk_whitening
+    handler: cli_get_wisun_fsk_whitening
+    help: "Deprecated: use get_sun_fsk_whitening"
+  condition:
+  - "cli"
+- name: cli_command
+  value:
+    group: "packet_assistant"
+    name: set_wisun_fsk_whitening
+    handler: cli_set_wisun_fsk_whitening
+    help: "Deprecated: use set_sun_fsk_whitening"
+    argument:
+    - type: uint8
+      help: "ON/OFF"
+  condition:
+  - "cli"
+- name: cli_command
+  value:
+    group: "packet_assistant"
+    name: get_wisun_ofdm_scrambler
+    handler: cli_get_wisun_ofdm_scrambler
+    help: "Deprecated: use get_sun_ofdm_scrambler"
+  condition:
+  - "cli"
+  - "device_generic_family_efr32xg25"
+- name: cli_command
+  value:
+    group: "packet_assistant"
+    name: set_wisun_ofdm_scrambler
+    handler: cli_set_wisun_ofdm_scrambler
+    help: "Deprecated: use set_sun_ofdm_scrambler"
+    argument:
+    - type: uint8
+      help: "scrambler value"
+  condition:
+  - "cli"
+  - "device_generic_family_efr32xg25"
+- name: cli_command
+  value:
+    group: "packet_assistant"
+    name: get_wisun_ofdm_rate
+    handler: cli_get_wisun_ofdm_rate
+    help: "Deprecated: use get_sun_ofdm_rate"
+  condition:
+  - "cli"
+  - "device_generic_family_efr32xg25"
+- name: cli_command
+  value:
+    group: "packet_assistant"
+    name: set_wisun_ofdm_rate
+    handler: cli_set_wisun_ofdm_rate
+    help: "Deprecated: use set_sun_ofdm_rate"
+    argument:
+    - type: uint8
+      help: "rate value 0-6"
+  condition:
+  - "cli"
+  - "device_generic_family_efr32xg25"
 - name: event_handler
   value:
     event: internal_app_init
     include: "sl_rail_sdk_packet_assistant.h"
-    handler: "validation_check"
+    handler: "sl_packet_assistant_validation_check"
   priority: 1000
+- name: event_handler
+  value:
+    event: internal_app_init
+    include: "sl_rail_sdk_packet_assistant.h"
+    handler: "sl_packet_assistant_init"
+  priority: 2000

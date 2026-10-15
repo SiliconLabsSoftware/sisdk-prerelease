@@ -34,10 +34,14 @@
 
 MISRAC_DISABLE
 #include "em_device.h"
+#include "btl_driver_cmu.h"
 MISRAC_ENABLE
 
 #ifdef BOOTLOADER_SUPPORT_STORAGE
 #include "sl_clock_manager_init.h"
+#if defined(DCDC_PRESENT)
+#include "sl_device_init_dcdc.h"
+#endif
 #include "btl_storage_cfg.h"
 #include "storage/btl_storage.h"
 #include "debug/btl_debug.h"
@@ -244,12 +248,13 @@ static void cleanup_parser_memory(ParserContext_t *ctx)
 {
   MemSectionInfo_t *currentInstance = &ctx->memorySectionInfo;
 
+#ifndef BOOTLOADER_SUPPORT_STORAGE
+  // Retained only in streaming builds for per-segment hash verify (parse_blobFromStreamingBuf).
   if (currentInstance->ListOfBlockOfHashes != NULL) {
     free(currentInstance->ListOfBlockOfHashes);
     currentInstance->ListOfBlockOfHashes = NULL;
   }
 
-#ifndef BOOTLOADER_SUPPORT_STORAGE
   if (ctx->segmentBuffer != NULL) {
     free(ctx->segmentBuffer);
     ctx->segmentBuffer = NULL;
@@ -858,7 +863,7 @@ int32_t parse_memorySection(ParserContext_t *ctx, InputBuffer_t *input)
 
       if (ctx->imageProperties->instructions & instruction_mask) {
         // Disable LFRCO.
-        CMU->CLKEN0_SET = CMU_CLKEN0_LFRCO;
+        btl_driver_enable_lfrco_clock();
         LFRCO->CTRL_SET = LFRCO_CTRL_DISONDEMAND;
         LFRCO->CTRL_CLR = LFRCO_CTRL_FORCEEN;
         while ((LFRCO->STATUS & LFRCO_STATUS_ENS) != 0U) {
@@ -870,7 +875,7 @@ int32_t parse_memorySection(ParserContext_t *ctx, InputBuffer_t *input)
 
         // Clear disable on-demand.
         LFRCO->CTRL_CLR = LFRCO_CTRL_DISONDEMAND;
-        CMU->CLKEN0_CLR = CMU_CLKEN0_LFRCO;
+        btl_driver_disable_lfrco_clock();
 
         uint32_t runningSEVersion = 0xFFFFFFFFUL;
         if (!bootload_getSeVersion(&runningSEVersion)) {
@@ -890,7 +895,10 @@ int32_t parse_memorySection(ParserContext_t *ctx, InputBuffer_t *input)
 #ifdef BOOTLOADER_SUPPORT_STORAGE
         //Increase CPU clock frequency before proceeding with the upgrades
         if (BOOTLOADER_ENFORCE_FAST_UPGRADES) {
-          //Faster upgrades are enabled. Configure CPU to run at higher frequencies
+          // Faster upgrades: bring up DVDD then configure HF clocks.
+#if defined(DCDC_PRESENT)
+          sl_device_init_dcdc();
+#endif
           sl_clock_manager_init();
           BTL_DEBUG_INIT();
         }
@@ -959,14 +967,24 @@ int32_t parse_memorySectionInfo(ParserContext_t *ctx, InputBuffer_t *input)
   }
 
   currentInstance->totalHashBytes = currentInstance->memorySection.memSectionInfo.numBlocks * 32;
-
+#ifndef BOOTLOADER_SUPPORT_STORAGE
+  // Re-parsing a memory section must not leak the previous section's hash list.
+  if (currentInstance->ListOfBlockOfHashes != NULL) {
+    free(currentInstance->ListOfBlockOfHashes);
+    currentInstance->ListOfBlockOfHashes = NULL;
+  }
+#endif
   if (currentInstance->totalHashBytes != 0) {
+#ifndef BOOTLOADER_SUPPORT_STORAGE
+    // Storage upgrade: hash bytes are checked as they arrive;no buffer needed.
+    // Streaming OTA: save all block hashes here, verify each flash chunk later.
     currentInstance->ListOfBlockOfHashes = (uint8_t *)malloc(currentInstance->totalHashBytes);
     if (currentInstance->ListOfBlockOfHashes == NULL) {
       ctx->internalState = ParserStateError;
       return BOOTLOADER_ERROR_PARSER_UNEXPECTED;
     }
     memset(currentInstance->ListOfBlockOfHashes, 0, currentInstance->totalHashBytes);
+#endif
     ctx->internalState = ParserStateReceiveBlockOfHashes;
   } else {
 #ifndef BOOTLOADER_SUPPORT_STORAGE
@@ -989,12 +1007,27 @@ int32_t parse_rcvBlockOfHashes(ParserContext_t *ctx, InputBuffer_t *input)
 {
   MemSectionInfo_t *currentInstance = &ctx->memorySectionInfo;
   size_t neededBytes = currentInstance->totalHashBytes - ctx->destTLVBufOffset;
+  size_t bytesCopied;
 
-  size_t bytesCopied = streamToBufferTransfer(ctx,
-                                              currentInstance->ListOfBlockOfHashes,
-                                              currentInstance->totalHashBytes,
-                                              input,
-                                              neededBytes);
+#ifdef BOOTLOADER_SUPPORT_STORAGE
+  // Storage: no hash-list buffer. Consume hash bytes from input (discard); SHA via
+  // updateSHAContextBasedOnTag below. Do not use padBuffer/streamToBufferTransfer —
+  // padBuffer is 3 bytes and cannot drain numBlocks * 32 hash stream.
+  {
+    size_t avail = input->length - input->offset;
+    bytesCopied = neededBytes;
+    if (bytesCopied > avail) {
+      bytesCopied = avail;
+    }
+    ctx->destTLVBufOffset += bytesCopied;
+  }
+#else
+  bytesCopied = streamToBufferTransfer(ctx,
+                                       currentInstance->ListOfBlockOfHashes,
+                                       currentInstance->totalHashBytes,
+                                       input,
+                                       neededBytes);
+#endif
 
   updateSHAContextBasedOnTag(ctx, input->buffer + input->offset, bytesCopied);
   input->offset += bytesCopied;
@@ -1348,6 +1381,10 @@ int32_t parser_init(void *context,
                     uint8_t flags)
 {
   ParserContext_t* ctx = (ParserContext_t*)context;
+
+  // parser_init may run again on the same context after a failed or partial parse.
+  cleanup_parser_memory(ctx);
+
   ctx->hashInterface = sha256Interface;
   ctx->flashWriteInterface = flashWrite;
   ctx->flashCodeRegionInterface = flashCodeRegion;
@@ -1479,6 +1516,9 @@ int32_t parse_seBlob(ParserContext_t* ctx, InputBuffer_t *input, const Bootloade
     }
     if ((ctx->imageProperties->instructions & BTL_IMAGE_INSTRUCTION_SE) && (callbacks->bootloaderCallback != NULL)) {
       callbacks->bootloaderCallback(ctx->programmingAddress, blobBuffer, ctx->destTLVBufOffset, 0, ctx);
+      if (ctx->retCode != BOOTLOADER_OK) {
+        return BOOTLOADER_ERROR_PARSER_UNEXPECTED;
+      }
     }
 
     ctx->offsetInTLV += ctx->destTLVBufOffset;
@@ -1596,9 +1636,9 @@ int32_t parser_error(ParserContext_t *ctx, InputBuffer_t *input)
 {
   (void)input;
   
-  /* Ensure parser-allocated memory is always cleaned up.
-   * ListOfBlockOfHashes is freed for both storage and streaming builds.
-   * segmentBuffer is freed only for streaming builds inside cleanup_parser_memory().
+  /* Clean up parser memory on error.
+   * Only streaming builds allocate ListOfBlockOfHashes and segmentBuffer.
+   * Storage builds skip this cleanup.
    */
   cleanup_parser_memory(ctx);
 

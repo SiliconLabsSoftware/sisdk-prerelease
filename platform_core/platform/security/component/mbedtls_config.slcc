@@ -11,7 +11,6 @@ provides:
 include:
 - path: config
   file_list:
-  - path: sli_mbedtls_acceleration.h
   - path: sli_mbedtls_omnipresent.h
 
 - path: config/preset
@@ -49,16 +48,6 @@ config_file:
 
 - path: config/template/sl_mbedtls_trustzone_config.h
   file_id: mbedtls_config
-  export: true
-  condition: [trustzone_nonsecure]
-
-- path: config/template/sl_mbedtls_device_config.h
-  file_id: sl_mbedtls_device_config
-    # We use tz_secure_key_library_s instead of trustzone_secure since the
-    # secure bootloader will need this file to build.
-  unless: [tz_secure_key_library_s, trustzone_nonsecure]
-- path: config/template/sl_mbedtls_device_config.h
-  file_id: sl_mbedtls_device_config
   export: true
   condition: [trustzone_nonsecure]
 

@@ -93,6 +93,7 @@
 #include "common/non_copyable.hpp"
 #include "common/random.hpp"
 #include "common/timer.hpp"
+#include "crypto/mbedtls.hpp"
 #include "crypto/sha256.hpp"
 #include "meshcop/meshcop.hpp"
 #include "meshcop/meshcop_tlvs.hpp"
@@ -279,6 +280,7 @@ private:
     void  HandleTimer(TimeMilli aNow);
     void  Process(void);
     void  FreeMbedtls(void);
+    int   SetHsEcJpakePassword(void);
 
     static int  HandleMbedtlsGetTimer(void *aContext);
     int         HandleMbedtlsGetTimer(void);
@@ -310,6 +312,7 @@ private:
     Callback<ReceiveHandler> mReceiveCallback;
     mbedtls_ssl_config       mConf;
     mbedtls_ssl_context      mSsl;
+    Crypto::EcJpakePassword  mEcJpakePassword;
 #if defined(MBEDTLS_SSL_SRV_C) && defined(MBEDTLS_SSL_COOKIE_C)
     mbedtls_ssl_cookie_ctx mCookieCtx;
 #endif

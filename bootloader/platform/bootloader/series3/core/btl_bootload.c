@@ -227,6 +227,8 @@ SL_WEAK void bootload_applicationCallback(uint32_t offset,
       // Allocate a separate buffer for padding to ensure the input buffer remains intact
       paddedData = (uint8_t *)malloc(paddedSize);
       if (paddedData == NULL) {
+        // Propagate failure; parser checks ctx->retCode after callback returns.
+        ctx->retCode = BOOTLOADER_ERROR_PARSER_UNEXPECTED;
         return;
       }
       memcpy(paddedData, data, length);
@@ -270,6 +272,8 @@ SL_WEAK void bootload_bootloaderCallback(uint32_t address,
     // Allocate a separate buffer for padding to ensure the input buffer remains intact
     paddedData = (uint8_t *)malloc(paddedSize);
     if (paddedData == NULL) {
+      // Propagate failure; parser checks ctx->retCode after callback returns.
+      ctx->retCode = BOOTLOADER_ERROR_PARSER_UNEXPECTED;
       return;
     }
     memcpy(paddedData, data, length);
@@ -310,7 +314,18 @@ bool bootload_checkApplicationPropertiesMagic(void *appProperties)
   // (GetAliasedAddr(0) is FLASH_S_BASE when secure).
   appPropertiesAddr = bootloader_GetAliasedAddr((uint32_t)appProperties);
   flashBase = bootloader_GetAliasedAddr(FLASH_BASE);
-  flashEnd = flashBase + FLASH_SIZE;
+  // External-flash parts have no FLASH_SIZE. Region 1 size from the SE is the
+  // application extent, as with the other Series 3 address checks.
+  sl_se_code_region_config_t region_config = { 0 };
+  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_init_command_context(&cmd_ctx);
+  if (sl_se_code_region_get_config(&cmd_ctx, &region_config, 1U, 1U) != SL_STATUS_OK) {
+    sl_se_deinit_command_context(&cmd_ctx);
+    return false;
+  }
+  sl_se_deinit_command_context(&cmd_ctx);
+  flashEnd = bootloader_GetAliasedAddr((uint32_t)mainBootloaderTable->startOfAppSpace)
+             + region_config.region_size;
   appEndCfg = (uint32_t)mainBootloaderTable->endOfAppSpace;
   if (appEndCfg != 0UL) {
     appEndCfg = bootloader_GetAliasedAddr(appEndCfg);
@@ -358,10 +373,18 @@ bool bootload_verifyApplication(uint32_t startAddress)
   uint32_t appPc = (uint32_t)appStart->resetVector;
   uint32_t appProps = (uint32_t)appStart->signature;
 
-  // Check that SP points to RAM
-  if ((appSp < SRAM_BASE) || (appSp > (SRAM_BASE + SRAM_SIZE))) {
-    return false;
-  }
+  appSp = bootloader_GetAliasedAddr(appSp);
+  // Check that SP points to RAM. SRAM-only is insufficient when the host
+  // application stack is placed in DTCM.
+  bool sp_in_sram = (appSp >= SRAM_BASE) && (appSp <= (SRAM_BASE + SRAM_SIZE));
+  #if defined(DTCM_BASE) && defined(DTCM_MAX_SIZE)
+    bool sp_in_dtcm = (appSp >= DTCM_BASE) && (appSp <= (DTCM_BASE + DTCM_MAX_SIZE));
+  #else
+    bool sp_in_dtcm = false;
+  #endif
+    if (!sp_in_sram && !sp_in_dtcm) {
+      return false;
+    }
 
   sl_se_code_region_config_t region_config = { 0 };
   sl_se_command_context_t cmd_ctx = { 0 };

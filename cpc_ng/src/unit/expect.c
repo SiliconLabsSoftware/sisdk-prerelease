@@ -21,7 +21,6 @@
 #endif
 
 #include "../sli_cpc_hdr.h"
-#include "sl_cpc_bus_instances.h"
 #include "sl_cpc_drv_mock.h"
 
 #include "expect.h"
@@ -101,9 +100,9 @@ void test_assert_packet(unsigned int lineno, const sli_cpc_hdr_t *hdr, const cpc
 
   check_field_uint("len", expect->len, sli_cpc_u16_from_le(hdr->size_le), lineno);
   check_field_uint("dst", expect->dst, sli_cpc_header_get_address(hdr), lineno);
-  check_field_uint("seq", expect->seq, sli_cpc_header_get_seq(hdr), lineno);
-  check_field_uint("ack", expect->ack, sli_cpc_header_get_ack(hdr), lineno);
-  check_field_uint("wnd", expect->wnd, sli_cpc_header_get_rx_wnd(hdr), lineno);
+  check_field_uint("seq", expect->seq, hdr->seq, lineno);
+  check_field_uint("ack", expect->ack, hdr->ack, lineno);
+  check_field_uint("wnd", expect->wnd, hdr->rx_wnd, lineno);
 }
 
 mock_cpc_tx_packet_t *test_pop_outgoing(unsigned int lineno, uint32_t timeout, sl_cpc_drv_mock_t *drv,
@@ -119,7 +118,7 @@ mock_cpc_tx_packet_t *test_pop_outgoing(unsigned int lineno, uint32_t timeout, s
   // pump the dispatcher a handful of times to give it a chance to enqueue
   // the outgoing frame.
   for (uint32_t i = 0; i < timeout && mock_cpc_drv_pending_tx_count(drv) == 0; i++) {
-    sli_cpc_bus_process_action(g_bus);
+    sli_cpc_bus_process_action(&drv->bus);
   }
 #endif
 

@@ -1,46 +1,57 @@
-id: psa_crypto_api
+id: tf_psa_crypto_api
 package: mbedtls
 label: PSA Crypto API
 description: >-
-  Public PSA Crypto API headers for `trustzone_secure` and
-  `trustzone_unaware` builds; `trustzone_nonsecure` uses TF-M
-  `psa_crypto_api_nonsecure` with `psa_crypto_adjust_config` for shared
-  PSA adjust headers.
+  This component provides the public PSA Crypto API header files.
 category: Platform|Security|PSA Crypto
 quality: production
 ui_hints:
   visibility: never
+# Paths are relative to tf-psa-crypto/, not the mbedtls package root.
+conflicts:
+- name: tz_secure_key_library_ns
 provides:
 - name: psa_crypto_api
-conflicts:
-- name: trustzone_nonsecure
+- name: tf_psa_crypto_api
 requires:
-- name: psa_crypto_adjust_config
-- name: mbedtls_crypto_platform_api
+- name: tf_psa_crypto_mbedtls
+- name: psa_crypto_driver_contexts
+recommends:
+- id: psa_crypto_driver_contexts_default
+  vendor: silabs
 include:
 - path: include
   file_list:
   - path: psa/crypto.h
-  - path: psa/crypto_builtin_composites.h
-  - path: psa/crypto_builtin_key_derivation.h
-  - path: psa/crypto_builtin_primitives.h
   - path: psa/crypto_compat.h
-  - path: psa/crypto_config.h
   - path: psa/crypto_driver_common.h
-  - path: psa/crypto_driver_contexts_composites.h
-  - path: psa/crypto_driver_contexts_key_derivation.h
-  - path: psa/crypto_driver_contexts_primitives.h
+  # crypto_driver_contexts_*.h live in psa_driver_dispatch (Secure/unaware).
+  # Do not re-export them from tf-psa-crypto/include, and after upstream
+  # TF-PSA-Crypto#809 do not add tf-psa-crypto/dispatch to Non-Secure include paths.
+  - path: psa/crypto_driver_random.h
   - path: psa/crypto_extra.h
   - path: psa/crypto_platform.h
-  - path: psa/crypto_se_driver.h
   - path: psa/crypto_sizes.h
   - path: psa/crypto_struct.h
   - path: psa/crypto_types.h
   - path: psa/crypto_values.h
+  - path: tf-psa-crypto/build_info.h
+  - path: tf-psa-crypto/private/crypto_adjust_config_auto_enabled.h
+  - path: tf-psa-crypto/private/crypto_adjust_config_derived.h
+  - path: tf-psa-crypto/private/crypto_adjust_config_dependencies.h
+  - path: tf-psa-crypto/private/crypto_adjust_config_key_pair_types.h
+  - path: tf-psa-crypto/private/crypto_adjust_config_support.h
+  - path: tf-psa-crypto/private/crypto_adjust_config_synonyms.h
+  - path: tf-psa-crypto/version.h
+- path: core
+  file_list:
+  - path: tf_psa_crypto_common.h
+- path: drivers/builtin/include
+  file_list:
+  - path: mbedtls/private/crypto_adjust_config_enable_builtins.h
 # -I package root so TF-M's `<include/psa/...>` redirects resolve.
 - path: .
-
 metadata:
   sbom:
-    reference: mbedtls_sbom
-root_path: mbedtls
+    reference: tf_psa_crypto_sbom
+root_path: mbedtls/tf-psa-crypto

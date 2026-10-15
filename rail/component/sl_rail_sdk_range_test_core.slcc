@@ -7,6 +7,8 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: never
 root_path: "rail/component/sl_rail_sdk_range_test_core"
 
 config_file:
@@ -41,10 +43,6 @@ include:
   - "path": "app_measurement.h"
   - "path": "app_menu.h"
   - "path": "app_process.h"
-
-#-------- Hides Component for user in Studio ---------
-ui_hints:
-  visibility: never
 
 #-------------- Template Contribution ----------------
 template_contribution:

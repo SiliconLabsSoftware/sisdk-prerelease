@@ -12,6 +12,11 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: basic
+documentation:
+  docset: rail
+  document: rail-sdk-services/rail-sdk-phy-selector
 root_path: "rail/component/sl_rail_sdk_phy_selector"
 provides:
 - name: sl_rail_sdk_phy_selector
@@ -61,5 +66,3 @@ template_contribution:
     help: "List available phys with protocol infos"
   condition:
   - "cli"
-
-

@@ -345,7 +345,7 @@ sl_status_t sl_btmesh_node_save_replay_protection_list(void)
     return rsp->data.rsp_node_save_replay_protection_list.result;
 }
 
-sl_status_t sl_btmesh_node_set_uuid(uuid_128 uuid)
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_node_set_uuid(uuid_128 uuid)
 {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
@@ -1043,6 +1043,22 @@ sl_status_t sl_btmesh_node_set_scan_bond_lookup(uint8_t bond_lookup)
     sl_btmesh_host_handle_command();
 
     return rsp->data.rsp_node_set_scan_bond_lookup.result;
+}
+
+sl_status_t sl_btmesh_node_set_uuid_transient(uuid_128 uuid)
+{
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+    size_t cmd_payload_len = sizeof(sl_btmesh_cmd_node_set_uuid_transient_t);
+
+    cmd->header = SLI_BGAPI_MSG_HEADER(sli_btmesh_node_class_id,
+                                       sli_btmesh_node_set_uuid_transient_command_id,
+                                       (uint8_t) sl_bgapi_msg_type_cmd | (uint8_t) sl_bgapi_dev_type_btmesh,
+                                       cmd_payload_len);
+    cmd->data.cmd_node_set_uuid_transient.uuid = uuid;
+    sl_btmesh_host_handle_command();
+
+    return rsp->data.rsp_node_set_uuid_transient.result;
 }
 
 sl_status_t sl_btmesh_prov_init(void)

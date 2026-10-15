@@ -64,6 +64,10 @@
 #ifndef OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
 #define OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE   1
 #endif
+// <q>  CSL (Coordinated Sampled Listening) Transmitter
+#ifndef OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
+#define OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE 0
+#endif
 // <o SL_OPENTHREAD_CSL_TX_UNCERTAINTY> CSL Scheduling Uncertainty (±10 us units) <12..999:1>
 // <i> Left unchanged the value will be set to 175 for RCPs, 20 for FTDs, and 12 for MTDs
 #ifndef SL_OPENTHREAD_CSL_TX_UNCERTAINTY
@@ -292,10 +296,9 @@
 // </e>
 // <h> MLE Children
 // <o OPENTHREAD_CONFIG_MLE_MAX_CHILDREN>  Maximum number of Thread children supported by the device
-// <i>  Default is 10. Used by the Thread stack to configure the size of child table.
-// <d>  10
+// <d>  0
 #ifndef OPENTHREAD_CONFIG_MLE_MAX_CHILDREN
-#define OPENTHREAD_CONFIG_MLE_MAX_CHILDREN         10
+#define OPENTHREAD_CONFIG_MLE_MAX_CHILDREN         0
 #endif
 // </h>
 // <e>  MLE Long Routes extension (experimental)
@@ -469,7 +472,7 @@
 // <i>  The maximum number of RX buffers to use in the radio driver.
 // <d>  16
 #ifndef SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT
-#define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT       16
+#define SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT       8
 #endif
 // </h>
 // </h>

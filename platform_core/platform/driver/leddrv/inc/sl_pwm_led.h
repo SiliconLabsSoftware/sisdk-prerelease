@@ -77,6 +77,9 @@ sl_status_t sl_pwm_led_init(void *context);
 /***************************************************************************//**
  * Start the PWM LED. This enables the GPIO timer route.
  *
+ * @note On Series 3 devices, if the TIMER was disabled, it is enabled and its
+ *       TOP and compare values are restored before the route is enabled.
+ *
  * @param[in] context         Pointer to PWM LED specific data
  *
  ******************************************************************************/
@@ -84,6 +87,9 @@ void sl_pwm_led_start(void *context);
 
 /***************************************************************************//**
  * Stop the PWM LED.  This disables the GPIO timer route.
+ *
+ * @note On Series 3 devices, the TIMER is also disabled once none of its
+ *       outputs are routed to a pin, so it does not prevent EM2 entry.
  *
  * @param[in] context         Pointer to PWM LED specific data
  *

@@ -185,9 +185,10 @@ void app_process_action(void)
           break;
         }
 #endif
-        printf("\n  . Current data length is %u bytes.\n",
+        printf("\n  . Current data length is %" PRIu32 " bytes.\n",
                plain_msg_size[plain_msg_size_select]);
-        printf("  + Press SPACE to select data length (%u or %u or %u), "
+        printf("  + Press SPACE to select data length (%" PRIu32 " or %" PRIu32
+               " or %" PRIu32 "), "
                "press ENTER to run.\n", plain_msg_size[0], plain_msg_size[1],
                plain_msg_size[2]);
         app_state = SELECT_DATA_SIZE;
@@ -201,14 +202,14 @@ void app_process_action(void)
         if (plain_msg_size_select > MAX_MSG_SIZE_SELECTION) {
           plain_msg_size_select = 0;
         }
-        printf("  + Current data length is %u bytes.\n",
+        printf("  + Current data length is %" PRIu32 " bytes.\n",
                plain_msg_size[plain_msg_size_select]);
       }
       if (enter_press) {
         enter_press = false;
         set_plain_msg_len(plain_msg_size[plain_msg_size_select]);
         // Plain message hash for decryption check
-        printf("  + Generating a SHA256 hash value of %u bytes random "
+        printf("  + Generating a SHA256 hash value of %" PRIu32 " bytes random "
                "message... ", plain_msg_size[plain_msg_size_select]);
         app_state = PSA_CRYPTO_EXIT;
         if (compute_msg_hash() == PSA_SUCCESS) {
@@ -403,7 +404,7 @@ static void print_key_storage(void)
 static psa_status_t encrypt_aead_init(psa_algorithm_t algo)
 {
   memset(get_cipher_msg_buf_ptr(), 0, plain_msg_size[plain_msg_size_select]);
-  printf(" %u bytes random plaintext with %d bit key\n",
+  printf(" %" PRIu32 " bytes random plaintext with %d bit key\n",
          plain_msg_size[plain_msg_size_select],
          symmetric_key_size[symmetric_key_size_select]);
 
@@ -423,7 +424,7 @@ static psa_status_t encrypt_aead_init(psa_algorithm_t algo)
     // Free resources
     reset_key_attr();
   } else {
-    printf("Failed to create key: %d\n", ret);
+    printf("Failed to create key: %" PRId32 "\n", (int32_t)ret);
   }
 
   return ret;
@@ -472,7 +473,7 @@ static void decrypt_aead_init(void)
 {
   // Use the key in encryption for decryption
   memset(get_plain_msg_buf_ptr(), 0, plain_msg_size[plain_msg_size_select]);
-  printf(" %u bytes ciphertext with %d bit key\n",
+  printf(" %" PRIu32 " bytes ciphertext with %d bit key\n",
          plain_msg_size[plain_msg_size_select],
          symmetric_key_size[symmetric_key_size_select]);
 

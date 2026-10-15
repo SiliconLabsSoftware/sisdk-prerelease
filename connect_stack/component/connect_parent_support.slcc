@@ -1,9 +1,14 @@
 id: "connect_parent_support"
 label: "Parent Support"
 package: "connect_stack"
+description: "Provides parent functionalities such as indirect communication (communication with sleepy devices) and child table. It should be included for any coordinator or range extender node intended to support multiple end-device and/or sleepy end-device nodes."
 category: "Connect"
 quality: "production"
-description: "Provides parent functionalities such as indirect communication (communication with sleepy devices) and child table. It should be included for any coordinator or range extender node intended to support multiple end-device and/or sleepy end-device nodes."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: connect-stack-api/parent-support
 provides:
 - name: "connect_parent_support"
 requires:
@@ -18,10 +23,6 @@ config_file:
 template_contribution:
 - name: component_catalog
   value: connect_parent_support
-
-documentation:
-  docset: connect-stack
-  document: group-parent-support
 
 metadata:
   sbom:

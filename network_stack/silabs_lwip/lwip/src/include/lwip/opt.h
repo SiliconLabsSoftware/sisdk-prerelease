@@ -201,6 +201,18 @@
 #if !defined SL_LWIP_MLD6_ONDEMAND_TIMER || defined __DOXYGEN__
 #define SL_LWIP_MLD6_ONDEMAND_TIMER     SL_LWIP_ADAPTIVE_TIMERS
 #endif
+
+/**
+ * SL_LWIP_LINK_DOWN_CLEANUP: Per-module link-down cleanup + netif_stop_timers
+ * in netif.c. Each module cleanup also requires its timer macro:
+ * TCP → SL_LWIP_TCP_DYNAMIC_TIMER, DHCP → SL_LWIP_DHCP_ONDEMAND_TIMER,
+ * DNS → SL_LWIP_DNS_ONDEMAND_TIMER, ETHARP → SL_LWIP_ETHARP_ONDEMAND_TIMER,
+ * ND6 → SL_LWIP_ND6_DYNAMIC_TIMER, MLD6 → SL_LWIP_MLD6_ONDEMAND_TIMER.
+ * DHCP on-demand coarse timer uses LINK_DOWN_CLEANUP && DHCP_ONDEMAND_TIMER.
+ */
+#if !defined SL_LWIP_LINK_DOWN_CLEANUP || defined __DOXYGEN__
+#define SL_LWIP_LINK_DOWN_CLEANUP       SL_LWIP_ADAPTIVE_TIMERS
+#endif
 /**
  * @}
  */

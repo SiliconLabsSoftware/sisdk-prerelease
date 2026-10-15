@@ -1,16 +1,18 @@
 id: "connect_ota_unicast_bootloader_server"
 label: "OTA Unicast Bootloader Server"
 package: "connect_stack"
+description: "Implements the server side of the Connect OTA Unicast Bootloader protocol. The OTA Unicast Bootloader Server component should be used to distribute an image from the server to a target device (client) in a reliable unicast fashion and to instruct a target device to initiate a bootload."
 category: "Connect|OTA"
 quality: "production"
-description: "Implements the server side of the Connect OTA Unicast Bootloader protocol. The OTA Unicast Bootloader Server component should be used to distribute an image from the server to a target device (client) in a reliable unicast fashion and to instruct a target device to initiate a bootload."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: connect-stack-api/ota-unicast-bootloader-server
 provides:
 - name: "connect_ota_unicast_bootloader_server"
 requires:
 - name: "connect_stack_common"
-source:
-- path: "ota-unicast-bootloader/ota-unicast-bootloader-server/ota-unicast-bootloader-server.c"
-- path: "ota-unicast-bootloader/ota-unicast-bootloader-server/ota-unicast-bootloader-server-cb.c"
 include:
 - path: "ota-unicast-bootloader"
   file_list:
@@ -21,6 +23,9 @@ include:
   file_list:
   - path: "ota-unicast-bootloader-server.h"
   - path: "ota-unicast-bootloader-server-internal.h"
+source:
+- path: "ota-unicast-bootloader/ota-unicast-bootloader-server/ota-unicast-bootloader-server.c"
+- path: "ota-unicast-bootloader/ota-unicast-bootloader-server/ota-unicast-bootloader-server-cb.c"
 config_file:
 - path: "ota-unicast-bootloader/ota-unicast-bootloader-server/config/ota-unicast-bootloader-server-config.h"
 template_contribution:
@@ -38,10 +43,6 @@ template_contribution:
     event_handler: "emAfPluginOtaUnicastBootloaderServerEventHandler"
 - name: component_catalog
   value: connect_ota_unicast_bootloader_server
-
-documentation:
-  docset: connect-stack
-  document: group-ota-unicast-bootloader-server
 
 metadata:
   sbom:

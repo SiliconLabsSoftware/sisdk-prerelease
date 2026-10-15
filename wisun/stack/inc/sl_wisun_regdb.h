@@ -152,6 +152,19 @@ const sl_wisun_phy_params_t *ws_regdb_phy_params(uint8_t phy_mode_id, uint8_t op
 const sl_wisun_chan_params_t *ws_regdb_chan_params(uint8_t reg_domain, uint8_t chan_plan_id, uint8_t operating_class);
 
 /**************************************************************************//**
+ * Get channel parameters for an explicit channel plan
+ *
+ * @param[in] reg_domain Regulatory domain
+ * @param[in] chan0_freq_hz First channel center frequency (hertz)
+ * @param[in] chan_spacing_hz Separation between adjacent channels (hertz)
+ * @param[in] chan_count Total number of channels (before masking) (TotalNumChan)
+ * @return Pointer to the Channel Plan parameters, or NULL if not found
+ *
+ * Available in libraries: Full, FFN, LFN (see @ref API_AVAILABILITY)
+ */
+const sl_wisun_chan_params_t *ws_regdb_chan_params_explicit(uint8_t reg_domain, uint32_t chan0_freq_hz, uint32_t chan_spacing_hz, uint16_t chan_count);
+
+/**************************************************************************//**
  * Retrieve the ID as defined in Wi-SUN specification for the given channel spacing.
  *
  * @param[in] val Channel spacing in Hz

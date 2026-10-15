@@ -50,6 +50,7 @@
 #endif
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
+#include "sl_cpc_wake.h"
 #include "sl_gpio.h"
 #include "sli_cpc_wake.h"
 #endif
@@ -87,25 +88,42 @@ typedef struct sli_cpc_control {
 #endif
 } sli_cpc_control_t;
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
-/** @brief Per-bus CPC wake mode. */
-typedef enum {
-  SL_CPC_WAKE_MODE_DISABLED,
-  SL_CPC_WAKE_MODE_DEVICE,
-  SL_CPC_WAKE_MODE_HOST,
-} sl_cpc_wake_mode_t;
-#endif
-
 /** @brief Bus configuration. */
 typedef struct sl_cpc_bus_config {
   bool is_secondary;
   uint16_t rx_frame_pool_count;
   uint16_t tx_frame_pool_count;
-#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
-  sl_cpc_wake_mode_t wake_mode;
-  sl_gpio_t wake_pin;
+#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+  // local sleep configuration if used
+  sl_cpc_power_mode_t power_mode;
+  sl_gpio_t wake_in_pin;
+  sl_cpc_wake_in_response_t wake_in_response;
+#endif
+
+#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
+  // output wake pin configuration if used
+  sl_cpc_wake_out_mode_t wake_out_mode;
+  sl_gpio_t wake_out_pin;
 #endif
 } sl_cpc_bus_config_t;
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+/** @brief Kernel resources for one bus. */
+struct sl_cpc_bus_kernel {
+#if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
+  alignas(4) uint8_t transmit_queue_mutex_cb[osMutexCbSize];
+  alignas(4) uint8_t eps_list_mutex_cb[osMutexCbSize];
+  alignas(4) uint8_t event_signal_semaphore_cb[osSemaphoreCbSize];
+  alignas(4) uint8_t thread_cb[osThreadCbSize];
+  alignas(8) uint8_t thread_stack[(SL_CPC_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u];
+#endif
+
+  osMutexId_t ep_list_lock;        ///< endpoints list lock
+  osMutexId_t transmit_queue_lock; ///< transmit queue lock
+  osSemaphoreId_t event_signal;    ///< event signal
+  osThreadId_t thread_id;          ///< CPC thread
+};
+#endif
 
 /**
  * @brief CPC bus.
@@ -131,8 +149,7 @@ typedef struct sl_cpc_bus {
   sli_cpc_dispatcher_context_t dispatcher;
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
-  sl_cpc_wake_mode_t wake_mode;
-  union {
+  struct {
 #if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
     sli_cpc_wake_device_t device;
 #endif
@@ -143,18 +160,7 @@ typedef struct sl_cpc_bus {
 #endif
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
-#if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
-  alignas(4) uint8_t transmit_queue_mutex_cb[osMutexCbSize];
-  alignas(4) uint8_t eps_list_mutex_cb[osMutexCbSize];
-  alignas(4) uint8_t event_signal_semaphore_cb[osSemaphoreCbSize];
-  alignas(4) uint8_t thread_cb[osThreadCbSize];
-  alignas(8) uint8_t thread_stack[(SL_CPC_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u];
-#endif
-
-  osMutexId_t ep_list_lock;        ///< endpoints list lock
-  osMutexId_t transmit_queue_lock; ///< transmit queue lock
-  osSemaphoreId_t event_signal;    ///< event signal
-  osThreadId_t thread_id;          ///< CPC thread
+  struct sl_cpc_bus_kernel kernel;
 #else
   uint32_t rx_process_flag; ///< Pending RX process signals (bare-metal)
 #endif

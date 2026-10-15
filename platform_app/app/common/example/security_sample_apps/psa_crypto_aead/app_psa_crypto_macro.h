@@ -41,7 +41,7 @@
     if (ret == PSA_SUCCESS) {                                 \
       printf("PSA_SUCCESS");                                  \
     } else {                                                  \
-      printf("PSA_ERROR: %d", ret);                          \
+      printf("PSA_ERROR: %" PRId32, (int32_t)ret);            \
     }                                                         \
                                                               \
     if (cycles < (SystemHCLKGet() / 10)) {                    \
@@ -67,7 +67,7 @@
     if (ret == PSA_SUCCESS) {       \
       printf("OK\n");               \
     } else {                        \
-      printf("Failed: %d\n", ret); \
+      printf("Failed: %" PRId32 "\n", (int32_t)ret); \
     }                               \
     return ret;                     \
   } while (0)

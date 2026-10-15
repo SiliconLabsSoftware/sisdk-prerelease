@@ -11,6 +11,7 @@ component:
   - id: "wisun_stack"
   - id: "wisun_stack_lfn"
   - id: "wisun_stack_ffn"
+  - id: "wisun_lfn_parent"
   - id: "wisun_stack_debug"
   - id: "sl_main"
   - id: clock_manager

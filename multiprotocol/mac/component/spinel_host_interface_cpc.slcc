@@ -46,6 +46,8 @@ define:
 - name: "OPENTHREAD_POSIX_CONFIG_CONFIGURATION_FILE_ENABLE"
   value: 0
 
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/multiprotocol-solution-linux/system-architecture
 metadata:
   sbom:
     license: Zlib

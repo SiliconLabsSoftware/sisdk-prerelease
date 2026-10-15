@@ -72,7 +72,14 @@ extern "C" {
 #define MUTEX_INIT  = { 0 }
 
 /// Mbed TLS mutexes maps to SLI PSEC OSAL locks.
-typedef sli_psec_osal_lock_t mbedtls_threading_mutex_t;
+typedef sli_psec_osal_lock_t mbedtls_platform_mutex_t;
+//
+// TODO :
+// - create ticket to implement proper condition variable , mimim with osal completion object for now.
+//   ( create ticket is not possible since jira is currently down )
+// - In tf-psa-crypto-1.1.0 condition variable is not supported yet , hence this is neeeded yet.
+//
+typedef sli_psec_osal_completion_t mbedtls_platform_condition_variable_t;
 
 typedef struct mbedtls_test_thread_t {
   osThreadAttr_t thread_attr;
@@ -89,7 +96,7 @@ typedef struct mbedtls_test_thread_t {
  *
  * \param mutex    Pointer to the mutex
  */
-static inline void THREADING_SetRecursive(mbedtls_threading_mutex_t *mutex)
+static inline void THREADING_SetRecursive(mbedtls_platform_mutex_t *mutex)
 {
   sl_status_t sl_status = sli_psec_osal_set_recursive_lock((sli_psec_osal_lock_t*)mutex);
   EFM_ASSERT(sl_status == SL_STATUS_OK);
@@ -100,10 +107,10 @@ static inline void THREADING_SetRecursive(mbedtls_threading_mutex_t *mutex)
  *
  * \param mutex    Pointer to the mutex needing initialization
  */
-static inline void THREADING_InitMutex(mbedtls_threading_mutex_t *mutex)
+static inline int THREADING_InitMutex(mbedtls_platform_mutex_t *mutex)
 {
   sl_status_t sl_status = sli_psec_osal_init_lock(mutex);
-  EFM_ASSERT(sl_status == SL_STATUS_OK);
+  return (sl_status == SL_STATUS_OK ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
 }
 
 /**
@@ -111,7 +118,7 @@ static inline void THREADING_InitMutex(mbedtls_threading_mutex_t *mutex)
  *
  * \param mutex    Pointer to the mutex being freed
  */
-static inline void THREADING_FreeMutex(mbedtls_threading_mutex_t *mutex)
+static inline void THREADING_FreeMutex(mbedtls_platform_mutex_t *mutex)
 {
   sl_status_t sl_status = sli_psec_osal_free_lock(mutex);
   EFM_ASSERT(sl_status == SL_STATUS_OK);
@@ -124,10 +131,10 @@ static inline void THREADING_FreeMutex(mbedtls_threading_mutex_t *mutex)
  *
  * \return         RTOS_ERR_NONE on success, error code otherwise.
  */
-static inline int THREADING_TakeMutexBlocking(mbedtls_threading_mutex_t *mutex)
+static inline int THREADING_TakeMutexBlocking(mbedtls_platform_mutex_t *mutex)
 {
   if (mutex == NULL) {
-    return MBEDTLS_ERR_THREADING_BAD_INPUT_DATA;
+    return MBEDTLS_ERR_THREADING_USAGE_ERROR;
   }
   sl_status_t sl_status = sli_psec_osal_take_lock(mutex);
   return (sl_status == SL_STATUS_OK ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
@@ -140,10 +147,10 @@ static inline int THREADING_TakeMutexBlocking(mbedtls_threading_mutex_t *mutex)
  *
  * \return         RTOS_ERR_NONE on success (= mutex successfully owned), error code otherwise.
  */
-static inline int THREADING_TakeMutexNonBlocking(mbedtls_threading_mutex_t *mutex)
+static inline int THREADING_TakeMutexNonBlocking(mbedtls_platform_mutex_t *mutex)
 {
   if (mutex == NULL) {
-    return MBEDTLS_ERR_THREADING_BAD_INPUT_DATA;
+    return MBEDTLS_ERR_THREADING_USAGE_ERROR;
   }
   sl_status_t sl_status = sli_psec_osal_take_lock_non_blocking(mutex);
   return (sl_status == SL_STATUS_OK ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
@@ -156,12 +163,76 @@ static inline int THREADING_TakeMutexNonBlocking(mbedtls_threading_mutex_t *mute
  *
  * \return         RTOS_ERR_NONE on success, error code otherwise.
  */
-static inline int THREADING_GiveMutex(mbedtls_threading_mutex_t *mutex)
+static inline int THREADING_GiveMutex(mbedtls_platform_mutex_t *mutex)
 {
   if (mutex == NULL) {
-    return MBEDTLS_ERR_THREADING_BAD_INPUT_DATA;
+    return MBEDTLS_ERR_THREADING_USAGE_ERROR;
   }
   sl_status_t sl_status = sli_psec_osal_give_lock(mutex);
+  return (sl_status == SL_STATUS_OK ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+}
+
+//
+// TODO :
+// - create ticket to implement proper condition variable , mimim with osal completion object for now.
+//   ( create ticket is not possible since jira is currently down )
+// - In tf-psa-crypto-1.1.0 condition variable is not supported yet , hence this is neeeded yet.
+//
+
+/**
+ * \brief          Initialize a condition variable
+ *
+ * \param cond    Pointer to the condition variable needing initialization
+ */
+ static inline int THREADING_InitConditionVariable(mbedtls_platform_condition_variable_t *cond)
+ {
+   sl_status_t sl_status = sli_psec_osal_init_completion(cond);
+   return (sl_status == SL_STATUS_OK ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+ }
+
+ /**
+  * \brief          Free a given condition variable
+  *
+  * \param cond    Pointer to the condition variable being freed
+  */
+ static inline void THREADING_FreeConditionVariable(mbedtls_platform_condition_variable_t *cond)
+ {
+   sl_status_t sl_status = sli_psec_osal_free_completion(cond);
+   EFM_ASSERT(sl_status == SL_STATUS_OK);
+ }
+
+ /**
+  * \brief          Signal a condition variable
+  *
+  * \param cond    Pointer to the condition variable being signaled
+  */
+ static inline int THREADING_SignalConditionVariable(mbedtls_platform_condition_variable_t *cond)
+ {
+   sl_status_t sl_status = sli_psec_osal_complete(cond);
+   return (sl_status == SL_STATUS_OK ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+ }
+
+ /**
+  * \brief          Broadcast a condition variable
+  *
+  * \param cond    Pointer to the condition variable being broadcasted
+  */
+ static inline int THREADING_BroadcastConditionVariable(mbedtls_platform_condition_variable_t *cond)
+ {
+   sl_status_t sl_status = sli_psec_osal_complete(cond);
+   return (sl_status == SL_STATUS_OK ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+ }
+/**
+ * \brief          Wait for a condition variable
+ *
+ * \param cond    Pointer to the condition variable being waited on
+ * \param mutex    Pointer to the mutex being waited on
+ */
+static inline int THREADING_WaitConditionVariable(mbedtls_platform_condition_variable_t *cond,     mbedtls_platform_mutex_t *mutex)
+{
+  sl_status_t sl_status = sli_psec_osal_wait_completion(cond, SLI_PSEC_OSAL_WAIT_FOREVER);
+  if (sl_status != SL_STATUS_OK ) return MBEDTLS_ERR_THREADING_MUTEX_ERROR;
+  sl_status = sli_psec_osal_give_lock(mutex);
   return (sl_status == SL_STATUS_OK ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
 }
 
@@ -178,7 +249,7 @@ static inline int THREADING_ThreadCreate(mbedtls_test_thread_t *thread,
                                          void *thread_data)
 {
   if (thread == NULL || thread_func == NULL) {
-    return MBEDTLS_ERR_THREADING_BAD_INPUT_DATA;
+    return MBEDTLS_ERR_THREADING_USAGE_ERROR;
   }
 
   thread->thread_ID = osThreadNew(thread_func, thread_data, &thread->thread_attr);
@@ -197,7 +268,7 @@ static inline int THREADING_ThreadCreate(mbedtls_test_thread_t *thread,
 static inline int THREADING_ThreadJoin(mbedtls_test_thread_t *thread)
 {
   if (thread == NULL) {
-    return MBEDTLS_ERR_THREADING_BAD_INPUT_DATA;
+    return MBEDTLS_ERR_THREADING_USAGE_ERROR;
   }
 
   if (osThreadJoin(thread->thread_ID) != 0) {
@@ -218,17 +289,24 @@ extern "C" {
 #endif
 
 /* Forward declaration of threading_set_alt */
-void mbedtls_threading_set_alt(void (*mutex_init)(mbedtls_threading_mutex_t *),
-                               void (*mutex_free)(mbedtls_threading_mutex_t *),
-                               int (*mutex_lock)(mbedtls_threading_mutex_t *),
-                               int (*mutex_unlock)(mbedtls_threading_mutex_t *) );
+void mbedtls_threading_set_alt(
+                                int (*mutex_init)(mbedtls_platform_mutex_t *),
+                                void (*mutex_destroy)(mbedtls_platform_mutex_t *),
+                                int (*mutex_lock)(mbedtls_platform_mutex_t *),
+                                int (*mutex_unlock)(mbedtls_platform_mutex_t *),
+                                int (*cond_init)(mbedtls_platform_condition_variable_t *),
+                                void (*cond_destroy)(mbedtls_platform_condition_variable_t *),
+                                int (*cond_signal)(mbedtls_platform_condition_variable_t *),
+                                int (*cond_broadcast)(mbedtls_platform_condition_variable_t *),
+                                int (*cond_wait)(mbedtls_platform_condition_variable_t *,
+                                                 mbedtls_platform_mutex_t *));
 
 /* Forward declaration of test_thread_set_alt */
 void mbedtls_test_thread_set_alt(int (*thread_create)(mbedtls_test_thread_t *thread,
-                                                      void (*thread_func)(
-                                                        void *),
-                                                      void *thread_data),
-                                 int (*thread_join)(mbedtls_test_thread_t *thread));
+                                  void *(*thread_func)(
+                                      void *),
+                                  void *thread_data),
+             int (*thread_join)(mbedtls_test_thread_t *thread));
 
 /**
  * \brief          Helper function for setting up the mbed TLS threading subsystem
@@ -238,12 +316,18 @@ static inline void THREADING_setup(void)
   mbedtls_threading_set_alt(&THREADING_InitMutex,
                             &THREADING_FreeMutex,
                             &THREADING_TakeMutexBlocking,
-                            &THREADING_GiveMutex);
+                            &THREADING_GiveMutex,
+                            &THREADING_InitConditionVariable,
+                            &THREADING_FreeConditionVariable,
+                            &THREADING_SignalConditionVariable,
+                            &THREADING_BroadcastConditionVariable,
+                            &THREADING_WaitConditionVariable
+                          );
 }
 
 static inline void THREAD_test_setup(void)
 {
-  mbedtls_test_thread_set_alt(&THREADING_ThreadCreate,
+  mbedtls_test_thread_set_alt((int (*)(mbedtls_test_thread_t *,void *(*)(void *), void *))&THREADING_ThreadCreate,
                               &THREADING_ThreadJoin);
 }
 #ifdef __cplusplus

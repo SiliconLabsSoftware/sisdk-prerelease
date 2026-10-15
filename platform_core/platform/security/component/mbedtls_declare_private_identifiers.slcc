@@ -1,0 +1,30 @@
+id: mbedtls_declare_private_identifiers
+package: platform_core
+label: Mbed TLS Declare Private Identifiers
+description: >-
+  This component enables the declarations of private legacy Mbed TLS primitives
+  which will allow the user to call the private software implementations of the
+  crypto algorithms that are "builtin" to TF-PSA-Crypto.
+  NOTE:
+  The private builtin crypto implemenattions are "software ONLY" and do not
+  make use of the hardware acceleration incorporated in the Silicon Labs
+  devices. The ALT plugins in Mbed TLS 3.6 (and earlier versions) that replaced
+  the software implementations with hardware acceleration support are obsoleted
+  and removed from Mbed TLS 4 and TF-PSA-Crypto. Hardware acceleration is only
+  supported by the PSA drivers, called be the PSA Crypto API.
+  Existing use cases of legacy mbedtls crypto APIs are recommended to consider
+  migrating to use PSA Crypto APIs.
+
+category: Platform|Security|PSA Crypto
+quality: production
+provides:
+- name: mbedtls_declare_private_identifiers
+requires:
+- name: psa_crypto_config
+template_contribution:
+- name: psa_crypto_builtin_config
+  value: MBEDTLS_DECLARE_PRIVATE_IDENTIFIERS
+metadata:
+  sbom:
+    reference: mbedtls_sbom
+root_path: platform_core

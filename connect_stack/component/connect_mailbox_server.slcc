@@ -1,16 +1,18 @@
 id: "connect_mailbox_server"
 label: "Mailbox Server"
 package: "connect_stack"
+description: "Implements the server side of the Connect mailbox protocol. It stores messages from mailbox client(s) and delivers them upon the destination node checks in. When a message expires it is removed from the queue. In both cases, delivery status is reported back to the mailbox client(s)."
 category: "Connect|Mailbox"
 quality: "production"
-description: "Implements the server side of the Connect mailbox protocol. It stores messages from mailbox client(s) and delivers them upon the destination node checks in. When a message expires it is removed from the queue. In both cases, delivery status is reported back to the mailbox client(s)."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: connect-stack-api/mailbox-server
 provides:
 - name: "connect_mailbox_server"
 requires:
 - name: "connect_stack_common"
-source:
-- path: "mailbox/mailbox-server/mailbox-server.c"
-- path: "mailbox/mailbox-server/mailbox-server-cb.c"
 include:
 - path: "mailbox"
   file_list:
@@ -19,6 +21,9 @@ include:
 - path: "mailbox/mailbox-server"
   file_list:
   - path: "mailbox-server.h"
+source:
+- path: "mailbox/mailbox-server/mailbox-server.c"
+- path: "mailbox/mailbox-server/mailbox-server-cb.c"
 config_file:
 - path: "mailbox/mailbox-server/config/mailbox-server-config.h"
 template_contribution:
@@ -48,10 +53,6 @@ template_contribution:
     event_handler: "emAfPluginMailboxServerEventHandler"
 - name: component_catalog
   value: connect_mailbox_server
-
-documentation:
-  docset: connect-stack
-  document: group-mailbox-server
 
 metadata:
   sbom:

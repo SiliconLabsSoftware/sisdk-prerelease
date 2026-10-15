@@ -28,8 +28,6 @@ requires:
   condition: [trustzone_secure]
 - name: mbedtls_ecc
   condition: [trustzone_secure]
-- name: mbedtls_ecdh
-  condition: [trustzone_secure]
 - name: mbedtls_ecdsa
   condition: [trustzone_secure]
 - name: mbedtls_entropy_hardware
@@ -37,8 +35,6 @@ requires:
 - name: mbedtls_gcm
   condition: [trustzone_secure]
 - name: mbedtls_hash
-  condition: [trustzone_secure]
-- name: mbedtls_hkdf
   condition: [trustzone_secure]
 - name: mbedtls_jpake
   condition: [trustzone_secure]

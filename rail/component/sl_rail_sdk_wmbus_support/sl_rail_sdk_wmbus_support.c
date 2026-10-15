@@ -36,7 +36,8 @@
 #include "em_cmu.h"
 #include "sl_common.h"
 
-#include "mbedtls/aes.h"
+#include "sl_rail_sdk_wmbus_crypto_shim.h"
+#include <stdbool.h>
 
 //(1B length field + 255B payload + 17block * 2B CRC) * 3/2 3of6 ratio + 1B postamble
 //if you need software Manchester, you should change it to (1+255+17*2)*2+1
@@ -50,9 +51,73 @@
 //stores the current mbus Mode. Currently only used for modeT TX.
 static sl_rail_sdk_wmbus_mode_t wmbusMode;
 
-//tools for encryption
-static mbedtls_aes_context aes_ctx;
-SL_ALIGN(4) static uint8_t aesKey[16] SL_ATTRIBUTE_ALIGN(4); //the aes key should be stored 32-bit aligned for mbedTls
+// Maximum AES-CBC payload length used by mode 5 (16-byte blocks, up to 256 bytes)
+#define WMBUS_AES_CBC_MAX_LENGTH 256
+
+SL_ALIGN(4) static uint8_t aesKey[16] SL_ATTRIBUTE_ALIGN(4);
+
+static psa_status_t wmbus_import_aes_key(psa_key_id_t *key_id)
+{
+  psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+
+  psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
+  psa_set_key_algorithm(&attributes, PSA_ALG_CBC_NO_PADDING);
+  psa_set_key_type(&attributes, PSA_KEY_TYPE_AES);
+  psa_set_key_bits(&attributes, 128);
+
+  return psa_import_key(&attributes, aesKey, sizeof(aesKey), key_id);
+}
+
+static psa_status_t wmbus_psa_cbc_crypt(bool encrypt,
+                                        psa_key_id_t key_id,
+                                        const uint8_t *iv,
+                                        const uint8_t *input,
+                                        size_t input_length,
+                                        uint8_t *output,
+                                        size_t output_size,
+                                        size_t *output_length)
+{
+  psa_cipher_operation_t operation = PSA_CIPHER_OPERATION_INIT;
+  psa_status_t status;
+
+  if (encrypt) {
+    status = psa_cipher_encrypt_setup(&operation, key_id, PSA_ALG_CBC_NO_PADDING);
+  } else {
+    status = psa_cipher_decrypt_setup(&operation, key_id, PSA_ALG_CBC_NO_PADDING);
+  }
+
+  if (status == PSA_SUCCESS) {
+    status = psa_cipher_set_iv(&operation, iv, 16);
+  }
+
+  size_t update_length = 0;
+  if (status == PSA_SUCCESS) {
+    status = psa_cipher_update(&operation,
+                               input,
+                               input_length,
+                               output,
+                               output_size,
+                               &update_length);
+  }
+
+  size_t finish_length = 0;
+  if (status == PSA_SUCCESS) {
+    status = psa_cipher_finish(&operation,
+                               output + update_length,
+                               output_size - update_length,
+                               &finish_length);
+  }
+
+  if (status != PSA_SUCCESS) {
+    (void)psa_cipher_abort(&operation);
+  }
+
+  if ((status == PSA_SUCCESS) && (output_length != NULL)) {
+    *output_length = update_length + finish_length;
+  }
+
+  return status;
+}
 
 /// Constant for accessibility setting used in the app
 static sl_rail_sdk_wmbus_accessibility_t wmbus_accessibility = SL_RAIL_SDK_WMBUS_ACCESSIBILITY;
@@ -233,7 +298,7 @@ uint16_t sl_rail_sdk_wmbus_frame_add_idle_filler(uint8_t *buffer, uint16_t fille
 
 void sl_rail_sdk_wmbus_frame_crypto5_init(void)
 {
-  mbedtls_aes_init(&aes_ctx);
+  sl_psa_crypto_init();
 }
 
 void sl_rail_sdk_wmbus_frame_crypto5_set_key(const uint8_t *newKey)
@@ -256,8 +321,6 @@ uint8_t sl_rail_sdk_wmbus_frame_crypto5_encrypt(uint8_t *input,
     return 0;
   }
 
-  mbedtls_aes_setkey_enc(&aes_ctx, aesKey, 128);
-
   if (encryptedBlocks == 0) {
     encryptedBlocks = (uint8_t)(length / 16);
     if (length % 16) {
@@ -270,7 +333,38 @@ uint8_t sl_rail_sdk_wmbus_frame_crypto5_encrypt(uint8_t *input,
     sl_rail_sdk_wmbus_frame_add_idle_filler(input + length, (uint16_t)encryptedBlocks * 16 - length);
   }
 
-  mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_ENCRYPT, (uint16_t)encryptedBlocks * 16, iv, input, output);
+  uint16_t cipher_length = (uint16_t)encryptedBlocks * 16;
+  if (cipher_length > WMBUS_AES_CBC_MAX_LENGTH) {
+    return 0;
+  }
+
+  psa_key_id_t key_id;
+  psa_status_t status = wmbus_import_aes_key(&key_id);
+
+  if (status == PSA_SUCCESS) {
+    const uint8_t *plaintext = input;
+    uint8_t plaintext_copy[WMBUS_AES_CBC_MAX_LENGTH];
+
+    if (input == output) {
+      memcpy(plaintext_copy, input, cipher_length);
+      plaintext = plaintext_copy;
+    }
+
+    size_t output_length = 0;
+    status = wmbus_psa_cbc_crypt(true,
+                                 key_id,
+                                 iv,
+                                 plaintext,
+                                 cipher_length,
+                                 output,
+                                 cipher_length,
+                                 &output_length);
+    psa_destroy_key(key_id);
+  }
+
+  if (status != PSA_SUCCESS) {
+    return 0;
+  }
 
   return encryptedBlocks;
 }
@@ -284,6 +378,31 @@ void sl_rail_sdk_wmbus_frame_crypto5_decrypt(uint8_t *input,
     return;
   }
 
-  mbedtls_aes_setkey_dec(&aes_ctx, aesKey, 128);
-  mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_DECRYPT, length, iv, input, output);
+  if (length > WMBUS_AES_CBC_MAX_LENGTH) {
+    return;
+  }
+
+  psa_key_id_t key_id;
+  psa_status_t status = wmbus_import_aes_key(&key_id);
+
+  if (status == PSA_SUCCESS) {
+    const uint8_t *ciphertext = input;
+    uint8_t ciphertext_copy[WMBUS_AES_CBC_MAX_LENGTH];
+
+    if (input == output && length > 0) {
+      memcpy(ciphertext_copy, input, length);
+      ciphertext = ciphertext_copy;
+    }
+
+    size_t output_length = 0;
+    status = wmbus_psa_cbc_crypt(false,
+                                 key_id,
+                                 iv,
+                                 ciphertext,
+                                 length,
+                                 output,
+                                 length,
+                                 &output_length);
+    psa_destroy_key(key_id);
+  }
 }

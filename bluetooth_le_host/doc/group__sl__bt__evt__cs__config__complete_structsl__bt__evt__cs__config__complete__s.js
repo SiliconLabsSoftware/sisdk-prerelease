@@ -18,7 +18,7 @@ var group__sl__bt__evt__cs__config__complete_structsl__bt__evt__cs__config__comp
     [ "channel_selection_type", "group__sl__bt__evt__cs__config__complete.html#a28c25227e048ce9ad638a9b45571c38b", null ],
     [ "ch3c_shape", "group__sl__bt__evt__cs__config__complete.html#af0a43e94c534b39cb31bc03542073311", null ],
     [ "ch3c_jump", "group__sl__bt__evt__cs__config__complete.html#a39abf6bc849e29c14ff444f175740ad2", null ],
-    [ "reserved", "group__sl__bt__evt__cs__config__complete.html#a414493fd436b863c737c67d20e7701b2", null ],
+    [ "cs_enhancements", "group__sl__bt__evt__cs__config__complete.html#a7f14d0a39f348178974a619bf1d71637", null ],
     [ "t_ip1_time", "group__sl__bt__evt__cs__config__complete.html#a08368feec576ebf7d4d7b2a59f5e8faf", null ],
     [ "t_ip2_time", "group__sl__bt__evt__cs__config__complete.html#a112ebb35bf97364875faeedf17a377d3", null ],
     [ "t_fcs_time", "group__sl__bt__evt__cs__config__complete.html#acd04c7e8fdcecf00dfe627a18e387a74", null ],

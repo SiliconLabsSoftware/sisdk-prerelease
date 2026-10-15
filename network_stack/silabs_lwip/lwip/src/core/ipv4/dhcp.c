@@ -264,6 +264,9 @@ void dhcp_fine_timer_handler(void *arg);
 static void dhcp_fine_timer_handler(void *arg);
 #endif
 #endif /* SL_LWIP_DHCP_ONDEMAND_TIMER */
+#if SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DHCP_ONDEMAND_TIMER
+static u8_t sli_dhcp_coarse_timer_active;
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DHCP_ONDEMAND_TIMER */
 
 /* build outgoing messages */
 /* create a DHCP message, fill in common headers */
@@ -523,6 +526,9 @@ dhcp_select(struct netif *netif)
 /**
  * The DHCP timer that checks for lease renewal/rebind timeouts.
  * Must be called once a minute (see @ref DHCP_COARSE_TIMER_SECS).
+ *
+ * With SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DHCP_ONDEMAND_TIMER, call via
+ * dhcp_coarse_timeout_cb so the next minute is armed after each fire.
  */
 void
 dhcp_coarse_tmr(void)
@@ -678,6 +684,75 @@ dhcp_fine_timer_handler(void *arg)
   }
 }
 #endif /* SL_LWIP_DHCP_ONDEMAND_TIMER */
+
+#if SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DHCP_ONDEMAND_TIMER
+/**
+ * Timer callback: run coarse lease work, then arm the next minute while active.
+ *
+ * @param arg unused
+ */
+void
+dhcp_coarse_timeout_cb(void *arg)
+{
+  LWIP_UNUSED_ARG(arg);
+
+  dhcp_coarse_tmr();
+
+  if (sli_dhcp_coarse_timer_active) {
+    sys_timeout(DHCP_COARSE_TIMER_MSECS, dhcp_coarse_timeout_cb, NULL);
+  }
+}
+
+/** Start global coarse timer. Idempotent. Started from dhcp_start(). */
+void
+sli_dhcp_coarse_timer_start(void)
+{
+  if (!sli_dhcp_coarse_timer_active) {
+    sli_dhcp_coarse_timer_active = 1;
+    sys_timeout(DHCP_COARSE_TIMER_MSECS, dhcp_coarse_timeout_cb, NULL);
+    LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_STATE, ("DHCP: Coarse timer STARTED\n"));
+  }
+}
+
+/** Stop global coarse timer (last link-down). */
+void
+sli_dhcp_coarse_timer_stop(void)
+{
+  if (sli_dhcp_coarse_timer_active) {
+    sli_dhcp_coarse_timer_active = 0;
+    sys_untimeout(dhcp_coarse_timeout_cb, NULL);
+    LWIP_DEBUGF(DHCP_DEBUG | LWIP_DBG_STATE, ("DHCP: Coarse timer STOPPED\n"));
+  }
+}
+
+#if LWIP_TESTMODE
+int
+sli_dhcp_coarse_timer_is_active(void)
+{
+  return sli_dhcp_coarse_timer_active;
+}
+#endif /* LWIP_TESTMODE */
+
+/**
+ * Link-down: dhcp_release_and_stop then dhcp_cleanup to free the client.
+ * Both already no-op when there is no client. Stop coarse on last link.
+ * App must call dhcp_start() again after link-up (link-up alone does not restart DHCP).
+ */
+void
+sli_dhcp_cleanup_on_link_down(struct netif *netif)
+{
+  LWIP_ASSERT_CORE_LOCKED();
+  LWIP_ERROR("sli_dhcp_cleanup_on_link_down: invalid netif", netif != NULL, return);
+
+  dhcp_release_and_stop(netif);
+  dhcp_cleanup(netif);
+
+  /* Last-link stop even if this netif has no DHCP client (e.g. static Ethernet). */
+  if (!sli_netif_other_netif_is_up_link_up(netif)) {
+    sli_dhcp_coarse_timer_stop();
+  }
+}
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DHCP_ONDEMAND_TIMER */
 
 /**
  * A DHCP negotiation transaction, or ARP request, has timed out.
@@ -981,6 +1056,11 @@ dhcp_start(struct netif *netif)
   }
   dhcp->pcb_allocated = 1;
 
+#if SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DHCP_ONDEMAND_TIMER
+  /* Global coarse (T1/T2) starts with a DHCP client, not bare link-up. */
+  sli_dhcp_coarse_timer_start();
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DHCP_ONDEMAND_TIMER */
+
   if (!netif_is_link_up(netif)) {
     /* set state INIT and wait for dhcp_network_changed() to call dhcp_discover() */
     dhcp_set_state(dhcp, DHCP_STATE_INIT);
@@ -1054,6 +1134,7 @@ dhcp_inform(struct netif *netif)
 void
 dhcp_network_changed_link_up(struct netif *netif)
 {
+  
   struct dhcp *dhcp = netif_dhcp_data(netif);
 
   if (!dhcp) {

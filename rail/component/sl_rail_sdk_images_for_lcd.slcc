@@ -7,6 +7,8 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: never
 root_path: "rail/component/sl_rail_sdk_images_for_lcd"
 include:
 - path: "."
@@ -21,6 +23,3 @@ template_contribution:
 #---------------- Component Catalog ------------------
 - name: component_catalog
   value: rail_sdk_images_for_lcd
-#-------- Hides Component for user in Studio ---------
-ui_hints:
-  visibility: never

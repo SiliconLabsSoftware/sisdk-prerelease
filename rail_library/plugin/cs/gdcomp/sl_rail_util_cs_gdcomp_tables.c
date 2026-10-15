@@ -34,51 +34,135 @@
 #if SL_RAIL_BLE_SUPPORTS_CS
 #include "sl_rail_util_cs_gdcomp_config.h"
 
-// 0dBm PA LUTs
+// Backward-compatibility shim for chips whose config header still provides a
+// single RTT slope/offset table per PA (i.e. no per-PHY _1M/_2M variants). In
+// that case the same table is used for both the BLE 1M and BLE 2M PHYs. Chips
+// that provide per-PHY tables (e.g. efr32xg2b) define the _1M/_2M macros and
+// this shim is skipped.
+#ifndef SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_0DBM_PA_1M
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_0DBM_PA_1M   SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_0DBM_PA
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_0DBM_PA_2M   SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_0DBM_PA
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_0DBM_PA_1M  SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_0DBM_PA
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_0DBM_PA_2M  SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_0DBM_PA
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_10DBM_PA_1M  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_10DBM_PA
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_10DBM_PA_2M  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_10DBM_PA
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_10DBM_PA_1M SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_10DBM_PA
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_10DBM_PA_2M SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_10DBM_PA
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_20DBM_PA_1M  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_20DBM_PA
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_20DBM_PA_2M  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_20DBM_PA
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_20DBM_PA_1M SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_20DBM_PA
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_20DBM_PA_2M SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_20DBM_PA
+#endif // SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_0DBM_PA_1M
+
+// 0dBm PA LUTs. The PBR phase table is shared across PHYs; the RTT slope and
+// offset tables are provided per PHY (BLE 1M and BLE 2M).
 static const int16_t gdcompPbrPhaseLsb0Dbm[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
   SL_RAIL_UTIL_CS_GDCOMP_PBR_0DBM_PA;
-static const int16_t gdcompRttSlope0Dbm[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
-  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_0DBM_PA;
-static const int16_t gdcompRttOffset0Dbm[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
-  SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_0DBM_PA;
+static const int16_t gdcompRttSlope0Dbm1m[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
+  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_0DBM_PA_1M;
+static const int16_t gdcompRttSlope0Dbm2m[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
+  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_0DBM_PA_2M;
+static const int16_t gdcompRttOffset0Dbm1m[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
+  SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_0DBM_PA_1M;
+static const int16_t gdcompRttOffset0Dbm2m[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
+  SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_0DBM_PA_2M;
 
+SLI_LIBRAIL_WEAK
+const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_0_dbm_tables_1m = {
+  .p_pbr_phase_lsb = gdcompPbrPhaseLsb0Dbm,
+  .p_rtt_slope = gdcompRttSlope0Dbm1m,
+  .p_rtt_offset = gdcompRttOffset0Dbm1m,
+  .table_length_halfwords = SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH,
+};
+
+SLI_LIBRAIL_WEAK
+const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_0_dbm_tables_2m = {
+  .p_pbr_phase_lsb = gdcompPbrPhaseLsb0Dbm,
+  .p_rtt_slope = gdcompRttSlope0Dbm2m,
+  .p_rtt_offset = gdcompRttOffset0Dbm2m,
+  .table_length_halfwords = SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH,
+};
+
+// Legacy single-PHY symbol retained for backward compatibility (BLE 1M).
 SLI_LIBRAIL_WEAK
 const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_0_dbm_tables = {
   .p_pbr_phase_lsb = gdcompPbrPhaseLsb0Dbm,
-  .p_rtt_slope = gdcompRttSlope0Dbm,
-  .p_rtt_offset = gdcompRttOffset0Dbm,
+  .p_rtt_slope = gdcompRttSlope0Dbm1m,
+  .p_rtt_offset = gdcompRttOffset0Dbm1m,
   .table_length_halfwords = SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH,
 };
 
 // 10dBm PA LUTs
 static const int16_t gdcompPbrPhaseLsb10Dbm[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
   SL_RAIL_UTIL_CS_GDCOMP_PBR_10DBM_PA;
-static const int16_t gdcompRttSlope10Dbm[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
-  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_10DBM_PA;
-static const int16_t gdcompRttOffset10Dbm[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
-  SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_10DBM_PA;
+static const int16_t gdcompRttSlope10Dbm1m[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
+  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_10DBM_PA_1M;
+static const int16_t gdcompRttSlope10Dbm2m[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
+  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_10DBM_PA_2M;
+static const int16_t gdcompRttOffset10Dbm1m[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
+  SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_10DBM_PA_1M;
+static const int16_t gdcompRttOffset10Dbm2m[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
+  SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_10DBM_PA_2M;
 
+SLI_LIBRAIL_WEAK
+const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_10_dbm_tables_1m = {
+  .p_pbr_phase_lsb = gdcompPbrPhaseLsb10Dbm,
+  .p_rtt_slope = gdcompRttSlope10Dbm1m,
+  .p_rtt_offset = gdcompRttOffset10Dbm1m,
+  .table_length_halfwords = SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH,
+};
+
+SLI_LIBRAIL_WEAK
+const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_10_dbm_tables_2m = {
+  .p_pbr_phase_lsb = gdcompPbrPhaseLsb10Dbm,
+  .p_rtt_slope = gdcompRttSlope10Dbm2m,
+  .p_rtt_offset = gdcompRttOffset10Dbm2m,
+  .table_length_halfwords = SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH,
+};
+
+// Legacy single-PHY symbol retained for backward compatibility (BLE 1M).
 SLI_LIBRAIL_WEAK
 const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_10_dbm_tables = {
   .p_pbr_phase_lsb = gdcompPbrPhaseLsb10Dbm,
-  .p_rtt_slope = gdcompRttSlope10Dbm,
-  .p_rtt_offset = gdcompRttOffset10Dbm,
+  .p_rtt_slope = gdcompRttSlope10Dbm1m,
+  .p_rtt_offset = gdcompRttOffset10Dbm1m,
   .table_length_halfwords = SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH,
 };
 
 // 20dBm PA LUTs
 static const int16_t gdcompPbrPhaseLsb20Dbm[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
   SL_RAIL_UTIL_CS_GDCOMP_PBR_20DBM_PA;
-static const int16_t gdcompRttSlope20Dbm[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
-  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_20DBM_PA;
-static const int16_t gdcompRttOffset20Dbm[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
-  SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_20DBM_PA;
+static const int16_t gdcompRttSlope20Dbm1m[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
+  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_20DBM_PA_1M;
+static const int16_t gdcompRttSlope20Dbm2m[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
+  SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_20DBM_PA_2M;
+static const int16_t gdcompRttOffset20Dbm1m[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
+  SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_20DBM_PA_1M;
+static const int16_t gdcompRttOffset20Dbm2m[SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH] =
+  SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_20DBM_PA_2M;
 
+SLI_LIBRAIL_WEAK
+const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_20_dbm_tables_1m = {
+  .p_pbr_phase_lsb = gdcompPbrPhaseLsb20Dbm,
+  .p_rtt_slope = gdcompRttSlope20Dbm1m,
+  .p_rtt_offset = gdcompRttOffset20Dbm1m,
+  .table_length_halfwords = SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH,
+};
+
+SLI_LIBRAIL_WEAK
+const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_20_dbm_tables_2m = {
+  .p_pbr_phase_lsb = gdcompPbrPhaseLsb20Dbm,
+  .p_rtt_slope = gdcompRttSlope20Dbm2m,
+  .p_rtt_offset = gdcompRttOffset20Dbm2m,
+  .table_length_halfwords = SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH,
+};
+
+// Legacy single-PHY symbol retained for backward compatibility (BLE 1M).
 SLI_LIBRAIL_WEAK
 const sl_rail_ble_cs_gd_comp_tables_t sl_rail_ble_cs_gd_comp_20_dbm_tables = {
   .p_pbr_phase_lsb = gdcompPbrPhaseLsb20Dbm,
-  .p_rtt_slope = gdcompRttSlope20Dbm,
-  .p_rtt_offset = gdcompRttOffset20Dbm,
+  .p_rtt_slope = gdcompRttSlope20Dbm1m,
+  .p_rtt_offset = gdcompRttOffset20Dbm1m,
   .table_length_halfwords = SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH,
 };
 

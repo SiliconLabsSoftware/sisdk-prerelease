@@ -31,6 +31,21 @@ extern "C" {
  */
 
 /**
+ * @brief Product id struct.
+ *
+ * @deprecated Use `zw_version_product_id_t` from `ZW_product_infos.h`.
+ */
+typedef struct {
+  uint16_t app_manufacturer_id;
+  uint16_t app_product_id;
+  uint16_t app_product_type;
+  uint16_t app_icon_type;
+  uint8_t generic_type;
+  uint8_t specyfic_type;
+  uint8_t requested_security_key;
+} zpal_product_id_t;
+
+/**
  * @brief Defines for identifying the secure element type supported by the chip.
  */
 typedef enum {
@@ -108,6 +123,43 @@ uint8_t zpal_get_chip_type(void);
  * @return Chip revision.
  */
 uint8_t zpal_get_chip_revision(void);
+
+/**
+ * @brief Get application version.
+ *
+ * @deprecated Use `zw_product_infos_get_app_version()`.
+ */
+uint32_t zpal_get_app_version(void) __attribute__((deprecated("Deprecated since SDK 8.2.0; last available in SDK 8.4.0. Use zw_product_infos_get_app_version instead")));
+
+/**
+ * @brief Get major part of application version.
+ *
+ * @deprecated Use `zw_product_infos_get_app_version()`.
+ */
+uint8_t zpal_get_app_version_major(void) __attribute__((deprecated("Deprecated since SDK 8.2.0; last available in SDK 8.4.0. Use zw_product_infos_get_app_version instead")));
+
+/**
+ * @brief Get minor part of application version.
+ *
+ * @deprecated Use `zw_product_infos_get_app_version()`.
+ */
+uint8_t zpal_get_app_version_minor(void) __attribute__((deprecated("Deprecated since SDK 8.2.0; last available in SDK 8.4.0. Use zw_product_infos_get_app_version instead")));
+
+/**
+ * @brief Get patch part of application version.
+ *
+ * @deprecated Use `zw_product_infos_get_app_version()`.
+ */
+uint8_t zpal_get_app_version_patch(void) __attribute__((deprecated("Deprecated since SDK 8.2.0; last available in SDK 8.4.0. Use zw_product_infos_get_app_version instead")));
+
+/**
+ * @brief Get product id.
+ *
+ * @param[out] product_id Product id.
+ *
+ * @deprecated Use `zw_product_infos_get_product_id()`.
+ */
+void zpal_get_product_id(zpal_product_id_t *product_id) __attribute__((deprecated("Deprecated since SDK 8.2.0; last available in SDK 8.4.0. Use zw_product_infos_get_product_id instead")));
 
 /**
  * @brief Initialize debug output.

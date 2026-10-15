@@ -588,11 +588,9 @@
  *
  */
 #ifndef OPENTHREAD_CONFIG_CRYPTO_LIB
-#if OPENTHREAD_RADIO
-#define OPENTHREAD_CONFIG_CRYPTO_LIB OPENTHREAD_CONFIG_CRYPTO_LIB_MBEDTLS
-#else
+/* Mbed TLS 4.x moved aes/sha256 headers private; OT radio builds that used
+ * CRYPTO_LIB_MBEDTLS fail on context_size.hpp includes. PSA path avoids those public headers. */
 #define OPENTHREAD_CONFIG_CRYPTO_LIB OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
-#endif
 #endif
 
 /**

@@ -27,8 +27,10 @@ requires:
 provides:
 - name: cpc_ng_drv_mock
   # Satisfy role components without selecting a real HW driver; tests use sl_cpc_drv_mock.
-- name: cpc_ng_primary_drv_instance
-- name: cpc_ng_secondary_drv_instance
+- name: cpc_ng_drv_primary_instance
+  allow_multiple: true
+- name: cpc_ng_drv_secondary_instance
+  allow_multiple: true
 template_contribution:
 - name: cpc_ng_drv_mock_instances
   value: "{{instance}}"

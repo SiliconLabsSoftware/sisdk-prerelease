@@ -106,6 +106,25 @@ sl_status_t sli_iostream_uart_unsubscribe_to_new_data(sl_iostream_uart_t *iostre
 void sli_uart_txc(void *context);
 #endif
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+/***************************************************************************//**
+ * Suspend one UART instance before the EM2 decision.
+ *
+ * @param[in] uart_context  UART context to suspend.
+ *
+ * Instances that listen while sleeping, have a busy transmitter, or are already
+ * suspended are left unchanged.
+ ******************************************************************************/
+void sli_iostream_uart_suspend_context(sl_iostream_uart_context_t *uart_context);
+
+/***************************************************************************//**
+ * Resume one UART instance suspended by sli_iostream_uart_suspend_context().
+ *
+ * @param[in] uart_context  UART context to resume.
+ ******************************************************************************/
+void sli_iostream_uart_resume_context(const sl_iostream_uart_context_t *uart_context);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

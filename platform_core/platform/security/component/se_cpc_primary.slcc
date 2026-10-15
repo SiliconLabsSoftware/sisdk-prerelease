@@ -33,10 +33,6 @@ requires:
 - name: native
 - name: se_cpc_common
 
-define:
-  # We do not currently support Mbed TLS alt-plugin acceleration with SEd.
-- name: NO_CRYPTO_ACCELERATION
-
 template_contribution:
 - name: component_catalog
   value: se_cpc_primary

@@ -6,18 +6,19 @@ description: >-
   algorithm using Mbed TLS.
 category: Platform|Security|Mbed TLS|Message Authentication Codes
 quality: production
+ui_hints:
+  visibility: never
 provides:
 - name: mbedtls_cmac
 requires:
 - name: mbedtls_aes
 - name: mbedtls_cipher
-- name: mbedtls_core
 - name: sli_protocol_crypto
   condition: [device_has_radioaes, device_has_semailbox]
 - name: psa_crypto_cmac
   condition: [psa_crypto]
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_CMAC_C
 documentation:
   url: https://docs.silabs.com/gecko-platform/4.4.7/platform-security/sl-crypto-cmac

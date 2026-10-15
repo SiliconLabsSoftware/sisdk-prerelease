@@ -1,0 +1,117 @@
+id: tf_psa_crypto_mbedtls
+package: mbedtls
+label: Mbed TLS platform in TF-PSA-Crypto
+description: >-
+  This component provides the user interface header files of TF-PSA-Crypto.
+category: Platform|Security|PSA Crypto
+quality: production
+ui_hints:
+  visibility: never
+provides:
+- name: tf_psa_crypto_mbedtls
+
+include:
+- path: include
+  file_list:
+  - path: mbedtls/asn1.h
+  - path: mbedtls/asn1write.h
+  - path: mbedtls/base64.h
+  - path: mbedtls/compat-3-crypto.h
+  - path: mbedtls/constant_time.h
+  - path: mbedtls/lms.h
+  - path: mbedtls/md.h
+  - path: mbedtls/memory_buffer_alloc.h
+  - path: mbedtls/nist_kw.h
+  - path: mbedtls/pk.h
+  - path: mbedtls/pem.h
+  - path: mbedtls/platform.h
+  - path: mbedtls/platform_time.h
+  - path: mbedtls/platform_util.h
+  - path: mbedtls/private/pk_private.h
+  - path: mbedtls/psa_util.h
+  - path: mbedtls/threading.h
+  - path: psa/crypto_driver_common.h
+  - path: psa/crypto_driver_random.h
+- path: core
+  file_list:
+  - path: alignment.h
+  - path: psa_crypto_core.h
+  - path: tf_psa_crypto_common.h
+  - path: tf_psa_crypto_platform_requirements.h
+- path: drivers/builtin/include
+  file_list:
+  - path: mbedtls/private_access.h
+  - path: mbedtls/private/bignum.h
+  - path: mbedtls/private/ccm.h
+  - path: mbedtls/private/chachapoly.h
+  - path: mbedtls/private/chacha20.h
+  - path: mbedtls/private/cipher.h
+  - path: mbedtls/private/cmac.h
+  - path: mbedtls/private/crypto_builtin_composites.h
+  - path: mbedtls/private/crypto_builtin_key_derivation.h
+  - path: mbedtls/private/ecp.h
+  - path: mbedtls/private/error_common.h
+  - path: mbedtls/private/ecdsa.h
+  - path: mbedtls/private/ecp.h
+  - path: mbedtls/private/ecjpake.h
+  - path: mbedtls/private/entropy.h
+  - path: mbedtls/private/error_common.h
+  - path: mbedtls/private/gcm.h
+  - path: mbedtls/private/hmac_drbg.h
+  - path: mbedtls/private/md5.h
+  - path: mbedtls/private/poly1305.h
+  - path: mbedtls/private/ripemd160.h
+  - path: mbedtls/private/rsa.h
+  - path: mbedtls/private/sha1.h
+  - path: mbedtls/private/sha256.h
+  - path: mbedtls/private/sha3.h
+  - path: mbedtls/private/sha512.h
+- path: drivers/builtin/src
+  file_list:
+  - path: bignum_core.h
+  - path: md_psa.h
+  - path: psa_util_internal.h
+
+- path: extras
+  file_list:
+  - path: md_wrap.h
+  - path: pk_wrap.h
+  - path: pk_internal.h
+  - path: pkwrite.h
+- path: platform
+  file_list:
+  - path: threading_internal.h
+- path: utilities
+  file_list:
+  - path: base64_internal.h
+  - path: constant_time_impl.h
+  - path: constant_time_internal.h
+  - path: crypto_oid.h
+
+source:
+- path: core/psa_util.c
+- path: drivers/builtin/src/psa_util_internal.c
+- path: extras/md.c
+- path: extras/nist_kw.c
+- path: extras/pk_ecc.c
+- path: extras/pk_rsa.c
+- path: extras/pk_wrap.c
+- path: extras/pk.c
+- path: extras/pkparse.c
+- path: extras/pkwrite.c
+- path: platform/memory_buffer_alloc.c
+- path: platform/platform_util.c
+- path: platform/platform.c
+- path: platform/threading.c
+- path: utilities/asn1parse.c
+- path: utilities/asn1write.c
+- path: utilities/base64.c
+- path: utilities/constant_time.c
+- path: utilities/oid.c
+- path: utilities/pem.c
+- path: utilities/pkcs5.c
+
+metadata:
+  sbom:
+    reference: tf_psa_crypto_sbom
+root_path: mbedtls/tf-psa-crypto

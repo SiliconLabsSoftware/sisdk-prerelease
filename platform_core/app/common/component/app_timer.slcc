@@ -140,3 +140,6 @@ library:
 - system: rt
   condition:
   - linux
+documentation:
+  docset: gecko-platform
+  document: platform-service/sleeptimer

@@ -12,30 +12,25 @@ provides:
 
 requires:
 - name: psa_crypto_common
-  # psa_common_driver depends on 'mbedtls/build_info.h' via 'sli_psa_driver_features.h'
-  # 'mbedtls/build_info.h' includes MBEDTLS_CONFIG_FILE and is provided by mbedtls_source.slcc.
-  # We include mbedtls_core here which requires both mbedtls_source and mbedtls_config.
-  # mbedtls_config provides the actual MBEDTLS_CONFIG_FILE of the application.
-- name: mbedtls_core
   # sli_psa_zeroize() is now a thin wrapper around sli_psec_zeroize() from
   # sli_psec_common.h. Pull the canonical helper into our include path.
 - name: sli_psec_common
 
 source:
   # Common drivers
-- path: src/sli_psa_driver_init.c
+- path: sl_psa_driver/src/sli_psa_driver_init.c
   unless: [trustzone_nonsecure]
-- path: src/sli_psa_driver_common.c
+- path: sl_psa_driver/src/sli_psa_driver_common.c
   unless: [trustzone_nonsecure]
-- path: src/sli_se_version_dependencies.c
+- path: sl_psa_driver/src/sli_se_version_dependencies.c
   unless: [trustzone_nonsecure]
 
 include:
-- path: ../sl_mbedtls_support/inc
+- path: sl_mbedtls_support/inc
   file_list:
   - path: sl_psa_values.h
   - path: sli_psa_crypto.h
-- path: inc
+- path: sl_psa_driver/inc
   file_list:
   - path: sli_psa_driver_common.h
     unless: [trustzone_nonsecure]
@@ -46,4 +41,4 @@ include:
 metadata:
   sbom:
     license: Zlib
-root_path: platform_core/platform/security/sl_component/sl_psa_driver
+root_path: platform_core/platform/security/sl_component

@@ -13,6 +13,8 @@ provides:
 requires:
 - name: device_has_cryptoacc
 - name: libcryptosoc
+  # cryptoacc_management.c needs the sli_se_lock_acquire  from sli_se_manager_internal.h
+- name: se_manager
 - name: enum
 - name: psa_driver_common
 - name: sl_assert

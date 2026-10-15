@@ -31,6 +31,7 @@
 
 
 #include "sl_log.h"
+#include "sl_log_platform_specific.h"
 #include "sl_common.h"
 
 
@@ -239,6 +240,11 @@ SL_WEAK uint32_t sl_log_get_timestamp_epoch(uint8_t core_id) {
 
 SL_WEAK sl_status_t sl_log_platform_core_deinit(void) {
  return SL_STATUS_OK;
+}
+
+SL_WEAK sl_log_api_backend_t *sl_log_get_api_backend(void)
+{
+  return (sl_log_api_backend_t *)0;
 }
 
 SL_WEAK sl_status_t sl_log_backend_init(void) {

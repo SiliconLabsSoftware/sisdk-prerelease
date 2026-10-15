@@ -13,10 +13,6 @@ requires:
 - name: psa_crypto_hash
   # Enable the mbedtls ECC and SHA corresponding to psa_crypto_xxx selections of ECC and SHA (since we always fallback to builtin)
 - name: mbedtls_ecc_secp256r1
-  condition: [psa_crypto_ecc_secp192r1]
-- name: mbedtls_ecc_secp192r1
-  condition: [psa_crypto_ecc_secp224r1]
-- name: mbedtls_ecc_secp224r1
   condition: [psa_crypto_ecc_secp256r1]
 - name: mbedtls_ecc_secp384r1
   condition: [psa_crypto_ecc_secp384r1]

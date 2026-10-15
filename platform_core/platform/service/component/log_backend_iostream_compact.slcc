@@ -16,7 +16,6 @@ provides:
 - name: log_backend
 - name: log_backend_iostream_impl
 - name: log_backend_iostream_compact
-  condition: [device_si91x]
 requires:
 - name: iostream_recommended_console
 - name: log
@@ -40,3 +39,6 @@ template_contribution:
   value: 1
 - name: log_compact_output_enable
   value: 1
+documentation:
+  docset: gecko-platform
+  document: platform-service/iostream

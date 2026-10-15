@@ -78,3 +78,6 @@ config_file:
 template_contribution:
 - name: component_catalog
   value: dma_manager_round_robin
+documentation:
+  docset: gecko-platform
+  document: platform-service/dma-manager

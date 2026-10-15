@@ -133,10 +133,10 @@ configuration:
     value: '"sensor_pir"'
   - name: SL_CLOCK_MANAGER_WDOG0CLK_SOURCE
     value: CMU_WDOG0CLKCTRL_CLKSEL_LFRCO
-  - name: APP_BUTTON_PRESS_WAKEUP_DELAY
+  - name: APP_BUTTON_PRESS_WAKEUP_DELAY_MS
     value: 46 # Average time for Sleep Timer to start after a reset when built in ocelot
     condition: [device_sdid_210]
-  - name: APP_BUTTON_PRESS_WAKEUP_DELAY
+  - name: APP_BUTTON_PRESS_WAKEUP_DELAY_MS
     value: 285 # Average time for Sleep Timer to start after a reset when built in margay
     condition: [device_sdid_235]
   - name: SL_CLOCK_MANAGER_EUSART0CLK_SOURCE

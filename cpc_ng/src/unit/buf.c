@@ -72,8 +72,8 @@ TEST(cpc_buf, chain_two_buffers)
  */
 TEST(cpc_buf, chain_three_buffers)
 {
-  sl_cpc_buf_t head;
   sl_cpc_buf_t middle;
+  sl_cpc_buf_t head;
   sl_cpc_buf_t tail;
 
   sl_cpc_buf_init(&head, NULL, 10);
@@ -115,8 +115,8 @@ TEST(cpc_buf, msgq_push_null_buff_is_noop)
  */
 TEST(cpc_buf, msgq_pop_empty_returns_false)
 {
-  sl_cpc_msgq_t msgq;
   sl_cpc_buf_t *out = NULL;
+  sl_cpc_msgq_t msgq;
 
   sl_cpc_msgq_init(&msgq);
   TEST_ASSERT_TRUE(sl_cpc_msgq_is_empty(&msgq));
@@ -131,9 +131,9 @@ TEST(cpc_buf, msgq_pop_empty_returns_false)
  */
 TEST(cpc_buf, msgq_push_pop_single_buffer)
 {
+  sl_cpc_buf_t *out = NULL;
   sl_cpc_msgq_t msgq;
   sl_cpc_buf_t buf;
-  sl_cpc_buf_t *out = NULL;
 
   sl_cpc_msgq_init(&msgq);
   TEST_ASSERT_TRUE(sl_cpc_msgq_is_empty(&msgq));
@@ -160,11 +160,11 @@ TEST(cpc_buf, msgq_push_pop_single_buffer)
  */
 TEST(cpc_buf, msgq_push_pop_fifo_order)
 {
-  sl_cpc_msgq_t msgq;
-  sl_cpc_buf_t first;
-  sl_cpc_buf_t second;
-  sl_cpc_buf_t third;
   sl_cpc_buf_t *out = NULL;
+  sl_cpc_buf_t second;
+  sl_cpc_buf_t first;
+  sl_cpc_buf_t third;
+  sl_cpc_msgq_t msgq;
 
   sl_cpc_msgq_init(&msgq);
   TEST_ASSERT_TRUE(sl_cpc_msgq_is_empty(&msgq));
@@ -204,10 +204,10 @@ TEST(cpc_buf, msgq_push_pop_fifo_order)
  */
 TEST(cpc_buf, msgq_push_pop_chain)
 {
+  sl_cpc_buf_t *out = NULL;
   sl_cpc_msgq_t msgq;
   sl_cpc_buf_t head;
   sl_cpc_buf_t tail;
-  sl_cpc_buf_t *out = NULL;
 
   sl_cpc_msgq_init(&msgq);
   sl_cpc_buf_init(&head, NULL, 4);
@@ -234,11 +234,11 @@ TEST(cpc_buf, msgq_push_pop_chain)
  */
 TEST(cpc_buf, msgq_push_pop_chain_single)
 {
+  sl_cpc_buf_t *out = NULL;
+  sl_cpc_buf_t single;
   sl_cpc_msgq_t msgq;
   sl_cpc_buf_t head;
   sl_cpc_buf_t tail;
-  sl_cpc_buf_t single;
-  sl_cpc_buf_t *out = NULL;
 
   sl_cpc_msgq_init(&msgq);
   sl_cpc_buf_init(&head, NULL, 4);
@@ -274,12 +274,12 @@ TEST(cpc_buf, msgq_push_pop_chain_single)
  */
 TEST(cpc_buf, msgq_push_pop_two_chains)
 {
-  sl_cpc_msgq_t msgq;
+  sl_cpc_buf_t *out = NULL;
   sl_cpc_buf_t c1_head;
   sl_cpc_buf_t c1_tail;
   sl_cpc_buf_t c2_head;
   sl_cpc_buf_t c2_tail;
-  sl_cpc_buf_t *out = NULL;
+  sl_cpc_msgq_t msgq;
 
   sl_cpc_msgq_init(&msgq);
 
@@ -318,13 +318,13 @@ TEST(cpc_buf, msgq_push_pop_two_chains)
  */
 TEST(cpc_buf, msgq_push_pop_chain_single_chain)
 {
-  sl_cpc_msgq_t msgq;
+  sl_cpc_buf_t *out = NULL;
+  sl_cpc_buf_t single_buf;
   sl_cpc_buf_t c1_head;
   sl_cpc_buf_t c1_tail;
-  sl_cpc_buf_t single_buf;
   sl_cpc_buf_t c2_head;
   sl_cpc_buf_t c2_tail;
-  sl_cpc_buf_t *out = NULL;
+  sl_cpc_msgq_t msgq;
 
   sl_cpc_msgq_init(&msgq);
 

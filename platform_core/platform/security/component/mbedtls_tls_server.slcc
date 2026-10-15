@@ -6,7 +6,7 @@ description: >-
   This component is DEPRECATED and will be removed in a future version of this product.
   This component will be replaced by the new component called mbedtls_ssl_server.
 category: Platform|Security|Mbed TLS|Upper Layer
-quality: production
+quality: deprecated
 provides:
 - name: mbedtls_tls_server
 requires:

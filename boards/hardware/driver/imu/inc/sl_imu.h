@@ -206,6 +206,13 @@ void sl_imu_get_gyro(int16_t gvec[3]);
  * @brief
  *    Perform gyroscope calibration to cancel gyro bias.
  *
+ * @note
+ *    Internally calls sl_imu_deinit(), sl_imu_init() and sl_imu_configure(),
+ *    which resets the fusion orientation to zero. Roll and pitch then
+ *    re-converge over several seconds; yaw does not, so the previous heading
+ *    is lost. The call blocks for several hundred milliseconds and the device
+ *    must be kept stationary. sl_imu_configure() must have been called first.
+ *
  * @retval SL_STATUS_OK
  *
  ******************************************************************************/

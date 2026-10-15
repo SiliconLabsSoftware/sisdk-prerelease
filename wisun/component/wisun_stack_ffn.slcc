@@ -1,8 +1,8 @@
 id: "wisun_stack_ffn"
 label: "Wi-SUN Stack FFN Support"
 description: >
-  Adds support for Full Function Node (FFN) device type. Includes support for
-  parenting FAN1.1 LFNs.
+  Adds support for Full Function Node (FFN) device type. LFN parenting is
+  provided by the optional wisun_lfn_parent component.
 package: "wisun"
 category: "Wi-SUN|Stack"
 quality: "production"
@@ -14,6 +14,7 @@ requires:
 - name: "wisun_dc_client_implementation"
 - name: "wisun_lxpm_implementation"
 - name: "wisun_dc_server_implementation"
+- name: "wisun_lfn_parent_implementation"
 
 recommends:
 - id: wisun_stack
@@ -23,6 +24,8 @@ recommends:
 - id: wisun_dc_server_stubs
   vendor: silabs
 - id: wisun_lxpm_stubs
+  vendor: silabs
+- id: wisun_lfn_parent
 
   vendor: silabs
 provides:

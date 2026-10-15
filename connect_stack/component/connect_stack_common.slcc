@@ -1,9 +1,14 @@
 id: "connect_stack_common"
 label: "Stack Common"
 package: "connect_stack"
+description: "Provides Connect Stack common functionalities such as 15.4-like MAC layer, events system, dynamic memory allocation, and other required infrastracture functions. It also provides the stack configuration file, which allocates all the sizable RAM data structures."
 category: "Connect"
 quality: "production"
-description: "Provides Connect Stack common functionalities such as 15.4-like MAC layer, events system, dynamic memory allocation, and other required infrastracture functions. It also provides the stack configuration file, which allocates all the sizable RAM data structures."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: customizing-applications-with-connect-v3x/02-components
 provides:
 - name: "connect_stack_common"
 - name: "wireless_stack"
@@ -162,10 +167,6 @@ template_contribution:
   #     include: sl-connect-watchdog.h
   #     handler: sl_connect_watchdog_permanent_allocation
   #     condition: [sl_main]
-
-documentation:
-  docset: connect-stack
-  document: group-silabs-connect-stack
 
 metadata:
   sbom:

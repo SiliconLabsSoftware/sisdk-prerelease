@@ -734,7 +734,7 @@ sl_status_t esl_core_process_opcode(esl_id_t self_id,
   }
   // process only TLVs addressed to this ESL Tag or broadcasted (only over PAwR!)
   if (id == self_id || (id == ESL_BROADCAST_ID && !has_notifications)) {
-#ifdef ESL_TAG_VENDOR_OPCODES_ENABLED
+#if defined(ESL_TAG_VENDOR_OPCODES_ENABLED) && ESL_TAG_VENDOR_OPCODES_ENABLED == 1
     // check for vendor opcodes first - let them processed by the vendor callback
     if ((opcode & ESL_TLV_OPCODE_VENDOR_SPECIFIC) == ESL_TLV_OPCODE_VENDOR_SPECIFIC) {
       uint8_t *data_p  = *(uint8_t **)data; // data must already point to the extra parameter after the mandatory ID
@@ -1031,12 +1031,17 @@ sl_status_t esl_core_process_opcode(esl_id_t self_id,
       }
       break;
 
-      default:
+      default: {
         // unknown or unimplemented opcode
         // Forward compatibility, ESL Profile d09r18, Section 3.1.3:
+        uint8_t *data_p  = *(uint8_t **)data;
+        uint8_t data_len = esl_core_get_tlv_len(opcode) - sizeof(esl_id_t);
+
+        *data = (void *)(data_p + data_len);
         result = SL_STATUS_NOT_SUPPORTED;
         esl_core_set_last_error(ESL_ERROR_INVALID_OPCODE);
-        break;
+      }
+      break;
     }
 
     sl_bt_esl_log(ESL_LOG_COMPONENT_CORE,

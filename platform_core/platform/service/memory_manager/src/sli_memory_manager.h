@@ -42,6 +42,10 @@
 #include "sl_component_catalog.h"
 #endif
 
+#if defined(SL_CATALOG_MEMORY_MANAGER_SYSTEMVIEW_RETARGET_PRESENT)
+#include "sl_compiler.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -89,21 +93,6 @@ extern char __HeapLimit[];
 // Payload: (reserved block address, block size).
 #define SLI_SYSTEMVIEW_EVENT_ID_RESERVATION_ADD_RETENTION     516
 #define SLI_SYSTEMVIEW_EVENT_ID_RESERVATION_REMOVE_RETENTION  517
-
-// GCC-only return address capture helper for SystemView site annotation.
-// Must be called at the top of a function (before any other function calls)
-// to capture the immediate caller's return address.
-#if defined(__GNUC__)
-__attribute__((always_inline)) static inline void *sli_mm_sv_get_return_address(void)
-{
-  return __builtin_extract_return_addr(__builtin_return_address(0));
-}
-#else
-static inline void *sli_mm_sv_get_return_address(void)
-{
-  return (void *)0;
-}
-#endif
 #endif // defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
 
 // Minimum block alignment in bytes. 8 bytes is the minimum alignment to account for largest CPU data type
@@ -181,8 +170,8 @@ static inline void *sli_mm_sv_get_return_address(void)
 #endif
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_3) \
-  && !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301) \
+#if defined(_SILICON_LABS_32B_SERIES_3)               \
+  && !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)  \
   && !defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT) \
   && defined(__CORTEXM)
 // Series 3 non-301 parts: GP heap spans through the stack at the RAM top (linker placement).
@@ -495,7 +484,56 @@ void sli_memory_create_stack(sl_memory_heap_t *heap);
  *       call this function from sl_main_init() instead of from sl_memory_init().
  ******************************************************************************/
 void sli_memory_register_systemview_heaps(void);
-#endif
+#endif // defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+
+#if defined(SL_CATALOG_MEMORY_MANAGER_SYSTEMVIEW_RETARGET_PRESENT) && defined(__GNUC__)
+/***************************************************************************//**
+ * Records a Memory Manager ownership event for a live object.
+ *
+ * This API emits the object pointer and owner program counter exactly as
+ * supplied. It does not validate either value or inspect Memory Manager state.
+ *
+ * @note Available only when the Memory Manager SystemView retarget component
+ *       is selected with GCC.
+ *
+ * @param[in] ptr       Object pointer to record. May be NULL.
+ * @param[in] owner_pc  Program counter identifying the current owner. May be
+ *                      NULL.
+ ******************************************************************************/
+void sli_memory_track_ownership(const void *ptr,
+                                const void *owner_pc);
+
+/***************************************************************************//**
+ * Gets the immediate caller's return address for ownership tracking.
+ *
+ * Call this at the beginning of a function, before another call can alter the
+ * caller context.
+ *
+ * @return Immediate caller's return address.
+ ******************************************************************************/
+__STATIC_FORCEINLINE const void *sli_memory_get_return_address(void)
+{
+  return __builtin_extract_return_addr(__builtin_return_address(0));
+}
+
+/***************************************************************************//**
+ * Gets the current program counter for ownership tracking.
+ *
+ * @return Program counter at the call site.
+ ******************************************************************************/
+__STATIC_FORCEINLINE const void *sli_memory_get_pc(void)
+{
+  uintptr_t pc;
+
+  __asm volatile ("mov %0, pc" : "=r" (pc));
+  return (const void *)pc;
+}
+#else
+// Keep ownership capture expressions out of disabled-tracing builds.
+#define sli_memory_track_ownership(ptr, owner_pc)  ((void)0)
+#define sli_memory_get_return_address()            ((const void *)0)
+#define sli_memory_get_pc()                        ((const void *)0)
+#endif  // defined(SL_CATALOG_MEMORY_MANAGER_SYSTEMVIEW_RETARGET_PRESENT) && defined(__GNUC__)
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_TEST_UTILITIES)
 /***************************************************************************//**

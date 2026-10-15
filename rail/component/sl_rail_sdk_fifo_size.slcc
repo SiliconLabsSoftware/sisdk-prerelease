@@ -7,6 +7,8 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: never
 root_path: "rail/component/sl_rail_sdk_fifo_size"
 provides:
 - name: "sl_rail_sdk_fifo_size"

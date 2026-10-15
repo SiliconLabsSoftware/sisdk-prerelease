@@ -51,6 +51,8 @@ target_link_libraries(otbr-web PRIVATE
     openthread-ftd
     openthread-posix
     mbedtls
+    # After mbedtls: resolve TF-PSA platform alloc (also covered by OBJECT stubs).
+    otbr-mbedtls-memory
     pthread
 )
 install(

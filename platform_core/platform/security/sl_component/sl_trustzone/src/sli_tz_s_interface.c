@@ -38,9 +38,8 @@
   #include "tz_service_config_autogen.h"
 #endif
 
-#include "psa/crypto_types.h"
-
 #include "sli_tz_iovec_check.h"
+#include "interface/include/psa/error.h"
 #include "sli_tz_s_interface.h"
 #if defined(SL_CATALOG_PSA_CRYPTO_KEY_PROTECTION_PRESENT)
   #include "sli_tz_secure_psa_key_protection.h"
@@ -49,12 +48,12 @@
 
 #include "sl_assert.h"
 
-#include "tfm_crypto_defs.h"
 #include "psa/client.h"
+#include "sli_tz_funcs_sids_autogen.h"
 
 #if defined(TZ_SERVICE_PSA_CRYPTO_PRESENT)
+  #include "tfm_crypto_defs.h"
   #include "sli_tz_service_psa_crypto.h"
-  #include "sli_tz_funcs_sids_autogen.h"
 #endif
 #include "sli_tz_service_syscfg.h"
 #if defined(TZ_SERVICE_NVM3_PRESENT) || defined(TZ_SERVICE_PSA_ITS_PRESENT)
@@ -167,9 +166,6 @@
     sli_tz_key_check_plan_t plan = { false, false, false, false, false };
 
     switch (function_id) {
-#if defined(SLI_TZ_HAS_TFM_CRYPTO_CLOSE_KEY_SID)
-      case TFM_CRYPTO_CLOSE_KEY_SID:
-#endif
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_DESTROY_KEY_SID)
       case TFM_CRYPTO_DESTROY_KEY_SID:
 #endif
@@ -252,20 +248,6 @@
         plan.check_packed_key_id = true;
         break;
 
-#if defined(SLI_TZ_HAS_TFM_CRYPTO_OPEN_KEY_SID)
-      case TFM_CRYPTO_OPEN_KEY_SID:
-        plan.explicit_sid = true;
-        plan.check_invec1_key_id = true;
-        break;
-#endif
-
-#if defined(SLI_TZ_HAS_TFM_CRYPTO_PAKE_SET_PASSWORD_KEY_SID)
-      case TFM_CRYPTO_PAKE_SET_PASSWORD_KEY_SID:
-        plan.explicit_sid = true;
-        plan.check_invec1_key_id = true;
-        break;
-#endif
-
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_IMPORT_KEY_SID)
       case TFM_CRYPTO_IMPORT_KEY_SID:
 #endif
@@ -275,17 +257,11 @@
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_GENERATE_KEY_CUSTOM_SID)
       case TFM_CRYPTO_GENERATE_KEY_CUSTOM_SID:
 #endif
-#if defined(SLI_TZ_HAS_TFM_CRYPTO_GENERATE_KEY_EXT_SID)
-      case TFM_CRYPTO_GENERATE_KEY_EXT_SID:
-#endif
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_SID)
       case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_SID:
 #endif
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_CUSTOM_SID)
       case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_CUSTOM_SID:
-#endif
-#if defined(SLI_TZ_HAS_TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_EXT_SID)
-      case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_EXT_SID:
 #endif
         plan.explicit_sid = true;
         plan.check_attr1_key_id = true;
@@ -428,8 +404,8 @@
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_PAKE_INPUT_SID)
       case TFM_CRYPTO_PAKE_INPUT_SID:
 #endif
-#if defined(SLI_TZ_HAS_TFM_CRYPTO_PAKE_GET_IMPLICIT_KEY_SID)
-      case TFM_CRYPTO_PAKE_GET_IMPLICIT_KEY_SID:
+#if defined(SLI_TZ_HAS_TFM_CRYPTO_PAKE_GET_SHARED_KEY_SID)
+      case TFM_CRYPTO_PAKE_GET_SHARED_KEY_SID:
 #endif
 #if defined(SLI_TZ_HAS_TFM_CRYPTO_PAKE_DERIVE_SECRET_SID)
       case TFM_CRYPTO_PAKE_DERIVE_SECRET_SID:

@@ -9,6 +9,13 @@
 
 #include <stdint.h>
 
+/**
+ * @brief Get the application build number.
+ *
+ * @deprecated Use the `APP_BUILD_NO` compile-time macro.
+ */
+uint16_t ZAF_GetBuildNumber(void) __attribute__((deprecated("Deprecated since SDK 8.2.0; last available in SDK 8.4.0. Use APP_BUILD_NO instead")));
+
 uint8_t ZAF_GetVersionMajor(void);
 
 uint8_t ZAF_GetVersionMinor(void);

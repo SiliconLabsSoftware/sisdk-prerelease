@@ -112,7 +112,7 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
 
   sl_status_t status;
   psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
 
   status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
@@ -391,7 +391,7 @@ psa_status_t sli_se_driver_mac_update(sli_se_driver_mac_operation_t *operation,
   psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
 
   // Ephemeral contexts
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
 
   status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
@@ -635,7 +635,7 @@ psa_status_t sli_se_driver_mac_sign_finish(
   psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
 
   // Ephemeral contexts
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;

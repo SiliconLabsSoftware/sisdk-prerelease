@@ -390,7 +390,7 @@ static psa_status_t sli_se_driver_validate_ecc_key(
         }
 
         // Create ephemeral SE command context.
-        sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
+        sl_se_command_context_t cmd_ctx;
         sl_status_t sl_status = sl_se_init_command_context(&cmd_ctx);
         if (sl_status != SL_STATUS_OK) {
           return PSA_ERROR_HARDWARE_FAILURE;
@@ -491,7 +491,7 @@ static psa_status_t sli_se_driver_validate_ecc_key(
             break;
             #endif // SLI_PSA_DRIVER_FEATURE_P256R1
 
-            #if defined(SLI_MBEDTLS_DEVICE_HSE_VAULT_HIGH) && !defined(_SILICON_LABS_32B_SERIES_3)
+            #if defined(SLI_SE_SUPPORTS_LARGER_THAN_256_BIT_KEYS)
 
             #if defined(SLI_PSA_DRIVER_FEATURE_P384R1)
           case 384:
@@ -510,14 +510,14 @@ static psa_status_t sli_se_driver_validate_ecc_key(
             break;
             #endif // SLI_PSA_DRIVER_FEATURE_P521R1
 
-            #else // SLI_MBEDTLS_DEVICE_HSE_VAULT_HIGH && !defined(_SILICON_LABS_32B_SERIES_3)
+            #else // SLI_SE_SUPPORTS_LARGER_THAN_256_BIT_KEYS
 
           case 384:     // fall through
           case 528:
             return PSA_ERROR_NOT_SUPPORTED;
             break;
 
-            #endif // SLI_MBEDTLS_DEVICE_HSE_VAULT_HIGH && !defined(_SILICON_LABS_32B_SERIES_3)
+            #endif // SLI_SE_SUPPORTS_LARGER_THAN_256_BIT_KEYS
 
           default:
             return PSA_ERROR_INVALID_ARGUMENT;
@@ -1086,6 +1086,8 @@ psa_status_t sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
       #endif // SLI_PSA_DRIVER_FEATURE_OPAQUE_KEYS
     #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
     case SL_PSA_KEY_LOCATION_KSU_0:
+    {
+      // Scope this case to avoid IAR Pe546 (declaration with init inside switch).
       if (key_buffer_size < sizeof(uint8_t)) {
         return PSA_ERROR_INSUFFICIENT_MEMORY;
       }
@@ -1113,6 +1115,7 @@ psa_status_t sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
           return PSA_ERROR_INVALID_ARGUMENT;
       }
       break;
+    }
    #endif
     default:
       return PSA_ERROR_DOES_NOT_EXIST;
@@ -1206,7 +1209,8 @@ psa_status_t sli_se_set_key_desc_output(const psa_key_attributes_t* attributes,
   && defined(MBEDTLS_PSA_CRYPTO_C)                           \
   && SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2
 
-#include "mbedtls/ecp.h"
+#include "mbedtls/private/ecp.h"
+#include "psa_util_internal.h"
 #include "psa_crypto_core.h"
 #include "mbedtls/psa_util.h"
 
@@ -1682,7 +1686,7 @@ psa_status_t sli_se_driver_generate_key(const psa_key_attributes_t *attributes,
   }
 
   // Generate the key using SE manager
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   sl_status_t sl_status = sl_se_init_command_context(&cmd_ctx);
   if (sl_status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
@@ -1834,7 +1838,7 @@ psa_status_t sli_se_driver_export_public_key(
     return PSA_ERROR_BUFFER_TOO_SMALL;
   }
 
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   sl_status = sl_se_init_command_context(&cmd_ctx);
   if (sl_status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
@@ -2096,7 +2100,7 @@ psa_status_t sli_se_opaque_import_key(const psa_key_attributes_t *attributes,
   sli_se_key_descriptor_set_plaintext(&plaintext_key_desc, data, data_length);
   #endif // SLI_SE_KEY_PADDING_REQUIRED
 
-  sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
+  sl_se_command_context_t cmd_ctx;
   sl_status_t sl_status = SL_STATUS_OK;
   // Set location specific properties for the output key buffer
   psa_status = sli_se_set_key_desc_output(attributes,
@@ -2238,7 +2242,7 @@ psa_status_t sli_se_opaque_export_key(const psa_key_attributes_t *attributes,
   }
 
   // Export key
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   sl_status = sl_se_init_command_context(&cmd_ctx);
   if (sl_status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
@@ -2326,7 +2330,7 @@ psa_status_t sli_se_ksu_destroy_key(const psa_key_attributes_t *attributes)
         psa_status = PSA_ERROR_DOES_NOT_EXIST;
         break;
       case SL_STATUS_PERMISSION:
-        psa_status = PSA_ERROR_NOT_PERMITTED ;
+        psa_status = PSA_ERROR_NOT_PERMITTED;
         break;
       default:
         psa_status = PSA_ERROR_HARDWARE_FAILURE;

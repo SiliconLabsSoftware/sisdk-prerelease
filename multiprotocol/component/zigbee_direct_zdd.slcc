@@ -18,11 +18,10 @@ requires:
 - name: zigbee_direct_stack_interface
 - name: zigbee_zcl_framework_core
 - name: bluetooth_stack
-- name: mbedtls_ccm
-- name: mbedtls_md5
-- name: psa_crypto_md5
+- name: psa_crypto
+- name: psa_crypto_aes
+- name: psa_crypto_ccm
 - name: psa_crypto_sha256
-- name: mbedtls_hash
 - name: psa_crypto_hmac
 - name: zigbee_network_steering
 - name: zigbee_packet_handoff
@@ -84,6 +83,8 @@ template_contribution:
     service_function: sl_zigbee_af_zigbee_direct_cluster_server_command_parse
 - name: token_header
   value: zigbee-direct-zdd-tokens.h
+documentation:
+  url: https://docs.silabs.com/zigbee/latest/zigbee-direct/
 metadata:
   sbom:
     license: MSLA

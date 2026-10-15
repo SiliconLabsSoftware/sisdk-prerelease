@@ -21,6 +21,9 @@ include:
 - path: platform/bootloader/series3
   file_list:
   - path: config/btl_config.h
+- path: platform/bootloader/series3/driver
+  file_list:
+  - path: btl_driver_cmu.h
 config_file:
 - path: platform/bootloader/debug/config/btl_debug_cfg.h
 requires:

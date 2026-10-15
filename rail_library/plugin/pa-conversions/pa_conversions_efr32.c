@@ -94,7 +94,7 @@ RAIL_TxPowerCurvesConfigAlt_t powerCurvesState;
     1U,        /* 2P4GIG_LP  */    \
     /* The rest are unsupported */ \
 }
-#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 5 || _SILICON_LABS_32B_SERIES_2_CONFIG == 10)
 #define SUPPORTED_PA_INDICES {                  \
     RAIL_NUM_PA, /* 2P4GIG_HP  */               \
     RAIL_NUM_PA, /* 2P4GIG_MP  */               \

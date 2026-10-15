@@ -1,8 +1,10 @@
 id: "sl_connect_ecdh_key_exchange"
 label: "ECDH Key Exchange support"
-package: "connect_app"
+package: "connect"
 category: "Connect|Test"
 quality: "production"
+ui_hints:
+  visibility: basic
 metadata:
   sbom:
     license: Zlib
@@ -34,3 +36,7 @@ template_contribution:
 #---------------- Component Catalog ------------------
 - name: component_catalog
   value: sl_connect_ecdh_key_exchange
+
+documentation:
+  docset: connect-stack
+  document: connect-stack-api/connect-ecdh-key-exchange

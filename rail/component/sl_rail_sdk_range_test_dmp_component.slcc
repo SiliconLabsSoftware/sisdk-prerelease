@@ -7,6 +7,8 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: never
 root_path: "rail/component/sl_rail_sdk_range_test_dmp_component"
 provides:
 - name: sl_rail_sdk_range_test_dmp_component
@@ -20,9 +22,7 @@ requires:
 - name: bluetooth_feature_connection_role_peripheral
 - name: bluetooth_feature_gatt
 - name: bluetooth_feature_gatt_server
-- name: mbedtls_config
-- name: mbedtls_aes
-- name: mbedtls_slcrypto
+- name: bluetooth_crypto_lib_psa
 - name: device_has_radio
 - name: sl_rail_sdk_simple_os
 - name: bt_ipc_listener

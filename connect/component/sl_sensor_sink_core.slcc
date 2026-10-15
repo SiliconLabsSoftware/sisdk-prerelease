@@ -1,10 +1,12 @@
 id: "sl_sensor_sink_core"
 label: "Sensor/Sink Core"
-package: "connect_app"
+package: "connect"
 description: >
   Common files among the Sensor and Sink sample apps.
 category: "Connect|Core"
 quality: "production"
+ui_hints:
+  visibility: never
 metadata:
   sbom:
     license: Zlib
@@ -20,10 +22,6 @@ include:
 
 config_file:
 - path: "config/sl_sensor_sink_config.h"
-
-#-------- Hides Component for user in Studio ---------
-ui_hints:
-  visibility: never
 
 #-------------- Template Contribution ----------------
 template_contribution:

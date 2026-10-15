@@ -152,6 +152,9 @@ configuration:
     condition: ["device_series_2"]
   - name: SL_BOARD_ENABLE_SENSOR_RHT
     value: 1
+  - name: SL_BOARD_ENABLE_SENSOR_LIGHT
+    value: 1
+    condition: [veml6035_driver, i2cspm]
   - name: SL_BOARD_ENABLE_SENSOR_IMU
     value: 1
     condition: [brd2603a]
@@ -172,10 +175,10 @@ configuration:
     value: '"multilevel_sensor"'
   - name: SL_CLOCK_MANAGER_WDOG0CLK_SOURCE
     value: CMU_WDOG0CLKCTRL_CLKSEL_LFRCO
-  - name: APP_BUTTON_PRESS_WAKEUP_DELAY
+  - name: APP_BUTTON_PRESS_WAKEUP_DELAY_MS
     value: 46 # Average time for Sleep Timer to start after a reset when built in ocelot
     condition: [device_sdid_210]
-  - name: APP_BUTTON_PRESS_WAKEUP_DELAY
+  - name: APP_BUTTON_PRESS_WAKEUP_DELAY_MS
     value: 285 # Average time for Sleep Timer to start after a reset when built in margay
     condition: [device_sdid_235]
   - name: SL_CLOCK_MANAGER_EUSART0CLK_SOURCE
@@ -206,6 +209,9 @@ define:
     value: <application_properties_config.h>
   - name: FILE_ID_APPLICATIONDATA # File identifiers for application file system
     value: "0x00000" # Range: 0x00000 - 0x0FFFF
+  - name: ZWAVE_SENSOR_LIGHT_SENSOR_PRESENT
+    value: 1
+    condition: [veml6035_driver, i2cspm]
 
 config_file:
   - path: MultilevelSensor.cc_config

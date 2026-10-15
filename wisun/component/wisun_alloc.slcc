@@ -26,13 +26,13 @@ source:
 template_contribution:
 - name: component_catalog
   value: wisun_alloc
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PLATFORM_C
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PLATFORM_MEMORY
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PLATFORM_CALLOC_MACRO sl_wisun_calloc
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_PLATFORM_FREE_MACRO   sl_wisun_free
 
 metadata:

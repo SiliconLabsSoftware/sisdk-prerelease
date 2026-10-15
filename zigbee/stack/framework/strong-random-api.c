@@ -24,10 +24,6 @@
 #include "hal/hal.h"
 #include "internal/inc/internal-defs-patch.h"
 
-#if defined(MBEDTLS_CONFIG_FILE)
-#include MBEDTLS_CONFIG_FILE
-#endif
-
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif
@@ -41,6 +37,9 @@
 #endif // SL_CATALOG_ZIGBEE_STRONG_RANDOM_API_
 
 #if defined(USE_PSA_API_FOR_TRNG)
+#if defined(MBEDTLS_CONFIG_FILE)
+#include MBEDTLS_CONFIG_FILE
+#endif
 #include "psa/crypto.h"
 #else // defined(USE_PSA_API_FOR_TRNG)
 extern bool sli_802154phy_radio_get_random_numbers(uint16_t *randomNumber, uint8_t count);

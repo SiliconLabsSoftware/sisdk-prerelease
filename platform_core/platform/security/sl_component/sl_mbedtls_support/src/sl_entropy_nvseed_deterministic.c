@@ -31,21 +31,12 @@
  *
  ******************************************************************************/
 
-#include <mbedtls/build_info.h>
+#include <tf-psa-crypto/build_info.h>
 
 #if defined(MBEDTLS_PLATFORM_NV_SEED_ALT)
 
 #include <string.h>
-#include "mbedtls/entropy.h"
-#include "mbedtls/platform.h"
-
-#if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
-  #include "mbedtls/sha512.h"
-#elif defined(MBEDTLS_ENTROPY_SHA256_ACCUMULATOR)
-  #include "mbedtls/sha256.h"
-#else
-  #error "NV seed entropy requested, but no entropy accumulator available"
-#endif
+#include <psa/crypto.h>
 
 // -----------------------------------------------------------------------------
 // Static variables
@@ -57,82 +48,46 @@ static uint32_t sli_volatile_seed = 0;
 
 int sli_nv_seed_read(unsigned char *buf, size_t buf_len)
 {
-  int ret;
+  psa_status_t status = PSA_ERROR_GENERIC_ERROR;
+  uint8_t hash_buffer[PSA_HASH_LENGTH(MBEDTLS_PSA_CRYPTO_RNG_HASH)];
+  psa_hash_operation_t hash_operation = PSA_HASH_OPERATION_INIT;
+  size_t hash_length;
 
-  #if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
-  uint8_t hash_buffer[64];
-  mbedtls_sha512_context ctx;
-  mbedtls_sha512_init(&ctx);
-
-  ret = mbedtls_sha512_starts(&ctx, 0);
-  if (ret != 0) {
+  status = psa_hash_setup(&hash_operation, MBEDTLS_PSA_CRYPTO_RNG_HASH);
+  if (status != PSA_SUCCESS) {
     goto exit;
   }
 
   // Volatile seed
-  ret = mbedtls_sha512_update(&ctx, (const unsigned char *)&sli_volatile_seed, sizeof(sli_volatile_seed));
-  if (ret != 0) {
+  status = psa_hash_update(&hash_operation, (const unsigned char *)&sli_volatile_seed, sizeof(sli_volatile_seed));
+  if (status != PSA_SUCCESS) {
     goto exit;
   }
 
   // SRAM
-  ret = mbedtls_sha512_update(&ctx, (const unsigned char *)SRAM_BASE, SRAM_SIZE);
-  if (ret != 0) {
+  status = psa_hash_update(&hash_operation, (const unsigned char *)SRAM_BASE, SRAM_SIZE);
+  if (status != PSA_SUCCESS) {
     goto exit;
   }
 
-  ret = mbedtls_sha512_finish(&ctx, hash_buffer);
-  if (ret != 0) {
+  status = psa_hash_finish(&hash_operation, hash_buffer, &hash_length);
+  if (status != PSA_SUCCESS) {
     goto exit;
   }
-
-  #else // MBEDTLS_ENTROPY_SHA512_ACCUMULATOR
-
-  uint8_t hash_buffer[32];
-  mbedtls_sha256_context ctx;
-  mbedtls_sha256_init(&ctx);
-
-  ret = mbedtls_sha256_starts(&ctx, 0);
-  if (ret != 0) {
-    goto exit;
-  }
-
-  // Volatile seed
-  ret = mbedtls_sha256_update(&ctx, (const unsigned char *)&sli_volatile_seed, sizeof(sli_volatile_seed));
-  if (ret != 0) {
-    goto exit;
-  }
-
-  // SRAM
-  ret = mbedtls_sha256_update(&ctx, (const unsigned char *)SRAM_BASE, SRAM_SIZE);
-  if (ret != 0) {
-    goto exit;
-  }
-
-  ret = mbedtls_sha256_finish(&ctx, hash_buffer);
-  if (ret != 0) {
-    goto exit;
-  }
-
-  #endif // MBEDTLS_ENTROPY_SHA512_ACCUMULATOR
 
   if (sizeof(hash_buffer) < buf_len) {
-    ret = MBEDTLS_ERR_ENTROPY_FILE_IO_ERROR;
+    status = PSA_ERROR_BUFFER_TOO_SMALL;
+    goto exit;
   }
 
   exit:
+  psa_hash_abort(&hash_operation);
 
-  #if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
-  mbedtls_sha512_free(&ctx);
-  #else
-  mbedtls_sha256_free(&ctx);
-  #endif
-
-  if (ret == 0) {
+  if (status == PSA_SUCCESS) {
     memcpy(buf, hash_buffer, buf_len);
   }
 
-  return ret;
+  return status;
 }
 
 int sli_nv_seed_write(unsigned char *buf, size_t buf_len)

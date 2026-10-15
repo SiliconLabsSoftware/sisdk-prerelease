@@ -14,9 +14,9 @@ provides:
 - name: zw_toolchain_settings
 requires:
 - name: toolchain_gcc_lto
-  condition: [zw_release, toolchain_gcc]
+  condition: [zw_stack_release_libraries, toolchain_gcc]
 - name: toolchain_llvm_lto
-  condition: [zw_release, toolchain_llvm]
+  condition: [zw_stack_release_libraries, toolchain_llvm]
 toolchain_settings:
 - option: gcc_compiler_option
   value: "-fmerge-all-constants"
@@ -25,6 +25,8 @@ toolchain_settings:
 - option: gcc_compiler_option
   value: "-Werror"
   condition: [zw_release]
+- option: gcc_compiler_option
+  value: "-Wno-error=deprecated-declarations"
 - option: gcc_compiler_option
   value: "-Wextra"
 - option: gcc_compiler_option
@@ -44,5 +46,7 @@ toolchain_settings:
   value: "-fshort-enums"
 - option: llvm_compiler_option
   value: "-fmerge-all-constants"
+- option: llvm_compiler_option
+  value: "-Wno-error=deprecated-declarations"
 
 root_path: zwave

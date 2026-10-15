@@ -18,12 +18,6 @@ template_contribution:
   value: tfm_crypto_reset_key_attributes
 
 - name: tfm_interface_func
-  value: tfm_crypto_open_key
-
-- name: tfm_interface_func
-  value: tfm_crypto_close_key
-
-- name: tfm_interface_func
   value: tfm_crypto_import_key
 
 - name: tfm_interface_func

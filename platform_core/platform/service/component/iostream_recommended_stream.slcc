@@ -12,3 +12,6 @@ provides:
 - name: iostream_recommended_stream
 requires:
 - name: iostream_transport
+documentation:
+  docset: gecko-platform
+  document: platform-service/iostream

@@ -1,12 +1,14 @@
 id: "sl_connect_rail_dmp_button"
 label: "Connect Rail DMP - Button support"
-package: "connect_app"
+package: "connect"
 description: >
   Connect RAIL DMP application button handler.
   If Simple Button already used by the app, this component will throw
   Compiler error as sl_button_on_change will be defined two times.
 category: "Connect|Utility"
 quality: "production"
+ui_hints:
+  visibility: basic
 metadata:
   sbom:
     license: Zlib
@@ -29,3 +31,7 @@ template_contribution:
 #---------------- Component Catalog ------------------
 - name: component_catalog
   value: sl_connect_rail_dmp_button
+
+documentation:
+  docset: connect-stack
+  document: connect-stack-api/connect-rail-dmp

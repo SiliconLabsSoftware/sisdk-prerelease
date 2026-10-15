@@ -191,7 +191,7 @@ psa_status_t sli_se_driver_single_shot_hkdf(
   }
 
   // Prepare SE command context.
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   sl_status_t sl_status = sl_se_init_command_context(&cmd_ctx);
   if (sl_status != SL_STATUS_OK) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -337,7 +337,7 @@ psa_status_t sli_se_driver_single_shot_pbkdf2(
   }
 
   // Prepare SE command context.
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   sl_status_t sl_status = sl_se_init_command_context(&cmd_ctx);
   if (sl_status != SL_STATUS_OK) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -407,7 +407,7 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
   sl_se_key_descriptor_t priv_desc = { 0 };
   sl_se_key_descriptor_t pub_desc = { 0 };
   sl_se_key_descriptor_t shared_desc = { 0 };
-  sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
+  sl_se_command_context_t cmd_ctx;
   sl_status_t sl_status = SL_STATUS_FAIL;
   psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
 

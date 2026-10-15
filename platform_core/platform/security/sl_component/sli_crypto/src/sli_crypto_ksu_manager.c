@@ -128,7 +128,7 @@ static inline sl_status_t sli_ksu_lock_release(void)
  *   Find available key KSU slot in key descriptor
  */
 static inline sl_status_t sli_ksu_find_free_user_slot(sl_se_key_descriptor_t *key_desc,
-                                                 void *user_ref)
+                                                      void *user_ref)
 {
   if (key_desc == NULL || user_ref == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -216,7 +216,7 @@ sl_status_t sli_ksu_key_slot_import(sl_se_key_descriptor_t *key_desc,
 
   // Initialize to an invalid value.
   uint8_t key_slot_id = ((uint8_t)SLI_KSU_MAX_KEY_SLOTS);
-  sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
+  sl_se_command_context_t cmd_ctx;
 
   // Find available slot in KSU
   sl_status = sli_ksu_find_free_user_slot(key_desc, user_ref);
@@ -287,7 +287,7 @@ sl_status_t sli_ksu_key_slot_generate(sl_se_key_descriptor_t *key_desc,
     return sl_status;
   }
 
-  sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
+  sl_se_command_context_t cmd_ctx;
 
   // Find available slot in KSU
   sl_status = sli_ksu_find_free_user_slot(key_desc, user_ref);
@@ -370,7 +370,7 @@ sl_status_t sli_ksu_delete_key(sl_se_key_descriptor_t *key_desc)
   ksu_slots[key_slot_id].state = SLI_KSU_SLOT_STATUS_AVAILABLE;
   ksu_slots[key_slot_id].crypto_engine_id = 0;
 
-  sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
+  sl_se_command_context_t cmd_ctx;
 
   sl_status = sl_se_init_command_context(&cmd_ctx);
   if (sl_status != SL_STATUS_OK) {
@@ -438,7 +438,7 @@ sl_status_t sli_ksu_key_slot_copy(sl_se_key_descriptor_t *source_key_desc,
   }
 
   sl_status_t sl_status = SL_STATUS_OK;
-  sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
+  sl_se_command_context_t cmd_ctx;
   uint8_t key_slot_id;
 
   // Acquire the KSU manager lock (mutex) to protect KSU slot operations

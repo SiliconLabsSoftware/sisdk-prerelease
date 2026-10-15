@@ -598,7 +598,7 @@ void sleep(sl_cli_command_arg_t *args)
 #else
   char* em4State = "";
   uint8_t emMode = (uint8_t)sl_cli_get_argument_string(args, 0)[0] - '0';
-#if defined(_SILICON_LABS_32B_SERIES_2)
+#if defined(_SILICON_LABS_32B_SERIES_2) && !defined(FPGA)
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   void (*em4Function)(void) = &sl_power_manager_enter_em4;
 #else
@@ -688,7 +688,8 @@ void sleep(sl_cli_command_arg_t *args)
 #endif
                   emMode, em4State,
 #if defined(_SILICON_LABS_32B_SERIES_2) && defined (VCOM_TX_PORT)
-                  (VCOM_TX_PORT == SL_GPIO_PORT_C || VCOM_TX_PORT == SL_GPIO_PORT_D)
+                  ((GPIO_Port_TypeDef)VCOM_TX_PORT == gpioPortC
+                   || (GPIO_Port_TypeDef)VCOM_TX_PORT == gpioPortD)
                   ? ((emMode < 2) ? "On" : "Off") :
 #endif
                   (emMode < 4) ? "On" : "Off",

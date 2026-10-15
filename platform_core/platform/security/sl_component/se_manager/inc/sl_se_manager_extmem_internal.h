@@ -30,6 +30,7 @@
 #ifndef SL_SE_MANAGER_EXTMEM_INTERNAL_H
 #define SL_SE_MANAGER_EXTMEM_INTERNAL_H
 
+#include "sl_code_classification.h"
 #include "sl_se_manager_types.h"
 #include "sl_se_manager_extmem.h"
 #include "sl_status.h"
@@ -79,7 +80,7 @@ extern "C" {
 typedef uint16_t sli_se_psram_configs_t[9]; // 9 regions, each region is a 16-bit configuration word.
 
 /// Deep Power Down mode.
-SL_ENUM( sli_se_deep_power_down_mode_t) {
+SL_ENUM(sli_se_deep_power_down_mode_t) {
   SLI_SE_DEEP_POWER_DOWN_MODE_ENABLE = 0,  ///< Enable auto Deep Power Down mode.
   SLI_SE_DEEP_POWER_DOWN_MODE_DISABLE = 1, ///< Disable auto Deep Power Down mode.
   SLI_SE_DEEP_POWER_DOWN_MODE_ENTER = 2,   ///< Enter Deep Power Down mode.
@@ -109,9 +110,10 @@ SL_ENUM( sli_se_deep_power_down_mode_t) {
  * @return SL_STATUS_OK if the operation is successful, or error code
  *         defined in sl_status.h.
  ******************************************************************************/
- sl_status_t sli_se_configure_dpd_mode(sl_se_command_context_t *cmd_ctx,
-                                       sli_se_spi_memory_instance_t spi_instance,
-                                       sli_se_deep_power_down_mode_t mode);
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SE_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
+sl_status_t sli_se_configure_dpd_mode(sl_se_command_context_t *cmd_ctx,
+                                      sli_se_spi_memory_instance_t spi_instance,
+                                      sli_se_deep_power_down_mode_t mode);
 #endif
 
 #if !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
@@ -133,8 +135,8 @@ SL_ENUM( sli_se_deep_power_down_mode_t) {
  *   of type sl_status_t that indicates why the command was not successful,
  *   @file sl_status.h.
  ******************************************************************************/
- sl_status_t sli_se_psram_region_apply_config(sl_se_command_context_t *cmd_ctx,
-                                              sli_se_psram_configs_t *regions_array);
+sl_status_t sli_se_psram_region_apply_config(sl_se_command_context_t *cmd_ctx,
+                                             sli_se_psram_configs_t *regions_array);
 #endif
 
 /// @} (end addtogroup sl_se_memory_region_utils)

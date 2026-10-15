@@ -19,6 +19,9 @@ include:
   - path: security/btl_security_ecdsa.h
   - path: security/btl_security_sha256.h
   - path: security/btl_security_types.h
+- path: platform/bootloader/series3/driver
+  file_list:
+  - path: btl_driver_cmu.h
 requires:
 - name: se_manager
 - name: bootloader_interface_headers

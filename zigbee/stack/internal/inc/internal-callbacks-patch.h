@@ -26,7 +26,7 @@
 #include "stack/include/sl_zigbee.h"
 #include "stack/include/message.h" // Required for packetHandlers
 #include "mac-child.h" // unified-mac
-#include "scan.h" // Required for PG_CH_BITMASK32
+#include "sl-mac-scan-15.4.h" // Required for PG_CH_BITMASK32
 #include "stack/include/sl_zigbee_types_internal.h"
 
 sl_zigbee_join_decision_t sl_zigbee_internal_trust_center_join_handler(sl_802154_short_addr_t newNodeId,

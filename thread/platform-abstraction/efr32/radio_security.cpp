@@ -51,6 +51,8 @@ extern "C" {
 }
 
 #include SL_OT_MAC_KEY_POLICY_CONFIG_HEADER
+#include "mac/mac-key-types.hpp"
+#include "mac/tx-aes-ccm-api.hpp"
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 
@@ -63,21 +65,17 @@ enum class MacKeyType
     COUNT
 };
 
+// Per-instance security material. `palKeys` is HW-facing; representation is
+// picked at compile time by `MacKeyStoragePolicy::PalKey` (plaintext bytes for
+// RADIOAES / plaintext LPWAES, KSU slot ref for LPWAES + KSU).
 struct securityMaterial
 {
-    uint8_t           ackKeyId;
-    uint8_t           keyId;
-    volatile uint32_t macFrameCounter;
-    volatile uint32_t ackFrameCounter;
-    otMacKeyMaterial  keys[static_cast<int>(MacKeyType::COUNT)];
-    // Plaintext copies for the platform's TX/Enhanced-ACK encryption.
-    // Kept separate from the valid PSA key references above.
-    // OpenThread core can read `keys[]` back via `Frame::GetAesKey()`/
-    // `otPlatCryptoAesSetKey()` in `TxFrame::RestoreTransmitSecurity()`
-    // on MAC-header-IE retries, and can misread clobbered raw key bytes
-    // as a faulty PSA handle.
-    otMacKeyMaterial rawKeys[static_cast<int>(MacKeyType::COUNT)];
-    volatile bool    keyUpdateInProgress;
+    uint8_t                         ackKeyId;
+    uint8_t                         keyId;
+    volatile uint32_t               macFrameCounter;
+    volatile uint32_t               ackFrameCounter;
+    MacKeyStoragePolicy::PalKeyList palKeys;
+    volatile bool                   keyUpdateInProgress;
 };
 
 static_assert(static_cast<size_t>(MacKeyType::COUNT) == MacKeyStoragePolicy::kMacKeyCount,
@@ -109,12 +107,10 @@ void sli_ot_radio_security_deinit(void)
         setKeyUpdateInProgress(material, true);
     }
 
-#if (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
-    for (const securityMaterial &material : sMacKeys)
+    for (securityMaterial &material : sMacKeys)
     {
-        MacKeyStoragePolicy::ReleaseKeys(material.keys);
+        MacKeyStoragePolicy::ReleaseKeys(material.palKeys);
     }
-#endif // PSA crypto lib
 
     // Clear security material for all instances
     memset(sMacKeys, 0, sizeof(sMacKeys));
@@ -162,13 +158,9 @@ otError sli_ot_radio_security_process_transmit(otRadioFrame *aFrame, otInstance 
         keyToUse = static_cast<uint8_t>(MacKeyType::CURRENT);
     }
 
-    // `mAesKey` points at the PSA keyRef entry that OpenThread core reads
-    // back via `Frame::GetAesKey()` on MAC-header-IE retries, so it must
-    // never be in plaintext.
-    //
-    // The plaintext bytes needed for this platform's own HW CCM encryption
-    // are passed explicitly below.
-    aFrame->mInfo.mTxInfo.mAesKey = &sMacKeys[instanceIndex].keys[keyToUse];
+    // Radio owns transmit security on this path; the OT stack does not read
+    // this pointer. Clear any stale value from a prior tx of this frame.
+    aFrame->mInfo.mTxInfo.mAesKey = nullptr;
 
     if (!aFrame->mInfo.mTxInfo.mIsHeaderUpdated)
     {
@@ -195,7 +187,7 @@ otError sli_ot_radio_security_process_transmit(otRadioFrame *aFrame, otInstance 
 
     error = sli_ot_process_transmit_aes_ccm(aFrame,
                                             &sExtAddress[instanceIndex],
-                                            &sMacKeys[instanceIndex].rawKeys[keyToUse]);
+                                            &sMacKeys[instanceIndex].palKeys[keyToUse]);
 
 exit:
     return error;
@@ -212,6 +204,7 @@ void sli_ot_radio_security_set_mac_key(otInstance             *aInstance,
     OT_UNUSED_VARIABLE(aKeyIdMode);
     OT_UNUSED_VARIABLE(aKeyType);
 
+    otError         error = OT_ERROR_NONE;
     instanceIndex_t index = sli_ot_radio_instance_get_index(aInstance);
 
     otEXPECT(sl_ot_rtos_task_can_access_pal());
@@ -240,27 +233,23 @@ void sli_ot_radio_security_set_mac_key(otInstance             *aInstance,
     // Signal to key users that the key state is invalid if pre-empted before update is complete
     setKeyUpdateInProgress(sMacKeys[index], true);
 
-#if (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
-    // Release previously prepared material before overwriting with new source
-    // key refs.
-    MacKeyStoragePolicy::ReleaseKeys(sMacKeys[index].keys);
-#endif
+    MacKeyStoragePolicy::ReleaseKeys(sMacKeys[index].palKeys);
 
     sMacKeys[index].keyId = aKeyId;
-    memcpy(&sMacKeys[index].keys[static_cast<int>(MacKeyType::PREV)], aPrevKey, sizeof(otMacKeyMaterial));
-    memcpy(&sMacKeys[index].keys[static_cast<int>(MacKeyType::CURRENT)], aCurrKey, sizeof(otMacKeyMaterial));
-    memcpy(&sMacKeys[index].keys[static_cast<int>(MacKeyType::NEXT)], aNextKey, sizeof(otMacKeyMaterial));
 
-#if (OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA)
-    // Export PSA keyRefs into rawKeys[] for HW CCM while leaving keys[] as
-    // valid references for SubMac retx restore.
-    MacKeyStoragePolicy::PrepareKeys(sMacKeys[index].keys, sMacKeys[index].rawKeys);
-#else
-    // RCP builds use CRYPTO_LIB_MBEDTLS and receive literal MAC keys over
-    // Spinel. HW CCM always reads rawKeys[], so mirror the literals there.
-    // Do not touch keys[] — process_transmit still points mAesKey at keys[].
-    memcpy(sMacKeys[index].rawKeys, sMacKeys[index].keys, sizeof(sMacKeys[index].rawKeys));
-#endif
+    {
+        const MacKeyStoragePolicy::StackKeyList incomingStackKeys = {
+            MacKeyStoragePolicy::StackKey::From(*aPrevKey),
+            MacKeyStoragePolicy::StackKey::From(*aCurrKey),
+            MacKeyStoragePolicy::StackKey::From(*aNextKey),
+        };
+
+        error = MacKeyStoragePolicy::InstallKeys(incomingStackKeys, sMacKeys[index].palKeys);
+    }
+
+    // Keep keyUpdateInProgress = true on failure so tx paths bail instead
+    // of encrypting with released keys.
+    otEXPECT(error == OT_ERROR_NONE);
 
     // Signal to key users that the key state is now valid
     setKeyUpdateInProgress(sMacKeys[index], false);

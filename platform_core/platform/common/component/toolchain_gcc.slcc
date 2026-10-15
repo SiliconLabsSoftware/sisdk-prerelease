@@ -41,3 +41,6 @@ toolchain_settings:
 - option: link_time_optimization
   value: disabled
   unless: [toolchain_lto, toolchain_gcc_lto, toolchain_llvm_lto]
+documentation:
+  docset: gecko-platform
+  document: platform-common/common

@@ -20,16 +20,13 @@
 #include "config/btl_config.h"
 #include "core/btl_util.h"
 #include "em_device.h"
+#if defined(SEMAILBOX_PRESENT)
+#include <stdbool.h>
+#endif
 #if defined(SEMAILBOX_PRESENT) && defined(SE_MANAGER_CONFIG_FILE)
 #include SE_MANAGER_CONFIG_FILE
 #endif
 MISRAC_DISABLE
-#if defined(SEMAILBOX_PRESENT)
-#include "sl_se_manager.h"
-#include "sl_se_manager_cipher.h"
-#endif
-
-#include "mbedtls/aes.h"
 #include "security/sha/btl_sha256.h"
 MISRAC_ENABLE
 
@@ -47,25 +44,24 @@ MISRAC_ENABLE
 
 /// Context variable type for AES-ECB
 typedef struct AesContext {
-  mbedtls_aes_context   aesContext;       ///< mbedTLS AES context
+  unsigned int keybits; ///< Key length in bits
+  uint8_t      key[32]; ///< AES key (128/192/256-bit)
 } AesContext_t;
 
 /// Context variable type for AES-CTR (and AES-CCM)
 typedef struct AesCtrContext {
 #if defined(SEMAILBOX_PRESENT)
-  sl_se_key_descriptor_t  aesKeyDesc;       ///< SE Manager Key descriptor
-  mbedtls_aes_context     aesContext;       ///< mbedTLS AES context
-#else
-  mbedtls_aes_context     aesContext;       ///< mbedTLS AES context
+  bool useInternalSeKey; ///< True when using the immutable SE application AES key
 #endif
-  size_t                  offsetInBlock;    ///< @brief Position in block of last
-                                            ///< byte en/decrypted
+  unsigned int keybits; ///< Key length in bits
+  uint8_t      key[32]; ///< AES key (128/192/256-bit), when not in SE storage
+  size_t       offsetInBlock; ///< Position in block of last byte en/decrypted
 #if defined(SEMAILBOX_PRESENT) && defined(SE_MANAGER_CONFIG_FILE)
-  uint8_t                 streamBlock[16U * BOOTLOADER_AES_CTR_NUM_BLOCKS_BUFFERED];  ///< Current CTR encrypted block
+  uint8_t                streamBlock[16U * BOOTLOADER_AES_CTR_NUM_BLOCKS_BUFFERED]; ///< Current CTR encrypted block(s)
 #else
-  uint8_t                 streamBlock[16];  ///< Current CTR encrypted block
+  uint8_t                streamBlock[16]; ///< Current CTR encrypted block
 #endif
-  uint8_t                 counter[16];      ///< Current counter/CCM value
+  uint8_t                counter[16]; ///< Current counter/CCM value
 } AesCtrContext_t;
 
 /** @} addtogroup AES */
@@ -77,7 +73,7 @@ typedef struct AesCtrContext {
 
 /// Context type for SHA algorithm
 typedef union Sha256Context {
-  btl_sha256_context       shaContext;      ///< mbedTLS SHA256 context struct
+  btl_sha256_context       shaContext;      ///< SHA-256 context struct
   uint8_t                  sha[32];         ///< resulting SHA hash
 } Sha256Context_t;
 

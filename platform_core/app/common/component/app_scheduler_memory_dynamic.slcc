@@ -33,3 +33,6 @@ include:
 
 source:
 - path: app_scheduler_memory_dynamic.c
+documentation:
+  docset: gecko-platform
+  document: platform-service/memory-manager

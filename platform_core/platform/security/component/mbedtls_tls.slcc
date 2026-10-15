@@ -7,13 +7,23 @@ description: >-
   This component will be replaced by a new set of components including mbedtls_ssl_tls,
   mbedtls_ssl_proto_tls12, mbedtls_ssl_client and mbedtls_ssl_keep_peer_certificate.
 category: Platform|Security|Mbed TLS|Upper Layer
-quality: production
+quality: deprecated
+
+# This component is part of the Mbed TLS upper layers (SSL, X509, etc).
+# In the TZ Secure Key Library use case, the Mbed TLS upper layers lives
+# in the TZ NonSecure application, and is not not allowed to be included
+# in the secure library.
+conflicts:
+- name: tz_secure_key_library_s
+
 provides:
 - name: mbedtls_tls
 - name: mbedtls_uses_psa_crypto
   allow_multiple: true
 requires:
 - name: mbedtls_hash
+  # MBEDTLS_SSL_TLS_C and MBEDTLS_SSL_PROTO_TLS1_2 require SHA-256 or SHA-384.
+- name: mbedtls_ssl_handshake_hash
 - name: mbedtls_cipher
 - name: mbedtls_cipher_cbc
 - name: mbedtls_ccm
@@ -21,14 +31,9 @@ requires:
 - name: mbedtls_x509
 - name: mbedtls_random
 - name: mbedtls_core
-- name: mbedtls_ecdh
-  condition: [psa_crypto_ecdh]
+- name: psa_crypto_ecdh
 - name: mbedtls_ecdsa
   condition: [psa_crypto_ecdsa]
-- name: mbedtls_ecc_secp192r1
-  condition: [psa_crypto_ecc_secp192r1]
-- name: mbedtls_ecc_secp224r1
-  condition: [psa_crypto_ecc_secp224r1]
 - name: mbedtls_ecc_secp256r1
   condition: [psa_crypto_ecc_secp256r1]
 - name: mbedtls_ecc_secp384r1
@@ -47,6 +52,9 @@ requires:
   condition: [psa_crypto_sha384]
 - name: mbedtls_sha512
   condition: [psa_crypto_sha512]
+recommends:
+- id: mbedtls_ssl_handshake_sha256
+  vendor: silabs
 template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_SSL_TLS_C

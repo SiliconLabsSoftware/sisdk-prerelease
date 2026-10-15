@@ -67,7 +67,7 @@ var group__sl__bt__cs =
     ] ],
     [ "sl_bt_cs_security_enable", "group__sl__bt__cs.html#ga1a9836693912844643f9d19c292a81ce", null ],
     [ "sl_bt_cs_set_default_settings", "group__sl__bt__cs.html#gafffbe85e1a062397e80c702ec792bf40", null ],
-    [ "sl_bt_cs_create_config", "group__sl__bt__cs.html#gabfd25cc7bc8b068882498998c44299af", null ],
+    [ "sl_bt_cs_create_config", "group__sl__bt__cs.html#gabc94b89bded7f8a2bd8699f3ccc36361", null ],
     [ "sl_bt_cs_remove_config", "group__sl__bt__cs.html#ga3e87a4164f6020acadda0d41e2137325", null ],
     [ "sl_bt_cs_set_channel_classification", "group__sl__bt__cs.html#gaa88b3a2d98f2204122e08031c2f5f9fd", null ],
     [ "sl_bt_cs_set_procedure_parameters", "group__sl__bt__cs.html#ga45623207ae15789c3b2a90876d38b625", null ],

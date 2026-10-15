@@ -83,10 +83,19 @@ const uint8_t *Pskc::ComputePskc(const uint8_t *aExtPanId, const char *aNetworkN
 {
     uint32_t blockCounter = 0;
     uint16_t useLen       = 0;
-    uint16_t prfBlockLen  = MBEDTLS_CIPHER_BLKSIZE_MAX;
+    // Prefer mbedtls's max block length (MBEDTLS_MAX_BLOCK_LENGTH on 3.5+/4.x;
+    // MBEDTLS_CIPHER_BLKSIZE_MAX on older 3.x). AES-CMAC-PRF-128 output is 16 bytes.
+#if defined(MBEDTLS_MAX_BLOCK_LENGTH)
+    static constexpr uint16_t kPrfBlockSize = MBEDTLS_MAX_BLOCK_LENGTH;
+#elif defined(MBEDTLS_CIPHER_BLKSIZE_MAX)
+    static constexpr uint16_t kPrfBlockSize = MBEDTLS_CIPHER_BLKSIZE_MAX;
+#else
+    static constexpr uint16_t kPrfBlockSize = 16;
+#endif
+    uint16_t prfBlockLen = kPrfBlockSize;
     uint8_t  prfInput[OT_PBKDF2_SALT_MAX_LENGTH + 4];
-    uint8_t  prfOutput[MBEDTLS_CIPHER_BLKSIZE_MAX];
-    uint8_t  keyBlock[MBEDTLS_CIPHER_BLKSIZE_MAX];
+    uint8_t  prfOutput[kPrfBlockSize];
+    uint8_t  keyBlock[kPrfBlockSize];
     uint16_t keyLen = OT_PSKC_LENGTH;
     uint8_t *pskc   = mPskc;
 

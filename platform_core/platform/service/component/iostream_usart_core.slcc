@@ -34,3 +34,5 @@ requires:
 - name: emlib_gpio
 - name: emlib_usart
 - name: atomic
+- name: power_manager_sleep_hooks
+  condition: [power_manager]

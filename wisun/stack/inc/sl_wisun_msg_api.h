@@ -156,6 +156,7 @@ typedef enum {
   SL_WISUN_MSG_GET_BROADCAST_SCHEDULE_TIME_REQ_ID         = 0x65,
   SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBOR_COUNT_REQ_ID       = 0x66,
   SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBORS_REQ_ID            = 0x67,
+  SL_WISUN_MSG_SET_FFN_POWER_SAVING_SCHEDULE_REQ_ID       = 0x68,
 } sl_wisun_msg_req_id_t;
 
 /// Wi-SUN Message API confirmation IDs
@@ -258,6 +259,7 @@ typedef enum {
   SL_WISUN_MSG_GET_BROADCAST_SCHEDULE_TIME_CNF_ID         = 0x65,
   SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBOR_COUNT_CNF_ID       = 0x66,
   SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBORS_CNF_ID            = 0x67,
+  SL_WISUN_MSG_SET_FFN_POWER_SAVING_SCHEDULE_CNF_ID       = 0x68,
 } sl_wisun_msg_cnf_id_t;
 
 /**************************************************************************//**
@@ -4674,6 +4676,53 @@ typedef struct {
 SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBORS) */
+
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_SET_FFN_POWER_SAVING_SCHEDULE sl_wisun_msg_set_ffn_power_saving_schedule
+ * @{
+ *****************************************************************************/
+
+/// Request message body.
+// See @ref sl_wisun_set_ffn_power_saving_schedule for schedule semantics,
+/// usage requirements, and status codes.
+SL_PACK_START(1)
+typedef struct {
+  /// Consecutive unicast dwell periods spent listening.
+  uint8_t listen_slots;
+  /// Consecutive unicast dwell periods that may be spent sleeping.
+  uint8_t sleep_slots;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_power_saving_schedule_req_body_t;
+SL_PACK_END()
+
+/// Request message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Request message body
+  sl_wisun_msg_set_ffn_power_saving_schedule_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_power_saving_schedule_req_t;
+SL_PACK_END()
+
+/// Confirmation message body
+SL_PACK_START(1)
+typedef struct {
+  /// Status of the request
+  uint32_t status;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_power_saving_schedule_cnf_body_t;
+SL_PACK_END()
+
+/// Confirmation message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Confirmation message body
+  sl_wisun_msg_set_ffn_power_saving_schedule_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_power_saving_schedule_cnf_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_SET_FFN_POWER_SAVING_SCHEDULE) */
 
 /**************************************************************************//**
  * @brief Send a request to the Wi-SUN stack

@@ -207,7 +207,7 @@ int sl_si91x_socket_async(int family, int type, int protocol, sl_si91x_socket_re
  *   | @ref SL_SI91X_SO_RCVTIME                          | sl_si91x_time_value                       | Socket Receive timeout. sl_si91x_time_value structure is used to represent time in two parts: seconds and microseconds.    |
  *   | @ref SL_SI91X_SO_MAXRETRY                         | uint16_t                                  | Maximum number of TCP TX retransmission attempts (default: 10)                                                             |
  *   | @ref SL_SI91X_SO_MSS                              | uint16_t                                  | Maximum Segment Size (MSS) for the TCP connection                                                                          |
- *   | @ref SL_SI91X_SO_TCP_KEEPALIVE                    | uint16_t                                  | TCP keep-alive idle time in seconds (idle connection; default: 1200)                                                       |
+ *   | @ref SL_SI91X_SO_TCP_KEEPALIVE                    | uint16_t                                  | TCP keep-alive idle timeout in seconds before keep-alive probes are sent on an inactive connection (default: 1200 seconds) |
  *   | @ref SL_SI91X_SO_HIGH_PERFORMANCE_SOCKET          | BIT(7)                                    | Set high performance socket                                                                                                |
  *   | @ref SL_SI91X_SO_SSL_ENABLE                       | SL_SI91X_ENABLE_TLS                       | Enable TLS/SSL                                                                                                             |
  *   | @ref SL_SI91X_SO_SSL_V_1_0_ENABLE                 | SL_SI91X_ENABLE_TLS \| SL_SI91X_TLS_V_1_0 | Enable TLS v1.0                                                                                                            |
@@ -218,7 +218,7 @@ int sl_si91x_socket_async(int family, int type, int protocol, sl_si91x_socket_re
  *   | @ref SL_SI91X_SO_CERT_INDEX                       | uint8_t                                   | Certificate index                                                                                                          |
  *   | @ref SL_SI91X_SO_TLS_SNI                          | sl_si91x_socket_type_length_value_t       | Server Name Indication (SNI)                                                                                               |
  *   | @ref SL_SI91X_SO_TLS_ALPN                         | sl_si91x_socket_type_length_value_t       | Application-Layer Protocol Negotiation (ALPN)                                                                              |
- *   | @ref SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE | uint8_t                                   | Maximum retransmission timeout value for TCP                                                                               |
+ *   | @ref SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE | uint8_t                                   | Maximum TCP retransmission timeout (power of 2, acceptable range is between 1 and 128 seconds)                             |
  *   | @ref SL_SI91X_SO_PER_SOCKET_CLOSE                 | BIT(0)                                    | Enable per-socket graceful close handling                                                                                  |
  *
  * @param[in] option_len 
@@ -254,7 +254,7 @@ int sl_si91x_socket_async(int family, int type, int protocol, sl_si91x_socket_re
  * The value of the option SL_SI91X_SO_MAX_RETRANSMISSION_TIMEOUT_VALUE should be a power of 2 between 1 and 128.
  *
  * @note TCP keep-alive (@ref SL_SI91X_SO_TCP_KEEPALIVE):
- * - Applies when the TCP connection is idle (no peer activity that refreshes the keep-alive timer). Keep-alive packet check whether the peer is still reachable.
+ * - Applies when the TCP connection is idle (no peer activity that refreshes the keep-alive timer). Keep-alive probes check whether the peer is still reachable.
  * - Configures the idle time (in seconds) before the first TCP keep-alive packet is sent. The default is 1200 seconds.
  * - If the peer does not respond, the NWP retries keep-alive with fixed defaults of 10 retries at 10-second intervals (not configurable via this API).
  * - Remote termination on silent peer loss occurs after: initial idle time + (retries × retry interval).
@@ -973,7 +973,8 @@ int sl_si91x_send_large_data(int socket, const uint8_t *buffer, size_t buffer_le
  *   The length of the buffer pointed to by the buffer parameter. Must be > 0.
  *
  * @param[in] flags 
- *   Controls the reception of the data. Note that the flags parameter are not currently supported.
+ *   Controls the reception of the data. When @c SL_SI91X_SOCKETS_ENABLE_RECV_FLAGS is set to 1,
+ *   @c MSG_PEEK (0x02) is supported. Otherwise any non-zero value fails with @c EOPNOTSUPP.
  *
  * @return 
  *   Returns the number of bytes received on success, or -1 on failure with @c errno set.
@@ -987,12 +988,19 @@ int sl_si91x_send_large_data(int socket, const uint8_t *buffer, size_t buffer_le
  * @retval -1/EWOULDBLOCK        Non-blocking socket has no data available.
  * @retval -1/ETIMEDOUT          @ref SL_SI91X_SO_RCVTIME elapsed before data was received.
  * @retval -1/ECONNRESET         Peer resets the connection.
+ * @retval -1/EOPNOTSUPP         @p flags is not supported (see @p flags).
  *
  * @note Thread safety:
  * - Not thread-safe on the same descriptor; serialize concurrent access.
  *
  * @note Side effects:
  * - Blocks the calling thread unless @ref SL_SI91X_SO_RCVTIME is set.
+ *
+ * @note
+ *   Enable @c MSG_PEEK by setting the project/compile define @c SL_SI91X_SOCKETS_ENABLE_RECV_FLAGS to 1
+ *   (for example in the SLC @c .slcp @c define list) so SDK socket sources are rebuilt with the flag.
+ *   Defining it only in application sources is not sufficient. Without that define, pass 0 for @p flags
+ *   or @c sl_si91x_recv() fails with @c EOPNOTSUPP.
  *
  * @see sl_si91x_recvfrom(), sl_si91x_send(), sl_si91x_setsockopt()
  *
@@ -1042,7 +1050,8 @@ int sl_si91x_recv(int socket, uint8_t *buffer, size_t bufferLength, int32_t flag
  *   The size of the buffer pointed to by the buffer parameter. Must be > 0.
  *
  * @param[in] flags 
- *   Controls the reception of the data. Note that the flags parameter is not currently supported.
+ *   Controls the reception of the data. When @c SL_SI91X_SOCKETS_ENABLE_RECV_FLAGS is set to 1,
+ *   @c MSG_PEEK (0x02) is supported. Otherwise any non-zero value fails with @c EOPNOTSUPP.
  *
  * @param[out] fromAddr 
  *   Pointer to a @ref sockaddr that will hold the address of the remote peer from which the current packet was received.
@@ -1099,6 +1108,45 @@ int sl_si91x_recvfrom(int socket,
                       int32_t flags,
                       struct sockaddr *fromAddr,
                       socklen_t *fromAddrLen);
+
+/**
+ * @brief Returns the number of bytes available to read on a socket.
+ *
+ * @details
+ * Queries the firmware for the count of bytes ready to read without consuming
+ * them from the NWP queue. Use @ref sl_si91x_recv or @ref sl_si91x_recvfrom
+ * separately to read the data.
+ *
+ * @pre Pre-conditions:
+ * - @p socket must be connected (TCP) or UDP-unconnected-ready.
+ *
+ * @param[in] socket
+ *   The socket ID or file descriptor for the specified socket.
+ *
+ * @param[out] available_bytes
+ *   Pointer to receive the available byte count. Must be non-NULL.
+ *
+ * @return
+ *   Returns 0 on success, or -1 on failure with @c errno set.
+ *
+ * @retval 0                 Success; @p available_bytes is populated.
+ * @retval -1/EBADF         @p socket is not a valid or ready descriptor.
+ * @retval -1/ENOTCONN      TCP socket is not connected.
+ * @retval -1/EINVAL        @p available_bytes is NULL.
+ * @retval -1               NWP query failed; @c errno is set from the firmware status
+ *                          (never 0). Unknown statuses map to @c ECONNABORTED or @c EIO.
+ *
+ * @see sl_si91x_recv(), sl_si91x_recvfrom()
+ *
+ * @par Example
+ * @code{.c}
+ * uint32_t available = 0;
+ * if (sl_si91x_socket_get_available_bytes(sock, &available) == 0 && available > 0) {
+ *   sl_si91x_recv(sock, buffer, available, 0);
+ * }
+ * @endcode
+ */
+int sl_si91x_socket_get_available_bytes(int socket, uint32_t *available_bytes);
 
 /**
  * @brief Disables send or receive operations on a socket.
@@ -1231,8 +1279,10 @@ int sl_si91x_shutdown(int socket, int how);
  * The sl_si91x_select() function has the following limitations:
  *   - Supports a maximum of 10 sockets per call.
  *   - Supports read and write fd_sets only. It does not monitor the exceptfds set.
- *   - Operates only with connected sockets. Listening sockets are not supported.
- *   - The select API supports configuring multiple file descriptors in a single call. However, it returns only one read descriptor when an event is pending, and returns none if no events are pending.
+ * @note
+ * A listening TCP socket in @p readfds becomes ready when a client is pending
+ * so @ref sl_si91x_accept() / @c accept() can proceed without blocking. Connected
+ * sockets become ready for receive (readfds) or send (writefds) as usual.
  *
  * @par Example
  * Synchronous select: wait up to 2 seconds for data on two sockets, then

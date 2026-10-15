@@ -1,6 +1,6 @@
 id: cpc_ng_unit_tests
 package: cpc_ng
-description: Unity unit tests for the CPC-NG core (API, buffers, control, endpoints, scatter-gather).
+description: Unity unit tests for the CPC-NG core (API, buffers, control, CRC, endpoints, scatter-gather).
 category: Tests|CPC-NG|Unit
 quality: internal
 label: CPC-NG Unit Tests
@@ -10,6 +10,7 @@ source:
 - path: src/unit/api.c
 - path: src/unit/buf.c
 - path: src/unit/control.c
+- path: src/unit/crc.c
 - path: src/unit/ep_ref_cnt.c
 - path: src/unit/expect.c
 - path: src/unit/expect.h
@@ -17,6 +18,7 @@ source:
 - path: src/unit/fixture.h
 - path: src/unit/frame.c
 - path: src/unit/frame.h
+- path: src/unit/multi_bus.c
 - path: src/unit/reset.c
 - path: src/unit/scatter_gather.c
 - path: src/unit/syn.c
@@ -49,15 +51,19 @@ template_contribution:
 - name: unity_test_group
   value: cpc_control
 - name: unity_test_group
-  value: cpc_reset
-- name: unity_test_group
-  value: cpc_syn
+  value: cpc_crc
 - name: unity_test_group
   value: cpc_ep_ref_cnt
 - name: unity_test_group
-  value: cpc_window
+  value: cpc_multi_bus
+- name: unity_test_group
+  value: cpc_reset
 - name: unity_test_group
   value: cpc_scatter_gather
+- name: unity_test_group
+  value: cpc_syn
+- name: unity_test_group
+  value: cpc_window
 toolchain_settings:
 - option: gcc_compiler_option
   value: -Wall -Wextra -Wpointer-arith

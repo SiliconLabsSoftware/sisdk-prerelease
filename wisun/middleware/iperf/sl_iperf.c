@@ -90,11 +90,6 @@ __STATIC_INLINE void _iperf_mutex_release(void);
  *****************************************************************************/
 __STATIC_INLINE bool _os_status_to_bool(const osStatus_t status);
 
-/**************************************************************************//**
- * @brief Release heap buffer owned by a test descriptor
- *****************************************************************************/
-__STATIC_INLINE void _iperf_test_release_buff(sl_iperf_test_t * const test);
-
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
@@ -231,6 +226,15 @@ void sl_iperf_service_init(void)
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
 
+void sl_iperf_test_free_buff(sl_iperf_test_t * const test)
+{
+  if (test != NULL && test->conn.buff != NULL) {
+    sl_free(test->conn.buff);
+    test->conn.buff = NULL;
+    test->conn.buff_size = 0U;
+  }
+}
+
 void sl_iperf_test_init(sl_iperf_test_t * const test, sl_iperf_mode_t mode, sl_iperf_protocol_t protocol, uint16_t buf_len)
 {
   static uint16_t test_id = 0U;
@@ -238,6 +242,11 @@ void sl_iperf_test_init(sl_iperf_test_t * const test, sl_iperf_mode_t mode, sl_i
   if (test == NULL) {
     return;
   }
+
+  // Drop any heap buffer still owned by this descriptor before wiping it.
+  // Callers must zero-initialize the descriptor on first use.
+  sl_iperf_test_free_buff(test);
+
   // clear structure
   memset(test, 0U, sizeof(sl_iperf_test_t));
 
@@ -281,7 +290,13 @@ void sl_iperf_test_set_default_logger(sl_iperf_test_t * const test)
 
 void sl_iperf_test_set_default_buff(sl_iperf_test_t * const test)
 {
-  if (test == NULL || test->opt.buf_len == 0U) {
+  if (test == NULL) {
+    return;
+  }
+
+  sl_iperf_test_free_buff(test);
+
+  if (test->opt.buf_len == 0U) {
     return;
   }
 
@@ -300,6 +315,13 @@ bool sl_iperf_test_add(sl_iperf_test_t * const test)
   osStatus_t status = osError;
   if (test != NULL) {
     status = osMessageQueuePut(_iperf_test_req_msg_queue, test, 0U, osWaitForever);
+    if (status == osOK) {
+      // Queue stores a copy; ownership of conn.buff moves with that copy.
+      test->conn.buff = NULL;
+      test->conn.buff_size = 0U;
+    } else {
+      sl_iperf_test_free_buff(test);
+    }
   }
   return _os_status_to_bool(status);
 }
@@ -324,15 +346,6 @@ __STATIC_INLINE void _iperf_mutex_acquire(void)
 __STATIC_INLINE void _iperf_mutex_release(void)
 {
   EFM_ASSERT(osMutexRelease(_iperf_mtx) == osOK);
-}
-
-__STATIC_INLINE void _iperf_test_release_buff(sl_iperf_test_t * const test)
-{
-  if (test != NULL && test->conn.buff != NULL) {
-    sl_free(test->conn.buff);
-    test->conn.buff = NULL;
-    test->conn.buff_size = 0U;
-  }
 }
 
 /// Thread function declaration
@@ -360,9 +373,11 @@ static void _iperf_thr_fnc(void *args)
       sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_NETWORK_CONNECTION,
                                      SL_IPERF_TEST_STATUS_ERR);
       sl_iperf_test_log(test, "Network not connected.\n");
-      _iperf_test_release_buff(test);
+      sl_iperf_test_free_buff(test);
+      // Keep serving the queue so later tests are not orphaned.
+      osMessageQueuePut(_iperf_test_res_msg_queue, test, 0U, osWaitForever);
       sl_iperf_delay_ms(1000UL);
-      break;
+      continue;
     }
 
     // Lock resources, execute particular test
@@ -400,7 +415,7 @@ static void _iperf_thr_fnc(void *args)
       test->cb(test);
     }
 
-    _iperf_test_release_buff(test);
+    sl_iperf_test_free_buff(test);
 
     // Release resources
     _iperf_mutex_release();

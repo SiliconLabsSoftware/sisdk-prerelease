@@ -34,6 +34,7 @@ requires:
   # Z-Wave
 - name: zw_startup
 - name: zw_versions
+- name: zw_legacy_api
 - name: zaf_protocol_config
 - name: sleeptimer
 - name: zw_toolchain_settings

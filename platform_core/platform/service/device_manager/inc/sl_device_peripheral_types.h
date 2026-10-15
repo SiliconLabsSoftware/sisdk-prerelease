@@ -41,6 +41,9 @@ extern "C" {
 /***************************************************************************//**
  * @addtogroup device_peripheral Device Abstraction Peripheral
  *
+ * The members of the peripheral structures are internal. They may change at any
+ * time, so always access them through the getter functions.
+ *
  * @{
  ******************************************************************************/
 
@@ -49,11 +52,11 @@ extern "C" {
 
 /// Define peripheral structure.
 typedef struct sl_peripheral {
-  uint32_t base;                 ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;  ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;      ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;  ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;    ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
+  uint32_t base;                 // Peripheral base address.
+  sl_clock_branch_t clk_branch;  // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;      // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;  // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;    // GPIO ROUTEEN enable bitmask (full 32-bit register).
 } sl_peripheral_val_t;
 
 /// Define peripheral typedef.
@@ -61,15 +64,16 @@ typedef const sl_peripheral_val_t* sl_peripheral_t;
 
 /// Define peripheral DMA structure.
 typedef struct sl_peripheral_dma {
-  uint32_t base;                         ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;          ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;              ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  uint32_t dual_destination_map;         ///< A bitmap of the channels supporting dual destination
-  uint32_t rule_based_interleaving_map;  ///< A bitmap of the channels supporting rule based interleaving
-  uint8_t nbr_channel;                   ///< Number of channels
-  uint8_t nbr_sync;                      ///< Number of sync bits
+  uint32_t base;                         // Peripheral base address.
+  sl_clock_branch_t clk_branch;          // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;              // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;          // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;            // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  uint32_t dual_destination_map;         // A bitmap of the channels supporting dual destination
+  uint32_t rule_based_interleaving_map;  // A bitmap of the channels supporting rule based interleaving
+  uint8_t nbr_channel;                   // Number of channels
+  uint8_t nbr_sync;                      // Number of sync bits
+  uint32_t retained_channel_map;         // A bitmap of the channels that are retained through EM2
 } sl_peripheral_dma_val_t;
 
 /// Define peripheral DMA typedef.
@@ -82,16 +86,16 @@ SL_ENUM(sl_peripheral_serial_type_t) {
 
 /// Define generic serial peripheral structure.
 typedef struct sl_peripheral_serial {
-  uint32_t base;                         ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;          ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;              ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_peripheral_serial_type_t ip_type;   ///< IP type (USART, EUSART)
-  uint32_t rx_irqn;                      ///< RX interrupt number
-  uint32_t tx_irqn;                      ///< TX interrupt number
-  sl_dma_signal_t dma_signal_rx_trigger; ///< RX data available DMA signal
-  sl_dma_signal_t dma_signal_tx_trigger; ///< TX buffer level DMA signal
+  uint32_t base;                         // Peripheral base address.
+  sl_clock_branch_t clk_branch;          // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;              // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;          // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;            // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_peripheral_serial_type_t ip_type;   // IP type (USART, EUSART)
+  uint32_t rx_irqn;                      // RX interrupt number
+  uint32_t tx_irqn;                      // TX interrupt number
+  sl_dma_signal_t dma_signal_rx_trigger; // RX data available DMA signal
+  sl_dma_signal_t dma_signal_tx_trigger; // TX buffer level DMA signal
 } sl_peripheral_serial_val_t;
 
 /// Define peripheral serial typedef.
@@ -99,13 +103,13 @@ typedef const sl_peripheral_serial_val_t* sl_peripheral_serial_t;
 
 /// Define peripheral I2C structure.
 typedef struct sl_peripheral_i2c {
-  uint32_t base;                            ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;             ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;                 ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;             ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;               ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_rxdatav;       ///< RX data available DMA channel
-  sl_dma_signal_t dma_signal_txbl;          ///< TX buffer level DMA channel
+  uint32_t base;                            // Peripheral base address.
+  sl_clock_branch_t clk_branch;             // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;                 // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;             // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;               // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_rxdatav;       // RX data available DMA channel
+  sl_dma_signal_t dma_signal_txbl;          // TX buffer level DMA channel
 } sl_peripheral_i2c_val_t;
 
 /// Define peripheral I2C typedef.
@@ -113,19 +117,19 @@ typedef const sl_peripheral_i2c_val_t* sl_peripheral_i2c_t;
 
 /// Define peripheral TIMER structure.
 typedef struct sl_peripheral_timer {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;         ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;           ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_cc0;       ///< CC0 DMA channel
-  sl_dma_signal_t dma_signal_cc1;       ///< CC1 DMA channel
-  sl_dma_signal_t dma_signal_cc2;       ///< CC2 DMA channel
-  sl_dma_signal_t dma_signal_ufof;      ///< Underflow/Overflow DMA channel
-  sl_dma_signal_t dma_signal_cc3;       ///< CC3 DMA channel
-  sl_dma_signal_t dma_signal_cc4;       ///< CC4 DMA channel
-  sl_dma_signal_t dma_signal_cc5;       ///< CC5 DMA channel
-  sl_dma_signal_t dma_signal_cc6;       ///< CC6 DMA channel
+  uint32_t base;                        // Peripheral base address.
+  sl_clock_branch_t clk_branch;         // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;             // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;         // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;           // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_cc0;       // CC0 DMA channel
+  sl_dma_signal_t dma_signal_cc1;       // CC1 DMA channel
+  sl_dma_signal_t dma_signal_cc2;       // CC2 DMA channel
+  sl_dma_signal_t dma_signal_ufof;      // Underflow/Overflow DMA channel
+  sl_dma_signal_t dma_signal_cc3;       // CC3 DMA channel
+  sl_dma_signal_t dma_signal_cc4;       // CC4 DMA channel
+  sl_dma_signal_t dma_signal_cc5;       // CC5 DMA channel
+  sl_dma_signal_t dma_signal_cc6;       // CC6 DMA channel
 } sl_peripheral_timer_val_t;
 
 /// Define peripheral TIMER typedef.
@@ -133,18 +137,18 @@ typedef const sl_peripheral_timer_val_t* sl_peripheral_timer_t;
 
 /// Define peripheral PROTIMER structure.
 typedef struct sl_peripheral_protimer {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_cc0;       ///< CC0 DMA channel
-  sl_dma_signal_t dma_signal_cc1;       ///< CC1 DMA channel
-  sl_dma_signal_t dma_signal_cc2;       ///< CC2 DMA channel
-  sl_dma_signal_t dma_signal_cc3;       ///< CC3 DMA channel
-  sl_dma_signal_t dma_signal_bof;       ///< BOF DMA channel
-  sl_dma_signal_t dma_signal_pof;       ///< POF DMA channel
-  sl_dma_signal_t dma_signal_wof;       ///< WOF DMA channel
+  uint32_t base;                        // Peripheral base address.
+  sl_clock_branch_t clk_branch;         // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;             // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;         // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;           // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_cc0;       // CC0 DMA channel
+  sl_dma_signal_t dma_signal_cc1;       // CC1 DMA channel
+  sl_dma_signal_t dma_signal_cc2;       // CC2 DMA channel
+  sl_dma_signal_t dma_signal_cc3;       // CC3 DMA channel
+  sl_dma_signal_t dma_signal_bof;       // BOF DMA channel
+  sl_dma_signal_t dma_signal_pof;       // POF DMA channel
+  sl_dma_signal_t dma_signal_wof;       // WOF DMA channel
 } sl_peripheral_protimer_val_t;
 
 /// Define peripheral PROTIMER typedef.
@@ -152,13 +156,13 @@ typedef const sl_peripheral_protimer_val_t* sl_peripheral_protimer_t;
 
 /// Define peripheral IADC structure.
 typedef struct sl_peripheral_iadc {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_scan;      ///< Scan DMA channel
-  sl_dma_signal_t dma_signal_single;    ///< Single DMA channel
+  uint32_t base;                        // Peripheral base address.
+  sl_clock_branch_t clk_branch;         // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;             // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;         // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;           // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_scan;      // Scan DMA channel
+  sl_dma_signal_t dma_signal_single;    // Single DMA channel
 } sl_peripheral_iadc_val_t;
 
 /// Define peripheral IADC typedef.
@@ -166,12 +170,12 @@ typedef const sl_peripheral_iadc_val_t* sl_peripheral_iadc_t;
 
 /// Define peripheral ADC structure.
 typedef struct sl_peripheral_adc {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_scan;      ///< Scan DMA channel
+  uint32_t base;                        // Peripheral base address.
+  sl_clock_branch_t clk_branch;         // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;             // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;         // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;           // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_scan;      // Scan DMA channel
 } sl_peripheral_adc_val_t;
 
 /// Define peripheral ADC typedef.
@@ -179,21 +183,21 @@ typedef const sl_peripheral_adc_val_t* sl_peripheral_adc_t;
 
 /// Define peripheral EUSART structure.
 typedef struct sl_peripheral_eusart {
-  uint32_t base;                            ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;             ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;                 ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;             ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;               ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_peripheral_serial_type_t ip_type;      ///< IP type (USART, EUSART)
-  uint32_t rx_irqn;                         ///< RX interrupt number
-  uint32_t tx_irqn;                         ///< TX interrupt number
+  uint32_t base;                            // Peripheral base address.
+  sl_clock_branch_t clk_branch;             // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;                 // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;             // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;               // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_peripheral_serial_type_t ip_type;      // IP type (USART, EUSART)
+  uint32_t rx_irqn;                         // RX interrupt number
+  uint32_t tx_irqn;                         // TX interrupt number
   union {
-    sl_dma_signal_t dma_signal_rxfl;        ///< RX DMA channel
-    sl_dma_signal_t dma_signal_rx_trigger;  ///< RX data available DMA signal
+    sl_dma_signal_t dma_signal_rxfl;        // RX DMA channel
+    sl_dma_signal_t dma_signal_rx_trigger;  // RX data available DMA signal
   };
   union {
-    sl_dma_signal_t dma_signal_txfl;        ///< TX DMA channel
-    sl_dma_signal_t dma_signal_tx_trigger;  ///< TX buffer level DMA signal
+    sl_dma_signal_t dma_signal_txfl;        // TX DMA channel
+    sl_dma_signal_t dma_signal_tx_trigger;  // TX buffer level DMA signal
   };
 } sl_peripheral_eusart_val_t;
 
@@ -202,21 +206,21 @@ typedef const sl_peripheral_eusart_val_t* sl_peripheral_eusart_t;
 
 /// Define peripheral EUART structure.
 typedef struct sl_peripheral_euart {
-  uint32_t base;                            ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;             ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;                 ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;             ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;               ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_peripheral_serial_type_t ip_type;      ///< IP type (USART, EUSART)
-  uint32_t rx_irqn;                         ///< RX interrupt number
-  uint32_t tx_irqn;                         ///< TX interrupt number
+  uint32_t base;                            // Peripheral base address.
+  sl_clock_branch_t clk_branch;             // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;                 // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;             // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;               // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_peripheral_serial_type_t ip_type;      // IP type (USART, EUSART)
+  uint32_t rx_irqn;                         // RX interrupt number
+  uint32_t tx_irqn;                         // TX interrupt number
   union {
-    sl_dma_signal_t dma_signal_rxfl;        ///< RX DMA channel
-    sl_dma_signal_t dma_signal_rx_trigger;  ///< RX data available DMA signal
+    sl_dma_signal_t dma_signal_rxfl;        // RX DMA channel
+    sl_dma_signal_t dma_signal_rx_trigger;  // RX data available DMA signal
   };
   union {
-    sl_dma_signal_t dma_signal_txfl;        ///< TX DMA channel
-    sl_dma_signal_t dma_signal_tx_trigger;  ///< TX buffer level DMA signal
+    sl_dma_signal_t dma_signal_txfl;        // TX DMA channel
+    sl_dma_signal_t dma_signal_tx_trigger;  // TX buffer level DMA signal
   };
 } sl_peripheral_euart_val_t;
 
@@ -225,25 +229,25 @@ typedef const sl_peripheral_euart_val_t* sl_peripheral_euart_t;
 
 /// Define peripheral USART structure.
 typedef struct sl_peripheral_usart {
-  uint32_t base;                           ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;            ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;                ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;            ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;              ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_peripheral_serial_type_t ip_type;     ///< IP type (USART, EUSART)
-  uint32_t rx_irqn;                        ///< RX interrupt number
-  uint32_t tx_irqn;                        ///< TX interrupt number
+  uint32_t base;                           // Peripheral base address.
+  sl_clock_branch_t clk_branch;            // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;                // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;            // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;              // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_peripheral_serial_type_t ip_type;     // IP type (USART, EUSART)
+  uint32_t rx_irqn;                        // RX interrupt number
+  uint32_t tx_irqn;                        // TX interrupt number
   union {
-    sl_dma_signal_t dma_signal_rx_trigger; ///< RX data available DMA signal
-    sl_dma_signal_t dma_signal_rxdatav;    ///< RXDATAV DMA channel
+    sl_dma_signal_t dma_signal_rx_trigger; // RX data available DMA signal
+    sl_dma_signal_t dma_signal_rxdatav;    // RXDATAV DMA channel
   };
   union {
-    sl_dma_signal_t dma_signal_tx_trigger; ///< TX buffer level DMA signal
-    sl_dma_signal_t dma_signal_txbl;       ///< TXBL DMA channel
+    sl_dma_signal_t dma_signal_tx_trigger; // TX buffer level DMA signal
+    sl_dma_signal_t dma_signal_txbl;       // TXBL DMA channel
   };
-  sl_dma_signal_t dma_signal_rxdatavright; ///< RXDATAVRIGHT DMA channel
-  sl_dma_signal_t dma_signal_txblright;    ///< TXBLRIGHT DMA channel
-  sl_dma_signal_t dma_signal_txempty;      ///< TXEMPTY DMA channel
+  sl_dma_signal_t dma_signal_rxdatavright; // RXDATAVRIGHT DMA channel
+  sl_dma_signal_t dma_signal_txblright;    // TXBLRIGHT DMA channel
+  sl_dma_signal_t dma_signal_txempty;      // TXEMPTY DMA channel
 } sl_peripheral_usart_val_t;
 
 /// Define peripheral USART typedef.
@@ -251,15 +255,15 @@ typedef const sl_peripheral_usart_val_t* sl_peripheral_usart_t;
 
 /// Define peripheral CAN structure.
 typedef struct sl_peripheral_can {
-  uint32_t base;                           ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;            ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;                ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_rxfl0;        ///< RXFL0 DMA channel
-  sl_dma_signal_t dma_signal_rxfl1;        ///< RXFL1 DMA channel
-  sl_dma_signal_t dma_signal_txfl0;        ///< TXFL0 DMA channel
-  sl_dma_signal_t dma_signal_txfl1;        ///< TXFL1 DMA channel
+  uint32_t base;                           // Peripheral base address.
+  sl_clock_branch_t clk_branch;            // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;                // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;            // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;              // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_rxfl0;        // RXFL0 DMA channel
+  sl_dma_signal_t dma_signal_rxfl1;        // RXFL1 DMA channel
+  sl_dma_signal_t dma_signal_txfl0;        // TXFL0 DMA channel
+  sl_dma_signal_t dma_signal_txfl1;        // TXFL1 DMA channel
 } sl_peripheral_can_val_t;
 
 /// Define peripheral CAN typedef.
@@ -267,12 +271,12 @@ typedef const sl_peripheral_can_val_t* sl_peripheral_can_t;
 
 /// Define peripheral MSC structure.
 typedef struct sl_peripheral_msc {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_wdata;     ///< Write data DMA channel
+  uint32_t base;                        // Peripheral base address.
+  sl_clock_branch_t clk_branch;         // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;             // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;         // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;           // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_wdata;     // Write data DMA channel
 } sl_peripheral_msc_val_t;
 
 /// Define peripheral MSC typedef.
@@ -280,12 +284,12 @@ typedef const sl_peripheral_msc_val_t* sl_peripheral_msc_t;
 
 /// Define peripheral MVP structure.
 typedef struct sl_peripheral_mvp {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_req;       ///< Request DMA channel
+  uint32_t base;                        // Peripheral base address.
+  sl_clock_branch_t clk_branch;         // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;             // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;         // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;           // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_req;       // Request DMA channel
 } sl_peripheral_mvp_val_t;
 
 /// Define peripheral MVP typedef.
@@ -293,12 +297,12 @@ typedef const sl_peripheral_mvp_val_t* sl_peripheral_mvp_t;
 
 /// Define peripheral PIXELRZ structure.
 typedef struct sl_peripheral_pixelrz {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_txf;       ///< Transmit FIFO DMA channel
+  uint32_t base;                        // Peripheral base address.
+  sl_clock_branch_t clk_branch;         // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;             // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;         // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;           // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_txf;       // Transmit FIFO DMA channel
 } sl_peripheral_pixelrz_val_t;
 
 /// Define peripheral PIXELRZ typedef.
@@ -306,12 +310,12 @@ typedef const sl_peripheral_pixelrz_val_t* sl_peripheral_pixelrz_t;
 
 /// Define peripheral PDM structure.
 typedef struct sl_peripheral_pdm {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_rxdata;    ///< Receive data DMA channel
+  uint32_t base;                        // Peripheral base address.
+  sl_clock_branch_t clk_branch;         // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;             // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;         // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;           // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_rxdata;    // Receive data DMA channel
 } sl_peripheral_pdm_val_t;
 
 /// Define peripheral PDM typedef.
@@ -319,12 +323,12 @@ typedef const sl_peripheral_pdm_val_t* sl_peripheral_pdm_t;
 
 /// Define peripheral LCD structure.
 typedef struct sl_peripheral_lcd {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_lcd;       ///< LCD DMA channel
+  uint32_t base;                        // Peripheral base address.
+  sl_clock_branch_t clk_branch;         // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;             // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;         // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;           // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_lcd;       // LCD DMA channel
 } sl_peripheral_lcd_val_t;
 
 /// Define peripheral LCD typedef.
@@ -332,12 +336,12 @@ typedef const sl_peripheral_lcd_val_t* sl_peripheral_lcd_t;
 
 /// Define peripheral LESENSE structure.
 typedef struct sl_peripheral_lesense {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_fifo;      ///< FIFO DMA channel
+  uint32_t base;                        // Peripheral base address.
+  sl_clock_branch_t clk_branch;         // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;             // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;         // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;           // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_fifo;      // FIFO DMA channel
 } sl_peripheral_lesense_val_t;
 
 /// Define peripheral LESENSE typedef.
@@ -345,13 +349,13 @@ typedef const sl_peripheral_lesense_val_t* sl_peripheral_lesense_t;
 
 /// Define peripheral VDAC structure.
 typedef struct sl_peripheral_vdac {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_ch0req;    ///< Channel 0 request DMA channel
-  sl_dma_signal_t dma_signal_ch1req;    ///< Channel 1 request DMA channel
+  uint32_t base;                        // Peripheral base address.
+  sl_clock_branch_t clk_branch;         // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;             // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;         // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;           // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_ch0req;    // Channel 0 request DMA channel
+  sl_dma_signal_t dma_signal_ch1req;    // Channel 1 request DMA channel
 } sl_peripheral_vdac_val_t;
 
 /// Define peripheral VDAC typedef.
@@ -359,13 +363,13 @@ typedef const sl_peripheral_vdac_val_t* sl_peripheral_vdac_t;
 
 /// Define peripheral LDMAXBAR structure.
 typedef struct sl_peripheral_ldmaxbar {
-  uint32_t base;                        ///< Peripheral base address.
-  sl_clock_branch_t clk_branch;         ///< Peripheral clock branch.
-  sl_bus_clock_t bus_clock;             ///< Peripheral bus clock.
-  uint16_t gpio_routeen_offset;          ///< Offset from GPIO base to ROUTEEN register.
-  uint32_t gpio_routeen_mask;            ///< GPIO ROUTEEN enable bitmask (full 32-bit register).
-  sl_dma_signal_t dma_signal_prsreq0;   ///< Channel 0 request DMA channel
-  sl_dma_signal_t dma_signal_prsreq1;   ///< Channel 1 request DMA channel
+  uint32_t base;                        // Peripheral base address.
+  sl_clock_branch_t clk_branch;         // Peripheral clock branch.
+  sl_bus_clock_t bus_clock;             // Peripheral bus clock.
+  uint16_t gpio_routeen_offset;         // Offset from GPIO base to ROUTEEN register.
+  uint32_t gpio_routeen_mask;           // GPIO ROUTEEN enable bitmask (full 32-bit register).
+  sl_dma_signal_t dma_signal_prsreq0;   // Channel 0 request DMA channel
+  sl_dma_signal_t dma_signal_prsreq1;   // Channel 1 request DMA channel
 } sl_peripheral_ldmaxbar_val_t;
 
 /// Define peripheral LDMAXBAR typedef.

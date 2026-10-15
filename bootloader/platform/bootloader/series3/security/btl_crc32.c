@@ -16,14 +16,13 @@
  ******************************************************************************/
 #include "btl_crc32.h"
 #include "em_device.h"
+#include "btl_driver_cmu.h"
 
 uint32_t btl_crc32Stream(const uint8_t *buffer,
                          size_t        length,
                          uint32_t      prevResult)
 {
-#if defined(_CMU_CLKEN0_MASK)
-  CMU->CLKEN0_SET = CMU_CLKEN0_GPCRC0;
-#endif
+  btl_driver_enable_gpcrc0_clock();
   GPCRC0->EN = GPCRC_EN_EN;
   GPCRC0->CTRL = GPCRC_CTRL_POLYSEL_CRC32;
   GPCRC0->INIT = prevResult;

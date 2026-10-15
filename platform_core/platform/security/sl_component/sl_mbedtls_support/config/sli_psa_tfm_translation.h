@@ -64,7 +64,6 @@
   && !defined(PSA_WANT_ALG_CBC_NO_PADDING) \
   && !defined(PSA_WANT_ALG_CBC_PKCS7)      \
   && !defined(PSA_WANT_ALG_ECB_NO_PADDING) \
-  && !defined(PSA_WANT_ALG_XTS)            \
   && !defined(PSA_WANT_ALG_OFB)            \
   && !defined(PSA_WANT_ALG_STREAM_CIPHER)
   #define TFM_CRYPTO_CIPHER_MODULE_DISABLED

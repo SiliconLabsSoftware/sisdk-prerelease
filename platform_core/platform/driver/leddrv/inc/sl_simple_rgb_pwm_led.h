@@ -324,7 +324,7 @@ void sl_led_get_rgb_color(const sl_led_rgb_pwm_t *rgb,    ///< LED Instance hand
 ///// initialize rgb LED
 ///sl_simple_rgb_pwm_led_init((void *) rgb_led_inst0.led_common.context); 
 ///
-///uint32_t max = sl_hal_timer_get_top(SL_SIMPLE_RGB_PWM_LED_INST0_PERIPHERAL);
+///uint16_t max = SL_SIMPLE_RGB_PWM_LED_INST0_RESOLUTION - 1;
 ///
 ///// turn on LED, set color to purple, turn off, toggle (would maintain purple color)
 ///sl_simple_rgb_pwm_led_turn_on((void *) rgb_led_inst0.led_common.context);
@@ -338,6 +338,24 @@ void sl_led_get_rgb_color(const sl_led_rgb_pwm_t *rgb,    ///< LED Instance hand
 ///// get the state of the led
 ///sl_led_state_t state = sl_simple_rgb_pwm_led_get_state((void *) rgb_led_inst0.led_common.context);
 ///   @endcode
+///
+///   @n @section rgb_led_low_power Low-Power Considerations
+///
+///   Peripherals that are not used should be disabled before the device enters sleep. On Series 3
+///   devices, an enabled TIMER prevents the device from entering EM2 or lower energy modes.
+///
+///   The driver manages the TIMER for you:
+///   - @ref sl_simple_rgb_pwm_led_turn_off disables the TIMER once the red, green, and blue
+///     outputs are all off. The LED pins are then driven by GPIO at their inactive level.
+///   - @ref sl_simple_rgb_pwm_led_turn_on re-enables the TIMER and restores the PWM period and
+///     the last color levels.
+///   - @ref sl_simple_rgb_pwm_led_set_color turns the color outputs on, like in previous releases,
+///     so the TIMER is enabled again.
+///
+///   To reach EM2 on Series 3, turn the RGB LED off before going to sleep. The TIMER used by the
+///   driver must not be shared with other software, since the driver disables it.
+///   Do not read the TIMER registers (for example the TOP value) while the LED is off, as they
+///   are not retained while the TIMER is disabled.
 ///
 /// @} end group led ********************************************************/
 

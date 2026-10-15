@@ -113,12 +113,12 @@ calc_ble_payload_length(const sl_rail_sdk_ble_packet_size_t header_len);
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
-int16_t sl_rail_sdk_802154_packet_pack_g_opt_data_frame(uint8_t phr_cfg,
-                                                        sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
-                                                        uint16_t payload_size,
-                                                        void *payload,
-                                                        uint16_t *frame_size,
-                                                        uint8_t *frame_buffer)
+int16_t sl_rail_sdk_802154_packet_pack_g_opt_frame(uint8_t phr_cfg,
+                                                   sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
+                                                   uint16_t payload_size,
+                                                   void *payload,
+                                                   uint16_t *frame_size,
+                                                   uint8_t *frame_buffer)
 {
   uint8_t *tmp_data = frame_buffer;
   uint8_t crc_size = 0;
@@ -191,11 +191,11 @@ int16_t sl_rail_sdk_802154_packet_pack_g_opt_data_frame(uint8_t phr_cfg,
   return 0;
 }
 
-int16_t sl_rail_sdk_802154_packet_pack_data_frame(const sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
-                                                  uint16_t payload_size,
-                                                  void *payload,
-                                                  uint16_t *frame_size,
-                                                  uint8_t *frame_buffer)
+int16_t sl_rail_sdk_802154_packet_pack_std_frame(const sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
+                                                 uint16_t payload_size,
+                                                 void *payload,
+                                                 uint16_t *frame_size,
+                                                 uint8_t *frame_buffer)
 {
   uint8_t *tmp_data = frame_buffer;
   uint8_t crc_size = 0;
@@ -259,12 +259,12 @@ int16_t sl_rail_sdk_802154_packet_pack_data_frame(const sl_rail_sdk_802154_packe
   return 0;
 }
 
-int16_t sl_rail_sdk_802154_packet_pack_ofdm_data_frame(uint8_t rate,
-                                                       uint8_t scrambler,
-                                                       uint16_t payload_size,
-                                                       const uint8_t *payload,
-                                                       uint16_t *frame_size,
-                                                       uint8_t *frame_buffer)
+int16_t sl_rail_sdk_802154_packet_pack_ofdm_ppdu(uint8_t rate,
+                                                 uint8_t scrambler,
+                                                 uint16_t payload_size,
+                                                 const uint8_t *payload,
+                                                 uint16_t *frame_size,
+                                                 uint8_t *frame_buffer)
 {
   uint32_t phr = 0U;
   uint16_t frameLength = 0U;
@@ -278,7 +278,14 @@ int16_t sl_rail_sdk_802154_packet_pack_ofdm_data_frame(uint8_t rate,
       || (frame_size == NULL)
       || (frame_buffer == NULL)) {
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("sl_rail_sdk_802154_packet_pack_ofdm_data_frame ERR: parameter\r\n");
+    app_log_warning("sl_rail_sdk_802154_packet_pack_ofdm_ppdu ERR: parameter\r\n");
+#endif
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  if (payload_size > (SL_RAIL_SDK_IEEE802154G_LEN_MAX - 4)) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_warning("sl_rail_sdk_802154_packet_pack_ofdm_ppdu ERR: payload size\r\n");
 #endif
     return SL_RAIL_SDK_802154_PACKET_ERROR;
   }
@@ -287,8 +294,7 @@ int16_t sl_rail_sdk_802154_packet_pack_ofdm_data_frame(uint8_t rate,
   *frame_size = payload_size + phr_size;
 
   // The Frame Length field (L10-L0) specifies the total number of octets contained in the PSDU (prior to FEC encoding). The PSDU field carries the data of the PHY packet.
-  frameLength = (*frame_size - phr_size) & 0x7FF; // FrameLength in byte
-  frameLength = frameLength + 4; // last 4 bytes will be overwritten before the Tx with the FCS.
+  frameLength = payload_size + 4; // FCS is generated and appended by RAIL.
   phr = (rate << 19) | (frameLength << 7) | (scrambler << 3);
 
   // Flip the 32 bits for all SUN modulations
@@ -296,29 +302,23 @@ int16_t sl_rail_sdk_802154_packet_pack_ofdm_data_frame(uint8_t rate,
 
   // Write the phr in the payload
   for (uint8_t index = 0; index < phr_size; index++) {
-    frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
+    frame_buffer[index] = (uint8_t)(phr >> (index * 8));
   }
 
-  for (uint8_t index = phr_size; index < *frame_size; index++) {
+  for (uint16_t index = phr_size; index < *frame_size; index++) {
     frame_buffer[index] = payload[index - phr_size];
   }
-
-  for (uint8_t index = *frame_size; index < (*frame_size + 4); index++) {
-    frame_buffer[index] = 0x00;
-  }
-
-  *frame_size = *frame_size + 4;
 
   // return SL_RAIL_SDK_802154_PACKET_OK if the frame is ready
   return SL_RAIL_SDK_802154_PACKET_OK;
 }
 
-int16_t sl_rail_sdk_802154_packet_pack_sunfsk_2bytes_data_frame(uint8_t fcsType,
-                                                                uint8_t whitening,
-                                                                uint16_t payload_size,
-                                                                const uint8_t *payload,
-                                                                uint16_t *frame_size,
-                                                                uint8_t *frame_buffer)
+int16_t sl_rail_sdk_802154_packet_pack_sunfsk_ppdu(uint8_t fcsType,
+                                                   uint8_t whitening,
+                                                   uint16_t payload_size,
+                                                   const uint8_t *payload,
+                                                   uint16_t *frame_size,
+                                                   uint8_t *frame_buffer)
 {
   uint16_t frameLength = 0;
   uint8_t fcsSizeByte = 0;
@@ -333,14 +333,21 @@ int16_t sl_rail_sdk_802154_packet_pack_sunfsk_2bytes_data_frame(uint8_t fcsType,
       || (frame_size == NULL)
       || (frame_buffer == NULL)) {
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("sl_rail_sdk_802154_packet_pack_sunfsk_2bytes_data_frame ERR: parameter\r\n");
+    app_log_warning("sl_rail_sdk_802154_packet_pack_sunfsk_ppdu ERR: parameter\r\n");
+#endif
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  fcsSizeByte = fcsType ? 2 : 4; //FCS type = 0 => fcsSizeByte = 4
+  if (payload_size > (SL_RAIL_SDK_IEEE802154G_LEN_MAX - fcsSizeByte)) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_warning("sl_rail_sdk_802154_packet_pack_sunfsk_ppdu ERR: payload size\r\n");
 #endif
     return SL_RAIL_SDK_802154_PACKET_ERROR;
   }
 
   *frame_size = payload_size + phr_size;
-  fcsSizeByte = fcsType ? 2 : 4; //FCS type = 0 => fcsSizeByte = 4
-  frameLength = (*frame_size - phr_size + fcsSizeByte) & 0x7FF;
+  frameLength = payload_size + fcsSizeByte;
   phr = (fcsType << 12) | (whitening << 11) | frameLength;
 
   // Flip bits of the 2 bytes PHR as it is a SUN modulation
@@ -348,11 +355,11 @@ int16_t sl_rail_sdk_802154_packet_pack_sunfsk_2bytes_data_frame(uint8_t fcsType,
 
   // Write the phr in the payload
   for (uint8_t index = 0; index < phr_size; index++) {
-    frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
+    frame_buffer[index] = (uint8_t)(phr >> (index * 8));
   }
   // Add payload bytes
 
-  for (uint8_t index = phr_size; index < *frame_size; index++) {
+  for (uint16_t index = phr_size; index < *frame_size; index++) {
     frame_buffer[index] = payload[index - phr_size];
   }
 
@@ -360,63 +367,12 @@ int16_t sl_rail_sdk_802154_packet_pack_sunfsk_2bytes_data_frame(uint8_t fcsType,
   return SL_RAIL_SDK_802154_PACKET_OK;
 }
 
-int16_t sl_rail_sdk_802154_packet_pack_sunfsk_4bytes_data_frame(uint8_t fcsType,
-                                                                uint8_t whitening,
-                                                                uint16_t payload_size,
-                                                                const uint8_t *payload,
-                                                                uint16_t *frame_size,
-                                                                uint8_t *frame_buffer)
-{
-  uint16_t frameLength = 0;
-  uint32_t phr = 0;
-  uint8_t phr_size = 4;
-
-  // Checking input parameters
-  if ((fcsType > 1)
-      || (whitening > 1)
-      || (payload_size == 0)
-      || (payload == NULL)
-      || (frame_size == NULL)
-      || (frame_buffer == NULL)) {
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("sl_rail_sdk_802154_packet_pack_sunfsk_2bytes_data_frame ERR: parameter\r\n");
-#endif
-    return SL_RAIL_SDK_802154_PACKET_ERROR;
-  }
-  // Add payload bytes
-  *frame_size = payload_size + phr_size;
-
-  frameLength = (*frame_size - phr_size) & 0x7FF; // FrameLength in byte
-  frameLength = frameLength + 4;
-  phr = (fcsType << 12) | (whitening << 11) | frameLength;
-
-  // Flip bits of the 2 bytes PHR as it is a SUN modulation
-  phr =  __RBIT(phr);
-
-  // Write the phr in the payload
-  for (uint8_t index = 0; index < phr_size; index++) {
-    frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
-  }
-
-  for (uint8_t index = phr_size; index < *frame_size; index++) {
-    frame_buffer[index] = payload[index - phr_size];
-  }
-
-  for (uint8_t index = *frame_size; index < (*frame_size + 4); index++) {
-    frame_buffer[index] = 0x00;
-  }
-
-  *frame_size = *frame_size + 4;
-  // return SL_RAIL_SDK_802154_PACKET_OK if the frame is ready
-  return SL_RAIL_SDK_802154_PACKET_OK;
-}
-
-int16_t sl_rail_sdk_802154_packet_pack_oqpsk_data_frame(bool spreadingMode,
-                                                        uint8_t rateMode,
-                                                        uint16_t payload_size,
-                                                        const uint8_t *payload,
-                                                        uint16_t *frame_size,
-                                                        uint8_t *frame_buffer)
+int16_t sl_rail_sdk_802154_packet_pack_oqpsk_ppdu(bool spreadingMode,
+                                                  uint8_t rateMode,
+                                                  uint16_t payload_size,
+                                                  const uint8_t *payload,
+                                                  uint16_t *frame_size,
+                                                  uint8_t *frame_buffer)
 {
   uint32_t phr = 0U;
   uint16_t frameLength = 0U;
@@ -429,7 +385,14 @@ int16_t sl_rail_sdk_802154_packet_pack_oqpsk_data_frame(bool spreadingMode,
       || (frame_size == NULL)
       || (frame_buffer == NULL)) {
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("sl_rail_sdk_802154_packet_pack_oqpsk_data_frame ERR: parameter\r\n");
+    app_log_warning("sl_rail_sdk_802154_packet_pack_oqpsk_ppdu ERR: parameter\r\n");
+#endif
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  if (payload_size > (SL_RAIL_SDK_IEEE802154G_LEN_MAX - 4)) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_warning("sl_rail_sdk_802154_packet_pack_oqpsk_ppdu ERR: payload size\r\n");
 #endif
     return SL_RAIL_SDK_802154_PACKET_ERROR;
   }
@@ -438,35 +401,28 @@ int16_t sl_rail_sdk_802154_packet_pack_oqpsk_data_frame(bool spreadingMode,
   *frame_size = payload_size + phr_size;
 
   // The Frame Length field (L10-L0) specifies the total number of octets contained in the PSDU (prior to FEC encoding). The PSDU field carries the data of the PHY packet.
-  frameLength = (*frame_size - phr_size) & 0x7FF;
-  frameLength = frameLength + 4;
+  frameLength = payload_size + 4;
   phr = ((uint8_t)spreadingMode << 15) | (rateMode << 13) | frameLength;
   // Flip the 32 bits for all SUN modulations
   phr = __RBIT(phr);
 
   // Write the phr in the payload
   for (uint8_t index = 0; index < phr_size; index++) {
-    frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
+    frame_buffer[index] = (uint8_t)(phr >> (index * 8));
   }
 
-  for (uint8_t index = phr_size; index < *frame_size; index++) {
+  for (uint16_t index = phr_size; index < *frame_size; index++) {
     frame_buffer[index] = payload[index - phr_size];
   }
-
-  for (uint8_t index = *frame_size; index < (*frame_size + 4); index++) {
-    frame_buffer[index] = 0x00;
-  }
-
-  *frame_size = *frame_size + 4;
 
   // return SL_RAIL_SDK_802154_PACKET_OK if the frame is ready
   return SL_RAIL_SDK_802154_PACKET_OK;
 }
 
-uint8_t *sl_rail_sdk_802154_packet_unpack_g_opt_data_frame(uint8_t *phr_cfg,
-                                                           sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
-                                                           uint16_t *payload_size,
-                                                           uint8_t *frame_buffer)
+uint8_t *sl_rail_sdk_802154_packet_unpack_g_opt_frame(uint8_t *phr_cfg,
+                                                      sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
+                                                      uint16_t *payload_size,
+                                                      uint8_t *frame_buffer)
 {
   uint8_t *tmp = frame_buffer;
   uint16_t length = 0U;
@@ -521,9 +477,9 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_g_opt_data_frame(uint8_t *phr_cfg,
   return tmp;
 }
 
-uint8_t *sl_rail_sdk_802154_packet_unpack_data_frame(sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
-                                                     uint16_t *payload_size,
-                                                     uint8_t *frame_buffer)
+uint8_t *sl_rail_sdk_802154_packet_unpack_std_frame(sl_rail_sdk_802154_packet_mhr_frame_t *mhr_cfg,
+                                                    uint16_t *payload_size,
+                                                    uint8_t *frame_buffer)
 {
   uint8_t *tmp = frame_buffer;
   uint16_t length = 0U;
@@ -569,15 +525,16 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_data_frame(sl_rail_sdk_802154_packet_m
   return tmp;
 }
 
-uint8_t *sl_rail_sdk_802154_packet_unpack_sunfsk_2byte_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                                  uint8_t *fcsType,
-                                                                  uint8_t *whitening,
-                                                                  uint16_t *payload_size,
-                                                                  uint8_t *frame_buffer)
+uint8_t *sl_rail_sdk_802154_packet_unpack_sunfsk_ppdu(const sl_rail_rx_packet_info_t *packet_information,
+                                                      uint8_t *fcsType,
+                                                      uint8_t *whitening,
+                                                      uint16_t *payload_size,
+                                                      uint8_t *frame_buffer)
 {
   uint32_t phr = 0U;
   uint8_t *tmp = frame_buffer;
   uint8_t phr_size = 2U;
+  uint8_t fcsSizeByte = 0U;
 
   if ((packet_information == NULL) || (fcsType == NULL) || (whitening == NULL) || (frame_buffer == NULL) || (payload_size == NULL)) {
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
@@ -593,50 +550,19 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_sunfsk_2byte_data_frame(const sl_rail_
 
   *fcsType = (phr >> 12) & 0x01;
   *whitening = (phr >> 11) & 0x01;
-
-  *payload_size = (phr & 0x7FF) - 4;
+  fcsSizeByte = *fcsType ? 2 : 4;  // 0 => 4-byte FCS, 1 => 2-byte FCS
+  *payload_size = (phr & 0x7FF) - fcsSizeByte;
 
   tmp += phr_size;
 
   return tmp;
 }
 
-uint8_t *sl_rail_sdk_802154_packet_unpack_sunfsk_4byte_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                                  uint8_t *fcsType,
-                                                                  uint8_t *whitening,
-                                                                  uint16_t *payload_size,
-                                                                  uint8_t *frame_buffer)
-{
-  uint32_t phr = 0U;
-  uint8_t *tmp = frame_buffer;
-  uint8_t phr_size = 4U;
-
-  if ((packet_information == NULL) || (fcsType == NULL) || (whitening == NULL) || (frame_buffer == NULL) || (payload_size == NULL)) {
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("app_ieee802154_unpack_frame_get_payload_mhr ERR: parameter\r\n");
-#endif
-    return NULL;
-  }
-
-  for (uint8_t index = 0; index < phr_size; index++) {
-    phr |= frame_buffer[index] << (index * 8);
-  }
-  phr = __RBIT(phr);
-
-  *fcsType = (phr >> 12) & 0x01;
-  *whitening = (phr >> 11) & 0x01;
-
-  *payload_size = (phr & 0x7FF) - 4;
-  tmp += phr_size;
-
-  return tmp;
-}
-
-uint8_t *sl_rail_sdk_802154_packet_unpack_ofdm_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                          uint8_t *rate,
-                                                          uint8_t *scrambler,
-                                                          uint16_t *payload_size,
-                                                          uint8_t *frame_buffer)
+uint8_t *sl_rail_sdk_802154_packet_unpack_ofdm_ppdu(const sl_rail_rx_packet_info_t *packet_information,
+                                                    uint8_t *rate,
+                                                    uint8_t *scrambler,
+                                                    uint16_t *payload_size,
+                                                    uint8_t *frame_buffer)
 {
   uint32_t phr = 0U;
   uint8_t *tmp = frame_buffer;
@@ -648,7 +574,7 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_ofdm_data_frame(const sl_rail_rx_packe
       || (payload_size == NULL)
       || (frame_buffer == NULL)) {
     #if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("sl_rail_sdk_802154_packet_unpack_ofdm_data_frame ERR: parameter\r\n");
+    app_log_warning("sl_rail_sdk_802154_packet_unpack_ofdm_ppdu ERR: parameter\r\n");
     #endif
     return NULL;
   }
@@ -667,11 +593,11 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_ofdm_data_frame(const sl_rail_rx_packe
   return tmp;
 }
 
-uint8_t *sl_rail_sdk_802154_packet_unpack_oqpsk_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                           bool *spreadingMode,
-                                                           uint8_t *rateMode,
-                                                           uint16_t *payload_size,
-                                                           uint8_t *frame_buffer)
+uint8_t *sl_rail_sdk_802154_packet_unpack_oqpsk_ppdu(const sl_rail_rx_packet_info_t *packet_information,
+                                                     bool *spreadingMode,
+                                                     uint8_t *rateMode,
+                                                     uint16_t *payload_size,
+                                                     uint8_t *frame_buffer)
 {
   uint32_t phr = 0U;
   uint8_t *tmp = frame_buffer;
@@ -683,7 +609,7 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_oqpsk_data_frame(const sl_rail_rx_pack
       || (payload_size == NULL)
       || (frame_buffer == NULL)) {
     #if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("sl_rail_sdk_802154_packet_unpack_oqpsk_data_frame ERR: parameter\r\n");
+    app_log_warning("sl_rail_sdk_802154_packet_unpack_oqpsk_ppdu ERR: parameter\r\n");
     #endif
     return NULL;
   }
@@ -702,12 +628,12 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_oqpsk_data_frame(const sl_rail_rx_pack
   return tmp;
 }
 
-int16_t sl_rail_sdk_802154_packet_pack_sidewalk_data_frame(uint8_t fcsType,
-                                                           uint8_t whitening,
-                                                           uint16_t payload_size,
-                                                           const uint8_t *payload,
-                                                           uint16_t *frame_size,
-                                                           uint8_t *frame_buffer)
+int16_t sl_rail_sdk_802154_packet_pack_sidewalk_ppdu(uint8_t fcsType,
+                                                     uint8_t whitening,
+                                                     uint16_t payload_size,
+                                                     const uint8_t *payload,
+                                                     uint16_t *frame_size,
+                                                     uint8_t *frame_buffer)
 {
   uint16_t frameLength = 0;
   uint8_t fcsSizeByte = 0;
@@ -720,17 +646,23 @@ int16_t sl_rail_sdk_802154_packet_pack_sidewalk_data_frame(uint8_t fcsType,
       || (payload_size == 0)
       || (payload == NULL)
       || (frame_size == NULL)
-      || (frame_buffer == NULL)
-      || (payload_size > 255)) {
+      || (frame_buffer == NULL)) {
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("sl_rail_sdk_802154_packet_pack_sidewalk_data_frame ERR: parameter\r\n");
+    app_log_warning("sl_rail_sdk_802154_packet_pack_sidewalk_ppdu ERR: parameter\r\n");
+#endif
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  fcsSizeByte = fcsType ? 2 : 4; //FCS type = 0 => fcsSizeByte = 4
+  if (payload_size > (SL_RAIL_SDK_IEEE802154G_LEN_MAX - fcsSizeByte)) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_warning("sl_rail_sdk_802154_packet_pack_sidewalk_ppdu ERR: payload size\r\n");
 #endif
     return SL_RAIL_SDK_802154_PACKET_ERROR;
   }
 
   *frame_size = payload_size + phr_size;
-  fcsSizeByte = fcsType ? 2 : 4; //FCS type = 0 => fcsSizeByte = 4
-  frameLength = (*frame_size - phr_size + fcsSizeByte) & 0x7FF;
+  frameLength = payload_size + fcsSizeByte;
   phr = ((fcsType << 12) | (whitening << 11) | frameLength) & 0x0FFFF;
 
   // Flip bits of the 2 bytes PHR as it is a SUN modulation
@@ -738,23 +670,22 @@ int16_t sl_rail_sdk_802154_packet_pack_sidewalk_data_frame(uint8_t fcsType,
 
   // Write the phr in the payload
   for (uint8_t index = 0; index < phr_size; index++) {
-    frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
+    frame_buffer[index] = (uint8_t)(phr >> (index * 8));
   }
 
-  for (uint8_t index = phr_size; index < *frame_size; index++) {
+  for (uint16_t index = phr_size; index < *frame_size; index++) {
     frame_buffer[index] = payload[index - phr_size];
   }
 
-  *frame_size = frameLength;
   // return SL_RAIL_SDK_802154_PACKET_OK if the frame is ready
   return SL_RAIL_SDK_802154_PACKET_OK;
 }
 
-uint8_t *sl_rail_sdk_802154_packet_unpack_sidewalk_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                              uint8_t *fcsType,
-                                                              uint8_t *whitening,
-                                                              uint16_t *payload_size,
-                                                              uint8_t *frame_buffer)
+uint8_t *sl_rail_sdk_802154_packet_unpack_sidewalk_ppdu(const sl_rail_rx_packet_info_t *packet_information,
+                                                        uint8_t *fcsType,
+                                                        uint8_t *whitening,
+                                                        uint16_t *payload_size,
+                                                        uint8_t *frame_buffer)
 {
   uint32_t phr = 0U;
   uint8_t *tmp = frame_buffer;
@@ -763,7 +694,7 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_sidewalk_data_frame(const sl_rail_rx_p
 
   if ((packet_information == NULL) || (fcsType == NULL) || (whitening == NULL) || (frame_buffer == NULL) || (payload_size == NULL)) {
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("sl_rail_sdk_802154_packet_unpack_sidewalk_data_frame ERR: parameter\r\n");
+    app_log_warning("sl_rail_sdk_802154_packet_unpack_sidewalk_ppdu ERR: parameter\r\n");
 #endif
     return NULL;
   }
@@ -784,118 +715,217 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_sidewalk_data_frame(const sl_rail_rx_p
   return tmp;
 }
 
-int16_t sl_rail_sdk_802154_packet_pack_longrange_data_frame(uint16_t payload_size,
-                                                            const uint8_t *payload,
-                                                            uint16_t *frame_size,
-                                                            uint8_t *frame_buffer)
-{
-  uint16_t frameLength = 0;
-  uint8_t fcsSizeByte = 2;
-  uint32_t phr = 0;
-  uint8_t phr_size = 1;
-
-  // Checking input parameters
-  if ((payload_size == 0)
-      || (payload == NULL)
-      || (frame_size == NULL)
-      || (frame_buffer == NULL)
-      || (payload_size > 127)) {
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("sl_rail_sdk_802154_packet_pack_longrange_data_frame ERR: parameter\r\n");
-#endif
-    return SL_RAIL_SDK_802154_PACKET_ERROR;
-  }
-
-  *frame_size = payload_size + phr_size;
-  frameLength = (*frame_size - phr_size + fcsSizeByte) & 0x7F;
-  phr = frameLength & 0x7F;
-
-  *frame_size = payload_size + phr_size;
-
-  // Write the phr in the payload
-  for (uint8_t index = 0; index < phr_size; index++) {
-    frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
-  }
-
-  for (uint8_t index = phr_size; index < *frame_size; index++) {
-    frame_buffer[index] = payload[index - phr_size];
-  }
-
-  // return SL_RAIL_SDK_802154_PACKET_OK if the frame is ready
-  return SL_RAIL_SDK_802154_PACKET_OK;
-}
-
-uint8_t *sl_rail_sdk_802154_packet_unpack_longrange_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                               uint16_t *payload_size,
-                                                               uint8_t *frame_buffer)
-{
-  uint32_t phr = 0U;
-  uint8_t *tmp = frame_buffer;
-  uint8_t phr_size = 1U;
-  uint8_t fcsSizeByte = 2U;
-
-  if ((packet_information == NULL) || (frame_buffer == NULL) || (payload_size == NULL)) {
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("sl_rail_sdk_802154_packet_unpack_longrange_data_frame ERR: parameter\r\n");
-#endif
-    return NULL;
-  }
-
-  for (uint8_t index = 0; index < phr_size; index++) {
-    phr |= frame_buffer[index] << (index * 8);
-  }
-
-  *payload_size = (phr & 0x7F) - fcsSizeByte;
-  tmp += phr_size;
-
-  return tmp;
-}
-
-int16_t sl_rail_sdk_802154_packet_pack_bpsk_data_frame(uint16_t payload_size,
-                                                       const uint8_t *payload,
-                                                       uint16_t *frame_size,
-                                                       uint8_t *frame_buffer)
-{
-  uint16_t frameLength = 0;
-  uint8_t fcsSizeByte = 2;
-  uint32_t phr = 0;
-  uint8_t phr_size = 1;
-
-  // Checking input parameters
-  if ((payload_size == 0)
-      || (payload == NULL)
-      || (frame_size == NULL)
-      || (frame_buffer == NULL)
-      || (payload_size > 127)) {
-#if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("sl_rail_sdk_802154_packet_pack_bpsk_data_frame ERR: parameter\r\n");
-#endif
-    return SL_RAIL_SDK_802154_PACKET_ERROR;
-  }
-
-  *frame_size = payload_size + phr_size;
-  frameLength = (*frame_size - phr_size + fcsSizeByte) & 0x7F;
-  phr = frameLength & 0x7F;
-
-  *frame_size = payload_size + phr_size;
-
-  // Write the phr in the payload
-  for (uint8_t index = 0; index < phr_size; index++) {
-    frame_buffer[index] = (uint8_t)((phr & (0xFF << index * 8)) >> index * 8);
-  }
-
-  for (uint8_t index = phr_size; index < *frame_size; index++) {
-    frame_buffer[index] = payload[index - phr_size];
-  }
-
-  // return SL_RAIL_SDK_802154_PACKET_OK if the frame is ready
-  return SL_RAIL_SDK_802154_PACKET_OK;
-}
-
-uint8_t *sl_rail_sdk_802154_packet_unpack_bpsk_data_frame(const sl_rail_rx_packet_info_t *packet_information,
-                                                          uint16_t *payload_size,
+int16_t sl_rail_sdk_802154_packet_pack_std_1byte_phr_ppdu(uint16_t payload_size,
+                                                          const uint8_t *payload,
+                                                          uint16_t *frame_size,
                                                           uint8_t *frame_buffer)
 {
+  uint16_t frameLength = 0;
+  uint8_t fcsSizeByte = 2;
+  uint32_t phr = 0;
+  uint8_t phr_size = 1;
+
+  // Checking input parameters
+  if ((payload_size == 0)
+      || (payload == NULL)
+      || (frame_size == NULL)
+      || (frame_buffer == NULL)
+      || (payload_size > (SL_RAIL_SDK_IEEE802154_LEN_MAX - fcsSizeByte))) {
+#if defined(SL_CATALOG_APP_LOG_PRESENT)
+    app_log_warning("sl_rail_sdk_802154_packet_pack_std_1byte_phr_ppdu ERR: parameter\r\n");
+#endif
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  *frame_size = payload_size + phr_size;
+  frameLength = payload_size + fcsSizeByte;
+  phr = frameLength & 0x7F;
+
+  *frame_size = payload_size + phr_size;
+
+  // Write the phr in the payload
+  for (uint8_t index = 0; index < phr_size; index++) {
+    frame_buffer[index] = (uint8_t)(phr >> (index * 8));
+  }
+
+  for (uint16_t index = phr_size; index < *frame_size; index++) {
+    frame_buffer[index] = payload[index - phr_size];
+  }
+
+  // return SL_RAIL_SDK_802154_PACKET_OK if the frame is ready
+  return SL_RAIL_SDK_802154_PACKET_OK;
+}
+
+int16_t sl_rail_sdk_802154_packet_pack_ofdm_phr(uint8_t rate,
+                                                uint8_t scrambler,
+                                                uint16_t payload_size,
+                                                uint8_t *phr_buffer,
+                                                uint8_t *phr_size)
+{
+  uint32_t phr = 0U;
+  uint16_t frameLength = 0U;
+  const uint8_t phr_size_bytes = 4U;
+
+  if ((rate & 0xE0)
+      || (scrambler & 0xFC)
+      || (payload_size == 0)
+      || (phr_buffer == NULL)
+      || (phr_size == NULL)) {
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  if (payload_size > (SL_RAIL_SDK_IEEE802154G_LEN_MAX - 4)) {
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  frameLength = payload_size + 4;
+  phr = (rate << 19) | (frameLength << 7) | (scrambler << 3);
+  phr = __RBIT(phr);
+
+  for (uint8_t index = 0; index < phr_size_bytes; index++) {
+    phr_buffer[index] = (uint8_t)(phr >> (index * 8));
+  }
+  *phr_size = phr_size_bytes;
+
+  return SL_RAIL_SDK_802154_PACKET_OK;
+}
+
+int16_t sl_rail_sdk_802154_packet_pack_sunfsk_phr(uint8_t fcsType,
+                                                  uint8_t whitening,
+                                                  uint16_t payload_size,
+                                                  uint8_t *phr_buffer,
+                                                  uint8_t *phr_size)
+{
+  uint16_t frameLength = 0;
+  uint8_t fcsSizeByte = 0;
+  uint32_t phr = 0;
+  const uint8_t phr_size_bytes = 2U;
+
+  if ((fcsType > 1)
+      || (whitening > 1)
+      || (payload_size == 0)
+      || (phr_buffer == NULL)
+      || (phr_size == NULL)) {
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  fcsSizeByte = fcsType ? 2 : 4;
+  if (payload_size > (SL_RAIL_SDK_IEEE802154G_LEN_MAX - fcsSizeByte)) {
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  frameLength = payload_size + fcsSizeByte;
+  phr = (fcsType << 12) | (whitening << 11) | frameLength;
+  phr = (uint16_t)(__RBIT(phr) >> 16);
+
+  for (uint8_t index = 0; index < phr_size_bytes; index++) {
+    phr_buffer[index] = (uint8_t)(phr >> (index * 8));
+  }
+  *phr_size = phr_size_bytes;
+
+  return SL_RAIL_SDK_802154_PACKET_OK;
+}
+
+int16_t sl_rail_sdk_802154_packet_pack_oqpsk_phr(bool spreadingMode,
+                                                 uint8_t rateMode,
+                                                 uint16_t payload_size,
+                                                 uint8_t *phr_buffer,
+                                                 uint8_t *phr_size)
+{
+  uint32_t phr = 0U;
+  uint16_t frameLength = 0U;
+  const uint8_t phr_size_bytes = 4U;
+
+  if ((rateMode & 0xFC)
+      || (payload_size == 0)
+      || (phr_buffer == NULL)
+      || (phr_size == NULL)) {
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  if (payload_size > (SL_RAIL_SDK_IEEE802154G_LEN_MAX - 4)) {
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  frameLength = payload_size + 4;
+  phr = ((uint8_t)spreadingMode << 15) | (rateMode << 13) | frameLength;
+  phr = __RBIT(phr);
+
+  for (uint8_t index = 0; index < phr_size_bytes; index++) {
+    phr_buffer[index] = (uint8_t)(phr >> (index * 8));
+  }
+  *phr_size = phr_size_bytes;
+
+  return SL_RAIL_SDK_802154_PACKET_OK;
+}
+
+int16_t sl_rail_sdk_802154_packet_pack_sidewalk_phr(uint8_t fcsType,
+                                                    uint8_t whitening,
+                                                    uint16_t payload_size,
+                                                    uint8_t *phr_buffer,
+                                                    uint8_t *phr_size)
+{
+  uint16_t frameLength = 0;
+  uint8_t fcsSizeByte = 0;
+  uint32_t phr = 0;
+  const uint8_t phr_size_bytes = 2U;
+
+  if ((fcsType > 1)
+      || (whitening > 1)
+      || (payload_size == 0)
+      || (phr_buffer == NULL)
+      || (phr_size == NULL)) {
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  fcsSizeByte = fcsType ? 2 : 4;
+  if (payload_size > (SL_RAIL_SDK_IEEE802154G_LEN_MAX - fcsSizeByte)) {
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  frameLength = payload_size + fcsSizeByte;
+  phr = ((fcsType << 12) | (whitening << 11) | frameLength) & 0x0FFFF;
+  phr = (uint16_t)(__RBIT(phr) >> 16);
+
+  for (uint8_t index = 0; index < phr_size_bytes; index++) {
+    phr_buffer[index] = (uint8_t)(phr >> (index * 8));
+  }
+  *phr_size = phr_size_bytes;
+
+  return SL_RAIL_SDK_802154_PACKET_OK;
+}
+
+int16_t sl_rail_sdk_802154_packet_pack_std_1byte_phr(uint16_t payload_size,
+                                                     uint8_t *phr_buffer,
+                                                     uint8_t *phr_size)
+{
+  uint16_t frameLength = 0;
+  const uint8_t fcsSizeByte = 2U;
+  uint32_t phr = 0;
+  const uint8_t phr_size_bytes = 1U;
+
+  if ((payload_size == 0)
+      || (phr_buffer == NULL)
+      || (phr_size == NULL)
+      || (payload_size > (SL_RAIL_SDK_IEEE802154_LEN_MAX - fcsSizeByte))) {
+    return SL_RAIL_SDK_802154_PACKET_ERROR;
+  }
+
+  frameLength = payload_size + fcsSizeByte;
+  phr = frameLength & 0x7F;
+
+  for (uint8_t index = 0; index < phr_size_bytes; index++) {
+    phr_buffer[index] = (uint8_t)(phr >> (index * 8));
+  }
+  *phr_size = phr_size_bytes;
+
+  return SL_RAIL_SDK_802154_PACKET_OK;
+}
+
+uint8_t *sl_rail_sdk_802154_packet_unpack_std_1byte_phr_ppdu(const sl_rail_rx_packet_info_t *packet_information,
+                                                             uint16_t *payload_size,
+                                                             uint8_t *frame_buffer)
+{
   uint32_t phr = 0U;
   uint8_t *tmp = frame_buffer;
   uint8_t phr_size = 1U;
@@ -903,7 +933,7 @@ uint8_t *sl_rail_sdk_802154_packet_unpack_bpsk_data_frame(const sl_rail_rx_packe
 
   if ((packet_information == NULL) || (frame_buffer == NULL) || (payload_size == NULL)) {
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
-    app_log_warning("sl_rail_sdk_802154_packet_unpack_bpsk_data_frame ERR: parameter\r\n");
+    app_log_warning("sl_rail_sdk_802154_packet_unpack_std_1byte_phr_ppdu ERR: parameter\r\n");
 #endif
     return NULL;
   }

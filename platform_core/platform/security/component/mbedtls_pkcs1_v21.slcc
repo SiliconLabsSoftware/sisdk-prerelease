@@ -14,7 +14,7 @@ requires:
 - name: mbedtls_rsa
 
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_PKCS1_V21
 metadata:
   sbom:

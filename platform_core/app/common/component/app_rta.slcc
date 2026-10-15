@@ -155,3 +155,6 @@ template_contribution:
     handler: app_rta_step
   unless:
   - kernel
+documentation:
+  docset: gecko-platform
+  document: platform-common/common

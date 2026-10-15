@@ -6,6 +6,8 @@ description: >-
   a 521-bit prime field Weierstrass curve, in Mbed TLS.
 category: Platform|Security|Mbed TLS|Elliptic Curves
 quality: production
+ui_hints:
+  visibility: never
 provides:
 - name: mbedtls_ecc_secp521r1
 - name: mbedtls_ecc_curve
@@ -15,7 +17,7 @@ requires:
 - name: psa_crypto_ecc_secp521r1
   condition: [psa_crypto]
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_builtin_config
   value: MBEDTLS_ECP_DP_SECP521R1_ENABLED
 - name: mbedtls_mpi_max
   value: 66

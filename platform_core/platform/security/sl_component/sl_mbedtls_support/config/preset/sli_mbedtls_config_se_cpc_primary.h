@@ -627,7 +627,6 @@
  */
 /* Short Weierstrass curves (supporting ECP, ECDH, ECDSA) */
 #define MBEDTLS_ECP_DP_SECP192R1_ENABLED
-#define MBEDTLS_ECP_DP_SECP224R1_ENABLED
 #define MBEDTLS_ECP_DP_SECP256R1_ENABLED
 #define MBEDTLS_ECP_DP_SECP384R1_ENABLED
 #define MBEDTLS_ECP_DP_SECP521R1_ENABLED
@@ -744,7 +743,7 @@
  *
  * Enable the ECDHE-PSK based ciphersuite modes in SSL / TLS.
  *
- * Requires: MBEDTLS_ECDH_C
+ * Requires: PSA_WANT_ALG_ECDH
  *
  * This enables the following ciphersuites (if other requisites are
  * enabled as well):
@@ -842,7 +841,7 @@
  *
  * Enable the ECDHE-RSA based ciphersuite modes in SSL / TLS.
  *
- * Requires: MBEDTLS_ECDH_C, MBEDTLS_RSA_C, MBEDTLS_PKCS1_V15,
+ * Requires: PSA_WANT_ALG_ECDH, MBEDTLS_RSA_C, MBEDTLS_PKCS1_V15,
  *           MBEDTLS_X509_CRT_PARSE_C
  *
  * This enables the following ciphersuites (if other requisites are
@@ -865,7 +864,7 @@
  *
  * Enable the ECDHE-ECDSA based ciphersuite modes in SSL / TLS.
  *
- * Requires: MBEDTLS_ECDH_C, MBEDTLS_ECDSA_C, MBEDTLS_X509_CRT_PARSE_C,
+ * Requires: PSA_WANT_ALG_ECDH, MBEDTLS_ECDSA_C, MBEDTLS_X509_CRT_PARSE_C,
  *
  * This enables the following ciphersuites (if other requisites are
  * enabled as well):
@@ -887,7 +886,7 @@
  *
  * Enable the ECDH-ECDSA based ciphersuite modes in SSL / TLS.
  *
- * Requires: MBEDTLS_ECDH_C, MBEDTLS_ECDSA_C, MBEDTLS_X509_CRT_PARSE_C
+ * Requires: PSA_WANT_ALG_ECDH, MBEDTLS_ECDSA_C, MBEDTLS_X509_CRT_PARSE_C
  *
  * This enables the following ciphersuites (if other requisites are
  * enabled as well):
@@ -909,7 +908,7 @@
  *
  * Enable the ECDH-RSA based ciphersuite modes in SSL / TLS.
  *
- * Requires: MBEDTLS_ECDH_C, MBEDTLS_RSA_C, MBEDTLS_X509_CRT_PARSE_C
+ * Requires: PSA_WANT_ALG_ECDH, MBEDTLS_RSA_C, MBEDTLS_X509_CRT_PARSE_C
  *
  * This enables the following ciphersuites (if other requisites are
  * enabled as well):
@@ -1001,33 +1000,6 @@
  * Uncomment this macro to prevent loading of default entropy functions.
  */
 //#define MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
-
-/**
- * \def MBEDTLS_NO_PLATFORM_ENTROPY
- *
- * Do not use built-in platform entropy functions.
- * This is useful if your platform does not support
- * standards like the /dev/urandom or Windows CryptoAPI.
- *
- * Uncomment this macro to disable the built-in platform entropy functions.
- */
-//#define MBEDTLS_NO_PLATFORM_ENTROPY
-
-/**
- * \def MBEDTLS_ENTROPY_FORCE_SHA256
- *
- * Force the entropy accumulator to use a SHA-256 accumulator instead of the
- * default SHA-512 based one (if both are available).
- *
- * Requires: MBEDTLS_SHA256_C
- *
- * On 32-bit systems SHA-256 can be much faster than SHA-512. Use this option
- * if you have performance concerns.
- *
- * This option is only useful if both MBEDTLS_SHA256_C and
- * MBEDTLS_SHA512_C are defined. Otherwise the available hash module is used.
- */
-//#define MBEDTLS_ENTROPY_FORCE_SHA256
 
 /**
  * \def MBEDTLS_ENTROPY_NV_SEED
@@ -1157,17 +1129,15 @@
  */
 //#define MBEDTLS_PSA_CRYPTO_CLIENT
 
-/** \def MBEDTLS_PSA_CRYPTO_DRIVERS
+/** \def SL_PSA_DRIVERS_ENABLED
  *
- * Enable support for the experimental PSA crypto driver interface.
+ * Enable the Silicon Labs PSA Crypto drivers in the dispatch layer. When set
+ * to 0, PSA Crypto is built software-only, without any Silicon Labs hardware
+ * driver entry points.
  *
  * Requires: MBEDTLS_PSA_CRYPTO_C
- *
- * \warning This interface is experimental. We intend to maintain backward
- *          compatibility with application code that relies on drivers,
- *          but the driver interfaces may change without notice.
  */
- #define MBEDTLS_PSA_CRYPTO_DRIVERS
+#define SL_PSA_DRIVERS_ENABLED 1
 
 /** \def MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
  *
@@ -2246,24 +2216,6 @@
 // #define MBEDTLS_DHM_C
 
 /**
- * \def MBEDTLS_ECDH_C
- *
- * Enable the elliptic curve Diffie-Hellman library.
- *
- * Module:  library/ecdh.c
- * Caller:  library/psa_crypto.c
- *          library/ssl_tls.c
- *          library/ssl*_client.c
- *          library/ssl*_server.c
- *
- * This module is used by the following key exchanges:
- *      ECDHE-ECDSA, ECDHE-RSA, DHE-PSK
- *
- * Requires: MBEDTLS_ECP_C
- */
-#define MBEDTLS_ECDH_C
-
-/**
  * \def MBEDTLS_ECDSA_C
  *
  * Enable the elliptic curve DSA library.
@@ -2353,21 +2305,6 @@
  * requisites are enabled as well.
  */
 #define MBEDTLS_GCM_C
-
-/**
- * \def MBEDTLS_HKDF_C
- *
- * Enable the HKDF algorithm (RFC 5869).
- *
- * Module:  library/hkdf.c
- * Caller:
- *
- * Requires: MBEDTLS_MD_C
- *
- * This module adds support for the Hashed Message Authentication Code
- * (HMAC)-based key derivation function (HKDF).
- */
-#define MBEDTLS_HKDF_C
 
 /**
  * \def MBEDTLS_HMAC_DRBG_C
@@ -2482,29 +2419,6 @@
 #define MBEDTLS_NET_C
 
 /**
- * \def MBEDTLS_OID_C
- *
- * Enable the OID database.
- *
- * Module:  library/oid.c
- * Caller:  library/asn1write.c
- *          library/pkcs5.c
- *          library/pkparse.c
- *          library/pkwrite.c
- *          library/rsa.c
- *          library/x509.c
- *          library/x509_create.c
- *          library/x509_crl.c
- *          library/x509_crt.c
- *          library/x509_csr.c
- *          library/x509write_crt.c
- *          library/x509write_csr.c
- *
- * This modules translates between OIDs and internal values.
- */
-#define MBEDTLS_OID_C
-
-/**
  * \def MBEDTLS_PADLOCK_C
  *
  * Enable VIA Padlock support on x86.
@@ -2613,21 +2527,6 @@
 #define MBEDTLS_PKCS5_C
 
 /**
- * \def MBEDTLS_PKCS12_C
- *
- * Enable PKCS#12 PBE functions.
- * Adds algorithms for parsing PKCS#8 encrypted private keys
- *
- * Module:  library/pkcs12.c
- * Caller:  library/pkparse.c
- *
- * Requires: MBEDTLS_ASN1_PARSE_C, MBEDTLS_CIPHER_C, MBEDTLS_MD_C
- *
- * This module enables PKCS#12 functions.
- */
-#define MBEDTLS_PKCS12_C
-
-/**
  * \def MBEDTLS_PLATFORM_C
  *
  * Enable the platform abstraction layer that allows you to re-assign
@@ -2678,8 +2577,8 @@
  * Enable dynamic secure element support in the Platform Security Architecture
  * cryptography API.
  *
- * \deprecated This feature is deprecated. Please switch to the driver
- *             interface enabled by #MBEDTLS_PSA_CRYPTO_DRIVERS.
+ * \deprecated This feature is deprecated. Please switch to the PSA
+ *             cryptoprocessor driver interface (#SL_PSA_DRIVERS_ENABLED).
  *
  * Module:  library/psa_crypto_se.c
  *
@@ -2740,7 +2639,7 @@
  * This module is used by the following key exchanges:
  *      RSA, DHE-RSA, ECDHE-RSA, RSA-PSK
  *
- * Requires: MBEDTLS_BIGNUM_C, MBEDTLS_OID_C
+ * Requires: MBEDTLS_BIGNUM_C
  */
 #define MBEDTLS_RSA_C
 
@@ -3081,7 +2980,7 @@
  *          library/x509_crt.c
  *          library/x509_csr.c
  *
- * Requires: MBEDTLS_ASN1_PARSE_C, MBEDTLS_BIGNUM_C, MBEDTLS_OID_C,
+ * Requires: MBEDTLS_ASN1_PARSE_C, MBEDTLS_BIGNUM_C,
  *           MBEDTLS_PK_PARSE_C
  *
  * This module is required for the X.509 parsing modules.
@@ -3139,7 +3038,7 @@
  *
  * Module:  library/x509_create.c
  *
- * Requires: MBEDTLS_BIGNUM_C, MBEDTLS_OID_C, MBEDTLS_PK_WRITE_C
+ * Requires: MBEDTLS_BIGNUM_C, MBEDTLS_PK_WRITE_C
  *
  * This module is the basis for creating X.509 certificates and CSRs.
  */
@@ -3547,14 +3446,5 @@
  * supplied at compile time.
  */
 //#define MBEDTLS_PLATFORM_GMTIME_R_ALT
-
-/**
- * Enable the verified implementations of ECDH primitives from Project Everest
- * (currently only Curve25519). This feature changes the layout of ECDH
- * contexts and therefore is a compatibility break for applications that access
- * fields of a mbedtls_ecdh_context structure directly. See also
- * MBEDTLS_ECDH_LEGACY_CONTEXT in include/mbedtls/ecdh.h.
- */
-//#define MBEDTLS_ECDH_VARIANT_EVEREST_ENABLED
 
 /** \} name SECTION: Module configuration options */

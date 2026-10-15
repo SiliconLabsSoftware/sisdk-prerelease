@@ -23,3 +23,6 @@ requires:
 - name: device_dma
 - name: device_emac
   condition: [device_has_emac]
+documentation:
+  docset: gecko-platform
+  document: platform-service/device-peripheral

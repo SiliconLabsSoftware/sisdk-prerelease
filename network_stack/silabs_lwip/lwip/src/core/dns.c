@@ -1909,6 +1909,44 @@ dns_gethostbyname_addrtype(const char *hostname, ip_addr_t *addr, dns_found_call
                      LWIP_DNS_ISMDNS_ARG(is_mdns));
 }
 
+#if SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DNS_ONDEMAND_TIMER
+/**
+ * Last-link DNS cleanup. Keeps dns_servers[] / local hostlist / non-RAND pcb.
+ */
+void
+sli_dns_cleanup_on_link_down(struct netif *netif)
+{
+  u8_t i;
+
+  LWIP_ASSERT_CORE_LOCKED();
+  LWIP_ERROR("sli_dns_cleanup_on_link_down: invalid netif", netif != NULL, return);
+
+  if (sli_netif_other_netif_is_up_link_up(netif)) {
+    return;
+  }
+
+  for (i = 0; i < DNS_TABLE_SIZE; i++) {
+    if ((dns_table[i].state == DNS_STATE_NEW) ||
+        (dns_table[i].state == DNS_STATE_ASKING)) {
+      /* dns_call_found: notify app (NULL), clear requests, may free RAND PCB. */
+      dns_call_found(i, NULL);
+    }
+    /* Clear DNS table slot to UNUSED (ttl / last_check_time). */
+    dns_table[i].state = DNS_STATE_UNUSED;
+    dns_table[i].ttl = 0;
+    dns_table[i].last_check_time = 0;
+  }
+
+  /* Stop on-demand DNS timer and clear timer flags. */
+  if (dns_timer_started) {
+    sys_untimeout(dns_timeout_cb, NULL);
+    dns_timer_started = 0;
+  }
+  dns_timer_eco_mode = 0;
+  has_active_queries = 0;
+}
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_DNS_ONDEMAND_TIMER */
+
 #if SL_LWIP_DNS_ONDEMAND_TIMER && LWIP_TESTMODE
 /**
  * Test helper functions for unit tests

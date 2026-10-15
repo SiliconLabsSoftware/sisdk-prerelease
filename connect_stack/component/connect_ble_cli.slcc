@@ -1,9 +1,11 @@
 id: "connect_ble_cli"
 label: "BLE CLI commands"
 package: "connect_stack"
+description: "Provides CLI commands to perform basic BLE operations."
 category: "Connect"
 quality: "production"
-description: "Provides CLI commands to perform basic BLE operations."
+ui_hints:
+  visibility: never
 provides:
 - name: "connect_ble_cli"
 requires:
@@ -25,7 +27,6 @@ requires:
 - name: "bluetooth_feature_sm"
 source:
 - path: "ble-cli/ble-cli.c"
-
 template_contribution:
 - name: component_catalog
   value: connect_ble_cli

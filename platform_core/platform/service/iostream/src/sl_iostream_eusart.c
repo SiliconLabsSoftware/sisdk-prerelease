@@ -57,6 +57,11 @@
 
 #if (defined(SL_CATALOG_POWER_MANAGER_PRESENT))
 #include "sl_power_manager.h"
+#include "sli_iostream_dmadrv.h"
+#endif
+
+#if defined(SL_CATALOG_GPIO_PERIPHERAL_PIN_LATCHING_PRESENT)
+#include "sl_gpio_peripheral_pin_latching.h"
 #endif
 
 #include <string.h>
@@ -119,9 +124,14 @@
 
 #if (defined(SL_CATALOG_POWER_MANAGER_PRESENT))
 static sl_power_manager_em_transition_event_handle_t on_power_manager_event_handle;
+static sl_power_manager_sleep_hook_handle_t eusart_sleep_hook_handle;
 
 static void on_power_manager_event(sl_power_manager_em_t from,
                                    sl_power_manager_em_t to);
+
+static void eusart_sleep_entry_hook(void);
+
+static void eusart_sleep_exit_hook(void);
 
 static sl_power_manager_em_transition_event_info_t on_power_manager_event_info =
 {
@@ -140,11 +150,19 @@ static sl_status_t eusart_tx(void *context, char c);
 
 static sl_status_t eusart_rx(void *context, char *c);
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+static sl_status_t eusart_deinit(void *context);
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#if !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
 static void eusart_tx_completed(void *context, bool enable);
 #endif
 
-static sl_status_t eusart_deinit(void *context);
+static sl_status_t eusart_suspend(const void *context);
+
+static sl_status_t eusart_resume(const void *context);
+
+static void eusart_unlatch_pins(const void *context);
+#endif
 
 #if defined(_SILICON_LABS_32B_SERIES_3)
 static inline sl_hal_eusart_parity_t iostream_to_hal_parity(sl_iostream_eusart_uart_parity_t parity)
@@ -298,7 +316,7 @@ static inline void init_hf_clocks(sl_iostream_eusart_config_t *eusart_config)
   // Use high frequency clock branch
   #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
     #if defined(EUART_PRESENT)
@@ -325,7 +343,7 @@ static inline void init_lf_clocks(sl_iostream_eusart_config_t *eusart_config)
   // Use low frequency clock branch
   #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7)  \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
   #if defined(EUART_PRESENT)
@@ -421,6 +439,11 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
 
 #endif
   uart_config->uart_periph->deinit = eusart_deinit;
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  uart_config->uart_periph->suspend = eusart_suspend;
+  uart_config->uart_periph->resume = eusart_resume;
+  uart_config->uart_periph->unlatch_pins = eusart_unlatch_pins;
+#endif
 
   status = sli_iostream_uart_context_init(iostream_uart,
                                           &eusart_context->context,
@@ -546,6 +569,9 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
   // Subscribe to notification to re-enable eusart after deepsleep.
   if (eusart_stream_list == NULL) {
     sl_power_manager_subscribe_em_transition_event(&on_power_manager_event_handle, &on_power_manager_event_info);
+    sl_power_manager_subscribe_sleep_hook(&eusart_sleep_hook_handle,
+                                          eusart_sleep_entry_hook,
+                                          eusart_sleep_exit_hook);
   }
   sl_slist_push(&eusart_stream_list, &eusart_context->node);
 #endif
@@ -696,13 +722,124 @@ static sl_status_t eusart_deinit(void *context)
   sl_slist_remove(&eusart_stream_list, &eusart_context->node);
   if (eusart_stream_list == NULL) {
     sl_power_manager_unsubscribe_em_transition_event(&on_power_manager_event_handle);
+    sl_power_manager_unsubscribe_sleep_hook(&eusart_sleep_hook_handle);
   }
 #endif
 
   return SL_STATUS_OK;
 }
 
-#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT))
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+/***************************************************************************//**
+ * Suspend EUSART hardware before EM2.
+ ******************************************************************************/
+static sl_status_t eusart_suspend(const void *context)
+{
+  const sl_iostream_uart_context_t *uart_ctx = (const sl_iostream_uart_context_t *)context;
+  const sl_iostream_eusart_context_t *eusart_context = (const sl_iostream_eusart_context_t *)uart_ctx;
+  EUSART_TypeDef *eusart_periph = sl_device_peripheral_eusart_get_base_addr(eusart_context->eusart);
+  sl_status_t status;
+
+  // FIFO/shifter only. TX DMA backlog is rejected in sli_iostream_uart_suspend_context().
+  if ((eusart_periph->EN & EUSART_EN_EN) != 0U
+      && (EUSART_STATUS_GET(eusart_periph) & _EUSART_STATUS_TXC_MASK) == 0U) {
+    return SL_STATUS_BUSY;
+  }
+
+  status = sli_iostream_dmadrv_pause_transfer(uart_ctx->rx_dma.channel);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  NVIC_DisableIRQ(uart_ctx->uart_periph->rx_irq_number);
+  EUSART_INT_DISABLE(eusart_periph, EUSART_IF_RXFL);
+
+#if defined(SL_CATALOG_GPIO_PERIPHERAL_PIN_LATCHING_PRESENT)
+  (void)sl_gpio_latch_peripheral_pins(eusart_context->eusart);
+#endif
+
+  EUSART_DISABLE(eusart_periph);
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Resume EUSART hardware after sleep (sleep-exit hook).
+ ******************************************************************************/
+static sl_status_t eusart_resume(const void *context)
+{
+  const sl_iostream_uart_context_t *uart_ctx = (const sl_iostream_uart_context_t *)context;
+  const sl_iostream_eusart_context_t *eusart_context = (const sl_iostream_eusart_context_t *)uart_ctx;
+  EUSART_TypeDef *eusart_periph = sl_device_peripheral_eusart_get_base_addr(eusart_context->eusart);
+  sl_status_t status;
+
+  sl_clock_manager_enable_bus_clock(eusart_context->bus_clock);
+  EUSART_ENABLE(eusart_periph);
+
+  status = sli_iostream_dmadrv_resume_transfer(uart_ctx->rx_dma.channel);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  NVIC_ClearPendingIRQ(uart_ctx->uart_periph->rx_irq_number);
+  NVIC_EnableIRQ(uart_ctx->uart_periph->rx_irq_number);
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Unlatch EUSART GPIO pins after EM0 restore.
+ ******************************************************************************/
+static void eusart_unlatch_pins(const void *context)
+{
+#if defined(SL_CATALOG_GPIO_PERIPHERAL_PIN_LATCHING_PRESENT)
+  const sl_iostream_uart_context_t *uart_ctx = (const sl_iostream_uart_context_t *)context;
+  const sl_iostream_eusart_context_t *eusart_context = (const sl_iostream_eusart_context_t *)uart_ctx;
+
+  (void)sl_gpio_unlatch_peripheral_pins(eusart_context->eusart);
+#else
+  (void)context;
+#endif
+}
+
+/***************************************************************************//**
+ * Sleep-entry hook: suspend EUSART instances that do not listen while sleeping.
+ ******************************************************************************/
+static void eusart_sleep_entry_hook(void)
+{
+  sl_iostream_eusart_context_t *eusart_context;
+
+  SL_SLIST_FOR_EACH_ENTRY(eusart_stream_list, eusart_context, sl_iostream_eusart_context_t, node) {
+    sli_iostream_uart_suspend_context(&eusart_context->context);
+  }
+}
+
+/***************************************************************************//**
+ * Sleep-exit hook: restore EUSART instances suspended on entry.
+ ******************************************************************************/
+static void eusart_sleep_exit_hook(void)
+{
+  const sl_iostream_eusart_context_t *eusart_context;
+
+  SL_SLIST_FOR_EACH_ENTRY(eusart_stream_list, eusart_context, sl_iostream_eusart_context_t, node) {
+    sli_iostream_uart_resume_context(&eusart_context->context);
+  }
+}
+
+/***************************************************************************//**
+ * Unlatch after the last EM0 enable, then clear the suspend flag.
+ ******************************************************************************/
+static void eusart_finish_em0_wake(sl_iostream_eusart_context_t *eusart_context)
+{
+  sl_iostream_uart_context_t *uart_ctx = &eusart_context->context;
+
+  if (uart_ctx->uart_sleep_suspended
+      && uart_ctx->uart_periph->unlatch_pins != NULL) {
+    uart_ctx->uart_periph->unlatch_pins(uart_ctx);
+    uart_ctx->uart_sleep_suspended = false;
+  }
+}
+
 /***************************************************************************//**
  * Power Manager callback notification for EUSART.
  * It is used to re-enabled EUSART module after deepsleeping.
@@ -717,16 +854,28 @@ static void on_power_manager_event(sl_power_manager_em_t from,
     case SL_POWER_MANAGER_EM0:
     case SL_POWER_MANAGER_EM1:
       SL_SLIST_FOR_EACH_ENTRY(eusart_stream_list, eusart_context, sl_iostream_eusart_context_t, node) {
+        // EM1 notifications also fire inside one sl_power_manager_sleep() call, before
+        // the sleep-exit hook, while the HFXO is restored. Leave a suspended UART
+        // disabled until that hook resumes it.
+        if ((to == SL_POWER_MANAGER_EM1)
+            && eusart_context->context.uart_sleep_suspended) {
+          continue;
+        }
         sl_clock_manager_enable_bus_clock(eusart_context->bus_clock);
         // Re-enable EUSART for non EM2 capable instance
         EUSART_ENABLE(sl_device_peripheral_eusart_get_base_addr(eusart_context->eusart));
+        // EM2 wake: this enable is the last one. EM1 fallback never gets here;
+        // sl_iostream_uart_wakeup() unlatches that path.
+        if (to == SL_POWER_MANAGER_EM0) {
+          eusart_finish_em0_wake(eusart_context);
+        }
       }
       break;
 
     case SL_POWER_MANAGER_EM2:
 
       SL_SLIST_FOR_EACH_ENTRY(eusart_stream_list, eusart_context, sl_iostream_eusart_context_t, node) {
-        if (!eusart_context->context.rx_enable && !eusart_context->context.tx_idle) {
+        if (!eusart_context->context.tx_idle) {
           sl_clock_manager_disable_bus_clock(eusart_context->bus_clock);
         }
       }

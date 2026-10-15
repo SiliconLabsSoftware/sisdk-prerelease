@@ -1,0 +1,21 @@
+#include "sl_gatt_client_manager.h"
+#include "sli_gatt_client_manager.h"
+
+{%- set includes = [] -%} {# Deduplicate includes before printing #include statements -#}
+{%- for handler in gatt_client_manager_on_event %}
+{%- if 'include' in handler and handler['include'] not in includes -%}
+{%- if includes.append(handler['include']) %}{% endif -%}
+{%- endif -%}
+{%- endfor -%}
+{%- for include in includes %}
+#include "{{include}}"
+{%- endfor %}
+
+void sli_gatt_client_manager_dispatch_event(const sl_gatt_client_manager_event_t *event)
+{
+  sli_gcm_log_event(event);
+{% for handler in gatt_client_manager_on_event %}
+  {{ handler['handler'] }}(event);
+{% endfor %}
+  sl_gatt_client_manager_on_event(event);
+}

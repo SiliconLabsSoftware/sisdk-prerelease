@@ -270,6 +270,7 @@ extern "C" {
 #define SL_DMA_CHANNEL_USES_ROUND_ROBIN             (1 << 1)
 #define SL_DMA_CHANNEL_SUPPORTS_INTERLEAVING        (1 << 2)
 #define SL_DMA_CHANNEL_SUPPORTS_DUAL_DESTINATION    (1 << 3)
+#define SL_DMA_CHANNEL_IS_RETAINED                  (1 << 4)
 
 // -----------------------------------------------------------------------------
 // TYPE DEFINITIONS
@@ -370,6 +371,7 @@ sl_status_t sl_dma_manager_allocate_channel(sl_dma_handle_t *dma_handle,
  *                                   - ::SL_DMA_CHANNEL_USES_ROUND_ROBIN
  *                                   - ::SL_DMA_CHANNEL_SUPPORTS_INTERLEAVING
  *                                   - ::SL_DMA_CHANNEL_SUPPORTS_DUAL_DESTINATION
+ *                                   - ::SL_DMA_CHANNEL_IS_RETAINED
  *
  *                                 ::SL_DMA_CHANNEL_HIGH_PRIORITY and
  *                                 ::SL_DMA_CHANNEL_USES_ROUND_ROBIN are

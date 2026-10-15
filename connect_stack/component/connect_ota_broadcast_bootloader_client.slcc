@@ -1,16 +1,18 @@
 id: "connect_ota_broadcast_bootloader_client"
 label: "OTA Broadcast Bootloader Client"
 package: "connect_stack"
+description: "Implements the client side of the broadcast-based Connect OTA Bootloader protocol. The OTA Broadcast Bootloader Client component should be used to receive an image from an OTA Broadcast Bootloader server, to respond to status inquiries from a server and to be instructed by a server to perform a bootload at a certain time in the future."
 category: "Connect|OTA"
 quality: "production"
-description: "Implements the client side of the broadcast-based Connect OTA Bootloader protocol. The OTA Broadcast Bootloader Client component should be used to receive an image from an OTA Broadcast Bootloader server, to respond to status inquiries from a server and to be instructed by a server to perform a bootload at a certain time in the future."
+ui_hints:
+  visibility: basic
+documentation:
+  docset: connect-stack
+  document: connect-stack-api/ota-bootloader-client
 provides:
 - name: "connect_ota_broadcast_bootloader_client"
 requires:
 - name: "connect_stack_common"
-source:
-- path: "ota-broadcast-bootloader/ota-broadcast-bootloader-client/ota-broadcast-bootloader-client.c"
-- path: "ota-broadcast-bootloader/ota-broadcast-bootloader-client/ota-broadcast-bootloader-client-cb.c"
 include:
 - path: "ota-broadcast-bootloader"
   file_list:
@@ -21,6 +23,9 @@ include:
   file_list:
   - path: "ota-broadcast-bootloader-client.h"
   - path: "ota-broadcast-bootloader-client-internal.h"
+source:
+- path: "ota-broadcast-bootloader/ota-broadcast-bootloader-client/ota-broadcast-bootloader-client.c"
+- path: "ota-broadcast-bootloader/ota-broadcast-bootloader-client/ota-broadcast-bootloader-client-cb.c"
 config_file:
 - path: "ota-broadcast-bootloader/ota-broadcast-bootloader-client/config/ota-broadcast-bootloader-client-config.h"
 template_contribution:
@@ -42,10 +47,6 @@ template_contribution:
     event_handler: "emAfPluginOtaBootloaderClientEventHandler"
 - name: component_catalog
   value: connect_ota_broadcast_bootloader_client
-
-documentation:
-  docset: connect-stack
-  document: group-ota-bootloader-client
 
 metadata:
   sbom:

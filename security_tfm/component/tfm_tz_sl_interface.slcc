@@ -14,6 +14,11 @@ include:
 - path: ../
   condition:
   - trustzone_secure
+- path: .
+  condition:
+  - trustzone_secure
+  file_list:
+  - path: interface/include/psa/error.h
 - path: interface/include
   unless:
   - tz_service_common
@@ -21,7 +26,6 @@ include:
   - path: tfm_api.h
   - path: psa_config.h
   - path: psa/client.h
-  - path: psa/error.h
 metadata:
   sbom:
     reference: tfm_sbom

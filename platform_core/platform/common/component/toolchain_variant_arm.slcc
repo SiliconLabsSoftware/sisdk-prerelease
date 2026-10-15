@@ -24,5 +24,7 @@ toolchain_settings:
   value: -x assembler-with-cpp
 - option: llvm_assembler_option
   value: -x assembler-with-cpp
-
+documentation:
+  docset: gecko-platform
+  document: platform-common/common
 root_path: platform_core

@@ -15,14 +15,6 @@ ui_hints:
 template_contribution:
 - name: third_party_ram_objects
   unless: [toolchain_lto]
-    # src/core/diags/factory_diags.cpp
-  value: factory_diags
-- name: third_party_ram_objects
-  unless: [toolchain_lto]
-    # src/core/thread/link_metrics.cpp
-  value: link_metrics
-- name: third_party_ram_objects
-  unless: [toolchain_lto]
     # src/core/mac/mac.cpp
   value: mac
 - name: code_classification_components
@@ -33,8 +25,6 @@ include:
 - path: include/code_classification
   condition: [toolchain_lto, device_series_3]
   file_list:
-  - path: sl_ot_code_classification_factory_diags.hpp
-  - path: sl_ot_code_classification_link_metrics.hpp
   - path: sl_ot_code_classification_mac.hpp
 
 define:
@@ -51,23 +41,7 @@ toolchain_settings:
 - option: gcc_c++_compiler_option
   condition: [toolchain_lto, device_series_3]
   unless: [ot_skip_code_classification]
-  value: "-include sl_ot_code_classification_factory_diags.hpp"
-- option: gcc_c++_compiler_option
-  condition: [toolchain_lto, device_series_3]
-  unless: [ot_skip_code_classification]
-  value: "-include sl_ot_code_classification_link_metrics.hpp"
-- option: gcc_c++_compiler_option
-  condition: [toolchain_lto, device_series_3]
-  unless: [ot_skip_code_classification]
   value: "-include sl_ot_code_classification_mac.hpp"
-- option: llvm_c++_compiler_option
-  condition: [toolchain_lto, device_series_3]
-  unless: [ot_skip_code_classification]
-  value: "-include sl_ot_code_classification_factory_diags.hpp"
-- option: llvm_c++_compiler_option
-  condition: [toolchain_lto, device_series_3]
-  unless: [ot_skip_code_classification]
-  value: "-include sl_ot_code_classification_link_metrics.hpp"
 - option: llvm_c++_compiler_option
   condition: [toolchain_lto, device_series_3]
   unless: [ot_skip_code_classification]

@@ -39,6 +39,7 @@ include:
   - path: sl_cpc_frame.h
   - path: sl_cpc_msgq.h
   - path: sl_cpc_version.h
+  - path: sl_cpc_wake.h
   - path: sli_cpc_types.h
   # CPC-3421: tests should not include internal headers.
 - path: src

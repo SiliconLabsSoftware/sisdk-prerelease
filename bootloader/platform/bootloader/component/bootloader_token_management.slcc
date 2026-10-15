@@ -11,6 +11,8 @@ include:
 - path: platform/bootloader/security
   file_list:
   - path: btl_security_tokens.h
+requires:
+- name: se_manager_mailbox
 provides:
 - name: bootloader_token_management
 - name: bootloader_nonsecure_incompatible

@@ -463,7 +463,7 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
     // -------------------------------
     // This event indicates that a new connection was opened.
     case sl_bt_evt_connection_opened_id:
-      // Check if there is a CBAP prodecure in progress already.
+      // Check if there is a CBAP procedure in progress already.
       if (candidate_device.handle != SL_BT_INVALID_CONNECTION_HANDLE) {
         CBAP_LOG_ERROR("There cannot be multiple procedures in progress at " \
                        "the same time. Closing new connection." CBAP_LOG_NL);

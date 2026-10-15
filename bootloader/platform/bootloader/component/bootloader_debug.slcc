@@ -24,6 +24,10 @@ include:
 - path: platform/bootloader
   file_list:
   - path: config/btl_config.h
+- path: platform/bootloader/series3/driver
+  condition: [device_series_3]
+  file_list:
+  - path: btl_driver_cmu.h
 requires:
 - name: bootloader_interface_common
   condition: [trustzone_unaware]

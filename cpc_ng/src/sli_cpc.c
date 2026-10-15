@@ -81,10 +81,10 @@
     }                                           \
   } while (0)
 
-#define LOCK_EP_LIST(bus) SLI_CPC_MUTEX_ACQUIRE((bus)->ep_list_lock, "endpoint list lock")
-#define RELEASE_EP_LIST(bus) SLI_CPC_MUTEX_RELEASE((bus)->ep_list_lock, "endpoint list lock")
-#define LOCK_TRANSMIT_QUEUE(bus) SLI_CPC_MUTEX_ACQUIRE((bus)->transmit_queue_lock, "transmit queue lock")
-#define RELEASE_TRANSMIT_QUEUE(bus) SLI_CPC_MUTEX_RELEASE((bus)->transmit_queue_lock, "transmit queue lock")
+#define LOCK_EP_LIST(bus) SLI_CPC_MUTEX_ACQUIRE((bus)->kernel.ep_list_lock, "endpoint list lock")
+#define RELEASE_EP_LIST(bus) SLI_CPC_MUTEX_RELEASE((bus)->kernel.ep_list_lock, "endpoint list lock")
+#define LOCK_TRANSMIT_QUEUE(bus) SLI_CPC_MUTEX_ACQUIRE((bus)->kernel.transmit_queue_lock, "transmit queue lock")
+#define RELEASE_TRANSMIT_QUEUE(bus) SLI_CPC_MUTEX_RELEASE((bus)->kernel.transmit_queue_lock, "transmit queue lock")
 #define LOCK_EP(ep) SLI_CPC_MUTEX_ACQUIRE((ep)->lock, "endpoint lock")
 #define RELEASE_EP(ep) SLI_CPC_MUTEX_RELEASE((ep)->lock, "endpoint lock")
 #else
@@ -121,6 +121,17 @@ bool secondary_application_version_mismatch = false;
 #endif
 
 /*******************************************************************************
+ ***************************  LOCAL VARIABLES   ********************************
+ ******************************************************************************/
+
+/***************************************************************************/ /**
+ * Endpoints opened with @ref sl_cpc_ep_listen and a NULL bus.
+ *
+ * Matched to a bus when the first SYN for that endpoint ID arrives.
+ ******************************************************************************/
+static sl_slist_node_t *any_bus_ep_list = NULL;
+
+/*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 // Initialization
@@ -139,17 +150,21 @@ static void ep_set_error(sl_cpc_ep_t *ep, sl_status_t status);
 static void process_closed_eps(sl_cpc_bus_t *bus);
 
 // Endpoint notifications
-static void move_ep_to_close_list(sl_cpc_ep_t *ep);
 static void notify_error(sl_cpc_ep_t *ep, sl_status_t status);
 static bool notify_state_change(const sl_cpc_ep_t *ep);
 static sl_status_t ep_request_open(sl_cpc_ep_t *ep, sl_cpc_bus_t *bus, bool connect);
+
+// Listen on any bus
+static sl_status_t ep_listen_any_bus(sl_cpc_ep_t *ep);
+static sl_cpc_ep_t *find_ep_any_bus(uint16_t address);
+static sl_cpc_ep_t *match_ep_to_bus(sl_cpc_bus_t *bus, uint16_t address);
 
 // Endpoint queue management
 static void clean_tx_queues(sl_cpc_ep_t *ep);
 static uint8_t get_ep_rx_buffer_count(const sl_cpc_ep_t *ep);
 
 // Frame validation
-static bool frame_has_invalid_flags(sl_cpc_frame_t *frame);
+static bool frame_has_invalid_flags(const sl_cpc_frame_t *frame);
 static bool frame_in_send_window(const sl_cpc_ep_t *ep, const sl_cpc_buf_t *buf);
 
 // Frame creation
@@ -161,7 +176,7 @@ static void receive_frame(sl_cpc_bus_t *bus, sl_cpc_frame_t *frame);
 static void reject_invalid_received_frame(sl_cpc_bus_t *bus, sl_cpc_ep_t *ep, uint16_t address);
 static bool process_incoming_ack(sl_cpc_bus_t *bus, sl_cpc_ep_t *ep, const sli_cpc_hdr_t *hdr);
 static bool process_incoming_payload(sl_cpc_ep_t *ep, const sli_cpc_hdr_t *hdr, sl_cpc_frame_t *frame);
-static void receive_syn(sl_cpc_bus_t *bus, sl_cpc_ep_t *ep, sl_cpc_frame_t *frame);
+static void receive_syn(sl_cpc_bus_t *bus, sl_cpc_ep_t *ep, const sl_cpc_frame_t *frame);
 static void receive_reset(sl_cpc_ep_t *ep);
 static void receive_ack(sl_cpc_ep_t *ep, const sli_cpc_hdr_t *remote_hdr);
 static sl_status_t process_received_data_frame(sl_cpc_frame_t *frame);
@@ -177,6 +192,10 @@ static void process_write_completions(sl_cpc_bus_t *bus);
 static void ep_clear_pend_ack(sl_cpc_ep_t *ep);
 static void ep_set_pend_ack(sl_cpc_ep_t *ep);
 static void ep_flush_pend_ack(sl_cpc_ep_t *ep);
+static void ep_clear_pend_syn(sl_cpc_ep_t *ep);
+static void ep_set_pend_syn(sl_cpc_ep_t *ep);
+static void ep_clear_pend_rst(sl_cpc_ep_t *ep);
+static void ep_set_pend_rst(sl_cpc_ep_t *ep);
 static void ep_clear_pend_wnd_probe(sl_cpc_ep_t *ep);
 static void cancel_scheduled_wnd_probe(sl_cpc_ep_t *ep);
 static void sli_compute_window_probe_timeout(sl_cpc_ep_t *ep);
@@ -184,6 +203,9 @@ static void schedule_wnd_probe(sl_cpc_ep_t *ep);
 static bool ep_needs_wnd_probe(const sl_cpc_ep_t *ep);
 static sl_status_t send_ack_frame(sl_cpc_ep_t *ep);
 static sl_status_t send_wnd_probe_frame(sl_cpc_ep_t *ep);
+static void send_syn_reply(sl_cpc_ep_t *ep, bool signal);
+static void process_pend_syn_flag(sl_cpc_ep_t *ep);
+static void process_pend_rst_flag(sl_cpc_ep_t *ep);
 static void process_pending_flags(sl_cpc_bus_t *bus);
 
 // Retransmission
@@ -260,7 +282,12 @@ void sli_cpc_ep_put_ref(sl_cpc_ep_t *ep)
 
   if (closed) {
     SLI_CPC_ASSERT(ep->state == SLI_CPC_STATE_CLOSING);
-    move_ep_to_close_list(ep);
+    if (ep->bus == NULL) {
+      ep_set_state(ep, SLI_CPC_STATE_CLOSED, true);
+    } else {
+      MCU_ATOMIC_SECTION(sl_slist_push(&ep->bus->closed_eps, &ep->node););
+      sli_cpc_bus_signal_event(ep->bus, SLI_CPC_SIGNAL_CLOSED);
+    }
   }
 }
 
@@ -307,6 +334,15 @@ static void terminate_ep(sl_cpc_ep_t *ep)
 {
   sl_cpc_bus_t *bus = ep->bus;
 
+  if (ep->state == SLI_CPC_STATE_CLOSING) {
+    return;
+  }
+
+  if (bus == NULL) {
+    ep_set_state(ep, SLI_CPC_STATE_CLOSING, false);
+    return;
+  }
+
   // The locking pattern is to always lock the endpoint's list first and then
   // endpoints. This pattern must be followed consistently to prevent deadlocks.
   // This function is entered with endpoint locked, so it must be unlocked first.
@@ -333,6 +369,12 @@ static void terminate_ep(sl_cpc_ep_t *ep)
   // Flush any pending ACK before teardown completes so the peer does not wait
   // through retransmit attempts for an ACK that will never come.
   ep_flush_pend_ack(ep);
+
+  // Drop any pending SYN reply
+  ep_clear_pend_syn(ep);
+
+  // Drop any pending RST
+  ep_clear_pend_rst(ep);
 }
 
 /***************************************************************************/ /**
@@ -405,6 +447,8 @@ void sli_cpc_bus_terminate_endpoints(sl_cpc_bus_t *bus)
  ******************************************************************************/
 void sl_cpc_ep_close(sl_cpc_ep_t *ep)
 {
+  MCU_DECLARE_IRQ_STATE;
+
   SLI_CPC_ASSERT(ep);
 
   LOCK_EP(ep);
@@ -414,14 +458,15 @@ void sl_cpc_ep_close(sl_cpc_ep_t *ep)
     return;
   }
 
+  MCU_ENTER_ATOMIC();
+  if (ep->bus == NULL) {
+    sl_slist_remove(&any_bus_ep_list, &ep->node);
+  }
+  MCU_EXIT_ATOMIC();
+
   ep->flags &= ~SLI_CPC_EP_FLAG_OPENED;
 
-  // endpoint might already be closing from a RST frame, so terminate it
-  // only if it's not already terminated. Deferred opens remain CLOSED while
-  // still on the bus list.
-  if (ep->state != SLI_CPC_STATE_CLOSING) {
-    terminate_ep(ep);
-  }
+  terminate_ep(ep);
 
   RELEASE_EP(ep);
   sli_cpc_ep_put_ref(ep);
@@ -513,7 +558,7 @@ void sli_cpc_bus_signal_event(sl_cpc_bus_t *bus, sli_cpc_signal_type_t signal_ty
 {
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   (void)signal_type;
-  osStatus_t status = osSemaphoreRelease(bus->event_signal);
+  osStatus_t status = osSemaphoreRelease(bus->kernel.event_signal);
   if (status != osOK && status != osErrorResource) {
     SLI_CPC_PANIC("Failed to release bus event signal, status=%d", (int)status);
   }
@@ -525,20 +570,11 @@ void sli_cpc_bus_signal_event(sl_cpc_bus_t *bus, sli_cpc_signal_type_t signal_ty
 }
 
 /***************************************************************************/ /**
- * Notify the core that an endpoint is terminated.
- ******************************************************************************/
-static void move_ep_to_close_list(sl_cpc_ep_t *ep)
-{
-  MCU_ATOMIC_SECTION(sl_slist_push(&ep->bus->closed_eps, &ep->node););
-  sli_cpc_bus_signal_event(ep->bus, SLI_CPC_SIGNAL_CLOSED);
-}
-
-/***************************************************************************/ /**
  * Handle frame write completion
  ******************************************************************************/
 static void on_send_done(sl_cpc_frame_t *frame, void *arg, sl_status_t status)
 {
-  sl_cpc_ep_t *ep = sli_cpc_frame_get_ep(frame);
+  sl_cpc_ep_t *ep = frame->ep;
   sl_cpc_ep_event_t event = {
     .send_done = {
       .buf = frame->payload,
@@ -557,7 +593,7 @@ static void on_send_done(sl_cpc_frame_t *frame, void *arg, sl_status_t status)
  ******************************************************************************/
 static void complete_tx_frame(sl_cpc_frame_t *frame)
 {
-  sl_cpc_ep_t *ep = sli_cpc_frame_get_ep(frame);
+  sl_cpc_ep_t *ep = frame->ep;
 
   LOCK_EP(ep);
 
@@ -601,7 +637,7 @@ static void process_write_completions(sl_cpc_bus_t *bus)
  ******************************************************************************/
 static void submit_write_completion(sl_cpc_frame_t *frame)
 {
-  sl_cpc_ep_t *ep = sli_cpc_frame_get_ep(frame);
+  sl_cpc_ep_t *ep = frame->ep;
 
   // When submitting for write completion, the buffer should not be referenced
   SLI_CPC_ASSERT(frame->ref_count == 0);
@@ -870,6 +906,11 @@ static sl_status_t ep_request_open(sl_cpc_ep_t *ep, sl_cpc_bus_t *bus, bool conn
   LOCK_EP_LIST(bus);
   LOCK_EP(ep);
 
+  if (ep->state != SLI_CPC_STATE_CLOSED || (ep->flags & SLI_CPC_EP_FLAG_OPENED) != 0) {
+    status = SL_STATUS_INVALID_STATE;
+    goto exit;
+  }
+
   status = sli_cpc_ep_attach(ep, bus);
   if (status != SL_STATUS_OK) {
     goto exit;
@@ -906,7 +947,129 @@ exit:
  ******************************************************************************/
 sl_status_t sl_cpc_ep_listen(sl_cpc_ep_t *ep, sl_cpc_bus_t *bus)
 {
+  SLI_CPC_ASSERT(ep);
+
+  // The control endpoint is created per bus by the bus itself.
+  if (ep->id == SL_CPC_EP_ID_CONTROL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (bus == NULL) {
+    return ep_listen_any_bus(ep);
+  }
+
   return ep_request_open(ep, bus, false);
+}
+
+/***************************************************************************/ /**
+ * Listen for a connection on any bus.
+ *
+ * The endpoint stays CLOSED with @ref SLI_CPC_EP_FLAG_OPENED set, the same
+ * shape as a listen deferred until its bus is initialized.
+ *
+ * The oldest listener for its ID is moved onto the bus that receives the first
+ * SYN after that bus is initialized.
+ ******************************************************************************/
+static sl_status_t ep_listen_any_bus(sl_cpc_ep_t *ep)
+{
+  sl_status_t status = SL_STATUS_OK;
+  MCU_DECLARE_IRQ_STATE;
+
+  LOCK_EP(ep);
+
+  if (ep->state != SLI_CPC_STATE_CLOSED || (ep->flags & SLI_CPC_EP_FLAG_OPENED) != 0 || ep->bus != NULL) {
+    status = SL_STATUS_INVALID_STATE;
+    goto release_ep;
+  }
+
+  sli_cpc_ep_get_ref(ep);
+  ep->flags &= ~SLI_CPC_EP_FLAG_CONNECT;
+  ep->flags |= SLI_CPC_EP_FLAG_OPENED;
+
+  MCU_ENTER_ATOMIC();
+  // Append last so the oldest listener for an ID is matched first, and only
+  // once endpoint-local setup above is complete.
+  sl_slist_push_back(&any_bus_ep_list, &ep->node);
+  MCU_EXIT_ATOMIC();
+
+release_ep:
+  RELEASE_EP(ep);
+
+  return status;
+}
+
+/***************************************************************************/ /**
+ * Find the oldest endpoint listening for @p address on any bus.
+ *
+ * @note Caller must be inside an atomic section.
+ ******************************************************************************/
+static sl_cpc_ep_t *find_ep_any_bus(uint16_t address)
+{
+  sl_cpc_ep_t *ep;
+
+  SL_SLIST_FOR_EACH_ENTRY(any_bus_ep_list, ep, sl_cpc_ep_t, node)
+  {
+    if (ep->id == address) {
+      return ep;
+    }
+  }
+
+  return NULL;
+}
+
+/***************************************************************************/ /**
+ * Resolve the endpoint for a SYN on @p bus.
+ *
+ * @return The endpoint for @p address on @p bus, or NULL if there is none.
+ ******************************************************************************/
+static sl_cpc_ep_t *match_ep_to_bus(sl_cpc_bus_t *bus, uint16_t address)
+{
+  sl_cpc_ep_t *ep;
+  MCU_DECLARE_IRQ_STATE;
+
+  LOCK_EP_LIST(bus);
+  MCU_ENTER_ATOMIC();
+
+  // Prefer an endpoint already registered on this bus.
+  ep = sli_cpc_bus_find_ep_from_id(bus, address);
+  if (ep != NULL) {
+    MCU_EXIT_ATOMIC();
+    RELEASE_EP_LIST(bus);
+    return ep;
+  }
+
+  // Do not bind a listen-any-bus endpoint before the bus is fully up.
+  if (!bus->initialized) {
+    MCU_EXIT_ATOMIC();
+    RELEASE_EP_LIST(bus);
+    return NULL;
+  }
+
+  // No listener: reject the peer with RST.
+  ep = find_ep_any_bus(address);
+  if (ep == NULL) {
+    MCU_EXIT_ATOMIC();
+    RELEASE_EP_LIST(bus);
+    reject_invalid_received_frame(bus, NULL, address);
+    return NULL;
+  }
+
+  SLI_CPC_ASSERT(ep->bus == NULL);
+  SLI_CPC_ASSERT(ep->state == SLI_CPC_STATE_CLOSED);
+  SLI_CPC_ASSERT((ep->flags & SLI_CPC_EP_FLAG_OPENED) != 0);
+  SLI_CPC_ASSERT((ep->flags & SLI_CPC_EP_FLAG_CONNECT) == 0);
+
+  sl_slist_remove(&any_bus_ep_list, &ep->node);
+  ep->bus = bus;
+  sli_cpc_bus_add_ep(bus, ep);
+
+  MCU_EXIT_ATOMIC();
+
+  sli_cpc_ep_listen(ep);
+
+  RELEASE_EP_LIST(bus);
+
+  return ep;
 }
 
 /***************************************************************************/ /**
@@ -974,6 +1137,13 @@ release_ep:
  ******************************************************************************/
 sl_status_t sl_cpc_ep_connect(sl_cpc_ep_t *ep, sl_cpc_bus_t *bus)
 {
+  SLI_CPC_ASSERT(ep);
+
+  // The control endpoint is created per bus by the bus itself.
+  if (ep->id == SL_CPC_EP_ID_CONTROL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
   return ep_request_open(ep, bus, true);
 }
 
@@ -1075,8 +1245,8 @@ static bool frame_in_send_window(const sl_cpc_ep_t *ep, const sl_cpc_buf_t *buf)
  ******************************************************************************/
 static void transmit_frame(sl_cpc_bus_t *bus, sl_cpc_frame_t *frame, bool signal)
 {
-  sl_cpc_ep_t *ep = sli_cpc_frame_get_ep(frame);
-  sli_cpc_hdr_t *hdr = sli_cpc_frame_get_header(frame);
+  sl_cpc_ep_t *ep = frame->ep;
+  sli_cpc_hdr_t *hdr = &frame->hdr;
 
   frame->tx_count++;
 
@@ -1092,7 +1262,7 @@ static void transmit_frame(sl_cpc_bus_t *bus, sl_cpc_frame_t *frame, bool signal
 
       sli_cpc_ep_frame_list_push_back(&ep->re_transmit_list, frame);
 
-      sli_cpc_header_set_seq(hdr, ep->send_nxt);
+      hdr->seq = ep->send_nxt;
 
       // Increase the send_nxt sequence, this is used as the upper bound
       // of sequence number that can be acknowledged by the remote
@@ -1162,6 +1332,40 @@ static void ep_set_pend_ack(sl_cpc_ep_t *ep)
 static void ep_clear_pend_ack(sl_cpc_ep_t *ep)
 {
   ep->flags &= ~SLI_CPC_EP_FLAG_PEND_ACK;
+}
+
+/***************************************************************************/ /**
+ * Mark that a SYN reply could not be sent and should be retried later.
+ *
+ * Set when get_syn_frame() fails while answering an incoming SYN in OPEN.
+ ******************************************************************************/
+static void ep_set_pend_syn(sl_cpc_ep_t *ep)
+{
+  ep->flags |= SLI_CPC_EP_FLAG_PEND_SYN;
+}
+
+/***************************************************************************/ /**
+ * Clear the pending SYN reply flag on an endpoint.
+ ******************************************************************************/
+static void ep_clear_pend_syn(sl_cpc_ep_t *ep)
+{
+  ep->flags &= ~SLI_CPC_EP_FLAG_PEND_SYN;
+}
+
+/***************************************************************************/ /**
+ * Mark that a RST could not be sent and should be retried later.
+ ******************************************************************************/
+static void ep_set_pend_rst(sl_cpc_ep_t *ep)
+{
+  ep->flags |= SLI_CPC_EP_FLAG_PEND_RST;
+}
+
+/***************************************************************************/ /**
+ * Clear the pending RST flag on an endpoint.
+ ******************************************************************************/
+static void ep_clear_pend_rst(sl_cpc_ep_t *ep)
+{
+  ep->flags &= ~SLI_CPC_EP_FLAG_PEND_RST;
 }
 
 /***************************************************************************/ /**
@@ -1287,7 +1491,7 @@ sl_status_t sl_cpc_ep_send(sl_cpc_ep_t *ep, sl_cpc_buf_t *buf, sl_cpc_frame_t *f
   sli_cpc_frame_init(frame);
   frame->payload = buf;
 
-  hdr = sli_cpc_frame_get_header(frame);
+  hdr = &frame->hdr;
 
   sli_cpc_header_set_address(hdr, ep->id);
   sli_cpc_header_set_payload_size(hdr, frame->payload->tot_len);
@@ -1433,11 +1637,9 @@ static bool process_incoming_ack(sl_cpc_bus_t *bus, sl_cpc_ep_t *ep, const sli_c
 {
   sl_cpc_frame_t *pending_frame;
   bool window_too_small = false;
-  uint8_t seq;
 
   // Validate packet sequence numbers to ensure frames are processed in order.
-  seq = sli_cpc_header_get_seq(hdr);
-  if (sli_cpc_header_is_ack_requested(hdr) && ep->ack != seq) {
+  if (sli_cpc_header_is_ack_requested(hdr) && ep->ack != hdr->seq) {
     ep_set_pend_ack(ep);
 
     SLI_CPC_DEBUG_TRACE_EP_RXD_OUT_OF_SEQ_FRAME(ep);
@@ -1530,17 +1732,17 @@ static void receive_frame(sl_cpc_bus_t *bus, sl_cpc_frame_t *frame)
 
   SLI_CPC_DEBUG_TRACE_CORE_RXD_FRAME(bus);
 
-  hdr = sli_cpc_frame_get_header(frame);
+  hdr = &frame->hdr;
   address = sli_cpc_header_get_address(hdr);
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-  if (bus->wake_mode == SL_CPC_WAKE_MODE_HOST) {
+  if (bus->wake.host.mode == SL_CPC_WAKE_OUT_MODE_CONFIRM) {
     sli_cpc_wake_handle_rx(&bus->wake.host, hdr);
   }
 #endif
 
   if (sli_cpc_header_is_reset(hdr)) {
-    sl_cpc_ep_t *rst_ep = sli_cpc_frame_get_ep(frame);
+    sl_cpc_ep_t *rst_ep = sli_cpc_bus_find_ep_from_id(bus, address);
 
     if (rst_ep) {
       LOCK_EP(rst_ep);
@@ -1551,23 +1753,42 @@ static void receive_frame(sl_cpc_bus_t *bus, sl_cpc_frame_t *frame)
     goto cleanup;
   }
 
-  ep = sli_cpc_frame_get_ep(frame);
+  ep = frame->ep;
 
-  if (ep) {
-    LOCK_EP(ep);
-  }
-
-  if (!ep || frame_has_invalid_flags(frame)) {
+  if (frame_has_invalid_flags(frame)) {
+    if (ep) {
+      LOCK_EP(ep);
+    }
     reject_invalid_received_frame(bus, ep, address);
     goto cleanup;
   }
 
   if (sli_cpc_header_is_syn(hdr)) {
+    SLI_CPC_ASSERT(ep == NULL);
+
+    ep = match_ep_to_bus(bus, address);
+    if (!ep) {
+      goto cleanup;
+    }
+
+    frame->ep = sli_cpc_ep_get_ref(ep);
+
+    LOCK_EP(ep);
     receive_syn(bus, ep, frame);
     sli_cpc_frame_put_ref(&frame);
-
     goto cleanup;
   }
+
+  if (!ep) {
+    ep = sli_cpc_bus_find_ep_from_id(bus, address);
+    frame->ep = sli_cpc_ep_get_ref(ep);
+    if (!ep) {
+      reject_invalid_received_frame(bus, NULL, address);
+      goto cleanup;
+    }
+  }
+
+  LOCK_EP(ep);
 
   if (is_ep_closed(ep)) {
     reject_invalid_received_frame(bus, ep, address);
@@ -1637,32 +1858,21 @@ static void receive_reset(sl_cpc_ep_t *ep)
  * Handles the incoming SYN while the caller retains ownership of the frame
  * and emits a reply where required by the matrix.
  ******************************************************************************/
-static void receive_syn(sl_cpc_bus_t *bus, sl_cpc_ep_t *ep, sl_cpc_frame_t *frame)
+static void receive_syn(sl_cpc_bus_t *bus, sl_cpc_ep_t *ep, const sl_cpc_frame_t *frame)
 {
-  const sli_cpc_hdr_t *hdr = sli_cpc_frame_get_header(frame);
+  const sli_cpc_hdr_t *hdr = &frame->hdr;
   uint16_t address = sli_cpc_header_get_address(hdr);
-  sl_cpc_frame_t *reply;
 
   switch (ep->state) {
     case SLI_CPC_STATE_OPEN:
-      ep->ack = sli_cpc_header_get_seq(hdr) + 1;
+      ep->ack = hdr->seq + 1;
       ep->remote_mtu = sli_cpc_u16_from_le(hdr->size_le);
 
-      reply = get_syn_frame(ep);
-      if (reply == NULL) {
-        // Couldn't get a TX frame; treat as a transient failure and let the
-        // peer retransmit. Endpoint stays in OPEN.
-        SLI_CPC_LOG_ERROR("OPEN+SYN: out of TX frames replying to ep=%u", (unsigned int)ep->id);
-        break;
-      }
-
-      transmit_frame(bus, reply, false);
-
-      ep_set_state(ep, SLI_CPC_STATE_SYN_RCVD, false);
+      send_syn_reply(ep, false);
       break;
 
     case SLI_CPC_STATE_SYN_SENT:
-      ep->ack = sli_cpc_header_get_seq(hdr) + 1;
+      ep->ack = hdr->seq + 1;
       ep->remote_mtu = sli_cpc_u16_from_le(hdr->size_le);
 
       receive_ack(ep, hdr);
@@ -1681,8 +1891,8 @@ static void receive_syn(sl_cpc_bus_t *bus, sl_cpc_ep_t *ep, sl_cpc_frame_t *fram
       // changed the endpoint state to connected, the second one ends up here. The endpoint seq,
       // ack, and rx_wnd are already initialized based on the first SYN+ACK, the second one should
       // have the same values. If there's a mismatch, consider it an error.
-      if ((ep->flags & SLI_CPC_EP_FLAG_CONNECT) != 0U && sli_cpc_header_get_seq(hdr) == (uint8_t)(ep->ack - 1U)
-          && sli_cpc_header_get_ack(hdr) == ep->send_una && sli_cpc_header_get_rx_wnd(hdr) == ep->send_wnd) {
+      if ((ep->flags & SLI_CPC_EP_FLAG_CONNECT) != 0U && hdr->seq == (uint8_t)(ep->ack - 1U) && hdr->ack == ep->send_una
+          && hdr->rx_wnd == ep->send_wnd) {
         ep_set_pend_ack(ep);
       } else {
         SLI_CPC_LOG_WARN("Unexpected SYN received in connected state on ep=%u", (unsigned int)ep->id);
@@ -1712,7 +1922,7 @@ static void receive_syn(sl_cpc_bus_t *bus, sl_cpc_ep_t *ep, sl_cpc_frame_t *fram
  ******************************************************************************/
 static void receive_ack(sl_cpc_ep_t *ep, const sli_cpc_hdr_t *remote_hdr)
 {
-  uint8_t ack = sli_cpc_header_get_ack(remote_hdr);
+  uint8_t ack = remote_hdr->ack;
   bool syn_acked = false;
 
   SLI_CPC_DEBUG_TRACE_EP_RXD_ACK(ep);
@@ -1749,8 +1959,8 @@ static void receive_ack(sl_cpc_ep_t *ep, const sli_cpc_hdr_t *remote_hdr)
 
     // send_una is incremented every time a frame is acked, so the sequence
     // number of popped frame should always match send_una.
-    const sli_cpc_hdr_t *hdr = sli_cpc_frame_get_header(frame);
-    uint8_t seq = sli_cpc_header_get_seq(hdr);
+    const sli_cpc_hdr_t *hdr = &frame->hdr;
+    uint8_t seq = hdr->seq;
     SLI_CPC_ASSERT(seq == ep->send_una);
 
     // Partial frame acks are not allowed; the frame must be acked as a whole.
@@ -1794,7 +2004,7 @@ static void receive_ack(sl_cpc_ep_t *ep, const sli_cpc_hdr_t *remote_hdr)
   start_retx_timer(ep);
 
 update_window:
-  ep->send_wnd = sli_cpc_header_get_rx_wnd(remote_hdr);
+  ep->send_wnd = remote_hdr->rx_wnd;
 
   // Set connected state only after send_una/send_wnd has been
   // updated as the connected handler may write immediately (e.g.
@@ -1813,13 +2023,13 @@ update_window:
  ******************************************************************************/
 static sl_status_t process_received_data_frame(sl_cpc_frame_t *frame)
 {
-  sl_cpc_ep_t *ep = sli_cpc_frame_get_ep(frame);
+  sl_cpc_ep_t *ep = frame->ep;
   const sli_cpc_hdr_t *hdr;
 
   SLI_CPC_DEBUG_TRACE_EP_RXD_DATA_FRAME(ep);
 
   // MTU must be respected.
-  hdr = sli_cpc_frame_get_header(frame);
+  hdr = &frame->hdr;
   SLI_CPC_ASSERT(sli_cpc_header_get_payload_size(hdr) <= SL_CPC_EP_MAX_PAYLOAD_SIZE);
 
   // Currently processing a reliable data frame. Should always be requesting an ACK.
@@ -1852,9 +2062,9 @@ static sl_status_t send_ack_frame(sl_cpc_ep_t *ep)
     return status;
   }
 
-  hdr = sli_cpc_frame_get_header(frame);
+  hdr = &frame->hdr;
 
-  sli_cpc_header_set_seq(hdr, 0);
+  hdr->seq = 0;
   sli_cpc_header_set_address(hdr, ep->id);
   sli_cpc_header_set_payload_size(hdr, 0);
 
@@ -1892,7 +2102,7 @@ static sl_status_t send_wnd_probe_frame(sl_cpc_ep_t *ep)
     return status;
   }
 
-  hdr = sli_cpc_frame_get_header(frame);
+  hdr = &frame->hdr;
 
   sli_cpc_header_set_ack_request(hdr, true);
   sli_cpc_header_set_address(hdr, ep->id);
@@ -1932,33 +2142,58 @@ void sli_cpc_ep_send_ack(sl_cpc_ep_t *ep)
  ******************************************************************************/
 void sli_cpc_send_reset_frame(sl_cpc_bus_t *bus, uint16_t address)
 {
+  sl_cpc_ep_t *ep = sli_cpc_bus_find_ep_from_id(bus, address);
   sl_cpc_frame_t *frame;
   sli_cpc_hdr_t *hdr;
   sl_status_t status;
 
   status = sli_cpc_get_write_command_frame(bus, &frame);
   if (status != SL_STATUS_OK) {
-    // CPC-3374: Defer the RST and retry when a TX frame is available instead of panicking.
     SLI_CPC_DEBUG_TRACE_CORE_TXD_RESET_FRAME_FAULT(bus);
-    SLI_CPC_PANIC("Could not allocate reset frame (status 0x%lx) for ep: %u", (unsigned long)status,
-                  (unsigned int)address);
+    if (ep != NULL) {
+      ep_set_pend_rst(ep);
+    } else {
+      SLI_CPC_LOG_WARN(
+        "Could not allocate reset frame (status 0x%lx) for unallocated ep: %u; "
+        "consider increasing the TX frame pool",
+        (unsigned long)status, (unsigned int)address);
+    }
+    return;
+  }
+
+  if (ep != NULL) {
+    ep_clear_pend_rst(ep);
   }
 
   SLI_CPC_DEBUG_TRACE_CORE_TXD_RESET(bus);
 
-  hdr = sli_cpc_frame_get_header(frame);
+  hdr = &frame->hdr;
 
   sli_cpc_header_set_reset(hdr, true);
   sli_cpc_header_set_ack_request(hdr, false);
-  sli_cpc_header_set_seq(hdr, 0);
+  hdr->seq = 0;
   sli_cpc_header_set_address(hdr, address);
   sli_cpc_header_set_payload_size(hdr, 0);
-  sli_cpc_header_set_ack(hdr, 0);
-  sli_cpc_header_set_rx_wnd(hdr, 0);
+  hdr->ack = 0;
+  hdr->rx_wnd = 0;
 
   frame->ep = NULL;
 
   transmit_frame(bus, frame, true);
+}
+
+/***************************************************************************/ /**
+ * Service a pending RST deferred after a TX frame allocation failure.
+ *
+ * @note Caller must hold the endpoint lock.
+ ******************************************************************************/
+static void process_pend_rst_flag(sl_cpc_ep_t *ep)
+{
+  if (!(ep->flags & SLI_CPC_EP_FLAG_PEND_RST)) {
+    return;
+  }
+
+  sli_cpc_send_reset_frame(ep->bus, ep->id);
 }
 
 /***************************************************************************/ /**
@@ -2010,7 +2245,7 @@ static sl_cpc_frame_t *get_syn_frame(sl_cpc_ep_t *ep)
     return NULL;
   }
 
-  hdr = sli_cpc_frame_get_header(frame);
+  hdr = &frame->hdr;
 
   sli_cpc_header_set_syn(hdr, true);
   sli_cpc_header_set_ack_request(hdr, true);
@@ -2020,6 +2255,34 @@ static sl_cpc_frame_t *get_syn_frame(sl_cpc_ep_t *ep)
   frame->ep = sli_cpc_ep_get_ref(ep);
 
   return frame;
+}
+
+/***************************************************************************/ /**
+ * Reply to an incoming SYN while the endpoint is in OPEN.
+ *
+ * On allocation failure, arms PEND_SYN so process_pending_flags can retry.
+ * On success, clears PEND_SYN, queues the SYN-ACK, and moves to SYN_RCVD.
+ *
+ * @param[in] ep      Listening endpoint in OPEN.
+ * @param[in] signal  Whether to signal the bus after queueing the frame.
+ *
+ * @note Caller must hold the endpoint lock. Endpoint must be in OPEN.
+ ******************************************************************************/
+static void send_syn_reply(sl_cpc_ep_t *ep, bool signal)
+{
+  sl_cpc_frame_t *frame;
+
+  SLI_CPC_ASSERT(ep->state == SLI_CPC_STATE_OPEN);
+
+  frame = get_syn_frame(ep);
+  if (frame == NULL) {
+    ep_set_pend_syn(ep);
+    return;
+  }
+
+  ep_clear_pend_syn(ep);
+  transmit_frame(ep->bus, frame, signal);
+  ep_set_state(ep, SLI_CPC_STATE_SYN_RCVD, false);
 }
 
 /***************************************************************************/ /**
@@ -2052,6 +2315,21 @@ static void process_pend_ack_flag(sl_cpc_ep_t *ep)
   }
 
   sli_cpc_ep_send_ack(ep);
+}
+
+/***************************************************************************/ /**
+ * Service a pending SYN reply deferred after a TX frame allocation failure.
+ *
+ * @note Caller must hold the endpoint lock.
+ ******************************************************************************/
+static void process_pend_syn_flag(sl_cpc_ep_t *ep)
+{
+  if (!(ep->flags & SLI_CPC_EP_FLAG_PEND_SYN)) {
+    return;
+  }
+
+  // signal=true: process_transmit_queue already ran in this process_action.
+  send_syn_reply(ep, true);
 }
 
 /***************************************************************************/ /**
@@ -2117,12 +2395,15 @@ static void process_pending_flags(sl_cpc_bus_t *bus)
     LOCK_EP(ep);
 
     if (!(ep->flags
-          & (SLI_CPC_EP_FLAG_PEND_ACK | SLI_CPC_EP_FLAG_WND_PROBE_SCHEDULED | SLI_CPC_EP_FLAG_PEND_WND_PROBE))) {
+          & (SLI_CPC_EP_FLAG_PEND_ACK | SLI_CPC_EP_FLAG_PEND_SYN | SLI_CPC_EP_FLAG_PEND_RST
+             | SLI_CPC_EP_FLAG_WND_PROBE_SCHEDULED | SLI_CPC_EP_FLAG_PEND_WND_PROBE))) {
       RELEASE_EP(ep);
       continue;
     }
 
     process_pend_ack_flag(ep);
+    process_pend_syn_flag(ep);
+    process_pend_rst_flag(ep);
     process_pend_wnd_probe_schedule_flag(ep);
     process_pend_wnd_probe_flag(ep);
 
@@ -2159,7 +2440,7 @@ static void process_transmit_complete(sl_cpc_bus_t *bus)
   MCU_EXIT_ATOMIC();
 
   while ((frame = sli_cpc_frame_list_pop(&frames)) != NULL) {
-    ep = sli_cpc_frame_get_ep(frame);
+    ep = frame->ep;
 
     if (ep == NULL) {
       // Sanity check, context should always be linked to an endpoint.
@@ -2175,7 +2456,7 @@ static void process_transmit_complete(sl_cpc_bus_t *bus)
     SLI_CPC_DEBUG_TRACE_CORE_TXD_TRANSMIT_COMPLETED(ep->bus);
 #endif
 
-    if (sli_cpc_header_is_ack_requested(sli_cpc_frame_get_header(frame))) {
+    if (is_ep_active(ep) && sli_cpc_header_is_ack_requested(&frame->hdr)) {
       start_retx_timer(ep);
     }
 
@@ -2188,14 +2469,14 @@ drop_cpc_frame:
   }
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-  if (bus->wake_mode == SL_CPC_WAKE_MODE_DEVICE && bus->tx_inflight_frame_count == 0) {
+  if (bus->wake.device.mode != SL_CPC_POWER_MODE_ALWAYS_ON && bus->tx_inflight_frame_count == 0) {
     // Finished sending all the frames, allow the core to enter sleep.
     sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
   }
 #endif
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-  if (bus->wake_mode == SL_CPC_WAKE_MODE_HOST && bus->tx_inflight_frame_count == 0) {
+  if (bus->wake.host.mode != SL_CPC_WAKE_OUT_DISABLED && bus->tx_inflight_frame_count == 0) {
     bool transmit_queue_empty;
 
     LOCK_TRANSMIT_QUEUE(bus);
@@ -2252,7 +2533,7 @@ static void process_transmit_queue(sl_cpc_bus_t *bus)
   }
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-  if (bus->wake_mode == SL_CPC_WAKE_MODE_HOST && !sli_cpc_wake_device(&bus->wake.host)) {
+  if (bus->wake.host.mode == SL_CPC_WAKE_OUT_MODE_CONFIRM && !sli_cpc_wake_device(&bus->wake.host)) {
     // The device is being woken up. The frames stay queued until it signals
     // that it is awake, which schedules another transmit.
     RELEASE_TRANSMIT_QUEUE(bus);
@@ -2269,15 +2550,15 @@ static void process_transmit_queue(sl_cpc_bus_t *bus)
 
   // Send as many frames as possible to the driver.
   while ((frame = sli_cpc_frame_list_pop(&transmit_queue)) != NULL) {
-    hdr = sli_cpc_frame_get_header(frame);
+    hdr = &frame->hdr;
 
-    ep = sli_cpc_frame_get_ep(frame);
+    ep = frame->ep;
     if (ep) {
       // Update endpoint meta-data.
       LOCK_EP(ep);
 
-      sli_cpc_header_set_ack(hdr, ep->ack);
-      sli_cpc_header_set_rx_wnd(hdr, get_ep_rx_buffer_count(ep));
+      hdr->ack = ep->ack;
+      hdr->rx_wnd = get_ep_rx_buffer_count(ep);
 
       ep_clear_pend_ack(ep);
 
@@ -2286,7 +2567,7 @@ static void process_transmit_queue(sl_cpc_bus_t *bus)
         // of sequence number of the frame used for measurement. Also,
         // measurement must not be done on retransmitted frames as there might
         // be confusion as to which bus of the frame is being acked.
-        ep->rtt_frame_seq = sli_cpc_header_get_seq(hdr);
+        ep->rtt_frame_seq = hdr->seq;
         ep->rtt_sent_ticks = sli_cpc_timer_get_tick_count64();
       }
 
@@ -2294,7 +2575,7 @@ static void process_transmit_queue(sl_cpc_bus_t *bus)
     }
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-    if (bus->wake_mode == SL_CPC_WAKE_MODE_DEVICE && bus->tx_inflight_frame_count == 0) {
+    if (bus->wake.device.mode != SL_CPC_POWER_MODE_ALWAYS_ON && bus->tx_inflight_frame_count == 0) {
       // Sending the first message since we last idle. Prevent the device from sleeping until all
       // coming frames are sent.
       sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
@@ -2367,12 +2648,11 @@ static inline bool has_ep_deferred_listen(const sl_cpc_ep_t *ep)
 /***************************************************************************/ /**
  * Checks if a frame's header has unsupported flags
  ******************************************************************************/
-static bool frame_has_invalid_flags(sl_cpc_frame_t *frame)
+static bool frame_has_invalid_flags(const sl_cpc_frame_t *frame)
 {
-  const sli_cpc_hdr_t *hdr = sli_cpc_frame_get_header(frame);
-  uint8_t control = sli_cpc_header_get_control(hdr);
+  const sli_cpc_hdr_t *hdr = &frame->hdr;
 
-  return control & SLI_CPC_CONTROL_RFU_Msk; // Check if reserved bits are set
+  return hdr->ctrl & SLI_CPC_CONTROL_RFU_Msk; // Check if reserved bits are set
 }
 
 /***************************************************************************/ /**
@@ -2460,19 +2740,26 @@ static void process_expired_retransmit(void *data)
   while (!sli_cpc_frame_list_empty(&bus->expired_retransmit_list)) {
     MCU_ATOMIC_SECTION(frame = sli_cpc_frame_list_pop(&bus->expired_retransmit_list););
 
-    ep = sli_cpc_frame_get_ep(frame);
+    ep = frame->ep;
 
     LOCK_EP(ep);
-    if (ep->packet_re_transmit_count >= SLI_CPC_RE_TRANSMIT) {
-      // mark the endpoint as being in error
-      ep_set_error(ep, SL_STATUS_TIMEOUT);
-    } else {
-      // RTO(new) = RTO(before retransmission) * 2
-      // with an upper limit at SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS
-      ep->re_transmit_timeout
-        = SL_MIN(ep->re_transmit_timeout * 2, sli_cpc_timer_ms_to_tick(SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS));
+    // The retx timer ISR may have queued this frame before terminate ran. On
+    // RTOS builds another context can call close/terminate while we wait on
+    // LOCK_EP above; by then the ep is CLOSING and clean_tx_queues() can no
+    // longer abort this already-popped frame. Skip retx/error handling unless
+    // the endpoint is still active.
+    if (is_ep_active(ep)) {
+      if (ep->packet_re_transmit_count >= SLI_CPC_RE_TRANSMIT) {
+        // mark the endpoint as being in error
+        ep_set_error(ep, SL_STATUS_TIMEOUT);
+      } else {
+        // RTO(new) = RTO(before retransmission) * 2
+        // with an upper limit at SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS
+        ep->re_transmit_timeout
+          = SL_MIN(ep->re_transmit_timeout * 2, sli_cpc_timer_ms_to_tick(SLI_CPC_MAX_RE_TRANSMIT_TIMEOUT_MS));
 
-      re_transmit_frame(ep, frame);
+        re_transmit_frame(ep, frame);
+      }
     }
 
     // CPC-2188: Need this hack because re_transmit_frame increments the ref_count, and we can't decrement
@@ -2498,8 +2785,8 @@ static sl_cpc_frame_t *on_frame_retx(sl_cpc_ep_t *ep)
     return NULL;
   }
 
-  hdr = sli_cpc_frame_get_header(frame);
-  if (sli_cpc_header_get_seq(hdr) == ep->rtt_frame_seq) {
+  hdr = &frame->hdr;
+  if (hdr->seq == ep->rtt_frame_seq) {
     // transmit timeout occured, invalidate the timestamp.
     // RTT should not be calculated with re-transmitted frames.
     ep->rtt_sent_ticks = 0;
@@ -2598,6 +2885,7 @@ static void initialize_ep_counters(sl_cpc_ep_t *ep)
   ep->rtt_variation = 0;
   ep->rtt_frame_seq = 0;
   ep->smoothed_rtt = 0;
+  ep->packet_re_transmit_count = 0u;
 
   ep->send_una = 0;
   ep->send_nxt = 0;

@@ -14,4 +14,7 @@ requires:
   condition: [toolchain_gcc]
 - name: toolchain_llvm_lto
   condition: [toolchain_llvm]
+documentation:
+  docset: gecko-platform
+  document: platform-common/common
 root_path: platform_core

@@ -33,8 +33,6 @@ requires:
 - name: tz_sl_interface_crypto_cipher_funcs
   condition: [psa_crypto_cipher_ecb]
 - name: tz_sl_interface_crypto_cipher_funcs
-  condition: [psa_crypto_cipher_xts]
-- name: tz_sl_interface_crypto_cipher_funcs
   condition: [psa_crypto_cipher_ofb]
 - name: tz_sl_interface_crypto_cipher_funcs
   condition: [psa_crypto_cipher_chacha20]

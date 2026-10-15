@@ -11,7 +11,6 @@ quality: evaluation
 requires:
 - name: wisun_br_stack
 - name: wisun_br_lwip
-- name: sl_si91x_basic_buffers
 - name: sl_si91x_spi_bus
 - name: wifi
 - name: wifi_resources
@@ -20,7 +19,6 @@ requires:
 provides:
 - name: wisun_br_wan
 - name: wisun_br_wifi
-- name: sl_si91x_network_stack
 
 include:
 - path: plugin

@@ -22,4 +22,7 @@ provides:
 define:
 - name: RESPONSE_PRINT_USE_LOCAL_CONFIG_HEADER
   value: "1"
+documentation:
+  docset: gecko-platform
+  document: platform-common/stdio
 root_path: platform_core

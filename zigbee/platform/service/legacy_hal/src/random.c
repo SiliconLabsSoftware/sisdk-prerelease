@@ -15,7 +15,7 @@
  *
  ******************************************************************************/
 #include <stdint.h>
-#include "random.h"
+#include "sl_zigbee_random.h"
 
 ////////////////////////
 uint16_t seed0 = 0xbeef;

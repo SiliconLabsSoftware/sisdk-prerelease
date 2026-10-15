@@ -13,6 +13,8 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: never
 root_path: "rail/component/sl_rail_sdk_mode_switch"
 
 provides:
@@ -62,7 +64,7 @@ template_contribution:
   value:
     name: get_fsk_fcs_type
     handler: cli_get_fsk_fcs_type
-    help: Get FSK FCS Type setting
+    help: Get FSK FCS type (0 = 4-byte, 1 = 2-byte)
 - name: cli_command
   value:
     name: get_fsk_whitening
@@ -82,10 +84,10 @@ template_contribution:
   value:
     name: set_fsk_fcs_type
     handler: cli_set_fsk_fcs_type
-    help: Set FSK FCS Type setting
+    help: Set FSK FCS type (0 = 4-byte, 1 = 2-byte)
     argument:
     - type: uint8
-      help: fcs_type
+      help: "0 = 4-byte FCS, 1 = 2-byte FCS"
 - name: cli_command
   value:
     name: set_fsk_whitening
@@ -126,6 +128,3 @@ template_contribution:
 #---------------- Component Catalog ------------------
 - name: component_catalog
   value: sl_rail_sdk_mode_switch
-#-------- Hides Component for user in Studio ---------
-ui_hints:
-  visibility: never

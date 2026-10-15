@@ -12,9 +12,10 @@ In 8.2.0, sample application sources are published as `zwave_app` (replacing `zw
 
 ### Build number reporting
 
-- `ZAF_GetBuildNumber()` was removed. Use the `APP_BUILD_NO` compile-time macro instead (Version Command Class, logs, and application metadata).
+- `ZAF_GetBuildNumber()` is deprecated. Use the `APP_BUILD_NO` compile-time macro instead (Version Command Class, logs, and application metadata).
 - In SLC projects, configure `USE_USER_APP_BUILD_NO` and `USER_APP_BUILD_NO` under Application Version Configuration when a fixed build number is required.
 - In CMake builds, `APP_BUILD_NO` inherits `ZW_BUILD_NO` (from `-DZW_BUILD_NO`). Values outside 0..65535 are clamped with a CMake warning because Version Command Class fields are 16-bit.
+- The deprecated API remains available through the `zw_legacy_api` component until its removal. Existing projects can therefore migrate without source changes, but new code must use `APP_BUILD_NO`.
 
 ### Product identity and application version accessors
 
@@ -27,7 +28,7 @@ PAL helpers were moved to the Z-Wave stack API in `ZW_product_infos.h`:
 | `zpal_get_app_version()` | `zw_product_infos_get_app_version()` |
 | `zpal_get_app_version_major()` / `_minor()` / `_patch()` | Decode `zw_product_infos_get_app_version()` or use `APP_VERSION` / `APP_REVISION` / `APP_PATCH` |
 
-Update includes: replace `zpal_misc.h` usage for these APIs with `ZW_product_infos.h`. Silicon Labs applications link the strong implementations from `ZW_version.c` via the `zw_versions` component.
+Update includes: replace `zpal_misc.h` usage for these APIs with `ZW_product_infos.h`. Silicon Labs applications link the strong implementations from `ZW_version.c` via the `zw_versions` component. The deprecated APIs remain available until their removal through `zw_legacy_api`.
 
 # 8.1.0 {#migrate-section-8-1-0}
 

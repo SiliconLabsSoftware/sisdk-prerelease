@@ -158,8 +158,11 @@ extern app_setting_wisun_t _wisun_app_settings;
 /// Wisun MAC CLI domain ID
 #define APP_CLI_WISUN_MAC_DOMAIN_ID         (1U)
 
+/// Wisun Statistics CLI domain ID
+#define APP_CLI_WISUN_STATISTICS_DOMAIN_ID  (2U)
+
 /// Wisun Wifi CLI domain ID
-#define APP_CLI_WISUN_WIFI_DOMAIN_ID        (2U)
+#define APP_CLI_WISUN_WIFI_DOMAIN_ID        (3U)
 
 /// App CLI input flag: None
 #define APP_CLI_INPUT_FLAG_NONE             APP_SETTINGS_INPUT_FLAG_NONE
@@ -293,7 +296,6 @@ typedef struct sl_wisun_cli_handler_property {
  *****************************************************************************/
 static sl_status_t _load_common_params_from_phy_cfg(void);
 
-#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
 /**************************************************************************//**
  * @brief Store CLI common PHY parameters to PHY config
  * @details Synchronization is required because of common parameters,
@@ -301,7 +303,6 @@ static sl_status_t _load_common_params_from_phy_cfg(void);
  * @return sl_status_t SL_STATUS_OK on success, SL_STATUS_FAIL otherwise
  *****************************************************************************/
 static sl_status_t _store_common_params_to_phy_cfg(void);
-#endif
 
 #if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /**************************************************************************//**
@@ -498,6 +499,19 @@ static sl_status_t _app_cli_get_passphrase(char *value_str,
                                            const char *key_str,
                                            const app_cli_entry_t *entry);
 #endif
+
+/**************************************************************************//**
+ * @brief Helper to get statistics for getter
+ * @param[out] *value_str is the desired value string
+ * @param[in] *key_str is the key string of the set command
+ * @param[in] *entry is the settings entry
+ * @return SL_STATUS_OK if the setting is success.
+ * @return SL_STATUS_FAIL if setting failed.
+ *****************************************************************************/
+static sl_status_t _app_cli_get_statistics(char *value_str,
+                                           const char *key_str,
+                                           const app_cli_entry_t *entry);
+
 /**************************************************************************//**
  * @brief Is CLI setting parameter is used.
  * @details It indicates the parameters used in the current setup.
@@ -1313,11 +1327,27 @@ static const size_t _wisun_app_cli_hnd_prop_size = sizeof(_wisun_app_cli_hnd_pro
 const char *app_settings_domain_str[] = {
   "wisun",
   "mac",
+  "statistics",
 #if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
   "wifi",
 #endif
   NULL,
 };
+
+const char *app_statistics_domain_str[] =
+{
+  "heap",
+  NULL,
+};
+
+
+typedef enum
+{
+  app_statistics_domain_heap = 0x00,
+} app_statistics_domain_t;
+
+/// Wi-SUN application statistics
+static sl_wisun_statistics_t app_statistics;
 
 ///  Wi-SUN application settings entry/entries
 const app_cli_entry_t app_settings_entries[] =
@@ -1904,11 +1934,93 @@ const app_cli_entry_t app_settings_entries[] =
   },
 #endif
   {
+    .key = "heap",
+    .domain = APP_CLI_WISUN_STATISTICS_DOMAIN_ID,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = (void *)SL_WISUN_STATISTICS_TYPE_HEAP,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = _app_cli_get_statistics,
+    .description = "Heap usage statistics"
+  },
+  {
     .key = NULL,
     .domain = 0,
     .value_size = APP_CLI_VALUE_SIZE_NONE,
     .input = APP_CLI_INPUT_FLAG_DEFAULT,
     .output = APP_CLI_OUTPUT_FLAG_DEFAULT,
+    .value = NULL,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = NULL,
+    .description = NULL
+  }
+};
+
+static const app_cli_entry_t app_statistics_entries[] =
+{
+  {
+    .key = "arena",
+    .domain = app_statistics_domain_heap,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.heap.arena,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Maximum heap usage"
+  },
+  {
+    .key = "uordblks",
+    .domain = app_statistics_domain_heap,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.heap.uordblks,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Current heap usage"
+  },
+  {
+    .key = "free",
+    .domain = app_statistics_domain_heap,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.heap.free,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Current free heap"
+  },
+  {
+    .key = "total",
+    .domain = app_statistics_domain_heap,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.heap.total,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Total available heap"
+  },
+  {
+    .key = NULL,
+    .domain = 0,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
     .value = NULL,
     .input_enum_list = NULL,
     .output_enum_list = NULL,
@@ -2370,7 +2482,6 @@ static sl_status_t _load_common_params_from_phy_cfg(void)
   return SL_STATUS_OK;
 }
 
-#if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
 static sl_status_t _store_common_params_to_phy_cfg(void)
 {
   static sl_wisun_phy_config_t phy_cfg = { 0U };
@@ -2411,7 +2522,6 @@ static sl_status_t _store_common_params_to_phy_cfg(void)
 
   return SL_STATUS_OK;
 }
-#endif
 
 #if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /* App CLI getting connection state (join state) */
@@ -2779,9 +2889,7 @@ static sl_status_t _app_cli_set_phy(const char *value_str,
     return SL_STATUS_FAIL;
   }
 
-#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
   _store_common_params_to_phy_cfg();
-#endif
 
   return SL_STATUS_OK;
 }
@@ -3400,4 +3508,45 @@ static void _cli_handler_iterator(const sl_cli_command_arg_t *args,
       return;
     }
   }
+}
+
+static sl_status_t _app_cli_get_statistics(char *value_str,
+                                           const char *key_str,
+                                           const app_cli_entry_t *entry)
+{
+  sl_status_t ret;
+  const app_cli_entry_t *iter;
+  sl_wisun_statistics_type_t statistics_type;
+
+  // API statistics type is stored in the settings entry value.
+  #ifdef __GNUC__
+  statistics_type = (sl_wisun_statistics_type_t) entry->value;
+  #elif defined __ICCARM__
+  statistics_type = (sl_wisun_statistics_type_t)((uint32_t) entry->value & 0xFF);
+  #endif
+
+  // Update statistics
+  ret = sl_wisun_get_statistics(statistics_type, &app_statistics);
+  if (ret != SL_STATUS_OK) {
+    printf("[Failed to retrieve statistics: %"PRIu32"]\r\n", ret);
+    return SL_STATUS_FAIL;
+  }
+
+  iter = app_statistics_entries;
+  while (iter->key) {
+    if (!strcmp(entry->key, app_statistics_domain_str[iter->domain])) {
+      if (!key_str || !strcmp(iter->key, key_str)) {
+        if (iter->get_handler) {
+          ret = iter->get_handler(value_str, NULL, iter);
+          if (ret == SL_STATUS_OK) {
+            printf("%s.%s.%s = %s\r\n", app_settings_domain_str[entry->domain], app_statistics_domain_str[iter->domain], iter->key, value_str);
+          }
+        }
+      }
+    }
+    iter++;
+  }
+
+  // Prevent parent from printing anything
+  return SL_STATUS_FAIL;
 }

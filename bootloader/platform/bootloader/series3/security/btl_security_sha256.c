@@ -18,6 +18,7 @@
 #include "btl_security_sha256.h"
 #include "btl_security_types.h"
 #include "api/btl_errorcode.h"
+#include "btl_driver_cmu.h"
 
 #if BTL_SECURITY_SHA256_DIGEST_LENGTH % 4 != 0
 #error "SHA digest size is not a multiple of native data type"
@@ -28,9 +29,7 @@
  */
 void btl_initSha256(void *ctx, void *cmd_ctx)
 {
-#if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
-  CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
-#endif
+  btl_driver_enable_semailbox_clock();
 
   Sha256Context_t *context = (Sha256Context_t *)ctx;
   sl_se_command_context_t *cmd = (sl_se_command_context_t *)cmd_ctx;

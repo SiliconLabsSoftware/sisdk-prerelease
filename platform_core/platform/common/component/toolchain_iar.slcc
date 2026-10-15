@@ -28,3 +28,6 @@ requires:
 recommends:
 - id: toolchain_iar_standard
   vendor: silabs
+documentation:
+  docset: gecko-platform
+  document: platform-common/common

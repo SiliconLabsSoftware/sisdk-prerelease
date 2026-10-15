@@ -7,12 +7,18 @@ quality: "production"
 metadata:
   sbom:
     license: Zlib
+ui_hints:
+  visibility: basic
+documentation:
+  docset: rail
+  document: rail-sdk-services/sl-rail-sdk-sleep
 root_path: "rail/component/sl_rail_sdk_sleep"
 
 requires:
 - name: power_manager
 - name: clock_manager_device_init
 - name: device_has_radio
+- name: sl_rail_util_init
 
 include:
 - path: ""
@@ -28,7 +34,7 @@ provides:
 #-------------- Template Contribution ----------------
 template_contribution:
 - name: component_catalog
-  value: flex_rail_sleep
+  value: sl_rail_sdk_sleep
 #--------------------- BUTTON ------------------------
 - name: event_handler
   value:

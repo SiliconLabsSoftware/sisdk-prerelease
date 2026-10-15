@@ -626,6 +626,7 @@ sl_status_t sl_dma_channel_abort(sl_dma_channel_handle_t *handle)
   ldma->CH[ch].LINK = 0UL;
   __DMB();
 
+#if (_LDMA_IPVERSION_RESETVALUE == 0x10U)
   sl_hal_ldma_disable_channel_request(ldma, ch);
   sl_hal_ldma_clear_interrupts(ldma, 1UL << ch);
   sl_hal_ldma_disable_interrupts(ldma, 1UL << ch);
@@ -643,6 +644,7 @@ sl_status_t sl_dma_channel_abort(sl_dma_channel_handle_t *handle)
   sl_hal_ldma_enable_interrupts(ldma, 1UL << ch);
   sl_hal_ldma_enable_channel_request(ldma, ch);
   __DMB();
+#endif
 
   // Lets process the completed descriptors now if there are any
   // remaining to be processed.

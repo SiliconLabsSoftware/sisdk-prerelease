@@ -91,6 +91,10 @@ extern "C" {
 #define SOCK_NONBLOCK 0x4000
 #endif
 
+#ifndef MSG_PEEK
+#define MSG_PEEK 0x02 ///< Peek at incoming data without removing it from the NWP queue.
+#endif
+
 #ifndef AF_INET
 #define AF_INET 2
 #endif

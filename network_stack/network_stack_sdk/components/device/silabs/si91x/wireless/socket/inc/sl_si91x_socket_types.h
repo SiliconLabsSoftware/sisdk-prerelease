@@ -559,4 +559,18 @@ typedef struct {
 
   /// Timeout for read
   uint8_t read_timeout[SLI_SI91X_2BYTE_FIELD_SIZE];
+
+  /// recv flags (for example MSG_PEEK)
+  uint8_t flags[SLI_SI91X_4BYTE_FIELD_SIZE];
 } sli_si91x_req_socket_read_t;
+
+#pragma pack(1)
+/// Bytes available on socket response (frame 0x75). Request payload is socket_id only.
+typedef struct {
+  /// socket id
+  uint8_t socket_id;
+
+  /// number of bytes ready to read
+  uint32_t available_bytes;
+} sli_si91x_rsp_socket_bytes_available_t;
+#pragma pack()

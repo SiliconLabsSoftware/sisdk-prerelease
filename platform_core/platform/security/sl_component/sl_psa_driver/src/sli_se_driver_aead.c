@@ -338,7 +338,7 @@ static psa_status_t sli_se_driver_software_gcm(sl_se_command_context_t *cmd_ctx,
     }
   }
 
-cleanup:
+  cleanup:
   // Wipe every buffer that holds (or could hold) state derived from the
   // GCM hash subkey H = AES_K(0), regardless of how far execution got.
   sli_psec_zeroize(Ek, sizeof(Ek));
@@ -360,7 +360,7 @@ static psa_status_t aead_start(sli_se_driver_aead_operation_t *operation,
   // Ephemeral contexts
   sli_se_driver_aead_preinit_t preinit = operation->ctx.preinit;
 
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
 
   sl_status_t status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
@@ -472,7 +472,7 @@ psa_status_t sli_se_driver_aead_encrypt_tag(
   }
 
   // Ephemeral contexts
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   sl_se_key_descriptor_t key_desc = { 0 };
 
   status = sl_se_init_command_context(&cmd_ctx);
@@ -687,7 +687,7 @@ psa_status_t sli_se_driver_aead_decrypt_tag(
   }
 
   // Ephemeral contexts
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   sl_se_key_descriptor_t key_desc = { 0 };
 
   status = sl_se_init_command_context(&cmd_ctx);
@@ -1271,7 +1271,7 @@ psa_status_t sli_se_driver_aead_update(sli_se_driver_aead_operation_t *operation
   sl_status_t status;
   size_t final_data_length = 0;
 
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   psa_status_t psa_status = PSA_ERROR_BAD_STATE;
 
   status = sl_se_init_command_context(&cmd_ctx);
@@ -1420,7 +1420,7 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
   sl_status_t status;
   psa_status_t psa_status;
 
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
 
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -1561,7 +1561,7 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
   sl_status_t status;
   psa_status_t psa_status;
 
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
 
   if (operation == NULL || plaintext_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;

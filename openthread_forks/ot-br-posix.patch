@@ -601,6 +601,70 @@ index 24f3f0f105239af2bd2d850f0270b53400c66c9a..df2702c568dc5be7b300b87d94c3eef4
  #endif
  #if OTBR_ENABLE_SRP_ADVERTISING_PROXY
      std::unique_ptr<AdvertisingProxy> mAdvertisingProxy;
+diff --git a/src/common/CMakeLists.txt b/src/common/CMakeLists.txt
+index 903317d6588591f88f613635f15f17daed809bcc..be6ac255bb918e871a0ded9cac6a35aa3ec12a8a 100644
+--- a/src/common/CMakeLists.txt
++++ b/src/common/CMakeLists.txt
+@@ -45,6 +45,11 @@ add_library(otbr-common
+     types.hpp
+ )
+ 
++# Always-linked into executables that need mbedtls platform alloc symbols.
++add_library(otbr-mbedtls-memory OBJECT
++    mbedtls_memory_stubs.cpp
++)
++
+ target_link_libraries(otbr-common
+     PUBLIC otbr-config
+ )
+diff --git a/src/common/mbedtls_memory_stubs.cpp b/src/common/mbedtls_memory_stubs.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..da90c744c2c5eb7bcb5f1139052b0fc113c53206
+--- /dev/null
++++ b/src/common/mbedtls_memory_stubs.cpp
+@@ -0,0 +1,42 @@
++/*
++ *  Copyright (c) 2026, The OpenThread Authors.
++ *  All rights reserved.
++ *
++ *  Redistribution and use in source and binary forms, with or without
++ *  modification, are permitted provided that the following conditions are met:
++ *  1. Redistributions of source code must retain the above copyright
++ *     notice, this list of conditions and the following disclaimer.
++ *  2. Redistributions in binary form must reproduce the above copyright
++ *     notice, this list of conditions and the following disclaimer in the
++ *     documentation and/or other materials provided with the distribution.
++ *  3. Neither the name of the copyright holder nor the
++ *     names of its contributors may be used to endorse or promote products
++ *     derived from this software without specific prior written permission.
++ *
++ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ *  POSSIBILITY OF SUCH DAMAGE.
++ */
++
++/**
++ * @file
++ *   Mbed TLS 4 / TF-PSA maps platform alloc to otPlatCryptoCAlloc/Free. Targets
++ *   that link mbedtls without pulling crypto_platform_mbedtls.o from
++ *   libopenthread (link order / standalone tools) need these host shims.
++ *   Built as an OBJECT library so the symbols are always linked into the EXE.
++ */
++
++#include <cstddef>
++#include <cstdlib>
++
++extern "C" void *otPlatCryptoCAlloc(size_t aNum, size_t aSize) { return calloc(aNum, aSize); }
++
++extern "C" void otPlatCryptoFree(void *aPtr) { free(aPtr); }
 diff --git a/src/host/CMakeLists.txt b/src/host/CMakeLists.txt
 index 31eec858c0e13f3d2b205963926b1ff3ea82ea33..24203ee1d53ab4e5fccda3b369b68db69a2021a0 100644
 --- a/src/host/CMakeLists.txt
@@ -3534,13 +3598,502 @@ index c55207cce8ab9d2bd0284dcc9917935f9634abae..1893fa5636664dd57bbff3ecef1bf765
          mPublisher.OnServiceRemoved(aInterfaceIndex, mType, aInstanceName);
          Remove(aInterfaceIndex, aInstanceName, aType, aDomain);
      }
+diff --git a/src/utils/CMakeLists.txt b/src/utils/CMakeLists.txt
+index acfb8a762d91b953c96d73001db59817d79daa30..7dfc7531e9d48cc59a07f8a1c95e2548ab83aa9d 100644
+--- a/src/utils/CMakeLists.txt
++++ b/src/utils/CMakeLists.txt
+@@ -43,5 +43,11 @@ add_library(otbr-utils
+ target_link_libraries(otbr-utils PUBLIC
+     otbr-common
+     otbr-posix
++    ot-config
+     mbedtls
+ )
++
++# Mbed TLS 4.x ships crypto as tfpsacrypto; 3.x uses mbedcrypto (often via mbedtls).
++if(TARGET tfpsacrypto)
++    target_link_libraries(otbr-utils PUBLIC tfpsacrypto)
++endif()
+diff --git a/src/utils/csprng.cpp b/src/utils/csprng.cpp
+index 96fb0ebd3b101a78f1952554450b34fb616edd18..354e8e967dc5c17dfb3958448ee55bfbe197e8e1 100644
+--- a/src/utils/csprng.cpp
++++ b/src/utils/csprng.cpp
+@@ -33,33 +33,12 @@
+ 
+ #include "csprng.hpp"
+ 
+-#include <assert.h>
+-
+-#include <mbedtls/ctr_drbg.h>
+-
+ #include "common/code_utils.hpp"
+ #include "common/types.hpp"
+ #include "host/posix/entropy.hpp"
+ 
+ namespace otbr {
+ 
+-static constexpr uint16_t kEntropyMinThreshold = 16;
+-
+-static int handleMbedtlsEntropyPoll(void *aData, unsigned char *aOutput, size_t aInLen, size_t *aOutLen)
+-{
+-    int rval = MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
+-
+-    SuccessOrExit(Entropy::GetEntropy(reinterpret_cast<uint8_t *>(aOutput), static_cast<uint16_t>(aInLen)));
+-    VerifyOrExit(aOutLen != nullptr);
+-
+-    *aOutLen = aInLen;
+-    rval     = 0;
+-
+-exit:
+-    OTBR_UNUSED_VARIABLE(aData);
+-    return rval;
+-}
+-
+ Csprng &Csprng::GetInstance(void)
+ {
+     static Csprng instance;
+@@ -71,9 +50,9 @@ otbrError Csprng::RandomGet(uint8_t *aBuffer, uint16_t aSize)
+     otbrError error = OTBR_ERROR_NONE;
+ 
+     VerifyOrExit(mInitialized, error = OTBR_ERROR_INVALID_STATE);
++    VerifyOrExit(aBuffer != nullptr || aSize == 0, error = OTBR_ERROR_INVALID_ARGS);
+ 
+-    if (mbedtls_ctr_drbg_random(&mCtrDrbgContext, static_cast<unsigned char *>(aBuffer), static_cast<size_t>(aSize)) <
+-        0)
++    if (aSize > 0 && Entropy::GetEntropy(aBuffer, aSize) != OTBR_ERROR_NONE)
+     {
+         error = OTBR_ERROR_INVALID_ARGS;
+     }
+@@ -83,28 +62,8 @@ exit:
+ }
+ 
+ Csprng::Csprng(void)
+-    : mInitialized(false)
+-{
+-    mbedtls_entropy_init(&mEntropyContext);
+-#ifndef OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
+-    if (mbedtls_entropy_add_source(&mEntropyContext, handleMbedtlsEntropyPoll, nullptr, kEntropyMinThreshold,
+-                                   MBEDTLS_ENTROPY_SOURCE_STRONG) != 0)
+-    {
+-        otbrLogWarning("Failed to add custom entropy source to mbedtls");
+-    }
+-#endif
+-    mbedtls_ctr_drbg_init(&mCtrDrbgContext);
+-
+-    if (mbedtls_ctr_drbg_seed(&mCtrDrbgContext, mbedtls_entropy_func, &mEntropyContext, nullptr, 0) == 0)
+-    {
+-        mInitialized = true;
+-    }
+-}
+-
+-Csprng::~Csprng(void)
++    : mInitialized(true)
+ {
+-    mbedtls_entropy_free(&mEntropyContext);
+-    mbedtls_ctr_drbg_free(&mCtrDrbgContext);
+ }
+ 
+ } // namespace otbr
+diff --git a/src/utils/csprng.hpp b/src/utils/csprng.hpp
+index 9526f0e35434371da5df8803acd0249015c3450d..d0d1ef192add28772d0b3f3451375e1062f84c5d 100644
+--- a/src/utils/csprng.hpp
++++ b/src/utils/csprng.hpp
+@@ -36,9 +36,6 @@
+ 
+ #include <common/types.hpp>
+ 
+-#include <mbedtls/ctr_drbg.h>
+-#include <mbedtls/entropy.h>
+-
+ namespace otbr {
+ 
+ class Csprng
+@@ -63,10 +60,7 @@ public:
+ 
+ private:
+     Csprng(void);
+-    ~Csprng(void);
+-
+-    mbedtls_entropy_context  mEntropyContext;
+-    mbedtls_ctr_drbg_context mCtrDrbgContext;
++    ~Csprng(void) = default;
+ 
+     bool mInitialized;
+ };
+diff --git a/src/utils/pskc.cpp b/src/utils/pskc.cpp
+index b15ca9e83813c1cc897dca78df5e0105d34b1551..52acd46f65908390460bb19c5e9f430567566ac4 100644
+--- a/src/utils/pskc.cpp
++++ b/src/utils/pskc.cpp
+@@ -83,10 +83,19 @@ const uint8_t *Pskc::ComputePskc(const uint8_t *aExtPanId, const char *aNetworkN
+ {
+     uint32_t blockCounter = 0;
+     uint16_t useLen       = 0;
+-    uint16_t prfBlockLen  = MBEDTLS_CIPHER_BLKSIZE_MAX;
++    // Prefer mbedtls's max block length (MBEDTLS_MAX_BLOCK_LENGTH on 3.5+/4.x;
++    // MBEDTLS_CIPHER_BLKSIZE_MAX on older 3.x). AES-CMAC-PRF-128 output is 16 bytes.
++#if defined(MBEDTLS_MAX_BLOCK_LENGTH)
++    static constexpr uint16_t kPrfBlockSize = MBEDTLS_MAX_BLOCK_LENGTH;
++#elif defined(MBEDTLS_CIPHER_BLKSIZE_MAX)
++    static constexpr uint16_t kPrfBlockSize = MBEDTLS_CIPHER_BLKSIZE_MAX;
++#else
++    static constexpr uint16_t kPrfBlockSize = 16;
++#endif
++    uint16_t prfBlockLen = kPrfBlockSize;
+     uint8_t  prfInput[OT_PBKDF2_SALT_MAX_LENGTH + 4];
+-    uint8_t  prfOutput[MBEDTLS_CIPHER_BLKSIZE_MAX];
+-    uint8_t  keyBlock[MBEDTLS_CIPHER_BLKSIZE_MAX];
++    uint8_t  prfOutput[kPrfBlockSize];
++    uint8_t  keyBlock[kPrfBlockSize];
+     uint16_t keyLen = OT_PSKC_LENGTH;
+     uint8_t *pskc   = mPskc;
+ 
+diff --git a/src/utils/pskc.hpp b/src/utils/pskc.hpp
+index ed26701cd53118ef9da80b9629916d553cf3a98a..44e62aa52e1d3aaf824b09634cd9a09bb748cdd8 100644
+--- a/src/utils/pskc.hpp
++++ b/src/utils/pskc.hpp
+@@ -45,7 +45,13 @@
+ #include <stdint.h>
+ #include <string.h>
+ 
++#include <mbedtls/version.h>
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
++#define MBEDTLS_ALLOW_PRIVATE_ACCESS
++#include <mbedtls/private/cmac.h>
++#else
+ #include <mbedtls/cmac.h>
++#endif
+ 
+ namespace otbr {
+ namespace Psk {
+diff --git a/src/utils/sha256.hpp b/src/utils/sha256.hpp
+index 24f119eb6b6c239fa573bbd6a0f961e1c6b0fdde..8e124d841d49639a893099393e5a275437418ef8 100644
+--- a/src/utils/sha256.hpp
++++ b/src/utils/sha256.hpp
+@@ -38,7 +38,13 @@
+ #include <openthread/platform/crypto.h>
+ #include "common/code_utils.hpp"
+ 
++#include <mbedtls/version.h>
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
++#define MBEDTLS_ALLOW_PRIVATE_ACCESS
++#include <mbedtls/private/sha256.h>
++#else
+ #include <mbedtls/sha256.h>
++#endif
+ 
+ namespace otbr {
+ /**
+diff --git a/src/utils/steering_data.cpp b/src/utils/steering_data.cpp
+index fc3a0a06fe72fbb9510efb36d0b0235829d05187..d7b61958cf5c9d551dac17c4d6968eff7675d274 100644
+--- a/src/utils/steering_data.cpp
++++ b/src/utils/steering_data.cpp
+@@ -29,7 +29,13 @@
+ #include "utils/steering_data.hpp"
+ 
+ #include <assert.h>
++#include <mbedtls/version.h>
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
++#define MBEDTLS_ALLOW_PRIVATE_ACCESS
++#include <mbedtls/private/sha256.h>
++#else
+ #include <mbedtls/sha256.h>
++#endif
+ 
+ #include "utils/crc16.hpp"
+ 
+diff --git a/src/web/CMakeLists.txt b/src/web/CMakeLists.txt
+index 217341ba2339cc4fee5eda8cc5a2e4b367ed8214..c5deedba544d219aa24051103d73ae2c0db8d25f 100644
+--- a/src/web/CMakeLists.txt
++++ b/src/web/CMakeLists.txt
+@@ -51,6 +51,8 @@ target_link_libraries(otbr-web PRIVATE
+     openthread-ftd
+     openthread-posix
+     mbedtls
++    # After mbedtls: resolve TF-PSA platform alloc (also covered by OBJECT stubs).
++    otbr-mbedtls-memory
+     pthread
+ )
+ install(
+diff --git a/src/web/web-service/frontend/res/js/app.js b/src/web/web-service/frontend/res/js/app.js
+index 83c79da2366c28acf71cabea59ba155a776993ee..5668750a8d8c055e7389597d01a07a0be3b15ca6 100644
+--- a/src/web/web-service/frontend/res/js/app.js
++++ b/src/web/web-service/frontend/res/js/app.js
+@@ -287,7 +287,7 @@
+                     console.log(response);
+                     $scope.res = response.data.result;
+                     if (response.data.result == 'successful') {
+-                        var image = "http://api.qrserver.com/v1/create-qr-code/?color=000000&amp;bgcolor=FFFFFF&amp;data=v%3D1%26%26eui%3D" + response.data.eui64 +"%26%26cc%3D" + $scope.thread.pskd +"&amp;qzone=1&amp;margin=0&amp;size=400x400&amp;ecc=L";
++                        var image = "https://api.qrserver.com/v1/create-qr-code/?color=000000&amp;bgcolor=FFFFFF&amp;data=v%3D1%26%26eui%3D" + response.data.eui64 +"%26%26cc%3D" + $scope.thread.pskd +"&amp;qzone=1&amp;margin=0&amp;size=400x400&amp;ecc=L";
+                         $scope.showQRCode(event, image);
+                     } else {
+                         $scope.showQRAlert(event, "sorry, can not generate the QR code.");
+@@ -440,7 +440,16 @@
+ 
+         $scope.restServerPort = '8081';
+         var formatRestAddr = function(host, port) {
+-            return (host.indexOf(':') > -1) ? '[' + host + ']:' + port : host + ':' + port;
++            // Remove existing IPv6 brackets if present
++            var normalizedHost = host.replace(/^\[(.*)\]$/, '$1');
++            
++            var formattedHost = (normalizedHost.indexOf(':') > -1) ? '[' + normalizedHost + ']' : normalizedHost;
++
++            // When using HTTPS and the target API host matches the Web UI host, use the web UI host (including port if present)
++            if (window.location.protocol === 'https:' && normalizedHost === window.location.hostname.replace(/^\[(.*)\]$/, '$1')) {
++                return window.location.host;
++            }
++            return formattedHost + ':' + port;
+         };
+         $scope.ipAddr = formatRestAddr(window.location.hostname, $scope.restServerPort);
+ 
+@@ -505,7 +514,7 @@
+         $scope.dataInit = async function() {
+             let response;
+         
+-            $http.get('http://' + $scope.ipAddr + '/api/node', {
++            $http.get(window.location.protocol + '//' + $scope.ipAddr + '/api/node', {
+                     headers: {
+                         'Accept': 'application/json'
+                     }
+@@ -609,7 +618,7 @@
+         // GET request to check action status
+         $scope.getActionStatus = async function(action_id) {
+ 
+-            const response = await $http.get('http://' + $scope.ipAddr + '/api/actions/' + action_id, {
++            const response = await $http.get(window.location.protocol + '//' + $scope.ipAddr + '/api/actions/' + action_id, {
+                 headers: {
+                     'Accept': 'application/vnd.api+json'
+                 }
+@@ -628,7 +637,7 @@
+             console.log("discover network ...");  // Debugging log message
+             do {
+                 // start discovery task
+-                const postResponse = await $http.post('http://' + $scope.ipAddr + '/api/actions', $scope.createRequestBodyUpdateDeviceCollection(deviceCount), {
++                const postResponse = await $http.post(window.location.protocol + '//' + $scope.ipAddr + '/api/actions', $scope.createRequestBodyUpdateDeviceCollection(deviceCount), {
+                     headers: {
+                         'Content-Type': 'application/vnd.api+json',
+                         'Accept': 'application/vnd.api+json'
+@@ -670,7 +679,7 @@
+ 
+         // GET device collection
+         $scope.fetchDevices = async function () {
+-            const response = await $http.get('http://' + $scope.ipAddr + '/api/devices', {
++            const response = await $http.get(window.location.protocol + '//' + $scope.ipAddr + '/api/devices', {
+                 headers: {
+                     'Accept': 'application/json'
+                 }
+@@ -689,7 +698,7 @@
+ 
+             do {
+                 // Fetch device diagnostics
+-                const postResponse = await $http.post('http://' + $scope.ipAddr + '/api/actions', $scope.createRequestBody(device_id), {
++                const postResponse = await $http.post(window.location.protocol + '//' + $scope.ipAddr + '/api/actions', $scope.createRequestBody(device_id), {
+                     headers: {
+                         'Content-Type': 'application/vnd.api+json',
+                         'Accept': 'application/vnd.api+json'
+@@ -785,7 +794,7 @@
+             const devices = await $scope.fetchDevices();
+ 
+             // Delete diagnostics entries
+-            await $http.delete('http://' + $scope.ipAddr + '/api/diagnostics').then(function(response) {
++            await $http.delete(window.location.protocol + '//' + $scope.ipAddr + '/api/diagnostics').then(function(response) {
+                 console.log(`Deleted diagnostics status ${response.status}`);
+             });
+ 
+@@ -793,7 +802,7 @@
+             await $scope.fetchDiagnosticsForDevices(devices);
+ 
+             // Fetch the list of device diagnostics
+-            const getResponse = await $http.get('http://' + $scope.ipAddr + '/api/diagnostics', {
++            const getResponse = await $http.get(window.location.protocol + '//' + $scope.ipAddr + '/api/diagnostics', {
+                 headers: {
+                     'Accept': 'application/json'
+                 }
+diff --git a/src/web/web-service/ot_client.hpp b/src/web/web-service/ot_client.hpp
+index 103de9396b14a4b150a4dbbc49bfe2a9162cbef2..cd7027daae303ae7ab058dbe25b446cc883a349f 100644
+--- a/src/web/web-service/ot_client.hpp
++++ b/src/web/web-service/ot_client.hpp
+@@ -43,14 +43,18 @@ namespace Web {
+ 
+ #define OT_SCANNED_NET_BUFFER_SIZE 250
+ #define OT_SET_MAX_DATA_SIZE 250
+-#define OT_NETWORK_NAME_MAX_SIZE 17
++// OpenThread dataset.h defines OT_NETWORK_NAME_MAX_SIZE as 16 (bytes, sans NUL).
++// Including mbedtls headers (e.g. via pskc.hpp) can pull that in first; do not redefine.
++#ifndef OT_NETWORK_NAME_MAX_SIZE
++#define OT_NETWORK_NAME_MAX_SIZE 16
++#endif
+ #define OT_HARDWARE_ADDRESS_SIZE 8
+ #define OT_PREFIX_SIZE 8
+ #define OT_ROUTER_ROLE 2
+ 
+ struct WpanNetworkInfo
+ {
+-    char     mNetworkName[OT_NETWORK_NAME_MAX_SIZE];
++    char     mNetworkName[OT_NETWORK_NAME_MAX_SIZE + 1]; ///< Includes terminating NUL
+     bool     mAllowingJoin;
+     uint16_t mPanId;
+     uint16_t mChannel;
+diff --git a/tests/gtest/CMakeLists.txt b/tests/gtest/CMakeLists.txt
+index 952686b55460d444a4aca358d7a78163d15e6e68..965b401d99e12d44c494ccf959c9ea9ca713103e 100644
+--- a/tests/gtest/CMakeLists.txt
++++ b/tests/gtest/CMakeLists.txt
+@@ -110,7 +110,10 @@ add_executable(otbr-posix-gtest-unit
+ target_include_directories(otbr-posix-gtest-unit
+     PRIVATE
+         ${OTBR_PROJECT_DIRECTORY}/src
++        ${OPENTHREAD_PROJECT_DIRECTORY}/include
++        ${OPENTHREAD_PROJECT_DIRECTORY}/src
+         ${OPENTHREAD_PROJECT_DIRECTORY}/src/core
++        ${OPENTHREAD_PROJECT_DIRECTORY}/src/posix/platform/include
+         ${OPENTHREAD_PROJECT_DIRECTORY}/tests/gtest
+ )
+ target_link_libraries(otbr-posix-gtest-unit
+@@ -129,7 +132,10 @@ add_executable(otbr-gtest-host-api
+ target_include_directories(otbr-gtest-host-api
+     PRIVATE
+         ${OTBR_PROJECT_DIRECTORY}/src
++        ${OPENTHREAD_PROJECT_DIRECTORY}/include
++        ${OPENTHREAD_PROJECT_DIRECTORY}/src
+         ${OPENTHREAD_PROJECT_DIRECTORY}/src/core
++        ${OPENTHREAD_PROJECT_DIRECTORY}/src/posix/platform/include
+         ${OPENTHREAD_PROJECT_DIRECTORY}/tests/gtest
+ )
+ target_link_libraries(otbr-gtest-host-api
+diff --git a/third_party/openthread/mbedtls-config.h b/third_party/openthread/mbedtls-config.h
+index 2c1844a01f68310c954ac2dc3b36a6e2f02d9348..93849686d64e004391f6f5be7ff2db144d69820d 100644
+--- a/third_party/openthread/mbedtls-config.h
++++ b/third_party/openthread/mbedtls-config.h
+@@ -29,84 +29,61 @@
+ #ifndef OTBR_MBEDTLS_CONFIG_H_
+ #define OTBR_MBEDTLS_CONFIG_H_
+ 
+-#define MBEDTLS_DEBUG_C
++#define MBEDTLS_CONFIG_VERSION 0x04010000
+ 
+-// Not supported on MIPS
+-#ifndef __mips__
+-#define MBEDTLS_HAVE_ASM
+-#endif
++// ==============================================================================
++// SSL / TLS (Mbed TLS 4.x upper layer).
++// Crypto algorithms live in OpenThread's psa-crypto-config.h
++// (TF_PSA_CRYPTO_CONFIG_FILE), not in this file.
++//
++// Version notes (gate on MBEDTLS_CONFIG_VERSION; version.h cannot be included
++// from inside this config without a circular include via build_info.h):
++// - MBEDTLS_SSL_EXPORT_KEYS removed in 4.x (always enabled).
++// - MBEDTLS_SSL_MAX_CONTENT_LEN removed in 4.x; use IN/OUT_CONTENT_LEN.
++// ==============================================================================
+ 
+-#define MBEDTLS_AES_ROM_TABLES
+-#define MBEDTLS_ECP_DP_SECP256R1_ENABLED
+-#define MBEDTLS_ECP_NIST_OPTIM
+-#define MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED
+-#define MBEDTLS_SSL_MAX_FRAGMENT_LENGTH
+-#define MBEDTLS_SSL_PROTO_TLS1_2
+-#define MBEDTLS_SSL_PROTO_DTLS
++#define MBEDTLS_DEBUG_C
++
++#define MBEDTLS_SSL_CLI_C
++#define MBEDTLS_SSL_SRV_C
++#define MBEDTLS_SSL_TLS_C
++#define MBEDTLS_SSL_COOKIE_C
+ #define MBEDTLS_SSL_DTLS_ANTI_REPLAY
+ #define MBEDTLS_SSL_DTLS_HELLO_VERIFY
++#if !defined(MBEDTLS_CONFIG_VERSION) || (MBEDTLS_CONFIG_VERSION < 0x04000000)
+ #define MBEDTLS_SSL_EXPORT_KEYS
++#endif
+ #define MBEDTLS_SSL_KEEP_PEER_CERTIFICATE
++#define MBEDTLS_SSL_MAX_FRAGMENT_LENGTH
++#define MBEDTLS_SSL_PROTO_TLS1_2
++#define MBEDTLS_SSL_PROTO_DTLS
+ 
+-#define MBEDTLS_AES_C
+-#define MBEDTLS_ASN1_PARSE_C
+-#define MBEDTLS_ASN1_WRITE_C
+-#define MBEDTLS_BIGNUM_C
+-#define MBEDTLS_CAN_ECDH
+-#define MBEDTLS_CCM_C
+-#define MBEDTLS_CIPHER_C
+-#define MBEDTLS_CTR_DRBG_C
+-#define MBEDTLS_CMAC_C
+-#define MBEDTLS_ECJPAKE_C
+-#define MBEDTLS_ECP_C
+-#define MBEDTLS_ENTROPY_C
+-#define MBEDTLS_HMAC_DRBG_C
+-#define MBEDTLS_MD_C
+-#define MBEDTLS_OID_C
+-#define MBEDTLS_PK_C
+-#define MBEDTLS_PK_HAVE_ECC_KEYS
+-#define MBEDTLS_PK_PARSE_C
+-#define MBEDTLS_SHA256_C
+-#define MBEDTLS_SHA256_SMALLER
+-#define MBEDTLS_SSL_COOKIE_C
+-#define MBEDTLS_SSL_CLI_C
+-#define MBEDTLS_SSL_SRV_C
+-#define MBEDTLS_SSL_TLS_C
++// EC-JPAKE via PSA PAKE (requires PSA_WANT_ALG_JPAKE in psa-crypto-config.h).
++#define MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED
+ 
+-// Enable CoAPS PSK support
++// CoAPS PSK / ECDHE-ECDSA
+ #define MBEDTLS_KEY_EXCHANGE_PSK_ENABLED
+-
+-// Enable CoAPS ECDSA support
+-#define MBEDTLS_BASE64_C
+-#define MBEDTLS_ECDH_C
+-#define MBEDTLS_ECDSA_C
+ #define MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
+-#define MBEDTLS_ECDSA_DETERMINISTIC
+-#define MBEDTLS_OID_C
+-#define MBEDTLS_PEM_PARSE_C
+-#define MBEDTLS_PK_CAN_ECDSA_SIGN
+-#define MBEDTLS_PK_WRITE_C
++
++#if !defined(MBEDTLS_CONFIG_VERSION) || (MBEDTLS_CONFIG_VERSION < 0x04000000)
++#define MBEDTLS_SSL_MAX_CONTENT_LEN 900
++#else
++#define MBEDTLS_SSL_IN_CONTENT_LEN  900
++#define MBEDTLS_SSL_OUT_CONTENT_LEN 900
++#endif
++#define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
++
++// ==============================================================================
++// X.509 (TLS layer). PK/PEM/BASE64 live in psa-crypto-config.h.
++// ==============================================================================
+ 
+ #define MBEDTLS_X509_USE_C
+ #define MBEDTLS_X509_CRT_PARSE_C
+ #define MBEDTLS_X509_CRL_PARSE_C
+ #define MBEDTLS_X509_CSR_PARSE_C
+ 
+-#define MBEDTLS_NET_C
+-#define MBEDTLS_TIMING_C
+-
+-#define MBEDTLS_AES_ROM_TABLES
+-
+-#define MBEDTLS_ECP_MAX_BITS 256
+-#define MBEDTLS_MPI_MAX_SIZE 32
+-#define MBEDTLS_SSL_MAX_CONTENT_LEN 900
+-
+-#define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
+-
+-#include "mbedtls/version.h"
+-#if (MBEDTLS_VERSION_NUMBER < 0x03000000)
+-    // Configuration sanity check. Done automatically in Mbed TLS >= 3.0.
+-    #include "mbedtls/check_config.h"
++#if defined(MBEDTLS_USER_CONFIG_FILE)
++#include MBEDTLS_USER_CONFIG_FILE
+ #endif
+ 
+ #endif // OTBR_MBEDTLS_CONFIG_H_
 diff --git a/third_party/openthread/repo b/third_party/openthread/repo
 deleted file mode 160000
-index 22b2ec2a82a64614e494588b706865391dd560de..0000000000000000000000000000000000000000
+index 3e6568b6096fb1f22178f55d0e134538def0539a..0000000000000000000000000000000000000000
 --- a/third_party/openthread/repo
 +++ /dev/null
 @@ -1 +0,0 @@
--Subproject commit 22b2ec2a82a64614e494588b706865391dd560de
+-Subproject commit 3e6568b6096fb1f22178f55d0e134538def0539a
 diff --git a/third_party/openthread/repo b/third_party/openthread/repo
 new file mode 120000
 index 0000000000000000000000000000000000000000..187daed247c149bf839782e61409834b00d53154
@@ -3549,3 +4102,35 @@ index 0000000000000000000000000000000000000000..187daed247c149bf839782e61409834b
 @@ -0,0 +1 @@
 +../../../openthread
 \ No newline at end of file
+diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
+index 5e8451afdb062ab5e080b56ed9a715e01b11de6e..09b85d2daa61b724c76feb483c0b407130015739 100644
+--- a/tools/CMakeLists.txt
++++ b/tools/CMakeLists.txt
+@@ -34,6 +34,7 @@ target_link_libraries(pskc PRIVATE
+     otbr-common
+     otbr-utils
+     mbedtls
++    otbr-mbedtls-memory
+ )
+ 
+ add_executable(steering-data
+@@ -44,6 +45,7 @@ target_link_libraries(steering-data PRIVATE
+     otbr-common
+     otbr-utils
+     mbedtls
++    otbr-mbedtls-memory
+ )
+ 
+ if ($ENV{REFERENCE_DEVICE})
+diff --git a/tools/steering_data.cpp b/tools/steering_data.cpp
+index 1b4e9afc91ae093a59656016a37ba6d15f1a52a8..fed4137a82078ae678872a1906230cf7d42fc03f 100644
+--- a/tools/steering_data.cpp
++++ b/tools/steering_data.cpp
+@@ -31,7 +31,6 @@
+  *   This file implements a simple tool to compute pskc.
+  */
+ 
+-#include <mbedtls/sha256.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <sysexits.h>

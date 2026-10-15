@@ -36,4 +36,7 @@ template_contribution:
 config_file:
 - path: config/keyscan_driver_config.h
   file_id: keyscan_driver_config
+documentation:
+  docset: gecko-platform
+  document: platform-driver/keyscan-driver
 root_path: platform_core/platform/driver/keyscan

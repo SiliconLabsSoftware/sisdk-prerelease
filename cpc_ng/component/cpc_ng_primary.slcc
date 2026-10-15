@@ -20,7 +20,7 @@ provides:
 - name: cpc_ng_primary
 requires:
 - name: cpc_ng
-- name: cpc_ng_primary_drv_instance
+- name: cpc_ng_drv_primary_instance
 template_contribution:
 - name: component_catalog
   value: cpc_ng_primary

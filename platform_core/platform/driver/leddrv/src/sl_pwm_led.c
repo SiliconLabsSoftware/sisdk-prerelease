@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 #include <stddef.h>
+#include <stdint.h>
 
 #include "sl_pwm_led.h"
 
@@ -92,9 +93,109 @@ static sl_bus_clock_t pwm_led_get_timer_clock(TIMER_TypeDef *timer)
   return timer_clock;
 }
 
+// Compute the Timer TOP value on basis of the application PWM frequency and resolution config values
+static uint32_t pwm_led_compute_top(sl_led_pwm_t *led)
+{
+  uint32_t top = 0;
+  uint32_t clock_freq;
+  sl_clock_branch_t clock_branch;
+
+  (void)pwm_led_get_timer_clock(led->timer);
+
+// First find the TOP value that satisfies the PWM frequency config (if not set to 0 = "don't care")
+  if (led->frequency > 0U) {
+    clock_branch = sl_device_peripheral_get_clock_branch(peripheral);
+    sl_clock_manager_get_clock_branch_frequency(clock_branch, &clock_freq);
+    top = (clock_freq / (led->frequency)) - 1U;
+  }
+
+// Then adjust it to make it an even multiplier of the PWM resolution config
+  top = (top / (led->resolution - 1)) * (led->resolution - 1);
+
+  if (top < (led->resolution - 1)) {
+    // The PWM resolution config demands a higher TOP value than what the frequency config sets.
+    // In this case the resolution config takes precedence over frequency.
+    // So simply set the TOP value equal to the max input value (resolution value - 1).
+    top = led->resolution - 1;
+  }
+
+  return top;
+}
+
+#if !defined(_SILICON_LABS_32B_SERIES_2)
+#if defined(_GPIO_TIMER_ROUTEEN_MASK)
+#define PWM_LED_ROUTEEN_CC0PEN_SHIFT  _GPIO_TIMER_ROUTEEN_CC0PEN_SHIFT
+#elif defined(_GPIO_TIMER0_ROUTEEN_MASK)
+#define PWM_LED_ROUTEEN_CC0PEN_SHIFT  _GPIO_TIMER0_ROUTEEN_CC0PEN_SHIFT
+#else
+#error "Unknown route setting"
+#endif
+
+static uint32_t pwm_led_get_timer_routeen(TIMER_TypeDef *timer)
+{
+#if defined(_GPIO_TIMER_ROUTEEN_MASK)
+  return GPIO->TIMERROUTE[TIMER_NUM(timer)].ROUTEEN;
+#else
+  switch (TIMER_NUM(timer)) {
+    case 0:
+      return GPIO->TIMER0ROUTE[0].ROUTEEN;
+    case 1:
+      return GPIO->TIMER1ROUTE[0].ROUTEEN;
+    case 2:
+      return GPIO->TIMER2ROUTE[0].ROUTEEN;
+    case 3:
+      return GPIO->TIMER3ROUTE[0].ROUTEEN;
+    default:
+      EFM_ASSERT(0);
+      // Report all outputs as routed so the TIMER is never disabled.
+      return UINT32_MAX;
+  }
+#endif
+}
+
+static bool pwm_led_channel_routed(sl_led_pwm_t *led)
+{
+  return (pwm_led_get_timer_routeen(led->timer)
+          & (1UL << (led->channel + PWM_LED_ROUTEEN_CC0PEN_SHIFT))) != 0U;
+}
+
+static void pwm_led_write_compare(sl_led_pwm_t *led, bool immediate)
+{
+  // Get the counter increments per intensity level step
+  uint32_t level_increments = sl_hal_timer_get_top(led->timer) / (led->resolution - 1);
+  uint32_t compare = led->level * level_increments;
+
+  // Ensure that the color level value does not exceed the timer's size.
+  EFM_ASSERT(compare <= SL_HAL_TIMER_MAX_COUNT(led->timer));
+
+  if (immediate) {
+    sl_hal_timer_channel_set_compare(led->timer, led->channel, compare);
+  }
+  sl_hal_timer_channel_set_compare_buffer(led->timer, led->channel, compare);
+}
+#endif
+
 void sl_pwm_led_start(void *led_handler)
 {
   sl_led_pwm_t *led = (sl_led_pwm_t *)led_handler;
+
+#if !defined(_SILICON_LABS_32B_SERIES_2)
+  // TOP, CNT and the compare values are lost while the TIMER is disabled,
+  // so they must be written again before the TIMER is restarted.
+  bool resume = (led->timer->EN & _TIMER_EN_EN_MASK) == 0U;
+  if (resume) {
+    sl_hal_timer_wait_ready(led->timer);
+    sl_hal_timer_enable(led->timer);
+    sl_hal_timer_set_top(led->timer, pwm_led_compute_top(led));
+  }
+  // The compare value of an output that is not routed yet can be written
+  // directly without any glitch on the pin.
+  pwm_led_write_compare(led, !pwm_led_channel_routed(led));
+  if (resume) {
+    sl_hal_timer_start(led->timer);
+  }
+#endif
+
   // Enable PWM output
 #if defined(_TIMER_ROUTE_MASK)
 #if defined(_SILICON_LABS_32B_SERIES_2)
@@ -180,6 +281,16 @@ void sl_pwm_led_stop(void *led_handler)
 #else
 #error "Unknown route setting"
 #endif
+
+#if !defined(_SILICON_LABS_32B_SERIES_2)
+  // An enabled TIMER prevents EM2 entry, so disable it once no LED output uses it.
+  if (((led->timer->EN & _TIMER_EN_EN_MASK) != 0U)
+      && (pwm_led_get_timer_routeen(led->timer) == 0U)) {
+    sl_hal_timer_stop(led->timer);
+    sl_hal_timer_disable(led->timer);
+    sl_hal_timer_wait_ready(led->timer);
+  }
+#endif
 }
 
 /*
@@ -227,7 +338,9 @@ sl_status_t sl_pwm_led_init(void *led_handler)
 #endif
   if ((led->resolution < 2UL) || (led->resolution > (max_count))) {
     // The user configured max level value is invalid
-
+#if !defined(_SILICON_LABS_32B_SERIES_2)
+    sl_hal_timer_disable(led->timer);
+#endif
     sl_clock_manager_disable_bus_clock(timer_clock);
 
     return SL_STATUS_FAIL;
@@ -310,26 +423,7 @@ sl_status_t sl_pwm_led_init(void *led_handler)
 #error "Unknown route setting"
 #endif
 
-// Configure the Timer TOP value on basis of the application PWM frequency and resolution config values
-  uint32_t top = 0;
-  uint32_t clock_freq;
-  sl_clock_branch_t clock_branch;
-// First find the TOP value that satisfies the PWM frequency config (if not set to 0 = "don't care")
-  if (led->frequency > 0U) {
-    clock_branch = sl_device_peripheral_get_clock_branch(peripheral);
-    sl_clock_manager_get_clock_branch_frequency(clock_branch, &clock_freq);
-    top = (clock_freq / (led->frequency)) - 1U;
-  }
-
-// Then adjust it to make it an even multiplier of the PWM resolution config
-  top = (top / (led->resolution - 1)) * (led->resolution - 1);
-
-  if (top < (led->resolution - 1)) {
-    // The PWM resolution config demands a higher TOP value than what the frequency config sets.
-    // In this case the resolution config takes precedence over frequency.
-    // So simply set the TOP value equal to the max input value (resolution value - 1).
-    top = led->resolution - 1;
-  }
+  uint32_t top = pwm_led_compute_top(led);
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   TIMER_TopSet(led->timer, top);
@@ -338,7 +432,7 @@ sl_status_t sl_pwm_led_init(void *led_handler)
   TIMER_Init_TypeDef timer_init = TIMER_INIT_DEFAULT;
   TIMER_Init(led->timer, &timer_init);
 #else
-  // Initialize TIMER 
+  // Initialize TIMER
   sl_hal_timer_config_t timer_init = SL_HAL_TIMER_CONFIG_DEFAULT;
   sl_hal_timer_init(led->timer, &timer_init);
   sl_hal_timer_enable(led->timer);
@@ -371,15 +465,9 @@ void sl_pwm_led_set_color(void *led_handler, uint16_t color)
   sl_pwm_led_stop(led);
   TIMER_CompareBufSet(led->timer, led->channel, led->level * level_increments);
 #else
-  // Get the counter increments per intensity level step
-  uint32_t level_increments = sl_hal_timer_get_top(led->timer) / (led->resolution - 1);
+  // The compare value is written by sl_pwm_led_start(), which also restores
+  // the TIMER if it was disabled.
   led->level = color;
-
-  // Ensure that the color level value does not exceed the timer's size.
-  EFM_ASSERT((led->level * level_increments) <= SL_HAL_TIMER_MAX_COUNT(led->timer));
-
-  sl_pwm_led_stop(led);
-  sl_hal_timer_channel_set_compare_buffer(led->timer, led->channel, led->level * level_increments);
 #endif
 
   sl_pwm_led_start(led);

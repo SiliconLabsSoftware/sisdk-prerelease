@@ -38,6 +38,10 @@
 
 #include "sl_component_catalog.h"
 
+#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT) || defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+#include "sl_cpc_wake.h"
+#endif
+
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
 #include "sli_cpc_hdr.h"
 #endif
@@ -45,7 +49,9 @@
 #if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
 typedef struct {
   sli_cpc_dispatcher_handle_t dispatcher_handle;
+  sl_cpc_power_mode_t mode;
   sl_gpio_t pin;
+  sl_cpc_wake_in_response_t response;
   int32_t int_no;
   bool active;
 } sli_cpc_wake_device_t;
@@ -70,6 +76,7 @@ typedef enum sli_cpc_wake_state {
 } sli_cpc_wake_state_t;
 
 typedef struct {
+  sl_cpc_wake_out_mode_t mode;
   sl_gpio_t pin;
   sli_cpc_wake_state_t state;
 } sli_cpc_wake_host_t;
@@ -83,11 +90,14 @@ extern "C" {
 /***************************************************************************/ /**
  * Initialize the wake up functionality.
  *
+ * @ref sli_cpc_wake_device_t::mode and @ref sli_cpc_wake_device_t::pin must
+ * already be set on @p wake.
+ *
  * @param[in] wake  Handle to initialize.
  *
  * @return SL_STATUS_OK if successful, otherwise an error code.
  ******************************************************************************/
-sl_status_t sli_cpc_wake_device_init(sli_cpc_wake_device_t *wake, sl_gpio_t pin);
+sl_status_t sli_cpc_wake_device_init(sli_cpc_wake_device_t *wake);
 
 /***************************************************************************/ /**
  * Deinitialize the wake up functionality.
@@ -103,11 +113,14 @@ void sli_cpc_wake_device_deinit(sli_cpc_wake_device_t *wake);
 /***************************************************************************/ /**
  * Initialize the wake up functionality.
  *
+ * @ref sli_cpc_wake_host_t::mode and @ref sli_cpc_wake_host_t::pin must already
+ * be set on @p wake.
+ *
  * @param[in] wake  Wake up structure to initialize
  *
  * @return SL_STATUS_OK if successful, otherwise an error code.
  ******************************************************************************/
-sl_status_t sli_cpc_wake_host_init(sli_cpc_wake_host_t *wake, sl_gpio_t pin);
+sl_status_t sli_cpc_wake_host_init(sli_cpc_wake_host_t *wake);
 
 /***************************************************************************/ /**
  * Deinitialize the wake up functionality.

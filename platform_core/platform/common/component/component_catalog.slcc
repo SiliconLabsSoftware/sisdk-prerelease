@@ -14,3 +14,6 @@ provides:
 - name: component_catalog
 define:
 - name: SL_COMPONENT_CATALOG_PRESENT
+documentation:
+  docset: gecko-platform
+  document: platform-common/common

@@ -1,10 +1,12 @@
 id: "sl_connect_rail_dmp_cli"
 label: "Connect Rail DMP - CLI support"
-package: "connect_app"
+package: "connect"
 description: >
   Connect RAIL DMP application command line interface.
 category: "Connect|Utility"
 quality: "production"
+ui_hints:
+  visibility: basic
 metadata:
   sbom:
     license: Zlib
@@ -47,3 +49,7 @@ template_contribution:
 #---------------- Component Catalog ------------------
 - name: component_catalog
   value: sl_connect_rail_dmp_button
+
+documentation:
+  docset: connect-stack
+  document: connect-stack-api/connect-rail-dmp

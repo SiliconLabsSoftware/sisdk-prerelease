@@ -34,45 +34,36 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
+
+#include "sl_cpc_buf.h"
 #include "sl_status.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#define SLI_CPC_CRC_LEN 2 ///< Length of the checksum in bytes
+
 /***************************************************************************/ /**
- * Computes CRC-16 XMODEM on given buffer. Software implementation.
+ * Computes CRC-16 XMODEM on given data. Software implementation.
  *
- * @param buffer Pointer to the buffer on which the CRC must be computed.
- * @param buffer_length Length of the buffer, in bytes.
+ * @param ptr Pointer to the data to compute the CRC on.
+ * @param len Length of the data, in bytes.
  *
  * @return CRC value.
  ******************************************************************************/
-uint16_t sli_cpc_get_crc_sw(const uint8_t *buffer, size_t buffer_length);
+uint16_t sli_cpc_crc(const void *ptr, size_t len);
 
-/***************************************************************************/ /**
- * Computes CRC-16 XMODEM on given buffer. Software implementation.
+/**
+ * @brief Compute the CRC of every byte in a CPC buffer chain.
  *
- * @param buffer         Pointer to the buffer on which the CRC must be computed.
- * @param buffer_length  Length of the buffer, in bytes.
- * @param security_tag   Pointer to the buffer containing the security tag.
- * @param security_tag_length  Length of the security tag buffer, in bytes.
+ * Segments are consumed in list order, as one continuous input. A buffer with
+ * no successor is the single-segment case.
  *
- * @return CRC value.
- ******************************************************************************/
-uint16_t sli_cpc_get_crc_sw_with_security(const uint8_t *buffer, size_t buffer_length, const uint8_t *security_tag,
-                                          size_t security_tag_length);
-
-/***************************************************************************/ /**
- * Validates CRC-16 XMODEM on given buffer. Software implementation.
- *
- * @param buffer Pointer to the buffer on which the CRC must be computed.
- * @param buffer_length Length of the buffer, in bytes.
- * @param expected_crc Expected CRC value.
- *
- * @return true if CRC matches. False otherwise.
- ******************************************************************************/
-bool sli_cpc_validate_crc_sw(const uint8_t *buffer, size_t buffer_length, uint16_t expected_crc);
+ * @param[in] buf Head of the buffer chain.
+ * @return The computed CRC.
+ */
+uint16_t sli_cpc_crc_buf(const sl_cpc_buf_t *buf);
 
 #ifdef __cplusplus
 }

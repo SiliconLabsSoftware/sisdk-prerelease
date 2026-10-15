@@ -468,6 +468,11 @@ void halInternalClassifyReset(void)
   if (savedResetCause == RESET_CRASH_ASSERT) {
     savedAssertInfo = halCrashInfo.data.assertInfo;
   }
+
+  // Clear noinit LWM PC unless boot is hardware WDOG expiry
+  if (savedResetCause != RESET_WATCHDOG_EXPIRED) {
+    halWatchdogLwmCaptureClear();
+  }
 }
 
 uint16_t halGetExtendedResetInfo(void)

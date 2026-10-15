@@ -118,7 +118,7 @@ t_cose_crypto_pub_key_verify(int32_t               cose_algorithm_id,
     psa_algorithm_t   psa_alg_id;
     psa_status_t      psa_result;
     enum t_cose_err_t return_value;
-    psa_key_handle_t  verification_key_psa;
+    mbedtls_svc_key_id_t verification_key_psa;
 
     /* This implementation does no look up keys by kid in the key
      * store */
@@ -142,7 +142,7 @@ t_cose_crypto_pub_key_verify(int32_t               cose_algorithm_id,
         goto Done;
     }
 
-    verification_key_psa = (psa_key_handle_t)verification_key.k.key_handle;
+    verification_key_psa = (mbedtls_svc_key_id_t)verification_key.k.key_handle;
 
     psa_result = psa_verify_hash(verification_key_psa,
                                  psa_alg_id,
@@ -171,7 +171,7 @@ t_cose_crypto_pub_key_sign(int32_t                cose_algorithm_id,
     enum t_cose_err_t return_value;
     psa_status_t      psa_result;
     psa_algorithm_t   psa_alg_id;
-    psa_key_handle_t  signing_key_psa;
+    mbedtls_svc_key_id_t signing_key_psa;
     size_t            signature_len;
 
     psa_alg_id = cose_alg_id_to_psa_alg_id(cose_algorithm_id);
@@ -191,7 +191,7 @@ t_cose_crypto_pub_key_sign(int32_t                cose_algorithm_id,
         goto Done;
     }
 
-    signing_key_psa = (psa_key_handle_t)signing_key.k.key_handle;
+    signing_key_psa = (mbedtls_svc_key_id_t)signing_key.k.key_handle;
 
     /* It is assumed that this call is checking the signature_buffer
      * length and won't write off the end of it.
@@ -225,7 +225,7 @@ enum t_cose_err_t t_cose_crypto_sig_size(int32_t           cose_algorithm_id,
                                          size_t           *sig_size)
 {
     enum t_cose_err_t return_value;
-    psa_key_handle_t  signing_key_psa;
+    mbedtls_svc_key_id_t signing_key_psa;
     size_t            key_len_bits;
     size_t            key_len_bytes;
 
@@ -241,7 +241,7 @@ enum t_cose_err_t t_cose_crypto_sig_size(int32_t           cose_algorithm_id,
         return T_COSE_ERR_UNSUPPORTED_SIGNING_ALG;
     }
 
-    signing_key_psa = (psa_key_handle_t)signing_key.k.key_handle;
+    signing_key_psa = (mbedtls_svc_key_id_t)signing_key.k.key_handle;
 
 #ifdef T_COSE_USE_PSA_CRYPTO_FROM_MBED_CRYPTO11
     /* This code is for MBed Crypto 1.1. It uses an older version of
@@ -490,7 +490,7 @@ t_cose_crypto_hmac_sign_setup(struct t_cose_crypto_hmac *hmac_ctx,
     hmac_ctx->op_ctx = psa_mac_operation_init();
 
     psa_ret = psa_mac_sign_setup(&hmac_ctx->op_ctx,
-                                 (psa_key_handle_t)signing_key.k.key_handle,
+                                 (mbedtls_svc_key_id_t)signing_key.k.key_handle,
                                  psa_alg);
 
     return psa_status_to_t_cose_error_hmac(psa_ret);
@@ -574,7 +574,7 @@ t_cose_crypto_hmac_verify_setup(struct t_cose_crypto_hmac *hmac_ctx,
     hmac_ctx->op_ctx = psa_mac_operation_init();
 
     psa_ret = psa_mac_verify_setup(&hmac_ctx->op_ctx,
-                                   (psa_key_handle_t)verify_key.k.key_handle,
+                                   (mbedtls_svc_key_id_t)verify_key.k.key_handle,
                                    psa_alg);
 
     return psa_status_to_t_cose_error_hmac(psa_ret);

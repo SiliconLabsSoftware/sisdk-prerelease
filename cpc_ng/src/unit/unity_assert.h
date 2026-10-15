@@ -10,9 +10,9 @@ extern "C" {
 void cpc_frame_pools_start_test(unsigned int lineno, const sl_cpc_bus_t *bus);
 void cpc_frame_pools_end_test(unsigned int lineno, const sl_cpc_bus_t *bus);
 
-#define CPC_FRAME_POOLS_START_TEST(_inst) cpc_frame_pools_start_test(__LINE__, (_inst))
+#define CPC_FRAME_POOLS_START_TEST(bus) cpc_frame_pools_start_test(__LINE__, (bus))
 
-#define CPC_FRAME_POOLS_END_TEST(_inst) cpc_frame_pools_end_test(__LINE__, (_inst))
+#define CPC_FRAME_POOLS_END_TEST(bus) cpc_frame_pools_end_test(__LINE__, (bus))
 
 #ifdef __cplusplus
 }

@@ -1,0 +1,60 @@
+id: gatt_client_manager
+label: GATT Client Manager
+package: bluetooth_le
+description: >
+  Manages GATT clients for Bluetooth Low Energy. Discovers application-defined
+  profiles (sets of service/characteristic UUID pairs), either automatically on
+  connection open or driven manually one profile at a time, and reports
+  resolved GATT handles and discovery completion through events.
+  It is able to cache discovery results, so a reconnecting peer with an unchanged database
+  skips rediscovery. Also provides an API to perform GATT operations that are guarded against running
+  while discovery owns the connection.
+  Warning: This component is experimental and under active development. Its API
+  may change, and backward compatibility is not guaranteed. Use it at your own
+  risk.
+category: Bluetooth|Application|Miscellaneous
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+root_path: bluetooth_le/common/gatt_client_manager
+tag:
+- No-Code
+config_file:
+- path: config/sl_gatt_client_manager_config.h
+source:
+- path: src/sl_gatt_client_manager.c
+- path: src/sl_gatt_client_manager_util.c
+- path: src/sl_gatt_client_manager_profile.c
+- path: src/sl_gatt_client_manager_events.c
+- path: src/sl_gatt_client_manager_connection.c
+- path: src/sl_gatt_client_manager_cache.c
+- path: src/sl_gatt_client_manager_discovery.c
+- path: src/sl_gatt_client_manager_gatt_ops.c
+include:
+- path: inc/
+  file_list:
+  - path: sl_gatt_client_manager_types.h
+  - path: sl_gatt_client_manager.h
+  - path: sli_gatt_client_manager.h
+  - path: sli_gatt_client_manager_types.h
+template_file:
+- path: template/sl_gatt_client_manager_event_dispatch.c.jinja
+provides:
+- name: gatt_client_manager
+requires:
+- name: bluetooth_stack
+- name: bluetooth_feature_gatt
+- name: sl_common
+- name: app_rta
+template_contribution:
+- name: bluetooth_on_event
+  value:
+    include: sl_gatt_client_manager.h
+    function: sl_gatt_client_manager_on_bt_event
+- name: component_catalog
+  value: gatt_client_manager
+- name: app_rta_init
+  value:
+    include: sli_gatt_client_manager.h
+    handler: sli_gcm_rta_init

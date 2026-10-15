@@ -40,61 +40,73 @@
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Assistant print settings
-// <o PRINT_PACKET_INFO> Enable assistant log prints
+// <o SL_PACKET_ASSISTANT_PRINT_PACKET_INFO> Enable assistant log prints
 // <i> Default: 0
 // <i> 1 enabled, 0 disabled
-#define PRINT_PACKET_INFO      (0) ///< Enable assistant log prints
+#define SL_PACKET_ASSISTANT_PRINT_PACKET_INFO      (0) ///< Enable assistant log prints
 
 // </h> Assistant print settings
 
-// <h> WISUN FSK header settings
-// <o WISUN_FSK_FCS_TYPE> FCS is on/off
-// <i> Default: 0
-// <i> FCS is on/off.
-#define WISUN_FSK_FCS_TYPE      (0) ///< Wi-SUN FCS is on/off
+// <h> TX frame size settings
+// <o SL_PACKET_ASSISTANT_MAX_TX_FRAME_SIZE> Maximum TX payload size (bytes)
+// <i> Default: 256
+// <i> Maximum payload length accepted by sl_packet_assistant_prepare_packet().
+#define SL_PACKET_ASSISTANT_MAX_TX_FRAME_SIZE      (256) ///< Maximum TX payload size in bytes
 
-// <o WISUN_FSK_WHITENING> Whitening is on/off
+// </h> TX frame size settings
+
+// <h> SUN FSK header settings
+// <o SL_PACKET_ASSISTANT_SUN_FSK_FCS_TYPE> FCS type
+// <0=> 4-byte FCS
+// <1=> 2-byte FCS
+// <i> Default: 0
+// <i> 0 = 4-byte FCS, 1 = 2-byte FCS
+#define SL_PACKET_ASSISTANT_SUN_FSK_FCS_TYPE      (0) ///< SUN FSK FCS type: 0 = 4-byte, 1 = 2-byte
+
+// <o SL_PACKET_ASSISTANT_SUN_FSK_WHITENING> Whitening is on/off
 // <i> Default: 1
 // <i> Whitening is on/off
-#define WISUN_FSK_WHITENING      (1) ///< Wi-SUN Whitening is on/off
+#define SL_PACKET_ASSISTANT_SUN_FSK_WHITENING      (1) ///< SUN FSK Whitening is on/off
 
-// </h> WISUN FSK header settings
+// </h> SUN FSK header settings
 
-// <h> WISUN OFDM header settings
-// <o WISUN_OFDM_RATE> Default Radio Configuration
+// <h> SUN OFDM header settings
+// <o SL_PACKET_ASSISTANT_SUN_OFDM_RATE> Default Radio Configuration
 // <i> Default: 6
-#define WISUN_OFDM_RATE  (6) ///< Wi-SUN OFDM rate Configuration
+#define SL_PACKET_ASSISTANT_SUN_OFDM_RATE  (6) ///< SUN OFDM rate Configuration
 
-// <o WISUN_OFDM_SCRAMBLER> 2 bits wide, The Scrambler field (S1-S0) specifies the scrambling seed
+// <o SL_PACKET_ASSISTANT_SUN_OFDM_SCRAMBLER> 2 bits wide, The Scrambler field (S1-S0) specifies the scrambling seed
 // <i> Default: 0
 // <i> 2 bits wide, The Scrambler field (S1-S0) specifies the scrambling seed
-#define WISUN_OFDM_SCRAMBLER      (0) ///< Wi-SUN OFDM Scrambler Configuration
+#define SL_PACKET_ASSISTANT_SUN_OFDM_SCRAMBLER      (0) ///< SUN OFDM Scrambler Configuration
 
-// </h> WISUN OFDM header settings
+// </h> SUN OFDM header settings
 
 // <h> SUN OQPSK header settings
-// <o SUN_OQPSK_SPREADINGMODE> spreading mode
+// <o SL_PACKET_ASSISTANT_SUN_OQPSK_SPREADINGMODE> spreading mode
 // <i> Default: 0
 // <i> spreading mode
-#define SUN_OQPSK_SPREADINGMODE      (0) ///< SUN OQPSK spreading mode Configuration
+#define SL_PACKET_ASSISTANT_SUN_OQPSK_SPREADINGMODE      (0) ///< SUN OQPSK spreading mode Configuration
 
-// <o SUN_OQPSK_RATEMODE> rate mode: 2 bits wide
+// <o SL_PACKET_ASSISTANT_SUN_OQPSK_RATEMODE> rate mode: 2 bits wide
 // <i> Default: 1
 // <i> rate mode: 2 bits wide
-#define SUN_OQPSK_RATEMODE      (0) ///< SUN OQPSK rate mode Configuration
+#define SL_PACKET_ASSISTANT_SUN_OQPSK_RATEMODE      (0) ///< SUN OQPSK rate mode Configuration
 
 // </h> SUN OQPSK header settings
 
 // <h> SideWalk FSK header settings
-// <o  SIDEWALK_FSK_FCS_TYPE> FCS is on/off
-// <i> Default: 0
-// <i> FCS is on/off.
-#define SIDEWALK_FSK_FCS_TYPE      (1) ///< SideWalk FSK FCS is on/off
+// <o SL_PACKET_ASSISTANT_SIDEWALK_FSK_FCS_TYPE> FCS type
+// <0=> 4-byte FCS
+// <1=> 2-byte FCS
+// <i> Default: 1
+// <i> 0 = 4-byte FCS, 1 = 2-byte FCS
+#define SL_PACKET_ASSISTANT_SIDEWALK_FSK_FCS_TYPE      (1) ///< SideWalk FSK FCS type: 0 = 4-byte, 1 = 2-byte
 
-// <o  SIDEWALK_FSK_WHITENING> Whitening is on/off
+// <o SL_PACKET_ASSISTANT_SIDEWALK_FSK_WHITENING> Whitening is on/off
 // <i> Default: 1
 // <i> Whitening is on/off
-#define  SIDEWALK_FSK_WHITENING      (1) ///< SideWalk FSK Whitening is on/off
+#define SL_PACKET_ASSISTANT_SIDEWALK_FSK_WHITENING      (1) ///< SideWalk FSK Whitening is on/off
 
 // </h> SideWalk FSK header settings
 

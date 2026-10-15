@@ -5,6 +5,8 @@ description: >-
   This component adds support for 1024-bit RSA operations.
 category: Platform|Security|Mbed TLS|RSA
 quality: evaluation
+ui_hints:
+  visibility: never
 provides:
 - name: mbedtls_rsa_1024
 - name: mbedtls_rsa_size

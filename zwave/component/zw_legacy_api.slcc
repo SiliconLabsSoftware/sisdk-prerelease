@@ -1,0 +1,22 @@
+id: zw_legacy_api
+label: Z-Wave Legacy API Compatibility
+category: Z-Wave
+description: >
+  Provides compatibility implementations for Z-Wave SDK APIs that have been
+  superseded or require transitional support. The implementations preserve
+  source and link compatibility for applications migrated from earlier SDK
+  releases while allowing the SDK to evolve independently. This component
+  provides a dedicated location for compatibility code whose lifecycle may
+  differ from that of the current SDK interfaces.
+package: zwave
+quality: production
+metadata:
+  sbom:
+    reference: zw_sbom_license
+requires:
+- name: zw_versions
+provides:
+- name: zw_legacy_api
+source:
+- path: "platform/SiliconLabs/components/zw_legacy_api/zw_legacy_api_8.2.c"
+root_path: zwave

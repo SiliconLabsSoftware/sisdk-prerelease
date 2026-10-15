@@ -33,4 +33,17 @@ template_contribution:
 define:
 - name: SL_CODE_COMPONENT_HAL_SYSRTC
   value: hal_sysrtc
+documentation:
+  docset: gecko-platform
+  document:
+  - page: platform-peripheral-efr32xg23/sysrtc
+    condition: [device_sdid_210]
+  - page: platform-peripheral-efr32xg24/sysrtc
+    condition: [device_sdid_215]
+  - page: platform-peripheral-efr32xg25/sysrtc
+    condition: [device_sdid_220]
+  - page: platform-peripheral-efr32xg28/sysrtc
+    condition: [device_sdid_235]
+  - page: platform-peripheral-sixg301/sysrtc
+    condition: [device_generic_family_sixx301]
 root_path: platform_core/platform/peripheral

@@ -57,6 +57,7 @@ requires:
 - name: bootloader_interface_common
 - name: bootloader_interface_s2
 - name: btl_util_header
+- name: se_manager_mailbox
 metadata:
   sbom:
     license: MSLA

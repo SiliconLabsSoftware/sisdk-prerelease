@@ -27,8 +27,10 @@
 #
 
 set(OT_MBEDTLS_DEFAULT_CONFIG_FILE \"openthread-mbedtls-config.h\")
+set(OT_TF_PSA_CRYPTO_DEFAULT_CONFIG_FILE \"openthread-psa-crypto-config.h\")
 
 set(OT_MBEDTLS_CONFIG_FILE "" CACHE STRING "The mbedTLS config file")
+set(OT_TF_PSA_CRYPTO_CONFIG_FILE "" CACHE STRING "The TF-PSA-Crypto config file")
 
 set(ENABLE_TESTING OFF CACHE BOOL "Disable mbedtls test" FORCE)
 set(ENABLE_PROGRAMS OFF CACHE BOOL "Disable mbetls program" FORCE)
@@ -47,7 +49,17 @@ string(REPLACE "-Wconversion" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(MBEDTLS_FATAL_WARNINGS OFF CACHE BOOL "Compiler warnings treated as errors" FORCE)
 
+# Mbed TLS 4.x / TF-PSA-Crypto do not ship autogen sources in git. Generate
+# them at configure/build time (needs Python jinja2 + jsonschema; see README.md).
+set(GEN_FILES ON CACHE BOOL "Generate mbedtls/tf-psa-crypto autogen sources" FORCE)
+
 add_subdirectory(repo)
+
+set(OT_MBEDTLS_PUBLIC_INCLUDES
+    ${CMAKE_CURRENT_SOURCE_DIR}/repo/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/repo/tf-psa-crypto/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/repo/tf-psa-crypto/drivers/builtin/include
+)
 
 if(UNIFDEFALL_EXE AND SED_EXE AND UNIFDEF_VERSION VERSION_GREATER_EQUAL 2.10)
     add_custom_command(OUTPUT openthread-mbedtls-config.h
@@ -56,6 +68,7 @@ if(UNIFDEFALL_EXE AND SED_EXE AND UNIFDEF_VERSION VERSION_GREATER_EQUAL 2.10)
             "-I$<JOIN:$<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>,;-I>"
             "-I$<JOIN:${OT_PUBLIC_INCLUDES},;-I>"
             "-I${CMAKE_CURRENT_SOURCE_DIR}/repo/include"
+            "-I${CMAKE_CURRENT_SOURCE_DIR}/repo/tf-psa-crypto/include"
             "${CMAKE_CURRENT_SOURCE_DIR}/mbedtls-config.h" |
             ${SED_EXE} '/openthread-core-config\.h/d' >
             openthread-mbedtls-config.h
@@ -63,60 +76,85 @@ if(UNIFDEFALL_EXE AND SED_EXE AND UNIFDEF_VERSION VERSION_GREATER_EQUAL 2.10)
         COMMAND_EXPAND_LISTS
     )
 
+    add_custom_command(OUTPUT openthread-psa-crypto-config.h
+        COMMAND ${UNIFDEFALL_EXE}
+            "'-D$<JOIN:$<TARGET_PROPERTY:ot-config,INTERFACE_COMPILE_DEFINITIONS>,';'-D>'"
+            "-I$<JOIN:$<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>,;-I>"
+            "-I$<JOIN:${OT_PUBLIC_INCLUDES},;-I>"
+            "-I${CMAKE_CURRENT_SOURCE_DIR}/repo/include"
+            "-I${CMAKE_CURRENT_SOURCE_DIR}/repo/tf-psa-crypto/include"
+            "${CMAKE_CURRENT_SOURCE_DIR}/psa-crypto-config.h" |
+            ${SED_EXE} '/openthread-core-config\.h/d' >
+            openthread-psa-crypto-config.h
+        MAIN_DEPENDENCY psa-crypto-config.h
+        COMMAND_EXPAND_LISTS
+    )
+
     add_custom_target(openthread-mbedtls-config
-        DEPENDS openthread-mbedtls-config.h)
+        DEPENDS openthread-mbedtls-config.h openthread-psa-crypto-config.h)
 
     add_dependencies(ot-config openthread-mbedtls-config)
     add_dependencies(mbedtls openthread-mbedtls-config)
     add_dependencies(mbedx509 openthread-mbedtls-config)
-    add_dependencies(mbedcrypto openthread-mbedtls-config)
+    add_dependencies(tfpsacrypto openthread-mbedtls-config)
 else()
     configure_file(mbedtls-config.h openthread-mbedtls-config.h COPYONLY)
+    configure_file(psa-crypto-config.h openthread-psa-crypto-config.h COPYONLY)
 endif()
 
 target_include_directories(ot-config SYSTEM
     INTERFACE
         ${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/repo/include)
+        ${OT_MBEDTLS_PUBLIC_INCLUDES})
 
-target_compile_definitions(mbedtls
-    PUBLIC
-        "MBEDTLS_CONFIG_FILE=$<IF:$<BOOL:${OT_MBEDTLS_CONFIG_FILE}>,${OT_MBEDTLS_CONFIG_FILE},${OT_MBEDTLS_DEFAULT_CONFIG_FILE}>"
-    PRIVATE
-        $<TARGET_PROPERTY:ot-config,INTERFACE_COMPILE_DEFINITIONS>
-)
-target_include_directories(mbedtls
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/repo/include>
-    PRIVATE
-        ${OT_PUBLIC_INCLUDES}
-        $<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>
+foreach(ot_mbedtls_target mbedtls mbedx509 tfpsacrypto)
+    target_compile_definitions(${ot_mbedtls_target}
+        PUBLIC
+            "MBEDTLS_CONFIG_FILE=$<IF:$<BOOL:${OT_MBEDTLS_CONFIG_FILE}>,${OT_MBEDTLS_CONFIG_FILE},${OT_MBEDTLS_DEFAULT_CONFIG_FILE}>"
+            "TF_PSA_CRYPTO_CONFIG_FILE=$<IF:$<BOOL:${OT_TF_PSA_CRYPTO_CONFIG_FILE}>,${OT_TF_PSA_CRYPTO_CONFIG_FILE},${OT_TF_PSA_CRYPTO_DEFAULT_CONFIG_FILE}>"
+        PRIVATE
+            $<TARGET_PROPERTY:ot-config,INTERFACE_COMPILE_DEFINITIONS>
+    )
+    target_include_directories(${ot_mbedtls_target}
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+            $<BUILD_INTERFACE:${OT_MBEDTLS_PUBLIC_INCLUDES}>
+        PRIVATE
+            ${OT_PUBLIC_INCLUDES}
+            $<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>
+    )
+endforeach()
+
+# TF-PSA-Crypto builds platform/builtin/extras/etc. as separate OBJECT libraries.
+# Those objects are archived into tfpsacrypto, so they must see the same config
+# macros as mbedtls/tfpsacrypto (otherwise mbedtls_calloc/free are missing).
+set(OT_TF_PSA_CRYPTO_COMPONENT_TARGETS
+    platform
+    extras
+    utilities
+    builtin
+    everest
+    p256-m
+    pqcp
 )
 
-target_compile_definitions(mbedx509
-    PUBLIC
-        "MBEDTLS_CONFIG_FILE=$<IF:$<BOOL:${OT_MBEDTLS_CONFIG_FILE}>,${OT_MBEDTLS_CONFIG_FILE},${OT_MBEDTLS_DEFAULT_CONFIG_FILE}>"
-    PRIVATE
-        $<TARGET_PROPERTY:ot-config,INTERFACE_COMPILE_DEFINITIONS>
-)
-target_include_directories(mbedx509
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/repo/include>
-    PRIVATE
-        ${OT_PUBLIC_INCLUDES}
-        $<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>
-)
-
-target_compile_definitions(mbedcrypto
-    PUBLIC
-        "MBEDTLS_CONFIG_FILE=$<IF:$<BOOL:${OT_MBEDTLS_CONFIG_FILE}>,${OT_MBEDTLS_CONFIG_FILE},${OT_MBEDTLS_DEFAULT_CONFIG_FILE}>"
-    PRIVATE
-        $<TARGET_PROPERTY:ot-config,INTERFACE_COMPILE_DEFINITIONS>
-)
-target_include_directories(mbedcrypto
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/repo/include>
-    PRIVATE
-        ${OT_PUBLIC_INCLUDES}
-        $<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>
-)
+foreach(ot_tfpsa_component ${OT_TF_PSA_CRYPTO_COMPONENT_TARGETS})
+    if(TARGET ${ot_tfpsa_component})
+        target_compile_definitions(${ot_tfpsa_component}
+            PUBLIC
+                "MBEDTLS_CONFIG_FILE=$<IF:$<BOOL:${OT_MBEDTLS_CONFIG_FILE}>,${OT_MBEDTLS_CONFIG_FILE},${OT_MBEDTLS_DEFAULT_CONFIG_FILE}>"
+                "TF_PSA_CRYPTO_CONFIG_FILE=$<IF:$<BOOL:${OT_TF_PSA_CRYPTO_CONFIG_FILE}>,${OT_TF_PSA_CRYPTO_CONFIG_FILE},${OT_TF_PSA_CRYPTO_DEFAULT_CONFIG_FILE}>"
+            PRIVATE
+                $<TARGET_PROPERTY:ot-config,INTERFACE_COMPILE_DEFINITIONS>
+        )
+        target_include_directories(${ot_tfpsa_component}
+            PRIVATE
+                ${CMAKE_CURRENT_BINARY_DIR}
+                ${OT_PUBLIC_INCLUDES}
+                $<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>
+        )
+        if(TARGET openthread-mbedtls-config)
+            add_dependencies(${ot_tfpsa_component} openthread-mbedtls-config)
+        endif()
+    endif()
+endforeach()

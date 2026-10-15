@@ -88,6 +88,11 @@ err_t etharp_request(struct netif *netif, const ip4_addr_t *ipaddr);
 #define etharp_gratuitous(netif) etharp_request((netif), netif_ip4_addr(netif))
 void etharp_cleanup_netif(struct netif *netif);
 
+#if SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_ETHARP_ONDEMAND_TIMER
+/** Last-link: stop on-demand ARP timer (table cleared by netif_set_down). */
+void sli_etharp_cleanup_on_link_down(struct netif *netif);
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP && SL_LWIP_ETHARP_ONDEMAND_TIMER */
+
 #if LWIP_ACD
 err_t etharp_acd_probe(struct netif *netif, const ip4_addr_t *ipaddr);
 err_t etharp_acd_announce(struct netif *netif, const ip4_addr_t *ipaddr);

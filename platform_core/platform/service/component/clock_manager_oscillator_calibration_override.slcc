@@ -29,3 +29,6 @@ template_contribution:
     include: sl_clock_manager_oscillator_calibration_override.h
     handler: sl_clock_manager_init_oscillator_calibration_override
   priority: 9999
+documentation:
+  docset: gecko-platform
+  document: platform-service/clock-manager

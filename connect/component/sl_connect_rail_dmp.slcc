@@ -1,6 +1,6 @@
 id: "sl_connect_rail_dmp"
 label: "Connect Rail DMP"
-package: "connect_app"
+package: "connect"
 description: >
   The Connect RAIL DMP component creates a RAIL task that utilizes the radio
   configuration's second protocol for communication over Base profile PHYs.
@@ -11,6 +11,8 @@ description: >
   the RAIL thread, Connect protocol communications will be halted.
 category: "Connect|Utility"
 quality: "production"
+ui_hints:
+  visibility: basic
 metadata:
   sbom:
     license: Zlib
@@ -49,3 +51,7 @@ template_contribution:
 #---------------- Component Catalog ------------------
 - name: component_catalog
   value: sl_connect_rail_dmp
+
+documentation:
+  docset: connect-stack
+  document: connect-stack-api/connect-rail-dmp

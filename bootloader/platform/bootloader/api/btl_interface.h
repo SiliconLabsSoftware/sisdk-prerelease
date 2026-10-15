@@ -525,6 +525,21 @@ typedef struct Bootloader_inOutVec {
 #define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE    \
                                            - (BTL_FIRST_STAGE_BASE \
                                               + BTL_FIRST_STAGE_SIZE))
+#elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_265)
+// No bootloader area: Place the bootloader in main flash
+#define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#if defined(BOOTLOADER_APPLOADER)
+#if defined(BOOTLOADER_SECURE)
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00014000UL)
+#else
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00012000UL)
+#endif // BOOTLOADER_SECURE
+#else
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
+#endif // BOOTLOADER_APPLOADER
+#define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE    \
+                                           - (BTL_FIRST_STAGE_BASE \
+                                              + BTL_FIRST_STAGE_SIZE))
 #elif defined(MAIN_BOOTLOADER_TEST)
 #else
 #error "This part is not supported in this bootloader version."

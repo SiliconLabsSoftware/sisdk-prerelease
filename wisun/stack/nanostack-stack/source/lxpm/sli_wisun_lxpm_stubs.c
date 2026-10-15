@@ -106,13 +106,6 @@ upp_domain_t *upp_domain_lookup(const uint8_t address[16])
   return NULL;
 }
 
-bool upp_hbh_len_check(const uint8_t *opt_data, uint8_t opt_data_len)
-{
-  (void)opt_data;
-  (void)opt_data_len;
-  return false;
-}
-
 bool upp_process_hbh(buffer_t *buf, uint8_t *opt_data)
 {
   (void)buf;

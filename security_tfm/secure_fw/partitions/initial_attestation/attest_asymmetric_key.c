@@ -47,7 +47,7 @@ extern enum tfm_plat_err_t sli_plat_get_initial_attest_key(uint8_t          *key
  * Global key handle for the attestation key. Used to prevent keys having to be
  * reloaded multiple times during a single token operation.
  */
-static psa_key_handle_t attestation_key_handle = ATTEST_KEY_HANDLE_NOT_LOADED;
+static mbedtls_svc_key_id_t attestation_key_handle = ATTEST_KEY_HANDLE_NOT_LOADED;
 
 /**
  * The public key is kept loaded as it is both not required to be secret (and
@@ -73,7 +73,7 @@ attest_register_initial_attestation_key()
     psa_ecc_family_t psa_curve;
     struct ecc_key_t attest_key = {0};
     uint8_t key_buf[3 * ECC_P256_COORD_SIZE]; /* priv + x_coord + y_coord */
-    psa_key_handle_t key_handle = ATTEST_KEY_HANDLE_NOT_LOADED;
+    mbedtls_svc_key_id_t key_handle = ATTEST_KEY_HANDLE_NOT_LOADED;
     psa_status_t crypto_res;
     psa_key_attributes_t key_attributes = psa_key_attributes_init();
 
@@ -149,7 +149,7 @@ attest_unregister_initial_attestation_key()
 }
 
 enum psa_attest_err_t
-attest_get_signing_key_handle(psa_key_handle_t *handle)
+attest_get_signing_key_handle(mbedtls_svc_key_id_t *handle)
 {
     if (attestation_key_handle == ATTEST_KEY_HANDLE_NOT_LOADED) {
         return PSA_ATTEST_ERR_GENERAL;

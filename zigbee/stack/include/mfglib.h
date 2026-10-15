@@ -284,7 +284,16 @@ int8_t mfglibGetSynOffset(void);
  * then set the CTUNE value as desired. mfglib is then restarted
  * to take effect of this new change.
  *
- * @details Use this function to change CTUNE value.
+ * This function does NOT write the new CTUNE value to the token, it only
+ * changes it in memory at run-time. It can be changed as many times as
+ * preferred, and the setting will be lost when a reset occurs. The value will
+ * survive deep sleep, but will not survive a reset. To make the value
+ * permanent, the TOKEN_MFG_CTUNE manufacturing token must be written using the
+ * token API or Simplicity Commander.
+ *
+ * @details Use this function to change CTUNE value. This function does not
+ * effect a permanent change; once a preferred CTUNE value is found, it must be
+ * written to a token using the token API for it to be permanent.
  *
  * @param[in] ctune Valid range of a CTUNE values is between 0x0000 - 0x00FF.
  *

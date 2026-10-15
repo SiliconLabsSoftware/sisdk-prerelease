@@ -1,0 +1,34 @@
+id: cpc_ng_drv_spi_peripheral_usart_secondary
+package: cpc_ng
+description: Instantiable SPI-peripheral (USART) driver for a CPC-NG Secondary device.
+category: Services|CPC-NG|Driver|Secondary Device
+quality: internal
+label: CPC-NG Secondary - SPI Peripheral (USART)
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/silabs
+instantiable:
+  prefix: instance
+source:
+- path: src/sl_cpc_drv_spi_peripheral_usart.c
+config_file:
+- path: config/series2/sl_cpc_drv_spi_peripheral_usart_{{instance}}_config.h
+  file_id: cpc_ng_drv_spi_peripheral_usart_config
+provides:
+- name: cpc_ng_drv_spi_peripheral_usart_secondary
+- name: cpc_ng_drv_secondary_instance
+  allow_multiple: true
+requires:
+- name: cpc_ng_drv_spi_peripheral
+- name: cpc_ng_secondary
+- name: hal_usart
+template_contribution:
+- name: cpc_ng_drv_spi_peripheral_usart_instances
+  value: "{{instance}}"
+- name: cpc_ng_drv_spi_peripheral_usart_role_secondary
+  value: "{{instance}}"
+- name: event_handler
+  value:
+    event: cpc_drv_instances_start_buses
+    handler: sl_cpc_drv_spi_peripheral_usart_instances_start_buses

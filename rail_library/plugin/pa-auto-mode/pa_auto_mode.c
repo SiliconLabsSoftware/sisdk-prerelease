@@ -173,7 +173,7 @@ static const RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
     .band = RAIL_PA_BAND_COUNT
   }
 };
-#elif _SILICON_LABS_32B_SERIES_2_CONFIG == 5
+#elif _SILICON_LABS_32B_SERIES_2_CONFIG == 5 || _SILICON_LABS_32B_SERIES_2_CONFIG == 10
 static const RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfigDefault[] = {
 // todo_sol: PA auto mode
   {

@@ -9,7 +9,9 @@ include:
 - path: platform/bootloader/series3
   file_list:
   - path: core/btl_parse.h
-  - path: driver/btl_driver_cmu.h
+- path: platform/bootloader/series3/driver
+  file_list:
+  - path: btl_driver_cmu.h
 - path: platform/bootloader/series3/storage/ext_mem
   file_list:
   - path: btl_storage_ext_mem.h

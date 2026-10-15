@@ -64,7 +64,7 @@ include:
   - path: micro-types.h
   - path: micro.h
   - path: platform-header.h
-  - path: random.h
+  - path: sl_zigbee_random.h
   - path: reset-def.h
   - path: serial.h
   - path: token-manufacturing-series-2.h

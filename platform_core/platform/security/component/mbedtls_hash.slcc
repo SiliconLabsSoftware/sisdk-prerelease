@@ -12,13 +12,12 @@ ui_hints:
 provides:
 - name: mbedtls_hash
 requires:
-- name: mbedtls_hash_function
-- name: mbedtls_core
+- name: psa_hash_function
 recommends:
-- id: mbedtls_sha256
+- id: psa_crypto_sha256
   vendor: silabs
 template_contribution:
-- name: mbedtls_config
+- name: psa_crypto_config
   value: MBEDTLS_MD_C
 metadata:
   sbom:

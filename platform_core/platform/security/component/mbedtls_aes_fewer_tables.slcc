@@ -1,0 +1,35 @@
+id: mbedtls_aes_fewer_tables
+package: platform_core
+label: AES Block Cipher Fewer Tables
+description: >-
+  This component enables the builtin AES software implementation in
+  TF-PSA-Crypto to use a small set of precomputed AES tables stored
+  in ROM/Flash.
+
+  This component omits 75% of the AES tables from ROM / RAM
+  (depending on the value of MBEDTLS_AES_ROM_TABLES)
+  by computing their values on the fly during operations
+  (the tables are entry-wise rotations of one another).
+
+  Tradeoff: This component reduces the RAM / ROM footprint
+  by ~6kb but at the cost of more arithmetic operations during
+  runtime. Specifically, one has to compare 4 accesses within
+  different tables to 4 accesses with additional arithmetic
+  operations within the same table. The performance gain/loss
+  depends on the system and memory details.
+
+category: Platform|Security|Mbed TLS|Encryption
+quality: production
+provides:
+- name: mbedtls_aes_fewer_tables
+requires:
+- name: mbedtls_aes
+template_contribution:
+- name: psa_crypto_builtin_config
+  value: MBEDTLS_AES_FEWER_TABLES
+documentation:
+  url: https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/crypto__config_8h/#c.MBEDTLS_AES_FEWER_TABLES
+metadata:
+  sbom:
+    reference: mbedtls_sbom
+root_path: platform_core

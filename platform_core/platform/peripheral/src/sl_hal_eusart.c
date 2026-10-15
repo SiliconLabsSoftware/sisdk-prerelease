@@ -1203,6 +1203,27 @@ static void eusart_sync_init_common(EUSART_TypeDef *eusart,
                                             SL_HAL_PRS_CONSUMER_EUSART4_RX);
       }
 #endif
+#if defined(EUSART5)
+      else if (eusart == EUSART5) {
+        sl_hal_prs_connect_channel_consumer(init->advanced_config->prs_rx_channel,
+                                            SL_HAL_PRS_TYPE_ASYNC,
+                                            SL_HAL_PRS_CONSUMER_EUSART5_RX);
+      }
+#endif
+#if defined(EUSART6)
+      else if (eusart == EUSART6) {
+        sl_hal_prs_connect_channel_consumer(init->advanced_config->prs_rx_channel,
+                                            SL_HAL_PRS_TYPE_ASYNC,
+                                            SL_HAL_PRS_CONSUMER_EUSART6_RX);
+      }
+#endif
+#if defined(EUSART7)
+      else if (eusart == EUSART7) {
+        sl_hal_prs_connect_channel_consumer(init->advanced_config->prs_rx_channel,
+                                            SL_HAL_PRS_TYPE_ASYNC,
+                                            SL_HAL_PRS_CONSUMER_EUSART7_RX);
+      }
+#endif
       else {
         EFM_ASSERT(false);
       }
@@ -1241,6 +1262,27 @@ static void eusart_sync_init_common(EUSART_TypeDef *eusart,
         sl_hal_prs_connect_channel_consumer(init->advanced_config->prs_clock_channel,
                                             SL_HAL_PRS_TYPE_ASYNC,
                                             SL_HAL_PRS_CONSUMER_EUSART4_CLK);
+      }
+#endif
+#if defined(EUSART5)
+      else if (eusart == EUSART5) {
+        sl_hal_prs_connect_channel_consumer(init->advanced_config->prs_clock_channel,
+                                            SL_HAL_PRS_TYPE_ASYNC,
+                                            SL_HAL_PRS_CONSUMER_EUSART5_CLK);
+      }
+#endif
+#if defined(EUSART6)
+      else if (eusart == EUSART6) {
+        sl_hal_prs_connect_channel_consumer(init->advanced_config->prs_clock_channel,
+                                            SL_HAL_PRS_TYPE_ASYNC,
+                                            SL_HAL_PRS_CONSUMER_EUSART6_CLK);
+      }
+#endif
+#if defined(EUSART7)
+      else if (eusart == EUSART7) {
+        sl_hal_prs_connect_channel_consumer(init->advanced_config->prs_clock_channel,
+                                            SL_HAL_PRS_TYPE_ASYNC,
+                                            SL_HAL_PRS_CONSUMER_EUSART7_CLK);
       }
 #endif
       else {

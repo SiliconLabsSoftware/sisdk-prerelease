@@ -160,23 +160,21 @@ void sli_cpc_buffer_chain_release(sl_cpc_msgq_t *msgq, sl_cpc_buf_t *buf, uint16
  ******************************************************************************/
 sl_status_t sli_cpc_alloc_rx_payload(const sl_cpc_bus_t *bus, sl_cpc_frame_t *frame)
 {
-  const sli_cpc_hdr_t *hdr = sli_cpc_frame_get_header(frame);
-  const uint16_t addr = sli_cpc_header_get_address(hdr);
+  const sli_cpc_hdr_t *hdr = &frame->hdr;
   const uint16_t payload_length = sli_cpc_header_get_payload_size(hdr);
-  sl_status_t status = SL_STATUS_OK;
   sl_cpc_buf_t *buf;
+  uint16_t addr;
 
+  if (payload_length == 0) {
+    return SL_STATUS_OK;
+  }
+
+  addr = sli_cpc_header_get_address(hdr);
   frame->ep = sli_cpc_ep_get_ref(sli_cpc_bus_find_ep_from_id(bus, addr));
 
   if (!frame->ep) {
     SLI_CPC_LOG_DEBUG("Received frame for an unallocated endpoint. Endpoint ID: %d", addr);
-    status = SL_STATUS_NOT_INITIALIZED;
-    goto exit;
-  }
-
-  if (payload_length == 0) {
-    // Command frame (e.g. RST, ACK), no payload to allocate.
-    goto exit;
+    return SL_STATUS_NOT_INITIALIZED;
   }
 
   buf = sli_cpc_buffer_chain_alloc(&frame->ep->rx_buffer_queue, payload_length);
@@ -186,12 +184,10 @@ sl_status_t sli_cpc_alloc_rx_payload(const sl_cpc_bus_t *bus, sl_cpc_frame_t *fr
     SLI_CPC_DEBUG_TRACE_EP_RXD_DATA_FRAME_DROPPED(frame->ep);
     SLI_CPC_LOG_ERROR("Received frame for an endpoint that is out of memory. Endpoint ID: %d", addr);
 
-    status = SL_STATUS_NO_MORE_RESOURCE;
-    goto exit;
+    return SL_STATUS_NO_MORE_RESOURCE;
   }
 
   frame->payload = buf;
 
-exit:
-  return status;
+  return SL_STATUS_OK;
 }

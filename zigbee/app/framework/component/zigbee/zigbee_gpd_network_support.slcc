@@ -18,6 +18,16 @@ requires:
   condition:
   - device_cortexm
 - name: clock_manager_runtime
+- name: psa_crypto
+- name: psa_crypto_ccm
+- name: psa_crypto_aes
+  # Series 2/3 get TRNG via psa_crypto; native/sim PSA needs CTR-DRBG and Silabs PSA driver headers.
+- name: mbedtls_random
+  condition:
+  - native
+- name: psa_driver_common
+  condition:
+  - native
 
 source:
 - path: app/gpd/components/gpd-nv.c

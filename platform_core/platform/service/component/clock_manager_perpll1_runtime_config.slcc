@@ -24,4 +24,7 @@ requires:
 template_contribution:
 - name: component_catalog
   value: clock_manager_perpll1_runtime_config
+documentation:
+  docset: gecko-platform
+  document: platform-service/clock-manager
 root_path: platform_core

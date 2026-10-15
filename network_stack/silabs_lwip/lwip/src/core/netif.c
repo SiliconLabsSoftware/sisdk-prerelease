@@ -92,6 +92,9 @@
 #if LWIP_IPV6
 #include "lwip/nd6.h"
 #endif
+#if LWIP_DNS && SL_LWIP_DNS_ONDEMAND_TIMER && SL_LWIP_LINK_DOWN_CLEANUP
+#include "lwip/dns.h"
+#endif
 
 #if LWIP_NETIF_STATUS_CALLBACK
 #define NETIF_STATUS_CALLBACK(n) do{ if (n->status_callback) { (n->status_callback)(n); }}while(0)
@@ -1101,10 +1104,12 @@ netif_set_link_down(struct netif *netif)
   }
 }
 
-#if SL_LWIP_ADAPTIVE_TIMERS
-/** Return whether any other netif is admin-up and link-up. */
+#if SL_LWIP_LINK_DOWN_CLEANUP
+/**
+ * Return 1 if another netif (other than skip) is admin-up and link-up.
+ */
 u8_t
-netif_other_netif_is_up_link_up(struct netif *skip_netif)
+sli_netif_other_netif_is_up_link_up(struct netif *skip_netif)
 {
   struct netif *n;
 
@@ -1116,7 +1121,9 @@ netif_other_netif_is_up_link_up(struct netif *skip_netif)
   return 0;
 }
 
-/** Stop ND6/MLD6 timers without changing link state. */
+/**
+ * Run per-module link-down cleanup without changing link flags.
+ */
 void
 netif_stop_timers(struct netif *netif)
 {
@@ -1124,17 +1131,28 @@ netif_stop_timers(struct netif *netif)
 
   LWIP_ERROR("netif_stop_timers: invalid netif", netif != NULL, return);
 
+#if LWIP_TCP && SL_LWIP_TCP_DYNAMIC_TIMER
+  sli_tcp_cleanup_on_link_down(netif);
+#endif /* LWIP_TCP && SL_LWIP_TCP_DYNAMIC_TIMER */
+#if LWIP_DHCP && SL_LWIP_DHCP_ONDEMAND_TIMER
+  sli_dhcp_cleanup_on_link_down(netif);
+#endif /* LWIP_DHCP && SL_LWIP_DHCP_ONDEMAND_TIMER */
+#if LWIP_DNS && SL_LWIP_DNS_ONDEMAND_TIMER
+  sli_dns_cleanup_on_link_down(netif);
+#endif /* LWIP_DNS && SL_LWIP_DNS_ONDEMAND_TIMER */
+#if LWIP_ARP && SL_LWIP_ETHARP_ONDEMAND_TIMER
+  sli_etharp_cleanup_on_link_down(netif);
+#endif /* LWIP_ARP && SL_LWIP_ETHARP_ONDEMAND_TIMER */
 #if LWIP_IPV6
 #if SL_LWIP_ND6_DYNAMIC_TIMER
-  nd6_cleanup_on_link_down(netif);
+  sli_nd6_cleanup_on_link_down(netif);
 #endif /* SL_LWIP_ND6_DYNAMIC_TIMER */
-#if SL_LWIP_MLD6_ONDEMAND_TIMER
-  mld6_cleanup_on_link_down(netif);
-#endif /* SL_LWIP_MLD6_ONDEMAND_TIMER */
+#if LWIP_IPV6_MLD && SL_LWIP_MLD6_ONDEMAND_TIMER
+  sli_mld6_cleanup_on_link_down(netif);
+#endif /* LWIP_IPV6_MLD && SL_LWIP_MLD6_ONDEMAND_TIMER */
 #endif /* LWIP_IPV6 */
 }
-
-#endif /* SL_LWIP_ADAPTIVE_TIMERS */
+#endif /* SL_LWIP_LINK_DOWN_CLEANUP */
 
 #if LWIP_NETIF_LINK_CALLBACK
 /**

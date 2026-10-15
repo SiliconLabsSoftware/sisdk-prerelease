@@ -1,4 +1,5 @@
 //#include <stdint.h>
+#include <climits>
 #include <sys/select.h>
 //#include <openthread/instance.h>
 #include "openthread-core-config.h"
@@ -9,24 +10,7 @@
 #include <openthread/dataset.h>
 #include "meshcop/dataset.hpp"
 #include "utils/parse_cmdline.hpp"
-#include <mbedtls/ctr_drbg.h>
-#include <mbedtls/entropy.h>
-
-//----------------------------------------------------------------------
-// mbedtls stubs
-
-#if (!defined(MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES) && \
-     (!defined(MBEDTLS_NO_PLATFORM_ENTROPY) || defined(MBEDTLS_HAVEGE_C) || defined(MBEDTLS_ENTROPY_HARDWARE_ALT)))
-#define OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
-#endif
-
-#if !OPENTHREAD_RADIO
-static mbedtls_ctr_drbg_context sCtrDrbgContext;
-static mbedtls_entropy_context  sEntropyContext;
-#ifndef OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
-static constexpr uint16_t kEntropyMinThreshold = 16;
-#endif
-#endif
+#include <psa/crypto.h>
 
 //----------------------------------------------------------------------
 // ParseAsHexString implementation (required for use in src/posix/platform/radio.cpp)
@@ -34,6 +18,11 @@ static constexpr uint16_t kEntropyMinThreshold = 16;
 
 using namespace ot;
 using namespace Utils;
+
+static Error MapPsaStatus(psa_status_t aStatus)
+{
+    return (aStatus == PSA_SUCCESS) ? kErrorNone : kErrorFailed;
+}
 
 enum HexStringParseMode
 {
@@ -115,50 +104,41 @@ Error CmdLineParser::ParseAsHexString(const char *aString, uint16_t &aSize, uint
 }
 
 //----------------------------------------------------------------------
-// AES stub implementation:
-// Borrowed from util/third_party/openthread/src/core/crypto/crypto_platform.cpp
+// Crypto stubs (PSA): RNG + AES-ECB for otPlatCrypto*
+// Replaces legacy mbedtls CTR-DRBG / AES (Mbed TLS 4.x).
 
 using namespace ot;
 using namespace Crypto;
 
+static constexpr size_t kAesBlockSize = 16;
+
 OT_TOOL_WEAK void otPlatCryptoRandomInit(void)
 {
-    mbedtls_entropy_init(&sEntropyContext);
-
-#ifndef OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
-    mbedtls_entropy_add_source(&sEntropyContext, handleMbedtlsEntropyPoll, nullptr, kEntropyMinThreshold,
-                               MBEDTLS_ENTROPY_SOURCE_STRONG);
-#endif
-
-    mbedtls_ctr_drbg_init(&sCtrDrbgContext);
-
-    int rval = mbedtls_ctr_drbg_seed(&sCtrDrbgContext, mbedtls_entropy_func, &sEntropyContext, nullptr, 0);
-    OT_ASSERT(rval == 0);
-    OT_UNUSED_VARIABLE(rval);
+    psa_status_t status = psa_crypto_init();
+    OT_ASSERT(status == PSA_SUCCESS);
+    OT_UNUSED_VARIABLE(status);
 }
 
 OT_TOOL_WEAK void otPlatCryptoRandomDeinit(void)
 {
-    mbedtls_entropy_free(&sEntropyContext);
-    mbedtls_ctr_drbg_free(&sCtrDrbgContext);
+    // PSA Crypto has no required global deinit for this host stub path.
 }
 
 OT_TOOL_WEAK otError otPlatCryptoRandomGet(uint8_t *aBuffer, uint16_t aSize)
 {
-    return ot::Crypto::MbedTls::MapError(
-        mbedtls_ctr_drbg_random(&sCtrDrbgContext, static_cast<unsigned char *>(aBuffer), static_cast<size_t>(aSize)));
+    return MapPsaStatus(psa_generate_random(aBuffer, aSize));
 }
 
 OT_TOOL_WEAK otError otPlatCryptoAesInit(otCryptoContext *aContext)
 {
-    Error                error = kErrorNone;
-    mbedtls_aes_context *context;
+    Error         error = kErrorNone;
+    psa_key_id_t *keyId;
 
     VerifyOrExit(aContext != nullptr, error = kErrorInvalidArgs);
-    VerifyOrExit(aContext->mContextSize >= sizeof(mbedtls_aes_context), error = kErrorFailed);
+    VerifyOrExit(aContext->mContextSize >= sizeof(psa_key_id_t), error = kErrorFailed);
 
-    context = static_cast<mbedtls_aes_context *>(aContext->mContext);
-    mbedtls_aes_init(context);
+    keyId  = static_cast<psa_key_id_t *>(aContext->mContext);
+    *keyId = 0;
 
 exit:
     return error;
@@ -167,15 +147,29 @@ exit:
 OT_TOOL_WEAK otError otPlatCryptoAesSetKey(otCryptoContext *aContext, const otCryptoKey *aKey)
 {
     Error                error = kErrorNone;
-    mbedtls_aes_context *context;
+    psa_key_id_t        *keyId;
+    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
+    psa_status_t         status;
     const LiteralKey     key(*static_cast<const Key *>(aKey));
 
     VerifyOrExit(aContext != nullptr, error = kErrorInvalidArgs);
-    VerifyOrExit(aContext->mContextSize >= sizeof(mbedtls_aes_context), error = kErrorFailed);
+    VerifyOrExit(aContext->mContextSize >= sizeof(psa_key_id_t), error = kErrorFailed);
 
-    context = static_cast<mbedtls_aes_context *>(aContext->mContext);
-    VerifyOrExit((mbedtls_aes_setkey_enc(context, key.GetBytes(), (key.GetLength() * CHAR_BIT)) == 0),
-                 error = kErrorFailed);
+    keyId = static_cast<psa_key_id_t *>(aContext->mContext);
+    if (*keyId != 0)
+    {
+        (void)psa_destroy_key(*keyId);
+        *keyId = 0;
+    }
+
+    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_ENCRYPT);
+    psa_set_key_algorithm(&attributes, PSA_ALG_ECB_NO_PADDING);
+    psa_set_key_type(&attributes, PSA_KEY_TYPE_AES);
+    psa_set_key_bits(&attributes, key.GetLength() * CHAR_BIT);
+
+    status = psa_import_key(&attributes, key.GetBytes(), key.GetLength(), keyId);
+    psa_reset_key_attributes(&attributes);
+    VerifyOrExit(status == PSA_SUCCESS, error = kErrorFailed);
 
 exit:
     return error;
@@ -183,14 +177,27 @@ exit:
 
 OT_TOOL_WEAK otError otPlatCryptoAesEncrypt(otCryptoContext *aContext, const uint8_t *aInput, uint8_t *aOutput)
 {
-    Error                error = kErrorNone;
-    mbedtls_aes_context *context;
+    Error         error = kErrorNone;
+    psa_key_id_t *keyId;
+    psa_status_t  status;
+    size_t        outputLength = 0;
+    uint8_t       temp[kAesBlockSize];
 
     VerifyOrExit(aContext != nullptr, error = kErrorInvalidArgs);
-    VerifyOrExit(aContext->mContextSize >= sizeof(mbedtls_aes_context), error = kErrorFailed);
+    VerifyOrExit(aContext->mContextSize >= sizeof(psa_key_id_t), error = kErrorFailed);
 
-    context = static_cast<mbedtls_aes_context *>(aContext->mContext);
-    VerifyOrExit((mbedtls_aes_crypt_ecb(context, MBEDTLS_AES_ENCRYPT, aInput, aOutput) == 0), error = kErrorFailed);
+    keyId = static_cast<psa_key_id_t *>(aContext->mContext);
+    VerifyOrExit(*keyId != 0, error = kErrorInvalidState);
+
+    status = psa_cipher_encrypt(*keyId,
+                                PSA_ALG_ECB_NO_PADDING,
+                                aInput,
+                                kAesBlockSize,
+                                temp,
+                                sizeof(temp),
+                                &outputLength);
+    VerifyOrExit(status == PSA_SUCCESS && outputLength == kAesBlockSize, error = kErrorFailed);
+    memcpy(aOutput, temp, kAesBlockSize);
 
 exit:
     return error;
@@ -198,14 +205,18 @@ exit:
 
 OT_TOOL_WEAK otError otPlatCryptoAesFree(otCryptoContext *aContext)
 {
-    Error                error = kErrorNone;
-    mbedtls_aes_context *context;
+    Error         error = kErrorNone;
+    psa_key_id_t *keyId;
 
     VerifyOrExit(aContext != nullptr, error = kErrorInvalidArgs);
-    VerifyOrExit(aContext->mContextSize >= sizeof(mbedtls_aes_context), error = kErrorFailed);
+    VerifyOrExit(aContext->mContextSize >= sizeof(psa_key_id_t), error = kErrorFailed);
 
-    context = static_cast<mbedtls_aes_context *>(aContext->mContext);
-    mbedtls_aes_free(context);
+    keyId = static_cast<psa_key_id_t *>(aContext->mContext);
+    if (*keyId != 0)
+    {
+        (void)psa_destroy_key(*keyId);
+        *keyId = 0;
+    }
 
 exit:
     return error;

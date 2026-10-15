@@ -102,6 +102,9 @@ typedef struct sl_cpc_drv_mock {
 typedef struct sl_cpc_drv_mock_config {
 } sl_cpc_drv_mock_config_t;
 
+/** @brief Table of all configured mock driver instances. */
+extern sl_cpc_drv_mock_t sl_cpc_drv_mock_instances[];
+
 /**
  * @brief Initialize a mock CPC driver and its embedded bus.
  *
@@ -128,7 +131,19 @@ static inline sl_cpc_bus_t *sl_cpc_drv_mock_get_bus(sl_cpc_drv_mock_t *drv)
   return &drv->bus;
 }
 
-extern sl_cpc_drv_mock_t sl_cpc_drv_mock_instances[];
+/**
+ * @brief Recover the mock driver that embeds @p bus.
+ *
+ * Inverse of @ref sl_cpc_drv_mock_get_bus. @p bus must be the `bus` member of
+ * an `sl_cpc_drv_mock_t`.
+ *
+ * @param[in] bus  Bus handle. Must not be NULL.
+ * @return Pointer to the enclosing mock driver.
+ */
+static inline sl_cpc_drv_mock_t *sl_cpc_drv_mock_from_bus(sl_cpc_bus_t *bus)
+{
+  return container_of(bus, sl_cpc_drv_mock_t, bus);
+}
 
 /**
  * @brief Deinitialize a mock CPC driver previously created with
@@ -188,7 +203,7 @@ void mock_cpc_drv_push_rx_frame(sl_cpc_drv_mock_t *drv, sl_cpc_frame_t *frame);
  * the bus so it processes the frame on its next tick.
  *
  * @code
- *   mock_cpc_drv_inject_frame(__LINE__, sl_cpc_drv_mock_default, &(cpc_frame_expect_t){
+ *   mock_cpc_drv_inject_frame(__LINE__, sl_cpc_drv_mock_from_bus(bus), &(cpc_frame_expect_t){
  *     .ack   = next_expected_ack,
  *   });
  * @endcode

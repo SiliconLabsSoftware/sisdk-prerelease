@@ -446,24 +446,19 @@ sl_status_t sl_dma_manager_allocate_channel_with_properties(sl_dma_handle_t *dma
   // Retrieve the first available dma channel from the DMA bitmask.
   // This will give us the available channel with the highest priority.
   uint32_t dma_channel_nbr_channel_mask = get_channel_mask(dma_handle->dma_peripheral->nbr_channel);
+  if ((channel_properties & SL_DMA_CHANNEL_IS_RETAINED) != 0) {
+    dma_channel_nbr_channel_mask &= dma_handle->dma_peripheral->retained_channel_map;
+  }
+  if ((channel_properties & SL_DMA_CHANNEL_SUPPORTS_INTERLEAVING) != 0) {
+    dma_channel_nbr_channel_mask &= dma_handle->dma_peripheral->rule_based_interleaving_map;
+  }
+  if ((channel_properties & SL_DMA_CHANNEL_SUPPORTS_DUAL_DESTINATION) != 0) {
+    dma_channel_nbr_channel_mask &= dma_handle->dma_peripheral->dual_destination_map;
+  }
   uint8_t dma_channel_tmp = (uint8_t)SL_CTZ(~(dma_handle->dma_channels_bitmap | ~dma_channel_nbr_channel_mask));
 
   // Check if we have any available channels
   if (dma_channel_tmp >= dma_handle->dma_peripheral->nbr_channel) {
-    CORE_EXIT_ATOMIC();
-    return SL_STATUS_NO_MORE_RESOURCE;
-  }
-
-  if ((channel_properties & SL_DMA_CHANNEL_SUPPORTS_INTERLEAVING)
-      && (SL_IS_BIT_CLEAR(dma_handle->dma_peripheral->rule_based_interleaving_map, SL_DEF_BIT(dma_channel_tmp)))) {
-    // Return if no Interleaving channel is available
-    CORE_EXIT_ATOMIC();
-    return SL_STATUS_NO_MORE_RESOURCE;
-  }
-
-  if ((channel_properties & SL_DMA_CHANNEL_SUPPORTS_DUAL_DESTINATION)
-      && (SL_IS_BIT_CLEAR(dma_handle->dma_peripheral->dual_destination_map, SL_DEF_BIT(dma_channel_tmp)))) {
-    // Return if no Dual Destination channel is available
     CORE_EXIT_ATOMIC();
     return SL_STATUS_NO_MORE_RESOURCE;
   }

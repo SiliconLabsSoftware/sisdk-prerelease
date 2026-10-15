@@ -1,5 +1,5 @@
 diff --git a/etc/cmake/options.cmake b/etc/cmake/options.cmake
-index 82aff72d2971730dff5c073179a4d2b33d346ffc..be8b236d307359f9da537d5c712f6f259ba4e59f 100644
+index 82aff72d2971730dff5c073179a4d2b33d346ffc..ecc0e903ea61249c64216dcfc98d441675f75699 100644
 --- a/etc/cmake/options.cmake
 +++ b/etc/cmake/options.cmake
 @@ -235,6 +235,7 @@ ot_option(OT_MLR OPENTHREAD_CONFIG_MLR_ENABLE "Multicast Listener Registration (
@@ -10,6 +10,17 @@ index 82aff72d2971730dff5c073179a4d2b33d346ffc..be8b236d307359f9da537d5c712f6f25
  ot_option(OT_NAT64_TRANSLATOR OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE "NAT64 translator support")
  ot_option(OT_NEIGHBOR_DISCOVERY_AGENT OPENTHREAD_CONFIG_NEIGHBOR_DISCOVERY_AGENT_ENABLE "neighbor discovery agent")
  ot_option(OT_NETDATA_PUBLISHER OPENTHREAD_CONFIG_NETDATA_PUBLISHER_ENABLE "Network Data publisher")
+@@ -367,7 +368,9 @@ ot_int_option(OT_VENDOR_OUI OPENTHREAD_CONFIG_NET_DIAG_VENDOR_OUI "set the vendo
+ # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ 
+ if(NOT OT_EXTERNAL_MBEDTLS)
+-    set(OT_MBEDTLS mbedtls mbedcrypto)
++    # Mbed TLS 4.x: TLS (mbedtls) + X.509 (mbedx509) + TF-PSA-Crypto (tfpsacrypto).
++    # Historical name mbedcrypto maps to tfpsacrypto.
++    set(OT_MBEDTLS mbedtls mbedx509 tfpsacrypto)
+     target_compile_definitions(ot-config INTERFACE "OPENTHREAD_CONFIG_ENABLE_BUILTIN_MBEDTLS=1")
+ else()
+     set(OT_MBEDTLS ${OT_EXTERNAL_MBEDTLS})
 diff --git a/include/openthread/platform/border_routing.h b/include/openthread/platform/border_routing.h
 index 018b186e8e233369647d3acf99b13fa151b7cc89..4dbd9e18020a410aa38799bd2b80dbd0784ca3f5 100644
 --- a/include/openthread/platform/border_routing.h
@@ -112,6 +123,83 @@ index 53b01d0231ec159e55a1be677d61044d6b4264d9..e234023001531fcbb1ae396414eadaba
      else
      {
          error = OT_ERROR_INVALID_COMMAND;
+diff --git a/src/cli/cli_tcp.cpp b/src/cli/cli_tcp.cpp
+index 7c5dadba62802a20767d86724a893a1cd3599466..0fc83ceeb61d31d87f3bb24a7a95bdf7edf9610a 100644
+--- a/src/cli/cli_tcp.cpp
++++ b/src/cli/cli_tcp.cpp
+@@ -48,9 +48,10 @@
+ 
+ #if OPENTHREAD_CONFIG_TLS_ENABLE
+ #include <mbedtls/debug.h>
+-#if (MBEDTLS_VERSION_NUMBER >= 0x03000000) && (MBEDTLS_VERSION_NUMBER < 0x04000000)
+-#include <mbedtls/ecjpake.h>
++#include <mbedtls/ssl.h>
+ #include "crypto/mbedtls.hpp"
++#if (MBEDTLS_VERSION_NUMBER < 0x04000000) && (MBEDTLS_VERSION_NUMBER >= 0x03000000)
++#include <mbedtls/ecjpake.h>
+ #endif
+ #endif
+ 
+@@ -265,6 +266,7 @@ exit:
+ #if OPENTHREAD_CONFIG_TLS_ENABLE
+         if (mUseTls)
+         {
++            mEcJpakePassword.Clear();
+             mbedtls_ssl_config_free(&mSslConfig);
+             mbedtls_ssl_free(&mSslContext);
+ 
+@@ -302,6 +304,7 @@ template <> otError TcpExample::Process<Cmd("deinit")>(Arg aArgs[])
+ #if OPENTHREAD_CONFIG_TLS_ENABLE
+     if (mUseTls)
+     {
++        mEcJpakePassword.Clear();
+         mbedtls_ssl_config_free(&mSslConfig);
+         mbedtls_ssl_free(&mSslContext);
+ 
+@@ -1207,11 +1210,10 @@ void TcpExample::PrepareTlsHandshake(void)
+         OutputLine("mbedtls_ssl_set_hostname returned %d", rv);
+     }
+ 
+-    rv = mbedtls_ssl_set_hs_ecjpake_password(&mSslContext, reinterpret_cast<const unsigned char *>(sEcjpakePassword),
+-                                             sEcjpakePasswordLength);
++    rv = mEcJpakePassword.Set(mSslContext, reinterpret_cast<const uint8_t *>(sEcjpakePassword), sEcjpakePasswordLength);
+     if (rv != 0)
+     {
+-        OutputLine("mbedtls_ssl_set_hs_ecjpake_password returned %d", rv);
++        OutputLine("EcJpakePassword::Set returned %d", rv);
+     }
+ 
+     mbedtls_ssl_set_bio(&mSslContext, &mEndpointAndCircularSendBuffer, otTcpMbedTlsSslSendCallback,
+diff --git a/src/cli/cli_tcp.hpp b/src/cli/cli_tcp.hpp
+index 5e5788aa6ef6a5e45ff0abb408a6d4852d2b731c..49c976e09c156371bcf63b7d9e11d7f6dc3c8bd7 100644
+--- a/src/cli/cli_tcp.hpp
++++ b/src/cli/cli_tcp.hpp
+@@ -55,6 +55,9 @@
+ #include "cli/cli_config.h"
+ #include "cli/cli_utils.hpp"
+ #include "common/time.hpp"
++#if OPENTHREAD_CONFIG_TLS_ENABLE
++#include "crypto/mbedtls.hpp"
++#endif
+ 
+ namespace ot {
+ namespace Cli {
+@@ -159,10 +162,11 @@ private:
+     otTcpEndpointAndCircularSendBuffer mEndpointAndCircularSendBuffer;
+ 
+ #if OPENTHREAD_CONFIG_TLS_ENABLE
+-    mbedtls_ssl_context mSslContext;
+-    mbedtls_ssl_config  mSslConfig;
+-    mbedtls_x509_crt    mSrvCert;
+-    mbedtls_pk_context  mPKey;
++    mbedtls_ssl_context     mSslContext;
++    mbedtls_ssl_config      mSslConfig;
++    mbedtls_x509_crt        mSrvCert;
++    mbedtls_pk_context      mPKey;
++    Crypto::EcJpakePassword mEcJpakePassword;
+ #if (MBEDTLS_VERSION_NUMBER < 0x04000000)
+     mbedtls_entropy_context mEntropy;
+ #endif
 diff --git a/src/core/api/thread_api.cpp b/src/core/api/thread_api.cpp
 index 6c1a910ac4a86fe95a3d911e76b6eb84ca1cdd62..bcc5efd19c07df3a6f90d2021a73619bf9fff122 100644
 --- a/src/core/api/thread_api.cpp
@@ -339,11 +427,146 @@ index 45b2b56a8c40b0996cc35dd20ad9a4e9cff88e22..9be3c2ed0acef441c906a6f8a2687821
  /**
   * @def OPENTHREAD_CONFIG_TREL_USE_HEAP_ENABLE
   *
+diff --git a/src/core/crypto/context_size.hpp b/src/core/crypto/context_size.hpp
+index 8d4afff7c52b98abe8ed07b7f08c5a9e2fc21cb6..39d251e58cbdbacc90eb2d19cb32d2c21dd03013 100644
+--- a/src/core/crypto/context_size.hpp
++++ b/src/core/crypto/context_size.hpp
+@@ -34,9 +34,17 @@
+ #include <openthread/crypto.h>
+ 
+ #if OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_MBEDTLS
++#include <mbedtls/version.h>
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
++#define MBEDTLS_ALLOW_PRIVATE_ACCESS
++#include <mbedtls/md.h>
++#include <mbedtls/private/aes.h>
++#include <mbedtls/private/sha256.h>
++#else
+ #include <mbedtls/aes.h>
+ #include <mbedtls/md.h>
+ #include <mbedtls/sha256.h>
++#endif
+ #elif OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_PSA
+ #include <psa/crypto.h>
+ #endif // OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_MBEDTLS
 diff --git a/src/core/crypto/crypto_platform_mbedtls.cpp b/src/core/crypto/crypto_platform_mbedtls.cpp
-index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..e386826000e7902189b4cde2357e6ae3ba6c74bb 100644
+index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..40fb34363cce70c3f83071e4177666c427cbccbb 100644
 --- a/src/core/crypto/crypto_platform_mbedtls.cpp
 +++ b/src/core/crypto/crypto_platform_mbedtls.cpp
-@@ -291,7 +291,7 @@ exit:
+@@ -36,6 +36,19 @@
+ 
+ #include <string.h>
+ 
++#include <mbedtls/version.h>
++
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
++// Soft-crypto primitives that remain legacy in OT; ECDSA uses PSA below.
++#define MBEDTLS_ALLOW_PRIVATE_ACCESS
++#include <mbedtls/md.h>
++#include <mbedtls/pk.h>
++#include <mbedtls/private/aes.h>
++#include <mbedtls/private/ccm.h>
++#include <mbedtls/private/cmac.h>
++#include <mbedtls/private/sha256.h>
++#include <psa/crypto.h>
++#else
+ #include <mbedtls/aes.h>
+ #include <mbedtls/ccm.h>
+ #include <mbedtls/cmac.h>
+@@ -45,7 +58,7 @@
+ #include <mbedtls/md.h>
+ #include <mbedtls/pk.h>
+ #include <mbedtls/sha256.h>
+-#include <mbedtls/version.h>
++#endif
+ 
+ #include <openthread/instance.h>
+ #include <openthread/platform/crypto.h>
+@@ -58,6 +71,7 @@
+ #include "common/new.hpp"
+ #include "crypto/ecdsa.hpp"
+ #include "crypto/hmac_sha256.hpp"
++#include "crypto/mbedtls.hpp"
+ #include "crypto/storage.hpp"
+ #include "instance/instance.hpp"
+ 
+@@ -73,21 +87,59 @@ using namespace Crypto;
+ #endif
+ 
+ #if OPENTHREAD_FTD || OPENTHREAD_MTD
++#if (MBEDTLS_VERSION_NUMBER < 0x04000000)
+ static mbedtls_ctr_drbg_context sCtrDrbgContext;
+ static mbedtls_entropy_context  sEntropyContext;
+ #ifndef OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
+ static constexpr uint16_t kEntropyMinThreshold = 16;
+ #endif
+ #endif
++#endif
+ 
+ #if OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
+ OT_TOOL_WEAK void *otPlatCryptoCAlloc(size_t aNum, size_t aSize) { return otPlatCAlloc(aNum, aSize); }
+ OT_TOOL_WEAK void  otPlatCryptoFree(void *aPtr) { otPlatFree(aPtr); }
+ #endif
+ 
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000) && defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
++// Weak so Silicon Labs psa_crypto_trng (sli_psa_trng.c) can override on device.
++// Host/simulation has no TRNG and links this fallback via otPlatEntropyGet().
++extern "C" OT_TOOL_WEAK psa_status_t mbedtls_psa_external_get_random(mbedtls_psa_external_random_context_t *aContext,
++                                                                     uint8_t                               *aOutput,
++                                                                     size_t                                 aOutputSize,
++                                                                     size_t *aOutputLength)
++{
++    OT_UNUSED_VARIABLE(aContext);
++
++    size_t remaining = aOutputSize;
++    size_t offset    = 0;
++
++    while (remaining > 0)
++    {
++        uint16_t chunk = (remaining > UINT16_MAX) ? UINT16_MAX : static_cast<uint16_t>(remaining);
++
++        if (otPlatEntropyGet(aOutput + offset, chunk) != OT_ERROR_NONE)
++        {
++            return PSA_ERROR_INSUFFICIENT_ENTROPY;
++        }
++
++        offset += chunk;
++        remaining -= chunk;
++    }
++
++    *aOutputLength = aOutputSize;
++    return PSA_SUCCESS;
++}
++#endif
++
+ OT_TOOL_WEAK void otPlatCryptoInit(void)
+ {
+-    // Intentionally empty.
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
++    // PSA Crypto is required for Mbed TLS 4.x / TF-PSA-Crypto (including EC-JPAKE).
++    psa_status_t status = psa_crypto_init();
++    OT_ASSERT(status == PSA_SUCCESS);
++    OT_UNUSED_VARIABLE(status);
++#endif
+ }
+ 
+ // AES  Implementation
+@@ -221,7 +273,14 @@ OT_TOOL_WEAK otError otPlatCryptoHmacSha256Init(otCryptoContext *aContext)
+     context = static_cast<mbedtls_md_context_t *>(aContext->mContext);
+     mbedtls_md_init(context);
+     mdInfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
++    VerifyOrExit(mdInfo != nullptr, error = kErrorFailed);
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
++    // Mbed TLS 4.x: hmac flag removed from mbedtls_md_setup(); use hmac_setup.
++    VerifyOrExit((mbedtls_md_setup(context, mdInfo, 0) == 0), error = kErrorFailed);
++    VerifyOrExit((mbedtls_md_hmac_setup(context, mdInfo) == 0), error = kErrorFailed);
++#else
+     VerifyOrExit((mbedtls_md_setup(context, mdInfo, 1) == 0), error = kErrorFailed);
++#endif
+ 
+ exit:
+     return error;
+@@ -291,7 +350,7 @@ exit:
      return error;
  }
  
@@ -352,6 +575,442 @@ index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..e386826000e7902189b4cde2357e6ae3
  {
      Error error = kErrorNone;
  
+@@ -504,6 +563,7 @@ exit:
+ }
+ 
+ #ifndef OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
++#if (MBEDTLS_VERSION_NUMBER < 0x04000000)
+ 
+ static int handleMbedtlsEntropyPoll(void *aData, unsigned char *aOutput, size_t aInLen, size_t *aOutLen)
+ {
+@@ -520,10 +580,16 @@ exit:
+     return rval;
+ }
+ 
++#endif // (MBEDTLS_VERSION_NUMBER < 0x04000000)
+ #endif // OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
+ 
+ OT_TOOL_WEAK void otPlatCryptoRandomInit(void)
+ {
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
++    psa_status_t status = psa_crypto_init();
++    OT_ASSERT(status == PSA_SUCCESS);
++    OT_UNUSED_VARIABLE(status);
++#else
+     mbedtls_entropy_init(&sEntropyContext);
+ 
+ #ifndef OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
+@@ -536,22 +602,255 @@ OT_TOOL_WEAK void otPlatCryptoRandomInit(void)
+     int rval = mbedtls_ctr_drbg_seed(&sCtrDrbgContext, mbedtls_entropy_func, &sEntropyContext, nullptr, 0);
+     OT_ASSERT(rval == 0);
+     OT_UNUSED_VARIABLE(rval);
++#endif
+ }
+ 
+ OT_TOOL_WEAK void otPlatCryptoRandomDeinit(void)
+ {
++#if (MBEDTLS_VERSION_NUMBER < 0x04000000)
+     mbedtls_entropy_free(&sEntropyContext);
+     mbedtls_ctr_drbg_free(&sCtrDrbgContext);
++#endif
+ }
+ 
+ OT_TOOL_WEAK otError otPlatCryptoRandomGet(uint8_t *aBuffer, uint16_t aSize)
+ {
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
++    return (psa_generate_random(aBuffer, aSize) == PSA_SUCCESS) ? OT_ERROR_NONE : OT_ERROR_FAILED;
++#else
+     return ot::Crypto::MbedTls::MapError(
+         mbedtls_ctr_drbg_random(&sCtrDrbgContext, static_cast<unsigned char *>(aBuffer), static_cast<size_t>(aSize)));
++#endif
+ }
+ 
+ #if OPENTHREAD_CONFIG_ECDSA_ENABLE
+ 
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
++
++namespace {
++
++/**
++ * Copy a SEC1 EC private-key DER and strip leading 0x00 bytes from the
++ * privateKey OCTET STRING down to 32 bytes (P-256). PSA import requires an
++ * exact-length key; OpenSSL-style SEC1 encodings often include a pad byte.
++ */
++static bool PrepareEcdsaKeyDerForParse(const uint8_t *aDer, uint8_t aDerLen, uint8_t *aOut, uint8_t &aOutLen)
++{
++    constexpr uint8_t kP256KeyBytes = 32;
++
++    if (aDerLen < 8 || aDerLen > OT_CRYPTO_ECDSA_MAX_DER_SIZE)
++    {
++        return false;
++    }
++
++    memcpy(aOut, aDer, aDerLen);
++    aOutLen = aDerLen;
++
++    // SEQUENCE with short-form length only (OT ECDSA DERs are well under 128).
++    if (aOut[0] != 0x30 || (aOut[1] & 0x80) != 0)
++    {
++        return true;
++    }
++
++    uint8_t seqLen    = aOut[1];
++    size_t  headerLen = 2;
++
++    if (headerLen + seqLen != aOutLen)
++    {
++        return true;
++    }
++
++    size_t p = headerLen;
++
++    // version INTEGER
++    if (p + 2 > aOutLen || aOut[p] != 0x02)
++    {
++        return true;
++    }
++
++    p += 2 + aOut[p + 1];
++
++    // privateKey OCTET STRING (short-form length)
++    if (p + 2 > aOutLen || aOut[p] != 0x04 || (aOut[p + 1] & 0x80) != 0)
++    {
++        return true;
++    }
++
++    uint8_t octLen     = aOut[p + 1];
++    size_t  octContent = p + 2;
++
++    if (octContent + octLen > aOutLen || octLen <= kP256KeyBytes || aOut[octContent] != 0x00)
++    {
++        return true;
++    }
++
++    size_t strip = 0;
++
++    while (octLen - strip > kP256KeyBytes && aOut[octContent + strip] == 0x00)
++    {
++        strip++;
++    }
++
++    if (strip == 0)
++    {
++        return true;
++    }
++
++    memmove(aOut + octContent, aOut + octContent + strip, aOutLen - (octContent + strip));
++    aOut[p + 1] = static_cast<uint8_t>(octLen - strip);
++    aOut[1]     = static_cast<uint8_t>(seqLen - strip);
++    aOutLen     = static_cast<uint8_t>(aOutLen - strip);
++
++    return true;
++}
++
++static int ParseEcdsaKeyPairDer(mbedtls_pk_context *aPk, const otPlatCryptoEcdsaKeyPair *aKeyPair)
++{
++    uint8_t der[OT_CRYPTO_ECDSA_MAX_DER_SIZE];
++    uint8_t derLen;
++
++    if (!PrepareEcdsaKeyDerForParse(aKeyPair->mDerBytes, aKeyPair->mDerLength, der, derLen))
++    {
++        return MBEDTLS_ERR_PK_KEY_INVALID_FORMAT;
++    }
++
++    return mbedtls_pk_parse_key(aPk, der, derLen, nullptr, 0);
++}
++
++} // namespace
++
++OT_TOOL_WEAK otError otPlatCryptoEcdsaGenerateKey(otPlatCryptoEcdsaKeyPair *aKeyPair)
++{
++    Error                error      = kErrorNone;
++    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
++    mbedtls_svc_key_id_t keyId      = MBEDTLS_SVC_KEY_ID_INIT;
++    mbedtls_pk_context   pk;
++    psa_status_t         status;
++    int                  ret;
++
++    mbedtls_pk_init(&pk);
++
++    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_EXPORT | PSA_KEY_USAGE_SIGN_HASH | PSA_KEY_USAGE_VERIFY_HASH);
++    psa_set_key_algorithm(&attributes, MBEDTLS_PK_ALG_ECDSA(PSA_ALG_SHA_256));
++    psa_set_key_type(&attributes, PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1));
++    psa_set_key_bits(&attributes, 256);
++
++    status = psa_generate_key(&attributes, &keyId);
++    VerifyOrExit(status == PSA_SUCCESS, error = kErrorFailed);
++
++    ret = mbedtls_pk_copy_from_psa(keyId, &pk);
++    VerifyOrExit(ret == 0, error = MbedTls::MapError(ret));
++
++    ret = mbedtls_pk_write_key_der(&pk, aKeyPair->mDerBytes, OT_CRYPTO_ECDSA_MAX_DER_SIZE);
++    VerifyOrExit(ret > 0, error = MbedTls::MapError(ret));
++
++    aKeyPair->mDerLength = static_cast<uint8_t>(ret);
++    memmove(aKeyPair->mDerBytes, aKeyPair->mDerBytes + OT_CRYPTO_ECDSA_MAX_DER_SIZE - aKeyPair->mDerLength,
++            aKeyPair->mDerLength);
++
++exit:
++    psa_destroy_key(keyId);
++    psa_reset_key_attributes(&attributes);
++    mbedtls_pk_free(&pk);
++
++    return error;
++}
++
++OT_TOOL_WEAK otError otPlatCryptoEcdsaGetPublicKey(const otPlatCryptoEcdsaKeyPair *aKeyPair,
++                                                   otPlatCryptoEcdsaPublicKey     *aPublicKey)
++{
++    Error              error = kErrorNone;
++    mbedtls_pk_context pk;
++    uint8_t            buffer[1 + OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE];
++    size_t             bufLen = 0;
++    int                ret;
++
++    mbedtls_pk_init(&pk);
++
++    ret = ParseEcdsaKeyPairDer(&pk, aKeyPair);
++    VerifyOrExit(ret == 0, error = kErrorParse);
++
++    ret = mbedtls_pk_write_pubkey_psa(&pk, buffer, sizeof(buffer), &bufLen);
++    VerifyOrExit(ret == 0, error = MbedTls::MapError(ret));
++    OT_ASSERT(bufLen == sizeof(buffer));
++
++    memcpy(aPublicKey->m8, buffer + 1, OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE);
++
++exit:
++    mbedtls_pk_free(&pk);
++    return error;
++}
++
++OT_TOOL_WEAK otError otPlatCryptoEcdsaSign(const otPlatCryptoEcdsaKeyPair *aKeyPair,
++                                           const otPlatCryptoSha256Hash   *aHash,
++                                           otPlatCryptoEcdsaSignature     *aSignature)
++{
++    Error                error      = kErrorNone;
++    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
++    mbedtls_svc_key_id_t keyId      = MBEDTLS_SVC_KEY_ID_INIT;
++    mbedtls_pk_context   pk;
++    psa_status_t         status;
++    size_t               signatureLen;
++    int                  ret;
++
++    mbedtls_pk_init(&pk);
++
++    ret = ParseEcdsaKeyPairDer(&pk, aKeyPair);
++    VerifyOrExit(ret == 0, error = kErrorParse);
++
++    ret = mbedtls_pk_get_psa_attributes(&pk, PSA_KEY_USAGE_SIGN_HASH, &attributes);
++    VerifyOrExit(ret == 0, error = MbedTls::MapError(ret));
++
++    ret = mbedtls_pk_import_into_psa(&pk, &attributes, &keyId);
++    VerifyOrExit(ret == 0, error = MbedTls::MapError(ret));
++
++    status = psa_sign_hash(keyId, MBEDTLS_PK_ALG_ECDSA(PSA_ALG_SHA_256), aHash->m8, Sha256::Hash::kSize, aSignature->m8,
++                           OT_CRYPTO_ECDSA_SIGNATURE_SIZE, &signatureLen);
++    VerifyOrExit(status == PSA_SUCCESS, error = kErrorFailed);
++    OT_ASSERT(signatureLen == OT_CRYPTO_ECDSA_SIGNATURE_SIZE);
++
++exit:
++    psa_destroy_key(keyId);
++    psa_reset_key_attributes(&attributes);
++    mbedtls_pk_free(&pk);
++
++    return error;
++}
++
++OT_TOOL_WEAK otError otPlatCryptoEcdsaVerify(const otPlatCryptoEcdsaPublicKey *aPublicKey,
++                                             const otPlatCryptoSha256Hash     *aHash,
++                                             const otPlatCryptoEcdsaSignature *aSignature)
++{
++    Error                error      = kErrorNone;
++    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
++    mbedtls_svc_key_id_t keyId      = MBEDTLS_SVC_KEY_ID_INIT;
++    psa_status_t         status;
++    uint8_t              buffer[1 + OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE];
++
++    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_VERIFY_HASH);
++    psa_set_key_algorithm(&attributes, MBEDTLS_PK_ALG_ECDSA(PSA_ALG_SHA_256));
++    psa_set_key_type(&attributes, PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1));
++    psa_set_key_bits(&attributes, 256);
++
++    buffer[0] = 0x04;
++    memcpy(buffer + 1, aPublicKey->m8, OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE);
++
++    status = psa_import_key(&attributes, buffer, sizeof(buffer), &keyId);
++    VerifyOrExit(status == PSA_SUCCESS, error = kErrorFailed);
++
++    status = psa_verify_hash(keyId, MBEDTLS_PK_ALG_ECDSA(PSA_ALG_SHA_256), aHash->m8, Sha256::Hash::kSize,
++                             aSignature->m8, OT_CRYPTO_ECDSA_SIGNATURE_SIZE);
++    VerifyOrExit(status == PSA_SUCCESS, error = kErrorSecurity);
++
++exit:
++    psa_destroy_key(keyId);
++    psa_reset_key_attributes(&attributes);
++
++    return error;
++}
++
++#else // MBEDTLS_VERSION_NUMBER >= 0x04000000
++
+ OT_TOOL_WEAK otError otPlatCryptoEcdsaGenerateKey(otPlatCryptoEcdsaKeyPair *aKeyPair)
+ {
+     mbedtls_pk_context pk;
+@@ -717,6 +1016,8 @@ exit:
+     return error;
+ }
+ 
++#endif // MBEDTLS_VERSION_NUMBER >= 0x04000000
++
+ #endif // #if OPENTHREAD_CONFIG_ECDSA_ENABLE
+ 
+ #endif // #if OPENTHREAD_FTD || OPENTHREAD_MTD
+diff --git a/src/core/crypto/mbedtls.cpp b/src/core/crypto/mbedtls.cpp
+index 57d7508dde5e3edb47289c24bf6a29037ce80822..16c41c3455a9108405414e62a82dbabd0e16bd21 100644
+--- a/src/core/crypto/mbedtls.cpp
++++ b/src/core/crypto/mbedtls.cpp
+@@ -33,13 +33,16 @@
+ 
+ #include "mbedtls.hpp"
+ 
++#include <mbedtls/debug.h>
++#include <mbedtls/platform.h>
++#include <mbedtls/ssl.h>
++#include <mbedtls/threading.h>
+ #if (MBEDTLS_VERSION_NUMBER < 0x04000000)
+ #include <mbedtls/ctr_drbg.h>
+ #include <mbedtls/entropy.h>
++#else
++#include <psa/crypto.h>
+ #endif
+-#include <mbedtls/debug.h>
+-#include <mbedtls/platform.h>
+-#include <mbedtls/threading.h>
+ 
+ #ifdef MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED
+ #include <mbedtls/pem.h>
+@@ -204,5 +207,63 @@ int MbedTls::CryptoSecurePrng(void *, unsigned char *aBuffer, size_t aSize)
+ 
+ #endif // OPENTHREAD_FTD || OPENTHREAD_MTD
+ 
++EcJpakePassword::EcJpakePassword(void)
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000) && defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
++    : mKeyId(MBEDTLS_SVC_KEY_ID_INIT)
++#endif
++{
++}
++
++void EcJpakePassword::Clear(void)
++{
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000) && defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
++    if (!mbedtls_svc_key_id_is_null(mKeyId))
++    {
++        psa_destroy_key(mKeyId);
++        mKeyId = MBEDTLS_SVC_KEY_ID_INIT;
++    }
++#endif
++}
++
++int EcJpakePassword::Set(mbedtls_ssl_context &aSsl, const uint8_t *aPassword, size_t aLength)
++{
++#if defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
++    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
++    psa_status_t         status;
++    int                  rval;
++
++    Clear();
++
++    psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_DERIVE);
++    psa_set_key_algorithm(&attributes, PSA_ALG_JPAKE(PSA_ALG_SHA_256));
++    psa_set_key_type(&attributes, PSA_KEY_TYPE_PASSWORD);
++
++    status = psa_import_key(&attributes, aPassword, aLength, &mKeyId);
++    if (status != PSA_SUCCESS)
++    {
++        mKeyId = MBEDTLS_SVC_KEY_ID_INIT;
++        return MBEDTLS_ERR_SSL_HW_ACCEL_FAILED;
++    }
++
++    rval = mbedtls_ssl_set_hs_ecjpake_password_opaque(&aSsl, mKeyId);
++    if (rval != 0)
++    {
++        Clear();
++    }
++
++    return rval;
++#else
++    return mbedtls_ssl_set_hs_ecjpake_password(&aSsl, aPassword, aLength);
++#endif
++#else
++    OT_UNUSED_VARIABLE(aSsl);
++    OT_UNUSED_VARIABLE(aPassword);
++    OT_UNUSED_VARIABLE(aLength);
++
++    return MBEDTLS_ERR_SSL_FEATURE_UNAVAILABLE;
++#endif
++}
++
+ } // namespace Crypto
+ } // namespace ot
+diff --git a/src/core/crypto/mbedtls.hpp b/src/core/crypto/mbedtls.hpp
+index 17dba846a8cd1a3bc918654ee0cdc5d9b6fe862b..fd6bf0fd19a7d12b52c8f14fe54659d435cad451 100644
+--- a/src/core/crypto/mbedtls.hpp
++++ b/src/core/crypto/mbedtls.hpp
+@@ -36,7 +36,11 @@
+ 
+ #include "openthread-core-config.h"
+ 
++#include <mbedtls/ssl.h>
+ #include <mbedtls/version.h>
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000) && defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
++#include <psa/crypto.h>
++#endif
+ 
+ #include <openthread/instance.h>
+ 
+@@ -100,6 +104,41 @@ public:
+ #endif
+ };
+ 
++/**
++ * Holds mbedtls-version-specific state for setting an EC-JPAKE password on an
++ * `mbedtls_ssl_context` (plaintext API on < 4.x, PSA opaque password on 4.x).
++ *
++ * Callers (e.g. MeshCoP secure transport) use this type without branching on
++ * mbedtls version or calling PSA APIs directly.
++ */
++class EcJpakePassword : private NonCopyable
++{
++public:
++    EcJpakePassword(void);
++    ~EcJpakePassword(void) { Clear(); }
++
++    /**
++     * Releases any PSA key held for the EC-JPAKE password (no-op on mbedtls < 4).
++     */
++    void Clear(void);
++
++    /**
++     * Configures @p aSsl to use @p aPassword for the EC-JPAKE handshake.
++     *
++     * @param[in,out] aSsl       SSL context for the handshake.
++     * @param[in]     aPassword  Password / PSK bytes.
++     * @param[in]     aLength    Length of @p aPassword.
++     *
++     * @returns 0 on success, or an mbedtls error code.
++     */
++    int Set(mbedtls_ssl_context &aSsl, const uint8_t *aPassword, size_t aLength);
++
++private:
++#if (MBEDTLS_VERSION_NUMBER >= 0x04000000) && defined(MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED)
++    mbedtls_svc_key_id_t mKeyId;
++#endif
++};
++
+ /**
+  * @}
+  */
 diff --git a/src/core/mac/mac.cpp b/src/core/mac/mac.cpp
 index 9737ab83e712117078ac6a0672591b69e7bce3a5..79f51e7d6df83174b232c7bfc56964308d1fb6ee 100644
 --- a/src/core/mac/mac.cpp
@@ -386,6 +1045,90 @@ index 9737ab83e712117078ac6a0672591b69e7bce3a5..79f51e7d6df83174b232c7bfc5696430
      error = aAckFrame.ProcessReceiveAesCcm(srcAddr.GetExtended(), *macKey);
      SuccessOrExit(error);
  
+diff --git a/src/core/meshcop/secure_transport.cpp b/src/core/meshcop/secure_transport.cpp
+index b73c024b09689c078b9b9b200e9d3c9edf35405f..bbd8a47f319d95e34ffed2560b656924aa3f4478 100644
+--- a/src/core/meshcop/secure_transport.cpp
++++ b/src/core/meshcop/secure_transport.cpp
+@@ -69,6 +69,7 @@ void SecureSession::Init(void)
+     MarkAsNotUsed();
+     ClearAllBytes(mSsl);
+     ClearAllBytes(mConf);
++    mEcJpakePassword.Clear();
+ #if defined(MBEDTLS_SSL_SRV_C) && defined(MBEDTLS_SSL_COOKIE_C)
+     ClearAllBytes(mCookieCtx);
+ #endif
+@@ -88,10 +89,16 @@ void SecureSession::FreeMbedtls(void)
+         mTransport.mExtension->mEcdheEcdsaInfo.Free();
+     }
+ #endif
++    mEcJpakePassword.Clear();
+     mbedtls_ssl_config_free(&mConf);
+     mbedtls_ssl_free(&mSsl);
+ }
+ 
++int SecureSession::SetHsEcJpakePassword(void)
++{
++    return mEcJpakePassword.Set(mSsl, mTransport.mPsk, mTransport.mPskLength);
++}
++
+ void SecureSession::SetState(State aState)
+ {
+     VerifyOrExit(mState != aState);
+@@ -313,7 +320,7 @@ Error SecureSession::Setup(void)
+ 
+     if (mTransport.mCipherSuite == SecureTransport::kEcjpakeWithAes128Ccm8)
+     {
+-        rval = mbedtls_ssl_set_hs_ecjpake_password(&mSsl, mTransport.mPsk, mTransport.mPskLength);
++        rval = SetHsEcJpakePassword();
+         VerifyOrExit(rval == 0);
+     }
+ 
+@@ -605,7 +612,7 @@ void SecureSession::Process(void)
+ 
+             if (mTransport.mCipherSuite == SecureTransport::kEcjpakeWithAes128Ccm8)
+             {
+-                mbedtls_ssl_set_hs_ecjpake_password(&mSsl, mTransport.mPsk, mTransport.mPskLength);
++                (void)SetHsEcJpakePassword();
+             }
+         }
+ 
+@@ -1127,7 +1134,7 @@ int SecureTransport::Extension::EcdheEcdsaInfo::SetSecureKeys(mbedtls_ssl_config
+                                       static_cast<size_t>(mOwnCertLength));
+         VerifyOrExit(rval == 0);
+ 
+-#if (MBEDTLS_VERSION_NUMBER >= 0x03000000)
++#if (MBEDTLS_VERSION_NUMBER >= 0x03000000) && (MBEDTLS_VERSION_NUMBER < 0x04000000)
+         rval = mbedtls_pk_parse_key(&mPrivateKey, static_cast<const unsigned char *>(mPrivateKeySrc),
+                                     static_cast<size_t>(mPrivateKeyLength), nullptr, 0,
+                                     Crypto::MbedTls::CryptoSecurePrng, nullptr);
+diff --git a/src/core/meshcop/secure_transport.hpp b/src/core/meshcop/secure_transport.hpp
+index c80f258b2aaa58444b329b7d2480f97312c73930..9094b4b7975f569ca6f34b35381f7fccdbfd4350 100644
+--- a/src/core/meshcop/secure_transport.hpp
++++ b/src/core/meshcop/secure_transport.hpp
+@@ -93,6 +93,7 @@
+ #include "common/non_copyable.hpp"
+ #include "common/random.hpp"
+ #include "common/timer.hpp"
++#include "crypto/mbedtls.hpp"
+ #include "crypto/sha256.hpp"
+ #include "meshcop/meshcop.hpp"
+ #include "meshcop/meshcop_tlvs.hpp"
+@@ -279,6 +280,7 @@ private:
+     void  HandleTimer(TimeMilli aNow);
+     void  Process(void);
+     void  FreeMbedtls(void);
++    int   SetHsEcJpakePassword(void);
+ 
+     static int  HandleMbedtlsGetTimer(void *aContext);
+     int         HandleMbedtlsGetTimer(void);
+@@ -310,6 +312,7 @@ private:
+     Callback<ReceiveHandler> mReceiveCallback;
+     mbedtls_ssl_config       mConf;
+     mbedtls_ssl_context      mSsl;
++    Crypto::EcJpakePassword  mEcJpakePassword;
+ #if defined(MBEDTLS_SSL_SRV_C) && defined(MBEDTLS_SSL_COOKIE_C)
+     mbedtls_ssl_cookie_ctx mCookieCtx;
+ #endif
 diff --git a/src/core/net/dnssd_server.cpp b/src/core/net/dnssd_server.cpp
 index c67fa3a00536c05cb5bf0818e4d64991a5280d54..58fd5c3093d30aaf38e3a5c39e022631b29d6a25 100644
 --- a/src/core/net/dnssd_server.cpp
@@ -1208,13 +1951,14 @@ index 62340241e7a7a6f6534ccaba33fff57b61b82316..d0d4a7eb25ca5453fbe086241558baff
      };
  
 diff --git a/src/lib/spinel/spinel.h b/src/lib/spinel/spinel.h
-index c755522d04488b523500ab4723e974801d44ed8b..c71cccbcab1c6d36a9b83838b6c60199d0a356be 100644
+index c755522d04488b523500ab4723e974801d44ed8b..f53266eccfbd26c62a66cb67b20085ee92f4fafa 100644
 --- a/src/lib/spinel/spinel.h
 +++ b/src/lib/spinel/spinel.h
-@@ -4961,6 +4961,121 @@ enum
+@@ -4961,7 +4961,122 @@ enum
       */
      SPINEL_PROP_DNSSD_SRV_RESULT = SPINEL_PROP_DNSSD__BEGIN + 9,
  
+-    SPINEL_PROP_DNSSD__END = 0x950,
 +    /// DNS-SD TXT Resolver
 +    /**
 +     * Format: `UULD`: Inserted/Removed
@@ -1273,26 +2017,27 @@ index c755522d04488b523500ab4723e974801d44ed8b..c71cccbcab1c6d36a9b83838b6c60199
 +     */
 +    SPINEL_PROP_DNSSD_IP4_ADDRESS_RESULT = SPINEL_PROP_DNSSD__BEGIN + 15,
 +
++    SPINEL_PROP_DNSSD__END = 0x940,
++
++    SPINEL_PROP_DNS_UPSTREAM__BEGIN = 0x940,
++
 +    /// DNS upstream query (NCP to host).
 +    /**
-+     * Format: `CS` + *n* bytes - Inserted (NCP to host).
++     * Format: `Cd` - Inserted (NCP to host).
 +     *
 +     * `C`: Transaction index (`0` to `31`).
-+     * `S`: DNS wire query length *n* in bytes.
-+     * Payload: *n* raw bytes immediately following (`EncodeDnsUpstreamWireMessage` / `DecodeDnsUpstreamWireMessage`).
-+     *          Length is taken from `S` only; this is not a Spinel `d` type (no second length prefix).
++     * `d`: DNS wire query (`EncodeDnsUpstreamWireMessage` / `DecodeDnsUpstreamWireMessage`).
 +     */
-+    SPINEL_PROP_DNS_UPSTREAM_QUERY = 0x940,
++    SPINEL_PROP_DNS_UPSTREAM_QUERY = SPINEL_PROP_DNS_UPSTREAM__BEGIN + 1,
 +
 +    /// DNS upstream query response (host to NCP).
 +    /**
-+     * Format: `CS` + *n* bytes - Set (host to NCP).
++     * Format: `Cd` - Set (host to NCP).
 +     *
 +     * `C`: Transaction index (`0` to `31`).
-+     * `S`: DNS wire response length *n* in bytes (zero indicates failure; no payload bytes follow).
-+     * Payload: *n* raw bytes immediately following when `S` > 0 (same encoding as QUERY).
++     * `d`: DNS wire response. A length of zero indicates failure.
 +     */
-+    SPINEL_PROP_DNS_UPSTREAM_RESPONSE = 0x941,
++    SPINEL_PROP_DNS_UPSTREAM_RESPONSE = SPINEL_PROP_DNS_UPSTREAM__BEGIN + 2,
 +
 +    /// DNS upstream query cancel (NCP to host).
 +    /**
@@ -1300,7 +2045,7 @@ index c755522d04488b523500ab4723e974801d44ed8b..c71cccbcab1c6d36a9b83838b6c60199
 +     *
 +     * `C`: Transaction index (`0` to `31`).
 +     */
-+    SPINEL_PROP_DNS_UPSTREAM_CANCEL = 0x942,
++    SPINEL_PROP_DNS_UPSTREAM_CANCEL = SPINEL_PROP_DNS_UPSTREAM__BEGIN + 3,
 +
 +    /// Enablement of DNS upstream forwarding on the NCP DNS-SD server.
 +    /**
@@ -1308,7 +2053,7 @@ index c755522d04488b523500ab4723e974801d44ed8b..c71cccbcab1c6d36a9b83838b6c60199
 +     *
 +     * `b`: Whether to enable or disable upstream DNS forwarding (`otDnssdUpstreamQuerySetEnabled`).
 +     */
-+    SPINEL_PROP_DNS_UPSTREAM_ENABLED = 0x943,
++    SPINEL_PROP_DNS_UPSTREAM_ENABLED = SPINEL_PROP_DNS_UPSTREAM__BEGIN + 4,
 +
 +    /// Host DNS upstream resolver availability (host to NCP).
 +    /**
@@ -1316,23 +2061,23 @@ index c755522d04488b523500ab4723e974801d44ed8b..c71cccbcab1c6d36a9b83838b6c60199
 +     *
 +     * `b`: Whether the host has at least one upstream DNS nameserver configured.
 +     */
-+    SPINEL_PROP_DNS_UPSTREAM_AVAILABLE = 0x944,
++    SPINEL_PROP_DNS_UPSTREAM_AVAILABLE = SPINEL_PROP_DNS_UPSTREAM__BEGIN + 5,
 +
 +    /// Discovered RDNSS upstream DNS servers (NCP to host).
 +    /**
-+     * Format: `C6` - Get and unsolicited notifications (`VALUE_IS`).
++     * Format: `CA(6)` - Get and unsolicited notifications (`VALUE_IS`).
 +     *
 +     * `C`: Number of recursive DNS server addresses (0 to 3).
-+     * `6`: IPv6 address of each server (repeated `C` times).
++     * `A(6)`: IPv6 address of each server.
 +     *
 +     * Emitted when Border Routing learns or updates RDNSS entries on the infrastructure link.
-+     * The host uses these addresses for `NcpUpstreamDnsResolver` forwarding (DH 11.3 / RDNSS selection).
 +     */
-+    SPINEL_PROP_DNS_UPSTREAM_RDNSS_SERVERS = 0x945,
++    SPINEL_PROP_DNS_UPSTREAM_RDNSS_SERVERS = SPINEL_PROP_DNS_UPSTREAM__BEGIN + 6,
 +
-     SPINEL_PROP_DNSSD__END = 0x950,
++    SPINEL_PROP_DNS_UPSTREAM__END = 0x950,
  
      SPINEL_PROP_BORDER_AGENT__BEGIN = 0x950,
+ 
 @@ -5074,8 +5189,59 @@ enum
       */
      SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_PREFIX = SPINEL_PROP_BORDER_ROUTER__BEGIN + 2,
@@ -1626,7 +2371,7 @@ index 3e6e7904145ec57dad8166c23a8eb679304f901f..9641b70838c7a1e06f61755db1fed04a
  } // namespace Spinel
  } // namespace ot
 diff --git a/src/lib/spinel/spinel_prop_codec.hpp b/src/lib/spinel/spinel_prop_codec.hpp
-index 979abd1a863dc1e8bf7df7088073ce9023239e01..ebf6d8d0d19abb9b84c1e68f7dc3e7f9f67436aa 100644
+index 979abd1a863dc1e8bf7df7088073ce9023239e01..15a9e57b49c59fcb96b5acf10e088f0729f1584d 100644
 --- a/src/lib/spinel/spinel_prop_codec.hpp
 +++ b/src/lib/spinel/spinel_prop_codec.hpp
 @@ -210,6 +210,142 @@ otError DecodeDnssdSrvResult(Decoder              &aDecoder,
@@ -1717,7 +2462,7 @@ index 979abd1a863dc1e8bf7df7088073ce9023239e01..ebf6d8d0d19abb9b84c1e68f7dc3e7f9
 +                                 uint16_t                 &aCallbackDataLen);
 +
 +/**
-+ * Encodes a DNS upstream query or response payload (`CSd` format).
++ * Encodes a DNS upstream query or response payload (`Cd` format).
 + *
 + * @param[in] aEncoder     A reference to the encoder object.
 + * @param[in] aTxnIndex    The transaction index.
@@ -1727,12 +2472,12 @@ index 979abd1a863dc1e8bf7df7088073ce9023239e01..ebf6d8d0d19abb9b84c1e68f7dc3e7f9
 +otError EncodeDnsUpstreamWireMessage(Encoder &aEncoder, uint8_t aTxnIndex, const uint8_t *aData, uint16_t aDataLength);
 +
 +/**
-+ * Decodes a DNS upstream query or response payload (`CSd` format).
++ * Decodes a DNS upstream query or response payload (`Cd` format).
 + *
 + * @param[in]  aDecoder      A reference to the decoder object.
 + * @param[out] aTxnIndex     A reference to the transaction index.
 + * @param[out] aData         A reference to the pointer to the DNS wire payload.
-+ * @param[out] aDataLength    A reference to the DNS wire payload length in bytes.
++ * @param[out] aDataLength   A reference to the DNS wire payload length in bytes.
 + */
 +otError DecodeDnsUpstreamWireMessage(Decoder        &aDecoder,
 +                                     uint8_t        &aTxnIndex,
@@ -1748,7 +2493,7 @@ index 979abd1a863dc1e8bf7df7088073ce9023239e01..ebf6d8d0d19abb9b84c1e68f7dc3e7f9
 +otError DecodeDnsUpstreamCancel(Decoder &aDecoder, uint8_t &aTxnIndex);
 +
 +/**
-+ * Encodes a DNS upstream RDNSS server list (`C6` format).
++ * Encodes a DNS upstream RDNSS server list (`CA(6)` format).
 + *
 + * @param[in] aEncoder      A reference to the encoder object.
 + * @param[in] aServers      IPv6 recursive DNS server addresses.
@@ -1757,7 +2502,7 @@ index 979abd1a863dc1e8bf7df7088073ce9023239e01..ebf6d8d0d19abb9b84c1e68f7dc3e7f9
 +otError EncodeDnsUpstreamRdnssServers(Encoder &aEncoder, const otIp6Address *aServers, uint8_t aNumServers);
 +
 +/**
-+ * Decodes a DNS upstream RDNSS server list (`C6` format).
++ * Decodes a DNS upstream RDNSS server list (`CA(6)` format).
 + *
 + * @param[in]  aDecoder      A reference to the decoder object.
 + * @param[out] aServers      Output array for IPv6 server addresses.
@@ -3539,6 +4284,21 @@ index faaae7e6a03645a5f5b22deb8f3970052f1ed1bb..068318934bcc1304269e276e32ebb1c1
  } // namespace Posix
  } // namespace ot
  
+diff --git a/tests/unit/test_ecdsa.cpp b/tests/unit/test_ecdsa.cpp
+index aad13a748820d3406187b14325a04d9414163bd3..e8ba141c7cbedeecc9a1519cabc59e38a6c25d52 100644
+--- a/tests/unit/test_ecdsa.cpp
++++ b/tests/unit/test_ecdsa.cpp
+@@ -35,10 +35,6 @@
+ #include "common/random.hpp"
+ #include "crypto/ecdsa.hpp"
+ 
+-#include <mbedtls/ctr_drbg.h>
+-#include <mbedtls/ecdsa.h>
+-#include <mbedtls/pk.h>
+-
+ #if OPENTHREAD_CONFIG_ECDSA_ENABLE
+ 
+ namespace ot {
 diff --git a/tests/unit/test_platform.cpp b/tests/unit/test_platform.cpp
 index ae850d96da5994db673c2368ff7d37b1addc7d3d..228543fb139ac787790991be3c16305aec7b227c 100644
 --- a/tests/unit/test_platform.cpp
@@ -3810,3 +4570,942 @@ index becb9569f391a9741e1709dc0c81e4e4cadadf7a..d0be3978bc9838a74029fcd63565838d
      printf("\nAll tests passed.\n");
      return 0;
  }
+diff --git a/third_party/mbedtls/BUILD.gn b/third_party/mbedtls/BUILD.gn
+index 35828980e565084f44866f5d4407f4b0bbb6ec95..c968548df211e18d5b1d7b5971333dde9b680822 100644
+--- a/third_party/mbedtls/BUILD.gn
++++ b/third_party/mbedtls/BUILD.gn
+@@ -26,9 +26,12 @@
+ #
+ 
+ declare_args() {
+-  # Configuration file for MbedTLS.
++  # Configuration file for MbedTLS (TLS/X.509).
+   mbedtls_config_file = "mbedtls-config.h"
+ 
++  # Configuration file for TF-PSA-Crypto.
++  tf_psa_crypto_config_file = "psa-crypto-config.h"
++
+   # Extra dependencies for MbedTLS
+   mbedtls_deps = [ "../../src/core:libopenthread_core_config" ]
+ }
+@@ -38,9 +41,16 @@ config("mbedtls_config") {
+     ".",
+     "repo/include",
+     "repo/library",
++    "repo/tf-psa-crypto/include",
++    "repo/tf-psa-crypto/drivers/builtin/include",
++    "repo/tf-psa-crypto/core",
++    "repo/tf-psa-crypto/drivers/builtin/src",
+   ]
+ 
+-  defines = [ "MBEDTLS_CONFIG_FILE=\"${mbedtls_config_file}\"" ]
++  defines = [
++    "MBEDTLS_CONFIG_FILE=\"${mbedtls_config_file}\"",
++    "TF_PSA_CRYPTO_CONFIG_FILE=\"${tf_psa_crypto_config_file}\"",
++  ]
+ }
+ 
+ config("warnings_fix_config") {
+@@ -56,264 +66,95 @@ group("warnings_fix") {
+   ]
+ }
+ 
++static_library("tfpsacrypto") {
++  sources = [
++    "repo/tf-psa-crypto/core/psa_crypto.c",
++    "repo/tf-psa-crypto/core/psa_crypto_client.c",
++    "repo/tf-psa-crypto/core/psa_crypto_driver_wrappers_no_static.c",
++    "repo/tf-psa-crypto/core/psa_crypto_random.c",
++    "repo/tf-psa-crypto/core/psa_crypto_slot_management.c",
++    "repo/tf-psa-crypto/core/psa_crypto_storage.c",
++    "repo/tf-psa-crypto/core/psa_its_file.c",
++    "repo/tf-psa-crypto/core/psa_util.c",
++    "repo/tf-psa-crypto/core/tf_psa_crypto_config.c",
++    "repo/tf-psa-crypto/core/tf_psa_crypto_version.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/aes.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/aesce.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/aesni.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/aria.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/bignum.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/bignum_core.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/bignum_mod.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/bignum_mod_raw.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/block_cipher.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/camellia.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/ccm.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/chacha20.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/chacha20_neon.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/chachapoly.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/cipher.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/cipher_wrap.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/cmac.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/ctr_drbg.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/ecdsa.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/ecjpake.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/ecp.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/ecp_curves.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/ecp_curves_new.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/entropy.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/entropy_poll.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/gcm.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/hmac_drbg.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/md5.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/poly1305.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/psa_crypto_aead.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/psa_crypto_cipher.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/psa_crypto_ecp.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/psa_crypto_ffdh.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/psa_crypto_hash.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/psa_crypto_mac.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/psa_crypto_pake.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/psa_crypto_rsa.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/psa_crypto_xof.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/psa_util_internal.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/ripemd160.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/rsa.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/rsa_alt_helpers.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/sha1.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/sha256.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/sha3.c",
++    "repo/tf-psa-crypto/drivers/builtin/src/sha512.c",
++  ]
++
++  public_deps = mbedtls_deps
++  public_deps += [ ":warnings_fix" ]
++
++  public_configs = [ ":mbedtls_config" ]
++}
++
+ static_library("mbedtls") {
+   sources = [
+-    "repo/include/mbedtls/aes.h",
+-    "repo/include/mbedtls/aria.h",
+-    "repo/include/mbedtls/asn1.h",
+-    "repo/include/mbedtls/asn1write.h",
+-    "repo/include/mbedtls/base64.h",
+-    "repo/include/mbedtls/bignum.h",
+-    "repo/include/mbedtls/block_cipher.h",
+-    "repo/include/mbedtls/build_info.h",
+-    "repo/include/mbedtls/camellia.h",
+-    "repo/include/mbedtls/ccm.h",
+-    "repo/include/mbedtls/chacha20.h",
+-    "repo/include/mbedtls/chachapoly.h",
+-    "repo/include/mbedtls/check_config.h",
+-    "repo/include/mbedtls/cipher.h",
+-    "repo/include/mbedtls/cmac.h",
+-    "repo/include/mbedtls/compat-2.x.h",
+-    "repo/include/mbedtls/config_adjust_legacy_crypto.h",
+-    "repo/include/mbedtls/config_adjust_legacy_from_psa.h",
+-    "repo/include/mbedtls/config_adjust_psa_from_legacy.h",
+-    "repo/include/mbedtls/config_adjust_psa_superset_legacy.h",
+-    "repo/include/mbedtls/config_adjust_ssl.h",
+-    "repo/include/mbedtls/config_adjust_x509.h",
+-    "repo/include/mbedtls/config_psa.h",
+-    "repo/include/mbedtls/constant_time.h",
+-    "repo/include/mbedtls/ctr_drbg.h",
+-    "repo/include/mbedtls/debug.h",
+-    "repo/include/mbedtls/des.h",
+-    "repo/include/mbedtls/dhm.h",
+-    "repo/include/mbedtls/ecdh.h",
+-    "repo/include/mbedtls/ecdsa.h",
+-    "repo/include/mbedtls/ecjpake.h",
+-    "repo/include/mbedtls/ecp.h",
+-    "repo/include/mbedtls/entropy.h",
+-    "repo/include/mbedtls/error.h",
+-    "repo/include/mbedtls/gcm.h",
+-    "repo/include/mbedtls/hkdf.h",
+-    "repo/include/mbedtls/hmac_drbg.h",
+-    "repo/include/mbedtls/lms.h",
+-    "repo/include/mbedtls/mbedtls_config.h",
+-    "repo/include/mbedtls/md5.h",
+-    "repo/include/mbedtls/md.h",
+-    "repo/include/mbedtls/memory_buffer_alloc.h",
+-    "repo/include/mbedtls/net_sockets.h",
+-    "repo/include/mbedtls/nist_kw.h",
+-    "repo/include/mbedtls/oid.h",
+-    "repo/include/mbedtls/pem.h",
+-    "repo/include/mbedtls/pkcs12.h",
+-    "repo/include/mbedtls/pkcs5.h",
+-    "repo/include/mbedtls/pkcs7.h",
+-    "repo/include/mbedtls/pk.h",
+-    "repo/include/mbedtls/platform.h",
+-    "repo/include/mbedtls/platform_time.h",
+-    "repo/include/mbedtls/platform_util.h",
+-    "repo/include/mbedtls/poly1305.h",
+-    "repo/include/mbedtls/private_access.h",
+-    "repo/include/mbedtls/psa_util.h",
+-    "repo/include/mbedtls/ripemd160.h",
+-    "repo/include/mbedtls/rsa.h",
+-    "repo/include/mbedtls/sha1.h",
+-    "repo/include/mbedtls/sha256.h",
+-    "repo/include/mbedtls/sha3.h",
+-    "repo/include/mbedtls/sha512.h",
+-    "repo/include/mbedtls/ssl_cache.h",
+-    "repo/include/mbedtls/ssl_ciphersuites.h",
+-    "repo/include/mbedtls/ssl_cookie.h",
+-    "repo/include/mbedtls/ssl.h",
+-    "repo/include/mbedtls/ssl_ticket.h",
+-    "repo/include/mbedtls/threading.h",
+-    "repo/include/mbedtls/timing.h",
+-    "repo/include/mbedtls/version.h",
+-    "repo/include/mbedtls/x509_crl.h",
+-    "repo/include/mbedtls/x509_crt.h",
+-    "repo/include/mbedtls/x509_csr.h",
+-    "repo/include/mbedtls/x509.h",
+-    "repo/include/psa/build_info.h",
+-    "repo/include/psa/crypto_adjust_auto_enabled.h",
+-    "repo/include/psa/crypto_adjust_config_dependencies.h",
+-    "repo/include/psa/crypto_adjust_config_key_pair_types.h",
+-    "repo/include/psa/crypto_adjust_config_synonyms.h",
+-    "repo/include/psa/crypto_builtin_composites.h",
+-    "repo/include/psa/crypto_builtin_key_derivation.h",
+-    "repo/include/psa/crypto_builtin_primitives.h",
+-    "repo/include/psa/crypto_compat.h",
+-    "repo/include/psa/crypto_config.h",
+-    "repo/include/psa/crypto_driver_common.h",
+-    "repo/include/psa/crypto_driver_contexts_composites.h",
+-    "repo/include/psa/crypto_driver_contexts_key_derivation.h",
+-    "repo/include/psa/crypto_driver_contexts_primitives.h",
+-    "repo/include/psa/crypto_extra.h",
+-    "repo/include/psa/crypto.h",
+-    "repo/include/psa/crypto_legacy.h",
+-    "repo/include/psa/crypto_platform.h",
+-    "repo/include/psa/crypto_se_driver.h",
+-    "repo/include/psa/crypto_sizes.h",
+-    "repo/include/psa/crypto_struct.h",
+-    "repo/include/psa/crypto_types.h",
+-    "repo/include/psa/crypto_values.h",
+-    "repo/library/aes.c",
+-    "repo/library/aesce.c",
+-    "repo/library/aesce.h",
+-    "repo/library/aesni.c",
+-    "repo/library/aesni.h",
+-    "repo/library/alignment.h",
+-    "repo/library/aria.c",
+-    "repo/library/asn1parse.c",
+-    "repo/library/asn1write.c",
+-    "repo/library/base64.c",
+-    "repo/library/base64_internal.h",
+-    "repo/library/bignum.c",
+-    "repo/library/bignum_core.c",
+-    "repo/library/bignum_core.h",
+-    "repo/library/bignum_core_invasive.h",
+-    "repo/library/bignum_internal.h",
+-    "repo/library/bignum_mod.c",
+-    "repo/library/bignum_mod.h",
+-    "repo/library/bignum_mod_raw.c",
+-    "repo/library/bignum_mod_raw.h",
+-    "repo/library/bignum_mod_raw_invasive.h",
+-    "repo/library/block_cipher.c",
+-    "repo/library/block_cipher_internal.h",
+-    "repo/library/bn_mul.h",
+-    "repo/library/camellia.c",
+-    "repo/library/ccm.c",
+-    "repo/library/chacha20.c",
+-    "repo/library/chachapoly.c",
+-    "repo/library/check_crypto_config.h",
+-    "repo/library/cipher.c",
+-    "repo/library/cipher_invasive.h",
+-    "repo/library/cipher_wrap.c",
+-    "repo/library/cipher_wrap.h",
+-    "repo/library/cmac.c",
+-    "repo/library/common.h",
+-    "repo/library/constant_time.c",
+-    "repo/library/constant_time_impl.h",
+-    "repo/library/constant_time_internal.h",
+-    "repo/library/ctr_drbg.c",
+-    "repo/library/ctr.h",
+     "repo/library/debug.c",
+-    "repo/library/debug_internal.h",
+-    "repo/library/des.c",
+-    "repo/library/dhm.c",
+-    "repo/library/ecdh.c",
+-    "repo/library/ecdsa.c",
+-    "repo/library/ecjpake.c",
+-    "repo/library/ecp.c",
+-    "repo/library/ecp_curves.c",
+-    "repo/library/ecp_curves_new.c",
+-    "repo/library/ecp_internal_alt.h",
+-    "repo/library/ecp_invasive.h",
+-    "repo/library/entropy.c",
+-    "repo/library/entropy_poll.c",
+-    "repo/library/entropy_poll.h",
+     "repo/library/error.c",
+-    "repo/library/gcm.c",
+-    "repo/library/hkdf.c",
+-    "repo/library/hmac_drbg.c",
+-    "repo/library/lmots.c",
+-    "repo/library/lmots.h",
+-    "repo/library/lms.c",
+-    "repo/library/md5.c",
+-    "repo/library/md.c",
+-    "repo/library/md_psa.h",
+-    "repo/library/md_wrap.h",
+-    "repo/library/memory_buffer_alloc.c",
+-    "repo/library/mps_common.h",
+-    "repo/library/mps_error.h",
++    "repo/library/mbedtls_config.c",
+     "repo/library/mps_reader.c",
+-    "repo/library/mps_reader.h",
+     "repo/library/mps_trace.c",
+-    "repo/library/mps_trace.h",
+     "repo/library/net_sockets.c",
+-    "repo/library/nist_kw.c",
+-    "repo/library/oid.c",
+-    "repo/library/padlock.c",
+-    "repo/library/padlock.h",
+-    "repo/library/pem.c",
+-    "repo/library/pk.c",
+-    "repo/library/pkcs12.c",
+-    "repo/library/pkcs5.c",
+     "repo/library/pkcs7.c",
+-    "repo/library/pk_ecc.c",
+-    "repo/library/pk_internal.h",
+-    "repo/library/pkparse.c",
+-    "repo/library/pk_wrap.c",
+-    "repo/library/pk_wrap.h",
+-    "repo/library/pkwrite.c",
+-    "repo/library/pkwrite.h",
+-    "repo/library/platform.c",
+-    "repo/library/platform_util.c",
+-    "repo/library/poly1305.c",
+-    "repo/library/psa_crypto_aead.c",
+-    "repo/library/psa_crypto_aead.h",
+-    "repo/library/psa_crypto.c",
+-    "repo/library/psa_crypto_cipher.c",
+-    "repo/library/psa_crypto_cipher.h",
+-    "repo/library/psa_crypto_client.c",
+-    "repo/library/psa_crypto_core_common.h",
+-    "repo/library/psa_crypto_core.h",
+-    "repo/library/psa_crypto_driver_wrappers.h",
+-    "repo/library/psa_crypto_driver_wrappers_no_static.c",
+-    "repo/library/psa_crypto_driver_wrappers_no_static.h",
+-    "repo/library/psa_crypto_ecp.c",
+-    "repo/library/psa_crypto_ecp.h",
+-    "repo/library/psa_crypto_ffdh.c",
+-    "repo/library/psa_crypto_ffdh.h",
+-    "repo/library/psa_crypto_hash.c",
+-    "repo/library/psa_crypto_hash.h",
+-    "repo/library/psa_crypto_invasive.h",
+-    "repo/library/psa_crypto_its.h",
+-    "repo/library/psa_crypto_mac.c",
+-    "repo/library/psa_crypto_mac.h",
+-    "repo/library/psa_crypto_pake.c",
+-    "repo/library/psa_crypto_pake.h",
+-    "repo/library/psa_crypto_random_impl.h",
+-    "repo/library/psa_crypto_rsa.c",
+-    "repo/library/psa_crypto_rsa.h",
+-    "repo/library/psa_crypto_se.c",
+-    "repo/library/psa_crypto_se.h",
+-    "repo/library/psa_crypto_slot_management.c",
+-    "repo/library/psa_crypto_slot_management.h",
+-    "repo/library/psa_crypto_storage.c",
+-    "repo/library/psa_crypto_storage.h",
+-    "repo/library/psa_its_file.c",
+-    "repo/library/psa_util.c",
+-    "repo/library/psa_util_internal.h",
+-    "repo/library/ripemd160.c",
+-    "repo/library/rsa_alt_helpers.c",
+-    "repo/library/rsa_alt_helpers.h",
+-    "repo/library/rsa.c",
+-    "repo/library/rsa_internal.h",
+-    "repo/library/sha1.c",
+-    "repo/library/sha256.c",
+-    "repo/library/sha3.c",
+-    "repo/library/sha512.c",
+     "repo/library/ssl_cache.c",
+     "repo/library/ssl_ciphersuites.c",
+-    "repo/library/ssl_ciphersuites_internal.h",
+     "repo/library/ssl_client.c",
+-    "repo/library/ssl_client.h",
+     "repo/library/ssl_cookie.c",
+     "repo/library/ssl_debug_helpers_generated.c",
+-    "repo/library/ssl_debug_helpers.h",
+-    "repo/library/ssl_misc.h",
+     "repo/library/ssl_msg.c",
+     "repo/library/ssl_ticket.c",
++    "repo/library/ssl_tls.c",
+     "repo/library/ssl_tls12_client.c",
+     "repo/library/ssl_tls12_server.c",
+     "repo/library/ssl_tls13_client.c",
+     "repo/library/ssl_tls13_generic.c",
+-    "repo/library/ssl_tls13_invasive.h",
+     "repo/library/ssl_tls13_keys.c",
+-    "repo/library/ssl_tls13_keys.h",
+     "repo/library/ssl_tls13_server.c",
+-    "repo/library/ssl_tls.c",
+-    "repo/library/threading.c",
+-    "repo/library/threading_internal.h",
+     "repo/library/timing.c",
+     "repo/library/version.c",
+     "repo/library/version_features.c",
+@@ -322,14 +163,17 @@ static_library("mbedtls") {
+     "repo/library/x509_crl.c",
+     "repo/library/x509_crt.c",
+     "repo/library/x509_csr.c",
+-    "repo/library/x509_internal.h",
++    "repo/library/x509_oid.c",
+     "repo/library/x509write.c",
+     "repo/library/x509write_crt.c",
+-    "repo/library/x509write_csr.c"
++    "repo/library/x509write_csr.c",
+   ]
+ 
+   public_deps = mbedtls_deps
+-  public_deps += [ ":warnings_fix" ]
++  public_deps += [
++    ":warnings_fix",
++    ":tfpsacrypto",
++  ]
+ 
+   public_configs = [ ":mbedtls_config" ]
+ }
+diff --git a/third_party/mbedtls/CMakeLists.txt b/third_party/mbedtls/CMakeLists.txt
+index 5fd9c5eb9247bdcd64722f6a507f6f2aca16da99..469d676148eef3fddabf1045085e37527064f6ab 100644
+--- a/third_party/mbedtls/CMakeLists.txt
++++ b/third_party/mbedtls/CMakeLists.txt
+@@ -27,8 +27,10 @@
+ #
+ 
+ set(OT_MBEDTLS_DEFAULT_CONFIG_FILE \"openthread-mbedtls-config.h\")
++set(OT_TF_PSA_CRYPTO_DEFAULT_CONFIG_FILE \"openthread-psa-crypto-config.h\")
+ 
+ set(OT_MBEDTLS_CONFIG_FILE "" CACHE STRING "The mbedTLS config file")
++set(OT_TF_PSA_CRYPTO_CONFIG_FILE "" CACHE STRING "The TF-PSA-Crypto config file")
+ 
+ set(ENABLE_TESTING OFF CACHE BOOL "Disable mbedtls test" FORCE)
+ set(ENABLE_PROGRAMS OFF CACHE BOOL "Disable mbetls program" FORCE)
+@@ -47,8 +49,18 @@ string(REPLACE "-Wconversion" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+ 
+ set(MBEDTLS_FATAL_WARNINGS OFF CACHE BOOL "Compiler warnings treated as errors" FORCE)
+ 
++# Mbed TLS 4.x / TF-PSA-Crypto do not ship autogen sources in git. Generate
++# them at configure/build time (needs Python jinja2 + jsonschema; see README.md).
++set(GEN_FILES ON CACHE BOOL "Generate mbedtls/tf-psa-crypto autogen sources" FORCE)
++
+ add_subdirectory(repo)
+ 
++set(OT_MBEDTLS_PUBLIC_INCLUDES
++    ${CMAKE_CURRENT_SOURCE_DIR}/repo/include
++    ${CMAKE_CURRENT_SOURCE_DIR}/repo/tf-psa-crypto/include
++    ${CMAKE_CURRENT_SOURCE_DIR}/repo/tf-psa-crypto/drivers/builtin/include
++)
++
+ if(UNIFDEFALL_EXE AND SED_EXE AND UNIFDEF_VERSION VERSION_GREATER_EQUAL 2.10)
+     add_custom_command(OUTPUT openthread-mbedtls-config.h
+         COMMAND ${UNIFDEFALL_EXE}
+@@ -56,6 +68,7 @@ if(UNIFDEFALL_EXE AND SED_EXE AND UNIFDEF_VERSION VERSION_GREATER_EQUAL 2.10)
+             "-I$<JOIN:$<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>,;-I>"
+             "-I$<JOIN:${OT_PUBLIC_INCLUDES},;-I>"
+             "-I${CMAKE_CURRENT_SOURCE_DIR}/repo/include"
++            "-I${CMAKE_CURRENT_SOURCE_DIR}/repo/tf-psa-crypto/include"
+             "${CMAKE_CURRENT_SOURCE_DIR}/mbedtls-config.h" |
+             ${SED_EXE} '/openthread-core-config\.h/d' >
+             openthread-mbedtls-config.h
+@@ -63,60 +76,85 @@ if(UNIFDEFALL_EXE AND SED_EXE AND UNIFDEF_VERSION VERSION_GREATER_EQUAL 2.10)
+         COMMAND_EXPAND_LISTS
+     )
+ 
++    add_custom_command(OUTPUT openthread-psa-crypto-config.h
++        COMMAND ${UNIFDEFALL_EXE}
++            "'-D$<JOIN:$<TARGET_PROPERTY:ot-config,INTERFACE_COMPILE_DEFINITIONS>,';'-D>'"
++            "-I$<JOIN:$<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>,;-I>"
++            "-I$<JOIN:${OT_PUBLIC_INCLUDES},;-I>"
++            "-I${CMAKE_CURRENT_SOURCE_DIR}/repo/include"
++            "-I${CMAKE_CURRENT_SOURCE_DIR}/repo/tf-psa-crypto/include"
++            "${CMAKE_CURRENT_SOURCE_DIR}/psa-crypto-config.h" |
++            ${SED_EXE} '/openthread-core-config\.h/d' >
++            openthread-psa-crypto-config.h
++        MAIN_DEPENDENCY psa-crypto-config.h
++        COMMAND_EXPAND_LISTS
++    )
++
+     add_custom_target(openthread-mbedtls-config
+-        DEPENDS openthread-mbedtls-config.h)
++        DEPENDS openthread-mbedtls-config.h openthread-psa-crypto-config.h)
+ 
+     add_dependencies(ot-config openthread-mbedtls-config)
+     add_dependencies(mbedtls openthread-mbedtls-config)
+     add_dependencies(mbedx509 openthread-mbedtls-config)
+-    add_dependencies(mbedcrypto openthread-mbedtls-config)
++    add_dependencies(tfpsacrypto openthread-mbedtls-config)
+ else()
+     configure_file(mbedtls-config.h openthread-mbedtls-config.h COPYONLY)
++    configure_file(psa-crypto-config.h openthread-psa-crypto-config.h COPYONLY)
+ endif()
+ 
+ target_include_directories(ot-config SYSTEM
+     INTERFACE
+         ${CMAKE_CURRENT_BINARY_DIR}
+-        ${CMAKE_CURRENT_SOURCE_DIR}/repo/include)
++        ${OT_MBEDTLS_PUBLIC_INCLUDES})
+ 
+-target_compile_definitions(mbedtls
+-    PUBLIC
+-        "MBEDTLS_CONFIG_FILE=$<IF:$<BOOL:${OT_MBEDTLS_CONFIG_FILE}>,${OT_MBEDTLS_CONFIG_FILE},${OT_MBEDTLS_DEFAULT_CONFIG_FILE}>"
+-    PRIVATE
+-        $<TARGET_PROPERTY:ot-config,INTERFACE_COMPILE_DEFINITIONS>
+-)
+-target_include_directories(mbedtls
+-    PUBLIC
+-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/repo/include>
+-    PRIVATE
+-        ${OT_PUBLIC_INCLUDES}
+-        $<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>
+-)
++foreach(ot_mbedtls_target mbedtls mbedx509 tfpsacrypto)
++    target_compile_definitions(${ot_mbedtls_target}
++        PUBLIC
++            "MBEDTLS_CONFIG_FILE=$<IF:$<BOOL:${OT_MBEDTLS_CONFIG_FILE}>,${OT_MBEDTLS_CONFIG_FILE},${OT_MBEDTLS_DEFAULT_CONFIG_FILE}>"
++            "TF_PSA_CRYPTO_CONFIG_FILE=$<IF:$<BOOL:${OT_TF_PSA_CRYPTO_CONFIG_FILE}>,${OT_TF_PSA_CRYPTO_CONFIG_FILE},${OT_TF_PSA_CRYPTO_DEFAULT_CONFIG_FILE}>"
++        PRIVATE
++            $<TARGET_PROPERTY:ot-config,INTERFACE_COMPILE_DEFINITIONS>
++    )
++    target_include_directories(${ot_mbedtls_target}
++        PUBLIC
++            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
++            $<BUILD_INTERFACE:${OT_MBEDTLS_PUBLIC_INCLUDES}>
++        PRIVATE
++            ${OT_PUBLIC_INCLUDES}
++            $<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>
++    )
++endforeach()
+ 
+-target_compile_definitions(mbedx509
+-    PUBLIC
+-        "MBEDTLS_CONFIG_FILE=$<IF:$<BOOL:${OT_MBEDTLS_CONFIG_FILE}>,${OT_MBEDTLS_CONFIG_FILE},${OT_MBEDTLS_DEFAULT_CONFIG_FILE}>"
+-    PRIVATE
+-        $<TARGET_PROPERTY:ot-config,INTERFACE_COMPILE_DEFINITIONS>
+-)
+-target_include_directories(mbedx509
+-    PUBLIC
+-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/repo/include>
+-    PRIVATE
+-        ${OT_PUBLIC_INCLUDES}
+-        $<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>
++# TF-PSA-Crypto builds platform/builtin/extras/etc. as separate OBJECT libraries.
++# Those objects are archived into tfpsacrypto, so they must see the same config
++# macros as mbedtls/tfpsacrypto (otherwise mbedtls_calloc/free are missing).
++set(OT_TF_PSA_CRYPTO_COMPONENT_TARGETS
++    platform
++    extras
++    utilities
++    builtin
++    everest
++    p256-m
++    pqcp
+ )
+ 
+-target_compile_definitions(mbedcrypto
+-    PUBLIC
+-        "MBEDTLS_CONFIG_FILE=$<IF:$<BOOL:${OT_MBEDTLS_CONFIG_FILE}>,${OT_MBEDTLS_CONFIG_FILE},${OT_MBEDTLS_DEFAULT_CONFIG_FILE}>"
+-    PRIVATE
+-        $<TARGET_PROPERTY:ot-config,INTERFACE_COMPILE_DEFINITIONS>
+-)
+-target_include_directories(mbedcrypto
+-    PUBLIC
+-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/repo/include>
+-    PRIVATE
+-        ${OT_PUBLIC_INCLUDES}
+-        $<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>
+-)
++foreach(ot_tfpsa_component ${OT_TF_PSA_CRYPTO_COMPONENT_TARGETS})
++    if(TARGET ${ot_tfpsa_component})
++        target_compile_definitions(${ot_tfpsa_component}
++            PUBLIC
++                "MBEDTLS_CONFIG_FILE=$<IF:$<BOOL:${OT_MBEDTLS_CONFIG_FILE}>,${OT_MBEDTLS_CONFIG_FILE},${OT_MBEDTLS_DEFAULT_CONFIG_FILE}>"
++                "TF_PSA_CRYPTO_CONFIG_FILE=$<IF:$<BOOL:${OT_TF_PSA_CRYPTO_CONFIG_FILE}>,${OT_TF_PSA_CRYPTO_CONFIG_FILE},${OT_TF_PSA_CRYPTO_DEFAULT_CONFIG_FILE}>"
++            PRIVATE
++                $<TARGET_PROPERTY:ot-config,INTERFACE_COMPILE_DEFINITIONS>
++        )
++        target_include_directories(${ot_tfpsa_component}
++            PRIVATE
++                ${CMAKE_CURRENT_BINARY_DIR}
++                ${OT_PUBLIC_INCLUDES}
++                $<TARGET_PROPERTY:ot-config,INTERFACE_INCLUDE_DIRECTORIES>
++        )
++        if(TARGET openthread-mbedtls-config)
++            add_dependencies(${ot_tfpsa_component} openthread-mbedtls-config)
++        endif()
++    endif()
++endforeach()
+diff --git a/third_party/mbedtls/README.md b/third_party/mbedtls/README.md
+index 3edfac0e419db679115b982f9ff1063d18efe34a..5eb23adca5b93777100ced3dce578f7450f8433a 100644
+--- a/third_party/mbedtls/README.md
++++ b/third_party/mbedtls/README.md
+@@ -1,12 +1,17 @@
+-# mbed TLS
++# mbed TLS / TF-PSA-Crypto
+ 
+ ## URL
+ 
+-https://github.com/ARMmbed/mbedtls/releases/tag/mbedtls-3.6.0
++https://github.com/Mbed-TLS/mbedtls/releases/tag/v4.1.0
++
++TF-PSA-Crypto (submodule of Mbed TLS 4.x):
++https://github.com/Mbed-TLS/TF-PSA-Crypto
+ 
+ ## Version
+ 
+-3.6.0
++4.1.0 (Mbed TLS) / 1.1.0 (TF-PSA-Crypto, as bundled with Mbed TLS v4.1.0)
++
++Aligned with Silicon Labs `mbedtls/4.1.0@silabs/feature_mbedtls4` (OPENTHREAD-6613 / OPENTHREAD-7020).
+ 
+ ## License
+ 
+@@ -18,7 +23,39 @@ Apache 2.0
+ 
+ ## Description
+ 
+-mbed TLS (formerly known as PolarSSL) makes it trivially easy for
+-developers to include cryptographic and SSL/TLS capabilities in their
+-(embedded) products, facilitating this functionality with a minimal
+-coding footprint.
++Mbed TLS 4.x splits the former monolithic crypto+TLS tree:
++
++- **TF-PSA-Crypto** (`repo/tf-psa-crypto`) — PSA Crypto API and cryptographic primitives
++- **Mbed TLS** (`repo/library`, `repo/include/mbedtls`) — TLS / DTLS / X.509 upper layers
++
++OpenThread build files:
++
++- `BUILD.gn` — `tfpsacrypto` + `mbedtls` static libraries
++- `CMakeLists.txt` — links `mbedtls`, `mbedx509`, and `tfpsacrypto` (`GEN_FILES=ON`)
++- `mbedtls-config.h` — TLS/X.509 options (`MBEDTLS_CONFIG_FILE`)
++- `psa-crypto-config.h` — PSA / crypto options (`TF_PSA_CRYPTO_CONFIG_FILE`)
++
++After checking out `repo` at `v4.1.0`, initialize nested submodules:
++
++```bash
++git -C repo submodule update --init --recursive
++```
++
++CMake generates helper sources at build time when `GEN_FILES=ON` (OpenThread default).
++Install Python packages first:
++
++```bash
++# Debian/Ubuntu
++sudo apt-get install -y python3-jinja2 python3-jsonschema
++# or: pip3 install jinja2 jsonschema
++```
++
++For GN (or a one-shot regenerate into the source tree):
++
++```bash
++# from third_party/mbedtls/repo
++python3 framework/scripts/generate_ssl_debug_helpers.py --mbedtls-root . library/
++perl scripts/generate_features.pl include/mbedtls scripts/data_files library/version_features.c
++perl scripts/generate_errors.pl tf-psa-crypto/drivers/builtin/include/mbedtls include/mbedtls scripts/data_files library/error.c
++python3 tf-psa-crypto/scripts/generate_driver_wrappers.py
++```
+diff --git a/third_party/mbedtls/mbedtls-config.h b/third_party/mbedtls/mbedtls-config.h
+index 54bdfad729940faf498360979caecff83208ef3c..9bfb41f959be4b89f53e2c836c3d3f962dd081c3 100644
+--- a/third_party/mbedtls/mbedtls-config.h
++++ b/third_party/mbedtls/mbedtls-config.h
+@@ -33,63 +33,13 @@
+ 
+ #include "openthread-core-config.h"
+ 
+-#include <stdio.h>
+-#include <stdlib.h>
+-
+ #include <openthread/config.h>
+-#include <openthread/platform/logging.h>
+-#include <openthread/platform/crypto.h>
+-
+-// ==============================================================================
+-// Cryptographic configuration
+-// ==============================================================================
+-
+-#define MBEDTLS_AES_C
+-#if (MBEDTLS_VERSION_NUMBER >= 0x03050000)
+-#define MBEDTLS_AES_ONLY_128_BIT_KEY_LENGTH
+-#endif
+-#define MBEDTLS_AES_ROM_TABLES
+-#define MBEDTLS_ASN1_PARSE_C
+-#define MBEDTLS_ASN1_WRITE_C
+-#define MBEDTLS_BIGNUM_C
+-#if (MBEDTLS_VERSION_NUMBER >= 0x03050000)
+-#define MBEDTLS_BLOCK_CIPHER_NO_DECRYPT
+-#endif
+-#define MBEDTLS_CCM_C
+-#define MBEDTLS_CIPHER_C
+-#define MBEDTLS_CMAC_C
+-#define MBEDTLS_CTR_DRBG_C
+-#define MBEDTLS_DEPRECATED_REMOVED
+-#define MBEDTLS_DEPRECATED_WARNING
+-#define MBEDTLS_ECJPAKE_C
+-#define MBEDTLS_ECP_C
+-#define MBEDTLS_ECP_DP_SECP256R1_ENABLED
+-#define MBEDTLS_ECP_NIST_OPTIM
+-#define MBEDTLS_ENTROPY_C
+-#define MBEDTLS_HAVE_ASM
+-#define MBEDTLS_HMAC_DRBG_C
+-#define MBEDTLS_MD_C
+-#define MBEDTLS_SHA224_C
+-#define MBEDTLS_SHA256_C
+-#define MBEDTLS_SHA256_SMALLER
+-
+-#if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE || OPENTHREAD_CONFIG_TLS_ENABLE || OPENTHREAD_CONFIG_ECDSA_ENABLE
+-#define MBEDTLS_ECDH_C
+-#define MBEDTLS_ECDSA_C
+-#endif
+ 
+-#if OPENTHREAD_CONFIG_BLE_TCAT_ENABLE
+-#define MBEDTLS_GCM_C
+-#endif
+-
+-#if OPENTHREAD_CONFIG_ECDSA_ENABLE
+-#if OPENTHREAD_CONFIG_DETERMINISTIC_ECDSA_ENABLE
+-#define MBEDTLS_ECDSA_DETERMINISTIC
+-#endif
+-#endif
++#define MBEDTLS_CONFIG_VERSION 0x04010000
+ 
+ // ==============================================================================
+-// SSL configuration
++// SSL / TLS configuration (Mbed TLS 4.x upper layer)
++// Crypto algorithms live in psa-crypto-config.h (TF_PSA_CRYPTO_CONFIG_FILE).
+ // ==============================================================================
+ 
+ #define MBEDTLS_SSL_CLI_C
+@@ -110,6 +60,7 @@
+ #define MBEDTLS_SSL_KEEP_PEER_CERTIFICATE
+ #endif
+ 
++// EC-JPAKE via PSA PAKE (requires PSA_WANT_ALG_JPAKE in psa-crypto-config.h).
+ #define MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED
+ 
+ #if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
+@@ -133,74 +84,18 @@
+ #define MBEDTLS_SSL_CIPHERSUITES         MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
+ 
+ // ==============================================================================
+-// x509 & PK configuration
++// X.509 (TLS layer). PK/PEM/BASE64 live in psa-crypto-config.h for Mbed TLS 4.x.
+ // ==============================================================================
+ 
+-#define MBEDTLS_OID_C
+-#define MBEDTLS_PK_C
+-#define MBEDTLS_PK_PARSE_C
+-
+-#if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE || OPENTHREAD_CONFIG_TLS_ENABLE || OPENTHREAD_CONFIG_ECDSA_ENABLE
+-#define MBEDTLS_BASE64_C
+-#define MBEDTLS_PEM_PARSE_C
+-#endif
+-
+ #if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE || OPENTHREAD_CONFIG_TLS_ENABLE
+ #define MBEDTLS_X509_USE_C
+ #define MBEDTLS_X509_CRT_PARSE_C
+ #endif
+ 
+-#if OPENTHREAD_CONFIG_ECDSA_ENABLE
+-#define MBEDTLS_PK_WRITE_C
+-#endif
+-
+-// ==============================================================================
+-// MPI configuration
+-// ==============================================================================
+-
+-#define MBEDTLS_MPI_WINDOW_SIZE            1 /**< Maximum windows size used. */
+-#define MBEDTLS_MPI_MAX_SIZE              32 /**< Maximum number of bytes for usable MPIs. */
+-
+-// ==============================================================================
+-// ECP configuration
+-// ==============================================================================
+-
+-#if (MBEDTLS_VERSION_NUMBER < 0x03000000)
+-#define MBEDTLS_ECP_MAX_BITS             256 /**< Maximum bit size of groups */
+-#endif
+-#define MBEDTLS_ECP_WINDOW_SIZE            2 /**< Maximum window size used */
+-#define MBEDTLS_ECP_FIXED_POINT_OPTIM      0 /**< Enable fixed-point speed-up */
+-
+-// ==============================================================================
+-// Platform configuration
+-// ==============================================================================
+-
+-#define MBEDTLS_PLATFORM_SNPRINTF_MACRO snprintf
+-
+-#if OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
+-#define MBEDTLS_PLATFORM_STD_CALLOC     otPlatCryptoCAlloc /**< Default allocator to use, can be undefined */
+-#define MBEDTLS_PLATFORM_STD_FREE       otPlatCryptoFree   /**< Default free to use, can be undefined */
+-#else
+-#define MBEDTLS_MEMORY_BUFFER_ALLOC_C
+-#endif
+-
+-#define MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
+-#define MBEDTLS_NO_PLATFORM_ENTROPY
+-#define MBEDTLS_PLATFORM_C
+-#define MBEDTLS_PLATFORM_MEMORY
+-#define MBEDTLS_PLATFORM_NO_STD_FUNCTIONS
+-#define MBEDTLS_ENTROPY_MAX_SOURCES 1
+-
+ // Spans multiple lines to avoid being processed by unifdef
+ #if defined(\
+     MBEDTLS_USER_CONFIG_FILE)
+ #include MBEDTLS_USER_CONFIG_FILE
+ #endif
+ 
+-#include "mbedtls/version.h"
+-#if (MBEDTLS_VERSION_NUMBER < 0x03000000)
+-    // Configuration sanity check. Done automatically in Mbed TLS >= 3.0.
+-    #include "mbedtls/check_config.h"
+-#endif
+-
+ #endif /* MBEDTLS_CONFIG_H */
+diff --git a/third_party/mbedtls/psa-crypto-config.h b/third_party/mbedtls/psa-crypto-config.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..12574df67935431a506d8253f46f601fdc2b82ff
+--- /dev/null
++++ b/third_party/mbedtls/psa-crypto-config.h
+@@ -0,0 +1,143 @@
++/*
++ *  Copyright (c) 2018, The OpenThread Authors.
++ *  All rights reserved.
++ *
++ *  Redistribution and use in source and binary forms, with or without
++ *  modification, are permitted provided that the following conditions are met:
++ *  1. Redistributions of source code must retain the above copyright
++ *     notice, this list of conditions and the following disclaimer.
++ *  2. Redistributions in binary form must reproduce the above copyright
++ *     notice, this list of conditions and the following disclaimer in the
++ *     documentation and/or other materials provided with the distribution.
++ *  3. Neither the name of the copyright holder nor the
++ *     names of its contributors may be used to endorse or promote products
++ *     derived from this software without specific prior written permission.
++ *
++ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ *  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ *  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ *  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ *  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ *  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ *  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ *  POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#ifndef OT_PSA_CRYPTO_CONFIG_H
++#define OT_PSA_CRYPTO_CONFIG_H
++
++#include "openthread-core-config.h"
++
++#include <stdio.h>
++#include <stdlib.h>
++
++#include <openthread/config.h>
++#include <openthread/platform/crypto.h>
++
++#define TF_PSA_CRYPTO_CONFIG_VERSION 0x01010000
++
++// ==============================================================================
++// PSA Crypto core
++// ==============================================================================
++
++#define MBEDTLS_PSA_CRYPTO_C
++
++#define PSA_WANT_ALG_CCM                        1
++#define PSA_WANT_ALG_CMAC                       1
++#define PSA_WANT_ALG_HMAC                       1
++#define PSA_WANT_ALG_SHA_224                    1
++#define PSA_WANT_ALG_SHA_256                    1
++#define PSA_WANT_ALG_JPAKE                      1
++#define PSA_WANT_ALG_TLS12_ECJPAKE_TO_PMS       1
++#define PSA_WANT_ALG_TLS12_PRF                  1
++#define PSA_WANT_ECC_SECP_R1_256                1
++#define PSA_WANT_KEY_TYPE_AES                   1
++#define PSA_WANT_KEY_TYPE_HMAC                  1
++#define PSA_WANT_KEY_TYPE_PASSWORD              1
++#define PSA_WANT_KEY_TYPE_DERIVE                1
++#define PSA_WANT_KEY_TYPE_RAW_DATA              1
++#define PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC    1
++#define PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT   1
++#define PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE 1
++#define PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY        1
++#define PSA_WANT_ALG_ECDSA                      1
++#define PSA_WANT_ALG_ECDH                       1
++
++#if OPENTHREAD_CONFIG_DETERMINISTIC_ECDSA_ENABLE
++#define PSA_WANT_ALG_DETERMINISTIC_ECDSA        1
++#endif
++
++#if OPENTHREAD_CONFIG_BLE_TCAT_ENABLE
++#define PSA_WANT_ALG_GCM                        1
++#endif
++
++// Size / performance tweaks retained from the OT mbedtls 3.x config.
++#define MBEDTLS_AES_ONLY_128_BIT_KEY_LENGTH
++#define MBEDTLS_AES_ROM_TABLES
++#define MBEDTLS_BLOCK_CIPHER_NO_DECRYPT
++#define MBEDTLS_SHA256_SMALLER
++#define MBEDTLS_ECP_NIST_OPTIM
++#define MBEDTLS_DEPRECATED_REMOVED
++#define MBEDTLS_DEPRECATED_WARNING
++
++#define MBEDTLS_MPI_WINDOW_SIZE            1 /**< Maximum windows size used. */
++#define MBEDTLS_MPI_MAX_SIZE              32 /**< Maximum number of bytes for usable MPIs. */
++#define MBEDTLS_ECP_WINDOW_SIZE            2 /**< Maximum window size used */
++#define MBEDTLS_ECP_FIXED_POINT_OPTIM      0 /**< Enable fixed-point speed-up */
++
++// ==============================================================================
++// Platform / entropy
++// ==============================================================================
++
++#define MBEDTLS_PLATFORM_SNPRINTF_MACRO snprintf
++
++#if OPENTHREAD_CONFIG_HEAP_EXTERNAL_ENABLE
++#define MBEDTLS_PLATFORM_STD_CALLOC     otPlatCryptoCAlloc /**< Default allocator to use, can be undefined */
++#define MBEDTLS_PLATFORM_STD_FREE       otPlatCryptoFree   /**< Default free to use, can be undefined */
++#else
++#define MBEDTLS_MEMORY_BUFFER_ALLOC_C
++#endif
++
++// For host / simulation builds:
++// Use PSA's built-in CTR_DRBG seeded once from /dev/urandom.
++#if OPENTHREAD_EXAMPLES_SIMULATION || OPENTHREAD_PLATFORM_POSIX
++#define MBEDTLS_CTR_DRBG_C
++#define MBEDTLS_PSA_BUILTIN_GET_ENTROPY
++// Lift the on-device AES-128-only restriction so CTR_DRBG can use AES-256.
++#undef MBEDTLS_AES_ONLY_128_BIT_KEY_LENGTH
++#else
++// For device builds:
++// Use the platform's hardware TRNG via mbedtls_psa_external_get_random() override.
++#define MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
++#endif
++
++#define MBEDTLS_PLATFORM_C
++#define MBEDTLS_PLATFORM_MEMORY
++#define MBEDTLS_PLATFORM_NO_STD_FUNCTIONS
++#define MBEDTLS_HAVE_ASM
++
++// MD layer (HMAC / generic digests). Required for otPlatCryptoHmacSha256*
++// and for Mbed TLS 4.x where mbedtls_md_setup() no longer accepts hmac=1.
++#define MBEDTLS_MD_C
++
++// PK / PEM / BASE64 (configured via TF-PSA-Crypto in Mbed TLS 4.x)
++#define MBEDTLS_PK_C
++#define MBEDTLS_PK_PARSE_C
++
++#if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE || OPENTHREAD_CONFIG_TLS_ENABLE || OPENTHREAD_CONFIG_ECDSA_ENABLE
++#define MBEDTLS_BASE64_C
++#define MBEDTLS_PEM_PARSE_C
++#endif
++
++#if OPENTHREAD_CONFIG_ECDSA_ENABLE
++#define MBEDTLS_PK_WRITE_C
++#endif
++
++#if defined(MBEDTLS_USER_CONFIG_FILE)
++#include MBEDTLS_USER_CONFIG_FILE
++#endif
++
++#endif /* OT_PSA_CRYPTO_CONFIG_H */
+diff --git a/third_party/mbedtls/repo b/third_party/mbedtls/repo
+index e185d7fd85499c8ce5ca2a54f5cf8fe7dbe3f8df..0fe989b6b514192783c469039edd325fd0989806 160000
+--- a/third_party/mbedtls/repo
++++ b/third_party/mbedtls/repo
+@@ -1 +1 @@
+-Subproject commit e185d7fd85499c8ce5ca2a54f5cf8fe7dbe3f8df
++Subproject commit 0fe989b6b514192783c469039edd325fd0989806

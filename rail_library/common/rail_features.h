@@ -106,7 +106,7 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports OFDM PA.
 /// See also runtime refinement \ref RAIL_SupportsOFDMPA().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_OFDM_PA.
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5 || _SILICON_LABS_32B_SERIES_2_CONFIG == 10)
 #define RAIL_SUPPORTS_OFDM_PA 1
 #else
 #define RAIL_SUPPORTS_OFDM_PA 0
@@ -216,6 +216,7 @@ extern "C" {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14) \
@@ -231,7 +232,8 @@ extern "C" {
 /// Boolean to indicate whether the selected chip supports HFXO compensation.
 /// See also runtime refinement \ref RAIL_SupportsHFXOCompensation().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_HFXO_COMPENSATION.
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10) \
   || (_SILICON_LABS_32B_SERIES_3_CONFIG == 353))
 #define RAIL_SUPPORTS_HFXO_COMPENSATION RAIL_SUPPORTS_EXTERNAL_THERMISTOR
 #else
@@ -247,6 +249,7 @@ extern "C" {
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 7)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)  \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 9)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 11) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 14))
@@ -317,7 +320,7 @@ extern "C" {
 /// VDET voltage measurement feature.
 /// See also runtime refinement \ref RAIL_SupportsVdet().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_VDET.
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10)
 #define RAIL_SUPPORTS_VDET 1
 #else
 #define RAIL_SUPPORTS_VDET 0
@@ -652,7 +655,8 @@ extern "C" {
 /// RAIL_IEEE802154_SupportsGModeSwitch().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_IEEE802154_SUPPORTS_G_MODE_SWITCH.
 #if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10))
 #define RAIL_IEEE802154_SUPPORTS_G_MODESWITCH \
   RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868  // limit to Sub-GHz for now
 #else
@@ -736,7 +740,7 @@ extern "C" {
 /// or concurrent mode.
 /// See also runtime refinement \ref RAIL_IEEE802154_SupportsDualPaConfig().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_IEEE802154_SUPPORTS_DUAL_PA_CONFIG.
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5 || _SILICON_LABS_32B_SERIES_2_CONFIG == 10)
 #define RAIL_IEEE802154_SUPPORTS_DUAL_PA_CONFIG 1
 #else
 #define RAIL_IEEE802154_SUPPORTS_DUAL_PA_CONFIG 0
@@ -744,7 +748,8 @@ extern "C" {
 
 /// Boolean to indicate whether the selected chip supports the pa power setting table.
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE.
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10) \
   || (_SILICON_LABS_32B_SERIES_3_CONFIG >= 300))
 #define RAIL_SUPPORTS_DBM_POWERSETTING_MAPPING_TABLE 1
 #else
@@ -806,8 +811,9 @@ extern "C" {
 /// See also runtime refinement \ref
 /// RAIL_SupportsProtocolWiSUN().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_PROTOCOL_WI_SUN.
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8) \
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 8)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUPPORTS_PROTOCOL_WI_SUN 1
 #else
@@ -972,8 +978,9 @@ extern "C" {
 /// configurable RSSI threshold set by \ref RAIL_SetRssiDetectThreshold().
 /// See also runtime refinement \ref RAIL_SupportsRssiDetectThreshold().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_RSSI_DETECT_THRESHOLD.
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 5) \
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 3)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 13))
 #define RAIL_SUPPORTS_RSSI_DETECT_THRESHOLD (1U)
 #else
@@ -984,7 +991,7 @@ extern "C" {
 /// thermal protection set by \ref RAIL_ConfigThermalProtection().
 /// See also runtime refinement \ref RAIL_SupportsThermalProtection().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_THERMAL_PROTECTION.
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5 || _SILICON_LABS_32B_SERIES_2_CONFIG == 10)
   #define RAIL_SUPPORTS_THERMAL_PROTECTION  (1U)
 #else
   #define RAIL_SUPPORTS_THERMAL_PROTECTION  (0U)
@@ -1004,7 +1011,7 @@ extern "C" {
 /// enabled by \ref RAIL_RX_OPTION_ENABLE_COLLISION_DETECTION
 /// See also runtime refinement \ref RAIL_SupportsCollisionDetection().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_COLLISION_DETECTION.
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5 || _SILICON_LABS_32B_SERIES_2_CONFIG == 10)
   #define RAIL_SUPPORTS_COLLISION_DETECTION  (1U)
 #else
   #define RAIL_SUPPORTS_COLLISION_DETECTION  (0U)
@@ -1037,7 +1044,7 @@ extern "C" {
 /// bypass for external FEM.
 /// See also runtime refinement \ref RAIL_SupportsPrsLnaBypass().
 /// @deprecated RAIL 2.x synonym of \ref SL_RAIL_SUPPORTS_PRS_LNA_BYPASS.
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5 || _SILICON_LABS_32B_SERIES_2_CONFIG == 10)
   #define RAIL_SUPPORTS_PRS_LNA_BYPASS (1U)
 #else
   #define RAIL_SUPPORTS_PRS_LNA_BYPASS (0U)

@@ -8,9 +8,12 @@ description: >
   leading bracket prefix (timestamp and/or log type) is configured in
   sl_log_formatted_iostream_config.h. Requires the log_backend_iostream
   component for transport.
-  Formatted strings are currently supported only for host logs.
-  Captive core logs do not support formatted output; instead, they are emitted
-  in an encoded form and require a post processing script for decoding and interpretation.
+  Formatted strings are currently supported only for host logs. Numeric event
+  records are not emitted at all in this mode: the ring-buffer write path
+  returns SL_STATUS_NOT_SUPPORTED, so this backend cannot carry captive core
+  records in any form, encoded or otherwise. A project that needs captive core
+  output must select log_backend_iostream_compact, which writes the records
+  verbatim for offline decoding, or log_backend_systemview.
 category: Services|Log|Log Backend I/O Stream
 quality: production
 metadata:
@@ -20,7 +23,6 @@ provides:
 - name: log_backend
 - name: log_backend_iostream_impl
 - name: log_backend_iostream_formatted
-  condition: [device_si91x]
 requires:
 - name: iostream_recommended_console
 - name: log
@@ -42,3 +44,6 @@ template_contribution:
   value: log_default_ring_buffer
 - name: component_catalog
   value: log_formatted_output
+documentation:
+  docset: gecko-platform
+  document: platform-service/iostream

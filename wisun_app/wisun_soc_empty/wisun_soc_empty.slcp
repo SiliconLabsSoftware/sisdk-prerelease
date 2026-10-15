@@ -10,6 +10,10 @@ component:
   - id: "segger_rtt"
   - id: "wisun_stack"
   - id: "wisun_stack_lfn"
+  - id: "wisun_lfn_parent"
+    condition: [device_sdid_220]
+  - id: "wisun_lfn_parent"
+    condition: [device_sdid_235]
   - id: "power_manager"
     condition: [device_sdid_210]
   - id: "wisun_stack_ffn"

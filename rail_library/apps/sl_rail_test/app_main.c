@@ -311,6 +311,8 @@ static void changeTxPayload(uint32_t offset,
 #ifdef _SILICON_LABS_32B_SERIES_2
 #define sl_hal_emu_get_reset_cause RMU_ResetCauseGet
 #define sl_hal_emu_clear_reset_cause RMU_ResetCauseClear
+#elif !defined(_EMU_RSTCAUSE_MASK)
+#define sl_hal_emu_get_reset_cause sl_hal_emu_get_soft_reset_cause
 #endif
 // When Power Manager is absent it cannot supply sl_power_manager_em4_unlatch_pin_retention(),
 // so provide a replacement: the EMU function (inlined in em_emu.h) on Series-2, no-op elsewhere.
@@ -338,7 +340,9 @@ void sl_rail_test_internal_app_init(void)
 
   // Grab the reset cause
   uint32_t resetCause = sl_hal_emu_get_reset_cause();
+#if !defined(_EMU_RSTCAUSE_MASK)
   sl_hal_emu_clear_reset_cause(); // So resetCause is rational and not an accumulated mess
+#endif
   // Release GPIOs that were held by EM4h to ensure proper startup
   sl_power_manager_em4_unlatch_pin_retention();
 

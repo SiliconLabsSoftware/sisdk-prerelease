@@ -74,13 +74,14 @@ extern "C" {
  *   depending on the frequency mode, until the transmit is really completed. Once the transmit is
  *   completed the requirement is removed and the system can go to a lower energy mode if allowed.
  *
- *   On the receive side, a requirement on EM1 or the clock is kept active,, depending on the
+ *   On the receive side, a requirement on EM1 or the clock is kept active, depending on the
  *   frequency mode, is added if the application can receive data asynchronously. Meaning that
  *   the system can receive data when the MCU is in sleep mode (EM1 or EM2 to allow the reception).
  *   Allowing the reception in sleep mode will obviously increase the power consumption.
- *   Otherwise, If the system doesn't expect to receive anything, no requirement is added and
- *   the system can go to the lowest Energy mode allowed. You can control this behavior using a
- *   configuration per instance, see the following configuration:
+ *   Otherwise, if the system does not expect to receive anything, no requirement is added.
+ *   High-frequency EUSART instances are disabled before EM2 entry and restored after wake;
+ *   low-frequency EUSART instances are EM2-capable and remain enabled. You can control the
+ *   reception behavior using a configuration per instance, see the following configuration:
  *
  *       SL_IOSTREAM_EUSART_<instance_name>_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
  *
@@ -149,7 +150,7 @@ typedef struct {
 #if defined(EUSART_COUNT)
   uint8_t port_index;                           ///< Port index for GPIO routing
 #endif
-#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT))
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   sl_slist_node_t node;
 #endif
 } sl_iostream_eusart_context_t;

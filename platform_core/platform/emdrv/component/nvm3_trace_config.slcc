@@ -19,4 +19,7 @@ provides:
 - name: nvm3_trace_config
 validation_helper:
 - path: platform/emdrv/nvm3/config/nvm3_time_trace_validation.lua
+documentation:
+  docset: gecko-platform
+  document: platform-driver/nvm3
 root_path: platform_core

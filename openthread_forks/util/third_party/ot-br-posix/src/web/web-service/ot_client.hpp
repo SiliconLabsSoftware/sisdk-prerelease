@@ -43,14 +43,18 @@ namespace Web {
 
 #define OT_SCANNED_NET_BUFFER_SIZE 250
 #define OT_SET_MAX_DATA_SIZE 250
-#define OT_NETWORK_NAME_MAX_SIZE 17
+// OpenThread dataset.h defines OT_NETWORK_NAME_MAX_SIZE as 16 (bytes, sans NUL).
+// Including mbedtls headers (e.g. via pskc.hpp) can pull that in first; do not redefine.
+#ifndef OT_NETWORK_NAME_MAX_SIZE
+#define OT_NETWORK_NAME_MAX_SIZE 16
+#endif
 #define OT_HARDWARE_ADDRESS_SIZE 8
 #define OT_PREFIX_SIZE 8
 #define OT_ROUTER_ROLE 2
 
 struct WpanNetworkInfo
 {
-    char     mNetworkName[OT_NETWORK_NAME_MAX_SIZE];
+    char     mNetworkName[OT_NETWORK_NAME_MAX_SIZE + 1]; ///< Includes terminating NUL
     bool     mAllowingJoin;
     uint16_t mPanId;
     uint16_t mChannel;

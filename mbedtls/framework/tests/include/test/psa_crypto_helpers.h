@@ -9,6 +9,7 @@
 #ifndef PSA_CRYPTO_HELPERS_H
 #define PSA_CRYPTO_HELPERS_H
 
+#include "build_info.h"
 #include "test/helpers.h"
 
 #if (MBEDTLS_VERSION_MAJOR < 4 && defined(MBEDTLS_PSA_CRYPTO_C)) || \
@@ -17,7 +18,12 @@
 #endif
 
 #include <psa/crypto.h>
+
+#if !defined(MBEDTLS_VERSION_MAJOR) || MBEDTLS_VERSION_MAJOR >= 4
+#include <mbedtls/private/ctr_drbg.h>
+#else
 #include <mbedtls/ctr_drbg.h>
+#endif
 
 #if defined(MBEDTLS_PSA_CRYPTO_C)
 /** Initialize the PSA Crypto subsystem. */
@@ -536,10 +542,12 @@ uint64_t mbedtls_test_parse_binary_string(data_t *bin_string);
 #endif /* MBEDTLS_PSA_CRYPTO_CLIENT */
 
 /* Helper macro to get the size of the each key slot buffer. */
+#if !defined(MBEDTLS_PSA_KEY_BUFFER_MAX_SIZE)
 #if defined(MBEDTLS_PSA_STATIC_KEY_SLOTS)
 #define MBEDTLS_PSA_KEY_BUFFER_MAX_SIZE     MBEDTLS_PSA_STATIC_KEY_SLOT_BUFFER_SIZE
 #else
 #define MBEDTLS_PSA_KEY_BUFFER_MAX_SIZE     SIZE_MAX
+#endif
 #endif
 
 /* Helper macro for the PK module to check whether MBEDTLS_PSA_STATIC_KEY_SLOT_BUFFER_SIZE

@@ -195,7 +195,7 @@ configuration:
     value: "1"
 
 tag:
-  - prebuilt_demo
+  # - prebuilt_demo
   - hwfilter:device:device_supports_bluetooth
   - hwfilter:device:device_series_2
   - hwfilter:board:hardware_board_has_vcom_hardware_flowcontrol

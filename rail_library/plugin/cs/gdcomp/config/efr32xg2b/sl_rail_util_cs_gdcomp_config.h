@@ -37,75 +37,153 @@ extern "C" {
 
 #define SL_RAIL_UTIL_CS_GDCOMP_RUNTIME_PA_TABLE_SELECTION 0
 
+// This tracks entreis of AGC_STATUS_0 gainIndex values.
 // AGC_STATUS_0 goes from 0 to 33 i.e. 34 values,
-// but we subtract 3 to get table index, so can do
-// with 31 values in the table.
-#define SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH 31U
+// and firmware subtracts 3 to get table index.
+// But validation has given us values from 1-33,
+// so the table length is 33.
+#define SL_RAIL_UTIL_CS_GDCOMP_TABLE_LENGTH 33U
 
-#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_0DBM_PA \
-  {                                              \
-    97, 98, 95, 98, 97,                          \
-    98, 95, 94, 96, 99,                          \
-    98, 102, 95, 102, 97,                        \
-    96, 97, 99, 95, 91,                          \
-    88, 93, 93, 93, 93,                          \
-    93, 93, 93, 93, 93,                          \
-    93,                                          \
+// RTT slope (per channel) and offset are S16.4, 1 LSB = 1/16 ns.
+// Converted from Q8 half-nanoseconds by dividing by 32. PBR entries are unchanged.
+// Separate tables are provided per PHY (BLE 1M and BLE 2M). The HAL selects the
+// variant that matches the PHY applied when CS is configured. PBR phase tables
+// remain shared across PHYs.
+//
+// The 10 dBm tables are the BLE 1M and BLE 2M validation data for AGC index
+// 1 through 33. The 0 dBm and 20 dBm tables keep the previous values, and
+// entries past the last measured value repeat that value. Their 2M tables
+// use the same values as 1M until 2M data is available for those PA settings.
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_0DBM_PA_1M \
+  {                                                 \
+    3, 3, 3, 3, 3,                                  \
+    3, 3, 3, 3, 3,                                  \
+    3, 3, 3, 3, 3,                                  \
+    3, 3, 3, 3, 3,                                  \
+    3, 3, 3, 3, 3,                                  \
+    3, 3, 3, 3, 3,                                  \
+    3, 3, 3,                                        \
   }
 
-#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_0DBM_PA \
-  {                                               \
-    -2435, -2766, -2950, -2708, -3329,            \
-    -3720, -1268, -1620, -2052, -2549,            \
-    -2640, -2776, -2464, -2590, -2516,            \
-    -2478, -2884, -2497, -2983, -2726,            \
-    -2883, -3091, -3091, -3091, -3091,            \
-    -3091, -3091, -3091, -3091, -3091,            \
-    -3091,                                        \
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_0DBM_PA_2M \
+  {                                                 \
+    3, 3, 3, 3, 3,                                  \
+    3, 3, 3, 3, 3,                                  \
+    3, 3, 3, 3, 3,                                  \
+    3, 3, 3, 3, 3,                                  \
+    3, 3, 3, 3, 3,                                  \
+    3, 3, 3, 3, 3,                                  \
+    3, 3, 3,                                        \
   }
 
-#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_10DBM_PA \
-  {                                               \
-    97, 98, 95, 98, 97,                           \
-    98, 95, 94, 96, 99,                           \
-    98, 102, 95, 102, 97,                         \
-    96, 97, 99, 95, 91,                           \
-    88, 93, 93, 93, 93,                           \
-    93, 93, 93, 93, 93,                           \
-    93,                                           \
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_0DBM_PA_1M \
+  {                                                  \
+    -76, -86, -92, -85, -104,                        \
+    -116, -40, -51, -64, -80,                        \
+    -83, -87, -77, -81, -79,                         \
+    -77, -90, -78, -93, -85,                         \
+    -90, -97, -97, -97, -97,                         \
+    -97, -97, -97, -97, -97,                         \
+    -97, -97, -97,                                   \
   }
 
-#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_10DBM_PA \
-  {                                                \
-    -2435, -2766, -2950, -2708, -3329,             \
-    -3720, -1268, -1620, -2052, -2549,             \
-    -2640, -2776, -2464, -2590, -2516,             \
-    -2478, -2884, -2497, -2983, -2726,             \
-    -2883, -3091, -3091, -3091, -3091,             \
-    -3091, -3091, -3091, -3091, -3091,             \
-    -3091,                                         \
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_0DBM_PA_2M \
+  {                                                  \
+    -76, -86, -92, -85, -104,                        \
+    -116, -40, -51, -64, -80,                        \
+    -83, -87, -77, -81, -79,                         \
+    -77, -90, -78, -93, -85,                         \
+    -90, -97, -97, -97, -97,                         \
+    -97, -97, -97, -97, -97,                         \
+    -97, -97, -97,                                   \
   }
 
-#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_20DBM_PA \
-  {                                               \
-    97, 98, 95, 98, 97,                           \
-    98, 95, 94, 96, 99,                           \
-    98, 102, 95, 102, 97,                         \
-    96, 97, 99, 95, 91,                           \
-    88, 93, 93, 93, 93,                           \
-    93, 93, 93, 93, 93,                           \
-    93,                                           \
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_10DBM_PA_1M \
+  {                                                  \
+    -3, -3, -3, -3, -3,                              \
+    -3, -3, -3, -3, -3,                              \
+    -3, -3, -3, -3, -3,                              \
+    -3, -3, -3, -3, -3,                              \
+    -3, -3, -3, -3, -3,                              \
+    -3, -3, -3, -3, -3,                              \
+    -3, -3, -3,                                      \
   }
 
-#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_20DBM_PA \
-  {                                                \
-    -2435, -2766, -2950, -2708, -3329,             \
-    -3720, -1268, -1620, -2052, -2549,             \
-    -2640, -2776, -2464, -2590, -2516,             \
-    -2478, -2884, -2497, -2983, -2726,             \
-    -2883, -3091, -3091, -3091, -3091,             \
-    -3091, -3091, -3091, -3091, -3091,             \
-    -3091,                                         \
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_10DBM_PA_2M \
+  {                                                  \
+    -1, -1, -1, -1, -1,                              \
+    -1, -1, -1, -1, -1,                              \
+    -1, -1, -1, -1, -1,                              \
+    -1, -1, -1, -1, -1,                              \
+    -1, -1, -1, -1, -1,                              \
+    -1, -1, -1, -1, -1,                              \
+    -1, -1, -1,                                      \
+  }
+
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_10DBM_PA_1M \
+  {                                                   \
+    -226, -186, -163, -248, -211,                     \
+    -218, -216, -214, -214, -218,                     \
+    -222, -217, -213, -220, -218,                     \
+    -223, -220, -218, -215, -211,                     \
+    -209, -207, -207, -207, -204,                     \
+    -204, -203, -204, -263, -231,                     \
+    -220, -275, -240,                                 \
+  }
+
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_10DBM_PA_2M \
+  {                                                   \
+    -340, -301, -280, -360, -326,                     \
+    -326, -329, -331, -333, -334,                     \
+    -335, -336, -336, -334, -337,                     \
+    -334, -333, -337, -330, -329,                     \
+    -324, -322, -321, -321, -324,                     \
+    -319, -322, -319, -379, -345,                     \
+    -336, -383, -361,                                 \
+  }
+
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_20DBM_PA_1M \
+  {                                                  \
+    3, 3, 3, 3, 3,                                   \
+    3, 3, 3, 3, 3,                                   \
+    3, 3, 3, 3, 3,                                   \
+    3, 3, 3, 3, 3,                                   \
+    3, 3, 3, 3, 3,                                   \
+    3, 3, 3, 3, 3,                                   \
+    3, 3, 3,                                         \
+  }
+
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_SLOPE_20DBM_PA_2M \
+  {                                                  \
+    3, 3, 3, 3, 3,                                   \
+    3, 3, 3, 3, 3,                                   \
+    3, 3, 3, 3, 3,                                   \
+    3, 3, 3, 3, 3,                                   \
+    3, 3, 3, 3, 3,                                   \
+    3, 3, 3, 3, 3,                                   \
+    3, 3, 3,                                         \
+  }
+
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_20DBM_PA_1M \
+  {                                                   \
+    -76, -86, -92, -85, -104,                         \
+    -116, -40, -51, -64, -80,                         \
+    -83, -87, -77, -81, -79,                          \
+    -77, -90, -78, -93, -85,                          \
+    -90, -97, -97, -97, -97,                          \
+    -97, -97, -97, -97, -97,                          \
+    -97, -97, -97,                                    \
+  }
+
+#define SL_RAIL_UTIL_CS_GDCOMP_RTT_OFFSET_20DBM_PA_2M \
+  {                                                   \
+    -76, -86, -92, -85, -104,                         \
+    -116, -40, -51, -64, -80,                         \
+    -83, -87, -77, -81, -79,                          \
+    -77, -90, -78, -93, -85,                          \
+    -90, -97, -97, -97, -97,                          \
+    -97, -97, -97, -97, -97,                          \
+    -97, -97, -97,                                    \
   }
 
 // AUTOGENERATED testRunCalibration.m 20230828_2220_c06eaf7f
@@ -117,7 +195,7 @@ extern "C" {
     5, 4, 5, 4, 4,                         \
     2, 3, 3, 1, 1,                         \
     1, 1, 1, 1, 1,                         \
-    1,                                     \
+    1, 1, 1,                               \
   }
 
 // AUTOGENERATED testRunCalibration.m 20230828_2220_c06eaf7f
@@ -129,7 +207,7 @@ extern "C" {
     52, 51, 51, 53, 53,                     \
     53, 53, 53, 52, 53,                     \
     52, 53, 53, 51, 52,                     \
-    52,                                     \
+    52, 52, 52,                             \
   }
 
 // AUTOGENERATED testRunCalibration.m 20230908_2159_9791097d
@@ -141,7 +219,7 @@ extern "C" {
     26, 27, 26, 27, 30,                     \
     30, 30, 30, 31, 31,                     \
     31, 31, 31, 31, 31,                     \
-    31,                                     \
+    31, 31, 31,                             \
   }
 
 #ifdef __cplusplus

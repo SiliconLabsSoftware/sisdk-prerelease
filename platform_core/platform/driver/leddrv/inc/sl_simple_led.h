@@ -249,6 +249,16 @@ sl_led_state_t sl_simple_led_get_state(void *led_handle);
 ///   Do **not** pass @c &sl_led_led0 to @c sl_simple_led_turn_on (or similar), and do **not**
 ///   use @c &simple_led0_context from application code.
 ///
+///   @n @section simple_led_low_power Low-Power Considerations
+///
+///   Peripherals that are not used should be disabled before the device enters sleep. On Series 3
+///   devices, an enabled non-EM2 peripheral, such as a TIMER, prevents the device from entering
+///   EM2 or lower energy modes.
+///
+///   The Simple LED driver only uses GPIO, which keeps its state in EM2, so a Simple LED can be
+///   left on or off while sleeping. PWM driven LEDs are different: see the Simple RGB PWM LED
+///   driver, which requires the LED to be turned off before EM2 on Series 3 devices.
+///
 /// @} end group simple_led ********************************************************/
 
 #ifdef __cplusplus

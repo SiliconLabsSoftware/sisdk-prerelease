@@ -99,7 +99,9 @@ void sl_iperf_service_init(void);
 
 /**************************************************************************//**
  * @brief Initialize the iPerf test.
- * @details Initialize a test descriptor with default content
+ * @details Initialize a test descriptor with default content. Any heap buffer
+ *          still owned by the descriptor is freed first; the descriptor must
+ *          be zero-initialized on first use.
  * @param[in, out] test Test descriptor
  * @param[in] mode Mode
  * @param[in] protocol Protocol
@@ -119,16 +121,26 @@ void sl_iperf_test_set_default_logger(sl_iperf_test_t * const test);
 
 /**************************************************************************//**
  * @brief Set the default internal test buffer.
- * @details Helper function
+ * @details Allocates a heap RX/TX buffer of test->opt.buf_len bytes.
+ *          Any buffer previously owned by the descriptor is freed first.
  * @param[out] test Test descriptor
  *****************************************************************************/
 void sl_iperf_test_set_default_buff(sl_iperf_test_t * const test);
 
+/**************************************************************************//**
+ * @brief Free the heap buffer owned by a test descriptor.
+ * @details No-op if test is NULL or conn.buff is already NULL.
+ * @param[in,out] test Test descriptor
+ *****************************************************************************/
+void sl_iperf_test_free_buff(sl_iperf_test_t * const test);
+
 #if !defined(SL_IPERF_CMSIS_RTOS_DISABLED)
 /**************************************************************************//**
  * @brief Add the iPerf test to the execution queue.
- * @details Add test to the input messagequeue.
- * @param[in] test Test descriptor
+ * @details Copies the descriptor into the request queue. On success, buffer
+ *          ownership moves with the queued copy and caller conn.buff is
+ *          cleared. On failure, the caller's buffer is freed.
+ * @param[in,out] test Test descriptor
  * @return true On Success
  * @return false On Failure
  *****************************************************************************/

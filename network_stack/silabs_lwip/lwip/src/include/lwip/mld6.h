@@ -75,10 +75,10 @@ struct mld_group {
 err_t  mld6_stop(struct netif *netif);
 void   mld6_report_groups(struct netif *netif);
 void   mld6_tmr(void);
-#if SL_LWIP_MLD6_ONDEMAND_TIMER
-/** Clean up MLD6 state when link goes down. */
-void   mld6_cleanup_on_link_down(struct netif *netif);
-#endif /* SL_LWIP_MLD6_ONDEMAND_TIMER */
+#if SL_LWIP_MLD6_ONDEMAND_TIMER && SL_LWIP_LINK_DOWN_CLEANUP
+/** Clear MLD group timers; stop MLD6 timer on last link. */
+void   sli_mld6_cleanup_on_link_down(struct netif *netif);
+#endif /* SL_LWIP_MLD6_ONDEMAND_TIMER && SL_LWIP_LINK_DOWN_CLEANUP */
 struct mld_group *mld6_lookfor_group(struct netif *ifp, const ip6_addr_t *addr);
 void   mld6_input(struct pbuf *p, struct netif *inp);
 err_t  mld6_joingroup(const ip6_addr_t *srcaddr, const ip6_addr_t *groupaddr);

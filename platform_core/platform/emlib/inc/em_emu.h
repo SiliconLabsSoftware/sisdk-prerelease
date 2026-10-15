@@ -434,9 +434,12 @@ typedef enum {
 typedef enum {
 #if defined(_DCDC_EM23CTRL0_IPKVAL_Load5mA)
   emuDcdcPeakCurrent_Load5mA  = _DCDC_EM23CTRL0_IPKVAL_Load5mA,  /**< Load 5mA, peak current 90mA. */
-#endif
-#if defined(_DCDC_EM23CTRL0_IPKVAL_LOAD5MA)
+#elif defined(_DCDC_EM23CTRL0_IPKVAL_LOAD5MA)
   emuDcdcPeakCurrent_Load5mA  = _DCDC_EM23CTRL0_IPKVAL_LOAD5MA,  /**< Load 5mA, peak current 90mA. */
+#elif defined(_DCDC_EM23CTRL0_IPKVAL_DEFAULT)
+  /* Load5mA is hidden in the device header.
+     Use the DCDC default encoding as the compatible fallback. */
+  emuDcdcPeakCurrent_Load5mA  = _DCDC_EM23CTRL0_IPKVAL_DEFAULT, /**< Default peak current in EM2/3. */
 #endif
 #if defined(_DCDC_EM23CTRL0_IPKVAL_Load10mA)
   emuDcdcPeakCurrent_Load10mA = _DCDC_EM23CTRL0_IPKVAL_Load10mA, /**< Load 10mA, peak current 150mA. */

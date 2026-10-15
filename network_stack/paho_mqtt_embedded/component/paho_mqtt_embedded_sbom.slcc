@@ -7,7 +7,7 @@ description: >
   dual-licensed under EPL-2.0 or EDL-1.0 (the declared project license per the
   repository LICENSE/NOTICE; EDL-1.0 is the BSD-3-Clause text), while the
   Silicon Labs Si91x lwIP integration files (MQTTSi91x_lwip.c,
-  sli_lwip_mqtt_mbedtls_config.h) are licensed under Zlib.
+  sli_lwip_mqtt_mbedtls_config.h, sli_lwip_mqtt_psa_crypto_config.h) are licensed under Zlib.
 category: Third Party
 quality: production
 ui_hints:

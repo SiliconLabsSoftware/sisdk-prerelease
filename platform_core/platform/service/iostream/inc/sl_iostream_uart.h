@@ -216,6 +216,9 @@ typedef struct {
   IRQn_Type rx_irq_number;                  ///< Receive IRQ Number
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   IRQn_Type tx_irq_number;                  ///< Transmit IRQ Number
+  sl_status_t (*suspend)(const void *context);   ///< Suspend UART hardware before EM2
+  sl_status_t (*resume)(const void *context);    ///< Resume UART hardware after sleep
+  void (*unlatch_pins)(const void *context);     ///< Unlatch GPIO pins after EM0 restore
 #endif
 } sli_iostream_uart_periph_t;
 
@@ -262,6 +265,7 @@ typedef struct {
   bool em_req_added;                        ///< em_req_added. Available only when Power Manager present.
   bool rx_enable;                           ///< Enables reception while sleeping and keeps the clock enabled in deep sleep
   bool enable_high_frequency;               ///< Indicates if high frequency mode is enabled
+  bool uart_sleep_suspended;                ///< UART disabled by the sleep-entry hook. Cleared after the EM0 unlatch.
 #endif
   bool lf_to_crlf;                          ///< lf_to_crlf
   bool sw_flow_control;                     ///< software flow control

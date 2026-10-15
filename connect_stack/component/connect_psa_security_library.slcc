@@ -1,9 +1,11 @@
 id: "connect_psa_security_library"
 label: "AES Security (Library)"
 package: "connect_stack"
+description: "Provides the Connect AES Security library."
 category: "Connect"
 quality: "production"
-description: "Provides the Connect AES Security library."
+ui_hints:
+  visibility: never
 provides:
 - name: "connect_aes_security_implementation"
   allow_multiple: true

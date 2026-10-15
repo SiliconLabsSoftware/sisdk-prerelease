@@ -2432,7 +2432,7 @@ PACKSTRUCT( struct sl_bt_cmd_cs_create_config_s
     uint8_t channel_selection_type;
     uint8_t ch3c_shape;
     uint8_t ch3c_jump;
-    uint8_t reserved;
+    uint8_t cs_enhancements;
 });
 
 typedef struct sl_bt_cmd_cs_create_config_s sl_bt_cmd_cs_create_config_t;
@@ -2559,7 +2559,7 @@ PACKSTRUCT( struct sl_bt_cmd_cs_test_start_s
     uint8_t t_pm_time;
     uint8_t t_sw_time;
     uint8_t tone_antenna_config;
-    uint8_t reserved;
+    uint8_t cs_enhancements;
     uint8_t snr_control_initiator;
     uint8_t snr_control_reflector;
     uint16_t drbg_nonce;

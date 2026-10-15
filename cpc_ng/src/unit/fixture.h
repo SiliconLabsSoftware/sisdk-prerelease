@@ -2,6 +2,7 @@
 #define CPC_FIXTURE_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "../sli_cpc.h"
@@ -21,78 +22,79 @@ extern "C" {
 /// Bitmask of endpoint events observed by @ref cpc_test_event_cb.
 extern int cpc_test_event_mask;
 
-/// True after @ref cpc_test_bus_start succeeds; cleared by @ref cpc_test_bus_stop.
-extern bool cpc_test_bus_started;
-
 /**
- * @brief Drive the bus forward one scheduling step.
+ * @brief Drive @p bus forward one scheduling step.
  *
- * On FreeRTOS builds this yields to the CPC task; on baremetal it runs
- * `sli_cpc_bus_process_action()` once.
+ * FreeRTOS: yield so the bus's CPC task can run. Baremetal: process @p bus once.
  */
-void cpc_test_pump(void);
+void cpc_test_pump(sl_cpc_bus_t *bus);
 
 /**
- * @brief Yield until the mock retransmit timer is armed.
+ * @brief Yield until the mock retransmit timer is armed, pumping @p bus.
  *
  * After a reliable frame is transmitted the core may still be wrapping up
  * the TX-completion path. Poll a few times before asserting on the timer
  * queue or firing the timer.
  */
-void cpc_test_wait_retx_timer(void);
+void cpc_test_wait_retx_timer(sl_cpc_bus_t *bus);
 
 /**
- * @brief Bring up a fresh bus wired to the mock driver.
- *
- * Resets the virtual timer, initializes the bus kernel and core, and
- * clears @ref cpc_test_event_mask.
+ * @brief Initialize mock instance 0, or every mock when @p all is true.
  *
  * @param[in] lineno       Call-site line for Unity assertions.
- * @param[in] initialized  Initial @c g_bus->initialized value. Pass true to skip
+ * @param[in] initialized  Initial bus @c initialized flag. Pass true to skip
  *                         control bring-up; false when the test will start the
  *                         bus and drive that sequence.
+ * @param[in] all          When true, initialize every entry in
+ *                         @c sl_cpc_drv_mock_instances (requires count >= 2).
  */
-void cpc_test_setup(unsigned int lineno, bool initialized);
+void cpc_test_setup(unsigned int lineno, bool initialized, bool all);
 
 /**
- * @brief Convenience macro to setup test environment.
+ * @brief Convenience macro for @ref cpc_test_setup on mock instance 0.
  */
-#define TEST_CPC_SETUP(_initialized) cpc_test_setup(__LINE__, (_initialized))
+#define TEST_CPC_SETUP(initialized) cpc_test_setup(__LINE__, (initialized), false)
 
 /**
- * @brief Tear down the bus created by @ref cpc_test_setup.
+ * @brief Convenience macro for @ref cpc_test_setup on every mock instance.
  */
-void cpc_test_tear_down(unsigned int lineno);
+#define TEST_CPC_MULTI_BUS_SETUP(initialized) cpc_test_setup(__LINE__, (initialized), true)
 
 /**
- * @brief Convenience macro to tear down test environment.
+ * @brief Stop and deinit mock instance 0, or every mock when @p all is true.
  */
-#define TEST_CPC_TEAR_DOWN() cpc_test_tear_down(__LINE__)
+void cpc_test_tear_down(unsigned int lineno, bool all);
 
 /**
- * @brief Start the bus control endpoint for tests that need the init sequence.
- *
- * Sets @ref cpc_test_bus_started on success so teardown can call
- * @ref cpc_test_bus_stop.
+ * @brief Convenience macro for @ref cpc_test_tear_down on mock instance 0.
  */
-sl_status_t cpc_test_bus_start(unsigned int lineno);
+#define TEST_CPC_TEAR_DOWN() cpc_test_tear_down(__LINE__, false)
 
 /**
- * @brief Convenience macro: start the bus with failures reported at the call site.
+ * @brief Convenience macro for @ref cpc_test_tear_down on every mock instance.
  */
-#define TEST_CPC_BUS_START() cpc_test_bus_start(__LINE__)
+#define TEST_CPC_MULTI_BUS_TEAR_DOWN() cpc_test_tear_down(__LINE__, true)
 
 /**
- * @brief Stop the bus control endpoint started by @ref cpc_test_bus_start.
- *
- * No-op if the bus was not started. Clears @ref cpc_test_bus_started.
+ * @brief Return the mock bus at @p index in @c sl_cpc_drv_mock_instances.
  */
-void cpc_test_bus_stop(unsigned int lineno);
+sl_cpc_bus_t *cpc_test_mock_bus(unsigned int lineno, size_t index);
+
+#define CPC_TEST_MOCK_BUS(index) cpc_test_mock_bus(__LINE__, (index))
 
 /**
- * @brief Convenience macro: stop the bus with failures reported at the call site.
+ * @brief Start control on @p bus.
  */
-#define TEST_CPC_BUS_STOP() cpc_test_bus_stop(__LINE__)
+sl_status_t cpc_test_bus_start(unsigned int lineno, sl_cpc_bus_t *bus);
+
+#define TEST_CPC_BUS_START(bus) cpc_test_bus_start(__LINE__, (bus))
+
+/**
+ * @brief Stop control on @p bus if the fixture started it.
+ */
+void cpc_test_bus_stop(unsigned int lineno, sl_cpc_bus_t *bus);
+
+#define TEST_CPC_BUS_STOP(bus) cpc_test_bus_stop(__LINE__, (bus))
 
 /**
  * @brief Clear @ref cpc_test_event_mask.
@@ -100,14 +102,14 @@ void cpc_test_bus_stop(unsigned int lineno);
 void cpc_test_event_reset(void);
 
 /**
- * @brief Bind the mock bus to the primary control ops.
+ * @brief Bind @p bus to the primary control ops.
  */
-void cpc_test_set_role_primary(void);
+void cpc_test_set_role_primary(sl_cpc_bus_t *bus);
 
 /**
- * @brief Bind the mock bus to the secondary control ops.
+ * @brief Bind @p bus to the secondary control ops.
  */
-void cpc_test_set_role_secondary(void);
+void cpc_test_set_role_secondary(sl_cpc_bus_t *bus);
 
 /**
  * @brief Record endpoint events into @ref cpc_test_event_mask.
@@ -127,7 +129,7 @@ void cpc_test_write_payload(unsigned int lineno, sl_cpc_ep_t *ep, const uint8_t 
 /**
  * @brief Convenience macro: queue a payload with failures reported at the call site.
  */
-#define TEST_WRITE_PAYLOAD(_ep, _payload, _len) cpc_test_write_payload(__LINE__, (_ep), (_payload), (_len))
+#define TEST_WRITE_PAYLOAD(ep, payload, len) cpc_test_write_payload(__LINE__, (ep), (payload), (len))
 
 /**
  * @brief Register an endpoint and place it directly in the CONNECTED state.

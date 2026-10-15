@@ -22,3 +22,6 @@ template_contribution:
   value: 1
 - name: component_catalog
   value: crash_manager_backend_ram
+documentation:
+  docset: gecko-platform
+  document: platform-service/diagnostics

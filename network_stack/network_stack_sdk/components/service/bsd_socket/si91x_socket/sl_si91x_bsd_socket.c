@@ -541,7 +541,6 @@ static void sli_populate_source_address(struct sockaddr *addr,
 
 ssize_t recvfrom(int socket_id, void *buf, size_t buf_len, int flags, struct sockaddr *addr, socklen_t *addr_len)
 {
-  UNUSED_PARAMETER(flags); // Ignoring the 'flags' parameter
   sli_wifi_wait_period_t wait_time = 0;
   errno                            = 0;
 
@@ -568,6 +567,9 @@ ssize_t recvfrom(int socket_id, void *buf, size_t buf_len, int flags, struct soc
   request.socket_id = (uint8_t)si91x_socket->id;
   memcpy(request.requested_bytes, &buf_len, sizeof(buf_len));
   memcpy(request.read_timeout, &si91x_socket->read_timeout, sizeof(request.read_timeout));
+  if (sli_si91x_prepare_recv_wire_flags(flags, request.flags) < 0) {
+    return -1;
+  }
 
   // Configure wait time and send the command
   wait_time = (SLI_WIFI_WAIT_FOR_EVER | SLI_WIFI_WAIT_FOR_RESPONSE_BIT);

@@ -178,7 +178,7 @@ static psa_status_t get_attestation_get_public_key(uint8_t *key_buffer,
   return get_attestation_public_key(key_buffer);
 #else
   sl_status_t status = SL_STATUS_FAIL;
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
 
   status = sl_se_init();
   if (status != SL_STATUS_OK) {
@@ -201,7 +201,7 @@ static psa_status_t get_attestation_get_public_key(uint8_t *key_buffer,
 
   // Write the uncompressed format byte
   if (status == SL_STATUS_OK) {
-    memcpy(key_buffer + 1 , aligned_key_buffer, ATTESTATION_PUBLIC_KEY_SIZE - 1);
+    memcpy(key_buffer + 1, aligned_key_buffer, ATTESTATION_PUBLIC_KEY_SIZE - 1);
     key_buffer[0u] = 0x04;
   }
   return error_mapping_sl_status_to_psa_status(status);
@@ -595,7 +595,7 @@ enum tfm_security_lifecycle_t sli_attest_hal_get_security_lifecycle(void)
   debug_options.secure_invasive_lock = (bool)(syscfg_rootlock_status & SYSCFG_ROOTLOCKSTATUS_USERSPIDLOCK);
   debug_options.secure_non_invasive_lock = (bool)(syscfg_rootlock_status & SYSCFG_ROOTLOCKSTATUS_USERSPNIDLOCK);
   #else // _SYSCFG_ROOTLOCKSTATUS_MASK
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   sl_status_t status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
     return TFM_SLC_UNKNOWN;
@@ -1039,7 +1039,7 @@ psa_status_t sli_initial_attest_get_token(psa_invec in_vec[],
   size_t token_buf_size = out_vec[0].len;
   size_t token_size = 0u;
 
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   sl_status_t status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
     return error_mapping_sl_status_to_psa_status(status);
@@ -1068,7 +1068,7 @@ psa_status_t sli_initial_attest_get_token_size(psa_invec in_vec[],
   size_t challenge_size = *(size_t *)in_vec[1].base;
   size_t *token_buf_size = (size_t *)out_vec[0].base;
 
-  sl_se_command_context_t cmd_ctx = { 0 };
+  sl_se_command_context_t cmd_ctx;
   sl_status_t status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
     return error_mapping_sl_status_to_psa_status(status);

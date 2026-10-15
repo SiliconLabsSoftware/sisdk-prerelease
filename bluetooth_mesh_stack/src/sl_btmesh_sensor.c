@@ -55,7 +55,7 @@ static void uint8_to_buf(uint8_t *ptr, uint8_t n)
 /* int16 */
 static int16_t int16_from_buf(const uint8_t *ptr)
 {
-  return ((int16_t)ptr[0]) | ((int16_t)ptr[1] << 8);
+  return (int16_t)(((int16_t)ptr[0]) | ((int16_t)ptr[1] << 8));
 }
 
 static void int16_to_buf(uint8_t *ptr, int16_t n)
@@ -67,7 +67,7 @@ static void int16_to_buf(uint8_t *ptr, int16_t n)
 /* uint16 */
 static int16_t uint16_from_buf(const uint8_t *ptr)
 {
-  return ((int16_t)ptr[0]) | ((int16_t)ptr[1] << 8);
+  return (int16_t)(((int16_t)ptr[0]) | ((int16_t)ptr[1] << 8));
 }
 
 static void uint16_to_buf(uint8_t *ptr, uint16_t n)
@@ -320,7 +320,7 @@ uint8_t mesh_sensor_data_to_buf(uint16_t property_id, uint8_t *ptr, uint8_t *val
     {
       uint8_to_buf(ptr++, 4);
       const energy_in_a_period_of_day_t *e = (const energy_in_a_period_of_day_t*)value;
-      uint16_to_buf(ptr, e->energy);
+      uint16_to_buf(ptr, (uint16_t)e->energy);
       uint8_to_buf(ptr + 2, e->start_time);
       uint8_to_buf(ptr + 3, e->end_time);
       ret += 5;
@@ -421,7 +421,7 @@ uint8_t mesh_sensor_data_to_buf(uint16_t property_id, uint8_t *ptr, uint8_t *val
       ptr -= 2;
       break;
   }
-  return ret;
+  return (uint8_t)ret;
 }
 
 mesh_device_property_t mesh_sensor_data_from_buf(uint16_t property_id, const uint8_t *ptr)
@@ -662,9 +662,9 @@ sl_status_t mesh_lib_sensor_descriptors_from_buf(sensor_descriptor_t *descriptor
     int pos = 0;
     int idx = 0;
     while (pos < input_len) {
-      descriptor[idx].property_id = buf[pos] | (buf[pos + 1] << 8);
-      descriptor[idx].positive_tolerance = buf[pos + 2] | ((buf[pos + 3] & 0x0F) << 8);
-      descriptor[idx].negative_tolerance = (buf[pos + 3] >> 4) | (buf[pos + 4] << 4);
+      descriptor[idx].property_id = (sensor_property_id_t)(buf[pos] | (buf[pos + 1] << 8));
+      descriptor[idx].positive_tolerance = (sensor_positive_tolerance_t)(buf[pos + 2] | ((buf[pos + 3] & 0x0F) << 8));
+      descriptor[idx].negative_tolerance = (sensor_negative_tolerance_t)((buf[pos + 3] >> 4) | (buf[pos + 4] << 4));
       descriptor[idx].sampling_function = buf[pos + 5];
       descriptor[idx].measurement_period = buf[pos + 6];
       descriptor[idx].update_interval = buf[pos + 7];

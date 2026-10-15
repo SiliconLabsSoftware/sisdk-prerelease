@@ -48,6 +48,12 @@
 #include "storage/bootloadinfo/btl_storage_bootloadinfo.h"
 #endif
 
+#ifdef BOOTLOADER_SUPPORT_STORAGE
+#ifndef BTL_EM4_GPIO_RETENTION
+#include "driver/btl_driver_delay.h"
+#endif
+#endif
+
 #ifdef BOOTLOADER_SUPPORT_COMMUNICATION
 #include "communication/btl_communication.h"
 #endif
@@ -132,7 +138,8 @@ __STATIC_INLINE void lockBootloaderArea(void)
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) 
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
 __STATIC_INLINE void configureSMUToDefault(void)
 {
 #if defined(CMU_CLKEN1_SMU)
@@ -165,14 +172,15 @@ __STATIC_INLINE void configureSMUToDefault(void)
   CMU->CLKEN1_CLR = CMU_CLKEN1_SMU;
 #endif
 }
-#endif // BOOTLOADER_APPLOADER || _SILICON_LABS_32B_SERIES_2_CONFIG_[5,6,8,9,13,11]
+#endif // BOOTLOADER_APPLOADER || _SILICON_LABS_32B_SERIES_2_CONFIG_[5,6,8,9,13,11,14]
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
 __STATIC_INLINE void configureSMU(void)
 {
 #if defined(CMU_CLKEN1_SMU)
@@ -201,7 +209,7 @@ __STATIC_INLINE void configureSMU(void)
   CMU->CLKEN1_CLR = CMU_CLKEN1_SMU;
 #endif
 }
-#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_[5,6,8,9,13,11]
+#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_[5,6,8,9,13,11,14]
 
 void HardFault_Handler(void)
 {
@@ -318,6 +326,7 @@ int main(void)
       btl_em4GpioRetentionCounterIncrement();
     }
 #else
+   
     if (!reset_resetCounterEnabled()) {
       // Start counting the number of consecutive resets after the first reset
       reset_enableResetCounter();
@@ -338,9 +347,8 @@ int main(void)
 
     // Wait a short while (approx. 500 ms) before continuing.
     // This allows other operations to complete before the reset.
-    for (int i = 800000; i > 0; i--) {
-      // Do nothing
-    }
+    delay_init();
+    delay_milliseconds(500, true);
 #endif
   }
 #endif
@@ -522,9 +530,10 @@ void SystemInit2(void)
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) 
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
   configureSMU();
-#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_[5,6,8,9,13,11]
+#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_[5,6,8,9,13,11,14]
 
 #if defined(TEST_BOOTLOADER_RAM_CLEAN_UP)
   ram_clean_up_test();
@@ -696,7 +705,8 @@ void SystemInit2(void)
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
-    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
     configureSMUToDefault();
 #endif
     // Set vector table to application's table

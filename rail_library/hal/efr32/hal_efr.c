@@ -381,7 +381,7 @@ static const debugSignal_t debugSignals[] =
     }
   },
 #endif//RAIL_SUPPORTS_OFDM_PA
-#ifdef _SILICON_LABS_32B_SERIES_3
+#if defined(_SILICON_LABS_32B_SERIES_3) && (_SILICON_LABS_32B_SERIES_3_CONFIG != 381)
   // Requires custom firmware with debug channels enabled from RAC
   {
     .name = "RAC_SWDBG0",

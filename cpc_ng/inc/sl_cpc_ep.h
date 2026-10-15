@@ -327,13 +327,35 @@ sl_status_t sl_cpc_ep_pop_recv_buf(sl_cpc_ep_t *ep, sl_cpc_buf_t **out_buf);
 /***************************************************************************/ /**
  * Listen for an incoming connection on an endpoint.
  *
+ * If @p bus is set, the endpoint listens on that specific bus only.
+ *
+ * If @p bus is NULL, the endpoint listens on any bus. It is bound to the first
+ * bus that receives a connection for its ID.
+ *
+ * An endpoint that listens on a specific bus has priority over ones that listen
+ * on any bus. For example, if one endpoint listens for ID 10 on busX while
+ * another endpoint listens for ID 10 on any bus, the connection on busX will be
+ * routed to the endpoint that specifically listens for ID 10 on busX.
+ *
+ * Note that the same ID cannot be used by two endpoints on the same specific
+ * bus. For example, two endpoints cannot both listen for ID 10 on the same bus.
+ *
+ * However, several endpoints may listen for the same ID on any bus, because in
+ * this case each endpoint will be bound to a different bus for each connection.
+ * For example, if multiple endpoints listen for ID 10 on any bus, the first
+ * connection will be routed to the first endpoint, and the second connection
+ * will be routed to the second endpoint, and so on.
+ *
+ * @ref SL_CPC_EP_ID_CONTROL is reserved; the bus owns that endpoint.
+ *
  * @param[in] ep  Endpoint that will accept the connection.
- * @param[in] bus Bus the endpoint belongs to.
+ * @param[in] bus Bus to listen on, or NULL to listen on any bus.
  *
  * @retval SL_STATUS_OK                    Listen started successfully.
- * @retval SL_STATUS_NULL_POINTER          @p bus is NULL.
+ * @retval SL_STATUS_INVALID_PARAMETER     @p ep is the control endpoint.
  * @retval SL_STATUS_INVALID_STATE         Endpoint is not in a valid state to listen.
- * @retval SL_STATUS_ALREADY_INITIALIZED   Another endpoint with the same ID is open.
+ * @retval SL_STATUS_ALREADY_INITIALIZED   Another endpoint already listens for this ID
+ *                                         on @p bus.
  * @retval SL_STATUS_INVALID_CONFIGURATION Endpoint is not properly configured.
  ******************************************************************************/
 sl_status_t sl_cpc_ep_listen(sl_cpc_ep_t *ep, sl_cpc_bus_t *bus);
@@ -346,6 +368,7 @@ sl_status_t sl_cpc_ep_listen(sl_cpc_ep_t *ep, sl_cpc_bus_t *bus);
  *
  * @retval SL_STATUS_OK                    Connect started successfully.
  * @retval SL_STATUS_NULL_POINTER          @p bus is NULL.
+ * @retval SL_STATUS_INVALID_PARAMETER     @p ep is the control endpoint.
  * @retval SL_STATUS_INVALID_STATE         Endpoint is not in a valid state to connect.
  * @retval SL_STATUS_ALREADY_INITIALIZED   Another endpoint with the same ID is open.
  * @retval SL_STATUS_INVALID_CONFIGURATION Endpoint is not properly configured.

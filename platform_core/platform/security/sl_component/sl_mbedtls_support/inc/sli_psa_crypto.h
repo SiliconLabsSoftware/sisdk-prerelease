@@ -93,14 +93,10 @@ typedef uint32_t sli_psa_ksu_key_attributes_t;
 // names share the same C namespace.
 #define SLI_PSA_CONTEXT_ENUM_NAME(NAME) \
   NAME ## _e
-#define SLI_MBEDTLS_CONTEXT_ENUM_NAME(NAME) \
-  NAME ## _e
 
 // Convenience macros for getting the size of a context structure type
 #define SLI_PSA_CONTEXT_GET_RUNTIME_SIZE(NAME) \
   (sli_psa_context_get_size(SLI_PSA_CONTEXT_ENUM_NAME(NAME)))
-#define SLI_MBEDTLS_CONTEXT_GET_RUNTIME_SIZE(NAME) \
-  (sli_mbedtls_context_get_size(SLI_MBEDTLS_CONTEXT_ENUM_NAME(NAME)))
 
 // -----------------------------------------------------------------------------
 // Type Definitions
@@ -115,24 +111,6 @@ typedef enum {
   SLI_PSA_CONTEXT_ENUM_NAME(psa_key_derivation_operation_t),
   SLI_PSA_CONTEXT_ENUM_NAME(psa_key_attributes_t)
 } sli_psa_context_name_t;
-
-// Type names supported by sli_mbedtls_context_get_size.
-typedef enum {
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_aes_context),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_ccm_context),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_cipher_context_t),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_ctr_drbg_context),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_entropy_context),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_md_context_t),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_nist_kw_context),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_pk_context),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_sha1_context),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_sha256_context),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_ssl_config),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_ssl_context),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_ssl_cookie_ctx),
-  SLI_MBEDTLS_CONTEXT_ENUM_NAME(mbedtls_x509_crt)
-} sli_mbedtls_context_name_t;
 
 // -----------------------------------------------------------------------------
 // Function Declarations
@@ -157,23 +135,6 @@ extern "C" {
  *   Size (in bytes) of the context structure as expected by the current build.
  ******************************************************************************/
 size_t sli_psa_context_get_size(sli_psa_context_name_t ctx_type);
-
-/***************************************************************************//**
- * @brief
- *   Get the size of a named Mbed TLS context structure. This is valuable for
- *   code shipping as precompiled libraries and needing to link with a source
- *   version of PSA Crypto, since the context structures can change in size
- *   based on configuration options which might not have been present at library
- *   compilation time.
- *
- * @param ctx_type
- *   Which context structure to get the size of. Use
- *   #SLI_MBEDTLS_CONTEXT_ENUM_NAME(<mbed-tls-type>) as argument.
- *
- * @return
- *   Size (in bytes) of the context structure as expected by the current build.
- ******************************************************************************/
-size_t sli_mbedtls_context_get_size(sli_mbedtls_context_name_t ctx_type);
 
 /***************************************************************************//**
  * @brief
