@@ -4,7 +4,7 @@
 - package: boards
 - description: Kit BSP support for the EFR32xG24 Dev Kit.
 - category: Platform|Board|Kit|Development Kit
-- quality: production
+- quality: evaluation
 - metadata:
     sbom:
       license: Zlib

@@ -28,7 +28,7 @@
 static inline psa_status_t print_aead_error(psa_status_t ret)
 {
   if (ret != PSA_SUCCESS) {
-    printf("Failed: %d\n", ret);
+    printf("Failed: %ld\n", ret);
   }
   return ret;
 }

@@ -2,9 +2,9 @@
 - id: brd2506b_config
 - label: brd2506b config
 - description: Configuration files for BRD2506B
-- category: Platform|Board|Config
 - package: boards
-- quality: production
+- category: Platform|Board|Config
+- quality: evaluation
 - metadata:
     sbom:
       license: Zlib

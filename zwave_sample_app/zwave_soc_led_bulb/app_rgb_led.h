@@ -46,14 +46,6 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
-
-/**
- * @addtogroup Apps
- * @{
- * @addtogroup LEDBulb
- * @{
- */
-
 typedef struct {
   uint8_t red;
   uint8_t green;
@@ -76,11 +68,6 @@ void app_rgbw_led_update(void);
 void app_rgbw_led_get_color(rgb_led_color* colorOut);
 void app_rgbw_led_set_color(rgb_led_color const* color);
 void app_rgbw_led_set_intensity(uint8_t intensity);
-
-/**
- * @}
- * @}
- */
 
 #ifdef __cplusplus
 }

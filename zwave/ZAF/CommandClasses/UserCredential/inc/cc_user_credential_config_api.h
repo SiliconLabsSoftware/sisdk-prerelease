@@ -94,7 +94,7 @@ uint8_t cc_user_credential_get_max_length_of_data(u3c_credential_type credential
  * of 0 implies that credentials of this type must always be read back when sent
  * in a report.
  *
- * @param[in] type The specific credential type
+ * @param[in] credential_type The specific credential type
  * @return The maximum allowed hash length for this credential type (in bytes),
  *         if supported
  */
@@ -118,9 +118,10 @@ uint8_t cc_user_credential_get_cl_recommended_timeout(u3c_credential_type creden
 uint8_t cc_user_credential_get_cl_number_of_steps(u3c_credential_type credential_type);
 
 /**
- * Checks whether the All Users Checksum functionality is supported by the application.
+ * Gets the configured recommended Credential Learn timeout for a specific credential type.
  *
- * @return true if All Users Checksum is supported
+ * @param[in] credential_type The specific credential type
+ * @return The recommended Credential Learn timeout (in seconds)
  */
 bool cc_user_credential_is_all_users_checksum_supported(void);
 

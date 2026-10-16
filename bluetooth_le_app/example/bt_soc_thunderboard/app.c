@@ -50,9 +50,7 @@
 #endif // SL_CATALOG_GATT_SERVICE_BATTERY_PRESENT
 #ifdef SL_CATALOG_GATT_SERVICE_HALL_PRESENT
 #include "sl_gatt_service_hall.h"
-#ifdef SL_CATALOG_SI7210_DRIVER_PRESENT
 #include "sensor_hall.h"
-#endif // SL_CATALOG_SI7210_DRIVER_PRESENT
 #endif // SL_CATALOG_GATT_SERVICE_HALL_PRESENT
 #ifdef SL_CATALOG_GATT_SERVICE_LIGHT_PRESENT
 #include "sl_gatt_service_light.h"
@@ -223,12 +221,12 @@ static void shutdown_stop_timer(void)
 static void sensor_init(void)
 {
   sl_status_t sc;
-#if defined(SL_CATALOG_GATT_SERVICE_HALL_PRESENT) && defined(SL_CATALOG_SI7210_DRIVER_PRESENT)
+#ifdef SL_CATALOG_GATT_SERVICE_HALL_PRESENT
   sc = sensor_hall_init();
   if (sc != SL_STATUS_OK) {
     app_log_warning("Hall sensor initialization failed" APP_LOG_NL);
   }
-#endif
+#endif // SL_CATALOG_GATT_SERVICE_HALL_PRESENT
 #ifdef SL_CATALOG_SENSOR_LIGHT_PRESENT
   sc = sl_sensor_light_init();
   if (sc != SL_STATUS_OK) {
@@ -266,9 +264,9 @@ static void sensor_init(void)
 
 static void sensor_deinit(void)
 {
-#if defined(SL_CATALOG_GATT_SERVICE_HALL_PRESENT) && defined(SL_CATALOG_SI7210_DRIVER_PRESENT)
+#ifdef SL_CATALOG_GATT_SERVICE_HALL_PRESENT
   sensor_hall_deinit();
-#endif
+#endif // SL_CATALOG_GATT_SERVICE_HALL_PRESENT
 #ifdef SL_CATALOG_SENSOR_LIGHT_PRESENT
   sl_sensor_light_deinit();
 #endif // SL_CATALOG_SENSOR_LIGHT_PRESENT
@@ -315,23 +313,14 @@ uint8_t sl_gatt_service_battery_get_type(void)
 sl_status_t sl_gatt_service_hall_get(float *field_strength, bool *alert, bool *tamper)
 {
   sl_status_t sc;
-#if defined(SL_CATALOG_SI7210_DRIVER_PRESENT)
   sc = sensor_hall_get(field_strength, alert, tamper);
   if (SL_STATUS_OK == sc) {
     app_log_info("Magnetic flux = %4.3f mT" APP_LOG_NL, (double)*field_strength);
   } else if (SL_STATUS_NOT_INITIALIZED == sc) {
-    // Hall HW expected (e.g. BRD2602A) but driver init failed
     app_log_info("Hall sensor is not initialized" APP_LOG_NL);
   } else {
     app_log_status_error_f(sc, "Hall sensor measurement failed" APP_LOG_NL);
   }
-#else
-  // Hall GATT kept for Si Connect on boards without Si7210
-  (void)field_strength;
-  (void)alert;
-  (void)tamper;
-  sc = SL_STATUS_NOT_INITIALIZED;
-#endif
   return sc;
 }
 #endif

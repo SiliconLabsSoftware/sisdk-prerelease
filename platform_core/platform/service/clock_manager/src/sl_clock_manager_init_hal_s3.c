@@ -332,10 +332,7 @@ static void get_hfxo_ctune(uint8_t *ctune_xi_steady, uint8_t *ctune_xo_steady)
       EFM_ASSERT(false);
     }
   }
-#else
-  (void)ctune_xi_steady;
-  (void)ctune_xo_steady;
-#endif  // (SL_CLOCK_MANAGER_HFXO_MODE == HFXO_CFG_MODE_XTAL)
+#endif
 }
 
 /***************************************************************************//**

@@ -27,7 +27,6 @@
 #include <ZW_application_transport_interface.h>
 #include <app.h>
 #include <ZAF_file_ids.h>
-#include <ZW_classcmd.h>
 #include <zpal_nvm.h>
 #include <zpal_misc.h>
 #include <ZAF_nvm_app.h>
@@ -369,7 +368,7 @@ SaveApplicationSettings(uint8_t bListening,
 
   status = ZAF_nvm_app_read(FILE_ID_APPLICATIONSETTINGS, &tApplicationSettings, FILE_SIZE_APPLICATIONSETTINGS);
   if (ZPAL_STATUS_OK == status) {
-    tApplicationSettings.listening = (GENERIC_TYPE_STATIC_CONTROLLER == bGeneric) ? true : bListening;
+    tApplicationSettings.listening = bListening;
     tApplicationSettings.generic = bGeneric;
     tApplicationSettings.specific = bSpecific;
     status = ZAF_nvm_app_write(FILE_ID_APPLICATIONSETTINGS, &tApplicationSettings, FILE_SIZE_APPLICATIONSETTINGS);
@@ -393,7 +392,7 @@ ReadApplicationSettings(uint8_t* pListening,
   if (ObjectExist(FILE_ID_APPLICATIONSETTINGS)) {
     status = ZAF_nvm_app_read(FILE_ID_APPLICATIONSETTINGS, &tApplicationSettings, FILE_SIZE_APPLICATIONSETTINGS);
     if (ZPAL_STATUS_OK == status) {
-      *pListening = (GENERIC_TYPE_STATIC_CONTROLLER == tApplicationSettings.generic) ? true : tApplicationSettings.listening;
+      *pListening = tApplicationSettings.listening;
       *pGeneric = tApplicationSettings.generic;
       *pSpecific = tApplicationSettings.specific;
       dataIsRead = true;

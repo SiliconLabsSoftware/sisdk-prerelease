@@ -2,9 +2,9 @@
 - id: brd2503c_config
 - label: brd2503c config
 - description: Configuration files for BRD2503C
-- category: Platform|Board|Config
 - package: boards
-- quality: production
+- category: Platform|Board|Config
+- quality: evaluation
 - metadata:
     sbom:
       license: Zlib

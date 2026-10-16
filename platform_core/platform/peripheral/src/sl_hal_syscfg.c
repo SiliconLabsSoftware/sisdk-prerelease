@@ -207,13 +207,12 @@ static const sli_hal_syscfg_ecc_bank_t ecc_bank_tbl[SL_HAL_SYSCFG_ECC_BANKS] =
   || defined(_MPAHBRAM_CTRL_MASK)
 
 #if defined(__ICCARM__)
-/* Disable optimization for the next function; IAR LTO/speed-opt can duplicate inline-asm labels. */
-#define SL_ECC_ASM_OPTIMIZE_NONE _Pragma("optimize=none")
+#define SL_ECC_ASM_NOINLINE __attribute__((noinline))
 #else
-#define SL_ECC_ASM_OPTIMIZE_NONE
+#define SL_ECC_ASM_NOINLINE
 #endif
 
-static void sli_hal_syscfg_ecc_read_write_existing_pio(const sli_hal_syscfg_ecc_bank_t *ecc_bank);
+static void SL_ECC_ASM_NOINLINE sli_hal_syscfg_ecc_read_write_existing_pio(const sli_hal_syscfg_ecc_bank_t *ecc_bank);
 #else
 static void sli_hal_syscfg_ecc_read_write_existing_dma(uint32_t start,
                                                        uint32_t size,
@@ -266,8 +265,7 @@ extern __INLINE void sl_hal_syscfg_zero_dmem0retnctrl(void);
  * @details This function uses core to load and store the existing data
  *    values in the given RAM bank.
  ******************************************************************************/
-SL_ECC_ASM_OPTIMIZE_NONE
-static void sli_hal_syscfg_ecc_read_write_existing_pio(const sli_hal_syscfg_ecc_bank_t *ecc_bank)
+static void SL_ECC_ASM_NOINLINE sli_hal_syscfg_ecc_read_write_existing_pio(const sli_hal_syscfg_ecc_bank_t *ecc_bank)
 {
   EFM_ASSERT(ecc_bank != NULL);
   EFM_ASSERT(ecc_bank->base < (ecc_bank->base + ecc_bank->size));

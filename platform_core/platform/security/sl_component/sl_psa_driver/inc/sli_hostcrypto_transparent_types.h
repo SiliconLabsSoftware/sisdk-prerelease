@@ -72,12 +72,14 @@ typedef struct {
   uint8_t iv_length;                        ///< Length of IV
   size_t processed_ad;                      ///< Current additional data length
   size_t processed_len;                     ///< Current encrypted/decrypted message length
-  // Array instead of a feature-gated union so the type is never empty (IAR Pe169).
-#if defined(SLI_PSA_DRIVER_FEATURE_CHACHAPOLY)
-  uint8_t block[64];                        ///< Input data block (ChaChaPoly).
-#else
-  uint8_t block[16];                        ///< Input data block (AES CCM/GCM).
+  union {
+#if defined(SLI_PSA_DRIVER_FEATURE_CCM) || defined(SLI_PSA_DRIVER_FEATURE_GCM)
+    uint8_t aes_block[16];                  ///< Input data saved for aes.
 #endif
+  #if defined(SLI_PSA_DRIVER_FEATURE_CHACHAPOLY)
+    uint8_t chacha_block[64];               ///< Input data saved for Chachapoly.
+  #endif
+  } block;
 } sli_hostcrypto_transparent_aead_operation_t;
 
 typedef struct {

@@ -63,7 +63,6 @@ library:
   - linux_arch_arm32v7
   unless:
   - zigbee_i386
-  - armv7l_tizen-0.1-13.1_gcc-9.2-softfp
 - path: libs/build/gcc/arm32v7/zigbee-ncp-uart/release_singlenetwork/libzigbee-ncp-uart.a
   condition:
   - toolchain_gcc
@@ -74,7 +73,6 @@ library:
   unless:
   - zigbee_multi_network
   - zigbee_i386
-  - armv7l_tizen-0.1-13.1_gcc-9.2-softfp
 - path: libs/build/gcc/arm64v8/zigbee-ncp-uart/release/libzigbee-ncp-uart.a
   condition:
   - toolchain_gcc
@@ -86,7 +84,6 @@ library:
   unless:
   - zigbee_x86_64
   - zigbee_aarch64_cortex_a72_gcc_12_3_0_musl
-  - aarch64_tizen-0.1-13.1_gcc-9.2-softfp
 - path: libs/build/gcc/arm64v8/zigbee-ncp-uart/release_singlenetwork/libzigbee-ncp-uart.a
   condition:
   - toolchain_gcc
@@ -98,7 +95,6 @@ library:
   - zigbee_multi_network
   - zigbee_x86_64
   - zigbee_aarch64_cortex_a72_gcc_12_3_0_musl
-  - aarch64_tizen-0.1-13.1_gcc-9.2-softfp
 - path: libs/build/gcc/armv7l_tizen-0.1-13.1_gcc-9.2-softfp/zigbee-ncp-uart/release/libzigbee-ncp-uart.a
   condition:
   - toolchain_gcc

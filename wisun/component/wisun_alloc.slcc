@@ -35,6 +35,12 @@ template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_PLATFORM_FREE_MACRO   sl_wisun_free
 
+toolchain_settings:
+- option: gcc_linker_option
+  value: "-Wl,--wrap=sli_memory_get_heap_handle"
+- option: llvm_linker_option
+  value: "-Wl,--wrap=sli_memory_get_heap_handle"
+
 metadata:
   sbom:
     license: MSLA

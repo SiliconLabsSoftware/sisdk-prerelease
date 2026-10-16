@@ -1,3 +1,4 @@
+
 import siliconlabs.slc.board_gen.board.board as Board
 import siliconlabs.slc.board_gen.project_config as Project_Config
 import siliconlabs.slc.board_gen.hardware as Hardware
@@ -23,26 +24,13 @@ required_gpio = {
     '9': 'LEGACY_NCP_SPI_WAKE_INT'
 }
 
-# Fallback when exp 9 is not MCU-connected (e.g. CURL)
-required_gpio_alt = {
-    '7': 'LEGACY_NCP_SPI_HOST_INT',
-    '11': 'LEGACY_NCP_SPI_WAKE_INT'
-}
-
-
-def _gpio_map(board: Hardware):
-    for signal in required_gpio:
-        if not board.get_peripheral_options(Req('gpio'), brd_component, {signal: None}):
-            return required_gpio_alt
-    return required_gpio
-
 
 def compatible(provides: Set[str], board: Hardware) -> bool:
     if board.has_component(brd_component):
         # Usart available on exp 4/6/8/10
         if board.get_peripheral_options(Req('usart'), brd_component, spi_signals):
             # Gpio index on expansion header:
-            for signal in _gpio_map(board).keys():
+            for signal in required_gpio.keys():
                 # Not compatible if we don't have all the gpio connected
                 if not board.get_peripheral_options(Req('gpio'), brd_component, {signal: None, }):
                     return False
@@ -68,7 +56,7 @@ def configure(project: Project_Config, board: Hardware, _):
     project.satisfy_requirement(req, locs)
 
     # GPIOs
-    for signal, req_name in _gpio_map(board).items():
+    for signal, req_name in required_gpio.items():
         req = project.requirement(req_name)
         opts = board.get_peripheral_options(req, brd_component, {signal: None, })
         if opts:
