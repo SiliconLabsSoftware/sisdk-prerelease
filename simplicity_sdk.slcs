@@ -11,8 +11,8 @@ component_path:
 - path: bluetooth_zvd/component
 - path: bluetooth_le_controller/component
 - path: bluetooth_common/component
-- path: bluetooth_mesh/component
 - path: bluetooth_le_host/component
+- path: bluetooth_mesh/component
 - path: bluetooth_apploader/component
 - path: bluetooth_mesh_srtest/component
 - path: bluetooth_mesh_middleware/component
@@ -175,8 +175,8 @@ documentation:
   version: 9.1.2
 upgrade_manifest:
 - path: bluetooth_le_middleware/upgrade.slcu
-- path: bluetooth_mesh/component/upgrade.slcu
 - path: bluetooth_le_host/component/upgrade.slcu
+- path: bluetooth_mesh/component/upgrade.slcu
 - path: bluetooth_mesh_middleware/upgrade.slcu
 - path: connect_stack/component/upgrade.slcu
 - path: cpc/upgrade.slcu
