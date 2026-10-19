@@ -444,6 +444,7 @@ SECTIONS
     */{{object}}.*(.rodata*)
 {%- endfor %}
 
+
 {%- if ccv_enable %}
   __ccv_vma_ramfuncs_end__ = .;
   . = . + 0x20;
@@ -461,10 +462,6 @@ SECTIONS
     */{{object}}.*(.text*)
     */{{object}}.*(.rodata*)
 {%- endfor %}
-
-{%- if "freertos_kernel" in component_catalog %}
-    *(text_freertos_kernel_*timecritical*)
-{%- endif %}
 
 {%- if ccv_enable %}
     /* Code Classification Validator Code */

@@ -98,22 +98,21 @@ extern "C" {
  *
  *  ## Integration steps
  *
- *  -# **Add a component.** Include the instantiable `uart` SLC component for a
- *     polling or interrupt-driven instance, or `uart_async` for a DMA-backed
- *     instance. `uart_async` pulls in the DMA Channel Driver and DMA Manager.
- *     The UART driver supports various peripherals. Users can enable support
- *     for a specific peripheral using the `uart_eusart` or `uart_usart` components.
- *     Failure to provide the backend corresponding to the instance's configuration
- *     will cause a compilation error.
+ *  -# **Add a component.** Include the instantiable SLC component matching
+ *     the underlying peripheral: `uart_eusart` for an EUART or EUSART
+ *     peripheral, or `uart_usart` for a USART peripheral.
  *  -# **Configure the instance.** Set TX, RX, and optional CTS/RTS routing
  *     along with the line settings in the instance configuration (Pin Tool).
  *     Hardware flow control also requires @c SL_UART_FLOW_CONTROL_CTS_RTS in
- *     the line configuration.
+ *     the line configuration. Set @c SL_UART_<PERIPH>_<INSTANCE>_ASYNC_ENABLE to 1 to
+ *     enable the async (DMA) APIs on the instance. This requires the
+ *     `uart_async` component; without it the build fails. Async support is
+ *     compiled out of the driver when that component is absent.
  *  -# **Automatic initialization.** Every instance declared through SLC is
  *     initialized and line-configured by the generated
  *     @c sl_uart_instances_init(), which is hooked into driver initialization
  *     and therefore runs automatically when sl_main is present. The
- *     application uses the generated `sl_uart_<instance>_handle` directly
+ *     application uses the generated `sl_uart_<periph>_<instance>_handle` directly
  *     and does not call @ref sl_uart_init() or @ref sl_uart_configure_line().
  *     Without sl_main, call @c sl_uart_instances_init() once during startup.
  *  -# **Transfer data.** Use the polling, interrupt, or async APIs as
@@ -125,7 +124,8 @@ extern "C" {
  *     needed.
  *
  *  Applications that manage their own handles instead of declaring instances
- *  in SLC depend on `uart_core` (and `uart_async_core` for async transfers).
+ *  in SLC depend on `uart_eusart_core` and/or `uart_usart_core` (and
+ *  `uart_async` for async transfers).
  *  See "Manual instance declaration" under @ref uart_driver for the full
  *  init flow, IRQ handlers, and a copy-paste example.
  *
@@ -158,13 +158,13 @@ extern "C" {
  *    uint8_t byte = 0x55;
  *
  *    // Blocks until the byte has been accepted into the TX FIFO.
- *    sl_status_t status = sl_uart_write_byte(&sl_uart_inst0_handle, byte);
+ *    sl_status_t status = sl_uart_write_byte(&sl_uart_eusart_inst0_handle, byte);
  *    if (status != SL_STATUS_OK) {
  *      // Handle error
  *    }
  *
  *    // Non-blocking: returns SL_STATUS_EMPTY when the RX FIFO has no data.
- *    if (sl_uart_read_byte(&sl_uart_inst0_handle, &byte) == SL_STATUS_OK) {
+ *    if (sl_uart_read_byte(&sl_uart_eusart_inst0_handle, &byte) == SL_STATUS_OK) {
  *      // Process `byte`
  *    }
  *  }
@@ -205,14 +205,14 @@ extern "C" {
  *  {
  *    static rx_context_t rx_ctx;
  *
- *    sl_uart_set_rx_ready_callback(&sl_uart_inst0_handle, on_rx_ready, &rx_ctx);
- *    sl_uart_enable_rx_ready_interrupt(&sl_uart_inst0_handle);
+ *    sl_uart_set_rx_ready_callback(&sl_uart_eusart_inst0_handle, on_rx_ready, &rx_ctx);
+ *    sl_uart_enable_rx_ready_interrupt(&sl_uart_eusart_inst0_handle);
  *  }
  *  @endcode
  *
  *  ### Async DMA
  *
- *  Requires a `uart_async` instance. Buffers passed to
+ *  Requires an instance with DMA enabled in its configuration. Buffers passed to
  *  @ref sl_uart_async_write() and @ref sl_uart_async_read() must remain valid
  *  until the corresponding callback indicates that the buffer has been released.
  *  See @ref uart_async for queueing, abort, RX timeout, and RX event flags.
@@ -259,12 +259,12 @@ extern "C" {
  *  void app_init(void)
  *  {
  *    // Assign the RX and TX event callbacks.
- *    sl_uart_async_set_tx_complete_callback(&sl_uart_inst0_handle, on_async_tx, NULL);
- *    sl_uart_async_set_rx_event_callback(&sl_uart_inst0_handle, on_async_rx, NULL);
+ *    sl_uart_async_set_tx_complete_callback(&sl_uart_eusart_inst0_handle, on_async_tx, NULL);
+ *    sl_uart_async_set_rx_event_callback(&sl_uart_eusart_inst0_handle, on_async_rx, NULL);
  *
  *    // Submit the RX and TX transfers.
- *    sl_uart_async_read(&sl_uart_inst0_handle, rx_buf, sizeof(rx_buf));
- *    sl_uart_async_write(&sl_uart_inst0_handle, tx_buf, sizeof(tx_buf));
+ *    sl_uart_async_read(&sl_uart_eusart_inst0_handle, rx_buf, sizeof(rx_buf));
+ *    sl_uart_async_write(&sl_uart_eusart_inst0_handle, tx_buf, sizeof(tx_buf));
  *  }
  *  @endcode
  *
@@ -288,13 +288,13 @@ extern "C" {
  *
  *  Manual instantiation is intended for advanced users who need to use the
  *  UART driver without SLC-generated instances. Prefer declaring
- *  a `uart` or `uart_async` instance through SLC whenever possible for
+ *  a `uart_eusart` or `uart_usart` instance through SLC whenever possible for
  *  ease of use.
  *
- *  Applications that do not declare a `uart` / `uart_async` instance through
+ *  Applications that do not declare a `uart_eusart` / `uart_usart` instance through
  *  SLC must set up everything that the generated @c sl_uart_instances.c would
- *  otherwise provide. Depend on `uart_core` (and `uart_async_core` when using
- *  @ref uart_async), then:
+ *  otherwise provide. Depend on `uart_eusart_core` and/or `uart_usart_core`
+ *  (and `uart_async` when using @ref uart_async), then:
  *
  *  -# **Declare pin and line configuration.** Fill a
  *     @ref sl_uart_pin_config_t (TX, RX, and CTS/RTS when hardware flow
@@ -328,7 +328,7 @@ extern "C" {
  *  allocates the handle dynamically with @ref sl_uart_handle_get_size().
  *  Replace the peripheral, pins, and IRQ handler names for the hardware in
  *  use. Pass @ref SL_UART_ASYNC_CONFIG_DEFAULT instead of @c NULL to enable
- *  async DMA (requires `uart_async_core`).
+ *  async DMA (requires `uart_async`).
  *
  *  @code{.c}
  *  #include <stdlib.h>
@@ -506,9 +506,10 @@ typedef void (*sl_uart_tx_complete_cb_t)(sl_uart_handle_t *uart_handle,
  *  when a buffer completes, a receive timeout fires, the driver needs another
  *  RX buffer, or a transfer is aborted.
  *
- *  Requires the `uart_async` component (or `uart_async_core` for manually
- *  allocated handles). SLC-generated `uart_async` instances are already
- *  initialized with async resources by @c sl_uart_instances_init();
+ *  Requires the `uart_async` component, and an SLC instance with DMA enabled
+ *  in its configuration (or a manually allocated handle). SLC-generated
+ *  instances with DMA enabled are already initialized with async resources
+ *  by @c sl_uart_instances_init();
  *  For manually allocated handles, pass a non-NULL @ref sl_uart_async_config_t
  *  to @ref sl_uart_init() — for example @ref SL_UART_ASYNC_CONFIG_DEFAULT.
  *  Calling async functions without async resources is not supported.

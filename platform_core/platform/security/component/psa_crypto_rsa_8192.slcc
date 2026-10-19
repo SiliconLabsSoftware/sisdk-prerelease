@@ -12,6 +12,8 @@ provides:
 requires:
 - name: psa_crypto_rsa
 - name: mbedtls_rsa_8192
+documentation:
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/keys/types.html#c.PSA_KEY_TYPE_RSA_KEY_PAIR
 metadata:
   sbom:
     reference: mbedtls_sbom

@@ -260,6 +260,18 @@ sl_status_t sl_keyscan_driver_stop_scan(void);
 ///   When initialization is done successfully, scanning can be started by calling
 ///   @ref sl_keyscan_driver_start_scan().
 ///
+///   @n @section keyscan_power_management Power management
+///
+///   On devices where the KEYSCAN peripheral is not retained in deep sleep, the
+///   application must disable scanning when the keypad is not needed. Call
+///   @ref sl_keyscan_driver_stop_scan() before entering EM2; leaving the scan
+///   enabled can prevent the system from entering that energy mode.
+///
+///   @ref sl_keyscan_driver_stop_scan() and @ref sl_keyscan_driver_start_scan()
+///   are the disable and enable paths for the hardware module: stop clears the
+///   peripheral enable and start restores it. On parts that require GPIO pin
+///   latching around disable, the driver performs latch and unlatch as part of
+///   these calls.
 ///
 ///   Here is a complete example:
 ///

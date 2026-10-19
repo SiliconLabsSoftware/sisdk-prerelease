@@ -479,9 +479,12 @@ void sli_memory_create_stack(sl_memory_heap_t *heap);
 /***************************************************************************//**
  * Registers Memory Manager LT/ST heaps with SEGGER SystemView.
  *
- * @note Must be called after SEGGER_SYSVIEW_Start(). For C++ applications,
- *       sl_memory_init() runs from .preinit_array before SystemView is ready;
- *       call this function from sl_main_init() instead of from sl_memory_init().
+ * @note Must be called after SEGGER_SYSVIEW_Start() (packets are dropped while
+ *       the SEGGER SystemView internal state EnableState is 0). C applications:
+ *       sl_main_init() starts SystemView then sl_memory_init() calls this.
+ *       C++ applications: Memory Manager pre-init starts SystemView and calls
+ *       this before C++ static constructors may dynamically allocate from the
+ *       heap.
  ******************************************************************************/
 void sli_memory_register_systemview_heaps(void);
 #endif // defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)

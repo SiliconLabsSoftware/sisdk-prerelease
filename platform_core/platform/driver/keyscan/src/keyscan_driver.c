@@ -35,7 +35,8 @@
 #include "keyscan_driver.h"
 #include "keyscan_driver_hal.h"
 #include "keyscan_driver_config.h"
-#include "em_core.h"
+#include "sl_assert.h"
+#include "sl_core.h"
 
 /*******************************************************************************
  **************************   LOCAL VARIABLES   ********************************

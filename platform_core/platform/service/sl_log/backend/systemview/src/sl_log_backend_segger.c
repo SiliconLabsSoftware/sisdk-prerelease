@@ -16,6 +16,7 @@
 #include <stdarg.h>
 
 #include "SEGGER_SYSVIEW.h"
+#include "sl_sysview_custom_api.h"
 #include "sl_log_platform_specific.h"
 #include "sl_log_common_config.h"
 
@@ -57,8 +58,11 @@ sl_log_api_backend_t sl_log_api_backend={
  */
 sl_status_t sl_log_systemview_init(void)
 {
-  SEGGER_SYSVIEW_Conf();
-  SEGGER_SYSVIEW_Start();
+  // SystemView may already be started by C++ Memory Manager pre-init, or by
+  // sl_main_init() for C projects with Memory Manager. Refresh the
+  // timestamp frequency after sleeptimer is ready.
+  sli_systemview_start();
+  sli_systemview_update_timestamp_freq();
   return SL_STATUS_OK;
 }
 

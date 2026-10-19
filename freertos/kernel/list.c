@@ -100,6 +100,7 @@ void vListInitialiseItem(ListItem_t * const pxItem)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vListInsertEnd(List_t * const pxList,
                     ListItem_t * const pxNewListItem)
 {
@@ -134,6 +135,7 @@ void vListInsertEnd(List_t * const pxList,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vListInsert(List_t * const pxList,
                  ListItem_t * const pxNewListItem)
 {
@@ -205,6 +207,7 @@ void vListInsert(List_t * const pxList,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 UBaseType_t uxListRemove(ListItem_t * const pxItemToRemove)
 {
   /* The list item knows which list it is in.  Obtain the list from the list

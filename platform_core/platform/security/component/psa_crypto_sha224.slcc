@@ -18,7 +18,7 @@ template_contribution:
   value: "MBEDTLS_PSA_BUILTIN_ALG_SHA_224 1"
   condition: [mbedtls_sha224]
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/ops/hashes.html#c.PSA_ALG_SHA_224
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/ops/hashes.html#c.PSA_ALG_SHA_224
 metadata:
   sbom:
     reference: mbedtls_sbom

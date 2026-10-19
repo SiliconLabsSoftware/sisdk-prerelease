@@ -62,6 +62,9 @@ template_contribution:
   value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR_GENERATE 1"
   condition: [mbedtls_ecc]
 
+documentation:
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/keys/types.html#c.PSA_KEY_TYPE_ECC_KEY_PAIR
+
 metadata:
   sbom:
     reference: mbedtls_sbom

@@ -63,6 +63,7 @@ typedef struct {
 typedef struct {
   uint32_t faulty_handle; ///< Handle of watchdog that caused reset.
   uint32_t faulty_uid;    ///< UID of watchdog that caused reset.
+  uint32_t unfed_mask;    ///< Bitmask of all unfed enabled watchdogs at record time.
   uint32_t magic;         ///< Magic number to validate data.
   bool valid;             ///< Whether the data is valid.
 } watchdog_manager_noinit_state_t;
@@ -182,12 +183,23 @@ static void check_and_feed_hw_watchdog(void)
 }
 
 /***************************************************************************//**
+ * @brief Get bitmask of enabled watchdogs not fed in the current period.
+ *
+ * @note Caller must hold the atomic section (CORE_ENTER_ATOMIC).
+ ******************************************************************************/
+static uint32_t get_unfed_mask(void)
+{
+  return manager_state.enabled_mask & ~manager_state.fed_mask;
+}
+
+/***************************************************************************//**
  * @brief Record faulty watchdog for post-reset retrieval.
+ *
+ * @note Caller must hold the atomic section (CORE_ENTER_ATOMIC).
  ******************************************************************************/
 static void record_faulty_watchdog(void)
 {
-  // Find first unfed enabled watchdog.
-  uint32_t unfed_mask = manager_state.enabled_mask & ~manager_state.fed_mask;
+  uint32_t unfed_mask = get_unfed_mask();
 
   if (unfed_mask != 0) {
     // Find first unfed watchdog (bit position).
@@ -195,6 +207,7 @@ static void record_faulty_watchdog(void)
       if (unfed_mask & (1u << i)) {
         noinit_state.faulty_handle = i;  // Store bit position, not bitmask.
         noinit_state.faulty_uid = manager_state.watchdog_uids[i];
+        noinit_state.unfed_mask = unfed_mask;
         noinit_state.magic = WATCHDOG_MANAGER_MAGIC;
         noinit_state.valid = true;
         break;
@@ -648,6 +661,58 @@ sl_status_t sl_watchdog_manager_force_feed(void)
 }
 
 /***************************************************************************//**
+ * Get the UID of a software watchdog.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_get_uid(const sl_watchdog_handle_t *handle,
+                                        uint32_t *watchdog_uid)
+{
+  if (handle == NULL || watchdog_uid == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if (!manager_state.initialized) {
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+
+  if (!is_valid_handle(*handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_HANDLE;
+  }
+
+  *watchdog_uid = manager_state.watchdog_uids[*handle];
+
+  CORE_EXIT_ATOMIC();
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Get the bitmask of enabled software watchdogs not yet fed.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_get_unfed_mask(uint32_t *unfed_mask)
+{
+  if (unfed_mask == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  if (!manager_state.initialized) {
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_ATOMIC();
+
+  *unfed_mask = get_unfed_mask();
+
+  CORE_EXIT_ATOMIC();
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
  * Get the hardware watchdog timeout period.
  ******************************************************************************/
 sl_status_t sl_watchdog_manager_get_timeout_period(uint8_t *period)
@@ -789,7 +854,7 @@ static sl_status_t retrieve_faulty_validate(void)
 }
 
 /***************************************************************************//**
- * Retrieve faulty watchdog handlefrom previous reset.
+ * Retrieve faulty watchdog handle from previous reset.
  ******************************************************************************/
 sl_status_t sl_watchdog_manager_retrieve_faulty(sl_watchdog_handle_t *handle)
 {
@@ -833,9 +898,31 @@ sl_status_t sl_watchdog_manager_retrieve_faulty_uid(uint32_t *watchdog_uid)
 }
 
 /***************************************************************************//**
+ * Retrieve bitmask of all unfed watchdogs recorded before previous reset.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_retrieve_faulty_mask(uint32_t *unfed_mask)
+{
+  sl_status_t status;
+
+  if (unfed_mask == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  status = retrieve_faulty_validate();
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  *unfed_mask = noinit_state.unfed_mask;
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
  * Internal function called before potential watchdog reset to record state.
  * This is called from check_and_feed_hw_watchdog() function.
- * This function is called repeatedly so only the last faulty watchdog handle is stored.
+ * This function is called repeatedly so only the last set of unfed watchdog
+ * handles is stored.
  ******************************************************************************/
 void sli_watchdog_manager_record_state(void)
 {
@@ -883,12 +970,18 @@ void sli_watchdog_manager_on_starve(void)
 
   context.faulty_handle = UINT32_MAX;
   context.watchdog_uid = 0;
+  context.unfed_mask = 0;
+  context.enabled_mask = 0;
 
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
 
-  uint32_t unfed_mask = manager_state.enabled_mask & ~manager_state.fed_mask;
+  uint32_t unfed_mask = get_unfed_mask();
+  context.unfed_mask = unfed_mask;
+  context.enabled_mask = manager_state.enabled_mask;
+
   if (unfed_mask != 0) {
+    // Legacy contract: faulty_handle is the lowest unfed handle.
     for (uint32_t i = 0; i < SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS; i++) {
       if (unfed_mask & (1u << i)) {
         context.faulty_handle = i;

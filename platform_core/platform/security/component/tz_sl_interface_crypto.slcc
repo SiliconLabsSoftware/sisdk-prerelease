@@ -67,6 +67,8 @@ requires:
 
 - name: tz_sl_interface_crypto_rng_funcs
 
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
 metadata:
   sbom:
     license: Zlib

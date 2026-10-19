@@ -21,6 +21,9 @@ include:
 source:
 - path: sl_component/sl_trustzone/src/sli_tz_ns_interface.c
 
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
+
 metadata:
   sbom:
     license: Zlib

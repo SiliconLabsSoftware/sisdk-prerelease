@@ -92,8 +92,10 @@ typedef enum {
 /// Context passed to the starve callback when the hardware watchdog is about
 /// to expire.
 typedef struct {
-  sl_watchdog_handle_t faulty_handle; ///< First unfed enabled SW watchdog, or UINT32_MAX.
+  sl_watchdog_handle_t faulty_handle; ///< First unfed enabled SW watchdog (lowest handle), or UINT32_MAX.
   uint32_t watchdog_uid;              ///< UID of @p faulty_handle, or 0 if unknown.
+  uint32_t unfed_mask;                ///< Bitmask of all enabled-but-unfed SW watchdogs (bit N = handle N).
+  uint32_t enabled_mask;              ///< Bitmask of enabled SW watchdogs at warning time.
 } sl_watchdog_manager_starve_context_t;
 
 /// Starve callback invoked from the WDOG warning interrupt before timeout reset.
@@ -299,6 +301,55 @@ sl_status_t sl_watchdog_manager_enable(sl_watchdog_handle_t *handle);
 sl_status_t sl_watchdog_manager_force_feed(void);
 
 /***************************************************************************//**
+ * @brief Gets the UID of a software watchdog.
+ *
+ * @details
+ * Returns the UID passed to sl_watchdog_manager_create() for @p handle. This
+ * is intended for mapping bits of
+ * @ref sl_watchdog_manager_starve_context_t::unfed_mask or
+ * sl_watchdog_manager_get_unfed_mask() back to meaningful identifiers.
+ *
+ * @param[in]  handle       Pointer to the handle of the software watchdog to
+ *                          query. Must not be NULL.
+ * @param[out] watchdog_uid Pointer to variable that will receive the UID.
+ *                          Must not be NULL.
+ *
+ * @return SL_STATUS_OK if successful.
+ * @return SL_STATUS_NULL_POINTER if handle or watchdog_uid is NULL.
+ * @return SL_STATUS_INVALID_HANDLE if the handle is invalid.
+ * @return SL_STATUS_NOT_INITIALIZED if sl_watchdog_manager_init() has not
+ *         been called.
+ *
+ * @note Safe to call from the starve callback (interrupt context).
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_get_uid(const sl_watchdog_handle_t *handle,
+                                        uint32_t *watchdog_uid);
+
+/***************************************************************************//**
+ * @brief Gets the bitmask of enabled software watchdogs not yet fed.
+ *
+ * @details
+ * Returns @c enabled_mask & ~fed_mask for the current hardware watchdog period.
+ * Bit N set means handle N is enabled and has not been fed since the hardware
+ * watchdog was last fed.
+ *
+ * When every enabled watchdog has been fed, the fed mask is cleared to start
+ * the next period, so this function then reports every enabled watchdog as
+ * unfed again. A value of 0 means no software watchdog is enabled.
+ *
+ * @param[out] unfed_mask Pointer to variable that will receive the mask.
+ *                        Must not be NULL.
+ *
+ * @return SL_STATUS_OK if successful.
+ * @return SL_STATUS_NULL_POINTER if unfed_mask is NULL.
+ * @return SL_STATUS_NOT_INITIALIZED if sl_watchdog_manager_init() has not
+ *         been called.
+ *
+ * @note Safe to call from the starve callback (interrupt context).
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_get_unfed_mask(uint32_t *unfed_mask);
+
+/***************************************************************************//**
  * @brief Gets the hardware watchdog timeout period index.
  *
  * @param[out] period Current hardware PERSEL index (0-15). Must not be NULL.
@@ -440,6 +491,40 @@ sl_status_t sl_watchdog_manager_retrieve_faulty(sl_watchdog_handle_t *handle);
  *       sl_hal_emu_clear_reset_cause() when the reset cause has been consumed.
  ******************************************************************************/
 sl_status_t sl_watchdog_manager_retrieve_faulty_uid(uint32_t *watchdog_uid);
+
+/***************************************************************************//**
+ * @brief Retrieve the bitmask of all unfed watchdogs recorded before a reset.
+ *
+ * @details
+ * After a reset caused by watchdog expiration, this function returns the last
+ * recorded @c enabled_mask & ~fed_mask snapshot (bit N = handle N). Unlike
+ * sl_watchdog_manager_retrieve_faulty(), which only reports the lowest unfed
+ * handle, this exposes every software watchdog that was starving.
+ *
+ * This function uses the same no_init state as
+ * sl_watchdog_manager_retrieve_faulty() and must be called before
+ * sl_watchdog_manager_init().
+ *
+ * @param[out] unfed_mask Pointer to variable that will receive the mask.
+ *                        Must not be NULL.
+ *
+ * @return SL_STATUS_OK if successful and a faulty watchdog was found.
+ * @return SL_STATUS_NULL_POINTER if unfed_mask is NULL.
+ * @return SL_STATUS_NOT_AVAILABLE if the reset was not caused by a watchdog.
+ * @return SL_STATUS_INVALID_STATE if this function is called after
+ *         sl_watchdog_manager_init().
+ *
+ * @note This function MUST be called before sl_watchdog_manager_init() to
+ *       retrieve information from the previous reset.
+ *
+ * @note This function reads but does not clear the EMU reset-cause register.
+ *       The application (or another service) is responsible for calling
+ *       sl_hal_emu_clear_reset_cause() when the reset cause has been consumed.
+ *
+ * @note Handles are allocated dynamically; the mask is only meaningful if
+ *       watchdogs are recreated in the same order after reset.
+ ******************************************************************************/
+sl_status_t sl_watchdog_manager_retrieve_faulty_mask(uint32_t *unfed_mask);
 
 /***************************************************************************//**
  * @brief Registers a callback for hardware watchdog starvation.

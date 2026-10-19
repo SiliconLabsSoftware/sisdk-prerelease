@@ -45,6 +45,7 @@
 
 #if (configENABLE_MPU == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vRestoreContextOfFirstTask(void)       /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
   __asm volatile
@@ -118,6 +119,7 @@ void vRestoreContextOfFirstTask(void)       /* __attribute__ (( naked )) PRIVILE
 
 #else /* configENABLE_MPU */
 
+SLI_FREERTOS_TIME_CRITICAL
 void vRestoreContextOfFirstTask(void)       /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
   __asm volatile
@@ -207,11 +209,13 @@ void vStartFirstTask(void)   /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
     "   isb                                             \n"
     "   svc %0                                          \n"     /* System call to start the first task. */
     "   nop                                             \n"
+    "   .ltorg                                          \n"     /* Assemble the current literal pool to avoid offset-out-of-bound errors with lto. */
     ::"i" (portSVC_START_SCHEDULER) : "memory"
   );
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 uint32_t ulSetInterruptMask(void)   /* __attribute__(( naked )) PRIVILEGED_FUNCTION */
 {
   __asm volatile
@@ -229,6 +233,7 @@ uint32_t ulSetInterruptMask(void)   /* __attribute__(( naked )) PRIVILEGED_FUNCT
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vClearInterruptMask(__attribute__( (unused) ) uint32_t ulMask)     /* __attribute__(( naked )) PRIVILEGED_FUNCTION */
 {
   __asm volatile
@@ -246,6 +251,7 @@ void vClearInterruptMask(__attribute__( (unused) ) uint32_t ulMask)     /* __att
 
 #if (configENABLE_MPU == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void PendSV_Handler(void)       /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
   __asm volatile
@@ -360,6 +366,7 @@ void PendSV_Handler(void)       /* __attribute__ (( naked )) PRIVILEGED_FUNCTION
 
 #else /* configENABLE_MPU */
 
+SLI_FREERTOS_TIME_CRITICAL
 void PendSV_Handler(void)       /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
   __asm volatile
@@ -414,6 +421,7 @@ void PendSV_Handler(void)       /* __attribute__ (( naked )) PRIVILEGED_FUNCTION
 
 #if ( (configENABLE_MPU == 1) && (configUSE_MPU_WRAPPERS_V1 == 0) )
 
+SLI_FREERTOS_TIME_CRITICAL
 void SVC_Handler(void)       /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
   __asm volatile
@@ -452,6 +460,7 @@ void SVC_Handler(void)       /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 
 #else /* ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 
+SLI_FREERTOS_TIME_CRITICAL
 void SVC_Handler(void)       /* __attribute__ (( naked )) PRIVILEGED_FUNCTION */
 {
   __asm volatile

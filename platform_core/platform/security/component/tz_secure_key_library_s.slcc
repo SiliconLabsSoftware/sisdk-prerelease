@@ -71,6 +71,8 @@ define:
   # ITS should be encrypted when used in the SKL
 - name: SLI_PSA_ITS_ENCRYPTED
 
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
 metadata:
   sbom:
     license: Zlib

@@ -286,6 +286,7 @@ EventBits_t xEventGroupSync(EventGroupHandle_t xEventGroup,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 EventBits_t xEventGroupWaitBits(EventGroupHandle_t xEventGroup,
                                 const EventBits_t uxBitsToWaitFor,
                                 const BaseType_t xClearOnExit,
@@ -419,6 +420,7 @@ EventBits_t xEventGroupWaitBits(EventGroupHandle_t xEventGroup,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 EventBits_t xEventGroupClearBits(EventGroupHandle_t xEventGroup,
                                  const EventBits_t uxBitsToClear)
 {
@@ -453,6 +455,7 @@ EventBits_t xEventGroupClearBits(EventGroupHandle_t xEventGroup,
 
     #if ( (configUSE_TRACE_FACILITY == 1) && (INCLUDE_xTimerPendFunctionCall == 1) && (configUSE_TIMERS == 1) )
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xEventGroupClearBitsFromISR(EventGroupHandle_t xEventGroup,
                                        const EventBits_t uxBitsToClear)
 {
@@ -471,6 +474,7 @@ BaseType_t xEventGroupClearBitsFromISR(EventGroupHandle_t xEventGroup,
     #endif /* if ( ( configUSE_TRACE_FACILITY == 1 ) && ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 1 ) ) */
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 EventBits_t xEventGroupGetBitsFromISR(EventGroupHandle_t xEventGroup)
 {
   UBaseType_t uxSavedInterruptStatus;
@@ -494,6 +498,7 @@ EventBits_t xEventGroupGetBitsFromISR(EventGroupHandle_t xEventGroup)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 EventBits_t xEventGroupSetBits(EventGroupHandle_t xEventGroup,
                                const EventBits_t uxBitsToSet)
 {
@@ -672,6 +677,7 @@ BaseType_t xEventGroupGetStaticBuffer(EventGroupHandle_t xEventGroup,
 
 /* For internal use only - execute a 'set bits' command that was pended from
  * an interrupt. */
+SLI_FREERTOS_TIME_CRITICAL
 void vEventGroupSetBitsCallback(void * pvEventGroup,
                                 uint32_t ulBitsToSet)
 {
@@ -688,6 +694,7 @@ void vEventGroupSetBitsCallback(void * pvEventGroup,
 
 /* For internal use only - execute a 'clear bits' command that was pended from
  * an interrupt. */
+SLI_FREERTOS_TIME_CRITICAL
 void vEventGroupClearBitsCallback(void * pvEventGroup,
                                   uint32_t ulBitsToClear)
 {
@@ -702,6 +709,7 @@ void vEventGroupClearBitsCallback(void * pvEventGroup,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static BaseType_t prvTestWaitCondition(const EventBits_t uxCurrentEventBits,
                                        const EventBits_t uxBitsToWaitFor,
                                        const BaseType_t xWaitForAllBits)
@@ -732,6 +740,7 @@ static BaseType_t prvTestWaitCondition(const EventBits_t uxCurrentEventBits,
 
     #if ( (configUSE_TRACE_FACILITY == 1) && (INCLUDE_xTimerPendFunctionCall == 1) && (configUSE_TIMERS == 1) )
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xEventGroupSetBitsFromISR(EventGroupHandle_t xEventGroup,
                                      const EventBits_t uxBitsToSet,
                                      BaseType_t * pxHigherPriorityTaskWoken)

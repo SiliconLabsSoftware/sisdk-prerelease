@@ -19,6 +19,8 @@ template_file:
 
 define:
 - name: TZ_SERVICE_CONFIG_PRESENT
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
 metadata:
   sbom:
     license: Zlib

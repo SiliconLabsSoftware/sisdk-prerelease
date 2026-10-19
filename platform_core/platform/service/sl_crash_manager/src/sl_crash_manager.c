@@ -36,8 +36,8 @@
 #include "em_device.h"
 #endif
 
-#if defined(RMU_COUNT) && (RMU_COUNT > 0)
-#include "em_rmu.h"
+#if defined(_EMU_RSTCAUSE_MASK)
+#include "sl_hal_emu.h"
 #endif
 
 #if defined(SL_CATALOG_LOG_BACKEND_PROPRIETARY_PRESENT) \
@@ -188,8 +188,8 @@ SL_WEAK uint32_t platform_get_uptime_ms(void)
 
 SL_WEAK uint32_t platform_get_reset_reason(void)
 {
-#if defined(RMU_COUNT) && (RMU_COUNT > 0)
-  return RMU_ResetCauseGet();
+#if defined(_EMU_RSTCAUSE_MASK)
+  return sl_hal_emu_get_reset_cause();
 #else
   return 0U;
 #endif
@@ -198,7 +198,11 @@ SL_WEAK uint32_t platform_get_reset_reason(void)
 SL_WEAK uint32_t platform_get_device_id(void)
 {
 #if defined(DEVINFO)
+#if defined(_DEVINFO_PART_FAMILY_MASK)
   return DEVINFO->PART;
+#else
+  return DEVINFO->PART0;
+#endif
 #else
   return 0U;
 #endif

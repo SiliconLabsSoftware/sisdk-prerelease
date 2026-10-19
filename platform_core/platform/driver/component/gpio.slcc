@@ -25,6 +25,7 @@ requires:
 - name: interrupt_manager
 - name: clock_manager_runtime
 - name: device_gpio
+- name: device_peripheral
 - name: component_catalog
 - name: code_classification
 - name: log_none

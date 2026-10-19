@@ -168,9 +168,10 @@ Additional information:
 #define SEGGER_SYSVIEW_GET_TIMESTAMP()      DWT->CYCCNT
 #define SYSVIEW_TIMESTAMP_FREQ              (SystemCoreClock)
 #elif (SEGGER_SYSVIEW_TIMESTAMP_SOURCE == SEGGER_SYSVIEW_TIMESTAMP_SOURCE_SLEEPTIMER)
-// Return 0 until Sleeptimer is initialized (safe for early SystemView hooks).
+// Return 0 until Sleeptimer is initialized (safe for early SystemView hooks,
+// including C++ pre-init before clocks / sleeptimer are ready).
 #define SEGGER_SYSVIEW_GET_TIMESTAMP()      (sl_sleeptimer_is_initialized() ? sl_sleeptimer_get_tick_count() : 0u)
-#define SYSVIEW_TIMESTAMP_FREQ              sl_sleeptimer_get_timer_frequency()
+#define SYSVIEW_TIMESTAMP_FREQ              (sl_sleeptimer_is_initialized() ? sl_sleeptimer_get_timer_frequency() : 0u)
 #else
 #error "SEGGER_SYSVIEW_TIMESTAMP_SOURCE must be set to SEGGER_SYSVIEW_TIMESTAMP_SOURCE_DWT or SEGGER_SYSVIEW_TIMESTAMP_SOURCE_SLEEPTIMER"
 #endif

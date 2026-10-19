@@ -26,6 +26,9 @@ source:
 - path: src/sli_tz_iovec_check.c
   condition: [trustzone_secure]
 
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
+
 metadata:
   sbom:
     license: Zlib

@@ -23,6 +23,8 @@ source:
 - path: src/sli_tz_service_nvm3_s.c
 
 
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
 metadata:
   sbom:
     license: Zlib

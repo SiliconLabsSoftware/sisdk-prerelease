@@ -19,7 +19,7 @@ template_contribution:
 - name: psa_crypto_config
   value: PSA_WANT_ECC_TWISTED_EDWARDS_255 1
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/keys/types.html#c.PSA_ECC_FAMILY_TWISTED_EDWARDS
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/keys/types.html#c.PSA_ECC_FAMILY_TWISTED_EDWARDS
 metadata:
   sbom:
     reference: mbedtls_sbom

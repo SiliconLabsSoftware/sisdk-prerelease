@@ -19,6 +19,8 @@ requires:
 template_contribution:
 - name: psa_crypto_config
   value: PSA_WANT_ALG_RSA_OAEP 1
+documentation:
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/ops/pke.html#c.PSA_ALG_RSA_OAEP
 metadata:
   sbom:
     reference: mbedtls_sbom

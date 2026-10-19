@@ -25,6 +25,8 @@ template_contribution:
 - name: psa_crypto_config
   value: MBEDTLS_PSA_CRYPTO_CLIENT
 
+documentation:
+  url: https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/crypto__config_8h/#c.MBEDTLS_PSA_CRYPTO_CLIENT
 metadata:
   sbom:
     license: Zlib

@@ -53,6 +53,7 @@ Revision: $Rev: 9599 $
 */
 
 #include <stddef.h>
+#include <stdbool.h>
 #include "sl_sysview_custom_api.h"
 #include "SEGGER_SYSVIEW.h"
 #include "SEGGER_SYSVIEW_Conf.h"
@@ -63,7 +64,6 @@ Revision: $Rev: 9599 $
 #endif
 
 #if (SEGGER_SYSVIEW_TIMESTAMP_SOURCE == SEGGER_SYSVIEW_TIMESTAMP_SOURCE_SLEEPTIMER)
-#include "sl_status.h"
 #include "sl_sleeptimer.h"
 #endif
 
@@ -124,6 +124,7 @@ extern SEGGER_SYSVIEW_OS_API SYSVIEW_X_OS_TraceAPI;
 #endif
 
 static SEGGER_SYSVIEW_MODULE gecko_sdk_module;
+static bool is_configured = false;
 
 int SendSystemDescription_CaptiveCore(uint8_t core_id) {
   (void)core_id;
@@ -188,14 +189,18 @@ static void _cbSendSystemDesc(void) {
 void SEGGER_SYSVIEW_Conf(void) {
   SEGGER_SYSVIEW_OS_API *os_api = NULL;
 
-#if (SEGGER_SYSVIEW_TIMESTAMP_SOURCE == SEGGER_SYSVIEW_TIMESTAMP_SOURCE_SLEEPTIMER)
-  // Initialize Sleeptimer module in case not already done.
-  sl_status_t status = SL_STATUS_OK;
-  status = sl_sleeptimer_init();
-  if (status != SL_STATUS_OK) {
+  // SEGGER_SYSVIEW_Conf() can run from C++ pre-init, sl_main_init() and the
+  // RTOS start hooks. Re-running it would reset the SystemView RTT buffer
+  // (dropping events already recorded) and allocate another captive core RTT
+  // buffer.
+  if (is_configured) {
     return;
   }
-#endif
+  is_configured = true;
+
+  // Sleeptimer is not initialized here: SEGGER_SYSVIEW_Conf() may run before
+  // clocks are set up. Timestamps read 0 until sl_sleeptimer_init() and the
+  // frequency is updated with sli_systemview_update_timestamp_freq().
 
 #if (SEGGER_SYSVIEW_TIMESTAMP_SOURCE == SEGGER_SYSVIEW_TIMESTAMP_SOURCE_DWT) && !defined(SL_COMPONENT_CATALOG_KERNEL_PRESENT)
   // Enable DWT and ensure it is functionnal even when no debugger attached.
@@ -223,6 +228,30 @@ void SEGGER_SYSVIEW_Conf(void) {
 
 int sl_systemview_GetGSDKEventOffset(void) {
   return gecko_sdk_module.EventOffset;
+}
+
+bool sli_systemview_is_configured(void) {
+  return is_configured;
+}
+
+void sli_systemview_start(void) {
+  SEGGER_SYSVIEW_Conf();
+  if (SEGGER_SYSVIEW_GetMainContext()->EnableState == 0u) {
+    SEGGER_SYSVIEW_Start();
+  }
+}
+
+void sli_systemview_update_timestamp_freq(void) {
+  SEGGER_SYSVIEW_CORE_CONTEXT *context = SEGGER_SYSVIEW_GetMainContext();
+  U32 timestamp_freq = SYSVIEW_TIMESTAMP_FREQ;
+  U32 cpu_freq = SYSVIEW_CPU_FREQ;
+
+  context->SysFreq = timestamp_freq;
+  context->CPUFreq = cpu_freq;
+  // Captive-core context was configured during early Conf with a placeholder
+  // frequency; keep it in sync with the main context once the source is ready.
+  _ContextCaptiveCore.SysFreq = timestamp_freq;
+  _ContextCaptiveCore.CPUFreq = cpu_freq;
 }
 
 /*************************** End of file ****************************/

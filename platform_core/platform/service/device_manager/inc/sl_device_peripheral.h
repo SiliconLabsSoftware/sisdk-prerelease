@@ -219,9 +219,6 @@ extern "C" {
 /// Define pointer to LDMA0 peripheral structure.
 #define SL_PERIPHERAL_LDMA0 ((sl_peripheral_t)(&sl_peripheral_dma_val_ldma0))
 
-/// Define pointer to LDMA1 peripheral structure.
-#define SL_PERIPHERAL_LDMA1 ((sl_peripheral_t)(&sl_peripheral_dma_val_ldma1))
-
 /// Define pointer to LDMAXBAR0 peripheral structure.
 #define SL_PERIPHERAL_LDMAXBAR0 ((sl_peripheral_t)(&sl_peripheral_val_ldmaxbar0))
 
@@ -401,9 +398,6 @@ extern "C" {
 
 /// Define pointer to LDMA0 DMA peripheral structure.
 #define SL_PERIPHERAL_DMA_LDMA0 (&sl_peripheral_dma_val_ldma0)
-
-/// Define pointer to LDMA1 DMA peripheral structure.
-#define SL_PERIPHERAL_DMA_LDMA1 (&sl_peripheral_dma_val_ldma1)
 
 /// @} (end peripheral_dma_defines)
 
@@ -979,7 +973,6 @@ extern const sl_peripheral_val_t sl_peripheral_val_wdog1;
 
 // External declaration for LDMA DMA peripheral structure.
 extern const sl_peripheral_dma_val_t sl_peripheral_dma_val_ldma0;
-extern const sl_peripheral_dma_val_t sl_peripheral_dma_val_ldma1;
 
 /// @endcond
 

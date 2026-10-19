@@ -225,6 +225,8 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_SEQ_USER_SEQUENCER_GENERIC_ERROR = 86,
   /** The sequence timed out. */
   RAIL_ASSERT_SEQUENCE_TIMEOUT = 87,
+  /** PITA LPW deny-shutdown watchdog overflowed. */
+  RAIL_ASSERT_FAILED_PITA_WATCHDOG = 88,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -317,6 +319,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_INVALID_OR_MISSING_SOFTWARE_MODEM_IMAGE    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_OR_MISSING_SOFTWARE_MODEM_IMAGE)
 #define RAIL_ASSERT_SEQ_USER_SEQUENCER_GENERIC_ERROR           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_SEQ_USER_SEQUENCER_GENERIC_ERROR)
 #define RAIL_ASSERT_SEQUENCE_TIMEOUT                           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_SEQUENCE_TIMEOUT)
+#define RAIL_ASSERT_FAILED_PITA_WATCHDOG                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_PITA_WATCHDOG)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /// Use this define to create an array of error messages that map to the codes
@@ -431,6 +434,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*85*/ "Software modem image invalid or missing",                                  \
     /*86*/ "The sequencer user generated error",                                       \
     /*87*/ "The sequence timed out",                                                   \
+    /*88*/ "PITA LPW deny-shutdown watchdog overflowed",                               \
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

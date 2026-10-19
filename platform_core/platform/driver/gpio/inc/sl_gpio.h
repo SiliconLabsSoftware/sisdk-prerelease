@@ -38,6 +38,7 @@ extern "C" {
 #include <stdbool.h>
 #include "sl_status.h"
 #include "sl_device_gpio.h"
+#include "sl_device_peripheral.h"
 #include "sl_code_classification.h"
 
 #ifndef EM_GPIO_H
@@ -501,6 +502,44 @@ sl_status_t sl_gpio_unlock(void);
  *         SL_STATUS_NULL_POINTER if state is passed as null.
  ******************************************************************************/
 sl_status_t sl_gpio_is_locked(bool *state);
+
+/***************************************************************************//**
+ * Latch all GPIO pins routed to a peripheral.
+ *
+ * Freezes the output state of every pin currently routed to the given
+ * peripheral through the GPIO DBUS. This prevents pin glitches when the
+ * peripheral is disabled or loses retention during sleep.
+ *
+ * Weak default implementation returns SL_STATUS_OK (no-op). The
+ * gpio_peripheral_pin_latching component provides a strong override when
+ * present.
+ *
+ * @param[in] peripheral  The peripheral whose routed pins should be latched.
+ *
+ * @return SL_STATUS_OK on success.
+ *         SL_STATUS_INVALID_PARAMETER if the peripheral has no ROUTEEN
+ *         information (gpio_routeen_offset == 0xFFFF).
+ ******************************************************************************/
+sl_status_t sl_gpio_latch_peripheral_pins(sl_peripheral_t peripheral);
+
+/***************************************************************************//**
+ * Unlatch all GPIO pins routed to a peripheral.
+ *
+ * Releases the output latch on every pin currently routed to the given
+ * peripheral, returning pad control to the live GPIO/peripheral path.
+ * Call this after the peripheral has been fully restored and re-enabled.
+ *
+ * Weak default implementation returns SL_STATUS_OK (no-op). The
+ * gpio_peripheral_pin_latching component provides a strong override when
+ * present.
+ *
+ * @param[in] peripheral  The peripheral whose routed pins should be unlatched.
+ *
+ * @return SL_STATUS_OK on success.
+ *         SL_STATUS_INVALID_PARAMETER if the peripheral has no ROUTEEN
+ *         information (gpio_routeen_offset == 0xFFFF).
+ ******************************************************************************/
+sl_status_t sl_gpio_unlatch_peripheral_pins(sl_peripheral_t peripheral);
 
 /** @} (end addtogroup gpio driver) */
 #ifdef __cplusplus

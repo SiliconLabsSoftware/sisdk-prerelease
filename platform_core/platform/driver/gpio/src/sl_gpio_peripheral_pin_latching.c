@@ -28,7 +28,7 @@
  *
  ******************************************************************************/
 
-#include "sl_gpio_peripheral_pin_latching.h"
+#include "sl_gpio.h"
 #include "sl_hal_gpio.h"
 #include "em_device.h"
 
@@ -68,6 +68,7 @@
  * @param[out] gap_position  Position of the input-only route register gap
  *                           (1-based from ROUTEEN).  0xFF means no gap.
  ******************************************************************************/
+#if defined(SLI_GPIO_HW_PIN_LATCHING_PRESENT)
 static void get_routeen_info(sl_peripheral_t peripheral,
                              uint16_t *offset,
                              uint32_t *mask,
@@ -107,6 +108,7 @@ static void get_routeen_info(sl_peripheral_t peripheral,
   }
 #endif // EUSART_PRESENT
 }
+#endif
 
 /***************************************************************************//**
  * Core implementation shared by latch and unlatch.
@@ -123,6 +125,7 @@ static void get_routeen_info(sl_peripheral_t peripheral,
  * shifted by one to account for an input-only route register with no enable
  * bit.
  ******************************************************************************/
+#if defined(SLI_GPIO_HW_PIN_LATCHING_PRESENT)
 static sl_status_t latch_unlatch_peripheral_pins(sl_peripheral_t peripheral,
                                                  bool latch)
 {
@@ -170,6 +173,7 @@ static sl_status_t latch_unlatch_peripheral_pins(sl_peripheral_t peripheral,
 
   return SL_STATUS_OK;
 }
+#endif
 
 // -----------------------------------------------------------------------------
 // Public API
@@ -179,7 +183,11 @@ static sl_status_t latch_unlatch_peripheral_pins(sl_peripheral_t peripheral,
  ******************************************************************************/
 sl_status_t sl_gpio_latch_peripheral_pins(sl_peripheral_t peripheral)
 {
+#if defined(SLI_GPIO_HW_PIN_LATCHING_PRESENT)
   return latch_unlatch_peripheral_pins(peripheral, true);
+#else
+  return SL_STATUS_OK;
+#endif
 }
 
 /***************************************************************************//**
@@ -187,5 +195,9 @@ sl_status_t sl_gpio_latch_peripheral_pins(sl_peripheral_t peripheral)
  ******************************************************************************/
 sl_status_t sl_gpio_unlatch_peripheral_pins(sl_peripheral_t peripheral)
 {
+#if defined(SLI_GPIO_HW_PIN_LATCHING_PRESENT)
   return latch_unlatch_peripheral_pins(peripheral, false);
+#else
+  return SL_STATUS_OK;
+#endif
 }

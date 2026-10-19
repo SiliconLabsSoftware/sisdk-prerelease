@@ -47,6 +47,7 @@
 #include "FreeRTOS.h"
 #include "em_device.h"
 #include "sl_memory_manager.h"
+#include "sli_memory_manager.h"
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
 #endif
@@ -132,14 +133,24 @@ static void * prvPortMalloc(size_t xWantedSize, uint8_t block_type)
 
 void * pvPortMalloc(size_t xWantedSize)
 {
-  return prvPortMalloc(xWantedSize,
-                       sli_freertos_heap_3_short_term_allocations
-                       ? BLOCK_TYPE_SHORT_TERM
-                       : BLOCK_TYPE_LONG_TERM);
+#if defined(SL_CATALOG_MEMORY_MANAGER_SYSTEMVIEW_RETARGET_PRESENT) && defined(__GNUC__)
+  const void * volatile owner_pc = sli_memory_get_return_address();
+#endif
+  void *pvReturn = prvPortMalloc(xWantedSize,
+                                 sli_freertos_heap_3_short_term_allocations
+                                 ? BLOCK_TYPE_SHORT_TERM
+                                 : BLOCK_TYPE_LONG_TERM);
+#if defined(SL_CATALOG_MEMORY_MANAGER_SYSTEMVIEW_RETARGET_PRESENT) && defined(__GNUC__)
+  sli_memory_track_ownership(pvReturn, owner_pc);
+#endif
+  return pvReturn;
 }
 #else
 void * pvPortMalloc(size_t xWantedSize)
 {
+#if defined(SL_CATALOG_MEMORY_MANAGER_SYSTEMVIEW_RETARGET_PRESENT) && defined(__GNUC__)
+  const void * volatile owner_pc = sli_memory_get_return_address();
+#endif
   void * pvReturn = NULL;
 
   vTaskSuspendAll();
@@ -169,6 +180,9 @@ void * pvPortMalloc(size_t xWantedSize)
   }
     #endif
 
+#if defined(SL_CATALOG_MEMORY_MANAGER_SYSTEMVIEW_RETARGET_PRESENT) && defined(__GNUC__)
+  sli_memory_track_ownership(pvReturn, owner_pc);
+#endif
   return pvReturn;
 }
 #endif

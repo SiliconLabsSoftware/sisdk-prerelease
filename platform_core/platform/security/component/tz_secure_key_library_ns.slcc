@@ -66,6 +66,9 @@ template_contribution:
     include: sli_tz_ns_interface.h
     handler: sli_tz_ns_interface_init
 
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
+
 metadata:
   sbom:
     license: Zlib

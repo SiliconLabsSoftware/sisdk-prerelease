@@ -61,6 +61,8 @@ include:
   - path: sli_se_transparent_functions.h
   - path: sli_se_transparent_types.h
 
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     license: Zlib

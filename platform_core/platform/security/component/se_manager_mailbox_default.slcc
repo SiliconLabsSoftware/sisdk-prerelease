@@ -14,6 +14,8 @@ provides:
 - name: se_manager_mailbox_source
 - name: se_manager_mailbox_default
 
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-api/sl-se-manager
 metadata:
   sbom:
     license: Zlib

@@ -117,12 +117,6 @@
 #include "sl_memory_manager.h"
 #endif
 
-#if defined(SL_CATALOG_MEMORY_MANAGER_PRESENT) \
-  && defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT) \
-  && defined(__GNUC__)
-#include "sli_memory_manager.h"
-#endif
-
 #if defined(SL_CATALOG_CLOCK_MANAGER_PRESENT)
 #include "sl_clock_manager_init.h"
 #endif
@@ -156,8 +150,8 @@
 #define SLI_METRIC_EVENT_HANDLER_SAVE(func)
 #endif
 
-#if defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT) && !defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT)
-#include "SEGGER_SYSVIEW.h"
+#if defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT)
+#include "sl_sysview_custom_api.h"
 #endif
 
 #if defined(SL_CATALOG_SEGGER_RTT_PRESENT)
@@ -277,8 +271,15 @@ void sl_main_init(void)
 #endif
 
 #if defined(SL_CATALOG_SEGGER_RTT_PRESENT)
-  SEGGER_RTT_Init();
-  SLI_METRIC_EVENT_HANDLER_SAVE("SEGGER_RTT_Init");
+#if defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT)
+  // C++ Memory Manager pre-init may already have started SystemView.
+  // Re-initializing RTT would drop its RTT channel.
+  if (!sli_systemview_is_configured())
+#endif
+  {
+    SEGGER_RTT_Init();
+    SLI_METRIC_EVENT_HANDLER_SAVE("SEGGER_RTT_Init");
+  }
 #endif
 
 #if defined(SL_CATALOG_LOG_COMPONENT_PRESENT)
@@ -286,17 +287,12 @@ void sl_main_init(void)
   SLI_METRIC_EVENT_HANDLER_SAVE("sl_log_init_stage1");
 #endif
 
-#if defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT) && !defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT)
-  SEGGER_SYSVIEW_Conf();
-  SEGGER_SYSVIEW_Start();
-#endif
-
-#if defined(SL_CATALOG_MEMORY_MANAGER_PRESENT) \
-  && defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT) \
-  && defined(__GNUC__) \
-  && defined(SL_CATALOG_CPP_SUPPORT_PRESENT)
-  sli_memory_register_systemview_heaps();
-  SLI_METRIC_EVENT_HANDLER_SAVE("sli_memory_register_systemview_heaps");
+#if defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT) \
+  && (!defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT) \
+  || (defined(SL_CATALOG_MEMORY_MANAGER_PRESENT) \
+  && !defined(SL_CATALOG_CPP_SUPPORT_PRESENT)))
+  sli_systemview_start();
+  SLI_METRIC_EVENT_HANDLER_SAVE("sli_systemview_start");
 #endif
 
 #if defined(SL_CATALOG_MEMORY_MANAGER_PRESENT) && !defined(SL_CATALOG_CPP_SUPPORT_PRESENT)
@@ -409,6 +405,11 @@ void sl_main_init(void)
 #if defined(SL_CATALOG_SLEEPTIMER_PRESENT)
   sl_sleeptimer_init();
   SLI_METRIC_EVENT_HANDLER_SAVE("sl_sleeptimer_init");
+#endif
+
+#if defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT) && !defined(SL_CATALOG_LOG_BACKEND_SYSTEMVIEW_PRESENT)
+  // SystemView was started before the clocks and the timestamp source.
+  sli_systemview_update_timestamp_freq();
 #endif
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)

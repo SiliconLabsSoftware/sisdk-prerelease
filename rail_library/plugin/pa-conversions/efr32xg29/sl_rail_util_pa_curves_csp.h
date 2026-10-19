@@ -67,13 +67,13 @@ extern "C" {
     -26,  /*! Power Level 6 */            \
     -20,  /*! Power Level 7 */            \
     -14,  /*! Power Level 8 */            \
-    -6,   /*! Power Level 9 */            \
-    -2,   /*! Power Level 10 */           \
-    0,    /*! Power Level 11 */           \
-    1,    /*! Power Level 12 */           \
+    -9,   /*! Power Level 9 */            \
+    -6,   /*! Power Level 10 */           \
+    -2,    /*! Power Level 11 */          \
+    0,    /*! Power Level 12 */           \
     2,    /*! Power Level 13 */           \
     4,    /*! Power Level 14 */           \
-    5,    /*! Power Level 15 */           \
+    6,    /*! Power Level 15 */           \
   }
 // *INDENT-OFF*
 // Macro to declare the variables needed to initialize RAIL_TxPowerCurvesConfig_t for use in

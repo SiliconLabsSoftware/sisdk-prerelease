@@ -28,8 +28,15 @@
  *
  ******************************************************************************/
 #include <stdint.h>
-{% set uart_instances_it = (uart_instances | default([], true) | list) + (uart_async_instances | default([], true) | list) %}
-{% set uart_async_instances_it = uart_async_instances | default([], true) | list %}
+{# Build a single list of complete instance names (peripheral_type + instance). #}
+{% set ns = namespace(instances=[]) %}
+{% for instance in uart_eusart_instances | default([], true) | list %}
+  {% set ns.instances = ns.instances + ['eusart_' ~ instance] %}
+{% endfor %}
+{% for instance in uart_usart_instances | default([], true) | list %}
+  {% set ns.instances = ns.instances + ['usart_' ~ instance] %}
+{% endfor %}
+{% set uart_instances_it = ns.instances %}
 #include "sl_assert.h"
 #include "sl_common.h"
 #include "sl_device_peripheral.h"
@@ -45,43 +52,19 @@
 #define SL_UART_PERIPHERAL(periph)        SL_CONCAT_PASTER_2(SL_PERIPHERAL_, periph)
 #define SL_UART_RX_IRQHandler(periph)     SL_CONCAT_PASTER_2(periph, _RX_IRQHandler)
 #define SL_UART_TX_IRQHandler(periph)     SL_CONCAT_PASTER_2(periph, _TX_IRQHandler)
-
-// Low-level driver family a peripheral belongs to. Instance configurations spell their
-// peripheral as a bare token (USART0, EUSART1, ...), so the family is resolved by pasting
-// that token. Only usable where em_device.h is not included, since it redefines those
-// names as typed base pointers.
-#define SL_UART_LLD_EUSART                1
-#define SL_UART_LLD_USART                 2
-
-#define SL_UART_LLD_OF(periph)            SL_CONCAT_PASTER_2(periph, _SL_UART_LLD)
-
-#define EUART0_SL_UART_LLD                SL_UART_LLD_EUSART
-#define EUSART0_SL_UART_LLD               SL_UART_LLD_EUSART
-#define EUSART1_SL_UART_LLD               SL_UART_LLD_EUSART
-#define EUSART2_SL_UART_LLD               SL_UART_LLD_EUSART
-#define EUSART3_SL_UART_LLD               SL_UART_LLD_EUSART
-#define EUSART4_SL_UART_LLD               SL_UART_LLD_EUSART
-#define USART0_SL_UART_LLD                SL_UART_LLD_USART
-#define USART1_SL_UART_LLD                SL_UART_LLD_USART
-#define USART2_SL_UART_LLD                SL_UART_LLD_USART
 {% for instance in uart_instances_it %}
-
-#if SL_UART_LLD_OF(SL_UART_{{ instance | upper }}_PERIPHERAL) == SL_UART_LLD_EUSART \
-  && !defined(SL_CATALOG_UART_EUSART_PRESENT)
-#error "UART instance '{{ instance }}' is configured on an EUSART peripheral. Add the uart_eusart component to the project."
-#endif
-
-#if SL_UART_LLD_OF(SL_UART_{{ instance | upper }}_PERIPHERAL) == SL_UART_LLD_USART \
-  && !defined(SL_CATALOG_UART_USART_PRESENT)
-#error "UART instance '{{ instance }}' is configured on a USART peripheral. Add the uart_usart component to the project."
-#endif
-{% endfor %}
-{% for instance in uart_instances_it %}
-sl_peripheral_t sl_uart_{{ instance }}_peripheral = SL_UART_PERIPHERAL(SL_UART_{{ instance | upper }}_PERIPHERAL);
 sl_uart_handle_t sl_uart_{{ instance }}_handle;
-{% if instance in uart_async_instances_it %}
+#if defined(SL_UART_{{ instance | upper }}_ASYNC_ENABLE) && (SL_UART_{{ instance | upper }}_ASYNC_ENABLE == 1)
+#if !defined(SL_CATALOG_UART_ASYNC_PRESENT)
+#error "UART instance '{{ instance }}' enables asynchronous support. Add the uart_async component to the project."
+#define SL_UART_{{ instance | upper }}_ASYNC_CONFIG  NULL
+#else
 const sl_uart_async_config_t sl_uart_{{ instance }}_async_config = SL_UART_ASYNC_CONFIG_DEFAULT;
-{% endif %}
+#define SL_UART_{{ instance | upper }}_ASYNC_CONFIG  (&sl_uart_{{ instance }}_async_config)
+#endif
+#else
+#define SL_UART_{{ instance | upper }}_ASYNC_CONFIG  NULL
+#endif
 
 const sl_uart_pin_config_t sl_uart_{{ instance }}_pin_config = {
   .tx = { SL_UART_{{ instance | upper }}_TX_PORT, SL_UART_{{ instance | upper }}_TX_PIN },
@@ -121,9 +104,9 @@ void sl_uart_instances_init(void)
 
   {%- for instance in uart_instances_it %}
   status = sl_uart_init(&sl_uart_{{ instance }}_handle,
-                        sl_uart_{{ instance }}_peripheral,
+                        SL_UART_PERIPHERAL(SL_UART_{{ instance | upper }}_PERIPHERAL),
                         &sl_uart_{{ instance }}_pin_config,
-                        {% if instance in uart_async_instances_it %}&sl_uart_{{ instance }}_async_config{% else %}NULL{% endif %});
+                        SL_UART_{{ instance | upper }}_ASYNC_CONFIG);
   EFM_ASSERT(status == SL_STATUS_OK);
 
   status = sl_uart_configure_line(&sl_uart_{{ instance }}_handle,

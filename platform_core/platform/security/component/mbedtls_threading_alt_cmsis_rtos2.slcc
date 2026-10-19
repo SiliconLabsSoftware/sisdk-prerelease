@@ -49,6 +49,8 @@ template_contribution:
   value: MBEDTLS_THREADING_ALT
   condition: [device_si91x]
 
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-mbedtls/
 metadata:
   sbom:
     license: Zlib

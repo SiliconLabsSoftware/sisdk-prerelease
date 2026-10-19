@@ -51,6 +51,8 @@ template_contribution:
   value: tfm_crypto_raw_key_agreement
 
 
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
 metadata:
   sbom:
     license: Zlib

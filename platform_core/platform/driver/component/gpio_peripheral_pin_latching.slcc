@@ -6,30 +6,31 @@ description: >
   mode transitions. Latching freezes pin states before the controlling
   peripheral loses retention; unlatching restores live pad control after
   the peripheral is re-enabled.
+
+  When this component is present its strong definitions override the weak
+  no-op stubs provided by the gpio component.
 category: Platform|Driver|GPIO
 quality: evaluation
 metadata:
   sbom:
     license: Zlib
 root_path: platform_core/platform/driver/gpio/
-include:
-- path: inc
-  file_list:
-  - path: sl_gpio_peripheral_pin_latching.h
 source:
 - path: src/sl_gpio_peripheral_pin_latching.c
 provides:
 - name: gpio_peripheral_pin_latching
-  condition: [device_has_no_deepsleep_retention]
 requires:
-- name: device_has_no_deepsleep_retention
+- name: gpio
 - name: hal_gpio
 - name: status
 - name: device_peripheral_hal
+- name: device_has_no_deepsleep_retention
 - name: code_classification
 define:
 - name: SL_CODE_COMPONENT_GPIO_PERIPHERAL_PIN_LATCHING
   value: gpio_peripheral_pin_latching
+- name: SLI_GPIO_HW_PIN_LATCHING_PRESENT
+  value: 1
 documentation:
   docset: gecko-platform
   document: platform-driver/gpio

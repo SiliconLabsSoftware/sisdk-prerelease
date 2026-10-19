@@ -25,7 +25,8 @@ requires:
 - name: component_catalog
 - name: cmsis_core
 - name: device
-- name: emlib_wdog
+- name: hal_emu
+- name: hal_wdog
   condition: [device_has_wdog]
 recommends:
 - id: log

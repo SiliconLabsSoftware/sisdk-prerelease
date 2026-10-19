@@ -820,6 +820,14 @@ int8_t sl_zigbee_get_radio_power(void)
   return parameters.radioTxPower;
 }
 
+sl_802154_short_addr_t sl_zigbee_get_parent_id(void)
+{
+  sl_802154_long_addr_t parent_eui64;
+  sl_802154_short_addr_t parent_node_id = SL_ZIGBEE_NULL_NODE_ID;
+  (void)sl_zigbee_ezsp_get_parent_child_parameters(parent_eui64, &parent_node_id);
+  return parent_node_id;
+}
+
 uint8_t sl_zigbee_next_zigbee_sequence_number(void)
 {
   uint8_t value = 0;

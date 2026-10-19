@@ -20,6 +20,8 @@ requires:
 template_contribution:
 - name: psa_crypto_config
   value: PSA_WANT_ALG_RSA_PKCS1V15_SIGN 1
+documentation:
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/ops/sign.html#c.PSA_ALG_RSA_PKCS1V15_SIGN
 metadata:
   sbom:
     reference: mbedtls_sbom

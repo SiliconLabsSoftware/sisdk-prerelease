@@ -18,6 +18,8 @@ requires:
 - name: tz_common
 - name: tz_iovec_check
 
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
 metadata:
   sbom:
     license: ZLib

@@ -14,6 +14,8 @@ requires:
 - name: device_series_2
 - name: se_manager
   condition: [trustzone_secure]
+- name: se_manager
+  condition: [device_has_semailbox, trustzone_unaware]
 - name: cryptoacc_library
   condition: [device_has_cryptoacc, trustzone_secure]
 - name: psa_driver

@@ -38,6 +38,8 @@ include:
     unless: [trustzone_nonsecure]
   - path: sli_psa_driver_features.h
 
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     license: Zlib

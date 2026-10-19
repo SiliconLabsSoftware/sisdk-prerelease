@@ -1,36 +1,34 @@
 id: uart_async
 package: platform_core
-label: UART Async Driver
+label: UART Driver Async Support
 description: >
-  Platform UART async driver for USART, EUART, and EUSART peripherals. Declares the
-  underlying peripheral signals (TX, RX, CTS, RTS) and configures the DMA channels  for transmission and reception. An instance declared via this component will only
-  support the asynchronous transfer APIs. Generated instances are initialized
-  by sl_uart_init_instances() (automatically when sl_main is present). Add the  uart_eusart or uart_usart component to support the selected peripheral type.
+  Compiles in UART driver async (DMA) support. Required for instances that set
+  SL_UART_<PERIPH>_<INSTANCE>_ASYNC_ENABLE to 1, and for users that allocate their UART
+  instances themselves and pass a non-NULL sl_uart_async_config_t to
+  sl_uart_init().
 category: Platform|Driver|UART
 quality: production
 metadata:
   sbom:
     license: Zlib
 root_path: platform_core/platform/driver/uart/
-instantiable:
-  prefix: inst
+source:
+- path: src/sl_uart_async.c
+- path: src/sli_uart_async.h
+- path: src/sli_uart_async_types.h
+- path: src/sli_uart_transfer_pool.c
+- path: src/sli_uart_transfer_pool.h
+provides:
+- name: uart_async
 requires:
-- name: uart_async_core
+- name: dma_channel
+- name: dma_manager
+- name: memory_manager
+- name: sleeptimer
 - name: uart_core
-config_file:
-- path: config/sl_uart_{{instance}}_config.h
-  file_id: uart_async_config
-template_file:
-- path: init/sl_uart_instances.c.jinja
-- path: init/sl_uart_instances.h.jinja
 template_contribution:
-- name: uart_async_instances
-  value: '{{instance}}'
-- name: event_handler
-  value:
-    event: driver_init
-    include: sl_uart_instances.h
-    handler: sl_uart_instances_init
+- name: component_catalog
+  value: uart_async
 documentation:
   docset: gecko-platform
   document: platform-driver/uartdrv

@@ -33,6 +33,8 @@ template_contribution:
 recommends:
 - id: psa_crypto_rsa_2048
   vendor: silabs
+documentation:
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/keys/types.html#c.PSA_KEY_TYPE_RSA_KEY_PAIR
 metadata:
   sbom:
     reference: mbedtls_sbom

@@ -649,6 +649,7 @@ QueueHandle_t xQueueCreateMutexStatic(const uint8_t ucQueueType,
 
 #if ( (configUSE_MUTEXES == 1) && (INCLUDE_xSemaphoreGetMutexHolder == 1) )
 
+SLI_FREERTOS_TIME_CRITICAL
 TaskHandle_t xQueueGetMutexHolder(QueueHandle_t xSemaphore)
 {
   TaskHandle_t pxReturn;
@@ -683,6 +684,7 @@ TaskHandle_t xQueueGetMutexHolder(QueueHandle_t xSemaphore)
 
 #if ( (configUSE_MUTEXES == 1) && (INCLUDE_xSemaphoreGetMutexHolder == 1) )
 
+SLI_FREERTOS_TIME_CRITICAL
 TaskHandle_t xQueueGetMutexHolderFromISR(QueueHandle_t xSemaphore)
 {
   TaskHandle_t pxReturn;
@@ -710,6 +712,7 @@ TaskHandle_t xQueueGetMutexHolderFromISR(QueueHandle_t xSemaphore)
 
 #if (configUSE_RECURSIVE_MUTEXES == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xQueueGiveMutexRecursive(QueueHandle_t xMutex)
 {
   BaseType_t xReturn;
@@ -763,6 +766,7 @@ BaseType_t xQueueGiveMutexRecursive(QueueHandle_t xMutex)
 
 #if (configUSE_RECURSIVE_MUTEXES == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xQueueTakeMutexRecursive(QueueHandle_t xMutex,
                                     TickType_t xTicksToWait)
 {
@@ -869,6 +873,7 @@ QueueHandle_t xQueueCreateCountingSemaphore(const UBaseType_t uxMaxCount,
 #endif /* ( ( configUSE_COUNTING_SEMAPHORES == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) ) */
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xQueueGenericSend(QueueHandle_t xQueue,
                              const void * const pvItemToQueue,
                              TickType_t xTicksToWait,
@@ -1047,6 +1052,7 @@ BaseType_t xQueueGenericSend(QueueHandle_t xQueue,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xQueueGenericSendFromISR(QueueHandle_t xQueue,
                                     const void * const pvItemToQueue,
                                     BaseType_t * const pxHigherPriorityTaskWoken,
@@ -1184,6 +1190,7 @@ BaseType_t xQueueGenericSendFromISR(QueueHandle_t xQueue,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xQueueGiveFromISR(QueueHandle_t xQueue,
                              BaseType_t * const pxHigherPriorityTaskWoken)
 {
@@ -1324,6 +1331,7 @@ BaseType_t xQueueGiveFromISR(QueueHandle_t xQueue,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xQueueReceive(QueueHandle_t xQueue,
                          void * const pvBuffer,
                          TickType_t xTicksToWait)
@@ -1447,6 +1455,7 @@ BaseType_t xQueueReceive(QueueHandle_t xQueue,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xQueueSemaphoreTake(QueueHandle_t xQueue,
                                TickType_t xTicksToWait)
 {
@@ -1769,6 +1778,7 @@ BaseType_t xQueuePeek(QueueHandle_t xQueue,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xQueueReceiveFromISR(QueueHandle_t xQueue,
                                 void * const pvBuffer,
                                 BaseType_t * const pxHigherPriorityTaskWoken)
@@ -1854,6 +1864,7 @@ BaseType_t xQueueReceiveFromISR(QueueHandle_t xQueue,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xQueuePeekFromISR(QueueHandle_t xQueue,
                              void * const pvBuffer)
 {
@@ -1913,6 +1924,7 @@ BaseType_t xQueuePeekFromISR(QueueHandle_t xQueue,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 UBaseType_t uxQueueMessagesWaiting(const QueueHandle_t xQueue)
 {
   UBaseType_t uxReturn;
@@ -1954,6 +1966,7 @@ UBaseType_t uxQueueSpacesAvailable(const QueueHandle_t xQueue)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 UBaseType_t uxQueueMessagesWaitingFromISR(const QueueHandle_t xQueue)
 {
   UBaseType_t uxReturn;
@@ -2078,6 +2091,7 @@ UBaseType_t uxQueueGetQueueLength(QueueHandle_t xQueue)   /* PRIVILEGED_FUNCTION
 
 #if (configUSE_MUTEXES == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 static UBaseType_t prvGetDisinheritPriorityAfterTimeout(const Queue_t * const pxQueue)
 {
   UBaseType_t uxHighestPriorityOfWaitingTasks;
@@ -2100,6 +2114,7 @@ static UBaseType_t prvGetDisinheritPriorityAfterTimeout(const Queue_t * const px
 #endif /* configUSE_MUTEXES */
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static BaseType_t prvCopyDataToQueue(Queue_t * const pxQueue,
                                      const void * pvItemToQueue,
                                      const BaseType_t xPosition)
@@ -2163,6 +2178,7 @@ static BaseType_t prvCopyDataToQueue(Queue_t * const pxQueue,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static void prvCopyDataFromQueue(Queue_t * const pxQueue,
                                  void * const pvBuffer)
 {
@@ -2180,6 +2196,7 @@ static void prvCopyDataFromQueue(Queue_t * const pxQueue,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static void prvUnlockQueue(Queue_t * const pxQueue)
 {
   /* THIS FUNCTION MUST BE CALLED WITH THE SCHEDULER SUSPENDED. */
@@ -2274,6 +2291,7 @@ static void prvUnlockQueue(Queue_t * const pxQueue)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static BaseType_t prvIsQueueEmpty(const Queue_t * pxQueue)
 {
   BaseType_t xReturn;
@@ -2292,6 +2310,7 @@ static BaseType_t prvIsQueueEmpty(const Queue_t * pxQueue)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xQueueIsQueueEmptyFromISR(const QueueHandle_t xQueue)
 {
   BaseType_t xReturn;
@@ -2313,6 +2332,7 @@ BaseType_t xQueueIsQueueEmptyFromISR(const QueueHandle_t xQueue)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static BaseType_t prvIsQueueFull(const Queue_t * pxQueue)
 {
   BaseType_t xReturn;
@@ -2331,6 +2351,7 @@ static BaseType_t prvIsQueueFull(const Queue_t * pxQueue)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xQueueIsQueueFullFromISR(const QueueHandle_t xQueue)
 {
   BaseType_t xReturn;
@@ -2707,6 +2728,7 @@ void vQueueUnregisterQueue(QueueHandle_t xQueue)
 
 #if (configUSE_TIMERS == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vQueueWaitForMessageRestricted(QueueHandle_t xQueue,
                                     TickType_t xTicksToWait,
                                     const BaseType_t xWaitIndefinitely)
@@ -2835,6 +2857,7 @@ BaseType_t xQueueRemoveFromSet(QueueSetMemberHandle_t xQueueOrSemaphore,
 
 #if (configUSE_QUEUE_SETS == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 QueueSetMemberHandle_t xQueueSelectFromSet(QueueSetHandle_t xQueueSet,
                                            TickType_t const xTicksToWait)
 {
@@ -2854,6 +2877,7 @@ QueueSetMemberHandle_t xQueueSelectFromSet(QueueSetHandle_t xQueueSet,
 
 #if (configUSE_QUEUE_SETS == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 QueueSetMemberHandle_t xQueueSelectFromSetFromISR(QueueSetHandle_t xQueueSet)
 {
   QueueSetMemberHandle_t xReturn = NULL;
@@ -2872,6 +2896,7 @@ QueueSetMemberHandle_t xQueueSelectFromSetFromISR(QueueSetHandle_t xQueueSet)
 
 #if (configUSE_QUEUE_SETS == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 static BaseType_t prvNotifyQueueSetContainer(const Queue_t * const pxQueue)
 {
   Queue_t * pxQueueSetContainer = pxQueue->pxQueueSetContainer;

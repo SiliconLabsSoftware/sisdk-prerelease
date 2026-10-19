@@ -737,3 +737,21 @@ void GPIO_ODD_IRQHandler(void)
 
   sl_gpio_dispatch_interrupt(odd_flags);
 }
+
+/***************************************************************************//**
+ * Weak default: latch all GPIO pins routed to a peripheral.
+ ******************************************************************************/
+SL_WEAK sl_status_t sl_gpio_latch_peripheral_pins(sl_peripheral_t peripheral)
+{
+  (void)peripheral;
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Weak default: unlatch all GPIO pins routed to a peripheral.
+ ******************************************************************************/
+SL_WEAK sl_status_t sl_gpio_unlatch_peripheral_pins(sl_peripheral_t peripheral)
+{
+  (void)peripheral;
+  return SL_STATUS_OK;
+}

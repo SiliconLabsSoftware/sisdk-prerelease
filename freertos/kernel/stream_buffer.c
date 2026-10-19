@@ -715,6 +715,7 @@ BaseType_t xStreamBufferSetTriggerLevel(StreamBufferHandle_t xStreamBuffer,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 size_t xStreamBufferSpacesAvailable(StreamBufferHandle_t xStreamBuffer)
 {
   const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
@@ -765,6 +766,7 @@ size_t xStreamBufferBytesAvailable(StreamBufferHandle_t xStreamBuffer)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 size_t xStreamBufferSend(StreamBufferHandle_t xStreamBuffer,
                          const void * pvTxData,
                          size_t xDataLengthBytes,
@@ -875,6 +877,7 @@ size_t xStreamBufferSend(StreamBufferHandle_t xStreamBuffer,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 size_t xStreamBufferSendFromISR(StreamBufferHandle_t xStreamBuffer,
                                 const void * pvTxData,
                                 size_t xDataLengthBytes,
@@ -923,6 +926,7 @@ size_t xStreamBufferSendFromISR(StreamBufferHandle_t xStreamBuffer,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static size_t prvWriteMessageToBuffer(StreamBuffer_t * const pxStreamBuffer,
                                       const void * pvTxData,
                                       size_t xDataLengthBytes,
@@ -969,6 +973,7 @@ static size_t prvWriteMessageToBuffer(StreamBuffer_t * const pxStreamBuffer,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 size_t xStreamBufferReceive(StreamBufferHandle_t xStreamBuffer,
                             void * pvRxData,
                             size_t xBufferLengthBytes,
@@ -1103,6 +1108,7 @@ size_t xStreamBufferNextMessageLengthBytes(StreamBufferHandle_t xStreamBuffer)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 size_t xStreamBufferReceiveFromISR(StreamBufferHandle_t xStreamBuffer,
                                    void * pvRxData,
                                    size_t xBufferLengthBytes,
@@ -1157,6 +1163,7 @@ size_t xStreamBufferReceiveFromISR(StreamBufferHandle_t xStreamBuffer,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static size_t prvReadMessageFromBuffer(StreamBuffer_t * pxStreamBuffer,
                                        void * pvRxData,
                                        size_t xBufferLengthBytes,
@@ -1263,6 +1270,7 @@ BaseType_t xStreamBufferIsFull(StreamBufferHandle_t xStreamBuffer)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xStreamBufferSendCompletedFromISR(StreamBufferHandle_t xStreamBuffer,
                                              BaseType_t * pxHigherPriorityTaskWoken)
 {
@@ -1299,6 +1307,7 @@ BaseType_t xStreamBufferSendCompletedFromISR(StreamBufferHandle_t xStreamBuffer,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xStreamBufferReceiveCompletedFromISR(StreamBufferHandle_t xStreamBuffer,
                                                 BaseType_t * pxHigherPriorityTaskWoken)
 {
@@ -1335,6 +1344,7 @@ BaseType_t xStreamBufferReceiveCompletedFromISR(StreamBufferHandle_t xStreamBuff
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static size_t prvWriteBytesToBuffer(StreamBuffer_t * const pxStreamBuffer,
                                     const uint8_t * pucData,
                                     size_t xCount,
@@ -1375,6 +1385,7 @@ static size_t prvWriteBytesToBuffer(StreamBuffer_t * const pxStreamBuffer,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static size_t prvReadBytesFromBuffer(StreamBuffer_t * pxStreamBuffer,
                                      uint8_t * pucData,
                                      size_t xCount,
@@ -1415,6 +1426,7 @@ static size_t prvReadBytesFromBuffer(StreamBuffer_t * pxStreamBuffer,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static size_t prvBytesInBuffer(const StreamBuffer_t * const pxStreamBuffer)
 {
   /* Returns the distance between xTail and xHead. */

@@ -324,10 +324,12 @@ void sli_zigbee_af_cli_info_command(sl_cli_command_arg_t *arguments)
   sl_zigbee_af_cli_println("]");
   sl_zigbee_af_cli_flush();
 
-  #ifndef EZSP_HOST
-  sl_zigbee_af_cli_println("parentID [0x%04X] parentRssi [%d]", sl_zigbee_get_parent_id(), sl_zigbee_get_avg_parent_rssi());
-  sl_zigbee_af_app_flush();
-  #endif // EZSP_HOST
+  sl_zigbee_af_cli_print("parentID [0x%04X]", sl_zigbee_get_parent_id());
+#ifndef EZSP_HOST
+  sl_zigbee_af_cli_print(" parentRssi [%d]", sl_zigbee_get_avg_parent_rssi());
+#endif // EZSP_HOST
+  sl_zigbee_af_cli_println("");
+  sl_zigbee_af_cli_flush();
 
 #if !defined SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT
   sli_zigbee_af_cli_version_command();

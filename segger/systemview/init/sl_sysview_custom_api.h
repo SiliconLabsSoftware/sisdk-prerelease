@@ -31,6 +31,8 @@
 #ifndef SYSVIEW_CUSTOM_API_H
 #define SYSVIEW_CUSTOM_API_H
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,6 +47,29 @@ extern "C" {
  * @return gecko_sdk_module event offset value.
  ******************************************************************************/
 int sl_systemview_GetGSDKEventOffset (void);
+
+/***************************************************************************//**
+ * Indicates whether SEGGER_SYSVIEW_Conf() has already run.
+ *
+ * @return true if SystemView is configured, false otherwise.
+ ******************************************************************************/
+bool sli_systemview_is_configured(void);
+
+/***************************************************************************//**
+ * Configures SystemView (once) and starts recording if not already started.
+ *
+ * @note Safe to call before sleeptimer and clocks are initialized, including
+ *       from C++ pre-initialization. RTT must be initialized first.
+ ******************************************************************************/
+void sli_systemview_start(void);
+
+/***************************************************************************//**
+ * Updates the timestamp and CPU frequencies reported to the SystemView host.
+ *
+ * @note Call once the timestamp source is initialized when SystemView was
+ *       started before it.
+ ******************************************************************************/
+void sli_systemview_update_timestamp_freq(void);
 
 #ifdef __cplusplus
 }

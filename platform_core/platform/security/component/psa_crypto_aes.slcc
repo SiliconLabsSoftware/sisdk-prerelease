@@ -16,7 +16,7 @@ template_contribution:
   value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_AES 1"
   condition: [mbedtls_aes]
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/keys/types.html#c.PSA_KEY_TYPE_AES
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/keys/types.html#c.PSA_KEY_TYPE_AES
 metadata:
   sbom:
     reference: mbedtls_sbom

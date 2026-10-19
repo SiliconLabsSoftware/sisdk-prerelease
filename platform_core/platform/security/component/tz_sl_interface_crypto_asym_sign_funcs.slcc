@@ -30,6 +30,8 @@ template_contribution:
   value: tfm_crypto_asymmetric_decrypt
 
 
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
 metadata:
   sbom:
     license: Zlib

@@ -475,22 +475,6 @@ initialize manually
 
 {%- endfor %}
 
-{%- if "freertos_kernel" in component_catalog %}
-define block text_freertos_kernel_ram with alignment = {{ram_code_alignment}}
-{
-  readwrite code section text_freertos_kernel_*timecritical*,
-};
-
-define block text_freertos_kernel_ram_init with alignment = {{ram_code_alignment}}
-{
-  readonly code section text_freertos_kernel_*timecritical*_init,
-};
-
-initialize manually
-{
-  readonly section text_freertos_kernel_*timecritical*,
-};
-{%- endif %}
 
 define block text_ram_objects with alignment = {{ram_code_alignment}}
 {
@@ -565,9 +549,6 @@ define block text_ram with alignment = {{ram_code_alignment}}, fixed order
   {%- for component in code_classification_components %}
   block text_{{component}}_ram,
   {%- endfor %}
-  {%- if "freertos_kernel" in component_catalog %}
-  block text_freertos_kernel_ram,
-  {%- endif %}
   block text_ram_objects,
   block text_application_ram,
 {%- if linker_mpu is defined %}
@@ -580,9 +561,6 @@ define block text_ram_init with alignment = {{ram_code_alignment}}
   {%- for component in code_classification_components %}
   block text_{{component}}_ram_init,
   {%- endfor %}
-  {%- if "freertos_kernel" in component_catalog %}
-  block text_freertos_kernel_ram_init,
-  {%- endif %}
   block text_ram_objects_init,
   block text_application_ram_init,
 };

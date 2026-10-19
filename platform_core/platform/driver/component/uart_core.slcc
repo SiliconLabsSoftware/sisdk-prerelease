@@ -4,7 +4,8 @@ label: UART Driver
 description: >
   Internal UART driver component meant for users that do not wish to have their UART instance
   declared statically. Users may use this component directly without defining a UART driver instance
-  in their project, but are responsible for allocating the instance and defining the peripheral  IRQ handlers themselves.
+  in their project, but are responsible for allocating the instance and defining the peripheral
+  IRQ handlers themselves. Add the uart_async component to compile in DMA support.
 category: Platform|Driver|UART
 quality: production
 ui_hints:
@@ -32,7 +33,6 @@ requires:
 - name: status
 - name: sl_assert
 - name: sl_core
-- name: uart_lld
 template_contribution:
 - name: component_catalog
   value: uart

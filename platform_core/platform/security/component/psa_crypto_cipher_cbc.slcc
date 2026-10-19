@@ -19,7 +19,7 @@ template_contribution:
   value: "MBEDTLS_PSA_BUILTIN_ALG_CBC_NO_PADDING 1"
   condition: [mbedtls_cipher_cbc]
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/ops/ciphers.html#c.PSA_ALG_CBC_NO_PADDING
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/ops/ciphers.html#c.PSA_ALG_CBC_NO_PADDING
 metadata:
   sbom:
     reference: mbedtls_sbom

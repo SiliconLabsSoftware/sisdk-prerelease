@@ -38,42 +38,42 @@
 extern "C" {
 #endif
 
-#define SL_RAIL_PA_TABLE_0_NUM_VALUES  (29U)
-#define SL_RAIL_PA_TABLE_0_STEP_DDBM   (10U)
-#define SL_RAIL_PA_TABLE_0_MAX_POWER_DDBM     (0U)
-#define SL_RAIL_PA_TABLE_0_MIN_POWER_DDBM     (-292)
+#define SL_RAIL_PA_TABLE_0_MIN_POWER_DDBM -272
+#define SL_RAIL_PA_TABLE_0_MAX_POWER_DDBM    0
+#define SL_RAIL_PA_TABLE_0_STEP_DDBM        10
+#define SL_RAIL_PA_TABLE_0_NUM_VALUES       29U
 
-#define SL_RAIL_PA_TABLE_0                           \
-  {                                                  \
-    0x8000 /* est_deci-dBm:-272 act_deci-dBm:-272*/, \
-    0x8000 /* est_deci-dBm:-262 act_deci-dBm:-272*/, \
-    0x8000 /* est_deci-dBm:-252 act_deci-dBm:-272*/, \
-    0x8000 /* est_deci-dBm:-242 act_deci-dBm:-272*/, \
-    0x8000 /* est_deci-dBm:-232 act_deci-dBm:-272*/, \
-    0x8000 /* est_deci-dBm:-222 act_deci-dBm:-272*/, \
-    0x8000 /* est_deci-dBm:-212 act_deci-dBm:-272*/, \
-    0x8000 /* est_deci-dBm:-202 act_deci-dBm:-272*/, \
-    0x8000 /* est_deci-dBm:-192 act_deci-dBm:-272*/, \
-    0x8000 /* est_deci-dBm:-182 act_deci-dBm:-272*/, \
-    0x8000 /* est_deci-dBm:-172 act_deci-dBm:-272*/, \
-    0x8000 /* est_deci-dBm:-162 act_deci-dBm:-272*/, \
-    0x8000 /* est_deci-dBm:-152 act_deci-dBm:-272*/, \
-    0x8001 /* est_deci-dBm:-142 act_deci-dBm:-150*/, \
-    0x8001 /* est_deci-dBm:-132 act_deci-dBm:-150*/, \
-    0x8001 /* est_deci-dBm:-122 act_deci-dBm:-150*/, \
-    0x8001 /* est_deci-dBm:-112 act_deci-dBm:-150*/, \
-    0x8001 /* est_deci-dBm:-102 act_deci-dBm:-150*/, \
-    0x8002 /* est_deci-dBm:-92 act_deci-dBm:-97*/,   \
-    0x8002 /* est_deci-dBm:-82 act_deci-dBm:-97*/,   \
-    0x8002 /* est_deci-dBm:-72 act_deci-dBm:-97*/,   \
-    0x8003 /* est_deci-dBm:-62 act_deci-dBm:-68*/,   \
-    0x8003 /* est_deci-dBm:-52 act_deci-dBm:-68*/,   \
-    0x8004 /* est_deci-dBm:-42 act_deci-dBm:-50*/,   \
-    0x8005 /* est_deci-dBm:-32 act_deci-dBm:-36*/,   \
-    0x8006 /* est_deci-dBm:-22 act_deci-dBm:-26*/,   \
-    0x8008 /* est_deci-dBm:-12 act_deci-dBm:-14*/,   \
-    0x800b /* est_deci-dBm:-2 act_deci-dBm:-2*/,     \
-    0x800c /* est_deci-dBm:0 act_deci-dBm:0*/,       \
+#define SL_RAIL_PA_TABLE_0                            \
+  {                               /* round:lowest */  \
+    0x8000 /* est_deci-dBm:-272 act_deci-dBm:-272 */, \
+    0x8000 /* est_deci-dBm:-262 act_deci-dBm:-272 */, \
+    0x8000 /* est_deci-dBm:-252 act_deci-dBm:-272 */, \
+    0x8000 /* est_deci-dBm:-242 act_deci-dBm:-272 */, \
+    0x8000 /* est_deci-dBm:-232 act_deci-dBm:-272 */, \
+    0x8000 /* est_deci-dBm:-222 act_deci-dBm:-272 */, \
+    0x8000 /* est_deci-dBm:-212 act_deci-dBm:-272 */, \
+    0x8000 /* est_deci-dBm:-202 act_deci-dBm:-272 */, \
+    0x8000 /* est_deci-dBm:-192 act_deci-dBm:-272 */, \
+    0x8000 /* est_deci-dBm:-182 act_deci-dBm:-272 */, \
+    0x8000 /* est_deci-dBm:-172 act_deci-dBm:-272 */, \
+    0x8000 /* est_deci-dBm:-162 act_deci-dBm:-272 */, \
+    0x8000 /* est_deci-dBm:-152 act_deci-dBm:-272 */, \
+    0x8001 /* est_deci-dBm:-142 act_deci-dBm:-150 */, \
+    0x8001 /* est_deci-dBm:-132 act_deci-dBm:-150 */, \
+    0x8001 /* est_deci-dBm:-122 act_deci-dBm:-150 */, \
+    0x8001 /* est_deci-dBm:-112 act_deci-dBm:-150 */, \
+    0x8001 /* est_deci-dBm:-102 act_deci-dBm:-150 */, \
+    0x8002 /* est_deci-dBm: -92 act_deci-dBm: -97 */, \
+    0x8002 /* est_deci-dBm: -82 act_deci-dBm: -97 */, \
+    0x8002 /* est_deci-dBm: -72 act_deci-dBm: -97 */, \
+    0x8003 /* est_deci-dBm: -62 act_deci-dBm: -68 */, \
+    0x8003 /* est_deci-dBm: -52 act_deci-dBm: -68 */, \
+    0x8004 /* est_deci-dBm: -42 act_deci-dBm: -50 */, \
+    0x8005 /* est_deci-dBm: -32 act_deci-dBm: -36 */, \
+    0x8006 /* est_deci-dBm: -22 act_deci-dBm: -26 */, \
+    0x8008 /* est_deci-dBm: -12 act_deci-dBm: -14 */, \
+    0x800b /* est_deci-dBm:  -2 act_deci-dBm:  -2 */, \
+    0x800c /* est_deci-dBm:   0 act_deci-dBm:   0 */, \
   }
 
 #ifdef __cplusplus

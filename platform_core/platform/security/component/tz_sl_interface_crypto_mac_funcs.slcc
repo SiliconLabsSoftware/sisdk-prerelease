@@ -35,6 +35,8 @@ template_contribution:
 - name: tfm_interface_func
   value: tfm_crypto_mac_abort
 
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
 metadata:
   sbom:
     license: Zlib

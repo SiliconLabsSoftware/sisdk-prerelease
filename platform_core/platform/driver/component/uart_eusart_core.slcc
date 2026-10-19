@@ -1,0 +1,28 @@
+id: uart_eusart_core
+package: platform_core
+label: UART EUSART Backend
+description: >
+  EUART/EUSART low-level backend for the UART driver. Meant for users that do
+  not declare UART instances statically but still need EUART/EUSART support.
+category: Platform|Driver|UART
+quality: production
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/driver/uart/
+source:
+- path: src/sli_uart_eusart.c
+- path: src/sli_uart_eusart.h
+provides:
+- name: uart_eusart_core
+requires:
+- name: hal_eusart
+- name: uart_core
+template_contribution:
+- name: component_catalog
+  value: uart_eusart
+documentation:
+  docset: gecko-platform
+  document: platform-driver/uartdrv

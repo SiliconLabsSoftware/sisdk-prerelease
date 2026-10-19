@@ -29,7 +29,7 @@ template_contribution:
   value: "MBEDTLS_PSA_BUILTIN_ALG_STREAM_CIPHER 1"
   condition: [mbedtls_chachapoly]
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/ops/ciphers.html#c.PSA_ALG_STREAM_CIPHER
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/ops/ciphers.html#c.PSA_ALG_STREAM_CIPHER
 metadata:
   sbom:
     reference: mbedtls_sbom

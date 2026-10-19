@@ -32,10 +32,41 @@
 #include <new>
 
 #include "sl_memory_manager.h"
+#include "sli_memory_manager.h"
 #include "sl_assert.h"
+
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+#include "SEGGER_RTT.h"
+#include "sl_sysview_custom_api.h"
+#endif
 
 //--------------------------------------------------------------------------
 // MEMORY MANAGER PRE-INITIALIZATION
+
+/***************************************************************************//**
+ * Early initialization shared by the GCC and IAR pre-init hooks below.
+ *
+ * @note With SystemView, RTT and SystemView are started before the heap so
+ *       that the LT/ST heaps are defined before any static constructor
+ *       allocates. Otherwise the SystemView Heap Viewer cannot bind those
+ *       allocations.
+ ******************************************************************************/
+static void sli_memory_cpp_preinit(void)
+{
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  SEGGER_RTT_Init();
+  sli_systemview_start();
+#endif
+
+  sl_memory_init();
+#if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
+  sl_memory_init_dtcm();
+#endif
+
+#if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
+  sli_memory_register_systemview_heaps();
+#endif
+}
 
 #if defined (__GNUC__)
 /***************************************************************************//**
@@ -57,10 +88,7 @@
  * sl_memory_init() is not called by the component sl_system.
  ******************************************************************************/
 static void sl_memory_preinit(void) {
-  sl_memory_init();
-#if defined(SL_CATALOG_MEMORY_MANAGER_DTCM_PRESENT)
-  sl_memory_init_dtcm();
-#endif
+  sli_memory_cpp_preinit();
 }
 
 __attribute__((used, section(".preinit_array")))
@@ -92,7 +120,7 @@ class sl_memory_preinit
 public:
   sl_memory_preinit()
   {
-    sl_memory_init();
+    sli_memory_cpp_preinit();
   }
 
   ~sl_memory_preinit()

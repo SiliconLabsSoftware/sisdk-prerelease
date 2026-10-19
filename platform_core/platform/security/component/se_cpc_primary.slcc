@@ -37,6 +37,8 @@ template_contribution:
 - name: component_catalog
   value: se_cpc_primary
 
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-api/sl-se-manager
 metadata:
   sbom:
     license: Zlib

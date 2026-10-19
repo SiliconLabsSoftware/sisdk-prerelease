@@ -165,7 +165,9 @@ sl_status_t sl_memory_init(void)
   sli_memory_create_stack(&sli_general_purpose_heap);
 #endif
 
-  // Systemview heap registration is guaranteed to be after SEGGER_SYSVIEW_Start()
+  // C path: sl_main_init() starts SystemView before sl_memory_init(), including
+  // when the sl_log SystemView backend is present (so SEGGER_SYSVIEW_HeapDefine()
+  // is not dropped).
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW) && !defined(SL_CATALOG_CPP_SUPPORT_PRESENT)
   sli_memory_register_systemview_heaps();
 #endif

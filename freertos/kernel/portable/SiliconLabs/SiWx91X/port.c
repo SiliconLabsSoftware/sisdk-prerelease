@@ -254,6 +254,7 @@ static void prvTaskExitError(void) /* PRIVILEGED_FUNCTION */
   }
 }
 /*-----------------------------------------------------------*/
+SLI_FREERTOS_TIME_CRITICAL
 void vPortSVCHandler(void) /* PRIVILEGED_FUNCTION */
 {
   __asm volatile (
@@ -463,7 +464,7 @@ void vPortEndScheduler(void) /* PRIVILEGED_FUNCTION */
   configASSERT(uxCriticalNesting == 1000UL);
 }
 /*-----------------------------------------------------------*/
-PRIVILEGED_FUNCTION void vPortEnterCritical(void)
+SLI_FREERTOS_TIME_CRITICAL void vPortEnterCritical(void)
 {
   portDISABLE_INTERRUPTS();
   uxCriticalNesting++;
@@ -478,7 +479,7 @@ PRIVILEGED_FUNCTION void vPortEnterCritical(void)
   }
 }
 /*-----------------------------------------------------------*/
-PRIVILEGED_FUNCTION void vPortExitCritical(void)
+SLI_FREERTOS_TIME_CRITICAL void vPortExitCritical(void)
 {
   configASSERT(uxCriticalNesting);
   uxCriticalNesting--;
@@ -488,6 +489,7 @@ PRIVILEGED_FUNCTION void vPortExitCritical(void)
   }
 }
 /*-----------------------------------------------------------*/
+SLI_FREERTOS_TIME_CRITICAL
 void xPortPendSVHandler(void) /* PRIVILEGED_FUNCTION */
 {
   /* This is a naked function. */
@@ -544,6 +546,7 @@ void xPortPendSVHandler(void) /* PRIVILEGED_FUNCTION */
   );
 }
 /*-----------------------------------------------------------*/
+SLI_FREERTOS_TIME_CRITICAL
 void xPortSysTickHandler(void) /* PRIVILEGED_FUNCTION */
 {
   /* The SysTick runs at the lowest interrupt priority, so when this interrupt
@@ -570,7 +573,7 @@ void xPortSysTickHandler(void) /* PRIVILEGED_FUNCTION */
 
 #if (configUSE_TICKLESS_IDLE == 1)
 
-PRIVILEGED_FUNCTION __attribute__( (weak) )
+SLI_FREERTOS_TIME_CRITICAL __attribute__( (weak) )
 void vPortSuppressTicksAndSleep(TickType_t xExpectedIdleTime)
 {
   uint32_t ulReloadValue, ulCompleteTickPeriods, ulCompletedSysTickDecrements, ulSysTickDecrementsLeft;
@@ -820,7 +823,7 @@ static void vPortEnableVFP(void) /* PRIVILEGED_FUNCTION */
 
 #if (configASSERT_DEFINED == 1)
 
-PRIVILEGED_FUNCTION void vPortValidateInterruptPriority(void)
+SLI_FREERTOS_TIME_CRITICAL void vPortValidateInterruptPriority(void)
 {
   uint32_t ulCurrentInterrupt;
   uint8_t ucCurrentPriority;

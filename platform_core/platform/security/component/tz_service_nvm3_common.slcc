@@ -36,6 +36,8 @@ template_contribution:
     sid: SLI_TZ_SERVICE_NVM3_DEINITDEFAULT_SID
     func: sli_tz_nvm3_deinit_default
 
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
 metadata:
   sbom:
     license: Zlib

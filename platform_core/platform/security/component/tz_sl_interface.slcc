@@ -25,6 +25,8 @@ template_file:
 - path: config/template/sli_tz_funcs_sids_autogen.h.jinja
   export: true
   condition: [trustzone_nonsecure]
+documentation:
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
 metadata:
   sbom:
     license: Zlib

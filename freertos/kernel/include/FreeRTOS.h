@@ -106,6 +106,14 @@
 /* Definitions specific to the port being used. */
 #include "portable.h"
 
+#if (portUSING_MPU_WRAPPERS == 1)
+    #define SLI_FREERTOS_TIME_CRITICAL
+#else
+    #include "sl_code_classification.h"
+/* Must prefix a function definition, and only one declaration per function may carry it. */
+    #define SLI_FREERTOS_TIME_CRITICAL    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_FREERTOS_KERNEL, SL_CODE_CLASS_TIME_CRITICAL)
+#endif
+
 /* Must be defaulted before configUSE_NEWLIB_REENTRANT is used below. */
 #ifndef configUSE_NEWLIB_REENTRANT
     #define configUSE_NEWLIB_REENTRANT    0

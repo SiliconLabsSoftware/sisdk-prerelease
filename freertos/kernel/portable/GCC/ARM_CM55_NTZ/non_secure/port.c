@@ -928,6 +928,7 @@ static void prvSetupMPU(void)       /* PRIVILEGED_FUNCTION */
 
 #if (configENABLE_FPU == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 static void prvSetupFPU(void)       /* PRIVILEGED_FUNCTION */
 {
         #if (configENABLE_TRUSTZONE == 1)
@@ -953,6 +954,7 @@ static void prvSetupFPU(void)       /* PRIVILEGED_FUNCTION */
 #endif /* configENABLE_FPU */
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vPortYield(void)   /* PRIVILEGED_FUNCTION */
 {
   /* Set a PendSV to request a context switch. */
@@ -965,6 +967,7 @@ void vPortYield(void)   /* PRIVILEGED_FUNCTION */
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vPortEnterCritical(void)   /* PRIVILEGED_FUNCTION */
 {
   portDISABLE_INTERRUPTS();
@@ -977,6 +980,7 @@ void vPortEnterCritical(void)   /* PRIVILEGED_FUNCTION */
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vPortExitCritical(void)   /* PRIVILEGED_FUNCTION */
 {
   configASSERT(ulCriticalNesting);
@@ -988,6 +992,7 @@ void vPortExitCritical(void)   /* PRIVILEGED_FUNCTION */
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void SysTick_Handler(void)   /* PRIVILEGED_FUNCTION */
 {
   uint32_t ulPreviousMask;
@@ -1008,6 +1013,7 @@ void SysTick_Handler(void)   /* PRIVILEGED_FUNCTION */
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vPortSVCHandler_C(uint32_t * pulCallerStackAddress)   /* PRIVILEGED_FUNCTION portDONT_DISCARD */
 {
     #if ( (configENABLE_MPU == 1) && (configUSE_MPU_WRAPPERS_V1 == 1) )
@@ -1892,6 +1898,7 @@ BaseType_t xPortIsAuthorizedToAccessBuffer(const void * pvBuffer,
 #endif /* #if ( configENABLE_MPU == 1 ) && ( configUSE_MPU_WRAPPERS_V1 == 0 ) */
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xPortIsInsideInterrupt(void)
 {
   uint32_t ulCurrentInterrupt;
@@ -1914,6 +1921,7 @@ BaseType_t xPortIsInsideInterrupt(void)
 
 #if ( (configASSERT_DEFINED == 1) && (portHAS_ARMV8M_MAIN_EXTENSION == 1) )
 
+SLI_FREERTOS_TIME_CRITICAL
 void vPortValidateInterruptPriority(void)
 {
   uint32_t ulCurrentInterrupt;

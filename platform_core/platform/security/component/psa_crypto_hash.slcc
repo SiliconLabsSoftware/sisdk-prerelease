@@ -25,6 +25,9 @@ template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_MD_C
   condition: [mbedtls_uses_psa_crypto]
+documentation:
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/ops/algorithms.html#c.PSA_ALG_IS_HASH
+
 metadata:
   sbom:
     reference: mbedtls_sbom

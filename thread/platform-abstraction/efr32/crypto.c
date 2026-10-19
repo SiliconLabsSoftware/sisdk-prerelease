@@ -60,6 +60,7 @@
 #include "sl_psa_crypto.h"
 #include "sl_status.h"
 #include "sli_psa_crypto.h"
+#include <mbedtls/platform_util.h>
 #include "mbedtls/psa_util.h"
 
 #define MAX_HMAC_KEY_SIZE (32)
@@ -122,7 +123,8 @@ sl_status_t sli_ot_crypto_context_deinit(otCryptoContext *aContext)
     otEXPECT_ACTION((aContext != NULL), status = SL_STATUS_INVALID_PARAMETER);
     otEXPECT_ACTION((aContext->mContext != NULL), status = SL_STATUS_INVALID_PARAMETER);
 
-    memset(aContext->mContext, 0, aContext->mContextSize);
+    // Use a compiler-resistant scrub; plain memset() is subject to dead-store elimination.
+    mbedtls_platform_zeroize(aContext->mContext, aContext->mContextSize);
 
 #if OPENTHREAD_CONFIG_CRYPTO_PLATFORM_ALLOCS_CONTEXT
     sl_free(aContext->mContext);
@@ -441,8 +443,8 @@ otError otPlatCryptoImportKey(otCryptoKeyRef      *aKeyId,
     error = mapPsaStatusToOtError(status);
 
 exit:
-    // clear extracted private key bytes (stack buffer).
-    memset(aPrivateKey, 0, sizeof(aPrivateKey));
+    // Scrub extracted private key bytes; plain memset() can be eliminated by the compiler.
+    mbedtls_platform_zeroize(aPrivateKey, sizeof(aPrivateKey));
     return error;
 }
 
@@ -731,11 +733,12 @@ static psa_status_t reImportUnwrapped(const otCryptoKey *aKey, otCryptoKeyRef *a
                                    hmacKeyBytes,
                                    key_size);
 
-    memset(hmacKeyBytes, 0, sizeof(hmacKeyBytes));
-
     otEXPECT(status == PSA_SUCCESS);
 
 exit:
+    // Scrub plaintext HMAC/Network Key copy on all exit paths. Plain memset() is subject to
+    // GCC dead-store elimination under -Os.
+    mbedtls_platform_zeroize(hmacKeyBytes, sizeof(hmacKeyBytes));
 #else
     *aHmacKeyRef = aKey->mKeyRef;
 #endif
@@ -906,9 +909,9 @@ otError otPlatCryptoEcdsaExportPublicKey(otCryptoKeyRef aKeyRef, otPlatCryptoEcd
     // Use byte array to get the public key because PSA adds a encoding header at the beginning of the array.
     // It is easier to export it to a byte array and copy only the public key to output array.
     status = sl_sec_man_export_public_key(aKeyRef, aByteArray, sizeof(aByteArray), &aKeyLength);
+    otEXPECT_ACTION(status == PSA_SUCCESS, error = mapPsaStatusToOtError(status));
 
     memcpy(aPublicKey->m8, &aByteArray[1], OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE);
-    error = mapPsaStatusToOtError(status);
 
 exit:
     return error;
@@ -976,9 +979,9 @@ otError otPlatCryptoPbkdf2GenerateKey(const uint8_t *aPassword,
     otError      error = OT_ERROR_NONE;
     psa_status_t status;
     size_t       outSize;
-    psa_key_id_t passwordKeyId = 0;
-    psa_key_id_t saltKeyId     = 0;
-    psa_key_id_t keyId         = 0;
+    psa_key_id_t passwordKeyId = PSA_KEY_ID_NULL;
+    psa_key_id_t saltKeyId     = PSA_KEY_ID_NULL;
+    psa_key_id_t keyId         = PSA_KEY_ID_NULL;
 
     // Algorithm is PBKDF2-AES-CMAC-PRF-128
     psa_algorithm_t algo = PSA_ALG_PBKDF2_AES_CMAC_PRF_128;
@@ -986,29 +989,28 @@ otError otPlatCryptoPbkdf2GenerateKey(const uint8_t *aPassword,
     // Initialize key derivation
     psa_key_derivation_operation_t operation = psa_key_derivation_operation_init();
     status                                   = psa_key_derivation_setup(&operation, algo);
-    error                                    = mapPsaStatusToOtError(status);
+    otEXPECT_ACTION(status == PSA_SUCCESS, error = mapPsaStatusToOtError(status));
 
     // Set capacity
     status = psa_key_derivation_set_capacity(&operation, aKeyLen);
-    error  = mapPsaStatusToOtError(status);
+    otEXPECT_ACTION(status == PSA_SUCCESS, error = mapPsaStatusToOtError(status));
 
     // Set iteration count as cost
     status = psa_key_derivation_input_integer(&operation, PSA_KEY_DERIVATION_INPUT_COST, aIterationCounter);
-    error  = mapPsaStatusToOtError(status);
+    otEXPECT_ACTION(status == PSA_SUCCESS, error = mapPsaStatusToOtError(status));
 
     // Create salt as a key
     psa_key_attributes_t saltKeyAttr = psa_key_attributes_init();
     psa_set_key_usage_flags(&saltKeyAttr, PSA_KEY_USAGE_DERIVE);
     psa_set_key_type(&saltKeyAttr, PSA_KEY_TYPE_RAW_DATA);
     psa_set_key_algorithm(&saltKeyAttr, algo);
-    error = mapPsaStatusToOtError(status);
 
     status = psa_import_key(&saltKeyAttr, aSalt, aSaltLen, &saltKeyId);
-    error  = mapPsaStatusToOtError(status);
+    otEXPECT_ACTION(status == PSA_SUCCESS, error = mapPsaStatusToOtError(status));
 
     // Provide salt
     status = psa_key_derivation_input_key(&operation, PSA_KEY_DERIVATION_INPUT_SALT, saltKeyId);
-    error  = mapPsaStatusToOtError(status);
+    otEXPECT_ACTION(status == PSA_SUCCESS, error = mapPsaStatusToOtError(status));
 
     // Create key for password (key)
     psa_key_attributes_t passwordKeyAttr = psa_key_attributes_init();
@@ -1017,11 +1019,11 @@ otError otPlatCryptoPbkdf2GenerateKey(const uint8_t *aPassword,
     psa_set_key_algorithm(&passwordKeyAttr, algo);
 
     status = psa_import_key(&passwordKeyAttr, aPassword, aPasswordLen, &passwordKeyId);
-    error  = mapPsaStatusToOtError(status);
+    otEXPECT_ACTION(status == PSA_SUCCESS, error = mapPsaStatusToOtError(status));
 
     // Provide password (key)
     status = psa_key_derivation_input_key(&operation, PSA_KEY_DERIVATION_INPUT_PASSWORD, passwordKeyId);
-    error  = mapPsaStatusToOtError(status);
+    otEXPECT_ACTION(status == PSA_SUCCESS, error = mapPsaStatusToOtError(status));
 
     // Configure output as a key
     psa_key_attributes_t keyAttrResult = psa_key_attributes_init();
@@ -1031,16 +1033,26 @@ otError otPlatCryptoPbkdf2GenerateKey(const uint8_t *aPassword,
     psa_set_key_algorithm(&keyAttrResult, PSA_ALG_CTR);
 
     status = psa_key_derivation_output_key(&keyAttrResult, &operation, &keyId);
-    error  = mapPsaStatusToOtError(status);
+    otEXPECT_ACTION(status == PSA_SUCCESS, error = mapPsaStatusToOtError(status));
 
     // Export output key
     status = psa_export_key(keyId, aKey, aKeyLen, &outSize);
-    error  = mapPsaStatusToOtError(status);
+    otEXPECT_ACTION(status == PSA_SUCCESS, error = mapPsaStatusToOtError(status));
 
-    // Release keys used
-    psa_destroy_key(keyId);
-    psa_destroy_key(saltKeyId);
-    psa_destroy_key(passwordKeyId);
+exit:
+    if (keyId != PSA_KEY_ID_NULL)
+    {
+        psa_destroy_key(keyId);
+    }
+    if (saltKeyId != PSA_KEY_ID_NULL)
+    {
+        psa_destroy_key(saltKeyId);
+    }
+    if (passwordKeyId != PSA_KEY_ID_NULL)
+    {
+        psa_destroy_key(passwordKeyId);
+    }
+    psa_key_derivation_abort(&operation);
 
     return error;
 }
@@ -1071,8 +1083,8 @@ otError otPlatCryptoEcdsaVerify(const otPlatCryptoEcdsaPublicKey *aPublicKey,
                                    aByteArray,
                                    OT_CRYPTO_ECDSA_PUBLIC_KEY_SIZE + 1); // To account for the padded byte.
 
-    // If key import fails, assert, as we cannot proceed
-    OT_ASSERT(status == PSA_SUCCESS);
+    // Invalid peer public key is untrusted input, not a programming error.
+    otEXPECT_ACTION(status == PSA_SUCCESS, error = OT_ERROR_INVALID_ARGS);
 
     // Verify the signature.
     status = sl_sec_man_verify(aKeyId,
@@ -1083,7 +1095,7 @@ otError otPlatCryptoEcdsaVerify(const otPlatCryptoEcdsaPublicKey *aPublicKey,
                                sizeof(aSignature->m8),
                                aIsHash);
 
-    // Destroy the temp key.
+    // Destroy the temp key (only reached when import succeeded).
     sl_sec_man_destroy_key(aKeyId);
 
     error = mapPsaStatusToOtError(status);
@@ -1149,7 +1161,8 @@ exit:
         psa_destroy_key(keyRef);
     }
 
-    memset(keyBuffer, 0, sizeof(keyBuffer));
+    // Scrub exported IKM; plain memset() can be eliminated by the compiler.
+    mbedtls_platform_zeroize(keyBuffer, sizeof(keyBuffer));
 
     return error;
 }

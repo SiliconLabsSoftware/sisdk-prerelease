@@ -802,6 +802,7 @@ static size_t prvSnprintfReturnValueToCharsWritten(int iSnprintfReturnValue,
 /*-----------------------------------------------------------*/
 
 #if (configNUMBER_OF_CORES > 1)
+SLI_FREERTOS_TIME_CRITICAL
 static void prvCheckForRunStateChange(void)
 {
   UBaseType_t uxPrevCriticalNesting;
@@ -861,6 +862,7 @@ static void prvCheckForRunStateChange(void)
 /*-----------------------------------------------------------*/
 
 #if (configNUMBER_OF_CORES > 1)
+SLI_FREERTOS_TIME_CRITICAL
 static void prvYieldForTask(const TCB_t * pxTCB)
 {
   BaseType_t xLowestPriorityToPreempt;
@@ -963,6 +965,7 @@ static void prvYieldForTask(const TCB_t * pxTCB)
 /*-----------------------------------------------------------*/
 
 #if (configNUMBER_OF_CORES > 1)
+SLI_FREERTOS_TIME_CRITICAL
 static void prvSelectHighestPriorityTask(BaseType_t xCoreID)
 {
   UBaseType_t uxCurrentPriority = uxTopReadyPriority;
@@ -2183,6 +2186,7 @@ void vTaskDelete(TaskHandle_t xTaskToDelete)
 
 #if (INCLUDE_xTaskDelayUntil == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskDelayUntil(TickType_t * const pxPreviousWakeTime,
                            const TickType_t xTimeIncrement)
 {
@@ -2260,6 +2264,7 @@ BaseType_t xTaskDelayUntil(TickType_t * const pxPreviousWakeTime,
 
 #if (INCLUDE_vTaskDelay == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskDelay(const TickType_t xTicksToDelay)
 {
   BaseType_t xAlreadyYielded = pdFALSE;
@@ -2304,6 +2309,7 @@ void vTaskDelay(const TickType_t xTicksToDelay)
 
 #if ( (INCLUDE_eTaskGetState == 1) || (configUSE_TRACE_FACILITY == 1) || (INCLUDE_xTaskAbortDelay == 1) )
 
+SLI_FREERTOS_TIME_CRITICAL
 eTaskState eTaskGetState(TaskHandle_t xTask)
 {
   eTaskState eReturn;
@@ -2568,6 +2574,7 @@ UBaseType_t uxTaskBasePriorityGetFromISR(const TaskHandle_t xTask)
 
 #if (INCLUDE_vTaskPrioritySet == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskPrioritySet(TaskHandle_t xTask,
                       UBaseType_t uxNewPriority)
 {
@@ -2884,6 +2891,7 @@ void vTaskPreemptionEnable(const TaskHandle_t xTask)
 
 #if (INCLUDE_vTaskSuspend == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskSuspend(TaskHandle_t xTaskToSuspend)
 {
   TCB_t * pxTCB;
@@ -3017,6 +3025,7 @@ void vTaskSuspend(TaskHandle_t xTaskToSuspend)
 
 #if (INCLUDE_vTaskSuspend == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 static BaseType_t prvTaskIsTaskSuspended(const TaskHandle_t xTask)
 {
   BaseType_t xReturn = pdFALSE;
@@ -3076,6 +3085,7 @@ static BaseType_t prvTaskIsTaskSuspended(const TaskHandle_t xTask)
 
 #if (INCLUDE_vTaskSuspend == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskResume(TaskHandle_t xTaskToResume)
 {
   TCB_t * const pxTCB = xTaskToResume;
@@ -3132,6 +3142,7 @@ void vTaskResume(TaskHandle_t xTaskToResume)
 
 #if ( (INCLUDE_xTaskResumeFromISR == 1) && (INCLUDE_vTaskSuspend == 1) )
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskResumeFromISR(TaskHandle_t xTaskToResume)
 {
   BaseType_t xYieldRequired = pdFALSE;
@@ -3489,6 +3500,7 @@ void vTaskEndScheduler(void)
 }
 /*----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskSuspendAll(void)
 {
   traceENTER_vTaskSuspendAll();
@@ -3619,6 +3631,7 @@ static TickType_t prvGetExpectedIdleTime(void)
 #endif /* configUSE_TICKLESS_IDLE */
 /*----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskResumeAll(void)
 {
   TCB_t * pxTCB = NULL;
@@ -3750,6 +3763,7 @@ BaseType_t xTaskResumeAll(void)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 TickType_t xTaskGetTickCount(void)
 {
   TickType_t xTicks;
@@ -3769,6 +3783,7 @@ TickType_t xTaskGetTickCount(void)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 TickType_t xTaskGetTickCountFromISR(void)
 {
   TickType_t xReturn;
@@ -3804,6 +3819,7 @@ TickType_t xTaskGetTickCountFromISR(void)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 UBaseType_t uxTaskGetNumberOfTasks(void)
 {
   traceENTER_uxTaskGetNumberOfTasks();
@@ -4119,6 +4135,7 @@ TaskHandle_t xTaskGetIdleTaskHandleForCore(BaseType_t xCoreID)
  * 1. */
 #if (configUSE_TICKLESS_IDLE != 0)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskStepTick(TickType_t xTicksToJump)
 {
   TickType_t xUpdatedTickCount;
@@ -4188,6 +4205,7 @@ BaseType_t xTaskCatchUpTicks(TickType_t xTicksToCatchUp)
 
 #if (INCLUDE_xTaskAbortDelay == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskAbortDelay(TaskHandle_t xTask)
 {
   TCB_t * pxTCB = xTask;
@@ -4273,6 +4291,7 @@ BaseType_t xTaskAbortDelay(TaskHandle_t xTask)
 #endif /* INCLUDE_xTaskAbortDelay */
 /*----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskIncrementTick(void)
 {
   TCB_t * pxTCB;
@@ -4610,6 +4629,7 @@ BaseType_t xTaskCallApplicationTaskHook(TaskHandle_t xTask,
 /*-----------------------------------------------------------*/
 
 #if (configNUMBER_OF_CORES == 1)
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskSwitchContext(void)
 {
   traceENTER_vTaskSwitchContext();
@@ -4689,6 +4709,7 @@ void vTaskSwitchContext(void)
   traceRETURN_vTaskSwitchContext();
 }
 #else /* if ( configNUMBER_OF_CORES == 1 ) */
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskSwitchContext(BaseType_t xCoreID)
 {
   traceENTER_vTaskSwitchContext();
@@ -4785,6 +4806,7 @@ void vTaskSwitchContext(BaseType_t xCoreID)
 #endif /* if ( configNUMBER_OF_CORES > 1 ) */
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskPlaceOnEventList(List_t * const pxEventList,
                            const TickType_t xTicksToWait)
 {
@@ -4814,6 +4836,7 @@ void vTaskPlaceOnEventList(List_t * const pxEventList,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskPlaceOnUnorderedEventList(List_t * pxEventList,
                                     const TickType_t xItemValue,
                                     const TickType_t xTicksToWait)
@@ -4846,6 +4869,7 @@ void vTaskPlaceOnUnorderedEventList(List_t * pxEventList,
 
 #if (configUSE_TIMERS == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskPlaceOnEventListRestricted(List_t * const pxEventList,
                                      TickType_t xTicksToWait,
                                      const BaseType_t xWaitIndefinitely)
@@ -4881,6 +4905,7 @@ void vTaskPlaceOnEventListRestricted(List_t * const pxEventList,
 #endif /* configUSE_TIMERS */
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskRemoveFromEventList(const List_t * const pxEventList)
 {
   TCB_t * pxUnblockedTCB;
@@ -4967,6 +4992,7 @@ BaseType_t xTaskRemoveFromEventList(const List_t * const pxEventList)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskRemoveFromUnorderedEventList(ListItem_t * pxEventListItem,
                                        const TickType_t xItemValue)
 {
@@ -5038,6 +5064,7 @@ void vTaskRemoveFromUnorderedEventList(ListItem_t * pxEventListItem,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskSetTimeOutState(TimeOut_t * const pxTimeOut)
 {
   traceENTER_vTaskSetTimeOutState(pxTimeOut);
@@ -5054,6 +5081,7 @@ void vTaskSetTimeOutState(TimeOut_t * const pxTimeOut)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskInternalSetTimeOutState(TimeOut_t * const pxTimeOut)
 {
   traceENTER_vTaskInternalSetTimeOutState(pxTimeOut);
@@ -5066,6 +5094,7 @@ void vTaskInternalSetTimeOutState(TimeOut_t * const pxTimeOut)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskCheckForTimeOut(TimeOut_t * const pxTimeOut,
                                 TickType_t * const pxTicksToWait)
 {
@@ -5126,6 +5155,7 @@ BaseType_t xTaskCheckForTimeOut(TimeOut_t * const pxTimeOut,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskMissedYield(void)
 {
   traceENTER_vTaskMissedYield();
@@ -5262,7 +5292,6 @@ static portTASK_FUNCTION(prvPassiveIdleTask, pvParameters)
  * void prvIdleTask( void *pvParameters );
  *
  */
-
 static portTASK_FUNCTION(prvIdleTask, pvParameters)
 {
   /* Stop warnings. */
@@ -5389,6 +5418,7 @@ static portTASK_FUNCTION(prvIdleTask, pvParameters)
 
 #if (configUSE_TICKLESS_IDLE != 0)
 
+SLI_FREERTOS_TIME_CRITICAL
 eSleepModeStatus eTaskConfirmSleepModeStatus(void)
 {
         #if (INCLUDE_vTaskSuspend == 1)
@@ -5917,6 +5947,7 @@ static void prvDeleteTCB(TCB_t * pxTCB)
 #endif /* INCLUDE_vTaskDelete */
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static void prvResetNextTaskUnblockTime(void)
 {
   if ( listLIST_IS_EMPTY(pxDelayedTaskList) != pdFALSE ) {
@@ -5938,6 +5969,7 @@ static void prvResetNextTaskUnblockTime(void)
 #if ( (INCLUDE_xTaskGetCurrentTaskHandle == 1) || (configUSE_MUTEXES == 1) ) || (configNUMBER_OF_CORES > 1)
 
     #if (configNUMBER_OF_CORES == 1)
+SLI_FREERTOS_TIME_CRITICAL
 TaskHandle_t xTaskGetCurrentTaskHandle(void)
 {
   TaskHandle_t xReturn;
@@ -5954,6 +5986,7 @@ TaskHandle_t xTaskGetCurrentTaskHandle(void)
   return xReturn;
 }
     #else /* #if ( configNUMBER_OF_CORES == 1 ) */
+SLI_FREERTOS_TIME_CRITICAL
 TaskHandle_t xTaskGetCurrentTaskHandle(void)
 {
   TaskHandle_t xReturn;
@@ -5997,6 +6030,7 @@ TaskHandle_t xTaskGetCurrentTaskHandleForCore(BaseType_t xCoreID)
 
 #if ( (INCLUDE_xTaskGetSchedulerState == 1) || (configUSE_TIMERS == 1) )
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskGetSchedulerState(void)
 {
   BaseType_t xReturn;
@@ -6031,6 +6065,7 @@ BaseType_t xTaskGetSchedulerState(void)
 
 #if (configUSE_MUTEXES == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskPriorityInherit(TaskHandle_t const pxMutexHolder)
 {
   TCB_t * const pxMutexHolderTCB = pxMutexHolder;
@@ -6115,6 +6150,7 @@ BaseType_t xTaskPriorityInherit(TaskHandle_t const pxMutexHolder)
 
 #if (configUSE_MUTEXES == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskPriorityDisinherit(TaskHandle_t const pxMutexHolder)
 {
   TCB_t * const pxTCB = pxMutexHolder;
@@ -6196,6 +6232,7 @@ BaseType_t xTaskPriorityDisinherit(TaskHandle_t const pxMutexHolder)
 
 #if (configUSE_MUTEXES == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskPriorityDisinheritAfterTimeout(TaskHandle_t const pxMutexHolder,
                                          UBaseType_t uxHighestPriorityWaitingTask)
 {
@@ -6298,6 +6335,7 @@ void vTaskPriorityDisinheritAfterTimeout(TaskHandle_t const pxMutexHolder,
  * Otherwise set xYieldPendings to true to wait to
  * yield until exiting the critical section.
  */
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskYieldWithinAPI(void)
 {
   traceENTER_vTaskYieldWithinAPI();
@@ -6316,6 +6354,7 @@ void vTaskYieldWithinAPI(void)
 
 #if ( (portCRITICAL_NESTING_IN_TCB == 1) && (configNUMBER_OF_CORES == 1) )
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskEnterCritical(void)
 {
   traceENTER_vTaskEnterCritical();
@@ -6346,6 +6385,7 @@ void vTaskEnterCritical(void)
 
 #if (configNUMBER_OF_CORES > 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskEnterCritical(void)
 {
   traceENTER_vTaskEnterCritical();
@@ -6390,6 +6430,7 @@ void vTaskEnterCritical(void)
 
 #if (configNUMBER_OF_CORES > 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 UBaseType_t vTaskEnterCriticalFromISR(void)
 {
   UBaseType_t uxSavedInterruptStatus = 0;
@@ -6418,6 +6459,7 @@ UBaseType_t vTaskEnterCriticalFromISR(void)
 
 #if ( (portCRITICAL_NESTING_IN_TCB == 1) && (configNUMBER_OF_CORES == 1) )
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskExitCritical(void)
 {
   traceENTER_vTaskExitCritical();
@@ -6454,6 +6496,7 @@ void vTaskExitCritical(void)
 
 #if (configNUMBER_OF_CORES > 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskExitCritical(void)
 {
   traceENTER_vTaskExitCritical();
@@ -6505,6 +6548,7 @@ void vTaskExitCritical(void)
 
 #if (configNUMBER_OF_CORES > 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskExitCriticalFromISR(UBaseType_t uxSavedInterruptStatus)
 {
   traceENTER_vTaskExitCriticalFromISR(uxSavedInterruptStatus);
@@ -6890,6 +6934,7 @@ void vTaskGetRunTimeStatistics(char * pcWriteBuffer,
 #endif /* ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( configUSE_STATS_FORMATTING_FUNCTIONS > 0 ) ) */
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 TickType_t uxTaskResetEventItemValue(void)
 {
   TickType_t uxReturn;
@@ -6910,6 +6955,7 @@ TickType_t uxTaskResetEventItemValue(void)
 
 #if (configUSE_MUTEXES == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 TaskHandle_t pvTaskIncrementMutexHeldCount(void)
 {
   TCB_t * pxTCB;
@@ -6934,6 +6980,7 @@ TaskHandle_t pvTaskIncrementMutexHeldCount(void)
 
 #if (configUSE_TASK_NOTIFICATIONS == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 uint32_t ulTaskGenericNotifyTake(UBaseType_t uxIndexToWaitOn,
                                  BaseType_t xClearCountOnExit,
                                  TickType_t xTicksToWait)
@@ -7019,6 +7066,7 @@ uint32_t ulTaskGenericNotifyTake(UBaseType_t uxIndexToWaitOn,
 
 #if (configUSE_TASK_NOTIFICATIONS == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskGenericNotifyWait(UBaseType_t uxIndexToWaitOn,
                                   uint32_t ulBitsToClearOnEntry,
                                   uint32_t ulBitsToClearOnExit,
@@ -7118,6 +7166,7 @@ BaseType_t xTaskGenericNotifyWait(UBaseType_t uxIndexToWaitOn,
 
 #if (configUSE_TASK_NOTIFICATIONS == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskGenericNotify(TaskHandle_t xTaskToNotify,
                               UBaseType_t uxIndexToNotify,
                               uint32_t ulValue,
@@ -7230,6 +7279,7 @@ BaseType_t xTaskGenericNotify(TaskHandle_t xTaskToNotify,
 
 #if (configUSE_TASK_NOTIFICATIONS == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskGenericNotifyFromISR(TaskHandle_t xTaskToNotify,
                                      UBaseType_t uxIndexToNotify,
                                      uint32_t ulValue,
@@ -7381,6 +7431,7 @@ BaseType_t xTaskGenericNotifyFromISR(TaskHandle_t xTaskToNotify,
 
 #if (configUSE_TASK_NOTIFICATIONS == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 void vTaskGenericNotifyGiveFromISR(TaskHandle_t xTaskToNotify,
                                    UBaseType_t uxIndexToNotify,
                                    BaseType_t * pxHigherPriorityTaskWoken)
@@ -7487,6 +7538,7 @@ void vTaskGenericNotifyGiveFromISR(TaskHandle_t xTaskToNotify,
 
 #if (configUSE_TASK_NOTIFICATIONS == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTaskGenericNotifyStateClear(TaskHandle_t xTask,
                                         UBaseType_t uxIndexToClear)
 {
@@ -7522,6 +7574,7 @@ BaseType_t xTaskGenericNotifyStateClear(TaskHandle_t xTask,
 
 #if (configUSE_TASK_NOTIFICATIONS == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 uint32_t ulTaskGenericNotifyValueClear(TaskHandle_t xTask,
                                        UBaseType_t uxIndexToClear,
                                        uint32_t ulBitsToClear)
@@ -7657,6 +7710,7 @@ configRUN_TIME_COUNTER_TYPE ulTaskGetIdleRunTimePercent(void)
 #endif /* if ( ( configGENERATE_RUN_TIME_STATS == 1 ) && ( INCLUDE_xTaskGetIdleTaskHandle == 1 ) ) */
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 static void prvAddCurrentTaskToDelayedList(TickType_t xTicksToWait,
                                            const BaseType_t xCanBlockIndefinitely)
 {

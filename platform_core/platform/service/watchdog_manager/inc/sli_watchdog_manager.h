@@ -70,11 +70,12 @@ void sli_watchdog_manager_micrium_install_task_sw_hook(void);
  * Record which software watchdog was not fed, for post-reset retrieval.
  *
  * @details
- * Stores the first unfed enabled watchdog handle in no-init state so that
- * after a watchdog-triggered reset, sl_watchdog_manager_retrieve_faulty() and
- * sl_watchdog_manager_retrieve_faulty_uid() can report which watchdog caused
- * the reset. Called internally when the manager
- * detects that not all enabled watchdogs have been fed in time.
+ * Stores the first unfed enabled watchdog handle, its UID, and the full unfed
+ * bitmask in no-init state so that after a watchdog-triggered reset,
+ * sl_watchdog_manager_retrieve_faulty(), sl_watchdog_manager_retrieve_faulty_uid()
+ * and sl_watchdog_manager_retrieve_faulty_mask() can report which watchdogs
+ * were starving. Called internally when the manager detects that not all
+ * enabled watchdogs have been fed in time.
  ******************************************************************************/
 void sli_watchdog_manager_record_state(void);
 

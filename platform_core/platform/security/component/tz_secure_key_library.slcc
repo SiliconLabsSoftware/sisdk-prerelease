@@ -18,9 +18,7 @@ conflicts:
 - name: trustzone_unaware
 
 documentation:
-  docset: gecko-platform
-  document:
-  - page: platform-security-psa-crypto/psa-crypto-plugins
+  url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf
 metadata:
   sbom:
     license: Zlib

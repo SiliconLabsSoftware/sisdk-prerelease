@@ -40,6 +40,8 @@ include:
     condition: [device_has_symcrypto, device_has_semailbox, device_has_ksu]
   - path: sli_hostcrypto_transparent_types.h
     condition: [device_has_symcrypto]
+documentation:
+  url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins
 metadata:
   sbom:
     license: Zlib

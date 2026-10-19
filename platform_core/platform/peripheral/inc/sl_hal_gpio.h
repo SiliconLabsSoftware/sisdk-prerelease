@@ -1576,7 +1576,7 @@ __INLINE sl_status_t sl_hal_gpio_get_non_overlap_protection_disable(sl_gpio_t *g
 __INLINE sl_status_t sl_hal_gpio_latch_pin(const sl_gpio_t *gpio)
 {
   SL_LOG_DEBUG_ASSERT(gpio != NULL);
-#if defined(_GPIO_P_HOLD_HOLD_MASK)
+#if defined(_GPIO_P_HOLD_MASK)
   SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
 #if defined(HSIO_PRESENT) && defined(_HSIO_P_HOLD_HOLD_MASK)
   if (sl_hal_gpio_is_hsio_port(gpio->port)) {
@@ -1608,7 +1608,7 @@ __INLINE sl_status_t sl_hal_gpio_latch_pin(const sl_gpio_t *gpio)
 __INLINE sl_status_t sl_hal_gpio_unlatch_pin(const sl_gpio_t *gpio)
 {
   SL_LOG_DEBUG_ASSERT(gpio != NULL);
-#if defined(_GPIO_P_HOLD_HOLD_MASK)
+#if defined(_GPIO_P_HOLD_MASK)
   SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
 #if defined(HSIO_PRESENT) && defined(_HSIO_P_HOLD_HOLD_MASK)
   if (sl_hal_gpio_is_hsio_port(gpio->port)) {

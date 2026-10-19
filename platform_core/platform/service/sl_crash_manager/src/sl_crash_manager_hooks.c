@@ -51,7 +51,7 @@
 #endif
 
 #if defined(WDOG_COUNT) && (WDOG_COUNT > 0) && defined(WDOG_IF_WARN)
-#include "em_wdog.h"
+#include "sl_hal_wdog.h"
 #endif
 
 #if defined(SL_CATALOG_LOG_BACKEND_PROPRIETARY_PRESENT) \
@@ -450,7 +450,7 @@ __NO_PROLOGUE void UsageFault_Handler(void)
 /**
  * @brief Record watchdog warning: type WATCHDOG, reserved = interrupt flags
  *
- * @param[in] unfed_mask  WDOGn_IntGet() value (e.g. WDOG_IF_WARN)
+ * @param[in] unfed_mask  sl_hal_wdog_get_pending_interrupts() value (e.g. WDOG_IF_WARN)
  */
 void sli_crash_manager_on_watchdog_warning(uint32_t unfed_mask)
 {
@@ -486,11 +486,11 @@ void sli_crash_manager_on_watchdog_warning(uint32_t unfed_mask)
  */
 void WDOG0_IRQHandler(void)
 {
-  uint32_t flags = WDOGn_IntGet(WDOG0);
+  uint32_t flags = sl_hal_wdog_get_pending_interrupts(WDOG0);
   if (flags & WDOG_IF_WARN) {
     sli_crash_manager_on_watchdog_warning(flags);
   }
-  WDOGn_IntClear(WDOG0, flags);
+  sl_hal_wdog_clear_interrupts(WDOG0, flags);
 }
 #endif
 
@@ -500,11 +500,11 @@ void WDOG0_IRQHandler(void)
  */
 void WDOG1_IRQHandler(void)
 {
-  uint32_t flags = WDOGn_IntGet(WDOG1);
+  uint32_t flags = sl_hal_wdog_get_pending_interrupts(WDOG1);
   if (flags & WDOG_IF_WARN) {
     sli_crash_manager_on_watchdog_warning(flags);
   }
-  WDOGn_IntClear(WDOG1, flags);
+  sl_hal_wdog_clear_interrupts(WDOG1, flags);
 }
 #endif
 

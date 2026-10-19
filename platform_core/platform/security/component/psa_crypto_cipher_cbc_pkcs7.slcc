@@ -17,7 +17,7 @@ template_contribution:
   value: "MBEDTLS_PSA_BUILTIN_ALG_CBC_PKCS7 1"
   condition: [mbedtls_cipher_cbc, mbedtls_cipher_padding_pkcs7]
 documentation:
-  url: https://armmbed.github.io/mbed-crypto/html/api/ops/ciphers.html#c.PSA_ALG_CBC_PKCS7
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/ops/ciphers.html#c.PSA_ALG_CBC_PKCS7
 metadata:
   sbom:
     reference: mbedtls_sbom

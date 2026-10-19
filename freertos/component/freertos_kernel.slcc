@@ -94,6 +94,8 @@ template_contribution:
   value: freertos_kernel
 - name: component_catalog
   value: kernel
+- name: code_classification_components
+  value: freertos_kernel
 - name: rte_components
   value: RTE_RTOS_FreeRTOS_CORE
   priority: -9000

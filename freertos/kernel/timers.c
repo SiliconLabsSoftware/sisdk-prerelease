@@ -431,6 +431,7 @@ static void prvInitialiseNewTimer(const char * const pcTimerName,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTimerGenericCommandFromTask(TimerHandle_t xTimer,
                                         const BaseType_t xCommandID,
                                         const TickType_t xOptionalValue,
@@ -475,6 +476,7 @@ BaseType_t xTimerGenericCommandFromTask(TimerHandle_t xTimer,
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTimerGenericCommandFromISR(TimerHandle_t xTimer,
                                        const BaseType_t xCommandID,
                                        const TickType_t xOptionalValue,
@@ -1070,6 +1072,7 @@ static void prvCheckForValidListAndQueue(void)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTimerIsTimerActive(TimerHandle_t xTimer)
 {
   BaseType_t xReturn;
@@ -1096,6 +1099,7 @@ BaseType_t xTimerIsTimerActive(TimerHandle_t xTimer)
 }
 /*-----------------------------------------------------------*/
 
+SLI_FREERTOS_TIME_CRITICAL
 void * pvTimerGetTimerID(const TimerHandle_t xTimer)
 {
   Timer_t * const pxTimer = xTimer;
@@ -1138,6 +1142,7 @@ void vTimerSetTimerID(TimerHandle_t xTimer,
 
     #if (INCLUDE_xTimerPendFunctionCall == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTimerPendFunctionCallFromISR(PendedFunction_t xFunctionToPend,
                                          void * pvParameter1,
                                          uint32_t ulParameter2,
@@ -1168,6 +1173,7 @@ BaseType_t xTimerPendFunctionCallFromISR(PendedFunction_t xFunctionToPend,
 
     #if (INCLUDE_xTimerPendFunctionCall == 1)
 
+SLI_FREERTOS_TIME_CRITICAL
 BaseType_t xTimerPendFunctionCall(PendedFunction_t xFunctionToPend,
                                   void * pvParameter1,
                                   uint32_t ulParameter2,

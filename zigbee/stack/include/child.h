@@ -489,7 +489,8 @@ sl_status_t sl_zigbee_send_link_power_delta_request (void);
  */
 int8_t sl_zigbee_get_avg_parent_rssi(void);
 
-/** @brief Accessor function for the parent's node ID if applicable (SoC only).
+/** @brief Accessor function for the parent's node ID if applicable.
+ *  On host, this queries the NCP via EZSP getParentChildParameters.
  */
 sl_802154_short_addr_t sl_zigbee_get_parent_id(void);
 
