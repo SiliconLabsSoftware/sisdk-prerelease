@@ -1243,7 +1243,7 @@ static void lightness_request(uint16_t model_id,
            actual_request, transition_ms, delay_ms);
 
   // Lightness is bound to an underlying Generic Level
-  // If lightess is set, any ongoing Generic Level Move transitions must be cancelled
+  // If lightness is set, any ongoing Generic Level Move transitions must be cancelled
   // Delayed updates cancel the transition at the timer callback
   if (!delay_ms) {
     pri_level_move_stop();
@@ -1984,8 +1984,6 @@ static void pri_level_request(uint16_t model_id,
       break;
 
     case mesh_generic_request_level_move: {
-      const bool state_changed = (lightbulb_state.lightness_current != request->level);
-
       log_info("pri_level_request (move): delta=%d, transition=%lu, delay=%u" NL,
                request->level, transition_ms, delay_ms);
 
@@ -2009,6 +2007,16 @@ static void pri_level_request(uint16_t model_id,
       lightness_kind = mesh_generic_state_level;
       lightness = pri_level_to_lightness(requested_level);
       lightbulb_state.lightness_target = lightness_validate_and_correct(lightness);
+
+      // Pri level move starts increasing or decreasing the generic pri level to
+      // the maximum or minimum level. The minimum -32768 generic level means 0
+      // lightness level. The maximum generic level is limited by the lightness
+      // range state (binding). If the target lightness level is already reached
+      // then the request is a no-operation.
+      // Note: If the requested level is zero then it means a halt so the btmesh
+      //       stack passes it as mesh_generic_request_level_halt.
+      const bool state_changed =
+        (lightbulb_state.lightness_current != lightbulb_state.lightness_target);
 
       if (state_changed) {
         log_info("Setting pri_level to <%d>" NL, requested_level);
@@ -2246,10 +2254,13 @@ static void delayed_pri_level_request(void)
         pri_level_move_callback();
       }
 
-      pri_level_move_schedule_next_request((int32_t)lightbulb_state.lightness_target
-                                           - (int32_t)lightbulb_state.lightness_current);
-      pri_level_update_and_publish(BTMESH_LIGHTING_SERVER_MAIN,
-                                   UNKNOWN_REMAINING_TIME);
+      if (lightbulb_state.lightness_current != lightbulb_state.lightness_target) {
+        int32_t remaining_delta = (int32_t)lightbulb_state.lightness_target
+                                  - (int32_t)lightbulb_state.lightness_current;
+        pri_level_move_schedule_next_request(remaining_delta);
+        pri_level_update_and_publish(BTMESH_LIGHTING_SERVER_MAIN,
+                                     UNKNOWN_REMAINING_TIME);
+      }
       break;
 
     case mesh_generic_request_level_halt:

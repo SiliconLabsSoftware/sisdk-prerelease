@@ -46,12 +46,13 @@ Table of content:
       - [service\_reset](#service_reset)
       - [read\_sensor](#read_sensor)
       - [vendor\_opcode](#vendor_opcode)
-      - [image\_throughput](#image_throughput)
     - [Access Point control commands](#access-point-control-commands)
       - [help](#help)
       - [mode](#mode)
+      - [image\_throughput](#image_throughput)
       - [network](#network)
       - [set\_rssi\_threshold](#set_rssi_threshold)
+      - [adv\_dedup](#adv_dedup)
       - [scan](#scan)
       - [list](#list)
       - [sync](#sync)
@@ -96,6 +97,7 @@ The Access Point Python application consists of the following files:
 - ap\_core\_pawr.py
 - ap\_core\_pawr\_responses.py
 - ap\_core\_scan.py
+- ap\_core\_adv\_dedup.py
 - ap\_core\_tag\_commands.py
 - ap\_core\_utils.py
 - ap\_ead.py
@@ -334,26 +336,29 @@ Examples:
 #### connect
     Connect to one or more ESL devices.
 
-Usage: `connect [-h] [--group_id <u7> | --next_group] [--addr_type, -t] [address]`
+Usage: `connect [-h] [--group_id <u7> | --next_group] [--addr_type ] [--ap_identity <addr>] [--identity_type ] [address]`
 
 Positional argument:
-- `[address]`               Bluetooth address (e.g. `AA:BB:CC:DD:EE:22`) in case insensitive format or ESL ID of the tag or `all`.
+- `[address]`                 Bluetooth address (e.g. `AA:BB:CC:DD:EE:22`) in case insensitive format or ESL ID of the tag or `all`.
 
 Options:
-- `[--group_id, -g <u7>]`:  ESL group ID (optional, default is group 0).
-- `[--next_group, -ng]`:    Automatically find and connect to the next synchronized tag in the optimal group (based on the upcoming PAwR subevent).
-- `[--addr_type, -t]`:      ESL address type (optional), possible values:
-    - `public`:             Public device address (default assumption).
-    - `static`:             Random static device address.
+- `[--group_id, -g <u7>]`:    ESL group ID (optional, default is group 0).
+- `[--next_group, -ng]`:      Automatically find and connect to the next synchronized tag in the optimal group (based on the upcoming PAwR subevent).
+- `[--addr_type, -t]`:        ESL address type (optional), possible values:
+    - `public`:               Public device address (default assumption).
+    - `static`:               Random static device address.
+- `[--ap_identity, -id]`:     Temporary AP identity Bluetooth address for this connect request only. Do not use it with ESLs that are already synchronized to this AP's default identity. These ESLs will reject any connection request coming from a  foreign AP according to ESLP.
+- `[--identity_type, -id_t]`: Address type for `--ap_identity`. Defaults to `public` type if omitted.
 
 _Notes:_
 - _`<esl_id>` and `<group_id>` can be used instead of `<bt_addr>` if ESL is already configured._
 - _The `--next_group` / `-ng` option is mutually exclusive with `--group_id` / `-g`. It prioritizes connection to synchronized tags whose group ID is closest to the upcoming PAwR subevent window, maximizing throughput by reducing radio wait time._
 - _`<address_type>` will be taken into account only if the given `<bt_addr>` is unknown - otherwise the proper type reported by the remote device will be used._
 - _If the `<group_id>` is not given after the ESL ID then the default value group zero is used. This applies to many commands expecting the group ID as optional parameter._
-- _The `all` keyword can be used with a special meaning with `connect` command: it will try to connect to all advertiser ESLs (within the 'group_id' if it is given or to any advertisers if it isn't) up to the the maximum number of simultaneous connections supported by the current build of the ESL library and the attached Network Co-Processor embedded controller._
+- _The `all` keyword can be used with a special meaning with `connect` command: it will try to connect to all advertiser ESLs (within the `group_id` if it is given or to any advertisers if it isn't) up to the the maximum number of simultaneous  connections supported by the current build of the ESL library and the attached Network Co-Processor embedded controller._
 - _If the group is specified along with the keyword `all`, then only devices in the group will be connected. That is, specifying the group ID will not work with ESLs that are not yet configured._
 - _An explicit address type is ignored for an already configured ESL that is addressed by ESL ID. The correct type is already known in this case and will be used instead._
+- _The AP can temporarily assume another AP's Bluetooth identity for failover purposes using `--ap_identity <addr>` option, allowing it to service ESLs synchronized to that identity. This mechanism requires that the corresponding LTK be available from the shared managed key database. Without the correct LTK, connection may be established. It must not be used with ESLs synchronized to this AP's own default identity, as those devices will reject any request presented with a foreign identity._
 
 Examples:
 - `connect bc:33:ac:fa:57:d0`
@@ -622,40 +627,6 @@ _Notes:_
  - _The latest Silabs ESL example supports PAwR interval skipping as an experimental feature to further reduce power consumption. To enable skipping on supported ESLs, you can issue the `vendor_opcode <esl_id> -d <skip_count>` command. Skipping can be disabled by issuing the command `vendor_opcode <esl_id> -d 0`._
  - _An ESL for which PAwR skipping is currently enabled **may not receive PAwR commands immediately!** Commands are automatically retransmitted up to 3 times if not responded to, but for higher skip rates you may need to manually retry several times to succeed._
 
-#### image\_throughput
-    Run or stop the image throughput stress test across synchronized ESL Tags.
-
-Usage: `image_throughput [-h] {start,stop} [--max_count <u15>] [--max_group <u7>]`
-
-Positional arguments:
-- `{start, stop}`: Start or stop the image throughput stress test.
-
-Options:
-- `[--max_count, -c <u15>]`: Upper limit on how many **synchronized** Tags are enrolled in a deterministic order: first by ESL ID, then by group ID. This ordering spreads enrollment across groups for better performance. If omitted, all eligible synchronized Tags are considered (subject to `--max_group` and internal eligibility). The value must be at least **1** when given.
-- `[--max_group, -g <u7>]`: Highest **ESL group ID** for Tags that may be enrolled. Tags in groups above this value are skipped. If omitted, there is no group ceiling from this option. When given, the value must be in the range **0**-**127** (aligned with PAwR subevent / group limits).
-
-_Notes:_
-- _While the test is active, the current AP mode line from [`mode`](#mode) will indicate that an image throughput test is running (in addition to manual versus automated)._
-- _At high log verbosity, the console can be very noisy during the test; avoid issuing unrelated CLI commands until the test completes unless you intend to stop it._
-- _Stopping PAwR or losing sync can also end the test; the AP then reverts to the saved pre-test automated/manual state._
-- _This command is a diagnostic utility, not an Access Point operating mode. While the test runs, the AP switches to manual mode; when the test finishes normally, the previous automated versus manual mode is restored automatically. Issuing [`mode auto`](#mode) or [`mode manual`](#mode) while the test runs stops the test as well (with statistics logged)._
-- _PAwR must already be running; ESLs must be in Synchronized state and support image transfer. The AP uses image files from the `image/` folder (same default source as for the [`image_update`](#image_update) command). Demo mode must be disabled before `start`; if demo mode is on, the command is rejected._
-
-_Disclaimer: Switching to manual mode gives full control over devices on your network. Issuing other ESL commands while the test runs can interfere with timing and connection state; it is highly recommended not to issue commands manually during the test._
-
-Examples:
-- `image_throughput start`
-
-  Start the test with default enrollment (all eligible synchronized Tags, subject to eligibility checks in the AP).
-
-- `image_throughput start -c 8 -g 3`
-
-  Start the test, enrolling at most eight Tags whose ESL group ID is 3 or lower. If fewer than eight ESLs are configured in groups 0-3, the test will run on fewer devices than the number given by the `-c` option.
-
-- `image_throughput stop`
-
-  Stop the running test and print summary statistics; the AP restores the operating mode in effect before `start`.
-
 ### Access Point control commands
 ---
 #### help
@@ -698,6 +669,41 @@ Examples:
 
   Ask current mode.
 
+#### image\_throughput
+    Run or stop the image throughput stress test across synchronized ESL Tags.
+
+Usage: `image_throughput [-h] {start,stop} [--max_count <u15>] [--max_group <u7>] [--parallel_connections <N>]`
+
+Positional arguments:
+- `{start, stop}`: Start or stop the image throughput stress test.
+
+Options:
+- `[--max_count, -c <u15>]`: Upper limit on how many **synchronized** Tags are enrolled in a deterministic order: first by ESL ID, then by group ID. This ordering spreads enrollment across groups for better performance. If omitted, all eligible synchronized Tags are considered (subject to `--max_group` and internal eligibility). The value must be at least **1** when given.
+- `[--max_group, -g <u7>]`: Highest **ESL group ID** for Tags that may be enrolled. Tags in groups above this value are skipped. If omitted, there is no group ceiling from this option. When given, the value must be in the range **0**-**127** (aligned with PAwR subevent / group limits).
+- `[--parallel_connections, -p <N>]` Cap on parallel **BLE** connections: if omitted, the previous or stack-discovered cap is unchanged; **0** clears it; **1**-**32** sets a fixed cap for this run. Please note that setting a cap higher than the maximum parallel connection supported by the ESL AP NCP target will have no effect.
+
+_Notes:_
+- _While the test is active, the current AP mode line from [`mode`](#mode) will indicate that an image throughput test is running (in addition to manual versus automated)._
+- _At high log verbosity, the console can be very noisy during the test; avoid issuing unrelated CLI commands until the test completes unless you intend to stop it._
+- _Stopping PAwR or losing sync can also end the test; the AP then reverts to the saved pre-test automated/manual state._
+- _This command is a diagnostic utility, not an Access Point operating mode. While the test runs, the AP switches to manual mode; when the test finishes normally, the previous automated versus manual mode is restored automatically. Issuing [`mode auto`](#mode) or [`mode manual`](#mode) while the test runs stops the test as well (with statistics logged)._
+- _PAwR must already be running; ESLs must be in Synchronized state and support image transfer. The AP uses image files from the `image/` folder (same default source as for the [`image_update`](#image_update) command). Demo mode must be disabled before `start`; if demo mode is on, the command is rejected._
+
+_Disclaimer: Switching to manual mode gives full control over devices on your network. Issuing other ESL commands while the test runs can interfere with timing and connection state; it is highly recommended not to issue commands manually during the test._
+
+Examples:
+- `image_throughput start`
+
+  Start the test with default enrollment (all eligible synchronized Tags, subject to eligibility checks in the AP).
+
+- `image_throughput start -c 8 -g 3`
+
+  Start the test, enrolling at most eight Tags whose ESL group ID is 3 or lower. If fewer than eight ESLs are configured in groups 0-3, the test will run on fewer devices than the number given by the `-c` option.
+
+- `image_throughput stop`
+
+  Stop the running test and print summary statistics; the AP restores the operating mode in effect before `start`.
+
 #### network
     Execute commands related to the network control.
 
@@ -723,6 +729,50 @@ Positional argument:
 - `rssi`: RSSI value.
 
 _Note: Negative values are accepted, only!_
+
+#### adv\_dedup
+    Control esl_lib advertisement deduplication at runtime.
+
+Usage: `adv_dedup [-h] [--defaults] [--refresh <int>] [--watchdog <int>] [--cache <int>] [--multiplier <float>] [{on,off,config}]`
+
+Positional arguments:
+- `{on,off,config}`: Enable or disable deduplication, or update parameters without changing the on/off state.
+
+Options:
+- `[--defaults, -d]`:         Reset all parameters to esl_lib compile-time defaults before applying any explicit options on the same command line.
+- `[--refresh, -r <int>]`:    tag_found refresh interval in seconds.
+- `[--watchdog, -w <int>]`:   Default absence watchdog in seconds for advertisers without enough interval samples. Same allowed range as refresh. Values below the effective refresh interval are raised to match refresh.
+- `[--cache, -c <int>]`:      Maximum number of cached advertisers before FIFO eviction.
+- `[--multiplier, -m <float>]`: Adaptive watchdog multiplier applied to the average of the three largest observed ESL advertisement intervals.
+
+_Notes:_
+- _Startup on/off follows `ap_config.ESL_ADV_DEDUP_ENABLE`; timing defaults follow the compiled `esl_lib` values from `esl_lib_adv_dedup_config.h` until changed at runtime._
+- _Optional parameters are **sticky**: the AP keeps the last values internally and reuses them on the next `adv_dedup on` if omitted. Turning the filter off with `adv_dedup off` preserves these values for a later re-enable._
+- _Issue the command without a choice, or `adv_dedup config` without options, to print the current sticky configuration and on/off state._
+- _`adv_dedup config` with options updates the sticky values immediately; if deduplication is currently enabled, the new settings are applied at once. If it is disabled, the values are stored and take effect on the next `adv_dedup on`._
+- _Reconfiguring deduplication clears the `esl_lib` advertisement cache; tags may be reported again as newly discovered._
+- _While deduplication is enabled, `esl_lib` also evicts a tag from the cache per address when its central connection is established, or when the link closes before establishment, so a later advertisement is not delayed by the dedup filter._
+- _When deduplication is enabled, keep `ADVERTISING_TIMEOUT` in `ap_config.py` at or above the refresh interval._
+
+Examples:
+- `adv_dedup on`
+
+  Enable deduplication with the current sticky parameters.
+- `adv_dedup off`
+
+  Disable deduplication; parameter values are kept for later use.
+- `adv_dedup config -r 60 -c 2000`
+
+  Set refresh to 60 s and cache size to 2000 entries. Will be applied immediately if deduplication filtering is already enabled.
+- `adv_dedup on -d -w 90`
+
+  Reset to esl_lib defaults, override default watchdog to 90 s, then enable.
+- `adv_dedup config -d`
+
+  Reset all sticky parameters to esl_lib compile-time defaults.
+- `adv_dedup`
+
+  Show whether deduplication is on or off and print the sticky parameter set.
 
 #### scan
     Start or stop scanning for advertising ESL devices.

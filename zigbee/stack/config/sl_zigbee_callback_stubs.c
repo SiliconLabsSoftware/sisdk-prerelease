@@ -23,6 +23,7 @@
 #include "stack/include/message.h" // Required for packetHandlers
 #include "stack/include/sl_zigbee_types_internal.h"
 #include "stack/internal/inc/raw-message-internal-def.h"
+#include "stack/internal/inc/stack-info-internal-def.h"
 
 #include  "mac-phy.h"
 #include  "scan.h"
@@ -879,10 +880,16 @@ SL_WEAK void sl_zigbee_rtos_stack_wakeup_isr_handler(void)
 }
 
 // -----------------------------------------------------------------------------
+// Weak implementation of public Callback sl_zigbee_af_radio_needs_calibrating_cb
+SL_WEAK void sl_zigbee_af_radio_needs_calibrating_cb(void)
+{
+  sli_mac_stack_calibrate_current_channel();
+}
+
 // Weak implementation of public Callback sl_zigbee_radio_needs_calibrating_handler
 SL_WEAK void sl_zigbee_radio_needs_calibrating_handler(void)
 {
-  // stub function
+  sl_zigbee_af_radio_needs_calibrating_cb();
 }
 
 // -----------------------------------------------------------------------------
@@ -914,6 +921,7 @@ SL_WEAK void sl_zigbee_scan_error_handler(
 
 //for privileged callback handlers
 #include "stack/internal/inc/internal-callbacks-patch.h"
+#include "stack/internal/inc/stack-info-internal-def.h"
 
 // -----------------------------------------------------------------------------
 // Weak implementation of public Callback sl_zigbee_af_incoming_message_cb
@@ -2619,6 +2627,7 @@ SL_WEAK void sl_zigbee_rtos_stack_wakeup_isr_handler(void)
 // Weak implementation of public Callback sl_zigbee_af_radio_needs_calibrating_cb
 SL_WEAK void sl_zigbee_af_radio_needs_calibrating_cb(void)
 {
+  sli_mac_stack_calibrate_current_channel();
 }
 
 // RadioNeedsCalibratingHandler

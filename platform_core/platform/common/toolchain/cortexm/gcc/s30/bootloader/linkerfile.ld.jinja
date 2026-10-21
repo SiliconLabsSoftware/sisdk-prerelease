@@ -89,6 +89,8 @@
   #}
   {%- set physical_code_region0_size = ((9 * logical_code_region0_size) // 8)  %}
   {%- set region0_axip_overhead = physical_code_region0_size - logical_code_region0_size  %}
+{%- else %}
+  {%- set physical_code_region0_size = logical_code_region0_size  %}
 {%- endif %}
 
 {#-
@@ -144,7 +146,11 @@
 #}
 {%- if memory_ram_start is defined %}
   {%- set app_ram_start = memory_ram_start | first %}
-  {%- set app_ram_alias_start = memory_ram_alias_start | first %}
+  {%- if memory_ram_alias_start is defined %}
+    {%- set app_ram_alias_start = memory_ram_alias_start | first %}
+  {%- else %}
+    {%- set app_ram_alias_start = sram_alias_addr + (app_ram_start - sram_addr) %}
+  {%- endif %}
 {%- else %}
   {%- set app_ram_start = sram_addr %}
   {%- set app_ram_alias_start = sram_alias_addr %}

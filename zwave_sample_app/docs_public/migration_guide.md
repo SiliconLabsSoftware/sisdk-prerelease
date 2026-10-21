@@ -2,6 +2,10 @@
 
 This guide shows how to migrate projects from previous SDKs to a newer one.
 
+# 8.0.4 {#migrate-section-8-0-4}
+
+# 8.0.3 {#migrate-section-8-0-3}
+
 # 8.0.2 {#migrate-section-8-0-2}
 
 # 8.0.1 {#migrate-section-8-0-1}

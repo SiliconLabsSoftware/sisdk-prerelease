@@ -28,6 +28,10 @@
  *
  ******************************************************************************/
 
+#if defined (SL_COMPONENT_CATALOG_PRESENT)
+  #include "sl_component_catalog.h"
+#endif
+
 #include <string.h>
 
 #if defined(TZ_SERVICE_CONFIG_PRESENT)
@@ -38,6 +42,7 @@
 
 #include "sli_tz_iovec_check.h"
 #include "sli_tz_s_interface.h"
+
 #if defined(SL_CATALOG_PSA_CRYPTO_KEY_PROTECTION_PRESENT)
 #include "sli_tz_secure_psa_key_protection.h"
 #include "psa/crypto_client_struct.h"
@@ -103,6 +108,254 @@
 // Global secure dispatch functions
 
 #if defined(TZ_SERVICE_PSA_CRYPTO_PRESENT)
+#if defined(SL_CATALOG_PSA_CRYPTO_KEY_PROTECTION_PRESENT)
+  static psa_status_t sli_tz_check_key_range_access(psa_key_id_t key_id)
+  {
+    return sl_psa_key_check_access(key_id);
+  }
+
+  static bool sli_tz_get_key_id_from_invec(const sli_tz_iovec_params_t *iovec_copy,
+                                           size_t in_len,
+                                           size_t key_idx,
+                                           psa_key_id_t *key_id)
+  {
+    if ((iovec_copy == NULL) || (key_id == NULL)) {
+      return false;
+    }
+
+    if ((in_len <= key_idx)
+        || (iovec_copy->in_vec[key_idx].base == NULL)
+        || (iovec_copy->in_vec[key_idx].len != sizeof(psa_key_id_t))) {
+      return false;
+    }
+
+    *key_id = *(const psa_key_id_t *)iovec_copy->in_vec[key_idx].base;
+    return true;
+  }
+
+  static bool sli_tz_get_key_id_from_attributes(const sli_tz_iovec_params_t *iovec_copy,
+                                                size_t in_len,
+                                                size_t attributes_idx,
+                                                psa_key_id_t *key_id)
+  {
+    if ((iovec_copy == NULL) || (key_id == NULL)) {
+      return false;
+    }
+
+    if ((in_len <= attributes_idx)
+        || (iovec_copy->in_vec[attributes_idx].base == NULL)
+        || (iovec_copy->in_vec[attributes_idx].len != sizeof(psa_key_attributes_t))) {
+      return false;
+    }
+
+    const psa_key_attributes_t *attributes =
+      (const psa_key_attributes_t *)iovec_copy->in_vec[attributes_idx].base;
+    *key_id = MBEDTLS_SVC_KEY_ID_GET_KEY_ID(psa_get_key_id(attributes));
+    return true;
+  }
+
+  static bool sli_tz_crypto_sid_uses_packed_key_id(uint32_t function_id)
+  {
+    (void)function_id;
+    bool key_id_in_packed_iov = false;
+    
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_CLOSE_KEY_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_CLOSE_KEY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_DESTROY_KEY_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_DESTROY_KEY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_GET_KEY_ATTRIBUTES_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_GET_KEY_ATTRIBUTES_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_EXPORT_KEY_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_EXPORT_KEY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_EXPORT_PUBLIC_KEY_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_EXPORT_PUBLIC_KEY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_PURGE_KEY_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_PURGE_KEY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_COPY_KEY_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_COPY_KEY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_CIPHER_ENCRYPT_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_CIPHER_ENCRYPT_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_CIPHER_DECRYPT_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_CIPHER_DECRYPT_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_MAC_SIGN_SETUP_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_MAC_SIGN_SETUP_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_MAC_VERIFY_SETUP_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_MAC_VERIFY_SETUP_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_MAC_COMPUTE_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_MAC_COMPUTE_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_MAC_VERIFY_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_MAC_VERIFY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_AEAD_ENCRYPT_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_AEAD_ENCRYPT_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_AEAD_DECRYPT_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_AEAD_DECRYPT_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_AEAD_ENCRYPT_SETUP_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_AEAD_ENCRYPT_SETUP_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_AEAD_DECRYPT_SETUP_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_AEAD_DECRYPT_SETUP_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_SIGN_MESSAGE_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_SIGN_MESSAGE_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_VERIFY_MESSAGE_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_VERIFY_MESSAGE_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_SIGN_HASH_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_SIGN_HASH_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_VERIFY_HASH_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_VERIFY_HASH_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_ASYMMETRIC_ENCRYPT_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_ASYMMETRIC_ENCRYPT_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_ASYMMETRIC_DECRYPT_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_ASYMMETRIC_DECRYPT_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_KEY_DERIVATION_INPUT_KEY_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_KEY_DERIVATION_INPUT_KEY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_KEY_DERIVATION_KEY_AGREEMENT_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_KEY_DERIVATION_KEY_AGREEMENT_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_RAW_KEY_AGREEMENT_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_CRYPTO_RAW_KEY_AGREEMENT_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_SL_PSA_KEY_DERIVATION_SINGLE_SHOT_SID)
+        key_id_in_packed_iov = key_id_in_packed_iov || (function_id == TFM_SL_PSA_KEY_DERIVATION_SINGLE_SHOT_SID);
+    #endif
+
+    return key_id_in_packed_iov;
+  }
+
+  static bool sli_tz_crypto_sid_uses_invec1_key_id(uint32_t function_id)
+  {
+    (void)function_id;
+    bool key_id_in_invec1 = false;
+
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_OPEN_KEY_SID)
+        key_id_in_invec1 = key_id_in_invec1 || (function_id == TFM_CRYPTO_OPEN_KEY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_PAKE_SET_PASSWORD_KEY_SID)
+        key_id_in_invec1 = key_id_in_invec1 || (function_id == TFM_CRYPTO_PAKE_SET_PASSWORD_KEY_SID);
+    #endif
+
+    return key_id_in_invec1;
+  }
+
+  static bool sli_tz_crypto_sid_uses_attributes_invec1(uint32_t function_id)
+  {
+    (void)function_id;
+    bool key_id_in_attributes = false;
+
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_IMPORT_KEY_SID)
+        key_id_in_attributes = key_id_in_attributes || (function_id == TFM_CRYPTO_IMPORT_KEY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_COPY_KEY_SID)
+        key_id_in_attributes = key_id_in_attributes || (function_id == TFM_CRYPTO_COPY_KEY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_GENERATE_KEY_SID)
+        key_id_in_attributes = key_id_in_attributes || (function_id == TFM_CRYPTO_GENERATE_KEY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_GENERATE_KEY_CUSTOM_SID)
+        key_id_in_attributes = key_id_in_attributes || (function_id == TFM_CRYPTO_GENERATE_KEY_CUSTOM_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_GENERATE_KEY_EXT_SID)
+        key_id_in_attributes = key_id_in_attributes || (function_id == TFM_CRYPTO_GENERATE_KEY_EXT_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_SID)
+        key_id_in_attributes = key_id_in_attributes || (function_id == TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_CUSTOM_SID)
+        key_id_in_attributes = key_id_in_attributes
+                               || (function_id == TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_CUSTOM_SID);
+    #endif
+    #if defined(SLI_TZ_HAS_TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_EXT_SID)
+        key_id_in_attributes = key_id_in_attributes
+                               || (function_id == TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_EXT_SID);
+    #endif
+
+    return key_id_in_attributes;
+  }
+
+  static psa_status_t sli_tz_check_key_range_access_s_interface(
+    uint32_t function_id,
+    const struct tfm_crypto_pack_iovec *iov,
+    const sli_tz_iovec_params_t *iovec_copy,
+    size_t in_len)
+  {
+    psa_status_t access_status;
+    psa_key_id_t check_key_id = 0;
+
+    if ((iov == NULL) || (iovec_copy == NULL)) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (sli_tz_crypto_sid_uses_packed_key_id(function_id)) {
+      access_status = sli_tz_check_key_range_access(iov->key_id);
+      if (access_status != PSA_SUCCESS) {
+        return access_status;
+      }
+    }
+
+    if (sli_tz_crypto_sid_uses_invec1_key_id(function_id)) {
+      if (!sli_tz_get_key_id_from_invec(iovec_copy, in_len, 1u, &check_key_id)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      access_status = sli_tz_check_key_range_access(check_key_id);
+      if (access_status != PSA_SUCCESS) {
+        return access_status;
+      }
+    }
+
+    if (sli_tz_crypto_sid_uses_attributes_invec1(function_id)) {
+      if (!sli_tz_get_key_id_from_attributes(iovec_copy, in_len, 1u, &check_key_id)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      access_status = sli_tz_check_key_range_access(check_key_id);
+      if (access_status != PSA_SUCCESS) {
+        return access_status;
+      }
+    }
+
+#if defined(SLI_TZ_HAS_TFM_SL_PSA_KEY_DERIVATION_SINGLE_SHOT_SID)
+    if (function_id == TFM_SL_PSA_KEY_DERIVATION_SINGLE_SHOT_SID) {
+      if (!sli_tz_get_key_id_from_attributes(iovec_copy, in_len, 4u, &check_key_id)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      access_status = sli_tz_check_key_range_access(check_key_id);
+      if (access_status != PSA_SUCCESS) {
+        return access_status;
+      }
+    }
+#endif
+
+    return PSA_SUCCESS;
+  }
+#endif
+
 __attribute__((__used__))
 int32_t sli_tz_s_interface_dispatch_crypto(psa_invec in_vec[],
                                            size_t in_len,
@@ -129,18 +382,9 @@ int32_t sli_tz_s_interface_dispatch_crypto(psa_invec in_vec[],
   }
 
   #if defined(SL_CATALOG_PSA_CRYPTO_KEY_PROTECTION_PRESENT)
-  // Check if NS is trying to access a protected key ID.
-  // Most operations carry the key ID in iov->key_id, but import/generate
-  // operations carry it in the key attributes (second iovec entry).
-  psa_key_id_t check_key_id = iov->key_id;
-  if (check_key_id == 0
-      && in_len >= 2
-      && iovec_copy.in_vec[1].len >= sizeof(struct psa_client_key_attributes_s)) {
-    const struct psa_client_key_attributes_s *client_attr =
-      (const struct psa_client_key_attributes_s *)iovec_copy.in_vec[1].base;
-    check_key_id = client_attr->id;
-  }
-  psa_status_t access_status = sl_psa_key_check_access(check_key_id);
+  // Check if NS is trying to access a protected key ID for this operation.
+  psa_status_t access_status =
+    sli_tz_check_key_range_access_s_interface(function_id, iov, &iovec_copy, in_len);
   if (access_status != PSA_SUCCESS) {
     return access_status;
   }

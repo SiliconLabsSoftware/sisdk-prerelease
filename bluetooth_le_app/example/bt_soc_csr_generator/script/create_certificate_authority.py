@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2025 Silicon Laboratories Inc. www.silabs.com
+# Copyright 2026 Silicon Laboratories Inc. www.silabs.com
 #
 # SPDX-License-Identifier: Zlib
 #
@@ -34,19 +34,21 @@ For intermediate CA creation, the higher level (n-1) CA must be present. (Except
 '''
 # Metadata
 __author__ = 'Silicon Laboratories, Inc'
-__copyright__ = 'Copyright 2025, Silicon Laboratories, Inc.'
+__copyright__ = 'Copyright 2026, Silicon Laboratories, Inc.'
 
 import os
-import pathlib
 import stat
 import datetime
 import argparse
-import cryptography
 from cryptography import x509
 from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import serialization, hashes
 from jinja2 import FileSystemLoader, Environment
+from pathlib import Path
 from production_line_tool import generate_serial_number, add_certificate_to_database
+
+WORKING_DIR = Path.home() / ".silabs" / "certificates"
+TEMPLATE_FILE = Path(__file__).parent / 'sl_bt_cbap_root_cert.h.jinja'
 
 def main(level,
          validity,
@@ -71,18 +73,20 @@ def main(level,
     else:
         name = 'intermediate_' + str(level)
 
-    path_dir = os.path.join(os.path.abspath(os.path.join((__file__), '..')), name + '_authority')
-    # Check if certificate authority already exists
-    if os.path.exists(path_dir):
-        raise FileExistsError(f'Directory: {path_dir} already exists. Please remove it first.')
-    os.makedirs(path_dir)
+    path_dir = (WORKING_DIR / (name + '_authority')).resolve()
 
-    path_key = os.path.join(path_dir, 'private_key.pem')
-    path_cert = os.path.join(path_dir, 'certificate.pem')
-    path_template = os.path.join(os.path.abspath(os.path.join((__file__), '..')), 'sl_bt_cbap_root_cert.h.jinja')
+    # Check if certificate authority already exists
+    if path_dir.is_dir():
+        raise FileExistsError(f'Directory: {path_dir} already exists. Please remove it first.')
+    print(f"Output directory: {path_dir}")
+    path_dir.mkdir(parents=True, exist_ok=True)
+
+    path_key = path_dir / 'private_key.pem'
+    path_cert = path_dir / 'certificate.pem'
+    path_template = TEMPLATE_FILE
 
     if level == 0:
-        path_database = os.path.join(path_dir, 'issued_certificates.yaml')
+        path_database = path_dir / 'issued_certificates.yaml'
     else:
         # For intermediate certificate creation, check the existence of the higher certificate.
         if level == 1:
@@ -90,13 +94,14 @@ def main(level,
         else:
             prev_name = 'intermediate_' + str(level - 1)
 
-        path_prev_dir = os.path.join(os.path.abspath(os.path.join((__file__), '..')), prev_name + '_authority')
-        path_prev_key = os.path.join(path_prev_dir, 'private_key.pem')
-        path_prev_cert = os.path.join(path_prev_dir, 'certificate.pem')
-        path_database = os.path.join(path_prev_dir, 'issued_certificates.yaml')
+        path_prev_dir = (WORKING_DIR / (prev_name + '_authority')).resolve()
+        print(f"Issuer Certificate Authority: {path_prev_dir}")
+        path_prev_key = path_prev_dir / 'private_key.pem'
+        path_prev_cert = path_prev_dir / 'certificate.pem'
+        path_database = path_prev_dir / 'issued_certificates.yaml'
 
-        if not os.path.exists(path_prev_key) or not os.path.exists(path_prev_cert) or not os.path.exists(path_database):
-            raise FileNotFoundError(prev_name + ' authority cannot be found at ' + path_prev_dir)
+        if not path_prev_key.is_file() or not path_prev_cert.is_file() or not path_database.is_file():
+            raise FileNotFoundError(f'{prev_name} authority cannot be found at {path_prev_dir}')
 
     # Generate EC key pair. Use X9.62/SECG curve over a 256 bit prime field (aka prime256v1).
     key = ec.generate_private_key(ec.SECP256R1())
@@ -146,7 +151,7 @@ def main(level,
         # Note: if there is a revocation list, it should be also checked if the certificate is revoked or not.
         now = datetime.datetime.now(datetime.timezone.utc)
         if now < root_cert.not_valid_before_utc or root_cert.not_valid_after_utc < now:
-            raise Exception('The validity period of ' + path_prev_cert + ' has expired.')
+            raise Exception(f'The validity period of {path_prev_cert} has expired.')
 
         # Sign with the key of the higher authority.
         cert = create_certificate(key.public_key(),
@@ -162,7 +167,7 @@ def main(level,
         f.write(cert.public_bytes(serialization.Encoding.PEM))
 
     convert_header(path_cert, path_template) # Create header for SoC example
-    print(name + ' authority certificate created.')
+    print(f'{name} authority certificate created under: {path_dir}')
 
 def create_certificate(public_key, subjects, validity, policy_oid, signing_key, issuer, path_database):
     ''' Create an x509 certificate object.
@@ -199,7 +204,7 @@ def create_certificate(public_key, subjects, validity, policy_oid, signing_key, 
         cert = cert.add_extension(x509.CertificatePolicies(policies=policy_info), critical=True)
 
     # Sign certificate
-    cert = cert.sign(signing_key, cryptography.hazmat.primitives.hashes.SHA256())
+    cert = cert.sign(signing_key, hashes.SHA256())
     add_certificate_to_database(cert, path_database)
     return cert
 
@@ -209,16 +214,19 @@ def convert_header(path_pem, path_template):
 
     Keyword arguments:
     path_pem -- Path to the certificate file in PEM format.
-    path_template -- Path to the jinja2 template directory.
+    path_template -- Path to the jinja2 template.
     Return values:
     path_header -- Path to the certificate header file.
     '''
+    path_pem = Path(path_pem)
+    path_template = Path(path_template)
+
     # Check input
-    if not os.path.exists(path_pem):
+    if not path_pem.exists():
         raise FileNotFoundError('Cannot find certificate file.')
 
     # Load certificate
-    with open(path_pem, 'r') as f:
+    with path_pem.open('r') as f:
         crt = f.readlines()
 
     # Remove PEM certificate delimiters
@@ -229,23 +237,22 @@ def convert_header(path_pem, path_template):
     i = 0
     while i < len(crt):
         if i < len(crt) - 1:
-            crt[i] = crt[i] = '  "' + crt[i].strip() + '" \\\n'
+            crt[i] = '  "' + crt[i].strip() + '" \\\n'
         else:
-            crt[i] = crt[i] = '  "' + crt[i].strip() + '"'
+            crt[i] = '  "' + crt[i].strip() + '"'
         i = i + 1
 
     crt = ''.join(crt)
 
     # Load jinja template
     env = Environment()
-    env.loader = FileSystemLoader(os.path.normpath(os.path.join(path_template, '..').replace('\\', '/')))
+    env.loader = FileSystemLoader(path_template.parent)
 
     # Write to file
-    path_header = os.path.join(os.path.abspath(os.path.join(path_pem, '..')),
-                               pathlib.Path(path_template).stem)
+    path_header = path_pem.parent / path_template.stem
 
-    with open(path_header, 'w') as f:
-        f.write(env.get_template(str(pathlib.Path(path_template).name)).render(sl_bt_cbap_root_cert = crt))
+    with path_header.open('w') as f:
+        f.write(env.get_template(path_template.name).render(sl_bt_cbap_root_cert=crt))
 
     print(str(path_header) + ' created.')
     return path_header

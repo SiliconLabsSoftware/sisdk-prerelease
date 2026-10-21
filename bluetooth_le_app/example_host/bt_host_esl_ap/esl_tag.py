@@ -499,9 +499,11 @@ class Tag:
             for cb in self._observers:
                 cb(self, field, old, new)
 
-    def reset(self, keep_esl_address=False):
+    def reset(self, keep_esl_address=False, old_esl_state_override=None):
         """Reset object states"""
-        old_esl_state = self.esl_state
+        old_esl_state = (
+            self.esl_state if old_esl_state_override is None else old_esl_state_override
+        )
         keys = [
             elw.ESL_LIB_DATA_TYPE_GATT_AP_SYNC_KEY,
             elw.ESL_LIB_DATA_TYPE_GATT_RESPONSE_KEY,
@@ -581,8 +583,15 @@ class Tag:
 
     def unassociate(self):
         """Unassociate tag object"""
+        old_esl_address = self.esl_address
+        old_esl_state = self.esl_state
         self.gatt_values = {}
-        self.reset()
+
+
+        if old_esl_address is not None:
+            self._notify("esl_address", old_esl_address, None)
+
+        self.reset(old_esl_state_override=old_esl_state)
 
     def unsynchronize(self):
         """Clear the BASIC_STATE_FLAG_SYNCHRONIZED flag internally to consider a tag unsynced"""
@@ -934,7 +943,18 @@ class Tag:
         elif isinstance(evt, esl_lib.EventConfigureTagResponse):
             if evt.connection_handle == self.connection_handle:
                 if evt.status == elw.SL_STATUS_OK:
+                    # SL_STATUS_OK confirms the device accepted the write; notify TagDB here when
+                    # the stored ESL Address changes (setter alone runs before confirmation).
+                    old_esl_address_for_notify = self.esl_address
                     self.gatt_values[evt.type] = self.gatt_write_values[evt.type]
+                    if evt.type == elw.ESL_LIB_DATA_TYPE_GATT_ESL_ADDRESS:
+                        new_esl_address = self.esl_address
+                        if old_esl_address_for_notify != new_esl_address:
+                            self._notify(
+                                "esl_address",
+                                old_esl_address_for_notify,
+                                new_esl_address,
+                            )
                 else:
                     self.log.error(
                         "Tag configuration failed for %s at addres %s with result %s!",
@@ -1143,9 +1163,10 @@ class Tag:
         key_type: int = elw.ESL_LIB_KEY_TYPE_NO_KEY,
         key: bytes = None,
         timeout: int = None,
+        ignore_tag_state: bool = False
     ):
         """Connect to the tag"""
-        if self.state != TagState.IDLE:
+        if self.state != TagState.IDLE and not ignore_tag_state:
             raise InvalidTagStateError(
                 f"Invalid ESL object state: {self._state} at address {self.ble_address}"
             )

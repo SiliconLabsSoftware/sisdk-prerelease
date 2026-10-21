@@ -8,7 +8,7 @@ typedef struct {
 
 static const sl_psa_key_range_t protected_ranges[] = SLI_TZ_PSA_KEY_PROTECTION_RANGES_INIT;
 
-static bool sli_psa_key_id_is_protected(psa_key_id_t key_id)
+bool sl_psa_key_id_is_protected(psa_key_id_t key_id)
 {
   for (size_t i = 0; i < SLI_TZ_PSA_KEY_PROTECTION_RANGE_COUNT; i++) {
     if (key_id >= protected_ranges[i].start && 
@@ -21,7 +21,7 @@ static bool sli_psa_key_id_is_protected(psa_key_id_t key_id)
 
 psa_status_t sl_psa_key_check_access(psa_key_id_t key_id)
 {
-  if (sli_psa_key_id_is_protected(key_id)) {
+  if (sl_psa_key_id_is_protected(key_id)) {
     return PSA_ERROR_NOT_PERMITTED;
   }
   return PSA_SUCCESS;

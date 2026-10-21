@@ -94,7 +94,6 @@ __ALIGNED(4) static const uint8_t stackInfo_4[2] =
 };
 #endif // RADIO_CONFIG_ENABLE_STACK_INFO
 
-STORE_IN_RAM
 static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr_0 = {
 #if RAIL_SUPPORTS_OFDM_PA
   {
@@ -114,7 +113,6 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr_0 = {
 #endif // RAIL_SUPPORTS_OFDM_PA
 };
 
-STORE_IN_RAM
 static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr_1 = {
 #if RAIL_SUPPORTS_OFDM_PA
   {

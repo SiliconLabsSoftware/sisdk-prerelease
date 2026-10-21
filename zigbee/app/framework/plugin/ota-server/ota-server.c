@@ -472,6 +472,12 @@ static void addEmberAfOtaImageIdIntoResponse(const sl_zigbee_af_ota_image_id_t* 
   (void) sl_zigbee_af_put_int32u_in_resp(id->firmwareVersion);
 }
 
+// Returns true if 'bytes' remain at 'index' within a message of 'length'.
+static bool otaPayloadHasBytes(uint8_t index, uint8_t length, uint8_t bytes)
+{
+  return ((uint16_t)index + (uint16_t)bytes) <= (uint16_t)length;
+}
+
 static bool commandParse(sl_zigbee_af_cluster_command_t* command)
 {
   uint8_t commandId = command->commandId;
@@ -497,12 +503,19 @@ static bool commandParse(sl_zigbee_af_cluster_command_t* command)
 
       fieldControl = sl_zigbee_af_get_int8u(buffer, index, length);
       index++;
+      // Image ID is always 8 bytes (mfg + type + version).
+      if (!otaPayloadHasBytes(index, length, 8)) {
+        return false;
+      }
       index += sli_zigbee_af_ota_parse_image_id_from_message(&imageId,
                                                              &(buffer[index]),
-                                                             length);
+                                                             (uint8_t)(length - index));
 
       if (commandId == ZCL_QUERY_NEXT_IMAGE_REQUEST_COMMAND_ID) {
         if (fieldControl & QUERY_NEXT_IMAGE_HW_VER_PRESENT_MASK) {
+          if (!otaPayloadHasBytes(index, length, 2)) {
+            return false;
+          }
           hardwareVersionPresent = true;
           hardwareVersion = sl_zigbee_af_get_int16u(buffer, index, length);
           index += 2;
@@ -516,6 +529,9 @@ static bool commandParse(sl_zigbee_af_cluster_command_t* command)
       } // else // ZCL_IMAGE_BLOCK_REQUEST_COMMAND_ID
         //   or ZCL_IMAGE_PAGE_REQUEST_COMMAND_ID
 
+      if (!otaPayloadHasBytes(index, length, 5)) { // offset (4) + maxDataSize (1)
+        return false;
+      }
       offset = sl_zigbee_af_get_int32u(buffer, index, length);
       index += 4;
       maxDataSize = sl_zigbee_af_get_int8u(buffer, index, length);
@@ -526,11 +542,17 @@ static bool commandParse(sl_zigbee_af_cluster_command_t* command)
         memset(&callbackStruct, 0, sizeof(sl_zigbee_af_image_block_request_callback_struct_t));
 
         if (fieldControl & OTA_FIELD_CONTROL_NODE_EUI64_PRESENT_BIT) {
+          if (!otaPayloadHasBytes(index, length, EUI64_SIZE)) {
+            return false;
+          }
           memcpy(callbackStruct.sourceEui, &(buffer[index]), EUI64_SIZE);
           index += EUI64_SIZE;
         }
 
         if (fieldControl & OTA_FIELD_CONTROL_MIN_BLOCK_REQUEST_PRESENT_BIT) {
+          if (!otaPayloadHasBytes(index, length, 2)) {
+            return false;
+          }
           callbackStruct.minBlockRequestPeriod = sl_zigbee_af_get_int16u(buffer, index, length);
           callbackStruct.bitmask |= SL_ZIGBEE_AF_IMAGE_BLOCK_REQUEST_MIN_BLOCK_REQUEST_SUPPORTED_BY_CLIENT;
           index += 2;
@@ -549,6 +571,9 @@ static bool commandParse(sl_zigbee_af_cluster_command_t* command)
         uint16_t responseSpacing;
         uint8_t status;
 
+        if (!otaPayloadHasBytes(index, length, 4)) { // pageSize + responseSpacing
+          return false;
+        }
         pageSize = sl_zigbee_af_get_int16u(buffer, index, length);
         index += 2;
 
@@ -574,9 +599,12 @@ static bool commandParse(sl_zigbee_af_cluster_command_t* command)
       uint8_t status = sl_zigbee_af_get_int8u(buffer, index, length);
       index++;
       if (status == SL_ZIGBEE_ZCL_STATUS_SUCCESS) {
+        if (!otaPayloadHasBytes(index, length, 8)) {
+          return false;
+        }
         index += sli_zigbee_af_ota_parse_image_id_from_message(&imageId,
                                                                &(buffer[index]),
-                                                               length);
+                                                               (uint8_t)(length - index));
       }
       upgradeEndRequestHandler(command->source, status, &imageId);
       return true;
@@ -584,10 +612,14 @@ static bool commandParse(sl_zigbee_af_cluster_command_t* command)
     case ZCL_QUERY_SPECIFIC_FILE_REQUEST_COMMAND_ID: {
       uint8_t* requestNodeAddress = &(buffer[index]);
       uint16_t currentStackVersion;
+      // requestNodeAddress (8) + imageId (8) + stackVersion (2)
+      if (!otaPayloadHasBytes(index, length, 18)) {
+        return false;
+      }
       index += 8;  // add 8 to jump over the requestNodeAddress
       index += sli_zigbee_af_ota_parse_image_id_from_message(&imageId,
                                                              &(buffer[index]),
-                                                             length);
+                                                             (uint8_t)(length - index));
       currentStackVersion = sl_zigbee_af_get_int16u(buffer, index, length);
       index += 2;
       querySpecificFileRequestHandler(requestNodeAddress,

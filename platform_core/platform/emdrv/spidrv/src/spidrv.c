@@ -2467,21 +2467,27 @@ static Ecode_t WaitForIdleLine(SPIDRV_Handle_t handle)
 static Ecode_t sli_spidrv_exit_em23(SPIDRV_Handle_t handle)
 {
   EUSART_TypeDef *eusart = handle->peripheral.eusartPort;
-#if defined(_SILICON_LABS_32B_SERIES_2)
-  EUSART_Enable(eusart, eusartEnable);
-  BUS_RegMaskedWrite(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
-                     _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
-                     GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_SCLKPEN);
-#else
-  sl_hal_eusart_enable(eusart);
-  sl_hal_eusart_enable_rx(eusart);
-  sl_hal_eusart_enable_tx(eusart);
-  sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
-  sl_hal_bus_reg_write_mask(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
-                            _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
-                            GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_SCLKPEN);
-#endif
 
+  uint32_t eusart_num = EUSART_NUM(eusart);
+  bool is_eusart_not_em2_capable = EUSART_NOT_EM2_CAPABLE(eusart_num);
+
+  if (is_eusart_not_em2_capable || (handle->initData.type == spidrvMaster)) {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+    EUSART_Enable(eusart, eusartEnable);
+
+    BUS_RegMaskedWrite(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
+                       _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
+                       GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_SCLKPEN);
+#else
+    sl_hal_eusart_enable(eusart);
+    sl_hal_eusart_enable_rx(eusart);
+    sl_hal_eusart_enable_tx(eusart);
+    sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
+    sl_hal_bus_reg_write_mask(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
+                              _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
+                              GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_SCLKPEN);
+#endif
+  }
   return ECODE_EMDRV_SPIDRV_OK;
 }
 
@@ -2491,15 +2497,23 @@ static Ecode_t sli_spidrv_exit_em23(SPIDRV_Handle_t handle)
 static Ecode_t sli_spidrv_enter_em23(SPIDRV_Handle_t handle)
 {
   EUSART_TypeDef *eusart = handle->peripheral.eusartPort;
+
+  uint32_t eusart_num = EUSART_NUM(eusart);
+  bool is_eusart_not_em2_capable = EUSART_NOT_EM2_CAPABLE(eusart_num);
+
+  if (is_eusart_not_em2_capable || (handle->initData.type == spidrvMaster)) {
 #if defined(_SILICON_LABS_32B_SERIES_2)
-  BUS_RegMaskedWrite(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
-                     _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
-                     0);
+    EUSART_Enable(eusart, eusartDisable);
+
+    BUS_RegMaskedWrite(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
+                       _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
+                       0);
 #else
-  sl_hal_bus_reg_write_mask(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
-                            _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
-                            0);
+    sl_hal_bus_reg_write_mask(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
+                              _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
+                              0);
 #endif
+  }
 
   return ECODE_EMDRV_SPIDRV_OK;
 }

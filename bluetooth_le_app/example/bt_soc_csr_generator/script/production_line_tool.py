@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2025 Silicon Laboratories Inc. www.silabs.com
+# Copyright 2026 Silicon Laboratories Inc. www.silabs.com
 #
 # SPDX-License-Identifier: Zlib
 #
@@ -31,25 +31,27 @@ Python 3.9 or higher.
 Python packages contained in `requirements.txt`.
   Run `pip install -r requirements.txt` to install all requirements for the application.
 Simplicity Commander added to path.
-Certificate Authority created using the `create_authority_certificate.py` script.
+Certificate Authority created using the `create_certificate_authority.py` script.
 A connected device with the prepared certificate signing request with the
   `SoC - Certificate Signing Request Generator` example.
 '''
 # Metadata
 __author__ = 'Silicon Laboratories, Inc'
-__copyright__ = 'Copyright 2025, Silicon Laboratories, Inc.'
+__copyright__ = 'Copyright 2026, Silicon Laboratories, Inc.'
 
 import os
 import sys
-import pathlib
 import datetime
 import re
 import binascii, struct
 import argparse
 import subprocess
 import yaml
+from pathlib import Path
 from cryptography import x509
 from cryptography.hazmat import primitives
+
+WORKING_DIR               = Path.home() / ".silabs" / "certificates"
 
 RAM_DATA_START            = 0x20007C00
 RAM_DATA_LEN_MAX          = 1024
@@ -84,15 +86,16 @@ def main(level, validity, serial, ip, device, protocol):
 
     # Set paths and check certificate authority.
     if level == 0:
-        path_auth_dir = os.path.join(os.path.abspath(os.path.join((__file__), '..')), 'central_authority')
+        path_auth_dir = (WORKING_DIR / 'central_authority').resolve()
     else:
-        path_auth_dir = os.path.join(os.path.abspath(os.path.join((__file__), '..')), 'intermediate_' + str(level) + '_authority')
-    path_auth_key = os.path.join(path_auth_dir, 'private_key.pem')
-    path_auth_cert = os.path.join(path_auth_dir, 'certificate.pem')
-    path_auth_database = os.path.join(path_auth_dir, 'issued_certificates.yaml')
+        path_auth_dir = (WORKING_DIR / ('intermediate_' + str(level) + '_authority')).resolve()
+    print(f"Issuer Certificate Authority: {path_auth_dir}")
+    path_auth_key = path_auth_dir / 'private_key.pem'
+    path_auth_cert = path_auth_dir / 'certificate.pem'
+    path_auth_database = path_auth_dir / 'issued_certificates.yaml'
 
-    if not os.path.exists(path_auth_dir) or not os.path.exists(path_auth_key) or not os.path.exists(path_auth_cert):
-        raise FileNotFoundError(path_auth_dir + ' authority is incomplete.')
+    if not path_auth_key.is_file() or not path_auth_cert.is_file():
+        raise FileNotFoundError(f'{path_auth_dir} authority is incomplete.')
 
     # Retrieve RAM data.
     ram_data = read_ram(RAM_DATA_START, RAM_DATA_LEN_MAX)
@@ -100,7 +103,7 @@ def main(level, validity, serial, ip, device, protocol):
 
     # Get Certificate Signing Request from RAM data.
     csr = get_csr(ram_data)
-    print('Certificate Signing Request retrieved from RAM data.', os.linesep)
+    print('Certificate Signing Request retrieved from RAM data.\n')
 
     # Retrieve Control Block from NVM3.
     path_nvm3_dump = dump_nvm3(path_auth_dir)
@@ -138,7 +141,7 @@ def main(level, validity, serial, ip, device, protocol):
                control_block.max_link_data_len)
 
     # Flash back the modified NVM3 content onto the device.
-    subprocess_call(('commander flash ' + path_nvm3_dump + ' ' + device_argument()).split())
+    subprocess_call(['commander', 'flash', str(path_nvm3_dump)] + device_argument())
     print('Certificate flashed onto the device.')
     os.remove(path_nvm3_dump) # Clean up
 
@@ -151,9 +154,9 @@ def read_ram(start_address, memory_size):
     Return values:
     The retrieved data from the RAM.
     '''
-    cmd = ('commander readmem '
+    cmd = (['commander', 'readmem']
            + device_argument()
-           + ' --range ' + hex(start_address) + ':+' + hex(memory_size)).split()
+           + ['--range', f'{hex(start_address)}:+{hex(memory_size)}'])
     output = subprocess_call(cmd).stdout
 
     # Grab raw bytes from the output.
@@ -295,7 +298,7 @@ def add_certificate_to_database(certificate, path_database):
         yaml.dump(issued, stream, default_flow_style=False, allow_unicode=True)
 
     # Save the signed certificate to file in PEM format.
-    path_cert_pem = os.path.abspath(os.path.join(os.path.join(path_database, '..'), str(certificate.serial_number) + '.crt'))
+    path_cert_pem = (Path(path_database).parent / f'{certificate.serial_number}.crt').resolve()
     with open(path_cert_pem, 'wb') as f:
         f.write(certificate.public_bytes(primitives.serialization.Encoding.PEM))
     print('Signing completed. Certificate is stored in:', path_cert_pem)
@@ -308,15 +311,15 @@ def dump_nvm3(path_dir):
     Return values:
     Path to the NVM3 image file.
     '''
-    path_nvm3_dump = os.path.join(path_dir, 'nvm3_dump.s37')
+    path_nvm3_dump = path_dir / 'nvm3_dump.s37'
 
     # Remove temp file if exist
-    if os.path.exists(path_nvm3_dump):
+    if path_nvm3_dump.exists():
         print(path_nvm3_dump, 'already exists. Removing.')
         os.remove(path_nvm3_dump)
 
     # Search for the NVM3 area in the device's flash and dump the content to file.
-    subprocess_call(('commander nvm3 read ' + device_argument() + ' -o ' + path_nvm3_dump).split())
+    subprocess_call(['commander', 'nvm3', 'read'] + device_argument() + ['-o', str(path_nvm3_dump)])
     return path_nvm3_dump
 
 def patch_nvm3(path_nvm3_dump, data, nvm3_start_key, nvm3_object_size):
@@ -330,7 +333,7 @@ def patch_nvm3(path_nvm3_dump, data, nvm3_start_key, nvm3_object_size):
     '''
 
     # Temporary file to help patching the NVM3 dump file.
-    path_nvm3_patch = str(pathlib.Path(os.path.splitext(path_nvm3_dump)[0] + '.patch'))
+    path_nvm3_patch = Path(path_nvm3_dump).with_suffix('.patch')
 
     # Create patch file
     with open(path_nvm3_patch, 'w') as f:
@@ -379,7 +382,7 @@ class ControlBlock():
 
     def get_nvm3_object(self, path_nvm3_dump):
         # Read NVM3 object from the NVM3 image that belongs to the control block key.
-        cmd = ('commander nvm3 parse ' + path_nvm3_dump + ' --key ' + str(NVM3_CONTROL_BLOCK_KEY[args.protocol])).split()
+        cmd = ['commander', 'nvm3', 'parse', str(path_nvm3_dump), '--key', str(NVM3_CONTROL_BLOCK_KEY[args.protocol])]
         nvm3_object = subprocess_call(cmd).stdout.decode('utf-8')
 
         # Check Control Block key.
@@ -429,7 +432,7 @@ class ControlBlock():
         print('\t\tEC key pair present:', self.device_ec_key_present)
 
         self.static_auth_present = bool(bitmap & (1 << STATIC_AUTH_DATA_BIT))
-        print('\t\tStatic Authentication data present:', self.static_auth_present, os.linesep)
+        print(f'\t\tStatic Authentication data present: {self.static_auth_present}\n')
 
     def validate(self):
         # Expecting zero as the version number.
@@ -469,19 +472,19 @@ def subprocess_call(command):
     return process
 
 def device_argument():
-    '''Returns the device argument of a Simplicity Commander command.
+    '''Returns the device argument of a Simplicity Commander command as a list of tokens.
     '''
-    arg = ''
+    arg = []
 
     if args.serial is not None and args.ip is not None:
         raise Exception('At most one of [J-Link serial number] or [IP address] shall be defined.')
     elif args.serial is not None:
-        arg += '--serialno ' + args.serial
+        arg += ['--serialno', args.serial]
     elif args.ip is not None:
-        arg += '--ip ' + args.ip
+        arg += ['--ip', args.ip]
 
     if args.device is not None:
-        arg += ' --device ' + args.device
+        arg += ['--device', args.device]
 
     return arg
 
@@ -493,9 +496,9 @@ def load_args():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=CustomFormatter)
 
-    parser.epilog = (f'examples:{os.linesep}'
-                     f'\t%(prog)s                     Try to autodetect device.{os.linesep}'
-                     f'\t%(prog)s --serial 440192051  Connect to device with the given J-Link serial.{os.linesep}'
+    parser.epilog = (f'examples:\n'
+                     f'\t%(prog)s                     Try to autodetect device.\n'
+                     f'\t%(prog)s --serial 440192051  Connect to device with the given J-Link serial.\n'
                      f'\t%(prog)s --ip 192.168.0.143  Connect to device with the given IP address.')
 
     parser.add_argument('-l', '--level',

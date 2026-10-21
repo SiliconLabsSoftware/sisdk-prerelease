@@ -408,6 +408,9 @@ source:
 - path: app/em260/command-handlers-trust-center-generated.c
   condition:
   - zigbee_ncp
+- path: app/em260/command-handlers-configuration-generated.c
+  condition:
+  - zigbee_ncp
   # Stubs
 - path: stack/framework/debug-stub.c
   unless:

@@ -297,6 +297,17 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
     return status;
   }
 
+  // Validate the RAIL mapping configuration. This is only supported if multiprotocol is enabled.
+#if (SL_RAIL_LIB_MULTIPROTOCOL_SUPPORT == 1)
+  // Valid scheduler priority levels range from 0 to 255.
+#if (SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MIN > 255)
+#error Invalid configuration: SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MIN > 255
+#endif
+#if (SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MIN < SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MAX)
+#error Invalid configuration: SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MIN < SL_BT_CONTROLLER_SCHEDULER_PRI_RAIL_WINDOW_MAX
+#endif
+#endif // SL_RAIL_LIB_MULTIPROTOCOL_SUPPORT == 1
+
   if (config->priorities != NULL) {
     sl_btctrl_configure_scheduler_priorities(config->priorities);
   } else {
