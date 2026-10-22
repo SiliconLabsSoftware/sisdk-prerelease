@@ -115,9 +115,9 @@ component_path:
 - path: unity_test_framework/component
 - path: usb/protocol/usb/component
 - path: usb_internal/protocol/usb/component
-- path: wisun/component
-- path: wisun_config_generator/component
 - path: wisun_sdk/component
+- path: wisun_config_generator/component
+- path: wisun/component
 - path: zigbee_wwah/app/framework/component
 - path: zigbee_sleepy_to_sleepy/component
 - path: zigbee_sleepy_to_sleepy/app/framework/component
@@ -168,7 +168,7 @@ documentation:
 - docset: wifi
   version: 4.0.3
 - docset: wisun
-  version: 2.11.1
+  version: 2.11.2
 - docset: zigbee
   version: 9.0.3
 upgrade_manifest:
@@ -187,9 +187,9 @@ upgrade_manifest:
 - path: rail_sdk/upgrade.slcu
 - path: security_mbedtls/platform/security/component/upgrade.slcu
 - path: unity_test_framework/component/upgrade.slcu
-- path: wisun/upgrade.slcu
-- path: wisun_config_generator/wisun_config_generator.slcu
 - path: wisun_sdk/upgrade.slcu
+- path: wisun_config_generator/wisun_config_generator.slcu
+- path: wisun/upgrade.slcu
 - path: zigbee/component/upgrade.slcu
 - path: zwave/component/upgrade.slcu
 post_build_profile:
