@@ -50,6 +50,13 @@ void sl_zigbee_gpd_load_gpd_default_configuration(sl_zigbee_gpd_t_t * gpd)
   gpd->securityKeyType = SL_ZIGBEE_AF_PLUGIN_APPS_SECURITY_KEY_TYPE;
   gpd->securityLevel = SL_ZIGBEE_AF_PLUGIN_APPS_SECURITY_LEVEL;
 
+#if (SL_ZIGBEE_AF_PLUGIN_APPS_USE_IC_DERIVED_TCLK == 1)
+  {
+    uint8_t icDerivedTclk[SL_ZIGBEE_AF_PLUGIN_APPS_KEY_LENGTH] = SL_ZIGBEE_AF_PLUGIN_APPS_IC_DERIVED_TCLK;
+    sl_zigbee_gpd_set_ic_derived_tc_link_key(icDerivedTclk);
+  }
+#endif
+
   gpd->gpdState = SL_ZIGBEE_GPD_APP_STATE_NOT_COMMISSIONED;
   //gpd->securityFrameCounter = 0; // Default FC , no need to initialise
 }

@@ -37,6 +37,9 @@
 
 #include "sl_assert.h"
 #include "cmsis_os2.h"
+#include "sys/socket.h"
+#include "arpa/inet.h"
+#include "sl_wisun_app_core_util.h"
 #include "sl_ftp_clnt.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -344,23 +347,32 @@ sl_status_t sl_ftp_clnt_init(sl_ftp_clnt_t * const clnt,
 static sl_status_t _connect_channel(sl_ftp_clnt_ch_t * const clnt_ch)
 {
   int32_t res = SL_FTP_ERROR;
+  sockaddr_in6_t waddr = { 0U };
 
   if (clnt_ch == NULL) {
     return SL_STATUS_FAIL;
   }
 
-  clnt_ch->sock_id = sl_ftp_tcp_socket_create();
+  clnt_ch->sock_id = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
 
   if (clnt_ch->sock_id == SL_FTP_INVALID_SOCKID) {
     sl_ftp_debug("Socket creation failed\n");
     return SL_STATUS_FAIL;
   }
 
-  res = sl_ftp_tcp_socket_connect(clnt_ch->sock_id, clnt_ch->host, clnt_ch->port);
+  if (inet_pton(AF_INET6, clnt_ch->host, &waddr.sin6_addr) != 1) {
+    sl_ftp_debug("Connect failed\n");
+    close(clnt_ch->sock_id);
+    return SL_STATUS_FAIL;
+  }
+
+  waddr.sin6_family = AF_INET6;
+  waddr.sin6_port = htons(clnt_ch->port);
+  res = connect(clnt_ch->sock_id, (const struct sockaddr *)&waddr, sizeof(sockaddr_in6_t));
 
   if (res == SL_FTP_ERROR) {
     sl_ftp_debug("Connect failed\n");
-    (void) sl_ftp_socket_close(clnt_ch->sock_id);
+    close(clnt_ch->sock_id);
     return SL_STATUS_FAIL;
   }
 
@@ -383,9 +395,10 @@ static sl_status_t _send_on_ch(sl_ftp_clnt_ch_t * const clnt_ch, size_t size)
     return SL_STATUS_FAIL;
   }
 
-  if (sl_ftp_tcp_socket_send(clnt_ch->sock_id,
-                             clnt_ch->buff_ptr,
-                             size) == SL_FTP_ERROR) {
+  if (send(clnt_ch->sock_id,
+           clnt_ch->buff_ptr,
+           size,
+           0L) == SL_FTP_ERROR) {
     return SL_STATUS_FAIL;
   }
 
@@ -412,8 +425,8 @@ static int32_t _recv_on_ch(sl_ftp_clnt_ch_t * const clnt_ch,
   for (uint8_t retry = 0U; retry < 2U; ++retry) {
     res = 0L;
     for (size_t i = 0U; i < (timeout / 100U) && data_ptr < buff_end; ++i) {
-      sl_ftp_delay_ms(100U);
-      res = sl_ftp_tcp_socket_recv(clnt_ch->sock_id, data_ptr, remained_size);
+      osDelay(100U);
+      res = recv(clnt_ch->sock_id, data_ptr, remained_size, 0L);
       if (res > 0L) {
         break;
       }
@@ -480,10 +493,11 @@ sl_status_t sl_ftp_clnt_recv_ctrl_until_ret_code(sl_ftp_clnt_t * const clnt,
   }
 
   while (time_cnt < SL_FTP_CLNT_RECV_TIMEOUT_MS) {
-    sl_ftp_delay_ms(100U);
-    res = sl_ftp_tcp_socket_recv(clnt->ctrl_ch.sock_id,
-                                 clnt->ctrl_ch.buff_ptr,
-                                 clnt->ctrl_ch.buff_size);
+    osDelay(100U);
+    res = recv(clnt->ctrl_ch.sock_id,
+               clnt->ctrl_ch.buff_ptr,
+               clnt->ctrl_ch.buff_size,
+               0L);
     if (res > 0) {
       _get_srv_ret_code(clnt);
       _parse_ret_code(clnt);
@@ -539,7 +553,7 @@ sl_status_t sl_ftp_clnt_connect_auth(sl_ftp_clnt_t * const clnt,
     return status;
   }
 
-  sl_ftp_delay_ms(SL_FTP_CLNT_RECV_TIMEOUT_MS);
+  osDelay(SL_FTP_CLNT_RECV_TIMEOUT_MS);
 
   __check_stat(sl_ftp_clnt_send_cmd(clnt, "", NULL));
   __check_stat(sl_ftp_clnt_recv_ctrl_until_ret_code(clnt, SL_FTP_SRV_RET_CODE_2XX_SREADY));
@@ -554,11 +568,11 @@ sl_status_t sl_ftp_clnt_connect_auth(sl_ftp_clnt_t * const clnt,
   __check_stat(sl_ftp_clnt_recv_ctrl_until_ret_code(clnt, SL_FTP_SRV_RET_CODE_2XX_NAMESYST));
 
   __check_stat(sl_ftp_clnt_send_cmd(clnt, SL_FTP_CTRL_CMD_FEAT, NULL));
-  sl_ftp_delay_ms(SL_FTP_CLNT_RECV_TIMEOUT_MS);
+  osDelay(SL_FTP_CLNT_RECV_TIMEOUT_MS);
   __check_stat(sl_ftp_clnt_recv_ctrl_until_ret_code(clnt, SL_FTP_SRV_RET_CODE_2XX_SYSSTAT));
 
   __check_stat(sl_ftp_clnt_send_cmd(clnt, SL_FTP_CTRL_CMD_HELP, "SITE"));
-  sl_ftp_delay_ms(SL_FTP_CLNT_RECV_TIMEOUT_MS);
+  osDelay(SL_FTP_CLNT_RECV_TIMEOUT_MS);
   __check_stat(sl_ftp_clnt_recv_ctrl_until_ret_code(clnt, SL_FTP_SRV_RET_CODE_2XX_HELPMSG));
 
   __check_stat(sl_ftp_clnt_send_cmd(clnt, SL_FTP_CTRL_CMD_OPTS, "UTF8 ON"));
@@ -575,7 +589,7 @@ sl_status_t sl_ftp_clnt_connect_auth(sl_ftp_clnt_t * const clnt,
     return SL_STATUS_FAIL;
   }
   __check_stat(sl_ftp_clnt_send_cmd(clnt, mode_cmd, NULL));
-  sl_ftp_delay_ms(SL_FTP_CLNT_RECV_TIMEOUT_MS);
+  osDelay(SL_FTP_CLNT_RECV_TIMEOUT_MS);
   __check_stat(sl_ftp_clnt_recv_ctrl_until_ret_code(clnt, SL_FTP_SRV_RET_CODE_2XX_EPSVMODE));
 
   _request_data_ch_operation(clnt, SL_FTP_DATA_CH_REQUEST_CONNECT_MSK | SL_FTP_DATA_CH_REQUEST_RECV_MSK);
@@ -667,12 +681,12 @@ sl_status_t sl_ftp_clnt_close(sl_ftp_clnt_t * const clnt)
 {
   __check_stat(sl_ftp_clnt_send_cmd(clnt, SL_FTP_CTRL_CMD_QUIT, NULL));
   if (clnt == NULL || clnt->ctrl_ch.sock_id == SL_FTP_INVALID_SOCKID
-      || sl_ftp_socket_close(clnt->ctrl_ch.sock_id) == SL_FTP_ERROR) {
+      || close(clnt->ctrl_ch.sock_id) == SL_FTP_ERROR) {
     return SL_STATUS_FAIL;
   }
 
   if (clnt->data_ch.sock_id != SL_FTP_INVALID_SOCKID) {
-    (void)sl_ftp_socket_close(clnt->ctrl_ch.sock_id);
+    close(clnt->ctrl_ch.sock_id);
   }
 
   return SL_STATUS_OK;
@@ -858,7 +872,7 @@ static void _clnt_thr_fnc(void * args)
   (void) args;
 
   // wait for network connected state
-  sl_ftp_wait_for_connection();
+  sl_wisun_app_core_util_wait_for_connection();
 
   sl_ftp_debug("FTP Data Service started\n");
 
@@ -880,7 +894,7 @@ static void _clnt_thr_fnc(void * args)
     if (flags & SL_FTP_DATA_CH_REQUEST_CONNECT_MSK) {
       sl_ftp_debug("Connect request flags: %lu\n", flags);
       _connect_channel(&clnt.data_ch);
-      sl_ftp_delay_ms(1000UL);
+      osDelay(1000UL);
       (void) osEventFlagsSet(clnt.evt_flags, SL_FTP_DATA_CH_RESPONSE_CONNECTED_MSK);
     }
 
@@ -897,8 +911,8 @@ static void _clnt_thr_fnc(void * args)
           break;
         }
 
-        sl_ftp_delay_ms(100UL);
-        res = sl_ftp_tcp_socket_recv(clnt.data_ch.sock_id, clnt.data_ch.buff_ptr, clnt.data_ch.buff_size);
+        osDelay(100UL);
+        res = recv(clnt.data_ch.sock_id, clnt.data_ch.buff_ptr, clnt.data_ch.buff_size, 0L);
         if (res > 0) {
           if (clnt.data_ch.data_hnd) {
             clnt.data_ch.data_hnd(&clnt.data_ch, res);
@@ -915,8 +929,8 @@ static void _clnt_thr_fnc(void * args)
       sl_ftp_debug("Sending on data channel started: %ld, %s, %u\n",
                    clnt.data_ch.sock_id, clnt.data_ch.host, clnt.data_ch.port);
       while (1) {
-        sl_ftp_delay_ms(100UL);
-        res = sl_ftp_tcp_socket_send(clnt.data_ch.sock_id, clnt.data_ch.buff_ptr, clnt.data_ch.buff_size);
+        osDelay(100UL);
+        res = send(clnt.data_ch.sock_id, clnt.data_ch.buff_ptr, clnt.data_ch.buff_size, 0L);
         if (res > 0L || timeout > SL_FTP_CLNT_RECV_TIMEOUT_MS) {
           break;
         }
@@ -925,7 +939,7 @@ static void _clnt_thr_fnc(void * args)
     }
 
     sl_ftp_debug("Closing data channel\n");
-    sl_ftp_socket_close(clnt.data_ch.sock_id);
+    close(clnt.data_ch.sock_id);
     // clear all flags
     (void) osEventFlagsClear(clnt.evt_flags, SL_FTP_DATA_CH_ALL_FLAG_MSK);
     (void) osEventFlagsSet(clnt.evt_flags, SL_FTP_DATA_CH_RESPONSE_CLOSED_MSK);

@@ -39,9 +39,14 @@
 
 #include SL_OT_MAC_KEY_POLICY_CONFIG_HEADER
 #include "mac-key-types.hpp"
+#include "mac/mac_frame.hpp"
 
 /**
  * Applies AES-CCM to a transmit frame.
+ *
+ * Parses the Auxiliary Security Header internally. Prefer
+ * `sli_ot_process_transmit_aes_ccm_with_parse_info()` when the caller already
+ * holds a `kParseSecurityHeader`-parsed `ParseInfo`.
  *
  * @param[in,out] aFrame       MAC frame buffer to secure.
  * @param[in]     aExtAddress  Extended address used to build the CCM nonce.
@@ -55,5 +60,27 @@
 otError sli_ot_process_transmit_aes_ccm(otRadioFrame                      *aFrame,
                                         const otExtAddress                *aExtAddress,
                                         const MacKeyStoragePolicy::PalKey *aPalKey);
+
+/**
+ * Applies AES-CCM to a transmit frame using a pre-parsed `ParseInfo`.
+ *
+ * No-op when @p aParseInfo lacks an Auxiliary Security Header; the frame is
+ * left unsecured.
+ *
+ * @param[in,out] aFrame       MAC frame buffer to secure.
+ * @param[in]     aExtAddress  Extended address used to build the CCM nonce.
+ * @param[in]     aPalKey      PAL-side key material for the selected slot;
+ *                             must not be `nullptr`.
+ * @param[in]     aParseInfo   `ParseInfo` populated by a prior
+ *                             `ParseFrom(..., kParseSecurityHeader)` on
+ *                             @p aFrame; must not be `nullptr`.
+ *
+ * @retval OT_ERROR_NONE          Frame secured, or Aux Security Header not parsed.
+ * @retval OT_ERROR_INVALID_ARGS  `aPalKey` or `aParseInfo` was `nullptr`.
+ */
+otError sli_ot_process_transmit_aes_ccm_with_parse_info(otRadioFrame                      *aFrame,
+                                                        const otExtAddress                *aExtAddress,
+                                                        const MacKeyStoragePolicy::PalKey *aPalKey,
+                                                        const ot::Mac::TxFrame::ParseInfo *aParseInfo);
 
 #endif // TX_AES_CCM_API_HPP_

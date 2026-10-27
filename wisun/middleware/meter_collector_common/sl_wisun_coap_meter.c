@@ -290,13 +290,6 @@ static void _redirect_resp(sockaddr_in6_t * const new_addr,
 
 #if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT) \
   && SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
-/**************************************************************************//**
- * @brief Handle LFN wakeup event
- * @details Callback for custom event handling.
- *          The callback triggers notification service for LFN devices.
- * @param[in] evt Event
- *****************************************************************************/
-static void _lfn_wakeup_evt_cb(sl_wisun_evt_t * evt);
 #endif
 
 #if SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
@@ -383,6 +376,9 @@ static const sl_wisun_lfn_params_t *_lfn_params = NULL;
 
 /// LFN threshold in milliseconds to send
 static uint32_t _lfn_threshold_ms = 0;
+
+/// Whether LFN wake-up app hook is active
+static bool _lfn_wakeup_app_hnd_enabled = false;
 #endif
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
@@ -470,11 +466,10 @@ void sl_wisun_coap_meter_init(void)
   // For LFN devices, tick event should be enabled
   if (device_type == SL_WISUN_LFN) {
     sl_wisun_coap_notify_tick_evt_enable(true);
-    EFM_ASSERT(app_wisun_em_custom_callback_register(SL_WISUN_MSG_LFN_WAKE_UP_IND_ID,
-                                                     _lfn_wakeup_evt_cb) == SL_STATUS_OK);
     _lfn_params = _get_lfn_profile();
     EFM_ASSERT(_lfn_params != NULL);
     _lfn_threshold_ms = _calc_lfn_threshold_ms(_lfn_params);
+    _lfn_wakeup_app_hnd_enabled = true;
   }
 #endif
 
@@ -857,13 +852,17 @@ static void _redirect_resp(sockaddr_in6_t * const new_addr,
 
 #if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT) \
   && SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
-static void _lfn_wakeup_evt_cb(sl_wisun_evt_t * evt)
+void sl_wisun_lfn_wake_up_app_hnd(sl_wisun_evt_t *evt)
 {
   uint32_t time = 0UL;
   static uint32_t prev_time = 0UL;
   uint32_t elapsed_time = 0UL;
 
   (void) evt;
+
+  if (!_lfn_wakeup_app_hnd_enabled) {
+    return;
+  }
 
   time = sl_sleeptimer_get_tick_count();
   elapsed_time = sl_sleeptimer_tick_to_ms(time - prev_time);

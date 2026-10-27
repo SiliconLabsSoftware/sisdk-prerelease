@@ -1,0 +1,40 @@
+package: zigbee
+description: >
+  A component providing Green Power v1.1.3 sink-side security features
+  (InvolveTC client, server hooks, OOB/IC commissioning). Host/NCP EZSP
+  passthrough for GP TC commands is deferred; TC-mediated commissioning is
+  SoC-first. Shared codec/types live in zigbee_green_power_v113_common.
+label: Green Power v1.1.3
+quality: production
+id: zigbee_green_power_v113
+category: Zigbee|Green Power
+provides:
+- name: zigbee_green_power_v113
+requires:
+- name: zigbee_gp
+- name: zigbee_green_power_common
+- name: zigbee_green_power_v113_common
+- name: zigbee_green_power_server
+
+recommends:
+- name: zigbee_green_power_v113_cli
+
+  vendor: silabs
+source:
+- path: app/framework/plugin/green-power-v113/green-power-tc-client.c
+- path: app/framework/plugin/green-power-v113/green-power-server-v113.c
+include:
+- path: app/framework/plugin/green-power-v113
+  file_list:
+  - path: green-power-v113.h
+  - path: green-power-tc-msg.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_green_power_v113
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/green-power-v113
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

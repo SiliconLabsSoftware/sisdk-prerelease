@@ -38,12 +38,14 @@
 #include <stdbool.h>
 
 #include "sl_assert.h"
+#include "cmsis_os2.h"
 #include "sl_iperf_types.h"
 #include "sl_iperf_network_interface.h"
 #include "sl_iperf.h"
 #include "sl_iperf_util.h"
 #include "sl_iperf_udp_srv.h"
 #include "socket/socket.h"
+#include "arpa/inet.h"
 #include "sl_wisun_common.h"
 #include "sl_sleeptimer.h"
 
@@ -124,11 +126,13 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
 {
   int32_t pkt_id            =   1L;
   client_tx_params_t params = { 0U };
-  int32_t r                 = SL_IPERF_NW_API_ERROR;
+  int32_t r                 = SOCKET_RETVAL_ERROR;
   bool finack_received      = false;
   uint32_t target_bytes_per_sec;
   uint64_t elapsed_ms;
   uint64_t ideal_bytes;
+  socklen_t addrlen = sizeof(sockaddr_in6_t);
+  sockaddr_in6_t *srv_addr = &test->conn.srv_addr;
 
   bool packet_nbr_explicit;
   sl_sleeptimer_timer_handle_t status_timer = { 0U };
@@ -147,8 +151,8 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
   sl_iperf_test_fill_buffer_with_pattern(test);
 
   // create socket
-  test->conn.socket_id = sl_iperf_socket_create(test->opt.protocol);
-  if (test->conn.socket_id == SL_IPERF_NW_API_ERROR) {
+  test->conn.socket_id = socket(AF_INET6, SOCK_DGRAM | SOCK_NONBLOCK, IPPROTO_UDP);
+  if (test->conn.socket_id == SOCKET_RETVAL_ERROR) {
     sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_CLIENT_SOCK_OPEN, SL_IPERF_TEST_STATUS_ERR);
     sl_iperf_test_log(test, "UDP Client: sl_iperf_socket_create failed.\n");
     return;
@@ -170,13 +174,15 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
   }
 
   // set remote address
-  sl_iperf_set_socket_addr_family(&test->conn.srv_addr);
-  sl_iperf_inet_pton(test->opt.remote_addr, &test->conn.srv_addr);
+  srv_addr->sin6_family = AF_INET6;
+  inet_pton(AF_INET6, test->opt.remote_addr, &srv_addr->sin6_addr);
   sl_iperf_test_log_verbose(test, "UDP Client: Listener port is %u.\n", test->opt.port ? test->opt.port : SL_IPERF_SERVER_DEFAULT_PORT);
-  sl_iperf_set_socket_addr_port(&test->conn.srv_addr,
-                                test->opt.port ? test->opt.port : SL_IPERF_SERVER_DEFAULT_PORT);
-  sl_iperf_socket_setsockopt(test->conn.socket_id, SOL_SOCKET, SO_SNDBUF,
-                             &test->opt.socket_buffer_size, sizeof(uint32_t));
+  srv_addr->sin6_port = htons(test->opt.port ? test->opt.port : SL_IPERF_SERVER_DEFAULT_PORT);
+  setsockopt(test->conn.socket_id,
+             SOL_SOCKET,
+             SO_SNDBUF,
+             &test->opt.socket_buffer_size,
+             sizeof(uint32_t));
 
   // Compute target rate in bytes/s (based on bw_format)
   target_bytes_per_sec = sl_iperf_bytes_from_formatted_bandwidth(test->opt.bw_format,
@@ -189,7 +195,7 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
 
   test->conn.run = true;
 
-  test->statistic.ts_curr_sent_ms = sl_iperf_get_timestamp_ms();
+  test->statistic.ts_curr_sent_ms = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
   test->statistic.ts_start_ms = test->statistic.ts_curr_sent_ms;
   test->statistic.bytes = 0;
   elapsed_ms = 0;
@@ -206,10 +212,12 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
     _prepare_udp_clnt_header(test, pkt_id);
     sl_iperf_test_log_verbose(test, "UDP Client: sending packet_id = %d\n", pkt_id);
 
-    r = sl_iperf_socket_sendto(test->conn.socket_id,
-                               test->conn.buff,
-                               params.packet_size,
-                               &test->conn.srv_addr);
+    r = sendto(test->conn.socket_id,
+               test->conn.buff,
+               params.packet_size,
+               0U,
+               (const struct sockaddr *) &test->conn.srv_addr,
+               sizeof(sockaddr_in6_t));
 
     sl_iperf_stats_lock();
     test->statistic.nbr_calls++;
@@ -225,10 +233,10 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
       // We reach this if send fails
       test->statistic.errs++;
       sl_iperf_stats_unlock();
-      sl_iperf_delay_ms(2);
+      osDelay(2);
     }
 
-    test->statistic.ts_curr_sent_ms = sl_iperf_get_timestamp_ms();
+    test->statistic.ts_curr_sent_ms = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
     elapsed_ms = test->statistic.ts_curr_sent_ms - test->statistic.ts_start_ms;
 
     // Compute ideal bytes that should have been sent by now
@@ -240,27 +248,29 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
       uint32_t ahead_bytes = (uint32_t)(test->statistic.bytes - ideal_bytes);
       uint64_t delay_next_packet_ms = ((uint64_t)ahead_bytes * 1000U) / target_bytes_per_sec;
       if (delay_next_packet_ms > 1U) {
-        sl_iperf_delay_ms(delay_next_packet_ms);
+        osDelay(delay_next_packet_ms);
       }
     }
 
-    test->statistic.ts_curr_sent_ms = sl_iperf_get_timestamp_ms();
+    test->statistic.ts_curr_sent_ms = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
     elapsed_ms = test->statistic.ts_curr_sent_ms - test->statistic.ts_start_ms;
   }
 
   // Send last packet
   pkt_id = -pkt_id;
-  test->statistic.ts_curr_sent_ms = sl_iperf_get_timestamp_ms();
+  test->statistic.ts_curr_sent_ms = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
   _prepare_udp_clnt_header(test, pkt_id);
   sl_iperf_test_log_verbose(test, "UDP Client: sending packet_id = %d\n", pkt_id);
 
   for (uint32_t retry_cnt = 0UL;
     retry_cnt < SL_IPERF_CLIENT_SENDTO_RETRY_MAX_CNT;
     ++retry_cnt) {
-    r = sl_iperf_socket_sendto(test->conn.socket_id,
-                               test->conn.buff,
-                               params.packet_size,
-                               &test->conn.srv_addr);
+    r = sendto(test->conn.socket_id,
+               test->conn.buff,
+               params.packet_size,
+               0U,
+               (const struct sockaddr *) &test->conn.srv_addr,
+               sizeof(sockaddr_in6_t));
 
     sl_iperf_stats_lock();
     test->statistic.nbr_calls++;
@@ -275,39 +285,43 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
       // We reach this if send fails
       test->statistic.errs++;
       sl_iperf_stats_unlock();
-      sl_iperf_delay_ms(2);
+      osDelay(2);
     }
   }
 
   test->conn.run = false;
-  test->statistic.ts_end_ms = sl_iperf_get_timestamp_ms();
+  test->statistic.ts_end_ms = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
   sl_sleeptimer_stop_timer(&status_timer);
 
   // Pad wall time to the configured or packet-count-derived duration.
   if (test->statistic.ts_end_ms < (test->statistic.ts_start_ms + test->opt.duration_ms + 1U)) { // Delay can't be == 1ms
     uint64_t delay_ms = test->statistic.ts_start_ms + test->opt.duration_ms - test->statistic.ts_end_ms;
-    sl_iperf_delay_ms(delay_ms);
-    test->statistic.ts_end_ms = sl_iperf_get_timestamp_ms();
+    osDelay(delay_ms);
+    test->statistic.ts_end_ms = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
   }
 
   for (uint8_t i = 0; i < SL_IPERF_SERVER_UDP_TX_FINACK_COUNT; ++i) {
-    r = sl_iperf_socket_recvfrom(test->conn.socket_id,
-                                 test->conn.buff,
-                                 SL_IPERF_UDP_SERVER_FIN_ACK_SIZE,
-                                 &test->conn.srv_addr);
+    r = recvfrom(test->conn.socket_id,
+                 test->conn.buff,
+                 SL_IPERF_UDP_SERVER_FIN_ACK_SIZE,
+                 0U,
+                 (struct sockaddr *) &test->conn.srv_addr,
+                 &addrlen);
     if (r > 0L) {
       // parse FinACK response
       _parse_srv_finack(test);
       finack_received = true;
       break;
-    } else if ( r == SL_IPERF_NW_API_ERROR ) {
+    } else if ( r == SOCKET_RETVAL_ERROR ) {
       _prepare_udp_clnt_header(test, --pkt_id);
-      (void) sl_iperf_socket_sendto(test->conn.socket_id,
-                                    test->conn.buff,
-                                    params.packet_size,
-                                    &test->conn.srv_addr);
+      sendto(test->conn.socket_id,
+             test->conn.buff,
+             params.packet_size,
+             0U,
+             (const struct sockaddr *) &test->conn.srv_addr,
+             sizeof(sockaddr_in6_t));
     }
-    sl_iperf_delay_ms(SL_IPERF_FINACK_RECV_TIMEOUT_MS / SL_IPERF_SERVER_UDP_TX_FINACK_COUNT);
+    osDelay(SL_IPERF_FINACK_RECV_TIMEOUT_MS / SL_IPERF_SERVER_UDP_TX_FINACK_COUNT);
   }
 
   if (!finack_received) {
@@ -320,8 +334,8 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
   sl_iperf_test_calculate_average_bandwidth(test);
 
   // close socket
-  r = sl_iperf_socket_close(test->conn.socket_id);
-  if (r == SL_IPERF_NW_API_ERROR) {
+  r = close(test->conn.socket_id);
+  if (r == SOCKET_RETVAL_ERROR) {
     sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_SERVER_SOCK_CLOSE, SL_IPERF_TEST_STATUS_ERR);
   } else {
     sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_NONE, SL_IPERF_TEST_STATUS_DONE);
@@ -337,16 +351,17 @@ static void _prepare_udp_clnt_header(sl_iperf_test_t * const test, const int32_t
   sl_iperf_udp_clnt_hdr_t * hdr = NULL;
   uint32_t flags                = 0UL;
   sl_iperf_time_t t             = { 0U };
+  const sockaddr_in6_t *srv_addr = &test->conn.srv_addr;
 
   hdr = (sl_iperf_udp_clnt_hdr_t * ) test->conn.buff;
 
   // reset header
   memset(hdr, 0U, sizeof(sl_iperf_udp_clnt_hdr_t));
 
-  hdr->dtg.id            = sl_iperf_network_htonl(pkt_id);
+  hdr->dtg.id            = htonl(pkt_id);
   sl_iperf_calc_time_from_ms(&t, test->statistic.ts_curr_sent_ms);
-  hdr->dtg.time_var_sec  = sl_iperf_network_htonl(t.sec);
-  hdr->dtg.time_var_usec = sl_iperf_network_htonl(t.usec);
+  hdr->dtg.time_var_sec  = htonl(t.sec);
+  hdr->dtg.time_var_usec = htonl(t.usec);
   if (pkt_id < 0) {
     hdr->dtg.id2 = -1L;
   } else {
@@ -354,11 +369,11 @@ static void _prepare_udp_clnt_header(sl_iperf_test_t * const test, const int32_t
   }
 
   flags = SL_IPERF_HEADER_EXTEND | SL_IPERF_HEADER_UDPTEST;
-  hdr->base.flags       = sl_iperf_network_htonl(flags);
-  hdr->base.num_threads = sl_iperf_network_htonl(1U);
-  hdr->base.buf_len     = sl_iperf_network_htonl(test->conn.buff_size);
-  hdr->base.port        = (int32_t)sl_iperf_network_htons(sl_iperf_get_socket_addr_port(&test->conn.srv_addr));
-  hdr->base.amount      = sl_iperf_network_htonl((test->opt.packet_nbr * test->opt.buf_len)
+  hdr->base.flags       = htonl(flags);
+  hdr->base.num_threads = htonl(1U);
+  hdr->base.buf_len     = htonl(test->conn.buff_size);
+  hdr->base.port        = (int32_t)srv_addr->sin6_port;
+  hdr->base.amount      = htonl((test->opt.packet_nbr * test->opt.buf_len)
                                                  & ~SL_IPERF_HEADER_TIME_MODE);
 
 #if SL_IPERF_VERBOSE_MODE
@@ -394,8 +409,8 @@ static void _udp_client_calc_tx(sl_iperf_test_t *const test,
 
 __STATIC_INLINE uint64_t _get_u64_val_from_hl(const uint32_t high, const uint32_t low)
 {
-  return ((uint64_t) sl_iperf_network_ntohl(high) << 32U)
-         | (uint64_t) sl_iperf_network_ntohl(low);
+  return ((uint64_t) ntohl(high) << 32U)
+         | (uint64_t) ntohl(low);
 }
 
 static void _parse_srv_finack(sl_iperf_test_t * const test)
@@ -413,14 +428,14 @@ static void _parse_srv_finack(sl_iperf_test_t * const test)
   sl_iperf_print_test_srv_header_json(test, hdr);
 #endif
   test->statistic.finack_tot_len = (uint32_t)_get_u64_val_from_hl(hdr->tot_len_u, hdr->tot_len_l);
-  t.sec = sl_iperf_network_ntohl(hdr->stop_sec);
-  t.usec = sl_iperf_network_ntohl(hdr->stop_usec);
+  t.sec = ntohl(hdr->stop_sec);
+  t.usec = ntohl(hdr->stop_usec);
   test->statistic.finack_duration_ms = sl_iperf_calc_ms_from_time(&t);
-  test->statistic.finack_pkt = sl_iperf_network_ntohl(hdr->packet_cnt);
+  test->statistic.finack_pkt = ntohl(hdr->packet_cnt);
   test->statistic.finack_bw = (uint32_t)(((uint64_t)test->statistic.finack_tot_len * SL_IPERF_DATA_BYTE_TO_BIT_ML * SL_IPERF_TIME_S_TO_MS_ML) / test->statistic.finack_duration_ms);
-  test->statistic.udp_lost_pkt = sl_iperf_network_ntohl(hdr->lost_pkt_cnt);
-  test->statistic.udp_out_of_order = sl_iperf_network_ntohl(hdr->out_of_order_cnt);
-  t.sec = sl_iperf_network_ntohl(hdr->jitter_sec);
-  t.usec = sl_iperf_network_ntohl(hdr->jitter_usec);
+  test->statistic.udp_lost_pkt = ntohl(hdr->lost_pkt_cnt);
+  test->statistic.udp_out_of_order = ntohl(hdr->out_of_order_cnt);
+  t.sec = ntohl(hdr->jitter_sec);
+  t.usec = ntohl(hdr->jitter_usec);
   test->statistic.udp_jitter = sl_iperf_calc_ms_from_time(&t);
 }

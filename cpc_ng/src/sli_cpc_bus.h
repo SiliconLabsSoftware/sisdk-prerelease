@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sli_cpc_bus.h
  * @brief CPC Bus Internal Definitions
  *******************************************************************************
  * # License
@@ -77,6 +77,48 @@ sl_status_t sli_cpc_bus_init(sl_cpc_bus_t *bus, const sl_cpc_bus_config_t *cfg, 
  ******************************************************************************/
 void sli_cpc_bus_deinit(sl_cpc_bus_t *bus);
 
+/***************************************************************************/ /**
+ * Initialize runtime PM for the bus (device wake path).
+ *
+ * When wake device support is present, copies power-mode / wake-in config onto
+ * the bus and initializes device wake if the power mode is not always-on.
+ * Otherwise a no-op.
+ *
+ * @param[in] bus  CPC bus pointer.
+ * @param[in] cfg  Bus configuration. Must not be NULL.
+ *
+ * @return SL_STATUS_OK if successful, or if the operation is unavailable.
+ *         Error code otherwise.
+ ******************************************************************************/
+sl_status_t sli_cpc_bus_pm_runtime_init(sl_cpc_bus_t *bus, const sl_cpc_bus_config_t *cfg);
+
+/***************************************************************************/ /**
+ * Deinitialize runtime PM for the bus.
+ *
+ * @param[in] bus  CPC bus pointer.
+ ******************************************************************************/
+void sli_cpc_bus_pm_runtime_deinit(sl_cpc_bus_t *bus);
+
+/***************************************************************************/ /**
+ * Acquire a runtime PM reference on the bus driver.
+ *
+ * Calls @ref sli_cpc_drv_ops_t::pm_runtime_get when wake device support is
+ * present and the driver implements the operation; otherwise a no-op.
+ *
+ * @param[in] bus  CPC bus pointer.
+ ******************************************************************************/
+void sli_cpc_bus_pm_runtime_get(sl_cpc_bus_t *bus);
+
+/***************************************************************************/ /**
+ * Release a runtime PM reference on the bus driver.
+ *
+ * Calls @ref sli_cpc_drv_ops_t::pm_runtime_put when wake device support is
+ * present and the driver implements the operation; otherwise a no-op.
+ *
+ * @param[in] bus  CPC bus pointer.
+ ******************************************************************************/
+void sli_cpc_bus_pm_runtime_put(sl_cpc_bus_t *bus);
+
 /******************************************************************************/
 /*                          Driver to core interface                          */
 /******************************************************************************/
@@ -84,7 +126,7 @@ void sli_cpc_bus_deinit(sl_cpc_bus_t *bus);
 /***************************************************************************/ /**
  * Signal process needed.
  ******************************************************************************/
-void sli_cpc_bus_signal_event(sl_cpc_bus_t *bus, sli_cpc_signal_type_t signal_type);
+void sli_cpc_bus_signal_event(sl_cpc_bus_t *bus);
 
 /***************************************************************************/ /**
  * Notifies core of rx completion.
@@ -147,7 +189,7 @@ static inline void sli_cpc_bus_notify_tx_data_by_drv(sl_cpc_bus_t *bus, sli_cpc_
 
   MCU_ATOMIC_SECTION(sli_cpc_frame_list_extend(&bus->transmit_completed_list, frames);)
 
-  sli_cpc_bus_signal_event(bus, SLI_CPC_SIGNAL_TX);
+  sli_cpc_bus_signal_event(bus);
 }
 
 #ifdef __cplusplus

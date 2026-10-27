@@ -19,6 +19,7 @@ source:
 include:
 - path: inc
   file_list:
+  - path: sl_cpc_drv_spi.h
   - path: sl_cpc_drv_spi_peripheral.h
 provides:
 - name: cpc_ng_drv_spi_peripheral

@@ -42,9 +42,13 @@
 #include "sl_health_thermometer.h"
 #include "sl_main_init.h"
 #include "app.h"
+#include "app_config.h"
 
 // Connection handle.
 static uint8_t app_connection = 0;
+
+// Last reported app connection PHY
+static uint8_t app_connection_phy = 0;
 
 // The advertising set handle allocated from Bluetooth stack.
 static uint8_t advertising_set_handle = 0xff;
@@ -54,6 +58,11 @@ static volatile bool app_btn0_pressed = false;
 
 // Periodic timer handle.
 static app_timer_t app_periodic_timer;
+
+static sl_status_t app_start_advertising(void);
+static sl_status_t app_start_legacy_advertising(void);
+static sl_status_t app_start_extended_advertising(void);
+static const char *app_phy_to_string(uint8_t phy);
 
 // Periodic timer callback.
 static void app_periodic_timer_cb(app_timer_t *timer, void *data);
@@ -125,13 +134,13 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                    address.addr[1],
                    address.addr[0]);
 
-      // Create an advertising set.
-      sc = sl_bt_advertiser_create_set(&advertising_set_handle);
+      // Prefer the configured PHY. Reject remote PHY updates to a different PHY.
+      sc = sl_bt_connection_set_default_preferred_phy(BLE_THERMOMETER_PHY,
+                                                      BLE_THERMOMETER_PHY);
       app_assert_status(sc);
 
-      // Generate data for advertising
-      sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
-                                                 sl_bt_advertiser_general_discoverable);
+      // Create an advertising set.
+      sc = sl_bt_advertiser_create_set(&advertising_set_handle);
       app_assert_status(sc);
 
       // Set advertising interval to 100ms.
@@ -143,18 +152,23 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
         0);  // max. num. adv. events
       app_assert_status(sc);
 
-      // Start advertising and enable connections.
-      sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                         sl_bt_legacy_advertiser_connectable);
+      // Start advertising and enable connections on the configured PHY.
+      sc = app_start_advertising();
       app_assert_status(sc);
 
-      app_log_info("Started advertising" APP_LOG_NL);
+      app_log_info("Started advertising on %s" APP_LOG_NL,
+                   app_phy_to_string(BLE_THERMOMETER_PHY));
       break;
 
     // -------------------------------
     // This event indicates that a new connection was opened.
     case sl_bt_evt_connection_opened_id:
       app_log_info("Connection opened" APP_LOG_NL);
+
+      sc = sl_bt_connection_set_preferred_phy(evt->data.evt_connection_opened.connection,
+                                              BLE_THERMOMETER_PHY,
+                                              BLE_THERMOMETER_PHY);
+      app_assert_status(sc);
 
 #ifdef SL_CATALOG_BLUETOOTH_FEATURE_POWER_CONTROL_PRESENT
       // Set remote connection power reporting - needed for Power Control
@@ -170,12 +184,23 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // This event indicates that a connection was closed.
     case sl_bt_evt_connection_closed_id:
       app_log_info("Connection closed" APP_LOG_NL);
+      app_connection_phy = 0;
 
       // Restart advertising after client has disconnected.
-      sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
-                                         sl_bt_legacy_advertiser_connectable);
+      sc = app_start_advertising();
       app_assert_status(sc);
-      app_log_info("Started advertising" APP_LOG_NL);
+      app_log_info("Started advertising on %s" APP_LOG_NL,
+                   app_phy_to_string(BLE_THERMOMETER_PHY));
+      break;
+
+    // -------------------------------
+    // PHY update completed.
+    case sl_bt_evt_connection_phy_status_id:
+      if (evt->data.evt_connection_phy_status.phy != app_connection_phy) {
+        app_connection_phy = evt->data.evt_connection_phy_status.phy;
+        app_log_info("Connection PHY: %s" APP_LOG_NL,
+                     app_phy_to_string(app_connection_phy));
+      }
       break;
 
     ///////////////////////////////////////////////////////////////////////////
@@ -301,6 +326,91 @@ static void app_periodic_timer_cb(app_timer_t *timer, void *data)
   if (sc) {
     app_log_warning("Failed to send temperature measurement indication [0x%04lx]" APP_LOG_NL, sc);
   }
+}
+
+/**************************************************************************//**
+ * Convert a GAP PHY value to a readable name for logging.
+ *****************************************************************************/
+static const char *app_phy_to_string(uint8_t phy)
+{
+  switch (phy) {
+    case sl_bt_gap_phy_1m:
+      return "1M PHY";
+    case sl_bt_gap_phy_2m:
+      return "2M PHY";
+    case sl_bt_gap_phy_coded:
+      return "Coded PHY";
+    default:
+      return "unknown PHY";
+  }
+}
+
+/**************************************************************************//**
+ * Start connectable advertising on the PHY selected in app_config.h.
+ *
+ * 1M uses legacy advertising. 2M and Coded PHY use extended advertising.
+ *****************************************************************************/
+static sl_status_t app_start_advertising(void)
+{
+  // BLE_THERMOMETER_PHY is an enum value, so it cannot be tested with #if.
+  if (BLE_THERMOMETER_PHY == sl_bt_gap_phy_1m) {
+    return app_start_legacy_advertising();
+  }
+  return app_start_extended_advertising();
+}
+
+/**************************************************************************//**
+ * Start connectable legacy advertising on 1M PHY.
+ *****************************************************************************/
+static sl_status_t app_start_legacy_advertising(void)
+{
+  sl_status_t sc;
+
+  sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
+                                             sl_bt_advertiser_general_discoverable);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+
+  sc = sl_bt_legacy_advertiser_start(advertising_set_handle,
+                                     sl_bt_legacy_advertiser_connectable);
+  return sc;
+}
+
+/**************************************************************************//**
+ * Start connectable extended advertising on 2M or Coded PHY.
+ *****************************************************************************/
+static sl_status_t app_start_extended_advertising(void)
+{
+  sl_status_t sc;
+  uint8_t primary_phy;
+  uint8_t secondary_phy;
+
+  if (BLE_THERMOMETER_PHY == sl_bt_gap_phy_2m) {
+    primary_phy = sl_bt_gap_phy_1m;
+    secondary_phy = sl_bt_gap_phy_2m;
+  } else {
+    primary_phy = sl_bt_gap_phy_coded;
+    secondary_phy = sl_bt_gap_phy_coded;
+  }
+
+  sc = sl_bt_extended_advertiser_set_phy(advertising_set_handle,
+                                         primary_phy,
+                                         secondary_phy);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+
+  sc = sl_bt_extended_advertiser_generate_data(advertising_set_handle,
+                                               sl_bt_advertiser_general_discoverable);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+
+  sc = sl_bt_extended_advertiser_start(advertising_set_handle,
+                                       sl_bt_extended_advertiser_connectable,
+                                       0);
+  return sc;
 }
 
 #ifdef SL_CATALOG_CLI_PRESENT

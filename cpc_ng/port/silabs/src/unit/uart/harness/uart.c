@@ -4,11 +4,37 @@
  *
  * End-to-end UART RX tests against the real sl_cpc_drv_uart driver:
  *
- *   setup → encode wire frame → inject bytes → run dispatcher → read frame → expect
+ *   setup → encode wire frame → inject bytes → process driver → read frame → expect
  *
- * Tests suspend the CPC core task and call sli_cpc_dispatcher_process() manually
+ * Tests suspend the CPC core task and drive the UART driver read path manually
  * so RX handling is deterministic under Unity. Bytes enter the UART RX path through
- * loopback_inject_bytes(); the read helpers drain the CPC dispatcher when asserting.
+ * loopback_inject_bytes_at(); uart_inject_bytes() yields after each injected byte so the
+ * UART RX callback can re-arm DMA while the CPC thread is suspended.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
  ******************************************************************************/
 
 #include <stdalign.h>
@@ -38,7 +64,7 @@
 #include "loopback.h"
 #include "uart.h"
 
-#define EP_RX_BUFFER_COUNT 2U
+#define EP_RX_BUFFER_COUNT 5U
 #define EP_RX_BUFFER_SIZE 64U
 
 // Fail tests that would otherwise spin on a stuck dispatcher queue.
@@ -265,7 +291,7 @@ size_t encode_uart_frame(uint8_t *out, size_t out_capacity, const cpc_frame_expe
 
   frame_to_header(frame, &hdr);
 
-  out[0] = (uint8_t)TEST_UART_PREAMBLE;
+  out[0] = (uint8_t)TEST_UART_SOF;
   memcpy(&out[1], &hdr, SLI_CPC_HEADER_SIZE);
 
   header_crc = sli_cpc_crc(&out[1], SLI_CPC_HEADER_SIZE);
@@ -358,7 +384,20 @@ size_t uart_inject_frame(uint8_t *wire, size_t wire_capacity, cpc_frame_expect_t
 
 void uart_inject_bytes_at(unsigned int lineno, const uint8_t *data, size_t length)
 {
-  loopback_inject_bytes_at(lineno, data, length);
+  if (length == 0U) {
+    return;
+  }
+
+  UNITY_TEST_ASSERT_NOT_NULL(data, lineno, "uart_inject_bytes: data is NULL");
+
+  for (size_t i = 0; i < length; i++) {
+    loopback_inject_bytes_at(lineno, &data[i], 1U);
+  }
+
+  // CPC-3552: Renode somehow needs a delay for the bytes to be injected and received by the driver.
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  osDelay(1);
+#endif
 }
 
 void uart_inject_corrupt_then_valid(cpc_frame_expect_t frame, uart_wire_corrupt_fn corrupt)

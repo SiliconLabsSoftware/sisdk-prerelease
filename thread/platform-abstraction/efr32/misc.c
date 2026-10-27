@@ -135,10 +135,18 @@ otPlatResetReason otPlatGetResetReason(otInstance *aInstance)
     /* clang-format off */
     else if ((sResetCause & EMU_RSTCAUSE_AVDDBOD)
              || (sResetCause & EMU_RSTCAUSE_DECBOD)
-             #if defined(EMU_RSTCAUSE_DVDDBOD)
+#if defined(EMU_RSTCAUSE_DVDDBOD)
              || (sResetCause & EMU_RSTCAUSE_DVDDBOD)
+#endif
+#if defined(EMU_RSTCAUSE_DVDDLEBOD)
              || (sResetCause & EMU_RSTCAUSE_DVDDLEBOD)
-             #endif
+#endif
+#if defined(EMU_RSTCAUSE_DHVDDBOD)
+             || (sResetCause & EMU_RSTCAUSE_DHVDDBOD)
+#endif
+#if defined(EMU_RSTCAUSE_DHVDDLEBOD)
+             || (sResetCause & EMU_RSTCAUSE_DHVDDLEBOD)
+#endif
              || (sResetCause & EMU_RSTCAUSE_EM4))
     /* clang-format on */
     {
@@ -169,9 +177,18 @@ otPlatResetReason otPlatGetResetReason(otInstance *aInstance)
     /* clang-format off */
     else if ((sResetCause & RMU_RSTCAUSE_AVDDBOD)
              || (sResetCause & RMU_RSTCAUSE_DECBOD)
-             #if defined(EMU_RSTCAUSE_DVDDBOD)
+#if defined(RMU_RSTCAUSE_DVDDBOD)
              || (sResetCause & RMU_RSTCAUSE_DVDDBOD)
-             #endif
+#endif
+#if defined(RMU_RSTCAUSE_DVDDLEBOD)
+             || (sResetCause & RMU_RSTCAUSE_DVDDLEBOD)
+#endif
+#if defined(RMU_RSTCAUSE_DHVDDBOD)
+             || (sResetCause & RMU_RSTCAUSE_DHVDDBOD)
+#endif
+#if defined(RMU_RSTCAUSE_DHVDDLEBOD)
+             || (sResetCause & RMU_RSTCAUSE_DHVDDLEBOD)
+#endif
              || (sResetCause & RMU_RSTCAUSE_EM4RST))
     /* clang-format on */
     {

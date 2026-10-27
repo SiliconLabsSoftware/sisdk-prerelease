@@ -10,10 +10,14 @@ metadata:
 root_path: cpc_ng/port/silabs
 instantiable:
   prefix: instance
+include:
+- path: inc
+  file_list:
+  - path: sl_cpc_drv_spi_peripheral_usart.h
 source:
 - path: src/sl_cpc_drv_spi_peripheral_usart.c
 config_file:
-- path: config/series2/sl_cpc_drv_spi_peripheral_usart_{{instance}}_config.h
+- path: config/sl_cpc_drv_spi_peripheral_usart_{{instance}}_config.h
   file_id: cpc_ng_drv_spi_peripheral_usart_config
 provides:
 - name: cpc_ng_drv_spi_peripheral_usart_secondary

@@ -76,7 +76,7 @@ extern "C" {
  * @ref sl_gatt_client_manager_register_profile, discovery can start
  * automatically on @c sl_bt_evt_connection_opened when
  * @ref SL_GATT_CLIENT_MANAGER_AUTO_START_DISCOVERY is set, or be driven with
- * @ref sl_gatt_client_manager_start_discovery or 
+ * @ref sl_gatt_client_manager_start_discovery or
  * @ref sl_gatt_client_manager_discover_profile (one profile at a time).
  *
  * Each pair is resolved with primary-service then characteristic discovery.
@@ -89,7 +89,7 @@ extern "C" {
  *
  * A peer table may contain the same service more than once. The component
  * keeps **one instance per pair**, the matching service with the **lowest
- * handle**, then its characteristic. @ref sl_gatt_client_manager_discovery_complete_evt_t::match_count 
+ * handle**, then its characteristic. @ref sl_gatt_client_manager_discovery_complete_evt_t::match_count
  * reports how many service instances were seen so the application can detect ambiguity.
  *
  * @subsection gcm_handles Handle ownership
@@ -126,7 +126,7 @@ extern "C" {
  * @ref SL_GATT_CLIENT_MANAGER_EVENT_DISCOVERY_COMPLETE. Waiting only for that
  * event is therefore safe. The exceptions never start a profile:
  * @ref sl_gatt_client_manager_force_discovery aborting an in-flight run, and
- * errors raised before any profile is selected, which are reported through 
+ * errors raised before any profile is selected, which are reported through
  * @ref SL_GATT_CLIENT_MANAGER_EVENT_ERROR.
  *
  * @subsection gcm_cache Optional RAM cache
@@ -184,7 +184,7 @@ extern "C" {
  *
  * - **Duplicate service UUIDs in a profile.** Listing the same service UUID
  *   on several pairs still consumes one pair slot each in the profile table,
- *   per-connection results, and cache. Identical services should be listed 
+ *   per-connection results, and cache. Identical services should be listed
  *   consecutively to allow reuse of previously discovered handles.
  * - **No bonding or identity.** The component does not look at whether the
  *   connection is bonded, nor does it key the cache or Service Changed /

@@ -26,7 +26,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OT_PSA_CRYPTO_CONFIG_H
+// Spans multiple lines to avoid being processed by unifdef
+#ifndef \
+    OT_PSA_CRYPTO_CONFIG_H
 #define OT_PSA_CRYPTO_CONFIG_H
 
 #include "openthread-core-config.h"

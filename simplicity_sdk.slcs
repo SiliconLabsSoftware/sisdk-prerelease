@@ -7,13 +7,13 @@ supplier: Silicon Laboratories, Inc.
 component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
-- path: bluetooth_le/component
 - path: bluetooth_common/component
+- path: bluetooth_le/component
 - path: bluetooth_le_host/component
 - path: bluetooth_mesh_stack/component
+- path: bluetooth_mesh_srtest/component
 - path: bluetooth_mesh/component
 - path: bluetooth_le_controller/component
-- path: bluetooth_mesh_srtest/component
 - path: bluetooth_le_internal/component
 - path: bluetooth_apploader/component
 - path: boards/hardware/board/config/component
@@ -106,8 +106,8 @@ component_path:
 - path: rail/component
 - path: rail_library_internal/component/rail_library_internal
 - path: rail_library_chips_internal/component/rail_library_chips_internal
-- path: rail_library/component/rail_library
 - path: rail_library_alpha_chips/component/rail_library_alpha_chips
+- path: rail_library/component/rail_library
 - path: realtime_locationing/component
 - path: rtos_benchmark_internal/component
 - path: rv2_framework_internal/component
@@ -116,15 +116,14 @@ component_path:
 - path: security_libcryptosoc/component
 - path: segger/component
 - path: network_stack/silabs_lwip/component
-- path: thread/component
 - path: thread_internal/component/internal
+- path: thread/component
 - path: unity_test_framework/component
 - path: unity_internal/component
 - path: usb_internal/protocol/usb/component
 - path: usb/protocol/usb/component
 - path: wisun/component
 - path: wisun/component/middleware
-- path: zigbee_smart_energy/component/zigbee_smart_energy
 - path: zigbee_internal/platform/radio/mac/component/zigbee_internal
 - path: zigbee_internal/platform/radio/rail_lib/plugin/component/zigbee_internal
 - path: zigbee_internal/component/zigbee_internal
@@ -139,6 +138,7 @@ component_path:
 - path: zigbee/util/silicon_labs/silabs_core/component/zigbee
 - path: zigbee/app/framework/component/zigbee
 - path: zigbee/platform/service/component/zigbee
+- path: zigbee_smart_energy/component/zigbee_smart_energy
 - path: zwave/component
 - path: zwave/component/CommandClasses
 - path: zwave/component-internal
@@ -151,10 +151,10 @@ documentation:
   version: 1.0.0
 - docset: amazon_expresslink_sdk_internal
   version: 1.0.0
-- docset: aws_sdk
-  version: 3.1.0
 - docset: aws_sdk_202412_00
   version: "202412.0.0"
+- docset: aws_sdk
+  version: 3.1.0
 - docset: azure_freertos_middleware
   version: 1.1.0
 - docset: btmesh-service-api
@@ -205,10 +205,10 @@ documentation:
   version: 1.8.0
 - docset: wifi
   version: 4.2.0
-- docset: wifi_internal
-  version: 4.2.0
 - docset: wifi_siwx353
   version: 0.1.0
+- docset: wifi_internal
+  version: 4.2.0
 - docset: wiseconnect_common
   version: 4.2.0
 - docset: zigbee

@@ -49,12 +49,12 @@ Example — UART VCOM on `BRD4186C`:
 mkdir -p build/secondary && cd build/secondary
 $(slt where slc-cli)/slc generate ../../cpc_echo_secondary.slcp -d . \
   --slconf ../../user.slconf \
-  --with brd4186c,cpc_ng_drv_uart_secondary:vcom
+  --with brd4186c,cpc_ng_drv_uart_eusart_secondary:vcom
 
 mkdir -p build/primary && cd build/primary
 $(slt where slc-cli)/slc generate ../../cpc_echo_primary.slcp -d . \
   --slconf ../../user.slconf \
-  --with brd4186c,cpc_ng_drv_uart_primary:vcom
+  --with brd4186c,cpc_ng_drv_uart_eusart_primary:vcom
 ```
 
 Example — SDIO on `BRD6360A`:

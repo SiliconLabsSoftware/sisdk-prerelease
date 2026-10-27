@@ -384,6 +384,7 @@ static otError skipRxPacketLengthBytes(sl_rail_rx_packet_info_t *pPacketInfo);
 #define FLAG_CURRENT_TX_USE_CSMA 0x00000010
 #define FLAG_SCHEDULED_RX_PENDING 0x00000020
 #define FLAG_SCHEDULED_TX_PENDING 0x00000040
+#define FLAG_SLEEP_PENDING 0x00000080
 
 // Internal state variables
 static volatile uint32_t sMiscRadioState = 0;
@@ -519,6 +520,16 @@ bool sli_ot_radio_state_is_tx_ack_ongoing(void)
 void sli_ot_radio_state_set_tx_ack_ongoing(bool aOngoing)
 {
     setInternalFlag(FLAG_ONGOING_TX_ACK, aOngoing);
+}
+
+bool sli_ot_radio_state_is_sleep_pending(void)
+{
+    return getInternalFlag(FLAG_SLEEP_PENDING);
+}
+
+void sli_ot_radio_state_set_sleep_pending(bool aPending)
+{
+    setInternalFlag(FLAG_SLEEP_PENDING, aPending);
 }
 
 bool sli_ot_radio_state_is_using_csma(void)
@@ -1453,8 +1464,11 @@ otError otPlatRadioReceive(otInstance *aInstance, uint8_t aChannel)
     int8_t           txPower;
 
     otEXPECT_ACTION(sl_ot_rtos_task_can_access_pal(), error = OT_ERROR_REJECTED);
+    otEXPECT_ACTION(sli_ot_radio_state_is_initialized(), error = OT_ERROR_INVALID_STATE);
     otEXPECT_ACTION(!sli_ot_radio_state_is_tx_data_ongoing() && !sli_ot_energy_scan_is_blocking_receive(aInstance),
                     error = OT_ERROR_INVALID_STATE);
+
+    sli_ot_radio_state_set_sleep_pending(false);
 
 #if (FAST_CHANNEL_SWITCHING_SUPPORT && OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE)
     sli_ot_radio_channel_switching_configure(aInstance, aChannel);
@@ -1478,8 +1492,12 @@ exit:
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 otError otPlatRadioReceiveAt(otInstance *aInstance, uint8_t aChannel, otRadioTime32 aStart, uint32_t aDuration)
 {
-    otError error   = OT_ERROR_NONE;
-    int8_t  txPower = sl_get_tx_power_for_current_channel(aInstance);
+    otError error = OT_ERROR_NONE;
+    int8_t  txPower;
+
+    otEXPECT_ACTION(sli_ot_radio_state_is_initialized(), error = OT_ERROR_INVALID_STATE);
+
+    txPower = sl_get_tx_power_for_current_channel(aInstance);
 
     // We can only have one schedule request i.e. either Rx or Tx as they use the
     // same RAIL resources.
@@ -1514,6 +1532,8 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
     instanceIndex_t txBufIndex = sli_ot_radio_instance_get_index(aInstance);
 
     otEXPECT_ACTION(sl_ot_rtos_task_can_access_pal(), error = OT_ERROR_REJECTED);
+
+    sli_ot_radio_state_set_sleep_pending(false);
 
 #if OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE
     // Accept GP packets even if radio is not in required state.
@@ -1760,7 +1780,24 @@ void txCurrentPacket(void)
             // time needed for CSMA/CA
             txSchedulerInfo.transaction_time += RADIO_TIMING_CSMA_OVERHEAD_US;
 #endif
-            csmaConfig.csma_tries        = sCurrentTxPacket->frame.mInfo.mTxInfo.mMaxCsmaBackoffs;
+            // Translate OpenThread's "mMaxCsmaBackoffs" to RAIL's "csma_tries":
+            //  - OT:   mMaxCsmaBackoffs=0 with mCsmaCaEnabled=true means "do a single
+            //          CCA before TX, no backoffs; fail with CCA error if channel busy".
+            //  - RAIL: csma_tries=0 skips CSMA entirely (immediate TX), and csma_tries > 15
+            //          (SL_RAIL_MAX_LBT_TRIES) is disallowed.
+            uint8_t requestedBackoffs = sCurrentTxPacket->frame.mInfo.mTxInfo.mMaxCsmaBackoffs;
+
+            if (requestedBackoffs == 0)
+            {
+                csmaConfig = (sl_rail_csma_config_t)SL_RAIL_CSMA_CONFIG_SINGLE_CCA;
+            }
+            else
+            {
+                // Reset to the 802.15.4 preset
+                csmaConfig = (sl_rail_csma_config_t)SL_RAIL_CSMA_CONFIG_802_15_4_2003_2P4_GHZ_OQPSK_CSMA;
+                csmaConfig.csma_tries =
+                    (requestedBackoffs < SL_RAIL_MAX_LBT_TRIES) ? requestedBackoffs + 1 : SL_RAIL_MAX_LBT_TRIES;
+            }
             csmaConfig.cca_threshold_dbm = sli_ot_radio_interface_get_cca_threshold();
 
             status = sli_ot_radio_interface_rail_start_cca_csma_tx(sCurrentTxPacket->frame.mChannel,
@@ -2829,6 +2866,14 @@ void efr32RadioProcess(otInstance *aInstance)
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
     sli_ot_radio_instance_process_commands();
 #endif // OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
+
+    // Complete a sleep deferred by otPlatRadioSleep. processRxPackets() ran
+    // first, so otPlatRadioReceiveDone was delivered before the transition.
+    if (sli_ot_radio_state_is_sleep_pending() && !sli_ot_radio_state_is_receiving_frame()
+        && !sli_ot_radio_state_is_tx_ack_ongoing())
+    {
+        sli_ot_radio_interface_complete_sleep();
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -3072,3 +3117,30 @@ SL_WEAK void emRadioHoldOffIsr(bool active)
 } // extern "C"
 
 #endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+
+#ifdef TESTING
+// The static sTransmitBuffer / sCurrentTxPacket are not reachable from
+// unit tests, so expose a minimal shim that lets a test seed a prepared
+// otRadioFrame and point sCurrentTxPacket at it before invoking
+// txCurrentPacket() directly.
+extern "C" otRadioFrame *sli_ot_test_radio_get_tx_buffer(uint8_t aIndex)
+{
+    if (aIndex >= RADIO_REQUEST_BUFFER_COUNT)
+    {
+        return nullptr;
+    }
+    sTransmitBuffer[aIndex].frame.mPsdu = sTransmitPsdu[aIndex];
+    return &sTransmitBuffer[aIndex].frame;
+}
+
+extern "C" void sli_ot_test_radio_set_current_tx_packet(uint8_t aIndex, otInstance *aInstance)
+{
+    if (aIndex >= RADIO_REQUEST_BUFFER_COUNT)
+    {
+        sCurrentTxPacket = nullptr;
+        return;
+    }
+    sTransmitBuffer[aIndex].instance = aInstance;
+    sCurrentTxPacket                 = &sTransmitBuffer[aIndex];
+}
+#endif // TESTING

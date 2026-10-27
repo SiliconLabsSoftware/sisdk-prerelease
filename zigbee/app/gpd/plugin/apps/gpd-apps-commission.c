@@ -15,6 +15,17 @@
  *
  ******************************************************************************/
 #include "gpd-components-common.h"
+
+static uint8_t gpdCommissioningFailureCount = 0;
+
+#define GPD_IC_FALLBACK_THRESHOLD  3U
+
+typedef enum {
+  GPD_COM_KEY_MODE_DEFAULT_TCLK = 0,
+  GPD_COM_KEY_MODE_IC_TCLK      = 1,
+} gpd_commissioning_key_mode_t;
+
+static gpd_commissioning_key_mode_t gpdCommissioningKeyMode = GPD_COM_KEY_MODE_DEFAULT_TCLK;
 #include "gpd-apps-cb.h"
 
 // Global variable to hold the next RX channel
@@ -511,6 +522,13 @@ void sl_zigbee_gpd_af_plugin_commissioning_reply_cb(uint8_t length,
                                                            length,
                                                            commReplyPayload)) {
     sl_zigbee_gpd_set_state(SL_ZIGBEE_GPD_APP_STATE_COMMISSIONING_REPLY_RECEIVED);
+    gpdCommissioningFailureCount = 0;
+  } else if (gpdCommissioningKeyMode == GPD_COM_KEY_MODE_DEFAULT_TCLK) {
+    gpdCommissioningFailureCount++;
+    if (gpdCommissioningFailureCount >= GPD_IC_FALLBACK_THRESHOLD) {
+      gpdCommissioningKeyMode = GPD_COM_KEY_MODE_IC_TCLK;
+      gpdCommissioningFailureCount = 0;
+    }
   }
 }
 

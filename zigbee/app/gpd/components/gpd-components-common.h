@@ -76,7 +76,10 @@
 #define SL_ZIGBEE_GPD_SECURITY_KEY_TYPE_GROUP         0x02   // ZGP group key
 #define SL_ZIGBEE_GPD_SECURITY_KEY_TYPE_GROUP_DERIVED 0x03   // ZGPD Derived group key
 #define SL_ZIGBEE_GPD_SECURITY_KEY_TYPE_OOB           0x04   // (individual) OOB ZGPD Key
+#define SL_ZIGBEE_GPD_SECURITY_KEY_TYPE_ELSEWHERE     0x05   // Key Type Elsewhere (GP v1.1.3)
+#define SL_ZIGBEE_GPD_SECURITY_KEY_TYPE_OOB_V113      0x06   // Out-of-Band GPD Key (GP v1.1.3)
 #define SL_ZIGBEE_GPD_SECURITY_KEY_TYPE_DERIVED       0x07   // derived individual ZGPD key
+#define SL_ZIGBEE_GPD_SECURITY_KEY_SIZE               16     // AES-128 key, same length as SL_ZIGBEE_ENCRYPTION_KEY_SIZE
 
 //GPD Security Key Indication Flag
 #define SL_ZIGBEE_GPD_SECURITY_KEY_INDICATION_SHARED     0x00
@@ -404,6 +407,8 @@ void sl_zigbee_gpd_copy_from_shadow(sl_zigbee_gpd_t_t * gpd);
 void sl_zigbee_gpd_store_sec_data_to_nv(sl_zigbee_gpd_t_t * gpd);
 void sl_zigbee_gpd_store_sec_data_from_nv(sl_zigbee_gpd_t_t * gpd);
 void sl_zigbee_gpd_load_sec_data_from_nv(sl_zigbee_gpd_t_t * gpd);
+
+void sl_zigbee_gpd_set_ic_derived_tc_link_key(const uint8_t *key);
 
 //Incomming Command and Message Handler
 void sl_zigbee_gpd_incoming_command_handler(uint8_t *gpdCommandBuffer,

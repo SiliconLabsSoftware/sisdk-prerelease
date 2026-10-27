@@ -38,7 +38,6 @@
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "app.h"
-#include "app_custom_callback.h"
 #include "sl_wisun_event_mgr.h"
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_app_core_config.h"
@@ -71,9 +70,6 @@ void app_init(void)
     .priority   = osPriorityNormal
   };
 
-  // Register callbacks
-  app_wisun_em_custom_callback_register(SL_WISUN_BR_MSG_STOPPED_IND_ID,
-                                        app_custom_br_stopped_callback);
 
   osThreadId_t app_thr_id = osThreadNew(app_task,
                                         NULL,

@@ -1,5 +1,5 @@
 /**
- * @file
+ * @file app.c
  * @brief CPC Echo Example — Primary (Host MCU).
  *
  * Connects to endpoint 90 on the secondary, then ping-pongs a fixed payload for

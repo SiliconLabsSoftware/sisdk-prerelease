@@ -19,6 +19,7 @@ source:
 - path: src/unit/frame.c
 - path: src/unit/frame.h
 - path: src/unit/multi_bus.c
+- path: src/unit/pm_runtime.c
 - path: src/unit/reset.c
 - path: src/unit/scatter_gather.c
 - path: src/unit/syn.c
@@ -30,6 +31,7 @@ provides:
 requires:
 - name: cpc_ng
 - name: cpc_ng_drv_mock
+- name: cpc_ng_pm_runtime
 - name: cpc_ng_primary
 - name: cpc_ng_secondary
 - name: iostream
@@ -56,6 +58,8 @@ template_contribution:
   value: cpc_ep_ref_cnt
 - name: unity_test_group
   value: cpc_multi_bus
+- name: unity_test_group
+  value: cpc_pm_runtime
 - name: unity_test_group
   value: cpc_reset
 - name: unity_test_group

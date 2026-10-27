@@ -14,6 +14,7 @@ source:
 - path: ../../src/unit/unity_assert.c
 - path: ../../src/unit/unity_assert.h
 - path: src/unit/uart/crc.c
+- path: src/unit/uart/flow_control.c
 - path: src/unit/uart/harness/loopback.c
 - path: src/unit/uart/harness/loopback.h
 - path: src/unit/uart/harness/uart.c
@@ -33,6 +34,8 @@ define:
 template_contribution:
 - name: unity_test_group
   value: cpc_drv_uart_crc
+- name: unity_test_group
+  value: cpc_drv_uart_flow_control
 - name: unity_test_group
   value: cpc_drv_uart_resync
 toolchain_settings:

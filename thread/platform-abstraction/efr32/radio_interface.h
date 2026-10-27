@@ -203,6 +203,15 @@ void sli_ot_radio_interface_init_config(void);
 void sli_ot_radio_interface_deinit_config(void);
 
 /**
+ * Complete the transition to Sleep.
+ *
+ * Clears the deferred-sleep flag and either yields or idles the radio
+ * depending on whether a scheduled RX window is pending. Shared by
+ * otPlatRadioSleep() and the deferred-sleep consumer in efr32RadioProcess().
+ */
+void sli_ot_radio_interface_complete_sleep(void);
+
+/**
  * Configure CCA mode in RAIL
  *
  * @param[in] aMode  CCA mode

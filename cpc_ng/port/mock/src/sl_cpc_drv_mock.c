@@ -1,9 +1,34 @@
 /***************************************************************************/ /**
- * @file
+ * @file sl_cpc_drv_mock.c
  * @brief Mock CPC driver used by the CPC unit tests.
  *
  * Implements `sli_cpc_drv_ops_t` against an in-memory pair of frame
  * queues so that tests can drive the CPC core without any real PHY.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
  ******************************************************************************/
 
 #include <stddef.h>
@@ -367,7 +392,7 @@ void mock_cpc_drv_push_rx_frame(sl_cpc_drv_mock_t *drv, sl_cpc_frame_t *frame)
 {
   MCU_ATOMIC_SECTION(sli_cpc_frame_list_push_back(&drv->rx_pending_queue, frame);)
 
-  sli_cpc_bus_signal_event(&drv->bus, SLI_CPC_SIGNAL_RX);
+  sli_cpc_bus_signal_event(&drv->bus);
 }
 
 // Range-check a single header field against `[0, max]` and fail the current

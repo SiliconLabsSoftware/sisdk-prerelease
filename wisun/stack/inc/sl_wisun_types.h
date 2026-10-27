@@ -359,6 +359,13 @@ typedef enum {
   SL_WISUN_DC_CLIENT_STATE_SCAN_COMPLETE = 4,
 } sl_wisun_dc_client_state_t;
 
+/// Effective FFN local power-saving activation state.
+typedef enum {
+  SL_WISUN_FFN_POWER_SAVING_DISABLED = 0,
+  SL_WISUN_FFN_POWER_SAVING_SET,
+  SL_WISUN_FFN_POWER_SAVING_ACTIVE,
+} sl_wisun_ffn_power_saving_activation_state_t;
+
 /// Wi-SUN Message API common header
 SL_PACK_START(1)
 typedef struct {

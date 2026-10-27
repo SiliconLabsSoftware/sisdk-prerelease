@@ -2516,17 +2516,29 @@ static sl_status_t close_connection(esl_lib_connection_t *conn)
   (void)app_timer_stop(&conn->timer);
 
   if (conn->last_error != SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_BY_LOCAL_HOST) {
+    sl_status_t timer_sc;
+
     sc = sl_bt_connection_close(conn->connection_handle);
-    // Invalidate to avoid later possible redundant close calls that would fail
-    conn->last_error = SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_BY_LOCAL_HOST;
     // Prevent executing any future commands until the connection is closed
     conn->command_complete = false;
 
-    (void)app_timer_start(&conn->timer,
-                          CLOSE_TIMEOUT_MS,
-                          connection_timeout,
-                          conn,
-                          false);
+    timer_sc = app_timer_start(&conn->timer,
+                               CLOSE_TIMEOUT_MS,
+                               connection_timeout,
+                               conn,
+                               false);
+    if (timer_sc != SL_STATUS_OK) {
+      // No close-timeout will ever expire. Caller must release the object.
+      esl_lib_log_connection_error(CONN_FMT "Close timeout start failed, connection handle = %u, sc = 0x%04x" APP_LOG_NL,
+                                   ESL_LIB_LOG_PTR(conn),
+                                   conn->connection_handle,
+                                   timer_sc);
+      return timer_sc;
+    }
+    // Armed close timeout owns the object. Mark the close only after that,
+    // including when sl_bt_connection_close() itself failed: the link may
+    // still be half open until this timeout or the closed event.
+    conn->last_error = SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_BY_LOCAL_HOST;
   }
 
   return sc;
@@ -2861,14 +2873,19 @@ static void connection_timeout(app_timer_t *timer,
                                        ESL_LIB_LOG_PTR(conn),
                                        conn->connection_handle);
       }
-      // Try to gentle close the connection in the first place
+      // Try to gentle close the connection in the first place.
       sc = close_connection(conn);
       if (sc != SL_STATUS_OK) {
-        status = ESL_LIB_STATUS_CONN_CLOSE_FAILED;
         esl_lib_log_connection_error(CONN_FMT "Connection close request failed in timeout handler, connection handle = %u, sc = 0x%04x" APP_LOG_NL,
                                      ESL_LIB_LOG_PTR(conn),
                                      conn->connection_handle,
                                      sc);
+        // Release only when the close timeout could not be armed. Otherwise that
+        // timeout (last_error already local-terminate) removes the object if the
+        // closed event never arrives.
+        if (conn->last_error != SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_BY_LOCAL_HOST) {
+          status = ESL_LIB_STATUS_CONN_CLOSE_FAILED;
+        }
       }
     }
 

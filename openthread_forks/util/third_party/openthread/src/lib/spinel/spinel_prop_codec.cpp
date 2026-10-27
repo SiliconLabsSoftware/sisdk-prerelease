@@ -474,6 +474,12 @@ otError DecodeDnssdTxtResult(Decoder              &aDecoder,
     SuccessOrExit(error = aDecoder.ReadUtf8(aTxtResult.mServiceInstance));
     SuccessOrExit(error = aDecoder.ReadUtf8(aTxtResult.mServiceType));
     SuccessOrExit(error = aDecoder.ReadDataWithLen(aTxtResult.mTxtData, aTxtResult.mTxtDataLength));
+
+    if (aTxtResult.mTxtDataLength == 0)
+    {
+        aTxtResult.mTxtData = nullptr;
+    }
+
     SuccessOrExit(error = aDecoder.ReadUint32(aTxtResult.mTtl));
     SuccessOrExit(error = aDecoder.ReadUint32(aTxtResult.mInfraIfIndex));
     SuccessOrExit(error = aDecoder.ReadData(aCallbackData, aCallbackDataLen));
@@ -491,12 +497,15 @@ otError EncodeDnssdAddressResult(Encoder                        &aEncoder,
 
     SuccessOrExit(error = aEncoder.WriteUtf8(aAddressResult.mHostName));
     SuccessOrExit(error = aEncoder.WriteUint32(aAddressResult.mInfraIfIndex));
-    SuccessOrExit(error = aEncoder.WriteUint16(aAddressResult.mAddressesLength));
+    SuccessOrExit(error = aEncoder.OpenStruct());
+
     for (uint16_t i = 0; i < aAddressResult.mAddressesLength; i++)
     {
         SuccessOrExit(error = aEncoder.WriteIp6Address(aAddressResult.mAddresses[i].mAddress));
         SuccessOrExit(error = aEncoder.WriteUint32(aAddressResult.mAddresses[i].mTtl));
     }
+
+    SuccessOrExit(error = aEncoder.CloseStruct());
     SuccessOrExit(error = aEncoder.WriteData(aCallbackData, aCallbackDataLen));
 
 exit:
@@ -521,25 +530,27 @@ exit:
 otError DecodeDnssdAddressResult(Decoder                  &aDecoder,
                                  otPlatDnssdAddressResult &aAddressResult,
                                  otPlatDnssdAddressAndTtl *aAddressArray,
-                                 uint16_t                  aMaxAddresses,
+                                 uint16_t                  aAddressArraySize,
                                  const uint8_t           *&aCallbackData,
                                  uint16_t                 &aCallbackDataLen)
 {
     otError  error = OT_ERROR_NONE;
-    uint16_t count;
+    uint16_t count = 0;
 
     SuccessOrExit(error = aDecoder.ReadUtf8(aAddressResult.mHostName));
     SuccessOrExit(error = aDecoder.ReadUint32(aAddressResult.mInfraIfIndex));
-    SuccessOrExit(error = aDecoder.ReadUint16(count));
-    VerifyOrExit(count <= aMaxAddresses, error = OT_ERROR_PARSE);
+    SuccessOrExit(error = aDecoder.OpenStruct());
 
-    for (uint16_t i = 0; i < count; i++)
+    while ((count < aAddressArraySize) && !aDecoder.IsAllReadInStruct())
     {
-        SuccessOrExit(error = aDecoder.ReadIp6Address(aAddressArray[i].mAddress));
-        SuccessOrExit(error = aDecoder.ReadUint32(aAddressArray[i].mTtl));
+        SuccessOrExit(error = aDecoder.ReadIp6Address(aAddressArray[count].mAddress));
+        SuccessOrExit(error = aDecoder.ReadUint32(aAddressArray[count].mTtl));
+        count++;
     }
 
-    aAddressResult.mAddresses       = aAddressArray;
+    SuccessOrExit(error = aDecoder.CloseStruct());
+
+    aAddressResult.mAddresses       = (count > 0) ? aAddressArray : nullptr;
     aAddressResult.mAddressesLength = count;
     SuccessOrExit(error = aDecoder.ReadData(aCallbackData, aCallbackDataLen));
 

@@ -625,6 +625,7 @@
 -Xlinker --wrap=otIp4CidrFromString
 -Xlinker --wrap=otIp4FromIp4MappedIp6Address
 -Xlinker --wrap=otNat64GetCidr
+-Xlinker --wrap=otNat64GetIp6Prefix
 -Xlinker --wrap=otNat64GetNextAddressMapping
 -Xlinker --wrap=otNat64Send
 -Xlinker --wrap=otNat64SetIp4Cidr
@@ -733,6 +734,7 @@
 -Xlinker --wrap=otSrpClientGetDomainName
 -Xlinker --wrap=otSrpClientItemStateToString
 -Xlinker --wrap=otSrpClientGetServerAddress
+-Xlinker --wrap=otSrpClientGetCounters
 -Xlinker --wrap=otSrpClientGetHostInfo
 -Xlinker --wrap=otSrpClientGetServices
 -Xlinker --wrap=otSrpClientAddService
@@ -750,6 +752,7 @@
 -Xlinker --wrap=otSrpClientClearHostAndServices
 -Xlinker --wrap=otSrpClientDisableAutoStartMode
 -Xlinker --wrap=otSrpClientEnableAutoStartMode
+-Xlinker --wrap=otSrpClientResetCounters
 -Xlinker --wrap=otSrpClientSetCallback
 -Xlinker --wrap=otSrpClientSetKeyLeaseInterval
 -Xlinker --wrap=otSrpClientSetLeaseInterval

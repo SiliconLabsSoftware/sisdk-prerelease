@@ -105,6 +105,8 @@ typedef enum {
   SL_WISUN_MSG_FB_READY_IND_ID                    = 0x9C,
   /// This event is sent when an LXPM neighbor is updated.
   SL_WISUN_MSG_LXPM_NEIGHBOR_UPDATED_IND_ID       = 0x9D,
+  /// FFN local power-saving activation state changed.
+  SL_WISUN_MSG_FFN_POWER_SAVING_STATE_IND_ID      = 0x9E,
 } sl_wisun_msg_ind_id_t;
 
 /**************************************************************************//**
@@ -910,6 +912,31 @@ SL_PACK_END()
 
 /** @} (end SL_WISUN_MSG_LXPM_NEIGHBOR_UPDATED_IND_ID) */
 
+/**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_FFN_POWER_SAVING_STATE_IND sl_wisun_msg_ffn_power_saving_state_ind
+ * @{
+ *****************************************************************************/
+
+/// Indication message body
+SL_PACK_START(1)
+typedef struct {
+  /// @ref sl_wisun_ffn_power_saving_activation_state_t
+  uint8_t activation_state;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_ffn_power_saving_state_ind_body_t;
+SL_PACK_END()
+
+/// Indication message
+SL_PACK_START(1)
+typedef struct {
+  /// Common message header
+  sl_wisun_msg_header_t header;
+  /// Indication message body
+  sl_wisun_msg_ffn_power_saving_state_ind_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_ffn_power_saving_state_ind_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_FFN_POWER_SAVING_STATE_IND) */
+
 /// @brief Wi-SUN event definitions
 /// @details This structure contains a Wi-SUN API event and its associated data.
 SL_PACK_START(1)
@@ -981,6 +1008,8 @@ typedef struct {
     sl_wisun_msg_fb_ready_ind_body_t fb_ready;
     /// #SL_WISUN_MSG_LXPM_NEIGHBOR_UPDATED_IND_ID event data
     sl_wisun_msg_lxpm_neighbor_updated_ind_body_t lxpm_neighbor_updated;
+    /// #SL_WISUN_MSG_FFN_POWER_SAVING_STATE_IND_ID event data
+    sl_wisun_msg_ffn_power_saving_state_ind_body_t ffn_power_saving_state;
   } evt;
 } SL_ATTRIBUTE_PACKED sl_wisun_evt_t;
 SL_PACK_END()

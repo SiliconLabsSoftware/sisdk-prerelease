@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sl_cpc_drv_spi_peripheral_eusart.c
  * @brief CPC SPI peripheral driver — EUSART hardware init.
  *******************************************************************************
  * # License

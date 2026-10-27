@@ -72,6 +72,7 @@ static throughput_t ui_state;
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 
+#if defined(THROUGHPUT_UI_LOG_ENABLE) && THROUGHPUT_UI_LOG_ENABLE
 // Function to a row on UI
 static void refresh_ui(uint8_t refresh_row)
 {
@@ -217,6 +218,7 @@ static void refresh_ui(uint8_t refresh_row)
   }
   UI_PRINTBOX(APP_LOG_NEW_LINE);
 }
+#endif // THROUGHPUT_UI_LOG_ENABLE
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************

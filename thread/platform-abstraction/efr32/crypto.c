@@ -567,8 +567,8 @@ otError otPlatCryptoAesCcmProcessOneShot(bool                            aEncryp
     bool         contiguous;
     uint8_t      nonce[OT_CCM_PAL_MAX_NONCE_SIZE];
 
-    otEXPECT_ACTION(aConfig != NULL && aConfig->mNonce != NULL && aHeader != NULL && aData != NULL,
-                    error = OT_ERROR_INVALID_ARGS);
+    otEXPECT_ACTION(aConfig != NULL && aConfig->mNonce != NULL && aData != NULL, error = OT_ERROR_INVALID_ARGS);
+    otEXPECT_ACTION(aConfig->mHeaderLength == 0 || aHeader != NULL, error = OT_ERROR_INVALID_ARGS);
     otEXPECT_ACTION(aConfig->mKey.mKey == NULL, error = OT_ERROR_INVALID_ARGS);
     otEXPECT_ACTION(aConfig->mNonceLength > 0 && aConfig->mNonceLength <= sizeof(nonce), error = OT_ERROR_INVALID_ARGS);
 
@@ -630,7 +630,10 @@ otError otPlatCryptoAesCcmProcessOneShot(bool                            aEncryp
 
         otEXPECT_ACTION(totalLength + aConfig->mTagLength <= sizeof(tmpBuf), error = OT_ERROR_NO_BUFS);
 
-        memcpy(tmpBuf, aHeader, aConfig->mHeaderLength);
+        if (aConfig->mHeaderLength > 0)
+        {
+            memcpy(tmpBuf, aHeader, aConfig->mHeaderLength);
+        }
         memcpy(tmpBuf + aConfig->mHeaderLength, aData, copyPayloadSize);
 
         status = sl_sec_man_aes_ccm_crypt(aConfig->mKey.mKeyRef,

@@ -2079,14 +2079,12 @@ sl_status_t sli_si91x_send_socket_data(sli_si91x_socket_t *si91x_socket,
                                               SLI_BUFFER_MANAGER_ALLOCATION_TYPE_DEDICATED,
                                               SLI_WIFI_ALLOCATE_COMMAND_BUFFER_WAIT_TIME,
                                               (sli_buffer_t)&packet);
-  // Socket send maps TX-pool exhaustion (SL_STATUS_ALLOCATION_FAILED / 0x19) to
-  // ENOBUFS ("try again later" in the BSD send() docs). Return that status
-  // without an ERROR-tagged PRINT_ERROR_LOGS line. Other allocate failures
-  // still go through VERIFY_STATUS_AND_RETURN.
-  if (status == SL_STATUS_ALLOCATION_FAILED) {
+  // Socket send maps TX-pool exhaustion to ENOBUFS ("try again later" in the BSD
+  // send() docs). Return without ERROR-tagging so PRINT_ERROR_LOGS stays quiet
+  // on transient backpressure; BSD maps non-IN_PROGRESS to ENOBUFS.
+  if (status != SL_STATUS_OK) {
     return status;
   }
-  VERIFY_STATUS_AND_RETURN(status);
 
   // Enter atomic section to safely access the queue
   CORE_irqState_t state = CORE_EnterAtomic();

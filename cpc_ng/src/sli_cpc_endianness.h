@@ -1,5 +1,5 @@
 /**
- * @file
+ * @file sli_cpc_endianness.h
  * @brief CPC endianness helpers.
  *******************************************************************************
  * # License

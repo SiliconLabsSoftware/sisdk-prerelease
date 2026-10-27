@@ -17,6 +17,7 @@ limitations under the License.
 <configurator>
   <domain name="GP" spec="gp-1.0a-09-5499-26" certifiable="true">
     <older spec="gp-1.0-09-5499-24" certifiable="true"/>
+    <older spec="gp-1.1.3" certifiable="false"/>
   </domain>
   <bitmap name="GpGpsFunctionality" type="BITMAP24">
     <field name="gpFeature" mask="0x000001"/>
@@ -68,7 +69,7 @@ limitations under the License.
     <field name="macSeqNumCap" mask="0x01"/>
     <field name="rxOnCap" mask="0x02"/>
     <field name="applicationInformationPresent" mask="0x04"/>
-    <field name="reserved" mask="0x08"/>
+    <field name="icBasedTclkSupported" mask="0x08"/>
     <field name="panIdRequest" mask="0x10"/>
     <field name="gpSecurityKeyRequest" mask="0x20"/>
     <field name="fixedLocation" mask="0x40"/>
@@ -228,6 +229,7 @@ limitations under the License.
     <field name="clusterListPresent" mask="0x08"/>
     <field name="switchInformationPresent" mask="0x10"/>
     <field name="applicationDescriptionPresent" mask="0x20"/>
+    <field name="icBasedTclkUsed" mask="0x40"/>
   </bitmap>
   <enum name="GpPairingConfigurationOptionCommunicationMode" type="ENUM8">
     <item name="UnicastForwarding" value="0x00" introducedIn="gp-1.0-09-5499-24"/>
@@ -479,6 +481,44 @@ limitations under the License.
     <item name="GpdGroupKey" value="0x02"/>
     <item name="NetworkDerivedGroupKey" value="0x03"/>
     <item name="IndividigualGpdKey" value="0x04"/>
+    <item name="KeyTypeElsewhere" value="0x05" introducedIn="gp-1.1.3"/>
+    <item name="OutOfBandGpdKey" value="0x06" introducedIn="gp-1.1.3"/>
+    <item name="DerivedIndividualGpdKey" value="0x07"/>
+  </enum>
+  <enum name="GpTcResponseStatus" type="ENUM8" introducedIn="gp-1.1.3">
+    <item name="Success" value="0x00"/>
+    <item name="Failure" value="0x01"/>
+    <item name="ActionDenied" value="0x02"/>
+  </enum>
+  <!-- Figure 72 – Options field of the GP TC Request command. -->
+  <bitmap name="GpTcRequestOption" type="BITMAP8" introducedIn="gp-1.1.3">
+    <field name="ApplicationId" mask="0x07" introducedIn="gp-1.1.3"/>
+    <field name="OobGpdSecurityKeyPresent" mask="0x08" introducedIn="gp-1.1.3"/>
+    <field name="Reserved" mask="0xF0" introducedIn="gp-1.1.3"/>
+  </bitmap>
+  <!-- Figure 74 / 76 – Options for GP TC Pairing Completion / Decommissioning Notification. -->
+  <bitmap name="GpTcGpdIdOption" type="BITMAP8" introducedIn="gp-1.1.3">
+    <field name="ApplicationId" mask="0x07" introducedIn="gp-1.1.3"/>
+    <field name="Reserved" mask="0xF8" introducedIn="gp-1.1.3"/>
+  </bitmap>
+  <!-- Figure 53 – Options field of the GP TC Response command. -->
+  <bitmap name="GpTcResponseOption" type="BITMAP16" introducedIn="gp-1.1.3">
+    <field name="ApplicationId" mask="0x0007" introducedIn="gp-1.1.3"/>
+    <field name="InClearGpdSecurityKeyPresent" mask="0x0008" introducedIn="gp-1.1.3"/>
+    <field name="GpdSecurityKeyPresent" mask="0x0010" introducedIn="gp-1.1.3"/>
+    <field name="GpdKeyEncryption" mask="0x0020" introducedIn="gp-1.1.3"/>
+    <field name="SecurityLevel" mask="0x00C0" introducedIn="gp-1.1.3"/>
+    <field name="KeyType" mask="0x0700" introducedIn="gp-1.1.3"/>
+    <field name="IcEncryptedKeyType" mask="0x3800" introducedIn="gp-1.1.3"/>
+    <field name="Reserved" mask="0x4000" introducedIn="gp-1.1.3"/>
+    <field name="ExtendedOptionsPresent" mask="0x8000" introducedIn="gp-1.1.3"/>
+  </bitmap>
+  <!-- Table 40 – ICEncryptedKeyType sub-field of GP TC Response Options. -->
+  <enum name="IceEncryptedKeyType" type="ENUM8" introducedIn="gp-1.1.3">
+    <item name="None" value="0x00"/>
+    <item name="ZigbeeNetworkKey" value="0x01"/>
+    <item name="GpdGroupKey" value="0x02"/>
+    <item name="NetworkDerivedGroupKey" value="0x03"/>
     <item name="DerivedIndividualGpdKey" value="0x07"/>
   </enum>
   <cluster introducedIn="gp-1.0-09-5499-24">
@@ -515,6 +555,12 @@ limitations under the License.
     <attribute side="client" code="0x0020" define="GP_CLIENT_GP_SHARED_SECURITY_KEY_TYPE" type="BITMAP8" min="0x00" max="0x08" writable="true" default="0x03" optional="true" introducedIn="gp-1.0-09-5499-24">gp shared security key type</attribute>
     <attribute side="client" code="0x0021" define="GP_CLIENT_GP_SHARED_SECURITY_KEY" type="SECURITY_KEY" writable="true" optional="true" introducedIn="gp-1.0-09-5499-24">gp shared security key</attribute>
     <attribute side="client" code="0x0022" define="GP_CLIENT_GP_LINK_KEY" type="SECURITY_KEY" writable="true" default="0x5a6967426565416c6c69616e63653039" optional="false" introducedIn="gp-1.0-09-5499-24">gp link key</attribute>
+    <attribute side="server" code="0x0030" define="GP_SERVER_GP_TC_POLICY_ALLOW_GPD" type="BOOLEAN" writable="true" default="0x01" optional="true" introducedIn="gp-1.1.3">gpTC Policy AllowGPD</attribute>
+    <attribute side="server" code="0x0031" define="GP_SERVER_GP_TC_POLICY_IC_MODE" type="BOOLEAN" writable="true" default="0x00" optional="true" introducedIn="gp-1.1.3">gpTC Policy ICMode</attribute>
+    <attribute side="server" code="0x0032" define="GP_SERVER_GP_TC_POLICY_SECURITY_LEVEL" type="ENUM8" writable="true" default="0x02" optional="true" introducedIn="gp-1.1.3">gpTC Policy SecurityLevel</attribute>
+    <attribute side="server" code="0x0033" define="GP_SERVER_GP_TC_POLICY_SHARED_SECURITY_KEY_TYPE" type="ENUM8" writable="true" default="0x00" optional="true" introducedIn="gp-1.1.3">gpTC Policy SharedSecurityKeyType</attribute>
+    <attribute side="server" code="0x0034" define="GP_SERVER_GP_TC_POLICY_SHARED_SECURITY_KEY" type="SECURITY_KEY" writable="true" optional="true" introducedIn="gp-1.1.3">gpTC Policy SharedSecurityKey</attribute>
+    <attribute side="server" code="0x0035" define="GP_SERVER_GP_TC_POLICY_LINK_KEY" type="SECURITY_KEY" writable="true" default="0x5a6967426565416c6c69616e63653039" optional="true" introducedIn="gp-1.1.3">gpTC Policy LinkKey</attribute>
     <!-- Client-to-server commands. -->
     <command source="client" code="0x00" name="GpNotification" optional="true" disableDefaultResponse="true" introducedIn="gp-1.0-09-5499-24">
       <description>
@@ -645,7 +691,25 @@ limitations under the License.
       <arg name="entriesCount" type="INT8U"/>
       <arg name="proxyTableEntries" type="INT8U" array="true"/>
     </command>
-    <!-- Server-to-client commands. -->
+    <!-- Table 49 – client side commands generated: GP TC Response (0x0C).
+         Same numeric ID as server-generated GpTcRequest; ZCL direction distinguishes them. -->
+    <command source="client" code="0x0c" name="GpTcResponse" optional="true" disableDefaultResponse="true" introducedIn="gp-1.1.3">
+      <description>
+        From GP-aware TC to GPS with commissioning authorization response.
+        Format: Figure 52 / Options: Figure 53 (GP Basic v1.1.3).
+      </description>
+      <arg name="status" type="GpTcResponseStatus" introducedIn="gp-1.1.3"/>
+      <arg name="options" type="GpTcResponseOption" introducedIn="gp-1.1.3"/>
+      <arg name="extendedOptions" type="BITMAP8" presentIf="options &amp; 0x8000" introducedIn="gp-1.1.3"/>
+      <arg name="gpdSrcId" type="INT32U" presentIf="(options &amp; 0x0007) == 0x0000" introducedIn="gp-1.1.3"/>
+      <arg name="gpdIeee" type="IEEE_ADDRESS" presentIf="(options &amp; 0x0007) == 0x0002" introducedIn="gp-1.1.3"/>
+      <arg name="endpoint" type="INT8U" presentIf="(options &amp; 0x0007) == 0x0002" introducedIn="gp-1.1.3"/>
+      <arg name="gpdSecurityKey" type="SECURITY_KEY" presentIf="options &amp; 0x0010" introducedIn="gp-1.1.3"/>
+      <arg name="gpdKeyMic" type="INT32U" presentIf="(options &amp; 0x0010) &amp;&amp; (options &amp; 0x0020)" introducedIn="gp-1.1.3"/>
+      <arg name="frameCounter" type="INT32U" presentIf="(options &amp; 0x0010) &amp;&amp; (options &amp; 0x0020) &amp;&amp; (((options &amp; 0x00C0) == 0x0080) || ((options &amp; 0x00C0) == 0x00C0))" introducedIn="gp-1.1.3"/>
+      <arg name="inClearGpdSecurityKey" type="SECURITY_KEY" presentIf="options &amp; 0x0008" introducedIn="gp-1.1.3"/>
+    </command>
+    <!-- Server-to-client commands (Table 41 – server side commands generated). -->
     <command source="server" code="0x00" name="GpNotificationResponse" optional="true" disableDefaultResponse="true" introducedIn="gp-1.0-09-5499-24">
       <description>
         From GPS to GPP to acknowledge GP Notification received in unicast mode.
@@ -725,6 +789,41 @@ limitations under the License.
       <arg name="gpdIeee" type="INT64U" presentIf="((options &amp; 0x18) == 0x00) &amp;&amp; ((options &amp; 0x07) == 0x02)"/>
       <arg name="endpoint" type="INT8U" presentIf="(options &amp; 0x07) == 0x02"/>
       <arg name="index" type="INT8U" presentIf="(options &amp; 0x18) == 0x08"/>
+    </command>
+    <!-- Table 41 – server side commands generated: Request 0x0C, Pairing Completion 0x0D,
+         Decommissioning 0x0E. Default Response required on Pairing/Decomm (SUCCESS / NOT_FOUND). -->
+    <command source="server" code="0x0c" name="GpTcRequest" optional="true" disableDefaultResponse="true" introducedIn="gp-1.1.3">
+      <description>
+        From GPS to GP-aware TC to request commissioning authorization.
+        Format: Figure 71 / Options: Figure 72 (GP Basic v1.1.3).
+      </description>
+      <arg name="options" type="GpTcRequestOption" introducedIn="gp-1.1.3"/>
+      <arg name="gpdSrcId" type="INT32U" presentIf="(options &amp; 0x07) == 0x00" introducedIn="gp-1.1.3"/>
+      <arg name="gpdIeee" type="IEEE_ADDRESS" presentIf="(options &amp; 0x07) == 0x02" introducedIn="gp-1.1.3"/>
+      <arg name="endpoint" type="INT8U" presentIf="(options &amp; 0x07) == 0x02" introducedIn="gp-1.1.3"/>
+      <arg name="gpdCommandId" type="INT8U" introducedIn="gp-1.1.3"/>
+      <arg name="gpdCommandPayload" type="OCTET_STRING" introducedIn="gp-1.1.3"/>
+      <arg name="oobGpdKey" type="SECURITY_KEY" presentIf="options &amp; 0x08" introducedIn="gp-1.1.3"/>
+    </command>
+    <command source="server" code="0x0d" name="GpTcPairingCompletion" optional="true" disableDefaultResponse="false" introducedIn="gp-1.1.3">
+      <description>
+        From GPS to GP-aware TC to notify pairing completion.
+        Format: Figure 73 / Options: Figure 74 (GP Basic v1.1.3). IEEE AppID Endpoint SHALL be 0xFF.
+      </description>
+      <arg name="options" type="GpTcGpdIdOption" introducedIn="gp-1.1.3"/>
+      <arg name="gpdSrcId" type="INT32U" presentIf="(options &amp; 0x07) == 0x00" introducedIn="gp-1.1.3"/>
+      <arg name="gpdIeee" type="IEEE_ADDRESS" presentIf="(options &amp; 0x07) == 0x02" introducedIn="gp-1.1.3"/>
+      <arg name="endpoint" type="INT8U" presentIf="(options &amp; 0x07) == 0x02" introducedIn="gp-1.1.3"/>
+    </command>
+    <command source="server" code="0x0e" name="GpTcDecommissioningNotification" optional="true" disableDefaultResponse="false" introducedIn="gp-1.1.3">
+      <description>
+        From GPS to GP-aware TC to notify GPD decommissioning.
+        Format: Figure 75 / Options: Figure 76 (GP Basic v1.1.3). IEEE AppID Endpoint SHALL be 0xFF.
+      </description>
+      <arg name="options" type="GpTcGpdIdOption" introducedIn="gp-1.1.3"/>
+      <arg name="gpdSrcId" type="INT32U" presentIf="(options &amp; 0x07) == 0x00" introducedIn="gp-1.1.3"/>
+      <arg name="gpdIeee" type="IEEE_ADDRESS" presentIf="(options &amp; 0x07) == 0x02" introducedIn="gp-1.1.3"/>
+      <arg name="endpoint" type="INT8U" presentIf="(options &amp; 0x07) == 0x02" introducedIn="gp-1.1.3"/>
     </command>
   </cluster>
 </configurator>

@@ -659,150 +659,225 @@ static bool manufactureIdValidation(uint8_t *attributeOptions,
   return true;
 }
 
+static void sli_gp_tt_add_reported_compact_attr_translation(sl_zigbee_gp_address_t *gpdAddr,
+                                                          uint8_t endpoint,
+                                                          sl_zigbee_gp_translation_table_additional_info_block_option_record_field_t *additionalInfo,
+                                                          uint8_t additionalInfoReportLen,
+                                                          uint8_t additionalInfoRecordLen,
+                                                          uint8_t additionalInfoAttrLen,
+                                                          uint8_t attrRecordIndex)
+{
+  uint8_t status = 0xFF;
+  uint8_t outIndex;
+
+  if (!sli_zigbee_af_gp_endpoint_and_cluster_id_validation(endpoint,
+                                                           !(additionalInfo->optionData.compactAttr.attributeOptions & 0x01),
+                                                           additionalInfo->optionData.compactAttr.clusterID)) {
+    return;
+  }
+  if (!manufactureIdValidation(&(additionalInfo->optionData.compactAttr.attributeOptions),
+                               additionalInfo->optionData.compactAttr.manufacturerID,
+                               additionalInfo->optionData.compactAttr.clusterID,
+                               additionalInfo->optionData.compactAttr.attributeID)) {
+    return;
+  }
+  {
+    uint8_t recordLen = additionalInfoRecordLen;
+    if ((additionalInfo->optionData.compactAttr.attributeOptions) & 0x02) {
+      recordLen += 2;
+    }
+    additionalInfo->optionSelector = (recordLen + additionalInfoAttrLen - additionalInfoReportLen);
+    sl_zigbee_af_green_power_cluster_println(" AdditionalInfo.optionSelector : %d additionalInfoReportdLen = %d additionalInfoRecordLen = %d additionalInfoAttrLen",
+                                             additionalInfo->optionSelector,
+                                             additionalInfoReportLen,
+                                             recordLen,
+                                             additionalInfoAttrLen);
+    additionalInfo->totalLengthOfAddInfoBlock = (recordLen + additionalInfoAttrLen);
+  }
+
+  status = sli_zigbee_af_gp_trans_table_find_matching_translation_table_entry((GP_TRANSLATION_TABLE_SCAN_LEVEL_GPD_ID
+                                                                               | GP_TRANSLATION_TABLE_SCAN_LEVEL_GPD_CMD_ID
+                                                                               | GP_TRANSLATION_TABLE_SCAN_LEVEL_ZB_ENDPOINT
+                                                                               | GP_TRANSLATION_TABLE_SCAN_LEVEL_ADDITIONAL_INFO_BLOCK),
+                                                                              true,
+                                                                              gpdAddr,
+                                                                              SL_ZIGBEE_ZCL_GP_GPDF_COMPACT_ATTRIBUTE_REPORTING,
+                                                                              endpoint,
+                                                                              NULL,
+                                                                              additionalInfo,
+                                                                              &outIndex,
+                                                                              0);
+  if (status != GP_TRANSLATION_TABLE_STATUS_SUCCESS) {
+    status = addPairedDeviceToTranslationTable(ADD_PAIRED_DEVICE,
+                                               true,
+                                               gpdAddr,
+                                               SL_ZIGBEE_ZCL_GP_GPDF_COMPACT_ATTRIBUTE_REPORTING,
+                                               endpoint,
+                                               0,
+                                               additionalInfo->optionData.compactAttr.clusterID,
+                                               0,
+                                               0,
+                                               NULL,
+                                               0,
+                                               additionalInfo->totalLengthOfAddInfoBlock,
+                                               additionalInfo,
+                                               &outIndex);
+    sl_zigbee_af_green_power_cluster_println("Status %d attrRecord index = %d ", status, attrRecordIndex);
+  }
+}
+
+static void sli_gp_tt_process_report_attribute(const uint8_t *report,
+                                               uint8_t *length,
+                                               uint8_t reportLength,
+                                               uint8_t recordRemainingLength,
+                                               uint8_t tempAttributeOption,
+                                               uint8_t attrRecordIndex,
+                                               sl_zigbee_gp_address_t *gpdAddr,
+                                               uint8_t endpoint,
+                                               sl_zigbee_gp_translation_table_additional_info_block_option_record_field_t *additionalInfo,
+                                               uint8_t additionalInfoReportLen,
+                                               uint8_t additionalInfoRecordLen)
+{
+  uint8_t additionalInfoAttrLen = 0;
+  uint8_t attributeRemainingLength = 0;
+  uint8_t reportDescAttributeOption = 0;
+
+  additionalInfo->optionData.compactAttr.attributeOptions = tempAttributeOption;
+  additionalInfo->optionData.compactAttr.attributeID = (uint16_t)(report[*length]
+                                                                  + ((uint16_t)report[*length + 1] << 8));
+  *length += 2;
+  additionalInfoAttrLen += 2;
+  additionalInfo->optionData.compactAttr.attributeDataType = report[*length];
+  *length += 1;
+  additionalInfoAttrLen++;
+  reportDescAttributeOption = report[*length];
+  *length += 1;
+  attributeRemainingLength = (reportDescAttributeOption & 0x0F) + 1;
+  if ((reportDescAttributeOption & 0x10)
+      && attributeRemainingLength
+      && (recordRemainingLength > (*length - reportLength))) {
+    additionalInfo->optionData.compactAttr.attrOffsetWithinReport = report[*length];
+    *length += 1;
+    attributeRemainingLength--;
+  } else if (!(reportDescAttributeOption & 0x10)) {
+    additionalInfo->optionData.compactAttr.attrOffsetWithinReport = 0x00;
+  }
+  additionalInfoAttrLen++;
+  if ((reportDescAttributeOption & 0x20)
+      && attributeRemainingLength
+      && (recordRemainingLength > (*length - reportLength))) {
+    *length += attributeRemainingLength;
+  }
+  if (reportDescAttributeOption & 0x10) {
+    sli_gp_tt_add_reported_compact_attr_translation(gpdAddr,
+                                                    endpoint,
+                                                    additionalInfo,
+                                                    additionalInfoReportLen,
+                                                    additionalInfoRecordLen,
+                                                    additionalInfoAttrLen,
+                                                    attrRecordIndex);
+  }
+}
+
+static void sli_gp_tt_process_report_data_points(const uint8_t *report,
+                                                 uint8_t *length,
+                                                 uint8_t reportLength,
+                                                 uint8_t recordRemainingLength,
+                                                 uint8_t reportIndex,
+                                                 sl_zigbee_gp_address_t *gpdAddr,
+                                                 uint8_t endpoint,
+                                                 sl_zigbee_gp_translation_table_additional_info_block_option_record_field_t *additionalInfo,
+                                                 uint8_t additionalInfoReportLen)
+{
+  uint8_t additionalInfoRecordLen = 0;
+  uint8_t noOfattributes = 0;
+
+  do {
+    sl_zigbee_af_print_buffer(SL_ZIGBEE_AF_PRINT_CORE, &report[*length - 4], (recordRemainingLength + 4), true);
+    sl_zigbee_af_green_power_cluster_println("");
+    additionalInfoRecordLen = 0;
+    uint8_t tempAttributeOption = ((report[*length] & 0x1F) >> 3);
+    noOfattributes = ((report[*length] & 0x07) + 1);
+    *length += 1;
+    additionalInfoRecordLen++;
+    additionalInfo->optionData.compactAttr.clusterID = (uint16_t)(report[*length]
+                                                                  + ((uint16_t)report[*length + 1] << 8));
+    *length += 2;
+    additionalInfoRecordLen += 2;
+    if (tempAttributeOption & 0x02) {
+      additionalInfo->optionData.compactAttr.manufacturerID = (uint16_t)(report[*length]
+                                                                         + ((uint16_t)report[*length + 1] << 8));
+      *length += 2;
+    }
+    additionalInfoRecordLen = additionalInfoReportLen + additionalInfoRecordLen;
+    for (uint8_t attrRecordIndex = 0; attrRecordIndex < noOfattributes; attrRecordIndex++) {
+      sli_gp_tt_process_report_attribute(report,
+                                         length,
+                                         reportLength,
+                                         recordRemainingLength,
+                                         tempAttributeOption,
+                                         attrRecordIndex,
+                                         gpdAddr,
+                                         endpoint,
+                                         additionalInfo,
+                                         additionalInfoReportLen,
+                                         additionalInfoRecordLen);
+    }
+    sl_zigbee_af_green_power_cluster_println("record index = %d ", reportIndex);
+  } while (recordRemainingLength > (*length - reportLength));
+}
+
+static void sli_gp_tt_add_single_report_to_translation_table(sl_zigbee_gp_address_t *gpdAddr,
+                                                             uint8_t endpoint,
+                                                             const uint8_t *report,
+                                                             uint8_t reportIndex)
+{
+  sl_zigbee_gp_translation_table_additional_info_block_option_record_field_t additionalInfo = { 0 };
+  uint8_t additionalInfoReportLen = 0;
+  uint8_t length = 0;
+  uint8_t reportLength = 0;
+  uint8_t recordRemainingLength = 0;
+
+  additionalInfo.optionData.compactAttr.reportIdentifier = report[length];
+  length += 1;
+  additionalInfoReportLen++;
+  if (report[length] & SL_ZIGBEE_AF_GP_GPD_APPLICATION_DESCRIPTION_COMMAND_REPORT_OPTIONS_TIMEOUT_PERIOD_PRESENT) {
+    length += 3;
+  } else {
+    length += 1;
+  }
+  recordRemainingLength = report[length];
+  length += 1;
+  additionalInfoReportLen++;
+
+  reportLength = length;
+  sli_gp_tt_process_report_data_points(report,
+                                       &length,
+                                       reportLength,
+                                       recordRemainingLength,
+                                       reportIndex,
+                                       gpdAddr,
+                                       endpoint,
+                                       &additionalInfo,
+                                       additionalInfoReportLen);
+}
+
 static void addReportstoTranslationTable(sl_zigbee_gp_address_t *gpdAddr,
                                          uint8_t gpdCommandId,
                                          uint8_t endpoint)
 {
   UNUSED_VAR(gpdCommandId);
-  // none entry match, create TT entries for New GPD
-  sl_zigbee_gp_translation_table_additional_info_block_option_record_field_t additionalInfo = { 0 };
-  uint8_t additionalInfoReportLen = 0;
-  uint8_t additionalInfoRecordLen = 0;
-  uint8_t additionalInfoAttrLen = 0;
-  uint8_t noOfattributes = 0;
-  uint8_t length = 0;
-  uint8_t reportLength = 0;
-  uint8_t recordRemainingLength = 0;
-  uint8_t attributeRemainingLength = 0;
-
-  uint8_t index = 0;
-  const uint8_t *report = NULL;
   const sli_zigbee_gp_comm_data_saved_t *gpdCommDataPtr = sl_zigbee_af_green_power_server_find_commissioning_gpd_instance(gpdAddr);
 
   if (gpdCommDataPtr == NULL) {
     return;
   }
-  // Populate all the reports as option records of the additional block
-  for (index = 0; index < gpdCommDataPtr->numberOfReports; index++) {
-    report = sli_zigbee_af_gp_find_report_id(index,
-                                             gpdCommDataPtr->numberOfReports,
-                                             gpdCommDataPtr->reportsStorage);
+  for (uint8_t index = 0; index < gpdCommDataPtr->reports.numberOfReports; index++) {
+    const uint8_t *report = sli_zigbee_af_gp_find_report_id(index,
+                                                            gpdCommDataPtr->reports.numberOfReports,
+                                                            gpdCommDataPtr->reports.reportsStorage);
     if (report != NULL) {
-      length = 0;
-      reportLength = 0;
-      additionalInfoReportLen = 0;
-
-      additionalInfo.optionData.compactAttr.reportIdentifier = report[length]; //reportId
-      length += 1; //reportId
-      additionalInfoReportLen++;
-      if (report[length] & SL_ZIGBEE_AF_GP_GPD_APPLICATION_DESCRIPTION_COMMAND_REPORT_OPTIONS_TIMEOUT_PERIOD_PRESENT) {
-        length += 3; // option and 2 byte timeout
-      } else {
-        length += 1; // just the option byte
-      }
-      recordRemainingLength = report[length];
-      length += 1; // length
-      additionalInfoReportLen++;
-
-      reportLength = length; // length
-      do {
-        sl_zigbee_af_print_buffer(SL_ZIGBEE_AF_PRINT_CORE, &report[length - 4], (recordRemainingLength + 4), true);
-        sl_zigbee_af_green_power_cluster_println("");
-        additionalInfoRecordLen = 0;
-        uint8_t tempAttributeOption = ((report[length] & 0x1F) >> 3); // attribute option
-        noOfattributes = ( (report[length] & 0x07) + 1);
-        length += 1; //data point options
-        additionalInfoRecordLen++;
-        additionalInfo.optionData.compactAttr.clusterID = report[length] + ((uint16_t)report[length + 1] << 8);
-        length += 2; // clusterid
-        additionalInfoRecordLen += 2;
-        if (tempAttributeOption & 0x02) { // ManufactureId present
-          additionalInfo.optionData.compactAttr.manufacturerID = report[length] + ((uint16_t)report[length + 1] << 8);
-          length += 2;
-        }
-        additionalInfoRecordLen = (additionalInfoReportLen + additionalInfoRecordLen);
-        for (uint8_t attrRecordIndex = 0; attrRecordIndex < noOfattributes; attrRecordIndex++) {
-          additionalInfo.optionData.compactAttr.attributeOptions = tempAttributeOption;
-          additionalInfoAttrLen = 0;
-          additionalInfo.optionData.compactAttr.attributeID = report[length] + ((uint16_t)report[length + 1] << 8);
-          length += 2;
-          additionalInfoAttrLen += 2;
-          additionalInfo.optionData.compactAttr.attributeDataType = report[length];
-          length += 1;
-          additionalInfoAttrLen++;
-          uint8_t reportDescAttributeOption = report[length];
-          length += 1;
-          attributeRemainingLength = (reportDescAttributeOption & 0x0F) + 1;
-          if (reportDescAttributeOption & 0x10) {
-            if ((attributeRemainingLength) && (recordRemainingLength > (length - reportLength))) {
-              additionalInfo.optionData.compactAttr.attrOffsetWithinReport = report[length];
-              length += 1;
-              attributeRemainingLength--;
-            }
-          } else {
-            additionalInfo.optionData.compactAttr.attrOffsetWithinReport = 0x00;
-          }
-          additionalInfoAttrLen++;
-          if (reportDescAttributeOption & 0x20) {
-            if ((attributeRemainingLength) && (recordRemainingLength > (length - reportLength))) {
-              length += attributeRemainingLength;
-            }
-          }
-          if (reportDescAttributeOption & 0x10) { // Reported bit set
-            if (sli_zigbee_af_gp_endpoint_and_cluster_id_validation(endpoint,
-                                                                    !(additionalInfo.optionData.compactAttr.attributeOptions & 0x01), // Mask for server/Client
-                                                                    additionalInfo.optionData.compactAttr.clusterID)
-                && manufactureIdValidation(&(additionalInfo.optionData.compactAttr.attributeOptions),
-                                           additionalInfo.optionData.compactAttr.manufacturerID,
-                                           additionalInfo.optionData.compactAttr.clusterID,
-                                           additionalInfo.optionData.compactAttr.attributeID)) {
-              if ((additionalInfo.optionData.compactAttr.attributeOptions) & 0x02) {
-                additionalInfoRecordLen += 2;
-              }
-              additionalInfo.optionSelector = (additionalInfoRecordLen + additionalInfoAttrLen - additionalInfoReportLen);//(endRecord - startRecord - 1);
-              sl_zigbee_af_green_power_cluster_println(" AdditionalInfo.optionSelector : %d additionalInfoReportdLen = %d additionalInfoRecordLen = %d additionalInfoAttrLen",
-                                                       additionalInfo.optionSelector,
-                                                       additionalInfoReportLen,
-                                                       additionalInfoRecordLen,
-                                                       additionalInfoAttrLen);
-              additionalInfo.totalLengthOfAddInfoBlock = (additionalInfoRecordLen + additionalInfoAttrLen);
-
-              uint8_t status = 0xFF;
-              uint8_t outIndex;
-              status = sli_zigbee_af_gp_trans_table_find_matching_translation_table_entry((GP_TRANSLATION_TABLE_SCAN_LEVEL_GPD_ID
-                                                                                           | GP_TRANSLATION_TABLE_SCAN_LEVEL_GPD_CMD_ID
-                                                                                           | GP_TRANSLATION_TABLE_SCAN_LEVEL_ZB_ENDPOINT
-                                                                                           | GP_TRANSLATION_TABLE_SCAN_LEVEL_ADDITIONAL_INFO_BLOCK),//uint8_t levelOfScan,
-                                                                                          true,
-                                                                                          gpdAddr,
-                                                                                          SL_ZIGBEE_ZCL_GP_GPDF_COMPACT_ATTRIBUTE_REPORTING,
-                                                                                          endpoint,
-                                                                                          NULL,
-                                                                                          &additionalInfo,
-                                                                                          &outIndex,
-                                                                                          0);
-              if (status != GP_TRANSLATION_TABLE_STATUS_SUCCESS) {
-                status = addPairedDeviceToTranslationTable(ADD_PAIRED_DEVICE,
-                                                           true,
-                                                           gpdAddr,
-                                                           SL_ZIGBEE_ZCL_GP_GPDF_COMPACT_ATTRIBUTE_REPORTING,
-                                                           endpoint,
-                                                           0,
-                                                           additionalInfo.optionData.compactAttr.clusterID,
-                                                           0,
-                                                           0,
-                                                           NULL,
-                                                           0,
-                                                           additionalInfo.totalLengthOfAddInfoBlock,
-                                                           &additionalInfo,
-                                                           &outIndex);
-                sl_zigbee_af_green_power_cluster_println("Status %d attrRecord index = %d ", status, attrRecordIndex);
-              }
-            }
-          }
-        }
-        sl_zigbee_af_green_power_cluster_println("record index = %d ", index);
-      } while (recordRemainingLength > (length - reportLength));
+      sli_gp_tt_add_single_report_to_translation_table(gpdAddr, endpoint, report, index);
     }
   }
 }

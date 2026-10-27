@@ -86,6 +86,40 @@ if (OTBR_TELEMETRY_DATA_API)
     target_compile_definitions(otbr-config INTERFACE OTBR_ENABLE_TELEMETRY_DATA_API=1)
 endif()
 
+# Opt-in, Linux-only: build the in-process nftables firewall backend instead of
+# relying on the legacy ipset/ip6tables shell firewall (which remains the
+# default). Requires libnftnl + libmnl at build time and nf_tables kernel
+# support at runtime.
+option(OTBR_NFTABLES "Enable in-process nftables firewall backend (libnftnl/libmnl)" OFF)
+if (OTBR_NFTABLES)
+    if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        message(FATAL_ERROR "OTBR_NFTABLES is only supported on Linux")
+    endif()
+    pkg_check_modules(LIBNFTNL REQUIRED IMPORTED_TARGET libnftnl)
+    pkg_check_modules(LIBMNL REQUIRED IMPORTED_TARGET libmnl)
+    target_compile_definitions(otbr-config INTERFACE OTBR_ENABLE_NFTABLES=1)
+else()
+    target_compile_definitions(otbr-config INTERFACE OTBR_ENABLE_NFTABLES=0)
+endif()
+
+# Opt-in, macOS-only: build the in-process pf firewall backend. otbr-agent then
+# owns the Thread ingress filter (and the NAT44 masquerade) in the pf anchor
+# "otbr", driven through pfctl(8), and produces the ingress prefix tables from
+# Thread network data. The main ruleset (/etc/pf.conf) has to reference the
+# anchor; script/_firewall adds the reference.
+option(OTBR_PF "Enable in-process pf firewall backend (pfctl)" OFF)
+if (OTBR_PF)
+    if (NOT APPLE)
+        message(FATAL_ERROR "OTBR_PF is only supported on macOS")
+    endif()
+    if (OTBR_NFTABLES)
+        message(FATAL_ERROR "OTBR_PF and OTBR_NFTABLES are mutually exclusive")
+    endif()
+    target_compile_definitions(otbr-config INTERFACE OTBR_ENABLE_PF=1)
+else()
+    target_compile_definitions(otbr-config INTERFACE OTBR_ENABLE_PF=0)
+endif()
+
 option(OTBR_OPENWRT "Enable OpenWrt support" OFF)
 if(OTBR_OPENWRT)
     target_compile_definitions(otbr-config INTERFACE OTBR_ENABLE_OPENWRT=1)
@@ -185,6 +219,16 @@ option(OTBR_WEB "Enable Web GUI" OFF)
 option(OTBR_NOTIFY_UPSTART "Notify upstart when ready." ON)
 if(OTBR_NOTIFY_UPSTART)
     target_compile_definitions(otbr-config INTERFACE OTBR_ENABLE_NOTIFY_UPSTART=1)
+endif()
+
+# When OTBR_PLATFORM_RESET_EXIT is enabled, the daemon exits with status 0 on
+# platform reset. Ensure the service supervisor is configured to restart on clean
+# exits as well (e.g. systemd Restart=always).
+option(OTBR_PLATFORM_RESET_EXIT "Exit on platform reset instead of restarting in-place" OFF)
+if(OTBR_PLATFORM_RESET_EXIT)
+    target_compile_definitions(otbr-config INTERFACE OTBR_ENABLE_PLATFORM_RESET_EXIT=1)
+else()
+    target_compile_definitions(otbr-config INTERFACE OTBR_ENABLE_PLATFORM_RESET_EXIT=0)
 endif()
 
 set(OTBR_NAT64_DEFAULT OFF)

@@ -38,7 +38,7 @@ config_file:
 - path: "config/sl_ftp_config.h"
 
 requires:
-- name: "sl_wisun_ftp_posix_port"
+- name: "sl_wisun_app_core"
 - name: "sl_string"
 
 #-------------- Template Contribution ----------------

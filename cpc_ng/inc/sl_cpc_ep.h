@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sl_cpc_ep.h
  * @brief CPC public endpoint API.
  *******************************************************************************
  * # License
@@ -134,6 +134,20 @@ typedef void(sl_cpc_ep_event_cb_t)(sl_cpc_ep_t *ep, sl_cpc_ep_event_type_t event
                                    void *arg);
 
 /**
+ * @brief Round-trip time estimator for one endpoint.
+ *
+ * The RTT is measured only once per window so frames do not carry a uint64_t
+ * timestamp. This keeps the sequence number of the frame used for the
+ * measurement and the timestamp at which it was sent.
+ */
+struct sl_cpc_ep_rtt {
+  uint8_t frame_seq;   ///< Sequence number of the frame used for measurement.
+  uint64_t sent_ticks; ///< Timestamp at which the frame with sequence `frame_seq` was sent.
+  uint64_t smoothed;   ///< smoothed rtt
+  uint64_t variation;  ///< rtt variation
+};
+
+/**
  * @brief CPC endpoint.
  *
  * Bidirectional communication channel on a bus.
@@ -143,39 +157,33 @@ typedef struct sl_cpc_ep {
   uint8_t id;           ///< id
   uint8_t flags;        ///< flags
 
-  /// Send next, the next sequence number that will be used for transmission
-  /// Used to keep track of unacknowledged frames and frame sequence allowed
-  /// for transmission
-  uint8_t send_nxt;
+  struct {
+    /// Send next, the next sequence number that will be used for transmission
+    /// Used to keep track of unacknowledged frames and frame sequence allowed
+    /// for transmission
+    uint8_t nxt;
 
-  /// Send Unacknowledged, the oldest unacknowledged sequence number
-  uint8_t send_una;
+    /// Send Unacknowledged, the oldest unacknowledged sequence number
+    uint8_t una;
 
-  /// Send window, maximum number of frames that the remote can accept
-  /// TX frames should have a sequence in the range [send_una; send_una + send_wnd)
-  uint8_t send_wnd;
+    /// Send window, maximum number of frames that the remote can accept
+    /// TX frames should have a sequence in the range [send.una; send.una + send.wnd)
+    uint8_t wnd;
+  } send;
 
-  /// In order to avoid bloating frames with a uint64_t, the RTT is measured
-  /// only once "per window" and variables used for this measurement are kept
-  /// in the endpoint. To keep track of the frame used for RTT, the endpoint
-  /// keeps the sequence number of the frame as well as the timestamp at which
-  /// it was sent.
-  uint8_t rtt_frame_seq;
+  struct sl_cpc_ep_rtt rtt;
 
-  /// Timestamp at which the frame with sequence `rtt_frame_seq` was sent.
-  uint64_t rtt_sent_ticks;
+  struct {
+    /// Max payload length this endpoint is able to receive.
+    uint16_t local;
 
-  /// Max payload length this endpoint is able to receive.
-  uint16_t mtu;
-
-  /// Maximum payload length the remote endpoint is able to receive.
-  uint16_t remote_mtu;
+    /// Maximum payload length the remote endpoint is able to receive.
+    uint16_t remote;
+  } mtu;
 
   uint8_t ack;                       ///< ack
   uint8_t packet_re_transmit_count;  ///< packet re transmit count
   uint32_t re_transmit_timeout;      ///< re transmit timeout
-  uint64_t smoothed_rtt;             ///< smoothed rtt
-  uint64_t rtt_variation;            ///< rtt variation
   sli_cpc_timer_t re_transmit_timer; ///< re transmit timer
   sli_cpc_ep_state_t state;          ///< state
 
@@ -223,11 +231,13 @@ typedef struct sl_cpc_ep {
   sli_cpc_ep_debug_counters_t debug_counters;
 #endif
 #if defined(SL_CATALOG_KERNEL_PRESENT)
+  struct {
 #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
-  alignas(4) uint8_t lock_cb[osMutexCbSize]; ///< lock cb
+    alignas(4) uint8_t lock_cb[osMutexCbSize]; ///< lock cb
 #endif
-  osMutexId_t lock;                   ///< lock
-  osSemaphoreId_t state_event_signal; ///< endpoint state has changed
+    osMutexId_t lock;                   ///< lock
+    osSemaphoreId_t state_event_signal; ///< endpoint state has changed
+  } kernel;
 #endif
 #if defined(SL_CATALOG_CPC_SECURITY_PRESENT)
   uint32_t frame_counter_rx;

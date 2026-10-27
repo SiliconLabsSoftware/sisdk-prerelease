@@ -1,6 +1,31 @@
 /***************************************************************************/ /**
  * @file uart.h
  * @brief CPC UART driver unit-test helpers.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
  ******************************************************************************/
 
 #ifndef CPC_DRV_UART_TEST_UART_H
@@ -18,13 +43,13 @@ extern "C" {
 
 #define TEST_UART_EP_ID 42U
 
-// Must match SLI_CPC_DRV_UART_PREAMBLE in sl_cpc_drv_uart.c.
-#define TEST_UART_PREAMBLE 0xEBU
+// Must match SLI_CPC_DRV_UART_SOF in sl_cpc_drv_uart.c.
+#define TEST_UART_SOF 0xEBU
 
-// Preamble + CPC header + header CRC; matches the UART driver header block size.
+// SOF + CPC header + header CRC; matches the UART driver header block size.
 #define TEST_UART_HEADER_BLOCK_SIZE (1U + SLI_CPC_HEADER_SIZE + sizeof(uint16_t))
 
-// Sized for the frames used in these tests (preamble + header + CRCs + payload).
+// Sized for the frames used in these tests (SOF + header + CRCs + payload).
 #define TEST_UART_WIRE_BUFFER_SIZE 64U
 
 #define TEST_UART_STREAM_BUFFER_SIZE 64U

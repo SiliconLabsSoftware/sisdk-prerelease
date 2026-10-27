@@ -42,7 +42,19 @@ extern "C" {
 #include <stdint.h>
 #include "sl_bgapi.h"
 #include "sl_status.h"
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
+#if defined(SL_CATALOG_PSA_CRYPTO_PRESENT)
 #include "psa/crypto_types.h"
+#else
+// Projects without PSA Crypto, hosts in particular, reference the key types
+// below but call no PSA function.
+typedef uint32_t psa_key_id_t;
+typedef uint32_t psa_key_lifetime_t;
+typedef uint32_t psa_key_usage_t;
+#endif // SL_CATALOG_PSA_CRYPTO_PRESENT
 
 /// @typedef Session key, CORE Version Denver r04, Vol 3, Part C, Table 12.10
 typedef uint8_t                         sl_bt_ead_session_key_t[16];

@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file app_custom_callback.h
- * @brief Application custom callback implementations
+ * @brief Application event extension handlers
  *******************************************************************************
  * # License
  * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
@@ -38,7 +38,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
-#include "sl_wisun_api.h"
+#include "sl_wisun_event_mgr.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -51,40 +51,17 @@ extern "C" {
 //                          Public Function Declarations
 // -----------------------------------------------------------------------------
 
-/***************************************************************************//**
- * @brief Application custom connected callback
- * @details This function registered as connected state custom callback
- * @param[in] evt event argument
- ******************************************************************************/
-void app_custom_connected_callback (sl_wisun_evt_t *evt);
-
 /**************************************************************************//**
- * @brief Application custom data sent on socket callback
- * @details This function registered as data sent on socket custom callback
+ * @brief Application join state event extension
  * @param[in] evt event argument
  *****************************************************************************/
-void app_custom_socket_data_sent_callback(sl_wisun_evt_t *evt);
+void sl_wisun_join_state_event_app_hnd(sl_wisun_evt_t *evt);
 
 /**************************************************************************//**
- * @brief Application custom socket data callback
- * @details This function registered as socket data custom callback
+ * @brief Application regulation TX level event extension
  * @param[in] evt event argument
  *****************************************************************************/
-void app_custom_socket_data_callback(sl_wisun_evt_t *evt);
-
-/**************************************************************************//**
- * @brief Application custom join state callback
- * @details This function registered as join state custom callback
- * @param[in] evt event argument
- *****************************************************************************/
-void app_custom_join_state_callback(sl_wisun_evt_t *evt);
-
-/**************************************************************************//**
- * @brief Application custom regulation TX level indication callback
- * @details This function registered as regulation TX level indication callback
- * @param[in] evt event argument
- *****************************************************************************/
-void app_custom_regulation_tx_level_callback(sl_wisun_evt_t *evt);
+void sl_wisun_regulation_tx_level_app_hnd(sl_wisun_evt_t *evt);
 
 #ifdef __cplusplus
 }

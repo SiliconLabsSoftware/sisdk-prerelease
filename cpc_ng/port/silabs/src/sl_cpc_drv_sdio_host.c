@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sl_cpc_drv_sdio_host.c
  * @brief CPC Host SDIO Driver implementation.
  *
  * @warning Ensure SDHC has bus access to the memory where CPC headers and

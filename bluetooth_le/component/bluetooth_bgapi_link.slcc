@@ -1,0 +1,69 @@
+id: bluetooth_bgapi_link
+package: bluetooth_le
+label: Bluetooth BGAPI over cpc-ng
+description: >
+  Provides BGAPI communication over cpc-ng between an embedded NCP host and a
+  Bluetooth NCP target where each CPC endpoint frame carries one complete BGAPI
+  message.
+category: Bluetooth|Application|Utility
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+root_path: bluetooth_le/common/bgapi_link
+tag:
+- No-Code
+config_file:
+- path: config/sl_bt_bgapi_link_config.h
+include:
+- path: inc
+  file_list:
+  - path: sl_bt_bgapi_link.h
+  - path: sli_bt_bgapi_link.h
+  - path: sl_bt_ncp_transport.h
+- path: src
+  file_list:
+  - path: sli_bt_bgapi_link_binding.h
+source:
+- path: src/sl_bt_bgapi_link.c
+- path: src/sl_bt_bgapi_link_host.c
+  condition: [cpc_ng_primary]
+- path: src/sl_bt_bgapi_link_ncp.c
+  condition: [cpc_ng_secondary]
+provides:
+- name: bluetooth_bgapi_link
+- name: bluetooth_ncp_transport
+conflicts:
+- name: ncp_host_com
+- name: ncp_sec
+requires:
+- name: bt_link
+- name: app_rta
+- name: cpc_ng
+- name: component_catalog
+- name: sl_common
+- name: sl_core
+- name: status
+- name: bluetooth_api_ncp_host
+  condition: [cpc_ng_primary]
+template_contribution:
+- name: component_catalog
+  value: bluetooth_bgapi_link
+- name: app_rta_init
+  value:
+    include: sli_bt_bgapi_link.h
+    handler: sli_bt_bgapi_link_init
+  priority: 2
+- name: app_rta_ready
+  value:
+    include: sli_bt_bgapi_link.h
+    handler: sli_bt_bgapi_link_ready
+- name: event_handler
+  condition: [cpc_ng_primary]
+  value:
+    event: internal_app_init
+    include: sli_bt_bgapi_link.h
+    handler: sli_bt_bgapi_link_host_init
+  priority: 3
+validation_helper:
+- path: config/validator.lua

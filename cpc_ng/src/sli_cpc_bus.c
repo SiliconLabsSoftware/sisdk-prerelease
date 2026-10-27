@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sli_cpc_bus.c
  * @brief CPC Bus implementation.
  *******************************************************************************
  * # License
@@ -31,10 +31,15 @@
 #include "sl_component_catalog.h"
 #include "sl_status.h"
 
+#include "sli_cpc_assert.h"
 #include "sli_cpc_bus.h"
 #include "sli_cpc_control.h"
 #include "sli_cpc_debug.h"
 #include "sli_cpc_frame_list.h"
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
 #include "sli_cpc_wake.h"
@@ -173,49 +178,29 @@ static void deinit_kernel(const sl_cpc_bus_t *bus)
  ******************************************************************************/
 static sl_status_t init_wake(sl_cpc_bus_t *bus, const sl_cpc_bus_config_t *cfg)
 {
-  bool sleep_configured = false;
-
-#if !defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT) && !defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-  (void)bus;
-  (void)cfg;
-#endif
+  sl_status_t status;
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
   bus->wake.host.mode = cfg->wake_out_mode;
   bus->wake.host.pin = cfg->wake_out_pin;
 
   if (cfg->wake_out_mode != SL_CPC_WAKE_OUT_DISABLED) {
-    sl_status_t status = sli_cpc_wake_host_init(&bus->wake.host);
+    status = sli_cpc_wake_host_init(&bus->wake.host);
     if (status != SL_STATUS_OK) {
       return status;
     }
   }
 #endif
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-  bus->wake.device.mode = cfg->power_mode;
-  bus->wake.device.pin = cfg->wake_in_pin;
-  bus->wake.device.response = cfg->wake_in_response;
-
-  if (cfg->power_mode != SL_CPC_POWER_MODE_ALWAYS_ON) {
-    sl_status_t status = sli_cpc_wake_device_init(&bus->wake.device);
-    if (status != SL_STATUS_OK) {
+  status = sli_cpc_bus_pm_runtime_init(bus, cfg);
+  if (status != SL_STATUS_OK) {
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-      if (cfg->wake_out_mode != SL_CPC_WAKE_OUT_DISABLED) {
-        sli_cpc_wake_host_deinit(&bus->wake.host);
-      }
-#endif
-
-      return status;
+    if (cfg->wake_out_mode != SL_CPC_WAKE_OUT_DISABLED) {
+      sli_cpc_wake_host_deinit(&bus->wake.host);
     }
-
-    sleep_configured = true;
-  }
 #endif
 
-  if (!sleep_configured) {
-    // No host/device wake path; keep the core out of deep sleep.
-    sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+    return status;
   }
 
   return SL_STATUS_OK;
@@ -223,30 +208,17 @@ static sl_status_t init_wake(sl_cpc_bus_t *bus, const sl_cpc_bus_config_t *cfg)
 
 static void deinit_wake(sl_cpc_bus_t *bus)
 {
-  bool sleep_configured = false;
-
-#if !defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT) && !defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+#if !defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT) && !defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
   (void)bus;
 #endif
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
   if (bus->wake.host.mode != SL_CPC_WAKE_OUT_DISABLED) {
     sli_cpc_wake_host_deinit(&bus->wake.host);
   }
 #endif
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-  if (bus->wake.device.mode != SL_CPC_POWER_MODE_ALWAYS_ON) {
-    sli_cpc_wake_device_deinit(&bus->wake.device);
-    sleep_configured = true;
-  }
-#endif
-#endif
-
-  if (!sleep_configured) {
-    sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
-  }
+  sli_cpc_bus_pm_runtime_deinit(bus);
 }
 
 /***************************************************************************/ /**
@@ -320,7 +292,11 @@ static void deinit_early(sl_cpc_bus_t *bus)
  ******************************************************************************/
 static sl_status_t init_late(sl_cpc_bus_t *bus)
 {
-  return bus->drv_ops->init(bus);
+  if (bus->drv_ops->init) {
+    return bus->drv_ops->init(bus);
+  }
+
+  return SL_STATUS_OK;
 }
 
 /***************************************************************************/ /**
@@ -328,14 +304,9 @@ static sl_status_t init_late(sl_cpc_bus_t *bus)
  ******************************************************************************/
 static void deinit_late(sl_cpc_bus_t *bus)
 {
-  // system endpoint doesn't have a deinit function
-#if defined(SL_CATALOG_CPC_NG_PRIMARY_PRESENT)
   if (bus->drv_ops->deinit) {
     bus->drv_ops->deinit(bus);
   }
-#else
-  (void)bus;
-#endif
 }
 
 /***************************************************************************/ /**
@@ -405,6 +376,131 @@ void sli_cpc_bus_deinit(sl_cpc_bus_t *bus)
   deinit_early(bus);
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   deinit_kernel(bus);
+#endif
+}
+
+/***************************************************************************/ /**
+ * Initialize runtime PM for the bus (device wake path).
+ ******************************************************************************/
+sl_status_t sli_cpc_bus_pm_runtime_init(sl_cpc_bus_t *bus, const sl_cpc_bus_config_t *cfg)
+{
+  sl_status_t status = SL_STATUS_OK;
+  bool configured = false;
+
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
+  bus->pm_runtime.mode = cfg->power_mode;
+  bus->pm_runtime.pin = cfg->wake_in_pin;
+  bus->pm_runtime.response = cfg->wake_in_response;
+
+  if (cfg->power_mode == SL_CPC_POWER_MODE_WAKE_FROM_GPIO) {
+    status = sli_cpc_wake_from_gpio_init(&bus->pm_runtime);
+    configured = true;
+  } else if (cfg->power_mode == SL_CPC_POWER_MODE_ALWAYS_ON && bus->drv_ops->pm_runtime_resume != NULL) {
+    status = bus->drv_ops->pm_runtime_resume(bus);
+    if (status == SL_STATUS_OK) {
+      configured = true;
+    }
+  }
+#else
+  (void)bus;
+  (void)cfg;
+#endif
+
+  if (!configured) {
+    // No device wake path; keep the core out of deep sleep.
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+    sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+#endif
+  }
+
+  return status;
+}
+
+/***************************************************************************/ /**
+ * Deinitialize runtime PM for the bus.
+ ******************************************************************************/
+void sli_cpc_bus_pm_runtime_deinit(sl_cpc_bus_t *bus)
+{
+  bool configured = false;
+
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
+  if (bus->pm_runtime.mode == SL_CPC_POWER_MODE_WAKE_FROM_GPIO) {
+    sli_cpc_wake_from_gpio_deinit(&bus->pm_runtime);
+    configured = true;
+  } else if (bus->pm_runtime.mode == SL_CPC_POWER_MODE_ALWAYS_ON && bus->drv_ops->pm_runtime_suspend != NULL) {
+    bus->drv_ops->pm_runtime_suspend(bus);
+    configured = true;
+  }
+#else
+  (void)bus;
+#endif
+
+  if (!configured) {
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+    sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+#endif
+  }
+}
+
+/***************************************************************************/ /**
+ * Acquire a runtime PM reference on the bus driver.
+ ******************************************************************************/
+void sli_cpc_bus_pm_runtime_get(sl_cpc_bus_t *bus)
+{
+  SLI_CPC_ASSERT(bus != NULL);
+
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
+  if (bus->pm_runtime.mode != SL_CPC_POWER_MODE_WAKE_FROM_GPIO) {
+    return;
+  }
+
+  bus->pm_runtime.ref_cnt++;
+  if (bus->pm_runtime.ref_cnt > 1) {
+    return;
+  }
+
+  if (bus->drv_ops->pm_runtime_resume != NULL) {
+    sl_status_t status;
+
+    status = bus->drv_ops->pm_runtime_resume(bus);
+    if (status != SL_STATUS_OK) {
+      SLI_CPC_PANIC("Failed to pm runtime resume driver, status 0x%lx", status);
+      bus->pm_runtime.ref_cnt--;
+    }
+  } else {
+    sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+  }
+#else
+  (void)bus;
+#endif
+}
+
+/***************************************************************************/ /**
+ * Release a runtime PM reference on the bus driver.
+ ******************************************************************************/
+void sli_cpc_bus_pm_runtime_put(sl_cpc_bus_t *bus)
+{
+  SLI_CPC_ASSERT(bus != NULL);
+
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
+  if (bus->pm_runtime.mode != SL_CPC_POWER_MODE_WAKE_FROM_GPIO) {
+    return;
+  }
+
+  SLI_CPC_ASSERT(bus->pm_runtime.ref_cnt > 0);
+
+  bus->pm_runtime.ref_cnt--;
+  if (bus->pm_runtime.ref_cnt > 0) {
+    return;
+  }
+
+  if (bus->drv_ops->pm_runtime_suspend != NULL) {
+    bus->drv_ops->pm_runtime_suspend(bus);
+  } else {
+    sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+  }
+#else
+  (void)bus;
 #endif
 }
 

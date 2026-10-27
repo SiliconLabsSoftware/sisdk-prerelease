@@ -58,6 +58,7 @@ NcpNetworkProperties::NcpNetworkProperties(void)
     : mDeviceRole(OT_DEVICE_ROLE_DISABLED)
 {
     memset(&mDatasetActiveTlvs, 0, sizeof(mDatasetActiveTlvs));
+    memset(&mDatasetPendingTlvs, 0, sizeof(mDatasetPendingTlvs));
     SetMeshLocalPrefix(kMeshLocalPrefixInit);
 }
 
@@ -95,10 +96,16 @@ void NcpNetworkProperties::GetDatasetActiveTlvs(otOperationalDatasetTlvs &aDatas
     memcpy(aDatasetTlvs.mTlvs, mDatasetActiveTlvs.mTlvs, mDatasetActiveTlvs.mLength);
 }
 
+void NcpNetworkProperties::SetDatasetPendingTlvs(const otOperationalDatasetTlvs &aPendingOpDatasetTlvs)
+{
+    mDatasetPendingTlvs.mLength = aPendingOpDatasetTlvs.mLength;
+    memcpy(mDatasetPendingTlvs.mTlvs, aPendingOpDatasetTlvs.mTlvs, aPendingOpDatasetTlvs.mLength);
+}
+
 void NcpNetworkProperties::GetDatasetPendingTlvs(otOperationalDatasetTlvs &aDatasetTlvs) const
 {
-    // TODO: Implement the method under NCP mode.
-    OTBR_UNUSED_VARIABLE(aDatasetTlvs);
+    aDatasetTlvs.mLength = mDatasetPendingTlvs.mLength;
+    memcpy(aDatasetTlvs.mTlvs, mDatasetPendingTlvs.mTlvs, mDatasetPendingTlvs.mLength);
 }
 
 void NcpNetworkProperties::SetMeshLocalPrefix(const otMeshLocalPrefix &aMeshLocalPrefix)

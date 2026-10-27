@@ -83,6 +83,12 @@ static bool accept_dfu_boot;
 #if defined(SECURITY) && SECURITY == 1
 static buf_ncp_host_t buf_ncp_out = { 0 };
 static bool enable_security = false;
+// Events that arrive between the boot event and the handshake response.
+// Replayed by ncp_host_get_msg() once the boot event has been consumed.
+#define NCP_SEC_PENDING_MAX 4
+static buf_ncp_host_t ncp_sec_pending[NCP_SEC_PENDING_MAX];
+static uint8_t ncp_sec_pending_count;
+static uint8_t ncp_sec_pending_rd;
 #endif // defined(SECURITY) && SECURITY == 1
 
 static int32_t ncp_host_peek_timeout(uint32_t len, uint32_t timeout);
@@ -333,6 +339,17 @@ static int32_t ncp_host_get_msg(void)
   int32_t ret;
   uint32_t msg_header;
 
+#if defined(SECURITY) && SECURITY == 1
+  if (ncp_sec_pending_count > 0) {
+    buf_ncp_host_t *src = &ncp_sec_pending[ncp_sec_pending_rd];
+    memcpy(buf_ncp_in.buf, src->buf, src->len);
+    buf_ncp_in.len = src->len;
+    ncp_sec_pending_rd = (uint8_t)((ncp_sec_pending_rd + 1) % NCP_SEC_PENDING_MAX);
+    ncp_sec_pending_count--;
+    return buf_ncp_in.len;
+  }
+#endif // defined(SECURITY) && SECURITY == 1
+
   // wait for the full header before attempting to decode it
   ret = ncp_host_read_exact(&buf_ncp_raw.buf[0],
                             SL_BGAPI_MSG_HEADER_LEN,
@@ -540,6 +557,49 @@ void ncp_host_on_bt_event(sl_bt_msg_t *evt)
 }
 
 #if defined(SECURITY) && SECURITY == 1
+static bool ncp_sec_is_bt_event(uint32_t hdr)
+{
+  return (hdr & 0xf8) == (uint32_t)(sl_bgapi_dev_type_bt | sl_bgapi_msg_type_evt);
+}
+
+static bool ncp_sec_defer_message(const uint8_t *msg, uint16_t len)
+{
+  uint8_t wr;
+
+  if ((ncp_sec_pending_count >= NCP_SEC_PENDING_MAX) || (len > DEFAULT_HOST_BUFLEN)) {
+    return false;
+  }
+  wr = (uint8_t)((ncp_sec_pending_rd + ncp_sec_pending_count) % NCP_SEC_PENDING_MAX);
+  memcpy(ncp_sec_pending[wr].buf, msg, len);
+  ncp_sec_pending[wr].len = len;
+  ncp_sec_pending_count++;
+  return true;
+}
+
+static int32_t ncp_sec_read_bgapi(uint8_t *dst, uint32_t dst_max, uint32_t timeout_ms)
+{
+  uint32_t header;
+  uint32_t payload_len;
+  int32_t ret;
+
+  ret = ncp_host_read_exact(dst, SL_BGAPI_MSG_HEADER_LEN, timeout_ms);
+  if (ret < 0) {
+    return -1;
+  }
+  memcpy(&header, dst, sizeof(header));
+  payload_len = SL_BGAPI_MSG_LEN(header);
+  if ((SL_BGAPI_MSG_HEADER_LEN + payload_len) > dst_max) {
+    return -1;
+  }
+  if (payload_len > 0) {
+    ret = ncp_host_read_exact(dst + SL_BGAPI_MSG_HEADER_LEN, payload_len, timeout_ms);
+    if (ret < 0) {
+      return -1;
+    }
+  }
+  return (int32_t)(SL_BGAPI_MSG_HEADER_LEN + payload_len);
+}
+
 static void ncp_sec_host_command_handler(buf_ncp_host_t *buf)
 {
   uint8_t response[DEFAULT_HOST_BUFLEN] = { 0 };
@@ -556,14 +616,42 @@ static void ncp_sec_host_command_handler(buf_ncp_host_t *buf)
     case sl_bt_evt_system_boot_id:
     case sl_bt_evt_dfu_boot_id:
       security_reset();
-      // Wait for the security handshake response (80 bytes length)
-      ret = ncp_host_peek_timeout(SEC_BGAPI_RSP_MSG_LEN,
-                                  MSG_RECV_TIMEOUT_MS * SEC_BGAPI_RSP_MSG_LEN);
-      if (ret < 0) {
-        return;
+      ncp_sec_pending_count = 0;
+      ncp_sec_pending_rd = 0;
+      // Read BGAPI messages until the handshake response. Any Bluetooth event
+      // in front of it is kept and delivered after the boot event.
+      {
+        uint32_t deadline = get_monotonic_ms()
+                            + (MSG_RECV_TIMEOUT_MS * (uint32_t)SEC_BGAPI_RSP_MSG_LEN);
+        bool got_handshake = false;
+
+        while (get_monotonic_ms() < deadline) {
+          uint32_t remain = deadline - get_monotonic_ms();
+          uint32_t hdr;
+
+          if (remain == 0) {
+            break;
+          }
+          ret = ncp_sec_read_bgapi(response, sizeof(response), remain);
+          if (ret < 0) {
+            break;
+          }
+          memcpy(&hdr, response, sizeof(hdr));
+          if ((SL_BT_MSG_ID(hdr) == sl_bt_rsp_user_message_to_target_id)
+              && (ret == SEC_BGAPI_RSP_MSG_LEN)) {
+            got_handshake = true;
+            break;
+          }
+          if (ncp_sec_is_bt_event(hdr)
+              && ncp_sec_defer_message(response, (uint16_t)ret)) {
+            continue;
+          }
+          break;
+        }
+        if (!got_handshake) {
+          break;
+        }
       }
-      // Read the rest of the message
-      ret = host_comm_rx(SEC_BGAPI_RSP_MSG_LEN, (void *) &response);
       resp_cmd = (sl_bt_msg_t *)response;
       if (SL_BT_MSG_ID(resp_cmd->header)
           == sl_bt_rsp_user_message_to_target_id) {

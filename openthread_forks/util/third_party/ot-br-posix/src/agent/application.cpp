@@ -33,6 +33,13 @@
 
 #define OTBR_LOG_TAG "APP"
 
+#include <errno.h>
+#include <limits.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #ifdef HAVE_LIBSYSTEMD
 #include <systemd/sd-daemon.h>
 #endif
@@ -40,12 +47,28 @@
 #include <openthread/error.h>
 
 #include "agent/application.hpp"
+
 #include "common/code_utils.hpp"
 #include "common/logging.hpp"
 #include "common/mainloop_manager.hpp"
 #include "common/types.hpp"
 #include "host/posix/dnssd.hpp"
 #include "utils/infra_link_selector.hpp"
+
+#if OTBR_ENABLE_NFTABLES || OTBR_ENABLE_PF
+#include <algorithm>
+#include <string.h>
+#include <vector>
+
+#if OTBR_ENABLE_NAT64
+#include <openthread/nat64.h>
+#endif
+#include <openthread/netdata.h>
+#include <openthread/thread.h>
+#endif
+#if OTBR_ENABLE_PF
+#include <openthread/openthread-system.h>
+#endif
 
 namespace otbr {
 
@@ -159,7 +182,26 @@ void Application::Deinit(void)
 
 otbrError Application::Run(void)
 {
-    otbrError error = OTBR_ERROR_NONE;
+    struct sigaction sa{};
+    otbrError        error = OTBR_ERROR_NONE;
+
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESETHAND;
+
+    // allow quitting elegantly
+    sa.sa_handler = HandleSignal;
+    if (sigaction(SIGTERM, &sa, nullptr) < 0)
+    {
+        otbrLogWarning("Failed to install SIGTERM handler: %s", strerror(errno));
+    }
+
+    // avoid exiting on SIGPIPE
+    sa.sa_handler = SIG_IGN;
+    sa.sa_flags   = 0;
+    if (sigaction(SIGPIPE, &sa, nullptr) < 0)
+    {
+        otbrLogWarning("Failed to ignore SIGPIPE: %s", strerror(errno));
+    }
 
 #ifdef HAVE_LIBSYSTEMD
     if (getenv("SYSTEMD_EXEC_PID") != nullptr)
@@ -183,11 +225,52 @@ otbrError Application::Run(void)
     }
 #endif
 
-    // allow quitting elegantly
-    signal(SIGTERM, HandleSignal);
+    // Generic readiness notification for fd-based supervisors (s6, dinit,
+    // ...): write a newline to the file descriptor passed in OTBR_NOTIFY_FD.
+    // See https://skarnet.org/software/s6/notifywhenup.html
+    {
+        const char *notifyFdEnv = getenv("OTBR_NOTIFY_FD");
 
-    // avoid exiting on SIGPIPE
-    signal(SIGPIPE, SIG_IGN);
+        if (notifyFdEnv != nullptr)
+        {
+            char *end = nullptr;
+            long  notifyFdLong;
+
+            errno        = 0;
+            notifyFdLong = strtol(notifyFdEnv, &end, 10);
+
+            // Reject the standard I/O stream descriptors (0-2)
+            if (end != notifyFdEnv && *end == '\0' && errno == 0 && notifyFdLong >= 3 && notifyFdLong <= INT_MAX)
+            {
+                int     notifyFd = static_cast<int>(notifyFdLong);
+                ssize_t rval;
+
+                otbrLogInfo("Notify readiness on file descriptor %d.", notifyFd);
+
+                do
+                {
+                    rval = write(notifyFd, "\n", 1);
+                } while (rval == -1 && errno == EINTR);
+
+                if (rval == -1)
+                {
+                    otbrLogWarning("Failed to notify readiness on file descriptor %d: %s", notifyFd, strerror(errno));
+                }
+
+                close(notifyFd);
+            }
+            else
+            {
+                otbrLogWarning("Ignoring invalid OTBR_NOTIFY_FD value: %s", notifyFdEnv);
+            }
+
+            // Run() may execute again within the same process lifecycle
+            // (pseudo reset) or after an in-place re-exec (otPlatReset),
+            // when the descriptor number may have been reused for an
+            // unrelated resource. Only notify once.
+            unsetenv("OTBR_NOTIFY_FD");
+        }
+    }
 
     while (!sShouldTerminate)
     {
@@ -232,13 +315,26 @@ otbrError Application::Run(void)
 
 void Application::HandleSignal(int aSignal)
 {
+    OTBR_UNUSED_VARIABLE(aSignal);
+
     sShouldTerminate = true;
-    signal(aSignal, SIG_DFL);
 }
 
 void Application::CreateRcpMode(void)
 {
     otbr::Host::RcpHost &rcpHost = static_cast<otbr::Host::RcpHost &>(mHost);
+#if OTBR_ENABLE_NFTABLES
+    mNftables = MakeUnique<Firewall::Nftables>();
+    mFirewall = MakeUnique<Firewall::FirewallManager>(*mNftables, mInterfaceName);
+    // A table deleted behind the agent's back (`nft flush ruleset`, OpenWrt's
+    // `fw4 flush`) is put back at once; one that cannot be is fatal, as at
+    // startup.
+    mNftablesMonitor = MakeUnique<Firewall::NftablesMonitor>(mFirewall->GetTableName(), [this](void) {
+        otbrError error = mFirewall->Reinstall();
+
+        SuccessOrDie(error, "Failed to reinstall the firewall!");
+    });
+#endif
 #if OTBR_ENABLE_BACKBONE_ROUTER
     mBackboneAgent = MakeUnique<BackboneRouter::BackboneAgent>(rcpHost);
 #endif
@@ -328,6 +424,59 @@ void Application::InitRcpMode(const std::string &aRestListenAddress, int aRestLi
     });
 #endif
 #endif // OTBR_ENABLE_BORDER_AGENT
+#if OTBR_ENABLE_NFTABLES || OTBR_ENABLE_PF
+    // The firewall is a security control: if it was built in (OTBR_NFTABLES or
+    // OTBR_PF) but cannot be installed, abort rather than silently forward
+    // traffic unfiltered. This mirrors the legacy script path, which `die`d when
+    // the otbr-firewall / otbr-nat44 services failed to start.
+    // Each result is taken once: SuccessOrDie() names its argument twice, so a
+    // call passed to it directly runs a second time on the failing path and the
+    // fatal log reports what that second attempt returned.
+    otbrError firewallError;
+
+#if OTBR_ENABLE_NFTABLES
+    firewallError = mNftables->Init();
+    SuccessOrDie(firewallError, "Failed to initialize the nftables firewall!");
+    // Watched from before the table exists, so a flush during setup is not
+    // missed; the agent's own deletions carry its port id and are ignored.
+    firewallError = mNftablesMonitor->Init(mNftables->GetPortId());
+    SuccessOrDie(firewallError, "Failed to watch the firewall table!");
+#else
+    // pf rules are scoped to the Thread interface by name, and on macOS the
+    // kernel picks that name (utunN) when mHost.Init() creates the interface,
+    // so the backend is created here rather than in CreateRcpMode().
+    mPfctl    = MakeUnique<Firewall::PfctlProcess>();
+    mFirewall = MakeUnique<Firewall::PfFirewall>(*mPfctl, otSysGetThreadNetifName());
+#endif
+    firewallError = mFirewall->Init();
+    SuccessOrDie(firewallError, "Failed to initialize the firewall manager!");
+    firewallError = mFirewall->EnableIngressFilter();
+    SuccessOrDie(firewallError, "Failed to install the Thread ingress filter!");
+    // Populate the ingress allow/deny sets from Thread network data, and keep
+    // them in sync as it changes. This is the in-process replacement for the
+    // OpenThread posix platform firewall's ipset producer. The NAT44
+    // masquerade follows the NAT64 translator the same way: only an active
+    // translator produces IPv4 traffic from the Thread interface, and a build
+    // with NAT64 can still have it switched off at runtime.
+    rcpHost.AddThreadStateChangedCallback([this](otChangedFlags aFlags) {
+        // Network data carries the on-mesh prefixes; the active dataset carries
+        // the mesh-local prefix, which the deny set also covers.
+        if (aFlags & (OT_CHANGED_THREAD_NETDATA | OT_CHANGED_ACTIVE_DATASET))
+        {
+            UpdateIngressPrefixes();
+        }
+#if OTBR_ENABLE_NAT64
+        if (aFlags & OT_CHANGED_NAT64_TRANSLATOR_STATE)
+        {
+            UpdateNat44Masquerade();
+        }
+#endif
+    });
+    UpdateIngressPrefixes();
+#if OTBR_ENABLE_NAT64
+    UpdateNat44Masquerade();
+#endif
+#endif
 #if OTBR_ENABLE_BACKBONE_ROUTER
     mBackboneAgent->Init();
 #endif
@@ -351,8 +500,125 @@ void Application::InitRcpMode(const std::string &aRestListenAddress, int aRestLi
 #endif
 }
 
+#if OTBR_ENABLE_NFTABLES || OTBR_ENABLE_PF
+void Application::UpdateIngressPrefixes(void)
+{
+    otNetworkDataIterator    iterator = OT_NETWORK_DATA_ITERATOR_INIT;
+    otBorderRouterConfig     config;
+    const otMeshLocalPrefix *meshLocal;
+    std::vector<Ip6Prefix>   denySrc;
+    std::vector<Ip6Prefix>   allowDst;
+    otInstance              *instance;
+
+    // Several border routers can advertise the same on-mesh prefix, and duplicate
+    // intervals in a single transaction make the kernel reject the whole batch,
+    // so only distinct prefixes go in. (Declared before the first VerifyOrExit so
+    // no goto crosses its initialisation.)
+    auto addUnique = [](std::vector<Ip6Prefix> &aVec, const Ip6Prefix &aPrefix) {
+        if (std::find(aVec.begin(), aVec.end(), aPrefix) == aVec.end())
+        {
+            aVec.push_back(aPrefix);
+        }
+    };
+
+    // The firewall only exists in RCP mode, so check it before downcasting mHost.
+    VerifyOrExit(mFirewall != nullptr && mFirewall->IsIngressFilterEnabled());
+
+    instance = static_cast<otbr::Host::RcpHost &>(mHost).GetInstance();
+    VerifyOrExit(instance != nullptr);
+
+    // Deny-src and allow-dst both cover every on-mesh prefix.
+    while (otNetDataGetNextOnMeshPrefix(instance, &iterator, &config) == OT_ERROR_NONE)
+    {
+        Ip6Prefix prefix;
+        prefix.Set(config.mPrefix);
+        addUnique(denySrc, prefix);
+        addUnique(allowDst, prefix);
+    }
+
+    // Deny-src additionally covers the mesh-local /64.
+    meshLocal = otThreadGetMeshLocalPrefix(instance);
+    if (meshLocal != nullptr)
+    {
+        Ip6Prefix mlPrefix{};
+        memcpy(mlPrefix.mPrefix.m8, meshLocal->m8, sizeof(meshLocal->m8));
+        mlPrefix.mLength = 64;
+        addUnique(denySrc, mlPrefix);
+    }
+
+    if (mFirewall->ReplaceIngressPrefixes(denySrc, allowDst) != OTBR_ERROR_NONE)
+    {
+        otbrLogWarning("Firewall: failed to update ingress prefixes");
+    }
+
+exit:
+    return;
+}
+
+#if OTBR_ENABLE_NAT64
+void Application::UpdateNat44Masquerade(void)
+{
+    otInstance *instance;
+    bool        active;
+    otbrError   error;
+
+    VerifyOrExit(mFirewall != nullptr && !mBackboneInterfaceName.empty());
+
+    instance = static_cast<otbr::Host::RcpHost &>(mHost).GetInstance();
+    VerifyOrExit(instance != nullptr);
+
+    // Installed while the translator translates, removed once it stops. Not
+    // fatal like the ingress filter at startup: without the masquerade NAT64
+    // traffic goes untranslated, nothing goes unfiltered.
+    active = (otNat64GetTranslatorState(instance) == OT_NAT64_STATE_ACTIVE);
+    VerifyOrExit(active != mFirewall->IsNat44Enabled());
+
+    error = active ? mFirewall->EnableNat44Masquerade(mBackboneInterfaceName) : mFirewall->DisableNat44Masquerade();
+    if (error != OTBR_ERROR_NONE)
+    {
+        otbrLogWarning("Firewall: failed to %s the NAT44 masquerade", active ? "install" : "remove");
+    }
+
+exit:
+    return;
+}
+#endif
+#endif
+
 void Application::DeinitRcpMode(void)
 {
+#if OTBR_ENABLE_NFTABLES || OTBR_ENABLE_PF
+#if OTBR_ENABLE_NFTABLES
+    if (mNftablesMonitor != nullptr)
+    {
+        mNftablesMonitor->Deinit();
+    }
+#endif
+    // Tear down the OTBR firewall while its backend is still usable (the
+    // backend outlives mFirewall by member declaration order).
+    if (mFirewall != nullptr)
+    {
+        otbrError firewallError = mFirewall->Deinit();
+        if (firewallError != OTBR_ERROR_NONE)
+        {
+            otbrLogWarning("Firewall: teardown failed (%d)", firewallError);
+        }
+    }
+#if OTBR_ENABLE_NFTABLES
+    // Close the netlink socket too, or a later InitRcpMode() dies in
+    // mNftables->Init() on the still-open socket.
+    if (mNftables != nullptr)
+    {
+        mNftables->Deinit();
+    }
+#endif
+#if OTBR_ENABLE_PF
+    // Both are recreated by InitRcpMode(); release them in reverse order of
+    // creation so mFirewall never outlives the pfctl runner it references.
+    mFirewall.reset();
+    mPfctl.reset();
+#endif
+#endif
 #if OTBR_ENABLE_DNSSD_PLAT
     mDnssdPlatform.Stop();
 #endif

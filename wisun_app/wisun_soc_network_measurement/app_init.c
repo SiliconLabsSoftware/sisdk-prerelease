@@ -43,7 +43,6 @@
 #include "sl_wisun_network_measurement_stat.h"
 #include "sl_wisun_event_mgr.h"
 #include "app.h"
-#include "app_custom_callback.h"
 #include "sl_wisun_coap_rhnd.h"
 
 #if defined(SL_CATALOG_GUI_PRESENT)
@@ -134,17 +133,6 @@ void app_init(void)
   coap_resource.discoverable           = true;
   EFM_ASSERT(sl_wisun_coap_rhnd_resource_add(&coap_resource) == SL_STATUS_OK);
 
-  // Register callbacks
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_CONNECTED_IND_ID,
-                                        app_custom_connected_callback);
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_SOCKET_DATA_IND_ID,
-                                        app_custom_socket_data_callback);
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_SOCKET_DATA_SENT_IND_ID,
-                                        app_custom_socket_data_sent_callback);
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_JOIN_STATE_IND_ID,
-                                        app_custom_join_state_callback);
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID,
-                                        app_custom_regulation_tx_level_callback);
 
   // Creating App main thread
   const osThreadAttr_t app_task_attr = {

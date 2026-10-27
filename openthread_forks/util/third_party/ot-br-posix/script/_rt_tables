@@ -30,6 +30,8 @@
 #       This script manipulates router tables.
 #
 
+BACKBONE_ROUTER="${BACKBONE_ROUTER:-1}"
+
 rt_tables_uninstall()
 {
     with BACKBONE_ROUTER || return 0

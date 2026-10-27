@@ -24,6 +24,16 @@ The animation below showcases the demo running on an EFR32xG21 Wireless Starter 
 
 ![Blinky animation](image/readme_img5.gif)
 
+## PHY Configuration
+
+The example advertises and opens connections on the PHY selected in `config/app_config.h` (`BLE_BLINKY_PHY`). The default is **`sl_bt_gap_phy_1m`** with legacy advertising.
+
+| `BLE_BLINKY_PHY` | Advertising | Connection |
+|------------------|-------------|------------|
+| `sl_bt_gap_phy_1m` | Legacy | 1M |
+| `sl_bt_gap_phy_2m` | Extended (1M primary, 2M secondary) | 2M |
+| `sl_bt_gap_phy_coded` | Extended (Coded primary and secondary) | Coded |
+
 ## Device Firmware Update
 
 This example project does not include Device Firmware Update (DFU) functionality by default, but it can be added easily.

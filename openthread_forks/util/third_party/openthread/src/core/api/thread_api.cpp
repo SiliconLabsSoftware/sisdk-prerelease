@@ -46,18 +46,6 @@ void otThreadSetChildTimeout(otInstance *aInstance, uint32_t aTimeout)
     AsCoreType(aInstance).Get<Mle::Mle>().SetTimeout(aTimeout);
 }
 
-otError otThreadSaveNetworkInfo(otInstance *aInstance)
-{
-    Error     error    = kErrorNone;
-    Instance &instance = AsCoreType(aInstance);
-
-    VerifyOrExit(instance.Get<Mle::Mle>().IsAttached(), error = kErrorInvalidState);
-    instance.Get<Mle::Mle>().Store();
-
-exit:
-    return error;
-}
-
 const otExtendedPanId *otThreadGetExtendedPanId(otInstance *aInstance)
 {
     return &AsCoreType(aInstance).Get<MeshCoP::NetworkIdentity>().GetExtPanId();
@@ -495,16 +483,10 @@ uint32_t otThreadGetStoreFrameCounterAhead(otInstance *aInstance)
 }
 #endif
 
-#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
-otError otThreadWakeup(otInstance         *aInstance,
-                       const otExtAddress *aWedAddress,
-                       uint16_t            aWakeupIntervalUs,
-                       uint16_t            aWakeupDurationMs,
-                       otWakeupCallback    aCallback,
-                       void               *aCallbackContext)
+#if OPENTHREAD_CONFIG_TD_WAKE_INITIATOR_ENABLE
+otError otThreadWakeup(otInstance *, const otExtAddress *, uint16_t, uint16_t, otWakeupCallback, void *)
 {
-    return AsCoreType(aInstance).Get<Mle::Mle>().Wakeup(AsCoreType(aWedAddress), aWakeupIntervalUs, aWakeupDurationMs,
-                                                        aCallback, aCallbackContext);
+    return kErrorNotImplemented;
 }
 #endif
 

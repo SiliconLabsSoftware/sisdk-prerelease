@@ -39,8 +39,8 @@
 #include "common/code_utils.hpp"
 #include "common/debug.hpp"
 #include "common/logging.hpp"
+#include "mac/mac_frame.hpp"
 #include "utils/code_utils.h"
-#include "utils/mac_frame.h"
 
 #include "platform-efr32.h"
 #include "radio_instance.h"
@@ -53,6 +53,8 @@ extern "C" {
 #include SL_OT_MAC_KEY_POLICY_CONFIG_HEADER
 #include "mac/mac-key-types.hpp"
 #include "mac/tx-aes-ccm-api.hpp"
+
+using namespace ot;
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 
@@ -118,19 +120,28 @@ void sli_ot_radio_security_deinit(void)
 
 otError sli_ot_radio_security_process_transmit(otRadioFrame *aFrame, otInstance *aInstance)
 {
-    otError         error = OT_ERROR_NONE;
-    uint8_t         keyId;
-    uint8_t         keyToUse;
-    instanceIndex_t instanceIndex = sli_ot_radio_instance_get_index(aInstance);
+    otError                 error = OT_ERROR_NONE;
+    uint8_t                 keyId;
+    uint8_t                 keyToUse;
+    instanceIndex_t         instanceIndex = sli_ot_radio_instance_get_index(aInstance);
+    const Mac::TxFrame     &txFrame       = static_cast<const Mac::TxFrame &>(*aFrame);
+    Mac::TxFrame::ParseInfo info;
 
-    otEXPECT(otMacFrameIsSecurityEnabled(aFrame) && otMacFrameIsKeyIdMode1(aFrame)
-             && !aFrame->mInfo.mTxInfo.mIsSecurityProcessed);
+    otEXPECT(!aFrame->mInfo.mTxInfo.mIsSecurityProcessed);
+
+    error = info.ParseFrom(txFrame, Mac::Frame::kParseSecurityHeader);
+    if (error == OT_ERROR_NOT_FOUND)
+    {
+        ExitNow(error = OT_ERROR_NONE);
+    }
+    SuccessOrExit(error);
+    otEXPECT(info.mKeyIdMode == Mac::Frame::kKeyIdMode1);
 
     otEXPECT_ACTION(!sMacKeys[instanceIndex].keyUpdateInProgress, error = OT_ERROR_INVALID_STATE);
 
-    if (otMacFrameIsAck(aFrame))
+    if (info.mType == Mac::Frame::kTypeAck)
     {
-        keyId = otMacFrameGetKeyId(aFrame);
+        keyId = info.mKeyIndex;
 
         otEXPECT_ACTION(keyId != 0, error = OT_ERROR_FAILED);
 
@@ -172,7 +183,7 @@ otError sli_ot_radio_security_process_transmit(otRadioFrame *aFrame, otInstance 
         frameCounter                            = sMacKeys[instanceIndex].macFrameCounter;
         sMacKeys[instanceIndex].macFrameCounter = frameCounter + 1;
 
-        if (otMacFrameIsAck(aFrame))
+        if (info.mType == Mac::Frame::kTypeAck)
         {
             // Store ack frame counter and ack key ID for receive frame
             sMacKeys[instanceIndex].ackKeyId        = keyId;
@@ -181,13 +192,14 @@ otError sli_ot_radio_security_process_transmit(otRadioFrame *aFrame, otInstance 
 
         CORE_EXIT_ATOMIC();
 
-        otMacFrameSetKeyId(aFrame, keyId);
-        otMacFrameSetFrameCounter(aFrame, frameCounter);
+        info.WriteKeyIndex(keyId);
+        info.WriteFrameCounter(frameCounter);
     }
 
-    error = sli_ot_process_transmit_aes_ccm(aFrame,
-                                            &sExtAddress[instanceIndex],
-                                            &sMacKeys[instanceIndex].palKeys[keyToUse]);
+    error = sli_ot_process_transmit_aes_ccm_with_parse_info(aFrame,
+                                                            &sExtAddress[instanceIndex],
+                                                            &sMacKeys[instanceIndex].palKeys[keyToUse],
+                                                            &info);
 
 exit:
     return error;

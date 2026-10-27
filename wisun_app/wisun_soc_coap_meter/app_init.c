@@ -39,7 +39,6 @@
 #include "sl_wisun_app_core_config.h"
 #include "app.h"
 #if !defined(SL_WISUN_FG23_SUPPORT)
-#include "app_custom_callback.h"
 #endif
 #include "sl_component_catalog.h"
 
@@ -75,13 +74,6 @@ void app_init(void)
 #endif
 
 #if !defined(SL_WISUN_FG23_SUPPORT)
-  /* Register callbacks */
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_CONNECTED_IND_ID,
-                                        app_custom_connected_callback);
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_SOCKET_DATA_IND_ID,
-                                        app_custom_socket_data_callback);
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_SOCKET_DATA_SENT_IND_ID,
-                                        app_custom_socket_data_sent_callback);
 #endif
 
   /* Creating App main thread */

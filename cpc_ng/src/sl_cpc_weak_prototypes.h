@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sl_cpc_weak_prototypes.h
  * @brief CPC weak function prototypes grouped into one header. Those functions
  *        should be implemented by the user.
  *******************************************************************************

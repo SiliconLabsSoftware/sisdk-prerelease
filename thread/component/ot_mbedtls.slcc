@@ -20,6 +20,7 @@ requires:
 - name: mbedtls_jpake
   # TLS EC J-PAKE ciphersuite / set_hs_ecjpake_password(_opaque) APIs.
 - name: mbedtls_key_exchange_ecjpake
+- name: mbedtls_pem_parse
 - name: mbedtls_ecc_secp256r1
 - name: mbedtls_cmac
 recommends:

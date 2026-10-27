@@ -205,14 +205,6 @@ public:
     void RequestCslFrameTransmission(void);
 #endif
 
-#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
-    /**
-     * Requests `Mac` to start a wake-up frame transmission.
-     */
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void RequestWakeupFrameTransmission(void);
-#endif
-
     /**
      * Requests transmission of a data poll (MAC Data Request) frame.
      *
@@ -554,15 +546,6 @@ public:
     void SetCslPeriod(uint16_t aPeriod);
 
     /**
-     * This method converts a given CSL period in units of 10 symbols to microseconds.
-     *
-     * @param[in] aPeriodInTenSymbols   The CSL period in unit of 10 symbols.
-     *
-     * @returns The converted CSL period value in microseconds corresponding to @p aPeriodInTenSymbols.
-     */
-    static uint32_t CslPeriodToUsec(uint16_t aPeriodInTenSymbols);
-
-    /**
      * Indicates whether CSL is started at the moment.
      *
      * @retval TRUE   If CSL is enabled.
@@ -644,61 +627,6 @@ public:
      */
     uint8_t GetWakeupChannel(void) const { return mWakeupChannel; }
 
-#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE || OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
-    /**
-     * Sets the wake-up channel.
-     *
-     * @param[in]  aChannel  The wake-up channel.
-     *
-     * @retval kErrorNone          Successfully set the wake-up channel.
-     * @retval kErrorInvalidArgs   The @p aChannel is not in the supported channel mask.
-     */
-    Error SetWakeupChannel(uint8_t aChannel);
-#endif
-
-#if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
-    /**
-     * Gets the wake-up listen parameters.
-     *
-     * @param[out]  aInterval  A reference to return the wake-up listen interval in microseconds.
-     * @param[out]  aDuration  A reference to return the wake-up listen duration in microseconds.
-     */
-    void GetWakeupListenParameters(uint32_t &aInterval, uint32_t &aDuration) const;
-
-    /**
-     * Sets the wake-up listen parameters.
-     *
-     * The listen interval must be greater than the listen duration.
-     * The listen duration must be greater or equal than `Radio::kMinWakeupListenDuration`.
-     *
-     * @param[in]  aInterval  The wake-up listen interval in microseconds.
-     * @param[in]  aDuration  The wake-up listen duration in microseconds.
-     *
-     * @retval kErrorNone          Successfully set the wake-up listen parameters.
-     * @retval kErrorInvalidArgs   Configured listen interval is not greater than listen duration.
-     */
-    Error SetWakeupListenParameters(uint32_t aInterval, uint32_t aDuration);
-
-    /**
-     * Enables/disables listening for wake-up frames.
-     *
-     * @param[in]  aEnable  TRUE to enable listening for wake-up frames, FALSE otherwise
-     *
-     * @retval kErrorNone          Successfully enabled/disabled listening for wake-up frames.
-     * @retval kErrorInvalidArgs   Configured listen interval is not greater than listen duration.
-     * @retval kErrorInvalidState  Could not enable/disable listening for wake-up frames.
-     */
-    Error SetWakeupListenEnabled(bool aEnable);
-
-    /**
-     * Returns whether listening for wake-up frames is enabled.
-     *
-     * @retval TRUE   If listening for wake-up frames is enabled.
-     * @retval FALSE  If listening for wake-up frames is not enabled.
-     */
-    bool IsWakeupListenEnabled(void) const { return mWakeupListenEnabled; }
-#endif // OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
-
 private:
     static constexpr uint16_t kMaxCcaSampleCount = OPENTHREAD_CONFIG_CCA_FAILURE_RATE_AVERAGING_WINDOW;
 
@@ -713,10 +641,8 @@ private:
     static constexpr uint8_t kMaxFrameRetriesCsl             = 0;
     static constexpr uint8_t kTxNumBcast                     = OPENTHREAD_CONFIG_MAC_TX_NUM_BCAST;
 
-    static constexpr uint16_t kMinCslIePeriod = OPENTHREAD_CONFIG_MAC_CSL_MIN_PERIOD;
-
-    static constexpr uint32_t kDefaultWedListenInterval = OPENTHREAD_CONFIG_WED_LISTEN_INTERVAL;
-    static constexpr uint32_t kDefaultWedListenDuration = OPENTHREAD_CONFIG_WED_LISTEN_DURATION;
+    static constexpr uint32_t kDefaultWedListenInterval = 1000000;
+    static constexpr uint32_t kDefaultWedListenDuration = 8000;
 
     enum Operation : uint8_t
     {
@@ -732,9 +658,6 @@ private:
 #endif
 #if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
         kOperationTransmitDataCsl,
-#endif
-#if OPENTHREAD_CONFIG_WAKEUP_COORDINATOR_ENABLE
-        kOperationTransmitWakeup,
 #endif
     };
 
@@ -771,24 +694,29 @@ private:
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void RecordCcaStatus(bool aCcaSuccess, uint8_t aChannel);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void RecordFrameTransmitStatus(const TxFrame &aFrame, Error aError, uint8_t aRetryCount, bool aWillRetx);
+    void RecordFrameTransmitStatus(const TxFrame::ParseInfo &aFrameInfo,
+                                   Error                     aError,
+                                   uint8_t                   aRetryCount,
+                                   bool                      aWillRetx);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void HandleTransmitDone(TxFrame &aFrame, RxFrame *aAckFrame, Error aError);
+    void HandleTransmitDone(TxFrame::ParseInfo &aFrameInfo, RxFrame *aAckFrame, Error aError);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void EnergyScanDone(int8_t aEnergyScanMaxRssi);
 
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    Error ProcessReceiveSecurity(RxFrame &aFrame, const Address &aSrcAddr, Neighbor *aNeighbor);
+    Error ProcessReceiveSecurity(RxFrame::ParseInfo &aFrameInfo, const Address &aSrcAddr, Neighbor *aNeighbor);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void  ProcessTransmitSecurity(TxFrame &aFrame);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void  ProcessTransmitSecurity(TxFrame::ParseInfo &aFrameInfo);
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    Error ProcessEnhAckSecurity(TxFrame &aTxFrame, RxFrame &aAckFrame);
+    Error ProcessEnhAckSecurity(TxFrame::ParseInfo &aTxFrameInfo, RxFrame::ParseInfo &aAckFrameInfo);
 #endif
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    const KeyMaterial *DetermineMode1Key(const Frame &aFrame) const;
+    const KeyMaterial *DetermineMode1Key(const Frame::ParseInfo &aFrameInfo) const;
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    const KeyMaterial *DetermineMode1KeyAndSequence(const Frame &aFrame, uint32_t &aKeySequence) const;
+    const KeyMaterial *DetermineMode1KeyAndSequence(const Frame::ParseInfo &aFrameInfo, uint32_t &aKeySequence) const;
 
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void     UpdateIdleMode(void);
@@ -813,30 +741,36 @@ private:
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void     BeginTransmit(void);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
+    void     HandleTxFramePrepFailed(TxFrames &aTxFrames);
+    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     Error    FilterDestShortAddress(ShortAddress aDestAddress) const;
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void     UpdateNeighborLinkInfo(Neighbor &aNeighbor, const RxFrame &aRxFrame);
+    void     UpdateNeighborLinkInfo(Neighbor &aNeighbor, const RxFrame::ParseInfo &aRxFrameInfo);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    bool     HandleMacCommand(RxFrame &aFrame);
+    void     HandleMacCommand(RxFrame::ParseInfo &aFrameInfo);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void     HandleTimer(void);
 #if OPENTHREAD_CONFIG_RADIO_LINK_IEEE_802_15_4_ENABLE
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    Error ProcessTxDone(TxFrame &aFrame, RxFrame *aAckFrame, Error &aError);
+    Error ProcessTxDone(TxFrame::ParseInfo &aFrameInfo, RxFrame::ParseInfo &aAckFrameInfo, Error &aError);
 #endif
 #if OPENTHREAD_CONFIG_MULTI_RADIO
-    Error ProcessMultiRadioTxDone(TxFrame &aFrame, Error &aError);
+    Error ProcessMultiRadioTxDone(TxFrame::ParseInfo &aFrameInfo, Error &aError);
 #endif
 
     Error CanScan(void) const;
     void  Scan(Operation aScanOperation, uint32_t aScanChannels, uint16_t aScanDuration);
     Error UpdateScanChannel(void);
     void  PerformActiveScan(void);
-    void  ReportActiveScanResult(const RxFrame *aBeaconFrame);
+    void  ReportActiveScanResult(const RxFrame::ParseInfo *aBeaconFrameInfo);
     void  PerformEnergyScan(void);
     void  ReportEnergyScanResult(int8_t aRssi);
-    void LogFrameRxFailure(const RxFrame *aFrame, Error aError) const;
-    void LogFrameTxFailure(const TxFrame &aFrame, Error aError, uint8_t aRetryCount, bool aWillRetx) const;
+
+    void LogFrameRxFailure(const RxFrame::ParseInfo &aFrameInfo, Error aError) const;
+    void LogFrameTxFailure(const TxFrame::ParseInfo &aFrameInfo,
+                           Error                     aError,
+                           uint8_t                   aRetryCount,
+                           bool                      aWillRetx) const;
     void LogBeacon(const char *aActionText) const;
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void LogOperation(OperationAction aAction, Operation aOperation) const;
@@ -846,7 +780,7 @@ private:
 
 #if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void ProcessCsl(const RxFrame &aFrame, const Address &aSrcAddr);
+    void ProcessCsl(const RxFrame::ParseInfo &aFrameInfo, const Address &aSrcAddr);
 #endif
 #if OPENTHREAD_CONFIG_MAC_CSL_RECEIVER_ENABLE
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
@@ -856,13 +790,7 @@ private:
 #endif
 #if OPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void ProcessEnhAckProbing(const RxFrame &aFrame, const Neighbor &aNeighbor);
-#endif
-#if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    Error HandleWakeupFrame(const RxFrame &aFrame);
-    SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void  UpdateWakeupListening(void);
+    void ProcessEnhAckProbing(const RxFrame::ParseInfo &aFrameInfo, const Neighbor &aNeighbor);
 #endif
 
     using OperationTask = TaskletIn<Mac, &Mac::PerformNextOperation>;
@@ -881,9 +809,6 @@ private:
 #if OPENTHREAD_CONFIG_MAC_STAY_AWAKE_BETWEEN_FRAGMENTS
     bool mShouldDelaySleep : 1;
     bool mDelayingSleep : 1;
-#endif
-#if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
-    bool mWakeupListenEnabled : 1;
 #endif
     Operation   mOperation;
     uint16_t    mPendingOperations;
@@ -909,10 +834,6 @@ private:
     uint16_t mCslPeriod;
 #endif
     uint8_t mWakeupChannel;
-#if OPENTHREAD_CONFIG_WAKEUP_END_DEVICE_ENABLE
-    uint32_t mWakeupListenInterval;
-    uint32_t mWakeupListenDuration;
-#endif
     union
     {
         ScanResult::ScanCallback    mActiveScanCallback;

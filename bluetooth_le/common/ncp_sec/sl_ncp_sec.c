@@ -232,24 +232,24 @@ static int get_random_data(void *ctx, uint8_t *rand, size_t len)
 
 static int generate_ecc_keypair()
 {
-  psa_key_handle_t handle;
-  psa_status_t status = psa_open_key(PSA_ECDH_KEY_ID, &handle);
+  psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
+
+  // The key is persistent, so reading back its attributes tells us whether a
+  // previous run already generated it.
+  psa_status_t status = psa_get_key_attributes(PSA_ECDH_KEY_ID, &attr);
+  psa_reset_key_attributes(&attr);
   if (status == PSA_SUCCESS) {
     // No need to regenerate private key if already present
     return (int)status;
   }
   // Not present, generate private key on curve secp256r1 (NIST P-256)
-  psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
+  psa_key_id_t key_id;
   psa_set_key_type(&attr, PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1));
   psa_set_key_bits(&attr, 256);
   psa_set_key_id(&attr, PSA_ECDH_KEY_ID);
   psa_set_key_usage_flags(&attr, PSA_KEY_USAGE_DERIVE | PSA_KEY_USAGE_EXPORT);
   psa_set_key_algorithm(&attr, PSA_ALG_ECDH);
-  status = psa_generate_key(&attr, &handle);
-  if (status != PSA_SUCCESS) {
-    return (int)status;
-  }
-  psa_close_key(handle);
+  status = psa_generate_key(&attr, &key_id);
 
   return (int)status;
 }
@@ -257,15 +257,9 @@ static int generate_ecc_keypair()
 static int ecdh(const uint8_t *public_key_in)
 {
   psa_status_t status;
-  psa_key_handle_t handle;
   uint8_t sha256_input[ECDH_PUBLIC_KEY_SIZE];
   uint8_t sha256_output[ECDH_PUBLIC_KEY_SIZE];
 
-  // Calculate shared secret
-  status = psa_open_key(PSA_ECDH_KEY_ID, &handle);
-  if (status != PSA_SUCCESS) {
-    return (int)status;
-  }
   // The SECP_R1 key family identifier is a leading 0x04
   uint8_t host_public_key[PUBLIC_KEYPAIR_SIZE + 1];
   host_public_key[0] = 0x04;
@@ -273,7 +267,7 @@ static int ecdh(const uint8_t *public_key_in)
   size_t output_len;
   // Also validates the host's public key
   status = psa_raw_key_agreement(PSA_ALG_ECDH,
-                                 handle,
+                                 PSA_ECDH_KEY_ID,
                                  host_public_key,
                                  sizeof(host_public_key),
                                  sha256_input,
@@ -290,10 +284,13 @@ static int ecdh(const uint8_t *public_key_in)
                             sha256_output,
                             sizeof(sha256_output),
                             &hash_out_size);
-  if (PSA_SUCCESS != status || hash_out_size < sizeof(ccm_key)) {
+  if (PSA_SUCCESS != status) {
     return (int)status;
   }
-  psa_close_key(handle);
+  if (hash_out_size < sizeof(ccm_key)) {
+    // Needs its own error, as status holds PSA_SUCCESS here
+    return (int)PSA_ERROR_GENERIC_ERROR;
+  }
   memcpy(ccm_key, sha256_output, sizeof(ccm_key));
 
   return (int)status;
@@ -353,19 +350,24 @@ static sl_status_t increase_security(uint8_t *public_keys,
          sizeof(ncp_sec_counter_out.target_iv));
 
   // Export the public key to use for en-/decrypt
-  psa_key_handle_t handle;
-  psa_status_t status;
-  status = psa_open_key(PSA_ECDH_KEY_ID, &handle);
-  if (status != PSA_SUCCESS) {
-    return SL_STATUS_ABORT;
-  }
   uint8_t tmp[PUBLIC_KEYPAIR_SIZE + 1];
   size_t len;
-  status = psa_export_public_key(handle, tmp, sizeof(tmp), &len);
+  psa_status_t status = psa_export_public_key(PSA_ECDH_KEY_ID,
+                                              tmp,
+                                              sizeof(tmp),
+                                              &len);
   if (status != PSA_SUCCESS) {
     return SL_STATUS_ABORT;
   }
   memcpy(public_keys, tmp + 1, PUBLIC_KEYPAIR_SIZE);
+
+  // The ECDH key is not needed again until the next time the host raises
+  // security, so release the key slot it occupies.
+  status = psa_purge_key(PSA_ECDH_KEY_ID);
+  if (status != PSA_SUCCESS) {
+    return SL_STATUS_ABORT;
+  }
+
   ncp_sec_state = NCP_SEC_ENCRYPTED;
 
   return SL_STATUS_OK;
@@ -438,7 +440,7 @@ static sl_bt_msg_t* encrypt_message(sl_bt_msg_t *msg)
   auth_data[6] = ncp_sec_counter_out.counter_hi;
 
   psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
-  psa_key_handle_t private_handle;
+  psa_key_id_t private_key_id;
   psa_set_key_type(&attr, PSA_KEY_TYPE_AES);
   psa_set_key_bits(&attr, AES_CCM_KEY_SIZE * 8);
   psa_set_key_id(&attr, PSA_CIPHER_KEY_ID);
@@ -448,7 +450,7 @@ static sl_bt_msg_t* encrypt_message(sl_bt_msg_t *msg)
   psa_status_t status = psa_import_key(&attr,
                                        ccm_key,
                                        sizeof(ccm_key),
-                                       &private_handle);
+                                       &private_key_id);
   if (PSA_SUCCESS != status) {
     return NULL;
   }
@@ -457,15 +459,16 @@ static sl_bt_msg_t* encrypt_message(sl_bt_msg_t *msg)
   // and counter which are signed
   size_t out_len;
   size_t plaintext_len = len + 2;  // data len + header's upper 2 bytes
-  status = psa_aead_encrypt(private_handle,
+  status = psa_aead_encrypt(private_key_id,
                             PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, AUTH_TAG_LENGHT),
                             (uint8_t *)&ncp_sec_counter_out, NONCE_SIZE,
                             auth_data, sizeof(auth_data),
                             (uint8_t *)msg + 2, plaintext_len,
                             cipher_msg + 2, sizeof(cipher_msg) - 2,
                             &out_len);
-  psa_destroy_key(private_handle);
-  if (PSA_SUCCESS != status || out_len == 0) {
+  psa_status_t destroy_status = psa_destroy_key(private_key_id);
+
+  if (PSA_SUCCESS != status || out_len == 0 || PSA_SUCCESS != destroy_status) {
     return NULL;
   }
 
@@ -520,7 +523,7 @@ static sl_bt_msg_t* decrypt_command(sl_bt_msg_t *msg)
   memcpy(auth_data + 2, &nonce.counter, 4);
   auth_data[6] = nonce.counter_hi;
 
-  psa_key_handle_t private_handle;
+  psa_key_id_t private_key_id;
   psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
   psa_set_key_type(&attr, PSA_KEY_TYPE_AES);
   psa_set_key_bits(&attr, AES_CCM_KEY_SIZE * 8);
@@ -531,7 +534,7 @@ static sl_bt_msg_t* decrypt_command(sl_bt_msg_t *msg)
   psa_status_t status = psa_import_key(&attr,
                                        ccm_key,
                                        sizeof(ccm_key),
-                                       &private_handle);
+                                       &private_key_id);
   if (PSA_SUCCESS != status) {
     return NULL;
   }
@@ -540,15 +543,16 @@ static sl_bt_msg_t* decrypt_command(sl_bt_msg_t *msg)
   // and counter which are signed
   size_t out_len;
   size_t cipher_len = len + 2 - 5; // data + header upper 2 bytes - 5 bytes IV
-  status = psa_aead_decrypt(private_handle,
+  status = psa_aead_decrypt(private_key_id,
                             PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, AUTH_TAG_LENGHT),
                             (uint8_t *)&nonce, NONCE_SIZE,
                             auth_data, sizeof(auth_data),
                             (uint8_t *)msg + 2, cipher_len,
                             cipher_msg + 2, sizeof(cipher_msg) - 2,
                             &out_len);
-  psa_destroy_key(private_handle);
-  if (PSA_SUCCESS != status || out_len == 0) {
+  psa_status_t destroy_status = psa_destroy_key(private_key_id);
+
+  if (PSA_SUCCESS != status || out_len == 0 || PSA_SUCCESS != destroy_status) {
     return NULL;
   }
 

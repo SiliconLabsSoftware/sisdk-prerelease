@@ -22,6 +22,7 @@ include:
 - path: stack/include
   file_list:
   - path: gp-types.h
+  - path: gp-install-code.h
 - path: stack/gp
   file_list:
   - path: sli-gp-proxy-table.h
@@ -77,6 +78,7 @@ source:
 - path: stack/internal/src/ipc/gp-sink-table-ipc-command-messages.c
   condition:
   - zigbee_use_ipc
+- path: stack/gp/gp-install-code.c
 config_file:
 - path: stack/config/component_config/sl_zigbee_green_power_config.h
 

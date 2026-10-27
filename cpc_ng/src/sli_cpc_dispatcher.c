@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sli_cpc_dispatcher.c
  * @brief CPC API implementation.
  *******************************************************************************
  * # License
@@ -94,7 +94,7 @@ sl_status_t sli_cpc_dispatcher_push(sli_cpc_dispatcher_handle_t *handle, sli_cpc
 
   MCU_EXIT_ATOMIC();
 
-  sli_cpc_bus_signal_event(handle->bus, SLI_CPC_SIGNAL_SYSTEM);
+  sli_cpc_bus_signal_event(handle->bus);
 
   return SL_STATUS_OK;
 }

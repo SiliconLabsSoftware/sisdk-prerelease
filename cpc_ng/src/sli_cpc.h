@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sli_cpc.h
  * @brief CPC Internal Definitions
  *******************************************************************************
  * # License
@@ -71,17 +71,6 @@ extern "C" {
 #define SLI_CPC_INIT_WINDOW_PROBE_TIMEOUT_MS 100
 #define SLI_CPC_RE_TRANSMIT 10
 #define SLI_CPC_WINDOW_PROBE_MAX 10
-
-/******************************************************************************/
-/*                                   Enums                                    */
-/******************************************************************************/
-
-typedef enum sli_cpc_signal_type {
-  SLI_CPC_SIGNAL_RX,
-  SLI_CPC_SIGNAL_TX,
-  SLI_CPC_SIGNAL_CLOSED,
-  SLI_CPC_SIGNAL_SYSTEM,
-} sli_cpc_signal_type_t;
 
 /******************************************************************************/
 /*                                    APIs                                    */

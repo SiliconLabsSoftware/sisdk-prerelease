@@ -37,7 +37,6 @@
 #include "sl_wisun_cli.h"
 #include "sl_component_catalog.h"
 #include "sl_cli.h"
-#include "sl_string.h"
 #include "sl_wisun_api.h"
 #include "sl_wisun_trace_util.h"
 #include "sl_wisun_cli_util.h"
@@ -56,10 +55,6 @@
 #if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 #include "border_router/sl_wisun_br_api.h"
 #include "sl_wisun_app_setting_br.h"
-  #if defined(SL_CATALOG_WISUN_BR_AGENT_SERVICE_PRESENT) \
-  && SL_WISUN_BR_AGENT_SERVICE_CLI_ENABLED
-  #include "sl_wisun_br_agent_cli.h"
-  #endif
 #else
 #include "sl_wisun_app_setting.h"
 #endif
@@ -81,59 +76,6 @@ extern app_setting_wisun_t _wisun_app_settings;
 #endif
 
 #if SL_WISUN_CLI_ENABLED
-
-#if defined(SL_CATALOG_WISUN_PING_PRESENT) \
-  && SL_WISUN_PING_CLI_ENABLED
-#include "sl_wisun_ping_cli.h"
-#endif
-
-#if defined(SL_CATALOG_WISUN_RTT_LOGGER_PRESENT) \
-  && SL_WISUN_RTT_LOGGER_CLI_ENABLED
-#include "sl_wisun_rtt_logger_cli.h"
-#endif
-
-#if defined(SL_CATALOG_IPERF_PRESENT) \
-  && SL_WISUN_IPERF_CLI_ENABLED
-#include "sl_iperf_cli.h"
-#endif
-
-#if defined(SL_CATALOG_WISUN_OTA_DFU_PRESENT) \
-  && SL_WISUN_OTA_DFU_CLI_ENABLED
-#include "sl_wisun_ota_dfu_cli.h"
-#include "sl_wisun_ota_dfu_config.h"
-#endif
-
-#if defined(SL_CATALOG_WISUN_NETWORK_MEASUREMENT_PRESENT) \
-  && SL_WISUN_NETWORK_MEASUREMENT_CLI_ENABLED
-#include "sl_wisun_network_measurement_cli.h"
-#endif
-
-#if defined(SL_CATALOG_WISUN_APP_STATUS_PRESENT) \
-  && SL_WISUN_APP_STATUS_CLI_ENABLED
-#include "sl_wisun_app_status_cli.h"
-#endif
-
-#if defined(SL_CATALOG_WISUN_CLI_UTIL_PRESENT) \
-  && SL_WISUN_CLI_UTIL_CLI_ENABLED
-#include "sl_wisun_cli_util_cli.h"
-#endif
-
-#if (defined(SL_CATALOG_WISUN_TCP_CLIENT_PRESENT) || defined(SL_CATALOG_WISUN_UDP_CLIENT_PRESENT)) \
-  && SL_WISUN_CLIENT_CLI_ENABLED
-#include "sl_wisun_client_cli.h"
-#endif
-
-#if defined(SL_CATALOG_WISUN_COLLECTOR_PRESENT) \
-  && defined(SL_CATALOG_WISUN_COAP_PRESENT)     \
-  && SL_WISUN_COLLECTOR_CLI_ENABLED
-#include "sl_wisun_coap_collector_cli.h"
-#endif
-
-#if defined(SL_CATALOG_WISUN_COLLECTOR_PRESENT) \
-  && !defined(SL_CATALOG_WISUN_COAP_PRESENT)    \
-  && SL_WISUN_COLLECTOR_CLI_ENABLED
-#include "sl_wisun_collector_cli.h"
-#endif
 
 #if defined(SL_CATALOG_WISUN_STACK_DEBUG_PRESENT) \
   && SL_WISUN_TRACE_LEVEL_CONTROL_CLI_ENABLED
@@ -266,23 +208,6 @@ typedef struct app_cli_phy_common_params {
   /// PHY config type
   uint8_t phy_config_type;
 } app_cli_phy_common_params_t;
-
-/// Function pointer for CLI handler functions
-typedef void (*sl_wisun_app_cli_handler)(const sl_cli_command_arg_t *arguments);
-
-/// Structure for Wi-SUN CLI handler properties
-typedef struct sl_wisun_cli_handler_property {
-  /// CLI group
-  const char *cli_group;
-  /// CLI group shortcut
-  const char *cli_group_shortcut;
-  /// CLI command
-  const char *cli_command;
-  /// CLI command shortcut
-  const char *cli_command_shortcut;
-  /// CLI handler
-  sl_wisun_app_cli_handler cli_handler_fnc;
-} sl_wisun_cli_handler_property_t;
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -728,17 +653,6 @@ static void _app_connect(const sl_wisun_phy_config_type_t config_type);
 static void _app_start(void);
 #endif
 
-/**************************************************************************//**
- * @brief Helper function to iterate through CLI handlers
- * @details Helper function
- * @param[in] args CLI arguments pointer
- * @param[in] size CLI arguments size
- * @param[in] props CLI handler properties pointer
- *****************************************************************************/
-static void _cli_handler_iterator(const sl_cli_command_arg_t *args,
-                                  const size_t size,
-                                  const sl_wisun_cli_handler_property_t *props);
-
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
@@ -800,524 +714,6 @@ static const app_enum_t _app_trace_level_enum[] =
   { NULL, 0 }
 };
 #endif
-
-#if defined(SL_CATALOG_IPERF_PRESENT) \
-  && SL_WISUN_CLI_ENABLED             \
-  && SL_WISUN_IPERF_CLI_ENABLED
-/// iPerf CLI handler properties
-static sl_wisun_cli_handler_property_t _iperf_cli_hnd_prop[] = {
-  {
-    .cli_group = "iperf",
-    .cli_group_shortcut = "i",
-    .cli_command = "get",
-    .cli_command_shortcut = "g",
-    .cli_handler_fnc = &sl_iperf_cli_get
-  },
-  {
-    .cli_group = "iperf",
-    .cli_group_shortcut = "i",
-    .cli_command = "set",
-    .cli_command_shortcut = "s",
-    .cli_handler_fnc = &sl_iperf_cli_set
-  },
-  {
-    .cli_group = "iperf",
-    .cli_group_shortcut = "i",
-    .cli_command = "server",
-    .cli_command_shortcut = "-s",
-    .cli_handler_fnc = &sl_iperf_cli_exec_server
-  },
-  {
-    .cli_group = "iperf",
-    .cli_group_shortcut = "i",
-    .cli_command = "client",
-    .cli_command_shortcut = "-c",
-    .cli_handler_fnc = &sl_iperf_cli_exec_client
-  },
-  {
-    .cli_group = "N/A",
-    .cli_group_shortcut = "N/A",
-    .cli_command = "N/A",
-    .cli_command_shortcut = "N/A",
-    .cli_handler_fnc = NULL
-  }
-};
-
-/// iPerf CLI handler properties size
-static const size_t _iperf_cli_hnd_prop_size = sizeof(_iperf_cli_hnd_prop) / sizeof(sl_wisun_cli_handler_property_t);
-#endif
-
-#if defined(SL_CATALOG_WISUN_OTA_DFU_PRESENT) \
-  && SL_WISUN_CLI_ENABLED                     \
-  && SL_WISUN_OTA_DFU_CLI_ENABLED
-/// OTA DFU CLI handler properties
-static sl_wisun_cli_handler_property_t _ota_dfu_cli_hnd_prop[] = {
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "start_firmware_update",
-    .cli_command_shortcut = "fb",
-    .cli_handler_fnc = &app_fw_update_start
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "stop_firmware_update",
-    .cli_command_shortcut = "fq",
-    .cli_handler_fnc = &app_fw_update_stop
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "reboot_and_install_fw",
-    .cli_command_shortcut = "fr",
-    .cli_handler_fnc = &app_fw_reboot_and_install
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "firmware_update_status",
-    .cli_command_shortcut = "fs",
-    .cli_handler_fnc = &app_fw_update_status
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "set_host_addr",
-    .cli_command_shortcut = "sha",
-    .cli_handler_fnc = &app_set_host_addr
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "get_host_addr",
-    .cli_command_shortcut = "gha",
-    .cli_handler_fnc = &app_get_host_addr
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "set_host_uri",
-    .cli_command_shortcut = "shu",
-    .cli_handler_fnc = &app_set_host_uri
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "get_host_uri",
-    .cli_command_shortcut = "ghu",
-    .cli_handler_fnc = &app_get_host_uri
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "set_gbl_path",
-    .cli_command_shortcut = "sgp",
-    .cli_handler_fnc = &app_set_gbl_path
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "get_gbl_path",
-    .cli_command_shortcut = "ggp",
-    .cli_handler_fnc = &app_get_gbl_path
-  },
-#if SL_WISUN_OTA_DFU_HOST_NOTIFY_ENABLED
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "set_notify_host_addr",
-    .cli_command_shortcut = "snha",
-    .cli_handler_fnc = &app_set_notify_host_addr
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "get_notify_host_addr",
-    .cli_command_shortcut = "gnha",
-    .cli_handler_fnc = &app_get_notify_host_addr
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "set_notify_host_uri",
-    .cli_command_shortcut = "snhu",
-    .cli_handler_fnc = &app_set_notify_host_uri
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "get_notify_host_uri",
-    .cli_command_shortcut = "gnhu",
-    .cli_handler_fnc = &app_get_notify_host_uri
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "set_notify_download_chunk",
-    .cli_command_shortcut = "sndc",
-    .cli_handler_fnc = &app_set_notify_download_chunk
-  },
-  {
-    .cli_group = "ota-dfu",
-    .cli_group_shortcut = "od",
-    .cli_command = "get_notify_download_chunk",
-    .cli_command_shortcut = "gndc",
-    .cli_handler_fnc = &app_get_notify_download_chunk
-  },
-#endif
-  {
-    .cli_group = "N/A",
-    .cli_group_shortcut = "N/A",
-    .cli_command = "N/A",
-    .cli_command_shortcut = "N/A",
-    .cli_handler_fnc = NULL
-  }
-};
-
-/// OTA DFU CLI handler properties size
-static const size_t _ota_dfu_cli_hnd_prop_size = sizeof(_ota_dfu_cli_hnd_prop) / sizeof(sl_wisun_cli_handler_property_t);
-#endif
-
-/// Wi-SUN app CLI handler properties
-static sl_wisun_cli_handler_property_t _wisun_app_cli_hnd_prop[] = {
-#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "join_fan10",
-    .cli_command_shortcut = "j10",
-    .cli_handler_fnc = &app_join_fan10
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "join_fan11",
-    .cli_command_shortcut = "j11",
-    .cli_handler_fnc = &app_join_fan11
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "join_explicit",
-    .cli_command_shortcut = "je",
-    .cli_handler_fnc = &app_join_explicit
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "disconnect",
-    .cli_command_shortcut = "d",
-    .cli_handler_fnc = &app_disconnect
-  },
-#else
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "start_fan11",
-    .cli_command_shortcut = "st11",
-    .cli_handler_fnc = &app_start_fan11
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "stop",
-    .cli_command_shortcut = "sp",
-    .cli_handler_fnc = &app_stop
-  },
-#endif
-#if defined(SL_CATALOG_WISUN_BR_WIFI_PRESENT)
-  {
-    .cli_group = "wifi",
-    .cli_group_shortcut = "wi",
-    .cli_command = "connect",
-    .cli_command_shortcut = "cw",
-    .cli_handler_fnc = &app_wifi_connect
-  },
-  {
-    .cli_group = "wifi",
-    .cli_group_shortcut = "wi",
-    .cli_command = "disconnect",
-    .cli_command_shortcut = "dw",
-    .cli_handler_fnc = &app_wifi_disconnect
-  },
-#endif
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "mac_allow",
-    .cli_command_shortcut = "ma",
-    .cli_handler_fnc = &app_mac_allow
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "mac_deny",
-    .cli_command_shortcut = "md",
-    .cli_handler_fnc = &app_mac_deny
-  },
-  #if defined(SL_CATALOG_WISUN_STACK_DEBUG_PRESENT) \
-  && SL_WISUN_CLI_ENABLED                           \
-  && SL_WISUN_TRACE_LEVEL_CONTROL_CLI_ENABLED
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "set_trace_level",
-    .cli_command_shortcut = "tl",
-    .cli_handler_fnc = &app_set_trace_level
-  },
-#endif
-#if defined(SL_CATALOG_WISUN_PING_PRESENT) \
-  && SL_WISUN_CLI_ENABLED                  \
-  && SL_WISUN_PING_CLI_ENABLED
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "ping",
-    .cli_command_shortcut = "p",
-    .cli_handler_fnc = &app_ping
-  },
-#endif
-#if defined(SL_CATALOG_WISUN_RTT_LOGGER_PRESENT) \
-  && SL_WISUN_CLI_ENABLED                        \
-  && SL_WISUN_RTT_LOGGER_CLI_ENABLED
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "start_rtt_report",
-    .cli_command_shortcut = "strr",
-    .cli_handler_fnc = &app_start_rtt_report
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "stop_rtt_report",
-    .cli_command_shortcut = "sprr",
-    .cli_handler_fnc = &app_stop_rtt_report
-  },
-#endif
-#if defined(SL_CATALOG_WISUN_NETWORK_MEASUREMENT_PRESENT) \
-  && SL_WISUN_CLI_ENABLED                                 \
-  && SL_WISUN_NETWORK_MEASUREMENT_CLI_ENABLED
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "measure",
-    .cli_command_shortcut = "m",
-    .cli_handler_fnc = &app_measure
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "print_nodeinfo",
-    .cli_command_shortcut = "pni",
-    .cli_handler_fnc = &app_print_node_info
-  },
-#endif
-#if defined(SL_CATALOG_WISUN_APP_STATUS_PRESENT) \
-  && SL_WISUN_CLI_ENABLED                        \
-  && SL_WISUN_APP_STATUS_CLI_ENABLED
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "set_app_status_address",
-    .cli_command_shortcut = "sasa",
-    .cli_handler_fnc = &sl_app_status_cli_set_address
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "set_app_status_schedule",
-    .cli_command_shortcut = "sast",
-    .cli_handler_fnc = &sl_app_status_cli_set_schedule
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "get_app_status_address",
-    .cli_command_shortcut = "gasa",
-    .cli_handler_fnc = &sl_app_status_cli_get_address
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "get_app_status_schedule",
-    .cli_command_shortcut = "gast",
-    .cli_handler_fnc = &sl_app_status_cli_get_schedule
-  },
-#endif
-#if defined(SL_CATALOG_WISUN_CLI_UTIL_PRESENT) \
-  && SL_WISUN_CLI_ENABLED                      \
-  && SL_WISUN_CLI_UTIL_CLI_ENABLED
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "set",
-    .cli_command_shortcut = "s",
-    .cli_handler_fnc = &app_set
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "get",
-    .cli_command_shortcut = "g",
-    .cli_handler_fnc = &app_get
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "save",
-    .cli_command_shortcut = "a",
-    .cli_handler_fnc = &app_save
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "reset",
-    .cli_command_shortcut = "r",
-    .cli_handler_fnc = &app_reset
-  },
-#endif
-#if defined(SL_CATALOG_WISUN_TCP_CLIENT_PRESENT) \
-  && SL_WISUN_CLI_ENABLED                        \
-  && SL_WISUN_CLIENT_CLI_ENABLED
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "tcp_client",
-    .cli_command_shortcut = "tc",
-    .cli_handler_fnc = &app_tcp_client
-  },
-#endif
-#if defined(SL_CATALOG_WISUN_UDP_CLIENT_PRESENT) \
-  && SL_WISUN_CLI_ENABLED                        \
-  && SL_WISUN_CLIENT_CLI_ENABLED
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "udp_client",
-    .cli_command_shortcut = "uc",
-    .cli_handler_fnc = &app_udp_client
-  },
-#endif
-#if (defined(SL_CATALOG_WISUN_TCP_CLIENT_PRESENT) || defined(SL_CATALOG_WISUN_UDP_CLIENT_PRESENT)) \
-  && SL_WISUN_CLI_ENABLED && SL_WISUN_CLIENT_CLI_ENABLED
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "socket_close",
-    .cli_command_shortcut = "sc",
-    .cli_handler_fnc = &app_socket_close
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "socket_write",
-    .cli_command_shortcut = "sw",
-    .cli_handler_fnc = &app_socket_write
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "socket_read",
-    .cli_command_shortcut = "sr",
-    .cli_handler_fnc = &app_socket_read
-  },
-#endif
-#if defined(SL_CATALOG_WISUN_COLLECTOR_PRESENT) \
-  && defined(SL_CATALOG_WISUN_COAP_PRESENT)     \
-  && SL_WISUN_CLI_ENABLED                       \
-  && SL_WISUN_COLLECTOR_CLI_ENABLED
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "register_meter",
-    .cli_command_shortcut = "r",
-    .cli_handler_fnc = &app_register_meter
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "remove_meter",
-    .cli_command_shortcut = "d",
-    .cli_handler_fnc = &app_remove_meter
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "async_request",
-    .cli_command_shortcut = "a",
-    .cli_handler_fnc = &app_async_request
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "list_meters",
-    .cli_command_shortcut = "p",
-    .cli_handler_fnc = &app_list_meters
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "led_toggle",
-    .cli_command_shortcut = "l",
-    .cli_handler_fnc = &app_led_toggle
-  },
-#endif
-#if defined(SL_CATALOG_WISUN_COLLECTOR_PRESENT) \
-  && !defined(SL_CATALOG_WISUN_COAP_PRESENT)    \
-  && SL_WISUN_CLI_ENABLED                       \
-  && SL_WISUN_COLLECTOR_CLI_ENABLED
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "register_meter",
-    .cli_command_shortcut = "r",
-    .cli_handler_fnc = &app_register_meter
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "remove_meter",
-    .cli_command_shortcut = "d",
-    .cli_handler_fnc = &app_remove_meter
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "async_request",
-    .cli_command_shortcut = "a",
-    .cli_handler_fnc = &app_async_request
-  },
-#endif
-#if defined(SL_CATALOG_WISUN_BR_AGENT_SERVICE_PRESENT) \
-  && SL_WISUN_BR_AGENT_SERVICE_CLI_ENABLED
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "set_br_bridge_agent_addr",
-    .cli_command_shortcut = "sbra",
-    .cli_handler_fnc = &app_set_br_agent_bridge_remote_addr
-  },
-  {
-    .cli_group = "wisun",
-    .cli_group_shortcut = "w",
-    .cli_command = "get_br_bridge_agent_addr",
-    .cli_command_shortcut = "gbra",
-    .cli_handler_fnc = &app_get_br_agent_bridge_addr
-  },
-#endif
-  {
-    .cli_group = "N/A",
-    .cli_group_shortcut = "N/A",
-    .cli_command = "N/A",
-    .cli_command_shortcut = "N/A",
-    .cli_handler_fnc = NULL
-  }
-};
-
-/// iPerf CLI handler properties size
-static const size_t _wisun_app_cli_hnd_prop_size = sizeof(_wisun_app_cli_hnd_prop) / sizeof(sl_wisun_cli_handler_property_t);
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -2036,16 +1432,18 @@ static const app_cli_entry_t app_statistics_entries[] =
 
 #if defined(SL_CATALOG_APP_PROJECT_INFO_PRESENT)
 /* CLI app about handler */
-void app_about(void)
+void app_about(const sl_cli_command_arg_t *arguments)
 {
+  (void) arguments;
   sl_wisun_app_core_util_project_info_print(false);
 }
 #endif
 
 #if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /* CLI app reboot handler */
-void app_reboot(void)
+void app_reboot(const sl_cli_command_arg_t *arguments)
 {
+  (void) arguments;
   NVIC_SystemReset();
 }
 #endif
@@ -2338,54 +1736,6 @@ void app_set_trace_level(const sl_cli_command_arg_t *arguments)
   }
 }
 #endif
-
-/* App CLI handler */
-void app_cli_handler(const sl_cli_command_arg_t *args)
-{
-#if defined(SL_CATALOG_APP_PROJECT_INFO_PRESENT)
-  if ((sl_strcasecmp(args->argv[0], "about") == 0)
-      || (sl_strcasecmp(args->argv[0], "a") == 0)) {
-    app_about();
-  }
-#endif
-#if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
-  if ((sl_strcasecmp(args->argv[0], "reboot") == 0)
-      || (sl_strcasecmp(args->argv[0], "r") == 0)) {
-    app_reboot();
-  }
-#endif
-  _cli_handler_iterator(args,
-                        _wisun_app_cli_hnd_prop_size,
-                        _wisun_app_cli_hnd_prop);
-}
-
-/* OTA DFU CLI handler */
-void sl_wisun_ota_dfu_cli_handler(const sl_cli_command_arg_t *args)
-{
-#if defined(SL_CATALOG_WISUN_OTA_DFU_PRESENT) \
-  && SL_WISUN_CLI_ENABLED                     \
-  && SL_WISUN_OTA_DFU_CLI_ENABLED
-  _cli_handler_iterator(args,
-                        _ota_dfu_cli_hnd_prop_size,
-                        _ota_dfu_cli_hnd_prop);
-#else
-  (void) args;
-#endif
-}
-
-/* iPerf CLI handler */
-void sl_iperf_cli_handler(const sl_cli_command_arg_t *args)
-{
-#if defined(SL_CATALOG_IPERF_PRESENT) \
-  && SL_WISUN_CLI_ENABLED             \
-  && SL_WISUN_IPERF_CLI_ENABLED
-  _cli_handler_iterator(args,
-                        _iperf_cli_hnd_prop_size,
-                        _iperf_cli_hnd_prop);
-#else
-  (void) args;
-#endif
-}
 
 // -----------------------------------------------------------------------------
 //                          Static Function Definitions
@@ -3495,20 +2845,6 @@ static sl_status_t _app_cli_get_passphrase(char *value_str,
   return res;
 }
 #endif
-
-static void _cli_handler_iterator(const sl_cli_command_arg_t *args,
-                                  const size_t size,
-                                  const sl_wisun_cli_handler_property_t *props)
-{
-  for (size_t i = 0U; i < size - 1U; ++i) {
-    if (((sl_strcasecmp(args->argv[0], props[i].cli_group) == 0) || (sl_strcasecmp(args->argv[0], props[i].cli_group_shortcut) == 0))
-        && ((sl_strcasecmp(args->argv[1], props[i].cli_command) == 0) || (sl_strcasecmp(args->argv[1], props[i].cli_command_shortcut) == 0))
-        && (props[i].cli_handler_fnc != NULL)) {
-      props[i].cli_handler_fnc(args);
-      return;
-    }
-  }
-}
 
 static sl_status_t _app_cli_get_statistics(char *value_str,
                                            const char *key_str,

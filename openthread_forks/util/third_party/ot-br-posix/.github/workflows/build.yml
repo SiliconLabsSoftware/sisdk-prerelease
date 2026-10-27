@@ -79,7 +79,7 @@ jobs:
     - name: Run
       run: script/test build check
     - name: Codecov
-      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
 
   rest-check:
     runs-on: ubuntu-22.04
@@ -103,7 +103,34 @@ jobs:
     - name: Run
       run: script/test build check
     - name: Codecov
-      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+
+  nftables-check:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: ["Debug", "Release"]
+    env:
+      BUILD_TARGET: check
+      OTBR_BUILD_TYPE: ${{ matrix.build_type }}
+      OTBR_MDNS: openthread
+      OTBR_OPTIONS: "-DOTBR_NFTABLES=ON -DOT_FIREWALL=OFF -DBUILD_TESTING=ON"
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        submodules: recursive
+        persist-credentials: false
+    - name: Bootstrap
+      run: tests/scripts/bootstrap.sh
+    # Build only: this compiles nftables_impl.cpp, which no other job does.
+    - name: Build
+      run: script/test build
+    # The firewall unit tests mock the backend, so they need no privileges. The
+    # rest of the suite launches otbr-agent, which cannot install nftables rules
+    # without CAP_NET_ADMIN and a usable nf_tables, so it is not run here.
+    - name: Firewall unit tests
+      run: CTEST_OUTPUT_ON_FAILURE=1 ctest --test-dir build/otbr -R 'Firewall|Nftables|MnlNetlink'
 
   script-check:
     runs-on: ubuntu-22.04
@@ -120,7 +147,7 @@ jobs:
     - name: Run
       run: tests/scripts/check-scripts
     - name: Codecov
-      uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
 
   scan-build:
     runs-on: ubuntu-22.04

@@ -285,7 +285,7 @@ int32_t uartOpen(void *handle, int8_t *port, uint32_t baudRate,
   char deviceStr[64];
   memset(deviceStr, 0, sizeof(deviceStr));
   // Support COM10+ style names
-  _snprintf(deviceStr, sizeof(deviceStr) - 1, "\\\\.\\%s", (char*)port);
+  snprintf(deviceStr, sizeof(deviceStr), "\\\\.\\%s", (char*)port);
 
   HANDLE hComm = CreateFileA(deviceStr,
                              GENERIC_READ | GENERIC_WRITE,

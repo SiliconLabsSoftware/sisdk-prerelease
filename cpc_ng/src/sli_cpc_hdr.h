@@ -1,5 +1,5 @@
 /**
- * @file
+ * @file sli_cpc_hdr.h
  * @brief CPC data link header definitions and utilities.
  *******************************************************************************
  * # License

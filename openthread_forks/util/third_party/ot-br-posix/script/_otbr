@@ -30,20 +30,17 @@
 OTBR_TOP_BUILDDIR="${BUILD_DIR}/otbr"
 readonly OTBR_TOP_BUILDDIR
 
+# Each helper defaults the flags it reads; the same default in two files is
+# harmless, and a script sees them whichever helpers it sources. None of
+# these is readonly: a platform default file may override them.
 BORDER_ROUTING="${BORDER_ROUTING:-1}"
-readonly BORDER_ROUTING
-
 BACKBONE_ROUTER="${BACKBONE_ROUTER:-1}"
-readonly BACKBONE_ROUTER
-
 NAT64="${NAT64:-1}"
-readonly NAT64
-
 NAT64_SERVICE="${NAT64_SERVICE:-openthread}"
 readonly NAT64_SERVICE
 
 DISCOVERY_PROXY="${DISCOVERY_PROXY:-1}"
-readonly DISCOVERY_PROXY
+FIREWALL="${FIREWALL:-1}"
 
 # Handle deprecated DHCPV6_PD_REF flag
 if [[ -n ${DHCPV6_PD_REF+x} ]]; then
@@ -73,7 +70,6 @@ OTBR_OPTIONS="${OTBR_OPTIONS-}"
 readonly OTBR_OPTIONS
 
 REFERENCE_DEVICE="${REFERENCE_DEVICE:-0}"
-readonly REFERENCE_DEVICE
 
 if [[ ${REFERENCE_DEVICE} == "0" ]]; then
     OTBR_VENDOR_NAME="${OTBR_VENDOR_NAME:-OpenThread}"
@@ -98,9 +94,9 @@ otbr_uninstall()
     sudo killall otbr-web otbr-agent || true
 
     (
-        if cd "${OTBR_TOP_BUILDDIR}"; then
-            # shellcheck disable=SC2024
-            sudo xargs rm <install_manifests.txt || true
+        if cd "${OTBR_TOP_BUILDDIR}" 2>/dev/null && [ -f install_manifest.txt ]; then
+            sudo xargs -a install_manifest.txt -r rm -f || true
+            rm -f install_manifest.txt
         fi
     )
     if have systemctl; then
@@ -119,6 +115,14 @@ otbr_install()
         "-DOTBR_MDNS=${OTBR_MDNS}"
         "-DOTBR_VENDOR_NAME=${OTBR_VENDOR_NAME}"
         "-DOTBR_PRODUCT_NAME=${OTBR_PRODUCT_NAME}"
+        # Same variable the firewall and nat44 scripts resolve, so one setup run
+        # cannot build an agent that owns the firewall while installing the
+        # legacy services that also do, or the reverse. They run before this
+        # does and the marker this build writes is not there yet at that point,
+        # so the shell variable, not the file, is what keeps them agreeing.
+        "-DOTBR_NFTABLES=$([ "${OTBR_NFTABLES:-0}" = "1" ] && echo ON || echo OFF)"
+        # Likewise for the pf backend on macOS.
+        "-DOTBR_PF=$([ "${OTBR_PF:-0}" = "1" ] && echo ON || echo OFF)"
         # Force re-evaluation of version strings
         "-DOTBR_VERSION="
         "-DOT_PACKAGE_VERSION="
@@ -189,6 +193,7 @@ otbr_install()
             "-DOT_REFERENCE_DEVICE=ON"
             "-DOT_DHCP6_CLIENT=ON"
             "-DOT_DHCP6_SERVER=ON"
+            "-DOT_POSIX_INSTALL_EXTERNAL_ROUTES=ON"
         )
     fi
 

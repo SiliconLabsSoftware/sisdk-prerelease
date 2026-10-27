@@ -26,4 +26,6 @@ requires:
 - name: bsd_socket_api
 - name: sl_si91x_socket
 
+documentation:
+  url: https://docs.silabs.com/wiseconnect/latest/wiseconnect-api-reference-guide-sockets/
 root_path: network_stack/network_stack_sdk/./components/service/bsd_socket

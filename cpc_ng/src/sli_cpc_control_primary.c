@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sli_cpc_control_primary.c
  * @brief CPC control primary: bus init sequence initiator.
  *******************************************************************************
  * # License
@@ -304,7 +304,7 @@ static sl_status_t on_bus_enable_response(sli_cpc_control_t *ctrl, const sl_cpc_
 
   SLI_CPC_LOG_DEBUG("primary init sequence completed");
   ctrl->initialized = true;
-  sli_cpc_bus_signal_event(bus, SLI_CPC_SIGNAL_SYSTEM);
+  sli_cpc_bus_signal_event(bus);
 
   return SL_STATUS_OK;
 }

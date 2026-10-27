@@ -85,8 +85,6 @@ typedef struct event_handler {
   sl_wisun_msg_ind_id_t id;
   /// Callback for internal usage
   wisun_event_callback_t callback;
-  /// Custom, registerable and removable callback for applications
-  custom_wisun_event_callback_t custom_callback;
   /// Event notification
   app_wisun_trace_util_evt_notify_t evt_notify;
 } event_handler_t;
@@ -154,113 +152,91 @@ static const osMutexAttr_t _app_wisun_event_mgr_mtx_attr = {
 static event_handler_t _wisun_events[] = {
   {
     .id = SL_WISUN_MSG_NETWORK_UPDATE_IND_ID,
-    .callback = sl_wisun_network_update_event_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_network_update_event_hnd
   },
   {
     .id = SL_WISUN_MSG_CONNECTED_IND_ID,
-    .callback = sl_wisun_connected_event_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_connected_event_hnd
   },
   {
     .id = SL_WISUN_MSG_SOCKET_DATA_IND_ID,
-    .callback = sl_wisun_socket_data_event_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_socket_data_event_hnd
   },
   {
     .id = SL_WISUN_MSG_SOCKET_DATA_AVAILABLE_IND_ID,
-    .callback = sl_wisun_socket_data_available_event_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_socket_data_available_event_hnd
   },
   {
     .id = SL_WISUN_MSG_SOCKET_CONNECTED_IND_ID,
-    .callback = sl_wisun_socket_connected_event_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_socket_connected_event_hnd
   },
   {
     .id = SL_WISUN_MSG_SOCKET_CONNECTION_AVAILABLE_IND_ID,
-    .callback = sl_wisun_socket_connection_available_event_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_socket_connection_available_event_hnd
   },
   {
     .id = SL_WISUN_MSG_SOCKET_CLOSING_IND_ID,
-    .callback = sl_wisun_socket_closing_event_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_socket_closing_event_hnd
   },
   {
     .id = SL_WISUN_MSG_DISCONNECTED_IND_ID,
-    .callback = sl_wisun_disconnected_event_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_disconnected_event_hnd
   },
   {
     .id = SL_WISUN_MSG_CONNECTION_LOST_IND_ID,
-    .callback = sl_wisun_connection_lost_event_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_connection_lost_event_hnd
   },
   {
     .id = SL_WISUN_MSG_SOCKET_DATA_SENT_IND_ID,
-    .callback = sl_wisun_socket_data_sent_event_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_socket_data_sent_event_hnd
   },
   {
     .id = SL_WISUN_MSG_ERROR_IND_ID,
-    .callback = sl_wisun_error_event_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_error_event_hnd
   },
   {
     .id = SL_WISUN_MSG_JOIN_STATE_IND_ID,
-    .callback = sl_wisun_join_state_event_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_join_state_event_hnd
   },
   {
     .id = SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID,
-    .callback = sl_wisun_regulation_tx_level_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_regulation_tx_level_hnd
   },
   {
     .id = SL_WISUN_MSG_LFN_WAKE_UP_IND_ID,
-    .callback = sl_wisun_lfn_wake_up_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_lfn_wake_up_hnd
   },
   {
     .id = SL_WISUN_MSG_LFN_MULTICAST_REG_IND_ID,
-    .callback = sl_wisun_multicast_reg_finish_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_multicast_reg_finish_hnd
   },
   {
     .id = SL_WISUN_MSG_DHCP_VENDOR_DATA_IND_ID,
-    .callback = sl_wisun_dhcp_vendor_data_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_dhcp_vendor_data_hnd
   },
   {
     .id = SL_WISUN_MSG_PAN_DEFECT_IND_ID,
-    .callback = sl_wisun_pan_defect_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_pan_defect_hnd
   },
   {
     .id = SL_WISUN_MSG_DIRECT_CONNECT_LINK_AVAILABLE_IND_ID,
-    .callback = sl_wisun_direct_connect_link_available_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_direct_connect_link_available_hnd
   },
   {
     .id = SL_WISUN_MSG_DIRECT_CONNECT_LINK_STATUS_IND_ID,
-    .callback = sl_wisun_direct_connect_status_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_direct_connect_status_hnd
   },
   {
     .id = SL_WISUN_BR_MSG_STOPPED_IND_ID,
-    .callback = sl_wisun_br_stopped_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_br_stopped_hnd
   },
   {
     .id = SL_WISUN_MSG_MODE_SWITCH_FALLBACK_IND_ID,
-    .callback = sl_wisun_mode_switch_fallback_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_mode_switch_fallback_hnd
   },
   {
     .id = SL_WISUN_BR_MSG_ROUTING_TABLE_UPDATE_IND_ID,
-    .callback = sl_wisun_br_routing_table_update_hnd,
-    .custom_callback = NULL
+    .callback = sl_wisun_br_routing_table_update_hnd
   }
 };
 
@@ -291,63 +267,6 @@ void app_wisun_event_mgr_init(void)
                                sizeof(_conditions)) == SL_STATUS_OK);
 }
 
-/* Event Manager custom callback register */
-sl_status_t app_wisun_em_custom_callback_register(sl_wisun_msg_ind_id_t id,
-                                                  custom_wisun_event_callback_t callback)
-{
-  osKernelState_t kernel_state = osKernelLocked;
-
-  if (callback == NULL) {
-    return SL_STATUS_FAIL; // parameter error
-  }
-
-  kernel_state = osKernelGetState();
-
-  // check kernel state to avoid mutex acquire issue
-  if (kernel_state == osKernelRunning) {
-    app_wisun_event_mgr_mutex_lock();
-  }
-
-  for (uint16_t i = 0; i < _wisun_event_size; ++i) {
-    if (_wisun_events[i].id == id) {
-      _wisun_events[i].custom_callback = callback;
-      break;
-    }
-  }
-
-  if (kernel_state == osKernelRunning) {
-    app_wisun_event_mgr_mutex_unlock();
-  }
-
-  return SL_STATUS_OK;
-}
-
-/* Event Manager custom callback removing */
-sl_status_t app_wisun_em_custom_callback_remove(sl_wisun_msg_ind_id_t id)
-{
-  osKernelState_t kernel_state = osKernelLocked;
-
-  kernel_state = osKernelGetState();
-
-  // check kernel state to avoid mutex acquire issue
-  if (kernel_state == osKernelRunning) {
-    app_wisun_event_mgr_mutex_lock();
-  }
-
-  for (uint16_t i = 0; i < _wisun_event_size; ++i) {
-    if (_wisun_events[i].id == id) {
-      _wisun_events[i].custom_callback = NULL;
-      break;
-    }
-  }
-
-  if (kernel_state == osKernelRunning) {
-    app_wisun_event_mgr_mutex_unlock();
-  }
-
-  return SL_STATUS_OK;
-}
-
 /* Wi-SUN event callback */
 void sl_wisun_on_event(sl_wisun_evt_t *evt)
 {
@@ -361,9 +280,6 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
     printf("[Unknown event: %d]\r\n", evt->header.id);
   } else {
     _wisun_events[idx].callback(evt);
-    if (_wisun_events[idx].custom_callback != NULL) {
-      _wisun_events[idx].custom_callback(evt);
-    }
 
     // Store original channel mask
     tmp_chs = _wisun_events[idx].evt_notify.evt_chs;
@@ -799,4 +715,31 @@ SL_WEAK void sl_wisun_br_routing_table_update_hnd(sl_wisun_evt_t *evt)
 {
   (void) evt;
   EFM_ASSERT(false);
+}
+
+// --------------------- application extension hooks ---------------------------
+
+SL_WEAK void sl_wisun_network_update_event_app_hnd(sl_wisun_evt_t *evt)
+{
+  (void) evt;
+}
+
+SL_WEAK void sl_wisun_join_state_event_app_hnd(sl_wisun_evt_t *evt)
+{
+  (void) evt;
+}
+
+SL_WEAK void sl_wisun_regulation_tx_level_app_hnd(sl_wisun_evt_t *evt)
+{
+  (void) evt;
+}
+
+SL_WEAK void sl_wisun_lfn_wake_up_app_hnd(sl_wisun_evt_t *evt)
+{
+  (void) evt;
+}
+
+SL_WEAK void sl_wisun_br_stopped_app_hnd(sl_wisun_evt_t *evt)
+{
+  (void) evt;
 }

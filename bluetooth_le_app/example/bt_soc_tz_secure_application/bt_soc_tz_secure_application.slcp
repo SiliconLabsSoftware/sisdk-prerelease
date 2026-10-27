@@ -22,12 +22,15 @@ provides:
   - name: bt_soc_tz_secure_application
 
 component:
+  - id: toolchain_gcc_lto
   - id: tz_secure_key_library_s
 
 define:
   # PSA Crypto configuration:
   - name: TFM_CRYPTO_CONC_OPER_NUM
     value: 2
+  # If used, keep the AES lookup tables in flash.
+  - name: MBEDTLS_AES_ROM_TABLES
 
 template_contribution:
   - name: application_type
@@ -69,6 +72,7 @@ configuration:
     value: '1'
 
 tag:
+  - toolchain:gcc
   - companion:nonsecure_app  # Needs a companion app and cannot be built alone
   - hwfilter:device:device_series_2
   - hwfilter:device:armv8m.main

@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sl_cpc_drv_sdio_device.c
  * @brief CPC SDIO Driver implementation.
  *
  * Known limitations (CPC-2989):

@@ -106,7 +106,7 @@ bool sli_gcm_uuid_is_valid(const sl_gatt_client_manager_uuid_t *uuid)
 }
 
 bool sli_gcm_uuid_equal(const sl_gatt_client_manager_uuid_t *a,
-                       const sl_gatt_client_manager_uuid_t *b)
+                        const sl_gatt_client_manager_uuid_t *b)
 {
   if (a == NULL || b == NULL) {
     return false;

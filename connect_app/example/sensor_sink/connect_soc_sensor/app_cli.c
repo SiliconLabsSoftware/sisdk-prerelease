@@ -42,7 +42,6 @@
 #include "sl_app_common.h"
 #include "stack-info.h"
 #include "app_init.h"
-#include "mbedtls/build_info.h"
 #include "psa/crypto.h"
 
 // -----------------------------------------------------------------------------
@@ -434,23 +433,16 @@ bool set_security_key(uint8_t* key, size_t key_length)
   psa_set_key_algorithm(&key_attr, PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 4));
   psa_set_key_id(&key_attr, security_key_id);
 
-#ifdef PSA_KEY_LOCATION_SLI_SE_OPAQUE
+#if _SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT
   psa_set_key_lifetime(&key_attr,
                        PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
                          PSA_KEY_LIFETIME_PERSISTENT,
                          PSA_KEY_LOCATION_SLI_SE_OPAQUE));
 #else
-#ifdef MBEDTLS_PSA_CRYPTO_STORAGE_C
   psa_set_key_lifetime(&key_attr,
                        PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
                          PSA_KEY_LIFETIME_PERSISTENT,
                          PSA_KEY_LOCATION_LOCAL_STORAGE));
-#else
-  psa_set_key_lifetime(&key_attr,
-                       PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
-                         PSA_KEY_LIFETIME_VOLATILE,
-                         PSA_KEY_LOCATION_LOCAL_STORAGE));
-#endif
 #endif
 
   psa_status = psa_import_key(&key_attr,

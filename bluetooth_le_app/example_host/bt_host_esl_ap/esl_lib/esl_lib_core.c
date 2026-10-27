@@ -325,6 +325,17 @@ static void esl_lib_core_on_bt_event(sl_bt_msg_t *evt)
       }
       send_connection_mode_event();
       break;
+    // The external bonding database manages the IRK, so the stack will ask us
+    // for the local one. We don't keep a local IRK on the host side. Returning
+    // an empty response lets the stack generate a fresh key for this session.
+    case sl_bt_evt_external_bondingdb_local_irk_request_id:
+      sc = sl_bt_external_bondingdb_set_local_irk(0, NULL);
+      if (sc != SL_STATUS_OK) {
+        esl_lib_log_core_critical("Failed to set local IRK request, sc = 0x%04x" APP_LOG_NL, sc);
+      } else {
+        esl_lib_log_core_debug("Local IRK not available, generating a new key." APP_LOG_NL);
+      }
+      break;
     case sl_bt_evt_scanner_legacy_advertisement_report_id:
       process_advertisement_report(evt->data.evt_scanner_legacy_advertisement_report.data.data,
                                    evt->data.evt_scanner_legacy_advertisement_report.data.len,

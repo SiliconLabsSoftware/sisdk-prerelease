@@ -1,6 +1,6 @@
 id: cpc_ng_wake
 package: cpc_ng
-description: Shared CPC-NG wake implementation. Instantiable host and device wake components select role and GPIO per instance.
+description: Shared CPC-NG wake implementation. Instantiable host wake and runtime PM components select role and GPIO per instance.
 category: Services|CPC-NG|Internal
 quality: experimental
 label: CPC-NG Wake

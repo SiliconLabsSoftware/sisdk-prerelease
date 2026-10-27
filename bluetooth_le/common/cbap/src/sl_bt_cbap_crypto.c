@@ -33,12 +33,6 @@
 #include "em_system.h"
 #include "sl_common.h"
 
-#include "mbedtls/pk.h"
-#include "mbedtls/x509.h"
-#include "mbedtls/x509_csr.h"
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
-#include "mbedtls/oid.h"
 #include "mbedtls/x509_crt.h"
 #include "psa/crypto.h"
 #include "psa/crypto_values.h"
@@ -111,14 +105,8 @@ static const uint8_t cert_chain_roles[CERT_ID_COUNT] = {
   [CERT_ID_DEVICE]  = SL_BT_CBAP_ROLE_PROVER,
 };
 
-// Certificate chain security profile
-static const mbedtls_x509_crt_profile cert_chain_profile = {
-  .allowed_mds    = MBEDTLS_X509_ID_FLAG(MBEDTLS_MD_SHA256),
-  .allowed_pks    = (MBEDTLS_X509_ID_FLAG(MBEDTLS_PK_ECDSA)
-                     | MBEDTLS_X509_ID_FLAG(MBEDTLS_PK_ECKEY)),
-  .allowed_curves = MBEDTLS_X509_ID_FLAG(MBEDTLS_ECP_DP_SECP256R1),
-  .rsa_min_bitlen = 0,
-};
+// Certificate chain security profile, set up by sli_bt_cbap_crypto_init().
+static mbedtls_x509_crt_profile cert_chain_profile;
 
 // Public key ID of the remote device
 static mbedtls_svc_key_id_t remote_pub_key_id = 0;
@@ -199,6 +187,16 @@ void sli_bt_cbap_crypto_init(void)
       app_assert_status(sc);
     }
   }
+
+  // Mbed TLS matches allowed_pks against two different identifiers: the
+  // signature algorithm of every certificate of the chain, and the public key
+  // type of the end entity. An ECDSA signed certificate carrying an EC public
+  // key needs a bit for each, and the key type has no public name, so both are
+  // inherited from the Suite B preset, which is the ECDSA only profile of the
+  // library. Narrow it down to the single hash and curve that CBAP uses.
+  cert_chain_profile = mbedtls_x509_crt_profile_suiteb;
+  cert_chain_profile.allowed_mds = MBEDTLS_X509_ID_FLAG(MBEDTLS_MD_SHA256);
+  cert_chain_profile.allowed_curves = MBEDTLS_X509_ID_FLAG(MBEDTLS_ECP_DP_SECP256R1);
 
   // The root certificate is self-signed, therefore it is its own issuer.
   if (required[CERT_ID_ROOT]) {

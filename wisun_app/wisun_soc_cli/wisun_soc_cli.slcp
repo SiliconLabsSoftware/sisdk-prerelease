@@ -436,6 +436,20 @@ template_contribution:
         - type: uint8
           help: "lfn_limit: Number of locally supported LFN"
   - name: "cli_command"
+    condition: [wisun_stack_ffn]
+    value:
+      group: "wisun"
+      name: "set_ffn_power_saving"
+      handler: "app_set_ffn_power_saving_schedule"
+      help: "Configure FFN unicast listen/sleep schedule before join (0 0 disables)"
+      shortcuts:
+        - name: "sffnps"
+      argument:
+        - type: uint8
+          help: "listen_slots: consecutive unicast dwells spent listening"
+        - type: uint8
+          help: "sleep_slots: consecutive unicast dwells that may be spent sleeping"
+  - name: "cli_command"
     value:
       group: "wisun"
       name: "mode_switch"

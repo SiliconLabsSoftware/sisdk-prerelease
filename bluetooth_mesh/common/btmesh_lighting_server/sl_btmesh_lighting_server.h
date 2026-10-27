@@ -163,8 +163,23 @@ typedef void (*sl_btmesh_lighting_generic_onoff_cb_t)(uint8_t onoff);
 typedef void (*sl_btmesh_lighting_pri_level_move_cb_t)(void);
 typedef void (*sl_btmesh_lighting_pri_level_halt_cb_t)(void);
 
+/// Unregistered policy means allow, so existing clients keep today's Move behavior.
+typedef enum {
+  SL_BTMESH_LIGHTING_DIMMING_ALLOW = 0,
+  SL_BTMESH_LIGHTING_DIMMING_DEFER,
+  SL_BTMESH_LIGHTING_DIMMING_REJECT
+} sl_btmesh_lighting_dimming_policy_t;
+
+typedef sl_btmesh_lighting_dimming_policy_t (*sl_btmesh_lighting_dimming_policy_cb_t)(void);
+
 sl_status_t sl_btmesh_register_lighting_generic_onoff_cb(sl_btmesh_lighting_generic_onoff_cb_t callback);
 sl_status_t sl_btmesh_register_lightness_pri_level_move_cb(sl_btmesh_lighting_pri_level_move_cb_t cb);
 sl_status_t sl_btmesh_register_lightness_pri_level_halt_cb(sl_btmesh_lighting_pri_level_halt_cb_t cb);
+sl_status_t sl_btmesh_register_lighting_dimming_policy_cb(sl_btmesh_lighting_dimming_policy_cb_t cb);
+
+/***************************************************************************//**
+ * Cancel a manual dim hold that is waiting until dimming is allowed.
+ ******************************************************************************/
+void sl_btmesh_cancel_deferred_level_move(void);
 
 #endif // SL_BTMESH_LIGHTING_SERVER_H

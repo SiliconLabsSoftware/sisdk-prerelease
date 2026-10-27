@@ -41,6 +41,7 @@
 #include "sl_iperf_udp_srv.h"
 #include "sl_iperf_udp_clnt.h"
 #include "sl_iperf_util.h"
+#include "sl_wisun_app_core_util.h"
 
 #if !defined(SL_IPERF_CMSIS_RTOS_DISABLED)
 #include "em_common.h"
@@ -80,15 +81,6 @@ __STATIC_INLINE void _iperf_mutex_acquire(void);
  * @details Helper function
  *****************************************************************************/
 __STATIC_INLINE void _iperf_mutex_release(void);
-
-/**************************************************************************//**
- * @brief Convert OS status to bool value
- * @details Helper function
- * @param[in] status OS Status
- * @return true if status is osOK
- * @return false if status is NOT osOK
- *****************************************************************************/
-__STATIC_INLINE bool _os_status_to_bool(const osStatus_t status);
 
 // -----------------------------------------------------------------------------
 //                                Static Variables
@@ -180,9 +172,6 @@ static sl_iperf_log_t _def_log = { 0 };
 void sl_iperf_service_init(void)
 {
   static sl_iperf_test_t test = { 0 };
-
-  // init network interface
-  sl_iperf_nw_interface_init();
 
 #if !defined(SL_IPERF_CMSIS_RTOS_DISABLED)
   // init mutex
@@ -323,7 +312,7 @@ bool sl_iperf_test_add(sl_iperf_test_t * const test)
       sl_iperf_test_free_buff(test);
     }
   }
-  return _os_status_to_bool(status);
+  return status == osOK;
 }
 
 bool sl_iperf_test_get(sl_iperf_test_t * const test, const uint32_t timeout_ms)
@@ -331,7 +320,7 @@ bool sl_iperf_test_get(sl_iperf_test_t * const test, const uint32_t timeout_ms)
   osStatus_t status = osError;
   uint8_t msg_prio = 0U;
   status = osMessageQueueGet(_iperf_test_res_msg_queue, (void *)test, &msg_prio, timeout_ms);
-  return _os_status_to_bool(status);
+  return status == osOK;
 }
 
 // -----------------------------------------------------------------------------
@@ -356,7 +345,7 @@ static void _iperf_thr_fnc(void *args)
   osStatus_t status     = osError;
 
   // wait for network connected state
-  sl_iperf_network_wait_for_connection();
+  sl_wisun_app_core_util_wait_for_connection();
 
   SL_IPERF_SERVICE_LOOP() {
     // Pop Test from the queue
@@ -369,14 +358,14 @@ static void _iperf_thr_fnc(void *args)
     memset(&test->statistic, 0, sizeof(sl_iperf_stats_t));
 
     // check network connection
-    if (!sl_iperf_network_is_connected()) {
+    if (!sl_wisun_app_core_util_network_is_connected()) {
       sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_NETWORK_CONNECTION,
                                      SL_IPERF_TEST_STATUS_ERR);
       sl_iperf_test_log(test, "Network not connected.\n");
       sl_iperf_test_free_buff(test);
       // Keep serving the queue so later tests are not orphaned.
       osMessageQueuePut(_iperf_test_res_msg_queue, test, 0U, osWaitForever);
-      sl_iperf_delay_ms(1000UL);
+      osDelay(1000UL);
       continue;
     }
 
@@ -397,7 +386,7 @@ static void _iperf_thr_fnc(void *args)
       case SL_IPERF_MODE_SERVER:
         if (sl_iperf_test_is_udp_srv(test)) {
           /// Call UDP Server
-          sl_iperf_delay_ms(100UL);
+          osDelay(100UL);
           sl_iperf_test_udp_server(test);
         } else if (sl_iperf_test_is_tcp_srv(test)) {
           (void) 0L;
@@ -423,11 +412,6 @@ static void _iperf_thr_fnc(void *args)
     // Push test content to the queue
     osMessageQueuePut(_iperf_test_res_msg_queue, test, 0U, osWaitForever);
   }
-}
-
-__STATIC_INLINE bool _os_status_to_bool(const osStatus_t status)
-{
-  return status == osOK ? true : false;
 }
 
 static void _iperf_status_update_thr_fnc(void *args)

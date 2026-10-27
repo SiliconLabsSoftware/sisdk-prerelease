@@ -76,7 +76,8 @@
 
 // <o SL_ZIGBEE_AF_PLUGIN_APPS_SECURITY_KEY_TYPE> GPD Security Key Type <0-7>
 // <i> Default: 4
-// <i> GPD Security Key Type.
+// <i> GPD Security Key Type. 4 = legacy OOB (v1.1.2), 5 = Key Type Elsewhere,
+// <i> 6 = OOB GPD key (v1.1.3, requires pre-shared key on sink/TC), 7 = derived.
 #define SL_ZIGBEE_AF_PLUGIN_APPS_SECURITY_KEY_TYPE 4
 
 // <o SL_ZIGBEE_AF_PLUGIN_APPS_KEY_REQUEST> GPD Security Key Request <0-1>
@@ -157,6 +158,17 @@
 // <d> { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff }
 #define SL_ZIGBEE_AF_PLUGIN_APPS_KEY { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff }
 #define SL_ZIGBEE_AF_PLUGIN_APPS_KEY_LENGTH (16)
+
+// <q SL_ZIGBEE_AF_PLUGIN_APPS_USE_IC_DERIVED_TCLK> Use install-code-derived TC link key (GP v1.1.3)
+// <i> Default: 0
+// <i> When enabled, SL_ZIGBEE_AF_PLUGIN_APPS_IC_DERIVED_TCLK is used instead of ZA09
+// <i> for encrypting commissioning keys (IC-TCLK path / dTCLK fallback).
+#define SL_ZIGBEE_AF_PLUGIN_APPS_USE_IC_DERIVED_TCLK 0
+
+// <a.16 SL_ZIGBEE_AF_PLUGIN_APPS_IC_DERIVED_TCLK> Install-code-derived TC link key <0..255> <f.h>
+// <i> Pre-derived 16-byte key (AES-MMO of GPD install code). Used when
+// <i> SL_ZIGBEE_AF_PLUGIN_APPS_USE_IC_DERIVED_TCLK is 1.
+#define SL_ZIGBEE_AF_PLUGIN_APPS_IC_DERIVED_TCLK { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
 
 // </h>
 

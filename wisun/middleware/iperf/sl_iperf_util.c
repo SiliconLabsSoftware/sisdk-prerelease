@@ -41,6 +41,9 @@
 #include "sl_iperf_config.h"
 #include "sl_iperf_log.h"
 #include "sl_iperf.h"
+#include "sl_sleeptimer.h"
+#include "socket/socket.h"
+#include "arpa/inet.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -339,21 +342,21 @@ void sl_iperf_print_test_srv_header_json(sl_iperf_test_t * const test, const sl_
   sl_iperf_log_print(test->log, "{\n");
   sl_iperf_log_print(test->log, "%*s\"Test-%lu-Srv\": {\n", __indent(1U), test->id);
   sl_iperf_log_print(test->log, "%*s\"dtg\": {\n", __indent(2U));
-  sl_iperf_log_print(test->log, "%*s\"id\":            %ld,\n", __indent(3U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->dtg.id));
-  sl_iperf_log_print(test->log, "%*s\"time_var_sec\":  %lu,\n", __indent(3U), sl_iperf_network_ntohl(hdr->dtg.time_var_sec));
-  sl_iperf_log_print(test->log, "%*s\"time_var_usec\": %lu,\n", __indent(3U), sl_iperf_network_ntohl(hdr->dtg.time_var_usec));
-  sl_iperf_log_print(test->log, "%*s\"id2\":           %ld\n", __indent(3U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->dtg.id2));
+  sl_iperf_log_print(test->log, "%*s\"id\":            %ld,\n", __indent(3U), (int32_t) ntohl((uint32_t)hdr->dtg.id));
+  sl_iperf_log_print(test->log, "%*s\"time_var_sec\":  %lu,\n", __indent(3U), ntohl(hdr->dtg.time_var_sec));
+  sl_iperf_log_print(test->log, "%*s\"time_var_usec\": %lu,\n", __indent(3U), ntohl(hdr->dtg.time_var_usec));
+  sl_iperf_log_print(test->log, "%*s\"id2\":           %ld\n", __indent(3U), (int32_t) ntohl((uint32_t)hdr->dtg.id2));
   sl_iperf_log_print(test->log, "%*s},\n", __indent(2U));
-  sl_iperf_log_print(test->log, "%*s\"flags\":            %ld,\n", __indent(2U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->flags));
-  sl_iperf_log_print(test->log, "%*s\"tot_len_u\":        %lu,\n", __indent(2U), sl_iperf_network_ntohl(hdr->tot_len_u));
-  sl_iperf_log_print(test->log, "%*s\"tot_len_l\":        %lu,\n", __indent(2U), sl_iperf_network_ntohl(hdr->tot_len_l));
-  sl_iperf_log_print(test->log, "%*s\"stop_sec\":         %lu,\n", __indent(2U), sl_iperf_network_ntohl(hdr->stop_sec));
-  sl_iperf_log_print(test->log, "%*s\"stop_usec\":        %lu,\n", __indent(2U), sl_iperf_network_ntohl(hdr->stop_usec));
-  sl_iperf_log_print(test->log, "%*s\"lost_pkt_cnt\":     %lu,\n", __indent(2U), sl_iperf_network_ntohl(hdr->lost_pkt_cnt));
-  sl_iperf_log_print(test->log, "%*s\"out_of_order_cnt\": %lu,\n", __indent(2U), sl_iperf_network_ntohl(hdr->out_of_order_cnt));
-  sl_iperf_log_print(test->log, "%*s\"packet_cnt\":       %lu,\n", __indent(2U), sl_iperf_network_ntohl(hdr->packet_cnt));
-  sl_iperf_log_print(test->log, "%*s\"jitter_sec\":       %lu,\n", __indent(2U), sl_iperf_network_ntohl(hdr->jitter_sec));
-  sl_iperf_log_print(test->log, "%*s\"jitter_usec\":      %lu\n", __indent(2U), sl_iperf_network_ntohl(hdr->jitter_usec));
+  sl_iperf_log_print(test->log, "%*s\"flags\":            %ld,\n", __indent(2U), (int32_t) ntohl((uint32_t)hdr->flags));
+  sl_iperf_log_print(test->log, "%*s\"tot_len_u\":        %lu,\n", __indent(2U), ntohl(hdr->tot_len_u));
+  sl_iperf_log_print(test->log, "%*s\"tot_len_l\":        %lu,\n", __indent(2U), ntohl(hdr->tot_len_l));
+  sl_iperf_log_print(test->log, "%*s\"stop_sec\":         %lu,\n", __indent(2U), ntohl(hdr->stop_sec));
+  sl_iperf_log_print(test->log, "%*s\"stop_usec\":        %lu,\n", __indent(2U), ntohl(hdr->stop_usec));
+  sl_iperf_log_print(test->log, "%*s\"lost_pkt_cnt\":     %lu,\n", __indent(2U), ntohl(hdr->lost_pkt_cnt));
+  sl_iperf_log_print(test->log, "%*s\"out_of_order_cnt\": %lu,\n", __indent(2U), ntohl(hdr->out_of_order_cnt));
+  sl_iperf_log_print(test->log, "%*s\"packet_cnt\":       %lu,\n", __indent(2U), ntohl(hdr->packet_cnt));
+  sl_iperf_log_print(test->log, "%*s\"jitter_sec\":       %lu,\n", __indent(2U), ntohl(hdr->jitter_sec));
+  sl_iperf_log_print(test->log, "%*s\"jitter_usec\":      %lu\n", __indent(2U), ntohl(hdr->jitter_usec));
   sl_iperf_log_print(test->log, "%*s}\n", __indent(1U));
   sl_iperf_log_print(test->log, "}\n");
 }
@@ -366,30 +369,30 @@ void sl_iperf_print_test_clnt_header_json(sl_iperf_test_t * const test, const sl
   sl_iperf_log_print(test->log, "{\n");
   sl_iperf_log_print(test->log, "%*s\"Test-%lu-Clnt\": {\n", __indent(1U), test->id);
   sl_iperf_log_print(test->log, "%*s\"dtg\": {\n", __indent(2U));
-  sl_iperf_log_print(test->log, "%*s\"id\":            %ld,\n", __indent(3U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->dtg.id));
-  sl_iperf_log_print(test->log, "%*s\"time_var_sec\":  %lu,\n", __indent(3U), sl_iperf_network_ntohl(hdr->dtg.time_var_sec));
-  sl_iperf_log_print(test->log, "%*s\"time_var_usec\": %lu,\n", __indent(3U), sl_iperf_network_ntohl(hdr->dtg.time_var_usec));
-  sl_iperf_log_print(test->log, "%*s\"id2\":           %ld\n", __indent(3U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->dtg.id2));
+  sl_iperf_log_print(test->log, "%*s\"id\":            %ld,\n", __indent(3U), (int32_t) ntohl((uint32_t)hdr->dtg.id));
+  sl_iperf_log_print(test->log, "%*s\"time_var_sec\":  %lu,\n", __indent(3U), ntohl(hdr->dtg.time_var_sec));
+  sl_iperf_log_print(test->log, "%*s\"time_var_usec\": %lu,\n", __indent(3U), ntohl(hdr->dtg.time_var_usec));
+  sl_iperf_log_print(test->log, "%*s\"id2\":           %ld\n", __indent(3U), (int32_t) ntohl((uint32_t)hdr->dtg.id2));
   sl_iperf_log_print(test->log, "%*s},\n", __indent(2U));
   sl_iperf_log_print(test->log, "%*s\"base\": {\n", __indent(2U));
-  sl_iperf_log_print(test->log, "%*s\"flags\":       %ld,\n", __indent(3U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->base.flags));
-  sl_iperf_log_print(test->log, "%*s\"num_threads\": %ld,\n", __indent(3U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->base.num_threads));
-  sl_iperf_log_print(test->log, "%*s\"port\":        %ld,\n", __indent(3U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->base.port));
-  sl_iperf_log_print(test->log, "%*s\"buf_len\":     %ld,\n", __indent(3U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->base.buf_len));
-  sl_iperf_log_print(test->log, "%*s\"win_band\":    %ld,\n", __indent(3U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->base.win_band));
-  sl_iperf_log_print(test->log, "%*s\"amount\":      %ld\n", __indent(3U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->base.amount));
+  sl_iperf_log_print(test->log, "%*s\"flags\":       %ld,\n", __indent(3U), (int32_t) ntohl((uint32_t)hdr->base.flags));
+  sl_iperf_log_print(test->log, "%*s\"num_threads\": %ld,\n", __indent(3U), (int32_t) ntohl((uint32_t)hdr->base.num_threads));
+  sl_iperf_log_print(test->log, "%*s\"port\":        %ld,\n", __indent(3U), (int32_t) ntohl((uint32_t)hdr->base.port));
+  sl_iperf_log_print(test->log, "%*s\"buf_len\":     %ld,\n", __indent(3U), (int32_t) ntohl((uint32_t)hdr->base.buf_len));
+  sl_iperf_log_print(test->log, "%*s\"win_band\":    %ld,\n", __indent(3U), (int32_t) ntohl((uint32_t)hdr->base.win_band));
+  sl_iperf_log_print(test->log, "%*s\"amount\":      %ld\n", __indent(3U), (int32_t) ntohl((uint32_t)hdr->base.amount));
   sl_iperf_log_print(test->log, "%*s},\n", __indent(2U));
   sl_iperf_log_print(test->log, "%*s\"extend\": {\n", __indent(2U));
-  sl_iperf_log_print(test->log, "%*s\"type\":               %ld,\n", __indent(3U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->extend.type));
-  sl_iperf_log_print(test->log, "%*s\"length\":             %ld,\n", __indent(3U), (int32_t) sl_iperf_network_ntohl((uint32_t)hdr->extend.length));
-  sl_iperf_log_print(test->log, "%*s\"u_flags\":            %d,\n", __indent(3U), (int16_t) sl_iperf_network_ntohs((uint16_t)hdr->extend.u_flags));
-  sl_iperf_log_print(test->log, "%*s\"l_flags\":            %d,\n", __indent(3U), (int16_t) sl_iperf_network_ntohs((uint16_t)hdr->extend.l_flags));
-  sl_iperf_log_print(test->log, "%*s\"u_version\":          %lu,\n", __indent(3U), sl_iperf_network_ntohl(hdr->extend.u_version));
-  sl_iperf_log_print(test->log, "%*s\"l_version\":          %lu,\n", __indent(3U), sl_iperf_network_ntohl(hdr->extend.l_version));
-  sl_iperf_log_print(test->log, "%*s\"tos\":                %d,\n", __indent(3U), (int16_t) sl_iperf_network_ntohs((uint16_t)hdr->extend.tos));
-  sl_iperf_log_print(test->log, "%*s\"l_rate\":             %lu,\n", __indent(3U), sl_iperf_network_ntohl(hdr->extend.l_rate));
-  sl_iperf_log_print(test->log, "%*s\"u_rate\":             %lu,\n", __indent(3U), sl_iperf_network_ntohl(hdr->extend.u_rate));
-  sl_iperf_log_print(test->log, "%*s\"tcp_write_prefetch\": %lu\n", __indent(3U), sl_iperf_network_ntohl(hdr->extend.tcp_write_prefetch));
+  sl_iperf_log_print(test->log, "%*s\"type\":               %ld,\n", __indent(3U), (int32_t) ntohl((uint32_t)hdr->extend.type));
+  sl_iperf_log_print(test->log, "%*s\"length\":             %ld,\n", __indent(3U), (int32_t) ntohl((uint32_t)hdr->extend.length));
+  sl_iperf_log_print(test->log, "%*s\"u_flags\":            %d,\n", __indent(3U), (int16_t) ntohs((uint16_t)hdr->extend.u_flags));
+  sl_iperf_log_print(test->log, "%*s\"l_flags\":            %d,\n", __indent(3U), (int16_t) ntohs((uint16_t)hdr->extend.l_flags));
+  sl_iperf_log_print(test->log, "%*s\"u_version\":          %lu,\n", __indent(3U), ntohl(hdr->extend.u_version));
+  sl_iperf_log_print(test->log, "%*s\"l_version\":          %lu,\n", __indent(3U), ntohl(hdr->extend.l_version));
+  sl_iperf_log_print(test->log, "%*s\"tos\":                %d,\n", __indent(3U), (int16_t) ntohs((uint16_t)hdr->extend.tos));
+  sl_iperf_log_print(test->log, "%*s\"l_rate\":             %lu,\n", __indent(3U), ntohl(hdr->extend.l_rate));
+  sl_iperf_log_print(test->log, "%*s\"u_rate\":             %lu,\n", __indent(3U), ntohl(hdr->extend.u_rate));
+  sl_iperf_log_print(test->log, "%*s\"tcp_write_prefetch\": %lu\n", __indent(3U), ntohl(hdr->extend.tcp_write_prefetch));
   sl_iperf_log_print(test->log, "%*s}\n", __indent(2U));
   sl_iperf_log_print(test->log, "%*s}\n", __indent(1U));
   sl_iperf_log_print(test->log, "}\n");
@@ -480,19 +483,21 @@ void sl_iperf_test_print_udp_conn_str(sl_iperf_test_t * const test)
   static char clnt_ip_str[SL_IPERF_IP_STR_BUFF_LEN] = { 0U };
   static char srv_ip_str[SL_IPERF_IP_STR_BUFF_LEN]  = { 0U };
 
-  sl_iperf_inet_ntop(&test->conn.clnt_addr, clnt_ip_str, sizeof(clnt_ip_str));
-  sl_iperf_inet_ntop(&test->conn.srv_addr, srv_ip_str, sizeof(srv_ip_str));
+  inet_ntop(AF_INET6, &test->conn.clnt_addr.sin6_addr,
+            clnt_ip_str, sizeof(clnt_ip_str));
+  inet_ntop(AF_INET6, &test->conn.srv_addr.sin6_addr,
+            srv_ip_str, sizeof(srv_ip_str));
   if (test->opt.mode == SL_IPERF_MODE_SERVER) {
     sl_iperf_test_log(test, SL_IPERF_UDP_SRV_CONNECTION_FORMAT_STR,
                       srv_ip_str,
-                      sl_iperf_get_socket_addr_port(&test->conn.srv_addr),
+                      ntohs(test->conn.srv_addr.sin6_port),
                       clnt_ip_str,
-                      sl_iperf_get_socket_addr_port(&test->conn.clnt_addr));
+                      ntohs(test->conn.clnt_addr.sin6_port));
   } else {
     sl_iperf_test_log(test, SL_IPERF_UDP_CLNT_CONNECTION_FORMAT_STR,
                       clnt_ip_str,
                       srv_ip_str,
-                      sl_iperf_get_socket_addr_port(&test->conn.srv_addr));
+                      ntohs(test->conn.srv_addr.sin6_port));
   }
 }
 
@@ -506,7 +511,7 @@ void sl_iperf_test_update_status(sl_iperf_test_t * const test, bool reset)
   stat_update_params_t params            = { 0UL };
 
   if (reset) {
-    ts_ms_prev = sl_iperf_get_timestamp_ms();
+    ts_ms_prev = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
     data_bytes_prev = 0UL;
     update_time_ms = 0UL;
     lost_pkt_prev = 0UL;
@@ -522,7 +527,7 @@ void sl_iperf_test_update_status(sl_iperf_test_t * const test, bool reset)
   sl_iperf_stats_lock();
 
   // Elapsed time calculation
-  params.ts_ms_cur = sl_iperf_get_timestamp_ms();
+  params.ts_ms_cur = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
   params.ts_ms_delta = params.ts_ms_cur - ts_ms_prev;
   params.data_bytes_cur = test->statistic.bytes;
   params.data_bytes_delta = params.data_bytes_cur - data_bytes_prev;
@@ -630,7 +635,7 @@ void sl_iperf_test_calculate_average_bandwidth(sl_iperf_test_t * const test)
 bool sl_iperf_test_check_time(const sl_iperf_test_t * const test)
 {
 #if (0U < SL_IPERF_MAX_TEST_TIMEOUT_MS)
-  return (bool)((sl_iperf_get_timestamp_ms() - test->statistic.ts_start_ms)
+  return (bool)(((sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count()) - test->statistic.ts_start_ms)
                 < (test->opt.duration_ms + SL_IPERF_MAX_TEST_TIMEOUT_MS));
 #else
   (void) test;

@@ -220,11 +220,7 @@ void Peer::SetPort(uint16_t aPort)
     VerifyOrExit(mPort != aPort);
 
     mPort = aPort;
-
-    if (mPort != 0)
-    {
-        AsCoreType(&mSockAddr).SetPort(mPort);
-    }
+    AsCoreType(&mSockAddr).SetPort(mPort);
 
 exit:
     return;

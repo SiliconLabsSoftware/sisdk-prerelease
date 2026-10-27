@@ -396,6 +396,9 @@ autoselected_components:
   id: mbedtls_asn1_write
 - package: platform_core
   vendor: silabs
+  id: mbedtls_base64
+- package: platform_core
+  vendor: silabs
   id: mbedtls_cipher
 - package: platform_core
   vendor: silabs
@@ -442,6 +445,9 @@ autoselected_components:
 - package: platform_core
   vendor: silabs
   id: mbedtls_oid
+- package: platform_core
+  vendor: silabs
+  id: mbedtls_pem_parse
 - package: platform_core
   vendor: silabs
   id: mbedtls_pk
@@ -833,10 +839,10 @@ sdk_extension:
   id: usb
   version: 1.8.0
 - vendor: silabs
-  id: boards
+  id: segger
   version: 1.2.0
 - vendor: silabs
-  id: segger
+  id: boards
   version: 1.2.0
 - vendor: silabs
   id: mbedtls
@@ -857,11 +863,11 @@ sdk_extension:
   id: freertos
   version: 1.2.0
 - vendor: silabs
-  id: delta_dfu
-  version: 1.1.0
-- vendor: silabs
   id: security_sxsymcrypt
   version: 1.2.0
+- vendor: silabs
+  id: delta_dfu
+  version: 1.1.0
 - vendor: silabs
   id: openthread_forks
   version: 3.2.0
@@ -875,16 +881,16 @@ sdk_extension:
   id: thread
   version: 3.2.0
 - vendor: silabs
-  id: security_libcryptosoc
-  version: 1.2.0
-- vendor: silabs
   id: unity_test_framework
   version: 1.2.0
 - vendor: silabs
-  id: platform_core
+  id: security_libcryptosoc
   version: 1.2.0
 - vendor: silabs
   id: common_15_4
+  version: 1.2.0
+- vendor: silabs
+  id: platform_core
   version: 1.2.0
 - vendor: silabs
   id: cmsis

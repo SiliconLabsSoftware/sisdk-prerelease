@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sl_cpc_drv_spi_peripheral_eusart_instance_config.h
  * @brief CPC SPI SECONDARY driver configuration file.
  *******************************************************************************
  * # License

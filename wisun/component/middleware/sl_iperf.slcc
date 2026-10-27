@@ -22,7 +22,6 @@ provides:
 - name: sl_iperf
 
 source:
-- path: "sl_iperf_network_interface.c"
 - path: "sl_iperf.c"
 - path: "sl_iperf_log.c"
 - path: "sl_iperf_util.c"
@@ -43,7 +42,8 @@ config_file:
 - path: "config/sl_iperf_config.h"
 
 requires:
-- name: "sl_wisun_iperf_posix_port"
+- name: "sl_wisun_app_core"
+- name: "sleeptimer"
 
 #-------------- Template Contribution ----------------
 template_contribution:

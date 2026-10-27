@@ -28,4 +28,6 @@ requires:
 - name: log_none
 - name: network_stack_common
 
+documentation:
+  url: https://docs.silabs.com/wiseconnect/latest/wiseconnect-api-reference-guide-sockets/
 root_path: network_stack/network_stack_sdk/./components/device/silabs/si91x/wireless/socket

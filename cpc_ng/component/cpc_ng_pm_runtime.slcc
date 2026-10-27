@@ -1,0 +1,22 @@
+id: cpc_ng_pm_runtime
+package: cpc_ng
+description: |
+  CPC-NG runtime power management for a bus end. Enables local sleep policy
+  (power mode, wake-in GPIO, runtime PM get/put) so the MCU may enter deep sleep
+  when idle while still waking on peer traffic or GPIO.
+
+  Install on any end that uses wake-in or driver runtime PM; configuration lives
+  in the CPC driver instance headers.
+category: Services|CPC-NG|Internal
+quality: experimental
+label: CPC-NG Runtime PM
+provides:
+- name: cpc_ng_pm_runtime
+requires:
+- name: cpc_ng_wake
+- name: gpio
+- name: power_manager
+template_contribution:
+- name: component_catalog
+  value: cpc_ng_pm_runtime
+root_path: cpc_ng

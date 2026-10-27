@@ -38,9 +38,8 @@
 #include "app_process.h"
 #include "app_init.h"
 #include "app_framework_common.h"
-// Ensure that psa is initialized correctly
 #include "psa/crypto.h"
-#include "mbedtls/build_info.h"
+#include "em_device.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -89,23 +88,16 @@ void emberAfInitCallback(void)
     psa_set_key_type(&key_attr, PSA_KEY_TYPE_AES);
     psa_set_key_bits(&key_attr, 128);
 
-#ifdef PSA_KEY_LOCATION_SLI_SE_OPAQUE
+#if _SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT
     psa_set_key_lifetime(&key_attr,
                          PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
                            PSA_KEY_LIFETIME_PERSISTENT,
                            PSA_KEY_LOCATION_SLI_SE_OPAQUE));
 #else
-#ifdef MBEDTLS_PSA_CRYPTO_STORAGE_C
     psa_set_key_lifetime(&key_attr,
                          PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
                            PSA_KEY_LIFETIME_PERSISTENT,
                            PSA_KEY_LOCATION_LOCAL_STORAGE));
-#else
-    psa_set_key_lifetime(&key_attr,
-                         PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
-                           PSA_KEY_LIFETIME_VOLATILE,
-                           PSA_KEY_LOCATION_LOCAL_STORAGE));
-#endif
 #endif
 
     psa_status = psa_import_key(&key_attr,

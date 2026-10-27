@@ -235,12 +235,6 @@ bool Diags::ShouldHandleReceivedFrame(const otRadioFrame &aFrame) const
     return false;
 }
 
-bool Diags::IsChannelValid(uint8_t aChannel)
-{
-    OT_UNUSED_VARIABLE(aChannel);
-    return false;
-}
-
 void Diags::ReceiveDone(otRadioFrame *aFrame, Error aError)
 {
     OT_UNUSED_VARIABLE(aFrame);

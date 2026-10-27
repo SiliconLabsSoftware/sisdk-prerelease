@@ -47,6 +47,12 @@
 * Customer should define these in their own application code
 ***************************************************************************/
 
+/* Autogen sources (zap-command.h) include af.h before this header, so zcl-debug-print.h may
+ * already own sl_zigbee_af_* print macros (see SLI_ZIGBEE_AF_PRINT_MACROS_DEFINED_BY_ZCL_DEBUG_PRINT_H).
+ * Do not #undef/redefine them to wrapper calls in that case (UC simulation sets SL_ZIGBEE_TEST and
+ * omits weak wrapper implementations from green-power-print-wrapper.c). */
+#if !defined(SLI_ZIGBEE_AF_PRINT_MACROS_DEFINED_BY_ZCL_DEBUG_PRINT_H)
+
 /* When af.h has already included zcl-debug-print.h, its include guard is set. The #undef
  * block below would strip sl_zigbee_af_* macros and the delegated #include would then be
  * a no-op, leaving e.g. sl_zigbee_af_green_power_cluster_print undefined. Skip the #undef
@@ -141,6 +147,7 @@ extern uint16_t sl_zigbee_af_print_active_area;
 #define sl_zigbee_af_service_discovery_println(...) sl_zigbee_af_println(0x00, __VA_ARGS__)
 #define sl_zigbee_af_print(...) sl_zigbee_af_print_wrapper(__VA_ARGS__)
 #define sl_zigbee_af_println(...) sl_zigbee_af_println_wrapper(__VA_ARGS__)
+#if !defined(SLI_ZIGBEE_APP_FRAMEWORK_UTIL_ZCL_DEBUG_PRINT_H)
 /* Framework code uses warn/error macros from zcl-debug-print.h; map them here when
  * only the Green Power adapter print path is used (no ZCL framework core). */
 #define sl_zigbee_af_app_warn(...) sl_zigbee_af_app_print_wrapper(__VA_ARGS__)
@@ -151,6 +158,7 @@ extern uint16_t sl_zigbee_af_print_active_area;
 #define sl_zigbee_af_core_warnln(...) sl_zigbee_af_core_println_wrapper(__VA_ARGS__)
 #define sl_zigbee_af_core_error(...) sl_zigbee_af_core_print_wrapper(__VA_ARGS__)
 #define sl_zigbee_af_core_errorln(...) sl_zigbee_af_core_println_wrapper(__VA_ARGS__)
+#endif // !SLI_ZIGBEE_APP_FRAMEWORK_UTIL_ZCL_DEBUG_PRINT_H
 void sl_zigbee_af_print_wrapper(uint16_t area, const char * formatString, ...);
 #if !defined(SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT)
 void sl_zigbee_af_print_big_endian_eui64_wrapper(uint8_t * eui, ...);
@@ -223,5 +231,7 @@ void sl_zigbee_af_println_wrapper(uint16_t area, const char * formatString, ...)
 #error "Include zigbee debug component or use the custom print system by setting SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_PRINT_SYSTEM to 1"
 #endif // SL_CATALOG_ZIGBEE_DEBUG_PRINT_PRESENT
 #endif // (SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_ADAPTER_USE_CUSTOM_PRINT_SYSTEM == 1)
+
+#endif // !SLI_ZIGBEE_AF_PRINT_MACROS_DEFINED_BY_ZCL_DEBUG_PRINT_H
 
 #endif //_SILABS_GREEN_POWER_PRINT_WRAPPER_H_

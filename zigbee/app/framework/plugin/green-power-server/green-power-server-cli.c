@@ -124,3 +124,4 @@ void sl_zigbee_af_green_power_server_cli_run_test_vectors(SL_CLI_COMMAND_ARG)
   sl_zigbee_af_cli_println("Command is not supported");
 #endif // (SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_SERVER_SECURITY_TEST_VECTORS == 1)
 }
+

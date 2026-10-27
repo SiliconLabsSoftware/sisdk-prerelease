@@ -27,4 +27,6 @@ requires:
 - name: log_none
   condition: ["device_si91x"]
 
+documentation:
+  url: https://docs.silabs.com/wiseconnect/latest/wiseconnect-api-reference-guide-websocket-client/
 root_path: network_stack/network_stack_sdk/./components/service/sl_websocket_client

@@ -75,6 +75,7 @@ include:
   - path: "sl_wisun_trace_api.h"
   - path: "sl_wisun_alloc.h"
   - path: "sli_wisun_internal_api.h"
+  - path: "sli_wisun_timer_group.h"
   - path: "sli_wisun_timer_service.h"
   - path: "sl_wisun_connection_params_api.h"
   - path: "sl_wisun_lfn_params_api.h"

@@ -1,0 +1,19 @@
+#include "sl_common.h"
+#include "sl_cpc_drv_instances.h"
+#include "sli_uart.h"
+
+{% for instance in cpc_ng_drv_uart_usart_instances %}
+#include "sl_cpc_drv_uart_usart_{{ instance }}_config.h"
+{% endfor %}
+
+{% for instance in cpc_ng_drv_uart_usart_instances %}
+void SL_CONCAT_PASTER_3(USART, SL_CPC_DRV_UART_USART_{{ instance|upper }}_PERIPHERAL_NO, _RX_IRQHandler)(void)
+{
+  sli_uart_rx_irq_handler(&sl_cpc_drv_uart_usart_{{ instance }}->uart_handle);
+}
+
+void SL_CONCAT_PASTER_3(USART, SL_CPC_DRV_UART_USART_{{ instance|upper }}_PERIPHERAL_NO, _TX_IRQHandler)(void)
+{
+  sli_uart_tx_irq_handler(&sl_cpc_drv_uart_usart_{{ instance }}->uart_handle);
+}
+{% endfor %}

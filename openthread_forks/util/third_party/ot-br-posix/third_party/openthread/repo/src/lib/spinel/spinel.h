@@ -4997,12 +4997,11 @@ enum
 
     /// DNS-SD IPv6 Address Resolution Result
     /**
-     * Format: `ULS(A(6L))D`: Set
+     * Format: `ULt(A(6L))D`: Set
      *
      * `U`: Host name.
      * `L`: Infrastructure interface index.
-     * `S`: Number of (`6` address, `L` TTL) pairs.
-     * `A(6L)`: Concatenated IPv6 address and TTL pairs (no per-entry struct wrapper).
+     * `t(A(6L))`: Struct containing an array of IPv6 addresses, each followed by a TTL as `uint32_t`.
      * `D`: Callback context (`sizeof(otPlatDnssdAddressCallback)`).
      */
     SPINEL_PROP_DNSSD_IP6_ADDRESS_RESULT = SPINEL_PROP_DNSSD__BEGIN + 13,

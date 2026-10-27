@@ -38,7 +38,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
-#include "sl_wisun_api.h"
+#include "sl_wisun_event_mgr.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ extern "C" {
  * @details This function registered as br stopped custom callback
  * @param[in] evt event argument
  ******************************************************************************/
-void app_custom_br_stopped_callback(sl_wisun_evt_t *evt);
+void sl_wisun_br_stopped_app_hnd(sl_wisun_evt_t *evt);
 
 #ifdef __cplusplus
 }

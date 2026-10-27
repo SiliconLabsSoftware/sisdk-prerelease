@@ -56,18 +56,18 @@ extern "C" {
 /**************************************************************************//**
  * @brief CLI app about handler
  * @details CLI function
- * @param[in] void
+ * @param[in] arguments Arguments
  *****************************************************************************/
-void app_about(void);
+void app_about(const sl_cli_command_arg_t *arguments);
 #endif
 
 #if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 /**************************************************************************//**
  * @brief CLI app reboot handler
  * @details CLI function
- * @param[in] void
+ * @param[in] arguments Arguments
  *****************************************************************************/
-void app_reboot(void);
+void app_reboot(const sl_cli_command_arg_t *arguments);
 #endif
 
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)
@@ -124,27 +124,6 @@ void app_mac_deny(const sl_cli_command_arg_t *arguments);
  *****************************************************************************/
 void app_set_trace_level(const sl_cli_command_arg_t *arguments);
 #endif
-
-/**************************************************************************//**
- * @brief App CLI handler
- * @details CLI function
- * @param[in] args Arguments
- *****************************************************************************/
-void app_cli_handler(const sl_cli_command_arg_t *args);
-
-/**************************************************************************//**
- * @brief OTA DFU CLI handler
- * @details CLI function
- * @param[in] args Arguments
- *****************************************************************************/
-void sl_wisun_ota_dfu_cli_handler(const sl_cli_command_arg_t *args);
-
-/**************************************************************************//**
- * @brief iPerf CLI handler
- * @details CLI function
- * @param[in] args Arguments
- *****************************************************************************/
-void sl_iperf_cli_handler(const sl_cli_command_arg_t *args);
 
 #if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 #if defined(SL_CATALOG_WISUN_APP_CORE_PRESENT)

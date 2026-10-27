@@ -123,7 +123,6 @@ void sli_gcm_abort_run(connection_entry_t *entry, bool drain)
   }
 }
 
-
 #if GCM_NEEDS_GATT_SERVICE
 /// True if CSF, Service Changed, or Database Hash still need work this connection.
 static bool gatt_service_phase_needed(const connection_entry_t *entry)
@@ -586,9 +585,9 @@ static void continue_after_step(connection_entry_t *entry,
 
 /// Entry point for every discovery run.
 sl_status_t sli_gcm_begin_run(connection_entry_t *entry,
-                             bool run_all,
-                             uint16_t profile_handle,
-                             bool force_refresh)
+                              bool run_all,
+                              uint16_t profile_handle,
+                              bool force_refresh)
 {
   uint16_t first;
 
@@ -652,9 +651,9 @@ sl_status_t sli_gcm_begin_run(connection_entry_t *entry,
 /// Start a run now, or remember it until the aborted run it replaces has
 /// drained. Deferred runs are started from handle_procedure_completed().
 sl_status_t sli_gcm_request_run(connection_entry_t *entry,
-                               bool run_all,
-                               uint16_t profile_handle,
-                               bool force_refresh)
+                                bool run_all,
+                                uint16_t profile_handle,
+                                bool force_refresh)
 {
   if (entry->state != discovery_state_aborting) {
     return sli_gcm_begin_run(entry, run_all, profile_handle, force_refresh);
@@ -683,13 +682,13 @@ void sli_gcm_trigger_rediscovery(connection_entry_t *entry, sl_status_t status)
 #endif
 
   sli_gcm_emit_rediscovery_needed(entry->connection,
-                          status,
-                          SL_GATT_CLIENT_MANAGER_AUTO_REDISCOVERY);
+                                  status,
+                                  SL_GATT_CLIENT_MANAGER_AUTO_REDISCOVERY);
 #if SL_GATT_CLIENT_MANAGER_AUTO_REDISCOVERY
   (void)sli_gcm_request_run(entry,
-                    true,
-                    SL_GATT_CLIENT_MANAGER_INVALID_PROFILE_HANDLE,
-                    true);
+                            true,
+                            SL_GATT_CLIENT_MANAGER_INVALID_PROFILE_HANDLE,
+                            true);
 #endif
 }
 
@@ -716,9 +715,9 @@ void sli_gcm_handle_procedure_completed(uint8_t connection, uint16_t result)
     if (entry->pending_run_valid) {
       entry->pending_run_valid = false;
       (void)sli_gcm_begin_run(entry,
-                      entry->pending_run_all,
-                      entry->pending_profile,
-                      entry->pending_force_refresh);
+                              entry->pending_run_all,
+                              entry->pending_profile,
+                              entry->pending_force_refresh);
     }
     return;
   }
@@ -1163,4 +1162,3 @@ sl_status_t sli_gcm_on_connection_opened(connection_entry_t *entry)
   return SL_STATUS_OK;
 #endif
 }
-

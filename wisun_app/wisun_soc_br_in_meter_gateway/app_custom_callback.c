@@ -57,7 +57,7 @@
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
 /* Wi-SUN BR stopped custom callback */
-void app_custom_br_stopped_callback(sl_wisun_evt_t *evt)
+void sl_wisun_br_stopped_app_hnd(sl_wisun_evt_t *evt)
 {
   if (evt->evt.br_stopped.status == SL_STATUS_OK) {
     printf("[Border Router stopped]\n");

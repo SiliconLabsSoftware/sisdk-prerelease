@@ -167,21 +167,27 @@ class AutoEventHandlersMixin:
         self, evt: esl_lib.EventConfigureTagResponse
     ):
         """ESL library configure tag response event handler extension for auto mode"""
-        if evt.status == elw.SL_STATUS_OK:
-            tag = self.tag_db.find(evt.connection_handle)
-            if tag is not None and tag.provisioned:
-                if (
-                    tag.max_image_index is not None
-                    and tag.has_image_transfer
-                    and IMAGE_MAX_AUTO_UPLOAD_COUNT
-                    and tag.auto_image_count
-                    < min((tag.max_image_index + 1), IMAGE_MAX_AUTO_UPLOAD_COUNT)
-                ):
-                    self.upload_auto_image(
-                        (tag.auto_image_count % len(self.image_files)), tag
-                    )
-                else:
-                    self.ap_update_complete(tag.esl_id, tag.group_id)
+        tag = self.tag_db.find(evt.connection_handle)
+        if evt.status != elw.SL_STATUS_OK:
+            # Auto mode does not continue after a failed configure, and no other
+            # path closes this link. Drop it so a Connected tag cannot block the
+            # idle commissioning check forever.
+            if tag is not None:
+                self.disconnect(tag)
+            return
+        if tag is not None and tag.provisioned:
+            if (
+                tag.max_image_index is not None
+                and tag.has_image_transfer
+                and IMAGE_MAX_AUTO_UPLOAD_COUNT
+                and tag.auto_image_count
+                < min((tag.max_image_index + 1), IMAGE_MAX_AUTO_UPLOAD_COUNT)
+            ):
+                self.upload_auto_image(
+                    (tag.auto_image_count % len(self.image_files)), tag
+                )
+            else:
+                self.ap_update_complete(tag.esl_id, tag.group_id)
 
     def auto_esl_event_image_transfer_finished(
         self, evt: esl_lib.EventImageTransferFinished

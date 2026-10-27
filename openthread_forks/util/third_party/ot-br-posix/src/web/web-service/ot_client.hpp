@@ -41,6 +41,8 @@
 namespace otbr {
 namespace Web {
 
+class WebServiceTest;
+
 #define OT_SCANNED_NET_BUFFER_SIZE 250
 #define OT_SET_MAX_DATA_SIZE 250
 // OpenThread dataset.h defines OT_NETWORK_NAME_MAX_SIZE as 16 (bytes, sans NUL).
@@ -126,6 +128,8 @@ public:
     bool FactoryReset(void);
 
 private:
+    friend class WebServiceTest;
+
     void Disconnect(void);
     void DiscardRead(void);
 

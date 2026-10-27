@@ -345,6 +345,7 @@ void sl_wisun_network_update_event_hnd(sl_wisun_evt_t *evt)
   app_wisun_trace_util_destroy_ip_str(ip_str);
   app_wisun_trace_util_destroy_time_str(time_str);
   __CHECK_FOR_STATUS(evt->evt.network_update.status);
+  sl_wisun_network_update_event_app_hnd(evt);
 }
 
 /* Connected event handler */
@@ -420,11 +421,13 @@ void sl_wisun_join_state_event_hnd(sl_wisun_evt_t *evt)
   }
 #endif
   __CHECK_FOR_STATUS(evt->evt.join_state.status);
+  sl_wisun_join_state_event_app_hnd(evt);
 }
 
 void sl_wisun_lfn_wake_up_hnd(sl_wisun_evt_t *evt)
 {
   __CHECK_FOR_STATUS(evt->evt.lfn_wake_up.status);
+  sl_wisun_lfn_wake_up_app_hnd(evt);
 }
 
 void sl_wisun_multicast_reg_finish_hnd(sl_wisun_evt_t *evt)
@@ -459,6 +462,7 @@ void sl_wisun_direct_connect_status_hnd(sl_wisun_evt_t *evt)
 void sl_wisun_br_stopped_hnd(sl_wisun_evt_t *evt)
 {
   __CHECK_FOR_STATUS(evt->evt.br_stopped.status);
+  sl_wisun_br_stopped_app_hnd(evt);
 }
 
 void sl_wisun_mode_switch_fallback_hnd(sl_wisun_evt_t *evt)
@@ -469,6 +473,7 @@ void sl_wisun_mode_switch_fallback_hnd(sl_wisun_evt_t *evt)
 void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt)
 {
   __CHECK_FOR_STATUS(evt->evt.regulation_tx_level.status);
+  sl_wisun_regulation_tx_level_app_hnd(evt);
 }
 
 void sl_wisun_br_routing_table_update_hnd(sl_wisun_evt_t *evt)

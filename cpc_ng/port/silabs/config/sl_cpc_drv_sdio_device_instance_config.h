@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sl_cpc_drv_sdio_device_instance_config.h
  * @brief CPC SDIO SECONDARY driver configuration file.
  *******************************************************************************
  * # License

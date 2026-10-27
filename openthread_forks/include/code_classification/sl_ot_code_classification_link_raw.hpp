@@ -247,16 +247,19 @@ private:
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void InvokeReceiveDone(RxFrame *aFrame, Error aError);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
-    void InvokeTransmitDone(TxFrame &aFrame, RxFrame *aAckFrame, Error aError);
+    void InvokeTransmitDone(TxFrame::ParseInfo &aFrameInfo, RxFrame *aAckFrame, Error aError);
     SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OPENTHREAD, SL_CODE_CLASS_TIME_CRITICAL)
     void InvokeEnergyScanDone(int8_t aEnergyScanMaxRssi);
 // #if OT_SHOULD_LOG_AT(OT_LOG_LEVEL_INFO)
 // Avoid including log.hpp
 #if ((OPENTHREAD_CONFIG_LOG_OUTPUT != OPENTHREAD_CONFIG_LOG_OUTPUT_NONE) \
      && (OPENTHREAD_CONFIG_LOG_LEVEL >= 4))
-   void RecordFrameTransmitStatus(const TxFrame &aFrame, Error aError, uint8_t aRetryCount, bool aWillRetx);
+    void RecordFrameTransmitStatus(const TxFrame::ParseInfo &aFrameInfo,
+                                   Error                     aError,
+                                   uint8_t                   aRetryCount,
+                                   bool                      aWillRetx);
 #else
-    void RecordFrameTransmitStatus(const TxFrame &, Error, uint8_t, bool) {}
+    void RecordFrameTransmitStatus(const TxFrame::ParseInfo &, Error, uint8_t, bool) {}
 #endif
 
     uint8_t                 mReceiveChannel;

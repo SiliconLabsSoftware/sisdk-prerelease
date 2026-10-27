@@ -1,0 +1,44 @@
+package: zigbee
+description: >
+  Shared Green Power v1.1.3 types and utilities (TC Request/Response codec,
+  OOB key store, link-key resolution). Used by both InvolveTC sinks
+  (zigbee_green_power_v113) and GP-aware Trust Centers (zigbee_green_power_tc)
+  without pulling green_power_server into TC-only images.
+label: Green Power v1.1.3 Common
+quality: production
+id: zigbee_green_power_v113_common
+category: Zigbee|Green Power
+provides:
+- name: zigbee_green_power_v113_common
+requires:
+- name: zigbee_gp
+- name: zigbee_green_power_common
+
+config_file:
+- path: app/framework/plugin/green-power-v113/config/green-power-v113-config.h
+source:
+- path: app/framework/plugin/green-power-v113/green-power-oob-signature.c
+- path: app/framework/plugin/green-power-v113/green-power-oob-key.c
+- path: app/framework/plugin/green-power-v113/green-power-tc-msg.c
+- path: app/framework/plugin/green-power-v113/green-power-link-key.c
+include:
+- path: app/framework/plugin/green-power-v113
+  file_list:
+  - path: green-power-v113.h
+  - path: green-power-tc-msg.h
+  - path: green-power-oob-key-tokens.h
+- path: stack/include
+  file_list:
+  - path: gp-install-code.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_green_power_v113_common
+- name: token_header
+  value: green-power-oob-key-tokens.h
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/green-power-v113
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

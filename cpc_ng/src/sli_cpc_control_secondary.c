@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sli_cpc_control_secondary.c
  * @brief CPC control secondary: bus init sequence responders.
  *******************************************************************************
  * # License
@@ -328,7 +328,7 @@ static void secondary_on_send_done(sli_cpc_control_t *ctrl, const sl_cpc_ep_even
   if (ctrl_type == SLI_CPC_CTRL_TYPE_BUS_ENABLE) {
     SLI_CPC_LOG_DEBUG("secondary init sequence completed");
     ctrl->initialized = true;
-    sli_cpc_bus_signal_event(bus, SLI_CPC_SIGNAL_SYSTEM);
+    sli_cpc_bus_signal_event(bus);
   }
 }
 

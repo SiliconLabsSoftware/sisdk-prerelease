@@ -49,6 +49,14 @@
 #if OTBR_ENABLE_BACKBONE_ROUTER
 #include "backbone_router/backbone_agent.hpp"
 #endif
+#if OTBR_ENABLE_NFTABLES
+#include "firewall/firewall_manager.hpp"
+#include "firewall/nftables_impl.hpp"
+#include "firewall/nftables_monitor.hpp"
+#endif
+#if OTBR_ENABLE_PF
+#include "firewall/pf_firewall.hpp"
+#endif
 #if OTBR_ENABLE_SRP_ADVERTISING_PROXY
 #include "sdp_proxy/advertising_proxy.hpp"
 #endif
@@ -259,6 +267,13 @@ private:
     void InitRcpMode(const std::string &aRestListenAddress, int aRestListenPort);
     void DeinitRcpMode(void);
 
+#if OTBR_ENABLE_NFTABLES || OTBR_ENABLE_PF
+    void UpdateIngressPrefixes(void);
+#if OTBR_ENABLE_NAT64
+    void UpdateNat44Masquerade(void);
+#endif
+#endif
+
     void CreateNcpMode(void);
     void InitNcpMode(void);
     void DeinitNcpMode(void);
@@ -291,6 +306,15 @@ private:
     UdpProxy mEphemeralKeyUdpProxy;
 #endif
 
+#endif
+#if OTBR_ENABLE_NFTABLES
+    std::unique_ptr<Firewall::Nftables>        mNftables;
+    std::unique_ptr<Firewall::FirewallManager> mFirewall;
+    std::unique_ptr<Firewall::NftablesMonitor> mNftablesMonitor;
+#endif
+#if OTBR_ENABLE_PF
+    std::unique_ptr<Firewall::PfctlProcess> mPfctl;
+    std::unique_ptr<Firewall::PfFirewall>   mFirewall;
 #endif
 #if OTBR_ENABLE_TREL
     UdpProxy mTrelUdpProxy;

@@ -68,14 +68,10 @@ requires:
 source:
   - path: "app.c"
   - path: "app_init.c"
-  - path: "app_custom_callback.c"
-    unless: [device_sdid_210]
 include:
   - path: "."
     file_list:
     - path: "app.h"
-    - path: "app_custom_callback.h"
-      unless: [device_sdid_210]
 define:
   - name: "DEBUG_EFM"
   - name: "WISUN_CONFIG_DEVICE_TYPE"

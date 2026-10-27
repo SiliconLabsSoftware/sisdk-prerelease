@@ -330,13 +330,11 @@ void sli_ot_process_transmit_aes_ccm_device(otRadioFrame                       &
 {
     Mac::TxFrame       &txFrame = static_cast<Mac::TxFrame &>(aFrame);
     Mac::Frame::Lengths lengths;
-    FrameData           payload;
 
     SuccessOrAssert(txFrame.DetermineLengths(lengths));
-    SuccessOrAssert(txFrame.GetPayload(payload));
 
     const uint32_t payloadLength = lengths.mPayload;
-    uint8_t *const payloadBytes  = AsNonConst(payload.GetBytes());
+    uint8_t *const payloadBytes  = txFrame.GetPsduStartingAt(lengths.mHeader);
 
     TxSecurityProcessing handler;
 

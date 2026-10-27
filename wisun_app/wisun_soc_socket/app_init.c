@@ -38,7 +38,6 @@
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_app_core_config.h"
 #include "app.h"
-#include "app_custom_callback.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -63,13 +62,6 @@ void app_init(void)
   /* Init project info */
   sl_wisun_app_core_util_project_info_init("Wi-SUN Sockets Application");
 
-  /* Register callbacks */
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_CONNECTED_IND_ID,
-                                        app_custom_connected_callback);
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_SOCKET_DATA_IND_ID,
-                                        app_custom_socket_data_callback);
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_SOCKET_DATA_SENT_IND_ID,
-                                        app_custom_socket_data_sent_callback);
 
   /* Creating App main thread */
   const osThreadAttr_t app_task_attr = {

@@ -41,6 +41,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
+#include "netinet/in.h"
 #include "sl_iperf_network_interface.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -201,9 +202,9 @@ typedef struct sl_iperf_conn {
   /// Accepted sock used by TCP server to rx.
   int32_t socket_id_clnt;
   /// Server sock addr IP.
-  sl_iperf_socket_addr_t srv_addr;
+  sockaddr_in6_t srv_addr;
   /// Client sock addr IP.
-  sl_iperf_socket_addr_t clnt_addr;
+  sockaddr_in6_t clnt_addr;
   /// Server (rx'd) or client (tx'd) started.
   bool run;
   /// Buffer ptr to receive/transmit

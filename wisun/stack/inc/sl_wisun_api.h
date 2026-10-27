@@ -551,9 +551,9 @@ sl_status_t sl_wisun_reset_regulation_duty_cycle(void);
  * with a MAC neighbor and none of its frame counters belongs to an installed
  * key. Entries may also be evicted when the security neighbor table is full.
  *
- * @note On a 32-bit Cortex-M33, the heap consumption for each allocated MAC
- * neighbor table entry is of ~500 bytes (this does not include the associated
- * security neighbor entry).
+ * @note On a 32-bit Cortex-M33, each allocated MAC neighbor table entry
+ * consumes ~440 bytes of heap in Full/FFN libraries and ~416 bytes in BR/LFN
+ * libraries (excluding the associated security neighbor entry).
  * Each allocated security neighbor table entry consumes ~48 bytes of heap.
  * These values include the 8-byte heap metadata associated with each
  * allocation.
@@ -1531,7 +1531,13 @@ sl_status_t sl_wisun_get_lxpm_group_neighbors(const in6_addr_t *group_address, u
  * While both values positive enables the listen/sleep pattern.
  *
  * Must be called before @ref sl_wisun_join. The schedule is static until disconnect;
- * runtime changes are not supported.
+ * runtime changes are not supported. Disconnecting (@ref sl_wisun_disconnect)
+ * clears the schedule and disables power saving: call this function again before
+ * the next join to use power saving. Losing the connection and reconnecting
+ * automatically keeps the schedule.
+ *
+ * Power saving is not supported with a fixed unicast channel: if the network uses one,
+ * the stack disables power saving at join start (see @ref SL_WISUN_MSG_FFN_POWER_SAVING_STATE_IND_ID).
  *
  * @warning This is a proprietary feature intended only for a homogeneous,
  * controlled PAN where every possible FFN parent and unicast sender supports

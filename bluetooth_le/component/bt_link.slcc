@@ -1,0 +1,48 @@
+id: bt_link
+package: bluetooth_le
+label: cpc-ng message link
+description: >
+  Provides a protocol-agnostic message link over cpc-ng, with one complete
+  message per endpoint payload. Multiple links can use their own endpoints and
+  message storage while sharing one deferred runtime.
+category: Services|Platform|Utility
+metadata:
+  sbom:
+    license: Zlib
+quality: experimental
+root_path: bluetooth_le/common/bt_link
+tag:
+- No-Code
+config_file:
+- path: config/sl_bt_link_config.h
+include:
+- path: inc
+  file_list:
+  - path: sl_bt_link.h
+  - path: sl_bt_link_runtime.h
+  - path: sli_bt_link.h
+- path: src
+  file_list:
+  - path: sli_bt_link_runtime.h
+source:
+- path: src/sl_bt_link.c
+- path: src/sl_bt_link_runtime.c
+provides:
+- name: bt_link
+requires:
+- name: app_rta
+- name: cpc_ng
+- name: component_catalog
+- name: sl_common
+- name: sl_core
+- name: status
+template_contribution:
+- name: component_catalog
+  value: bt_link
+- name: app_rta_init
+  value:
+    include: sli_bt_link.h
+    handler: sli_bt_link_runtime_init
+  priority: 1
+validation_helper:
+- path: config/validator.lua

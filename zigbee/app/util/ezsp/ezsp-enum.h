@@ -346,6 +346,9 @@ enum {
   SL_ZIGBEE_EZSP_VALUE_JOIN_USE_INSTALL_CODE_ENABLE = 0x48,
   // The stack revision.
   SL_ZIGBEE_EZSP_VALUE_STACK_REVISION           = 0x49,
+  // Recent average RSSI (dBm) between this device and its parent. Read only.
+  // Returned as a signed 8-bit value.
+  SL_ZIGBEE_EZSP_VALUE_AVG_PARENT_RSSI          = 0x4A,
   // The extra milliseconds added to the APS retry and Fragmentation retry
   // timeout for known sleepy destinations.
   SL_ZIGBEE_EZSP_CONFIG_SLEEPY_TARGET_MAC_TIMEOUT_INCREASE = 0x50

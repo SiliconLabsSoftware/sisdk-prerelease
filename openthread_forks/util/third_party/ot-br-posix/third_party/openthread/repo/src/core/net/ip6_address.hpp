@@ -43,6 +43,7 @@
 #include "common/clearable.hpp"
 #include "common/encoding.hpp"
 #include "common/equatable.hpp"
+#include "common/num_utils.hpp"
 #include "common/string.hpp"
 #include "mac/mac_types.hpp"
 
@@ -91,6 +92,22 @@ public:
      * @retval kErrorInvalidArgs   The @p aPrefix length is not valid (must be `kLength`).
      */
     Error InitFrom(const Prefix &aPrefix);
+
+    /**
+     * Indicates whether or not the Network Prefix is a locally assigned Unique Local Address (ULA) prefix, i.e., a
+     * `fd00::/8` prefix.
+     *
+     * RFC 4193 defines a ULA prefix as `fc00::/7` followed by the L bit, which is set to one for a locally assigned
+     * prefix. Section 3.2 of RFC 4193 defines a Global ID generation process for locally assigned prefixes only, so
+     * `fd00::/8` is the only form a conformant generator can produce. This is what `GenerateRandomUla()` produces.
+     *
+     * Note that this is intentionally stricter than `Prefix::IsUniqueLocal()`, which matches the entire `fc00::/7`
+     * ULA range and is used to recognize prefixes advertised by other devices.
+     *
+     * @retval TRUE   If the Network Prefix is a locally assigned ULA prefix.
+     * @retval FALSE  If the Network Prefix is not a locally assigned ULA prefix.
+     */
+    bool IsLocallyAssignedUla(void) const { return m8[0] == 0xfd; }
 
 } OT_TOOL_PACKED_END;
 
@@ -275,7 +292,7 @@ public:
      *
      * @returns The size (in bytes) of the prefix.
      */
-    static uint8_t SizeForLength(uint8_t aLength) { return BytesForBitSize(aLength); }
+    static uint8_t SizeForLength(uint8_t aLength) { return Min(BytesForBitSize(aLength), kMaxSize); }
 
     /**
      * Indicates whether or not a given prefix length is valid for use as a NAT64 prefix.

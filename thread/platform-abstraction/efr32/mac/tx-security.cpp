@@ -56,31 +56,54 @@ otError sli_ot_process_transmit_aes_ccm(otRadioFrame                      *aFram
     return OT_ERROR_NONE;
 #else
 
-    otError                   error        = OT_ERROR_NONE;
-    uint32_t                  frameCounter = 0;
-    Mac::Frame::SecurityLevel securityLevel;
-    Crypto::AesCcm::Nonce     nonce;
-    Mac::TxFrame             &txFrame = *static_cast<Mac::TxFrame *>(aFrame);
+    otError                 error   = OT_ERROR_NONE;
+    const Mac::TxFrame     &txFrame = *static_cast<const Mac::TxFrame *>(aFrame);
+    Mac::TxFrame::ParseInfo info;
 
-    VerifyOrExit(txFrame.GetSecurityEnabled());
+    error = info.ParseFrom(txFrame, Mac::Frame::kParseSecurityHeader);
+    if (error == OT_ERROR_NOT_FOUND)
+    {
+        ExitNow(error = OT_ERROR_NONE);
+    }
+    SuccessOrExit(error);
+
+    error = sli_ot_process_transmit_aes_ccm_with_parse_info(aFrame, aExtAddress, aPalKey, &info);
+
+exit:
+    return error;
+#endif // OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION < OT_THREAD_VERSION_1_2)
+}
+
+otError sli_ot_process_transmit_aes_ccm_with_parse_info(otRadioFrame                      *aFrame,
+                                                        const otExtAddress                *aExtAddress,
+                                                        const MacKeyStoragePolicy::PalKey *aPalKey,
+                                                        const Mac::TxFrame::ParseInfo     *aParseInfo)
+{
+#if (OPENTHREAD_RADIO && (OPENTHREAD_CONFIG_THREAD_VERSION < OT_THREAD_VERSION_1_2))
+    OT_UNUSED_VARIABLE(aFrame);
+    OT_UNUSED_VARIABLE(aExtAddress);
+    OT_UNUSED_VARIABLE(aPalKey);
+    OT_UNUSED_VARIABLE(aParseInfo);
+
+    return OT_ERROR_NONE;
+#else
+
+    otError               error = OT_ERROR_NONE;
+    Crypto::AesCcm::Nonce nonce;
+    Mac::TxFrame         &txFrame = *static_cast<Mac::TxFrame *>(aFrame);
+
+    VerifyOrExit(aParseInfo != nullptr, error = OT_ERROR_INVALID_ARGS);
+
+    // Nothing to secure if the frame has no Auxiliary Security Header.
+    VerifyOrExit(aParseInfo->mParsedSecurityHeader);
+
     VerifyOrExit(aPalKey != nullptr, error = OT_ERROR_INVALID_ARGS);
 
-    SuccessOrExit(error = txFrame.GetSecurityLevel(securityLevel));
-    SuccessOrExit(error = txFrame.GetFrameCounter(frameCounter));
+    nonce.InitFrom(*static_cast<const Mac::ExtAddress *>(aExtAddress),
+                   aParseInfo->mFrameCounter,
+                   static_cast<uint8_t>(aParseInfo->mSecurityLevel));
 
-    {
-        Mac::Frame::Lengths lengths;
-
-        SuccessOrExit(error = txFrame.DetermineLengths(lengths));
-
-        const uint8_t tagLength = static_cast<uint8_t>(lengths.mFooter - txFrame.GetFcsSize());
-
-        nonce.InitFrom(*static_cast<const Mac::ExtAddress *>(aExtAddress),
-                       frameCounter,
-                       static_cast<uint8_t>(securityLevel));
-
-        sli_ot_process_transmit_aes_ccm_device(txFrame, nonce, tagLength, securityLevel, *aPalKey);
-    }
+    sli_ot_process_transmit_aes_ccm_device(txFrame, nonce, aParseInfo->mMicSize, aParseInfo->mSecurityLevel, *aPalKey);
 
     txFrame.SetIsSecurityProcessed(true);
 

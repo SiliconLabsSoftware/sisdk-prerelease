@@ -1,0 +1,1353 @@
+/*
+ *    Copyright (c) 2026, The OpenThread Authors.
+ *    All rights reserved.
+ *
+ *    Redistribution and use in source and binary forms, with or without
+ *    modification, are permitted provided that the following conditions are met:
+ *    1. Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *    2. Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *    3. Neither the name of the copyright holder nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ *    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ *    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ *    ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ *    LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ *    CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ *    SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ *    INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ *    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ *    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *    POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include <errno.h>
+#include <net/if.h>
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include "common/types.hpp"
+#include "firewall/firewall_manager.hpp"
+#include "firewall/nftables.hpp"
+
+#if OTBR_ENABLE_NFTABLES
+#include <memory>
+
+#include <libmnl/libmnl.h>
+#include <libnftnl/chain.h>
+#include <libnftnl/expr.h>
+#include <libnftnl/rule.h>
+#include <linux/netfilter.h>
+#include <linux/netfilter/nf_tables.h>
+#include <linux/netfilter/nfnetlink.h>
+
+#include "fake_netlink_socket.hpp"
+#include "firewall/netlink_socket.hpp"
+#include "firewall/nftables_impl.hpp"
+#endif
+
+using ::testing::_;
+using ::testing::AnyNumber;
+using ::testing::AtLeast;
+using ::testing::DoAll;
+using ::testing::InSequence;
+using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::SetArgPointee;
+using ::testing::StrEq;
+
+using otbr::Ip6Prefix;
+using otbr::Firewall::ChainPriority;
+using otbr::Firewall::ChainType;
+using otbr::Firewall::FirewallManager;
+using otbr::Firewall::Hook;
+using otbr::Firewall::INftables;
+using otbr::Firewall::PktType;
+using otbr::Firewall::SetDirection;
+
+#if OTBR_ENABLE_NFTABLES
+using otbr::Firewall::FakeNetlinkSocket;
+using otbr::Firewall::MnlNetlinkSocket;
+using otbr::Firewall::Nftables;
+#endif
+using otbr::Firewall::Verdict;
+
+namespace {
+
+// The table the manager under test names after its interface.
+const char *const kTableName = "otbr_wpan0";
+
+class MockNftables : public INftables
+{
+public:
+    MOCK_METHOD(otbrError, Init, (), (override));
+    MOCK_METHOD(otbrError, Deinit, (), (override));
+    MOCK_METHOD(otbrError, BeginBatch, (), (override));
+    MOCK_METHOD(otbrError, CommitBatch, (), (override));
+    MOCK_METHOD(void, AbortBatch, (), (override));
+    MOCK_METHOD(otbrError, DelTable, (const std::string &), (override));
+    MOCK_METHOD(otbrError, AddTable, (const std::string &), (override));
+    MOCK_METHOD(otbrError,
+                AddChain,
+                (const std::string &, const std::string &, Hook, ChainPriority, ChainType),
+                (override));
+    MOCK_METHOD(otbrError, DelChain, (const std::string &, const std::string &), (override));
+    MOCK_METHOD(otbrError, AddIp6PrefixSet, (const std::string &, const std::string &), (override));
+    MOCK_METHOD(otbrError, AddSetElement, (const std::string &, const std::string &, const Ip6Prefix &), (override));
+    MOCK_METHOD(otbrError, FlushSet, (const std::string &, const std::string &), (override));
+    MOCK_METHOD(otbrError,
+                AddRuleNfprotoNeqIp6Return,
+                (const std::string &, const std::string &, uint64_t *),
+                (override));
+    MOCK_METHOD(otbrError,
+                AddRuleOifnameNeqReturn,
+                (const std::string &, const std::string &, const std::string &, uint64_t *),
+                (override));
+    MOCK_METHOD(otbrError,
+                AddRuleIifPkttypeVerdict,
+                (const std::string &, const std::string &, const std::string &, PktType, Verdict, uint64_t *),
+                (override));
+    MOCK_METHOD(otbrError,
+                AddRulePkttypeVerdict,
+                (const std::string &, const std::string &, PktType, Verdict, uint64_t *),
+                (override));
+    MOCK_METHOD(otbrError,
+                AddRuleSetLookupVerdict,
+                (const std::string &, const std::string &, const std::string &, SetDirection, Verdict, uint64_t *),
+                (override));
+    MOCK_METHOD(otbrError, AddRuleVerdict, (const std::string &, const std::string &, Verdict, uint64_t *), (override));
+    MOCK_METHOD(
+        otbrError,
+        AddRuleNdNsRedirect,
+        (const std::string &, const std::string &, const Ip6Prefix &, const std::string &, uint16_t, uint64_t *),
+        (override));
+    MOCK_METHOD(otbrError,
+                AddRuleIifMark,
+                (const std::string &, const std::string &, const std::string &, uint32_t, uint64_t *),
+                (override));
+    MOCK_METHOD(otbrError,
+                AddRuleMarkMasquerade,
+                (const std::string &, const std::string &, uint32_t, uint64_t *),
+                (override));
+    MOCK_METHOD(otbrError, DelRule, (const std::string &, const std::string &, uint64_t), (override));
+};
+
+void SetSuccessfulDefaults(MockNftables &mock)
+{
+    using ::testing::DoAll;
+    using ::testing::Return;
+
+    ON_CALL(mock, DelTable).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, AddTable).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, AddChain).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, DelChain).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, AddIp6PrefixSet).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, AddSetElement).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, FlushSet).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, BeginBatch).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, CommitBatch).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, DelRule).WillByDefault(Return(OTBR_ERROR_NONE));
+
+    ON_CALL(mock, AddRuleNfprotoNeqIp6Return).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, AddRuleOifnameNeqReturn).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, AddRuleIifPkttypeVerdict).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, AddRulePkttypeVerdict).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, AddRuleSetLookupVerdict).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, AddRuleVerdict).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, AddRuleNdNsRedirect).WillByDefault(DoAll(SetArgPointee<5>(200), Return(OTBR_ERROR_NONE)));
+    ON_CALL(mock, AddRuleIifMark).WillByDefault(Return(OTBR_ERROR_NONE));
+    ON_CALL(mock, AddRuleMarkMasquerade).WillByDefault(Return(OTBR_ERROR_NONE));
+}
+
+} // namespace
+
+TEST(FirewallManagerTest, InitOnlyCreatesTable)
+{
+    NiceMock<MockNftables> mock;
+
+    {
+        // The delete must be inside the batch: nf_tables rejects a table
+        // change sent on its own with EINVAL.
+        InSequence seq;
+        EXPECT_CALL(mock, BeginBatch()).WillOnce(Return(OTBR_ERROR_NONE));
+        EXPECT_CALL(mock, DelTable(StrEq(kTableName))).WillOnce(Return(OTBR_ERROR_NONE));
+        EXPECT_CALL(mock, AddTable(StrEq(kTableName))).WillOnce(Return(OTBR_ERROR_NONE));
+        EXPECT_CALL(mock, CommitBatch()).WillOnce(Return(OTBR_ERROR_NONE));
+    }
+    // Init must NOT touch any chains, sets, or rules — those are lazy.
+    EXPECT_CALL(mock, AddChain(_, _, _, _, _)).Times(0);
+    EXPECT_CALL(mock, AddIp6PrefixSet(_, _)).Times(0);
+    EXPECT_CALL(mock, AddRuleNfprotoNeqIp6Return(_, _, _)).Times(0);
+    EXPECT_CALL(mock, AddRuleOifnameNeqReturn(_, _, _, _)).Times(0);
+
+    FirewallManager fw(mock, "wpan0");
+    EXPECT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    EXPECT_TRUE(fw.IsInitialized());
+    EXPECT_FALSE(fw.IsIngressFilterEnabled());
+}
+
+TEST(FirewallManagerTest, TableIsNamedAfterTheThreadInterface)
+{
+    // Two agents on one host must not share a table: each Init drops a
+    // leftover table of its own name, and would take the other's rules with it.
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+    EXPECT_CALL(mock, DelTable(StrEq(kTableName))).Times(1);
+    EXPECT_CALL(mock, AddTable(StrEq(kTableName))).Times(1);
+    EXPECT_CALL(mock, DelTable(StrEq("otbr_wpan1"))).Times(2);
+    EXPECT_CALL(mock, AddTable(StrEq("otbr_wpan1"))).Times(1);
+    EXPECT_CALL(mock, FlushSet(StrEq("otbr_wpan1"), _)).Times(2);
+    EXPECT_CALL(mock, FlushSet(StrEq(kTableName), _)).Times(0);
+
+    FirewallManager wpan0(mock, "wpan0");
+    FirewallManager wpan1(mock, "wpan1");
+    EXPECT_EQ(wpan0.GetTableName(), kTableName);
+    EXPECT_EQ(wpan1.GetTableName(), "otbr_wpan1");
+    ASSERT_EQ(wpan0.Init(), OTBR_ERROR_NONE);
+    ASSERT_EQ(wpan1.Init(), OTBR_ERROR_NONE);
+    ASSERT_EQ(wpan1.EnableIngressFilter(), OTBR_ERROR_NONE);
+    EXPECT_EQ(wpan1.ReplaceIngressPrefixes({}, {}), OTBR_ERROR_NONE);
+    EXPECT_EQ(wpan1.Deinit(), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, InitTwiceFails)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    EXPECT_EQ(fw.Init(), OTBR_ERROR_INVALID_STATE);
+}
+
+TEST(FirewallManagerTest, InitPropagatesBackendError)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+    EXPECT_CALL(mock, BeginBatch()).WillOnce(Return(OTBR_ERROR_ERRNO));
+
+    FirewallManager fw(mock, "wpan0");
+    EXPECT_EQ(fw.Init(), OTBR_ERROR_ERRNO);
+    EXPECT_FALSE(fw.IsInitialized());
+}
+
+TEST(FirewallManagerTest, DeinitDeletesTable)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+    EXPECT_CALL(mock, DelTable(StrEq(kTableName))).Times(2); // once in Init, once in Deinit
+
+    {
+        // Deinit deletes the table in a batch of its own.
+        InSequence seq;
+        EXPECT_CALL(mock, BeginBatch()).WillOnce(Return(OTBR_ERROR_NONE)); // Init
+        EXPECT_CALL(mock, CommitBatch()).WillOnce(Return(OTBR_ERROR_NONE));
+        EXPECT_CALL(mock, BeginBatch()).WillOnce(Return(OTBR_ERROR_NONE)); // Deinit
+        EXPECT_CALL(mock, CommitBatch()).WillOnce(Return(OTBR_ERROR_NONE));
+    }
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    EXPECT_EQ(fw.Deinit(), OTBR_ERROR_NONE);
+    EXPECT_FALSE(fw.IsInitialized());
+}
+
+TEST(FirewallManagerTest, EnableIngressFilterInstallsChainAndRulesInOrder)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    // BeginBatch/CommitBatch deliberately omitted from this InSequence — they
+    // are also called by Init(), and including them in the sequence would
+    // cross-couple unrelated expectations.
+    {
+        InSequence seq;
+        EXPECT_CALL(mock, AddIp6PrefixSet(StrEq(kTableName), StrEq(FirewallManager::kIngressDenySrcSet))).Times(1);
+        EXPECT_CALL(mock, AddIp6PrefixSet(StrEq(kTableName), StrEq(FirewallManager::kIngressAllowDstSet))).Times(1);
+        EXPECT_CALL(mock, AddChain(StrEq(kTableName), StrEq(FirewallManager::kIngressChain), Hook::kForward,
+                                   ChainPriority::kFilter, ChainType::kFilter))
+            .Times(1);
+        // First, so that nothing below it -- the unicast drop in particular --
+        // ever sees IPv4: NAT64 replies are forwarded to the Thread interface.
+        EXPECT_CALL(mock, AddRuleNfprotoNeqIp6Return(StrEq(kTableName), StrEq(FirewallManager::kIngressChain), _))
+            .Times(1);
+        EXPECT_CALL(
+            mock, AddRuleOifnameNeqReturn(StrEq(kTableName), StrEq(FirewallManager::kIngressChain), StrEq("wpan0"), _))
+            .Times(1);
+        EXPECT_CALL(mock, AddRuleIifPkttypeVerdict(_, StrEq(FirewallManager::kIngressChain), StrEq("wpan0"),
+                                                   PktType::kUnicast, Verdict::kDrop, _))
+            .Times(1);
+        EXPECT_CALL(mock, AddRuleSetLookupVerdict(_, StrEq(FirewallManager::kIngressChain),
+                                                  StrEq(FirewallManager::kIngressDenySrcSet), SetDirection::kSrc,
+                                                  Verdict::kDrop, _))
+            .Times(1);
+        EXPECT_CALL(mock, AddRuleSetLookupVerdict(_, StrEq(FirewallManager::kIngressChain),
+                                                  StrEq(FirewallManager::kIngressAllowDstSet), SetDirection::kDst,
+                                                  Verdict::kAccept, _))
+            .Times(1);
+        EXPECT_CALL(
+            mock, AddRulePkttypeVerdict(_, StrEq(FirewallManager::kIngressChain), PktType::kUnicast, Verdict::kDrop, _))
+            .Times(1);
+        EXPECT_CALL(mock, AddRuleVerdict(_, StrEq(FirewallManager::kIngressChain), Verdict::kAccept, _)).Times(1);
+    }
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    EXPECT_EQ(fw.EnableIngressFilter(), OTBR_ERROR_NONE);
+    EXPECT_TRUE(fw.IsIngressFilterEnabled());
+}
+
+TEST(FirewallManagerTest, EnableIngressFilterTwiceIsIdempotent)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+    EXPECT_CALL(mock, AddChain(_, StrEq(FirewallManager::kIngressChain), _, _, _)).Times(1);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    ASSERT_EQ(fw.EnableIngressFilter(), OTBR_ERROR_NONE);
+    EXPECT_EQ(fw.EnableIngressFilter(), OTBR_ERROR_NONE); // second call: no-op.
+}
+
+TEST(FirewallManagerTest, EnableNdProxyLazilyCreatesPreroutingChainOnFirstCall)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    EXPECT_CALL(mock, AddChain(StrEq(kTableName), StrEq(FirewallManager::kPreroutingChain), Hook::kPrerouting,
+                               ChainPriority::kRaw, ChainType::kFilter))
+        .Times(1);
+    EXPECT_CALL(
+        mock, AddRuleNdNsRedirect(StrEq(kTableName), StrEq(FirewallManager::kPreroutingChain), _, StrEq("eth0"), 88, _))
+        .Times(2)
+        .WillOnce(DoAll(SetArgPointee<5>(42), Return(OTBR_ERROR_NONE)))
+        .WillOnce(DoAll(SetArgPointee<5>(43), Return(OTBR_ERROR_NONE)));
+    EXPECT_CALL(mock, DelRule(_, StrEq(FirewallManager::kPreroutingChain), 42)).Times(1);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+
+    Ip6Prefix domainPrefix("fd00::", 64);
+    EXPECT_EQ(fw.EnableNdProxyRedirect(domainPrefix, "eth0", 88), OTBR_ERROR_NONE);
+    // Second call must NOT recreate the chain, but must replace the previous rule (handle 42).
+    EXPECT_EQ(fw.EnableNdProxyRedirect(domainPrefix, "eth0", 88), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, DisableNdProxyDeletesRule)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    EXPECT_CALL(mock, AddRuleNdNsRedirect(_, _, _, _, _, _))
+        .WillOnce(DoAll(SetArgPointee<5>(99), Return(OTBR_ERROR_NONE)));
+    EXPECT_CALL(mock, DelRule(StrEq(kTableName), StrEq(FirewallManager::kPreroutingChain), 99)).Times(1);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+
+    Ip6Prefix domainPrefix("fd00::", 64);
+    ASSERT_EQ(fw.EnableNdProxyRedirect(domainPrefix, "eth0", 88), OTBR_ERROR_NONE);
+    EXPECT_EQ(fw.DisableNdProxyRedirect(), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, DisableNdProxyWhenNotEnabledIsNoOp)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+    EXPECT_CALL(mock, DelRule(_, _, _)).Times(0);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+
+    EXPECT_EQ(fw.DisableNdProxyRedirect(), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, EnableNdProxyRejectsInvalidPrefix)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+
+    Ip6Prefix invalid; // length 0
+    EXPECT_EQ(fw.EnableNdProxyRedirect(invalid, "eth0", 88), OTBR_ERROR_INVALID_ARGS);
+}
+
+TEST(FirewallManagerTest, InitRejectsEmptyThreadInterfaceName)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    EXPECT_CALL(mock, BeginBatch()).Times(0);
+
+    FirewallManager fw(mock, "");
+    EXPECT_EQ(fw.Init(), OTBR_ERROR_INVALID_ARGS);
+}
+
+TEST(FirewallManagerTest, EnableNdProxyRejectsEmptyBackboneInterface)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+
+    // Rejected before any batch is opened (Init() opens one of its own).
+    EXPECT_CALL(mock, BeginBatch()).Times(0);
+
+    Ip6Prefix domain("2001:db8::", 64);
+    EXPECT_EQ(fw.EnableNdProxyRedirect(domain, "", 88), OTBR_ERROR_INVALID_ARGS);
+}
+
+TEST(FirewallManagerTest, EnableNdProxyBeforeInitFails)
+{
+    NiceMock<MockNftables> mock;
+
+    FirewallManager fw(mock, "wpan0");
+
+    Ip6Prefix domainPrefix("fd00::", 64);
+    EXPECT_EQ(fw.EnableNdProxyRedirect(domainPrefix, "eth0", 88), OTBR_ERROR_INVALID_STATE);
+}
+
+TEST(FirewallManagerTest, ReplaceIngressPrefixesFlushesThenRefillsBothSets)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    ASSERT_EQ(fw.EnableIngressFilter(), OTBR_ERROR_NONE);
+
+    // The whole point of the flush-then-refill shape is that a prefix which
+    // fell out of the network data is gone afterwards, so the order matters:
+    // both flushes first, then the refills, all inside one batch.
+    {
+        InSequence seq;
+        EXPECT_CALL(mock, BeginBatch());
+        EXPECT_CALL(mock, FlushSet(_, StrEq(FirewallManager::kIngressDenySrcSet)));
+        EXPECT_CALL(mock, FlushSet(_, StrEq(FirewallManager::kIngressAllowDstSet)));
+        EXPECT_CALL(mock, AddSetElement(_, StrEq(FirewallManager::kIngressDenySrcSet), _)).Times(2);
+        EXPECT_CALL(mock, AddSetElement(_, StrEq(FirewallManager::kIngressAllowDstSet), _)).Times(1);
+        EXPECT_CALL(mock, CommitBatch());
+    }
+
+    std::vector<Ip6Prefix> denySrc  = {Ip6Prefix("2001:db8:1::", 64), Ip6Prefix("fd00::", 64)};
+    std::vector<Ip6Prefix> allowDst = {Ip6Prefix("2001:db8:1::", 64)};
+    EXPECT_EQ(fw.ReplaceIngressPrefixes(denySrc, allowDst), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, ReplaceIngressPrefixesLeavesOutPrefixesAnotherOneCovers)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    ASSERT_EQ(fw.EnableIngressFilter(), OTBR_ERROR_NONE);
+
+    // An on-mesh /48 without SLAAC next to a /64 inside it. The sets are
+    // interval sets and the kernel refuses the second of two overlapping
+    // intervals, which used to fail the whole update.
+    EXPECT_CALL(mock, AddSetElement(_, StrEq(FirewallManager::kIngressDenySrcSet), Ip6Prefix("fd11::", 48))).Times(1);
+    EXPECT_CALL(mock, AddSetElement(_, StrEq(FirewallManager::kIngressDenySrcSet), Ip6Prefix("fd22:0:0:1::", 64)))
+        .Times(1);
+    EXPECT_CALL(mock, AddSetElement(_, StrEq(FirewallManager::kIngressAllowDstSet), Ip6Prefix("fd11::", 48))).Times(1);
+    EXPECT_CALL(mock, AddSetElement(_, _, Ip6Prefix("fd11::", 64))).Times(0);
+
+    // In either order: what matters is which prefix covers which.
+    std::vector<Ip6Prefix> denySrc  = {Ip6Prefix("fd11::", 48), Ip6Prefix("fd11::", 64), Ip6Prefix("fd22:0:0:1::", 64)};
+    std::vector<Ip6Prefix> allowDst = {Ip6Prefix("fd11::", 64), Ip6Prefix("fd11::", 48)};
+    EXPECT_EQ(fw.ReplaceIngressPrefixes(denySrc, allowDst), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, ReplaceIngressPrefixesReducesEachSetOnItsOwn)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    ASSERT_EQ(fw.EnableIngressFilter(), OTBR_ERROR_NONE);
+
+    // The /48 is denied as a source; that must not swallow the /64 allowed
+    // as a destination, which lives in another set.
+    EXPECT_CALL(mock, AddSetElement(_, StrEq(FirewallManager::kIngressDenySrcSet), Ip6Prefix("fd11::", 48))).Times(1);
+    EXPECT_CALL(mock, AddSetElement(_, StrEq(FirewallManager::kIngressAllowDstSet), Ip6Prefix("fd11::", 64))).Times(1);
+
+    EXPECT_EQ(fw.ReplaceIngressPrefixes({Ip6Prefix("fd11::", 48)}, {Ip6Prefix("fd11::", 64)}), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, ReplaceIngressPrefixesComparesOnlyTheBitsOfThePrefix)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    ASSERT_EQ(fw.EnableIngressFilter(), OTBR_ERROR_NONE);
+
+    // A /33 covers the half of the /32 whose next bit is clear: 2001:db8:4000::/34
+    // lies inside it, 2001:db8:8000::/34 does not. Bits after a prefix's
+    // length do not count, and a repeated prefix is added once.
+    EXPECT_CALL(mock, AddSetElement(_, _, Ip6Prefix("2001:db8::", 33))).Times(1);
+    EXPECT_CALL(mock, AddSetElement(_, _, Ip6Prefix("2001:db8:8000::", 34))).Times(1);
+    EXPECT_CALL(mock, AddSetElement(_, _, Ip6Prefix("2001:db8:4000::", 34))).Times(0);
+
+    std::vector<Ip6Prefix> allowDst = {Ip6Prefix("2001:db8:4000::", 34), Ip6Prefix("2001:db8:0:0:dead::", 33),
+                                       Ip6Prefix("2001:db8:8000::", 34), Ip6Prefix("2001:db8::", 33)};
+    EXPECT_EQ(fw.ReplaceIngressPrefixes({}, allowDst), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, ReplaceIngressPrefixesRejectsAnInvalidPrefix)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    ASSERT_EQ(fw.EnableIngressFilter(), OTBR_ERROR_NONE);
+
+    // Refused before any batch is opened (Init() and EnableIngressFilter()
+    // open one each, so this expectation is set only after they have run).
+    EXPECT_CALL(mock, BeginBatch()).Times(0);
+    EXPECT_CALL(mock, CommitBatch()).Times(0);
+
+    // A zero-length prefix is invalid; the whole update must be discarded
+    // rather than leaving the sets flushed but only partly refilled.
+    std::vector<Ip6Prefix> denySrc  = {Ip6Prefix("2001:db8::", 0)};
+    std::vector<Ip6Prefix> allowDst = {};
+    EXPECT_EQ(fw.ReplaceIngressPrefixes(denySrc, allowDst), OTBR_ERROR_INVALID_ARGS);
+}
+
+TEST(FirewallManagerTest, ReplaceIngressPrefixesValidatesBeforeReducing)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    ASSERT_EQ(fw.EnableIngressFilter(), OTBR_ERROR_NONE);
+
+    EXPECT_CALL(mock, BeginBatch()).Times(0);
+
+    // The /200 is invalid, and the /48 covers it: reduced first, it would be
+    // dropped unseen and the update would succeed on bad input.
+    std::vector<Ip6Prefix> denySrc = {Ip6Prefix("fd11::", 48), Ip6Prefix("fd11::", 200)};
+    EXPECT_EQ(fw.ReplaceIngressPrefixes(denySrc, {}), OTBR_ERROR_INVALID_ARGS);
+}
+
+TEST(FirewallManagerTest, FailedOperationAbortsTheBatch)
+{
+    // A failure between BeginBatch() and CommitBatch() must discard the batch,
+    // otherwise the backend stays in a batch and every later one is rejected.
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    ASSERT_EQ(fw.EnableIngressFilter(), OTBR_ERROR_NONE);
+
+    EXPECT_CALL(mock, AddSetElement(_, _, _)).WillOnce(Return(OTBR_ERROR_ERRNO));
+    EXPECT_CALL(mock, CommitBatch()).Times(0);
+    EXPECT_CALL(mock, AbortBatch()).Times(1);
+
+    EXPECT_NE(fw.ReplaceIngressPrefixes({Ip6Prefix("2001:db8::", 64)}, {}), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, EnableNdProxyKeepsRuleHandleWhenCommitFails)
+{
+    // The kernel rolls a failed batch back, so the rule installed earlier still
+    // exists. The handle must be kept, or that rule can never be deleted.
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+    ON_CALL(mock, AddRuleNdNsRedirect(_, _, _, _, _, _))
+        .WillByDefault(DoAll(SetArgPointee<5>(4242), Return(OTBR_ERROR_NONE)));
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+
+    Ip6Prefix domain("2001:db8::", 64);
+    ASSERT_EQ(fw.EnableNdProxyRedirect(domain, "eth0", 88), OTBR_ERROR_NONE);
+
+    // The next call fails at commit; the one after it must still delete the rule
+    // installed above, i.e. DelRule() is expected for both.
+    // Any error but a missing table, which would be answered by a reinstall.
+    EXPECT_CALL(mock, CommitBatch())
+        .WillOnce([]() {
+            errno = EINVAL;
+            return OTBR_ERROR_ERRNO;
+        })
+        .WillRepeatedly(Return(OTBR_ERROR_NONE));
+    EXPECT_CALL(mock, AbortBatch()).Times(1);
+    EXPECT_CALL(mock, DelRule(_, _, 4242u)).Times(2);
+
+    EXPECT_NE(fw.EnableNdProxyRedirect(domain, "eth0", 88), OTBR_ERROR_NONE);
+    EXPECT_EQ(fw.EnableNdProxyRedirect(domain, "eth0", 88), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, ReplaceIngressPrefixesRequiresEnableIngressFilter)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+
+    // EnableIngressFilter NOT called — there are no sets to fill yet, and the
+    // refusal comes before any batch is opened (Init() opens one of its own,
+    // so this expectation is set only after Init has run).
+    EXPECT_CALL(mock, BeginBatch()).Times(0);
+    EXPECT_EQ(fw.ReplaceIngressPrefixes({Ip6Prefix("2001:db8::", 64)}, {}), OTBR_ERROR_INVALID_STATE);
+}
+
+TEST(FirewallManagerTest, ReplaceIngressPrefixesBeforeInitFails)
+{
+    NiceMock<MockNftables> mock;
+
+    FirewallManager fw(mock, "wpan0");
+
+    // Nothing may reach the backend before Init(): not even a batch.
+    EXPECT_CALL(mock, BeginBatch()).Times(0);
+    EXPECT_EQ(fw.ReplaceIngressPrefixes({Ip6Prefix("2001:db8::", 64)}, {}), OTBR_ERROR_INVALID_STATE);
+}
+
+TEST(FirewallManagerTest, EnableNat44InstallsTheMarkAndMasqueradeChains)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    EXPECT_CALL(mock, AddChain(StrEq(kTableName), StrEq(FirewallManager::kNatPreroutingChain), Hook::kPrerouting,
+                               ChainPriority::kMangle, ChainType::kFilter))
+        .Times(1);
+    EXPECT_CALL(mock, AddChain(StrEq(kTableName), StrEq(FirewallManager::kNatPostroutingChain), Hook::kPostrouting,
+                               ChainPriority::kSrcNat, ChainType::kNat))
+        .Times(1);
+    // No forward chain: an accept there ends that chain only and changes
+    // nothing for the packet.
+    EXPECT_CALL(mock, AddChain(_, _, Hook::kForward, _, _)).Times(0);
+
+    EXPECT_CALL(mock, AddRuleIifMark(StrEq(kTableName), StrEq(FirewallManager::kNatPreroutingChain), StrEq("wpan0"),
+                                     FirewallManager::kNat44Mark, _))
+        .Times(1);
+    EXPECT_CALL(mock, AddRuleMarkMasquerade(StrEq(kTableName), StrEq(FirewallManager::kNatPostroutingChain),
+                                            FirewallManager::kNat44Mark, _))
+        .Times(1);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    EXPECT_EQ(fw.EnableNat44Masquerade("eth0"), OTBR_ERROR_NONE);
+    EXPECT_TRUE(fw.IsNat44Enabled());
+}
+
+TEST(FirewallManagerTest, EnableNat44TwiceIsNoOp)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+    // Two chains created on the first call (mangle-prerouting, nat-
+    // postrouting); the second call must make zero additional AddChain calls.
+    EXPECT_CALL(mock, AddChain(_, _, _, _, _)).Times(2);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+    ASSERT_EQ(fw.EnableNat44Masquerade("eth0"), OTBR_ERROR_NONE);
+    EXPECT_EQ(fw.EnableNat44Masquerade("eth0"), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, EnableNat44RejectsEmptyUpstreamInterface)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+
+    FirewallManager fw(mock, "wpan0");
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+
+    // Must be rejected before any batch is opened (Init() opens one of its own,
+    // so this expectation is set only after Init has run).
+    EXPECT_CALL(mock, BeginBatch()).Times(0);
+
+    EXPECT_EQ(fw.EnableNat44Masquerade(""), OTBR_ERROR_INVALID_ARGS);
+}
+
+TEST(FirewallManagerTest, EnableNat44BeforeInitFails)
+{
+    NiceMock<MockNftables> mock;
+
+    FirewallManager fw(mock, "wpan0");
+    EXPECT_EQ(fw.EnableNat44Masquerade("eth0"), OTBR_ERROR_INVALID_STATE);
+}
+
+namespace {
+
+// Everything the manager can be asked for, so a reinstall has it all to
+// reproduce: the filter with a prefix in each set, NAT44, an
+// ND-proxy rule the kernel handed handle 4242 for.
+void InstallEverything(NiceMock<MockNftables> &aMock, FirewallManager &aFw)
+{
+    SetSuccessfulDefaults(aMock);
+    ON_CALL(aMock, AddRuleNdNsRedirect(_, _, _, _, _, _))
+        .WillByDefault(DoAll(SetArgPointee<5>(4242), Return(OTBR_ERROR_NONE)));
+
+    ASSERT_EQ(aFw.Init(), OTBR_ERROR_NONE);
+    ASSERT_EQ(aFw.EnableIngressFilter(), OTBR_ERROR_NONE);
+    ASSERT_EQ(aFw.ReplaceIngressPrefixes({Ip6Prefix("fd11::", 48)}, {Ip6Prefix("fd22::", 64)}), OTBR_ERROR_NONE);
+    ASSERT_EQ(aFw.EnableNat44Masquerade("eth0"), OTBR_ERROR_NONE);
+    ASSERT_EQ(aFw.EnableNdProxyRedirect(Ip6Prefix("2001:db8::", 64), "br-lan", 88), OTBR_ERROR_NONE);
+}
+
+// The calls a reinstall makes that a test does not pin down. Set before the
+// pinned ones, which take precedence.
+void AllowTheRest(NiceMock<MockNftables> &aMock)
+{
+    EXPECT_CALL(aMock, AddChain(_, _, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(aMock, AddIp6PrefixSet(_, _)).Times(AnyNumber());
+    EXPECT_CALL(aMock, AddSetElement(_, _, _)).Times(AnyNumber());
+    EXPECT_CALL(aMock, AddRuleMarkMasquerade(_, _, _, _)).Times(AnyNumber());
+    EXPECT_CALL(aMock, AddRuleNdNsRedirect(_, _, _, _, _, _)).Times(AnyNumber());
+}
+
+// What a batch answers once the table is gone.
+otbrError CommitFailsWith(int aErrno)
+{
+    errno = aErrno;
+    return OTBR_ERROR_ERRNO;
+}
+
+} // namespace
+
+TEST(FirewallManagerTest, ReinstallRebuildsEverythingInOneBatch)
+{
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+
+    // Expectations set after the setup only count what follows.
+    AllowTheRest(mock);
+    EXPECT_CALL(mock, BeginBatch()).Times(1);
+    EXPECT_CALL(mock, CommitBatch()).Times(1);
+    {
+        InSequence seq;
+        EXPECT_CALL(mock, DelTable(StrEq(kTableName)));
+        EXPECT_CALL(mock, AddTable(StrEq(kTableName)));
+        EXPECT_CALL(mock, AddIp6PrefixSet(StrEq(kTableName), StrEq(FirewallManager::kIngressDenySrcSet)));
+        EXPECT_CALL(mock, AddChain(StrEq(kTableName), StrEq(FirewallManager::kIngressChain), _, _, _));
+        EXPECT_CALL(mock, AddSetElement(StrEq(kTableName), StrEq(FirewallManager::kIngressDenySrcSet),
+                                        Ip6Prefix("fd11::", 48)));
+        EXPECT_CALL(mock, AddSetElement(StrEq(kTableName), StrEq(FirewallManager::kIngressAllowDstSet),
+                                        Ip6Prefix("fd22::", 64)));
+        EXPECT_CALL(mock, AddRuleIifMark(StrEq(kTableName), StrEq(FirewallManager::kNatPreroutingChain), StrEq("wpan0"),
+                                         FirewallManager::kNat44Mark, _));
+        EXPECT_CALL(mock, AddRuleMarkMasquerade(StrEq(kTableName), StrEq(FirewallManager::kNatPostroutingChain), _, _));
+        EXPECT_CALL(mock, AddChain(StrEq(kTableName), StrEq(FirewallManager::kPreroutingChain), Hook::kPrerouting,
+                                   ChainPriority::kRaw, _));
+        EXPECT_CALL(mock, AddRuleNdNsRedirect(StrEq(kTableName), StrEq(FirewallManager::kPreroutingChain),
+                                              Ip6Prefix("2001:db8::", 64), StrEq("br-lan"), 88, _))
+            .WillOnce(DoAll(SetArgPointee<5>(4343), Return(OTBR_ERROR_NONE)));
+    }
+
+    EXPECT_EQ(fw.Reinstall(), OTBR_ERROR_NONE);
+    EXPECT_TRUE(fw.IsIngressFilterEnabled());
+    EXPECT_TRUE(fw.IsNat44Enabled());
+    ::testing::Mock::VerifyAndClearExpectations(&mock);
+
+    // The rule handle is the one the reinstall got, not the one from before.
+    EXPECT_CALL(mock, DelRule(StrEq(kTableName), StrEq(FirewallManager::kPreroutingChain), 4343));
+    EXPECT_EQ(fw.DisableNdProxyRedirect(), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, ReinstallBeforeInitFails)
+{
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    EXPECT_CALL(mock, BeginBatch()).Times(0);
+    EXPECT_EQ(fw.Reinstall(), OTBR_ERROR_INVALID_STATE);
+}
+
+TEST(FirewallManagerTest, AMissingTableIsReinstalledWithTheUpdate)
+{
+    // The table was deleted behind the agent's back; the next update gets
+    // ENOENT, and everything comes back in one batch -- the update included.
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+
+    AllowTheRest(mock);
+    {
+        InSequence seq;
+        // The update's own attempt ...
+        EXPECT_CALL(mock, AddSetElement(StrEq(kTableName), StrEq(FirewallManager::kIngressDenySrcSet),
+                                        Ip6Prefix("fd33::", 64)));
+        EXPECT_CALL(mock, CommitBatch()).WillOnce([]() { return CommitFailsWith(ENOENT); });
+        // ... then the reinstall, carrying it.
+        EXPECT_CALL(mock, DelTable(StrEq(kTableName)));
+        EXPECT_CALL(mock, AddTable(StrEq(kTableName)));
+        EXPECT_CALL(mock, AddSetElement(StrEq(kTableName), StrEq(FirewallManager::kIngressDenySrcSet),
+                                        Ip6Prefix("fd33::", 64)));
+        EXPECT_CALL(mock, AddRuleMarkMasquerade(StrEq(kTableName), _, _, _));
+        EXPECT_CALL(mock, AddRuleNdNsRedirect(StrEq(kTableName), _, _, _, _, _));
+        EXPECT_CALL(mock, CommitBatch()).WillOnce(Return(OTBR_ERROR_NONE));
+    }
+
+    EXPECT_EQ(fw.ReplaceIngressPrefixes({Ip6Prefix("fd33::", 64)}, {}), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, OtherErrorsAreNotAnsweredByReinstalling)
+{
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+
+    AllowTheRest(mock);
+    EXPECT_CALL(mock, CommitBatch()).WillOnce([]() { return CommitFailsWith(EINVAL); });
+    EXPECT_CALL(mock, DelTable(_)).Times(0);
+
+    EXPECT_EQ(fw.ReplaceIngressPrefixes({Ip6Prefix("fd33::", 64)}, {}), OTBR_ERROR_ERRNO);
+    ::testing::Mock::VerifyAndClearExpectations(&mock);
+
+    // The refused prefixes are not what is wanted: a later reinstall carries
+    // the ones from before.
+    AllowTheRest(mock);
+    EXPECT_CALL(mock, AddSetElement(_, StrEq(FirewallManager::kIngressDenySrcSet), Ip6Prefix("fd11::", 48)));
+    EXPECT_CALL(mock, AddSetElement(_, StrEq(FirewallManager::kIngressDenySrcSet), Ip6Prefix("fd33::", 64))).Times(0);
+    EXPECT_EQ(fw.Reinstall(), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, AFailedReinstallIsNotRetried)
+{
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+
+    // The update's commit and the reinstall's: two, then it stops.
+    EXPECT_CALL(mock, CommitBatch()).Times(2).WillRepeatedly([]() { return CommitFailsWith(ENOENT); });
+    EXPECT_CALL(mock, DelTable(StrEq(kTableName))).Times(1);
+
+    EXPECT_EQ(fw.ReplaceIngressPrefixes({Ip6Prefix("fd33::", 64)}, {}), OTBR_ERROR_ERRNO);
+    EXPECT_TRUE(fw.IsInitialized());
+}
+
+TEST(FirewallManagerTest, ReplacingTheNdRuleOnAMissingTableReinstalls)
+{
+    // The old rule's handle is gone with the table; the reinstall installs
+    // the new rule, and its handle is what a later disable deletes.
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+
+    AllowTheRest(mock);
+    {
+        InSequence seq;
+        // The replacement's own attempt ...
+        EXPECT_CALL(mock, DelRule(StrEq(kTableName), StrEq(FirewallManager::kPreroutingChain), 4242));
+        EXPECT_CALL(mock,
+                    AddRuleNdNsRedirect(StrEq(kTableName), _, Ip6Prefix("2001:db8:2::", 64), StrEq("br-lan"), 99, _))
+            .WillOnce(DoAll(SetArgPointee<5>(7777), Return(OTBR_ERROR_NONE)));
+        EXPECT_CALL(mock, CommitBatch()).WillOnce([]() { return CommitFailsWith(ENOENT); });
+        // ... then the reinstall, whose handle is the one that counts.
+        EXPECT_CALL(mock, DelTable(StrEq(kTableName)));
+        EXPECT_CALL(mock, AddChain(StrEq(kTableName), StrEq(FirewallManager::kPreroutingChain), Hook::kPrerouting,
+                                   ChainPriority::kRaw, _));
+        EXPECT_CALL(mock,
+                    AddRuleNdNsRedirect(StrEq(kTableName), _, Ip6Prefix("2001:db8:2::", 64), StrEq("br-lan"), 99, _))
+            .WillOnce(DoAll(SetArgPointee<5>(5555), Return(OTBR_ERROR_NONE)));
+        EXPECT_CALL(mock, CommitBatch()).WillOnce(Return(OTBR_ERROR_NONE));
+        EXPECT_CALL(mock, DelRule(StrEq(kTableName), StrEq(FirewallManager::kPreroutingChain), 5555));
+        EXPECT_CALL(mock, CommitBatch()).WillOnce(Return(OTBR_ERROR_NONE));
+    }
+
+    EXPECT_EQ(fw.EnableNdProxyRedirect(Ip6Prefix("2001:db8:2::", 64), "br-lan", 99), OTBR_ERROR_NONE);
+    EXPECT_EQ(fw.DisableNdProxyRedirect(), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, DeinitForgetsWhatWasWanted)
+{
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+    ASSERT_EQ(fw.Deinit(), OTBR_ERROR_NONE);
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+
+    // A fresh table, nothing in it.
+    EXPECT_CALL(mock, AddIp6PrefixSet(_, _)).Times(0);
+    EXPECT_CALL(mock, AddRuleMarkMasquerade(_, _, _, _)).Times(0);
+    EXPECT_CALL(mock, AddRuleNdNsRedirect(_, _, _, _, _, _)).Times(0);
+    EXPECT_EQ(fw.Reinstall(), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, AFailedReinstallKeepsTheNdRuleHandle)
+{
+    // A failed batch changes nothing in the kernel, so the rule installed
+    // before is still the one to delete.
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+
+    AllowTheRest(mock);
+    EXPECT_CALL(mock, CommitBatch()).WillOnce([]() { return CommitFailsWith(ENOENT); });
+    EXPECT_EQ(fw.Reinstall(), OTBR_ERROR_ERRNO);
+    ::testing::Mock::VerifyAndClearExpectations(&mock);
+
+    EXPECT_CALL(mock, DelRule(StrEq(kTableName), StrEq(FirewallManager::kPreroutingChain), 4242));
+    EXPECT_EQ(fw.DisableNdProxyRedirect(), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, ReinstallWithoutTheRedirectForgetsItsHandle)
+{
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+    ASSERT_EQ(fw.DisableNdProxyRedirect(), OTBR_ERROR_NONE);
+
+    AllowTheRest(mock);
+    EXPECT_CALL(mock, AddRuleNdNsRedirect(_, _, _, _, _, _)).Times(0);
+    EXPECT_CALL(mock, DelRule(_, _, _)).Times(0);
+    EXPECT_EQ(fw.Reinstall(), OTBR_ERROR_NONE);
+    ::testing::Mock::VerifyAndClearExpectations(&mock);
+
+    // Nothing is deleted when the redirect is enabled again: there is no rule.
+    EXPECT_CALL(mock, DelRule(_, _, _)).Times(0);
+    EXPECT_EQ(fw.EnableNdProxyRedirect(Ip6Prefix("2001:db8::", 64), "br-lan", 88), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, AReinstallLeavesOutPrefixesAnotherOneCovers)
+{
+    // What is wanted is what the sets hold, so a reinstall sends the same
+    // elements the update did: the covered prefix stays out.
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+    ASSERT_EQ(fw.ReplaceIngressPrefixes({Ip6Prefix("fd11::", 48), Ip6Prefix("fd11::", 64)}, {}), OTBR_ERROR_NONE);
+
+    AllowTheRest(mock);
+    EXPECT_CALL(mock, AddSetElement(_, StrEq(FirewallManager::kIngressDenySrcSet), Ip6Prefix("fd11::", 48))).Times(1);
+    EXPECT_CALL(mock, AddSetElement(_, _, Ip6Prefix("fd11::", 64))).Times(0);
+    EXPECT_EQ(fw.Reinstall(), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, DisableNat44DeletesBothChains)
+{
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+
+    {
+        InSequence seq;
+        EXPECT_CALL(mock, BeginBatch());
+        EXPECT_CALL(mock, DelChain(StrEq(kTableName), StrEq(FirewallManager::kNatPreroutingChain)));
+        EXPECT_CALL(mock, DelChain(StrEq(kTableName), StrEq(FirewallManager::kNatPostroutingChain)));
+        EXPECT_CALL(mock, CommitBatch());
+    }
+    EXPECT_CALL(mock, DelTable(_)).Times(0);
+
+    EXPECT_EQ(fw.DisableNat44Masquerade(), OTBR_ERROR_NONE);
+    EXPECT_FALSE(fw.IsNat44Enabled());
+    ::testing::Mock::VerifyAndClearExpectations(&mock);
+
+    // Gone from what a reinstall carries, too.
+    AllowTheRest(mock);
+    EXPECT_CALL(mock, AddChain(_, StrEq(FirewallManager::kNatPreroutingChain), _, _, _)).Times(0);
+    EXPECT_CALL(mock, AddRuleMarkMasquerade(_, _, _, _)).Times(0);
+    EXPECT_EQ(fw.Reinstall(), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, DisableNat44WhenNotEnabledIsNoOp)
+{
+    NiceMock<MockNftables> mock;
+    SetSuccessfulDefaults(mock);
+    FirewallManager fw(mock, "wpan0");
+
+    ASSERT_EQ(fw.Init(), OTBR_ERROR_NONE);
+
+    EXPECT_CALL(mock, BeginBatch()).Times(0);
+    EXPECT_EQ(fw.DisableNat44Masquerade(), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, DisableNat44BeforeInitFails)
+{
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    EXPECT_CALL(mock, BeginBatch()).Times(0);
+    EXPECT_EQ(fw.DisableNat44Masquerade(), OTBR_ERROR_INVALID_STATE);
+}
+
+TEST(FirewallManagerTest, DisableNat44OnAMissingTableReinstallsWithoutIt)
+{
+    // The chains went with the table; what comes back has no masquerade.
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+
+    AllowTheRest(mock);
+    {
+        InSequence seq;
+        EXPECT_CALL(mock, CommitBatch()).WillOnce([]() { return CommitFailsWith(ENOENT); });
+        EXPECT_CALL(mock, DelTable(StrEq(kTableName)));
+        EXPECT_CALL(mock, AddTable(StrEq(kTableName)));
+        EXPECT_CALL(mock, CommitBatch()).WillOnce(Return(OTBR_ERROR_NONE));
+    }
+    EXPECT_CALL(mock, AddRuleMarkMasquerade(_, _, _, _)).Times(0);
+
+    EXPECT_EQ(fw.DisableNat44Masquerade(), OTBR_ERROR_NONE);
+    EXPECT_FALSE(fw.IsNat44Enabled());
+}
+
+TEST(FirewallManagerTest, AFailedDisableKeepsNat44Wanted)
+{
+    // A failed batch changed nothing in the kernel: the masquerade is still
+    // installed, and still what a reinstall must carry.
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+
+    EXPECT_CALL(mock, CommitBatch()).WillOnce([]() { return CommitFailsWith(EINVAL); });
+    EXPECT_EQ(fw.DisableNat44Masquerade(), OTBR_ERROR_ERRNO);
+    EXPECT_TRUE(fw.IsNat44Enabled());
+    ::testing::Mock::VerifyAndClearExpectations(&mock);
+
+    AllowTheRest(mock);
+    EXPECT_CALL(mock, AddRuleMarkMasquerade(StrEq(kTableName), StrEq(FirewallManager::kNatPostroutingChain), _, _));
+    EXPECT_EQ(fw.Reinstall(), OTBR_ERROR_NONE);
+}
+
+TEST(FirewallManagerTest, Nat44CanBeEnabledAgainAfterDisable)
+{
+    NiceMock<MockNftables> mock;
+    FirewallManager        fw(mock, "wpan0");
+
+    InstallEverything(mock, fw);
+    ASSERT_EQ(fw.DisableNat44Masquerade(), OTBR_ERROR_NONE);
+
+    EXPECT_CALL(mock, AddChain(StrEq(kTableName), StrEq(FirewallManager::kNatPreroutingChain), _, _, _));
+    EXPECT_CALL(mock, AddChain(StrEq(kTableName), StrEq(FirewallManager::kNatPostroutingChain), _, _, _));
+    EXPECT_CALL(mock, AddRuleMarkMasquerade(StrEq(kTableName), StrEq(FirewallManager::kNatPostroutingChain), _, _));
+    EXPECT_EQ(fw.EnableNat44Masquerade("eth0"), OTBR_ERROR_NONE);
+    EXPECT_TRUE(fw.IsNat44Enabled());
+}
+
+#if OTBR_ENABLE_NFTABLES
+
+// --------------------------------------------------------------------------
+// Nftables backend tests.
+//
+// These drive the real Nftables against a scripted socket, which is what makes
+// the reply handling reachable at all: FirewallManager's tests mock INftables
+// and so never enter this code. Each case below corresponds to a defect that
+// review found and that no test could previously have caught.
+// --------------------------------------------------------------------------
+
+namespace {
+
+// The rule a sent batch carries, or nullptr when it carries none. A batch is
+// batch-begin, the messages, batch-end, back to back in one datagram.
+using RulePtr = std::unique_ptr<struct nftnl_rule, void (*)(const struct nftnl_rule *)>;
+
+RulePtr ParseTheNewRule(const std::vector<uint8_t> &aBatch)
+{
+    RulePtr                rule(nullptr, nftnl_rule_free);
+    const struct nlmsghdr *nlh = reinterpret_cast<const struct nlmsghdr *>(aBatch.data());
+    int                    len = static_cast<int>(aBatch.size());
+
+    for (; mnl_nlmsg_ok(nlh, len); nlh = mnl_nlmsg_next(nlh, &len))
+    {
+        if (nlh->nlmsg_type != ((NFNL_SUBSYS_NFTABLES << 8) | NFT_MSG_NEWRULE))
+        {
+            continue;
+        }
+        rule.reset(nftnl_rule_alloc());
+        if (rule != nullptr && nftnl_rule_nlmsg_parse(nlh, rule.get()) < 0)
+        {
+            rule.reset();
+        }
+        break;
+    }
+
+    return rule;
+}
+
+std::vector<struct nftnl_expr *> ExpressionsOf(struct nftnl_rule *aRule)
+{
+    std::vector<struct nftnl_expr *> exprs;
+    struct nftnl_expr_iter          *iter = nftnl_expr_iter_create(aRule);
+
+    if (iter != nullptr)
+    {
+        for (struct nftnl_expr *e = nftnl_expr_iter_next(iter); e != nullptr; e = nftnl_expr_iter_next(iter))
+        {
+            exprs.push_back(e);
+        }
+        nftnl_expr_iter_destroy(iter);
+    }
+
+    return exprs;
+}
+
+} // namespace
+
+class NftablesBackendTest : public ::testing::Test
+{
+protected:
+    void SetUp(void) override { ASSERT_EQ(mNftables.Init(), OTBR_ERROR_NONE); }
+
+    // Runs one trivial batch, letting the caller script what the kernel says.
+    otbrError RunBatch(void)
+    {
+        otbrError error = mNftables.BeginBatch();
+
+        if (error == OTBR_ERROR_NONE)
+        {
+            error = mNftables.AddTable("otbr-test");
+        }
+        if (error == OTBR_ERROR_NONE)
+        {
+            error = mNftables.CommitBatch();
+        }
+
+        return error;
+    }
+
+    FakeNetlinkSocket mSocket;
+    Nftables          mNftables{mSocket};
+};
+
+TEST_F(NftablesBackendTest, CommitRetriesWhenTheReceiveIsInterrupted)
+{
+    // A signal must not turn into a failed commit: otbr-agent treats firewall
+    // failures as fatal, so this would take the daemon down.
+    mSocket.QueueFailure(EINTR);
+    mSocket.QueueAck(0);
+
+    EXPECT_EQ(RunBatch(), OTBR_ERROR_NONE);
+    EXPECT_EQ(mSocket.PendingReplies(), 0u);
+}
+
+TEST_F(NftablesBackendTest, NfprotoNeqIp6ReturnNeedsABatch)
+{
+    // Every rule reaches the kernel as part of a batch; outside one there is
+    // nothing to append it to, and nothing may be sent on its own.
+    EXPECT_EQ(mNftables.AddRuleNfprotoNeqIp6Return("otbr-test", "chain", nullptr), OTBR_ERROR_INVALID_STATE);
+    EXPECT_EQ(mSocket.SendCount(), 0u);
+}
+
+TEST_F(NftablesBackendTest, NfprotoNeqIp6ReturnBuildsTheRuleItNames)
+{
+    // The manager tests only see the mock being asked for this rule. This is
+    // what the backend puts on the wire for it: the protocol family loaded,
+    // compared for inequality with IPv6, and a return verdict -- in that
+    // order, since the verdict must not fire for IPv6.
+    mSocket.QueueAck(0);
+
+    ASSERT_EQ(mNftables.BeginBatch(), OTBR_ERROR_NONE);
+    ASSERT_EQ(mNftables.AddRuleNfprotoNeqIp6Return("otbr-test", "chain", nullptr), OTBR_ERROR_NONE);
+    ASSERT_EQ(mNftables.CommitBatch(), OTBR_ERROR_NONE);
+    ASSERT_EQ(mSocket.SendCount(), 1u);
+
+    RulePtr rule = ParseTheNewRule(mSocket.Sent(0));
+    ASSERT_NE(rule, nullptr);
+    EXPECT_STREQ(nftnl_rule_get_str(rule.get(), NFTNL_RULE_TABLE), "otbr-test");
+    EXPECT_STREQ(nftnl_rule_get_str(rule.get(), NFTNL_RULE_CHAIN), "chain");
+
+    std::vector<struct nftnl_expr *> exprs = ExpressionsOf(rule.get());
+    ASSERT_EQ(exprs.size(), 3u);
+
+    ASSERT_STREQ(nftnl_expr_get_str(exprs[0], NFTNL_EXPR_NAME), "meta");
+    EXPECT_EQ(nftnl_expr_get_u32(exprs[0], NFTNL_EXPR_META_KEY), static_cast<uint32_t>(NFT_META_NFPROTO));
+    EXPECT_EQ(nftnl_expr_get_u32(exprs[0], NFTNL_EXPR_META_DREG), static_cast<uint32_t>(NFT_REG_1));
+
+    // The comparison reads the register the load wrote.
+    ASSERT_STREQ(nftnl_expr_get_str(exprs[1], NFTNL_EXPR_NAME), "cmp");
+    EXPECT_EQ(nftnl_expr_get_u32(exprs[1], NFTNL_EXPR_CMP_SREG), static_cast<uint32_t>(NFT_REG_1));
+    EXPECT_EQ(nftnl_expr_get_u32(exprs[1], NFTNL_EXPR_CMP_OP), static_cast<uint32_t>(NFT_CMP_NEQ));
+    uint32_t       dataLen = 0;
+    const uint8_t *data    = static_cast<const uint8_t *>(nftnl_expr_get(exprs[1], NFTNL_EXPR_CMP_DATA, &dataLen));
+    ASSERT_NE(data, nullptr);
+    ASSERT_EQ(dataLen, 1u);
+    EXPECT_EQ(data[0], NFPROTO_IPV6);
+
+    ASSERT_STREQ(nftnl_expr_get_str(exprs[2], NFTNL_EXPR_NAME), "immediate");
+    EXPECT_EQ(nftnl_expr_get_u32(exprs[2], NFTNL_EXPR_IMM_VERDICT), static_cast<uint32_t>(NFT_RETURN));
+}
+
+TEST_F(NftablesBackendTest, DelChainNamesTheChainItDeletes)
+{
+    // What the backend puts on the wire for a chain delete: one NFT_MSG_DELCHAIN
+    // naming the table, the chain and the inet family.
+    mSocket.QueueAck(0);
+
+    EXPECT_EQ(mNftables.DelChain("otbr-test", "chain"), OTBR_ERROR_INVALID_STATE);
+
+    ASSERT_EQ(mNftables.BeginBatch(), OTBR_ERROR_NONE);
+    ASSERT_EQ(mNftables.DelChain("otbr-test", "chain"), OTBR_ERROR_NONE);
+    ASSERT_EQ(mNftables.CommitBatch(), OTBR_ERROR_NONE);
+    ASSERT_EQ(mSocket.SendCount(), 1u);
+
+    const std::vector<uint8_t> &batch = mSocket.Sent(0);
+    const struct nlmsghdr      *nlh   = reinterpret_cast<const struct nlmsghdr *>(batch.data());
+    int                         len   = static_cast<int>(batch.size());
+    int                         found = 0;
+
+    for (; mnl_nlmsg_ok(nlh, len); nlh = mnl_nlmsg_next(nlh, &len))
+    {
+        struct nftnl_chain *chain;
+
+        if (nlh->nlmsg_type != ((NFNL_SUBSYS_NFTABLES << 8) | NFT_MSG_DELCHAIN))
+        {
+            continue;
+        }
+        found++;
+        chain = nftnl_chain_alloc();
+        ASSERT_NE(chain, nullptr);
+        ASSERT_GE(nftnl_chain_nlmsg_parse(nlh, chain), 0);
+        EXPECT_STREQ(nftnl_chain_get_str(chain, NFTNL_CHAIN_TABLE), "otbr-test");
+        EXPECT_STREQ(nftnl_chain_get_str(chain, NFTNL_CHAIN_NAME), "chain");
+        EXPECT_EQ(nftnl_chain_get_u32(chain, NFTNL_CHAIN_FAMILY), static_cast<uint32_t>(NFPROTO_INET));
+        nftnl_chain_free(chain);
+    }
+    EXPECT_EQ(found, 1);
+}
+
+TEST_F(NftablesBackendTest, RuleWithAnOversizedInterfaceNameIsRejected)
+{
+    // The name goes into a fixed-size kernel field. Truncating it would leave a
+    // valid name for a different interface, so the rule would be installed
+    // against the wrong one; it is refused instead.
+    const std::string tooLong(IFNAMSIZ, 'x');
+
+    ASSERT_EQ(mNftables.BeginBatch(), OTBR_ERROR_NONE);
+    EXPECT_EQ(mNftables.AddRuleIifMark("otbr-test", "chain", tooLong, 0x1001, nullptr), OTBR_ERROR_INVALID_ARGS);
+
+    // One character shorter fits, so the rejection is about the bound and not
+    // about the rule being malformed some other way.
+    EXPECT_EQ(mNftables.AddRuleIifMark("otbr-test", "chain", tooLong.substr(1), 0x1001, nullptr), OTBR_ERROR_NONE);
+    mNftables.AbortBatch();
+}
+
+TEST_F(NftablesBackendTest, CommitFailsWhenALaterMessageOfTheBatchIsRejected)
+{
+    // The kernel answers every message of a batch, in order, so the ack of an
+    // earlier message arrives before the error of a later one. Stopping at that
+    // ack would report the commit as successful while the rules it was supposed
+    // to install are not there -- for the ingress filter, a border router
+    // forwarding into the mesh with nothing filtering it.
+    mSocket.QueueAck(0);
+    mSocket.QueueNetlinkError(EPERM, 1);
+
+    EXPECT_NE(RunBatch(), OTBR_ERROR_NONE);
+    EXPECT_EQ(mSocket.PendingReplies(), 0u);
+}
+
+TEST_F(NftablesBackendTest, CommitReadsEveryReplyBeforeReturning)
+{
+    // Whatever the outcome, no reply may be left in the socket: the next
+    // transaction would read it as its own answer.
+    mSocket.QueueAck(0);
+    mSocket.QueueAck(1);
+    mSocket.QueueAck(2);
+
+    EXPECT_EQ(RunBatch(), OTBR_ERROR_NONE);
+    EXPECT_EQ(mSocket.PendingReplies(), 0u);
+}
+
+TEST_F(NftablesBackendTest, CommitFailsWhenTheReceiveTimesOut)
+{
+    // The receive timeout exists so a lost ack cannot hang the single-threaded
+    // daemon; it must surface as an error rather than being retried forever.
+    mSocket.QueueFailure(EAGAIN);
+
+    EXPECT_NE(RunBatch(), OTBR_ERROR_NONE);
+}
+
+TEST_F(NftablesBackendTest, CommitFailsOnAZeroLengthReply)
+{
+    // Leaving the receive loop without an ack means the batch was never
+    // acknowledged, so it must not be reported as committed.
+    mSocket.QueueZeroLengthReply();
+
+    // A valid ack behind the zero-length reply: the commit must stop at the
+    // short read rather than read past it. Without that check the loop treats
+    // the empty reply as "nothing to parse", goes round again, and reports this
+    // ack as if it had answered the batch.
+    mSocket.QueueAck(0);
+
+    EXPECT_NE(RunBatch(), OTBR_ERROR_NONE);
+    EXPECT_EQ(mSocket.PendingReplies(), 1u);
+}
+
+TEST_F(NftablesBackendTest, CommitDrainsStaleRepliesBeforeSending)
+{
+    // Replies left behind by an earlier timed-out transaction would otherwise be
+    // consumed as if they answered this batch.
+    mSocket.QueueAck(0);
+
+    EXPECT_EQ(RunBatch(), OTBR_ERROR_NONE);
+    ASSERT_EQ(mSocket.SendCount(), 1u);
+    EXPECT_GE(mSocket.DrainsBeforeSend(0), 1u);
+}
+
+TEST_F(NftablesBackendTest, AFailedOperationDoesNotWedgeTheBackend)
+{
+    // A failure between BeginBatch() and CommitBatch() used to leave mInBatch
+    // set, after which every later BeginBatch() was rejected for the life of the
+    // process.
+    mSocket.FailNextSend(EPERM);
+    EXPECT_NE(RunBatch(), OTBR_ERROR_NONE);
+
+    EXPECT_EQ(mNftables.BeginBatch(), OTBR_ERROR_NONE);
+    EXPECT_EQ(mNftables.CommitBatch(), OTBR_ERROR_ERRNO);
+}
+
+TEST_F(NftablesBackendTest, BeginBatchTwiceLeavesTheOpenBatchAlone)
+{
+    // The guard against nesting must reject the second call without tearing down
+    // the batch the first call is still building.
+    ASSERT_EQ(mNftables.BeginBatch(), OTBR_ERROR_NONE);
+    EXPECT_EQ(mNftables.BeginBatch(), OTBR_ERROR_INVALID_STATE);
+
+    // The first batch is still usable.
+    mSocket.QueueAck(0);
+    EXPECT_EQ(mNftables.AddTable("otbr-test"), OTBR_ERROR_NONE);
+    EXPECT_EQ(mNftables.CommitBatch(), OTBR_ERROR_NONE);
+}
+
+TEST(MnlNetlinkSocketTest, RejectsIoWhileClosedRatherThanDereferencingNull)
+{
+    MnlNetlinkSocket socket;
+    uint8_t          buffer[8] = {0};
+
+    // Never opened, so the underlying mnl_socket is null. libmnl dereferences
+    // the handle it is given, so these must be rejected here rather than passed
+    // down.
+    ASSERT_FALSE(socket.IsOpen());
+
+    errno = 0;
+    EXPECT_EQ(socket.Send(buffer, sizeof(buffer)), -1);
+    EXPECT_EQ(errno, EBADF);
+
+    errno = 0;
+    EXPECT_EQ(socket.Recv(buffer, sizeof(buffer)), -1);
+    EXPECT_EQ(errno, EBADF);
+
+    // Must simply return; there is no fd to drain.
+    socket.Drain();
+}
+
+#endif // OTBR_ENABLE_NFTABLES

@@ -35,10 +35,8 @@ requires:
 - name: gatt_configuration
 - name: nvm3_lib
 - name: nvm3_default
-- name: mbedtls_asn1
-- name: mbedtls_core
-- name: mbedtls_pem
-- name: mbedtls_x509
+- name: mbedtls_pem_parse
+- name: mbedtls_x509_crt_parse
 - name: psa_crypto
 - name: psa_crypto_cmac
 - name: psa_crypto_ccm

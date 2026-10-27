@@ -551,6 +551,9 @@ autoselected_components:
   id: mbedtls_asn1_write
 - package: platform_core
   vendor: silabs
+  id: mbedtls_base64
+- package: platform_core
+  vendor: silabs
   id: mbedtls_cipher
 - package: platform_core
   vendor: silabs
@@ -597,6 +600,9 @@ autoselected_components:
 - package: platform_core
   vendor: silabs
   id: mbedtls_oid
+- package: platform_core
+  vendor: silabs
+  id: mbedtls_pem_parse
 - package: platform_core
   vendor: silabs
   id: mbedtls_pk
@@ -1118,16 +1124,16 @@ sdk_extension:
   id: security_libcryptosoc
   version: 1.2.0
 - vendor: silabs
-  id: bluetooth_le_controller
-  version: 11.2.0-alpha.119
-- vendor: silabs
   id: unity_test_framework
   version: 1.2.0
 - vendor: silabs
-  id: platform_core
-  version: 1.2.0
+  id: bluetooth_le_controller
+  version: 11.2.0-alpha.119
 - vendor: silabs
   id: common_15_4
+  version: 1.2.0
+- vendor: silabs
+  id: platform_core
   version: 1.2.0
 - vendor: silabs
   id: usb
@@ -1151,10 +1157,10 @@ sdk_extension:
   id: cpc
   version: 4.10.0
 - vendor: silabs
-  id: freertos
+  id: printf
   version: 1.2.0
 - vendor: silabs
-  id: printf
+  id: freertos
   version: 1.2.0
 - vendor: silabs
   id: delta_dfu
@@ -1168,6 +1174,9 @@ sdk_extension:
 - vendor: silabs
   id: coremark
   version: 1.1.0
+- vendor: silabs
+  id: cpc_ng
+  version: 0.1.0
 - vendor: silabs
   id: rail_library
   version: 3.2.0

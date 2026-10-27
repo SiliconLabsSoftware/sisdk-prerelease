@@ -36,27 +36,45 @@
 #include "sl_packet_utils.h"
 
 #include "common/code_utils.hpp"
+#include "common/encoding.hpp"
 #include "mac/mac_frame.hpp"
 
 using namespace ot;
+
+static constexpr uint16_t kFcfPanidCompressionMask = 1 << 6;
+
+static inline Error ParseAddrFields(const otRadioFrame *aFrame, Mac::Frame::ParseInfo &aFrameInfo)
+{
+    return aFrameInfo.ParseFrom(*static_cast<const Mac::Frame *>(aFrame), Mac::Frame::kParseAddrFields);
+}
 
 extern "C" {
 
 bool sli_ot_is_frame_pending(const otRadioFrame *aFrame)
 {
-    return static_cast<const Mac::RxFrame &>(*aFrame).GetFramePending();
+    Mac::RxFrame::ParseInfo info;
+    bool                    isFramePending = false;
+
+    SuccessOrExit(ParseAddrFields(aFrame, info));
+    isFramePending = info.mIsFramePending;
+
+exit:
+    return isFramePending;
 }
 
 otPanId sli_ot_get_dst_pan_id(const otRadioFrame *aFrame)
 {
-    const Mac::RxFrame &frame = static_cast<const Mac::RxFrame &>(*aFrame);
-    otPanId             panId = 0xFFFF;
+    Mac::RxFrame::ParseInfo info;
+    otPanId                 panId = 0xFFFF;
 
-    if (frame.IsDstPanIdPresent())
+    SuccessOrExit(ParseAddrFields(aFrame, info));
+
+    if (info.mPanIds.IsDestinationPresent())
     {
-        IgnoreError(frame.GetDstPanId(panId));
+        panId = info.mPanIds.GetDestination();
     }
 
+exit:
     return panId;
 }
 
@@ -75,12 +93,20 @@ exit:
 
 bool sli_ot_frame_is_pan_id_compressed(const otRadioFrame *aFrame)
 {
-    return static_cast<const Mac::RxFrame &>(*aFrame).IsPanIdCompressed();
+    return (aFrame->mLength >= sizeof(uint16_t))
+           && ((LittleEndian::ReadUint16(aFrame->mPsdu) & kFcfPanidCompressionMask) != 0);
 }
 
 uint16_t sli_ot_get_frame_version(const otRadioFrame *aFrame)
 {
-    return static_cast<const Mac::RxFrame &>(*aFrame).GetVersion();
+    Mac::RxFrame::ParseInfo info;
+    uint16_t                version = 0;
+
+    SuccessOrExit(ParseAddrFields(aFrame, info));
+    version = static_cast<uint16_t>(info.mVersion);
+
+exit:
+    return version;
 }
 
 } // extern "C"

@@ -1,8 +1,41 @@
+diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
+index 1626605d6117690972758aaf9b0d00fe1e108525..e8bc426f0a445b20e25f892b75a9063fd427950f 100644
+--- a/.github/workflows/build.yml
++++ b/.github/workflows/build.yml
+@@ -113,7 +113,7 @@ jobs:
+         cmake --build --preset simulation
+         ctest --preset simulation
+ 
+-  cmake-presets-ccm-one-shot:
++  cmake-presets-platform-options:
+     runs-on: ubuntu-24.04
+     steps:
+     - name: Harden Runner
+@@ -128,9 +128,9 @@ jobs:
+       timeout-minutes: 10
+       run: |
+         sudo apt-get --no-install-recommends install -y build-essential ninja-build libreadline-dev libncurses-dev
+-    - name: Build and test with platform CCM one-shot enabled
++    - name: Build and test with platform-specific options enabled
+       run: |
+-        cmake --preset simulation -DOT_CRYPTO_CCM_ONE_SHOT=ON
++        cmake --preset simulation -DOT_CRYPTO_CCM_ONE_SHOT=ON -DOT_MAC_ALLOW_INCOMPLETE_RX_ENH_ACK=ON
+         cmake --build --preset simulation
+         ctest --preset simulation
+ 
 diff --git a/etc/cmake/options.cmake b/etc/cmake/options.cmake
-index 82aff72d2971730dff5c073179a4d2b33d346ffc..ecc0e903ea61249c64216dcfc98d441675f75699 100644
+index 528218576dc4e5ac0630f59bc128c571ea7f1b9d..5186e884d7d4206314db1e8e07c52b0b1101fc80 100644
 --- a/etc/cmake/options.cmake
 +++ b/etc/cmake/options.cmake
-@@ -235,6 +235,7 @@ ot_option(OT_MLR OPENTHREAD_CONFIG_MLR_ENABLE "Multicast Listener Registration (
+@@ -224,6 +224,7 @@ ot_option(OT_LINK_METRICS_MANAGER  OPENTHREAD_CONFIG_LINK_METRICS_MANAGER_ENABLE
+ ot_option(OT_LINK_METRICS_SUBJECT OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE "link metrics subject")
+ ot_option(OT_LINK_RAW OPENTHREAD_CONFIG_LINK_RAW_ENABLE "link raw service")
+ ot_option(OT_LOG_LEVEL_DYNAMIC OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE "dynamic log level control")
++ot_option(OT_MAC_ALLOW_INCOMPLETE_RX_ENH_ACK OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK "allow incomplete rx frames when generating Enh-ACKs")
+ ot_option(OT_MAC_FILTER OPENTHREAD_CONFIG_MAC_FILTER_ENABLE "mac filter")
+ ot_option(OT_MDNS OPENTHREAD_CONFIG_MULTICAST_DNS_ENABLE "multicast DNS (mDNS)")
+ ot_option(OT_MDNS_VERBOSE OPENTHREAD_CONFIG_MULTICAST_DNS_VERBOSE_LOGGING_ENABLE "mDNS verbose logging")
+@@ -235,6 +236,7 @@ ot_option(OT_MLR OPENTHREAD_CONFIG_MLR_ENABLE "Multicast Listener Registration (
  ot_option(OT_MULTIPAN_RCP OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE "enable multi-PAN RCP")
  ot_option(OT_MULTIPLE_INSTANCE OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE "multiple instances")
  ot_option(OT_NAT64_BORDER_ROUTING OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE "border routing NAT64")
@@ -10,7 +43,7 @@ index 82aff72d2971730dff5c073179a4d2b33d346ffc..ecc0e903ea61249c64216dcfc98d4416
  ot_option(OT_NAT64_TRANSLATOR OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE "NAT64 translator support")
  ot_option(OT_NEIGHBOR_DISCOVERY_AGENT OPENTHREAD_CONFIG_NEIGHBOR_DISCOVERY_AGENT_ENABLE "neighbor discovery agent")
  ot_option(OT_NETDATA_PUBLISHER OPENTHREAD_CONFIG_NETDATA_PUBLISHER_ENABLE "Network Data publisher")
-@@ -367,7 +368,9 @@ ot_int_option(OT_VENDOR_OUI OPENTHREAD_CONFIG_NET_DIAG_VENDOR_OUI "set the vendo
+@@ -366,7 +368,9 @@ ot_int_option(OT_VENDOR_OUI OPENTHREAD_CONFIG_NET_DIAG_VENDOR_OUI "set the vendo
  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  
  if(NOT OT_EXTERNAL_MBEDTLS)
@@ -44,31 +77,6 @@ index 018b186e8e233369647d3acf99b13fa151b7cc89..4dbd9e18020a410aa38799bd2b80dbd0
  #ifdef __cplusplus
  }
  #endif
-diff --git a/include/openthread/thread.h b/include/openthread/thread.h
-index de5b1373accda2fba54e1cbd6146ab50c66a724a..ec08761cb2078ed943578132a30b065765450894 100644
---- a/include/openthread/thread.h
-+++ b/include/openthread/thread.h
-@@ -353,6 +353,20 @@ uint32_t otThreadGetChildTimeout(otInstance *aInstance);
-  */
- void otThreadSetChildTimeout(otInstance *aInstance, uint32_t aTimeout);
- 
-+/**
-+ * Saves the current network attachment state to non-volatile settings.
-+ *
-+ * This stores the current `NetworkInfo` and `ParentInfo` (if attached as a child) to the
-+ * platform settings. It is intended to be called before a reset or any sleep mode that does
-+ * not retain RAM.
-+ *
-+ * @param[in]  aInstance A pointer to an OpenThread instance.
-+ *
-+ * @retval OT_ERROR_NONE           Successfully stored network info.
-+ * @retval OT_ERROR_INVALID_STATE  The device is not attached to a Thread network.
-+ */
-+otError otThreadSaveNetworkInfo(otInstance *aInstance);
-+
- /**
-  * Gets the IEEE 802.15.4 Extended PAN ID.
-  *
 diff --git a/include/openthread/trel.h b/include/openthread/trel.h
 index e08fad368ebc5b4209d21c061a8e1d9fd3f2b3db..0cfa4abeba6d32454229245e9334870dea5cf4f5 100644
 --- a/include/openthread/trel.h
@@ -98,41 +106,33 @@ index e08fad368ebc5b4209d21c061a8e1d9fd3f2b3db..0cfa4abeba6d32454229245e9334870d
  /**
   * @}
   */
-diff --git a/src/cli/cli.cpp b/src/cli/cli.cpp
-index 53b01d0231ec159e55a1be677d61044d6b4264d9..e234023001531fcbb1ae396414eadaba8495dc31 100644
---- a/src/cli/cli.cpp
-+++ b/src/cli/cli.cpp
-@@ -6529,6 +6529,20 @@ template <> otError Interpreter::Process<Cmd("thread")>(Arg aArgs[])
-     {
-         OutputLine("%u", otThreadGetVersion());
-     }
-+    /**
-+     * @cli thread save
-+     * @code
-+     * thread save
-+     * Done
-+     * @endcode
-+     * @par
-+     * Saves the current network attachment state to non-volatile settings.
-+     * @sa otThreadSaveNetworkInfo
-+     */
-+    else if (aArgs[0] == "save")
-+    {
-+        error = otThreadSaveNetworkInfo(GetInstancePtr());
-+    }
-     else
-     {
-         error = OT_ERROR_INVALID_COMMAND;
+diff --git a/script/check-simulation-build-cmake b/script/check-simulation-build-cmake
+index a273da85b3155e5cc32a985ee5d48400f010a3bf..21c7cab0b68d66b124bde5bee2e688ba25b167da 100755
+--- a/script/check-simulation-build-cmake
++++ b/script/check-simulation-build-cmake
+@@ -203,9 +203,9 @@ build_all_features()
+     reset_source
+     "$(dirname "$0")"/cmake-build simulation -DOT_BLE_TCAT=ON
+ 
+-    # Build with platform CCM one-shot enabled
++    # Build with platform-specific options enabled
+     reset_source
+-    "$(dirname "$0")"/cmake-build simulation -DOT_CRYPTO_CCM_ONE_SHOT=ON
++    "$(dirname "$0")"/cmake-build simulation -DOT_CRYPTO_CCM_ONE_SHOT=ON -DOT_MAC_ALLOW_INCOMPLETE_RX_ENH_ACK=ON
+ }
+ 
+ build_nest_common()
 diff --git a/src/cli/cli_tcp.cpp b/src/cli/cli_tcp.cpp
-index 7c5dadba62802a20767d86724a893a1cd3599466..0fc83ceeb61d31d87f3bb24a7a95bdf7edf9610a 100644
+index 7c5dadba62802a20767d86724a893a1cd3599466..1fc448c1f43501f75a66c0688671d545caabb66a 100644
 --- a/src/cli/cli_tcp.cpp
 +++ b/src/cli/cli_tcp.cpp
-@@ -48,9 +48,10 @@
+@@ -48,9 +48,11 @@
  
  #if OPENTHREAD_CONFIG_TLS_ENABLE
  #include <mbedtls/debug.h>
 -#if (MBEDTLS_VERSION_NUMBER >= 0x03000000) && (MBEDTLS_VERSION_NUMBER < 0x04000000)
 -#include <mbedtls/ecjpake.h>
++#include <mbedtls/pk.h>
 +#include <mbedtls/ssl.h>
  #include "crypto/mbedtls.hpp"
 +#if (MBEDTLS_VERSION_NUMBER < 0x04000000) && (MBEDTLS_VERSION_NUMBER >= 0x03000000)
@@ -140,7 +140,7 @@ index 7c5dadba62802a20767d86724a893a1cd3599466..0fc83ceeb61d31d87f3bb24a7a95bdf7
  #endif
  #endif
  
-@@ -265,6 +266,7 @@ exit:
+@@ -265,6 +267,7 @@ exit:
  #if OPENTHREAD_CONFIG_TLS_ENABLE
          if (mUseTls)
          {
@@ -148,7 +148,7 @@ index 7c5dadba62802a20767d86724a893a1cd3599466..0fc83ceeb61d31d87f3bb24a7a95bdf7
              mbedtls_ssl_config_free(&mSslConfig);
              mbedtls_ssl_free(&mSslContext);
  
-@@ -302,6 +304,7 @@ template <> otError TcpExample::Process<Cmd("deinit")>(Arg aArgs[])
+@@ -302,6 +305,7 @@ template <> otError TcpExample::Process<Cmd("deinit")>(Arg aArgs[])
  #if OPENTHREAD_CONFIG_TLS_ENABLE
      if (mUseTls)
      {
@@ -156,7 +156,7 @@ index 7c5dadba62802a20767d86724a893a1cd3599466..0fc83ceeb61d31d87f3bb24a7a95bdf7
          mbedtls_ssl_config_free(&mSslConfig);
          mbedtls_ssl_free(&mSslContext);
  
-@@ -1207,11 +1210,10 @@ void TcpExample::PrepareTlsHandshake(void)
+@@ -1207,11 +1211,10 @@ void TcpExample::PrepareTlsHandshake(void)
          OutputLine("mbedtls_ssl_set_hostname returned %d", rv);
      }
  
@@ -200,29 +200,6 @@ index 5e5788aa6ef6a5e45ff0abb408a6d4852d2b731c..49c976e09c156371bcf63b7d9e11d7f6
  #if (MBEDTLS_VERSION_NUMBER < 0x04000000)
      mbedtls_entropy_context mEntropy;
  #endif
-diff --git a/src/core/api/thread_api.cpp b/src/core/api/thread_api.cpp
-index 6c1a910ac4a86fe95a3d911e76b6eb84ca1cdd62..bcc5efd19c07df3a6f90d2021a73619bf9fff122 100644
---- a/src/core/api/thread_api.cpp
-+++ b/src/core/api/thread_api.cpp
-@@ -46,6 +46,18 @@ void otThreadSetChildTimeout(otInstance *aInstance, uint32_t aTimeout)
-     AsCoreType(aInstance).Get<Mle::Mle>().SetTimeout(aTimeout);
- }
- 
-+otError otThreadSaveNetworkInfo(otInstance *aInstance)
-+{
-+    Error     error    = kErrorNone;
-+    Instance &instance = AsCoreType(aInstance);
-+
-+    VerifyOrExit(instance.Get<Mle::Mle>().IsAttached(), error = kErrorInvalidState);
-+    instance.Get<Mle::Mle>().Store();
-+
-+exit:
-+    return error;
-+}
-+
- const otExtendedPanId *otThreadGetExtendedPanId(otInstance *aInstance)
- {
-     return &AsCoreType(aInstance).Get<MeshCoP::NetworkIdentity>().GetExtPanId();
 diff --git a/src/core/api/trel_api.cpp b/src/core/api/trel_api.cpp
 index a70d696e4278703f1a4ee1f3fa9f68d373680aad..206fab90f47cff33e0c9a19a8fbb7f7e436dd0d0 100644
 --- a/src/core/api/trel_api.cpp
@@ -238,10 +215,10 @@ index a70d696e4278703f1a4ee1f3fa9f68d373680aad..206fab90f47cff33e0c9a19a8fbb7f7e
 +
  #endif // OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
 diff --git a/src/core/border_router/routing_manager.cpp b/src/core/border_router/routing_manager.cpp
-index a72445e5f38618aebee85a4f04a53330111da24f..c637d8d4a96e06ee9ff3520779249a47140210a8 100644
+index 6929f8e20ff5ba3ba669c751b66ed75024e66cd6..8e2f845ad0424265ac4727caed0e6c94336d9032 100644
 --- a/src/core/border_router/routing_manager.cpp
 +++ b/src/core/border_router/routing_manager.cpp
-@@ -2280,6 +2280,9 @@ RoutingManager::Nat64PrefixManager::Nat64PrefixManager(Instance &aInstance)
+@@ -2338,6 +2338,9 @@ RoutingManager::Nat64PrefixManager::Nat64PrefixManager(Instance &aInstance)
      mPlatformPrefix.Clear();
      mLocalPrefix.Clear();
      mPublishedPrefix.Clear();
@@ -251,7 +228,7 @@ index a72445e5f38618aebee85a4f04a53330111da24f..c637d8d4a96e06ee9ff3520779249a47
  }
  
  void RoutingManager::Nat64PrefixManager::SetEnabled(bool aEnabled)
-@@ -2373,10 +2376,18 @@ void RoutingManager::Nat64PrefixManager::Evaluate(void)
+@@ -2431,10 +2434,18 @@ void RoutingManager::Nat64PrefixManager::Evaluate(void)
  
      VerifyOrExit(mEnabled);
  
@@ -272,7 +249,7 @@ index a72445e5f38618aebee85a4f04a53330111da24f..c637d8d4a96e06ee9ff3520779249a47
      error = Get<NetworkData::Leader>().FindPreferredNat64Prefix(netdataPrefixConfig);
  
      // NAT64 prefix is expected to be published from this BR
-@@ -2423,6 +2434,20 @@ exit:
+@@ -2481,6 +2492,20 @@ exit:
      return;
  }
  
@@ -293,7 +270,7 @@ index a72445e5f38618aebee85a4f04a53330111da24f..c637d8d4a96e06ee9ff3520779249a47
  void RoutingManager::Nat64PrefixManager::Publish(const Ip6::Prefix &aPrefix, RoutePreference aPreference)
  {
      // Publishes the given prefix and preference in the Network Data
-@@ -3070,6 +3095,11 @@ extern "C" void otPlatBorderRoutingProcessDhcp6PdPrefix(otInstance
+@@ -3128,6 +3153,11 @@ extern "C" void otPlatBorderRoutingProcessDhcp6PdPrefix(otInstance
  
  #endif // OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
  
@@ -306,7 +283,7 @@ index a72445e5f38618aebee85a4f04a53330111da24f..c637d8d4a96e06ee9ff3520779249a47
  
  } // namespace ot
 diff --git a/src/core/border_router/routing_manager.hpp b/src/core/border_router/routing_manager.hpp
-index 551491f71a81200e94e0dd1b29849036f6bba980..0c1d242ed35c7538af7e7eb308020137fb361182 100644
+index 942a82cbd29a2f959e5394969b49d0a255323adf..191342b7d089642ccf5ff16ba565f2ae26eaa3f1 100644
 --- a/src/core/border_router/routing_manager.hpp
 +++ b/src/core/border_router/routing_manager.hpp
 @@ -408,6 +408,16 @@ public:
@@ -326,7 +303,7 @@ index 551491f71a81200e94e0dd1b29849036f6bba980..0c1d242ed35c7538af7e7eb308020137
      /**
      // Informs `RoutingManager` of a discovered NAT64 prefix from the platform.
      //
-@@ -865,6 +875,9 @@ private:
+@@ -867,6 +877,9 @@ private:
          void               HandlePlatformDiscoveredPrefix(const Ip6::Prefix &aPrefix);
          void               HandleRxRaTrackerChanged(void);
          void               HandleTimer(void);
@@ -336,7 +313,7 @@ index 551491f71a81200e94e0dd1b29849036f6bba980..0c1d242ed35c7538af7e7eb308020137
  
      private:
          void Discover(void);
-@@ -879,7 +892,10 @@ private:
+@@ -881,7 +894,10 @@ private:
          Ip6::Prefix     mLocalPrefix;         // The local prefix (from BR ULA prefix).
          Ip6::Prefix     mPublishedPrefix;     // The prefix to publish in Net Data (empty or local or from infra-if).
          RoutePreference mPublishedPreference; // The published prefix preference.
@@ -348,6 +325,38 @@ index 551491f71a81200e94e0dd1b29849036f6bba980..0c1d242ed35c7538af7e7eb308020137
      };
  
  #endif // OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE
+diff --git a/src/core/config/mac.h b/src/core/config/mac.h
+index bbb26f33cb23917b2e5f7a9e674bdcac8b06c2c7..48ef603caa6c02ab8123e9af7629b7c90614913f 100644
+--- a/src/core/config/mac.h
++++ b/src/core/config/mac.h
+@@ -282,6 +282,27 @@
+ #endif
+ #endif
+ 
++/**
++ * @def OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK
++ *
++ * Define as 1 to have `TxFrame::GenerateEnhAck()` require only fields through the Auxiliary Security Header to be
++ * parseable in the received frame, rather than the full frame (Header IEs and MAC Command ID).
++ *
++ * This is intended for radio platforms that construct Enhanced ACKs mid-RX from a partially received PSDU (e.g.,
++ * inside an early frame-pending callback), where the Header IE and MAC Command ID bytes may not yet be in RAM.
++ * Those bytes are not required for Enh-ACK construction.
++ *
++ * @note `aRxFrame.mLength` must still reflect the full PSDU length, including the MIC and FCS footers.
++ * `ParseInfo::ParseFrom()` strips those footers via `RemoveFooter()`, so a length that counts only the bytes
++ * received into RAM so far will cause `GenerateEnhAck()` to return `kErrorParse`.
++ *
++ * @note The platform remains responsible for suppressing Enh-ACK transmission for frames not successfully received per
++ * IEEE 802.15.4.
++ */
++#ifndef OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK
++#define OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK 0
++#endif
++
+ /**
+  * @def OPENTHREAD_CONFIG_MAC_ATTACH_DATA_POLL_PERIOD
+  *
 diff --git a/src/core/config/nat64.h b/src/core/config/nat64.h
 index 76e4eb179bfd6cbadb8f24cb474e5e38c30c5ff0..1071a06f39b58ec71885cad0df7ddc50d88591f2 100644
 --- a/src/core/config/nat64.h
@@ -372,7 +381,7 @@ index 76e4eb179bfd6cbadb8f24cb474e5e38c30c5ff0..1071a06f39b58ec71885cad0df7ddc50
   * @def OPENTHREAD_CONFIG_NAT64_PORT_TRANSLATION_ENABLE
   *
 diff --git a/src/core/config/openthread-core-config-check.h b/src/core/config/openthread-core-config-check.h
-index ed584ab4098743f864610c4069bbf97209212255..8c9cd7fe55c79256c3d8dae0ba84b852b641ce8f 100644
+index 0e70776689e5b6a7e4e67dd2400f8b822d563bf2..36d8b2a6b39d7c2efa7e44db77f0f99270733318 100644
 --- a/src/core/config/openthread-core-config-check.h
 +++ b/src/core/config/openthread-core-config-check.h
 @@ -643,6 +643,11 @@
@@ -450,7 +459,7 @@ index 8d4afff7c52b98abe8ed07b7f08c5a9e2fc21cb6..39d251e58cbdbacc90eb2d19cb32d2c2
  #include <psa/crypto.h>
  #endif // OPENTHREAD_CONFIG_CRYPTO_LIB == OPENTHREAD_CONFIG_CRYPTO_LIB_MBEDTLS
 diff --git a/src/core/crypto/crypto_platform_mbedtls.cpp b/src/core/crypto/crypto_platform_mbedtls.cpp
-index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..40fb34363cce70c3f83071e4177666c427cbccbb 100644
+index e04d2066537c43555da87282ff6559e4a7ba056d..1a0c23ae2366b91dd31d8f37fccd86abf530ab07 100644
 --- a/src/core/crypto/crypto_platform_mbedtls.cpp
 +++ b/src/core/crypto/crypto_platform_mbedtls.cpp
 @@ -36,6 +36,19 @@
@@ -490,7 +499,7 @@ index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..40fb34363cce70c3f83071e4177666c4
  #include "crypto/storage.hpp"
  #include "instance/instance.hpp"
  
-@@ -73,21 +87,59 @@ using namespace Crypto;
+@@ -73,21 +87,57 @@ using namespace Crypto;
  #endif
  
  #if OPENTHREAD_FTD || OPENTHREAD_MTD
@@ -509,8 +518,6 @@ index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..40fb34363cce70c3f83071e4177666c4
  #endif
  
 +#if (MBEDTLS_VERSION_NUMBER >= 0x04000000) && defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
-+// Weak so Silicon Labs psa_crypto_trng (sli_psa_trng.c) can override on device.
-+// Host/simulation has no TRNG and links this fallback via otPlatEntropyGet().
 +extern "C" OT_TOOL_WEAK psa_status_t mbedtls_psa_external_get_random(mbedtls_psa_external_random_context_t *aContext,
 +                                                                     uint8_t                               *aOutput,
 +                                                                     size_t                                 aOutputSize,
@@ -551,7 +558,7 @@ index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..40fb34363cce70c3f83071e4177666c4
  }
  
  // AES  Implementation
-@@ -221,7 +273,14 @@ OT_TOOL_WEAK otError otPlatCryptoHmacSha256Init(otCryptoContext *aContext)
+@@ -222,7 +272,14 @@ OT_TOOL_WEAK otError otPlatCryptoHmacSha256Init(otCryptoContext *aContext)
      context = static_cast<mbedtls_md_context_t *>(aContext->mContext);
      mbedtls_md_init(context);
      mdInfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
@@ -566,7 +573,7 @@ index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..40fb34363cce70c3f83071e4177666c4
  
  exit:
      return error;
-@@ -291,7 +350,7 @@ exit:
+@@ -292,7 +349,7 @@ exit:
      return error;
  }
  
@@ -575,7 +582,7 @@ index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..40fb34363cce70c3f83071e4177666c4
  {
      Error error = kErrorNone;
  
-@@ -504,6 +563,7 @@ exit:
+@@ -505,6 +562,7 @@ exit:
  }
  
  #ifndef OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
@@ -583,7 +590,7 @@ index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..40fb34363cce70c3f83071e4177666c4
  
  static int handleMbedtlsEntropyPoll(void *aData, unsigned char *aOutput, size_t aInLen, size_t *aOutLen)
  {
-@@ -520,10 +580,16 @@ exit:
+@@ -521,10 +579,16 @@ exit:
      return rval;
  }
  
@@ -600,7 +607,7 @@ index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..40fb34363cce70c3f83071e4177666c4
      mbedtls_entropy_init(&sEntropyContext);
  
  #ifndef OT_MBEDTLS_STRONG_DEFAULT_ENTROPY_PRESENT
-@@ -536,22 +602,255 @@ OT_TOOL_WEAK void otPlatCryptoRandomInit(void)
+@@ -537,22 +601,255 @@ OT_TOOL_WEAK void otPlatCryptoRandomInit(void)
      int rval = mbedtls_ctr_drbg_seed(&sCtrDrbgContext, mbedtls_entropy_func, &sEntropyContext, nullptr, 0);
      OT_ASSERT(rval == 0);
      OT_UNUSED_VARIABLE(rval);
@@ -856,7 +863,7 @@ index 1f1e0fbdf168f87acb1db79b5899a93370a8c180..40fb34363cce70c3f83071e4177666c4
  OT_TOOL_WEAK otError otPlatCryptoEcdsaGenerateKey(otPlatCryptoEcdsaKeyPair *aKeyPair)
  {
      mbedtls_pk_context pk;
-@@ -717,6 +1016,8 @@ exit:
+@@ -718,6 +1015,8 @@ exit:
      return error;
  }
  
@@ -1011,42 +1018,31 @@ index 17dba846a8cd1a3bc918654ee0cdc5d9b6fe862b..fd6bf0fd19a7d12b52c8f14fe54659d4
  /**
   * @}
   */
-diff --git a/src/core/mac/mac.cpp b/src/core/mac/mac.cpp
-index 9737ab83e712117078ac6a0672591b69e7bce3a5..79f51e7d6df83174b232c7bfc56964308d1fb6ee 100644
---- a/src/core/mac/mac.cpp
-+++ b/src/core/mac/mac.cpp
-@@ -37,6 +37,7 @@
+diff --git a/src/core/mac/mac_frame.cpp b/src/core/mac/mac_frame.cpp
+index 25f5392289aa91300baf9f1745abe8da43f532c1..1dc954da256bdc0db8c2477ddd4e11623a5bda49 100644
+--- a/src/core/mac/mac_frame.cpp
++++ b/src/core/mac/mac_frame.cpp
+@@ -977,7 +977,18 @@ Error TxFrame::GenerateEnhAck(const RxFrame &aRxFrame, bool aIsFramePending, con
  
- #include "crypto/aes_ccm.hpp"
- #include "crypto/sha256.hpp"
-+#include "crypto/storage.hpp"
- #include "instance/instance.hpp"
- #include "mac/mac_beacon.hpp"
- #include "utils/static_counter.hpp"
-@@ -1739,6 +1740,10 @@ Error Mac::ProcessReceiveSecurity(RxFrame &aFrame, const Address &aSrcAddr, Neig
-         ExitNow();
-     }
+     // Validate the received frame.
  
-+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
-+    VerifyOrExit((macKey != nullptr) && Crypto::Storage::IsKeyRefValid(macKey->GetKeyRef()));
++#if OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK
++    switch (rxInfo.ParseFrom(aRxFrame, kParseSecurityHeader))
++    {
++    case kErrorNone:
++    case kErrorNotFound:
++        break;
++    default:
++        ExitNow();
++    }
++#else
+     SuccessOrExit(rxInfo.ParseFrom(aRxFrame, kParseFully));
 +#endif
-+
-     SuccessOrExit(aFrame.ProcessReceiveAesCcm(*extAddress, *macKey));
  
-     if ((keyIdMode == Frame::kKeyIdMode1) && aNeighbor->IsStateValid())
-@@ -1852,6 +1857,10 @@ Error Mac::ProcessEnhAckSecurity(TxFrame &aTxFrame, RxFrame &aAckFrame)
-         VerifyOrExit(frameCounter >= neighbor->GetLinkAckFrameCounter());
-     }
- 
-+#if OPENTHREAD_CONFIG_PLATFORM_KEY_REFERENCES_ENABLE
-+    VerifyOrExit((macKey != nullptr) && Crypto::Storage::IsKeyRefValid(macKey->GetKeyRef()));
-+#endif
-+
-     error = aAckFrame.ProcessReceiveAesCcm(srcAddr.GetExtended(), *macKey);
-     SuccessOrExit(error);
- 
+     VerifyOrExit(rxInfo.mVersion == kVersion2015);
+     VerifyOrExit(rxInfo.mIsAckRequest);
 diff --git a/src/core/meshcop/secure_transport.cpp b/src/core/meshcop/secure_transport.cpp
-index b73c024b09689c078b9b9b200e9d3c9edf35405f..bbd8a47f319d95e34ffed2560b656924aa3f4478 100644
+index 447e55079446ed8a87dfd322c1eaefa2c6fa1eee..bbd8a47f319d95e34ffed2560b656924aa3f4478 100644
 --- a/src/core/meshcop/secure_transport.cpp
 +++ b/src/core/meshcop/secure_transport.cpp
 @@ -69,6 +69,7 @@ void SecureSession::Init(void)
@@ -1092,15 +1088,6 @@ index b73c024b09689c078b9b9b200e9d3c9edf35405f..bbd8a47f319d95e34ffed2560b656924
              }
          }
  
-@@ -1127,7 +1134,7 @@ int SecureTransport::Extension::EcdheEcdsaInfo::SetSecureKeys(mbedtls_ssl_config
-                                       static_cast<size_t>(mOwnCertLength));
-         VerifyOrExit(rval == 0);
- 
--#if (MBEDTLS_VERSION_NUMBER >= 0x03000000)
-+#if (MBEDTLS_VERSION_NUMBER >= 0x03000000) && (MBEDTLS_VERSION_NUMBER < 0x04000000)
-         rval = mbedtls_pk_parse_key(&mPrivateKey, static_cast<const unsigned char *>(mPrivateKeySrc),
-                                     static_cast<size_t>(mPrivateKeyLength), nullptr, 0,
-                                     Crypto::MbedTls::CryptoSecurePrng, nullptr);
 diff --git a/src/core/meshcop/secure_transport.hpp b/src/core/meshcop/secure_transport.hpp
 index c80f258b2aaa58444b329b7d2480f97312c73930..9094b4b7975f569ca6f34b35381f7fccdbfd4350 100644
 --- a/src/core/meshcop/secure_transport.hpp
@@ -1130,10 +1117,10 @@ index c80f258b2aaa58444b329b7d2480f97312c73930..9094b4b7975f569ca6f34b35381f7fcc
      mbedtls_ssl_cookie_ctx mCookieCtx;
  #endif
 diff --git a/src/core/net/dnssd_server.cpp b/src/core/net/dnssd_server.cpp
-index c67fa3a00536c05cb5bf0818e4d64991a5280d54..58fd5c3093d30aaf38e3a5c39e022631b29d6a25 100644
+index fb3cc397ae5f23efe011a352832b4200dcf5dc7a..1bef6ed455c80d9c0fd56ad251ce459590ad5b2c 100644
 --- a/src/core/net/dnssd_server.cpp
 +++ b/src/core/net/dnssd_server.cpp
-@@ -1657,6 +1657,27 @@ void Server::ResetUpstreamQueryTransaction(UpstreamQueryTransaction &aTxn, Error
+@@ -1661,6 +1661,27 @@ void Server::ResetUpstreamQueryTransaction(UpstreamQueryTransaction &aTxn, Error
      }
      aTxn.Reset();
  }
@@ -1162,7 +1149,7 @@ index c67fa3a00536c05cb5bf0818e4d64991a5280d54..58fd5c3093d30aaf38e3a5c39e022631
  
  #if OPENTHREAD_CONFIG_DNSSD_DISCOVERY_PROXY_ENABLE
 diff --git a/src/core/net/dnssd_server.hpp b/src/core/net/dnssd_server.hpp
-index e715a03fb613b4e033ae2302bbf10f07463617e0..37975f8160cc2ba1fa0d50495ff0ab8e23b702bc 100644
+index f483f1262809048ed5642aad92c6252b58d41c0d..0464643167b35908ee661dac0c2275d9605fe3b9 100644
 --- a/src/core/net/dnssd_server.hpp
 +++ b/src/core/net/dnssd_server.hpp
 @@ -249,6 +249,24 @@ public:
@@ -1385,7 +1372,7 @@ index 1bbdd1b65d066a60ea9c5a0a04e0a908fe9974e1..09025641a79c0d8df483d3a26f75cef9
  
  } // namespace Trel
 diff --git a/src/core/radio/trel_peer.cpp b/src/core/radio/trel_peer.cpp
-index 0e19519d3f3962d7ea99279da6dcf15185f89906..47722e510bce398c6ac60c998d3f86b93d89a9d9 100644
+index 0a93105c15cf1fa3248bc824d55387c420e88488..65d93f69f2f09733d1fcd6c06647c67e718eb698 100644
 --- a/src/core/radio/trel_peer.cpp
 +++ b/src/core/radio/trel_peer.cpp
 @@ -60,7 +60,13 @@ void Peer::Init(Instance &aInstance)
@@ -1404,10 +1391,10 @@ index 0e19519d3f3962d7ea99279da6dcf15185f89906..47722e510bce398c6ac60c998d3f86b9
      mDnssdState = kDnssdResolved;
  #endif
 diff --git a/src/core/radio/trel_peer.hpp b/src/core/radio/trel_peer.hpp
-index 26b5777adfa7d656632443d4bf058ef317d0ba4e..da9f34e459d1a1a022b70badddf53878562f8fb0 100644
+index 2e82d9f7209099de9f6375ffeefe5925c03417f4..d9ded70f26843a860917d041866992892c904210 100644
 --- a/src/core/radio/trel_peer.hpp
 +++ b/src/core/radio/trel_peer.hpp
-@@ -278,11 +278,17 @@ private:
+@@ -281,11 +281,17 @@ private:
      DnssdState mDnssdState;
      UptimeSec  mLastInteractionTime;
  #if OPENTHREAD_CONFIG_TREL_MANAGE_DNSSD_ENABLE
@@ -1431,7 +1418,7 @@ index 26b5777adfa7d656632443d4bf058ef317d0ba4e..da9f34e459d1a1a022b70badddf53878
      Heap::String mServiceName;
      Heap::String mHostName;
 diff --git a/src/core/radio/trel_peer_discoverer.cpp b/src/core/radio/trel_peer_discoverer.cpp
-index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328e446f2d5 100644
+index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8967e68aa 100644
 --- a/src/core/radio/trel_peer_discoverer.cpp
 +++ b/src/core/radio/trel_peer_discoverer.cpp
 @@ -42,8 +42,9 @@ namespace Trel {
@@ -1492,7 +1479,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
  }
  
  #if !OPENTHREAD_CONFIG_TREL_MANAGE_DNSSD_ENABLE
-@@ -261,8 +280,12 @@ void PeerDiscoverer::HandleDnssdPlatformStateChange(void)
+@@ -266,8 +285,12 @@ void PeerDiscoverer::HandleDnssdPlatformStateChange(void)
      else
      {
          VerifyOrExit(mState != kStateStopped);
@@ -1505,7 +1492,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
          Get<PeerTable>().Clear();
      }
  
-@@ -333,6 +356,123 @@ void PeerDiscoverer::HandleBrowseResult(otInstance *aInstance, const otPlatDnssd
+@@ -338,6 +361,123 @@ void PeerDiscoverer::HandleBrowseResult(otInstance *aInstance, const otPlatDnssd
      AsCoreType(aInstance).Get<PeerDiscoverer>().HandleBrowseResult(*aResult);
  }
  
@@ -1629,7 +1616,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
  void PeerDiscoverer::HandleBrowseResult(const Dnssd::BrowseResult &aResult)
  {
      Peer *peer;
-@@ -345,14 +485,47 @@ void PeerDiscoverer::HandleBrowseResult(const Dnssd::BrowseResult &aResult)
+@@ -350,14 +490,47 @@ void PeerDiscoverer::HandleBrowseResult(const Dnssd::BrowseResult &aResult)
      {
          // Previously discovered service is now removed.
  
@@ -1677,7 +1664,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
          Peer::Action action = Peer::kAdded;
  
          if (peer == nullptr)
-@@ -370,6 +543,7 @@ void PeerDiscoverer::HandleBrowseResult(const Dnssd::BrowseResult &aResult)
+@@ -375,6 +548,7 @@ void PeerDiscoverer::HandleBrowseResult(const Dnssd::BrowseResult &aResult)
          peer->Log(action);
  
          StartServiceResolvers(*peer);
@@ -1685,7 +1672,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
      }
  
  exit:
-@@ -380,6 +554,9 @@ void PeerDiscoverer::StartServiceResolvers(Peer &aPeer)
+@@ -385,6 +559,9 @@ void PeerDiscoverer::StartServiceResolvers(Peer &aPeer)
  {
      VerifyOrExit(!aPeer.mResolvingService);
  
@@ -1695,7 +1682,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
      aPeer.mResolvingService = true;
      Get<Dnssd>().StartSrvResolver(SrvResolver(aPeer));
      Get<Dnssd>().StartTxtResolver(TxtResolver(aPeer));
-@@ -390,6 +567,9 @@ exit:
+@@ -395,6 +572,9 @@ exit:
  
  void PeerDiscoverer::StopServiceResolvers(Peer &aPeer)
  {
@@ -1705,7 +1692,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
      VerifyOrExit(aPeer.mResolvingService);
  
      aPeer.mResolvingService = false;
-@@ -400,9 +580,32 @@ void PeerDiscoverer::StopServiceResolvers(Peer &aPeer)
+@@ -405,9 +585,32 @@ void PeerDiscoverer::StopServiceResolvers(Peer &aPeer)
      Get<Dnssd>().StopSrvResolver(SrvResolver(aPeer));
      Get<Dnssd>().StopTxtResolver(TxtResolver(aPeer));
  
@@ -1738,7 +1725,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
  
  void PeerDiscoverer::HandleSrvResult(otInstance *aInstance, const otPlatDnssdSrvResult *aResult)
  {
-@@ -417,6 +620,10 @@ void PeerDiscoverer::HandleSrvResult(const Dnssd::SrvResult &aResult)
+@@ -422,6 +625,10 @@ void PeerDiscoverer::HandleSrvResult(const Dnssd::SrvResult &aResult)
  
      peer = Get<PeerTable>().FindMatching(Peer::kMatchServiceName, aResult.mServiceInstance);
      VerifyOrExit(peer != nullptr);
@@ -1749,7 +1736,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
  
      if (aResult.mTtl == 0)
      {
-@@ -433,6 +640,16 @@ void PeerDiscoverer::HandleSrvResult(const Dnssd::SrvResult &aResult)
+@@ -438,6 +645,16 @@ void PeerDiscoverer::HandleSrvResult(const Dnssd::SrvResult &aResult)
              SuccessOrAssert(peer->mHostName.Set(aResult.mHostName));
              StartHostAddressResolver(*peer);
          }
@@ -1766,7 +1753,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
      }
  
      UpdatePeerState(*peer);
-@@ -456,6 +673,10 @@ void PeerDiscoverer::HandleTxtResult(const Dnssd::TxtResult &aResult)
+@@ -461,6 +678,10 @@ void PeerDiscoverer::HandleTxtResult(const Dnssd::TxtResult &aResult)
  
      peer = Get<PeerTable>().FindMatching(Peer::kMatchServiceName, aResult.mServiceInstance);
      VerifyOrExit(peer != nullptr);
@@ -1777,7 +1764,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
  
      peer->mTxtDataValidated = false;
  
-@@ -491,6 +712,12 @@ void PeerDiscoverer::HandleTxtResult(const Dnssd::TxtResult &aResult)
+@@ -496,6 +717,12 @@ void PeerDiscoverer::HandleTxtResult(const Dnssd::TxtResult &aResult)
  exit:
      if (peer != nullptr)
      {
@@ -1790,7 +1777,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
          UpdatePeerState(*peer);
      }
  }
-@@ -499,13 +726,31 @@ void PeerDiscoverer::StartHostAddressResolver(Peer &aPeer)
+@@ -504,13 +731,31 @@ void PeerDiscoverer::StartHostAddressResolver(Peer &aPeer)
  {
      Peer *sameHostPeer;
  
@@ -1822,7 +1809,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
      {
          UpdatePeerAddresses(aPeer, sameHostPeer->mHostAddresses);
      }
-@@ -607,10 +852,26 @@ void PeerDiscoverer::HandleAddressResult(const Dnssd::AddressResult &aResult)
+@@ -612,10 +857,26 @@ void PeerDiscoverer::HandleAddressResult(const Dnssd::AddressResult &aResult)
  
      for (Peer &peer : Get<PeerTable>())
      {
@@ -1849,7 +1836,7 @@ index 447c55ddc2427469bda3356f090966b0d230dbd6..b90b1c28633dba4234a41e3a5f75e328
  
          if (peer.Matches(Peer::kMatchHostName, aResult.mHostName))
          {
-@@ -717,9 +978,18 @@ void PeerDiscoverer::HandlePeerRemoval(Peer &aPeer)
+@@ -722,9 +983,18 @@ void PeerDiscoverer::HandlePeerRemoval(Peer &aPeer)
      // The order of calls is important here since the
      // `StopServiceResolvers()` clears the `aPeer.mHostName` which
      // would be needed in `StopHostAddressResolver()`.
@@ -1918,19 +1905,13 @@ index 4061a97a23445d8974802c51cfcd4cde77000215..afaa435637607688d9fd3a8dfd607300
  };
  
 diff --git a/src/lib/spinel/spinel.c b/src/lib/spinel/spinel.c
-index 62340241e7a7a6f6534ccaba33fff57b61b82316..d0d4a7eb25ca5453fbe086241558baff0129de8f 100644
+index 3f8938dab995d8d405e9179414a33971d5e3b2f4..d0d4a7eb25ca5453fbe086241558baff0129de8f 100644
 --- a/src/lib/spinel/spinel.c
 +++ b/src/lib/spinel/spinel.c
-@@ -1423,6 +1423,18 @@ const char *spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
-         {SPINEL_PROP_DNSSD_BROWSE_RESULT, "DNSSD_BROWSE_RESULT"},
-         {SPINEL_PROP_DNSSD_SRV_RESOLVER, "DNSSD_SRV_RESOLVER"},
-         {SPINEL_PROP_DNSSD_SRV_RESULT, "DNSSD_SRV_RESULT"},
-+        {SPINEL_PROP_DNSSD_TXT_RESOLVER, "DNSSD_TXT_RESOLVER"},
-+        {SPINEL_PROP_DNSSD_TXT_RESULT, "DNSSD_TXT_RESULT"},
-+        {SPINEL_PROP_DNSSD_IP6_ADDRESS_RESOLVER, "DNSSD_IP6_ADDRESS_RESOLVER"},
-+        {SPINEL_PROP_DNSSD_IP6_ADDRESS_RESULT, "DNSSD_IP6_ADDRESS_RESULT"},
-+        {SPINEL_PROP_DNSSD_IP4_ADDRESS_RESOLVER, "DNSSD_IP4_ADDRESS_RESOLVER"},
-+        {SPINEL_PROP_DNSSD_IP4_ADDRESS_RESULT, "DNSSD_IP4_ADDRESS_RESULT"},
+@@ -1429,6 +1429,12 @@ const char *spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
+         {SPINEL_PROP_DNSSD_IP6_ADDRESS_RESULT, "DNSSD_IP6_ADDRESS_RESULT"},
+         {SPINEL_PROP_DNSSD_IP4_ADDRESS_RESOLVER, "DNSSD_IP4_ADDRESS_RESOLVER"},
+         {SPINEL_PROP_DNSSD_IP4_ADDRESS_RESULT, "DNSSD_IP4_ADDRESS_RESULT"},
 +        {SPINEL_PROP_DNS_UPSTREAM_QUERY, "DNS_UPSTREAM_QUERY"},
 +        {SPINEL_PROP_DNS_UPSTREAM_RESPONSE, "DNS_UPSTREAM_RESPONSE"},
 +        {SPINEL_PROP_DNS_UPSTREAM_CANCEL, "DNS_UPSTREAM_CANCEL"},
@@ -1940,7 +1921,7 @@ index 62340241e7a7a6f6534ccaba33fff57b61b82316..d0d4a7eb25ca5453fbe086241558baff
          {SPINEL_PROP_BORDER_AGENT_MESHCOP_SERVICE_STATE, "BORDER_AGENT_MESHCOP_SERVICE_STATE"},
          {SPINEL_PROP_BORDER_AGENT_EPHEMERAL_KEY_STATE, "SPINEL_PROP_BORDER_AGENT_EPHEMERAL_KEY_STATE"},
          {SPINEL_PROP_BORDER_AGENT_EPHEMERAL_KEY_ENABLE, "SPINEL_PROP_BORDER_AGENT_EPHEMERAL_KEY_ENABLE"},
-@@ -1518,6 +1530,9 @@ const char *spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
+@@ -1524,6 +1530,9 @@ const char *spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
          {SPINEL_PROP_DEBUG_TREL_TEST_MODE_ENABLE, "DEBUG_TREL_TEST_MODE_ENABLE"},
          {SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_ENABLE, "SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_ENABLE"},
          {SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_PREFIX, "SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_PREFIX"},
@@ -1951,72 +1932,14 @@ index 62340241e7a7a6f6534ccaba33fff57b61b82316..d0d4a7eb25ca5453fbe086241558baff
      };
  
 diff --git a/src/lib/spinel/spinel.h b/src/lib/spinel/spinel.h
-index c755522d04488b523500ab4723e974801d44ed8b..f53266eccfbd26c62a66cb67b20085ee92f4fafa 100644
+index 31e5c80ad2e5bc180e57f1df68025c5737f48a88..b37b574ae56f135748d3ccccc815316d0ff844d5 100644
 --- a/src/lib/spinel/spinel.h
 +++ b/src/lib/spinel/spinel.h
-@@ -4961,7 +4961,122 @@ enum
+@@ -5018,7 +5018,64 @@ enum
       */
-     SPINEL_PROP_DNSSD_SRV_RESULT = SPINEL_PROP_DNSSD__BEGIN + 9,
+     SPINEL_PROP_DNSSD_IP4_ADDRESS_RESULT = SPINEL_PROP_DNSSD__BEGIN + 15,
  
 -    SPINEL_PROP_DNSSD__END = 0x950,
-+    /// DNS-SD TXT Resolver
-+    /**
-+     * Format: `UULD`: Inserted/Removed
-+     *
-+     * `U`: The service instance label.
-+     * `U`: The service type.
-+     * `L`: The infrastructure network interface index.
-+     * `D`: The context of the request (pointer to `otPlatDnssdTxtCallback`).
-+     */
-+    SPINEL_PROP_DNSSD_TXT_RESOLVER = SPINEL_PROP_DNSSD__BEGIN + 10,
-+
-+    /// DNS-SD TXT Resolution Result
-+    /**
-+     * Format: `UUdLLD`: Set
-+     *
-+     * `U`: Service instance label.
-+     * `U`: Service type.
-+     * `d`: Encoded TXT data bytes (empty if removed).
-+     * `L`: TTL in seconds (zero indicates removal).
-+     * `L`: Infrastructure interface index.
-+     * `D`: Callback context (`sizeof(otPlatDnssdTxtCallback)`).
-+     */
-+    SPINEL_PROP_DNSSD_TXT_RESULT = SPINEL_PROP_DNSSD__BEGIN + 11,
-+
-+    /// DNS-SD IPv6 Address Resolver
-+    /**
-+     * Format: `ULD`: Inserted/Removed
-+     *
-+     * `U`: Host name (no domain).
-+     * `L`: Infrastructure interface index.
-+     * `D`: Callback context (`sizeof(otPlatDnssdAddressCallback)`).
-+     */
-+    SPINEL_PROP_DNSSD_IP6_ADDRESS_RESOLVER = SPINEL_PROP_DNSSD__BEGIN + 12,
-+
-+    /// DNS-SD IPv6 Address Resolution Result
-+    /**
-+     * Format: `ULS(A(6L))D`: Set
-+     *
-+     * `U`: Host name.
-+     * `L`: Infrastructure interface index.
-+     * `S`: Number of (`6` address, `L` TTL) pairs.
-+     * `A(6L)`: Concatenated IPv6 address and TTL pairs (no per-entry struct wrapper).
-+     * `D`: Callback context (`sizeof(otPlatDnssdAddressCallback)`).
-+     */
-+    SPINEL_PROP_DNSSD_IP6_ADDRESS_RESULT = SPINEL_PROP_DNSSD__BEGIN + 13,
-+
-+    /// DNS-SD IPv4 Address Resolver
-+    /**
-+     * Format: `ULD`: Inserted/Removed (same as IPv6 resolver; IPv4 uses IPv4-mapped IPv6 in results).
-+     */
-+    SPINEL_PROP_DNSSD_IP4_ADDRESS_RESOLVER = SPINEL_PROP_DNSSD__BEGIN + 14,
-+
-+    /// DNS-SD IPv4 Address Resolution Result
-+    /**
-+     * Format: Same as `SPINEL_PROP_DNSSD_IP6_ADDRESS_RESULT`.
-+     */
-+    SPINEL_PROP_DNSSD_IP4_ADDRESS_RESULT = SPINEL_PROP_DNSSD__BEGIN + 15,
-+
 +    SPINEL_PROP_DNSSD__END = 0x940,
 +
 +    SPINEL_PROP_DNS_UPSTREAM__BEGIN = 0x940,
@@ -2078,7 +2001,7 @@ index c755522d04488b523500ab4723e974801d44ed8b..f53266eccfbd26c62a66cb67b20085ee
  
      SPINEL_PROP_BORDER_AGENT__BEGIN = 0x950,
  
-@@ -5074,8 +5189,59 @@ enum
+@@ -5131,8 +5188,59 @@ enum
       */
      SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_PREFIX = SPINEL_PROP_BORDER_ROUTER__BEGIN + 2,
  
@@ -2139,167 +2062,13 @@ index c755522d04488b523500ab4723e974801d44ed8b..f53266eccfbd26c62a66cb67b20085ee
  
      SPINEL_PROP_NEST_STREAM_MFG = SPINEL_PROP_NEST__BEGIN + 0,
 diff --git a/src/lib/spinel/spinel_prop_codec.cpp b/src/lib/spinel/spinel_prop_codec.cpp
-index 3e6e7904145ec57dad8166c23a8eb679304f901f..9641b70838c7a1e06f61755db1fed04a82c0053f 100644
+index 213d0b77489a31c33ccba4e5bbd7ab59d50eaa63..edb0f291abd2f45622b48c4a3f09051b36abad4a 100644
 --- a/src/lib/spinel/spinel_prop_codec.cpp
 +++ b/src/lib/spinel/spinel_prop_codec.cpp
-@@ -393,5 +393,227 @@ exit:
+@@ -558,5 +558,73 @@ exit:
      return error;
  }
  
-+template <>
-+otError EncodeDnssdDiscovery<otPlatDnssdTxtResolver>(Encoder &aEncoder, const otPlatDnssdTxtResolver &aDiscovery)
-+{
-+    otError error = OT_ERROR_NONE;
-+
-+    SuccessOrExit(error = aEncoder.WriteUtf8(aDiscovery.mServiceInstance));
-+    SuccessOrExit(error = aEncoder.WriteUtf8(aDiscovery.mServiceType));
-+    SuccessOrExit(error = aEncoder.WriteUint32(aDiscovery.mInfraIfIndex));
-+    SuccessOrExit(error = aEncoder.WriteData(reinterpret_cast<const uint8_t *>(&aDiscovery.mCallback),
-+                                             sizeof(aDiscovery.mCallback)));
-+
-+exit:
-+    return error;
-+}
-+
-+template <>
-+otError EncodeDnssdDiscovery<otPlatDnssdAddressResolver>(Encoder                          &aEncoder,
-+                                                         const otPlatDnssdAddressResolver &aDiscovery)
-+{
-+    otError error = OT_ERROR_NONE;
-+
-+    SuccessOrExit(error = aEncoder.WriteUtf8(aDiscovery.mHostName));
-+    SuccessOrExit(error = aEncoder.WriteUint32(aDiscovery.mInfraIfIndex));
-+    SuccessOrExit(error = aEncoder.WriteData(reinterpret_cast<const uint8_t *>(&aDiscovery.mCallback),
-+                                             sizeof(aDiscovery.mCallback)));
-+
-+exit:
-+    return error;
-+}
-+
-+otError EncodeDnssdTxtResult(Encoder                    &aEncoder,
-+                             const otPlatDnssdTxtResult &aTxtResult,
-+                             const uint8_t              *aCallbackData,
-+                             uint16_t                    aCallbackDataLen)
-+{
-+    otError error = OT_ERROR_NONE;
-+
-+    SuccessOrExit(error = aEncoder.WriteUtf8(aTxtResult.mServiceInstance));
-+    SuccessOrExit(error = aEncoder.WriteUtf8(aTxtResult.mServiceType));
-+    if (aTxtResult.mTxtData != nullptr && aTxtResult.mTxtDataLength > 0)
-+    {
-+        SuccessOrExit(error = aEncoder.WriteDataWithLen(aTxtResult.mTxtData, aTxtResult.mTxtDataLength));
-+    }
-+    else
-+    {
-+        SuccessOrExit(error = aEncoder.WriteDataWithLen(nullptr, 0));
-+    }
-+    SuccessOrExit(error = aEncoder.WriteUint32(aTxtResult.mTtl));
-+    SuccessOrExit(error = aEncoder.WriteUint32(aTxtResult.mInfraIfIndex));
-+    SuccessOrExit(error = aEncoder.WriteData(aCallbackData, aCallbackDataLen));
-+
-+exit:
-+    return error;
-+}
-+
-+otError DecodeDnssdTxtResolver(Decoder                &aDecoder,
-+                               otPlatDnssdTxtResolver &aTxtResolver,
-+                               const uint8_t         *&aCallbackData,
-+                               uint16_t               &aCallbackDataLen)
-+{
-+    otError error = OT_ERROR_NONE;
-+
-+    SuccessOrExit(error = aDecoder.ReadUtf8(aTxtResolver.mServiceInstance));
-+    SuccessOrExit(error = aDecoder.ReadUtf8(aTxtResolver.mServiceType));
-+    SuccessOrExit(error = aDecoder.ReadUint32(aTxtResolver.mInfraIfIndex));
-+    SuccessOrExit(error = aDecoder.ReadData(aCallbackData, aCallbackDataLen));
-+
-+exit:
-+    return error;
-+}
-+
-+otError DecodeDnssdTxtResult(Decoder              &aDecoder,
-+                             otPlatDnssdTxtResult &aTxtResult,
-+                             const uint8_t       *&aCallbackData,
-+                             uint16_t             &aCallbackDataLen)
-+{
-+    otError error = OT_ERROR_NONE;
-+
-+    SuccessOrExit(error = aDecoder.ReadUtf8(aTxtResult.mServiceInstance));
-+    SuccessOrExit(error = aDecoder.ReadUtf8(aTxtResult.mServiceType));
-+    SuccessOrExit(error = aDecoder.ReadDataWithLen(aTxtResult.mTxtData, aTxtResult.mTxtDataLength));
-+    SuccessOrExit(error = aDecoder.ReadUint32(aTxtResult.mTtl));
-+    SuccessOrExit(error = aDecoder.ReadUint32(aTxtResult.mInfraIfIndex));
-+    SuccessOrExit(error = aDecoder.ReadData(aCallbackData, aCallbackDataLen));
-+
-+exit:
-+    return error;
-+}
-+
-+otError EncodeDnssdAddressResult(Encoder                        &aEncoder,
-+                                 const otPlatDnssdAddressResult &aAddressResult,
-+                                 const uint8_t                  *aCallbackData,
-+                                 uint16_t                        aCallbackDataLen)
-+{
-+    otError error = OT_ERROR_NONE;
-+
-+    SuccessOrExit(error = aEncoder.WriteUtf8(aAddressResult.mHostName));
-+    SuccessOrExit(error = aEncoder.WriteUint32(aAddressResult.mInfraIfIndex));
-+    SuccessOrExit(error = aEncoder.WriteUint16(aAddressResult.mAddressesLength));
-+    for (uint16_t i = 0; i < aAddressResult.mAddressesLength; i++)
-+    {
-+        SuccessOrExit(error = aEncoder.WriteIp6Address(aAddressResult.mAddresses[i].mAddress));
-+        SuccessOrExit(error = aEncoder.WriteUint32(aAddressResult.mAddresses[i].mTtl));
-+    }
-+    SuccessOrExit(error = aEncoder.WriteData(aCallbackData, aCallbackDataLen));
-+
-+exit:
-+    return error;
-+}
-+
-+otError DecodeDnssdAddressResolver(Decoder                    &aDecoder,
-+                                   otPlatDnssdAddressResolver &aAddressResolver,
-+                                   const uint8_t             *&aCallbackData,
-+                                   uint16_t                   &aCallbackDataLen)
-+{
-+    otError error = OT_ERROR_NONE;
-+
-+    SuccessOrExit(error = aDecoder.ReadUtf8(aAddressResolver.mHostName));
-+    SuccessOrExit(error = aDecoder.ReadUint32(aAddressResolver.mInfraIfIndex));
-+    SuccessOrExit(error = aDecoder.ReadData(aCallbackData, aCallbackDataLen));
-+
-+exit:
-+    return error;
-+}
-+
-+otError DecodeDnssdAddressResult(Decoder                  &aDecoder,
-+                                 otPlatDnssdAddressResult &aAddressResult,
-+                                 otPlatDnssdAddressAndTtl *aAddressArray,
-+                                 uint16_t                  aMaxAddresses,
-+                                 const uint8_t           *&aCallbackData,
-+                                 uint16_t                 &aCallbackDataLen)
-+{
-+    otError  error = OT_ERROR_NONE;
-+    uint16_t count;
-+
-+    SuccessOrExit(error = aDecoder.ReadUtf8(aAddressResult.mHostName));
-+    SuccessOrExit(error = aDecoder.ReadUint32(aAddressResult.mInfraIfIndex));
-+    SuccessOrExit(error = aDecoder.ReadUint16(count));
-+    VerifyOrExit(count <= aMaxAddresses, error = OT_ERROR_PARSE);
-+
-+    for (uint16_t i = 0; i < count; i++)
-+    {
-+        SuccessOrExit(error = aDecoder.ReadIp6Address(aAddressArray[i].mAddress));
-+        SuccessOrExit(error = aDecoder.ReadUint32(aAddressArray[i].mTtl));
-+    }
-+
-+    aAddressResult.mAddresses       = aAddressArray;
-+    aAddressResult.mAddressesLength = count;
-+    SuccessOrExit(error = aDecoder.ReadData(aCallbackData, aCallbackDataLen));
-+
-+exit:
-+    return error;
-+}
-+
 +otError EncodeDnsUpstreamWireMessage(Encoder &aEncoder, uint8_t aTxnIndex, const uint8_t *aData, uint16_t aDataLength)
 +{
 +    otError error = OT_ERROR_NONE;
@@ -2371,95 +2140,13 @@ index 3e6e7904145ec57dad8166c23a8eb679304f901f..9641b70838c7a1e06f61755db1fed04a
  } // namespace Spinel
  } // namespace ot
 diff --git a/src/lib/spinel/spinel_prop_codec.hpp b/src/lib/spinel/spinel_prop_codec.hpp
-index 979abd1a863dc1e8bf7df7088073ce9023239e01..15a9e57b49c59fcb96b5acf10e088f0729f1584d 100644
+index dba00c85f409e597efac198527e910c8af509d4d..fd83d2dcdf8009bdf7dd9ad41ce96b3a51e18f62 100644
 --- a/src/lib/spinel/spinel_prop_codec.hpp
 +++ b/src/lib/spinel/spinel_prop_codec.hpp
-@@ -210,6 +210,142 @@ otError DecodeDnssdSrvResult(Decoder              &aDecoder,
-                              otPlatDnssdSrvResult &aSrvResult,
-                              const uint8_t       *&aCallbackData,
-                              uint16_t             &aCallbackDataLen);
-+
-+/**
-+ * Use Spinel::Encode to encode a Dnssd TXT result.
-+ *
-+ * @param[in] aEncoder          A reference to the encoder object.
-+ * @param[in] aTxtResult        A reference to the TXT result.
-+ * @param[in] aCallbackData     A pointer to the callback data.
-+ * @param[in] aCallbackDataLen  The data length.
-+ */
-+otError EncodeDnssdTxtResult(Encoder                    &aEncoder,
-+                             const otPlatDnssdTxtResult &aTxtResult,
-+                             const uint8_t              *aCallbackData,
-+                             uint16_t                    aCallbackDataLen);
-+
-+/**
-+ * Use Spinel::Decoder to decode a SPINEL_PROP_DNSSD_TXT_RESOLVER message to a otPlatDnssdTxtResolver.
-+ *
-+ * @param[in]  aDecoder          A reference to the decoder object.
-+ * @param[out] aTxtResolver      A reference to the TXT resolver.
-+ * @param[out] aCallbackData     A reference to the pointer to the callback data.
-+ * @param[out] aCallbackDataLen  A reference to the callback data length.
-+ */
-+otError DecodeDnssdTxtResolver(Decoder                &aDecoder,
-+                               otPlatDnssdTxtResolver &aTxtResolver,
-+                               const uint8_t         *&aCallbackData,
-+                               uint16_t               &aCallbackDataLen);
-+
-+/**
-+ * Use Spinel::Decoder to decode a SPINEL_PROP_DNSSD_TXT_RESULT message to a otPlatDnssdTxtResult.
-+ *
-+ * @param[in]  aDecoder          A reference to the decoder object.
-+ * @param[out] aTxtResult        A reference to the TXT result.
-+ * @param[out] aCallbackData     A reference to the pointer to the callback data.
-+ * @param[out] aCallbackDataLen  A reference to the callback data length.
-+ */
-+otError DecodeDnssdTxtResult(Decoder              &aDecoder,
-+                             otPlatDnssdTxtResult &aTxtResult,
-+                             const uint8_t       *&aCallbackData,
-+                             uint16_t             &aCallbackDataLen);
-+
-+/**
-+ * Use Spinel::Encode to encode a Dnssd Address result.
-+ *
-+ * @param[in] aEncoder          A reference to the encoder object.
-+ * @param[in] aAddressResult    A reference to the Address result.
-+ * @param[in] aCallbackData     A pointer to the callback data.
-+ * @param[in] aCallbackDataLen  The data length.
-+ */
-+otError EncodeDnssdAddressResult(Encoder                        &aEncoder,
-+                                 const otPlatDnssdAddressResult &aAddressResult,
-+                                 const uint8_t                  *aCallbackData,
-+                                 uint16_t                        aCallbackDataLen);
-+
-+/**
-+ * Use Spinel::Decoder to decode a SPINEL_PROP_DNSSD_IP6_ADDRESS_RESOLVER message to a otPlatDnssdAddressResolver.
-+ *
-+ * @param[in]  aDecoder          A reference to the decoder object.
-+ * @param[out] aAddressResolver  A reference to the Address resolver.
-+ * @param[out] aCallbackData     A reference to the pointer to the callback data.
-+ * @param[out] aCallbackDataLen  A reference to the callback data length.
-+ */
-+otError DecodeDnssdAddressResolver(Decoder                    &aDecoder,
-+                                   otPlatDnssdAddressResolver &aAddressResolver,
-+                                   const uint8_t             *&aCallbackData,
-+                                   uint16_t                   &aCallbackDataLen);
-+
-+/**
-+ * Use Spinel::Decoder to decode a SPINEL_PROP_DNSSD_IP6_ADDRESS_RESULT message to a otPlatDnssdAddressResult.
-+ *
-+ * @param[in]  aDecoder          A reference to the decoder object.
-+ * @param[out] aAddressResult    A reference to the Address result.
-+ * @param[out] aAddressArray     A pointer to the array of Address and TTL.
-+ * @param[in]  aMaxAddresses     The maximum number of addresses.
-+ * @param[out] aCallbackData     A reference to the pointer to the callback data.
-+ * @param[out] aCallbackDataLen  A reference to the callback data length.
-+ */
-+otError DecodeDnssdAddressResult(Decoder                  &aDecoder,
-+                                 otPlatDnssdAddressResult &aAddressResult,
-+                                 otPlatDnssdAddressAndTtl *aAddressArray,
-+                                 uint16_t                  aMaxAddresses,
-+                                 const uint8_t           *&aCallbackData,
-+                                 uint16_t                 &aCallbackDataLen);
+@@ -301,6 +301,60 @@ otError DecodeDnssdAddressResult(Decoder                  &aDecoder,
+                                  uint16_t                  aAddressArraySize,
+                                  const uint8_t           *&aCallbackData,
+                                  uint16_t                 &aCallbackDataLen);
 +
 +/**
 + * Encodes a DNS upstream query or response payload (`Cd` format).
@@ -2588,7 +2275,7 @@ index 1fbdec903ddbf584b238670a2fd394430b75174f..a28fed60b959184fb1e26bff081f6f35
  #if OPENTHREAD_CONFIG_DIAG_ENABLE
      otDiagSetOutputCallback(mInstance, &NcpBase::HandleDiagOutput_Jump, this);
 diff --git a/src/ncp/ncp_base.hpp b/src/ncp/ncp_base.hpp
-index d9aa796ae168e2eccc54078bb898bbf37cec0803..c4445cdcc5c8afd68dd288432f8e34ed564b16fc 100644
+index 0c8677930e7dc1fc39fa3ff9e59111167d70c95c..7ecd4c866e9f88ce0da1f40a617839ffa32be337 100644
 --- a/src/ncp/ncp_base.hpp
 +++ b/src/ncp/ncp_base.hpp
 @@ -117,6 +117,14 @@ public:
@@ -2606,56 +2293,7 @@ index d9aa796ae168e2eccc54078bb898bbf37cec0803..c4445cdcc5c8afd68dd288432f8e34ed
      /**
       * Returns an IID for the given instance
       *
-@@ -338,6 +346,48 @@ public:
-      */
-     void DnssdStopSrvResolver(const otPlatDnssdSrvResolver *aResolver);
- 
-+    /**
-+     * Starts a TXT resolver.
-+     *
-+     * @param[in] aResolver  The resolver to be started.
-+     */
-+    void DnssdStartTxtResolver(const otPlatDnssdTxtResolver *aResolver);
-+
-+    /**
-+     * Stops a TXT resolver.
-+     *
-+     * @param[in] aResolver  The resolver to be stopped.
-+     */
-+    void DnssdStopTxtResolver(const otPlatDnssdTxtResolver *aResolver);
-+
-+    /**
-+     * Starts an IPv6 address resolver.
-+     *
-+     * @param[in] aResolver  The resolver to be started.
-+     */
-+    void DnssdStartIp6AddressResolver(const otPlatDnssdAddressResolver *aResolver);
-+
-+    /**
-+     * Stops an IPv6 address resolver.
-+     *
-+     * @param[in] aResolver  The resolver to be stopped.
-+     */
-+    void DnssdStopIp6AddressResolver(const otPlatDnssdAddressResolver *aResolver);
-+
-+    /**
-+     * Starts an IPv4 address resolver.
-+     *
-+     * @param[in] aResolver  The resolver to be started.
-+     */
-+    void DnssdStartIp4AddressResolver(const otPlatDnssdAddressResolver *aResolver);
-+
-+    /**
-+     * Stops an IPv4 address resolver.
-+     *
-+     * @param[in] aResolver  The resolver to be stopped.
-+     */
-+    void DnssdStopIp4AddressResolver(const otPlatDnssdAddressResolver *aResolver);
-+
-     /**
-      * Gets the Dnssd state.
-      *
-@@ -346,6 +396,44 @@ public:
+@@ -388,6 +396,44 @@ public:
      otPlatDnssdState DnssdGetState(void);
  #endif // OPENTHREAD_FTD && OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
  
@@ -2700,9 +2338,9 @@ index d9aa796ae168e2eccc54078bb898bbf37cec0803..c4445cdcc5c8afd68dd288432f8e34ed
  protected:
      static constexpr uint8_t kBitsPerByte = 8; ///< Number of bits in a byte.
  
-@@ -586,6 +674,11 @@ protected:
-                                        void         *aContext);
+@@ -629,6 +675,11 @@ protected:
      void HandleUdpForwardStream(otMessage *aMessage, uint16_t aPeerPort, otIp6Address &aPeerAddr, uint16_t aPort);
+ 
  #endif // OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
 +#if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
 +    static void HandleTrelStateChanged(void *aContext);
@@ -2712,7 +2350,7 @@ index d9aa796ae168e2eccc54078bb898bbf37cec0803..c4445cdcc5c8afd68dd288432f8e34ed
  #endif // OPENTHREAD_MTD || OPENTHREAD_FTD
  
  #if OPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE || OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE
-@@ -781,7 +874,11 @@ protected:
+@@ -824,7 +875,11 @@ protected:
      bool            mDiscoveryScanEnableFiltering;
      uint16_t        mDiscoveryScanPanId;
  
@@ -2725,35 +2363,7 @@ index d9aa796ae168e2eccc54078bb898bbf37cec0803..c4445cdcc5c8afd68dd288432f8e34ed
      uint32_t        mThreadChangedFlags;
      ChangedPropsSet mChangedPropsSet;
  
-@@ -883,6 +980,11 @@ protected:
- 
- #if OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
- 
-+    static constexpr uint16_t kDnssdMaxAddressResultEntries = OPENTHREAD_CONFIG_NCP_DNSSD_MAX_ADDRESS_RESULT_ENTRIES;
-+
-+    static_assert(kDnssdMaxAddressResultEntries >= 1,
-+                  "OPENTHREAD_CONFIG_NCP_DNSSD_MAX_ADDRESS_RESULT_ENTRIES must be >= 1");
-+
-     template <typename DnssdObjType> struct DnssdDiscoveryPropKeyFor;
- 
-     template <typename DnssdObjType>
-@@ -903,7 +1005,7 @@ protected:
-         SuccessOrExit(error = mEncoder.EndFrame());
- 
-     exit:
--        if (error != OT_ERROR_NONE)
-+        if (error != OT_ERROR_NONE && aCallback != nullptr)
-         {
-             aCallback(mInstance, aRequestId, error);
-         }
-@@ -931,9 +1033,29 @@ protected:
-         return;
-     }
- 
-+    void DnssdUpdateAddressResolverDiscovery(const otPlatDnssdAddressResolver *aDiscovery,
-+                                             bool                              aStart,
-+                                             spinel_prop_key_t                 aPropKey);
-+
+@@ -1028,6 +1083,22 @@ protected:
      otPlatDnssdState mDnssdState;
  #endif // OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
  
@@ -2776,20 +2386,8 @@ index d9aa796ae168e2eccc54078bb898bbf37cec0803..c4445cdcc5c8afd68dd288432f8e34ed
  #if OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE && OPENTHREAD_CONFIG_BACKBONE_ROUTER_MULTICAST_ROUTING_ENABLE
      static void HandleBackboneRouterMulticastListenerEvent(void                                  *aContext,
                                                             otBackboneRouterMulticastListenerEvent aEvent,
-@@ -965,6 +1087,11 @@ template <> struct NcpBase::DnssdDiscoveryPropKeyFor<otPlatDnssdSrvResolver>
- {
-     static constexpr spinel_prop_key_t Key = SPINEL_PROP_DNSSD_SRV_RESOLVER;
- };
-+
-+template <> struct NcpBase::DnssdDiscoveryPropKeyFor<otPlatDnssdTxtResolver>
-+{
-+    static constexpr spinel_prop_key_t Key = SPINEL_PROP_DNSSD_TXT_RESOLVER;
-+};
- #endif
- 
- } // namespace Ncp
 diff --git a/src/ncp/ncp_base_dispatcher.cpp b/src/ncp/ncp_base_dispatcher.cpp
-index bda4d2aec7b4c4b61ac2934127bafbd368ebd824..6d0e3065a9ba916192bc15b440024b4f0c35bf47 100644
+index 0b041d093a5b7dc99527cd03620f2a67a14a9f9b..ca09891f9eba439666522ecaf62da6dda6f3b94f 100644
 --- a/src/ncp/ncp_base_dispatcher.cpp
 +++ b/src/ncp/ncp_base_dispatcher.cpp
 @@ -224,6 +224,10 @@ NcpBase::PropertyHandler NcpBase::FindGetPropertyHandler(spinel_prop_key_t aKey)
@@ -2815,22 +2413,19 @@ index bda4d2aec7b4c4b61ac2934127bafbd368ebd824..6d0e3065a9ba916192bc15b440024b4f
  #endif
          OT_NCP_GET_HANDLER_ENTRY(SPINEL_PROP_UNSOL_UPDATE_FILTER),
          OT_NCP_GET_HANDLER_ENTRY(SPINEL_PROP_UNSOL_UPDATE_LIST),
-@@ -546,6 +555,14 @@ NcpBase::PropertyHandler NcpBase::FindSetPropertyHandler(spinel_prop_key_t aKey)
-         OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNSSD_REQUEST_RESULT),
-         OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNSSD_BROWSE_RESULT),
-         OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNSSD_SRV_RESULT),
-+        OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNSSD_TXT_RESULT),
-+        OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNSSD_IP6_ADDRESS_RESULT),
-+        OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNSSD_IP4_ADDRESS_RESULT),
-+#endif
+@@ -550,6 +559,11 @@ NcpBase::PropertyHandler NcpBase::FindSetPropertyHandler(spinel_prop_key_t aKey)
+         OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNSSD_IP6_ADDRESS_RESULT),
+         OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNSSD_IP4_ADDRESS_RESULT),
+ #endif
 +#if OPENTHREAD_CONFIG_DNS_UPSTREAM_QUERY_ENABLE
 +        OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNS_UPSTREAM_RESPONSE),
 +        OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNS_UPSTREAM_ENABLED),
 +        OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_DNS_UPSTREAM_AVAILABLE),
- #endif
++#endif
  #if OPENTHREAD_CONFIG_BORDER_AGENT_ENABLE && OPENTHREAD_CONFIG_BORDER_AGENT_EPHEMERAL_KEY_ENABLE
          OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_BORDER_AGENT_EPHEMERAL_KEY_ENABLE),
-@@ -561,7 +578,15 @@ NcpBase::PropertyHandler NcpBase::FindSetPropertyHandler(spinel_prop_key_t aKey)
+         OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_BORDER_AGENT_EPHEMERAL_KEY_ACTIVATE),
+@@ -564,7 +578,15 @@ NcpBase::PropertyHandler NcpBase::FindSetPropertyHandler(spinel_prop_key_t aKey)
          OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_PREFIX),
  #endif
  #endif
@@ -2847,7 +2442,7 @@ index bda4d2aec7b4c4b61ac2934127bafbd368ebd824..6d0e3065a9ba916192bc15b440024b4f
          OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_UNSOL_UPDATE_FILTER),
  #if OPENTHREAD_CONFIG_JAM_DETECTION_ENABLE
 diff --git a/src/ncp/ncp_base_ftd.cpp b/src/ncp/ncp_base_ftd.cpp
-index 3cc9cbc105c44887e18bd6d10204e4cf9a4cc48c..f753732ec913a0681fea1d6231f212104a3cd181 100644
+index 12279a4f8f665244f96f58a404acf86f091e7c4f..4ed5699c68aee3ccaee11e81b5990292033f8697 100644
 --- a/src/ncp/ncp_base_ftd.cpp
 +++ b/src/ncp/ncp_base_ftd.cpp
 @@ -47,6 +47,21 @@
@@ -2964,156 +2559,11 @@ index 3cc9cbc105c44887e18bd6d10204e4cf9a4cc48c..f753732ec913a0681fea1d6231f21210
  #if OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
  
  void NcpBase::DnssdRegisterHost(const otPlatDnssdHost      *aHost,
-@@ -1707,6 +1794,48 @@ void NcpBase::DnssdStopSrvResolver(const otPlatDnssdSrvResolver *aResolver)
-     DnssdUpdateDiscovery(aResolver, /* aStart */ false);
- }
- 
-+void NcpBase::DnssdStartTxtResolver(const otPlatDnssdTxtResolver *aResolver) { DnssdUpdateDiscovery(aResolver, true); }
-+
-+void NcpBase::DnssdStopTxtResolver(const otPlatDnssdTxtResolver *aResolver) { DnssdUpdateDiscovery(aResolver, false); }
-+
-+void NcpBase::DnssdUpdateAddressResolverDiscovery(const otPlatDnssdAddressResolver *aDiscovery,
-+                                                  bool                              aStart,
-+                                                  spinel_prop_key_t                 aPropKey)
-+{
-+    uint8_t          header = SPINEL_HEADER_FLAG | SPINEL_HEADER_TX_NOTIFICATION_IID;
-+    spinel_command_t cmd    = aStart ? SPINEL_CMD_PROP_VALUE_INSERTED : SPINEL_CMD_PROP_VALUE_REMOVED;
-+
-+    VerifyOrExit(aDiscovery != nullptr);
-+    VerifyOrExit(mDnssdState == OT_PLAT_DNSSD_READY);
-+
-+    SuccessOrExit(mEncoder.BeginFrame(header, cmd, aPropKey));
-+    SuccessOrExit(Spinel::EncodeDnssdDiscovery(mEncoder, *aDiscovery));
-+    SuccessOrExit(mEncoder.EndFrame());
-+
-+exit:
-+    return;
-+}
-+
-+void NcpBase::DnssdStartIp6AddressResolver(const otPlatDnssdAddressResolver *aResolver)
-+{
-+    DnssdUpdateAddressResolverDiscovery(aResolver, true, SPINEL_PROP_DNSSD_IP6_ADDRESS_RESOLVER);
-+}
-+
-+void NcpBase::DnssdStopIp6AddressResolver(const otPlatDnssdAddressResolver *aResolver)
-+{
-+    DnssdUpdateAddressResolverDiscovery(aResolver, false, SPINEL_PROP_DNSSD_IP6_ADDRESS_RESOLVER);
-+}
-+
-+void NcpBase::DnssdStartIp4AddressResolver(const otPlatDnssdAddressResolver *aResolver)
-+{
-+    DnssdUpdateAddressResolverDiscovery(aResolver, true, SPINEL_PROP_DNSSD_IP4_ADDRESS_RESOLVER);
-+}
-+
-+void NcpBase::DnssdStopIp4AddressResolver(const otPlatDnssdAddressResolver *aResolver)
-+{
-+    DnssdUpdateAddressResolverDiscovery(aResolver, false, SPINEL_PROP_DNSSD_IP4_ADDRESS_RESOLVER);
-+}
-+
- otPlatDnssdState NcpBase::DnssdGetState(void) { return mDnssdState; }
- 
- template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_STATE>(void)
-@@ -1740,7 +1869,10 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_REQUEST_RESULT>
-     SuccessOrExit(error = mDecoder.ReadData(context, contextLen));
-     VerifyOrExit(contextLen == sizeof(otPlatDnssdRegisterCallback), error = OT_ERROR_PARSE);
-     callback = *reinterpret_cast<const otPlatDnssdRegisterCallback *>(context);
--    callback(mInstance, requestId, static_cast<otError>(result));
-+    if (callback != nullptr)
-+    {
-+        callback(mInstance, requestId, static_cast<otError>(result));
-+    }
- 
- exit:
-     return error;
-@@ -1757,7 +1889,10 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_BROWSE_RESULT>(
-     SuccessOrExit(error = DecodeDnssdBrowseResult(mDecoder, browseResult, context, contextLen));
-     VerifyOrExit(contextLen == sizeof(otPlatDnssdBrowseCallback), error = OT_ERROR_PARSE);
-     callback = *reinterpret_cast<const otPlatDnssdBrowseCallback *>(context);
--    callback(mInstance, &browseResult);
-+    if (callback != nullptr)
-+    {
-+        callback(mInstance, &browseResult);
-+    }
- 
- exit:
-     return error;
-@@ -1774,13 +1909,404 @@ template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_SRV_RESULT>(voi
-     SuccessOrExit(error = DecodeDnssdSrvResult(mDecoder, srvResult, context, contextLen));
-     VerifyOrExit(contextLen == sizeof(otPlatDnssdSrvCallback), error = OT_ERROR_PARSE);
-     callback = *reinterpret_cast<const otPlatDnssdSrvCallback *>(context);
--    callback(mInstance, &srvResult);
-+    if (callback != nullptr)
-+    {
-+        callback(mInstance, &srvResult);
-+    }
-+
-+exit:
-+    return error;
-+}
-+
-+template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_TXT_RESULT>(void)
-+{
-+    otError                error = OT_ERROR_NONE;
-+    otPlatDnssdTxtResult   txtResult;
-+    otPlatDnssdTxtCallback callback = nullptr;
-+    const uint8_t         *context;
-+    uint16_t               contextLen;
-+
-+    SuccessOrExit(error = DecodeDnssdTxtResult(mDecoder, txtResult, context, contextLen));
-+    VerifyOrExit(contextLen == sizeof(otPlatDnssdTxtCallback), error = OT_ERROR_PARSE);
-+    callback = *reinterpret_cast<const otPlatDnssdTxtCallback *>(context);
-+    if (callback != nullptr)
-+    {
-+        callback(mInstance, &txtResult);
-+    }
-+
-+exit:
-+    return error;
-+}
-+
-+template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_IP6_ADDRESS_RESULT>(void)
-+{
-+    otError                    error = OT_ERROR_NONE;
-+    otPlatDnssdAddressResult   addrResult;
-+    otPlatDnssdAddressAndTtl   addrArray[kDnssdMaxAddressResultEntries];
-+    otPlatDnssdAddressCallback callback = nullptr;
-+    const uint8_t             *context;
-+    uint16_t                   contextLen;
-+
-+    SuccessOrExit(error = DecodeDnssdAddressResult(mDecoder, addrResult, addrArray, kDnssdMaxAddressResultEntries,
-+                                                   context, contextLen));
-+    VerifyOrExit(contextLen == sizeof(otPlatDnssdAddressCallback), error = OT_ERROR_PARSE);
-+    callback = *reinterpret_cast<const otPlatDnssdAddressCallback *>(context);
-+    if (callback != nullptr)
-+    {
-+        callback(mInstance, &addrResult);
-+    }
-+
-+exit:
-+    return error;
-+}
-+
-+template <> otError NcpBase::HandlePropertySet<SPINEL_PROP_DNSSD_IP4_ADDRESS_RESULT>(void)
-+{
-+    otError                    error = OT_ERROR_NONE;
-+    otPlatDnssdAddressResult   addrResult;
-+    otPlatDnssdAddressAndTtl   addrArray[kDnssdMaxAddressResultEntries];
-+    otPlatDnssdAddressCallback callback = nullptr;
-+    const uint8_t             *context;
-+    uint16_t                   contextLen;
-+
-+    SuccessOrExit(error = DecodeDnssdAddressResult(mDecoder, addrResult, addrArray, kDnssdMaxAddressResultEntries,
-+                                                   context, contextLen));
-+    VerifyOrExit(contextLen == sizeof(otPlatDnssdAddressCallback), error = OT_ERROR_PARSE);
-+    callback = *reinterpret_cast<const otPlatDnssdAddressCallback *>(context);
-+    if (callback != nullptr)
-+    {
-+        callback(mInstance, &addrResult);
-+    }
- 
+@@ -1846,8 +1933,333 @@ otError NcpBase::HandleDnssdAddressResultPropertySet(void)
  exit:
      return error;
  }
++
  #endif // OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
  
 +#if OPENTHREAD_CONFIG_DNS_UPSTREAM_QUERY_ENABLE
@@ -3444,7 +2894,7 @@ index 3cc9cbc105c44887e18bd6d10204e4cf9a4cc48c..f753732ec913a0681fea1d6231f21210
  
  template <> otError NcpBase::HandlePropertyGet<SPINEL_PROP_BORDER_AGENT_MESHCOP_SERVICE_STATE>(void)
 diff --git a/src/ncp/ncp_base_mtd.cpp b/src/ncp/ncp_base_mtd.cpp
-index 06ada5833d0c3d6148d626778ee7ea97dcd6d333..a7391a9f95d71b1bf62efbb04afb874f0c59f76f 100644
+index 3d1fd143d2855f70d8906a463a28bac5ef5e9795..01456f26cfce3894e8f6adaf53976690acbee451 100644
 --- a/src/ncp/ncp_base_mtd.cpp
 +++ b/src/ncp/ncp_base_mtd.cpp
 @@ -53,6 +53,14 @@
@@ -3546,7 +2996,7 @@ index 06ada5833d0c3d6148d626778ee7ea97dcd6d333..a7391a9f95d71b1bf62efbb04afb874f
  #if OPENTHREAD_CONFIG_TIME_SYNC_ENABLE
  template <> otError NcpBase::HandlePropertyGet<SPINEL_PROP_THREAD_NETWORK_TIME>(void)
 diff --git a/src/ncp/ncp_config.h b/src/ncp/ncp_config.h
-index 9806b12a46ef122ff515fb269534de4972a6e403..ea411074fbaf8cbf23b1af964978064886a8b92a 100644
+index 0d3aed6d3fdb4e7e41e686c42d3faaf3180896db..3fc94d823fe1b6a4370e39d95a3cf3afff4cb4d8 100644
 --- a/src/ncp/ncp_config.h
 +++ b/src/ncp/ncp_config.h
 @@ -47,6 +47,29 @@
@@ -3600,7 +3050,7 @@ index 9806b12a46ef122ff515fb269534de4972a6e403..ea411074fbaf8cbf23b1af9649780648
 +#endif
 +
  /**
-  * @def OPENTHREAD_CONFIG_NCP_CLI_STREAM_ENABLE
+  * @def OPENTHREAD_CONFIG_NCP_DNSSD_MAX_ADDRESS_RESULT_ENTRIES
   *
 diff --git a/src/ncp/platform/border_routing.cpp b/src/ncp/platform/border_routing.cpp
 new file mode 100644
@@ -3714,54 +3164,6 @@ index 0000000000000000000000000000000000000000..88cd96190fec5efe4e2a4ad2f4cf7bcf
 +}
 +
 +#endif // OPENTHREAD_FTD && OPENTHREAD_CONFIG_DNS_UPSTREAM_QUERY_ENABLE
-diff --git a/src/ncp/platform/dnssd.cpp b/src/ncp/platform/dnssd.cpp
-index 9ee5fc5de3558b921043a89aec526e1b3b03cd08..efa5b0556f109e8f1e79281284a8eb26b05620ea 100644
---- a/src/ncp/platform/dnssd.cpp
-+++ b/src/ncp/platform/dnssd.cpp
-@@ -136,37 +136,37 @@ void otPlatDnssdStopSrvResolver(otInstance *aInstance, const otPlatDnssdSrvResol
- void otPlatDnssdStartTxtResolver(otInstance *aInstance, const otPlatDnssdTxtResolver *aResolver)
- {
-     OT_UNUSED_VARIABLE(aInstance);
--    OT_UNUSED_VARIABLE(aResolver);
-+    ot::Ncp::NcpBase::GetNcpInstance()->DnssdStartTxtResolver(aResolver);
- }
- 
- void otPlatDnssdStopTxtResolver(otInstance *aInstance, const otPlatDnssdTxtResolver *aResolver)
- {
-     OT_UNUSED_VARIABLE(aInstance);
--    OT_UNUSED_VARIABLE(aResolver);
-+    ot::Ncp::NcpBase::GetNcpInstance()->DnssdStopTxtResolver(aResolver);
- }
- 
- void otPlatDnssdStartIp6AddressResolver(otInstance *aInstance, const otPlatDnssdAddressResolver *aResolver)
- {
-     OT_UNUSED_VARIABLE(aInstance);
--    OT_UNUSED_VARIABLE(aResolver);
-+    ot::Ncp::NcpBase::GetNcpInstance()->DnssdStartIp6AddressResolver(aResolver);
- }
- 
- void otPlatDnssdStopIp6AddressResolver(otInstance *aInstance, const otPlatDnssdAddressResolver *aResolver)
- {
-     OT_UNUSED_VARIABLE(aInstance);
--    OT_UNUSED_VARIABLE(aResolver);
-+    ot::Ncp::NcpBase::GetNcpInstance()->DnssdStopIp6AddressResolver(aResolver);
- }
- 
- void otPlatDnssdStartIp4AddressResolver(otInstance *aInstance, const otPlatDnssdAddressResolver *aResolver)
- {
-     OT_UNUSED_VARIABLE(aInstance);
--    OT_UNUSED_VARIABLE(aResolver);
-+    ot::Ncp::NcpBase::GetNcpInstance()->DnssdStartIp4AddressResolver(aResolver);
- }
- 
- void otPlatDnssdStopIp4AddressResolver(otInstance *aInstance, const otPlatDnssdAddressResolver *aResolver)
- {
-     OT_UNUSED_VARIABLE(aInstance);
--    OT_UNUSED_VARIABLE(aResolver);
-+    ot::Ncp::NcpBase::GetNcpInstance()->DnssdStopIp4AddressResolver(aResolver);
- }
- 
- void otPlatDnssdStartRecordQuerier(otInstance *aInstance, const otPlatDnssdRecordQuerier *aQuerier)
 diff --git a/src/ncp/platform/mdns_socket.cpp b/src/ncp/platform/mdns_socket.cpp
 new file mode 100644
 index 0000000000000000000000000000000000000000..6fcaae9f4ea6ac06a65dc552ca4e4edeffe68050
@@ -4299,277 +3701,62 @@ index aad13a748820d3406187b14325a04d9414163bd3..e8ba141c7cbedeecc9a1519cabc59e38
  #if OPENTHREAD_CONFIG_ECDSA_ENABLE
  
  namespace ot {
-diff --git a/tests/unit/test_platform.cpp b/tests/unit/test_platform.cpp
-index ae850d96da5994db673c2368ff7d37b1addc7d3d..228543fb139ac787790991be3c16305aec7b227c 100644
---- a/tests/unit/test_platform.cpp
-+++ b/tests/unit/test_platform.cpp
-@@ -940,6 +940,29 @@ otError otPlatBleGapAdvUpdateData(otInstance *aInstance, uint8_t *aAdvertisement
-     return otPlatBleGapAdvSetData(aInstance, aAdvertisementData, aAdvertisementLen);
+diff --git a/tests/unit/test_mac_frame.cpp b/tests/unit/test_mac_frame.cpp
+index af5e208e3faedc43ebb6330d9fdfc1b942e447f1..42d3836041df2954d2377acf91f94150b6b91d08 100644
+--- a/tests/unit/test_mac_frame.cpp
++++ b/tests/unit/test_mac_frame.cpp
+@@ -909,6 +909,51 @@ void TestMacFrameAckGeneration(void)
+     VerifyOrQuit(csl != nullptr);
+     VerifyOrQuit(csl->GetPeriod() == 123 && csl->GetPhase() == 456);
+ #endif
++
++#if OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK
++    // Received Frame 3
++    // Same header layout as Received Frame 2 but with Information Elements
++    // Present set to True in the FCF (byte 1: 0xa8 -> 0xaa) and the bytes
++    // past the Auxiliary Security Header filled with garbage, simulating a
++    // mid-RX Enh-ACK build where the Header IEs and encrypted payload are
++    // not yet in RAM. `mLength` still reflects the full PSDU length.
++    uint8_t data_psdu3[] = {0x69, 0xaa, 0x8e, 0xce, 0xfa, 0x02, 0x24, 0x00, 0x24, 0x0d, 0x02,
++                            0x00, 0x00, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
++                            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
++
++    receivedFrame.mPsdu   = data_psdu3;
++    receivedFrame.mLength = sizeof(data_psdu3);
++
++    // `kParseFully` would fail on the garbage Header IE bytes; `GenerateEnhAck()`
++    // uses `kParseSecurityHeader` under this config and must still succeed.
++    VerifyOrQuit(ackInfo.ParseFrom(receivedFrame, Mac::Frame::kParseFully) != kErrorNone);
++    SuccessOrQuit(ackFrame.GenerateEnhAck(receivedFrame, false, ie_data, sizeof(ie_data)));
++
++    SuccessOrQuit(ackInfo.ParseFrom(ackFrame, Mac::Frame::kParseFully));
++    VerifyOrQuit(ackInfo.mType == Mac::Frame::kTypeAck);
++    VerifyOrQuit(ackInfo.mIsSecurityEnabled);
++    VerifyOrQuit(ackInfo.mIsIePresent);
++    VerifyOrQuit(ackInfo.mPanIds.IsDestinationPresent());
++    VerifyOrQuit(ackInfo.mPanIds.GetDestination() == 0xface);
++    VerifyOrQuit(ackInfo.mVersion == Mac::Frame::kVersion2015);
++    VerifyOrQuit(ackInfo.mSequenceNum == 142);
++
++    // Clear the Security Enabled bit in the FCF to verify Enh-ACK
++    // generation on a received frame without security.
++    data_psdu3[0] &= ~0x08;
++
++    VerifyOrQuit(ackInfo.ParseFrom(receivedFrame, Mac::Frame::kParseFully) != kErrorNone);
++    SuccessOrQuit(ackFrame.GenerateEnhAck(receivedFrame, false, ie_data, sizeof(ie_data)));
++
++    SuccessOrQuit(ackInfo.ParseFrom(ackFrame, Mac::Frame::kParseFully));
++    VerifyOrQuit(ackInfo.mType == Mac::Frame::kTypeAck);
++    VerifyOrQuit(!ackInfo.mIsSecurityEnabled);
++    VerifyOrQuit(ackInfo.mIsIePresent);
++    VerifyOrQuit(ackInfo.mPanIds.IsDestinationPresent());
++    VerifyOrQuit(ackInfo.mPanIds.GetDestination() == 0xface);
++    VerifyOrQuit(ackInfo.mVersion == Mac::Frame::kVersion2015);
++    VerifyOrQuit(ackInfo.mSequenceNum == 142);
++#endif // OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK
+ #endif // (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
  }
  
-+/* Weak stubs for callbacks defined in the FTD/MTD core library, not available for RCP targets. */
-+
-+OT_TOOL_WEAK void otPlatBleGapOnConnected(otInstance *aInstance, uint16_t aConnectionId)
-+{
-+    OT_UNUSED_VARIABLE(aInstance);
-+    OT_UNUSED_VARIABLE(aConnectionId);
-+}
-+
-+OT_TOOL_WEAK void otPlatBleGapOnDisconnected(otInstance *aInstance, uint16_t aConnectionId)
-+{
-+    OT_UNUSED_VARIABLE(aInstance);
-+    OT_UNUSED_VARIABLE(aConnectionId);
-+}
-+
-+OT_TOOL_WEAK void otPlatBleGattServerOnWriteRequest(otInstance             *aInstance,
-+                                                    uint16_t                aHandle,
-+                                                    const otBleRadioPacket *aPacket)
-+{
-+    OT_UNUSED_VARIABLE(aInstance);
-+    OT_UNUSED_VARIABLE(aHandle);
-+    OT_UNUSED_VARIABLE(aPacket);
-+}
-+
- #endif // OPENTHREAD_CONFIG_BLE_TCAT_ENABLE
- 
- #if OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
-diff --git a/tests/unit/test_spinel_prop_codec.cpp b/tests/unit/test_spinel_prop_codec.cpp
-index becb9569f391a9741e1709dc0c81e4e4cadadf7a..d0be3978bc9838a74029fcd63565838d73f2c69f 100644
---- a/tests/unit/test_spinel_prop_codec.cpp
-+++ b/tests/unit/test_spinel_prop_codec.cpp
-@@ -29,6 +29,8 @@
- #include <string.h>
- 
- #include "test_util.hpp"
-+
-+#include "common/code_utils.hpp"
- #include "lib/spinel/spinel_prop_codec.hpp"
- 
- namespace ot {
-@@ -53,6 +55,18 @@ static void FakeDnssdSrvCallback(otInstance *aInstance, const otPlatDnssdSrvResu
-     OT_UNUSED_VARIABLE(aResult);
- }
- 
-+static void FakeDnssdTxtCallback(otInstance *aInstance, const otPlatDnssdTxtResult *aResult)
-+{
-+    OT_UNUSED_VARIABLE(aInstance);
-+    OT_UNUSED_VARIABLE(aResult);
-+}
-+
-+static void FakeDnssdAddressCallback(otInstance *aInstance, const otPlatDnssdAddressResult *aResult)
-+{
-+    OT_UNUSED_VARIABLE(aInstance);
-+    OT_UNUSED_VARIABLE(aResult);
-+}
-+
- static constexpr uint16_t kMaxSpinelBufferSize = 2048;
- 
- void TestDnssd(void)
-@@ -454,6 +468,193 @@ void TestDnssdSrvResult(void)
-     VerifyOrQuit(*reinterpret_cast<const otPlatDnssdSrvCallback *>(callbackData) == FakeDnssdSrvCallback);
- }
- 
-+void TestDnssdTxtResolver(void)
-+{
-+    uint8_t         buf[kMaxSpinelBufferSize];
-+    uint16_t        len;
-+    Spinel::Buffer  ncpBuffer(buf, kMaxSpinelBufferSize);
-+    Spinel::Encoder encoder(ncpBuffer);
-+    Spinel::Decoder decoder;
-+    uint8_t         header;
-+    unsigned int    command;
-+    unsigned int    propKey;
-+    otError         error = OT_ERROR_NONE;
-+
-+    otPlatDnssdTxtResolver txtResolverEncode;
-+    otPlatDnssdTxtResolver txtResolverDecode;
-+    const uint8_t         *callbackData;
-+    uint16_t               callbackDataLen;
-+
-+    txtResolverEncode.mServiceInstance = "svc1";
-+    txtResolverEncode.mServiceType     = "_t._udp";
-+    txtResolverEncode.mInfraIfIndex    = 2;
-+    txtResolverEncode.mCallback        = FakeDnssdTxtCallback;
-+
-+    ncpBuffer.Clear();
-+    SuccessOrQuit(
-+        error = encoder.BeginFrame(SPINEL_HEADER_FLAG, SPINEL_CMD_PROP_VALUE_INSERTED, SPINEL_PROP_DNSSD_TXT_RESOLVER));
-+    SuccessOrQuit(error = EncodeDnssdDiscovery(encoder, txtResolverEncode));
-+    SuccessOrQuit(error = encoder.EndFrame());
-+    SuccessOrQuit(ncpBuffer.OutFrameBegin());
-+    len = ncpBuffer.OutFrameGetLength();
-+    VerifyOrQuit(ncpBuffer.OutFrameRead(len, buf) == len);
-+
-+    decoder.Init(buf, len);
-+    SuccessOrQuit(error = decoder.ReadUint8(header));
-+    SuccessOrQuit(error = decoder.ReadUintPacked(command));
-+    SuccessOrQuit(error = decoder.ReadUintPacked(propKey));
-+    SuccessOrQuit(error = DecodeDnssdTxtResolver(decoder, txtResolverDecode, callbackData, callbackDataLen));
-+    VerifyOrQuit(strcmp(txtResolverDecode.mServiceInstance, txtResolverEncode.mServiceInstance) == 0);
-+    VerifyOrQuit(strcmp(txtResolverDecode.mServiceType, txtResolverEncode.mServiceType) == 0);
-+    VerifyOrQuit(txtResolverDecode.mInfraIfIndex == txtResolverEncode.mInfraIfIndex);
-+    VerifyOrQuit(callbackDataLen == sizeof(otPlatDnssdTxtCallback));
-+    VerifyOrQuit(*reinterpret_cast<const otPlatDnssdTxtCallback *>(callbackData) == FakeDnssdTxtCallback);
-+}
-+
-+void TestDnssdTxtResult(void)
-+{
-+    uint8_t         buf[kMaxSpinelBufferSize];
-+    uint16_t        len;
-+    Spinel::Buffer  ncpBuffer(buf, kMaxSpinelBufferSize);
-+    Spinel::Encoder encoder(ncpBuffer);
-+    Spinel::Decoder decoder;
-+    uint8_t         header;
-+    unsigned int    command;
-+    unsigned int    propKey;
-+    otError         error = OT_ERROR_NONE;
-+
-+    const uint8_t          kTxt[] = {0x01, 0x02, 0x03};
-+    otPlatDnssdTxtResult   txtResultEncode;
-+    otPlatDnssdTxtResult   txtResultDecode;
-+    const uint8_t         *callbackData;
-+    uint16_t               callbackDataLen;
-+    otPlatDnssdTxtCallback callback = FakeDnssdTxtCallback;
-+
-+    txtResultEncode.mServiceInstance = "svc1";
-+    txtResultEncode.mServiceType     = "_t._udp";
-+    txtResultEncode.mTxtData         = kTxt;
-+    txtResultEncode.mTxtDataLength   = sizeof(kTxt);
-+    txtResultEncode.mTtl             = 60;
-+    txtResultEncode.mInfraIfIndex    = 3;
-+
-+    ncpBuffer.Clear();
-+    SuccessOrQuit(error =
-+                      encoder.BeginFrame(SPINEL_HEADER_FLAG, SPINEL_CMD_PROP_VALUE_SET, SPINEL_PROP_DNSSD_TXT_RESULT));
-+    SuccessOrQuit(error = EncodeDnssdTxtResult(encoder, txtResultEncode, reinterpret_cast<const uint8_t *>(&callback),
-+                                               sizeof(callback)));
-+    SuccessOrQuit(error = encoder.EndFrame());
-+    SuccessOrQuit(ncpBuffer.OutFrameBegin());
-+    len = ncpBuffer.OutFrameGetLength();
-+    VerifyOrQuit(ncpBuffer.OutFrameRead(len, buf) == len);
-+
-+    decoder.Init(buf, len);
-+    SuccessOrQuit(error = decoder.ReadUint8(header));
-+    SuccessOrQuit(error = decoder.ReadUintPacked(command));
-+    SuccessOrQuit(error = decoder.ReadUintPacked(propKey));
-+    SuccessOrQuit(error = DecodeDnssdTxtResult(decoder, txtResultDecode, callbackData, callbackDataLen));
-+    VerifyOrQuit(strcmp(txtResultDecode.mServiceInstance, txtResultEncode.mServiceInstance) == 0);
-+    VerifyOrQuit(strcmp(txtResultDecode.mServiceType, txtResultEncode.mServiceType) == 0);
-+    VerifyOrQuit(txtResultDecode.mTxtDataLength == txtResultEncode.mTxtDataLength);
-+    VerifyOrQuit(memcmp(txtResultDecode.mTxtData, txtResultEncode.mTxtData, txtResultDecode.mTxtDataLength) == 0);
-+    VerifyOrQuit(txtResultDecode.mTtl == txtResultEncode.mTtl);
-+    VerifyOrQuit(txtResultDecode.mInfraIfIndex == txtResultEncode.mInfraIfIndex);
-+    VerifyOrQuit(callbackDataLen == sizeof(otPlatDnssdTxtCallback));
-+    VerifyOrQuit(*reinterpret_cast<const otPlatDnssdTxtCallback *>(callbackData) == FakeDnssdTxtCallback);
-+}
-+
-+void TestDnssdAddressResolver(void)
-+{
-+    uint8_t                    buf[kMaxSpinelBufferSize];
-+    uint16_t                   len;
-+    Spinel::Buffer             ncpBuffer(buf, kMaxSpinelBufferSize);
-+    Spinel::Encoder            encoder(ncpBuffer);
-+    Spinel::Decoder            decoder;
-+    uint8_t                    header;
-+    unsigned int               command;
-+    unsigned int               propKey;
-+    otError                    error = OT_ERROR_NONE;
-+    otPlatDnssdAddressResolver addrEncode;
-+    otPlatDnssdAddressResolver addrDecode;
-+    const uint8_t             *callbackData;
-+    uint16_t                   callbackDataLen;
-+
-+    addrEncode.mHostName     = "host1";
-+    addrEncode.mInfraIfIndex = 4;
-+    addrEncode.mCallback     = FakeDnssdAddressCallback;
-+
-+    ncpBuffer.Clear();
-+    SuccessOrQuit(error = encoder.BeginFrame(SPINEL_HEADER_FLAG, SPINEL_CMD_PROP_VALUE_INSERTED,
-+                                             SPINEL_PROP_DNSSD_IP6_ADDRESS_RESOLVER));
-+    SuccessOrQuit(error = EncodeDnssdDiscovery(encoder, addrEncode));
-+    SuccessOrQuit(error = encoder.EndFrame());
-+    SuccessOrQuit(ncpBuffer.OutFrameBegin());
-+    len = ncpBuffer.OutFrameGetLength();
-+    VerifyOrQuit(ncpBuffer.OutFrameRead(len, buf) == len);
-+
-+    decoder.Init(buf, len);
-+    SuccessOrQuit(error = decoder.ReadUint8(header));
-+    SuccessOrQuit(error = decoder.ReadUintPacked(command));
-+    SuccessOrQuit(error = decoder.ReadUintPacked(propKey));
-+    SuccessOrQuit(error = DecodeDnssdAddressResolver(decoder, addrDecode, callbackData, callbackDataLen));
-+    VerifyOrQuit(strcmp(addrDecode.mHostName, addrEncode.mHostName) == 0);
-+    VerifyOrQuit(addrDecode.mInfraIfIndex == addrEncode.mInfraIfIndex);
-+    VerifyOrQuit(callbackDataLen == sizeof(otPlatDnssdAddressCallback));
-+    VerifyOrQuit(*reinterpret_cast<const otPlatDnssdAddressCallback *>(callbackData) == FakeDnssdAddressCallback);
-+}
-+
-+void TestDnssdAddressResult(void)
-+{
-+    uint8_t                    buf[kMaxSpinelBufferSize];
-+    uint16_t                   len;
-+    Spinel::Buffer             ncpBuffer(buf, kMaxSpinelBufferSize);
-+    Spinel::Encoder            encoder(ncpBuffer);
-+    Spinel::Decoder            decoder;
-+    uint8_t                    header;
-+    unsigned int               command;
-+    unsigned int               propKey;
-+    otError                    error = OT_ERROR_NONE;
-+    otPlatDnssdAddressResult   addrResultEncode;
-+    otPlatDnssdAddressResult   addrResultDecode;
-+    otPlatDnssdAddressAndTtl   addrArrayEncode[1];
-+    otPlatDnssdAddressAndTtl   addrArrayDecode[4];
-+    const uint8_t             *callbackData;
-+    uint16_t                   callbackDataLen;
-+    otPlatDnssdAddressCallback callback = FakeDnssdAddressCallback;
-+
-+    memset(&addrArrayEncode[0].mAddress, 0xab, sizeof(addrArrayEncode[0].mAddress));
-+    addrArrayEncode[0].mTtl = 30;
-+
-+    addrResultEncode.mHostName        = "host2";
-+    addrResultEncode.mAddresses       = addrArrayEncode;
-+    addrResultEncode.mAddressesLength = 1;
-+    addrResultEncode.mInfraIfIndex    = 5;
-+
-+    ncpBuffer.Clear();
-+    SuccessOrQuit(error = encoder.BeginFrame(SPINEL_HEADER_FLAG, SPINEL_CMD_PROP_VALUE_SET,
-+                                             SPINEL_PROP_DNSSD_IP6_ADDRESS_RESULT));
-+    SuccessOrQuit(error = EncodeDnssdAddressResult(encoder, addrResultEncode,
-+                                                   reinterpret_cast<const uint8_t *>(&callback), sizeof(callback)));
-+    SuccessOrQuit(error = encoder.EndFrame());
-+    SuccessOrQuit(ncpBuffer.OutFrameBegin());
-+    len = ncpBuffer.OutFrameGetLength();
-+    VerifyOrQuit(ncpBuffer.OutFrameRead(len, buf) == len);
-+
-+    decoder.Init(buf, len);
-+    SuccessOrQuit(error = decoder.ReadUint8(header));
-+    SuccessOrQuit(error = decoder.ReadUintPacked(command));
-+    SuccessOrQuit(error = decoder.ReadUintPacked(propKey));
-+    SuccessOrQuit(error = DecodeDnssdAddressResult(decoder, addrResultDecode, addrArrayDecode,
-+                                                   OT_ARRAY_LENGTH(addrArrayDecode), callbackData, callbackDataLen));
-+    VerifyOrQuit(strcmp(addrResultDecode.mHostName, addrResultEncode.mHostName) == 0);
-+    VerifyOrQuit(addrResultDecode.mInfraIfIndex == addrResultEncode.mInfraIfIndex);
-+    VerifyOrQuit(addrResultDecode.mAddressesLength == 1);
-+    VerifyOrQuit(addrResultDecode.mAddresses[0].mTtl == addrArrayEncode[0].mTtl);
-+    VerifyOrQuit(memcmp(&addrResultDecode.mAddresses[0].mAddress, &addrArrayEncode[0].mAddress, sizeof(otIp6Address)) ==
-+                 0);
-+    VerifyOrQuit(callbackDataLen == sizeof(otPlatDnssdAddressCallback));
-+    VerifyOrQuit(*reinterpret_cast<const otPlatDnssdAddressCallback *>(callbackData) == FakeDnssdAddressCallback);
-+}
-+
- } // namespace Spinel
- } // namespace ot
- 
-@@ -464,6 +665,10 @@ int main(void)
-     ot::Spinel::TestDnssdBrowserResult();
-     ot::Spinel::TestDnssdSrvResolver();
-     ot::Spinel::TestDnssdSrvResult();
-+    ot::Spinel::TestDnssdTxtResolver();
-+    ot::Spinel::TestDnssdTxtResult();
-+    ot::Spinel::TestDnssdAddressResolver();
-+    ot::Spinel::TestDnssdAddressResult();
-     printf("\nAll tests passed.\n");
-     return 0;
- }
 diff --git a/third_party/mbedtls/BUILD.gn b/third_party/mbedtls/BUILD.gn
 index 35828980e565084f44866f5d4407f4b0bbb6ec95..c968548df211e18d5b1d7b5971333dde9b680822 100644
 --- a/third_party/mbedtls/BUILD.gn
@@ -5355,10 +4542,10 @@ index 54bdfad729940faf498360979caecff83208ef3c..9bfb41f959be4b89f53e2c836c3d3f96
  #endif /* MBEDTLS_CONFIG_H */
 diff --git a/third_party/mbedtls/psa-crypto-config.h b/third_party/mbedtls/psa-crypto-config.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..12574df67935431a506d8253f46f601fdc2b82ff
+index 0000000000000000000000000000000000000000..fbd082016fbc48d8feca3f17c77b9e2b2c9118ba
 --- /dev/null
 +++ b/third_party/mbedtls/psa-crypto-config.h
-@@ -0,0 +1,143 @@
+@@ -0,0 +1,145 @@
 +/*
 + *  Copyright (c) 2018, The OpenThread Authors.
 + *  All rights reserved.
@@ -5387,7 +4574,9 @@ index 0000000000000000000000000000000000000000..12574df67935431a506d8253f46f601f
 + *  POSSIBILITY OF SUCH DAMAGE.
 + */
 +
-+#ifndef OT_PSA_CRYPTO_CONFIG_H
++// Spans multiple lines to avoid being processed by unifdef
++#ifndef \
++    OT_PSA_CRYPTO_CONFIG_H
 +#define OT_PSA_CRYPTO_CONFIG_H
 +
 +#include "openthread-core-config.h"

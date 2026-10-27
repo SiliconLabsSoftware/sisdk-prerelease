@@ -38,6 +38,10 @@
 #include "sli_bt_app_ota_dfu.h"
 #include "sl_bt_app_ota_dfu.h"
 #include "sl_bt_app_ota_dfu_config.h"
+#include "sl_component_catalog.h"
+#ifdef SL_CATALOG_APP_LOG_PRESENT
+#include "app_log.h"
+#endif // SL_CATALOG_APP_LOG_PRESENT
 
 // -----------------------------------------------------------------------------
 // Definitions
@@ -59,6 +63,14 @@
 #ifndef SL_BT_INVALID_CONNECTION_HANDLE
 #define SL_BT_INVALID_CONNECTION_HANDLE ((uint8_t) 0xFF)
 #endif // SL_BT_INVALID_CONNECTION_HANDLE
+
+#ifdef SL_CATALOG_APP_LOG_PRESENT
+#define APP_OTA_DFU_LOG(...) app_log_info(__VA_ARGS__)
+#define APP_OTA_DFU_LOG_ERR(...) app_log_error(__VA_ARGS__)
+#else
+#define APP_OTA_DFU_LOG(...)
+#define APP_OTA_DFU_LOG_ERR(...)
+#endif // SL_CATALOG_APP_LOG_PRESENT
 
 /// App OTA structure
 typedef struct app_ota_s {
@@ -221,6 +233,8 @@ void sli_bt_app_ota_dfu_on_event(sl_bt_msg_t *evt)
             // Check write storage results
             if (btl_ret_val != BOOTLOADER_OK) {
               // Write failed.
+              APP_OTA_DFU_LOG_ERR("Storage write failed: 0x%lx" APP_LOG_NL,
+                                  (unsigned long)btl_ret_val);
               req_sts = SL_BT_APP_OTA_DFU_ERROR;
               ota_error = SL_BT_APP_OTA_DFU_ERR_BOOTLOADER_API;
               attr_status = ATT_ERR_PACKAGE_LOST;
@@ -288,9 +302,12 @@ void sli_bt_app_ota_dfu_on_event(sl_bt_msg_t *evt)
                                                    sizeof(app_ota.buffer));
           if (btl_ret_val != BOOTLOADER_OK) {
             // Verification init failed.
+            APP_OTA_DFU_LOG_ERR("Image verification init failed: 0x%lx" APP_LOG_NL,
+                                (unsigned long)btl_ret_val);
             req_sts = SL_BT_APP_OTA_DFU_ERROR;
             ota_error = SL_BT_APP_OTA_DFU_ERR_BOOTLOADER_API;
           } else {
+            APP_OTA_DFU_LOG("Image verification init passed." APP_LOG_NL);
             req_sts = SL_BT_APP_OTA_DFU_VERIFY;
             ota_error = SL_BT_APP_OTA_DFU_NO_ERROR;
             // Reuse image position to store verification position.
@@ -361,11 +378,15 @@ static void app_ota_dfu_step(void)
     case SL_BT_APP_OTA_DFU_INIT:
       // Get bootloader information.
       bootloader_getInfo(&app_ota.bootloader_info);
+      APP_OTA_DFU_LOG("Bootloader info read: type 0x%lx, version 0x%08lx" APP_LOG_NL,
+                      (unsigned long)app_ota.bootloader_info.type,
+                      (unsigned long)app_ota.bootloader_info.version);
       // Get storage slot information.
       btl_ret_val =
         bootloader_getStorageSlotInfo(SL_BT_APP_OTA_DFU_USED_SLOT, &app_ota.slot_info);
 
       if (btl_ret_val == BOOTLOADER_OK) {
+        APP_OTA_DFU_LOG("Storage slot info read passed." APP_LOG_NL);
         // Forward bootloader and storage information to application.
         app_ota.event.event_id = SL_BT_APP_OTA_DFU_EVT_BTL_STORAGE_INFO_ID;
         app_ota.event.ota_error_code = SL_BT_APP_OTA_DFU_NO_ERROR;
@@ -379,6 +400,8 @@ static void app_ota_dfu_step(void)
         req_sts = SL_BT_APP_OTA_DFU_READ_FLASH;
       } else {
         // Getting bootloader and storage information failed.
+        APP_OTA_DFU_LOG_ERR("Storage slot info read failed: 0x%lx" APP_LOG_NL,
+                            (unsigned long)btl_ret_val);
         req_sts = SL_BT_APP_OTA_DFU_ERROR;
         ota_error = SL_BT_APP_OTA_DFU_ERR_BOOTLOADER_API;
       }
@@ -416,13 +439,17 @@ static void app_ota_dfu_step(void)
       // Check results.
       if (btl_ret_val != BOOTLOADER_OK) {
         // Bootloader API issue during reading flash content.
+        APP_OTA_DFU_LOG_ERR("Storage read failed: 0x%lx" APP_LOG_NL,
+                            (unsigned long)btl_ret_val);
         ota_error = SL_BT_APP_OTA_DFU_ERR_BOOTLOADER_API;
         req_sts = SL_BT_APP_OTA_DFU_ERROR;
       } else if (dirty) {
         // Storage space is not empty proceed to erase.
+        APP_OTA_DFU_LOG("Storage is not empty." APP_LOG_NL);
         req_sts = SL_BT_APP_OTA_DFU_ERASE;
       } else {
         // Storage space was originally empty, proceed to next
+        APP_OTA_DFU_LOG("Storage is empty." APP_LOG_NL);
         req_sts = SL_BT_APP_OTA_DFU_READY;
       }
       // Change to next state.
@@ -435,11 +462,14 @@ static void app_ota_dfu_step(void)
       btl_ret_val = bootloader_eraseStorageSlot(SL_BT_APP_OTA_DFU_USED_SLOT);
       if (btl_ret_val != BOOTLOADER_OK) {
         // Failed to erase storage slot.
+        APP_OTA_DFU_LOG_ERR("Storage erase failed: 0x%lx" APP_LOG_NL,
+                            (unsigned long)btl_ret_val);
         ota_error = SL_BT_APP_OTA_DFU_ERR_BOOTLOADER_API;
         req_sts = SL_BT_APP_OTA_DFU_ERROR;
       } else {
         // Storage slot erased successfully.
         // Application OTA DFU component is ready for an OTA process.
+        APP_OTA_DFU_LOG("Storage erase passed." APP_LOG_NL);
         req_sts = SL_BT_APP_OTA_DFU_READY;
       }
       // Change to next state.
@@ -489,10 +519,13 @@ static void app_ota_dfu_step(void)
         app_ota.image_position += SL_BT_APP_OTA_DFU_VERIFICATION_BLOCK_SIZE;
         // Verification finished successfully.
         // This means state change as well.
+        APP_OTA_DFU_LOG("Verification passed." APP_LOG_NL);
         req_sts = SL_BT_APP_OTA_DFU_FINALIZE;
         ota_error = SL_BT_APP_OTA_DFU_NO_ERROR;
       } else {
         // Verification process aborted.
+        APP_OTA_DFU_LOG_ERR("Verification failed: 0x%lx" APP_LOG_NL,
+                            (unsigned long)btl_ret_val);
         req_sts = SL_BT_APP_OTA_DFU_ERROR;
         ota_error = SL_BT_APP_OTA_DFU_ERR_BOOTLOADER_API;
       }
@@ -522,10 +555,13 @@ static void app_ota_dfu_step(void)
       btl_ret_val = bootloader_setImageToBootload(SL_BT_APP_OTA_DFU_USED_SLOT);
       if (btl_ret_val != BOOTLOADER_OK) {
         // Setting Image to boot failed.
+        APP_OTA_DFU_LOG_ERR("Set image to bootload failed: 0x%lx" APP_LOG_NL,
+                            (unsigned long)btl_ret_val);
         req_sts = SL_BT_APP_OTA_DFU_ERROR;
         ota_error = SL_BT_APP_OTA_DFU_ERR_BOOTLOADER_API;
       } else {
         // Get ready for reboot trigger from user code.
+        APP_OTA_DFU_LOG("Set image to bootload passed." APP_LOG_NL);
         req_sts = SL_BT_APP_OTA_DFU_WAIT_FOR_REBOOT;
       }
       // Change to next state.
@@ -585,7 +621,10 @@ sl_status_t sl_bt_app_ota_dfu_restart_progress(void)
 void sl_bt_app_ota_dfu_reboot(void)
 {
   if (app_ota.status.current == SL_BT_APP_OTA_DFU_WAIT_FOR_REBOOT) {
+    // Logged before the call because a successful install resets the device.
+    APP_OTA_DFU_LOG("Reboot and install." APP_LOG_NL);
     bootloader_rebootAndInstall();
+    APP_OTA_DFU_LOG_ERR("Reboot and install failed." APP_LOG_NL);
   }
 }
 
@@ -623,7 +662,11 @@ static bool init_state(bool start)
   int32_t boot_retv;
   boot_retv = bootloader_init();
   if (boot_retv != BOOTLOADER_OK) {
+    APP_OTA_DFU_LOG_ERR("Bootloader init failed: 0x%lx" APP_LOG_NL,
+                        (unsigned long)boot_retv);
     on_error(SL_BT_APP_OTA_DFU_ERR_BOOTLOADER_API, boot_retv);
+  } else {
+    APP_OTA_DFU_LOG("Bootloader init passed." APP_LOG_NL);
   }
   return (boot_retv == BOOTLOADER_OK);
 }

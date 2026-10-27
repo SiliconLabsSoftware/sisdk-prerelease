@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sl_cpc_drv_spi_peripheral_usart.c
  * @brief CPC SPI peripheral driver — USART hardware init.
  *******************************************************************************
  * # License

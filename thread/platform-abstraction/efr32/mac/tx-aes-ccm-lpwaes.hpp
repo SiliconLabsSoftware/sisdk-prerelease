@@ -68,13 +68,11 @@ void LpwAesTransmitAesCcmT<KeyStoragePolicy>::Process(otRadioFrame              
 {
     ot::Mac::TxFrame       &txFrame = static_cast<ot::Mac::TxFrame &>(aFrame);
     ot::Mac::Frame::Lengths lengths;
-    ot::FrameData           payload;
 
     SuccessOrAssert(txFrame.DetermineLengths(lengths));
-    SuccessOrAssert(txFrame.GetPayload(payload));
 
     const uint32_t       payloadLength  = lengths.mPayload;
-    unsigned char *const payloadBytes   = ot::AsNonConst(payload.GetBytes());
+    unsigned char *const payloadBytes   = txFrame.GetPsduStartingAt(lengths.mHeader);
     const bool           encryptPayload = TxSecurityLevel::EncryptsPayload(aSecurityLevel);
     const bool includePayloadInCcm      = (payloadLength > 0) && TxSecurityLevel::IncludesPayloadInCcm(aSecurityLevel);
     sli_crypto_descriptor_t keyDesc     = LpwAesKeyDesc(aPalKey);

@@ -1,0 +1,27 @@
+id: cpc_ng_drv_uart_usart_secondary
+package: cpc_ng
+description: Instantiable UART driver for a CPC-NG Secondary device.
+category: Services|CPC-NG|Driver|Secondary Device
+quality: experimental
+label: CPC-NG Secondary - UART
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/silabs
+instantiable:
+  prefix: instance
+config_file:
+- path: config/sl_cpc_drv_uart_usart_{{instance}}_config.h
+  file_id: cpc_ng_drv_uart_usart_config
+provides:
+- name: cpc_ng_drv_uart_usart_secondary
+- name: cpc_ng_drv_secondary_instance
+  allow_multiple: true
+requires:
+- name: cpc_ng_drv_uart_usart
+- name: cpc_ng_secondary
+template_contribution:
+- name: cpc_ng_drv_uart_usart_instances
+  value: "{{instance}}"
+- name: cpc_ng_drv_uart_usart_role_secondary
+  value: "{{instance}}"

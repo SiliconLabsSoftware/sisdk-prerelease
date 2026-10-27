@@ -16,7 +16,6 @@ component:
   - id: board_control
     condition: [hardware_board]
   - id: connect_app_framework_common
-  - id: mbedtls_core
   - id: common_token_manager
   - id: sl_rail_util_pti
 #------------Memory Protection Unit-------------------

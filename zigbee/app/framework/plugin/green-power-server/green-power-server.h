@@ -19,6 +19,12 @@
 #define _SILABS_GREEN_POWER_SERVER_H_
 
 #include "af-types.h"
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif
+#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_V113_PRESENT
+#include "green-power-v113.h"
+#endif
 
 /**
  * @defgroup green-power-server Green Power Server
@@ -95,6 +101,7 @@ enum
   GP_SINK_COMM_STATE_IDLE, /**< Idle */
   GP_SINK_COMM_STATE_COLLECT_REPORTS, /**< Collect reports */
   GP_SINK_COMM_STATE_SEND_COMM_REPLY, /**< Send commissioning reply */
+  GP_SINK_COMM_STATE_AWAITING_TC_RESPONSE, /**< Awaiting GP TC Response (v1.1.3) */
   GP_SINK_COMM_STATE_WAIT_FOR_SUCCESS, /**< Wait for success */
   GP_SINK_COMM_STATE_FINALISE_PAIRING, /**< Finalize pairing */
   GP_SINK_COMM_STATE_PAIRING_DONE, /**< Pairing done */
@@ -151,6 +158,11 @@ typedef struct {
   bool unicastCommunication; /**< If Commissioning is unicast or broadcast */
   bool inCommissioningMode; /**< If GP Server is in Commissioning Mode */
   bool proxiesInvolved; /**< If GP Proxies are involved */
+#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_V113_PRESENT
+  bool tcMediated; /**< If commissioning is TC-mediated (v1.1.3) */
+  bool awaitingTcResponse; /**< Awaiting GP TC Response (v1.1.3) */
+  sli_zigbee_gp_tc_response_t tcResponse; /**< Last GP TC Response (v1.1.3) */
+#endif
   uint8_t endpoint; /**< GP endpoint ID */
 } sl_zigbee_af_green_power_server_commissioning_state_t;
 
@@ -179,9 +191,19 @@ typedef struct {
   bool serverClient; /**< If cluster in server or client */
 }sli_zigbee_zigbee_cluster_t;
 
+/**
+ * @brief Multi-sensor report collection state for a commissioning GPD.
+ */
+typedef struct {
+  uint8_t totalNbOfReport; /**< Total number of reports expected */
+  uint8_t numberOfReports; /**< Number of reports received so far */
+  uint8_t lastIndex; /**< Write index into reportsStorage */
+  uint8_t reportsStorage[SIZE_OF_REPORT_STORAGE]; /**< Cached report descriptors */
+} sli_zigbee_gp_report_collection_t;
+
 // Structure to hold the information from commissioning command when received
 // and used for subsequent processing
-typedef struct {
+typedef struct sli_zigbee_gp_comm_data_saved {
   sl_zigbee_gp_address_t                addr;
   // saved from the commissioning frame 0xE0
   uint8_t                       gpdfOptions;
@@ -205,17 +227,31 @@ typedef struct {
 
   // multi-sensor and compact reporting,
   // data link to AppliDescriptionCmd (0xE4), one report descriptor (at a time)
-  // total number of report the GPD sensor
-  uint8_t                       totalNbOfReport;
-  uint8_t                       numberOfReports;
-  uint8_t                       lastIndex;
-  uint8_t                       reportsStorage[SIZE_OF_REPORT_STORAGE];
+  sli_zigbee_gp_report_collection_t reports;
   // state machine
   uint16_t                      gppShortAddress;
   sl_zigbee_sink_commission_state_t      commissionState;
   // Send GP Pairing bit for current commissioning
   bool                          doNotSendGpPairing;
   sl_zigbee_pre_sink_pairing_callback_source_t preSinkCbSource;
+#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_V113_PRESENT
+  sl_zigbee_gp_link_key_source_t linkKeySourceUsed;
+  uint8_t                       tcResponseKeyType;
+  bool                          oobSignatureVerified;
+  uint16_t                      commNotificationOptions;
+  uint8_t                       gpdCommandId;
+  uint8_t                       gpdCommandPayloadLen;
+  uint8_t                       gpdCommandPayload[SL_GP_TC_COMMISSIONING_PAYLOAD_MAX];
+  uint32_t                      commNotificationMic;
+  bool                          commNotificationMicPresent;
+  // Figures 123/125: TC already encrypted the commissioning-reply key.
+  bool                          tcReplyKeyPreEncrypted;
+  uint8_t                       tcReplyKeyMic[4];
+  uint32_t                      tcReplyKeyFrameCounter;
+  // Table 63: KeyType 0b101 on the Commissioning Reply carries the actual
+  // key type in the Security Information field (ICEncryptedKeyType).
+  uint8_t                       tcReplyIcEncryptedKeyType;
+#endif
 } sli_zigbee_gp_comm_data_saved_t;
 
 /** @brief Cached commissioning information for a Green Power Device (GPD). */
@@ -565,7 +601,7 @@ bool sli_zigbee_af_gp_key_tc_lk_derivation(sl_zigbee_gp_address_t * gpdAddr,
                                            uint32_t gpdSecurityFrameCounter,
                                            uint8_t mic[4],
                                            sl_zigbee_key_data_t * key,
-                                           bool directionIncomming);
+                                           bool directionIncoming);
 bool sli_zigbee_af_gp_calculate_incoming_command_mic(sl_zigbee_gp_address_t * gpdAddr,
                                                      bool rxAfterTx,
                                                      uint8_t keyType,
@@ -614,6 +650,49 @@ void sli_zigbee_af_gp_forward_gpd_command_default(sl_zigbee_gp_address_t *addr,
 void sl_zigbee_af_green_power_server_sink_table_init(void);
 
 bool isCommissioningAppEndpoint(uint8_t endpoint);
+
+#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_V113_PRESENT
+// GP v1.1.3 hooks implemented by zigbee_green_power_v113.
+bool sli_gp_v113_commissioning_mode_involve_tc_ok(void);
+void sli_gp_v113_update_involve_tc_link_key(sl_zigbee_key_data_t *linkKeyOut,
+                                             sl_zigbee_gp_link_key_source_t *linkKeySourceOut);
+void sli_gp_v113_on_decommission(const sl_zigbee_gp_address_t *gpdAddr,
+                                   uint8_t gpsSecurityLevelAttribute);
+bool sli_gp_v113_apply_commissioning_reply_override(sli_zigbee_gp_comm_data_saved_t *commissioningGpd,
+                                                     uint8_t *sendSecurityKeyType,
+                                                     bool *sendKeyinReply,
+                                                     bool *sendKeyEncryption,
+                                                     sl_zigbee_key_data_t *sendKey);
+void sli_gp_v113_on_pairing_success(sli_zigbee_gp_comm_data_saved_t *commissioningGpd,
+                                     sl_zigbee_af_green_power_server_commissioning_state_t *commissioningState);
+// Commissioning session for this GPD is over (instance deleted or reset).
+void sli_gp_v113_on_commissioning_instance_deleted(const sl_zigbee_gp_address_t *gpdAddr);
+bool sli_gp_v113_involve_tc_commissioning_cn_drop_early(bool involveTcSet,
+                                                         uint16_t commNotificationOptions);
+int8_t sli_gp_v113_check_encrypted_commissioning_key(uint8_t securityKeyType,
+                                                      sl_zigbee_gp_address_t *gpdAddr,
+                                                      sl_zigbee_key_data_t *key,
+                                                      sli_zigbee_gp_comm_data_saved_t *commissioningGpd);
+bool sli_gp_v113_process_encrypted_commissioning_key(uint8_t securityKeyType,
+                                                      sl_zigbee_gp_address_t *gpdAddr,
+                                                      uint8_t *gpdCommandPayload,
+                                                      uint8_t *index,
+                                                      sl_zigbee_key_data_t *key,
+                                                      sli_zigbee_gp_comm_data_saved_t *commissioningGpd);
+bool sli_gp_v113_handle_involve_tc_commissioning(uint16_t commNotificationOptions,
+                                                  uint8_t gpdCommandId,
+                                                  uint8_t *gpdCommandPayload,
+                                                  sli_zigbee_gp_comm_data_saved_t *commissioningGpd,
+                                                  sl_zigbee_af_green_power_server_commissioning_state_t *commissioningState);
+void sli_gp_v113_server_init(uint8_t initLevel);
+void sli_gp_v113_resolve_link_key_for_decrypt(const sl_zigbee_gp_address_t *gpdAddr,
+                                               sl_zigbee_key_data_t *linkKeyOut,
+                                               sl_zigbee_gp_link_key_source_t *linkKeySourceOut);
+void sli_gp_v113_resolve_link_key(const sl_zigbee_gp_address_t *gpdAddr,
+                                   sl_zigbee_gp_link_key_source_t preferredSource,
+                                   sl_zigbee_key_data_t *linkKeyOut,
+                                   sl_zigbee_gp_link_key_source_t *linkKeySourceOut);
+#endif // SL_CATALOG_ZIGBEE_GREEN_POWER_V113_PRESENT
 
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 

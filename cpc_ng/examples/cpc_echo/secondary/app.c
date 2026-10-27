@@ -1,5 +1,5 @@
 /**
- * @file
+ * @file app.c
  * @brief CPC Echo Example — Secondary (co-processor / MCU under test).
  *
  * Listens on endpoint 90 and echoes every received payload back to the primary.

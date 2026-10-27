@@ -41,6 +41,7 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 
+#include "cmsis_os2.h"
 #include "sl_status.h"
 #include "sl_ftp.h"
 #include "sl_ftp_config.h"

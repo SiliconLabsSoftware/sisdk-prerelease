@@ -31,15 +31,26 @@
 
 #include "rest/rest_web_server.hpp"
 
+#include <algorithm>
 #include <chrono>
+#include <future>
+#include <memory>
+#include <utility>
 
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <httplib.h>
 #include <string.h>
+#include <time.h>
 
 #include <openthread/commissioner.h>
+
+#if OTBR_ENABLE_EPSKC
+#include <openthread/border_agent_ephemeral_key.h>
+
+#include "border_agent/border_agent.hpp"
+#endif
 
 #include "common/api_strings.hpp"
 #include "rest/json.hpp"
@@ -62,11 +73,11 @@
 #ifndef OTBR_REST_ACCESS_CONTROL_ALLOW_HEADERS
 #define OTBR_REST_ACCESS_CONTROL_ALLOW_HEADERS                                        \
     "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, " \
-    "Access-Control-Request-Headers"
+    "Access-Control-Request-Headers, If-None-Match"
 #endif
 
 #ifndef OTBR_REST_ACCESS_CONTROL_ALLOW_METHODS
-#define OTBR_REST_ACCESS_CONTROL_ALLOW_METHODS "DELETE, GET, OPTIONS, POST"
+#define OTBR_REST_ACCESS_CONTROL_ALLOW_METHODS "DELETE, GET, OPTIONS, POST, PUT"
 #endif
 
 #define OT_REST_RESOURCE_PATH_NODE "/node"
@@ -85,6 +96,8 @@
 #define OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_JOINER "/node/commissioner/joiner"
 #define OT_REST_RESOURCE_PATH_NODE_COPROCESSOR "/node/coprocessor"
 #define OT_REST_RESOURCE_PATH_NODE_COPROCESSOR_VERSION "/node/coprocessor/version"
+#define OT_REST_RESOURCE_PATH_NODE_BA_EPSKC_STATE "/node/ba-epskc/state"
+#define OT_REST_RESOURCE_PATH_NODE_BA_EPSKC_KEY "/node/ba-epskc/key"
 #define OT_REST_RESOURCE_PATH_NETWORK "/networks"
 #define OT_REST_RESOURCE_PATH_NETWORK_CURRENT "/networks/current"
 #define OT_REST_RESOURCE_PATH_NETWORK_CURRENT_COMMISSION "/networks/commission"
@@ -141,58 +154,60 @@ HttpMethod GetMethod(const Request &aRequest)
 RestWebServer::RestWebServer(Host::RcpHost &aHost)
     : mHost(aHost)
 {
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE, MakeHandler(&RestWebServer::NodeInfo));
-    mServer.Delete(OT_REST_RESOURCE_PATH_NODE, MakeHandler(&RestWebServer::NodeInfo));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_BAID, MakeHandler(&RestWebServer::BaId));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_STATE, MakeHandler(&RestWebServer::State));
-    mServer.Put(OT_REST_RESOURCE_PATH_NODE_STATE, MakeHandler(&RestWebServer::State));
-    mServer.Options(OT_REST_RESOURCE_PATH_NODE_STATE, MakeHandler(&RestWebServer::State));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_EXTADDRESS, MakeHandler(&RestWebServer::ExtendedAddr));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_NETWORKNAME, MakeHandler(&RestWebServer::NetworkName));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_RLOC16, MakeHandler(&RestWebServer::Rloc16));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_LEADERDATA, MakeHandler(&RestWebServer::LeaderData));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_NUMOFROUTER, MakeHandler(&RestWebServer::NumOfRoute));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_EXTPANID, MakeHandler(&RestWebServer::ExtendedPanId));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_RLOC, MakeHandler(&RestWebServer::Rloc));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_DATASET_ACTIVE, MakeHandler(&RestWebServer::DatasetActive));
-    mServer.Put(OT_REST_RESOURCE_PATH_NODE_DATASET_ACTIVE, MakeHandler(&RestWebServer::DatasetActive));
-    mServer.Options(OT_REST_RESOURCE_PATH_NODE_DATASET_ACTIVE, MakeHandler(&RestWebServer::DatasetActive));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_DATASET_PENDING, MakeHandler(&RestWebServer::DatasetPending));
-    mServer.Put(OT_REST_RESOURCE_PATH_NODE_DATASET_PENDING, MakeHandler(&RestWebServer::DatasetPending));
-    mServer.Options(OT_REST_RESOURCE_PATH_NODE_DATASET_PENDING, MakeHandler(&RestWebServer::DatasetPending));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_STATE, MakeHandler(&RestWebServer::CommissionerState));
-    mServer.Put(OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_STATE, MakeHandler(&RestWebServer::CommissionerState));
-    mServer.Options(OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_STATE, MakeHandler(&RestWebServer::CommissionerState));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_JOINER, MakeHandler(&RestWebServer::CommissionerJoiner));
-    mServer.Post(OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_JOINER, MakeHandler(&RestWebServer::CommissionerJoiner));
-    mServer.Delete(OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_JOINER, MakeHandler(&RestWebServer::CommissionerJoiner));
-    mServer.Options(OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_JOINER, MakeHandler(&RestWebServer::CommissionerJoiner));
-    mServer.Get(OT_REST_RESOURCE_PATH_NODE_COPROCESSOR_VERSION, MakeHandler(&RestWebServer::CoprocessorVersion));
-
+    // OPTIONS are handled generically for all routes.
+    mServer.set_pre_routing_handler(MakePreRoutingHandler(&RestWebServer::OptionsHandler));
     mServer.set_error_handler(MakeHandler(&RestWebServer::RoutingErrorHandler));
-    mServer.Get(OT_REST_ROUTE_ACTIONS, MakeHandlerInMainLoop(&RestWebServer::ApiActionsHandler));
-    mServer.Get(OT_REST_ROUTE_ACTIONS_ID, MakeHandlerInMainLoop(&RestWebServer::ApiActionsItemGetHandler));
-    mServer.Post(OT_REST_ROUTE_ACTIONS, MakeHandlerInMainLoop(&RestWebServer::ApiActionsHandler));
-    mServer.Delete(OT_REST_ROUTE_ACTIONS, MakeHandlerInMainLoop(&RestWebServer::ApiActionsHandler));
-    mServer.Delete(OT_REST_ROUTE_ACTIONS_ID, MakeHandlerInMainLoop(&RestWebServer::ApiActionsItemDeleteHandler));
-    mServer.Options(OT_REST_ROUTE_ACTIONS, MakeHandlerInMainLoop(&RestWebServer::ApiActionsHandler));
 
-    mServer.Get(OT_REST_ROUTE_DEVICES, MakeHandlerInMainLoop(&RestWebServer::ApiDevicesHandler));
-    mServer.Get(OT_REST_ROUTE_DEVICES_ID, MakeHandlerInMainLoop(&RestWebServer::ApiDevicesItemGetHandler));
-    mServer.Get(OT_REST_ROUTE_NODE, MakeHandlerInMainLoop(&RestWebServer::ApiDevicesSelfGetHandler));
-    mServer.Delete(OT_REST_ROUTE_DEVICES, MakeHandlerInMainLoop(&RestWebServer::ApiDevicesHandler));
-    mServer.Delete(OT_REST_ROUTE_DEVICES_ID, MakeHandlerInMainLoop(&RestWebServer::ApiDevicesItemDeleteHandler));
-    mServer.Options(OT_REST_ROUTE_DEVICES, MakeHandlerInMainLoop(&RestWebServer::ApiDevicesHandler));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE, MakeHandler(&RestWebServer::NodeInfo));
+    RegisterDelete(OT_REST_RESOURCE_PATH_NODE, MakeHandler(&RestWebServer::NodeInfo));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_BAID, MakeHandler(&RestWebServer::BaId));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_STATE, MakeHandler(&RestWebServer::State));
+    RegisterPut(OT_REST_RESOURCE_PATH_NODE_STATE, MakeHandler(&RestWebServer::State));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_EXTADDRESS, MakeHandler(&RestWebServer::ExtendedAddr));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_NETWORKNAME, MakeHandler(&RestWebServer::NetworkName));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_RLOC16, MakeHandler(&RestWebServer::Rloc16));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_LEADERDATA, MakeHandler(&RestWebServer::LeaderData));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_NUMOFROUTER, MakeHandler(&RestWebServer::NumOfRoute));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_EXTPANID, MakeHandler(&RestWebServer::ExtendedPanId));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_RLOC, MakeHandler(&RestWebServer::Rloc));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_DATASET_ACTIVE, MakeHandler(&RestWebServer::DatasetActive));
+    RegisterPut(OT_REST_RESOURCE_PATH_NODE_DATASET_ACTIVE, MakeHandler(&RestWebServer::DatasetActive));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_DATASET_PENDING, MakeHandler(&RestWebServer::DatasetPending));
+    RegisterPut(OT_REST_RESOURCE_PATH_NODE_DATASET_PENDING, MakeHandler(&RestWebServer::DatasetPending));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_STATE, MakeHandler(&RestWebServer::CommissionerState));
+    RegisterPut(OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_STATE, MakeHandler(&RestWebServer::CommissionerState));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_JOINER, MakeHandler(&RestWebServer::CommissionerJoiner));
+    RegisterPost(OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_JOINER, MakeHandler(&RestWebServer::CommissionerJoiner));
+    RegisterDelete(OT_REST_RESOURCE_PATH_NODE_COMMISSIONER_JOINER, MakeHandler(&RestWebServer::CommissionerJoiner));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_COPROCESSOR_VERSION, MakeHandler(&RestWebServer::CoprocessorVersion));
 
-    mServer.Get(OT_REST_ROUTE_DIAGNOSTICS, MakeHandlerInMainLoop(&RestWebServer::ApiDiagnosticsHandler));
-    mServer.Get(OT_REST_ROUTE_DIAGNOSTICS_ID, MakeHandlerInMainLoop(&RestWebServer::ApiDiagnosticsItemGetHandler));
-    mServer.Delete(OT_REST_ROUTE_DIAGNOSTICS, MakeHandlerInMainLoop(&RestWebServer::ApiDiagnosticsHandler));
-    mServer.Delete(OT_REST_ROUTE_DIAGNOSTICS_ID,
+#if OTBR_ENABLE_EPSKC
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_BA_EPSKC_STATE, MakeHandler(&RestWebServer::EpskcState));
+    RegisterPut(OT_REST_RESOURCE_PATH_NODE_BA_EPSKC_STATE, MakeHandler(&RestWebServer::EpskcState));
+    RegisterGet(OT_REST_RESOURCE_PATH_NODE_BA_EPSKC_KEY, MakeHandler(&RestWebServer::EpskcKey));
+    RegisterPost(OT_REST_RESOURCE_PATH_NODE_BA_EPSKC_KEY, MakeHandler(&RestWebServer::EpskcKey));
+    RegisterDelete(OT_REST_RESOURCE_PATH_NODE_BA_EPSKC_KEY, MakeHandler(&RestWebServer::EpskcKey));
+#endif
+
+    RegisterGet(OT_REST_ROUTE_ACTIONS, MakeHandlerInMainLoop(&RestWebServer::ApiActionsHandler));
+    RegisterGet(OT_REST_ROUTE_ACTIONS_ID, MakeHandlerInMainLoop(&RestWebServer::ApiActionsItemGetHandler));
+    RegisterPost(OT_REST_ROUTE_ACTIONS, MakeHandlerInMainLoop(&RestWebServer::ApiActionsHandler));
+    RegisterDelete(OT_REST_ROUTE_ACTIONS, MakeHandlerInMainLoop(&RestWebServer::ApiActionsHandler));
+    RegisterDelete(OT_REST_ROUTE_ACTIONS_ID, MakeHandlerInMainLoop(&RestWebServer::ApiActionsItemDeleteHandler));
+
+    RegisterGet(OT_REST_ROUTE_DEVICES, MakeHandlerInMainLoop(&RestWebServer::ApiDevicesHandler));
+    RegisterGet(OT_REST_ROUTE_DEVICES_ID, MakeHandlerInMainLoop(&RestWebServer::ApiDevicesItemGetHandler));
+    RegisterGet(OT_REST_ROUTE_NODE, MakeHandlerInMainLoop(&RestWebServer::ApiDevicesSelfGetHandler));
+    RegisterDelete(OT_REST_ROUTE_DEVICES, MakeHandlerInMainLoop(&RestWebServer::ApiDevicesHandler));
+    RegisterDelete(OT_REST_ROUTE_DEVICES_ID, MakeHandlerInMainLoop(&RestWebServer::ApiDevicesItemDeleteHandler));
+
+    RegisterGet(OT_REST_ROUTE_DIAGNOSTICS, MakeHandlerInMainLoop(&RestWebServer::ApiDiagnosticsHandler));
+    RegisterGet(OT_REST_ROUTE_DIAGNOSTICS_ID, MakeHandlerInMainLoop(&RestWebServer::ApiDiagnosticsItemGetHandler));
+    RegisterDelete(OT_REST_ROUTE_DIAGNOSTICS, MakeHandlerInMainLoop(&RestWebServer::ApiDiagnosticsHandler));
+    RegisterDelete(OT_REST_ROUTE_DIAGNOSTICS_ID,
                    MakeHandlerInMainLoop(&RestWebServer::ApiDiagnosticsItemDeleteHandler));
-    mServer.Options(OT_REST_ROUTE_DIAGNOSTICS, MakeHandlerInMainLoop(&RestWebServer::ApiDiagnosticsHandler));
 
-    mServer.Get(OT_REST_ROUTE_WELLKNOWN_THREAD, MakeHandler(&RestWebServer::WellKnownThreadHandler));
-    mServer.Options(OT_REST_ROUTE_WELLKNOWN_THREAD, MakeHandler(&RestWebServer::WellKnownThreadHandler));
+    RegisterGet(OT_REST_ROUTE_WELLKNOWN_THREAD, MakeHandler(&RestWebServer::WellKnownThreadHandler));
 }
 
 RestWebServer::~RestWebServer(void)
@@ -205,6 +220,151 @@ RestWebServer::~RestWebServer(void)
     {
         mServerThread.join();
     }
+}
+
+void RestWebServer::RegisterGet(const std::string &aPattern, httplib::Server::Handler aHandler)
+{
+    mServer.Get(aPattern, aHandler);
+    mRouteRegistry.Add(aPattern, HttpMethod::kGet);
+}
+
+void RestWebServer::RegisterPost(const std::string &aPattern, httplib::Server::Handler aHandler)
+{
+    mServer.Post(aPattern, aHandler);
+    mRouteRegistry.Add(aPattern, HttpMethod::kPost);
+}
+
+void RestWebServer::RegisterPut(const std::string &aPattern, httplib::Server::Handler aHandler)
+{
+    mServer.Put(aPattern, aHandler);
+    mRouteRegistry.Add(aPattern, HttpMethod::kPut);
+}
+
+void RestWebServer::RegisterDelete(const std::string &aPattern, httplib::Server::Handler aHandler)
+{
+    mServer.Delete(aPattern, aHandler);
+    mRouteRegistry.Add(aPattern, HttpMethod::kDelete);
+}
+
+bool RestWebServer::RouteRegistry::MatchPath(const std::string &aPattern, const std::string &aPath)
+{
+    bool   matched    = false;
+    size_t patternPos = 0;
+    size_t pathPos    = 0;
+    while (patternPos < aPattern.size() && pathPos < aPath.size())
+    {
+        size_t      nextPatternSlash = aPattern.find('/', patternPos);
+        size_t      nextPathSlash    = aPath.find('/', pathPos);
+        std::string patternSeg       = aPattern.substr(patternPos, nextPatternSlash - patternPos);
+        std::string pathSeg          = aPath.substr(pathPos, nextPathSlash - pathPos);
+        if (!patternSeg.empty() && patternSeg[0] == ':')
+        {
+            VerifyOrExit(!pathSeg.empty());
+        }
+        else
+        {
+            VerifyOrExit(patternSeg == pathSeg);
+        }
+        VerifyOrExit((nextPatternSlash == std::string::npos) == (nextPathSlash == std::string::npos));
+        if (nextPatternSlash == std::string::npos)
+        {
+            patternPos = aPattern.size();
+            pathPos    = aPath.size();
+            break;
+        }
+        patternPos = nextPatternSlash + 1;
+        pathPos    = nextPathSlash + 1;
+    }
+    matched = (patternPos == aPattern.size() && pathPos == aPath.size());
+exit:
+    return matched;
+}
+
+RestWebServer::RouteRegistry::RouteMethods RestWebServer::RouteRegistry::MethodBit(HttpMethod aMethod)
+{
+    return static_cast<RouteMethods>(1u << static_cast<uint8_t>(aMethod));
+}
+
+void RestWebServer::RouteRegistry::Add(const std::string &aPattern, HttpMethod aMethod)
+{
+    auto it = std::find_if(mRoutes.begin(), mRoutes.end(),
+                           [&aPattern](const Route &aRoute) { return aRoute.mPattern == aPattern; });
+
+    if (it == mRoutes.end())
+    {
+        Route route;
+
+        route.mPattern    = aPattern;
+        route.mMethodMask = MethodBit(aMethod);
+        mRoutes.push_back(std::move(route));
+    }
+    else
+    {
+        it->mMethodMask |= MethodBit(aMethod);
+    }
+}
+
+RestWebServer::RouteRegistry::RouteMethods RestWebServer::RouteRegistry::GetMethods(const std::string &aPath) const
+{
+    const Route *route = nullptr;
+
+    for (const auto &r : mRoutes)
+    {
+        if (MatchPath(r.mPattern, aPath))
+        {
+            route = &r;
+            break;
+        }
+    }
+
+    return (route != nullptr) ? route->mMethodMask : 0;
+}
+
+bool RestWebServer::RouteRegistry::MatchMethod(RouteMethods aMethods, HttpMethod aMethod)
+{
+    return (aMethods & MethodBit(aMethod)) != 0;
+}
+
+bool RestWebServer::RouteRegistry::AnyMethod(RouteMethods aMethods)
+{
+    return aMethods != 0;
+}
+
+std::string RestWebServer::RouteRegistry::BuildMethodsString(RouteMethods aMethods)
+{
+    std::string methodsString = "";
+
+    if (aMethods == 0)
+    {
+        return methodsString;
+    }
+
+    if (aMethods & MethodBit(HttpMethod::kGet))
+        methodsString += "GET, ";
+    if (aMethods & MethodBit(HttpMethod::kPost))
+        methodsString += "POST, ";
+    if (aMethods & MethodBit(HttpMethod::kPut))
+        methodsString += "PUT, ";
+    if (aMethods & MethodBit(HttpMethod::kDelete))
+        methodsString += "DELETE, ";
+
+    return methodsString + "OPTIONS";
+}
+
+httplib::Server::HandlerResponse RestWebServer::OptionsHandler(const Request &aRequest, Response &aResponse)
+{
+    if (GetMethod(aRequest) == HttpMethod::kOptions)
+    {
+        RouteRegistry::RouteMethods methods = mRouteRegistry.GetMethods(aRequest.path);
+        if (RouteRegistry::AnyMethod(methods))
+        {
+            aResponse.status = StatusCode::NoContent_204;
+            aResponse.set_header(OT_REST_ALLOW_HEADER, RouteRegistry::BuildMethodsString(methods));
+            return httplib::Server::HandlerResponse::Handled;
+        }
+    }
+
+    return httplib::Server::HandlerResponse::Unhandled;
 }
 
 void RestWebServer::ErrorHandler(Response &aResponse, StatusCode aErrorCode) const
@@ -440,9 +600,6 @@ void RestWebServer::State(const Request &aRequest, Response &aResponse) const
     case HttpMethod::kPut:
         SetDataState(aRequest, aResponse);
         break;
-    case HttpMethod::kOptions:
-        aResponse.status = StatusCode::OK_200;
-        break;
     default:
         ErrorHandler(aResponse, StatusCode::MethodNotAllowed_405);
         break;
@@ -672,6 +829,51 @@ exit:
     }
 }
 
+static std::string TrimOws(const std::string &aValue)
+{
+    size_t begin = aValue.find_first_not_of(" \t");
+    size_t end   = aValue.find_last_not_of(" \t");
+
+    return begin == std::string::npos ? "" : aValue.substr(begin, end - begin + 1);
+}
+
+static void HandleMgmtPendingSetResponse(otError aResult, void *aContext)
+{
+    std::unique_ptr<std::promise<otError>> result(static_cast<std::promise<otError> *>(aContext));
+
+    result->set_value(aResult);
+}
+
+// Generates a Pending Timestamp from the current time. The leader rejects a
+// MGMT_PENDING_SET whose Pending Timestamp does not advance the one it holds,
+// and the clock may lag that value (not yet synchronized, or the dataset was
+// registered by a commissioner with a faster clock), so the result is made to
+// strictly advance the Pending Timestamp in @p aBaseTlvs when there is one.
+static otbrError GeneratePendingTimestamp(const otOperationalDatasetTlvs &aBaseTlvs, otTimestamp &aTimestamp)
+{
+    otbrError            error = OTBR_ERROR_NONE;
+    otOperationalDataset base;
+    timespec             now;
+
+    VerifyOrExit(clock_gettime(CLOCK_REALTIME, &now) == 0, error = OTBR_ERROR_REST);
+
+    aTimestamp.mSeconds = static_cast<uint64_t>(now.tv_sec) & 0xffffffffffff;
+    aTimestamp.mTicks   = static_cast<uint16_t>((static_cast<uint64_t>(now.tv_nsec) * 32768 / 1000000000) & 0x7fff);
+    aTimestamp.mAuthoritative = false;
+
+    if (otDatasetParseTlvs(&aBaseTlvs, &base) == OT_ERROR_NONE && base.mComponents.mIsPendingTimestampPresent &&
+        (aTimestamp.mSeconds < base.mPendingTimestamp.mSeconds ||
+         (aTimestamp.mSeconds == base.mPendingTimestamp.mSeconds &&
+          aTimestamp.mTicks <= base.mPendingTimestamp.mTicks)))
+    {
+        aTimestamp.mSeconds = (base.mPendingTimestamp.mSeconds + 1) & 0xffffffffffff;
+        aTimestamp.mTicks   = 0;
+    }
+
+exit:
+    return error;
+}
+
 void RestWebServer::SetDataset(DatasetType aDatasetType, const Request &aRequest, Response &aResponse) const
 {
     otbrError       error = OTBR_ERROR_NONE;
@@ -679,8 +881,25 @@ void RestWebServer::SetDataset(DatasetType aDatasetType, const Request &aRequest
     std::string     body;
     StatusCode      errorCode = StatusCode::OK_200;
 
+    std::unique_ptr<std::promise<otError>> mgmtSetResult;
+    std::future<otError>                   mgmtSetFuture;
+    bool                                   mgmtSetSent = false;
+
+    // RFC 9110 section 13.1.2: If-None-Match with "*" makes the write
+    // conditional on no dataset being in place, so a client that does not
+    // intend to supersede an in-flight pending dataset can turn that
+    // collision into an error it sees, before anything is sent to the
+    // leader. Other forms of the header (entity tags) have nothing to match
+    // against here and are rejected rather than mistaken for an
+    // unconditional write.
+    const std::string ifNoneMatch  = TrimOws(aRequest.get_header_value(OT_REST_IF_NONE_MATCH_HEADER));
+    const bool        onlyIfAbsent = ifNoneMatch == "*";
+
+    VerifyOrExit(ifNoneMatch.empty() || onlyIfAbsent, error = OTBR_ERROR_INVALID_ARGS);
+
     SuccessOrExit(
-        error = RunInMainLoop([this, aDatasetType, &errorCode, &aRequest]() {
+        error = RunInMainLoop([this, aDatasetType, onlyIfAbsent, &errorCode, &aRequest, &mgmtSetResult, &mgmtSetFuture,
+                               &mgmtSetSent]() {
             bool                     isTlv;
             otOperationalDataset     dataset = {};
             otOperationalDatasetTlvs datasetTlvs;
@@ -694,14 +913,38 @@ void RestWebServer::SetDataset(DatasetType aDatasetType, const Request &aRequest
             }
             else if (aDatasetType == DatasetType::kPending)
             {
+                // The Pending Dataset is registered with the leader (see below), which
+                // requires the device to be attached.
+                VerifyOrReturn(otThreadGetDeviceRole(GetInstance()) >= OT_DEVICE_ROLE_CHILD, OTBR_ERROR_INVALID_STATE);
                 errorOt = otDatasetGetPendingTlvs(GetInstance(), &datasetTlvs);
             }
 
-            // Create a new operational dataset if it doesn't exist.
+            // RFC 9110 section 13.2.1: the precondition is evaluated after the
+            // request checks (the role checks above still answer 409 first, the
+            // header cannot downgrade that to a 412) and before the content is
+            // processed. Evaluated in this main-loop task, it is atomic with
+            // the write below for the Active Dataset; for the Pending Dataset
+            // it is atomic with the MGMT_PENDING_SET send, and the leader's
+            // Pending Timestamp ordering arbitrates concurrent registrations.
+            VerifyOrReturn(!onlyIfAbsent || errorOt != OT_ERROR_NONE, OTBR_ERROR_DUPLICATED);
+
             if (errorOt == OT_ERROR_NOT_FOUND)
             {
-                VerifyOrReturn(otDatasetCreateNewNetwork(GetInstance(), &dataset) == OT_ERROR_NONE, OTBR_ERROR_REST);
-                otDatasetConvertToTlvs(&dataset, &datasetTlvs);
+                if (aDatasetType == DatasetType::kPending)
+                {
+                    // A Pending Dataset describes a change to the network this node is
+                    // attached to, so a new one starts from the current Active Dataset:
+                    // fields the request leaves out keep their current value.
+                    VerifyOrReturn(otDatasetGetActiveTlvs(GetInstance(), &datasetTlvs) == OT_ERROR_NONE,
+                                   OTBR_ERROR_REST);
+                }
+                else
+                {
+                    // Create a new operational dataset if it doesn't exist.
+                    VerifyOrReturn(otDatasetCreateNewNetwork(GetInstance(), &dataset) == OT_ERROR_NONE,
+                                   OTBR_ERROR_REST);
+                    otDatasetConvertToTlvs(&dataset, &datasetTlvs);
+                }
                 errorCode = StatusCode::Created_201;
             }
 
@@ -732,8 +975,27 @@ void RestWebServer::SetDataset(DatasetType aDatasetType, const Request &aRequest
                     VerifyOrReturn(Json::JsonPendingDatasetString2Dataset(aRequest.body, dataset),
                                    OTBR_ERROR_INVALID_ARGS);
                     VerifyOrReturn(dataset.mComponents.mIsDelayPresent, OTBR_ERROR_INVALID_ARGS);
+
+                    if (!dataset.mComponents.mIsPendingTimestampPresent)
+                    {
+                        VerifyOrReturn(GeneratePendingTimestamp(datasetTlvs, dataset.mPendingTimestamp) ==
+                                           OTBR_ERROR_NONE,
+                                       OTBR_ERROR_REST);
+                        dataset.mComponents.mIsPendingTimestampPresent = true;
+                    }
                 }
                 VerifyOrReturn(otDatasetUpdateTlvs(&dataset, &datasetTlvs) == OT_ERROR_NONE, OTBR_ERROR_REST);
+            }
+
+            if (aDatasetType == DatasetType::kPending)
+            {
+                otOperationalDataset merged;
+
+                // Without a Delay Timer the leader accepts the dataset but it never
+                // applies. The JSON path requires one in the request; this also
+                // covers the TLV path, whose merge result may lack one.
+                VerifyOrReturn(otDatasetParseTlvs(&datasetTlvs, &merged) == OT_ERROR_NONE, OTBR_ERROR_REST);
+                VerifyOrReturn(merged.mComponents.mIsDelayPresent, OTBR_ERROR_INVALID_ARGS);
             }
 
             if (aDatasetType == DatasetType::kActive)
@@ -742,10 +1004,65 @@ void RestWebServer::SetDataset(DatasetType aDatasetType, const Request &aRequest
             }
             else if (aDatasetType == DatasetType::kPending)
             {
-                VerifyOrReturn(otDatasetSetPendingTlvs(GetInstance(), &datasetTlvs) == OT_ERROR_NONE, OTBR_ERROR_REST);
+                // Register the Pending Dataset with the leader via MGMT_PENDING_SET
+                // rather than writing it locally, so that leader-side validation
+                // (Pending Timestamp ordering, minimum delay timer) applies even
+                // when this device is the leader.
+                otOperationalDataset emptyDataset = {};
+
+                mgmtSetResult.reset(new std::promise<otError>());
+                mgmtSetFuture = mgmtSetResult->get_future();
+
+                errorOt =
+                    otDatasetSendMgmtPendingSet(GetInstance(), &emptyDataset, datasetTlvs.mTlvs, datasetTlvs.mLength,
+                                                HandleMgmtPendingSetResponse, mgmtSetResult.get());
+                VerifyOrReturn(errorOt != OT_ERROR_ALREADY && errorOt != OT_ERROR_BUSY &&
+                                   errorOt != OT_ERROR_INVALID_STATE,
+                               OTBR_ERROR_INVALID_STATE);
+                VerifyOrReturn(errorOt == OT_ERROR_NONE, OTBR_ERROR_REST);
+
+                // On success the response callback owns (and frees) the promise.
+                mgmtSetResult.release();
+                mgmtSetSent = true;
             }
             return OTBR_ERROR_NONE;
         }));
+
+    if (mgmtSetSent)
+    {
+        otError mgmtError = OT_ERROR_RESPONSE_TIMEOUT;
+
+        // The callback is invoked on response reception, timeout, or abort.
+        // With OpenThread's default CoAP parameters the exchange can run for
+        // up to MAX_TRANSMIT_WAIT (62 to 93 s, RFC 7252 section 4.8.2) before
+        // it times out; answering earlier keeps the HTTP worker available.
+        // The client then learns the outcome is unknown (504), a late
+        // callback is absorbed by the heap-owned promise, and further
+        // registrations answer 409 (busy) until the exchange finalizes.
+        if (mgmtSetFuture.wait_for(std::chrono::seconds(30)) == std::future_status::ready)
+        {
+            mgmtError = mgmtSetFuture.get();
+        }
+
+        switch (mgmtError)
+        {
+        case OT_ERROR_NONE:
+            break;
+        case OT_ERROR_REJECTED:
+            ErrorHandler(aResponse, StatusCode::Conflict_409, "rejected by leader");
+            ExitNow();
+        case OT_ERROR_ABORT:
+            // Thread was stopped or the node detached while the request was in flight.
+            ErrorHandler(aResponse, StatusCode::Conflict_409, "no longer attached");
+            ExitNow();
+        case OT_ERROR_RESPONSE_TIMEOUT:
+            ErrorHandler(aResponse, StatusCode::GatewayTimeout_504, "no response from leader");
+            ExitNow();
+        default:
+            ErrorHandler(aResponse, StatusCode::InternalServerError_500);
+            ExitNow();
+        }
+    }
 
     aResponse.status = errorCode;
 
@@ -757,6 +1074,10 @@ exit:
     else if (error == OTBR_ERROR_INVALID_STATE)
     {
         ErrorHandler(aResponse, StatusCode::Conflict_409);
+    }
+    else if (error == OTBR_ERROR_DUPLICATED)
+    {
+        ErrorHandler(aResponse, StatusCode::PreconditionFailed_412);
     }
     else if (error != OTBR_ERROR_NONE)
     {
@@ -773,9 +1094,6 @@ void RestWebServer::Dataset(DatasetType aDatasetType, const Request &aRequest, R
         break;
     case HttpMethod::kPut:
         SetDataset(aDatasetType, aRequest, aResponse);
-        break;
-    case HttpMethod::kOptions:
-        aResponse.status = StatusCode::OK_200;
         break;
     default:
         ErrorHandler(aResponse, StatusCode::MethodNotAllowed_405);
@@ -858,9 +1176,6 @@ void RestWebServer::CommissionerState(const Request &aRequest, Response &aRespon
         break;
     case HttpMethod::kPut:
         SetCommissionerState(aRequest, aResponse);
-        break;
-    case HttpMethod::kOptions:
-        aResponse.status = StatusCode::OK_200;
         break;
     default:
         ErrorHandler(aResponse, StatusCode::MethodNotAllowed_405);
@@ -1033,10 +1348,6 @@ void RestWebServer::CommissionerJoiner(const Request &aRequest, Response &aRespo
     case HttpMethod::kDelete:
         RemoveJoiner(aRequest, aResponse);
         break;
-
-    case HttpMethod::kOptions:
-        aResponse.status = StatusCode::OK_200;
-        break;
     default:
         ErrorHandler(aResponse, StatusCode::MethodNotAllowed_405);
         break;
@@ -1066,37 +1377,178 @@ void RestWebServer::CoprocessorVersion(const Request &aRequest, Response &aRespo
     }
 }
 
-void RestWebServer::RoutingErrorHandler(const Request &aRequest, Response &aResponse)
+#if OTBR_ENABLE_EPSKC
+void RestWebServer::GetEpskcState(Response &aResponse) const
 {
-    httplib::StatusCode error = StatusCode::OK_200;
-    std::string         errorDetails;
+    std::string state;
 
-    // handle methods not used or not supported by cpp-httplib
+    state = RunInMainLoop([this]() {
+        otBorderAgentEphemeralKeyState stateCode = otBorderAgentEphemeralKeyGetState(GetInstance());
+        return Json::String2JsonString(stateCode == OT_BORDER_AGENT_STATE_DISABLED ? "disabled" : "enabled");
+    });
+
+    aResponse.set_content(state, OT_REST_CONTENT_TYPE_JSON);
+    aResponse.status = StatusCode::OK_200;
+}
+
+void RestWebServer::SetEpskcState(const Request &aRequest, Response &aResponse) const
+{
+    otbrError   error = OTBR_ERROR_NONE;
+    std::string body;
+
+    VerifyOrExit(Json::JsonString2String(aRequest.body, body), error = OTBR_ERROR_INVALID_ARGS);
+    VerifyOrExit(body == "enable" || body == "disable", error = OTBR_ERROR_INVALID_ARGS);
+
+    RunInMainLoop([this, &body]() { otBorderAgentEphemeralKeySetEnabled(GetInstance(), body == "enable"); });
+
+    aResponse.status = StatusCode::OK_200;
+
+exit:
+    if (error != OTBR_ERROR_NONE)
+    {
+        ErrorHandler(aResponse, StatusCode::BadRequest_400);
+    }
+}
+
+void RestWebServer::EpskcState(const Request &aRequest, Response &aResponse) const
+{
     switch (GetMethod(aRequest))
     {
-    case HttpMethod::kPost:
-        // fallthrough
     case HttpMethod::kGet:
-        // fallthrough
-    case HttpMethod::kDelete:
-        // fallthrough
-    case HttpMethod::kOptions:
+        GetEpskcState(aResponse);
+        break;
+    case HttpMethod::kPut:
+        SetEpskcState(aRequest, aResponse);
         break;
     default:
-        errorDetails = "method not supported";
-        error        = StatusCode::MethodNotAllowed_405;
-        aResponse.set_header("Allow", "GET, POST, DELETE, OPTIONS");
+        ErrorHandler(aResponse, StatusCode::MethodNotAllowed_405);
         break;
     }
+}
 
-    if (error != StatusCode::OK_200 || aResponse.status >= StatusCode::MultipleChoices_300)
+void RestWebServer::GetEpskcKey(Response &aResponse) const
+{
+    std::string body;
+
+    body = RunInMainLoop([this]() {
+        otBorderAgentEphemeralKeyState state = otBorderAgentEphemeralKeyGetState(GetInstance());
+        uint16_t                       port  = otBorderAgentEphemeralKeyGetUdpPort(GetInstance());
+        return Json::EpskcKeyStatus2JsonString(state, port);
+    });
+
+    aResponse.set_content(body, OT_REST_CONTENT_TYPE_JSON);
+    aResponse.status = StatusCode::OK_200;
+}
+
+void RestWebServer::ActivateEpskcKey(const Request &aRequest, Response &aResponse) const
+{
+    otbrError   error    = OTBR_ERROR_NONE;
+    otError     errorOt  = OT_ERROR_NONE;
+    uint32_t    lifetime = OT_BORDER_AGENT_DEFAULT_EPHEMERAL_KEY_TIMEOUT;
+    uint16_t    port     = OTBR_CONFIG_BORDER_AGENT_MESHCOP_E_UDP_PORT;
+    std::string tap;
+    uint16_t    resultPort = 0;
+
+    if (!aRequest.body.empty())
     {
-        if (error < aResponse.status)
+        VerifyOrExit(Json::JsonEpskcActivateParams(aRequest.body, lifetime, port), error = OTBR_ERROR_INVALID_ARGS);
+    }
+    VerifyOrExit(lifetime <= OT_BORDER_AGENT_MAX_EPHEMERAL_KEY_TIMEOUT, error = OTBR_ERROR_INVALID_ARGS);
+
+    error = BorderAgent::CreateEphemeralKey(tap);
+    VerifyOrExit(error == OTBR_ERROR_NONE, error = OTBR_ERROR_REST);
+
+    SuccessOrExit(error = RunInMainLoop([this, &errorOt, &resultPort, &tap, lifetime, port]() {
+                      errorOt = otBorderAgentEphemeralKeyStart(GetInstance(), tap.c_str(), lifetime, port);
+                      VerifyOrReturn(errorOt == OT_ERROR_NONE, OTBR_ERROR_OPENTHREAD);
+
+                      resultPort = otBorderAgentEphemeralKeyGetUdpPort(GetInstance());
+                      otbrLogInfo("Created Ephemeral Key for REST activation");
+                      return OTBR_ERROR_NONE;
+                  }));
+
+    aResponse.set_content(Json::EpskcActivateResult2JsonString(tap, resultPort), OT_REST_CONTENT_TYPE_JSON);
+    aResponse.status = StatusCode::OK_200;
+
+exit:
+    if (error == OTBR_ERROR_INVALID_ARGS)
+    {
+        ErrorHandler(aResponse, StatusCode::BadRequest_400);
+    }
+    else if (error == OTBR_ERROR_OPENTHREAD)
+    {
+        if (errorOt == OT_ERROR_INVALID_STATE)
         {
-            error = StatusCode(aResponse.status);
+            ErrorHandler(aResponse, StatusCode::Conflict_409);
         }
-        otbrLogWarning("%s:%d Error (%d) - %s", __FILE__, __LINE__, error, errorDetails.c_str());
-        ErrorHandler(aResponse, error, errorDetails);
+        else if (errorOt == OT_ERROR_INVALID_ARGS)
+        {
+            ErrorHandler(aResponse, StatusCode::BadRequest_400);
+        }
+        else
+        {
+            ErrorHandler(aResponse, StatusCode::InternalServerError_500);
+        }
+    }
+    else if (error != OTBR_ERROR_NONE)
+    {
+        ErrorHandler(aResponse, StatusCode::InternalServerError_500);
+    }
+}
+
+void RestWebServer::DeactivateEpskcKey(const Request &aRequest, Response &aResponse) const
+{
+    OT_UNUSED_VARIABLE(aRequest);
+
+    RunInMainLoop([this]() { otBorderAgentEphemeralKeyStop(GetInstance()); });
+
+    aResponse.status = StatusCode::OK_200;
+}
+
+void RestWebServer::EpskcKey(const Request &aRequest, Response &aResponse) const
+{
+    switch (GetMethod(aRequest))
+    {
+    case HttpMethod::kGet:
+        GetEpskcKey(aResponse);
+        break;
+    case HttpMethod::kPost:
+        ActivateEpskcKey(aRequest, aResponse);
+        break;
+    case HttpMethod::kDelete:
+        DeactivateEpskcKey(aRequest, aResponse);
+        break;
+    default:
+        ErrorHandler(aResponse, StatusCode::MethodNotAllowed_405);
+        break;
+    }
+}
+#endif // OTBR_ENABLE_EPSKC
+
+void RestWebServer::RoutingErrorHandler(const Request &aRequest, Response &aResponse)
+{
+    httplib::StatusCode status = StatusCode(aResponse.status);
+
+    if (status == StatusCode::NotFound_404 || status == StatusCode::MethodNotAllowed_405)
+    {
+        RouteRegistry::RouteMethods methods = mRouteRegistry.GetMethods(aRequest.path);
+
+        if (RouteRegistry::AnyMethod(methods) && !RouteRegistry::MatchMethod(methods, GetMethod(aRequest)))
+        {
+            status = StatusCode::MethodNotAllowed_405;
+        }
+
+        if (status == StatusCode::MethodNotAllowed_405)
+        {
+            aResponse.set_header(OT_REST_ALLOW_HEADER, RouteRegistry::BuildMethodsString(methods));
+            ErrorHandler(aResponse, status, "method not supported");
+            return;
+        }
+    }
+
+    if (aResponse.body.empty())
+    {
+        ErrorHandler(aResponse, status);
     }
 }
 
@@ -1148,10 +1600,6 @@ void RestWebServer::ApiActionsHandler(const Request &aRequest, Response &aRespon
         break;
     case HttpMethod::kDelete:
         ApiActionsDeleteHandler(aRequest, aResponse);
-        break;
-    case HttpMethod::kOptions:
-        aResponse.status = StatusCode::NoContent_204;
-        aResponse.set_header("Allow", "GET, POST, DELETE, OPTIONS");
         break;
     default:
         errorDetails = "not supported";
@@ -1519,10 +1967,6 @@ void RestWebServer::ApiDiagnosticsHandler(const Request &aRequest, Response &aRe
     case HttpMethod::kDelete:
         ApiDiagnosticsDeleteHandler(aRequest, aResponse);
         break;
-    case HttpMethod::kOptions:
-        aResponse.status = StatusCode::NoContent_204;
-        aResponse.set_header("Allow", "GET, DELETE, OPTIONS");
-        break;
     case HttpMethod::kPost:
     default:
         errorDetails = "not supported";
@@ -1550,10 +1994,6 @@ void RestWebServer::ApiDevicesHandler(const Request &aRequest, Response &aRespon
         break;
     case HttpMethod::kGet:
         ApiDevicesGetHandler(aRequest, aResponse);
-        break;
-    case HttpMethod::kOptions:
-        aResponse.status = StatusCode::NoContent_204;
-        aResponse.set_header("Allow", "GET, DELETE, OPTIONS");
         break;
     default:
         errorDetails = "not supported";
@@ -1826,11 +2266,6 @@ void RestWebServer::WellKnownThreadHandler(const Request &aRequest, Response &aR
     {
     case HttpMethod::kGet:
         WellKnownThreadGetHandler(aRequest, aResponse);
-        break;
-
-    case HttpMethod::kOptions:
-        aResponse.status = StatusCode::NoContent_204;
-        aResponse.set_header("Allow", "GET, OPTIONS");
         break;
 
     default:

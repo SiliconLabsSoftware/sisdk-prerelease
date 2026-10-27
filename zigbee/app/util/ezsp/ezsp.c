@@ -828,6 +828,16 @@ sl_802154_short_addr_t sl_zigbee_get_parent_id(void)
   return parent_node_id;
 }
 
+int8_t sl_zigbee_get_avg_parent_rssi(void)
+{
+  uint8_t value = 0;
+  uint8_t valueLength = 1;
+  sl_zigbee_ezsp_get_value(SL_ZIGBEE_EZSP_VALUE_AVG_PARENT_RSSI,
+                           &valueLength,
+                           &value);
+  return (int8_t)value;
+}
+
 uint8_t sl_zigbee_next_zigbee_sequence_number(void)
 {
   uint8_t value = 0;

@@ -37,8 +37,9 @@ static cache_entry_t cache[SL_GATT_CLIENT_MANAGER_MAX_CACHE_ENTRIES];
 /// Monotonic stamp copied into cache_entry_t::last_used for LRU eviction.
 static uint16_t cache_clock;
 
-static uint16_t clock_tick(void) {
-  if (cache_clock > UINT16_MAX - 1) { 
+static uint16_t clock_tick(void)
+{
+  if (cache_clock > (UINT16_MAX - 1)) {
     // Reset cache last used timestamps to 0 to avoid errors caused by overflow.
     for (uint8_t i = 0; i < SL_GATT_CLIENT_MANAGER_MAX_CACHE_ENTRIES; i++) {
       cache[i].last_used = 0;
@@ -213,10 +214,10 @@ bool sli_gcm_cache_try_restore(connection_entry_t *conn)
       }
       if (result->characteristic_found) {
         sli_gcm_emit_characteristic_found(conn->connection,
-                                            profile_handle,
-                                            i,
-                                            result->service_handle,
-                                            result->characteristic_handle);
+                                          profile_handle,
+                                          i,
+                                          result->service_handle,
+                                          result->characteristic_handle);
         if (conn->run_generation != generation) {
           return true;
         }

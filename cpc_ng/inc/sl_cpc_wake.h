@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sl_cpc_wake.h
  * @brief CPC public wake / power-mode definitions.
  *******************************************************************************
  * # License
@@ -54,11 +54,6 @@ typedef enum sl_cpc_power_mode {
   /// Keep instance always on. Note that this prevents the whole system from
   /// entering sleep state. Safe default.
   SL_CPC_POWER_MODE_ALWAYS_ON,
-
-  /// Instance may sleep, and can be wake up from the bus itself (e.g. SDIO
-  /// interrupt, SPI interrupt). As this setting is driver specific, it might
-  /// not be supported.
-  SL_CPC_POWER_MODE_WAKE_FROM_BUS,
 
   /// Instance may sleep with bus shut down, it requires an external GPIO to
   /// make the bus available again. The peer must drive the matching wake-out

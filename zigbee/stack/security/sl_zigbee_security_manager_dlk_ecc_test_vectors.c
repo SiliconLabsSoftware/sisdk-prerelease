@@ -26,7 +26,7 @@ struct sl_zigbee_dlk_ecc_test_vector_shared_data sl_dlk_ecc_speke_c25519_share_d
 {
   // share_1
   { .config     = { DLK_ECC_OPERATION_SPEKE, DLK_ECC_CURVE_25519, DLK_ECC_HASH_AES_MMO_128 },
-    .GIVEN_psk  = "ZigBeeAlliance18",
+    .GIVEN_psk  = { 'Z', 'i', 'g', 'B', 'e', 'e', 'A', 'l', 'l', 'i', 'a', 'n', 'c', 'e', '1', '8' },
     .EXPECT_G   =
     { 0x90, 0x2B, 0x44, 0x85, 0xC8, 0x4E, 0xC4, 0xA0,
       0x59, 0x44, 0xAB, 0x34, 0x42, 0x92, 0x68, 0x78,
@@ -45,7 +45,7 @@ struct sl_zigbee_dlk_ecc_test_vector_shared_data sl_dlk_ecc_speke_c25519_share_d
       0xBF, 0xF2, 0xA3, 0xB7, 0x6D, 0x6A, 0x29, 0x29, }, },
   // share_2
   { .config     = { DLK_ECC_OPERATION_SPEKE, DLK_ECC_CURVE_25519, DLK_ECC_HASH_AES_MMO_128 },
-    .GIVEN_psk  = "ZigBeeAlliance20",
+    .GIVEN_psk  = { 'Z', 'i', 'g', 'B', 'e', 'e', 'A', 'l', 'l', 'i', 'a', 'n', 'c', 'e', '2', '0' },
     .EXPECT_G   =
     { 0xDE, 0xE6, 0x39, 0xE5, 0xFF, 0xF9, 0x46, 0xD7,
       0xB1, 0x00, 0xCC, 0x5F, 0x3F, 0x9C, 0xE8, 0x9C,
@@ -64,7 +64,7 @@ struct sl_zigbee_dlk_ecc_test_vector_shared_data sl_dlk_ecc_speke_c25519_share_d
       0x96, 0x48, 0x18, 0x65, 0x7B, 0x47, 0xB5, 0xDB, }, },
   // share_3
   { .config     = { DLK_ECC_OPERATION_SPEKE, DLK_ECC_CURVE_25519, DLK_ECC_HASH_SHA_256 },
-    .GIVEN_psk  = "ZigBeeAlliance18",
+    .GIVEN_psk  = { 'Z', 'i', 'g', 'B', 'e', 'e', 'A', 'l', 'l', 'i', 'a', 'n', 'c', 'e', '1', '8' },
     .EXPECT_G   =
     { 0x09, 0xE8, 0xB7, 0x90, 0x39, 0x6F, 0x5B, 0xC0,
       0x99, 0x4B, 0xE4, 0x4F, 0xA7, 0x3C, 0xAE, 0x1A,
@@ -85,7 +85,7 @@ struct sl_zigbee_dlk_ecc_test_vector_shared_data sl_dlk_ecc_speke_c25519_share_d
       0xA9, 0x44, 0x0C, 0xAD, 0x78, 0x0B, 0xB7, 0x0B, }, },
   // share_4
   { .config     = { DLK_ECC_OPERATION_SPEKE, DLK_ECC_CURVE_25519, DLK_ECC_HASH_SHA_256 },
-    .GIVEN_psk  = "ZigBeeAlliance20",
+    .GIVEN_psk  = { 'Z', 'i', 'g', 'B', 'e', 'e', 'A', 'l', 'l', 'i', 'a', 'n', 'c', 'e', '2', '0' },
     .EXPECT_G   =
     { 0x09, 0xD0, 0x7B, 0x39, 0x6D, 0x10, 0xC1, 0x48,
       0xE3, 0xDA, 0xC6, 0xDE, 0xA7, 0xDC, 0xB2, 0x82,

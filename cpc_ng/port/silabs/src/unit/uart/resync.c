@@ -1,6 +1,31 @@
 /***************************************************************************/ /**
- * @file
+ * @file resync.c
  * @brief Header resync and preamble search tests for sl_cpc_drv_uart.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
  ******************************************************************************/
 
 #include <string.h>
@@ -15,7 +40,7 @@
 // Build a preamble-aligned block with an invalid header CRC (0x0000 vs 0xFF header).
 static void fill_invalid_header_block(uint8_t *block)
 {
-  block[0] = TEST_UART_PREAMBLE;
+  block[0] = TEST_UART_SOF;
   memset(&block[1], 0xFF, SLI_CPC_HEADER_SIZE);
   block[1U + SLI_CPC_HEADER_SIZE] = 0x00U;
   block[1U + SLI_CPC_HEADER_SIZE + 1U] = 0x00U;
@@ -282,7 +307,7 @@ TEST(cpc_drv_uart_resync, invalid_header_block_then_two_valid_frames)
  */
 TEST(cpc_drv_uart_resync, false_preamble_then_valid_frame)
 {
-  const uint8_t prefix[] = {TEST_UART_PREAMBLE, 0x00U, 0x00U};
+  const uint8_t prefix[] = {TEST_UART_SOF, 0x00U, 0x00U};
   const uint8_t payload[] = {0xAAU, 0xBBU};
 
   cpc_frame_expect_t frame = {
@@ -304,7 +329,7 @@ TEST(cpc_drv_uart_resync, false_preamble_then_valid_frame)
  */
 TEST(cpc_drv_uart_resync, false_preamble_split_inject_then_valid_frame)
 {
-  const uint8_t prefix[] = {TEST_UART_PREAMBLE, 0x00U, 0x00U};
+  const uint8_t prefix[] = {TEST_UART_SOF, 0x00U, 0x00U};
   const uint8_t payload[] = {0x99U, 0xAAU};
 
   cpc_frame_expect_t frame = {
@@ -408,7 +433,7 @@ TEST(cpc_drv_uart_resync, garbage_prefix_spurious_preamble_then_valid_frame)
     .payload = payload,
   };
   memset(prefix, 0x00U, sizeof(prefix));
-  prefix[1U] = TEST_UART_PREAMBLE;
+  prefix[1U] = TEST_UART_SOF;
   uart_inject_prefix_and_frame(prefix, sizeof(prefix), frame);
 
   TEST_UART_READ_EXPECT(TEST_UART_EP_ID, payload, sizeof(payload), true);

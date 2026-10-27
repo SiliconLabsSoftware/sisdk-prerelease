@@ -31,6 +31,22 @@ static const uint8_t keyDefaultTCLink[] = {
   0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39
 };
 
+static uint8_t gpdActiveTcLinkKey[SL_ZIGBEE_GPD_SECURITY_KEY_SIZE];
+static bool gpdIcTcLinkValid = false;
+
+void sl_zigbee_gpd_set_ic_derived_tc_link_key(const uint8_t *key)
+{
+  if (key != NULL) {
+    memcpy(gpdActiveTcLinkKey, key, SL_ZIGBEE_GPD_SECURITY_KEY_SIZE);
+    gpdIcTcLinkValid = true;
+  }
+}
+
+static const uint8_t *sl_zigbee_gpd_get_tc_link_key(void)
+{
+  return gpdIcTcLinkValid ? gpdActiveTcLinkKey : keyDefaultTCLink;
+}
+
 static uint8_t nonceTx[NONCE_SIZE];
 static uint8_t nonceRx[NONCE_SIZE];
 static psa_key_id_t gpd_ccm_key_id = 0;
@@ -236,8 +252,8 @@ int8_t sl_zigbee_gpd_security_encrypt_key(sl_zigbee_gpd_addr_t_t * addr,
 
   // Update Nonce TX
   sl_zigbee_gpd_set_fc_into_tx_nonce(frameCounter);
-  // Secure OOB key data with default TC_LK ZA09
-  sl_zigbee_gpd_mbedtls_ccm_setkey_wraper(keyDefaultTCLink);
+  // Secure OOB key data with TC link key (IC-derived or default)
+  sl_zigbee_gpd_mbedtls_ccm_setkey_wraper(sl_zigbee_gpd_get_tc_link_key());
   return gpdEncryptTagKeyWrapper(data, oobScured, mic);
 }
 
@@ -269,8 +285,8 @@ int8_t sl_zigbee_gpd_security_decrypt_key(sl_zigbee_gpd_addr_t_t * addr,
 
   // Update Nonce RX with Rx Security Counter
   sl_zigbee_gpd_set_fc_into_rx_nonce(frameCounter);
-  // Set security Key with default TC_LK ZA09
-  sl_zigbee_gpd_mbedtls_ccm_setkey_wraper(keyDefaultTCLink);
+  // Set security Key with TC link key (IC-derived or default)
+  sl_zigbee_gpd_mbedtls_ccm_setkey_wraper(sl_zigbee_gpd_get_tc_link_key());
   return gpdAuthDecryptKeyWrapper(inData, decryptedKey);
 }
 

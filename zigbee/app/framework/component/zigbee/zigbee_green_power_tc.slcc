@@ -1,0 +1,57 @@
+package: zigbee
+description: >
+  A component implementing GP-aware Trust Center functionality for GP v1.1.3.
+  SoC-only in the initial release — GP TC ZCL commands are not passed through
+  EZSP/NCP. Use a SoC TC/combo image for InvolveTC flows. Depends on
+  zigbee_green_power_v113_common (codec/types) only — does not pull the sink
+  green_power_server component.
+label: Green Power Trust Center
+quality: production
+id: zigbee_green_power_tc
+category: Zigbee|Green Power
+provides:
+- name: zigbee_green_power_tc
+requires:
+- name: zigbee_gp
+- name: zigbee_green_power_client
+- name: zigbee_green_power_v113_common
+
+config_file:
+- path: app/framework/plugin/green-power-tc/config/green-power-tc-config.h
+source:
+- path: app/framework/plugin/green-power-tc/green-power-tc.c
+- path: app/framework/plugin/green-power-tc/green-power-tc-policy.c
+- path: app/framework/plugin/green-power-tc/green-power-tc-crypto.c
+include:
+- path: app/framework/plugin/green-power-tc
+  file_list:
+  - path: green-power-tc.h
+  - path: green-power-tc-crypto.h
+- path: app/framework/plugin/green-power-v113
+  file_list:
+  - path: green-power-v113.h
+  - path: green-power-tc-msg.h
+- path: stack/include
+  file_list:
+  - path: gp-install-code.h
+template_contribution:
+- name: component_catalog
+  value: zigbee_green_power_tc
+- name: cluster_service
+  value:
+    cluster_id: '0x0021'
+    mfg_id: NOT_MFG_SPECIFIC
+    side: CLIENT
+    service_function: sl_zigbee_af_green_power_tc_cluster_client_command_parse
+- name: zigbee_af_callback
+  value:
+    callback_type: init_done
+    function_name: sl_zigbee_af_green_power_tc_init_cb
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/green-power-tc
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

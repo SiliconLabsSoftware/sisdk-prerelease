@@ -119,10 +119,10 @@ sl_status_t sl_gatt_client_manager_register_profile(
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (profile->pair_count > SL_GATT_CLIENT_MANAGER_MAX_PAIRS_PER_PROFILE) {
-  gcm_log_debug("register_profile: pair_count exceeds max=%u" APP_LOG_NL,
-                (unsigned)SL_GATT_CLIENT_MANAGER_MAX_PAIRS_PER_PROFILE);
-  return SL_STATUS_NO_MORE_RESOURCE;
-}
+    gcm_log_debug("register_profile: pair_count exceeds max=%u" APP_LOG_NL,
+                  (unsigned)SL_GATT_CLIENT_MANAGER_MAX_PAIRS_PER_PROFILE);
+    return SL_STATUS_NO_MORE_RESOURCE;
+  }
   for (uint8_t i = 0; i < profile->pair_count; i++) {
     if (!sli_gcm_uuid_is_valid(&profile->pairs[i].service)
         || !sli_gcm_uuid_is_valid(&profile->pairs[i].characteristic)) {
@@ -426,7 +426,7 @@ void sl_gatt_client_manager_on_bt_event(sl_bt_msg_t *evt)
   if (evt == NULL) {
     return;
   }
-  // The guard is recursive, so an application callback (caused by a FOUND or DISCOVERY_COMPLETE event) that steps back into 
+  // The guard is recursive, so an application callback (caused by a FOUND or DISCOVERY_COMPLETE event) that steps back into
   // a public API function nests safely without deadlocking.
   sc = app_rta_acquire(sli_gcm_ctx);
   if (sc != SL_STATUS_OK) {

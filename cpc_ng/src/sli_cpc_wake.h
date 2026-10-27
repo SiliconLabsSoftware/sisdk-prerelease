@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sli_cpc_wake.h
  * @brief CPC Wake Up Definitions
  *******************************************************************************
  * # License
@@ -38,7 +38,7 @@
 
 #include "sl_component_catalog.h"
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT) || defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT) || defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
 #include "sl_cpc_wake.h"
 #endif
 
@@ -46,7 +46,7 @@
 #include "sli_cpc_hdr.h"
 #endif
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
 typedef struct {
   sli_cpc_dispatcher_handle_t dispatcher_handle;
   sl_cpc_power_mode_t mode;
@@ -54,7 +54,8 @@ typedef struct {
   sl_cpc_wake_in_response_t response;
   int32_t int_no;
   bool active;
-} sli_cpc_wake_device_t;
+  unsigned int ref_cnt;
+} sli_cpc_pm_runtime_t;
 #endif
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
@@ -86,27 +87,27 @@ typedef struct {
 extern "C" {
 #endif
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
 /***************************************************************************/ /**
- * Initialize the wake up functionality.
+ * Initialize the wake from GPIO functionality.
  *
- * @ref sli_cpc_wake_device_t::mode and @ref sli_cpc_wake_device_t::pin must
+ * @ref sli_cpc_pm_runtime_t::mode and @ref sli_cpc_pm_runtime_t::pin must
  * already be set on @p wake.
  *
  * @param[in] wake  Handle to initialize.
  *
  * @return SL_STATUS_OK if successful, otherwise an error code.
  ******************************************************************************/
-sl_status_t sli_cpc_wake_device_init(sli_cpc_wake_device_t *wake);
+sl_status_t sli_cpc_wake_from_gpio_init(sli_cpc_pm_runtime_t *wake);
 
 /***************************************************************************/ /**
- * Deinitialize the wake up functionality.
+ * Deinitialize the wake from GPIO functionality.
  *
  * @param[in] Wake  Handle to deinitialize.
  *
  * @return SL_STATUS_OK if successful, otherwise an error code.
  ******************************************************************************/
-void sli_cpc_wake_device_deinit(sli_cpc_wake_device_t *wake);
+void sli_cpc_wake_from_gpio_deinit(sli_cpc_pm_runtime_t *wake);
 #endif
 
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)

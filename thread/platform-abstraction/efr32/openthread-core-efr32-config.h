@@ -480,6 +480,22 @@
 #endif
 
 /**
+ * @def OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK
+ *
+ * Define to 1 to have `TxFrame::GenerateEnhAck()` require only fields through
+ * the Auxiliary Security Header to be parseable in the received frame.
+ *
+ * Enabled on Thread 1.2+ because the radio builds Enhanced ACKs mid-RX from a
+ * frame-pending callback, before the Header IE and MAC Command ID bytes land
+ * in RAM. Those bytes are not required for ACK construction.
+ *
+ */
+#ifndef OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK
+#define OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK \
+    (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_PLATFORM_USEC_TIMER_ENABLE
  *
  * Define to 1 if you want to support microsecond timer in platform.

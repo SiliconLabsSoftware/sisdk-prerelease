@@ -35,6 +35,7 @@
 #include "sl_connect_ecdh_key_exchange.h"
 #include "ember-types.h"
 #include "psa/crypto.h"
+#include "em_device.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -71,10 +72,16 @@ psa_status_t sl_connect_ecdh_key_exchange_generate_key_pair(psa_key_id_t *key_id
   psa_set_key_usage_flags(&key_attr, PSA_KEY_USAGE_DERIVE);
   psa_set_key_algorithm(&key_attr, PSA_ALG_ECDH);
 
-#if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-  psa_set_key_lifetime(&key_attr, PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_PERSISTENCE_VOLATILE, 0x01));
+#if _SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT
+  psa_set_key_lifetime(&key_attr, 
+                       PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
+                        PSA_KEY_PERSISTENCE_VOLATILE, 
+                        PSA_KEY_LOCATION_SLI_SE_OPAQUE));
 #else
-  psa_set_key_lifetime(&key_attr, PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_PERSISTENCE_VOLATILE, 0x00));
+  psa_set_key_lifetime(&key_attr, 
+                       PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
+                        PSA_KEY_PERSISTENCE_VOLATILE, 
+                        PSA_KEY_LOCATION_LOCAL_STORAGE));
 #endif
 
   psa_status = psa_generate_key(&key_attr, key_id);

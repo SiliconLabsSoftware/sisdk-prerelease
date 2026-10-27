@@ -206,6 +206,9 @@ extern "C" {
 
 #include "sl_rail.h"
 
+#include <assert.h>
+#include <openthread-core-config.h>
+
 #include "alarm.h"
 #include "uart.h"
 
@@ -214,6 +217,14 @@ extern "C" {
 #else
 #include "sl_ot_rtos_adaptation.h"
 #endif
+
+// `radio.cpp` translates N `mMaxCsmaBackoffs` to N+1 RAIL `csma_tries`, and
+// `sl_rail_start_cca_csma_tx()` rejects `csma_tries > SL_RAIL_MAX_LBT_TRIES`
+// (returns SL_RAIL_STATUS_INVALID_PARAMETER).
+static_assert(OPENTHREAD_CONFIG_MAC_MAX_CSMA_BACKOFFS_DIRECT < SL_RAIL_MAX_LBT_TRIES,
+              "OPENTHREAD_CONFIG_MAC_MAX_CSMA_BACKOFFS_DIRECT should be < SL_RAIL_MAX_LBT_TRIES");
+static_assert(OPENTHREAD_CONFIG_MAC_MAX_CSMA_BACKOFFS_INDIRECT < SL_RAIL_MAX_LBT_TRIES,
+              "OPENTHREAD_CONFIG_MAC_MAX_CSMA_BACKOFFS_INDIRECT should be < SL_RAIL_MAX_LBT_TRIES");
 
 // Global reference to rail handle
 #ifndef SL_CATALOG_RAIL_MULTIPLEXER_PRESENT

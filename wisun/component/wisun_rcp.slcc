@@ -71,6 +71,7 @@ include:
   file_list:
   - path: sl_wisun_types.h
   - path: sl_wisun_common.h
+  - path: sli_wisun_timer_group.h
   - path: sli_wisun_timer_service.h
 
 library:

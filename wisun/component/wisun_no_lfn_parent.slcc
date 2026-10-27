@@ -17,6 +17,7 @@ source:
 - path: "nanostack-mac/source/stubs/fhss_ws_lfn_parent_stubs.c"
 - path: "nanostack-mac/source/stubs/mac_lfn_parent_stubs.c"
 - path: "nanostack-stack/source/stubs/lfn_parent_stubs.c"
+- path: "nanostack-stack/source/stubs/sli_wisun_task_lfn_parent_stubs.c"
 
 metadata:
   sbom:

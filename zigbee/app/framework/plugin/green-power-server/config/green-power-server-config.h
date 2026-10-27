@@ -57,6 +57,7 @@
 // <i> Default: 0
 // <i> Enable this option to run standard security test vectors command.  Will print results to cli
 #define SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_SERVER_SECURITY_TEST_VECTORS 0
+
 // </h>
 
 // <<< end of configuration section >>>

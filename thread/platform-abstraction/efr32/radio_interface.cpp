@@ -832,6 +832,22 @@ sl_rail_status_t sli_ot_radio_interface_rail_start_rx(uint8_t aChannel, const sl
     return sl_rail_start_rx(gRailHandle, aChannel, aScheduler);
 }
 
+void sli_ot_radio_interface_complete_sleep(void)
+{
+    sli_ot_radio_state_set_sleep_pending(false);
+
+    if (sli_ot_radio_state_is_rx_scheduled())
+    {
+        // When a scheduled RX is pending, only yield the radio
+        // since sl_rail_idle cancels a scheduled window
+        sli_ot_radio_interface_rail_yield_radio();
+    }
+    else
+    {
+        sli_ot_radio_state_set_idle();
+    }
+}
+
 //------------------------------------------------------------------------------
 // OpenThread Platform Radio API Functions (Instance-Independent)
 // These functions don't use the otInstance parameter and can be moved here
@@ -915,11 +931,21 @@ otError otPlatRadioSleep(otInstance *aInstance)
     OT_UNUSED_VARIABLE(aInstance);
     otError error = OT_ERROR_NONE;
 
-    otEXPECT(!sli_ot_radio_state_is_tx_data_ongoing());
+    otEXPECT_ACTION(sli_ot_radio_state_is_initialized(), error = OT_ERROR_INVALID_STATE);
+    otEXPECT_ACTION(!sli_ot_radio_state_is_tx_data_ongoing(), error = OT_ERROR_BUSY);
 
     otLogInfoPlat("State=OT_RADIO_STATE_SLEEP");
-    sli_ot_radio_state_set_scheduled_rx_pending(false);
-    sli_ot_radio_state_set_idle();
+
+    if (sli_ot_radio_state_is_receiving_frame() || sli_ot_radio_state_is_tx_ack_ongoing())
+    {
+        // efr32RadioProcess() idles the radio once the in-flight reception
+        // or ACK completes.
+        sli_ot_radio_state_set_sleep_pending(true);
+    }
+    else
+    {
+        sli_ot_radio_interface_complete_sleep();
+    }
 
 exit:
     return error;

@@ -37,13 +37,17 @@
 #include <stdio.h>
 
 #include "sl_assert.h"
+#include "cmsis_os2.h"
 #include "sl_iperf_types.h"
 #include "sl_iperf_network_interface.h"
 #include "sl_iperf.h"
 #include "sl_iperf_util.h"
 #include "sl_iperf_udp_srv.h"
 #include "socket/socket.h"
+#include "arpa/inet.h"
 #include "sl_sleeptimer.h"
+#include "sl_wisun_types.h"
+#include "netinet/in.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -84,6 +88,10 @@ static uint32_t _calc_jitter_abs_delta(const sl_iperf_test_t * const test);
  *****************************************************************************/
 static void _iperf_calc_jitter(sl_iperf_test_t * const test, const int32_t pkt_id);
 
+static int32_t _set_multicast_sock_opt(const int32_t sockid,
+                                       const sockaddr_in6_t * const multicast_addr,
+                                       const sl_wisun_multicast_group_action_t action);
+
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
@@ -102,27 +110,29 @@ static void status_timer_callback(sl_sleeptimer_timer_handle_t *handle, void *da
 // UDP Server test
 void sl_iperf_test_udp_server(sl_iperf_test_t * test)
 {
-  int32_t r                             = SL_IPERF_NW_API_ERROR;
+  int32_t r                             = SOCKET_RETVAL_ERROR;
   sl_iperf_udp_clnt_hdr_t *clnt_hdr     = NULL;
   int32_t pkt_id                        = 0;
   sl_iperf_time_t time                  = { 0U };
-  static sl_iperf_socket_addr_t mc_addr = { 0U };
+  static sockaddr_in6_t mc_addr = { 0U };
   sl_sleeptimer_timer_handle_t status_timer = { 0U };
+  socklen_t addrlen                     = sizeof(sockaddr_in6_t);
+  sockaddr_in6_t *srv_addr              = &test->conn.srv_addr;
 
   // reset error, set status queued
   sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_NONE,
                                  SL_IPERF_TEST_STATUS_QUEUED);
   sl_iperf_test_log_verbose(test, "UDP Server: started.\n");
 
-  test->statistic.ts_start_ms = sl_iperf_get_timestamp_ms();
+  test->statistic.ts_start_ms = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
 
   if (test->conn.buff == NULL || !test->conn.buff_size) {
     sl_iperf_test_log_verbose(test, "UDP Server: connection buffer error.\n");
     return;
   }
 
-  test->conn.socket_id  = sl_iperf_socket_create(test->opt.protocol);
-  if (test->conn.socket_id  == SL_IPERF_NW_API_ERROR) {
+  test->conn.socket_id  = socket(AF_INET6, SOCK_DGRAM | SOCK_NONBLOCK, IPPROTO_UDP);
+  if (test->conn.socket_id  == SOCKET_RETVAL_ERROR) {
     sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_SERVER_SOCK_OPEN, SL_IPERF_TEST_STATUS_ERR);
     sl_iperf_test_log(test, "UDP Server: sl_iperf_socket_create failed.\n");
     return;
@@ -136,28 +146,31 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
   sl_iperf_test_log(test, "Server listening on UDP port %u\n", test->opt.port);
   sl_iperf_test_log(test, "UDP buffer size: %lu bytes\n", test->conn.buff_size);
 
-  sl_iperf_set_socket_addr_family(&test->conn.srv_addr);
-  sl_iperf_set_socket_addr_ip(&test->conn.srv_addr, &sl_iperf_socket_inaddr_any);
-  sl_iperf_set_socket_addr_port(&test->conn.srv_addr, test->opt.port);
-  sl_iperf_socket_setsockopt(test->conn.socket_id, SOL_SOCKET, SO_RCVBUF,
-                             &test->opt.socket_buffer_size, sizeof(uint32_t));
+  srv_addr->sin6_family = AF_INET6;
+  srv_addr->sin6_addr = in6addr_any;
+  srv_addr->sin6_port = htons(test->opt.port);
+  setsockopt(test->conn.socket_id,
+             SOL_SOCKET,
+             SO_RCVBUF,
+             &test->opt.socket_buffer_size,
+             sizeof(uint32_t));
 
-  r = sl_iperf_socket_bind(test->conn.socket_id, &test->conn.srv_addr);
-  if (r == SL_IPERF_NW_API_ERROR) {
+  r = bind(test->conn.socket_id, (const struct sockaddr *)&test->conn.srv_addr, sizeof(sockaddr_in6_t));
+  if (r == SOCKET_RETVAL_ERROR) {
     sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_SERVER_SOCK_BIND, SL_IPERF_TEST_STATUS_ERR);
-    sl_iperf_test_log(test, "UDP Server: sl_iperf_socket_bind failed.\n");
-    sl_iperf_socket_close(test->conn.socket_id);
+    sl_iperf_test_log(test, "UDP Server: bind failed.\n");
+    close(test->conn.socket_id);
     return;
   }
   sl_iperf_test_log_verbose(test, "UDP Server: bind done.\n");
 
   // Join multicast group if it is required
   if (test->opt.multicast) {
-    sl_iperf_inet_pton(test->opt.remote_addr, &mc_addr);
-    r = sl_iperf_join_multicast_group(test->conn.socket_id, &mc_addr);
-    if (r == SL_IPERF_NW_API_ERROR) {
+    inet_pton(AF_INET6, test->opt.remote_addr, &mc_addr.sin6_addr);
+    r = _set_multicast_sock_opt(test->conn.socket_id, &mc_addr, (sl_wisun_multicast_group_action_t)IPV6_JOIN_GROUP);
+    if (r == SOCKET_RETVAL_ERROR) {
       sl_iperf_test_log(test, "UDP Server: joining to multicast group failed.\n");
-      sl_iperf_socket_close(test->conn.socket_id);
+      close(test->conn.socket_id);
       return;
     }
   } else {
@@ -167,11 +180,15 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
   test->statistic.nbr_rcv_snt_packets = 0U;
 
   while (sl_iperf_test_check_time(test)) {
-    r = sl_iperf_socket_recvfrom(test->conn.socket_id, test->conn.buff,
-                                 test->conn.buff_size, &test->conn.clnt_addr);
+    r = recvfrom(test->conn.socket_id,
+                 test->conn.buff,
+                 test->conn.buff_size,
+                 0U,
+                 (struct sockaddr *) &test->conn.clnt_addr,
+                 &addrlen);
     // Empty buff or error
-    if (!r || r == SL_IPERF_NW_API_ERROR) {
-      sl_iperf_delay_ms(2);
+    if (!r || r == SOCKET_RETVAL_ERROR) {
+      osDelay(2);
       continue;
     }
 
@@ -182,7 +199,7 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
     test->statistic.ts_prev_sent_ms = test->statistic.ts_curr_sent_ms;
 
     // get current time stamp
-    test->statistic.ts_curr_recv_ms = sl_iperf_get_timestamp_ms();
+    test->statistic.ts_curr_recv_ms = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
 
     if (!test->statistic.nbr_rcv_snt_packets++) {
       // Reset status on first packet reception.
@@ -208,7 +225,7 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
     // get sent timestamp
     test->statistic.ts_curr_sent_ms = _get_ms_ts_from_clnt_header(clnt_hdr);
 
-    pkt_id = sl_iperf_network_ntohl(clnt_hdr->dtg.id);
+    pkt_id = ntohl(clnt_hdr->dtg.id);
     sl_iperf_test_log_verbose(test, "UDP Server: packet received. pkt_id = %d (%d bytes).\n", pkt_id, r);
 
     _iperf_calc_jitter(test, pkt_id);
@@ -228,7 +245,7 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
     // 3. Received end packet
     else if (pkt_id < 0) {
       sl_iperf_test_log_verbose(test, "UDP Server: Received end packet.\n");
-      test->statistic.ts_end_ms = sl_iperf_get_timestamp_ms();
+      test->statistic.ts_end_ms = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
       test->conn.run = false;
       sl_sleeptimer_stop_timer(&status_timer);
       sl_iperf_stats_unlock();
@@ -257,7 +274,7 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
   test->statistic.tot_packets = test->statistic.nbr_rcv_snt_packets + test->statistic.udp_lost_pkt;
 
   if (test->conn.run || !test->statistic.tot_packets) {
-    test->statistic.ts_end_ms = sl_iperf_get_timestamp_ms();
+    test->statistic.ts_end_ms = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
     test->conn.run = false;
     sl_sleeptimer_stop_timer(&status_timer);
     if (test->statistic.tot_packets) {
@@ -274,15 +291,15 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
 
   // leave multicast group if it is required
   if (test->opt.multicast) {
-    r = sl_iperf_leave_multicast_group(test->conn.socket_id, &mc_addr);
-    if (r == SL_IPERF_NW_API_ERROR) {
+    r = _set_multicast_sock_opt(test->conn.socket_id, &mc_addr, (sl_wisun_multicast_group_action_t)IPV6_LEAVE_GROUP);
+    if (r == SOCKET_RETVAL_ERROR) {
       sl_iperf_test_log(test, "UDP Server: leaving multicast group failed.\n");
     }
   }
 
   // close socket
-  r = sl_iperf_socket_close(test->conn.socket_id);
-  if (r == SL_IPERF_NW_API_ERROR) {
+  r = close(test->conn.socket_id);
+  if (r == SOCKET_RETVAL_ERROR) {
     sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_SERVER_SOCK_CLOSE, SL_IPERF_TEST_STATUS_ERR);
   } else {
     sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_NONE, SL_IPERF_TEST_STATUS_DONE);
@@ -297,7 +314,8 @@ static void _iperf_udp_finack(sl_iperf_test_t * const test)
 {
   static sl_iperf_udp_srv_hdr_t hdr = { 0 };
   sl_iperf_time_t time              = { 0U };
-  int32_t r                         = SL_IPERF_NW_API_ERROR;
+  int32_t r                         = SOCKET_RETVAL_ERROR;
+  socklen_t addrlen                 = sizeof(sockaddr_in6_t);
 
   // assert minimum buff size for fin ack
   EFM_ASSERT(test->conn.buff_size >= SL_IPERF_UDP_SERVER_FIN_ACK_SIZE);
@@ -309,18 +327,18 @@ static void _iperf_udp_finack(sl_iperf_test_t * const test)
 
   // reset datagram
   memset(&hdr.dtg, 0, sizeof(sl_iperf_udp_datagram_t));
-  hdr.flags           = sl_iperf_network_htonl(SL_IPERF_HEADER_VERSION1);
+  hdr.flags           = htonl(SL_IPERF_HEADER_VERSION1);
   hdr.tot_len_u        = 0U;
-  hdr.tot_len_l        = sl_iperf_network_htonl(test->statistic.bytes);
+  hdr.tot_len_l        = htonl(test->statistic.bytes);
   sl_iperf_calc_time_from_ms(&time, sl_iperf_test_calc_time_duration_ms(test));
-  hdr.stop_sec         = sl_iperf_network_htonl(time.sec);
-  hdr.stop_usec        = sl_iperf_network_htonl(time.usec);
-  hdr.lost_pkt_cnt     = sl_iperf_network_htonl(test->statistic.udp_lost_pkt);
-  hdr.out_of_order_cnt = sl_iperf_network_htonl(test->statistic.udp_out_of_order);
-  hdr.packet_cnt       = sl_iperf_network_htonl(test->statistic.nbr_rcv_snt_packets + test->statistic.udp_lost_pkt);
+  hdr.stop_sec         = htonl(time.sec);
+  hdr.stop_usec        = htonl(time.usec);
+  hdr.lost_pkt_cnt     = htonl(test->statistic.udp_lost_pkt);
+  hdr.out_of_order_cnt = htonl(test->statistic.udp_out_of_order);
+  hdr.packet_cnt       = htonl(test->statistic.nbr_rcv_snt_packets + test->statistic.udp_lost_pkt);
   sl_iperf_calc_time_from_ms(&time, (sl_iperf_ts_ms_t)(test->statistic.udp_jitter));
-  hdr.jitter_sec       = sl_iperf_network_htonl(time.sec);  // sec
-  hdr.jitter_usec      = sl_iperf_network_htonl(time.usec); // usec
+  hdr.jitter_sec       = htonl(time.sec);  // sec
+  hdr.jitter_usec      = htonl(time.usec); // usec
 
 #if SL_IPERF_VERBOSE_MODE
   sl_iperf_print_test_srv_header_json(test, &hdr);
@@ -329,18 +347,22 @@ static void _iperf_udp_finack(sl_iperf_test_t * const test)
   for (uint32_t i = 0; i < SL_IPERF_SERVER_UDP_TX_FINACK_COUNT; ++i) {
     memcpy(test->conn.buff, &hdr, sizeof(sl_iperf_udp_srv_hdr_t));
 
-    if (sl_iperf_socket_sendto(test->conn.socket_id,
-                               test->conn.buff,
-                               SL_IPERF_UDP_SERVER_FIN_ACK_SIZE,
-                               &test->conn.clnt_addr) == SL_IPERF_NW_API_ERROR) {
+    if (sendto(test->conn.socket_id,
+               test->conn.buff,
+               SL_IPERF_UDP_SERVER_FIN_ACK_SIZE,
+               0U,
+               (const struct sockaddr *) &test->conn.clnt_addr,
+               sizeof(sockaddr_in6_t)) == SOCKET_RETVAL_ERROR) {
       sl_iperf_test_log_verbose(test, "UDP Server: FINACK send error.\n");
       continue;
     }
-    sl_iperf_delay_ms(1000UL);
-    r = sl_iperf_socket_recvfrom(test->conn.socket_id,
-                                 test->conn.buff,
-                                 test->conn.buff_size,
-                                 &test->conn.clnt_addr);
+    osDelay(1000UL);
+    r = recvfrom(test->conn.socket_id,
+                 test->conn.buff,
+                 test->conn.buff_size,
+                 0U,
+                 (struct sockaddr *) &test->conn.clnt_addr,
+                 &addrlen);
     if (r <= 0) {
       break;
     }
@@ -351,8 +373,8 @@ static void _iperf_udp_finack(sl_iperf_test_t * const test)
 
 __STATIC_INLINE sl_iperf_ts_ms_t _get_ms_ts_from_clnt_header(const sl_iperf_udp_clnt_hdr_t * const hdr)
 {
-  return sl_iperf_network_ntohl(hdr->dtg.time_var_sec) * SL_IPERF_TIME_S_TO_MS_ML
-         + sl_iperf_network_ntohl(hdr->dtg.time_var_usec) / SL_IPERF_TIME_MS_TO_US_ML;
+  return ntohl(hdr->dtg.time_var_sec) * SL_IPERF_TIME_S_TO_MS_ML
+         + ntohl(hdr->dtg.time_var_usec) / SL_IPERF_TIME_MS_TO_US_ML;
 }
 
 static uint32_t _calc_jitter_abs_delta(const sl_iperf_test_t * const test)
@@ -396,4 +418,36 @@ static void _iperf_calc_jitter(sl_iperf_test_t * const test, const int32_t pkt_i
   v1 = ((int64_t)abs_d - test->statistic.udp_jitter);
   v1 = ((v1 + 8L) >> 4UL);
   test->statistic.udp_jitter += v1;
+}
+
+static int32_t _set_multicast_sock_opt(const int32_t sockid,
+                                       const sockaddr_in6_t * const multicast_addr,
+                                       const sl_wisun_multicast_group_action_t action)
+{
+  int32_t r = SOCKET_RETVAL_ERROR;
+
+  #ifdef __GNUC__
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wpragmas"
+  #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
+  #elif defined __ICCARM__
+  #pragma diag_suppress=Pa039
+  #endif
+
+  SL_ALIGN(4) sl_wisun_socket_option_data_t opt SL_ATTRIBUTE_ALIGN(4) =
+  {
+    0U
+  };
+
+  memcpy(&opt.ipv6_address, &multicast_addr->sin6_addr, sizeof(in6_addr_t));
+
+  r = setsockopt(sockid, SOL_SOCKET, action, &opt, sizeof(opt));
+
+  #ifdef __GNUC__
+  #pragma GCC diagnostic pop
+  #elif defined __ICCARM__
+  #pragma diag_default=Pa039
+  #endif
+
+  return r;
 }

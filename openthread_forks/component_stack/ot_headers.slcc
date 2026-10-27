@@ -112,8 +112,6 @@ include:
   - path: platform/toolchain.h
   - path: platform/trel.h
   - path: platform/debug_uart.h
-  - path: provisional/link.h
-  - path: provisional/p2p.h
 - path: ../include
   file_list:
   - path: common/arg_macros.hpp
@@ -229,7 +227,6 @@ include:
   - path: config/net_diag.h
   - path: config/netdata_publisher.h
   - path: config/openthread-core-config-check.h
-  - path: config/p2p.h
   - path: config/parent_search.h
   - path: config/ping_sender.h
   - path: config/platform.h
@@ -239,10 +236,10 @@ include:
   - path: config/srp_client.h
   - path: config/srp_server.h
   - path: config/radio_link.h
+  - path: config/thread_direct.h
   - path: config/time_sync.h
   - path: config/tmf.h
   - path: config/trel.h
-  - path: config/wakeup.h
   - path: crypto/aes_ccm.hpp
   - path: crypto/aes_ecb.hpp
   - path: crypto/context_size.hpp
@@ -269,7 +266,6 @@ include:
   - path: mac/mac_types.hpp
   - path: mac/scan_result.hpp
   - path: mac/sub_mac.hpp
-  - path: mac/wakeup_tx_scheduler.hpp
   - path: meshcop/border_agent.hpp
   - path: meshcop/border_agent_admitter.hpp
   - path: meshcop/border_agent_ephemeral_key.hpp
@@ -374,8 +370,6 @@ include:
   - path: thread/network_data_tlvs.hpp
   - path: thread/network_data_types.hpp
   - path: thread/panid_query_server.hpp
-  - path: thread/peer.hpp
-  - path: thread/peer_table.hpp
   - path: thread/radio_selector.hpp
   - path: thread/router.hpp
   - path: thread/router_table.hpp

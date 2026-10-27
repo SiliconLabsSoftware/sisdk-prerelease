@@ -4691,6 +4691,8 @@ typedef struct {
   uint8_t listen_slots;
   /// Consecutive unicast dwell periods that may be spent sleeping.
   uint8_t sleep_slots;
+  /// Reserved, set to zero
+  uint8_t reserved[2];
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_power_saving_schedule_req_body_t;
 SL_PACK_END()
 

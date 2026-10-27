@@ -91,7 +91,7 @@ void gcm_log_hash(const char *label, const uint8_t *hash);
 
 // Generic Attribute (0x1801) is visited when at least one of Service Changed,
 // robust caching (CSF), or Database Hash (cache) is enabled.
-#if (SL_GATT_CLIENT_MANAGER_ENABLE_SERVICE_CHANGED \
+#if (SL_GATT_CLIENT_MANAGER_ENABLE_SERVICE_CHANGED   \
      || SL_GATT_CLIENT_MANAGER_ENABLE_ROBUST_CACHING \
      || SL_GATT_CLIENT_MANAGER_CACHE_ENABLE)
 #define GCM_NEEDS_GATT_SERVICE  (1)

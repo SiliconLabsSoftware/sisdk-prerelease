@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sli_cpc_wake.c
  * @brief CPC Wake Up implementation.
  *******************************************************************************
  * # License
@@ -30,7 +30,6 @@
 
 #include "sl_assert.h"
 #include "sl_gpio.h"
-#include "sl_power_manager.h"
 
 #include "sli_cpc.h"
 #include "sli_cpc_assert.h"
@@ -43,12 +42,34 @@
 /*                              Local functions                               */
 /******************************************************************************/
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
 // Must match sli_cpc_dispatcher_fnct_t (opaque mutable context for the callback).
 static void wake_dispatcher_fnct(void *context)
 {
-  sli_cpc_wake_device_t *wake = context;
-  sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, wake.device);
+  sli_cpc_pm_runtime_t *wake = context;
+  sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, pm_runtime);
+  sl_status_t status;
+  bool wake_val;
+
+  status = sl_gpio_get_pin_input(&wake->pin, &wake_val);
+  if (status != SL_STATUS_OK) {
+    SLI_CPC_PANIC("Failed to read wake GPIO, status=0x%lx", (unsigned long)status);
+  }
+
+  // If wake pin asserted, get a PM reference only if it wasn't already taken.
+  // Correspondingly, release PM reference only if wake pin deasserted and a
+  // previous reference was taken
+  if (wake_val && !wake->active) {
+    sli_cpc_bus_pm_runtime_get(bus);
+    wake->active = true;
+  } else if (!wake_val && wake->active) {
+    sli_cpc_bus_pm_runtime_put(bus);
+    wake->active = false;
+  }
+
+  if (!wake_val) {
+    return;
+  }
 
   if (bus->ctrl.ep.bus == NULL) {
     SLI_CPC_PANIC("Failed to send wake ACK, no ep found");
@@ -59,35 +80,11 @@ static void wake_dispatcher_fnct(void *context)
 
 static void wake_irq_cb(uint8_t int_no, void *context)
 {
-  sli_cpc_wake_device_t *wake = context;
-  sl_status_t status;
-  bool wake_val;
+  sli_cpc_pm_runtime_t *wake = context;
 
   SLI_CPC_ASSERT(int_no == wake->int_no);
 
-  status = sl_gpio_get_pin_input(&wake->pin, &wake_val);
-  if (status != SL_STATUS_OK) {
-    SLI_CPC_PANIC("Failed to read wake GPIO, status=0x%lx", (unsigned long)status);
-  }
-
-  if (wake_val) {
-    // Host has signaled to wake up. Prevent sleep on idle and schedule an ACK to signal
-    // the host the device is awake.
-    if (!wake->active) {
-      // Only add the requirement if it was not already added. This can happen if the host
-      // de-asserts the wake-up pin and re-asserts it before the interrupt could be serviced.
-      // In this case, still send the ACK to the host to signal device is awake, but don't add
-      // the requirement again.
-      sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
-      wake->active = true;
-    }
-
-    sli_cpc_dispatcher_push(&wake->dispatcher_handle, wake_dispatcher_fnct, wake);
-  } else if (wake->active) {
-    // Host has removed its wakeup assertion, allow the core to enter sleep on idle.
-    sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
-    wake->active = false;
-  }
+  sli_cpc_dispatcher_push(&wake->dispatcher_handle, wake_dispatcher_fnct, wake);
 }
 #endif
 
@@ -109,10 +106,10 @@ static bool is_wake_ack_frame(const sli_cpc_hdr_t *hdr)
 /*                             External functions                             */
 /******************************************************************************/
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-sl_status_t sli_cpc_wake_device_init(sli_cpc_wake_device_t *wake)
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
+sl_status_t sli_cpc_wake_from_gpio_init(sli_cpc_pm_runtime_t *wake)
 {
-  sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, wake.device);
+  sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, pm_runtime);
   sl_status_t status;
 
   sli_cpc_dispatcher_init_handle(&wake->dispatcher_handle, bus);
@@ -145,8 +142,9 @@ disable_wake:
   return status;
 }
 
-void sli_cpc_wake_device_deinit(sli_cpc_wake_device_t *wake)
+void sli_cpc_wake_from_gpio_deinit(sli_cpc_pm_runtime_t *wake)
 {
+  sl_cpc_bus_t *bus = container_of(wake, sl_cpc_bus_t, pm_runtime);
   MCU_DECLARE_IRQ_STATE;
 
   sli_cpc_dispatcher_cancel(&wake->dispatcher_handle);
@@ -157,8 +155,8 @@ void sli_cpc_wake_device_deinit(sli_cpc_wake_device_t *wake)
   }
 
   if (wake->active) {
-    // Remove the EM1 requirement added by the host.
-    sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+    sli_cpc_bus_pm_runtime_put(bus);
+    wake->active = false;
   }
   MCU_EXIT_ATOMIC();
 
@@ -178,11 +176,6 @@ sl_status_t sli_cpc_wake_host_init(sli_cpc_wake_host_t *wake)
   status = sl_gpio_set_pin_mode(&wake->pin, SL_GPIO_MODE_PUSH_PULL, 0);
   if (status != SL_STATUS_OK) {
     sl_gpio_set_pin_mode(&wake->pin, SL_GPIO_MODE_DISABLED, 0);
-    return status;
-  }
-
-  status = sl_gpio_set_pin_direction(&wake->pin, SL_GPIO_PIN_DIRECTION_OUT);
-  if (status != SL_STATUS_OK) {
     return status;
   }
 
@@ -247,7 +240,7 @@ void sli_cpc_wake_handle_rx(sli_cpc_wake_host_t *wake, const sli_cpc_hdr_t *hdr)
   // Any inbound frame proves that the device is awake.
   if (is_wake_ack_frame(hdr)) {
     wake->state = SLI_CPC_WAKE_STATE_AWAKE;
-    sli_cpc_bus_signal_event(bus, SLI_CPC_SIGNAL_TX);
+    sli_cpc_bus_signal_event(bus);
   }
 }
 #endif

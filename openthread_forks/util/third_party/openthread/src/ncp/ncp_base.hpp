@@ -673,6 +673,7 @@ protected:
                                        uint16_t      aSockPort,
                                        void         *aContext);
     void HandleUdpForwardStream(otMessage *aMessage, uint16_t aPeerPort, otIp6Address &aPeerAddr, uint16_t aPort);
+
 #endif // OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
 #if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
     static void HandleTrelStateChanged(void *aContext);
@@ -1014,10 +1015,14 @@ protected:
     /**
      * Template for making service discovery.
      *
-     * DnssdDiscoveryType can be: otPlatDnssdBrowser, otPlatDnssdSrvResolver, otPlatDnssdTxtResolver,
-     * otPlatDnssdAddressResolver and otPlatDnssdRecordQuerier.
+     * `DnssdDiscoveryType` can be `otPlatDnssdBrowser`, `otPlatDnssdSrvResolver`, `otPlatDnssdTxtResolver`,
+     * or `otPlatDnssdAddressResolver`.
+     *
+     * Use the 2-parameter overload for browser/SRV/TXT resolvers (one C type, one Spinel property).
+     * For address resolvers (one C type, two Spinel properties), pass the Spinel property key explicitly.
      */
-    template <typename DnssdDiscoveryType> void DnssdUpdateDiscovery(const DnssdDiscoveryType *aDiscovery, bool aStart)
+    template <typename DnssdDiscoveryType>
+    void DnssdUpdateDiscovery(const DnssdDiscoveryType *aDiscovery, bool aStart, spinel_prop_key_t aPropKey)
     {
         uint8_t          header = SPINEL_HEADER_FLAG | SPINEL_HEADER_TX_NOTIFICATION_IID;
         spinel_command_t cmd    = aStart ? SPINEL_CMD_PROP_VALUE_INSERTED : SPINEL_CMD_PROP_VALUE_REMOVED;
@@ -1025,7 +1030,7 @@ protected:
         VerifyOrExit(aDiscovery != nullptr);
         VerifyOrExit(mDnssdState == OT_PLAT_DNSSD_READY);
 
-        SuccessOrExit(mEncoder.BeginFrame(header, cmd, DnssdDiscoveryPropKeyFor<DnssdDiscoveryType>::Key));
+        SuccessOrExit(mEncoder.BeginFrame(header, cmd, aPropKey));
         SuccessOrExit(Spinel::EncodeDnssdDiscovery(mEncoder, *aDiscovery));
         SuccessOrExit(mEncoder.EndFrame());
 
@@ -1033,9 +1038,47 @@ protected:
         return;
     }
 
-    void DnssdUpdateAddressResolverDiscovery(const otPlatDnssdAddressResolver *aDiscovery,
-                                             bool                              aStart,
-                                             spinel_prop_key_t                 aPropKey);
+    template <typename DnssdDiscoveryType> void DnssdUpdateDiscovery(const DnssdDiscoveryType *aDiscovery, bool aStart)
+    {
+        DnssdUpdateDiscovery(aDiscovery, aStart, DnssdDiscoveryPropKeyFor<DnssdDiscoveryType>::Key);
+    }
+
+    /**
+     * Handles `SPINEL_PROP_DNSSD_IP6_ADDRESS_RESULT` and `SPINEL_PROP_DNSSD_IP4_ADDRESS_RESULT` property sets.
+     */
+    otError HandleDnssdAddressResultPropertySet(void);
+
+    /**
+     * Invokes a DNS-SD result callback recovered from Spinel callback context.
+     *
+     * @tparam ResultType    The DNS-SD result type (e.g. `otPlatDnssdTxtResult`).
+     *
+     * @param[in] aResult       The decoded result to pass to the callback.
+     * @param[in] aContext      Pointer to the serialized callback context.
+     * @param[in] aContextLen   Length of @p aContext in bytes.
+     *
+     * @retval OT_ERROR_NONE   Callback invoked (or skipped if null).
+     * @retval OT_ERROR_PARSE  Context length does not match callback pointer size.
+     */
+    template <typename ResultType>
+    otError InvokeDnssdResultCallback(const ResultType &aResult, const uint8_t *aContext, uint16_t aContextLen)
+    {
+        typedef void (*Callback)(otInstance *aInstance, const ResultType *aResult);
+
+        otError  error    = OT_ERROR_NONE;
+        Callback callback = nullptr;
+
+        VerifyOrExit(aContextLen == sizeof(Callback), error = OT_ERROR_PARSE);
+        memcpy(&callback, aContext, aContextLen);
+
+        if (callback != nullptr)
+        {
+            callback(mInstance, &aResult);
+        }
+
+    exit:
+        return error;
+    }
 
     otPlatDnssdState mDnssdState;
 #endif // OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE

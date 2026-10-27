@@ -106,3 +106,4 @@ template_contribution:
 tag:
   - toolchain:gcc
   - hwfilter:device:device_family_host
+  - hidden

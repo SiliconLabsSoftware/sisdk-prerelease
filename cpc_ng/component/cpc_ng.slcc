@@ -92,7 +92,6 @@ requires:
 - name: component_catalog
 - name: hal_emu
 - name: sl_string
-- name: power_manager
 - name: memory_manager
 template_contribution:
 - name: component_catalog
@@ -115,6 +114,11 @@ template_contribution:
     include: sl_cpc_drv_instances.h
     handler: sl_cpc_drv_instances_start_buses
   priority: 10001
+- name: event_handler
+  value:
+    event: service_process_action
+    include: sl_cpc.h
+    handler: sl_cpc_service_process_action
 template_file:
 - path: template/sl_cpc_bus_instances.h.jinja
 - path: template/sl_cpc_drv_instances.c.jinja

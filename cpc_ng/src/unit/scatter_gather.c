@@ -1,6 +1,31 @@
 /***************************************************************************/ /**
- * @file
+ * @file scatter_gather.c
  * @brief Unit tests for CPC scatter-gather buffer allocation.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
  ******************************************************************************/
 
 #include <stdlib.h>
@@ -250,7 +275,7 @@ static void scatter_gather_event_cb(sl_cpc_ep_t *ep, sl_cpc_ep_event_type_t type
 }
 
 /**
- * @brief Transmitted payloads advance send_nxt by the number of remote reception buffers consumed.
+ * @brief Transmitted payloads advance send.nxt by the number of remote reception buffers consumed.
  */
 TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
 {
@@ -296,8 +321,8 @@ TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
                               .wnd = 0,
                               .payload = payload_small,
                             });
-  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1U, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1U, ep.send.nxt);
 
   TEST_INJECT_FRAME(bus, {
                            .flags = 0,
@@ -309,8 +334,8 @@ TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
 
   cpc_test_pump(bus);
 
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1, ep.send.nxt);
 
   // 128-byte payload: consumes one remote reception buffer.
   sl_cpc_buf_init(&buf2, payload_mtu, sizeof(payload_mtu));
@@ -326,8 +351,8 @@ TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
                               .wnd = 0,
                               .payload = payload_mtu,
                             });
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 2, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 2, ep.send.nxt);
 
   TEST_INJECT_FRAME(bus, {
                            .flags = 0,
@@ -339,8 +364,8 @@ TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
 
   cpc_test_pump(bus);
 
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 2, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 2, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 2, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 2, ep.send.nxt);
 
   // 200-byte payload: consumes two remote reception buffers.
   sl_cpc_buf_init(&buf3, payload_large, sizeof(payload_large));
@@ -356,8 +381,8 @@ TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
                               .wnd = 0,
                               .payload = payload_large,
                             });
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 2, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 4, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 2, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 4, ep.send.nxt);
 
   TEST_INJECT_FRAME(bus, {
                            .flags = 0,
@@ -368,8 +393,8 @@ TEST(cpc_scatter_gather, tx_payload_advances_sequence_by_buffer_count)
                          });
 
   cpc_test_pump(bus);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 4, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 4, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 4, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 4, ep.send.nxt);
 
   sl_cpc_ep_close(&ep);
 
@@ -422,8 +447,8 @@ TEST(cpc_scatter_gather, tx_chained_buffers_below_mtu_advances_one_sequence)
                               .ack = CPC_TEST_PEER_SYN_SEQ + 1U,
                               .wnd = 0,
                             });
-  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1U, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1U, ep.send.nxt);
 
   TEST_INJECT_FRAME(bus, {
                            .flags = 0,
@@ -435,8 +460,8 @@ TEST(cpc_scatter_gather, tx_chained_buffers_below_mtu_advances_one_sequence)
 
   cpc_test_pump(bus);
 
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1U, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1U, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1U, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + 1U, ep.send.nxt);
 
   sl_cpc_ep_close(&ep);
 
@@ -445,7 +470,7 @@ TEST(cpc_scatter_gather, tx_chained_buffers_below_mtu_advances_one_sequence)
 }
 
 /**
- * @brief A stale ACK that does not advance past send_una leaves the frame unacked and
+ * @brief A stale ACK that does not advance past send.una leaves the frame unacked and
  *        keeps the retransmit timer armed.
  */
 TEST(cpc_scatter_gather, tx_payload_partial_ack_is_ignored)
@@ -484,8 +509,8 @@ TEST(cpc_scatter_gather, tx_payload_partial_ack_is_ignored)
                               .wnd = 0,
                             });
 
-  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + expected_seq_advance, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + expected_seq_advance, ep.send.nxt);
 
   cpc_test_pump(bus);
 
@@ -494,15 +519,15 @@ TEST(cpc_scatter_gather, tx_payload_partial_ack_is_ignored)
 
   // The core has sent a frame with seq=payload_seq, and this frame spans over
   // two reception buffers.
-  //   send_una = payload_seq;
-  //   send_nxt = payload_seq + 2
+  //   send.una = payload_seq;
+  //   send.nxt = payload_seq + 2
   // So the expect ack number should be payload_seq + 2, but let's not do that.
   // First, check our partial_ack is sensible, to make sure the test actually
   // tests what it's supposed to.
   uint8_t partial_ack = payload_seq + 1;
 
-  TEST_ASSERT_GREATER_THAN_UINT8(ep.send_una, partial_ack);
-  TEST_ASSERT_LESS_THAN_UINT8(ep.send_nxt, partial_ack);
+  TEST_ASSERT_GREATER_THAN_UINT8(ep.send.una, partial_ack);
+  TEST_ASSERT_LESS_THAN_UINT8(ep.send.nxt, partial_ack);
 
   // Inject this partial ack. This acks only the first half of the frame,
   // this should be ignored.
@@ -517,13 +542,13 @@ TEST(cpc_scatter_gather, tx_payload_partial_ack_is_ignored)
   cpc_test_pump(bus);
 
   // Endpoint state should be the same as before injecting the ack
-  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + expected_seq_advance, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + expected_seq_advance, ep.send.nxt);
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
 
   uint8_t complete_ack = payload_seq + expected_seq_advance;
 
-  TEST_ASSERT_EQUAL_UINT8(complete_ack, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(complete_ack, ep.send.nxt);
 
   // Inject full frame ack
   TEST_INJECT_FRAME(bus, {
@@ -536,8 +561,8 @@ TEST(cpc_scatter_gather, tx_payload_partial_ack_is_ignored)
   cpc_test_pump(bus);
 
   // This should be accepted by the core
-  TEST_ASSERT_EQUAL_UINT8(ep.send_una, complete_ack);
-  TEST_ASSERT_EQUAL_UINT8(ep.send_nxt, complete_ack);
+  TEST_ASSERT_EQUAL_UINT8(ep.send.una, complete_ack);
+  TEST_ASSERT_EQUAL_UINT8(ep.send.nxt, complete_ack);
   TEST_ASSERT_EQUAL(0, mock_cpc_timer_count_running());
 
   sl_cpc_ep_close(&ep);
@@ -608,8 +633,8 @@ TEST(cpc_scatter_gather, tx_two_multi_buffer_frames_single_ack)
                               .payload = payload2,
                             });
 
-  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + (2U * seq_advance_per_frame), ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + (2U * seq_advance_per_frame), ep.send.nxt);
 
   cpc_test_wait_retx_timer(bus);
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
@@ -624,7 +649,7 @@ TEST(cpc_scatter_gather, tx_two_multi_buffer_frames_single_ack)
 
   cpc_test_pump(bus);
 
-  TEST_ASSERT_EQUAL_UINT8(ep.send_nxt, ep.send_una);
+  TEST_ASSERT_EQUAL_UINT8(ep.send.nxt, ep.send.una);
   TEST_ASSERT_EQUAL(0, mock_cpc_timer_count_running());
 
   sl_cpc_ep_close(&ep);
@@ -697,8 +722,8 @@ TEST(cpc_scatter_gather, tx_one_buffer_then_two_buffers_single_ack)
                               .payload = payload2,
                             });
 
-  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + seq_advance_first + seq_advance_second, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + seq_advance_first + seq_advance_second, ep.send.nxt);
 
   cpc_test_wait_retx_timer(bus);
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
@@ -713,7 +738,7 @@ TEST(cpc_scatter_gather, tx_one_buffer_then_two_buffers_single_ack)
 
   cpc_test_pump(bus);
 
-  TEST_ASSERT_EQUAL_UINT8(ep.send_nxt, ep.send_una);
+  TEST_ASSERT_EQUAL_UINT8(ep.send.nxt, ep.send.una);
   TEST_ASSERT_EQUAL(0, mock_cpc_timer_count_running());
 
   sl_cpc_ep_close(&ep);
@@ -786,8 +811,8 @@ TEST(cpc_scatter_gather, tx_two_buffers_then_one_buffer_single_ack)
                               .payload = payload2,
                             });
 
-  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(payload_seq + seq_advance_first + seq_advance_second, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(payload_seq + seq_advance_first + seq_advance_second, ep.send.nxt);
 
   cpc_test_wait_retx_timer(bus);
   TEST_ASSERT_EQUAL(1, mock_cpc_timer_count_running());
@@ -802,7 +827,7 @@ TEST(cpc_scatter_gather, tx_two_buffers_then_one_buffer_single_ack)
 
   cpc_test_pump(bus);
 
-  TEST_ASSERT_EQUAL_UINT8(ep.send_nxt, ep.send_una);
+  TEST_ASSERT_EQUAL_UINT8(ep.send.nxt, ep.send.una);
   TEST_ASSERT_EQUAL(0, mock_cpc_timer_count_running());
 
   sl_cpc_ep_close(&ep);

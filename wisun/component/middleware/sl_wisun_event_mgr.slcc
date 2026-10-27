@@ -3,8 +3,8 @@ label: "Wi-SUN Event Manager"
 package: "wisun"
 description: >
   Manages all Wi-SUN events and offers an interface for handling them. There
-  are two primary categories: core and socket events. Both of these categories
-  support internal and external callbacks that can be implemented.
+  are two primary categories: core and socket events. Core handlers may call
+  optional weak application extension hooks.
 category: "Wi-SUN|Wi-SUN Services"
 quality: "production"
 metadata:

@@ -1,5 +1,5 @@
 /**
- * @file
+ * @file sli_cpc_utils.h
  * @brief CPC utility macros.
  *******************************************************************************
  * # License

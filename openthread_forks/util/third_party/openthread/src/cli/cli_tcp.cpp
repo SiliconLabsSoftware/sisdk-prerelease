@@ -48,6 +48,7 @@
 
 #if OPENTHREAD_CONFIG_TLS_ENABLE
 #include <mbedtls/debug.h>
+#include <mbedtls/pk.h>
 #include <mbedtls/ssl.h>
 #include "crypto/mbedtls.hpp"
 #if (MBEDTLS_VERSION_NUMBER < 0x04000000) && (MBEDTLS_VERSION_NUMBER >= 0x03000000)

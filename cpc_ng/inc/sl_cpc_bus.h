@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sl_cpc_bus.h
  * @brief CPC public bus API.
  *******************************************************************************
  * # License
@@ -49,7 +49,7 @@
 #endif
 #endif
 
-#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
+#if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT) || defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
 #include "sl_cpc_wake.h"
 #include "sl_gpio.h"
 #include "sli_cpc_wake.h"
@@ -93,7 +93,7 @@ typedef struct sl_cpc_bus_config {
   bool is_secondary;
   uint16_t rx_frame_pool_count;
   uint16_t tx_frame_pool_count;
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
   // local sleep configuration if used
   sl_cpc_power_mode_t power_mode;
   sl_gpio_t wake_in_pin;
@@ -148,11 +148,12 @@ typedef struct sl_cpc_bus {
 
   sli_cpc_dispatcher_context_t dispatcher;
 
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
+  sli_cpc_pm_runtime_t pm_runtime;
+#endif
+
 #if defined(SL_CATALOG_CPC_NG_WAKE_PRESENT)
   struct {
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
-    sli_cpc_wake_device_t device;
-#endif
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
     sli_cpc_wake_host_t host;
 #endif
@@ -162,7 +163,7 @@ typedef struct sl_cpc_bus {
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   struct sl_cpc_bus_kernel kernel;
 #else
-  uint32_t rx_process_flag; ///< Pending RX process signals (bare-metal)
+  uint32_t process_flag; ///< Pending process signals (bare-metal)
 #endif
 
   const sli_cpc_drv_ops_t *drv_ops;

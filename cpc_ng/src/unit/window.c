@@ -1,6 +1,31 @@
 /***************************************************************************/ /**
- * @file
+ * @file window.c
  * @brief Unit tests for CPC endpoint TX window handling.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
  ******************************************************************************/
 
 #include <stdlib.h>
@@ -62,7 +87,7 @@ TEST(cpc_window, three_payloads_transmit_as_window_opens)
   status = cpc_test_set_ep_connected(&ep, bus, first_payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE,
                                      CPC_TEST_PEER_MTU, 0U);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
-  TEST_ASSERT_EQUAL_UINT8(0, ep.send_wnd);
+  TEST_ASSERT_EQUAL_UINT8(0, ep.send.wnd);
 
   for (size_t i = 0; i < 3; i++) {
     TEST_WRITE_PAYLOAD(&ep, payloads[i], TEST_PAYLOAD_SIZE);
@@ -218,7 +243,7 @@ TEST(cpc_window, retransmit_shrinks_available_window)
   status = cpc_test_set_ep_connected(&ep, bus, first_payload_seq, CPC_TEST_PEER_SYN_SEQ + 1U, CPC_TEST_RX_SIZE,
                                      CPC_TEST_PEER_MTU, 3U);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
-  TEST_ASSERT_EQUAL_UINT8(3, ep.send_wnd);
+  TEST_ASSERT_EQUAL_UINT8(3, ep.send.wnd);
 
   // write two payloads
   TEST_WRITE_PAYLOAD(&ep, payloads[0], TEST_PAYLOAD_SIZE);
@@ -293,9 +318,9 @@ TEST(cpc_window, retransmit_shrinks_available_window)
   // A wrap around is even more interesting as the available window is
   // essentially una + window - nxt, 255 + 1 - 0 here, so we make sure that
   // the core takes the wrap around into account.
-  TEST_ASSERT_EQUAL(255, ep.send_una);
-  TEST_ASSERT_EQUAL(0, ep.send_nxt);
-  TEST_ASSERT_EQUAL_UINT8(1, ep.send_wnd);
+  TEST_ASSERT_EQUAL(255, ep.send.una);
+  TEST_ASSERT_EQUAL(0, ep.send.nxt);
+  TEST_ASSERT_EQUAL_UINT8(1, ep.send.wnd);
 
   // write a new payload. This should not fit in the newly computed window
   // and be kept in the holding queue.

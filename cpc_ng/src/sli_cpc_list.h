@@ -1,5 +1,5 @@
 /**
- * @file
+ * @file sli_cpc_list.h
  * @brief CPC list definitions.
  *******************************************************************************
  * # License

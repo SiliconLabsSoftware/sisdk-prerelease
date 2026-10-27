@@ -74,25 +74,7 @@ static const app_enum_t app_regulation_tx_level_enum[] =
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
 
-/* Wi-SUN connected custom callback */
-void app_custom_connected_callback(sl_wisun_evt_t *evt)
-{
-  (void) evt;
-}
-
-/* Socket data custom callback */
-void app_custom_socket_data_callback(sl_wisun_evt_t *evt)
-{
-  (void) evt;
-}
-
-/* Socket data sent custom callback */
-void app_custom_socket_data_sent_callback(sl_wisun_evt_t *evt)
-{
-  (void) evt;
-}
-
-void app_custom_join_state_callback(sl_wisun_evt_t *evt)
+void sl_wisun_join_state_event_app_hnd(sl_wisun_evt_t *evt)
 {
 #if defined(SL_CATALOG_GUI_PRESENT)
   static char nw_name[APP_SETTING_NETWORK_NAME_MAX_SIZE] = { 0 };
@@ -128,7 +110,7 @@ void app_custom_join_state_callback(sl_wisun_evt_t *evt)
 #endif
 }
 
-void app_custom_regulation_tx_level_callback(sl_wisun_evt_t *evt)
+void sl_wisun_regulation_tx_level_app_hnd(sl_wisun_evt_t *evt)
 {
   const app_enum_t *ptr;
 

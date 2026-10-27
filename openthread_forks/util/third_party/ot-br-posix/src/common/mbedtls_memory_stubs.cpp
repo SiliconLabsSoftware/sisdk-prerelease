@@ -37,6 +37,12 @@
 #include <cstddef>
 #include <cstdlib>
 
-extern "C" void *otPlatCryptoCAlloc(size_t aNum, size_t aSize) { return calloc(aNum, aSize); }
+extern "C" void *otPlatCryptoCAlloc(size_t aNum, size_t aSize)
+{
+    return calloc(aNum, aSize);
+}
 
-extern "C" void otPlatCryptoFree(void *aPtr) { free(aPtr); }
+extern "C" void otPlatCryptoFree(void *aPtr)
+{
+    free(aPtr);
+}

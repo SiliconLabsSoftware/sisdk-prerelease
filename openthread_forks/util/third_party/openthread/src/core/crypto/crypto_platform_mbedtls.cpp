@@ -102,8 +102,6 @@ OT_TOOL_WEAK void  otPlatCryptoFree(void *aPtr) { otPlatFree(aPtr); }
 #endif
 
 #if (MBEDTLS_VERSION_NUMBER >= 0x04000000) && defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
-// Weak so Silicon Labs psa_crypto_trng (sli_psa_trng.c) can override on device.
-// Host/simulation has no TRNG and links this fallback via otPlatEntropyGet().
 extern "C" OT_TOOL_WEAK psa_status_t mbedtls_psa_external_get_random(mbedtls_psa_external_random_context_t *aContext,
                                                                      uint8_t                               *aOutput,
                                                                      size_t                                 aOutputSize,
@@ -219,6 +217,7 @@ OT_TOOL_WEAK otError otPlatCryptoAesCcmProcessOneShot(bool                      
     mbedtls_ccm_init(&ctx);
 
     VerifyOrExit(aConfig != nullptr && aConfig->mNonce != nullptr && aData != nullptr, error = kErrorInvalidArgs);
+    VerifyOrExit(aHeader != nullptr || aConfig->mHeaderLength == 0, error = kErrorInvalidArgs);
 
     {
         const LiteralKey key(*static_cast<const Key *>(&aConfig->mKey));

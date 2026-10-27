@@ -44,10 +44,6 @@ extern "C" {
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
 
-/// Wi-SUN application custom callback type.
-/// User can implement own callbacks and register them (not mandatory)
-typedef void (*custom_wisun_event_callback_t) (sl_wisun_evt_t *);
-
 /// Wi-SUN event notification condition callback type.
 /// User can implement own condition callbacks and register them (not mandatory)
 typedef bool (*wisun_event_notify_cond_callback_t) (sl_wisun_evt_t *);
@@ -64,26 +60,6 @@ typedef bool (*wisun_event_notify_cond_callback_t) (sl_wisun_evt_t *);
  * @brief Event manager initialization
  *****************************************************************************/
 void app_wisun_event_mgr_init(void);
-
-/**************************************************************************//**
- * @brief Register custom callback based on event ID.
- * @details It registers the custom callback based on the event ID
- * @param[in] id event ID
- * @param[in] callback is the desired callback that is registered
- * @return sl_status_t SL_STATUS_OK if it is successful otherwise SL_STATUS_FAIL
- * @remark Warning: if the custom callback of the event ID has already been
- *         registered, then this write it over.
- *****************************************************************************/
-sl_status_t app_wisun_em_custom_callback_register(sl_wisun_msg_ind_id_t id,
-                                                  custom_wisun_event_callback_t callback);
-
-/**************************************************************************//**
- * @brief Remove custom callback based on event ID.
- * @details It removes the custom callback of event ID.
- * @param[in] id event ID
- * @return sl_status_t SL_STATUS_OK if it is successful otherwise SL_STATUS_FAIL
- *****************************************************************************/
-sl_status_t app_wisun_em_custom_callback_remove(sl_wisun_msg_ind_id_t id);
 
 /**************************************************************************//**
  * @brief Subscribe to event notification.
@@ -304,6 +280,42 @@ void sl_wisun_mode_switch_fallback_hnd(sl_wisun_evt_t *evt);
  * @param[in] evt event ptr
  *****************************************************************************/
 void sl_wisun_br_routing_table_update_hnd(sl_wisun_evt_t *evt);
+
+/**************************************************************************//**
+ * @brief Application extension for network update events
+ * @details Optional weak hook called after the core network update handler
+ * @param[in] evt event ptr
+ *****************************************************************************/
+void sl_wisun_network_update_event_app_hnd(sl_wisun_evt_t *evt);
+
+/**************************************************************************//**
+ * @brief Application extension for join state events
+ * @details Optional weak hook called after the core join state handler
+ * @param[in] evt event ptr
+ *****************************************************************************/
+void sl_wisun_join_state_event_app_hnd(sl_wisun_evt_t *evt);
+
+/**************************************************************************//**
+ * @brief Application extension for regulation TX level events
+ * @details Optional weak hook called after the core regulation TX level handler
+ * @param[in] evt event ptr
+ *****************************************************************************/
+void sl_wisun_regulation_tx_level_app_hnd(sl_wisun_evt_t *evt);
+
+/**************************************************************************//**
+ * @brief Application extension for LFN wake-up events
+ * @details Optional weak hook called after the core LFN wake-up handler
+ * @param[in] evt event ptr
+ *****************************************************************************/
+void sl_wisun_lfn_wake_up_app_hnd(sl_wisun_evt_t *evt);
+
+/**************************************************************************//**
+ * @brief Application extension for Border Router stopped events
+ * @details Optional weak hook called after the core BR stopped handler
+ * @param[in] evt event ptr
+ *****************************************************************************/
+void sl_wisun_br_stopped_app_hnd(sl_wisun_evt_t *evt);
+
 
 #ifdef __cplusplus
 }

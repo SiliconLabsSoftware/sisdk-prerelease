@@ -186,8 +186,31 @@ enum
   SL_ZIGBEE_GP_SECURITY_KEY_NWK_DERIVED = 0x03,
   /** GP Security Key Type is Out Of Box Key */
   SL_ZIGBEE_GP_SECURITY_KEY_GPD_OOB = 0x04,
+  /** GP Security Key Type is Key Type Elsewhere (GP v1.1.3) */
+  SL_ZIGBEE_GP_SECURITY_KEY_KEY_TYPE_ELSEWHERE = 0x05,
+  /** GP Security Key Type is Out-of-Band GPD Key (GP v1.1.3) */
+  SL_ZIGBEE_GP_SECURITY_KEY_OOB_V113 = 0x06,
   /** GP Security Key Type is GPD Derived Key */
   SL_ZIGBEE_GP_SECURITY_KEY_GPD_DERIVED = 0x07,
+};
+/**
+ * @brief Source used to resolve the Green Power link key (TC-LK / IC / attribute).
+ */
+#ifdef DOXYGEN_SHOULD_SKIP_THIS
+enum sl_zigbee_gp_link_key_source_t
+#else
+typedef uint8_t sl_zigbee_gp_link_key_source_t;
+enum
+#endif
+{
+  /** Default ZigbeeAlliance09 TC link key */
+  SL_ZIGBEE_GP_LINK_KEY_SOURCE_DEFAULT_TCLK = 0,
+  /** Current Trust Center link key */
+  SL_ZIGBEE_GP_LINK_KEY_SOURCE_TC_LINK = 1,
+  /** Install-code derived key */
+  SL_ZIGBEE_GP_LINK_KEY_SOURCE_IC_DERIVED = 2,
+  /** GP cluster link-key attribute (non-default) */
+  SL_ZIGBEE_GP_LINK_KEY_SOURCE_GP_LINK_KEY = 3,
 };
 /**
  * @brief Green Power Application ID

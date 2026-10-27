@@ -33,6 +33,10 @@
 // -----------------------------------------------------------------------------
 #include "sl_ftp.h"
 #include "sl_ftp_config.h"
+#include "arpa/inet.h"
+#include "sl_wisun_api.h"
+#include "sl_memory_manager.h"
+#include "sl_string.h"
 
 #if SL_FTP_ENABLE_FTP_PROTOCOL
 #include "sl_ftp_clnt.h"
@@ -46,6 +50,8 @@
 // -----------------------------------------------------------------------------
 /// Print line length
 #define SL_FTP_DATA_PRINT_LINE_LEN    (20UL)
+
+#define IPV6_STR_BUF_SIZE               (40U)
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
 // -----------------------------------------------------------------------------
@@ -92,85 +98,44 @@ void sl_ftp_dump_buff(const uint8_t * const data_ptr, const uint16_t data_size)
   printf("\n");
 }
 
-__WEAK void sl_ftp_delay_ms(const uint32_t delay_ms)
+const char * sl_ftp_get_global_addr(void)
 {
-  (void) delay_ms;
-}
+  static char str[IPV6_STR_BUF_SIZE] = { 0U };
+  in6_addr_t addr = { 0U };
 
-__WEAK int32_t sl_ftp_socket_close(int32_t sockid)
-{
-  (void) sockid;
-  return SL_FTP_ERROR;
-}
+  if (sl_wisun_get_ip_address(SL_WISUN_IP_ADDRESS_TYPE_GLOBAL, &addr) != SL_STATUS_OK) {
+    sl_strcpy_s(str, IPV6_STR_BUF_SIZE, SL_FTP_LOCAL_HOST_STR);
+    return (const char *) str;
+  }
 
-__WEAK bool sl_ftp_is_network_connected(void)
-{
-  return false;
-}
+  if (inet_ntop(AF_INET6, (const void *)&addr, str, IPV6_STR_BUF_SIZE) == NULL) {
+    sl_strcpy_s(str, IPV6_STR_BUF_SIZE, SL_FTP_LOCAL_HOST_STR);
+  }
 
-__WEAK void sl_ftp_wait_for_connection(void)
-{
-  (void) 0;
+  return (const char *) str;
 }
-
-__WEAK const char * sl_ftp_get_global_addr(void)
-{
-  return SL_FTP_LOCAL_HOST_STR;
-}
-
-#if SL_FTP_ENABLE_FTP_PROTOCOL
-__WEAK int32_t sl_ftp_tcp_socket_create(void)
-{
-  (void) 0UL;
-  return SL_FTP_ERROR;
-}
-
-__WEAK int32_t sl_ftp_tcp_socket_connect(int32_t sockid, const char *host, uint16_t port)
-{
-  (void) sockid;
-  (void) host;
-  (void) port;
-  return SL_FTP_ERROR;
-}
-
-__WEAK int32_t sl_ftp_tcp_socket_send(int32_t sockid, const void *buff, uint32_t len)
-{
-  (void) sockid;
-  (void) buff;
-  (void) len;
-  return SL_FTP_ERROR;
-}
-
-__WEAK int32_t sl_ftp_tcp_socket_recv(int32_t sockid, void *buff, uint32_t len)
-{
-  (void) sockid;
-  (void) buff;
-  (void) len;
-  return SL_FTP_ERROR;
-}
-#endif // SL_FTP_ENABLE_FTP_PROTOCOL
 
 #if SL_FTP_ENABLE_TFTP_PROTOCOL
-__WEAK int32_t sl_tftp_udp_socket_create(void)
+
+void * sl_tftp_udp_get_addr(const char *host,
+                            uint16_t port)
 {
-  return SL_FTP_ERROR;
+  sockaddr_in6_t *waddr = NULL;
+
+  waddr = (sockaddr_in6_t *)sl_malloc(sizeof(sockaddr_in6_t));
+  if (waddr == NULL) {
+    return NULL;
+  }
+
+  if (inet_pton(AF_INET6, host, &waddr->sin6_addr) != 1) {
+    sl_free(waddr);
+    return NULL;
+  }
+
+  waddr->sin6_family = AF_INET6;
+  waddr->sin6_port = htons(port);
+
+  return (void *)waddr;
 }
 
-__WEAK int32_t sl_tftp_udp_sendto(int32_t sockid, const void *buff, uint32_t len, const void *dest_addr)
-{
-  (void) sockid;
-  (void) buff;
-  (void) len;
-  (void) dest_addr;
-  return SL_TFTP_ERROR;
-}
-
-__WEAK int32_t sl_tftp_udp_recvfrom(int32_t sockid, void *buff, uint32_t len, void *src_addr)
-{
-  (void) sockid;
-  (void) buff;
-  (void) len;
-  (void) src_addr;
-  return SL_TFTP_ERROR;
-}
 #endif // SL_FTP_ENABLE_TFTP_PROTOCOL

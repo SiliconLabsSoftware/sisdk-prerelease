@@ -43,15 +43,13 @@ requires:
 - name: psa_crypto_common
   condition:
   - device_cortexm
-- name: psa_crypto_api
-  condition:
-  - device_family_host
 - name: psa_crypto_ccm
   condition:
   - device_cortexm
 - name: sli_protocol_crypto
   condition:
   - device_cortexm
+- name: component_catalog
 - name: sl_common
 template_contribution:
 - name: psa_key_slots

@@ -38,7 +38,6 @@
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_app_core_config.h"
 #include "app.h"
-#include "app_custom_callback.h"
 
 #if defined(SL_CATALOG_WISUN_COAP_PRESENT)
 #include "sl_wisun_coap_collector.h"
@@ -75,10 +74,6 @@ void app_init(void)
   sl_wisun_app_core_util_project_info_init("Wi-SUN Collector Application");
 #endif
 
-  /* Register callbacks */
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_CONNECTED_IND_ID, app_custom_connected_callback);
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_SOCKET_DATA_IND_ID, app_custom_socket_data_callback);
-  app_wisun_em_custom_callback_register(SL_WISUN_MSG_SOCKET_DATA_SENT_IND_ID, app_custom_socket_data_sent_callback);
 
   /* Creating App main thread */
   const osThreadAttr_t app_task_attr = {

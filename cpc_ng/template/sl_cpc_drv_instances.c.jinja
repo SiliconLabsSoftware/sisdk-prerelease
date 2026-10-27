@@ -5,6 +5,7 @@
 #include "sl_component_catalog.h"
 #include "sl_cpc_bus.h"
 #include "sl_status.h"
+#include "sli_cpc.h"
 
 {% set drv_instances_dict = {
   "mock": (cpc_ng_drv_mock_instances, cpc_ng_drv_mock_role_secondary),
@@ -12,7 +13,8 @@
   "sdio_host": (cpc_ng_drv_sdio_host_instances, cpc_ng_drv_sdio_host_role_secondary),
   "spi_peripheral_eusart": (cpc_ng_drv_spi_peripheral_eusart_instances, cpc_ng_drv_spi_peripheral_eusart_role_secondary),
   "spi_peripheral_usart": (cpc_ng_drv_spi_peripheral_usart_instances, cpc_ng_drv_spi_peripheral_usart_role_secondary),
-  "uart": (cpc_ng_drv_uart_instances, cpc_ng_drv_uart_role_secondary),
+  "uart_eusart": (cpc_ng_drv_uart_eusart_instances, cpc_ng_drv_uart_eusart_role_secondary),
+  "uart_usart": (cpc_ng_drv_uart_usart_instances, cpc_ng_drv_uart_usart_role_secondary),
 } -%}
 
 {% for drv_name, drv_instances_role in drv_instances_dict.items() %}
@@ -20,10 +22,6 @@
 #include "sl_cpc_drv_{{ drv_name }}_{{ instance }}_config.h"
 {% endfor %}
 {% endfor %}
-
-{% if cpc_ng_drv_uart_instances|count > 0 %}
-#include "sl_iostream_handles.h"
-{% endif %}
 
 sl_status_t sl_cpc_drv_instances_init(void)
 {
@@ -120,10 +118,32 @@ sl_status_t sl_cpc_drv_instances_init(void)
   };
   {% endfor %}
 
-  {% for instance in cpc_ng_drv_uart_instances -%}
-  const sl_cpc_drv_uart_config_t sl_cpc_drv_uart_{{ instance }}_cfg = {
-    .iostream = sl_iostream_{{ instance }}_handle,
-    .iostream_uart = sl_iostream_uart_{{ instance }}_handle,
+  {% for instance in cpc_ng_drv_uart_eusart_instances -%}
+  const sl_cpc_drv_uart_eusart_config_t sl_cpc_drv_uart_eusart_{{ instance }}_cfg = {
+    .peripheral = SL_CONCAT_PASTER_2(SL_PERIPHERAL_EUSART, SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_PERIPHERAL_NO),
+    .pins = {
+      .tx = { SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_TX_PORT, SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_TX_PIN },
+      .rx = { SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_RX_PORT, SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_RX_PIN },
+      .cts = { SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_CTS_PORT, SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_CTS_PIN },
+      .rts = { SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_RTS_PORT, SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_RTS_PIN },
+    },
+    .baudrate = SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_BAUDRATE,
+    .flow_control = SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_FLOW_CONTROL,
+    .oversampling = SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_OVERSAMPLING,
+  };
+  {% endfor %}
+
+  {% for instance in cpc_ng_drv_uart_usart_instances -%}
+  const sl_cpc_drv_uart_usart_config_t sl_cpc_drv_uart_usart_{{ instance }}_cfg = {
+    .peripheral = SL_CONCAT_PASTER_2(SL_PERIPHERAL_USART, SL_CPC_DRV_UART_USART_{{ instance|upper }}_PERIPHERAL_NO),
+    .pins = {
+      .tx = { SL_CPC_DRV_UART_USART_{{ instance|upper }}_TX_PORT, SL_CPC_DRV_UART_USART_{{ instance|upper }}_TX_PIN },
+      .rx = { SL_CPC_DRV_UART_USART_{{ instance|upper }}_RX_PORT, SL_CPC_DRV_UART_USART_{{ instance|upper }}_RX_PIN },
+      .cts = { SL_CPC_DRV_UART_USART_{{ instance|upper }}_CTS_PORT, SL_CPC_DRV_UART_USART_{{ instance|upper }}_CTS_PIN },
+      .rts = { SL_CPC_DRV_UART_USART_{{ instance|upper }}_RTS_PORT, SL_CPC_DRV_UART_USART_{{ instance|upper }}_RTS_PIN },
+    },
+    .baudrate = SL_CPC_DRV_UART_USART_{{ instance|upper }}_BAUDRATE,
+    .flow_control = SL_CPC_DRV_UART_USART_{{ instance|upper }}_FLOW_CONTROL,
   };
   {% endfor %}
 
@@ -133,7 +153,7 @@ sl_status_t sl_cpc_drv_instances_init(void)
     .is_secondary = {{ (instance in drv_instances_role.1)|string|lower }},
     .rx_frame_pool_count = SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_RX_FRAME_POOL_COUNT,
     .tx_frame_pool_count = SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_TX_FRAME_POOL_COUNT,
-#if defined(SL_CATALOG_CPC_NG_WAKE_DEVICE_PRESENT)
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
 #if defined(SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_POWER_MODE)
     .power_mode = SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_POWER_MODE,
     .wake_in_response = SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_WAKE_IN_RESPONSE,
@@ -174,6 +194,18 @@ sl_status_t sl_cpc_drv_instances_init(void)
 
   return SL_STATUS_OK;
 }
+
+
+#if !defined(SL_CATALOG_KERNEL_PRESENT)
+void sl_cpc_service_process_action(void)
+{
+{% for drv_name, drv_instances_role in drv_instances_dict.items() %}
+{% for instance in drv_instances_role.0 %}
+  sli_cpc_bus_process_action(sl_cpc_drv_{{ drv_name }}_get_bus(sl_cpc_drv_{{ drv_name }}_{{ instance }}));
+{% endfor %}
+{% endfor %}
+}
+#endif
 
 {% for drv_name, drv_instances_role in drv_instances_dict.items() if drv_instances_role.0|count > 0 %}
 void sl_cpc_drv_{{ drv_name }}_instances_start_buses(void) {

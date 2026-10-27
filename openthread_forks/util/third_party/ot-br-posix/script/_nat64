@@ -43,6 +43,8 @@ TAYGA_IPV6_ADDR=fdaa:bb:1::1
 TAYGA_TUN_V6_ADDR=fdaa:bb:1::2
 NAT64_PREFIX=64:ff9b::/96
 DYNAMIC_POOL="${NAT64_DYNAMIC_POOL:-192.168.255.0/24}"
+
+NAT64="${NAT64:-1}"
 NAT44_SERVICE=/etc/init.d/otbr-nat44
 WLAN_IFNAMES="${INFRA_IF_NAME:-eth0}"
 THREAD_IF="${THREAD_IF:-wpan0}"
@@ -147,8 +149,37 @@ tayga_stop()
     fi
 }
 
+# When otbr-agent is built with the opt-in in-process nftables firewall
+# backend (-DOTBR_NFTABLES=ON), it installs the NAT44 masquerade rules
+# itself, so the legacy iptables otbr-nat44 service must not duplicate them.
+# The build records which backend it chose in a marker file; an explicit
+# OTBR_NFTABLES in the environment overrides it.
+OTBR_NFTABLES_MARKER="/usr/share/otbr/nftables-backend"
+if [ -z "${OTBR_NFTABLES:-}" ]; then
+    # The marker carries the value the build decided, not just its presence:
+    # installing does not uninstall, so a file that could only say "on" would
+    # outlive a rebuild with the option turned back off. Anything missing or
+    # unrecognised means the legacy path, which over-filters rather than
+    # leaving the router with no ingress filter at all.
+    OTBR_NFTABLES=0
+    if [ -r "${OTBR_NFTABLES_MARKER}" ] && grep -qx '1' "${OTBR_NFTABLES_MARKER}"; then
+        OTBR_NFTABLES=1
+    fi
+fi
+
+# NAT44 on macOS is the pf backend's, set up by _firewall; otbr-nat44 is a
+# Linux service, so the functions below do nothing there.
+nat64_is_macos()
+{
+    [[ ${PLATFORM:-} == "macOS" || ${OSTYPE:-} == darwin* ]]
+}
+
 nat44_install()
 {
+    if [ "${OTBR_NFTABLES}" = "1" ]; then
+        echo "OTBR_NFTABLES=1: NAT44 masquerade is managed in-process (nftables); installing only the forwarding authorization."
+    fi
+
     local tayga_tun_nat44
 
     tayga_tun_nat44=
@@ -218,9 +249,17 @@ EOF
             echo "        iptables -t filter -A FORWARD -i $IFNAME -o $tayga_tun_nat44 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT" | sudo tee -a $NAT44_SERVICE
         done
     else
-        # Just a random fwmark bits.
-        echo "        iptables -t mangle -A PREROUTING -i $THREAD_IF -j MARK --set-mark 0x1001" | sudo tee -a $NAT44_SERVICE
-        echo "        iptables -t nat -A POSTROUTING -m mark --mark 0x1001 -j MASQUERADE" | sudo tee -a $NAT44_SERVICE
+        if [ "${OTBR_NFTABLES}" != "1" ]; then
+            # Just a random fwmark bits.
+            echo "        iptables -t mangle -A PREROUTING -i $THREAD_IF -j MARK --set-mark 0x1001" | sudo tee -a $NAT44_SERVICE
+            echo "        iptables -t nat -A POSTROUTING -m mark --mark 0x1001 -j MASQUERADE" | sudo tee -a $NAT44_SERVICE
+        fi
+        # The forwarding authorization is installed in both modes, the same way the
+        # Docker run script does it. The in-process backend cannot provide it: its
+        # rules live in an isolated `inet otbr_<thread-if>` table, where an accept is not   
+        # terminal for the hook, so a host with a DROP forward policy would still
+        # drop the traffic the masquerade is there to translate (see #3515).
+
         for IFNAME in $WLAN_IFNAMES; do
             echo "        iptables -t filter -A FORWARD -o $IFNAME -j ACCEPT" | sudo tee -a $NAT44_SERVICE
             echo "        iptables -t filter -A FORWARD -i $IFNAME -j ACCEPT" | sudo tee -a $NAT44_SERVICE
@@ -283,6 +322,10 @@ nat64_install()
 {
     with NAT64 || return 0
 
+    if nat64_is_macos; then
+        return 0
+    fi
+
     if [ "${NAT64_SERVICE:-openthread}" = tayga ]; then
         tayga_install
     fi
@@ -293,6 +336,10 @@ nat64_install()
 nat64_uninstall()
 {
     with NAT64 || return 0
+
+    if nat64_is_macos; then
+        return 0
+    fi
 
     nat64_stop
 
@@ -307,6 +354,10 @@ nat64_start()
 {
     with NAT64 || return 0
 
+    if nat64_is_macos; then
+        return 0
+    fi
+
     if [ "${NAT64_SERVICE:-openthread}" = tayga ]; then
         tayga_start
     fi
@@ -317,6 +368,10 @@ nat64_start()
 nat64_stop()
 {
     with NAT64 || return 0
+
+    if nat64_is_macos; then
+        return 0
+    fi
 
     if [ "${NAT64_SERVICE:-openthread}" = tayga ]; then
         tayga_stop

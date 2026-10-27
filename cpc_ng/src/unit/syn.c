@@ -1,6 +1,31 @@
 /***************************************************************************/ /**
- * @file
+ * @file syn.c
  * @brief Unit tests for CPC endpoint connect / SYN handshake.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
  ******************************************************************************/
 
 #include <stdlib.h>
@@ -111,13 +136,13 @@ TEST(cpc_syn, listen_then_handshake_completes)
 
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_SYN_RCVD, ep.state);
 
-  TEST_ASSERT_EQUAL_UINT16(CPC_TEST_PEER_MTU, ep.remote_mtu);
+  TEST_ASSERT_EQUAL_UINT16(CPC_TEST_PEER_MTU, ep.mtu.remote);
 
   // should be ready to sequence the next frame
-  TEST_ASSERT_EQUAL_UINT8(our_syn_seq + 1, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(our_syn_seq + 1, ep.send.nxt);
   // if SYN has sequence N, the endpoint expects for frame N+1
   TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_SYN_SEQ + 1U, ep.ack);
-  TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_RX_WND, ep.send_wnd);
+  TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_RX_WND, ep.send.wnd);
 
   // Step 3 -- peer completes the handshake with an ack-only DATA frame.
   TEST_INJECT_FRAME(bus, {
@@ -134,8 +159,8 @@ TEST(cpc_syn, listen_then_handshake_completes)
   TEST_ASSERT_BIT_HIGH(SL_CPC_EP_EVENT_CONNECTED, cpc_test_event_mask);
 
   // the window should have been updated by the ACK, other values are the same
-  TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_RX_WND + 10, ep.send_wnd);
-  TEST_ASSERT_EQUAL_UINT8(our_syn_seq + 1, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_RX_WND + 10, ep.send.wnd);
+  TEST_ASSERT_EQUAL_UINT8(our_syn_seq + 1, ep.send.nxt);
   TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_SYN_SEQ + 1U, ep.ack);
 
   sl_cpc_ep_close(&ep);
@@ -207,7 +232,7 @@ TEST(cpc_syn, listen_syn_reply_defers_when_tx_pool_exhausted)
 
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_OPEN, ep.state);
   TEST_ASSERT_BITS_HIGH(SLI_CPC_EP_FLAG_PEND_SYN, ep.flags);
-  TEST_ASSERT_EQUAL_UINT16(CPC_TEST_PEER_MTU, ep.remote_mtu);
+  TEST_ASSERT_EQUAL_UINT16(CPC_TEST_PEER_MTU, ep.mtu.remote);
   TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_SYN_SEQ + 1U, ep.ack);
 
   mock_cpc_drv_set_defer_tx_complete(sl_cpc_drv_mock_from_bus(bus), false);
@@ -289,11 +314,11 @@ TEST(cpc_syn, connect_then_handshake_completes)
 
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CONNECTED, ep.state);
   TEST_ASSERT_BIT_HIGH(SL_CPC_EP_EVENT_CONNECTED, cpc_test_event_mask);
-  TEST_ASSERT_EQUAL_UINT16(CPC_TEST_PEER_MTU, ep.remote_mtu);
+  TEST_ASSERT_EQUAL_UINT16(CPC_TEST_PEER_MTU, ep.mtu.remote);
 
-  TEST_ASSERT_EQUAL_UINT8(our_syn_seq + 1, ep.send_nxt);
+  TEST_ASSERT_EQUAL_UINT8(our_syn_seq + 1, ep.send.nxt);
   TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_SYN_SEQ + 1U, ep.ack);
-  TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_RX_WND, ep.send_wnd);
+  TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_RX_WND, ep.send.wnd);
 
   // We complete the handshake with an ack-only DATA frame acknowledging the
   // peer's SYN.
@@ -336,11 +361,11 @@ static void cpc_syn_event_cb(sl_cpc_ep_t *ep, sl_cpc_ep_event_type_t type, const
 }
 
 /**
- * @brief CONNECTED must run only after the SYN ACK updates send_una/send_wnd.
+ * @brief CONNECTED must run only after the SYN ACK updates send.una/send.wnd.
  *
  * With peer rx_wnd = 1, a connected handler that writes immediately (as the
  * control endpoint does) must transmit on the same pump. If CONNECTED fires
- * before send_una advances past the SYN, the write is held and nothing with
+ * before send.una advances past the SYN, the write is held and nothing with
  * payload leaves the stack until more window opens.
  */
 TEST(cpc_syn, connect_then_immediate_write_after_syn_ack)
@@ -386,9 +411,9 @@ TEST(cpc_syn, connect_then_immediate_write_after_syn_ack)
 
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CONNECTED, ep.state);
   TEST_ASSERT_BIT_HIGH(SL_CPC_EP_EVENT_CONNECTED, cpc_test_event_mask);
-  TEST_ASSERT_EQUAL_UINT8(our_syn_seq + 1U, ep.send_una);
-  TEST_ASSERT_EQUAL_UINT8(our_syn_seq + 2U, ep.send_nxt);
-  TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_RX_WND, ep.send_wnd);
+  TEST_ASSERT_EQUAL_UINT8(our_syn_seq + 1U, ep.send.una);
+  TEST_ASSERT_EQUAL_UINT8(our_syn_seq + 2U, ep.send.nxt);
+  TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_RX_WND, ep.send.wnd);
 
   packet = TEST_POP_OUTGOING_PAYLOAD(bus, {
                                             .flags = CPC_EXPECT_FLAG_ACK_REQ,
@@ -1202,7 +1227,7 @@ TEST(cpc_syn, listen_any_bus_then_syn_matches_ep_and_handshake_completes)
   TEST_ASSERT_EQUAL_PTR(bus, ep.bus);
   TEST_ASSERT_EQUAL_PTR(&ep, sli_cpc_bus_find_ep_from_id(bus, CPC_TEST_EP_ID));
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_SYN_RCVD, ep.state);
-  TEST_ASSERT_EQUAL_UINT16(CPC_TEST_PEER_MTU, ep.remote_mtu);
+  TEST_ASSERT_EQUAL_UINT16(CPC_TEST_PEER_MTU, ep.mtu.remote);
   TEST_ASSERT_EQUAL_UINT8(CPC_TEST_PEER_SYN_SEQ + 1U, ep.ack);
 
   TEST_INJECT_FRAME(bus, {

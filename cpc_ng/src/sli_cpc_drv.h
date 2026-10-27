@@ -1,5 +1,5 @@
 /***************************************************************************/ /**
- * @file
+ * @file sli_cpc_drv.h
  * @brief CPC Driver Interface
  *******************************************************************************
  * # License
@@ -59,16 +59,14 @@ typedef struct sli_cpc_drv_ops {
   /// @return SL_STATUS_OK if successful. Error code otherwise.
   sl_status_t (*init)(sl_cpc_bus_t *bus);
 
+  /// De-initializes the driver.
+  /// @param[in] bus Bus bound to this driver.
+  void (*deinit)(sl_cpc_bus_t *bus);
+
   /// Start receiving packets
   /// @param[in] bus Bus whose driver should start RX.
   /// @return SL_STATUS_OK if successful. Error code otherwise.
   sl_status_t (*start_rx)(sl_cpc_bus_t *bus);
-
-#if defined(SL_CATALOG_CPC_NG_PRIMARY_PRESENT)
-  /// De-Initializes CPC driver for the firmware upgrade to take over control.
-  /// @param[in] bus Bus whose driver to deinitialize.
-  void (*deinit)(sl_cpc_bus_t *bus);
-#endif
 
   /// Reads data from driver.
   /// @param[in]  bus      Bus to read from.
@@ -105,6 +103,17 @@ typedef struct sli_cpc_drv_ops {
   /// @param[in]     caps_size Size of @p caps.
   /// @return SL_STATUS_OK if successful. Error code otherwise.
   sl_status_t (*set_remote_capabilities)(sl_cpc_bus_t *bus, const void *caps, uint16_t caps_size);
+
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
+  /// Resume driver operations.
+  /// @param[in] bus Bus whose driver to wake / keep awake.
+  /// @return SL_STATUS_OK if successful. Error code otherwise.
+  sl_status_t (*pm_runtime_resume)(sl_cpc_bus_t *bus);
+
+  /// Suspend driver operations.
+  /// @param[in] bus Bus whose driver may sleep.
+  void (*pm_runtime_suspend)(sl_cpc_bus_t *bus);
+#endif
 } sli_cpc_drv_ops_t;
 
 /** @} (end addtogroup cpc) */

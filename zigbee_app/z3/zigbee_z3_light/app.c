@@ -311,7 +311,7 @@ void sl_zigbee_af_hal_button_isr_cb(uint8_t button, uint8_t state)
 void sli_zigbee_app_framework_force_sleep_callback(void)
 {
   // Do other things like turn off LEDs etc
-  sl_led_turn_off(&sl_led_led0);
+  led_turn_off(ON_OFF_LIGHT_LED);
 }
 #endif // SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
 #endif //#if (LARGE_NETWORK_TESTING == 0)

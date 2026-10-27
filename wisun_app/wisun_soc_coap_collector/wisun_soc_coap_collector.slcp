@@ -45,12 +45,10 @@ requires:
 source:
   - path: "app.c"
   - path: "app_init.c"
-  - path: "app_custom_callback.c"
 include:
   - path: "."
     file_list:
     - path: "app.h"
-    - path: "app_custom_callback.h"
 define:
   - name: "DEBUG_EFM"
 

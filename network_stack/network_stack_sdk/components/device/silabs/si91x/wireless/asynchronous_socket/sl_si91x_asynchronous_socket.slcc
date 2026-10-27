@@ -21,4 +21,6 @@ requires:
 - name: sl_si91x_socket
 - name: log_none
 
+documentation:
+  url: https://docs.silabs.com/wiseconnect/latest/wiseconnect-api-reference-guide-sockets/
 root_path: network_stack/network_stack_sdk/./components/device/silabs/si91x/wireless/asynchronous_socket

@@ -12,6 +12,7 @@ metadata:
 root_path: cpc_ng/port/silabs
 source:
 - path: src/sl_cpc_drv_uart.c
+- path: src/sli_cpc_drv_uart.h
 include:
 - path: inc
   file_list:
@@ -22,13 +23,4 @@ requires:
 - name: clock_manager_runtime
 - name: cpc_ng
 - name: cpc_ng_port_silabs
-- name: emlib_ldma
-  condition: [device_series_2]
-- name: hal_ldma
-  condition: [device_series_3]
-- name: iostream_uart
-template_contribution:
-- name: event_handler
-  value:
-    event: cpc_drv_instances_start_buses
-    handler: sl_cpc_drv_uart_instances_start_buses
+- name: uart_async

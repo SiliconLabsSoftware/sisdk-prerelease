@@ -142,11 +142,18 @@ EOF
     # web dependencies
     without WEB_GUI || command -v npm || sudo apt-get install --no-install-recommends -y nodejs npm
 
-    # firewall
+    # firewall — ipset for the legacy shell firewall (default); libnftnl + libmnl
+    # for the opt-in in-process nftables backend (-DOTBR_NFTABLES=ON).
     sudo apt-get install -y ipset
+    sudo apt-get install -y libnftnl-dev libmnl-dev
 
     # protobuf compiler
     sudo apt-get install -y libprotobuf-dev protobuf-compiler
+
+    # Python modules required by the mbed TLS PSA crypto driver
+    sudo apt-get install --no-install-recommends -y \
+        python3-jsonschema \
+        python3-jinja2
 }
 
 install_packages_opkg()
@@ -168,14 +175,24 @@ install_packages_rpm()
     if with NAT64 && [[ ${NAT64_SERVICE} == "tayga" ]]; then
         sudo $PM install -y tayga
     fi
+    # firewall — libnftnl + libmnl for the opt-in in-process nftables backend
+    # (-DOTBR_NFTABLES=ON).
+    sudo $PM install -y libnftnl-devel libmnl-devel
     sudo $PM install -y jsoncpp-devel
     sudo $PM install -y wget
     sudo $PM install -y protobuf protobuf-devel
+
+    # Python modules required by the mbed TLS PSA crypto driver
+    sudo $PM install -y python3-jsonschema python3-jinja2
 }
 
 install_packages_brew()
 {
     brew install cmake dbus jsoncpp ninja googletest
+
+    # Python modules required by the mbed TLS PSA crypto driver
+    python3 -m pip install --break-system-packages jsonschema Jinja2 \
+        || python3 -m pip install --user jsonschema Jinja2
 }
 
 install_packages_source()

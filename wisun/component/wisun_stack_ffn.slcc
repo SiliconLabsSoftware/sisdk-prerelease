@@ -38,6 +38,7 @@ provides:
 define:
 - name: "HAVE_LFN_PARENT"
 - name: "HAVE_FFN"
+- name: "HAVE_FFN_POWER_SAVING"
 - name: "HAVE_ROUTER"
 - name: "HAVE_RATE_ALG"
 - name: "HAVE_MODE_SWITCH"

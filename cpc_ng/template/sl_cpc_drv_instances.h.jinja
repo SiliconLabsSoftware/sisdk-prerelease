@@ -9,7 +9,8 @@
   "sdio_host": cpc_ng_drv_sdio_host_instances,
   "spi_peripheral_eusart": cpc_ng_drv_spi_peripheral_eusart_instances,
   "spi_peripheral_usart": cpc_ng_drv_spi_peripheral_usart_instances,
-  "uart": cpc_ng_drv_uart_instances,
+  "uart_eusart": cpc_ng_drv_uart_eusart_instances,
+  "uart_usart": cpc_ng_drv_uart_usart_instances,
 } -%}
 
 {% for drv_name, drv_instances in drv_instances_dict.items() if drv_instances|count > 0 %}

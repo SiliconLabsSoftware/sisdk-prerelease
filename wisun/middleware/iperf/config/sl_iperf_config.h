@@ -39,10 +39,6 @@
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h>iPerf common configuration
-// <o SL_IPERF_SOCKET_ADDR_LEN> Set the address length buffer size
-// <i> This parameter must be set for different port of network layer
-#define SL_IPERF_SOCKET_ADDR_LEN                   32U ///< Set the address length buffer size
-
 // <o SL_IPERF_MESSAGE_QUEUE_SIZE> Set test message queue size
 // <i> Default value: 16
 #define SL_IPERF_MESSAGE_QUEUE_SIZE                16U ///< Set test message queue size

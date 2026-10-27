@@ -1,6 +1,31 @@
 /***************************************************************************/ /**
- * @file
+ * @file api.c
  * @brief Unit tests for the CPC endpoint public API.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
  ******************************************************************************/
 
 #include <stdint.h>
@@ -50,7 +75,7 @@ TEST(cpc_api, init_and_listen_registers_ep_on_bus)
   TEST_ASSERT_NULL(ep.bus);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSED, ep.state);
   TEST_ASSERT_EQUAL(CPC_TEST_EP_ID, ep.id);
-  TEST_ASSERT_EQUAL(CPC_TEST_RX_SIZE, ep.mtu);
+  TEST_ASSERT_EQUAL(CPC_TEST_RX_SIZE, ep.mtu.local);
   TEST_ASSERT_NULL(sli_cpc_bus_find_ep_from_id(bus, CPC_TEST_EP_ID));
 
   status = sl_cpc_ep_listen(&ep, bus);
@@ -337,7 +362,7 @@ TEST(cpc_api, push_recv_buf_rejects_valid_buf_when_rx_size_configured_to_0)
 
   status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, 0, api_event_cb, NULL);
   TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
-  TEST_ASSERT_EQUAL(0, ep.mtu);
+  TEST_ASSERT_EQUAL(0, ep.mtu.local);
 
   sl_cpc_buf_init(&buf, (void *)0xDEADBEE0, 32);
 

@@ -187,6 +187,24 @@ bool sli_ot_radio_state_is_tx_ack_ongoing(void);
 void sli_ot_radio_state_set_tx_ack_ongoing(bool aOngoing);
 
 // ============================================================================
+// Deferred Sleep State
+// ============================================================================
+
+/**
+ * Check if a sleep transition has been deferred
+ *
+ * @returns True if a sleep is pending, false otherwise
+ */
+bool sli_ot_radio_state_is_sleep_pending(void);
+
+/**
+ * Set or clear the pending-sleep flag
+ *
+ * @param[in] aPending  True to set, false to clear
+ */
+void sli_ot_radio_state_set_sleep_pending(bool aPending);
+
+// ============================================================================
 // CSMA State
 // ============================================================================
 

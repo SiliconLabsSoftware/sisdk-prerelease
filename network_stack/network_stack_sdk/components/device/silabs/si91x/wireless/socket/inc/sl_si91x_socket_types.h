@@ -225,7 +225,7 @@ typedef void (*sl_si91x_socket_select_callback_t)(sl_si91x_fdset_t *fd_read,
  * @brief Callback function indicates termination of the remote socket.
  *
  * @details
- * The callback function notifies on the termination of the remote socket when the sl_si91x_set_remote_termination_callback API is registered and called.
+ * The callback function notifies termination of the remote socket when the sl_si91x_set_remote_termination_callback API is registered and called.
  * The callback provides the following details: host socket index (BSD socket descriptor), remote peer port number, and number of bytes sent before termination of the remote socket.
  *
  * Typical causes reported by firmware:

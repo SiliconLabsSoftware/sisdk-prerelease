@@ -485,7 +485,8 @@ void sl_zigbee_stack_power_up(void);
  */
 sl_status_t sl_zigbee_send_link_power_delta_request (void);
 
-/** @brief Accessor function for recent average RSSI value between this device and the parent (SoC only).
+/** @brief Accessor function for recent average RSSI value between this device and the parent.
+ *  On host, this queries the NCP via EZSP value SL_ZIGBEE_EZSP_VALUE_AVG_PARENT_RSSI.
  */
 int8_t sl_zigbee_get_avg_parent_rssi(void);
 
