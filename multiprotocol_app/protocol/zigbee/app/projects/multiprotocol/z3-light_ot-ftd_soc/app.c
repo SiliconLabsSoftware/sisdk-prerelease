@@ -347,6 +347,9 @@ void sl_rail_mux_invalid_rx_channel_detected_cb(int new_rx_channel, int old_rx_c
 #include "sl_bluetooth_advertiser_config.h"
 #include "sl_bluetooth_connection_config.h"
 #include "sl_component_catalog.h"
+#ifdef SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
+#include "sl_ble_event_handler.h"
+#endif // SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
 static uint8_t cli_adv_handle;
 static uint8_t activeBleConnections = 0;
 void zb_ble_dmp_print_ble_address(uint8_t *address)
@@ -520,20 +523,13 @@ void sl_bt_on_event(sl_bt_msg_t* evt)
     }
     break;
 
-    case sl_bt_evt_gatt_service_id: {
-      sl_bt_evt_gatt_service_t* service_evt =
-        (sl_bt_evt_gatt_service_t*) &(evt->data);
-      uint8_t i;
-      sl_zigbee_app_debug_println(
-        "GATT service, conn_handle=0x%02x, service_handle=0x%04x",
-        service_evt->connection, service_evt->service);
-      sl_zigbee_app_debug_print("UUID=[");
-      for (i = 0; i < service_evt->uuid.len; i++) {
-        sl_zigbee_app_debug_print("0x%04x ", service_evt->uuid.data[i]);
-      }
-      sl_zigbee_app_debug_println("]");
-    }
-    break;
+    case sl_bt_evt_gatt_service_id:
+    case sl_bt_evt_gatt_characteristic_id:
+    case sl_bt_evt_gatt_procedure_completed_id:
+#ifdef SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
+      (void)sli_ble_handle_gatt_client_log_event(evt);
+#endif // SL_CATALOG_ZIGBEE_BLE_EVENT_HANDLER_PRESENT
+      break;
 
     default:
       break;

@@ -6,7 +6,7 @@ label=Platform Sample App Package
 
 description=Platform Sample App Package
 
-version=1.0.3-alpha.1
+version=1.0.3-alpha.2
 
 prop.partCompatibility=mcu.arm.*
 

@@ -10,6 +10,8 @@ requires:
 - name: zigbee_system_common
 - name: bluetooth_stack
 - name: bluetooth_feature_gatt
+- name: zigbee_ble_event_handler
+- name: zigbee_debug_print
 
 source:
 - path: protocol/zigbee/app/framework/plugin-soc/ble_cli/sl_dmp_zigbee_ble_cli.c

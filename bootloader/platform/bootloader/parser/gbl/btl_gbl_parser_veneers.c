@@ -71,7 +71,8 @@ int32_t parser_nsc_parse(uint8_t buffer[],
   ImageProperties_NS_t *ns_image_prop = (ImageProperties_NS_t *)prop;
   int32_t error_code = BOOTLOADER_ERROR_PARSER_UNEXPECTED;
 
-  if (!bl_verify_ns_memory_access(buffer, length)) {
+  if (!bl_verify_ns_memory_access(buffer, length)
+      || !bl_verify_ns_memory_access(prop, sizeof(ImageProperties_NS_t))) {
     bl_fatal_assert_action();
   }
 

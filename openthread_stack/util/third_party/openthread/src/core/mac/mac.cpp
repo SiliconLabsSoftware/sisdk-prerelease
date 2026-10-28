@@ -1590,6 +1590,7 @@ Error Mac::ProcessReceiveSecurity(RxFrame &aFrame, const Address &aSrcAddr, Neig
     switch (keyIdMode)
     {
     case Frame::kKeyIdMode0:
+        VerifyOrExit(keyManager.IsKekSet(), error = kErrorSecurity);
         macKey     = &keyManager.GetKek();
         extAddress = &aSrcAddr.GetExtended();
         break;
