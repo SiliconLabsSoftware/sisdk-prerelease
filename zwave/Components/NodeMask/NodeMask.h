@@ -18,12 +18,27 @@
 /// Number of nodes per node mask byte
 #define NODEMASK_NODES_PER_BYTE   8
 
-/// Max length of a node mask
+// definition of the nodeMask for device included in classic Z-Wave
 #define MAX_NODEMASK_LENGTH       (ZW_MAX_NODES / NODEMASK_NODES_PER_BYTE)
-/// Max length of Long Range node mask
-#define MAX_LR_NODEMASK_LENGTH    (ZW_MAX_NODES_LR / NODEMASK_NODES_PER_BYTE)
-
 typedef uint8_t NODE_MASK_TYPE[MAX_NODEMASK_LENGTH];
+
+#ifdef ZW_CONTROLLER
+#define MAX_NODES_IN_LR_NODEMASK      ZW_CONTROLLER_MAX_LR_NODES
+/// Highest Long Range Node ID in the range handled by the controller
+#define HIGHEST_LR_NODE_ID_IN_CONTROLLER_RANGE    HIGHEST_LR_NODE_ID_IN_MASK
+#else
+#define MAX_NODES_IN_LR_NODEMASK      (HIGHEST_LONG_RANGE_NODE_ID - LOWEST_LONG_RANGE_NODE_ID + 1)
+#endif
+
+/* Max length of Long Range node mask
+ * Must use a round up divion in case node count is not a multiple of NODEMASK_NODES_PER_BYTE. */
+#define MAX_LR_NODEMASK_LENGTH \
+  ((MAX_NODES_IN_LR_NODEMASK + NODEMASK_NODES_PER_BYTE - 1) / NODEMASK_NODES_PER_BYTE)
+/* The highest long range node id managed by the mask.
+ * Note that in some cases, the mask may support more node id. However, they are excluded for a good
+ * reason (e.g. reserved LR node id). So keep HIGHEST_LR_NODE_ID_IN_MASK align with
+ * MAX_NODES_IN_LR_NODEMASK instead of the true mask capability. */
+#define HIGHEST_LR_NODE_ID_IN_MASK    (LOWEST_LONG_RANGE_NODE_ID + MAX_NODES_IN_LR_NODEMASK - 1)
 typedef uint8_t LR_NODE_MASK_TYPE[MAX_LR_NODEMASK_LENGTH];
 
 /***

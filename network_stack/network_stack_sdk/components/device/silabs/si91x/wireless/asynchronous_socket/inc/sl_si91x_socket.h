@@ -1123,16 +1123,16 @@ int sl_si91x_recvfrom(int socket,
  * @param[in] socket
  *   The socket ID or file descriptor for the specified socket.
  *
- * @param[out] available_bytes
+ * @param[out] available_bytes_count
  *   Pointer to receive the available byte count. Must be non-NULL.
  *
  * @return
  *   Returns 0 on success, or -1 on failure with @c errno set.
  *
- * @retval 0                 Success; @p available_bytes is populated.
+ * @retval 0                 Success; @p available_bytes_count is populated.
  * @retval -1/EBADF         @p socket is not a valid or ready descriptor.
  * @retval -1/ENOTCONN      TCP socket is not connected.
- * @retval -1/EINVAL        @p available_bytes is NULL.
+ * @retval -1/EINVAL        @p available_bytes_count is NULL.
  * @retval -1               NWP query failed; @c errno is set from the firmware status
  *                          (never 0). Unknown statuses map to @c ECONNABORTED or @c EIO.
  *
@@ -1141,12 +1141,12 @@ int sl_si91x_recvfrom(int socket,
  * @par Example
  * @code{.c}
  * uint32_t available = 0;
- * if (sl_si91x_socket_get_available_bytes(sock, &available) == 0 && available > 0) {
+ * if (sl_si91x_socket_get_available_bytes_count(sock, &available) == 0 && available > 0) {
  *   sl_si91x_recv(sock, buffer, available, 0);
  * }
  * @endcode
  */
-int sl_si91x_socket_get_available_bytes(int socket, uint32_t *available_bytes);
+int sl_si91x_socket_get_available_bytes_count(int socket, uint32_t *available_bytes_count);
 
 /**
  * @brief Disables send or receive operations on a socket.

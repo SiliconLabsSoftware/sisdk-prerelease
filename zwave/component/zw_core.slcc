@@ -70,6 +70,7 @@ include:
   - path: "ZW_security_api.h"
   - path: "ZW_typedefs.h"
   - path: "ZW_transport_api.h"
+  - path: "ZW_protocol_def.h"
   - path: "ZW_basis_api.h"
   - path: "ZW_system_startup_api.h"
   - path: "ZW_application_transport_interface.h"

@@ -107,6 +107,7 @@ void func_id_serial_api_get_init_data(__attribute__((unused)) uint8_t inputLengt
 #endif
 }
 
+#ifdef ZW_CONTROLLER
 void func_id_serial_api_get_nls_nodes(__attribute__((unused)) uint8_t const inputLength,
                                       const uint8_t *pInputBuffer,
                                       uint8_t *pOutputBuffer,
@@ -131,7 +132,6 @@ void func_id_serial_api_get_nls_nodes(__attribute__((unused)) uint8_t const inpu
   *pOutputLength = 3 + outputLength;
 }
 
-#ifdef ZW_CONTROLLER
 void func_id_serial_api_get_LR_nodes(__attribute__((unused)) uint8_t inputLength,
                                      const uint8_t *pInputBuffer,
                                      uint8_t *pOutputBuffer,

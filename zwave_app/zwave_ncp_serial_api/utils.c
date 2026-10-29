@@ -174,6 +174,7 @@ void Get_included_NLS_nodes(uint8_t * const node_id_list, uint8_t bitmask_offset
   assert(false);
 }
 
+#ifdef ZW_CONTROLLER
 /**
  * Acquire a list of included long range nodes IDS in the network from protocol.
  *
@@ -201,6 +202,7 @@ void Get_included_lr_nodes(uint8_t* node_id_list)
   }
   assert(false);
 }
+#endif
 
 void TriggerNotification(EApplicationEvent event)
 {

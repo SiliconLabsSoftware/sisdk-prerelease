@@ -7,6 +7,7 @@
 #define _ZW_TRANSPORT_API_H_
 #include <ZW_security_api.h>
 #include <zpal_radio.h>
+#include "ZW_protocol_def.h"
 
 /**
  * @addtogroup ZWaveAPI
@@ -26,13 +27,10 @@
 
 #define ZW_MAX_NODES        232
 
-/** Max number of Long Range nodes in a Z-wave system
- * Must not be higher than 4000 according to specs */
-#define ZW_MAX_NODES_LR    1024
-
-#define LOWEST_LONG_RANGE_NODE_ID   (0x0100)
-
-#define HIGHEST_LONG_RANGE_NODE_ID  (LOWEST_LONG_RANGE_NODE_ID + ZW_MAX_NODES_LR - 1)
+#ifdef ZW_CONTROLLER
+/** Max number of LR nodes that can be handled by a controller in a network. */
+#define ZW_CONTROLLER_MAX_LR_NODES      1024
+#endif
 
 #define NODEPARM_MAX       35   ///< max. number of parameters
 #define HOMEID_LENGTH      4    ///< Number of bytes in a homeID

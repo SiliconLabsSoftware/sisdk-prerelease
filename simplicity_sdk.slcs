@@ -38,8 +38,8 @@ component_path:
 - path: common_15_4/silabs_core/component
 - path: common_15_4/mac/component
 - path: compute/component
-- path: connect/component
 - path: connect_stack/component
+- path: connect/component
 - path: coremark/component
 - path: cpc_extra_tests/cpc-gpio/component
 - path: cpc_extra_tests/cpc-nvm3/component
@@ -124,6 +124,7 @@ component_path:
 - path: usb/protocol/usb/component
 - path: wisun/component
 - path: wisun/component/middleware
+- path: zigbee_smart_energy/component/zigbee_smart_energy
 - path: zigbee_internal/platform/radio/mac/component/zigbee_internal
 - path: zigbee_internal/platform/radio/rail_lib/plugin/component/zigbee_internal
 - path: zigbee_internal/component/zigbee_internal
@@ -138,7 +139,6 @@ component_path:
 - path: zigbee/util/silicon_labs/silabs_core/component/zigbee
 - path: zigbee/app/framework/component/zigbee
 - path: zigbee/platform/service/component/zigbee
-- path: zigbee_smart_energy/component/zigbee_smart_energy
 - path: zwave/component
 - path: zwave/component/CommandClasses
 - path: zwave/component-internal
@@ -203,11 +203,11 @@ documentation:
   version: 1.0.8
 - docset: protocol-usb
   version: 1.8.0
-- docset: wifi
-  version: 4.2.0
 - docset: wifi_siwx353
   version: 0.1.0
 - docset: wifi_internal
+  version: 4.2.0
+- docset: wifi
   version: 4.2.0
 - docset: wiseconnect_common
   version: 4.2.0

@@ -104,17 +104,11 @@ readme:
 configuration:
 #----------------- OS --------------------------------
   - name: SL_STACK_SIZE
-    value: 8192
+    value: 2000
   - name: APP_LOG_PREFIX_ENABLE
     value: 0
   - name: SL_CLI_EXAMPLE_TASK_STACK_SIZE
     value: 1024
-  - name: configTOTAL_HEAP_SIZE
-    value: 12288
-    condition: [device_generic_family_efr32xg27]
-  - name: configTOTAL_HEAP_SIZE
-    value: 12288
-    condition: [device_generic_family_efr32xg28]
   - name: SL_BT_CONFIG_MAX_CONNECTIONS
     value: 1
     condition:
@@ -228,13 +222,12 @@ define:
 tag:
   - hwfilter:board:hardware:has:vcom
   - hwfilter:board:hardware:has:pti
-  - hwfilter:ram:55k
+  - hwfilter:ram:73k
   - hwfilter:flash:402k
   - hwfilter:board:hardware_board_supports_rf_band_2400
   - hwfilter:board:simple_led:led0
   - hwfilter:!board:brd2704a
   - hwfilter:!board:brd2713a
-  - hwfilter:!board:brd2715a
   - hwfilter:!board:brd4171a
   - hwfilter:!board:brd4176a
   - hwfilter:!board:brd4179b
@@ -257,14 +250,11 @@ tag:
   - hwfilter:!board:brd4317a
   - hwfilter:!board:brd4318a
   - hwfilter:!board:brd4319a
-  - hwfilter:!board:brd4328a
-  - hwfilter:!board:brd4328b
   - hwfilter:!board:brd4329a
   - hwfilter:!board:brd4332a
   - hwfilter:!board:brd4337a
   - hwfilter:!board:brd4350a
   - hwfilter:!board:brd4351a
-  - hwfilter:!board:brd4356a
 
 #-------------- Template Contribution ----------------
 template_contribution:

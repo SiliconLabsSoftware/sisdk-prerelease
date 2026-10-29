@@ -243,7 +243,7 @@ static important_devices_list_error_t verify_device(const node_id_t node_id)
     if (!ZW_NodeMaskNodeIn(classic_node_mask, node_id)) {
       status = IMPORTANT_DEVICES_LIST_UNKNOWN_NODE_ID;
     }
-  } else if (node_id >= LOWEST_LONG_RANGE_NODE_ID && node_id <= HIGHEST_LONG_RANGE_NODE_ID) {
+  } else if (node_id >= LOWEST_LONG_RANGE_NODE_ID && node_id <= HIGHEST_LR_NODE_ID_IN_MASK) {
     LR_NODE_MASK_TYPE lr_node_mask;
     Get_included_lr_nodes(lr_node_mask);
     if (!ZW_NodeMaskNodeIn(lr_node_mask, node_id)) {

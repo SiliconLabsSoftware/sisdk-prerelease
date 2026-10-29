@@ -2041,7 +2041,11 @@ typedef union UCommandStatus{
   SNvmBackupRestoreStatus       NvmBackupRestoreStatus;
   SZWaveGenericBoolStatus       SetPowerDownCallbackStatus;
   SZWaveGetIncludedNodes        GetIncludedNodes;
+#ifdef ZW_CONTROLLER
+  /* Exclude this one from SLAVE to avoid a very large union (about 500 bytes).
+     Note that it's not used in the SLAVE configuration. */
   SZWaveGetIncludedNodesLR      GetIncludedNodesLR;
+#endif
   SZWaveGetIncludedNodesNLS     GetIncludedNodesNLS;
   SZWaveGeneric8bStatus         RequestNodeNeigborUpdateStatus;
   SZWaveGeneric8bStatus         RequestNodeTypeNeigborUpdateStatus;

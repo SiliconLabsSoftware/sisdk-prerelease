@@ -2681,12 +2681,16 @@ ZW_ADD_CMD(FUNC_ID_SERIAL_API_GET_INIT_DATA)
 #endif
 
 #if SUPPORT_SERIAL_GET_NLS_NODES
+#ifdef ZW_CONTROLLER
 ZW_ADD_CMD(FUNC_ID_ZW_GET_NLS_NODES)
 {
   uint8_t length = 0;
   func_id_serial_api_get_nls_nodes(frame_payload_len(frame), frame->payload, compl_workbuf, &length);
   DoRespond_workbuf(length);
 }
+#else
+#error "FUNC_ID_ZW_GET_NLS_NODES is only supported on ZW_CONTROLLER, because it depends on controller-specific functionality"
+#endif
 #endif
 
 #if SUPPORT_SERIAL_API_GET_LR_NODES

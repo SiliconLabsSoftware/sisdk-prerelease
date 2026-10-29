@@ -702,17 +702,17 @@ int sl_si91x_recvfrom(int socket,
   return bytes_read;
 }
 
-int sl_si91x_socket_get_available_bytes(int socket, uint32_t *available_bytes)
+int sl_si91x_socket_get_available_bytes_count(int socket, uint32_t *available_bytes_count)
 {
   const sli_si91x_socket_t *si91x_socket = sli_get_si91x_socket(socket);
 
-  SLI_SET_ERRNO_AND_RETURN_IF_TRUE(available_bytes == NULL, EINVAL);
+  SLI_SET_ERRNO_AND_RETURN_IF_TRUE(available_bytes_count == NULL, EINVAL);
   SLI_SET_ERRNO_AND_RETURN_IF_TRUE(si91x_socket == NULL, EBADF);
   SLI_SET_ERRNO_AND_RETURN_IF_TRUE(si91x_socket->type == SOCK_STREAM && si91x_socket->state != CONNECTED, ENOTCONN);
   SLI_SET_ERRNO_AND_RETURN_IF_TRUE(si91x_socket->state != CONNECTED && si91x_socket->state != UDP_UNCONNECTED_READY,
                                    EBADF);
 
-  sl_status_t status = sli_si91x_get_socket_bytes_available((uint8_t)si91x_socket->id, available_bytes);
+  sl_status_t status = sli_si91x_get_socket_bytes_available((uint8_t)si91x_socket->id, available_bytes_count);
   if (status != SL_STATUS_OK) {
     int mapped_errno = sli_si91x_socket_status_to_errno(status);
     if (mapped_errno == 0) {
