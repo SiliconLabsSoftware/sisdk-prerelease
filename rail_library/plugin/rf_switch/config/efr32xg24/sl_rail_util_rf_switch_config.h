@@ -13,12 +13,13 @@
 #ifndef SL_RAIL_UTIL_RF_SWITCH_CONFIG_H
 #define SL_RAIL_UTIL_RF_SWITCH_CONFIG_H
 
+#include "sl_gpio.h"
+
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // The antenna-switch control GPIO(s) are configured by the AoX Antenna utility.
 // This component configures the antenna-to-pin mapping (polarity / single vs
-// dual-pin / custom) plus the optional VDD power-gating pin and idle-low
-// behavior.
+// dual-pin / custom) plus the optional VDD power-gating pin.
 //
 // These knobs use plain integer literals so they can be compared in #if
 // directives below. The values match the enum numeric values and are cast back
@@ -46,28 +47,24 @@
 #define SL_RAIL_UTIL_RF_SWITCH_ANTENNA_GPIO_PATTERN_CUSTOM  { 0, 1, 2, 3 }
 // </h>
 
-// <h> RF Switch VDD / Idle
-// <q SL_RAIL_UTIL_RF_SWITCH_IDLE_CONTROL_PINS_LOW> Drive control pins low when radio inactive
-// <i> When enabled, the control pins rest low between radio activity so the
-// <i> external switch is not left powered through a control line at idle. Both
-// <i> control pins are parked low directly by the antenna-switch LDMA, so this
-// <i> consumes no additional PRS channels.
-// <i> Default: 0
-#define SL_RAIL_UTIL_RF_SWITCH_IDLE_CONTROL_PINS_LOW  0
-
+// <h> RF Switch VDD
 // <q SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE> Enable VDD power pin
+// <i> VDD follows radio activity. The control pins always follow the same
+// <i> radio activity and rest low while the radio is inactive, from boot.
 // <i> Default: 0
 #define SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE  0
 
 #if SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE
 // <o SL_RAIL_UTIL_RF_SWITCH_VDD_SETTLE_TIME_US> VDD settle time (us)
 // <1-255:1>
+// <i> Delay after VDD rises before the Channel Sounding antenna is selected.
 // <i> Default: 2
 #define SL_RAIL_UTIL_RF_SWITCH_VDD_SETTLE_TIME_US  2
 
 // <o SL_RAIL_UTIL_RF_SWITCH_VDD_PRS_SIGNAL> VDD PRS signal
 // <0=> PA enable OR LNA enable
 // <1=> TX active OR RX active
+// <i> Channel Sounding events always use PA enable OR LNA enable.
 // <i> Default: PA enable OR LNA enable
 #define SL_RAIL_UTIL_RF_SWITCH_VDD_PRS_SIGNAL  0
 #endif // SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE
@@ -81,7 +78,7 @@
 // RF switch VDD power pin
 // <gpio> SL_RAIL_UTIL_RF_SWITCH_VDD_PIN
 // $[GPIO_SL_RAIL_UTIL_RF_SWITCH_VDD_PIN]
-// #define SL_RAIL_UTIL_RF_SWITCH_VDD_PIN_PORT           gpioPortA
+// #define SL_RAIL_UTIL_RF_SWITCH_VDD_PIN_PORT           SL_GPIO_PORT_A
 // #define SL_RAIL_UTIL_RF_SWITCH_VDD_PIN_PIN            2
 // [GPIO_SL_RAIL_UTIL_RF_SWITCH_VDD_PIN]$
 #endif

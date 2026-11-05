@@ -24,8 +24,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
             self.decim_table.append(2.0**x)
             self.decim_table.append(3*2.0**(x-1))
 
-    #def _override_tx_rx_err(self, modem_calc):
-    #    return
 
     def _init_force_conditions(self, modem_calc):
         self.force_condition1 = (self.fields.hModInd>=2 and self.fields.nonstdpk==0 and en2fsk(modem_calc.inputs.API_modulation_type))
@@ -54,7 +52,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
         elif (modem_calc.inputs.API_pm_pattern == 13) :    #1010 PM pattern: Min pm length = 32 or 40 bits
             self.fields.preath   = 3
         elif (modem_calc.inputs.API_pm_pattern == 1000):
-        # include API_pm-pattern=17 for Direct-Mode: plus BCRgear=0x09 / sch_frzen=0 / chprd_losw=1
             self.fields.pm_pattern = 3
             self.fields.preath   = 3
             self.fields.skip_pmdet_ph = 1
@@ -67,7 +64,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
                 self.fields.detector
             else:
                 self.fields.detector = 3
-            # force gear switch to PM detection for BER mode
             if(modem_calc.inputs.API_BER_mode==1) :
                 self.fields.pm_pattern = 0
                 self.fields.preath   = 6
@@ -88,7 +84,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
         else : # default to 15 (for pm length <16 bits); PH can NOT give pmdet
              self.fields.skipsyn = 0            # skip sync-word search timeout reset
 
-# 2GFSK  pre/post cursor compensation is always disabed
     def _init_kphcomp_2fsk(self, modem_calc):
         self.kphcomp_2fsk = 0
 
@@ -179,12 +174,10 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
                 self.fields.skip_pm_det = 0
             else:
                 self.fields.rx_pream_src = 0
-        ####
 
         self.fields.mute_rssi_sel = 0
         self.fields.mute_rssi_cnt = 1
 
-        # AFC 4-Tb MA filter:  if disabled, we can reduce PM length
 
         if(modem_calc.inputs.API_BER_mode==0):
             if (modem_calc.API_Rb_error>=1):
@@ -203,7 +196,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
         else:
             self.fields.oneshot_waitcnt = 7
 
-        # jira-1652 remove revc0_c1 condition for arr_q_sync_en
         if(modem_calc.inputs.API_BER_mode==0):
             if(modem_calc.inputs.API_pm_pattern==1000):
                 self.fields.arr_q_sync_en = 1
@@ -237,9 +229,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
         else :
            self.fields.afcma_en = 0
 
-       # if bcr_sw_sycw = 1; before signal is arriving, fast_gear = {2'b00,crfast[0]}
-       # after signal arriving signal is detected and before the sync-word is detected,
-       # fast_gear = {1'b0,crfast[2:1]}
         if(self.fields.bcr_sw_sycw and  modem_calc.inputs.API_pm_pattern != 1000):
             self.fields.crfast = 1
         else:
@@ -276,8 +265,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
             self.fields.dis_midpt = self.fields.nonstdpk
 
     def _calc_step_10(self, modem_calc):
-        # AFC loop register  
-        # MA/Mean searching period
         self.fields.ma_freqdwn = 0
         self.fields.sch_frzen  = 1
 
@@ -303,8 +290,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
         self.fields.eyexest_en = 0
         self.fields.eyexest_fast = 1
 
-        ## RSSI jump detection will be disabled for the following mode:
-        ## (1)DSA-based RX hopping (2) OOK (3) ANT-DIV
         self.fields.rssi_sel = 1
         self.fields.enrssijmp = 1
         self.fields.enjmprx = 0
@@ -314,15 +299,12 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
             self.fields.enjmprx = 1
 
     def _calc_step_12(self, modem_calc):
-        # afc_gain_abs: 9-bit fraction
-        # PRO2's AFC gain
         if (self.fields.nonstdpk==1 and self.fields.detector==2 ) : # MA nonstdpk
             self.afc_gain_abs_pro2 = 2**5*self.afc_gain_cal/self.raw_flt_gain/2/(2**self.afc_adj)
         elif (self.fields.nonstdpk==1 and self.fields.detector==3 ) : # minmax nonstdpk
             self.afc_gain_abs_pro2 = self.fields.OSR_rx_BCR/2**2*self.afc_gain_cal/self.raw_flt_gain
         else : # stdpk 2Tb
             self.afc_gain_abs_pro2 =  self.afc_gain_cal/2**self.afc_adj/2**4
-        # PRO2+'s AFC gain
         if (self.fields.oneshot_afc == 1):
             if(self.fields.est_osr_en ==1):
                 self.afc_gain_abs = self.afc_gain_abs_pro2 /16
@@ -345,14 +327,10 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
             self.fields.afc_gain *= 2
 
     def _calc_orig_afclim(self, modem_calc, k_ratio, afc_RX_BW):
-        # 9/11/2012 afclim to be modified once we know better the formula
-    # 15-bit with 0 bit fraction
         if (modem_calc.inputs.API_dsa_mode == 3):
            if(modem_calc.inputs.API_fc <= 525000000):
               orig_afclim = trueround(1.4*2 ** 6 * self.BW_mod/2/self.fields.afc_gain / modem_calc.modulator.fields.dsm_ratio)
            else:
-           ##LAb testing shows AFC limter is triggered falsely at 900MHz band. To avoid this false trigger, AFC limter value is set to a value more than we expected.
-           ##We need to do more investigations.
               orig_afclim = trueround(2.8*2 ** 6 * self.BW_mod/2/self.fields.afc_gain / modem_calc.modulator.fields.dsm_ratio)
         else:
            orig_afclim = trueround(2 ** self.fields.oneshot_afc *
@@ -362,7 +340,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
         return orig_afclim
 
     def _calc_step_14(self, modem_calc):
-        # super(Pro2PlusDemodulatorCore, self)._calc_step_14(modem_calc)
         if (self.fields.signal_dsa_mode   == 1 or modem_calc.inputs.API_ant_div==1):
           if (modem_calc.inputs.API_Rsymb >=200000):
             self.fields.afc_shwait = 2 + self.fields.nonstdpk
@@ -382,7 +359,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
         super(Pro2PlusDemodulatorCore, self)._calc_step_15(modem_calc)
         self.fields.rst_pkdt_period = 0
         if (enook(modem_calc.inputs.API_modulation_type)):
-        ## Force to disable AFC estimator for OOK modem
              self.fields.afc_est_en = 0
         else:
            if(modem_calc.inputs.API_BER_mode==1):
@@ -394,14 +370,11 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
                 self.fields.afc_est_en = 1
 
         if (enook(modem_calc.inputs.API_modulation_type) or modem_calc.inputs.API_BER_mode==1) :
-            # self.fields.afc_est_en = 0
             self.fields.afc_fb_pll = 0
         else:
-            # self.fields.afc_est_en = 1
             self.fields.afc_fb_pll = (modem_calc.inputs.API_afc_en ==2 or modem_calc.inputs.API_afc_en ==1)
 
     def _calc_step_17(self, modem_calc):
-        #  4GFSK equalization
         if (en4gfsk(modem_calc.inputs.API_modulation_type) or
                   self.kphcomp_2fsk ==1):
             self.fields.phcompbyp = 0
@@ -416,9 +389,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
             self.fields.phcomp_gain_4gfsk0 =  2  # 4FSK 12/11/2012
 
     def _calc_step_20(self, modem_calc):
-        # nonstdpk = 1 if we wnat to get raw data ouput & run 2TB frequency
-        # estimator, set nonstdpk = 1 at this stage
-        # to get raw data output for standard packet,nonstdpk will be forced to 1
         if (modem_calc.inputs.API_raw_demod==1 or self.fields.signal_dsa_mode   == 1) :
             self.fields.nonstdpk_final = 1
         else:
@@ -438,8 +408,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
             self.fields.ndec2agc = 1
 
     def _calc_step_22(self, modem_calc):
-        # demodulator SFR register
-        # ANT-DIV && ADC reset enable
         self.fields.en_adc_rst = 0
         self.fields.adcwatch = 0
         if (modem_calc.inputs.API_ant_div==1) :
@@ -452,11 +420,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
             self.fields.antdiv = 0
 
 
-        # jira 1621 & 1218
-        #For IF bandwidths >500kHz we will enable the ADC gain correction (MODEM_AGC_CONTROL = 0x02)
-        # and the RSSI jump detector will be increased to 9dB.
-        #For IF bandwidths <=500kHz we will disable the ADC gain correction (MODEM_AGC_CONTROL = 0x00)
-        # and the RSSI jump detector will be increased to 6dB.
         if(self.Ch_Fil_Bw >500):
             self.fields.adc_gain_cor_en = 1
             self.fields.jmpdlylen = 0   # 0: 2Tb; 1: 4Tb
@@ -466,18 +429,15 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
             self.fields.jmpdlylen = 0   # Jira SI4440-1769
             self.fields.rssijmpthd = 6
 
-        # jira-1362: set res_lockup_byp in BERT/ API bit in BCR_MISC0 available after revC2
         if (modem_calc.inputs.API_BER_mode==1):
             self.fields.res_lockup_byp = 1  # disable "consecutive diff counter"
             self.fields.enrssijmp = 0       # jira-1621: disable rssi-jump in BERT
         else:
             self.fields.res_lockup_byp = 0
-            #if (self.fields.signal_dsa_mode  ==1 and self.fields.afcbd>0 and self.filter_k2>self.filter_k1):
             if (self.fields.enrssijmp==1 and self.fields.afcbd>0 and self.filter_k2>self.filter_k1):
                 self.fields.rssijmpthd = 15   # sufficient across filters?
 
     def _calc_step_23(self, modem_calc):
-        # # DSA RX hopping for super low data rate
         self.fields.rx_hopping_en = 0
         if (modem_calc.inputs.API_dsa_mode == 3):
             self.fields.rx_hopping_en = 1
@@ -488,10 +448,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
         super(Pro2PlusDemodulatorCore, self)._calculate(modem_calc)
 
         self.fields.spike_rm_en = self.fields.signal_dsa_mode
-        # if(self.max_hModInd <= 1):
-        #     self.fields.spike_det_thd = self.raw_diff * 2
-        # else:
-        #     self.fields.spike_det_thd = self.raw_diff
         self.min_spike_det_thd = 3
 
         if enook(modem_calc.inputs.API_modulation_type) and modem_calc.inputs.API_pm_len < 20:
@@ -531,7 +487,6 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
         self.fields.rssi_low_en = 1
         self.fields.rssi_arr_thd = 120
         if (self.fields.thd4gfsk_comp_en == 1):
-            ## for (MBUS Ng mode)
             self.fields.arr_eye_qual =  min(127,trueround(1.2*self.raweye_factor*self.raw_diff)+max(0,int(trueround(5*math.log(self.RX_CH_BW_k1*1000/self.BW_mod,10)))))
             self.fields.thd4gfsk_comp_ratio = int(trueround(0.702*256*self.OSR_rx_CH/3/self.raw_flt_gain/self.raweye_factor/self.gaussain_factor))
         else:
@@ -542,14 +497,12 @@ class Pro2PlusDemodulatorCore(Pro2DemodulatorCore):
         self.fields.squelch_clk_en = 0
         if (self.fields.signal_dsa_mode   == 1 and
             enook(modem_calc.inputs.API_modulation_type)):
-            #self.fields.rssi_arr_thd = 40
             self.fields.squelch_clk_en = 1
             self.fields.arr_squelch = 1
 
 
         self.fields.bw_peak = 12
 
-        # low duty cycle mode
         self.fields.mcu_timer_src = 0
         self.fields.rxclk_irpt_src =2
 

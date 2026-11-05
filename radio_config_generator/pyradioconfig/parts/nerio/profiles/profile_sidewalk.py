@@ -5,10 +5,12 @@ from pyradioconfig.parts.common.profiles.profile_modem import buildModemInfoOutp
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
     buildWhiteOutputs, build_ircal_sw_vars, buildLongRangeOutputs, buildStudioLogOutput
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
+from pycalcmodel.core.common import IPCategory
 
 
 class ProfileSidewalkNerio(IProfile):
 
+    ip_category = IPCategory.LPW
     fec_enabled_sync = 0x6F4E
     fec_disabled_sync = 0x904E #default
 
@@ -22,17 +24,14 @@ class ProfileSidewalkNerio(IProfile):
         self._family = "nerio"
 
     def buildProfileModel(self, model):
-        # Build profile object and append it to the model
         profile = self._makeProfile(model)
 
-        # Build inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
         self.build_hidden_profile_inputs(model, profile)
         self.build_deprecated_profile_inputs(model, profile)
 
-        # Build outputs
         self.build_register_profile_outputs(model, profile)
         self.build_variable_profile_outputs(model, profile)
         self.build_info_profile_outputs(model, profile)
@@ -77,17 +76,14 @@ class ProfileSidewalkNerio(IProfile):
                                      readable_name="FCS Type (CRC)", default=model.vars.fcs_type_802154.var_enum.TWO_BYTE)
 
     def build_advanced_profile_inputs(self, model, profile):
-        #No Advanced Profile Inputs on Jumbo
         pass
 
     def build_hidden_profile_inputs(self, model, profile):
-        # Hidden inputs to allow for fixed frame length testing
         IProfile.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                    readable_name="Frame Length Algorithm")
         IProfile.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
                                    readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=4095)
 
-        # Hidden inputs to allow for keeping absolute tolerance the same when testing at 915M
         IProfile.make_hidden_input(profile, model.vars.rx_xtal_error_ppm, category="general",
                                    readable_name="Set desired xtal tolerance on RX side", value_limit_min=0,
                                    value_limit_max=100)
@@ -104,7 +100,6 @@ class ProfileSidewalkNerio(IProfile):
                                      readable_name="Enable FEC")
 
     def build_deprecated_profile_inputs(self, model, profile):
-        #No deprecated Profile Inputs on Jumbo
         pass
 
     def build_register_profile_outputs(self, model, profile):
@@ -125,12 +120,9 @@ class ProfileSidewalkNerio(IProfile):
         buildModemInfoOutputs(model, profile)
 
     def _fixed_sidewalk_vars(self, model):
-        # Calculate all of the fixed values (forces) unique to this profile
 
-        # Disable FEC for now (untested)
         self._fixed_sidewalk_fec(model)
 
-        # Variable Length and Endianness Inputs
         model.vars.frame_bitendian.value_forced = model.vars.frame_bitendian.var_enum.LSB_FIRST
         model.vars.frame_length_type.value_forced = model.vars.frame_length_type.var_enum.VARIABLE_LENGTH
         model.vars.var_length_bitendian.value_forced = model.vars.var_length_bitendian.var_enum.MSB_FIRST
@@ -142,30 +134,24 @@ class ProfileSidewalkNerio(IProfile):
         model.vars.var_length_includecrc.value_forced = True  # Length is the total number of octets contained in the PSDU
         model.vars.var_length_adjust.value_forced = 0
 
-        # Header Inputs
         model.vars.header_calc_crc.value_forced = False  # No CRC on the header itself
         model.vars.header_en.value_forced = True
         model.vars.header_size.value_forced = 2  # Header size is 16 bits
         model.vars.header_white_en.value_forced = False  # When whitening is enabled it shall be applied only over the PSDU
 
-        # FEC settings (note that there is a separate variable fec_tx_enable that determines if FEC is on/off in TX)
         model.vars.fec_en.value_forced = model.vars.fec_en.var_enum.FEC_154G_NRNSC_INTERLEAVING
 
-        # Whitening Inputs set consistent with 802154 17.2.3
         model.vars.white_poly.value_forced = model.vars.white_poly.var_enum.PN9_802154
         model.vars.white_seed.value_forced = 0xFF  # This has been tested, need a 0 in position 8 due to EFR32 whitening architecture
         model.vars.white_output_bit.value_forced = 8
 
-        # CRC Inputs
         model.vars.payload_crc_en.value_forced = True
         model.vars.crc_bit_endian.value_forced = model.vars.crc_bit_endian.var_enum.MSB_FIRST
         model.vars.crc_byte_endian.value_forced = model.vars.crc_byte_endian.var_enum.MSB_FIRST
         model.vars.crc_input_order.value_forced = model.vars.crc_input_order.var_enum.LSB_FIRST
 
-        # Modulation type
         model.vars.modulation_type.value_forced = model.vars.modulation_type.var_enum.FSK2
 
-        # Symbol mapping and encoding
         model.vars.diff_encoding_mode.value_forced = model.vars.diff_encoding_mode.var_enum.DISABLED
         model.vars.dsss_chipping_code.value_forced = 0
         model.vars.dsss_len.value_forced = 0
@@ -173,16 +159,13 @@ class ProfileSidewalkNerio(IProfile):
         model.vars.fsk_symbol_map.value_forced = model.vars.fsk_symbol_map.var_enum.MAP0
         model.vars.symbol_encoding.value_forced = model.vars.symbol_encoding.var_enum.NRZ
 
-        # Preamble and syncword definition
         model.vars.preamble_pattern.value_forced = 1
         model.vars.preamble_pattern_len.value_forced = 2
         model.vars.syncword_length.value_forced = 16
         self._flexible_preamble_detection(model)
 
-        # Tolerance values
         self._set_sidewalk_tolerances(model)
 
-        # Variables that are optional inputs in the Base profile and need to be explicitly set
         model.vars.asynchronous_rx_enable.value_forced = False
         model.vars.manchester_mapping.value_forced = model.vars.manchester_mapping.var_enum.Default
         model.vars.syncword_tx_skip.value_forced = False
@@ -221,24 +204,17 @@ class ProfileSidewalkNerio(IProfile):
         model.vars.fec_tx_enable.value_forced = model.vars.fec_tx_enable.var_enum.DISABLED
 
     def _set_sidewalk_tolerances(self, model):
-        # These tolerances are from the initial PHY definition and are updated for later parts
-        # Leaving alone for Nerio definition due to optimized timing detection threshold
         model.vars.baudrate_tol_ppm.value_forced = 0
         model.vars.rx_xtal_error_ppm.value_forced = 10
         model.vars.tx_xtal_error_ppm.value_forced = 10
 
     def _flexible_preamble_detection(self, model):
-        #Skip for Nerio
         pass
 
     def _lookup_from_sidewalk_mode(self, model):
-        # This function calculates some variables/registers based on the sidewalk_mode
 
-        # Read the mode and fec_en from the profile inputs (not yet written to model vars)
         sidewalk_mode = model.profile.inputs.sidewalk_mode.var_value
 
-        # Set basic parameters based on the mode
-        # Note that for series 1, the bitrate variable represents chiprate, and so is unchanged between FEC on/off
         if sidewalk_mode == model.vars.sidewalk_mode.var_enum.FSK_50kbps:
             model.vars.bitrate.value_forced = 50000
             model.vars.deviation.value_forced = 25000
@@ -247,35 +223,25 @@ class ProfileSidewalkNerio(IProfile):
             model.vars.bitrate.value_forced = 150000
             model.vars.deviation.value_forced = 37500
 
-            #Optimizations
             model.vars.timing_detection_threshold.value_forced = 20
 
         else:
             model.vars.bitrate.value_forced = 250000
             model.vars.deviation.value_forced = 62500
 
-            # Optimizations
             model.vars.timing_detection_threshold.value_forced = 20
 
     def _lookup_syncword_from_fec(self, model):
-        #This function sets sync0 and sync1 based on whether FEC is enabled or not
-        #This is because we need sync0 to be correct for the active FEC setting (RAIL assumes this)
 
-        # Read the FEC setting
         if model.profile.inputs.fec_tx_enable.var_value is not None:
-            # This is to accommodate a hidden input for now
             fec_tx_enable = model.profile.inputs.fec_tx_enable.var_value
         else:
-            # This is set in the fixed variable section
             fec_tx_enable = model.vars.fec_tx_enable.value
 
-        #Lookup the syncword to use
         if fec_tx_enable == model.vars.fec_tx_enable.var_enum.DISABLED:
-            #Not compatible with dynamic FEC, uncoded as sync0
             syncword_0 = self.fec_disabled_sync
             syncword_1 = 0x0000
         else:
-            #Dynamic FEC ready with coded as sync0
             syncword_0 = self.fec_enabled_sync
             syncword_1 = self.fec_disabled_sync
 
@@ -283,7 +249,6 @@ class ProfileSidewalkNerio(IProfile):
         model.vars.syncword_1.value_forced = syncword_1
 
     def _set_sidewalk_crc(self, model):
-        #Set CRC vars based on fcs_type_802154 input
         fcs_type_802154 = model.profile.inputs.fcs_type_802154.var_value
 
         if fcs_type_802154 == model.vars.fcs_type_802154.var_enum.TWO_BYTE:

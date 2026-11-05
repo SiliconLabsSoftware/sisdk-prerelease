@@ -19,6 +19,7 @@ from pycalcmodel.core.variable import ModelVariableContainer, ModelVariableTypeX
 from pycalcmodel.core.reg_model import RegModel
 from pycalcmodel.core.default_phy import *
 from pycalcmodel.core.feature import *
+from pycalcmodel.core.common import IPCategory
 from datetime import datetime
 import sys
 from py_2_and_3_compatibility import *
@@ -28,7 +29,7 @@ __all__ = [ 'ModelRoot', 'ModelRootTypeXml', 'ModelRootInstanceXml' ]
 
 class ModelRoot(object):
 
-    def __init__(self, part_family, calc_version, target=None, part_revision='ANY'):
+    def __init__(self, part_family, calc_version, target=None, part_revision='ANY', ip_category=IPCategory.LPW):
         assert isinstance(part_family, basestring)
         assert isinstance(calc_version, basestring)
         self.part_family = part_family
@@ -45,6 +46,7 @@ class ModelRoot(object):
         self._reg_model = RegModel.get_reg_model(part_family, part_revision)  # Reg model object is passed by reference
         if target is not None:
             self.target = target
+        self.ip_category = ip_category
 
     @property
     def part_family(self):
@@ -76,6 +78,15 @@ class ModelRoot(object):
     def target(self, value):
         assert isinstance(value, basestring)
         self._target = value
+
+    @property
+    def ip_category(self):
+        return self._ip_category
+
+    @ip_category.setter
+    def ip_category(self, value):
+        assert isinstance(value, IPCategory)
+        self._ip_category = value
 
     @property
     def reg_model(self):
@@ -117,7 +128,8 @@ class ModelRoot(object):
                                          phys=self.phys.to_type_xml(phy_group_incl_list),
                                          profiles=self.profiles.to_type_xml(profile_incl_list, phy_group_incl_list),
                                          variables=self.vars.to_type_xml(),
-                                         features=self.features.to_type_xml())
+                                         features=self.features.to_type_xml(),
+                                         ip_category=self.ip_category.name)
             model_obj.export(outstream, 0, pretty_print=pretty_print)
             return 0
         else:
@@ -194,7 +206,8 @@ class ModelRoot(object):
                                          variables=self.vars.to_instance_xml(),
                                          features=self.features.to_instance_xml(),
                                          logs=logs_xml,
-                                         target=self.target)
+                                         target=self.target,
+                                         ip_category=self.ip_category.name)
             model_obj.export(outstream, 0, pretty_print=pretty_print)
             return 0
         else:
@@ -220,17 +233,11 @@ class ModelRoot(object):
             var.value_calc = None
             var.value_forced = None
 
-    #
-    # Used for instance models, where there is only one
-    #
     @property
     def profile(self):
         profile = next(x for x in self.profiles) # gets the first one
         return profile
 
-    #
-    # Used for instance models, where there is only zero or one
-    #
     @property
     def phy(self):
         phy = None
@@ -277,7 +284,6 @@ class ModelRootTypeXml(ModelRoot):
         for phy in _root.get_phys().get_phy():
             self.phys.append(ModelPhyTypeXml(self.vars, self.profiles, phy))
 
-        # with phys built, update the profile default phys
         for profile_root in _root.get_profiles().get_profile():
             profile = self.profiles.get_profile(profile_root.name)
             for default_phy_root in profile_root.get_default_phys().get_default_phy():
@@ -291,10 +297,11 @@ class ModelRootInstanceXml(ModelRoot):
 
         _root = model_inst.parse(filename)
         assert isinstance(_root, model_inst.model)
-
+        ip_category = IPCategory[_root.ip_category] if _root.ip_category is not None else IPCategory.LPW
         super(ModelRootInstanceXml, self).__init__(_root.part_family,
                                                    _root.calc_version,
-                                                   _root.target)
+                                                   _root.target,
+                                                   ip_category=ip_category)
         if self.xsd_version != _root.xsd_version:
             print("WARNING: Parsing XML with XSD version {} in pycalcmodel {}".format(self.xsd_version,
                                                                                       _root.xsd_version))
@@ -319,7 +326,6 @@ class ModelRootInstanceXml(ModelRoot):
         if phy is not None:
             self.phys.append(ModelPhyInstanceXml(self.vars, self.profiles, phy))
 
-        # with phys built, update the profile default phys
         profile_root = _root.get_profiles().get_profile()
         profile = self.profiles.get_profile(profile_root.name)
         for default_phy_root in profile_root.get_default_phys().get_default_phy():

@@ -18,6 +18,13 @@
 #include PLATFORM_HEADER
 #include "sl_legacy_hal_wdog.h"
 #include "sl_code_classification.h"
+#include "sl_status.h"
+#include "sl_common.h"
+
+SL_WEAK sl_status_t sl_watchdog_manager_force_feed(void)
+{
+  return SL_STATUS_NOT_INITIALIZED;
+}
 
 /***************************************************************************//**
  * Watchdog Interrupt Handler.
@@ -74,6 +81,7 @@ void halResetWatchdog(void)
 #if (SL_LEGACY_HAL_DISABLE_WATCHDOG == 0)
   WDOGn_Feed(SL_LEGACY_HAL_WDOG);
 #endif // (SL_LEGACY_HAL_DISABLE_WATCHDOG == 0)
+  (void) sl_watchdog_manager_force_feed();
 }
 
 /** @brief The value no longer matters.

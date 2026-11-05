@@ -11,10 +11,8 @@ class CALC_Modulator_Panther(CALC_Modulator):
         baud_per_symbol = 1
 
         if model.vars.MODEM_LONGRANGE_LRBLE.value == 1:
-            # In case of BLE LR 125 kps, baud_per_symbol is 8
             if model.vars.FRC_CTRL_RATESELECT.value == 0:
                 baud_per_symbol = 8
-            # In case of BLE LR 500 kps, baud_per_symbol is 2
             elif model.vars.FRC_CTRL_RATESELECT.value == 2:
                 baud_per_symbol = 2
             else:
@@ -57,10 +55,8 @@ class CALC_Modulator_Panther(CALC_Modulator):
         txbr_num_err_tol = 0.003
         txbr_max_den = 255
 
-        # : local variable for finding baudrate ratio that minimizes error between desired and actual baudrate
         txbr_num_err_map = {}
 
-        # find best integer ratio to match desired ratio
         found_best_ratio = False
         for den in xrange(txbr_max_den, 0, -1):
             num = ratio * den
@@ -72,7 +68,6 @@ class CALC_Modulator_Panther(CALC_Modulator):
                     found_best_ratio = True
                     break
 
-        # if best integer ratio is not found, re-calculate and find the ratio that is closest to the tolerance
         if not found_best_ratio:
             if len(txbr_num_err_map) > 0:
                 den = min(txbr_num_err_map, key=txbr_num_err_map.get)

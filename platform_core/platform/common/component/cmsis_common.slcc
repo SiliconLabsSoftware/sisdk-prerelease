@@ -29,6 +29,7 @@ source:
 provides:
 - name: cmsis_common
 requires:
+- name: log_none
 - name: cmsis_core
 - name: sl_assert
 - name: status

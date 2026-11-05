@@ -16,12 +16,10 @@ class CALC_Global_nerio(CALC_Global_jumbo):
 
     def buildVariables(self, model):
 
-        # Build variables from the Jumbo calculations
         super().buildVariables(model)
 
     def _add_common_regs(self, model):
         super()._add_common_regs(model)
-        # Add some variables for Nerio
         self._addModelRegister(model, 'MODEM.CTRL2.RATESELMODE', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.CTRL6.CODINGB', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.LONGRANGE.LRCORRTHD', int, ModelVariableFormat.HEX)
@@ -68,6 +66,5 @@ class CALC_Global_nerio(CALC_Global_jumbo):
         self._addModelRegister(model, 'FRC.FCD3.EXCLUDESUBFRAMEWCNT', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FRC.CTRL.RATESELECT', int, ModelVariableFormat.HEX)
 
-        # This register field was added specifically to enable the firmware fix for RAIL_LIB-2563
         self._addModelRegister(model, 'SEQ.MISC.BLE_VITERBI_FIX_EN', int, ModelVariableFormat.HEX)
 

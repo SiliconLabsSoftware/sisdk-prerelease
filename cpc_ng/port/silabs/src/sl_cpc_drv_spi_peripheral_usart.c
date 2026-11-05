@@ -89,7 +89,7 @@ static uint32_t prs_signal_cs(uint8_t peripheral_no)
   }
 }
 
-static sl_status_t init_caps(sl_cpc_drv_spi_peripheral_t *drv)
+static sl_status_t init_caps(struct sl_cpc_drv_spi_peripheral *drv)
 {
   sl_clock_branch_t spi_clock_branch;
   sl_status_t status;
@@ -112,7 +112,7 @@ static sl_status_t init_caps(sl_cpc_drv_spi_peripheral_t *drv)
 /***************************************************************************/ /**
  * Initialize peripheral clocks.
  ******************************************************************************/
-static void init_clocks(const sl_cpc_drv_spi_peripheral_t *drv)
+static void init_clocks(const struct sl_cpc_drv_spi_peripheral *drv)
 {
   sl_status_t status;
 
@@ -135,7 +135,7 @@ static void init_clocks(const sl_cpc_drv_spi_peripheral_t *drv)
  * Also fills the shared driver fields needed by the common SPI init
  * (PRS producers, RXBLOCKEN).
  ******************************************************************************/
-static sl_status_t init_hw(sl_cpc_drv_spi_peripheral_t *drv, const sl_cpc_drv_spi_peripheral_usart_config_t *cfg)
+static sl_status_t init_hw(struct sl_cpc_drv_spi_peripheral *drv, const sl_cpc_drv_spi_peripheral_usart_config_t *cfg)
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(cfg->peripheral);
   uint8_t peripheral_no = USART_NUM(usart);

@@ -64,12 +64,7 @@ class CALC_Demodulator(ICalculator):
 
         self._addModelVariable(model, 'rx_ch_hopping_order_num', int, ModelVariableFormat.DECIMAL)
 
-        # These values pass through to be consumed by RAIL API calls to enable RX scanning/hopping. Implemented as overrides to enable development. Long-term should be calculate-able.
         var = self._addModelVariable(model, 'rx_ch_hopping_mode', Enum, ModelVariableFormat.DECIMAL, 'For receive scanning PHYs: event to trigger a hop to next PHY')
-        # Enum values are defined by RAIL.
-        # TODO: find a better, programmatic way to ensure this enum definition always matches what is in RAIL
-        # One place to find them is pyrailib:
-        # \libraries\py_system_common\app\pyraillib\platform\efr32xg21\RpcWrapper.py
         member_data = [
             ['RAIL_RX_CHANNEL_HOPPING_MODE_MANUAL', 0, 'Manual mode'],
             ['RAIL_RX_CHANNEL_HOPPING_MODE_TIMEOUT'  , 1, 'Fixed time out'],
@@ -87,31 +82,22 @@ class CALC_Demodulator(ICalculator):
 
 
         if model.part_family.lower() not in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
-            # 40nm Series 2 enable optional input for SRC range minimum
             self._addModelVariable(model, 'src1_range_available_minimum', int, ModelVariableFormat.DECIMAL, 'SRC range minimum')
             self._addModelVariable(model, 'viterbidemod_disdemodof_viterbi_demod_disable_overflow_detect', int, ModelVariableFormat.DECIMAL)
 
 
 
     def calc_fxo_or_fdec8(self, model):
-        # EFR32 90nm parts (Dumbo, Jumbo, Nerio, Nixi) use fxo here.
-        # Note Panther will overload this to reflect its different architecture.
         model.vars.fxo_or_fdec8.value = model.vars.xtal_frequency.value * 1.0
 
     def calc_src12_bit_widths(self, model):
-        # EFR32 90nm parts (Dumbo, Jumbo, Nerio, Nixi) use 8, 11 here
-        # Note Panther will overload this to reflect its different architecture.
         model.vars.src1_bit_width.value = 8
         model.vars.src2_bit_width.value = 11
 
     def calc_ch_filt_bw_available(self, model):
-        # EFR32 90nm parts (Dumbo, Jumbo, Nerio, Nixi)
-        # Note Panther will overload this to reflect its different architecture.
         model.vars.ch_filt_bw_available.value = [0.263, 0.196]
 
     def calc_src1_range_available(self, model):
-        # EFR32 90nm parts (Dumbo, Jumbo, Nerio, Nixi)
-        # Note Panther will overload this to reflect its different architecture.
         model.vars.src1_range_available = xrange(127, 156, 1)
 
 
@@ -127,16 +113,13 @@ class CALC_Demodulator(ICalculator):
         modformat = model.vars.modulation_type.value
         spreading_factor = model.vars.dsss_spreading_factor.value * 1.0
 
-        # Start by assuming baudrate = bitrate
         baudrate = model.vars.bitrate.value
         baudrate_offset = model.vars.rx_bitrate_offset_hz.value
 
-        # for 4-FSK baudrate is half of bitrate
         if modformat == model.vars.modulation_type.var_enum.FSK4:
             baudrate /= 2.0
             baudrate_offset /= 2.0
 
-        # in DSSS mode factor in the spreading_factor to get baudrate = chiprate
         if spreading_factor > 0:
             baudrate *= spreading_factor
             baudrate_offset *= spreading_factor
@@ -168,127 +151,83 @@ class CALC_Demodulator(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # read required config parameters
         baudrate = model.vars.baudrate.value
         fxo = model.vars.fxo_or_fdec8.value
         bw_desired = model.vars.bandwidth_hz.value * 1.0
         brcalen = model.vars.brcalen.value
         tol = model.vars.baudrate_tol_ppm.value
 
-        # IF frequency is not known yet so set it to zero
-        # we only care about this if it is forced at the input
-        # in which case that value is going to be read back
         model.vars.if_frequency_hz.value = 0
         fc_desired = model.vars.if_frequency_hz.value * 1.0
 
-        # baudrate calibration works only in one direction so we set the
-        # baudrate to the smallest value we want to support and let the calibration
-        # hardware track it
         if brcalen == 1:
             baudrate -= baudrate * tol / 1000000.0
 
-        # check if the bandwidth value was forced
         if model.vars.bandwidth_hz.value_forced == None:
             forced = 0
         else:
             forced = 1
 
-        # want to minimize this so start with big number
         best_cost = 99e99
         best_fc = 0
 
-        # loop over all possible DEC0, DEC1, and CFOSR values
         for dec0 in [3, 4, 8]:
 
             for dec1 in xrange(11500, 0, -1):
 
-                # if we have desired center (IF) frequency choose corresponding setting
-                # if not try all options to find the best
                 if fc_desired > 0:
                     cfosr_list = self.valid_cfosr(round(fxo / (dec0 * fc_desired)))
                 else:
                     cfosr_list = [32, 16, 12, 8, 7]
 
                 for cfosr in cfosr_list:
-                    # given dec0 and dec1 calculate bandwidth we actually get
                     bw = (fxo * 0.263) / (dec0 * dec1)
 
-                    # unless we are at the largest BW possible skip the rest if bw is less
-                    # than 95% of carson bw or 82% of carson bw for 2.4GHz band
-                    # TODO: tune these constants
                     if bw > 2e6:
                         carson_scale = 0.82
                     else:
                         carson_scale = 0.95
 
-                    # we technically could do the following checks in the cost function below but
-                    # that would mean calculating the cost function for thousands of
-                    # combinations that we know will not work so to save computation
-                    # we check this here.
 
-                    # if bw less than a scaled version of the carson bw throw away this combination
-                    # unless we are using the widest possible bw setting we have on the chip
-                    # dec0 = 4 actually results in wider bw than dec0 = 3 due to the wider bw
-                    # decimation filter it has.
                     if bw < carson_scale * bw_desired and not (dec1 == 1 and (dec0 == 3 or dec0 == 4)):
                         continue
 
-                    # calculate IF frequency and bandwidth
                     fc = fxo / (dec0 * cfosr)
 
-                    # make sure the IF frequency we choose puts the lower edge
-                    # of the band above 107KHz which is the lower cutoff of the ADC filter
                     if (fc < 250e3 and fc_desired == 0) or fc - bw / 2 < 107e3:
                         continue
 
-                    # make sure the upper end of the spectrum is within limits of the filters
                     dec0_bw = self.return_dec0_bw(dec0, fxo)
 
                     if (fc + bw / 2) > dec0_bw:
                         continue
 
-                    # calculate corresponding DEC2 values
 
-                    # for extreme bandwidth PHYs e.g. OOK PHYs where bandwidth is much larger
-                    # than the carson bandwidth we want to try large OSR values
-                    # the limit for the else part is br = bw / 0.263*OSR*dec2 = bw/0.263*5*64 = bw/84
                     if bw_desired > 84 * baudrate:
                         dec2_start = int(math.floor(fxo / (15.0 * dec0 * dec1 * baudrate)))
                         dec2_end = int(math.ceil(fxo / (5.0 * dec0 * dec1 * baudrate)))
                     else:
-                        # for normal PHYs we stick with OSR of 5
-                        # we have two possible values for DEC2 given DEC0 and DEC1 so we loop
-                        # over those values below
                         dec2_start = int(math.floor(fxo / (5.0 * dec0 * dec1 * baudrate)))
                         dec2_end = dec2_start + 1
 
-                    # 0 is not a valid value for DEC2 so only try 1 if we end up with 0
                     if dec2_start == 0:
                         dec2_start = 1
                         dec2_end = 1
 
-                    # max value for DEC2 is 63
                     if dec2_end > 63:
                         dec2_end = 63
 
                     for dec2 in xrange(dec2_start, dec2_end + 1):
 
-                        # get best RXBR values for given divider ratios
                         rxbrint, rxbrnum, rxbrden = self.return_rxbr(dec0, dec1, dec2, baudrate, fxo, brcalen)
 
-                        # calculate real baudrate we get with these settings
                         baudrate_real = py2round(fxo / (dec0 * dec1 * dec2 * 2 * (rxbrint + float(rxbrnum) / rxbrden)))
 
-                        # calculate oversampling rate for given combination
                         osr = 2 * (rxbrint + float(rxbrnum) / rxbrden)
 
-                        # calculate cost function based on over-sampling-rate, bw, and rx bit rate
-                        #print(dec0, dec1, dec2, rxbrint, rxbrnum, rxbrden, cfosr, bw, baudrate, fc)
                         [cost, bw_error, osr_error, range_error, rate_error, fc_cost] = \
                             self.return_cost(model, osr, bw, bw_desired, baudrate_real, baudrate, fc, forced, brcalen)
 
-                        # record necessary info if we found a better combination than we had
-                        # prefer larger decimation in dec0 if the cost is the same
                         if cost < best_cost or (cost == best_cost and dec0 > dec1 and fc == best_fc):
                             best_cost = cost
                             best_dec0 = dec0
@@ -307,7 +246,6 @@ class CALC_Demodulator(ICalculator):
                             model.vars.cost_fc.value = fc_cost
                             model.vars.cost_total.value = cost
 
-        # store best combination in variables to be written to registers in other functions
         model.vars.dec0.value = int(best_dec0)
         model.vars.dec1.value = int(best_dec1)
         model.vars.dec2.value = int(best_dec2)
@@ -318,9 +256,6 @@ class CALC_Demodulator(ICalculator):
         model.vars.if_frequency_hz.value = int(best_fc)
 
 
-    # TODO: add deviation error to this cost function
-    # TODO: if timing_window * osr  > 256 we might fail: find where we break down in terms of high OSR
-    # TODO: make constant programmable
     def return_cost(self, model, osr, bw, bw_desired, baudrate_real, baudrate_hz, fc, forced, brcalen):
         """Cost function used to find optimal settigs for DEC0, DEC1, DEC2, CFOSR, RXBRNUM, RXBRDEN
 
@@ -338,13 +273,10 @@ class CALC_Demodulator(ICalculator):
         if bw > bw_desired:
             bw_error = 100.0 * (bw - bw_desired) / bw_desired
         else:
-            #TODO: might want to give this a bigger cost
             bw_error = 100.0 * (bw_desired - bw) / bw_desired
 
-        # we want osr to be integer
         osr_error = abs(osr - py2round(osr))
 
-        # calculate range_error as the distance to 5 or 8 if we are outside this range
         if osr < 4:
             range_error = 200.0
         elif osr < 5:
@@ -354,11 +286,8 @@ class CALC_Demodulator(ICalculator):
         else:
             range_error = 200.0
 
-        # if the baudrate is not exact penalize this setting by 1e9
         rate_error = 100.0 * abs(baudrate_real - baudrate_hz) / baudrate_real
 
-        # if baudrate calibration is enabled allow up to 1% error if not allow
-        # 0.1% error before penalizing due to excessive baudrate offset
         if brcalen == 1:
             rate_error_limit = 1.0
         else:
@@ -374,16 +303,12 @@ class CALC_Demodulator(ICalculator):
         else:
             fc_cost = 0.0
 
-        # if bandwidth was forced choose setting with smallest bw_error and
-        #  look at other metrics only if there are several with the same bw_error
         if forced:
             cost = 100 * bw_error + osr_error + range_error + rate_error + fc_cost
         else:
             cost = bw_error + osr_error + range_error + rate_error + fc_cost
 
-        #print(cost, bw_error, osr_error, range_error, rate_error, fc_cost)
         return cost, bw_error, osr_error, range_error, rate_error, fc_cost
-        #return cost
 
 
     def calc_dec0_reg(self, model):
@@ -408,9 +333,6 @@ class CALC_Demodulator(ICalculator):
         if val == 3:
             reg = 0
         elif val == 4:
-            # in dumbo and jumbo we have two dec0 filters wide and narrow
-            # choose between them based on bw
-            # for other chips set this to 1
             if family in ["dumbo", "jumbo", "unit_test_part"]:
                 if bw > fxo * 0.037:
                     reg = 1
@@ -580,31 +502,23 @@ class CALC_Demodulator(ICalculator):
             brcalen (unknown): unknown)
         """
 
-        # calculate total fractional multiplier for the target RX baud rate
         rxbrfrac = fxo / (dec0 * dec1 * dec2 * baudrate_hz * 2.0)
 
-        # if fraction is less than we can represent with 5 bits ratio
-        # return the smallest possible value
         if rxbrfrac < 1/31.0:
             return 0, 1, 31
 
-        # get the integer part
         rxbrint = math.floor(rxbrfrac)
 
         if rxbrint > 7:
             rxbrint = 7
 
-        # remove the integer part from the multiplier
         rxbrfrac -= rxbrint
 
-        # if brcalen is enabled HW requires that rxbrden to be 16
-        # see BRCALEN entry in datasheet
         if brcalen == 1:
             rxbrden_range = [16]
         else:
             rxbrden_range = xrange(1, 32)
 
-        # loop over all possible denominators and find best numarator
         best_error = 99
         best_num = 0
         best_den = 0
@@ -646,23 +560,19 @@ class CALC_Demodulator(ICalculator):
         dec1 = model.vars.dec1.value
         dec2 = model.vars.dec2.value
 
-        # if offset is zero use calculated rxbr values
         if baudrate_offset == 0:
             rxbrint = model.vars.rxbrint.value
             rxbrnum = model.vars.rxbrnum.value
             rxbrden = model.vars.rxbrden.value
         else:
-            # limit offset to 1%
             offset_limit = 0.01 * baudrate_hz
             if baudrate_offset > offset_limit:
                 baudrate_offset = offset_limit
             elif baudrate_offset < -offset_limit:
                 baudrate_offset = - offset_limit
 
-            # apply offset to baudrate
             new_baudrate = baudrate_hz + baudrate_offset
 
-            # if offset is non-zero recalculate rxbr and use the new values
             (rxbrint, rxbrnum, rxbrden) = self.return_rxbr(dec0, dec1, dec2, new_baudrate, fxo, brcalen)
 
         self._reg_write(model.vars.MODEM_RXBR_RXBRINT, int(rxbrint))
@@ -722,13 +632,11 @@ class CALC_Demodulator(ICalculator):
         mod_format = model.vars.modulation_type.value
         mode_index = CALC_Freq_Offset_Comp().freq_comp_mode_index(model, mode)
 
-        #FIXME: check if we need to add the ppm values for internal comp?
         if mode_index >= 4:
             freq_tolerance = 0
         else:
             freq_tolerance = 2.0 * (rx_ppm + tx_ppm)/1.0e6 * rf_freq_hz
 
-        # use Carson rule to calculate desired bandwidth
         if mod_format == model.vars.modulation_type.var_enum.OOK or \
            mod_format == model.vars.modulation_type.var_enum.ASK:
             bw_carson = 5.0 * baudrate_hz + freq_tolerance
@@ -738,10 +646,8 @@ class CALC_Demodulator(ICalculator):
         model.vars.bandwidth_carson_hz.value = int(py2round(bw_carson))
 
         if mod_format == model.vars.modulation_type.var_enum.OOK:
-            #Default value of BW for OOK is 75 times the bitrate
             model.vars.bandwidth_hz.value = int(py2round(baudrate_hz*75))
         else:
-            # default value of bandwidth_hz is the carson bandwidth
             model.vars.bandwidth_hz.value = int(py2round(bw_carson))
 
 
@@ -794,8 +700,6 @@ class CALC_Demodulator(ICalculator):
         dec2 = model.vars.dec2_actual.value
         mod_format = model.vars.modulation_type.value
 
-        # if supported frequency offset is larger than the deviation we should use
-        # that to calculate frequency gain to avoid saturation
         if freq_dev_hz != 0 and freq_offset >= freq_dev_hz:
             scale = freq_offset / freq_dev_hz
             freq_dev_hz = freq_offset
@@ -825,19 +729,14 @@ class CALC_Demodulator(ICalculator):
 
         target_freq_gain = model.vars.freq_gain.value
 
-        # need target_freq_gain in m * 2^(2-e) format
         if target_freq_gain > 0:
             m, e = CALC_Utilities().frac2exp(7, target_freq_gain)
             e = 2 - e
         else:
             m = e = 0
 
-        # Some input combinations can produce values out of range for the register fields,
-        # such as applying crystal accuracy  > 7ppm for PHY 915MHz/600bps/300Hz
 
-        # MCUW_RADIO_CFG-799
 
-        # TODO: is would be best to query the register model to determine these two fields are 7 bits wide
 
         if (int(m)) > 7:
             raise CalculationException("Calculated frequency signal scaling coefficient of %s exceeds limit of 7!" % int(m) )
@@ -879,7 +778,6 @@ class CALC_Demodulator(ICalculator):
         gain = model.vars.freq_gain_actual.value
         mod_format = model.vars.modulation_type.value
 
-        # frequency deviation only used for 2-FSK and 4-FSK modulation
         deviation = 0.0
 
         if gain > 0:
@@ -977,7 +875,6 @@ class CALC_Demodulator(ICalculator):
         else:
             interpolation_gain = txbrnum / 128.0
 
-        # calculate phase interpolation gain for MSK and OQPSK cases
         if modformat == model.vars.modulation_type.var_enum.MSK or \
            modformat == model.vars.modulation_type.var_enum.OQPSK:
             interpolation_gain = 2 ** (math.ceil(math.log(interpolation_gain, 2)))
@@ -1081,7 +978,6 @@ class CALC_Demodulator(ICalculator):
         self._reg_write(model.vars.MODEM_CTRL2_DATAFILTER,  datafilter)
 
 
-    # TODO: disable weighting also if DEVMULA/DEVMULB is used
     def calc_devweightdis_reg(self, model):
         """determine if deviation weighting should be disabled
         see section 5.7.5 in EFR32 Reference Manual (internal.pdf)
@@ -1092,7 +988,6 @@ class CALC_Demodulator(ICalculator):
 
         scale = model.vars.freq_gain_scale.value
 
-    # disable weighting if we scaled frequency gain
         if scale < 1:
             self._reg_write(model.vars.MODEM_CTRL2_DEVWEIGHTDIS,  1)
         else:
@@ -1124,13 +1019,9 @@ class CALC_Demodulator(ICalculator):
         self._reg_write(model.vars.MODEM_CTRL1_PHASEDEMOD, phasedemod)
 
 
-    # limit accumulated baudrate offset over timing window to 30000 ppm or 3%
-    # used in calc_resynper_brcal_val and calc_baudrate_tol_ppm_actual
-    # TODO: might need to tweak this number based on PHY performance
     max_accumulated_tolerance_ppm = 30000.0
 
 
-    #TODO: do not enable brcalen if preamble length is short
     def calc_resyncper_brcal_val(self, model):
         """calculate resync period for baudrate offset compensation
         see section 5.7.4 in EFR32 Reference Manual (internal.pdf)
@@ -1148,20 +1039,13 @@ class CALC_Demodulator(ICalculator):
         in_2fsk_opt_scope = model.vars.in_2fsk_opt_scope.value
 
         if mod_type == model.vars.modulation_type.var_enum.OOK or in_2fsk_opt_scope:
-            # Always use resynchronization period of 1 for OOK and 2FSK optimization
             resyncper = 1
         else:
-            # if non-zero baudrate tolerance is provided at input use that else set RESYNCPER to 2
             if tol > 0:
                 resyncper = self.max_accumulated_tolerance_ppm / (tol * timingwindow)
             else:
                 resyncper = 2.0
 
-        # if RESYNCPER < 0.5 enable baudrate measurement during preamble using
-        # BRCALEN and BRCALAVG and set RESYNCPER to 1
-        # note that RESYNCPER is rounded to the nearest integer when writing to register
-        # do not enable BRCAL in DSSS
-        # do not enable BRCAL with OOK (experimentally found to not work well)
         if resyncper < 0.5 and length == 0 and mod_type != model.vars.modulation_type.var_enum.OOK \
                 and not in_2fsk_opt_scope:
             resyncper = 1.0
@@ -1255,16 +1139,6 @@ class CALC_Demodulator(ICalculator):
 
         modulation = model.vars.modulation_type.value
 
-        # TODO: for now setting DEVOFFCOMP to zero for all cases. The only
-        # PHY we actually need this set to 1 is the MBUS ng PHY. Once we have
-        # more data on how to set it we should update this logic. We may want
-        # to add a new advanced input called deviation_error_ppm that would define
-        # how much deviation error we need to support and based on that we either
-        # enable or disable this bit.
-        #
-        # Note that the demod gain is also being set differently in that phy to compensate for
-        # higher than expected deviation.  Both of those register being poked go together.
-        #
         if modulation == model.vars.modulation_type.var_enum.FSK4:
             self._reg_write(model.vars.MODEM_CTRL4_DEVOFFCOMP, 0)
         else:
@@ -1310,7 +1184,6 @@ class CALC_Demodulator(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # set to zero by default
         model.vars.rx_bitrate_offset_hz.value = 0
 
 
@@ -1335,23 +1208,16 @@ class CALC_Demodulator(ICalculator):
     def calc_adc_freq_actual(self, model):
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
 
-        # For series 1, ADC samples at Fs=Fhfxo
         adc_freq_actual = xtal_frequency_hz
 
         model.vars.adc_freq_actual.value = adc_freq_actual
 
-    # Helper calculation for FW calulation of SRC1
-    # These are phy specific calculations that is easier to do here
-    # than to reverse calculate in firmware
     def calc_src1_denominator(self, model):
         dec0 = model.vars.dec0_actual.value
         dec1 = model.vars.dec1_actual.value
         bandwidth = model.vars.bandwidth_hz.value
         model.vars.src1_calcDenominator.value = bandwidth * dec0 * dec1
 
-    # Helper calculation for FW calulation of SRC2
-    # These are phy specific calculations that is easier to do here
-    # than to reverse calculate in firmware
     def calc_src2_denominator(self, model):
         osr = model.vars.oversampling_rate_actual.value
         datarate = model.vars.baudrate.value
@@ -1364,7 +1230,6 @@ class CALC_Demodulator(ICalculator):
         model.vars.src2_calcDenominator.value = src2_calcDenominator
 
     def calc_dec0_values_available(self, model):
-        # EFR32 90nm parts (Dumbo, Jumbo, Nerio, Nixi) always allow all rates to be available
         model.vars.input_decimation_filter_allow_dec3.value = 1
         model.vars.input_decimation_filter_allow_dec8.value = 1
         model.vars.input_decimation_filter_allow_dec5.value = 0

@@ -20,17 +20,14 @@ class ProfileBLEOcelot(ProfileBLELynx):
         self._sw_profile_outputs_common = sw_profile_outputs_common_ocelot()
 
     def buildProfileModel(self, model):
-        # Build profile object and append it to the model
         profile = self._makeProfile(model)
 
-        # Build inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
         self.build_hidden_profile_inputs(model, profile)
         self.build_metadata_profile_inputs(model, profile)
 
-        # Build outputs
         buildFrameOutputs(model, profile)
         buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
@@ -45,14 +42,11 @@ class ProfileBLEOcelot(ProfileBLELynx):
         build_modem_regs_ocelot(model, profile)
 
     def build_variable_profile_outputs(self, model, profile):
-        # RAIL Outputs
         self._sw_profile_outputs_common.build_rail_outputs(model, profile)
 
-        # IRCal outputs
         self._sw_profile_outputs_common.build_ircal_outputs(model, profile)
 
     def build_info_profile_outputs(self, model, profile):
-        # Informational output
         self._sw_profile_outputs_common.build_info_outputs(model, profile)
         profile.outputs.append(ModelOutput(model.vars.base_frequency_hz, '', ModelOutputType.INFO, readable_name="Base Channel Frequency"))
         profile.outputs.append(ModelOutput(model.vars.channel_spacing_hz, '', ModelOutputType.INFO, readable_name="Channel Spacing"))

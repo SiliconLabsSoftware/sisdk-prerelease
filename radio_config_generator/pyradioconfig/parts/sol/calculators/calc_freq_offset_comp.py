@@ -4,9 +4,7 @@ from pyradioconfig.parts.sol.calculators.calc_utilities import Calc_Utilities_So
 
 class Calc_Freq_Offset_Comp_Sol(CALC_Freq_Offset_Comp_ocelot):
     def calc_afc_scale_value(self, model):
-        # Overriding this function due to variable name change
 
-        # Load model values into local variables
         freqgain = model.vars.freq_gain_actual.value
         mod_format = model.vars.modulation_type.value
         mode = model.vars.frequency_comp_mode.value
@@ -34,7 +32,6 @@ class Calc_Freq_Offset_Comp_Sol(CALC_Freq_Offset_Comp_ocelot):
         else:
             res = synth_res
 
-        # AFC to synth for Legacy
         if(demod_sel==model.vars.demod_select.var_enum.LEGACY):
             if mode_index >= 4 and freqgain > 0:
                 if mod_format == model.vars.modulation_type.var_enum.FSK2 or \
@@ -61,12 +58,10 @@ class Calc_Freq_Offset_Comp_Sol(CALC_Freq_Offset_Comp_ocelot):
                 afcscale = 1.0 * baudrate * phscale / (256 * res)
                 afcscale_tx = baudrate * phscale / (256 * synth_res)
 
-                # Reduce afc scale by eighth if oneshot is disabled. Following BLE case
                 if afc_oneshot == 0 and bcr_det_en == 1:
                     afcscale = afcscale / 8.0
 
         elif (demod_sel == model.vars.demod_select.var_enum.BCR):
-            # digital mixer frequency comp
             afcscale =  model.vars.pro2_afc_gain.value /  res
             afcscale_tx = model.vars.pro2_afc_gain.value / synth_res
         else:
@@ -75,8 +70,6 @@ class Calc_Freq_Offset_Comp_Sol(CALC_Freq_Offset_Comp_ocelot):
 
         afcscale = afcscale * scale
 
-        # We have to set TX AFCSCALE to 0 to disable the TX adjustment
-        # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1510
         if (afc_tx_adjust_enable == False):
             afcscale_tx = 0.0
 
@@ -96,13 +89,8 @@ class Calc_Freq_Offset_Comp_Sol(CALC_Freq_Offset_Comp_ocelot):
         else:
             res = synth_res
 
-        # calculate limit
         afcadjlim = freq_limit / res
 
-        # if AFC_LIM_RESET is enabled we reset to the center frequency
-        # once the accumulated offset reaches the limit. In this mode we
-        # like to set the limit to about 20% higher than where we like the
-        # limit to be
         if afclimreset:
             afcadjlim *= 1.2
 
@@ -121,6 +109,23 @@ class Calc_Freq_Offset_Comp_Sol(CALC_Freq_Offset_Comp_ocelot):
             res = synth_res
 
         model.vars.afc_limit_hz_actual.value = afcadjlim * res
+
+    def calc_afcadjrx_res(self, model):
+        digmixfb = Calc_Utilities_Sol().get_fefilt_actual(model, 'DIGMIXCTRL_DIGMIXFBENABLE')
+        vtafcframe = model.vars.MODEM_REALTIMCFE_VTAFCFRAME.value
+        vtdemoden = model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value
+        bcrafconeshot = model.vars.MODEM_BCRDEMODAFC1_ONESHOTAFCEN.value
+
+        if digmixfb:
+            model.vars.afcadjrx_res.value = model.vars.digmix_res_actual.value
+        else:
+            model.vars.afcadjrx_res.value = model.vars.synth_res_actual.value
+
+        if not vtafcframe and vtdemoden:
+            model.vars.afcadjrx_res.value = 0.0
+
+        if bcrafconeshot:
+            model.vars.afcadjrx_res.value = 0.0
 
     def calc_afconeshoft_reg(self, model):
 

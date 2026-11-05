@@ -2,5 +2,4 @@ from pyradioconfig.parts.ocelot.phys.Phys_Studio_Base_Standard_SUNFSK import PHY
 
 
 class PHYS_Studio_Base_Standard_SUNFSK_Margay(PHYS_Studio_Base_Standard_SUNFSK_Ocelot):
-    #Inherit all from Ocelot
     pass

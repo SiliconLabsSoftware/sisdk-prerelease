@@ -110,7 +110,7 @@
 // <q BTL_STORAGE_SPIFLASH_MACRONIX_MX25R6435F> Support Macronix MX25R6435F  (64 Mb LP)
 // <i> Default: 0
 // <i> Enable support for the Macronix MX25R6435F SPI flash in the bootloader. Adding support for multiple SPI flashes in the bootloader requires more flash memory.
-#define BTL_STORAGE_SPIFLASH_MACRONIX_MX25R6435F               0 
+#define BTL_STORAGE_SPIFLASH_MACRONIX_MX25R6435F               1 
 
 /*****************************************************************************
 * Numonyx flashes

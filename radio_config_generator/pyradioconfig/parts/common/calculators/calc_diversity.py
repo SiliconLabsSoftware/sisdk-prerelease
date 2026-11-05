@@ -30,10 +30,7 @@ class CALC_Diversity(ICalculator):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Input variables
 
-        # Internal variables
-        # Must exposing the forced selection of a antenna 0 only as DISABLE enum
         var = self._addModelVariable(model, 'antdivmode', Enum, ModelVariableFormat.DECIMAL, 'Antenna diversity mode')
         member_data = [
             ['DISABLE', 0, 'Disabled. Only Antenna 0 used'],
@@ -45,7 +42,6 @@ class CALC_Diversity(ICalculator):
             'List of supported antenna diversity mode',
             member_data)
 
-        # Bools not allowed as advanced inputs due to GUI constraint. Using enum instead
         var = self._addModelVariable(model, 'antdivrepeatdis', Enum, ModelVariableFormat.DECIMAL, 'Repeated measurement of first antenna when Select-Best algorithm is used')
         member_data = [
             ['REPEATFIRST' , 0, 'Enable repeated measurement of first antenna'],
@@ -56,11 +52,9 @@ class CALC_Diversity(ICalculator):
             'Enable or disable repeated measurement of first antenna',
             member_data)
 
-        # Output software variables for RAIL to consume
         self._addModelVariable(model, 'div_antdivmode', int, ModelVariableFormat.DECIMAL, 'Antenna diversity mode')
         self._addModelVariable(model, 'div_antdivrepeatdis', int, ModelVariableFormat.DECIMAL, 'Repeated measurement of first antenna when Select-Best algorithm is used')
 
-        # Calculation variable for reset period
         if model.part_family.lower() in ["jumbo", "nerio", "nixi"]:
             self._addModelVariable(model, 'div_demod_reset_period_hemi_usec', int, ModelVariableFormat.DECIMAL, 'Sequencer FW issues a reset to demod at this interval. Used in antenna diversity.')
 
@@ -73,12 +67,9 @@ class CALC_Diversity(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # default value 0 ANTENNA0 Antenna 0 (ANT0=1, ANT1=0) is used. This is not exposed as one of the enums, so use 0 here.
-        # default ANTDIVREPEATDIS 0
         model.vars.antdivmode.value = model.vars.antdivmode.var_enum.DISABLE
         model.vars.antdivrepeatdis.value = model.vars.antdivrepeatdis.var_enum.REPEATFIRST
 
-        # unless set otherwise by advanced inputs
         antdivmode = model.vars.antdivmode.value
         antdivrepeatdis = model.vars.antdivrepeatdis.value
 
@@ -86,16 +77,13 @@ class CALC_Diversity(ICalculator):
 
         flag_using_Viterbi_demod = False
 
-        # Viterbi does not exist in Dumbo:
-        if model.part_family.lower() in ["jumbo", "nerio", "nixi", "panther", "lynx", "leopard", "lion"]:
+        if model.part_family.lower() in ["jumbo", "nerio", "nixi", "panther", "lynx", "leopard", "lionu", "lion"]:
             flag_using_Viterbi_demod = (model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value == 1)
 
         if (not flag_using_Viterbi_demod):
-            # not using coherent demod, OK to enable diversity
             model.vars.div_antdivmode.value = int(antdivmode)
             model.vars.div_antdivrepeatdis.value = int(antdivrepeatdis)
         else:
-            # Viterbi demod, may not enable diversity
 
             model.vars.div_antdivmode.value = int(model.vars.antdivmode.var_enum.DISABLE)
             model.vars.div_antdivrepeatdis.value = int(model.vars.antdivrepeatdis.var_enum.REPEATFIRST)
@@ -117,10 +105,8 @@ class CALC_Diversity(ICalculator):
         if model.part_family.lower() in ["jumbo", "nerio", "nixi"]:
 
             if antdivmode == model.vars.antdivmode.var_enum.DISABLE:
-                # disable if not in diversity mode
                 model.vars.div_demod_reset_period_hemi_usec.value = 0
             elif (antdivmode == model.vars.antdivmode.var_enum.ANTSELFIRST) or (antdivmode == model.vars.antdivmode.var_enum.ANTSELRSSI):
-                # Units are half uSec. Use 1000x preamble time as the period
                 model.vars.div_demod_reset_period_hemi_usec.value = int(preamblebits / baudrate * 1000 * 1e6 * 2)
 
     def calc_diversity_div_demod_reset_period_hemi_usec_reg(self, model):

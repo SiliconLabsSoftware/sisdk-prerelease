@@ -41,7 +41,6 @@ def _ksi_cache_put(key, value):
 class CALC_Demodulator_lynx(CALC_Demodulator_panther):
 
     def buildVariables(self, model, add_demod_rate_var=True):
-        #Build all vars from inherited file
         super().buildVariables(model)
 
         if add_demod_rate_var:
@@ -122,8 +121,6 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
             super().calc_bw_carson(model)
 
     def get_alpha(self, model, modulation_index, shaping_filter, shaping_filter_param):
-        # Bandwidth adjustment based on mi and bt
-        # the thresholds were derived based simulating bandwidth of modulated signal with 98% of the energy
         mi = modulation_index
         sf = shaping_filter
 
@@ -164,7 +161,6 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
                 else:
                     alpha = -0.1
         else:
-            # for non Gaussian shaping keeping the original alpha calculation
             if (mi < 1.0):
                 alpha = 0.2
             elif (mi == 1.0):
@@ -178,7 +174,6 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         self._addModelActual(model, 'demod_rate', float, ModelVariableFormat.DECIMAL)
 
     def calc_fxo_or_fdec8(self, model):
-        # We can not use rx_synth_freq_actual in these calculations due to circular dependency
         flag_using_half_rate_mode = (model.vars.RAC_IFADCTRIM0_IFADCENHALFMODE.value == 1)
         if flag_using_half_rate_mode:
             model.vars.fxo_or_fdec8.value = model.vars.rx_synth_freq_actual.value / 128.0
@@ -212,81 +207,64 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         trecs_enabled = model.vars.trecs_enabled.value
         oversampling_rate = model.vars.oversampling_rate_actual.value
 
-        # : DEC8
         dec8_filter_taps = del_dec8 = 22
         dec8_filter_rate = adc_freq_actual / 8
         dec8_grp_delay = dec8_filter_taps / 2
         dec8_grp_delay_us = dec8_grp_delay / adc_freq_actual * 1e6
 
-        # : DEC0
-        dec0_filter_taps = del_dec0 = 27.0 if dec0 == 3 or dec0 == 4 else 40
+        dec0_filter_taps = del_dec0 = 27.0 if dec0 in [3, 4, 5] else 40
         dec0_filter_rate = dec8_filter_rate / dec0
         dec0_grp_delay = dec0_filter_taps / 2
         dec0_grp_delay_us = dec0_grp_delay / dec8_filter_rate * 1e6
 
-        # : IRCAL
         dc_ircal_digmix_grp_delay = del_dc_ircal_digmix = 2
         dc_ircal_digmix_rate = dec0_filter_rate
         dc_ircal_digmix_grp_delay_us = dc_ircal_digmix_grp_delay / dc_ircal_digmix_rate * 1e6
 
-        # : DEC1
         dec1_filter_taps = del_dec1 = (dec1 - 1) * 4.0 + 1
         dec1_filter_rate = dc_ircal_digmix_rate / dec1
         dec1_delay = dec1_filter_taps / 2
         dec1_grp_delay_us = dec1_delay / dc_ircal_digmix_rate * 1e6
 
-        # : SRC1
         src1_grp_delay = del_src1 = 3
         src1_rate = dec1_filter_rate * src1_actual
         src1_delay_us = src1_grp_delay / src1_rate * 1e6
 
-        # : channel filter
         chf_filter_taps = del_chflt = 2*len(self.return_coeffs(model))-1
         chf_filter_rate = dec1_filter_rate
-        # : channel filter is odd (taps+1)/2.
-        # : -1 term comes from CHF input goes directly into the combinational logic and does not pass into the delay line before multiplier.
         chf_grp_delay = (chf_filter_taps + 1) / 2 - 1 # : channel filter is odd (taps+1)/2.
         chf_grp_delay_us = chf_grp_delay / chf_filter_rate * 1e6
 
-        # : src2 delay
         src2_grp_delay = del_src2 = 2
         src2_rate = chf_filter_rate * src2_actual
         src2_delay_us = src2_grp_delay / chf_filter_rate * 1e6
 
-        # Digital gain and CORDIC do not introduce any delays
         del_digigain = 0
         del_cordic = 0
 
-        # Differentiation delay of 1, frequency gain has no delay
         diff_grp_delay = del_diff = 1
         diff_rate = src2_rate
         diff_delay_us = diff_grp_delay / diff_rate * 1e6
 
-        # : DEC2
         dec2_grp_delay = del_dec2 = dec2
         dec2_rate = src2_rate / dec2
         dec2_delay_us = dec2_grp_delay / src2_rate * 1e6
 
-        # : data filter delay
         del_data = datafilter_taps
         datafilter_grp_delay = datafilter_taps / 2
         datafilter_rate = dec2_rate
         datafilter_delay_us = datafilter_grp_delay / datafilter_rate * 1e6
 
-        # : calculate delay in samples from adc to src
         del_adc_to_src = ((((del_dec8 / 8 + del_dec0) / dec0 + del_dc_ircal_digmix + del_dec1) / dec1 + \
                            del_src1) / src1_actual + del_chflt + del_src2) / src2_actual
 
-        # : calculate delay in samples from adc to diff
         del_adc_to_diff = del_adc_to_src + del_digigain + del_cordic + del_diff
 
         grpdel_mixer_to_diff = ((del_dec1 + 1) / 2 / dec1 + (del_chflt + 1) / 2 + del_src2) / src2_actual + del_digigain + del_cordic + del_diff
 
-        # : Calculate group delay to src in us
         grp_delay_to_src_us = dec8_grp_delay_us + dec0_grp_delay_us + dc_ircal_digmix_grp_delay_us + \
                               dec1_grp_delay_us + src1_delay_us + chf_grp_delay_us + src2_delay_us
 
-        # : Calculate group delay for each demod
         if trecs_enabled:
             grp_delay_us = grp_delay_to_src_us + diff_delay_us
             delay_adc_to_demod = del_adc_to_diff
@@ -306,17 +284,13 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         model.vars.delay_adc_to_demod_symbols.value = int(math.ceil(delay_adc_to_demod_symbols))
 
     def calc_preamble_detection_length(self, model):
-        #This method calculates a defualt value for preamble_detection_length
 
         preamble_length = model.vars.preamble_length.value
 
-        # Set the preamble detection length to the preamble length (TX) by default
         model.vars.preamble_detection_length.value = preamble_length
 
     def calc_demod_rate_actual(self,model):
-        #This function calculates the actual sample rate at the demod
 
-        # Load model variables into local variables
         adc_freq_actual = model.vars.adc_freq_actual.value
         dec0_actual = model.vars.dec0_actual.value
         dec1_actual = model.vars.dec1_actual.value
@@ -326,35 +300,26 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
 
         demod_rate_actual = adc_freq_actual * src1_actual * src2_actual / (8 * dec0_actual * dec1_actual * dec2_actual)
 
-        #Load local variables back into model variables
         model.vars.demod_rate_actual.value = demod_rate_actual
 
     def calc_phscale_derate_factor(self, model):
-        #This function calculates the derating factor for PHSCALE for TRECS PHYs with large freq offset tol
 
-        #Always set to 1 on Ocelot for now
         phscale_derate_factor = 1
 
-        #Write the model var
         model.vars.phscale_derate_factor.value = phscale_derate_factor
 
     def calc_rx_deviation_scaled(self,model):
-        #This function calculates the scaled RX deviation
 
-        #Load model variables into local variables
         deviation = model.vars.deviation.value
         freq_gain_actual = model.vars.freq_gain_actual.value
         demod_rate_actual = model.vars.demod_rate_actual.value
 
         rx_deviation_scaled = float(256*deviation*freq_gain_actual/demod_rate_actual)
 
-        #Load local variables back into model variables
         model.vars.rx_deviation_scaled.value = rx_deviation_scaled
 
     def calc_devweightdis_reg(self,model):
-        #This function calculates the register value of devweightdis
 
-        #Load model variables into local variables
         trecs_enabled = model.vars.trecs_enabled.value
         mod_type = model.vars.modulation_type.value
         rx_deviation_scaled = model.vars.rx_deviation_scaled.value
@@ -368,14 +333,12 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         else:
             devweightdis = 0
 
-        #Write register
         if trecs_enabled:
             self._reg_write(model.vars.MODEM_CTRL2_DEVWEIGHTDIS, devweightdis)
         else:
             super().calc_devweightdis_reg(model)
 
     def calc_phscale_reg(self, model):
-        #Load model variables into local variables
         mi = model.vars.modulation_index.value
         demod_sel = model.vars.demod_select.value
         osr = model.vars.oversampling_rate_actual.value
@@ -383,15 +346,12 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         trecs_enabled = model.vars.trecs_enabled.value
 
         if mi > 0.0:
-            # this scaling will bring the nominal soft decision as close to 64 as possible with a power of 2 scaling
             phscale_reg = int(round(math.log(2 * mi, 2)))
         else:
             phscale_reg = 0
 
-        #Derate phscale per phscale_derate_factor (used to accomodate large freq offset tol)
         phscale_reg += int(round(math.log2(phscale_derate_factor)))
 
-        # limit phscale_reg from 0 to 3
         phscale_reg = max(min(phscale_reg, 3), 0)
 
         if not trecs_enabled:
@@ -410,17 +370,14 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         freq_dev_min = model.vars.freq_dev_min.value
         baudrate = model.vars.baudrate.value
 
-        # Calculate minimum and maximum possible modulation indices
         mi_min = 2.0 * freq_dev_min / baudrate
         mi_max = 2.0 * freq_dev_max / baudrate
 
-        # Determine which modulation index to use for the purposes of KSI calculation
         mi_to_use = mi_min + (mi_max - mi_min) * 0.5
 
         model.vars.modulation_index_for_ksi.value = mi_to_use
 
     def return_ksi1_calc(self, model, phscale):
-        # Load model variables into local variables
         demod_sel = model.vars.demod_select.value
         modtype = model.vars.modulation_type.value
         trecs_enabled = model.vars.trecs_enabled.value
@@ -430,9 +387,6 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
 
         gain = 1 / phscale
 
-        # calculate ksi values for Viterbi demod only
-        # if the gain is set correctly this should give us nominal soft decisions of 64 for regular case
-        # in case of remod we actually use the legacy demod's gain which sets the deviation + freq offset to 128
         if (trecs_enabled and
                 (modtype == model.vars.modulation_type.var_enum.FSK2 or
                  modtype == model.vars.modulation_type.var_enum.FSK4 or
@@ -445,14 +399,10 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         return ksi1
 
     def calc_ksi1(self, model):
-        #This function writes the ksi1 model variable that is used to program both
-        #hardmodem and softmodem ksi1 regs
         trecs_enabled = model.vars.trecs_enabled.value
 
-        # Read in model vars
         phscale_actual = model.vars.phscale_actual.value
 
-        # Call the calculation routine for ksi1 based on actual selected phscale
         if trecs_enabled:
             model.vars.ksi1.value = self.return_ksi1_calc(model, phscale_actual)
         else:
@@ -460,14 +410,11 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
 
     def calc_ksi1_reg(self, model):
 
-        #Read in model vars
         ksi1 = model.vars.ksi1.value
 
-        #Write the reg
         self._reg_sat_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI1, ksi1)
 
     def gen_frequency_signal(self, x, sf, cf, sfosr, model):
-        # get parameters
         deviation = model.vars.deviation.value
         baudrate = model.vars.baudrate.value
         demodosr = round(model.vars.oversampling_rate_actual.value)
@@ -476,40 +423,28 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         demod_select = model.vars.demod_select.value
         dec2 = model.vars.dec2_actual.value
 
-        # scale shaping filter to desired amplitude OSR = 8
         sf = sf / np.sum(sf) * sfosr
 
-        # pulse shape OSR = 8
         y = sp.lfilter(sf, 1, x)
 
-        # apply deviation OSR = 8
         z = y * deviation
 
-        # integrate to get phase after scaling by sampling rate at TX OSR = 8
         t = np.cumsum(z / (baudrate * sfosr))
 
-        # modulate at baseband OSR = 8
         u = np.exp(1j * 2 * math.pi * t)
 
-        # resample at channel filter rate (e.g. sfosr -> osr) OSR = chflt_osr * src2
-        # FIXME: handle other remod paths here if we end up using them
         osr = demodosr
 
         u2 = resample_poly_cached(u,osr*src2, sfosr*16384)
 
-        # channel filter OSR = chflt_osr * src2
         v = sp.lfilter(cf, 1, u2)
 
-        # src2 - resample to target OSR rate OSR = target_osr * dec2
         v2 = resample_poly_cached(v, 16384, src2)
 
-        # CORDIC OSR = target_osr * dec2
         a = np.unwrap(np.angle(v2))
 
-        # differentiate phase to frequency OSR = target_osr * dec2
         f = a[osr:] - a[0:-osr]
 
-        # return frequency signal
         return f
 
     def _get_ksi_cache_additional_inputs(self, model):
@@ -554,40 +489,30 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
 
     def _build_ksi_cache_key(self, model, ksi1, osr, sf, cfh):
         cache_inputs = (
-            # Stable labels for readability + deterministic key structure.
             ("ksi1", ksi1),
             ("osr", osr),
             ("sf", sf),
             ("cfh", cfh),
-            # Prevent future derived parts with different waveform math from
-            # aliasing shared Lynx-family cache entries.
             ("impl", self._get_ksi_cache_impl_discriminator()),
             ("gen_signal", self._get_ksi_cache_gen_signal_inputs(model)),
         )
         cache_inputs += tuple(self._get_ksi_cache_additional_inputs(model))
-        # Version tag allows future key-shape changes without colliding old entries.
-        # freeze_for_cache converts nested/numpy-heavy inputs into a stable hashable key.
         return ("lynx_ksi2_ksi3_v4", freeze_for_cache(cache_inputs))
 
     def return_ksi2_ksi3_calc(self, model, ksi1):
-        # get parameters
         osr = int(round(model.vars.oversampling_rate_actual.value))
         _ksi_key = None
 
-        # calculate only if needed - ksi1 would be already calculated if that is the case
         if (ksi1 == 0):
             best_ksi2 = 0
             best_ksi3 = 0
         else:
-            # get shaping filter and it oversampling rate with respect to baudrate
             sf = CALC_Shaping_lynx().get_shaping_filter(model)/1.0
             sfosr = 8 # shaping filter coeffs are sampled at 8x
 
-            # get channel filter and expend the symmetric part
             cfh = np.asarray(self.return_coeffs(model))
             cfwb = cf = np.block([cfh, cfh[-2::-1]])/1.0
 
-            # Check result cache before expensive DSP computation.
             if _ADVANCED_CACHE_EN:
                 try:
                     _ksi_key = self._build_ksi_cache_key(model, ksi1, osr, sf, cfh)
@@ -595,56 +520,35 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
                     if _cached is not None:
                         return _cached
                 except Exception:
-                    # Never block calculation on cache-key construction edge cases.
-                    # Fallback is compute-without-cache for this invocation.
                     _ksi_key = None
 
-            # base sequences for +1 and -1
             a = np.array([ 1.0, 0, 0, 0, 0, 0, 0, 0])
             b = np.array([-1.0, 0, 0, 0, 0, 0, 0, 0])
 
-            # generate frequency signal for periodic 1 1 1 0 0 0 sequence for ksi1
             x1 = np.matlib.repmat(np.append(np.matlib.repmat(a, 1, 3),np.matlib.repmat(b, 1, 3)), 1, 4)
             f1 = self.gen_frequency_signal( x1[0], sf, cf, sfosr, model)
 
-            # generate frequency signal for periodic 1 1 0 0 1 1 sequence for ksi2
             x2 = np.matlib.repmat(np.append(np.matlib.repmat(a, 1, 2), np.matlib.repmat(b, 1, 2)), 1, 6)
             f2 = self.gen_frequency_signal( x2[0], sf, cf, sfosr, model)
 
-            # generate frequency signal for periodic 1 0 1 0 1 0 sequence for ksi3
             x3 = np.matlib.repmat(np.append(np.matlib.repmat(a, 1, 1), np.matlib.repmat(b, 1, 1)), 1, 12)
             f3 = self.gen_frequency_signal( x3[0], sf, cf, sfosr, model)
 
-            # generate frequency signal for periodic 1 0 1 0 1 0 sequence for ksi3 but with aqcusition channel filter
             f3wb = self.gen_frequency_signal( x3[0], sf, cfwb, sfosr, model)
 
-            # find scaling needed to get f1 to the desired ksi1 value and apply it to f2 and f3
             ind = osr - 1
             scaler = ksi1 / np.max(np.abs(f1[ind + 8 * osr - 1: - 2 * osr: osr]))
             f2 = scaler * f2
             f3 = scaler * f3
             f3wb = scaler * f3wb
 
-            # from matplotlib import pyplot as plt
-            # plt.plot(f1*scaler,'x-')
-            # plt.show()
-            # plt.plot(f2,'x-')
-            # plt.plot(f3,'x-')
-            # plt.plot(f3wb,'x-')
 
-            # search for best phase to sample to get ksi3 value.
-            # best phase is the phase that gives largest eye opening
             best_ksi3 = 0
             for ph in range(osr):
                 ksi3 = np.max(np.round(np.abs(f3[ - 6 * osr + ph: - 2 * osr: osr])))
                 if ksi3 > best_ksi3:
                     best_ksi3 = ksi3
 
-            # ksi2 is tricky depending if we sampled perfectly (symmetric around a
-            # pulse we should see the same value for 1 1 0 and 0 1 1 sequence but
-            # most of the time we cannot sample perfectly since can go as low as 4x
-            # oversampling for Viterbi PHYs. In this case we have 2 ksi values which we
-            # average to get the ksi2 value
             best_cost = 1e9
             for ph in range(osr):
                 x = np.round(np.abs(f2[- 6 * osr + ph: - 2 * osr: osr]))
@@ -653,9 +557,6 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
                     best_cost = cost
                     best_ksi2 = np.round(np.mean(x))
 
-        # ensure that ksi1 >= ksi2 >= ksi3
-        # this code should only be needed in the extreme case when ksi1 = ksi2 = ksi3 and
-        # small variation can cause one to be larger than the other
         best_ksi2 = ksi1 if best_ksi2 > ksi1 else best_ksi2
         best_ksi3 = best_ksi2 if best_ksi3 > best_ksi2 else best_ksi3
         _result = (best_ksi2, best_ksi3)
@@ -664,16 +565,11 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         return _result
 
     def calc_ksi2_ksi3(self, model):
-        # This function writes the ksi2,3 model variables that are used to program both
-        # hardmodem and softmodem ksi regs
         trecs_enabled = model.vars.trecs_enabled.value
 
-        #Read in model vars
         ksi1 = model.vars.ksi1.value
 
-        #Write the model vars
         if trecs_enabled:
-            # Call the calculation routine for ksi2 and ksi3
             ksi2, ksi3 = self.return_ksi2_ksi3_calc(model, ksi1)
             model.vars.ksi2.value = int(ksi2)
             model.vars.ksi3.value = int(ksi3)
@@ -683,18 +579,15 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
 
     def calc_ksi2_ksi3_reg(self, model):
 
-        #Read in model vars
         ksi2 = model.vars.ksi2.value
         ksi3 = model.vars.ksi3.value
 
-        #Write the reg fields
         self._reg_sat_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI2, int(ksi2))
         self._reg_sat_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI3, int(ksi3))
 
     def return_coeffs(self, model):
         bwsel = model.vars.MODEM_SRCCHF_BWSEL.value
 
-        # this table is from pg_lynx_book pp.1336
         if bwsel == 0:
             coeffs = [46, 105, 94, -10, -155, -230, -124, 192, 629, 1009, 1160]
         elif bwsel == 1:
@@ -705,14 +598,12 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         return coeffs
 
     def calc_freq_dev_min(self, model):
-        # Reading variables from model variables
         fdeverror = 0# : TODO add model.vars.deviation_tol_ppm.value
         deviation = model.vars.deviation.value
         freq_dev_min = int(deviation - (fdeverror * deviation) / 1000000)
         model.vars.freq_dev_min.value = freq_dev_min
 
     def calc_freq_dev_max(self, model):
-        # Reading variables from model variables
         fdeverror = 0 # : TODO add model.vars.deviation_tol_ppm.value
         deviation = model.vars.deviation.value
         freq_dev_max = int(deviation + (fdeverror * deviation) / 1000000)
@@ -729,32 +620,25 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         preamble_pattern = model.vars.preamble_pattern.value
         trecs_enabled = model.vars.trecs_enabled.value
 
-        # Lynx-specific because we have a special case for concurrent PHYs and keep BLE standard phys consistent
         if concurrent_phy:
-            #Last bit of preamble followed by all but one bit of syncword
             viterbi_demod_expect_patt = (syncword0 >> 1) | ((preamble_pattern & 1) << 31)
             patt = viterbi_demod_expect_patt
         elif trecs_enabled:
             syncword_str_part = '{:032b}'.format(syncword0_actual)[-syncword_len:] #Read the rightmost characters
 
-            #Need to check for zero because python treats -0 the same as 0 in terms of list slicing
             if trecs_pre_bits_to_syncword > 0:
-                #We can use the full TX preamble string for this because we are reading only the rightmost characters anyway
                 preamble_str_part = preamble_string[-trecs_pre_bits_to_syncword:]  # Read the rightmost characters
             else:
                 preamble_str_part = ""
 
             effective_syncword_str = preamble_str_part+syncword_str_part[::-1]+'0'*32 #reverse syncword part only
 
-            #HW will add head and tail for correlation computation
             viterbi_demod_expect_patt = int(effective_syncword_str[0:32],2)
             patt = viterbi_demod_expect_patt
 
-            # if MAPFSK is 1 mapping is inverted so invert the expected pattern to match
             if mapfsk:
                 patt ^= 0xFFFFFFFF
         else:
-            # set to default reset value
             patt = 0x123556B7
 
         model.vars.viterbi_demod_expect_patt.value = patt
@@ -768,17 +652,13 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         if demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI or \
             demod_select == model.vars.demod_select.var_enum.TRECS_SLICER:
 
-            # Head (end of preamble) and tail bits after syncword (0)
-            # Need to ensure this is only 4 bits max
             viterbi_demod_expect_patt_head_tail = int((preamble_pattern << 2) & 0xF)
 
-            # if MAPFSK is 1 mapping is inverted so invert the expected pattern to match
             if mapfsk:
                 viterbi_demod_expect_patt_head_tail ^= 0xF
 
             model.vars.viterbi_demod_expect_patt_head_tail.value = viterbi_demod_expect_patt_head_tail
         else:
-            # set to default reset value
             model.vars.viterbi_demod_expect_patt_head_tail.value = 5
 
     def calc_viterbi_demod_expect_patt_head_tail_reg(self, model):
@@ -795,9 +675,7 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
         model.vars.syncacqwin_actual.value = 4 * (model.vars.MODEM_REALTIMCFE_SYNCACQWIN.value + 1)
 
     def calc_datafilter(self,model):
-        #This function calculates the number of datafilter taps
 
-        #Load model variables into local variables
         osr = model.vars.oversampling_rate_actual.value
         demod_sel = model.vars.demod_select.value
         modformat = model.vars.modulation_type.value
@@ -805,12 +683,9 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
 
         if demod_sel==model.vars.demod_select.var_enum.COHERENT and \
                 modformat == model.vars.modulation_type.var_enum.OQPSK:
-            # : For Cohererent demod, set data filter taps to 9
             datafilter_taps = 9
-        # no data filter in path when TRecS is enabled
         if modformat == model.vars.modulation_type.var_enum.OQPSK or trecs_enabled:
             datafilter_taps = 2 # 2 here translates to datafilter_reg = 0 meaning disabled datafilter
-        #Calculate datafitler based on OSR
         else:
             if osr >= 8.5:
                 datafilter_taps = 9
@@ -829,42 +704,30 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
             else:
                 datafilter_taps = 2
 
-        #Load local variables back into model variables
         model.vars.datafilter_taps.value = datafilter_taps
 
     def calc_datafilter_reg(self,model):
-        #This function writes the datafilter register
 
-        #Load model variables into local variables
         datafilter_taps = model.vars.datafilter_taps.value
 
-        #The datafilter register setting is 2 less than the number of taps
         datafilter_reg = datafilter_taps - 2
 
         if datafilter_reg < 0:
             datafilter_reg = 0
 
-        # Write register
         self._reg_write(model.vars.MODEM_CTRL2_DATAFILTER, datafilter_reg)
 
     def calc_digmix_res_actual(self,model):
-        #This function calculates the digital mixer register
 
-        #Load model variables into local variables
         adc_freq_actual = model.vars.adc_freq_actual.value
         dec0_actual = model.vars.dec0_actual.value
-        # digital mixer frequency resolution, Hz/mixer ticks
         digmix_res = adc_freq_actual/((2**20) * 8.0 * dec0_actual)
         model.vars.digmix_res_actual.value = digmix_res
 
     def calc_digmixfreq_actual(self,model):
-        #This function calculates the actual digital mixer frequency based on the register
 
-        #Load model variables into local variables
         digmixfreq_reg = model.vars.MODEM_DIGMIXCTRL_DIGMIXFREQ.value
 
-        #Calculate the actual mixer frequency
-        # Calculate the actual mixer frequency
         if model.vars.lo_injection_side.value == model.vars.lo_injection_side.var_enum.HIGH_SIDE:
             digmixfreq_actual = int(digmixfreq_reg * model.vars.digmix_res_actual.value)
         else:
@@ -873,5 +736,4 @@ class CALC_Demodulator_lynx(CALC_Demodulator_panther):
             digmixfreq_pos = (2 ** digmixfreq_regsize) - digmixfreq_reg
             digmixfreq_actual = -1 * int(digmixfreq_pos * model.vars.digmix_res_actual.value)
 
-        #Load local variables back into model variables
         model.vars.digmixfreq_actual.value = digmixfreq_actual

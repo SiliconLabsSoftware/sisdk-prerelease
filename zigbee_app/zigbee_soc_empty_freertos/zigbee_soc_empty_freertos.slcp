@@ -104,3 +104,15 @@ tag:
   - toolchain:gcc
   - toolchain:iar
   - toolchain:llvm
+
+#-------------- Template Contribution ----------------
+template_contribution:
+  - name: default_stack_size_override
+    value: 1024
+    unless:
+      - device_series_3
+
+  - name: default_stack_size_override
+    value: 16384
+    condition:
+      - device_series_3

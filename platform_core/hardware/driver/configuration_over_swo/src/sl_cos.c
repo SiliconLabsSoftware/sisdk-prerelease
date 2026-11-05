@@ -47,6 +47,7 @@
 #include "sl_status.h"
 #include "sl_debug_swo.h"
 #include "sl_common.h"
+#include "sl_log_helper.h"
 
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
@@ -351,7 +352,7 @@ static sl_status_t sli_cos_swo_itm_8_write(const void *buffer,
   uint8_t  seq_nbr = 0;
 
   // Ensure buffer_length is within expected bounds
-  EFM_ASSERT(buffer_length == sizeof(COS_ConfigOption_t));
+  SL_LOG_DEBUG_ASSERT(buffer_length == sizeof(COS_ConfigOption_t));
 
   // Full length is 2 square braces, 1 byte length and 2 byte CRC
   packet_length = ( (uint32_t)buffer_length) + 9;

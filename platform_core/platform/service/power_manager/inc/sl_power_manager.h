@@ -288,7 +288,7 @@ void sl_power_manager_subscribe_em_transition_event(sl_power_manager_em_transiti
  * @param event_handle  Event handle which must be unregistered (must have been
  *                      registered previously).
  *
- * @note  An EFM_ASSERT is thrown if the handle is not found.
+ * @note  An SL_LOG_DEBUG_ASSERT is thrown if the handle is not found.
  ******************************************************************************/
 void sl_power_manager_unsubscribe_em_transition_event(sl_power_manager_em_transition_event_handle_t *event_handle);
 

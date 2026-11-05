@@ -31,6 +31,7 @@
 #include "sl_clock_manager.h"
 #include "sl_hal_gpio.h"
 #include "sl_i2c.h"
+#include "sl_log_helper.h"
 
 // Include instance config {# Include instance config #}
 {% for instance in i2c_instances %}#include "sl_i2c_{{ instance }}_config.h"
@@ -88,6 +89,7 @@ void sl_i2c_init_instances(void)
   {%- for instance in i2c_instances %}
   // Initialize the I2C driver
   status = sl_i2c_init(sl_i2c_{{instance}}_handle, &init_{{instance}});
-  EFM_ASSERT(SL_STATUS_OK == status);
+  SL_LOG_DEBUG_ASSERT(SL_STATUS_OK == status);
+  (void)status;
   {%- endfor %}
 }

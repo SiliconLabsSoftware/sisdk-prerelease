@@ -10,7 +10,6 @@ __all__ = ["Pro2PlusApiList"]
 
 class Pro2PlusApiList(Pro2ApiList):
     def _add_seq_cfg(self, modem_calc, api_list):
-#         api_list['SEQ_CFG0'] = (modem_calc.modulator.fields.close_hw_dly_comp)  # need API in FW
         pass
     def _add_modem_raw_search_api(self, modem_calc, api_list):
         sch_frzen = modem_calc.demodulator.fields.sch_frzen
@@ -32,7 +31,6 @@ class Pro2PlusApiList(Pro2ApiList):
         est_osr_en = modem_calc.demodulator.fields.est_osr_en
         arr_toler = modem_calc.demodulator.fields.arr_toler
         api_list['MODEM_DSA_CTRL1'] = (arriving_src*2**6+signal_dsa_mode  *2**5+arr_toler) & 0xff
-        # jira-1652: put arr_q_sync_en  back into rev-c2
         arr_q_sync_en = modem_calc.demodulator.fields.arr_q_sync_en
         if modem_calc.revc0_c1:
             arr_q_pm_en = modem_calc.demodulator.fields.arr_q_pm_en
@@ -60,7 +58,6 @@ class Pro2PlusApiList(Pro2ApiList):
         api_list['MODEM_DECIMATION_CFG2'] = ((modem_calc.demodulator.fields.ndec3*32 +
                                                   modem_calc.demodulator.fields.ndec2gain*8 +
                                                   modem_calc.demodulator.fields.ndec2agc*4) & 0xff)
-        # jira-1651: set IFPKD-TH for ETSI modes
         if modem_calc.revc0_c1 == False:
             api_list['MODEM_IFPKD_THRESHOLDS'] = modem_calc.demodulator.fields.ifpkd_th;
 
@@ -71,12 +68,10 @@ class Pro2PlusApiList(Pro2ApiList):
                                             modem_calc.demodulator.fields.low_duty)
         if modem_calc.revc0_c1 == False:                                            
             api_list['PREAMBLE_CONFIG'] = rx_pream_src*2**7 + 0x21
-        # DSA RX hopping for super low data rate
         if(modem_calc.demodulator.fields.rx_hopping_en ==1):
             api_list['MODEM_DSM_CTRL'] = 0x13
             api_list['RX_HOP_CONTROL'] = 0x10
             api_list['RX_HOP_TABLE_SIZE'] = modem_calc.demodulator.fields.fh_ch_number+1
-           #'SET_PROPERTY' 'RX_HOP_TABLE_ENTRY_0' 05
             table_entry = 0
             while  table_entry <= modem_calc.demodulator.fields.fh_ch_number:
                 hop_table = "RX_HOP_TABLE_ENTRY_" + str(table_entry)
@@ -87,9 +82,7 @@ class Pro2PlusApiList(Pro2ApiList):
         api_list['MODEM_OOK_BLOPK'] = modem_calc.demodulator.fields.bw_peak
     
     def _add_rssi_group(self, modem_calc, api_list):
-        # api_list['MODEM_RSSI_THRESH'] = 0 # default, not touched by calc
         api_list['MODEM_RSSI_JUMP_THRESH'] = modem_calc.demodulator.fields.rssijmpthd
-        # self._api_list['MODEM_RSSI_CONTROL'] = 1  # default: latch at pmdet 
         api_list['MODEM_RSSI_CONTROL'] = (modem_calc.demodulator.fields.rssi_sel*8 + 1)  
         api_list['MODEM_RSSI_CONTROL2'] = (modem_calc.demodulator.fields.rssijmp_dwn*32 + 
                                                 modem_calc.demodulator.fields.rssijmp_up*16 + 
@@ -101,7 +94,6 @@ class Pro2PlusApiList(Pro2ApiList):
         super(Pro2PlusApiList, self)._add_modem_if_control(api_list, modem_calc)
         api_list['MODEM_IF_CONTROL'] += int(modem_calc.inputs.API_ETSI % 3) # if 3, write 0 
     
-    # jira 1658: add 3 fields into OOK_MISC
     def _add_modem_ook_misc(self, api_list, modem_calc):
         fast_ma = modem_calc.demodulator.fields.fast_ma
         detector = modem_calc.demodulator.fields.detector
@@ -113,9 +105,6 @@ class Pro2PlusApiList(Pro2ApiList):
 
     def _add_modem_bcr_misc0(self, api_list, modem_calc):
         if modem_calc.revc0_c1 == False:                                            
-            # only write BCR_MISC0 in revC2
-            # api_list['MODEM_BCR_MISC0'] = int(adcwatch*128 + adcrst*64 + distogg*32 + ph0size*16) 
-            # DSA_BCR_RST == diff0rst_en 
             api_list['MODEM_BCR_MISC0'] = int( modem_calc.demodulator.fields.res_lockup_byp*8 + modem_calc.demodulator.fields.diff0rst_en)
 
 

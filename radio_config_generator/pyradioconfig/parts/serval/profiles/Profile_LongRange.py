@@ -14,17 +14,14 @@ class Profile_Long_Range_Serval(Profile_Long_Range_Nixi):
 
     def buildProfileModel(self, model):
 
-        # Build profile object and append it to the model
         profile = self._makeProfile(model)
 
-        # Build inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
         self.build_hidden_profile_inputs(model, profile)
         self.build_deprecated_profile_inputs(model, profile)
 
-        # Build outputs
         self.build_register_profile_outputs(model, profile)
         self.build_variable_profile_outputs(model, profile)
         self.build_info_profile_outputs(model, profile)
@@ -50,12 +47,10 @@ class Profile_Long_Range_Serval(Profile_Long_Range_Nixi):
                                    readable_name="Fast preamble detect")
 
     def build_hidden_profile_inputs(self, model, profile):
-        # Hidden inputs to allow for fixed frame length testing
         self.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                    readable_name="Frame Length Algorithm")
         self.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
                                    readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=0x7fffffff)
-        # Hidden inputs to allow for keeping absolute tolerance the same when testing at 915M
         self.make_hidden_input(profile, model.vars.freq_offset_hz, 'Advanced',
                                 readable_name="Frequency Offset Compensation (AFC) Limit", value_limit_min=0,
                                 value_limit_max=500000, units_multiplier=UnitsMultiplier.KILO)
@@ -64,7 +59,6 @@ class Profile_Long_Range_Serval(Profile_Long_Range_Nixi):
                                    readable_name="Enable ADC attenuation")
 
     def build_deprecated_profile_inputs(self, model, profile):
-        # These inputs were exposed on or after Serval Alpha 1 release, so they may be present in radioconf XML
         self.make_deprecated_input(profile, model.vars.max_tx_power_dbm)
 
     def build_register_profile_outputs(self, model, profile):
@@ -107,7 +101,6 @@ class Profile_Long_Range_Serval(Profile_Long_Range_Nixi):
         model.vars.syncword_0.value_forced = 0xe5
         model.vars.syncword_1.value_forced = 0x0
 
-        # Assorted app parameters
         model.vars.baudrate_tol_ppm.value_forced = 0
         model.vars.deviation_tol_ppm.value_forced = 0
 
@@ -134,7 +127,6 @@ class Profile_Long_Range_Serval(Profile_Long_Range_Nixi):
         model.vars.crc_pad_input.value_forced = False
         model.vars.crc_invert.value_forced = False
 
-        # Variables that are optional inputs in the Base profile and need to be explicitly set
         model.vars.test_ber.value_forced = False
         model.vars.manchester_mapping.value_forced = model.vars.manchester_mapping.var_enum.Default
         model.vars.syncword_tx_skip.value_forced = False
@@ -175,22 +167,17 @@ class Profile_Long_Range_Serval(Profile_Long_Range_Nixi):
         model.vars.var_length_byteendian.value_forced = model.vars.var_length_byteendian.var_enum.LSB_FIRST
 
     def _lookup_from_longrange_mode(self, model):
-        #This function calculates some variables/registers based on the longrange mode
 
-        #Read the mode and fec_en from the profile inputs (not yet written to model vars)
         longrange_mode = model.profile.inputs.longrange_mode.var_value
         fec_en = model.profile.inputs.fec_en.var_value
         fast_detect_mode_en = (model.profile.inputs.fast_detect_enable.var_value == model.vars.fast_detect_enable.var_enum.ENABLED)
 
-        # We need to modify the net bitrate (data rate) based on whether FEC is enabled or not
         if fec_en is not None and fec_en != model.vars.fec_en.var_enum.NONE:
             fec_factor=2
         else:
             fec_factor=1
 
-        # check if fast detect mode is enabled
         if fast_detect_mode_en :
-            # Hardcoded values selected from emperical data
             model.vars.MODEM_SQ_SQTIMOUT.value_forced = int(model.vars.dsss_len.value * 8)
             model.vars.MODEM_SQEXT_SQSTG2TIMOUT.value_forced = int(model.vars.dsss_len.value * 1.5)
 
@@ -227,8 +214,6 @@ class Profile_Long_Range_Serval(Profile_Long_Range_Nixi):
             model.vars.bitrate.value_forced = 80000//fec_factor
             model.vars.deviation.value_forced = 160000
 
-        # Owner: Rossano Pantaleoni
-        # Jira Link: https://jira.silabs.com/browse/MCUW_RADIO_CFG-2364
         elif longrange_mode == model.vars.longrange_mode.var_enum.LR_76p8k:
             model.vars.bitrate.value_forced = 76800//fec_factor
             model.vars.deviation.value_forced = 76800*2

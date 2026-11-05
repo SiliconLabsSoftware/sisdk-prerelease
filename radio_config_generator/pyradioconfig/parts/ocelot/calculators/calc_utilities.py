@@ -4,25 +4,20 @@ import math
 
 class CALC_Utilities_Ocelot(CALC_Utilities):
     def calc_oversampling_val(self, model):
-        #The actual OSR calculation has moved into the calc_demodulator.py file for Ocelot
         pass
 
     def calc_target_sensitivity(self, model):
-        #Overriding function due to variable name change
 
-        #Load model variables into local variables
         bitrate = model.vars.bitrate.value #This is the net bitrate (data only), because that is how Eb/No is defined
         freq = model.vars.base_frequency_hz.value
         modformat = model.vars.modulation_type.value
         demod = model.vars.demod_select.value
 
-        # approximate EbNo number to use for our PHY
         if modformat == model.vars.modulation_type.var_enum.FSK4:
             ebno = 14.0
         elif modformat == model.vars.modulation_type.var_enum.OOK:
             ebno = 19.0
         elif modformat == model.vars.modulation_type.var_enum.OQPSK:
-            # : For coherent demod, ebno = 8.5 based on measurement and Per's sim
             if demod == model.vars.demod_select.var_enum.COHERENT:
                 ebno = 8.5
             else: # : Legacy demod
@@ -30,7 +25,6 @@ class CALC_Utilities_Ocelot(CALC_Utilities):
         else:
             ebno = 13.0
 
-        # approximate noise figure to use for each band
         if freq < 500e6:
             nf = 3.5
         else:
@@ -38,13 +32,10 @@ class CALC_Utilities_Ocelot(CALC_Utilities):
 
         target_sensitivity = -173.9 + 10 * math.log(bitrate, 10) + ebno + nf
 
-        #Load local variables back into model variables
         model.vars.sensitivity.value = target_sensitivity
 
     def calc_error_check(self, model):
-        #Overriding function due to removal of freq_gain_scale variable
 
-        #Load model variables into local variables
         modulation_type = model.vars.modulation_type.value
         bitrate = model.vars.bitrate.value
         baudrate = model.vars.baudrate.value
@@ -113,13 +104,8 @@ class CALC_Utilities_Ocelot(CALC_Utilities):
 
         bw_error = abs(carson_bw * carson_scale - bw_dig) * 1.0 / carson_bw
 
-        # if bw_error > 0.2 and bw_forced == 0 and carson_bw < 3.4e6:
-        #     print("  WARNING: BW is set more than 20% away from Carson BW!")
 
-        #if osr > 8 or osr < 3:
-        #    print("  WARNING: Oversampling rate is beyond specified limits of 3 to 8!")
 
-        #Load local variables back into model variables
         model.vars.max_timing_window.value  = max_timing_window
         model.vars.timing_window.value      = timing_window
         model.vars.rx_bitrate_error.value   = rx_bitrate_error

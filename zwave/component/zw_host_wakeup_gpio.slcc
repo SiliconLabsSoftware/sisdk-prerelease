@@ -9,6 +9,10 @@ description: >
 
   Use sl_host_wakeup_gpio_config.h to configure the GPIO port and pin.
 
+documentation:
+  docset: z-wave
+  document: zwave-api/host-wakeup-gpio
+
 package: zwave
 quality: evaluation
 metadata:

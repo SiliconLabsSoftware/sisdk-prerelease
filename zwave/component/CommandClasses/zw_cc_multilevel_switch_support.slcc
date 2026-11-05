@@ -9,6 +9,10 @@ description: >
   To use it, please make sure that configuration related to your project is added to cc_config file located in
   <app_location>/config/cc_config/<app_name>.cc_config.
   See cc_configurator/README.md for more details.
+documentation:
+  docset: z-wave
+  document: zwave-api/multilevel-switch
+
 package: zwave
 quality: production
 metadata:

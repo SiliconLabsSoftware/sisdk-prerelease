@@ -1,12 +1,12 @@
 from pyradioconfig.parts.jumbo.calculators.calc_wisun import CALC_WiSUN_Jumbo
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
 from enum import Enum
+from pycalcmodel.core.common import IPCategory
 
 class CALC_WiSUN_Ocelot(CALC_WiSUN_Jumbo):
 
     def buildVariables(self, model):
 
-        #Call the inherited version
         super().buildVariables(model)
 
         self._addModelVariable(model, 'bch_lut_data', int, ModelVariableFormat.DECIMAL,
@@ -17,8 +17,6 @@ class CALC_WiSUN_Ocelot(CALC_WiSUN_Jumbo):
         protocol_id = model.vars.protocol_id.value
         modulation_type = model.vars.modulation_type.value
 
-        # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1859
-        # This calculation only applies to Wi-SUN FSK (FAN/HAN)
         if protocol_id == model.vars.protocol_id.var_enum.WiSUN and \
                 modulation_type == model.vars.modulation_type.var_enum.FSK2:
             bch_lut_data = [
@@ -40,5 +38,4 @@ class CALC_WiSUN_Ocelot(CALC_WiSUN_Jumbo):
                 0b000000000000100
             ]
 
-            #Write the model var
             model.vars.bch_lut_data.value = bch_lut_data

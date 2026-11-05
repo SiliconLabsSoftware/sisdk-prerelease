@@ -1,0 +1,17 @@
+
+SIXG301XFULL Rev B1 Studio Register Map Package
+===========================================================================
+
+Contents:
+
+.. toctree::
+   :maxdepth: 3
+
+   SIXG301XFULL
+
+Indices and Tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

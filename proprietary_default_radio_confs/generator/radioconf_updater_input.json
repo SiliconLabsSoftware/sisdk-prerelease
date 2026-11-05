@@ -1,0 +1,1580 @@
+{
+  "inputConfigDir": "",
+  "outputConfigDir": "",
+  "configurations": [
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg22/rf_band_2400/radio_settings.radioconf",
+      "die": "lynx",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Connect_2_4GHz_OQPSK_2Mcps_250kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg22/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "lynx",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Connect_2_4GHz_OQPSK_2Mcps_250kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg23/rf_band_434/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_434MHz_2GFSK_200kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg23/rf_band_434/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_434MHz_2GFSK_200kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg23/rf_band_470/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_434MHz_2GFSK_200kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg23/rf_band_470/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_434MHz_2GFSK_200kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg23/rf_band_868/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_863MHz_2GFSK_100kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg23/rf_band_868/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_863MHz_2GFSK_100kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg24/rf_band_2400/radio_settings.radioconf",
+      "die": "bobcat",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_2_4GHz_OQPSK_2Mcps_250kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg24/rf_band_2400/rf39mhz/radio_settings.radioconf",
+      "die": "bobcat",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_2_4GHz_OQPSK_2Mcps_250kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg24/rf_band_2400/rf40mhz/radio_settings.radioconf",
+      "die": "bobcat",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_2_4GHz_OQPSK_2Mcps_250kbps",
+          "channels": [
+            {
+              "channelName": "Channel Group 1",
+              "inputs": {
+                "xtal_frequency_hz": "40000000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg25/rf_band_470/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_490MHz_2GFSK_200kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg25/rf_band_470/rf39mhz/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_490MHz_2GFSK_200kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg25/rf_band_868/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_863MHz_2GFSK_100kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg25/rf_band_868/rf39mhz/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_863MHz_2GFSK_100kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg25/rf_band_915/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_915MHz_2GFSK_500kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg25/rf_band_915/rf39mhz/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_915MHz_2GFSK_500kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg26/rf_band_2400/radio_settings.radioconf",
+      "die": "caracal",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_2_4GHz_OQPSK_2Mcps_250kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg26/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "caracal",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_2_4GHz_OQPSK_2Mcps_250kbps",
+          "channels": [
+            {
+              "channelName": "Channel Group 1",
+              "inputs": {
+                "xtal_frequency_hz": "38400000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg26/rf_band_2400/rf39mhz/radio_settings.radioconf",
+      "die": "caracal",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_2_4GHz_OQPSK_2Mcps_250kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg26/rf_band_2400/rf40mhz/radio_settings.radioconf",
+      "die": "caracal",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_2_4GHz_OQPSK_2Mcps_250kbps",
+          "channels": [
+            {
+              "channelName": "Channel Group 1",
+              "inputs": {
+                "xtal_frequency_hz": "40000000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg27/rf_band_2400/radio_settings.radioconf",
+      "die": "leopard",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Connect_2_4GHz_OQPSK_2Mcps_250kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg27/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "leopard",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Connect_2_4GHz_OQPSK_2Mcps_250kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg28/rf_band_868/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_863MHz_2GFSK_100kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg28/rf_band_868/rf39mhz/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_863MHz_2GFSK_100kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg29/rf_band_2400/radio_settings.radioconf",
+      "die": "lion",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Connect_2_4GHz_OQPSK_2Mcps_250kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg29/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "lion",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Connect_2_4GHz_OQPSK_2Mcps_250kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg2d/rf_band_868/radio_settings.radioconf",
+      "die": "serval",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_863MHz_2GFSK_100kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_efr32xg2d/rf_band_868/rf39mhz/radio_settings.radioconf",
+      "die": "serval",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_863MHz_2GFSK_100kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_sixx301/rf_band_2400/radio_settings.radioconf",
+      "die": "rainier",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_2_4GHz_OQPSK_2Mcps_250kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_connect_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Connect/simple_connect_singlephy/device_generic_family_sixx301/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "rainier",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Connect",
+          "phy": "PHY_Studio_Connect_2_4GHz_OQPSK_2Mcps_250kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg22/rf_band_2400/radio_settings.radioconf",
+      "die": "lynx",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Datasheet_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg22/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "lynx",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Datasheet_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg23/rf_band_315/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_315M_2GFSK_38p4Kbps_20K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg23/rf_band_315/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_315M_2GFSK_38p4Kbps_20K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg23/rf_band_434/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_434M_2GFSK_100Kbps_50K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg23/rf_band_434/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_434M_2GFSK_100Kbps_50K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg23/rf_band_470/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_490M_2GFSK_38p4Kbps_20K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg23/rf_band_470/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_490M_2GFSK_38p4Kbps_20K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg23/rf_band_868/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg23/rf_band_868/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg24/rf_band_2400/radio_settings.radioconf",
+      "die": "bobcat",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg24/rf_band_2400/rf39mhz/radio_settings.radioconf",
+      "die": "bobcat",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg24/rf_band_2400/rf40mhz/radio_settings.radioconf",
+      "die": "bobcat",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K",
+          "channels": [
+            {
+              "channelName": "Channel Group 1",
+              "inputs": {
+                "xtal_frequency_hz": "40000000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg25/rf_band_470/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_490M_2GFSK_38p4Kbps_20K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg25/rf_band_470/rf39mhz/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_490M_2GFSK_38p4Kbps_20K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg25/rf_band_868/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg25/rf_band_868/rf39mhz/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg25/rf_band_915/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_915M_2GFSK_500Kbps_175K_mi0p7"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg25/rf_band_915/rf39mhz/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_915M_2GFSK_500Kbps_175K_mi0p7"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg26/rf_band_2400/radio_settings.radioconf",
+      "die": "caracal",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg26/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "caracal",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K",
+          "channels": [
+            {
+              "channelName": "Channel Group 1",
+              "inputs": {
+                "xtal_frequency_hz": "38400000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg26/rf_band_2400/rf39mhz/radio_settings.radioconf",
+      "die": "caracal",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg26/rf_band_2400/rf40mhz/radio_settings.radioconf",
+      "die": "caracal",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K",
+          "channels": [
+            {
+              "channelName": "Channel Group 1",
+              "inputs": {
+                "xtal_frequency_hz": "40000000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg27/rf_band_2400/radio_settings.radioconf",
+      "die": "leopard",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Datasheet_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg27/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "leopard",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Datasheet_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg28/rf_band_2400/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg28/rf_band_2400/rf39mhz/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg28/rf_band_868/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg28/rf_band_868/rf39mhz/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg29/rf_band_2400/radio_settings.radioconf",
+      "die": "lion",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Datasheet_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg29/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "lion",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Datasheet_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg2d/rf_band_868/radio_settings.radioconf",
+      "die": "serval",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_efr32xg2d/rf_band_868/rf39mhz/radio_settings.radioconf",
+      "die": "serval",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_sixx301/rf_band_2400/radio_settings.radioconf",
+      "die": "rainier",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_singlephy.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_singlephy/device_generic_family_sixx301/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "rainier",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg22/rf_band_2400/radio_settings.radioconf",
+      "die": "lynx",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Datasheet_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg22/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "lynx",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Datasheet_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg23/rf_band_315/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_315M_2GFSK_38p4Kbps_20K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg23/rf_band_315/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_315M_2GFSK_38p4Kbps_20K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg23/rf_band_434/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_434M_2GFSK_100Kbps_50K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg23/rf_band_434/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_434M_2GFSK_100Kbps_50K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg23/rf_band_470/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_490M_2GFSK_38p4Kbps_20K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg23/rf_band_470/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_490M_2GFSK_38p4Kbps_20K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg23/rf_band_868/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg23/rf_band_868/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg24.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg24/rf_band_2400/radio_settings.radioconf",
+      "die": "bobcat",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg24.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg24/rf_band_2400/rf39mhz/radio_settings.radioconf",
+      "die": "bobcat",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg24.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg24/rf_band_2400/rf40mhz/radio_settings.radioconf",
+      "die": "bobcat",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K",
+          "channels": [
+            {
+              "channelName": "Channel Group 1",
+              "inputs": {
+                "xtal_frequency_hz": "40000000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg25.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg25/rf_band_470/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_490M_2GFSK_38p4Kbps_20K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg25.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg25/rf_band_470/rf39mhz/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_490M_2GFSK_38p4Kbps_20K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg25.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg25/rf_band_868/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg25.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg25/rf_band_868/rf39mhz/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg25.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg25/rf_band_915/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_915M_2GFSK_500Kbps_175K_mi0p7"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg25.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg25/rf_band_915/rf39mhz/radio_settings.radioconf",
+      "die": "sol",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_915M_2GFSK_500Kbps_175K_mi0p7"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg26.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg26/rf_band_2400/radio_settings.radioconf",
+      "die": "caracal",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg26.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg26/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "caracal",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K",
+          "channels": [
+            {
+              "channelName": "Channel Group 1",
+              "inputs": {
+                "xtal_frequency_hz": "38400000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg26.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg26/rf_band_2400/rf39mhz/radio_settings.radioconf",
+      "die": "caracal",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg26.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg26/rf_band_2400/rf40mhz/radio_settings.radioconf",
+      "die": "caracal",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K",
+          "channels": [
+            {
+              "channelName": "Channel Group 1",
+              "inputs": {
+                "xtal_frequency_hz": "40000000"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg27/rf_band_2400/radio_settings.radioconf",
+      "die": "leopard",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Datasheet_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg27/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "leopard",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Datasheet_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg28.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg28/rf_band_2400/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg28.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg28/rf_band_2400/rf39mhz/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg28.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg28/rf_band_868/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_efr32xg28.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg28/rf_band_868/rf39mhz/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg29/rf_band_2400/radio_settings.radioconf",
+      "die": "lion",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Datasheet_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg29/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "lion",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Datasheet_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg2d/rf_band_868/radio_settings.radioconf",
+      "die": "serval",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_efr32xg2d/rf_band_868/rf39mhz/radio_settings.radioconf",
+      "die": "serval",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_sixx301.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_sixx301/rf_band_2400/radio_settings.radioconf",
+      "die": "rainier",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_long_preamble__device_generic_family_sixx301.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_long_preamble/device_generic_family_sixx301/rf_band_2400/rf384mhz/radio_settings.radioconf",
+      "die": "rainier",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration",
+          "profile": "Base",
+          "phy": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_multiphy_sub__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_multiphy/device_generic_family_efr32xg23/rf_band_868/subGHz/rf_band_914/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "simpletrx_multiphy",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps",
+          "channels": [
+            {
+              "channelName": "first_channelSubGHz",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_868M_GMSK_500Kbps"
+              }
+            },
+            {
+              "channelName": "second_channelSubGHz",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_915M_2GFSK_100Kbps_50K_antdiv"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_multiphy_sub__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_multiphy/device_generic_family_efr32xg23/rf_band_868/subGHz/rf_band_914/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "simpletrx_multiphy",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps",
+          "channels": [
+            {
+              "channelName": "first_channelSubGHz",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_868M_GMSK_500Kbps"
+              }
+            },
+            {
+              "channelName": "second_channelSubGHz",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_915M_2GFSK_100Kbps_50K_antdiv"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_multiphy_sub__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_multiphy/device_generic_family_efr32xg23/rf_band_868/subGHz/rf_band_915/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "simpletrx_multiphy",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps",
+          "channels": [
+            {
+              "channelName": "first_channelSubGHz",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_868M_GMSK_500Kbps"
+              }
+            },
+            {
+              "channelName": "second_channelSubGHz",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_915M_2GFSK_100Kbps_50K_antdiv"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_multiphy_sub__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_multiphy/device_generic_family_efr32xg23/rf_band_868/subGHz/rf_band_915/rf39mhz/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "simpletrx_multiphy",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps",
+          "channels": [
+            {
+              "channelName": "first_channelSubGHz",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_868M_GMSK_500Kbps"
+              }
+            },
+            {
+              "channelName": "second_channelSubGHz",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_915M_2GFSK_100Kbps_50K_antdiv"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_multiphy__device_generic_family_efr32xg28.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_multiphy/device_generic_family_efr32xg28/rf_band_868/2p4GHz/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "simpletrx_multiphy",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps",
+          "channels": [
+            {
+              "channelName": "channelSubGHz",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_868M_GMSK_500Kbps"
+              }
+            },
+            {
+              "channelName": "channel2p4",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_multiphy__device_generic_family_efr32xg28.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_multiphy/device_generic_family_efr32xg28/rf_band_868/2p4GHz/rf39mhz/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "simpletrx_multiphy",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps",
+          "channels": [
+            {
+              "channelName": "channelSubGHz",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_868M_GMSK_500Kbps"
+              }
+            },
+            {
+              "channelName": "channel2p4",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_2450M_2GFSK_1Mbps_500K"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_multiphy_sub__device_generic_family_efr32xg2d.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_multiphy/device_generic_family_efr32xg2d/rf_band_868/subGHz/rf_band_915/radio_settings.radioconf",
+      "die": "serval",
+      "protocols": [
+        {
+          "protocolName": "simpletrx_multiphy",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps",
+          "channels": [
+            {
+              "channelName": "first_channelSubGHz",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_868M_GMSK_500Kbps"
+              }
+            },
+            {
+              "channelName": "second_channelSubGHz"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/simple_rail_multiphy_sub__device_generic_family_efr32xg2d.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Base/simple_rail_multiphy/device_generic_family_efr32xg2d/rf_band_868/subGHz/rf_band_915/rf39mhz/radio_settings.radioconf",
+      "die": "serval",
+      "protocols": [
+        {
+          "protocolName": "simpletrx_multiphy",
+          "profile": "Base",
+          "phy": "PHY_Studio_868M_GMSK_500Kbps",
+          "channels": [
+            {
+              "channelName": "first_channelSubGHz",
+              "inputs": {
+                "phy_name_override": "PHY_Studio_868M_GMSK_500Kbps"
+              }
+            },
+            {
+              "channelName": "second_channelSubGHz"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/wmbus_434.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Mbus/wmbus_434/device_generic_family_efr32xg23/rf_band_434/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration 1",
+          "profile": "Mbus"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/wmbus_meter_868__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Mbus/wmbus_meter_868/device_generic_family_efr32xg23/rf_band_868/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "wmbus_mode_t",
+          "profile": "Mbus"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/wmbus_meter_868__device_generic_family_efr32xg28.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Mbus/wmbus_meter_868/device_generic_family_efr32xg28/rf_band_868/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "wmbus_mode_t",
+          "profile": "Mbus"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/wmbus_meter_868__device_generic_family_efr32xg2d.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Mbus/wmbus_meter_868/device_generic_family_efr32xg2d/rf_band_868/radio_settings.radioconf",
+      "die": "serval",
+      "protocols": [
+        {
+          "protocolName": "wmbus_mode_t",
+          "profile": "Mbus"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/wmbus_434.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Mbus/wmbus_434/device_generic_family_efr32xg23/rf_band_434/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "Protocol Configuration 1",
+          "profile": "Mbus"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/wmbus_collector_868__device_generic_family_efr32xg23.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Mbus/wmbus_collector_868/device_generic_family_efr32xg23/rf_band_868/radio_settings.radioconf",
+      "die": "ocelot",
+      "protocols": [
+        {
+          "protocolName": "wmbus_mode_t",
+          "profile": "Mbus"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/wmbus_collector_868__device_generic_family_efr32xg28.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Mbus/wmbus_collector_868/device_generic_family_efr32xg28/rf_band_868/radio_settings.radioconf",
+      "die": "margay",
+      "protocols": [
+        {
+          "protocolName": "wmbus_mode_t",
+          "profile": "Mbus"
+        }
+      ]
+    },
+    {
+      "inputConfigFile": "/home/zohavas/git/prop-default-radio-confs/generator/pregenerated_radio_configurations/wmbus_collector_868__device_generic_family_efr32xg2d.radioconf",
+      "outputConfigFile": "/home/zohavas/git/prop-default-radio-confs/Mbus/wmbus_collector_868/device_generic_family_efr32xg2d/rf_band_868/radio_settings.radioconf",
+      "die": "serval",
+      "protocols": [
+        {
+          "protocolName": "wmbus_mode_t",
+          "profile": "Mbus"
+        }
+      ]
+    }
+  ]
+}

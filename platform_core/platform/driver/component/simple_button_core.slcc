@@ -27,6 +27,7 @@ include:
 provides:
 - name: simple_button_core
 requires:
+- name: log_none
 - name: gpio
 - name: clock_manager_runtime
 - name: button

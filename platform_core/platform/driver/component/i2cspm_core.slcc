@@ -21,6 +21,7 @@ root_path: platform_core/platform/driver/i2cspm
 provides:
 - name: i2cspm_core
 requires:
+- name: log_none
 - name: hal_generic_gpio
 - name: clock_manager_runtime
 - name: i2c_core

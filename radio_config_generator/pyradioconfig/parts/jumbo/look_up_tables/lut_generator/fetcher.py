@@ -44,10 +44,8 @@ class Fetcher:
             print(f"Submodule {self.path} is already at tag {tag}")
             return
 
-        # Fetch all tags inside the submodule
         self._run_cmd(["git", "fetch", "--tags"])
 
-        # Checkout the specified tag
         if tag:
             self._run_cmd(["git", "checkout", f"{tag}"])
 

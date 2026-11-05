@@ -85,6 +85,25 @@
     },                                                          \
   }
 
+#if defined(SLI_SE_SUPPORTS_TLS_IDENTITY_KEY)
+/// Key descriptor for the factory-provisioned TLS identity key
+/// @note: Unlike the attestation keys, the SE permits this key to sign
+///   arbitrary digests, which is what TLS client authentication requires.
+  #define SL_SE_TLS_IDENTITY_KEY                                \
+  {                                                             \
+    .type = SL_SE_KEY_TYPE_ECC_P256,                            \
+    .flags = SL_SE_KEY_FLAG_IS_DEVICE_GENERATED                 \
+             | SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PRIVATE_KEY \
+             | SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY,          \
+    .storage = {                                                \
+      .method = SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE,           \
+      .location = {                                             \
+        .slot = SL_SE_KEY_SLOT_TLS_IDENTITY,                    \
+      },                                                        \
+    },                                                          \
+  }
+#endif // SLI_SE_SUPPORTS_TLS_IDENTITY_KEY
+
 #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
 
 /// Key descriptor for secure boot public key

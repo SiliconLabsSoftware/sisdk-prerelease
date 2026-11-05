@@ -8,8 +8,8 @@
  * curve, so the domain parameters remain unchanged. The SLI APIs keep the curve
  * outside tf-psa-crypto's mbedtls_ecp_group_load() dispatch and PSA Crypto
  * support.
- * Domain parameters are shared; the NIST modp reduction is selected by
- * MBEDTLS_ECP_WITH_MPI_UINT.
+ * Domain parameters are shared. NIST modp uses one raw-limb quasi-reduction
+ * for classic MPI and MBEDTLS_ECP_WITH_MPI_UINT (non-negative result in [0, 2P)).
  *******************************************************************************
  * # License
  * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
@@ -311,8 +311,12 @@ static const mbedtls_ecp_point secp224r1_T[16] = {
 #define secp224r1_T NULL
 #endif /* MBEDTLS_ECP_FIXED_POINT_OPTIM == 1 */
 
-#if defined(MBEDTLS_ECP_WITH_MPI_UINT)
 #if defined(MBEDTLS_ECP_NIST_OPTIM)
+/*
+ * Fast quasi-reduction modulo p224 (FIPS 186-3 D.2.2).
+ * Operates on limbs only; leaves N in [0, 2P) with high limbs cleared so
+ * ecp_modp() can finish with one constant-time conditional subtract.
+ */
 
 #define LOAD32      cur = A(i);
 
@@ -362,9 +366,6 @@ static inline int8_t sli_extract_carry(int64_t cur)
 #define ADD_LAST ADD_CARRY(last_c)
 #define SUB_LAST SUB_CARRY(last_c)
 
-/*
- * Helpers for the main 'loop'
- */
 #define INIT(b)         \
   int8_t c = 0, last_c; \
   int64_t cur;          \
@@ -391,9 +392,6 @@ static inline int8_t sli_extract_carry(int64_t cur)
 
 static int sli_ecp_mod_p224_raw(mbedtls_mpi_uint *X, size_t X_limbs);
 
-/*
- * Fast quasi-reduction modulo p224 (FIPS 186-3 D.2.2)
- */
 static int sli_ecp_mod_p224(mbedtls_mpi *N)
 {
   int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
@@ -440,126 +438,6 @@ static int sli_ecp_mod_p224_raw(mbedtls_mpi_uint *X, size_t X_limbs)
 }
 
 #endif /* MBEDTLS_ECP_NIST_OPTIM */
-#else /* !MBEDTLS_ECP_WITH_MPI_UINT */
-#if defined(MBEDTLS_ECP_NIST_OPTIM)
-
-#define LOAD32      cur = A(i);
-
-#if defined(MBEDTLS_HAVE_INT32)
-
-#define MAX32       N->n
-#define A(j)        N->p[j]
-#define STORE32     N->p[i] = cur;
-
-#else
-
-#define MAX32       N->n * 2
-#define A(j) (j) % 2 ? (uint32_t) (N->p[(j) / 2] >> 32) \
-  : (uint32_t) (N->p[(j) / 2])
-#define STORE32                                    \
-  if (i % 2) {                                     \
-    N->p[i / 2] &= 0x00000000FFFFFFFF;             \
-    N->p[i / 2] |= ((mbedtls_mpi_uint) cur) << 32; \
-  } else {                                         \
-    N->p[i / 2] &= 0xFFFFFFFF00000000;             \
-    N->p[i / 2] |= (mbedtls_mpi_uint) cur;         \
-  }
-
-#endif /* sizeof(mbedtls_mpi_uint) */
-
-static inline void sli_add32(uint32_t *dst, uint32_t src, signed char *carry)
-{
-  *dst += src;
-  *carry += (*dst < src);
-}
-
-static inline void sli_sub32(uint32_t *dst, uint32_t src, signed char *carry)
-{
-  *carry -= (*dst < src);
-  *dst -= src;
-}
-
-#define ADD(j)    sli_add32(&cur, A(j), &c);
-#define SUB(j)    sli_sub32(&cur, A(j), &c);
-
-#define INIT(b)                                                     \
-  int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;                  \
-  signed char c = 0, cc;                                            \
-  uint32_t cur;                                                     \
-  size_t i = 0, bits = (b);                                         \
-  /* N is the size of the product of two b-bit numbers, plus one */ \
-  /* limb for fix_negative */                                       \
-  MBEDTLS_MPI_CHK(mbedtls_mpi_grow(N, (b) * 2 / biL + 1));          \
-  LOAD32;
-
-#define NEXT                    \
-  STORE32; i++; LOAD32;         \
-  cc = c; c = 0;                \
-  if (cc < 0) {                 \
-    sli_sub32(&cur, -cc, &c); } \
-  else {                        \
-    sli_add32(&cur, cc, &c); }  \
-
-#define LAST                                \
-  STORE32; i++;                             \
-  cur = c > 0 ? c : 0; STORE32;             \
-  cur = 0; while (++i < MAX32) { STORE32; } \
-  if (c < 0) { sli_ecp_fix_negative(N, c, bits); }
-
-/*
- * If the result is negative, we get it in the form
- * c * 2^bits + N, with c negative and N positive shorter than 'bits'
- */
-static void sli_ecp_fix_negative(mbedtls_mpi *N, signed char c, size_t bits)
-{
-  size_t i;
-
-  /* Set N := 2^bits - 1 - N. We know that 0 <= N < 2^bits, so
-   * set the absolute value to 0xfff...fff - N. There is no carry
-   * since we're subtracting from all-bits-one. */
-  for (i = 0; i <= bits / 8 / sizeof(mbedtls_mpi_uint); i++) {
-    N->p[i] = ~(mbedtls_mpi_uint) 0 - N->p[i];
-  }
-  /* Add 1, taking care of the carry. */
-  i = 0;
-  do {
-    ++N->p[i];
-  } while (N->p[i++] == 0 && i <= bits / 8 / sizeof(mbedtls_mpi_uint));
-  /* Invert the sign.
-   * Now N = N0 - 2^bits where N0 is the initial value of N. */
-  N->s = -1;
-
-  /* Add |c| * 2^bits to the absolute value. Since c and N are
-   * negative, this adds c * 2^bits. */
-  mbedtls_mpi_uint msw = (mbedtls_mpi_uint) - c;
-#if defined(MBEDTLS_HAVE_INT64)
-  if (bits == 224) {
-    msw <<= 32;
-  }
-#endif
-  N->p[bits / 8 / sizeof(mbedtls_mpi_uint)] += msw;
-}
-
-/*
- * Fast quasi-reduction modulo p224 (FIPS 186-3 D.2.2)
- */
-static int sli_ecp_mod_p224(mbedtls_mpi *N)
-{
-  INIT(224);
-
-  SUB(7); SUB(11);               NEXT;          // A0 += -A7 - A11
-  SUB(8); SUB(12);               NEXT;          // A1 += -A8 - A12
-  SUB(9); SUB(13);               NEXT;          // A2 += -A9 - A13
-  SUB(10); ADD(7); ADD(11);    NEXT;            // A3 += -A10 + A7 + A11
-  SUB(11); ADD(8); ADD(12);    NEXT;            // A4 += -A11 + A8 + A12
-  SUB(12); ADD(9); ADD(13);    NEXT;            // A5 += -A12 + A9 + A13
-  SUB(13); ADD(10);               LAST;         // A6 += -A13 + A10
-
-  cleanup:
-  return ret;
-}
-#endif /* MBEDTLS_ECP_NIST_OPTIM */
-#endif /* MBEDTLS_ECP_WITH_MPI_UINT */
 
 /*
  * Create an MPI from embedded constants

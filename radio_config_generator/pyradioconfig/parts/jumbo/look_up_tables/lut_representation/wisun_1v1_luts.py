@@ -1,4 +1,3 @@
-# THIS IS GENERATED CODE - DO NOT EDIT
 from pyradioconfig.parts.jumbo.look_up_tables.lut_dataclasses.wisun_dataclasses import BitrateModulation1v1, \
     FrequencyChannel1v1
 

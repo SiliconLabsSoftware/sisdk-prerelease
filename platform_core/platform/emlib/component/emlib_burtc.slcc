@@ -19,6 +19,7 @@ provides:
 - name: hal_generic_burtc
   condition: [device_series_2]
 requires:
+- name: log_none
 - name: device
 - name: device_has_burtc
 - name: emlib_common

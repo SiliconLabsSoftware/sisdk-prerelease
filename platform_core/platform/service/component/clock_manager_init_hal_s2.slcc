@@ -15,11 +15,13 @@ provides:
   condition: [device_series_2]
 - name: clock_manager_init_hal_s2
 requires:
+- name: log_none
 - name: device_series_2
 - name: status
 - name: sl_assert
 - name: emlib_cmu
 - name: gpio
+- name: hal_emu
 root_path: platform_core/platform/service/clock_manager
 source:
 - path: src/sl_clock_manager_init_hal_s2.c

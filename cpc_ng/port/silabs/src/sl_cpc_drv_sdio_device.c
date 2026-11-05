@@ -65,7 +65,6 @@
 /*******************************************************************************
  *********************************   DEFINES   *********************************
  ******************************************************************************/
-#define CPC_DRV_SDIO_IRQ_HANDLER SL_CONCAT_PASTER_3(SDIO, SL_CPC_DRV_SDIO_PERIPHERAL_NO, _IRQHandler)
 #define CPC_DRV_SDIO_DESC_COUNT SL_CPC_DRV_SDIO_DEVICE_RX_FRAME_POOL_COUNT
 #define CPC_SDIO_DEFAULT_AGGREGATION SL_CPC_DRV_SDIO_DEVICE_RX_FRAME_POOL_COUNT
 static_assert(CPC_DRV_SDIO_DESC_COUNT >= 2,
@@ -77,25 +76,6 @@ static_assert(SL_CPC_EP_MAX_PAYLOAD_SIZE <= SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_MAX_X
 static_assert(SL_CPC_DRV_SDIO_DEVICE_RX_FRAME_POOL_COUNT >= CPC_SDIO_DEFAULT_AGGREGATION,
               "RX frame pool count is too small");
 
-// ADMA state machine. The driver starts by sending/receiving all the pending frame
-// headers, then all the payloads. Once it has completed, the corresponding CMD 53
-// over callback will be serviced, ending the active transfer.
-typedef enum {
-  ADMA_IDLE,
-  ADMA_RECEIVE_HEADER,
-  ADMA_RECEIVE_PAYLOAD,
-  ADMA_TRANSMIT_HEADER,
-  ADMA_TRANSMIT_PAYLOAD,
-  ADMA_FLUSH_SDIO,
-} adma_state_t;
-
-// Header block structure.
-struct sdio_header_block {
-  uint8_t frame_count;
-  uint8_t reserved[3];
-  sli_cpc_hdr_t headers[];
-};
-
 /*******************************************************************************
  *********************************   MACROS   **********************************
  ******************************************************************************/
@@ -103,159 +83,10 @@ struct sdio_header_block {
 #define ALIGNED_PAYLOAD_SIZE(x) (SL_DIV_ROUND_UP(x, SL_CPC_BUF_MIN_ALIGNMENT) * SL_CPC_BUF_MIN_ALIGNMENT)
 
 /*******************************************************************************
- ***************************  LOCAL VARIABLES   ********************************
- ******************************************************************************/
-
-/*
- * Singleton runtime state. Ops take `sl_cpc_bus_t *` per sli_cpc_drv.h
- * but mostly ignore `bus` and use these file-scope variables. For multi-bus
- * support, move this state into `sl_cpc_drv_sdio_device` and access it via container_of.
- */
-static sl_cpc_bus_t *s_bus;
-
-// List of frames currently pending processing by the ADMA. These frames have
-// a valid header, endpoint and payload pointer, but their payload buffer are
-// still to be received over the bus.
-static sli_cpc_frame_list_t rx_payload_pending_frames;
-
-// List of frames that were handled by the ADMA but that are waiting to be sent
-// over the bus before being served to the core.
-static sli_cpc_frame_list_t rx_complete_pending_frames;
-
-// List of frames received successfully from the bus. These frames are completely
-// populated, along with their payloads. They are ready to be handed to the core
-// for processing.
-static sli_cpc_frame_list_t rx_completed_frames;
-
-static sli_cpc_frame_list_t rx_free_frame_list;
-
-static volatile bool rx_alloc_stalled = false;
-
-// Indicates if the driver is already busy transmitting. This is to avoid corrupting
-// an active CMD53.
-static volatile bool tx_busy = false;
-
-// List of frames submitted to the driver waiting to be picked up by the driver.
-// This list is used when the driver is already busy with a TX event.
-static sli_cpc_frame_list_t tx_pending_frames;
-
-// List of frames waiting for their headers to be sent. These frames were populated
-// by the core and are to be processed when the host will read the frame headers.
-static sli_cpc_frame_list_t tx_header_pending_frames;
-
-// List of frames currently pending processing by the ADMA. These frames have
-// a valid header, endpoint and payload pointer, but their payload buffer are
-// still to be sent over the bus.
-static sli_cpc_frame_list_t tx_payload_pending_frames;
-
-// List of frames that have been sent over the bus, but pending the completion of the rest of the
-// SDIO transfer (i.e.: Frame 0 has been sent over the bus, but Frame 1 is still in-flight).
-static sli_cpc_frame_list_t tx_pending_xfer_complete_frames;
-
-// Buffer used to store the frame count.
-alignas(SL_CPC_BUF_MIN_ALIGNMENT) static struct sdio_header_block sdio_hdr_block;
-
-// Descriptor used to transfer aggregated frames over the bus.
-static sl_hal_sdio_dev_dma_descriptor_t frame_descriptors[CPC_DRV_SDIO_DESC_COUNT];
-
-// Aligned buffer used to store the unaligned payloads. (4 bytes size aligned)
-static uint32_t unaligned_payload_pool[CPC_DRV_SDIO_DESC_COUNT];
-
-// CPC-1998: avoid having to waste this block, just for a flush.
-// Buffer used to flush pad bytes coming from the bus.
-alignas(SL_CPC_BUF_MIN_ALIGNMENT) static uint8_t flush_buff[SL_CPC_DRV_SDIO_BLOCK_SIZE];
-
-// Descriptor used to discard pad bytes from the bus.
-static sl_hal_sdio_dev_dma_descriptor_t flush_desc;
-
-static volatile adma_state_t adma_state = ADMA_IDLE;
-
-/*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 
-static uint32_t sdio_drv_get_available_write_frame_slots(sl_cpc_bus_t *bus);
-static sl_status_t init_hw(const sl_cpc_drv_sdio_device_t *drv);
-static sl_status_t sdio_drv_init(sl_cpc_bus_t *bus);
-static sl_status_t sdio_drv_read_data(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames);
-static sl_status_t sdio_drv_start_rx(sl_cpc_bus_t *bus);
-static uint32_t sdio_drv_write(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames);
-static void cpc_drv_sdio_on_rx_frame_free(sl_cpc_bus_t *bus);
-
 SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_sdio_device_caps, 1);
-
-static void get_local_capabilities(sl_cpc_bus_t *bus, const void **caps_p, uint16_t *caps_size_p)
-{
-  const sl_cpc_drv_sdio_device_t *drv = container_of(bus, sl_cpc_drv_sdio_device_t, bus);
-
-  *caps_p = &drv->local_caps;
-  *caps_size_p = sizeof(drv->local_caps);
-}
-
-static sl_status_t set_remote_capabilities(sl_cpc_bus_t *bus, const void *caps, uint16_t caps_size)
-{
-  sl_cpc_drv_sdio_device_t *drv = container_of(bus, sl_cpc_drv_sdio_device_t, bus);
-
-  if (caps_size != sizeof(drv->remote_caps)) {
-    return SL_STATUS_INVALID_COUNT;
-  }
-  memcpy(&drv->remote_caps, caps, caps_size);
-  return SL_STATUS_OK;
-}
-
-#define s_sdio_device_drv sl_cpc_drv_sdio_device_instances[0]
-
-sl_status_t sl_cpc_drv_sdio_device_init(sl_cpc_drv_sdio_device_t *drv, const sl_cpc_drv_sdio_device_config_t *cfg,
-                                        const sl_cpc_bus_config_t *bus_cfg)
-{
-  static const sli_cpc_drv_ops_t ops = {
-    .init = &sdio_drv_init,
-    .start_rx = &sdio_drv_start_rx,
-    .read = &sdio_drv_read_data,
-    .write = &sdio_drv_write,
-    .get_available_write_frame_slots = &sdio_drv_get_available_write_frame_slots,
-    .on_rx_frame_free = &cpc_drv_sdio_on_rx_frame_free,
-    .get_local_capabilities = &get_local_capabilities,
-    .set_remote_capabilities = &set_remote_capabilities,
-  };
-
-  sl_status_t status;
-
-  if (cfg == NULL || bus_cfg == NULL) {
-    return SL_STATUS_NULL_POINTER;
-  }
-
-  memset(drv, 0, sizeof(*drv));
-
-  status = init_hw(drv);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-
-  return sli_cpc_bus_init(&drv->bus, bus_cfg, &ops);
-}
-
-static void adma_irq_handler(void);
-static void fun0_irq_handler(void);
-static void fun1_irq_handler(void);
-static void on_sdio_read_complete(void);
-static void on_sdio_read_start(void);
-static void on_sdio_write_complete(void);
-static void on_sdio_write_start(void);
-static void prepare_tx(void);
-static void sdio_drv_pin_init(void);
-static void adma_rx_start_frame_count(void);
-static void adma_rx_start_headers(void);
-static void adma_rx_abort_header_transfer(void);
-static void adma_rx_abort_payload_transfer(sl_cpc_frame_t *frame);
-static void adma_rx_start_payloads(void);
-static void adma_tx_prepare_frame_count(void);
-static void adma_tx_prepare_header_descriptors(void);
-static void adma_tx_prepare_payload_descriptors(void);
-static void clear_frame_list(sli_cpc_frame_list_t *list);
-static void start_transfer(size_t idx, adma_state_t next_state);
-static void start_flush_transfer(uint32_t xfer_count);
-static sl_status_t alloc_rx_frame_to_free_list(sl_cpc_bus_t *bus);
 
 /***************************************************************************/ /**
  * Checks if any of the bit in the mask is set, and clears the mask.
@@ -269,27 +100,576 @@ static inline bool evaluate_and_clear_mask(uint32_t *val, uint32_t mask)
 }
 
 /***************************************************************************/ /**
- * SDIO peripheral interrupt handler.
+ * This function clears the frame list.
  ******************************************************************************/
-void CPC_DRV_SDIO_IRQ_HANDLER(void)
+static void clear_frame_list(sli_cpc_frame_list_t *list)
 {
-  uint32_t pending_irq = sl_hal_sdio_dev_get_enabled_pending_interrupts(SL_CPC_DRV_SDIO_PERIPHERAL);
+  sl_cpc_frame_t *frame;
 
-  // Clear the interrupts now, as the callbacks could cause it to fire again.
-  sl_hal_sdio_dev_clear_interrupts(SL_CPC_DRV_SDIO_PERIPHERAL, pending_irq);
-
-  if (evaluate_and_clear_mask(&pending_irq, SDIO_FN0_GLB_INT_STS_REG_FN0_GLB_INT_STS_REG0)) {
-    fun0_irq_handler();
+  while (!sli_cpc_frame_list_empty(list)) {
+    frame = sli_cpc_frame_list_pop(list);
+    sli_cpc_frame_put_ref(&frame);
   }
+}
 
-  if (evaluate_and_clear_mask(&pending_irq, SDIO_FN0_GLB_INT_STS_REG_FN0_GLB_INT_STS_REG1)) {
-    fun1_irq_handler();
-  }
+/***************************************************************************/ /**
+ * This function starts the ADMA flush transfer.
+ ******************************************************************************/
+static void start_flush_transfer(sl_cpc_drv_sdio_device_t *drv, uint32_t xfer_count)
+{
+  sl_status_t status;
 
-  if (pending_irq) {
-    // Unhandled IRQ source.
+  drv->adma_state = SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_FLUSH_SDIO;
+  drv->flush_desc.xfer.xfer_count = xfer_count;
+  status = sl_hal_sdio_dev_start_dma_transfer(SL_CPC_DRV_SDIO_PERIPHERAL, &drv->flush_desc);
+  if (status != SL_STATUS_OK) {
+    SLI_CPC_LOG_ERROR("[SDIO] Failed to start ADMA flush transfer");
     SLI_CPC_ASSERT(false);
+    return;
   }
+}
+
+/***************************************************************************/ /**
+ * This function starts the ADMA transfer.
+ ******************************************************************************/
+static void start_transfer(sl_cpc_drv_sdio_device_t *drv, size_t idx, sli_cpc_drv_sdio_device_adma_state_t next_state)
+{
+  sl_status_t status;
+
+  if (idx == 0 || idx > CPC_DRV_SDIO_DESC_COUNT) {
+    SLI_CPC_LOG_ERROR("[SDIO] Invalid descriptor count for ADMA transfer: %u", (unsigned)idx);
+    SLI_CPC_ASSERT(false);
+    start_flush_transfer(drv, SL_CPC_DRV_SDIO_BLOCK_SIZE);
+    return;
+  }
+
+  drv->adma_state = next_state;
+  drv->frame_descriptors[idx - 1].xfer.end_ifs = true;
+  status = sl_hal_sdio_dev_start_dma_transfer(SL_CPC_DRV_SDIO_PERIPHERAL, drv->frame_descriptors);
+  if (status != SL_STATUS_OK) {
+    SLI_CPC_LOG_ERROR("[SDIO] Failed to start ADMA transfer, state: %u", next_state);
+    SLI_CPC_ASSERT(false);
+    return;
+  }
+}
+
+/***************************************************************************/ /**
+ * Allocate a single RX frame and push it onto rx_free_frame_list, ready
+ * to be popped by the SDIO IRQ. The free list is replenished as RX-pool slots
+ * become available via the @ref cpc_drv_sdio_on_rx_frame_free hook.
+ ******************************************************************************/
+static sl_status_t alloc_rx_frame_to_free_list(sl_cpc_drv_sdio_device_t *drv)
+{
+  sl_cpc_frame_t *frame;
+
+  frame = sli_cpc_frame_new(&drv->bus, true);
+  if (frame == NULL) {
+    return SL_STATUS_ALLOCATION_FAILED;
+  }
+
+  MCU_ATOMIC_SECTION(sli_cpc_frame_list_push_back(&drv->rx_free_frame_list, frame);)
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************/ /**
+ * Abort an RX header transfer by flushing the SDIO block and clearing pending lists.
+ ******************************************************************************/
+static void adma_rx_abort_header_transfer(sl_cpc_drv_sdio_device_t *drv)
+{
+  // CPC-2989: Harden SDIO driver abort transfer behavior.
+  clear_frame_list(&drv->rx_payload_pending_frames);
+  start_flush_transfer(drv, SL_CPC_DRV_SDIO_BLOCK_SIZE);
+}
+
+/***************************************************************************/ /**
+ * Abort an RX payload transfer by flushing the SDIO block and clearing pending lists.
+ ******************************************************************************/
+static void adma_rx_abort_payload_transfer(sl_cpc_drv_sdio_device_t *drv, sl_cpc_frame_t *frame)
+{
+  // CPC-2989: Harden SDIO driver abort transfer behavior.
+  sli_cpc_frame_put_ref(&frame);
+  clear_frame_list(&drv->rx_payload_pending_frames);
+  clear_frame_list(&drv->rx_complete_pending_frames);
+  start_flush_transfer(drv, SL_CPC_DRV_SDIO_BLOCK_SIZE);
+}
+
+/***************************************************************************/ /**
+ * Start the ADMA transfer for the incoming aggregated frames.
+ ******************************************************************************/
+static void adma_rx_start_frame_count(sl_cpc_drv_sdio_device_t *drv)
+{
+  size_t idx = 0;
+
+  memset(&drv->sdio_hdr_block, 0, sizeof(struct sli_cpc_drv_sdio_device_hdr_block));
+
+  // Arm the ADMA for the next raw header.
+  drv->frame_descriptors[idx++] = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER_END_INTERRUPT(
+    &drv->sdio_hdr_block, sizeof(struct sli_cpc_drv_sdio_device_hdr_block));
+
+  start_transfer(drv, idx, SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_RECEIVE_HEADER);
+}
+
+/***************************************************************************/ /**
+ * This function reads the receive frame count and chain the adma descriptors for
+ * the incoming headers.
+ ******************************************************************************/
+static void adma_rx_start_headers(sl_cpc_drv_sdio_device_t *drv)
+{
+  uint8_t frame_count = drv->sdio_hdr_block.frame_count;
+  sl_cpc_frame_t *frame = NULL;
+  uint8_t idx = 0;
+  MCU_DECLARE_IRQ_STATE;
+
+  if (frame_count == 0) {
+    SLI_CPC_LOG_WARN("[SDIO] RX - Received frame count is 0, flush the whole transfer");
+    adma_rx_abort_header_transfer(drv);
+    return;
+  }
+
+  // validate the frame count
+  if (frame_count > drv->local_caps.max_aggregation) {
+    SLI_CPC_LOG_ERROR(
+      "[SDIO] RX - Received frame count (%u) exceeds local driver capabilities, flush the whole transfer", frame_count);
+    adma_rx_abort_header_transfer(drv);
+    return;
+  }
+
+  MCU_ENTER_ATOMIC();
+  if (drv->rx_free_frame_list.len < frame_count) {
+    drv->rx_alloc_stalled = true;
+    MCU_EXIT_ATOMIC();
+    return;
+  }
+  MCU_EXIT_ATOMIC();
+
+  for (uint32_t i = 0; i < frame_count; i++) {
+    // Check that maximum descriptor count is not exceeded.
+    if (idx >= CPC_DRV_SDIO_DESC_COUNT) {
+      // No more descriptors available, start a transfer and continue with headers preparation.
+
+      // Update frame count buffer with remaining frames for the next iteration.
+      drv->sdio_hdr_block.frame_count = frame_count - idx;
+      start_transfer(drv, idx, SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_RECEIVE_HEADER);
+      return;
+    }
+
+    MCU_ENTER_ATOMIC();
+    frame = sli_cpc_frame_list_pop(&drv->rx_free_frame_list);
+    MCU_EXIT_ATOMIC();
+    SLI_CPC_ASSERT(frame != NULL);
+
+    drv->frame_descriptors[idx++] = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(&frame->hdr, SLI_CPC_HEADER_SIZE);
+
+    // Push the frame to the payload pending list.
+    sli_cpc_frame_list_push_back(&drv->rx_payload_pending_frames, frame);
+    frame = NULL;
+  }
+
+  // Done preparing descriptors for headers, start ADMA transfer and continue with payloads preparation.
+  start_transfer(drv, idx, SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_RECEIVE_PAYLOAD);
+}
+
+/***************************************************************************/ /**
+ * This function prepares the adma descriptors for the incoming payloads.
+ ******************************************************************************/
+static void adma_rx_start_payloads(sl_cpc_drv_sdio_device_t *drv)
+{
+  sl_cpc_frame_t *frame = NULL;
+  bool has_payload = false;
+  size_t transfer_len = 0;
+  size_t payload_len = 0;
+  uint32_t list_len = 0;
+  sl_status_t status;
+  size_t idx = 0;
+
+  list_len = sli_cpc_frame_list_get_len(&drv->rx_payload_pending_frames);
+
+  // validate the frame count
+  if (list_len == 0) {
+    SLI_CPC_LOG_ERROR("[SDIO] RX - Pending payload list length is 0, flush the whole transfer");
+    adma_rx_abort_payload_transfer(drv, NULL);
+    return;
+  }
+
+  for (uint32_t i = 0; i < list_len; i++) {
+    // Check that maximum descriptor count is not exceeded.
+    if (idx >= CPC_DRV_SDIO_DESC_COUNT) {
+      // No more descriptors available, start a transfer and continue with payloads preparation.
+      start_transfer(drv, idx, SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_RECEIVE_PAYLOAD);
+      return;
+    }
+
+    // Get a frame for the current payload.
+    frame = sli_cpc_frame_list_pop(&drv->rx_payload_pending_frames);
+    if (frame == NULL) {
+      SLI_CPC_LOG_WARN("[SDIO] RX - Frame is NULL, flush the whole transfer");
+      adma_rx_abort_payload_transfer(drv, NULL);
+      return;
+    }
+
+    if (!sli_cpc_header_is_size_valid(&frame->hdr)) {
+      // Invalid header size - discard the frame
+      SLI_CPC_LOG_WARN("[SDIO] RX - Invalid header size, flush the whole transfer");
+      adma_rx_abort_payload_transfer(drv, frame);
+      return;
+    }
+
+    /*
+     * SDIO hardware performs CRC validation on all block transfers.
+     * Therefore, payload checksum validation is not required for this driver.
+     * Set to true to satisfy datalink layer requirements until
+     * that part is refactored.
+     */
+    frame->payload_csum_is_valid = true;
+
+    status = sli_cpc_alloc_rx_payload(&drv->bus, frame);
+
+    // Check if the frame has a payload
+    payload_len = sli_cpc_header_get_payload_size(&frame->hdr);
+    if (payload_len > 0) {
+      if (status == SL_STATUS_OK) {
+        // Calculate the transfer length to reach the next 4-byte boundary.
+        transfer_len = ALIGNED_PAYLOAD_SIZE(payload_len);
+
+        // Prepare the ADMA descriptor for the payload including the trailing padding.
+        drv->frame_descriptors[idx++] = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(frame->payload->ptr, transfer_len);
+        has_payload = true;
+      } else {
+        // CPC-2989: The frame has a payload but no RX buffer could be allocated. It should be
+        // discarded while processing continues for remaining frames; for now, abort.
+        adma_rx_abort_payload_transfer(drv, frame);
+        return;
+      }
+    }
+    // Push the frame to the complete pending frames list.
+    sli_cpc_frame_list_push_back(&drv->rx_complete_pending_frames, frame);
+    frame = NULL;
+  }
+
+  // Done preparing descriptors for payloads, start ADMA transfer and continue with flushing the remaining padding bytes.
+  if (has_payload) {
+    start_transfer(drv, idx, SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_FLUSH_SDIO);
+  } else {
+    start_flush_transfer(drv, 0);
+  }
+}
+
+/***************************************************************************/ /**
+ * Prepare the ADMA descriptor for the frame count.
+ ******************************************************************************/
+static void adma_tx_prepare_frame_count(sl_cpc_drv_sdio_device_t *drv)
+{
+  uint32_t list_len = 0;
+  uint8_t frame_count = 0;
+  size_t idx = 0;
+
+  // Prepare the aggregate header block with the frame count.
+  list_len = sli_cpc_frame_list_get_len(&drv->tx_header_pending_frames);
+  if (!list_len) {
+    // No frames to send, nothing to do.
+    SLI_CPC_LOG_ERROR("[SDIO] No frames to send - aborting transfer");
+    start_flush_transfer(drv, SL_CPC_DRV_SDIO_BLOCK_SIZE);
+    return;
+  }
+
+  memset(&drv->sdio_hdr_block, 0, sizeof(struct sli_cpc_drv_sdio_device_hdr_block));
+
+  frame_count = (uint8_t)SL_MIN(list_len, drv->remote_caps.max_aggregation);
+  drv->sdio_hdr_block.frame_count = frame_count;
+
+  // Add frame count as first descriptor
+  drv->frame_descriptors[idx++]
+    = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(&drv->sdio_hdr_block, sizeof(struct sli_cpc_drv_sdio_device_hdr_block));
+
+  start_transfer(drv, idx, SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_TRANSMIT_HEADER);
+}
+
+/***************************************************************************/ /**
+ * Prepare the ADMA descriptors for the headers.
+ ******************************************************************************/
+static void adma_tx_prepare_header_descriptors(sl_cpc_drv_sdio_device_t *drv)
+{
+  sl_cpc_frame_t *frame = NULL;
+  uint32_t tx_frame_count = 0;
+  uint32_t list_len = 0;
+  size_t idx = 0;
+
+  // Prepare the aggregate header block.
+  list_len = sli_cpc_frame_list_get_len(&drv->tx_header_pending_frames);
+  if (!list_len) {
+    // No frames to send, nothing to do.
+    drv->adma_state = SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_IDLE;
+    return;
+  }
+
+  // Validate the frame count.
+  tx_frame_count = SL_MIN(list_len, drv->remote_caps.max_aggregation);
+  SLI_CPC_ASSERT(tx_frame_count > 0);
+
+  for (uint32_t i = 0; i < tx_frame_count; i++) {
+    // Check that maximum descriptor count is not exceeded.
+    if (idx >= CPC_DRV_SDIO_DESC_COUNT) {
+      // No more descriptors available, start a transfer and continue with headers preparation.
+      start_transfer(drv, idx, SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_TRANSMIT_HEADER);
+      return;
+    }
+
+    // Pop the frame from the header pending list and push it to the payload pending list.
+    frame = sli_cpc_frame_list_pop(&drv->tx_header_pending_frames);
+    if (frame == NULL) {
+      SLI_CPC_LOG_WARN("[SDIO] TX - Frame count exceeds list length");
+      // This should never happen, as we should pop less or equal to the frame count.
+      SLI_CPC_ASSERT(false);
+      return;
+    }
+
+    drv->frame_descriptors[idx++] = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(&frame->hdr, SLI_CPC_HEADER_SIZE);
+
+    // Move frame to pending list to notify completion.
+    sli_cpc_frame_list_push_back(&drv->tx_payload_pending_frames, frame);
+  }
+
+  // Done preparing descriptors for headers, start ADMA transfer and continue with payloads preparation.
+  start_transfer(drv, idx, SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_TRANSMIT_PAYLOAD);
+}
+
+/***************************************************************************/ /**
+ * Prepare the ADMA descriptors for the payloads.
+ ******************************************************************************/
+static void adma_tx_prepare_payload_descriptors(sl_cpc_drv_sdio_device_t *drv)
+{
+  sl_cpc_frame_t *frame = NULL;
+  size_t unaligned_len = 0;
+  bool has_payload = false;
+  size_t aligned_len = 0;
+  size_t payload_len = 0;
+  uint32_t dword_idx = 0;
+  uint32_t list_len = 0;
+  size_t idx = 0;
+
+  list_len = sli_cpc_frame_list_get_len(&drv->tx_payload_pending_frames);
+
+  if (!list_len) {
+    // No frames to send, nothing to do.
+    SLI_CPC_LOG_ERROR("[SDIO] No frames to send - aborting transfer");
+    start_flush_transfer(drv, SL_CPC_DRV_SDIO_BLOCK_SIZE);
+    return;
+  }
+
+  // link the frame payload descriptors
+  for (uint32_t i = 0; i < list_len; i++) {
+    // Check that maximum descriptor count is not exceeded, accomodate extra descriptor for unaligned payload.
+    if (idx >= (CPC_DRV_SDIO_DESC_COUNT - 1)) {
+      // No more descriptors available, start a transfer and continue with payloads preparation.
+      start_transfer(drv, idx, SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_TRANSMIT_PAYLOAD);
+      return;
+    }
+
+    frame = sli_cpc_frame_list_pop(&drv->tx_payload_pending_frames);
+    if (frame == NULL) {
+      SLI_CPC_LOG_WARN("[SDIO] TX - Frame count exceeds list length");
+      // This should never happen, as we should pop less or equal to the list length.
+      SLI_CPC_ASSERT(false);
+      return;
+    }
+
+    if (frame->payload) {
+      uint8_t *payload = frame->payload->ptr;
+      payload_len = sli_cpc_header_get_payload_size(&frame->hdr);
+
+      // Calculate the unaligned and aligned lengths.
+      unaligned_len = payload_len % SL_CPC_BUF_MIN_ALIGNMENT;
+      aligned_len = payload_len - unaligned_len;
+
+      if (aligned_len > 0) {
+        drv->frame_descriptors[idx++] = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(payload, aligned_len);
+      }
+
+      // Add the unaligned part to the realignment buffer.
+      if (unaligned_len > 0) {
+        // Clear the unaligned payload pool to avoid garbage data.
+        memset(&drv->unaligned_payload_pool[dword_idx], 0, SL_CPC_BUF_MIN_ALIGNMENT);
+        memcpy(&drv->unaligned_payload_pool[dword_idx], &payload[aligned_len], unaligned_len);
+
+        drv->frame_descriptors[idx++]
+          = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(&drv->unaligned_payload_pool[dword_idx], SL_CPC_BUF_MIN_ALIGNMENT);
+        dword_idx++;
+      }
+      has_payload = true;
+    }
+    // Move frame to pending list to notify completion.
+    sli_cpc_frame_list_push_back(&drv->tx_pending_xfer_complete_frames, frame);
+  }
+
+  // Done preparing descriptors for payloads, start ADMA transfer and continue with flushing the remaining padding bytes.
+  if (has_payload) {
+    start_transfer(drv, idx, SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_FLUSH_SDIO);
+  } else {
+    start_flush_transfer(drv, 0);
+  }
+}
+
+static void adma_irq_handler(sl_cpc_drv_sdio_device_t *drv)
+{
+  switch (drv->adma_state) {
+    case SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_RECEIVE_HEADER:
+      // Process the aggregated headers received from the host
+      adma_rx_start_headers(drv);
+      break;
+
+    case SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_RECEIVE_PAYLOAD:
+      // Process the aggregated payloads received from the host
+      adma_rx_start_payloads(drv);
+      break;
+
+    case SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_FLUSH_SDIO:
+      // Continue with flushing data until SDIO transfer is complete.
+      start_flush_transfer(drv, SL_CPC_DRV_SDIO_BLOCK_SIZE);
+      break;
+
+    case SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_TRANSMIT_HEADER:
+      adma_tx_prepare_header_descriptors(drv);
+      break;
+
+    case SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_TRANSMIT_PAYLOAD:
+      adma_tx_prepare_payload_descriptors(drv);
+      break;
+
+    default:
+      SLI_CPC_ASSERT(false);
+      break;
+  }
+}
+
+/***************************************************************************/ /**
+ * Attempt to arm a CMD53 Read operation if frames are pending.
+ ******************************************************************************/
+static void prepare_tx(sl_cpc_drv_sdio_device_t *drv)
+{
+  sli_cpc_frame_list_t *frames = &drv->tx_pending_frames;
+  uint32_t num_frames = sli_cpc_frame_list_get_len(frames);
+  bool should_start_tx = false;
+  sl_cpc_frame_t *frame;
+  size_t tfer_len = 0;
+  sl_status_t status;
+
+  MCU_DECLARE_IRQ_STATE;
+
+  MCU_ENTER_ATOMIC();
+  if (!drv->tx_busy && num_frames > 0) {
+    drv->tx_busy = true;
+    should_start_tx = true;
+  }
+  MCU_EXIT_ATOMIC();
+
+  if (!should_start_tx) {
+    // CMD53 Read is already active or no more data to be processed, nothing to do.
+    return;
+  }
+
+  // Starting a transmission.
+
+  SLI_CPC_ASSERT(sli_cpc_frame_list_empty(&drv->tx_header_pending_frames));
+  SLI_CPC_ASSERT(sli_cpc_frame_list_empty(&drv->tx_payload_pending_frames));
+
+  // Start with the frame count size (4 bytes)
+  tfer_len = sizeof(struct sli_cpc_drv_sdio_device_hdr_block);
+
+  SLI_CPC_FRAME_LIST_FOR_EACH(frames, frame)
+  {
+    // Compute the size of the CMD53.
+    tfer_len += SLI_CPC_HEADER_SIZE;
+
+    if (frame && frame->payload) {
+      tfer_len += ALIGNED_PAYLOAD_SIZE(frame->payload->len);
+    }
+  }
+
+  // To reduce the number of individual CMD53 needed from the host, advertise
+  // only a multiple of the block size to the host. If less data is sent, we will
+  // pad the last block with zeroes. The host will be responsible for ignoring the
+  // padding, based on the header(s).
+  tfer_len = SL_DIV_ROUND_UP(tfer_len, SL_CPC_DRV_SDIO_BLOCK_SIZE) * SL_CPC_DRV_SDIO_BLOCK_SIZE;
+
+  // Transaction starts by sending the headers.
+  sli_cpc_frame_list_extend(&drv->tx_header_pending_frames, frames);
+
+  // Signal the SDIO host that new frames are ready to be sent.
+  status = sl_hal_sdio_dev_setup_function_transfer(SL_CPC_DRV_SDIO_PERIPHERAL, SL_CPC_DRV_SDIO_FUNCTION_NUM, tfer_len);
+  SLI_CPC_ASSERT(status == SL_STATUS_OK);
+}
+
+/***************************************************************************/ /**
+ * Handle SDIO CMD53 write start. Start a reception operation.
+ *
+ * The host will start by sending a complete block with the following structure:
+ * [Number of frames (n) | Frame header 1 | ... | Frame header n]
+ *
+ * The secondary must receive these frames headers in order to know how many frames
+ * are coming, and where to store the payload data.
+ ******************************************************************************/
+static void on_sdio_write_start(sl_cpc_drv_sdio_device_t *drv)
+{
+  // Any prior transaction should be complete prior to starting a new one.
+  SLI_CPC_ASSERT(drv->adma_state == SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_IDLE);
+
+  adma_rx_start_frame_count(drv);
+}
+
+/***************************************************************************/ /**
+ * CMD53 write completed, finished reception. Notify the core that new data is
+ * available to be read from the driver.
+ ******************************************************************************/
+static void on_sdio_write_complete(sl_cpc_drv_sdio_device_t *drv)
+{
+  sli_cpc_frame_list_extend(&drv->rx_completed_frames, &drv->rx_complete_pending_frames);
+
+  // Notify the core that new data is available to be read.
+  sli_cpc_bus_notify_rx_data_from_drv(&drv->bus);
+
+  // ADMA transfer is complete.
+  drv->adma_state = SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_IDLE;
+}
+
+/***************************************************************************/ /**
+ * Handle SDIO CMD53 read start, begin transmission.
+ *
+ * Start the ADMA transfer that was previously armed prior to signaling the host
+ * that new data was available to be read.
+ ******************************************************************************/
+static void on_sdio_read_start(sl_cpc_drv_sdio_device_t *drv)
+{
+  if (!drv->tx_busy) {
+    // Host attempted a read when we had no frames to send. There is nothing we
+    // can do here, the CMD53 will timeout and we will have to handle the error
+    // later on.
+    SLI_CPC_ASSERT(false);
+    return;
+  }
+
+  // Any prior transaction should be complete prior to starting a new one.
+  SLI_CPC_ASSERT(drv->adma_state == SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_IDLE);
+
+  // Aggregation enabled - multiple frames can be pending.
+  adma_tx_prepare_frame_count(drv);
+}
+
+/***************************************************************************/ /**
+ * Handle SDIO CMD53 read over. Transmission completed.
+ ******************************************************************************/
+static void on_sdio_read_complete(sl_cpc_drv_sdio_device_t *drv)
+{
+  sli_cpc_bus_notify_tx_data_by_drv(&drv->bus, &drv->tx_pending_xfer_complete_frames);
+
+  // Transmission done.
+  drv->tx_busy = false;
+
+  // ADMA transfer is complete.
+  drv->adma_state = SLI_CPC_DRV_SDIO_DEVICE_ADMA_STATE_IDLE;
+
+  // Check if any new frames were submitted while we were busy.
+  prepare_tx(drv);
 }
 
 /***************************************************************************/ /**
@@ -327,7 +707,7 @@ static void fun0_irq_handler(void)
 /***************************************************************************/ /**
  * Function 1 interrupt handler.
  ******************************************************************************/
-static void fun1_irq_handler(void)
+static void fun1_irq_handler(sl_cpc_drv_sdio_device_t *drv)
 {
   uint32_t pending_irq = sl_hal_sdio_dev_get_enabled_pending_function_interrupts(SL_CPC_DRV_SDIO_PERIPHERAL, 1);
 
@@ -346,7 +726,7 @@ static void fun1_irq_handler(void)
     sl_hal_sdio_dev_clear_function_interrupts(SL_CPC_DRV_SDIO_PERIPHERAL, SL_CPC_DRV_SDIO_FUNCTION_NUM,
                                               SDIO_FN1_AXI_FN1_INT_FN1_SIG_ADMA_END_INT);
 
-    adma_irq_handler();
+    adma_irq_handler(drv);
   }
 
   // CMD53 Write end.
@@ -355,7 +735,7 @@ static void fun1_irq_handler(void)
                                               SDIO_FN1_AXI_FN1_INT_SIG_FN1_WR_OVER);
 
     // Reception completed.
-    on_sdio_write_complete();
+    on_sdio_write_complete(drv);
   }
 
   // CMD53 Read end
@@ -364,7 +744,7 @@ static void fun1_irq_handler(void)
                                               SDIO_FN1_AXI_FN1_INT_SIG_FN1_RD_OVER);
 
     // Transmission completed.
-    on_sdio_read_complete();
+    on_sdio_read_complete(drv);
   }
 
   // CMD53 Write Start
@@ -373,7 +753,7 @@ static void fun1_irq_handler(void)
                                               SDIO_FN1_AXI_FN1_INT_SIG_FN1_SDIO_WR_START);
 
     // Host initiated reception operation.
-    on_sdio_write_start();
+    on_sdio_write_start(drv);
   }
 
   // CMD53 Read Start
@@ -382,7 +762,7 @@ static void fun1_irq_handler(void)
                                               SDIO_FN1_AXI_FN1_INT_SIG_FN1_SDIO_RD_START);
 
     // Host requested transmission.
-    on_sdio_read_start();
+    on_sdio_read_start(drv);
   }
 
   if (evaluate_and_clear_mask(&pending_irq, SDIO_FN1_AXI_FN1_INT_SIG_FUN1_RST)) {
@@ -412,6 +792,72 @@ static void fun1_irq_handler(void)
   if (pending_irq) {
     SLI_CPC_LOG_ERROR("[SDIO] Unhandled FN1 interrupt: %lu", pending_irq);
     SLI_CPC_ASSERT(false);
+  }
+}
+
+/***************************************************************************/ /**
+ * SDIO peripheral interrupt handler.
+ ******************************************************************************/
+void sli_cpc_drv_sdio_device_irq_handler(sl_cpc_drv_sdio_device_t *drv)
+{
+  uint32_t pending_irq = sl_hal_sdio_dev_get_enabled_pending_interrupts(SL_CPC_DRV_SDIO_PERIPHERAL);
+
+  // Clear the interrupts now, as the callbacks could cause it to fire again.
+  sl_hal_sdio_dev_clear_interrupts(SL_CPC_DRV_SDIO_PERIPHERAL, pending_irq);
+
+  if (evaluate_and_clear_mask(&pending_irq, SDIO_FN0_GLB_INT_STS_REG_FN0_GLB_INT_STS_REG0)) {
+    fun0_irq_handler();
+  }
+
+  if (evaluate_and_clear_mask(&pending_irq, SDIO_FN0_GLB_INT_STS_REG_FN0_GLB_INT_STS_REG1)) {
+    fun1_irq_handler(drv);
+  }
+
+  if (pending_irq) {
+    // Unhandled IRQ source.
+    SLI_CPC_ASSERT(false);
+  }
+}
+
+/***************************************************************************/ /**
+ * Initialize the SDIO peripheral pins.
+ ******************************************************************************/
+static void sdio_drv_pin_init(void)
+{
+  sl_gpio_t gpio;
+  // CMD and DAT are driven by the device; SCLK is host-driven and stays an input.
+  sl_gpio_t driven_pins[] = {
+    {.port = SL_CPC_DRV_SDIO_CMD_PORT, .pin = SL_CPC_DRV_SDIO_CMD_PIN},
+    {.port = SL_CPC_DRV_SDIO_DAT0_PORT, .pin = SL_CPC_DRV_SDIO_DAT0_PIN},
+    {.port = SL_CPC_DRV_SDIO_DAT1_PORT, .pin = SL_CPC_DRV_SDIO_DAT1_PIN},
+    {.port = SL_CPC_DRV_SDIO_DAT2_PORT, .pin = SL_CPC_DRV_SDIO_DAT2_PIN},
+    {.port = SL_CPC_DRV_SDIO_DAT3_PORT, .pin = SL_CPC_DRV_SDIO_DAT3_PIN},
+  };
+
+  // Enable bus clock for GPIO.
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
+
+  // Enable bus clock for SDIO.
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_SDIO0);
+
+  // Configure SDIO pins routing.
+  GPIO->SDIO0PRI2ROUTEPEN
+    = (GPIO_SDIO0PRI2ROUTEPEN_SDIO0PRI2DATA0ROUTEPEN | GPIO_SDIO0PRI2ROUTEPEN_SDIO0PRI2DATA1ROUTEPEN
+       | GPIO_SDIO0PRI2ROUTEPEN_SDIO0PRI2DATA2ROUTEPEN | GPIO_SDIO0PRI2ROUTEPEN_SDIO0PRI2DATA3ROUTEPEN
+       | GPIO_SDIO0PRI2ROUTEPEN_SDIO0PRI2CMDROUTEPEN | GPIO_SDIO0PRI2ROUTEPEN_SDIO0PRI2CLKROUTEPEN);
+
+  // If CD GPIO pins are configured, use GPIO card detect; otherwise use the SDIO CD pin.
+#if defined(SL_CPC_DRV_SDIO_CD_PORT) && defined(SL_CPC_DRV_SDIO_CD_PIN)
+  gpio = (sl_gpio_t){.port = SL_CPC_DRV_SDIO_CD_PORT, .pin = SL_CPC_DRV_SDIO_CD_PIN};
+  sl_hal_gpio_set_pin_mode(&gpio, SL_GPIO_MODE_PUSH_PULL, 1);
+#endif
+
+  // Configure SDIO pins.
+  gpio = (sl_gpio_t){.port = SL_CPC_DRV_SDIO_SCLK_PORT, .pin = SL_CPC_DRV_SDIO_SCLK_PIN};
+  sl_hal_gpio_set_pin_mode(&gpio, SL_GPIO_MODE_INPUT, 1);
+
+  for (size_t i = 0; i < SL_ARRAY_SIZE(driven_pins); i++) {
+    sl_hal_gpio_set_pin_mode(&driven_pins[i], SL_GPIO_MODE_PUSH_PULL, 1);
   }
 }
 
@@ -488,46 +934,54 @@ static sl_status_t init_hw(const sl_cpc_drv_sdio_device_t *drv)
   return SL_STATUS_OK;
 }
 
-/***************************************************************************/ /**
- * Initialize the SDIO peripheral pins.
- ******************************************************************************/
-static void sdio_drv_pin_init(void)
+static inline sl_cpc_drv_sdio_device_t *to_drv(sl_cpc_bus_t *bus)
 {
-  sl_gpio_t gpio;
-  // CMD and DAT are driven by the device; SCLK is host-driven and stays an input.
-  sl_gpio_t driven_pins[] = {
-    {.port = SL_CPC_DRV_SDIO_CMD_PORT, .pin = SL_CPC_DRV_SDIO_CMD_PIN},
-    {.port = SL_CPC_DRV_SDIO_DAT0_PORT, .pin = SL_CPC_DRV_SDIO_DAT0_PIN},
-    {.port = SL_CPC_DRV_SDIO_DAT1_PORT, .pin = SL_CPC_DRV_SDIO_DAT1_PIN},
-    {.port = SL_CPC_DRV_SDIO_DAT2_PORT, .pin = SL_CPC_DRV_SDIO_DAT2_PIN},
-    {.port = SL_CPC_DRV_SDIO_DAT3_PORT, .pin = SL_CPC_DRV_SDIO_DAT3_PIN},
-  };
+  return container_of(bus, sl_cpc_drv_sdio_device_t, bus);
+}
 
-  // Enable bus clock for GPIO.
-  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
+static void get_local_capabilities(sl_cpc_bus_t *bus, const void **caps_p, uint16_t *caps_size_p)
+{
+  const sl_cpc_drv_sdio_device_t *drv = to_drv(bus);
 
-  // Enable bus clock for SDIO.
-  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_SDIO0);
+  *caps_p = &drv->local_caps;
+  *caps_size_p = sizeof(drv->local_caps);
+}
 
-  // Configure SDIO pins routing.
-  GPIO->SDIO0PRI2ROUTEPEN
-    = (GPIO_SDIO0PRI2ROUTEPEN_SDIO0PRI2DATA0ROUTEPEN | GPIO_SDIO0PRI2ROUTEPEN_SDIO0PRI2DATA1ROUTEPEN
-       | GPIO_SDIO0PRI2ROUTEPEN_SDIO0PRI2DATA2ROUTEPEN | GPIO_SDIO0PRI2ROUTEPEN_SDIO0PRI2DATA3ROUTEPEN
-       | GPIO_SDIO0PRI2ROUTEPEN_SDIO0PRI2CMDROUTEPEN | GPIO_SDIO0PRI2ROUTEPEN_SDIO0PRI2CLKROUTEPEN);
+static sl_status_t set_remote_capabilities(sl_cpc_bus_t *bus, const void *caps, uint16_t caps_size)
+{
+  sl_cpc_drv_sdio_device_t *drv = to_drv(bus);
 
-  // If CD GPIO pins are configured, use GPIO card detect; otherwise use the SDIO CD pin.
-#if defined(SL_CPC_DRV_SDIO_CD_PORT) && defined(SL_CPC_DRV_SDIO_CD_PIN)
-  gpio = (sl_gpio_t){.port = SL_CPC_DRV_SDIO_CD_PORT, .pin = SL_CPC_DRV_SDIO_CD_PIN};
-  sl_hal_gpio_set_pin_mode(&gpio, SL_GPIO_MODE_PUSH_PULL, 1);
-#endif
-
-  // Configure SDIO pins.
-  gpio = (sl_gpio_t){.port = SL_CPC_DRV_SDIO_SCLK_PORT, .pin = SL_CPC_DRV_SDIO_SCLK_PIN};
-  sl_hal_gpio_set_pin_mode(&gpio, SL_GPIO_MODE_INPUT, 1);
-
-  for (size_t i = 0; i < SL_ARRAY_SIZE(driven_pins); i++) {
-    sl_hal_gpio_set_pin_mode(&driven_pins[i], SL_GPIO_MODE_PUSH_PULL, 1);
+  if (caps_size != sizeof(drv->remote_caps)) {
+    return SL_STATUS_INVALID_COUNT;
   }
+  memcpy(&drv->remote_caps, caps, caps_size);
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************/ /**
+ * Validate that a core TX request is supported by the driver implementation.
+ ******************************************************************************/
+static sl_status_t validate_tx_batch(const sli_cpc_frame_list_t *frames)
+{
+  sl_cpc_frame_t *frame;
+
+  if (frames == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  // Check if any frame have a scatter-gather payload, return not supported if so.
+  // CPC-3361 [scatter gather] SDIO Device update device driver to support chained buffers
+  SLI_CPC_FRAME_LIST_FOR_EACH(frames, frame)
+  {
+    if (frame->payload == NULL) {
+      continue;
+    }
+    if (frame->payload->tot_len != frame->payload->len) {
+      return SL_STATUS_NOT_SUPPORTED;
+    }
+  }
+
+  return SL_STATUS_OK;
 }
 
 /***************************************************************************/ /**
@@ -535,29 +989,27 @@ static void sdio_drv_pin_init(void)
  ******************************************************************************/
 static sl_status_t sdio_drv_init(sl_cpc_bus_t *bus)
 {
-  sl_cpc_drv_sdio_device_t *drv = container_of(bus, sl_cpc_drv_sdio_device_t, bus);
-
-  s_bus = bus;
+  sl_cpc_drv_sdio_device_t *drv = to_drv(bus);
 
   // Initialize driver frame lists.
-  sli_cpc_frame_list_init(&rx_payload_pending_frames);
-  sli_cpc_frame_list_init(&rx_complete_pending_frames);
-  sli_cpc_frame_list_init(&rx_completed_frames);
-  sli_cpc_frame_list_init(&rx_free_frame_list);
-  sli_cpc_frame_list_init(&tx_pending_frames);
-  sli_cpc_frame_list_init(&tx_header_pending_frames);
-  sli_cpc_frame_list_init(&tx_payload_pending_frames);
-  sli_cpc_frame_list_init(&tx_pending_xfer_complete_frames);
+  sli_cpc_frame_list_init(&drv->rx_payload_pending_frames);
+  sli_cpc_frame_list_init(&drv->rx_complete_pending_frames);
+  sli_cpc_frame_list_init(&drv->rx_completed_frames);
+  sli_cpc_frame_list_init(&drv->rx_free_frame_list);
+  sli_cpc_frame_list_init(&drv->tx_pending_frames);
+  sli_cpc_frame_list_init(&drv->tx_header_pending_frames);
+  sli_cpc_frame_list_init(&drv->tx_payload_pending_frames);
+  sli_cpc_frame_list_init(&drv->tx_pending_xfer_complete_frames);
 
   for (uint32_t i = 0; i < CPC_SDIO_DEFAULT_AGGREGATION; i++) {
-    sl_status_t status = alloc_rx_frame_to_free_list(bus);
+    sl_status_t status = alloc_rx_frame_to_free_list(drv);
     if (status != SL_STATUS_OK) {
       SLI_CPC_ASSERT(false);
       return status;
     }
   }
 
-  flush_desc = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER_END_INTERRUPT(flush_buff, 0);
+  drv->flush_desc = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER_END_INTERRUPT(drv->flush_buff, 0);
 
   // Initialize local capabilities
   drv->remote_caps.max_aggregation = 1;
@@ -571,17 +1023,17 @@ static sl_status_t sdio_drv_init(sl_cpc_bus_t *bus)
  ******************************************************************************/
 static sl_status_t sdio_drv_read_data(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames)
 {
+  sl_cpc_drv_sdio_device_t *drv = to_drv(bus);
   MCU_DECLARE_IRQ_STATE;
-  (void)bus;
 
   MCU_ENTER_ATOMIC();
 
-  if (sli_cpc_frame_list_empty(&rx_completed_frames)) {
+  if (sli_cpc_frame_list_empty(&drv->rx_completed_frames)) {
     MCU_EXIT_ATOMIC();
     return SL_STATUS_EMPTY;
   }
 
-  sli_cpc_frame_list_extend(frames, &rx_completed_frames);
+  sli_cpc_frame_list_extend(frames, &drv->rx_completed_frames);
 
   MCU_EXIT_ATOMIC();
 
@@ -595,86 +1047,29 @@ static sl_status_t sdio_drv_read_data(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *f
  ******************************************************************************/
 static uint32_t sdio_drv_write(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames)
 {
+  sl_cpc_drv_sdio_device_t *drv = to_drv(bus);
   uint32_t num_frames = sli_cpc_frame_list_get_len(frames);
-  (void)bus;
-
-  if (sdio_drv_get_available_write_frame_slots(bus) < num_frames) {
-    // Core attempted to send more frames than available.
-    SLI_CPC_ASSERT(false);
-
-    return 0;
-  }
+  sl_status_t status;
 
   if (num_frames == 0) {
     goto exit;
   }
 
+  status = validate_tx_batch(frames);
+  if (status != SL_STATUS_OK) {
+    SLI_CPC_LOG_ERROR("[SDIO] TX requirements cannot be satisfied: 0x%lx", (unsigned long)status);
+    SLI_CPC_ASSERT(false);
+    return 0;
+  }
+
   MCU_ATOMIC_SECTION(
     // tx_pending_frames also accessed from IRQ to queue another CMD53 Read operation.
-    sli_cpc_frame_list_extend(&tx_pending_frames, frames);)
+    sli_cpc_frame_list_extend(&drv->tx_pending_frames, frames);)
 
-  prepare_tx();
+  prepare_tx(drv);
 
 exit:
   return num_frames;
-}
-
-/***************************************************************************/ /**
- * Attempt to arm a CMD53 Read operation if frames are pending.
- ******************************************************************************/
-static void prepare_tx(void)
-{
-  sli_cpc_frame_list_t *frames = &tx_pending_frames;
-  uint32_t num_frames = sli_cpc_frame_list_get_len(frames);
-  bool should_start_tx = false;
-  sl_cpc_frame_t *frame;
-  size_t tfer_len = 0;
-  sl_status_t status;
-
-  MCU_DECLARE_IRQ_STATE;
-
-  MCU_ENTER_ATOMIC();
-  if (!tx_busy && num_frames > 0) {
-    tx_busy = true;
-    should_start_tx = true;
-  }
-  MCU_EXIT_ATOMIC();
-
-  if (!should_start_tx) {
-    // CMD53 Read is already active or no more data to be processed, nothing to do.
-    return;
-  }
-
-  // Starting a transmission.
-
-  SLI_CPC_ASSERT(sli_cpc_frame_list_empty(&tx_header_pending_frames));
-  SLI_CPC_ASSERT(sli_cpc_frame_list_empty(&tx_payload_pending_frames));
-
-  // Start with the frame count size (4 bytes)
-  tfer_len = sizeof(struct sdio_header_block);
-
-  SLI_CPC_FRAME_LIST_FOR_EACH(frames, frame)
-  {
-    // Compute the size of the CMD53.
-    tfer_len += SLI_CPC_HEADER_SIZE;
-
-    if (frame && frame->payload) {
-      tfer_len += ALIGNED_PAYLOAD_SIZE(frame->payload->len);
-    }
-  }
-
-  // To reduce the number of individual CMD53 needed from the host, advertise
-  // only a multiple of the block size to the host. If less data is sent, we will
-  // pad the last block with zeroes. The host will be responsible for ignoring the
-  // padding, based on the header(s).
-  tfer_len = SL_DIV_ROUND_UP(tfer_len, SL_CPC_DRV_SDIO_BLOCK_SIZE) * SL_CPC_DRV_SDIO_BLOCK_SIZE;
-
-  // Transaction starts by sending the headers.
-  sli_cpc_frame_list_extend(&tx_header_pending_frames, frames);
-
-  // Signal the SDIO host that new frames are ready to be sent.
-  status = sl_hal_sdio_dev_setup_function_transfer(SL_CPC_DRV_SDIO_PERIPHERAL, SL_CPC_DRV_SDIO_FUNCTION_NUM, tfer_len);
-  SLI_CPC_ASSERT(status == SL_STATUS_OK);
 }
 
 /**************************************************************************/ /**
@@ -682,11 +1077,11 @@ static void prepare_tx(void)
  ******************************************************************************/
 static uint32_t sdio_drv_get_available_write_frame_slots(sl_cpc_bus_t *bus)
 {
-  const sl_cpc_drv_sdio_device_t *drv = container_of(bus, sl_cpc_drv_sdio_device_t, bus);
+  const sl_cpc_drv_sdio_device_t *drv = to_drv(bus);
   uint32_t num_available_slots;
 
   MCU_ATOMIC_SECTION(num_available_slots
-                     = drv->remote_caps.max_aggregation - sli_cpc_frame_list_get_len(&tx_pending_frames);)
+                     = drv->remote_caps.max_aggregation - sli_cpc_frame_list_get_len(&drv->tx_pending_frames);)
 
   // Sanity check for underflow
   if (num_available_slots > drv->remote_caps.max_aggregation) {
@@ -711,501 +1106,6 @@ static sl_status_t sdio_drv_start_rx(sl_cpc_bus_t *bus)
   return SL_STATUS_OK;
 }
 
-static void adma_irq_handler(void)
-{
-  switch (adma_state) {
-    case ADMA_RECEIVE_HEADER:
-      // Process the aggregated headers received from the host
-      adma_rx_start_headers();
-      break;
-
-    case ADMA_RECEIVE_PAYLOAD:
-      // Process the aggregated payloads received from the host
-      adma_rx_start_payloads();
-      break;
-
-    case ADMA_FLUSH_SDIO:
-      // Continue with flushing data until SDIO transfer is complete.
-      start_flush_transfer(SL_CPC_DRV_SDIO_BLOCK_SIZE);
-      break;
-
-    case ADMA_TRANSMIT_HEADER:
-      adma_tx_prepare_header_descriptors();
-      break;
-
-    case ADMA_TRANSMIT_PAYLOAD:
-      adma_tx_prepare_payload_descriptors();
-      break;
-
-    default:
-      SLI_CPC_ASSERT(false);
-      break;
-  }
-}
-
-/***************************************************************************/ /**
- * Handle SDIO CMD53 write start. Start a reception operation.
- *
- * The host will start by sending a complete block with the following structure:
- * [Number of frames (n) | Frame header 1 | ... | Frame header n]
- *
- * The secondary must receive these frames headers in order to know how many frames
- * are coming, and where to store the payload data.
- ******************************************************************************/
-static void on_sdio_write_start(void)
-{
-  // Any prior transaction should be complete prior to starting a new one.
-  SLI_CPC_ASSERT(adma_state == ADMA_IDLE);
-
-  adma_rx_start_frame_count();
-}
-
-/***************************************************************************/ /**
- * CMD53 write completed, finished reception. Notify the core that new data is
- * available to be read from the driver.
- ******************************************************************************/
-static void on_sdio_write_complete(void)
-{
-  sli_cpc_frame_list_extend(&rx_completed_frames, &rx_complete_pending_frames);
-
-  // Notify the core that new data is available to be read.
-  sli_cpc_bus_notify_rx_data_from_drv(s_bus);
-
-  // ADMA transfer is complete.
-  adma_state = ADMA_IDLE;
-}
-
-/***************************************************************************/ /**
- * Handle SDIO CMD53 read start, begin transmission.
- *
- * Start the ADMA transfer that was previously armed prior to signaling the host
- * that new data was available to be read.
- ******************************************************************************/
-static void on_sdio_read_start(void)
-{
-  if (!tx_busy) {
-    // Host attempted a read when we had no frames to send. There is nothing we
-    // can do here, the CMD53 will timeout and we will have to handle the error
-    // later on.
-    SLI_CPC_ASSERT(false);
-    return;
-  }
-
-  // Any prior transaction should be complete prior to starting a new one.
-  SLI_CPC_ASSERT(adma_state == ADMA_IDLE);
-
-  // Aggregation enabled - multiple frames can be pending.
-  adma_tx_prepare_frame_count();
-}
-
-/***************************************************************************/ /**
- * Handle SDIO CMD53 read over. Transmission completed.
- ******************************************************************************/
-static void on_sdio_read_complete(void)
-{
-  sli_cpc_bus_notify_tx_data_by_drv(s_bus, &tx_pending_xfer_complete_frames);
-
-  // Transmission done.
-  tx_busy = false;
-
-  // ADMA transfer is complete.
-  adma_state = ADMA_IDLE;
-
-  // Check if any new frames were submitted while we were busy.
-  prepare_tx();
-}
-
-/***************************************************************************/ /**
- * Start the ADMA transfer for the incoming aggregated frames.
- ******************************************************************************/
-static void adma_rx_start_frame_count(void)
-{
-  size_t idx = 0;
-
-  memset(&sdio_hdr_block, 0, sizeof(struct sdio_header_block));
-
-  // Arm the ADMA for the next raw header.
-  frame_descriptors[idx++]
-    = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER_END_INTERRUPT(&sdio_hdr_block, sizeof(struct sdio_header_block));
-
-  start_transfer(idx, ADMA_RECEIVE_HEADER);
-}
-
-/***************************************************************************/ /**
- * This function reads the receive frame count and chain the adma descriptors for
- * the incoming headers.
- ******************************************************************************/
-static void adma_rx_start_headers(void)
-{
-  uint8_t frame_count = sdio_hdr_block.frame_count;
-  sl_cpc_frame_t *frame = NULL;
-  uint8_t idx = 0;
-  MCU_DECLARE_IRQ_STATE;
-
-  if (frame_count == 0) {
-    SLI_CPC_LOG_WARN("[SDIO] RX - Received frame count is 0, flush the whole transfer");
-    adma_rx_abort_header_transfer();
-    return;
-  }
-
-  // validate the frame count
-  if (frame_count > s_sdio_device_drv.local_caps.max_aggregation) {
-    SLI_CPC_LOG_ERROR(
-      "[SDIO] RX - Received frame count (%u) exceeds local driver capabilities, flush the whole transfer", frame_count);
-    adma_rx_abort_header_transfer();
-    return;
-  }
-
-  MCU_ENTER_ATOMIC();
-  if (rx_free_frame_list.len < frame_count) {
-    rx_alloc_stalled = true;
-    MCU_EXIT_ATOMIC();
-    return;
-  }
-  MCU_EXIT_ATOMIC();
-
-  for (uint32_t i = 0; i < frame_count; i++) {
-    // Check that maximum descriptor count is not exceeded.
-    if (idx >= CPC_DRV_SDIO_DESC_COUNT) {
-      // No more descriptors available, start a transfer and continue with headers preparation.
-
-      // Update frame count buffer with remaining frames for the next iteration.
-      sdio_hdr_block.frame_count = frame_count - idx;
-      start_transfer(idx, ADMA_RECEIVE_HEADER);
-      return;
-    }
-
-    MCU_ENTER_ATOMIC();
-    frame = sli_cpc_frame_list_pop(&rx_free_frame_list);
-    MCU_EXIT_ATOMIC();
-    SLI_CPC_ASSERT(frame != NULL);
-
-    frame_descriptors[idx++] = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(&frame->hdr, SLI_CPC_HEADER_SIZE);
-
-    // Push the frame to the payload pending list.
-    sli_cpc_frame_list_push_back(&rx_payload_pending_frames, frame);
-    frame = NULL;
-  }
-
-  // Done preparing descriptors for headers, start ADMA transfer and continue with payloads preparation.
-  start_transfer(idx, ADMA_RECEIVE_PAYLOAD);
-}
-
-/***************************************************************************/ /**
- * Abort an RX header transfer by flushing the SDIO block and clearing pending lists.
- ******************************************************************************/
-static void adma_rx_abort_header_transfer(void)
-{
-  // CPC-2989: Harden SDIO driver abort transfer behavior.
-  clear_frame_list(&rx_payload_pending_frames);
-  start_flush_transfer(SL_CPC_DRV_SDIO_BLOCK_SIZE);
-}
-
-/***************************************************************************/ /**
- * Abort an RX payload transfer by flushing the SDIO block and clearing pending lists.
- ******************************************************************************/
-static void adma_rx_abort_payload_transfer(sl_cpc_frame_t *frame)
-{
-  // CPC-2989: Harden SDIO driver abort transfer behavior.
-  sli_cpc_frame_put_ref(&frame);
-  clear_frame_list(&rx_payload_pending_frames);
-  clear_frame_list(&rx_complete_pending_frames);
-  start_flush_transfer(SL_CPC_DRV_SDIO_BLOCK_SIZE);
-}
-
-/***************************************************************************/ /**
- * This function prepares the adma descriptors for the incoming payloads.
- ******************************************************************************/
-static void adma_rx_start_payloads(void)
-{
-  sl_cpc_frame_t *frame = NULL;
-  bool has_payload = false;
-  size_t transfer_len = 0;
-  size_t payload_len = 0;
-  uint32_t list_len = 0;
-  sl_status_t status;
-  size_t idx = 0;
-
-  list_len = sli_cpc_frame_list_get_len(&rx_payload_pending_frames);
-
-  // validate the frame count
-  if (list_len == 0) {
-    SLI_CPC_LOG_ERROR("[SDIO] RX - Pending payload list length is 0, flush the whole transfer");
-    adma_rx_abort_payload_transfer(NULL);
-    return;
-  }
-
-  for (uint32_t i = 0; i < list_len; i++) {
-    // Check that maximum descriptor count is not exceeded.
-    if (idx >= CPC_DRV_SDIO_DESC_COUNT) {
-      // No more descriptors available, start a transfer and continue with payloads preparation.
-      start_transfer(idx, ADMA_RECEIVE_PAYLOAD);
-      return;
-    }
-
-    // Get a frame for the current payload.
-    frame = sli_cpc_frame_list_pop(&rx_payload_pending_frames);
-    if (frame == NULL) {
-      SLI_CPC_LOG_WARN("[SDIO] RX - Frame is NULL, flush the whole transfer");
-      adma_rx_abort_payload_transfer(NULL);
-      return;
-    }
-
-    if (!sli_cpc_header_is_size_valid(&frame->hdr)) {
-      // Invalid header size - discard the frame
-      SLI_CPC_LOG_WARN("[SDIO] RX - Invalid header size, flush the whole transfer");
-      adma_rx_abort_payload_transfer(frame);
-      return;
-    }
-
-    /*
-     * SDIO hardware performs CRC validation on all block transfers.
-     * Therefore, payload checksum validation is not required for this driver.
-     * Set to true to satisfy datalink layer requirements until
-     * that part is refactored.
-     */
-    frame->payload_csum_is_valid = true;
-
-    status = sli_cpc_alloc_rx_payload(s_bus, frame);
-
-    // Check if the frame has a payload
-    payload_len = sli_cpc_header_get_payload_size(&frame->hdr);
-    if (payload_len > 0) {
-      if (status == SL_STATUS_OK) {
-        // Calculate the transfer length to reach the next 4-byte boundary.
-        transfer_len = ALIGNED_PAYLOAD_SIZE(payload_len);
-
-        // Prepare the ADMA descriptor for the payload including the trailing padding.
-        frame_descriptors[idx++] = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(frame->payload->ptr, transfer_len);
-        has_payload = true;
-      } else {
-        // CPC-2989: The frame has a payload but no RX buffer could be allocated. It should be
-        // discarded while processing continues for remaining frames; for now, abort.
-        adma_rx_abort_payload_transfer(frame);
-        return;
-      }
-    }
-    // Push the frame to the complete pending frames list.
-    sli_cpc_frame_list_push_back(&rx_complete_pending_frames, frame);
-    frame = NULL;
-  }
-
-  // Done preparing descriptors for payloads, start ADMA transfer and continue with flushing the remaining padding bytes.
-  if (has_payload) {
-    start_transfer(idx, ADMA_FLUSH_SDIO);
-  } else {
-    start_flush_transfer(0);
-  }
-}
-
-/***************************************************************************/ /**
- * Prepare the ADMA descriptor for the frame count.
- ******************************************************************************/
-static void adma_tx_prepare_frame_count(void)
-{
-  uint32_t list_len = 0;
-  uint8_t frame_count = 0;
-  size_t idx = 0;
-
-  // Prepare the aggregate header block with the frame count.
-  list_len = sli_cpc_frame_list_get_len(&tx_header_pending_frames);
-  if (!list_len) {
-    // No frames to send, nothing to do.
-    SLI_CPC_LOG_ERROR("[SDIO] No frames to send - aborting transfer");
-    start_flush_transfer(SL_CPC_DRV_SDIO_BLOCK_SIZE);
-    return;
-  }
-
-  memset(&sdio_hdr_block, 0, sizeof(struct sdio_header_block));
-
-  frame_count = (uint8_t)SL_MIN(list_len, s_sdio_device_drv.remote_caps.max_aggregation);
-  sdio_hdr_block.frame_count = frame_count;
-
-  // Add frame count as first descriptor
-  frame_descriptors[idx++] = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(&sdio_hdr_block, sizeof(struct sdio_header_block));
-
-  start_transfer(idx, ADMA_TRANSMIT_HEADER);
-}
-
-/***************************************************************************/ /**
- * Prepare the ADMA descriptors for the headers.
- ******************************************************************************/
-static void adma_tx_prepare_header_descriptors(void)
-{
-  sl_cpc_frame_t *frame = NULL;
-  uint32_t tx_frame_count = 0;
-  uint32_t list_len = 0;
-  size_t idx = 0;
-
-  // Prepare the aggregate header block.
-  list_len = sli_cpc_frame_list_get_len(&tx_header_pending_frames);
-  if (!list_len) {
-    // No frames to send, nothing to do.
-    adma_state = ADMA_IDLE;
-    return;
-  }
-
-  // Validate the frame count.
-  tx_frame_count = SL_MIN(list_len, s_sdio_device_drv.remote_caps.max_aggregation);
-  SLI_CPC_ASSERT(tx_frame_count > 0);
-
-  for (uint32_t i = 0; i < tx_frame_count; i++) {
-    // Check that maximum descriptor count is not exceeded.
-    if (idx >= CPC_DRV_SDIO_DESC_COUNT) {
-      // No more descriptors available, start a transfer and continue with headers preparation.
-      start_transfer(idx, ADMA_TRANSMIT_HEADER);
-      return;
-    }
-
-    // Pop the frame from the header pending list and push it to the payload pending list.
-    frame = sli_cpc_frame_list_pop(&tx_header_pending_frames);
-    if (frame == NULL) {
-      SLI_CPC_LOG_WARN("[SDIO] TX - Frame count exceeds list length");
-      // This should never happen, as we should pop less or equal to the frame count.
-      SLI_CPC_ASSERT(false);
-      return;
-    }
-
-    frame_descriptors[idx++] = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(&frame->hdr, SLI_CPC_HEADER_SIZE);
-
-    // Move frame to pending list to notify completion.
-    sli_cpc_frame_list_push_back(&tx_payload_pending_frames, frame);
-  }
-
-  // Done preparing descriptors for headers, start ADMA transfer and continue with payloads preparation.
-  start_transfer(idx, ADMA_TRANSMIT_PAYLOAD);
-}
-
-/***************************************************************************/ /**
- * Prepare the ADMA descriptors for the payloads.
- ******************************************************************************/
-static void adma_tx_prepare_payload_descriptors(void)
-{
-  sl_cpc_frame_t *frame = NULL;
-  size_t unaligned_len = 0;
-  bool has_payload = false;
-  size_t aligned_len = 0;
-  size_t payload_len = 0;
-  uint32_t dword_idx = 0;
-  uint32_t list_len = 0;
-  size_t idx = 0;
-
-  list_len = sli_cpc_frame_list_get_len(&tx_payload_pending_frames);
-
-  if (!list_len) {
-    // No frames to send, nothing to do.
-    SLI_CPC_LOG_ERROR("[SDIO] No frames to send - aborting transfer");
-    start_flush_transfer(SL_CPC_DRV_SDIO_BLOCK_SIZE);
-    return;
-  }
-
-  // link the frame payload descriptors
-  for (uint32_t i = 0; i < list_len; i++) {
-    // Check that maximum descriptor count is not exceeded, accomodate extra descriptor for unaligned payload.
-    if (idx >= (CPC_DRV_SDIO_DESC_COUNT - 1)) {
-      // No more descriptors available, start a transfer and continue with payloads preparation.
-      start_transfer(idx, ADMA_TRANSMIT_PAYLOAD);
-      return;
-    }
-
-    frame = sli_cpc_frame_list_pop(&tx_payload_pending_frames);
-    if (frame == NULL) {
-      SLI_CPC_LOG_WARN("[SDIO] TX - Frame count exceeds list length");
-      // This should never happen, as we should pop less or equal to the list length.
-      SLI_CPC_ASSERT(false);
-      return;
-    }
-
-    if (frame->payload) {
-      uint8_t *payload = frame->payload->ptr;
-      payload_len = sli_cpc_header_get_payload_size(&frame->hdr);
-
-      // Calculate the unaligned and aligned lengths.
-      unaligned_len = payload_len % SL_CPC_BUF_MIN_ALIGNMENT;
-      aligned_len = payload_len - unaligned_len;
-
-      if (aligned_len > 0) {
-        frame_descriptors[idx++] = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(payload, aligned_len);
-      }
-
-      // Add the unaligned part to the realignment buffer.
-      if (unaligned_len > 0) {
-        // Clear the unaligned payload pool to avoid garbage data.
-        memset(&unaligned_payload_pool[dword_idx], 0, SL_CPC_BUF_MIN_ALIGNMENT);
-        memcpy(&unaligned_payload_pool[dword_idx], &payload[aligned_len], unaligned_len);
-
-        frame_descriptors[idx++]
-          = SL_HAL_SDIO_DEV_DMA_DESCRIPTOR_XFER(&unaligned_payload_pool[dword_idx], SL_CPC_BUF_MIN_ALIGNMENT);
-        dword_idx++;
-      }
-      has_payload = true;
-    }
-    // Move frame to pending list to notify completion.
-    sli_cpc_frame_list_push_back(&tx_pending_xfer_complete_frames, frame);
-  }
-
-  // Done preparing descriptors for payloads, start ADMA transfer and continue with flushing the remaining padding bytes.
-  if (has_payload) {
-    start_transfer(idx, ADMA_FLUSH_SDIO);
-  } else {
-    start_flush_transfer(0);
-  }
-}
-
-/***************************************************************************/ /**
- * This function clears the frame list.
- ******************************************************************************/
-static void clear_frame_list(sli_cpc_frame_list_t *list)
-{
-  sl_cpc_frame_t *frame;
-
-  while (!sli_cpc_frame_list_empty(list)) {
-    frame = sli_cpc_frame_list_pop(list);
-    sli_cpc_frame_put_ref(&frame);
-  }
-}
-
-/***************************************************************************/ /**
- * This function starts the ADMA transfer.
- ******************************************************************************/
-static void start_transfer(size_t idx, adma_state_t next_state)
-{
-  sl_status_t status;
-
-  if (idx == 0 || idx > CPC_DRV_SDIO_DESC_COUNT) {
-    SLI_CPC_LOG_ERROR("[SDIO] Invalid descriptor count for ADMA transfer: %u", (unsigned)idx);
-    SLI_CPC_ASSERT(false);
-    start_flush_transfer(SL_CPC_DRV_SDIO_BLOCK_SIZE);
-    return;
-  }
-
-  adma_state = next_state;
-  frame_descriptors[idx - 1].xfer.end_ifs = true;
-  status = sl_hal_sdio_dev_start_dma_transfer(SL_CPC_DRV_SDIO_PERIPHERAL, frame_descriptors);
-  if (status != SL_STATUS_OK) {
-    SLI_CPC_LOG_ERROR("[SDIO] Failed to start ADMA transfer, state: %u", next_state);
-    SLI_CPC_ASSERT(false);
-    return;
-  }
-}
-
-/***************************************************************************/ /**
- * This function starts the ADMA flush transfer.
- ******************************************************************************/
-static void start_flush_transfer(uint32_t xfer_count)
-{
-  sl_status_t status;
-
-  adma_state = ADMA_FLUSH_SDIO;
-  flush_desc.xfer.xfer_count = xfer_count;
-  status = sl_hal_sdio_dev_start_dma_transfer(SL_CPC_DRV_SDIO_PERIPHERAL, &flush_desc);
-  if (status != SL_STATUS_OK) {
-    SLI_CPC_LOG_ERROR("[SDIO] Failed to start ADMA flush transfer");
-    SLI_CPC_ASSERT(false);
-    return;
-  }
-}
-
 /***************************************************************************/ /**
  * Driver hook invoked by sli_cpc_frame_free() after an RX frame has been
  * returned to the per-bus pool (so the pool's free count is already
@@ -1218,42 +1118,52 @@ static void start_flush_transfer(uint32_t xfer_count)
  ******************************************************************************/
 static void cpc_drv_sdio_on_rx_frame_free(sl_cpc_bus_t *bus)
 {
+  sl_cpc_drv_sdio_device_t *drv = to_drv(bus);
   bool resume = false;
   MCU_DECLARE_IRQ_STATE;
 
-  (void)bus;
-
-  alloc_rx_frame_to_free_list(s_bus);
+  alloc_rx_frame_to_free_list(drv);
 
   MCU_ENTER_ATOMIC();
-  if (rx_alloc_stalled) {
-    rx_alloc_stalled = false;
+  if (drv->rx_alloc_stalled) {
+    drv->rx_alloc_stalled = false;
     resume = true;
   }
   MCU_EXIT_ATOMIC();
 
   if (resume) {
-    adma_rx_start_headers();
+    adma_rx_start_headers(drv);
   }
 }
 
-/***************************************************************************/ /**
- * Allocate a single RX frame and push it onto rx_free_frame_list, ready
- * to be popped by the SDIO IRQ. The free list is replenished as RX-pool slots
- * become available via the @ref cpc_drv_sdio_on_rx_frame_free hook.
- ******************************************************************************/
-static sl_status_t alloc_rx_frame_to_free_list(sl_cpc_bus_t *bus)
+sl_status_t sl_cpc_drv_sdio_device_init(sl_cpc_drv_sdio_device_t *drv, const sl_cpc_drv_sdio_device_config_t *cfg,
+                                        const sl_cpc_bus_config_t *bus_cfg)
 {
-  sl_cpc_frame_t *frame;
+  static const sli_cpc_drv_ops_t ops = {
+    .init = &sdio_drv_init,
+    .start_rx = &sdio_drv_start_rx,
+    .read = &sdio_drv_read_data,
+    .write = &sdio_drv_write,
+    .get_available_write_frame_slots = &sdio_drv_get_available_write_frame_slots,
+    .on_rx_frame_free = &cpc_drv_sdio_on_rx_frame_free,
+    .get_local_capabilities = &get_local_capabilities,
+    .set_remote_capabilities = &set_remote_capabilities,
+  };
 
-  frame = sli_cpc_frame_new(bus, true);
-  if (frame == NULL) {
-    return SL_STATUS_ALLOCATION_FAILED;
+  sl_status_t status;
+
+  if (cfg == NULL || bus_cfg == NULL) {
+    return SL_STATUS_NULL_POINTER;
   }
 
-  MCU_ATOMIC_SECTION(sli_cpc_frame_list_push_back(&rx_free_frame_list, frame);)
+  memset(drv, 0, sizeof(*drv));
 
-  return SL_STATUS_OK;
+  status = init_hw(drv);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  return sli_cpc_bus_init(&drv->bus, bus_cfg, &ops);
 }
 
 sl_cpc_drv_sdio_device_t sl_cpc_drv_sdio_device_instances[SL_CPC_DRV_SDIO_DEVICE_INSTANCES_COUNT];

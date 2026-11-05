@@ -8,7 +8,6 @@ from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import Calc
 class CalcShapingRainier(Calc_Shaping_Bobcat):
 
     def calc_shaping_filter_gain_actual(self, model):
-        # The Ocelot shaping filter registers have changed in the register map, so need to override this function
 
         shaping_filter_mode = model.vars.MODEM_CTRL0_SHAPING.value
         sf = self.get_shaping_filter(model)
@@ -30,7 +29,6 @@ class CalcShapingRainier(Calc_Shaping_Bobcat):
                                    (sf[3] + sf[4])) / 4.0 / 128.0
 
         else:
-            # use mean or max ?
             shaping_filter_gain = (sf[0] + sf[8] + sf[16] + sf[24] + sf[32] + sf[40] + sf[48] + sf[56] +
                                    sf[1] + sf[9] + sf[17] + sf[25] + sf[33] + sf[41] + sf[49] + sf[57] +
                                    sf[2] + sf[10] + sf[18] + sf[26] + sf[34] + sf[42] + sf[50] + sf[58] +
@@ -50,7 +48,6 @@ class CalcShapingRainier(Calc_Shaping_Bobcat):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # for gaussian pulse shapes pulse_shape_parameter holds BT value
         bt = model.vars.shaping_filter_param.value
         max_filter_taps = model.vars.max_filter_taps.value
         req_filter_taps = self.get_required_filter_taps(bt)
@@ -62,7 +59,6 @@ class CalcShapingRainier(Calc_Shaping_Bobcat):
             bt = minumum_bt_supported
             LogMgr.Error("ERROR: BT < {} not supported on this part, overriding the current BT to {}".format(minumum_bt_supported, minumum_bt_supported))
 
-        # MCUW_RADIO_CFG-2372 - IQMOD can only use EVEN Mode
         if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD:
             implement_even_mode = True
             if req_filter_taps > 16:
@@ -70,43 +66,28 @@ class CalcShapingRainier(Calc_Shaping_Bobcat):
                 LogMgr.Error("ERROR: BT < 0.5 not supported, overriding the current BT to {}".format(bt))
 
 
-        # Even mode uses 16 taps (c0, c1...c7, c7, c6... c1, c0). Therefore anything that needs less than 16 taps can be
-        # implemented using Even mode
         if implement_even_mode:
             shaping = 2 # sets shaping filter in Even mode
-            # map BT value to standard deviation
             std = 1.05 / bt
 
-            # generate gaussian pulse shape
             w = self.gaussian(17, std)
-            # scale for unit DC gain
             w = tinynumpy.divide(w, w.sum())
-            # convolve with square wave of oversampling rate width which is 8 for the shaping filter
             f_hack = tinynumpy.convolve(w, tinynumpy.ones((1, 8)).flatten())
-            # scale and quantize coefficients, using 127 scaling factor to match Qiang's matlab sims
             c_hack = tinynumpy.round_((scaling_fac * f_hack))
-            # keep only 8 coeffs from the peak filter tap
             coeff = c_hack[4:12]
 
             return coeff, shaping
 
         else:
             shaping = 3 # sets shaping filter in Asymmetric mode
-            # map BT value to standard deviation
             std = 1.05 / bt
 
-            # generate gaussian pulse shape
             w = self.gaussian(int(max_filter_taps + 1 - 8), std) # To get max_filter_taps points after convolution
-            # scale for unit DC gain
             w = tinynumpy.divide(w, w.sum())
-            # convolve with square wave of oversampling rate width which is 8 for the shaping filter
             f_hack = tinynumpy.convolve(w, tinynumpy.ones((1, 8)).flatten())
-            # scale and quantize coefficients
             c_hack = tinynumpy.round_((scaling_fac * f_hack))
-            # keep only non 0 coeffs as 0 coeffs in the beginning add unnecessary delay to the TX chain
             c_hack = np.array(c_hack)
             coeff = c_hack[c_hack != 0]
-            # return coeffs
             return coeff, shaping
 
     def calc_shaping_reg(self, model):
@@ -136,7 +117,6 @@ class CalcShapingRainier(Calc_Shaping_Bobcat):
             coeff = self.update_coeffs(model, c, coeff)
 
         elif shaping_filter_option.value == model.vars.shaping_filter.var_enum.Custom_OQPSK.value:
-            # Not sure what filter this is
             coeff[0] = coeff[1] = 1
             coeff[2] = 16
             coeff[3] = 48

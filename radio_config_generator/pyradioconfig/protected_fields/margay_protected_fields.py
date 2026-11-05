@@ -18,14 +18,7 @@ class ProtectedFieldsMargay(ProtectedFieldsBase):
 
     """
 
-    # From https://confluence.silabs.com/display/PGMARGAY/Test+Plan+-+Feature+Write
-    # Omitting CMU, ULFRCO/LFRCO/HFRCO, EMU, DCDC, USB, ACMP, IADC, VDAC, cal fields
     PTE_PROTECTED_FIELD_DICT = {
-        # 'HFXO0_TRIM_SHUNTLVLANA': 'cal',
-        # 'HFXO0_TRIM_VTRREGTRIMANA': 'cal',
-        # 'HFXO0_TRIM_VTRCORETRIMANA': 'cal',
-        # 'HFXO0_LOWPWRCTRL_SHUNTBIASANA': 'cal',
-        # 'HFXO0_XTALCFG_TIMEOUTSTEADY': 'cal',
         'RAC_RFBIASCAL_RFBIASCALTC': 0x1A,
         'RAC_RFBIASCAL_RFBIASCALVREF': 'cal',
         'RAC_RFBIASCAL_RFBIASCALBIAS': 'cal',
@@ -92,7 +85,6 @@ class ProtectedFieldsMargay(ProtectedFieldsBase):
         'RAC_CLKMULTEN0_CLKMULTREG2ADJV': 0x0,
     }
 
-    # : List of fields found in PTE, but allow radio configurator to override the value
     PTE_PROTECTED_FIELD_EXCEPTIONS = [
         'RAC_PGACAL_PGAOFFPCALQ',  #: 'cal',  # : cal by fw
         'RAC_PGACAL_PGAOFFPCALI',  #: 'cal',  # : cal by fw
@@ -104,7 +96,6 @@ class ProtectedFieldsMargay(ProtectedFieldsBase):
         'MODEM_IRCALCOEFWR1_CIVWD',  # : Set by RAIL
     ]
 
-    # : List of fields protected by RAIL
     RAIL_PROTECTED_FIELDS = [
         'AGC_CTRL0_RSSISHIFT',
         'AGC_CTRL1_CCATHRSH',
@@ -138,6 +129,5 @@ class ProtectedFieldsMargay(ProtectedFieldsBase):
         'RAC_CLKMULTEN0_CLKMULTREG2ADJV',
     ]
 
-    # : List of fields that are found in PTE list, but does not need to be protected by RAIL
     RAIL_PROTECTED_FIELD_EXCEPTIONS = [
     ]

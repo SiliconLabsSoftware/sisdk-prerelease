@@ -12,43 +12,79 @@ requires:
 - name: trustzone_nonsecure
 template_contribution:
 - name: tfm_interface_func
-  value: tfm_crypto_key_derivation_setup
+  value:
+    function: tfm_crypto_key_derivation_setup
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_key_derivation_get_capacity
+  value:
+    function: tfm_crypto_key_derivation_get_capacity
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_key_derivation_set_capacity
+  value:
+    function: tfm_crypto_key_derivation_set_capacity
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_key_derivation_input_bytes
+  value:
+    function: tfm_crypto_key_derivation_input_bytes
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_key_derivation_input_integer
+  value:
+    function: tfm_crypto_key_derivation_input_integer
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_key_derivation_input_key
+  value:
+    function: tfm_crypto_key_derivation_input_key
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_key_derivation_key_agreement
+  value:
+    function: tfm_crypto_key_derivation_key_agreement
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_key_derivation_output_bytes
+  value:
+    function: tfm_crypto_key_derivation_output_bytes
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_key_derivation_output_key
+  value:
+    function: tfm_crypto_key_derivation_output_key
+    key_checks:
+    - source: key_attributes
+      invec: 1
 
 - name: tfm_interface_func
-  value: tfm_crypto_key_derivation_output_key_custom
+  value:
+    function: tfm_crypto_key_derivation_output_key_custom
+    key_checks:
+    - source: key_attributes
+      invec: 1
 
 - name: tfm_interface_func
-  value: tfm_crypto_key_derivation_abort
+  value:
+    function: tfm_crypto_key_derivation_abort
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_sl_psa_key_derivation_single_shot
+  value:
+    function: tfm_sl_psa_key_derivation_single_shot
+    key_checks:
+    - source: packed_key_id
+    - source: key_attributes
+      invec: 4
 
 - name: tfm_interface_func
-  value: tfm_crypto_raw_key_agreement
+  value:
+    function: tfm_crypto_raw_key_agreement
+    key_checks:
+    - source: packed_key_id
 
 
 documentation:

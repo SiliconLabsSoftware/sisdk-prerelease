@@ -12,6 +12,9 @@ provides:
 requires:
 - name: psa_crypto_rsa
 - name: mbedtls_rsa_1024
+template_contribution:
+- name: psa_vendor_rsa_max_key_bits
+  value: 1024
 documentation:
   url: https://arm-software.github.io/psa-api/crypto/1.2/api/keys/types.html#c.PSA_KEY_TYPE_RSA_KEY_PAIR
 metadata:

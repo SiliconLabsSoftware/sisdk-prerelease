@@ -5,12 +5,10 @@ from py_2_and_3_compatibility import *
 
 
 class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther):
-    # PHYs are inherited from Panther unless overridden
 
     def __init__(self):
         self.phy_internal_base = Phy_Internal_Base_Lynx()
 
-    ### Constant shaping coefficients ###
 
     def BLE_TX_Shaping_Coeffs(self, phy, model):
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override =        3
@@ -64,7 +62,6 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
         phy.profile_outputs.MODEM_SHAPING11_COEFF47.override =    0
 
     def BLE_TX_Shaping_PantherZ_Compatible_Coeffs(self, phy, model):
-        #For Lynx, just use the same BLE 1M coeffs
         self.BLE_TX_Shaping_Coeffs(phy, model)
 
     def BLE_2M_TX_Shaping_Coeffs(self, phy, model):
@@ -117,13 +114,10 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
         phy.profile_outputs.MODEM_SHAPING11_COEFF46.override    = 0
         phy.profile_outputs.MODEM_SHAPING11_COEFF47.override    = 0
 
-    ### Production PHYs (redirect to other PHYs) ###
 
-    ### Base function containing common overrides for BLE Viterbi noDSA PHYs ###
 
     def Bluetooth_LE_Viterbi_noDSA_base(self,phy,model):
 
-        #No AGC overrides needed as this PHY does not inherit (Lynx defaults to fast loop settings)
 
         phy.profile_inputs.bandwidth_hz.value = 1099233
         phy.profile_inputs.base_frequency_hz.value = long(2402000000)
@@ -154,9 +148,8 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
         phy.profile_inputs.timing_detection_threshold.value = 140
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
 
-        # Decimation and Demod Overrides
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 56831
         phy.profile_outputs.MODEM_CTRL0_FRAMEDETDEL.override = 2
         phy.profile_outputs.MODEM_CTRL2_DATAFILTER.override = 6
@@ -166,23 +159,18 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
 
         phy.profile_outputs.MODEM_TIMING_OFFSUBNUM.override = 0
 
-        # Shaping overrides
         self.BLE_TX_Shaping_Coeffs(phy, model)
 
-        # FRC Overrides
         PHY_COMMON_FRAME_BLE_AOX(phy, model)
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
         phy.profile_outputs.FRC_PUNCTCTRL_PUNCT0.override = 1
         phy.profile_outputs.FRC_PUNCTCTRL_PUNCT1.override = 1
 
-        # This should be set only on DSA PHYs (PGLYNX-566), sowe can clear it.
         phy.profile_outputs.FRC_CTRL_WAITEOFEN.override = 0
 
-        # Radio Controller Overrides
         phy.profile_outputs.RAC_SYNTHREGCTRL_MMDLDOVREFTRIM.override = 3
         phy.profile_outputs.RAC_SYNTHCTRL_MMDPOWERBALANCEDISABLE.override = 1
 
-        # Viterbi Demod Overrides
         phy.profile_outputs.MODEM_VITERBIDEMOD_SYNTHAFC.override = 1
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI1.override = 65
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI2.override = 45
@@ -202,17 +190,14 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
         phy.profile_outputs.MODEM_VITERBIDEMOD_CORRSTPSIZE.override = 0
         phy.profile_outputs.MODEM_TRECPMDET_PMTIMEOUTSEL.override = 0
 
-        # DSA Overrides
         phy.profile_outputs.MODEM_DSACTRL_DSAMODE.override = 0
 
-        # Other Overrides
         phy.profile_outputs.MODEM_REALTIMCFE_MINCOSTTHD.override = 600
         phy.profile_outputs.MODEM_REALTIMCFE_RTCFEEN.override = 1
         phy.profile_outputs.MODEM_REALTIMCFE_RTSCHWIN.override = 10
         phy.profile_outputs.MODEM_REALTIMCFE_TRACKINGWIN.override = 5
         phy.profile_outputs.MODEM_REALTIMCFE_VTAFCFRAME.override = 1
 
-    ###BLE Viterbi NO DSA PHYs, do not inherit###
     def Bluetooth_LE_Viterbi_noDSA_halfrate_base(self,phy,model):
         self.Bluetooth_LE_Viterbi_noDSA_base(phy, model)
         phy.profile_inputs.if_frequency_hz.value = 700000
@@ -242,23 +227,13 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
 
     def PHY_Bluetooth_1M_Concurrent(self, model, phy_name=None):
 
-        #Start with the BLE LR 125k PHY
         phy = self.PHY_Bluetooth_LongRange_dsa_125kbps(model, phy_name='PHY_Bluetooth_1M_Concurrent')
         phy.profile_inputs.preamble_pattern.value = 0b10
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CONCURRENT
 
-        #The concurrent PHY needs to have:
-        #Enable concurrent mode
-        #FRC = BLE LR 125k, with added sub-frame description for BLE 1M uncoded
-        #Demod = BLE LR 125k
-        #TRECS/Viterbi = BLE 1M
-        #BLE LR = BLE LR 125k
-        #DSA = BLE LR 125k
 
-        #Enable concurrent mode
         phy.profile_outputs.MODEM_COCURRMODE_CONCURRENT.override = 1
 
-        # Overrides for TRECS/Viterbi (copied from BLE 1M)
         phy.profile_outputs.MODEM_VITERBIDEMOD_SYNTHAFC.override = 1
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI1.override = 65
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI2.override = 45
@@ -278,7 +253,6 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
         phy.profile_outputs.MODEM_REALTIMCFE_TRACKINGWIN.override = 5
         phy.profile_outputs.MODEM_REALTIMCFE_VTAFCFRAME.override = 1
 
-        # Overrides for TX mode (copied from BLE 1M Fullrate)
         phy.profile_inputs.base_frequency_hz.value = long(2402000000)
         phy.profile_inputs.channel_spacing_hz.value = 1000000
         self.BLE_TX_Shaping_Coeffs(phy, model)
@@ -294,25 +268,19 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
         phy.profile_outputs.FRC_FECCTRL_CONVMODE.override = 0
         phy.profile_outputs.MODEM_CTRL0_CODING.override = 0
 
-        # : Workaround for frequency error estimation bug
         phy.profile_outputs.MODEM_DSACTRL_SCHPRD.override = 1
 
-        # : Disable oneshot AFC for Concurrent PHY
         phy.profile_outputs.MODEM_AFC_AFCONESHOT.override = 0
         phy.profile_outputs.MODEM_CTRL0_FRAMEDETDEL.override = 2
 
-        # : Copy from Bluetooth 1M Fullrate
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 56831 # : copy clock gating settings from BLE 1M
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI3.override = 32  # Needed because BW is wider than non-concurrent 1M
 
         phy.profile_outputs.MODEM_AFC_AFCSCALEE.override = 0
         phy.profile_outputs.MODEM_AFC_AFCSCALEM.override = 0
 
-        # : needed as part of IPMCUSRW-777 workaround
-        # : https://jira.silabs.com/browse/IPMCUSRW-771
         phy.profile_outputs.MODEM_LONGRANGE1_LOGICBASEDLRDEMODGATE.override = 0
 
-        # : Resolve floor issues by disabling DSA threshold
         phy.profile_outputs.MODEM_LONGRANGE6_LRSPIKETHD.override = 0
 
         phy.profile_outputs.MODEM_CTRL2_DATAFILTER.override = 2
@@ -347,7 +315,6 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
         phy.profile_outputs.AGC_CTRL4_RFPKDCNTEN.override = 0
         return phy
 
-    ###BLE LONG RANGE DSA PHYs, inherited from Panther###
 
     def PHY_Bluetooth_LongRange_dsa_125kbps(self,model,phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Bluetooth LongRange DSA 125kbps PHY for Lynx',phy_name=phy_name)
@@ -355,7 +322,6 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
         self.Bluetooth_LongRange_base(phy, model)
         self.phy_internal_base.AGC_MODIFIED_PANTHER_STYLE(phy, model)
 
-        #Use BLE 1M shaping coeffs
         self.BLE_TX_Shaping_Coeffs(phy,model)
 
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_125K
@@ -377,7 +343,6 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
         self.Bluetooth_LongRange_500kbps_base(phy, model)
         self.phy_internal_base.AGC_MODIFIED_PANTHER_STYLE(phy, model)
 
-        # Use BLE 1M shaping coeffs
         self.BLE_TX_Shaping_Coeffs(phy, model)
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CODED_500K
 
@@ -392,7 +357,6 @@ class PhysRAILBaseStandardBluetoothLELynx(PhysRAILBaseStandardBluetoothLEPanther
         phy.profile_outputs.tx_eof_delay_ns.override = 450
         return phy
 
-    ###Removing PHYs that are inherited but no longer directly used###
 
     def PHY_Bluetooth_LE(self, model, phy_name=None):
         pass

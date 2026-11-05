@@ -5,7 +5,8 @@ Features should not be defined anywhere else!
 
 from pycalcmodel.core.feature import ModelFeature
 
-class Features(object):
+
+class Features:
     @staticmethod
     def build(model):
         """Builds features into model
@@ -13,14 +14,14 @@ class Features(object):
         Args:
             model (MOdelRoot) : Data model that features are added to
         """
-        Features.build_feature(model, 'TX', 'Transmit', value=True)
-        Features.build_feature(model, 'RX', 'Receive', value=True)
-        Features.build_feature(model, 'BLE', 'Bluetooth Low-Energy', value=True)
-        Features.build_feature(model, 'SUBGIG', 'Proprietary Sub-GHz', value=True)
-        Features.build_feature(model, 'GIG_2_4', 'Proprietary 2.4GHz', value=True)
+        Features.build_feature(model, "TX", "Transmit", value=True)
+        Features.build_feature(model, "RX", "Receive", value=True)
+        Features.build_feature(model, "BLE", "Bluetooth Low-Energy", value=True)
+        Features.build_feature(model, "SUBGIG", "Proprietary Sub-GHz", value=True)
+        Features.build_feature(model, "GIG_2_4", "Proprietary 2.4GHz", value=True)
 
     @staticmethod
-    def build_feature(model, name, desc='', value=False):
+    def build_feature(model, name, desc="", value=False):
         """Builds features into model
 
         Args:

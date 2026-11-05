@@ -47,7 +47,7 @@
 #include "sl_iostream.h"
 #include "sl_enum.h"
 #include "sl_status.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_debug_swo.h"
 
 #include "sl_atomic.h"
@@ -127,7 +127,7 @@ void *sli_iostream_swo_itm_8_init(void)
   m_attr.name = "vuart lock";
   m_attr.attr_bits = 0u;
   context.lock = osMutexNew(&m_attr);
-  EFM_ASSERT(context.lock != NULL);
+  SL_LOG_DEBUG_ASSERT(context.lock != NULL);
 #endif
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
@@ -203,7 +203,9 @@ sl_status_t sli_iostream_swo_itm_8_write(void *context,
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   if (osKernelGetState() == osKernelRunning) {
     // Bypass lock if we print before the kernel is running
-    EFM_ASSERT(osMutexRelease(vuart_context->lock) == osOK);
+    osStatus_t os_status = osMutexRelease(vuart_context->lock);
+    SL_LOG_DEBUG_ASSERT(os_status == osOK);
+    (void)os_status;
   }
 #endif
   return SL_STATUS_OK;
@@ -217,7 +219,8 @@ static void sli_iosteam_swo_itm_em_transition(sl_power_manager_em_t from,
                                               sl_power_manager_em_t to)
 {
   (void)to;
-  EFM_ASSERT(from == SL_POWER_MANAGER_EM0);
+  SL_LOG_DEBUG_ASSERT(from == SL_POWER_MANAGER_EM0);
+  (void)from;
   while (ITM->TCR & ITM_TCR_BUSY_Msk) ;
 }
 #endif

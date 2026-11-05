@@ -31,6 +31,7 @@
 #define SL_MATH_MATRIX_H
 
 #include <stddef.h>
+#include "sl_status.h"
 #include "sl_math_types.h"
 
 #ifdef __cplusplus
@@ -47,8 +48,48 @@ typedef struct {
   float16_t *data;      ///< Pointer to the matrix data.
 } sl_math_matrix_f16_t;
 
+/**
+ * @brief
+ *  Matrix data type for `float32_t` elements.
+ */
+typedef struct {
+  size_t    num_rows;   ///< The number of rows in the matrix.
+  size_t    num_cols;   ///< The number of columns in the matrix.
+  float32_t *data;      ///< Pointer to the matrix data.
+} sl_math_matrix_f32_t;
+
+/**
+ * @brief
+ *  Matrix data type for `q7_t` elements.
+ */
+typedef struct {
+  size_t num_rows;      ///< The number of rows in the matrix.
+  size_t num_cols;      ///< The number of columns in the matrix.
+  q7_t   *data;         ///< Pointer to the matrix data.
+} sl_math_matrix_q7_t;
+
+/**
+ * @brief
+ *  Matrix data type for `q15_t` elements.
+ */
+typedef struct {
+  size_t num_rows;      ///< The number of rows in the matrix.
+  size_t num_cols;      ///< The number of columns in the matrix.
+  q15_t  *data;         ///< Pointer to the matrix data.
+} sl_math_matrix_q15_t;
+
+/**
+ * @brief
+ *  Matrix data type for `q31_t` elements.
+ */
+typedef struct {
+  size_t num_rows;      ///< The number of rows in the matrix.
+  size_t num_cols;      ///< The number of columns in the matrix.
+  q31_t  *data;         ///< Pointer to the matrix data.
+} sl_math_matrix_q31_t;
+
 /***************************************************************************//**
- * @addtogroup math_mvp_matrix
+ * @addtogroup math_matrix
  * @{
  ******************************************************************************/
 
@@ -60,10 +101,74 @@ typedef struct {
  * @param[in] num_rows The number of rows in the matrix.
  * @param[in] num_cols The number of cols in the matrix.
  * @param[in] data A pointer to the matrix data.
+ *
+ * @return
+ *   @ref SL_STATUS_OK on success. On failure, an appropriate `sl_status_t`
+ *   error code is returned.
  */
-void sl_math_matrix_init_f16(sl_math_matrix_f16_t *matrix, size_t num_rows, size_t num_cols, float16_t *data);
+sl_status_t sl_math_matrix_init_f16(sl_math_matrix_f16_t *matrix, size_t num_rows, size_t num_cols, float16_t *data);
 
-/** @} (end addtogroup math_mvp_matrix) */
+/**
+ * @brief
+ *  Initialize a `float32_t` matrix descriptor.
+ *
+ * @param[in] matrix Pointer to a matrix.
+ * @param[in] num_rows The number of rows in the matrix.
+ * @param[in] num_cols The number of cols in the matrix.
+ * @param[in] data A pointer to the matrix data.
+ *
+ * @return
+ *   @ref SL_STATUS_OK on success. On failure, an appropriate `sl_status_t`
+ *   error code is returned.
+ */
+sl_status_t sl_math_matrix_init_f32(sl_math_matrix_f32_t *matrix, size_t num_rows, size_t num_cols, float32_t *data);
+
+/**
+ * @brief
+ *  Initialize a `q7_t` matrix descriptor.
+ *
+ * @param[in] matrix Pointer to a matrix.
+ * @param[in] num_rows The number of rows in the matrix.
+ * @param[in] num_cols The number of cols in the matrix.
+ * @param[in] data A pointer to the matrix data.
+ *
+ * @return
+ *   @ref SL_STATUS_OK on success. On failure, an appropriate `sl_status_t`
+ *   error code is returned.
+ */
+sl_status_t sl_math_matrix_init_q7(sl_math_matrix_q7_t *matrix, size_t num_rows, size_t num_cols, q7_t *data);
+
+/**
+ * @brief
+ *  Initialize a `q15_t` matrix descriptor.
+ *
+ * @param[in] matrix Pointer to a matrix.
+ * @param[in] num_rows The number of rows in the matrix.
+ * @param[in] num_cols The number of cols in the matrix.
+ * @param[in] data A pointer to the matrix data.
+ *
+ * @return
+ *   @ref SL_STATUS_OK on success. On failure, an appropriate `sl_status_t`
+ *   error code is returned.
+ */
+sl_status_t sl_math_matrix_init_q15(sl_math_matrix_q15_t *matrix, size_t num_rows, size_t num_cols, q15_t *data);
+
+/**
+ * @brief
+ *  Initialize a `q31_t` matrix descriptor.
+ *
+ * @param[in] matrix Pointer to a matrix.
+ * @param[in] num_rows The number of rows in the matrix.
+ * @param[in] num_cols The number of cols in the matrix.
+ * @param[in] data A pointer to the matrix data.
+ *
+ * @return
+ *   @ref SL_STATUS_OK on success. On failure, an appropriate `sl_status_t`
+ *   error code is returned.
+ */
+sl_status_t sl_math_matrix_init_q31(sl_math_matrix_q31_t *matrix, size_t num_rows, size_t num_cols, q31_t *data);
+
+/** @} (end addtogroup math_matrix) */
 
 #ifdef __cplusplus
 }

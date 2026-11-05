@@ -101,6 +101,16 @@ CC_FirmwareUpdate_handler(
     {
       ZPAL_LOG_DEBUG(ZPAL_LOG_CC_FIRMWARE_UPDATE, "FIRMWARE_UPDATE_MD_REPORT_V5 - Report received!\n");
 
+      const uint8_t md_report_overhead = (uint8_t)(sizeof(pCmd->ZW_FirmwareUpdateMdReport1byteV8Frame.cmdClass)
+                                                   + sizeof(pCmd->ZW_FirmwareUpdateMdReport1byteV8Frame.cmd)
+                                                   + sizeof(pCmd->ZW_FirmwareUpdateMdReport1byteV8Frame.properties1)
+                                                   + sizeof(pCmd->ZW_FirmwareUpdateMdReport1byteV8Frame.reportNumber2)
+                                                   + sizeof(pCmd->ZW_FirmwareUpdateMdReport1byteV8Frame.checksum1)
+                                                   + sizeof(pCmd->ZW_FirmwareUpdateMdReport1byteV8Frame.checksum2));
+      if (cmdLength < md_report_overhead) {
+        return RECEIVED_FRAME_STATUS_FAIL;
+      }
+
       uint16_t crc16Result = zw_crc_check_crc16(ZW_CRC_INITIAL_VALUE, &(pCmd->ZW_Common.cmdClass), cmdLength);
       ZPAL_LOG_DEBUG(ZPAL_LOG_CC_FIRMWARE_UPDATE, "crc16Result = 0x%04x (valid CRC = %s)\n", crc16Result, (crc16Result == 0) ? "true" : "false");
 
@@ -109,14 +119,7 @@ CC_FirmwareUpdate_handler(
                                              + (uint16_t)(pCmd->ZW_FirmwareUpdateMdReport1byteV5Frame.reportNumber2);
       ZPAL_LOG_DEBUG(ZPAL_LOG_CC_FIRMWARE_UPDATE, "Report number = 0x%04x (dec: %u)\n", firmwareUpdateReportNumber, firmwareUpdateReportNumber);
 
-      uint8_t fw_actualFrameSize =  cmdLength
-                                   -/* Calculate length of actual data1 field */
-                                   (uint8_t)(sizeof(pCmd->ZW_FirmwareUpdateMdReport1byteV5Frame.cmdClass)
-                                             + sizeof(pCmd->ZW_FirmwareUpdateMdReport1byteV5Frame.cmd)
-                                             + sizeof(pCmd->ZW_FirmwareUpdateMdReport1byteV5Frame.properties1)
-                                             + sizeof(pCmd->ZW_FirmwareUpdateMdReport1byteV5Frame.reportNumber2)
-                                             + sizeof(pCmd->ZW_FirmwareUpdateMdReport1byteV5Frame.checksum1)
-                                             + sizeof(pCmd->ZW_FirmwareUpdateMdReport1byteV5Frame.checksum2));
+      uint8_t fw_actualFrameSize = (uint8_t)(cmdLength - md_report_overhead);
       ZPAL_LOG_DEBUG(ZPAL_LOG_CC_FIRMWARE_UPDATE, "fw_actualFrameSize = 0x%02x\n", fw_actualFrameSize);
 
       handleCmdClassFirmwareUpdateMdReport(crc16Result,

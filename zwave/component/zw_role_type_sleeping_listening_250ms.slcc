@@ -7,6 +7,9 @@ description: >
   Examples include Door Locks and Battery-Operated Thermostats. It listens every  250 ms
 
   Define ZAF_CONFIG_DEVICE_OPTION_MASK is automatically set by this component.
+documentation:
+  docset: z-wave
+  document: z-wave-development-basics/#z-wave-plus-device-type-and-role-type-specifications
 package: zwave
 quality: production
 metadata:

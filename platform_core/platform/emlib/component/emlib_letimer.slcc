@@ -19,6 +19,7 @@ provides:
 - name: hal_generic_letimer
   condition: [device_series_2]
 requires:
+- name: log_none
 - name: device
 - name: device_has_letimer
 - name: emlib_cmu

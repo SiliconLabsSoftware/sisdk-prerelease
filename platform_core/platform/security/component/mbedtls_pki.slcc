@@ -5,12 +5,12 @@ description: >-
   This component provides support for the full Public Key (PK) abstraction
   layer in Mbed TLS, including encryption and decryption, signature
   generation and verification, and public key file parsing and writing.
+  This component is DEPRECATED and is replaced by a set of components including
+  mbedtls_pk, mbedtls_pk_parse and mbedtls_pk_write.
 category: Platform|Security|Mbed TLS|Upper Layer
-quality: production
+quality: deprecated
 provides:
 - name: mbedtls_pki
-- name: mbedtls_uses_psa_crypto
-  allow_multiple: true
 requires:
 - name: mbedtls_pk
 - name: mbedtls_pk_parse

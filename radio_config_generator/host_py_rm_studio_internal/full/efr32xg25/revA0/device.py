@@ -1,5 +1,4 @@
 
-# -*- coding: utf-8 -*-
 
 """
 Device
@@ -14,9 +13,8 @@ register I/O or in a live session with a real part.
      :inherited-members:
 
 The ARM CMSIS System View Description (SVD) XML hierarchy is reflected in
-this package module composition. The ``device.py`` imports a number of
-peripheral modules, which in turn import register, field, and optional enum
-modules.
+this package module composition. Peripheral modules are loaded lazily on first
+access while static typing hints are provided by the companion ``device.pyi``.
 
 """
 
@@ -25,40 +23,83 @@ __all__ = [ 'RM_Device_EFR32XG25XFULL_RevA0' ]
 
 from . static import Base_RM_Device, RM_SVD_Info
 from .... common import RM_TrustZone_Access_Mode
-from . AGC_NS import *
-from . AGC_S import *
-from . CW import *
-from . FEFILT0_NS import *
-from . FEFILT0_S import *
-from . FEFILT1_NS import *
-from . FEFILT1_S import *
-from . FRC_NS import *
-from . FRC_S import *
-from . LEGOQPSK import *
-from . LRSWKOFDM import *
-from . MODEM_NS import *
-from . MODEM_S import *
-from . RAC_NS import *
-from . RAC_S import *
-from . RFCRC_NS import *
-from . RFCRC_S import *
-from . RFFPLL0_NS import *
-from . RFFPLL0_S import *
-from . SEQ import *
-from . SMCTRL_NS import *
-from . SMCTRL_S import *
-from . SUNFSK import *
-from . SUNOFDM import *
-from . SUNOQPSK import *
-from . SYNTH_NS import *
-from . SYNTH_S import *
-from . TXFRONT_NS import *
-from . TXFRONT_S import *
 
 import importlib
-import os
+from pathlib import Path
 
-_PKG_PATH = os.path.dirname(os.path.realpath(__file__))
+_PERIPHERAL_NAMES = (
+    'AGC_NS',
+    'AGC_S',
+    'CW',
+    'FEFILT0_NS',
+    'FEFILT0_S',
+    'FEFILT1_NS',
+    'FEFILT1_S',
+    'FRC_NS',
+    'FRC_S',
+    'LEGOQPSK',
+    'LRSWKOFDM',
+    'MODEM_NS',
+    'MODEM_S',
+    'RAC_NS',
+    'RAC_S',
+    'RFCRC_NS',
+    'RFCRC_S',
+    'RFFPLL0_NS',
+    'RFFPLL0_S',
+    'SEQ',
+    'SMCTRL_NS',
+    'SMCTRL_S',
+    'SUNFSK',
+    'SUNOFDM',
+    'SUNOQPSK',
+    'SYNTH_NS',
+    'SYNTH_S',
+    'TXFRONT_NS',
+    'TXFRONT_S',
+)
+
+_PERIPHERAL_NAME_SET = frozenset(_PERIPHERAL_NAMES)
+
+
+def _build_default_aliases(peripherals, mode='secure'):
+    """Build default TrustZone aliases from peripheral naming conventions."""
+    aliases = {}
+    peripherals_set = set(peripherals)
+
+    for peripheral in peripherals:
+        if mode == 'secure':
+            if peripheral.endswith('_S'):
+                alias_name = peripheral[:-2]
+                if alias_name + '_NS' in peripherals_set:
+                    aliases[alias_name] = peripheral
+            elif '_S_' in peripheral:
+                alias_name = peripheral.replace('_S_', '_')
+                nonsecure_name = peripheral.replace('_S_', '_NS_')
+                if nonsecure_name in peripherals_set:
+                    aliases[alias_name] = peripheral
+        else:
+            if peripheral.endswith('_NS'):
+                alias_name = peripheral[:-3]
+                if alias_name + '_S' in peripherals_set:
+                    aliases[alias_name] = peripheral
+            elif '_NS_' in peripheral:
+                alias_name = peripheral.replace('_NS_', '_')
+                secure_name = peripheral.replace('_NS_', '_S_')
+                if secure_name in peripherals_set:
+                    aliases[alias_name] = peripheral
+
+    return aliases
+
+
+def _build_reverse_alias_map(alias_map):
+    reverse_map = {}
+    for alias_name, peripheral_name in alias_map.items():
+        reverse_map.setdefault(peripheral_name, []).append(alias_name)
+    return {key: tuple(sorted(value)) for key, value in reverse_map.items()}
+
+
+_PKG_PATH = Path(__file__).resolve().parent
 _EXCLUDED_REGS_MOD_NAME = 'excluded_regs'
 _EXCLUDED_REGS_LIST_NAME = 'EXCLUDED_REGS'
 
@@ -71,7 +112,6 @@ class RM_Device_EFR32XG25XFULL_RevA0(Base_RM_Device):
 
     .. code-block:: py
 
-        # Example: Use register map package in offline mode
         import sys
         sys.path.append("path/to/this/package")
 
@@ -86,7 +126,6 @@ class RM_Device_EFR32XG25XFULL_RevA0(Base_RM_Device):
 
     .. code-block:: py
 
-        # Example: Use register map with live J-Link connection
         import sys
         sys.path.append("path/to/the/packages")
 
@@ -98,7 +137,6 @@ class RM_Device_EFR32XG25XFULL_RevA0(Base_RM_Device):
         accessMgr = JLINK_AccessManager(dut_label, JLINK_ARM_OPTIONS(), False)
         accessMgr.Connect()
 
-        # auto detect part and request corresponding RM class
         hwinfo = EFRDetectPlatform(self.accessMgr)
         rm_device_class = RM_Factory(hwinfo.family_name, hwinfo.rev_name)
         rmIO = RegisterMapInterface(accessMgr.ReadRegister,
@@ -131,117 +169,33 @@ class RM_Device_EFR32XG25XFULL_RevA0(Base_RM_Device):
             'EFR32XG25XFULL',
             RM_SVD_Info('EFR32XG25XFULL_SEQ.svd', '414832bb488cc693201de926fbafbecb'))
 
-        self.AGC_NS = RM_Peripheral_AGC_NS(self.zz_rmio, self.zz_label)
-        self.zz_pdict['AGC_NS'] = self.AGC_NS
-        self.AGC_S = RM_Peripheral_AGC_S(self.zz_rmio, self.zz_label)
-        self.zz_pdict['AGC_S'] = self.AGC_S
-        self.CW = RM_Peripheral_CW(self.zz_rmio, self.zz_label)
-        self.zz_pdict['CW'] = self.CW
-        self.FEFILT0_NS = RM_Peripheral_FEFILT0_NS(self.zz_rmio, self.zz_label)
-        self.zz_pdict['FEFILT0_NS'] = self.FEFILT0_NS
-        self.FEFILT0_S = RM_Peripheral_FEFILT0_S(self.zz_rmio, self.zz_label)
-        self.zz_pdict['FEFILT0_S'] = self.FEFILT0_S
-        self.FEFILT1_NS = RM_Peripheral_FEFILT1_NS(self.zz_rmio, self.zz_label)
-        self.zz_pdict['FEFILT1_NS'] = self.FEFILT1_NS
-        self.FEFILT1_S = RM_Peripheral_FEFILT1_S(self.zz_rmio, self.zz_label)
-        self.zz_pdict['FEFILT1_S'] = self.FEFILT1_S
-        self.FRC_NS = RM_Peripheral_FRC_NS(self.zz_rmio, self.zz_label)
-        self.zz_pdict['FRC_NS'] = self.FRC_NS
-        self.FRC_S = RM_Peripheral_FRC_S(self.zz_rmio, self.zz_label)
-        self.zz_pdict['FRC_S'] = self.FRC_S
-        self.LEGOQPSK = RM_Peripheral_LEGOQPSK(self.zz_rmio, self.zz_label)
-        self.zz_pdict['LEGOQPSK'] = self.LEGOQPSK
-        self.LRSWKOFDM = RM_Peripheral_LRSWKOFDM(self.zz_rmio, self.zz_label)
-        self.zz_pdict['LRSWKOFDM'] = self.LRSWKOFDM
-        self.MODEM_NS = RM_Peripheral_MODEM_NS(self.zz_rmio, self.zz_label)
-        self.zz_pdict['MODEM_NS'] = self.MODEM_NS
-        self.MODEM_S = RM_Peripheral_MODEM_S(self.zz_rmio, self.zz_label)
-        self.zz_pdict['MODEM_S'] = self.MODEM_S
-        self.RAC_NS = RM_Peripheral_RAC_NS(self.zz_rmio, self.zz_label)
-        self.zz_pdict['RAC_NS'] = self.RAC_NS
-        self.RAC_S = RM_Peripheral_RAC_S(self.zz_rmio, self.zz_label)
-        self.zz_pdict['RAC_S'] = self.RAC_S
-        self.RFCRC_NS = RM_Peripheral_RFCRC_NS(self.zz_rmio, self.zz_label)
-        self.zz_pdict['RFCRC_NS'] = self.RFCRC_NS
-        self.RFCRC_S = RM_Peripheral_RFCRC_S(self.zz_rmio, self.zz_label)
-        self.zz_pdict['RFCRC_S'] = self.RFCRC_S
-        self.RFFPLL0_NS = RM_Peripheral_RFFPLL0_NS(self.zz_rmio, self.zz_label)
-        self.zz_pdict['RFFPLL0_NS'] = self.RFFPLL0_NS
-        self.RFFPLL0_S = RM_Peripheral_RFFPLL0_S(self.zz_rmio, self.zz_label)
-        self.zz_pdict['RFFPLL0_S'] = self.RFFPLL0_S
-        self.SEQ = RM_Peripheral_SEQ(self.zz_rmio, self.zz_label)
-        self.zz_pdict['SEQ'] = self.SEQ
-        self.SMCTRL_NS = RM_Peripheral_SMCTRL_NS(self.zz_rmio, self.zz_label)
-        self.zz_pdict['SMCTRL_NS'] = self.SMCTRL_NS
-        self.SMCTRL_S = RM_Peripheral_SMCTRL_S(self.zz_rmio, self.zz_label)
-        self.zz_pdict['SMCTRL_S'] = self.SMCTRL_S
-        self.SUNFSK = RM_Peripheral_SUNFSK(self.zz_rmio, self.zz_label)
-        self.zz_pdict['SUNFSK'] = self.SUNFSK
-        self.SUNOFDM = RM_Peripheral_SUNOFDM(self.zz_rmio, self.zz_label)
-        self.zz_pdict['SUNOFDM'] = self.SUNOFDM
-        self.SUNOQPSK = RM_Peripheral_SUNOQPSK(self.zz_rmio, self.zz_label)
-        self.zz_pdict['SUNOQPSK'] = self.SUNOQPSK
-        self.SYNTH_NS = RM_Peripheral_SYNTH_NS(self.zz_rmio, self.zz_label)
-        self.zz_pdict['SYNTH_NS'] = self.SYNTH_NS
-        self.SYNTH_S = RM_Peripheral_SYNTH_S(self.zz_rmio, self.zz_label)
-        self.zz_pdict['SYNTH_S'] = self.SYNTH_S
-        self.TXFRONT_NS = RM_Peripheral_TXFRONT_NS(self.zz_rmio, self.zz_label)
-        self.zz_pdict['TXFRONT_NS'] = self.TXFRONT_NS
-        self.TXFRONT_S = RM_Peripheral_TXFRONT_S(self.zz_rmio, self.zz_label)
-        self.zz_pdict['TXFRONT_S'] = self.TXFRONT_S
-
+        self.__dict__['zz_peripheral_names'] = _PERIPHERAL_NAMES
+        self.__dict__['zz_peripheral_name_set'] = _PERIPHERAL_NAME_SET
+        self.__dict__['zz_loaded_all_peripherals'] = False
+        secure_aliases = _build_default_aliases(_PERIPHERAL_NAMES, mode='secure')
+        nonsecure_aliases = _build_default_aliases(_PERIPHERAL_NAMES, mode='nonsecure')
         if default_tz_access_mode == RM_TrustZone_Access_Mode.TZ_SECURE:
-            self.AGC = self.AGC_S
-            self.FEFILT0 = self.FEFILT0_S
-            self.FEFILT1 = self.FEFILT1_S
-            self.FRC = self.FRC_S
-            self.MODEM = self.MODEM_S
-            self.RAC = self.RAC_S
-            self.RFCRC = self.RFCRC_S
-            self.RFFPLL0 = self.RFFPLL0_S
-            self.SMCTRL = self.SMCTRL_S
-            self.SYNTH = self.SYNTH_S
-            self.TXFRONT = self.TXFRONT_S
-            pass
-        elif default_tz_access_mode == RM_TrustZone_Access_Mode.TZ_NONSECURE:
-            self.AGC = self.AGC_NS
-            self.FEFILT0 = self.FEFILT0_NS
-            self.FEFILT1 = self.FEFILT1_NS
-            self.FRC = self.FRC_NS
-            self.MODEM = self.MODEM_NS
-            self.RAC = self.RAC_NS
-            self.RFCRC = self.RFCRC_NS
-            self.RFFPLL0 = self.RFFPLL0_NS
-            self.SMCTRL = self.SMCTRL_NS
-            self.SYNTH = self.SYNTH_NS
-            self.TXFRONT = self.TXFRONT_NS
-            pass
-
-        if self.offline:
-            # assign the default reset values to the simulated register dictionary
-            for key in self.zz_pdict:
-                self.zz_pdict[key].assignRegDefault()
-        # build the register address-to-names mapping
-        for pkey in self.zz_pdict:
-            per_obj = self.zz_pdict[pkey]
-            # TODO: Remove deprecated self.zz_reg_addr_to_name in future pyrmsvd 2.x release
-            per_obj.getAddressNameMap(self.zz_reg_addr_to_name)
-            per_obj.getAddressNamesMap(self.zz_reg_addr_to_names)
-            if per_obj.isAliased():
-                # register device-level method to query the self.zz_reg_addr_to_names dict
-                per_obj.registerAddressToNamesCb(self.addressToNames)
+            self.__dict__['zz_alias_to_per_name'] = secure_aliases
+            self.__dict__['zz_per_to_alias_names'] = _build_reverse_alias_map(secure_aliases)
+        else:
+            self.__dict__['zz_alias_to_per_name'] = nonsecure_aliases
+            self.__dict__['zz_per_to_alias_names'] = _build_reverse_alias_map(nonsecure_aliases)
 
         self.__dict__['zz_frozen'] = True
 
-        # Process an optional exclusion list that will remove a register
-        # from a unfiltered register dump operation performed in the dump()
-        # method. The register is also removed from the generated list in
-        # the buildRegFilterList() method. Requires pyrmsvd support, so
-        # check if this version of the base class supports register exclusion.
 
-        excluded_regs_fn = os.path.join(_PKG_PATH, _EXCLUDED_REGS_MOD_NAME + '.py')
-        if os.path.exists(excluded_regs_fn) and hasattr(self, 'excludeFromDumpByName'):
-            spec = importlib.util.spec_from_file_location(_EXCLUDED_REGS_MOD_NAME, excluded_regs_fn)
+        file_name = _PKG_PATH / _EXCLUDED_REGS_MOD_NAME
+        file_path_py = file_name.with_suffix('.py')
+        file_path_pyc = file_name.with_suffix('.pyc')
+        if file_path_py.exists():
+            excluded_regs_fn = file_path_py
+        elif file_path_pyc.exists():
+            excluded_regs_fn = file_path_pyc
+        else:
+            excluded_regs_fn = None
+
+        if excluded_regs_fn and hasattr(self, 'excludeFromDumpByName'):
+            spec = importlib.util.spec_from_file_location(_EXCLUDED_REGS_MOD_NAME, str(excluded_regs_fn))
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
             excluded_regs = getattr(mod, _EXCLUDED_REGS_LIST_NAME)

@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include <stdalign.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -48,6 +49,9 @@
 
 #include "sl_cpc_bus.h"
 #include "sl_cpc_drv_mock_default_config.h"
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+#include "sl_cpc_drv_mock_default_kernel_config.h"
+#endif
 
 #include "../sli_cpc_control.h"
 #include "../sli_cpc_memory.h"
@@ -62,11 +66,10 @@
 int cpc_test_event_mask;
 
 static const sl_cpc_drv_mock_config_t s_test_drv_cfg = {};
-static const sl_cpc_bus_config_t s_test_bus_cfg = {
-  .is_secondary = false,
-  .rx_frame_pool_count = SL_CPC_DRV_MOCK_DEFAULT_RX_FRAME_POOL_COUNT,
-  .tx_frame_pool_count = SL_CPC_DRV_MOCK_DEFAULT_TX_FRAME_POOL_COUNT,
-};
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+alignas(8) static uint8_t s_test_task_stacks[SL_CPC_DRV_MOCK_INSTANCES_COUNT]
+                                            [(SL_CPC_DRV_MOCK_DEFAULT_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u];
+#endif
 
 /// True for each @c sl_cpc_drv_mock_instances[i] started via the fixture API.
 static bool s_mock_bus_started[SL_CPC_DRV_MOCK_INSTANCES_COUNT];
@@ -107,7 +110,20 @@ static void reclaim_service_init_mocks(void)
 
 static void init_mock_instance(unsigned int lineno, sl_cpc_drv_mock_t *drv, bool initialized)
 {
-  sl_status_t status = sl_cpc_drv_mock_init(drv, &s_test_drv_cfg, &s_test_bus_cfg);
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  size_t index = mock_instance_index(lineno, drv);
+#endif
+  sl_cpc_bus_config_t bus_cfg = {
+    .is_secondary = false,
+    .rx_frame_pool_count = SL_CPC_DRV_MOCK_DEFAULT_RX_FRAME_POOL_COUNT,
+    .tx_frame_pool_count = SL_CPC_DRV_MOCK_DEFAULT_TX_FRAME_POOL_COUNT,
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+    .task_priority = SL_CPC_DRV_MOCK_DEFAULT_TASK_PRIORITY,
+    .task_stack_ptr = s_test_task_stacks[index],
+    .task_stack_len = (uint32_t)sizeof(s_test_task_stacks[index]),
+#endif
+  };
+  sl_status_t status = sl_cpc_drv_mock_init(drv, &s_test_drv_cfg, &bus_cfg);
 
   UNITY_TEST_ASSERT_EQUAL_INT(SL_STATUS_OK, status, lineno, NULL);
   sl_cpc_drv_mock_get_bus(drv)->initialized = initialized;
@@ -292,7 +308,10 @@ sl_status_t cpc_test_set_ep_connected(sl_cpc_ep_t *ep, sl_cpc_bus_t *bus, uint8_
 
 void cpc_test_ep_discard(sl_cpc_ep_t *ep)
 {
+  sl_status_t status;
+
   sli_cpc_timer_stop(&ep->re_transmit_timer);
 
-  sl_cpc_ep_deinit(ep);
+  status = sl_cpc_ep_deinit(ep);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
 }

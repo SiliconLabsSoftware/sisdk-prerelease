@@ -17,10 +17,8 @@ class Profile_Connect_Sol(Profile_Base_Sol):
 
     def buildProfileModel(self, model):
 
-        # Start with base profile
         profile = super(Profile_Connect_Sol, self).buildProfileModel(model)
 
-        # Do not remove the following profile inputs from the base profile.
         retain_profile_input_list = [
             "fcs_type_802154",
             "crc_byte_endian",
@@ -32,20 +30,14 @@ class Profile_Connect_Sol(Profile_Base_Sol):
             "payload_white_en"
         ]
 
-        # Start with a profile that has lots of knobs, and remove most of them.
-        # Note that profile inputs included in "retain_profile_input_list" will not be removed.
-        # Remove those that are not in a certain category
         for input in profile.inputs:
-            # Force things in these categories
             if (input.category.startswith('frame_')) or (input.category == 'crc') or (input.category == 'whitening'):
                 if input._var._name not in retain_profile_input_list:
                     self._removeVariableFromInputs(profile, input._var, input.default)
 
-        # : Allow selection of Two Octet CRC vs. Four Octet CRC defined in IEEE802154-2020 (7.2.11)
         self.make_optional_input(profile, model.vars.fcs_type_802154, 'advanced', readable_name="FCS Type (CRC)",
                                  default=model.vars.fcs_type_802154.var_enum.TWO_BYTE)
 
-        #Hidden inputs to allow for fixed frame length testing
         self.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                    readable_name="Frame Length Algorithm")
         self.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
@@ -57,22 +49,17 @@ class Profile_Connect_Sol(Profile_Base_Sol):
 
         model.vars.protocol_id.value_forced = model.vars.protocol_id.var_enum.Connect
 
-        # frame_general
         model.vars.frame_bitendian.value_forced = model.vars.frame_bitendian.var_enum.LSB_FIRST
         model.vars.frame_length_type.value_forced = model.vars.frame_length_type.var_enum.VARIABLE_LENGTH
         model.vars.header_en.value_forced = True
         model.vars.frame_coding.value_forced = model.vars.frame_coding.var_enum.NONE
 
-        # frame_header
         model.vars.header_calc_crc.value_forced = False
 
-        # frame_fixed_length
         model.vars.fixed_length_size.value_forced = 16
 
-        # frame_var_length
         self._lookup_framing_from_header_size(model)
 
-        # frame_type_length
         model.vars.frame_type_loc.value_forced = 0
         model.vars.frame_type_bits.value_forced = 3
         model.vars.frame_type_lsbit.value_forced = 0
@@ -93,20 +80,15 @@ class Profile_Connect_Sol(Profile_Base_Sol):
         model.vars.frame_type_6_valid.value_forced = False
         model.vars.frame_type_7_valid.value_forced = False
 
-        # crc
-        # frame_payload
         model.vars.payload_crc_en.value_forced = True
         model.vars.crc_input_order.value_forced = model.vars.crc_input_order.var_enum.LSB_FIRST
         self._lookup_crc_from_fcs_type(model)
 
-        # : Whitening Option
         model.vars.header_white_en.value_forced = False # Always disable header whitening
 
-        # unused OFDM
         model.vars.ofdm_option.value_forced = model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz
 
     def _lookup_framing_from_header_size(self, model):
-        # frame_var_length
         if model.profile.inputs.header_size.var_value == 1:  # : One byte header as defined by IEEE802154 GFSK / OQPSK
             model.vars.var_length_numbits.value_forced = 7
             model.vars.var_length_bitendian.value_forced = model.vars.var_length_bitendian.var_enum.LSB_FIRST

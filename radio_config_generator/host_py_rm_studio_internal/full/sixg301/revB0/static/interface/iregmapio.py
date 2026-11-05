@@ -197,6 +197,7 @@ class IRegMapIO(object):
 
         :raises: RegMapLoggingError
         """
+        pass
 
     @abstractmethod
     def disableCLangLogger(self):
@@ -256,7 +257,8 @@ class IRegMapIO(object):
 
         :raises: RegMapLoggingError
         """
-
+        pass
+    
     @abstractmethod
     def disablePyLangLogger(self):
         """
@@ -271,7 +273,7 @@ class IRegMapIO(object):
     @abstractmethod
     def closePyLangLogger(self):
         """
-        End register map read and write logging to a C source file. The
+        End register map read and write logging to a Python source file. The
         current handler is flushed and closed. The user may call
         openPyLangLogger() again to reopen, for example to use a different
         filename.
@@ -331,3 +333,4 @@ class IRegMapIO(object):
             RegMapAccessError: Only allowed for offline simulated mode.
 
         """
+        pass

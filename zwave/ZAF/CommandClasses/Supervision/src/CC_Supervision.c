@@ -202,7 +202,7 @@ static bool mustCommandBeHandled(MULTICHAN_DEST_NODE_ID nodeID, uint8_t sessionI
 static received_frame_status_t CC_Supervision_handler(
   RECEIVE_OPTIONS_TYPE_EX *rxOpt,
   ZW_APPLICATION_TX_BUFFER *pCmd,
-  __attribute__((unused)) uint8_t cmdLength,
+  uint8_t cmdLength,
   ZW_APPLICATION_TX_BUFFER * pFrameOut,
   __attribute__((unused)) uint8_t * pLengthOut)
 {
@@ -231,6 +231,13 @@ static received_frame_status_t CC_Supervision_handler(
        *       differ from EXTRACT_SESSION_ID(pCmd->ZW_SupervisionGetFrame.sessionid)
        *    c. Do not send supervision_report.
        */
+      // The encapsulated command must fit in the received frame and hold at least a command class and a command
+      if ((cmdLength < sizeof(ZW_SUPERVISION_GET_FRAME))
+          || (pCmd->ZW_SupervisionGetV2Frame.encapsulatedCommandLength < sizeof(ZW_COMMON_FRAME))
+          || (pCmd->ZW_SupervisionGetV2Frame.encapsulatedCommandLength > cmdLength - sizeof(ZW_SUPERVISION_GET_FRAME))) {
+        return RECEIVED_FRAME_STATUS_FAIL;
+      }
+
       uint8_t properties1;
       /*
        * status need to be static to handle multi-cast single-cast follow up.

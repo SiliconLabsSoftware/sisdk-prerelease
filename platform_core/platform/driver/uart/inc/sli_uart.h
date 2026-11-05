@@ -35,7 +35,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_component_catalog.h"
 #include "sl_status.h"
 #include "sl_device_uart.h"
@@ -53,8 +53,8 @@ extern "C" {
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
 #define SLI_UART_ASSERT_VALID_HANDLE(uart_handle) \
-        EFM_ASSERT((uart_handle) != NULL); \
-        EFM_ASSERT((uart_handle)->uart != NULL)
+        SL_LOG_DEBUG_ASSERT((uart_handle) != NULL); \
+        SL_LOG_DEBUG_ASSERT((uart_handle)->uart != NULL)
 
 #define SLI_UART_OVERSAMPLING_IS_VALID(config, ref_freq) \
         ({ \

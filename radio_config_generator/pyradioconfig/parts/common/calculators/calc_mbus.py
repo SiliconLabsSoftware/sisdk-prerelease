@@ -29,7 +29,6 @@ class CALC_Mbus(ICalculator):
 
         self._add_mbus_mode_var(model)
 
-        # Mbus Frame Format
         var = self._addModelVariable(model, 'mbus_frame_format', Enum, ModelVariableFormat.DECIMAL,
                                      'List of supported Mbus Frame Format Configurations')
         member_data = [
@@ -43,7 +42,6 @@ class CALC_Mbus(ICalculator):
             member_data)
 
 
-        # Mbus Frame Format
         var = self._addModelVariable(model, 'mbus_symbol_encoding', Enum, ModelVariableFormat.DECIMAL,
                                      'List of supported Mbus Symbol Encoding Configurations')
         member_data = [
@@ -94,9 +92,6 @@ class CALC_Mbus(ICalculator):
                 len = 16
                 sync_a = long(0xf68d)
                 sync_b = long(0xf672)
-                # Note that the spec calls for a different 32-bit syncword for Ng mode,
-                # but it's really just the same 2gfsk pattern as the other modes
-                # expressed in 4gfsk notation.
             elif mode == model.vars.mbus_mode.var_enum.ModeR_4p8k:
                 len = 18
                 sync_a = long(0x7696)
@@ -116,8 +111,6 @@ class CALC_Mbus(ICalculator):
             else:
                 raise CalculationException("Can't calculate syncwords.  Unexpected Mbus mode selected!")
 
-            # Set syncword 0/1 based on whether frame format A or B is selected
-            # If only one syncword exists, don't flip them for frame B format
             if model.vars.mbus_frame_format.value != model.vars.mbus_frame_format.var_enum.FrameB or sync_b == 0:
                 syncword_0 = sync_a
                 syncword_1 = sync_b

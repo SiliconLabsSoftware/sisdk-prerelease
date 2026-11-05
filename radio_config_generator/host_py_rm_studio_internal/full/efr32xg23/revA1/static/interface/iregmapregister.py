@@ -15,7 +15,7 @@ which implements this interface.
 
 __all__ = ['IRegMapRegister']
 
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 
 
 class IRegMapRegister(object):
@@ -25,7 +25,9 @@ class IRegMapRegister(object):
     """
     __metaclass__ = ABCMeta
 
-    def _getio(self):
+    @property
+    @abstractmethod
+    def io(self):
         """
         This is the io property getter to interact with the part's register,
         which may be a live instance via J-Link or a simulated dictionary
@@ -37,7 +39,9 @@ class IRegMapRegister(object):
         """
         pass
 
-    def _setio(self, value):
+    @io.setter
+    @abstractmethod
+    def io(self, value):
         """
         This is the io property setter to interact with the part's register,
         which may be a live instance via J-Link or a simulated dictionary
@@ -49,9 +53,6 @@ class IRegMapRegister(object):
         """
         pass
 
-    io = abstractproperty(_getio, _setio)
-
-    # Query Methods
 
     @abstractmethod
     def registerAddressToNamesCb(self, addressToNamesCb):
@@ -96,7 +97,6 @@ class IRegMapRegister(object):
         """
         pass
 
-    # I/O Access Methods
 
     @abstractmethod
     def isReadable(self):
@@ -118,7 +118,6 @@ class IRegMapRegister(object):
         """
         pass
 
-    # Accessed Flag Methods
 
     @abstractmethod
     def clearAccessedFlag(self):
@@ -174,7 +173,6 @@ class IRegMapRegister(object):
         """
         pass
 
-    # Dump - Public
 
     @abstractmethod
     def includeInDump(self):

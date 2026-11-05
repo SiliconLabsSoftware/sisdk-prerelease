@@ -31,7 +31,7 @@
 #include "sl_iostream.h"
 #include "sli_iostream.h"
 #include "sl_status.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_core.h"
 
 #if defined(SL_CATALOG_KERNEL_PRESENT) && !defined(SL_IOSTREAM_FORCE_BAREMETAL)
@@ -99,7 +99,8 @@ sl_status_t sl_iostream_set_default(sl_iostream_t  *stream)
     reg_id = sli_task_register_id;
     if (reg_id == TASK_REGISTER_ID_INVALID) {
       status = sli_osTaskRegisterNew(&reg_id);
-      EFM_ASSERT(status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+      (void)status;
       sli_task_register_id = reg_id;
     }
   }
@@ -110,7 +111,8 @@ sl_status_t sl_iostream_set_default(sl_iostream_t  *stream)
 #if defined(SL_CATALOG_KERNEL_PRESENT) && !defined(SL_IOSTREAM_FORCE_BAREMETAL)
   if (osThreadGetId() != NULL) {
     status = sli_osTaskRegisterSetValue(NULL, reg_id, (uint32_t)stream);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
   }
 #endif
 
@@ -141,7 +143,8 @@ sl_iostream_t *sl_iostream_get_default(void)
     uint32_t reg;
 
     status = sli_osTaskRegisterGetValue(NULL, sli_task_register_id, &reg);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
 
     stream = (sl_iostream_t *)reg;
   }

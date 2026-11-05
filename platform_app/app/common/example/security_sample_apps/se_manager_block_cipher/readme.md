@@ -21,11 +21,15 @@ After reset, the application fills random **IV/nonce**, **associated data**, and
 - **SPACE** — cycle the current option
 - **ENTER (CR)** — confirm and proceed
 **Secure Vault High** — select in order:
-1. **Key storage:** plaintext, wrapped, or volatile SE slot
+1. **Key storage:** plaintext, wrapped, or volatile SE slot (volatile only where supported)
 2. **Key length:** 128, 192, or 256 bits
 3. **Payload size:** 256, 1024, or 4096 bytes (`PLAIN_MSG_SIZE` = 4096 in `app_se_manager_block_cipher.h`)
 4. **HMAC hash:** SHA-1, SHA-224, SHA-256, SHA-384, or SHA-512
 **Secure Vault Mid** — select key length, payload size, and HMAC hash (SHA-1/224/256 only); keys are **plaintext in RAM** only.
+
+> **Note:** SE volatile key support may not be supported on all platforms. On platforms
+> without volatile SE key storage, the volatile key-storage menu option is omitted.
+> Plaintext and wrapped key paths still work where available.
 
 ### Algorithms exercised (automatic test sequence)
 
@@ -83,6 +87,7 @@ After reset, the application fills random **IV/nonce**, **associated data**, and
 | SE manager init failed | Latest SE firmware; board has Secure Vault + SE mailbox |
 | Random buffer fill failed | SE random source / TRNG availability |
 | Wrapped or volatile key options missing | Expected on **Secure Vault Mid** — use a Vault High board for full key-storage paths |
+| Volatile key option missing | Expected on platforms that do not support SE volatile key storage |
 | ChaCha20-Poly1305 test skipped | Vault High required; not available on all Series 3 config parts |
 | Decrypt compare failed | Retry with smaller payload size; confirm SE firmware is current |
 | SHA-384/512 not in HMAC menu | Vault Mid supports SHA-1/224/256 only |

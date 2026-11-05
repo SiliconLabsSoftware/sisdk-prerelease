@@ -23,6 +23,10 @@ requires:
   # Record header is owned by bootloader package (see bootloader_s2_smp_record_header).
 - name: bootloader_s2_smp_record_header
 root_path: bootloader/platform/bootloader
+include:
+- path: core
+  file_list:
+  - path: btl_bootload.h
 config_file:
 - path: config/btl_smp_cfg.h
 source:

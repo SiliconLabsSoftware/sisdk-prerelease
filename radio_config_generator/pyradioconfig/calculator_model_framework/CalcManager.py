@@ -21,8 +21,10 @@ from pyradioconfig.calculator_model_framework.Utils.ModelChecking import ModelCh
 from pyradioconfig.calculator_model_framework.Utils.cache_flags import is_advanced_cache_enabled
 from pyradioconfig.calculator_model_framework.exceptions.exceptions import *
 from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICalculator
+from pycalcmodel.core.common import IPCategory
 from pyradioconfig.calculator_model_framework.interfaces.idefault_phy import IDefaultPhy
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
+from pyradioconfig.calculator_model_framework.interfaces.ipcollector import IPCollector_Base
 from pyradioconfig.calculator_model_framework.interfaces.iphy_filter import IPhyFilter, PhyFilterGroupTypes
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfile
 from pyradioconfig.calculator_model_framework.interfaces.itarget import ITarget
@@ -99,13 +101,11 @@ class CalcManager(object):
         For more details example usages, please review unittests.
     """
 
-    # Static variables
     __MODEL_NAME = __name__
     __MODEL_VER = __version__
     __developer_mode = True
     IC_str = ITarget.IC_str
 
-    # Private variables
     __part_family = None
     __part_revision = None
     __target = None
@@ -246,13 +246,11 @@ class CalcManager(object):
            part_revision (str): Part revision (e.g. 'A0').
 
         """
-        # Used for unit testing
         if opn.lower().startswith('unit_test_part'):
             tempList = [x.strip() for x in opn.split('-')]
             partFamily = 'unit_test_part'
             partRevision = tempList[1].upper()
             return partFamily, partRevision
-        # OPN decoder for EFR32
         elif opn.lower().startswith('efr32'):
             tempList = [x.strip() for x in opn.split('-')]
             partFamily = opn[5]
@@ -260,48 +258,54 @@ class CalcManager(object):
                 partFamily = 'dumbo'
             partRevision = tempList[1].upper()
             return partFamily, partRevision
-        # Unkown OPN type
         else:
             raise UnknownOPNTypeException('Unknown OPN type: ' + str(opn))
 
-    def getProfiles(self):
+    def getProfiles(self, ip_category=IPCategory.LPW):
         """Returns a list of profile objects
+
+        Args:
+            ip_category (IPCategory): get profiles belonging to this ip category (default=LPW)
 
         Returns:
            uniqueProfiles (dict): Uniquely named profile objects
 
         """
-        profileList = self.__getProfileList()
+        profileList = self.__getProfileList(ip_category)
         uniqueProfiles = dict()
 
         for profile in profileList:
-            # Check if profile is already in the dictionary
             profile = profile()
             key = profile.getName()
-            #if not uniqueProfiles.__contains__(key):
-            # Add to dictionary
             if len(key) > 0:
                 uniqueProfiles[key] = profile
 
         return uniqueProfiles
 
-    def __getProfileList(self):
+    def __getProfileList(self, ip_category):
         """Returns a list of all profile names for part family and part revision (cached)
+
+        Args:
+            ip_category (IPCategory): IP category used as cache key (default = None)
 
         Returns:
            list (list): List of uniquely named profile
 
         """
         if _ADVANCED_CACHE_EN and hasattr(self, '_profile_list_cache'):
-            return list(self._profile_list_cache)
+            if ip_category in self._profile_list_cache:
+                return list(self._profile_list_cache[ip_category])
         self.__verifyPartFamilyPartRevisionIsSet()
         part_family = self.__part_family
         part_revision = self.__part_revision
         try:
-            # Find all .py files for this family
             profilelist = self.__getProfileListPartFamily(part_family)
+            if ip_category is not None:
+                profilelist = [profile for profile in profilelist if profile.ip_category == ip_category]
             if _ADVANCED_CACHE_EN:
-                self._profile_list_cache = profilelist
+                if not hasattr(self, '_profile_list_cache'):
+                    self._profile_list_cache = {}
+                self._profile_list_cache[ip_category] = profilelist
             return profilelist
         except ImportError as ie:
             LogMgr.Error("Unable to import modules: {}".format(ie))
@@ -317,7 +321,6 @@ class CalcManager(object):
         Returns:
            list (list): List of uniquely named profile classes
         """
-        # Import profile modules and classes
         import_path = self.getPartFamilyImportPath(part_family, "profiles")
         profilelist = ClassManager.getClassListFromImportPath(import_path, IProfile)
         return profilelist
@@ -335,17 +338,14 @@ class CalcManager(object):
         """
         status = False
         try:
-            # Convert version string to object
-            #version = Version.fromString(version_string)
 
-            modem_instance_model = self.create_modem_model_instance(phy_name)
+            modem_instance_model = self.create_modem_model_instance(phy_name=phy_name, profile_name=profile_name)
             self.convert_model_instance_to_XML(modem_instance_model, input_path, phy_name = phy_name, profile_name = profile_name)
 
             status = True
         except:
             raise
 
-        # return success / fail
         return status
 
     def convert_model_instance_to_XML(self, model, output_path, phy_name = None, profile_name = None):
@@ -362,15 +362,8 @@ class CalcManager(object):
         else:
             phy = None
 
-        # Find profile requested
-        #profile = self._findProfile(profile_name, profile_version_string)
-        #if (profile == None):
-        #    raise Exception("Profile: " +  profile_name + ", Version: " + profile_version_string + " not found.")
 
-        # Build profile model
-        #profile.buildProfileModel(modem_model)
 
-        # Send modem model to file
         if profile_name is None:
             profile = getattr(model.profiles, phy.profile_name)
         else:
@@ -393,16 +386,17 @@ class CalcManager(object):
 
         model.to_instance_xml(output_path, self.__part_revision, '', processed, result_code, error_message, profile, phy)  # New way
 
-    def _findProfile(self, profile_name):
+    def _findProfile(self, profile_name, ip_category):
         """Finds profile for profile_name, version, part_family, part_revision
 
         Args:
             profile_name (str) : Profile name to create insance of (Optional, default = None)
+            ip_category (IPCategory): IP category used as cache key
 
         Returns:
            profile (Profile): Returns profile model object
         """
-        profileList = self.__getProfileList()
+        profileList = self.__getProfileList(ip_category)
         for profile in profileList:
             prof_obj = profile()
             key = prof_obj.getName()
@@ -436,7 +430,6 @@ class CalcManager(object):
             >>> radio_configurator.calculate(model_instance_profile)
         """
 
-        # Should only be one profile?  Should be only one
         result_code = CalcStatus.Success.value
         model_profile = None
         try:
@@ -446,41 +439,34 @@ class CalcManager(object):
 
         if model_profile is not None:
             try:
-                # Create new model to absorb any new inputs, defaults, etc...
                 modem_instance_model_new = self.create_modem_model_instance(profile_name=model_profile.name)
                 self.read_profile_inputs_into_model(modem_instance_model_new, model_profile)
             except (SystemExit, SystemError, MemoryError, KeyboardInterrupt):
                 raise
             except BaseException as e:
-                # Let the calculate function catch the error
                 result_code = CalcStatus.Failure.value
                 error_message = str(e)
                 pass
 
-        # Run calculators
         if (result_code == CalcStatus.Success.value):
             result_code, error_message = self.execute_calc_fuctions(modem_instance_model_new)
 
-        # Any phy's in here?  Could be one or none
         model_phy = None
         try:
             if result_code == CalcStatus.Success.value:
                 model_phy = modem_instance_model.phy
                 if model_phy is not None:
-                    # add phy to new model
-                    phy = self._findPhy(model_phy.name)
+                    phy = self._findPhy(model_phy.name, modem_instance_model.ip_category)
                     if not phy is None:
                         phy(modem_instance_model_new)
                         model_phy = modem_instance_model_new.phy
                     else:
                         model_phy = None
         except StopIteration:
-            # ignore no phy found
             pass
 
         model_profile = modem_instance_model_new.profile
 
-        # Send calculated modem model to file
         processed = True
         modem_instance_model_new.to_instance_xml(output_path,
                                                  modem_instance_model_new.part_revision,
@@ -507,15 +493,12 @@ class CalcManager(object):
         error_message = ''
 
         try:
-            # Read profile variables into variables
             self.read_profile_into_variables(model_instance)
 
-            # Get list of functions to perform calculators
-            calcFunctions = self._getCalculatorFunctionList()
+            calcFunctions = self._getCalculatorFunctionList(ip_category=model_instance.profile.ip_category)
             self.calculateOverList(calcFunctions, model_instance)
 
         except ModelVariableWriteAccess as e:
-            # This is a show stopper (assert) for the calc functions!
             raise
         except (SystemExit, SystemError, MemoryError, KeyboardInterrupt):
             raise
@@ -536,7 +519,7 @@ class CalcManager(object):
         LogMgr.reset()
         return result, error_message
 
-    def _getCalculatorFunctionList(self):
+    def _getCalculatorFunctionList(self, ip_category):
         """
         Returns a list of all calculator functions for part family and part revision
 
@@ -555,25 +538,20 @@ class CalcManager(object):
         :return:
             list (list): List of unique calculation function references
         """
-        calculators = self._getCalculatorsList()
+        calculators = self._getCalculatorsList(ip_category)
         calc_name_function_dict = dict()
         for calculator in calculators:
             for calc in calculator().getCalculationList():
                 calc_name = calc.__name__
                 if calc_name not in list(calc_name_function_dict.keys()):
-                    # add to the dict
                     calc_name_function_dict[calc_name] = calc
                 else:
-                    # if a calc name duplicate is found, definition in pyradioconfig/parts/.... takes precedence
-                    # check the file path name of calc in calc_name_function_dict
                     old_calc_file_path = os.path.normpath(inspect.getfile(calc_name_function_dict[calc_name].__self__.__class__))
                     new_calc_file_path = os.path.normpath(inspect.getfile(calc.__self__.__class__))
 
                     if f"pyradioconfig{os.path.sep}modules" in old_calc_file_path:
-                        # replace or override the calc implementation defined in pyradioconfig/parts/
                         if f"pyradioconfig{os.path.sep}parts" in new_calc_file_path:
                             calc_name_function_dict[calc_name] = calc
-                        # flag duplicate calc methods defined in pyradioconfig/modules or elsewhere
                         else:
                             calc_error_message = (f"calculation with same name {calc_name} found at \n"
                                                   f"{old_calc_file_path}\n"
@@ -583,21 +561,12 @@ class CalcManager(object):
 
                     elif f"pyradioconfig{os.path.sep}parts" in old_calc_file_path:
                         if f"pyradioconfig{os.path.sep}modules" in new_calc_file_path:
-                            # do nothing as pyradioconfig\parts takes precedence
                             pass
                         elif f"pyradioconfig{os.path.sep}parts" in new_calc_file_path:
-                            # add the duplicate calculation. In older parts, calculations with same name are defined,
-                            # but do not edit same model variables. If they do, that is caught when the model builds.
 
-                            # Since calc_name_function_dict can't store duplicates, we will store the calc method with
-                            # different calc_name in the dict. calc_name here does not matter here because eventually
-                            # we will extract all the methods. calc_name is only to handle the duplicates generated
-                            # by pyradioconfig\module.
                             calc_name = calc_name + "_" + new_calc_file_path.split("\\calculators\\")[-1]
                             calc_name_function_dict[calc_name] = calc
                         else:
-                            # found a calc_ method neither in pyradioconfig/parts/ nor in pyradioconfig/lpw.
-                            # shtewari: a remote possibility but wanted else to execute something in 'else'
                             calc_error_message = (f"calculation with name {calc_name} found at \n"
                                                   f"{new_calc_file_path}")
                             LogMgr.Error(calc_error_message)
@@ -606,14 +575,18 @@ class CalcManager(object):
         calc_list = list(calc_name_function_dict.values())
         return calc_list
 
-    def _getCalculatorsList(self):
+    def _getCalculatorsList(self, ip_category):
         """Returns a list of all calculator objects for part family and part revision
+
+        Args:
+            ip_category (IPCategory): IP category to filter out peripherals, register var/outputs and calcs
 
         Returns:
            list (list): List of calculation object references
         """
         if _ADVANCED_CACHE_EN and hasattr(self, '_calculators_list_cache'):
-            return list(self._calculators_list_cache)
+            if ip_category in self._calculators_list_cache:
+                return list(self._calculators_list_cache[ip_category])
         self.__verifyPartFamilyPartRevisionIsSet()
         part_family = self.__part_family
         part_revision = self.__part_revision
@@ -625,13 +598,17 @@ class CalcManager(object):
         and pyradioconfig/modules. '''
 
         if self._verify_ip_based_part():
-            calclist.extend(self.getCalculatorListIPBased())
-            calclist.extend(self.getCalculatorListLegacy())
+            calclist.extend(self.getCalculatorListIPBased(ip_category))
+            calclist.extend([calc for calc in self.getCalculatorListLegacy()
+                             if calc._calc_ip_category in (None, IPCategory.COMMON, ip_category)])
         else:
-            calclist.extend(self.getCalculatorListLegacy())
+            calclist.extend([calc for calc in self.getCalculatorListLegacy()
+                             if calc._calc_ip_category in (None, IPCategory.COMMON, ip_category)])
 
         if _ADVANCED_CACHE_EN:
-            self._calculators_list_cache = calclist
+            if not hasattr(self, '_calculators_list_cache'):
+                self._calculators_list_cache = {}
+            self._calculators_list_cache[ip_category] = calclist
         return calclist
 
     def getCalculatorListLegacy(self):
@@ -643,18 +620,14 @@ class CalcManager(object):
             class_type = ICalculator
 
             if part_family.lower() in ['dumbo', 'jumbo', 'lynx', 'nerio', 'nixi', 'panther', 'leopard', 'unit_test_part']:
-                # Find all .py files for this part in common
                 import_path = self.getPartFamilyImportPath("common", "calculators")
                 common_part_list = ClassManager.getClassListFromImportPath(import_path, class_type)
             else:
-                # As of ocelot, we are no longer merging 'commmon' calculators
                 common_part_list = []
 
-            # Find all .py files for this family and revision in part revision
             import_path = self.getPartFamilyImportPath(part_family, "calculators")
             rev_list = ClassManager.getClassListFromImportPath(import_path, class_type)
 
-            # Loop through common phys and remove and parent classes from part rev specific instance
             calclist = ClassManager.merge_lists_classes(common_part_list, rev_list)
 
             return calclist
@@ -663,7 +636,7 @@ class CalcManager(object):
         except Exception:
             LogMgr.Error(traceback.print_exc())
 
-    def getCalculatorListIPBased(self):
+    def getCalculatorListIPBased(self, ip_category=IPCategory.LPW):
         self.__verifyPartFamilyPartRevisionIsSet()
         part_family = self.__part_family
         part_revision = self.__part_revision
@@ -671,12 +644,10 @@ class CalcManager(object):
         calcList = []
 
         if self._verify_ip_based_part():
-            # call buildVariable in pyradioconfig/modules
             part_family = self.__part_family
             import_path = self.getPartFamilyImportPath(part_family, "ip_collector")
             part_rev = self.__part_revision
-            peripheral_calcs_list = ClassManager.get_calc_ips(import_path, part_family, part_rev, return_ip_obj=True)
-            # when building model, we need to make sure that duplicate instances are not called
+            peripheral_calcs_list = ClassManager.get_calc_ips(import_path, part_family, part_rev, ip_category, return_ip_obj=True)
             for (ip_obj, calculator) in peripheral_calcs_list:
                 calcList.append(calculator)
 
@@ -690,7 +661,6 @@ class CalcManager(object):
             modem_model (ModelRoot) : Data model instance
 
         """
-        # Validate model
         if not modem_model.validate():
             raise Exception('Model does not pass validation.  Please review vars and profile var definitions.')
 
@@ -701,40 +671,24 @@ class CalcManager(object):
         function  = VariableAccess()
         while True:
             num_calc_routines = calc_routine_list.__len__()
-            #print("Number of routines = %d" % num_calc_routines)
 
             for calc_routine in calc_routine_list[:]:       # The [:] thing is a trick to make a copy of the list.
-                                                            # Don't iterate over a list while items are being removed from it.
-                #print("About to call %s" % calc_routine.func_name)
                 try:
                     if isinstance(calc_routine, types.MethodType):
                         try:
                             function.name = calc_routine.im_class.__name__ + "." + calc_routine.__name__ + "()"
                         except AttributeError:
-                            # function.name = calc_routine.__qualname__ + "()"
                             function.name = calc_routine.__self__.__class__.__name__ + "." + calc_routine.__name__ + "()"
                         calc_routine(modem_model)
-                        #print("     Success!  %d left" % calc_routine_list.__len__())
                         calc_routine_list.remove(calc_routine)              # Remove the calc routine from the list if it didn't have errors
                         function.name = None
                 except ModelVariableEmptyValue as e:
-                    # Ignore when variable value has not been set
-                    #print("     Undefined inputs found in %s.  Will try again on next pass" % calc_routine.func_name)
                     pass
-                # except (SystemExit, SystemError, MemoryError, KeyboardInterrupt):
-                #     raise
-                #except Exception as e:
-                #    traceback.print_exc(file=sys.stdout)
-                #    print('DEBUG : ' + str(e))
-                #    raise e
                 finally:
                     function.name = None
 
-            #print("************** Pass complete with %d routines left ******************" % calc_routine_list.__len__())
 
             if num_calc_routines == calc_routine_list.__len__():
-                #We are finished calculating when the number of remaining calc routines is the same as we started with
-                #on this pass
 
                 modem_model.calc_routine_execution = dict()
 
@@ -744,29 +698,31 @@ class CalcManager(object):
 
                 for calc_routine_name in initial_calc_routine_name_list:
                     if calc_routine_name in final_calc_routine_name_list:
-                        #This means we failed to execute the routine
                         modem_model.calc_routine_execution[calc_routine_name] = False
                     else:
                         modem_model.calc_routine_execution[calc_routine_name] = True
 
                 break
 
-    def getPhys(self):
+    def getPhys(self, ip_category=IPCategory.LPW):
         """Returns a list of phys
+
+        Args:
+            ip_category (IPCategory): get phys belonging to this ip category (default=LPW)
 
         Returns:
            phyList (list) : List of Phy reference object functions
         """
-        phyList = self._getPhyFunctionList()
+        phyList = self._getPhyFunctionList(ip_category)
         return phyList
 
-    def _getPhyFunctionList(self):
+    def _getPhyFunctionList(self, ip_category):
         """Returns a list of all phy functions for part family and part revision
 
         Returns:
            list (list) : List of Phy reference object functions
         """
-        phy_class_list = self.__getPhyList()
+        phy_class_list = self.__getPhyList(ip_category)
         phy_function_list = []
         phy_name_list = []
         for phy_class in phy_class_list:
@@ -774,7 +730,6 @@ class CalcManager(object):
             for phy_function in phy_functions:
                 phy_function_name = phy_function.__name__
                 if (phy_function_name in phy_name_list) and (phy_function_name != '_phypass'):
-                    #Found a duplicate PHY definition, raise exception
                     raise Exception("Error! Found duplicate definition for %s" % phy_function_name)
                 else:
                     phy_function_list.append(phy_function)
@@ -782,23 +737,31 @@ class CalcManager(object):
 
         return phy_function_list
 
-    def __getPhyList(self):
+    def __getPhyList(self, ip_category):
         """Returns a list of all phys for part family and part revision
+
+        Args:
+            ip_category (IPCategory): IP category used as cache key (default = None)
 
         Returns:
            list (list) : List of Phy reference objects
         """
         if _ADVANCED_CACHE_EN and hasattr(self, '_phy_list_cache'):
-            return list(self._phy_list_cache)
+            if ip_category in self._phy_list_cache:
+                return list(self._phy_list_cache[ip_category])
         self.__verifyPartFamilyPartRevisionIsSet()
         part_family = self.__part_family
         part_revision = self.__part_revision
 
-        # Find all .py files for this family and revision in part revision
         import_path = self.getPartFamilyImportPath(part_family, "phys")
         phy_list = ClassManager.getClassListFromImportPath(import_path, IPhy)
+        if ip_category is not None:
+            phy_list = [phy for phy in phy_list if phy.ip_category == ip_category]
+
         if _ADVANCED_CACHE_EN:
-            self._phy_list_cache = phy_list
+            if not hasattr(self, '_phy_list_cache'):
+                self._phy_list_cache = {}
+            self._phy_list_cache[ip_category] = phy_list
         return phy_list
 
     def read_phy_into_profile(self, phy_name, modem_model):
@@ -811,36 +774,165 @@ class CalcManager(object):
         """
         phy = getattr(modem_model.phys, phy_name)
         profile_name = phy.profile_name
-        profile = self._findProfile(profile_name)
+        profile = self._findProfile(profile_name, modem_model.ip_category)
         if profile is not None:
             profile.buildProfileModel(modem_model)
 
         if phy is None:
-            phyFound = self._findPhy(phy_name)
+            phyFound = self._findPhy(phy_name, modem_model.ip_category)
             if not phyFound is None:
                 phyFound(modem_model)
 
-        # Load profile defaults into inputs
         profile_reference = getattr(modem_model.profiles, profile_name)
         for input in profile_reference.inputs:
-            # Do not load in default values for deprecated inputs (we want to leave as None if unused)
             if input.default is not None and input.deprecated == False:
                 input.var_value = input.default
 
-        # Assign Phy inputs to Profile Inputs
         for profile_input in phy.profile_inputs:
             variable = getattr(profile_reference.inputs, profile_input.var_name)
             value = profile_input.value
             if value is not None:
                 variable.var_value = value
 
-        # Assign Phy output overrides to Profile outputs overrides
         profile_reference = getattr(modem_model.profiles, profile_name)
         for profile_output in phy.profile_outputs:
             variable = getattr(profile_reference.outputs, profile_output.var_name)
             value = profile_output.override
             if value is not None:
                 variable.override = value
+
+    @staticmethod
+    def _copy_model_variables_from_phy(prod_model, phy_name):
+        """
+        Calculate a source PHY (or internal design PHY) and copy its resolved configuration into a prod PHY model.
+
+        Standard production profiles (like Profile_BLE,  Profile_IEEE802154_OQPSK, etc) are wrappers around existing
+        non-production design PHYs.  The prod profile decides which source PHY to point at using a profile_input (like
+        ble_feature. zigbee_feature, etc), but the source PHY (or internal design PHY) still needs to be calculated with
+        the prod model's current overrides so values such as crystal frequency, profile inputs, output overrides,
+        and directly-forced variables are reflected in the copied result.
+
+        This method builds a preview of the source PHY to determine which prod-model overrides
+        are valid for that source PHY, calculates the source PHY with those overrides, then copies
+        the calculated source profile inputs, output overrides, and forced model variables into
+        the prod model.  It also updates prod_model.phy.phy_points_to so generated output records
+        the non-production PHY backing the prod PHY.
+        """
+
+        calc_manager = CalcManager(part_family=prod_model.part_family, part_rev=prod_model.part_revision,
+                                   target=prod_model.target)
+
+        non_prod_phy_model_preview = calc_manager.create_modem_model_instance_and_load_phy(phy_name)
+        prod_model_overrides = CalcManager._get_phy_overrides_from_model(prod_model)
+        optional_inputs = CalcManager._filter_valid_phy_overrides(prod_model_overrides, non_prod_phy_model_preview)
+        prod_model_forced_values = CalcManager._get_model_forced_values(prod_model)
+
+        non_prod_phy_model = calc_manager.calc_config(phy_name, None, optional_inputs)
+
+        for non_prod_profile_input in non_prod_phy_model.profile.inputs:
+            model_var = getattr(prod_model.vars, non_prod_profile_input.var_name)
+            model_var.value_forced = non_prod_profile_input.var_value
+
+        for non_prod_profile_output in non_prod_phy_model.profile.outputs:
+            model_var = getattr(prod_model.vars, non_prod_profile_output.var_name)
+            if non_prod_profile_output.override is not None:
+                model_var.value_forced = non_prod_profile_output.override
+
+        for non_prod_model_var in non_prod_phy_model.vars:
+            if non_prod_model_var.value_forced is not None:
+                model_var = getattr(prod_model.vars, non_prod_model_var.name)
+                model_var.value_forced = non_prod_model_var.value
+
+        if prod_model.phy is not None:
+            prod_model.phy.phy_points_to = phy_name
+
+        CalcManager._set_model_forced_values(prod_model, prod_model_forced_values)
+
+    @staticmethod
+    def _get_phy_overrides_from_model(model) -> dict:
+        """
+        Extract all PHY calculation overrides currently represented in a model.
+
+        The extracted overrides are intentionally not filtered against another PHY model here.
+        This helper only performs the fundamental collection step, gathering values from:
+          - directly-forced model variables,
+          - populated profile inputs, and
+          - profile output overrides.
+
+        Returns:
+            dict: Override values keyed by model/profile variable name.
+        """
+        phy_overrides = dict()
+
+        for model_var in model.vars:
+            if model_var.value_forced is not None:
+                phy_overrides[model_var.name] = model_var.value_forced
+
+        if hasattr(model, 'profile'):
+            for profile_input in model.profile.inputs:
+                if profile_input.var_value is not None:
+                    phy_overrides[profile_input.var_name] = profile_input.var_value
+
+            for profile_output in model.profile.outputs:
+                if profile_output.override is not None:
+                    phy_overrides[profile_output.var_name] = profile_output.override
+
+        return phy_overrides
+
+    @staticmethod
+    def _filter_valid_phy_overrides(phy_overrides, phy_model) -> dict:
+        """
+        Filter model overrides down to the subset accepted by a specific PHY model.
+
+        Prod wrapper profiles can expose inputs that do not exist on the backing source PHY.
+        Passing those keys into calc_config() would raise InvalidOptionOverride.  This helper
+        keeps only overrides that can be loaded into phy_model through load_input_dictionary_into_model().
+
+        Args:
+            phy_overrides (dict): Candidate overrides keyed by model/profile variable name.
+            phy_model (ModelRoot): PHY model used to validate accepted override keys.
+
+        Returns:
+            dict: Overrides valid for phy_model, normalized for calc_config() optional_inputs.
+        """
+        valid_phy_overrides = dict()
+
+        for key, value in phy_overrides.items():
+            if CalcManager._is_valid_optional_input_for_model(phy_model, key):
+                valid_phy_overrides[key] = CalcManager._normalize_optional_input_value(value)
+
+        return valid_phy_overrides
+
+    @staticmethod
+    def _is_valid_optional_input_for_model(model, key):
+        key_upper = key.upper() if hasattr(key, 'upper') else key
+        return (hasattr(model.profile.inputs, key) or
+                hasattr(model.profile.outputs, key) or
+                hasattr(model.profile.outputs, key_upper) or
+                hasattr(model.vars, key))
+
+    @staticmethod
+    def _normalize_optional_input_value(value):
+        if isinstance(value, Enum):
+            return value.name
+
+        if isinstance(value, list):
+            return [CalcManager._normalize_optional_input_value(item) for item in value]
+
+        return value
+
+    @staticmethod
+    def _get_model_forced_values(model):
+        return {model_var.name: model_var.value_forced
+                for model_var in model.vars
+                if model_var.value_forced is not None}
+
+    @staticmethod
+    def _set_model_forced_values(model, forced_values):
+        for var_name, value_forced in forced_values.items():
+            model_var = getattr(model.vars, var_name)
+            model_var.value_forced = value_forced
+
 
     def set_public_log_flag(self, modem_model):
         """
@@ -871,28 +963,19 @@ class CalcManager(object):
 
         profile = modem_model.profile
 
-        # Fill profile inputs with default values if they are empty
         for input in profile.inputs:
-            # Do not load deprecated values into model
             if input.var_value is None and input.default is not None and input.deprecated == False:
                 input.var_value = input.default
 
-        # Call any profile specific calculate functions, prior to running all the calc functions
-        # This function is responsible for taking care of deprecating of input variables,
-        # converting profile inputs into more commonly used calculator inputs, or whatever.
         self._call_profile_calculate(modem_model)
 
-        # Assign user inputs from Profile to Variables, but skip deprecated Profile Inputs
-        # as they should have no direct impact on Model Variables
         for input in profile.inputs:
             if input.var_value is not None and input.deprecated == False:
                 variable = getattr(modem_model.vars, input.var_name)
                 variable.value_forced = input.var_value
 
-        # get register groups
         reg_groups = self.get_register_groups(modem_model.part_family)
 
-        # Validate each regex expression
         if reg_groups:
             regs_regex_found = {reg_group_regex for reg_group_list in reg_groups.values() for reg_group_regex in
                                 reg_group_list}
@@ -900,23 +983,19 @@ class CalcManager(object):
                 if len(reg_group_regex.split("_")) > 2:
                     raise InvalidRegexException(f"{reg_group_regex} is at the register field level (not allowed)")
 
-        # Assign user outputs from Profile to Variables
         for output in profile.outputs:
             if output.override is not None:
                 variable = getattr(modem_model.vars, output.var_name)
                 if (output.output_type is ModelOutputType.SVD_REG_FIELD) or (output.output_type is ModelOutputType.SEQ_REG_FIELD):
                     if output.override < 0:
-                        #Convert to 2s compliment and warn
                         field_width = variable.get_bit_width()
                         variable.value_forced = (1 << field_width) + output.override
                         LogMgr.Warning("Negative value for override of %s, assuming 2s compliment" % output.var_name)
                     else:
-                        # Use positive value
                         variable.value_forced = output.override
                 else:
                     variable.value_forced = output.override
 
-            # handle output groups
             if reg_groups:
                 group_found_for_output = False
                 for reg_group_name, reg_group_list in reg_groups.items():
@@ -928,19 +1007,13 @@ class CalcManager(object):
                             if reg_group_regex in regs_regex_found:
                                 regs_regex_found.remove(reg_group_regex)
 
-                # TODO: Temporary code for future use, to check if a register has been assigned a group
-                # TODO: This assert is not needed so long as a register output is allowed to not belong to any group.
                 if group_found_for_output is False and output.output_type in [ModelOutputType.SVD_REG_FIELD, ModelOutputType.SEQ_REG_FIELD]:
-                    # LogMgr.Warning('No group found for: {}'.format(output.var_name))
                     pass
 
         if reg_groups:
-            # Validate if every reg_regex in a group has been assigned at least 1 output (check for regex mistakes)
             if len(regs_regex_found) > 0:
                 LogMgr.Warning(f"WARNING: These regex did not find a register field match: {regs_regex_found}")
 
-        # Call any target specific calculate functions last (these overwrite all other settings)
-        # if not profile.skip_target_calculation:
         self._call_target_calculate(modem_model)
 
     def create_modem_model_instance(self, phy_name=None, profile_name=None, crystal_frequency=None):
@@ -963,27 +1036,42 @@ class CalcManager(object):
             >>> radio_configurator.calculateXMLInstance(model, output_path='c:/some_dir/output_instance.xml')
 
         """
+
+
         self.__verifyPartFamilyPartRevisionIsSet()
 
-        # Create empty modem model
         modem_model_instance = ModelRoot(self.__part_family, self.__MODEL_VER, self.__target, part_revision=self.__part_revision)
 
-        # Build features
         Features.build(modem_model_instance)
 
-        # Build calculator variables
-        calculators = self._getCalculatorsList()
+        ip_cat = IPCategory.LPW     # Defaults to LPW
+        if phy_name is not None:
+            phy = self._findPhy(phy_name, None)
+            if phy is None:
+                phy = self._findPhyGUID(phy_guid=phy_name, ip_category=None)
+            if phy is None:
+                raise Exception(
+                    'Phy %s is not available in the Radio Configurator for this part. Please use an available Phy.' % phy_name)
+            ip_cat = phy.__self__.ip_category
+        elif profile_name is not None:
+            ip_cat = self._findProfile(profile_name, None).ip_category
+            phy = None
+        else:
+            phy = None  # Theoretically this is not allowed, however unit tests supports phy_name = None and profile_name = None.
+
+        modem_model_instance.ip_category = ip_cat
+
+        calculators = self._getCalculatorsList(ip_category=ip_cat)
         for calculator in calculators:
             calculator().buildVariables(modem_model_instance)
 
         if profile_name is None:
-            # Populate all profiles, since we don't know which one the Phy will need yet
-            profiles = self.__getProfileList()
+            profiles = self.__getProfileList(ip_category=ip_cat)
             for profile in profiles:
-                profile().buildProfileModel(modem_model_instance)
+                if profile.ip_category == ip_cat:
+                    profile().buildProfileModel(modem_model_instance)
         else:
-            # Only make the profile needed
-            profile = self._findProfile(profile_name)
+            profile = self._findProfile(profile_name, ip_cat)
             if profile is not None:
                 profile.buildProfileModel(modem_model_instance)
             else:
@@ -992,28 +1080,18 @@ class CalcManager(object):
         if crystal_frequency is not None:
             self.load_crystal_frequency_into_model_inputs(modem_model_instance, crystal_frequency)
 
-        # Find and build phy
-        if phy_name is not None:
-            phy = self._findPhy(phy_name)
-            if not phy is None:
-                phy(modem_model_instance)
-            else:
-                phy = self._findPhyGUID(phy_guid=phy_name)
-                if not phy is None:
-                    phy(modem_model_instance)
-                    phy_name = modem_model_instance.phy.name  # phy.__name__
+        if phy is not None:
+            phy(modem_model_instance)
+            phy_name = modem_model_instance.phy.name  # For PHYs defined by GUID, this step converts phy_name to readable stirng
 
             if profile_name is None:
-                # Hack to remove profiles we don't need for this phy
                 phy_object = getattr(modem_model_instance.phys, phy_name)
                 profile_name = phy_object.profile_name
                 modem_model_instance.profiles.clear()
-                profile = self._findProfile(profile_name)
+                profile = self._findProfile(profile_name, ip_cat)
                 if profile is not None:
                     profile.buildProfileModel(modem_model_instance)
 
-        # Add default pnys
-        #self._buildDefaultPhys(modem_model_instance)
 
         return modem_model_instance
 
@@ -1023,52 +1101,68 @@ class CalcManager(object):
         import_path = self.getPartFamilyImportPath(part_family, "ip_collector")
         return ClassManager.verify_ip_based_part(import_path)
 
+    def get_all_ip_cats_in_part(self):
 
-    def create_modem_model_type(self):
+        """
+        Get all ip categories available with a part
+
+        Returns:
+            ip_cats (set) : Set of all ip categories found in part based on profiles.
+        """
+
+        ip_cats = set()
+        part_family = self.__part_family
+        profile_list = self.__getProfileListPartFamily(part_family)
+        for profile in profile_list:
+             ip_cats.add(profile().ip_category)
+
+        return ip_cats
+
+    def create_modem_model_type(self, ip_category=IPCategory.LPW):
         """Creates a type model for current part family and revision
+
+        Args:
+            ip_category (IPCategory): IP category for model type generation (default=IPCategory.LPW)
 
         Returns:
             modem_model (ModelRoot) : Data model type (lists all phys, profiles, varaibles, etc...)
         """
         self.__verifyPartFamilyPartRevisionIsSet()
 
-        # Create empty modem model
-        modem_type_model = ModelRoot(self.__part_family, self.__MODEL_VER, target=self.__target, part_revision=self.__part_revision)
+        modem_type_model = ModelRoot(self.__part_family, self.__MODEL_VER, target=self.__target, part_revision=self.__part_revision, ip_category=ip_category)
 
-        # Build features
         Features.build(modem_type_model)
 
-        # Build calculator variables
-        calculators = self._getCalculatorsList()
+        calculators = self._getCalculatorsList(ip_category=ip_category)
         for calculator in calculators:
             calculator().buildVariables(modem_type_model)
 
-        # Build model with all profiles
-        profiles = self.__getProfileList()
+        profiles = self.__getProfileList(ip_category=ip_category)
         for profile in profiles:
-            profile().buildProfileModel(modem_type_model)
+            if profile.ip_category == ip_category:
+                profile().buildProfileModel(modem_type_model)
 
-        # Build model with all phys
-        phys = self._getPhyFunctionList()
+        phys = self._getPhyFunctionList(ip_category)
         for phy in phys:
-            phy(modem_type_model)
+            if phy.__self__.ip_category == ip_category:
+                phy(modem_type_model)
 
-        # Add default pnys
         self._buildDefaultPhys(modem_type_model)
 
         return modem_type_model
 
-    def _findPhy(self, phy_name):
+    def _findPhy(self, phy_name, ip_category):
         """Finds phy for phy_name, version, part_family, part_revision
 
         Args:
             phy_name (str) : PHY name to find
+            ip_category (IPCategory): IP category used as cache key
 
         Returns:
             phy_function (function) : PHY function reference
         """
         phyFound = False
-        phyList = self.__getPhyList()
+        phyList = self.__getPhyList(ip_category)
         for phy in phyList:
             phy_functions = phy().getPhyList()
             for phy_function in phy_functions:
@@ -1094,34 +1188,22 @@ class CalcManager(object):
         """
 
         profile_name = model_profile.name
-        profile = self._findProfile(profile_name)
+        profile = self._findProfile(profile_name, modem_model.ip_category)
         if profile is not None:
             profile.buildProfileModel(modem_model)
 
         profile_new = getattr(modem_model.profiles, profile_name)
-        # Copy over input values
         for input in model_profile.inputs:
             if input.var_value is not None:
                 input_new = getattr(profile_new.inputs, input.var_name)
                 input_new.var_value = input.var_value
 
-        # Copy over output overrides
         for output in model_profile.outputs:
             if output.override is not None:
                 output_new = getattr(profile_new.outputs, output.var_name)
                 output_new.override = output.override
 
-        # Assign user inputs from Model Profile to Variables
-        #for input in profile_new.inputs:
-        #    if input.var_value is not None:
-        #        variable = getattr(modem_model.vars, input.var_name)
-        #        variable.value_forced = input.var_value
 
-        # Assign user outputs from Model Profile to Variables
-        #for output in profile_new.outputs:
-        #    if output.override is not None:
-        #        variable = getattr(modem_model.vars, output.var_name)
-        #        variable.value_forced = output.override
 
     def __verifyPartFamilyPartRevisionIsSet(self):
         """Verifies part family and revision is set
@@ -1140,7 +1222,7 @@ class CalcManager(object):
             raise Exception("Invalid Part family = {}!".format(self.__part_family))
         return True
 
-    def getPhyNames(self):
+    def getPhyNames(self, ip_category=IPCategory.LPW):
         """Gets a list of PHY names
 
         Returns:
@@ -1148,7 +1230,7 @@ class CalcManager(object):
         """
 
         phy_names = list()
-        for phy in self.getPhys():
+        for phy in self.getPhys(ip_category):
             phy_names.append(phy.__name__)
 
         return phy_names
@@ -1193,15 +1275,12 @@ class CalcManager(object):
 
         result_code, error_message = self.execute_calc_fuctions(model_instance)
 
-        ## Runtime post-calculation set of public log flag
         self.set_public_log_flag(model_instance)
 
-        ## Runtime post-calculation validation ##
         output_error_list, output_errorstr = ModelChecking.check_all_profile_outputs_calculated(model_instance)
         regexist_error_list, bitwidth_error_list, reg_errorstr = ModelChecking.check_regs(model_instance)
         calc_error_list, calc_errorstr = ModelChecking.check_all_calcs_ran(model_instance)
 
-        # Raise exception if model checking fails
         try:
             assert (len(output_error_list), len(regexist_error_list), len(bitwidth_error_list), len(calc_error_list))\
                    == (0, 0, 0, 0)
@@ -1214,7 +1293,6 @@ class CalcManager(object):
     def calculate_phy(self, phy_name=None, optional_inputs=None):
         if optional_inputs is None: optional_inputs = dict()
 
-        ## Get crystal frequency here for early calculation of concurrent PHYs
         crystal_frequency = optional_inputs.get('xtal_frequency_hz', None)
         model_instance = self.create_modem_model_instance_and_load_phy(phy_name, crystal_frequency=crystal_frequency)
 
@@ -1230,10 +1308,8 @@ class CalcManager(object):
                 LogMgr.Info('Loading {} from STATIC PHY.'.format(phy_name))
                 model_instance = ModelRootInstanceXml(static_phy_path)
             else:
-                # No static file found, going to try and calculate and save to XML
                 result_code, error_message = self.calculate(model_instance)
                 Static_TimeStamp_XML.print_modem_model_values_xml(static_phy_path, phy_name, model_instance)
-                # TODO: Add hash or checksum generation here
 
             model_instance = self.load_input_dictionary_into_model(model_instance, optional_inputs)
 
@@ -1271,7 +1347,6 @@ class CalcManager(object):
         if inputs is None: inputs = dict()
         for key, value in inputs.items():
             if hasattr(model_instance.profile.inputs, key):
-                # process option inputs into profile inputs
                 input = getattr(model_instance.profile.inputs, key)
 
                 if model_instance.phy and model_instance.phy.locked and value is not None and input.var_value != value:
@@ -1316,7 +1391,6 @@ class CalcManager(object):
         """
         if optional_inputs is None: optional_inputs = dict()
 
-        # Force path to end with "/"
         output_dir = os.path.normpath(output_dir) + os.sep
 
         cfg_location, store_config_output = self.getTargetCFGInfo()
@@ -1355,31 +1429,21 @@ class CalcManager(object):
         """
         if optional_inputs is None: optional_inputs = dict()
 
-        # Load instance model with phy variables
-        # call top level calculator function
         model_instance = self.calculate_phy(phy_name, optional_inputs)
 
         if bool(optional_inputs):
-            # Not an empty dictionary of optional input overrides
-            #optional_filename = optional_filename + "_with_input_overrides"
             comment = phy_name + " instance with overrides"
         else:
             comment = phy_name + " instance"
 
         if model_instance.result_code != CalcStatus.Failure.value and output_path is not None:
-            # print the results to a .cfg file
             self.processed_model_to_cfg(model_instance, output_path, model_instance.phy.name, show_do_not_care=show_do_not_care)
 
-            # Now look for variables that were forced unnecessarily
             output_lines = Human_Readable.compare_forced_to_calculated(model_instance)
 
-            # enable following lines to see settings for which forced values match calculated ones
-            # print('\n'.join(map(str,output_lines)))
 
-            # print to XML file
             Static_TimeStamp_XML.print_modem_model_values_xml(output_path, model_instance.phy.name, model_instance, comment)
         else:
-            # Some error happened, letting that bubble up
             pass
 
         return model_instance
@@ -1401,15 +1465,12 @@ class CalcManager(object):
         model_instance = self.create_modem_model_instance(phy_name=None, profile_name=profile_name)
         model_instance = self.load_input_dictionary_into_model(model_instance, optional_inputs)
 
-        # Run calculations
         result_code, error_message = self.calculate(model_instance)
 
         if model_instance.result_code != CalcStatus.Failure.value:
             if output_file_path is not None:
-                # Create output instance XML
                 self.convert_model_instance_to_XML(model_instance, output_file_path, phy_name = None, profile_name = profile_name)
         else:
-            # Some error happened, letting that bubble up
             return model_instance
 
         return model_instance
@@ -1468,7 +1529,6 @@ class CalcManager(object):
         include_set = frozenset(phy_group_to_include)
         filtered_phy_group_names = [phy.group_name for phy in model.phys if phy.group_name in include_set]
 
-        # Hack fix: If no PHY's are found, then return a warning entry
         if not filtered_phy_group_names:
             filtered_phy_group_names.append("NO PHYS FOUND!")
 
@@ -1486,7 +1546,6 @@ class CalcManager(object):
         part_family = self.__part_family
         part_revision = self.__part_revision
 
-        # Find all .py files for this family and revision in part revision
         import_path = self.getPartFamilyImportPath(part_family, "filters")
         classlist = ClassManager.getClassListFromImportPath(import_path, IPhyFilter)
         if _ADVANCED_CACHE_EN:
@@ -1519,7 +1578,6 @@ class CalcManager(object):
         if _ADVANCED_CACHE_EN:
             self._phy_groups_cache[phy_filter_group_types] = filterList
             if len(self._phy_groups_cache) > _PHY_GROUPS_CACHE_MAXSIZE:
-                # Evict least-recently-used key.
                 self._phy_groups_cache.popitem(last=False)
         return filterList
 
@@ -1581,6 +1639,14 @@ class CalcManager(object):
         """
         return self._get_phy_groups(PhyFilterGroupTypes.simplicity_studio_phys)
 
+    def get_simplicity_studio_non_ui_phy_groups(self):
+        """Gets list of backend PHY groups required at Studio calculation time but not shown in the Studio wizard UI.
+
+        Returns:
+            filterList (list) : List of PHY group names
+        """
+        return self._get_phy_groups(PhyFilterGroupTypes.simplicity_studio_non_ui_phys)
+
     def get_non_functional_phy_groups(self):
         """Gets list non-functional PHYs
 
@@ -1610,7 +1676,6 @@ class CalcManager(object):
         """
         default_phy_list = []
 
-        # Import profile modules and classes
         import_path = self.getPartFamilyImportPath(self.part_family, "phys")
         default_phy_list = ClassManager.getClassListFromImportPath(import_path, IDefaultPhy)
 
@@ -1638,18 +1703,15 @@ class CalcManager(object):
         model_instance.to_instance_xml(output_file, self.__part_revision, desc, True, result_code, error_message, profile, phy)
 
     def convert_isc_to_cfg(self, isc_filename, xml_filename, cfg_filename):
-        # Create ISC Parser
         isc = ImportISCFiles()
         inputs = isc.parse_file(isc_filename)
 
-        # Create model and fill with ISC file values
         if (isc.phy is not None) and (isc.phy != 'Custom settings') and (isc.phy != 'Custom_settings'):
             model_instance = self.calc_config('PHY_' + isc.phy, xml_filename, inputs)
         else:
             model_instance = self.calc_config_profile(isc.profile, xml_filename, inputs)
         Human_Readable.print_modem_model_values_v2(cfg_filename, None, model_instance)
 
-        # print out example profile python code
         profile = model_instance.profile
         for input in profile.inputs:
             if input._var.var_type is Enum:
@@ -1672,20 +1734,17 @@ class CalcManager(object):
 
 
     def convert_model_to_isc_section(self, model_instance, isc_filename = None):
-        # Create ISC Parser
         isc = ImportISCFiles()
         output_string = isc.export_modem_model_to_isc_section(model_instance, isc_filename)
         return output_string
 
     def _call_profile_calculate(self, model_instance):
         profile_name = model_instance.profile.name
-        profile = self._findProfile(profile_name)
+        profile = self._findProfile(profile_name, model_instance.ip_category)
 
         if hasattr(profile, "profile_calculate"):
             profile.profile_calculate(model_instance)
         else:
-            # we could ignore this, but I'd like to make sure each profile has a placeholder routine to allow
-            # compatiblity functions to be added in case inputs become deprecated.
             raise Exception('Profile {} does not have a profile_calculate() function.'.format(profile_name))
 
     def check_phy_has_tag(self, phy_name, tag, model=None):
@@ -1694,8 +1753,6 @@ class CalcManager(object):
         if model is None:
             model = self.create_modem_model_instance(phy_name=phy_name)
 
-        #Try to access the PHY from the model.phys object (exists in types model as well)
-        #If that fails then assume a populated model for a specific PHY (required to support GUIDs)
         try:
             phy = getattr(model.phys, phy_name)
         except:
@@ -1738,15 +1795,108 @@ class CalcManager(object):
 
     @staticmethod
     def get_list_of_parts_supported(incl_unit_test_part=False):
-        parts_list = []
-        exclude_list = ['common', 'wifi74000', 'lpw74010', 'lpwlo74010', 'lpwln74010']
-        if not incl_unit_test_part:
-            exclude_list.append('unit_test_part')
-        parts_location = os.path.dirname(parts.__file__)
-        for dirname in os.listdir(parts_location):
-            if not dirname.startswith('_') and dirname not in exclude_list:
-                parts_list.append(dirname)
+        """Get list of supported parts based on distribution whitelist.
+        
+        Starts with get_distribution_whitelisted_parts() and removes 'common'.
+        Optionally includes or excludes 'unit_test_part' based on incl_unit_test_part parameter.
+        
+        Args:
+            incl_unit_test_part (bool): If True, include unit_test_part (add if not present).
+                                       If False, remove unit_test_part if present. (default: False)
+        
+        Returns:
+            list: List of supported part family names
+        """
+        parts_list = CalcManager.get_distribution_whitelisted_parts()
+        
+        if 'common' in parts_list:
+            parts_list.remove('common')
+        
+        if incl_unit_test_part:
+            if 'unit_test_part' not in parts_list:
+                parts_list.append('unit_test_part')
+        else:
+            if 'unit_test_part' in parts_list:
+                parts_list.remove('unit_test_part')
+        
         return parts_list
+
+    @staticmethod
+    def get_list_of_all_parts() -> list:
+        """Return all part family directory names under the parts package.
+
+        Unlike get_list_of_parts_supported, this method has no hardcoded exclusion list.
+        Every subdirectory that does not start with '_' is returned, so inclusion/
+        exclusion is entirely governed by each part's included_in_distribution_release flag.
+
+        Returns:
+            list: Sorted lowercase part family names.
+        """
+        parts_location = os.path.dirname(parts.__file__)
+        return sorted(
+            dirname
+            for dirname in os.listdir(parts_location)
+            if not dirname.startswith('_')
+        )
+
+    @staticmethod
+    def get_distribution_whitelisted_parts() -> list:
+        """Return part family names where included_in_distribution_release is True.
+
+        Returns:
+            list: Lowercase part family names included in the distribution release,
+                  in the same order as get_list_of_all_parts().
+        """
+        whitelisted = []
+        for part_family in CalcManager.get_list_of_all_parts():
+            import_path = "pyradioconfig.parts.{}.filters".format(part_family)
+            try:
+                classlist = ClassManager.getClassListFromImportPath(import_path, IPhyFilter)
+            except Exception:
+                continue
+            if any(filter_cls().included_in_distribution_release for filter_cls in classlist):
+                whitelisted.append(part_family)
+        return whitelisted
+
+    @staticmethod
+    def get_distribution_whitelisted_ip_module_entries() -> set:
+        """Return the exact IP module subdirectory entries needed for whitelisted parts.
+
+        Discovers ip_collector classes for each whitelisted part (without instantiating
+        the full IPCollector_Base constructor, so no RM_Factory dependency) and collects
+        the peripherals declared in build_peripherals().
+
+        Returns:
+            set: Tuples of (category, ip_name, version, subdir) where:
+                 - category  : 'lpw', 'wifi', or 'common'
+                 - ip_name   : e.g. 'hadm'
+                 - version   : zero-padded version string, e.g. '01'
+                 - subdir    : 'prod_01' for PROD parts, or the part_family name for DEV parts
+        """
+        entries = set()
+        for part_family in CalcManager.get_distribution_whitelisted_parts():
+            import_path = "pyradioconfig.parts.{}.ip_collector".format(part_family)
+            try:
+                classlist = ClassManager.getClassListFromImportPath(import_path, IPCollector_Base)
+            except Exception:
+                continue  # part has no ip_collector — uses legacy calc architecture
+            for collector_cls in classlist:
+                collector = collector_cls.__new__(collector_cls)
+                collector.perip_dict = {}
+                collector._category_matches = lambda cat: True
+                collector.build_peripherals()
+                for periph in collector.perip_dict.values():
+                    if periph.prod_rev is not None:
+                        subdir = "prod_{}".format(periph.prod_rev)
+                    else:
+                        subdir = part_family  # DEV: subdir is named after the part family
+                    entries.add((
+                        periph.category.name.lower(),
+                        periph.ip_name,
+                        periph.ip_version,  # already zero-padded, e.g. '01'
+                        subdir,
+                    ))
+        return entries
 
     def _call_target_calculate(self, model_instance):
         target_name = model_instance.target
@@ -1782,7 +1932,6 @@ class CalcManager(object):
         try:
             targetlist = self.__getTargetListFromImport()
 
-            # Validate that we actually got targets
             if targetlist is None or len(targetlist) == 0:
                 import_path = self.getPartFamilyImportPath(self.part_family, "targets")
                 raise ValueError(
@@ -1803,7 +1952,6 @@ class CalcManager(object):
             raise
 
         except ValueError as ve:
-            # Empty targets directory or no valid modules
             LogMgr.Error(str(ve))
             raise
 
@@ -1842,7 +1990,6 @@ class CalcManager(object):
                     if len(name) > 0:
                         target_name_list.append(name)
         except Exception as e:
-            # Re-raise with context - __getTargetList already logged the error
             raise RuntimeError(
                 f"Failed to get target list for part family '{self.part_family}'. Make sure the targets module "
                 f"is properly defined and contains valid target classes. Error: {e}"
@@ -1861,10 +2008,8 @@ class CalcManager(object):
             ImportError: If import fails
             ValueError: If directory is empty or invalid
         """
-        # Import profile modules and classes
         import_path = self.getPartFamilyImportPath(self.part_family, "targets")
 
-        # Validate directory structure before attempting import
         self.__validateTargetsDirectory(import_path)
 
         target_list = ClassManager.getClassListFromImportPath(import_path, ITarget)
@@ -1883,25 +2028,18 @@ class CalcManager(object):
             ValueError: If directory is empty
         """
 
-        # Convert import path to file system path
-        # e.g., 'pyradioconfig.parts.dumbo.targets' -> 'pyradioconfig/parts/dumbo/targets'
         relative_path = import_path.replace('.', os.sep)
 
-        # Find the base path (where pyradioconfig package is)
-        # parts.__file__ is at pyradioconfig/parts/__init__.py, so go up one level
         base_path = os.path.dirname(os.path.dirname(parts.__file__))
 
-        # Construct full path
         targets_dir = os.path.join(os.path.dirname(base_path), relative_path)
 
-        # Check if directory exists
         if not os.path.exists(targets_dir):
             raise ImportError(
                 f"Targets directory does not exist for part family '{self.part_family}' at '{targets_dir}'. "
                 f"Expected path: {import_path}"
             )
 
-        # Check if __init__.py exists
         init_file = os.path.join(targets_dir, '__init__.py')
         if not os.path.exists(init_file):
             raise ImportError(
@@ -1911,7 +2049,6 @@ class CalcManager(object):
                 f"__all__ = ClassManager.getModuleNamesFromPath(__file__)'"
             )
 
-        # Check if directory has any .py files besides __init__.py
         py_files = [f for f in os.listdir(targets_dir)
                    if f.endswith('.py') and f != '__init__.py' and not f.startswith('__pycache__')]
 
@@ -1922,7 +2059,6 @@ class CalcManager(object):
             )
 
     def getTargetCFGInfo(self):
-        #Return the CFG output path and whether or not we track config output for this target
         target = self._findTarget(self.target)
         if target is not None:
             return target().getCFGInfo()
@@ -1930,7 +2066,6 @@ class CalcManager(object):
             return None
 
     def getTargetTag(self):
-        # Return the target tag
         target = self._findTarget(self.target)
         if target is not None:
             return target().getTargetTag()
@@ -1947,7 +2082,6 @@ class CalcManager(object):
     def check_phy_supported_on_target(self, phy_name, target_tag=None, model=None):
 
         if target_tag is None:
-            #This can be retrieved automatically but there is a performance penalty
             target_tag = self.getTargetTag()
 
         blacklist_tag = "-"+target_tag
@@ -1957,17 +2091,18 @@ class CalcManager(object):
         else:
             return True
 
-    def _findPhyGUID(self, phy_guid):
+    def _findPhyGUID(self, phy_guid, ip_category):
         """Finds phy for phy_guid, version, part_family, part_revision
 
         Args:
             phy_guid (str) : PHY GUID to find
+            ip_category (IPCategory): IP category used as cache key
 
         Returns:
             phy_function (function) : PHY function reference
         """
         phyFound = False
-        phyList = self.__getPhyList()
+        phyList = self.__getPhyList(ip_category)
         for phy in phyList:
             phy_functions = phy().getPhyList()
             for phy_function in phy_functions:
@@ -1983,27 +2118,28 @@ class CalcManager(object):
         else:
             return None
 
-    def findPHYNameFromGUID(self, phy_guid):
-        phy_func = self._findPhyGUID(phy_guid)
+    def findPHYNameFromGUID(self, phy_guid, ip_category=IPCategory.LPW):
+        phy_func = self._findPhyGUID(phy_guid, ip_category)
         if phy_func is not None:
             phy_name = phy_func.__name__
         else:
             phy_name = None
         return phy_name
 
-    def calc_config_phy_guid(self, phy_guid, output_path, optional_inputs=None, show_do_not_care=True):
+    def calc_config_phy_guid(self, phy_guid, output_path, ip_category=IPCategory.LPW, optional_inputs=None, show_do_not_care=True):
         """Run the calculator and generate the calculated outputs for a single PHY guid
 
         Args:
             phy_guid (str) : PHY GUID to run through the calculator.
             output_path (str) : Full path to output file
+            ip_category (IPCategory): IP category used for PHY lookup
             optional_inputs (dict) : Dictionary of input values.  Key is var_name and Value is var_value [Optional Input].
 
         Returns:
             model_instance (ModelRoot) : calculated data model instance
         """
 
-        phy_name = self.findPHYNameFromGUID(phy_guid)
+        phy_name = self.findPHYNameFromGUID(phy_guid, ip_category)
         if phy_name is not None:
             model_instance = self.calc_config(phy_name, output_path, optional_inputs, show_do_not_care)
         else:
@@ -2011,7 +2147,6 @@ class CalcManager(object):
         return model_instance
 
     def __override_profile_output(self, model_instance, key, value):
-        # process option inputs into profile output overrides
         output = getattr(model_instance.profile.outputs, key)
         output.override = self.__variable_value_type_cast(output._var, value)
 
@@ -2035,7 +2170,6 @@ class CalcManager(object):
             else:
                 LogMgr.Warning("Unable to import PhyGroups() from modules: {}".format(reg_path))
         except (ImportError, AttributeError) as ie:
-            # LogMgr.Warning("Unable to import modules: {}".format(ie))
             pass
         return reg_groups
 
@@ -2054,7 +2188,6 @@ class CalcManager(object):
         if variable.var_type != Enum:
             return (variable.var_type)(value)
         
-        #variable is an Enum
         if isinstance(value, basestring):
             if value.isdigit():
                 value = int(value)

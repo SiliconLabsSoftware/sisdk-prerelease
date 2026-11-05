@@ -1,12 +1,15 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from pyradioconfig.calculator_model_framework.interfaces.iphy import ModelPhy
+from pycalcmodel.core.common import IPCategory
 
 
 class Phys_Studio_Sigfox_Tx_Ocelot(IPhy):
 
+    ip_category = IPCategory.LPW
+
     def __configure_sigfox_tx_channel(self, phy: ModelPhy):
         phy.profile_inputs.syncword_tx_skip.value = True
-        phy.profile_inputs.xtal_frequency_hz.value = 39_000_000
+        self._set_xtal_frequency(phy, xtal_freq_hz=39000000)
         phy.profile_inputs.channel_spacing_hz.value = 100
         phy.profile_inputs.fixed_length_size.value = 16
         phy.profile_inputs.chcfg_channel_number_start.value = 0

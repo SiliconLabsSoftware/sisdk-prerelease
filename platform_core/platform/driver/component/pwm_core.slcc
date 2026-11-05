@@ -27,10 +27,13 @@ include:
 provides:
 - name: pwm_core
 requires:
+- name: log_none
 - name: hal_generic_timer
 - name: clock_manager_runtime
 - name: device_manager
 - name: gpio
+- name: gpio_peripheral_pin_latching
+  condition: [device_has_no_deepsleep_retention]
 - name: hal_generic_common
 - name: status
 - name: enum

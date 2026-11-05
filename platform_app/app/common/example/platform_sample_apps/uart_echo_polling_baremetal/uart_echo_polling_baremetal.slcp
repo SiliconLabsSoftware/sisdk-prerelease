@@ -1,0 +1,45 @@
+project_name: uart_echo_polling_baremetal
+package: platform_app
+quality: production
+label: Platform - UART Polling Echo Baremetal
+description: >
+  Demonstrates a polling UART echo with optional RTS/CTS hardware flow control.
+  The application repeatedly checks the receive FIFO and sends each received
+  byte back to the sender. This is suitable for simple, low-throughput
+  transfers where the CPU can continuously poll the UART.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+source:
+  - path: app.c
+  - path: app_uart_echo.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: app_uart_echo.h
+component:
+  - id: sl_main
+  - id: device_init
+  - id: clock_manager
+  - id: uart_eusart
+    instance: [vcom]
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+define:
+  - name: UART_TEST_HANDLE
+    value: sl_uart_eusart_vcom_handle
+  - name: DEBUG_EFM
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - hwfilter:device:device_has_euart
+  - hwfilter:board:hardware_board_has_vcom

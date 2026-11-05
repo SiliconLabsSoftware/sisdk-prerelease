@@ -5,6 +5,9 @@ description: >
   This component defines the board capabilities for Z-Wave applications. This helps the project
   to determine which features are available on the board, such as having an RGB LED on the board.
   This component only provides definitions and does not include any source files.
+documentation:
+  docset: z-wave
+  document: zwave-api/apps-hw
 package: zwave
 quality: production
 metadata:

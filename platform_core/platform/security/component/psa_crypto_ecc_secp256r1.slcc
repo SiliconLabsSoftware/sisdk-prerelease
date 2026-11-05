@@ -20,12 +20,8 @@ template_contribution:
 - name: psa_crypto_builtin_config
   value: "MBEDTLS_PSA_BUILTIN_ECC_SECP_R1_256 1"
   condition: [mbedtls_ecc_secp256r1]
-- name: psa_crypto_config
-  value: MBEDTLS_ECP_DP_SECP256R1_ENABLED
-  condition: [mbedtls_uses_psa_crypto]
 - name: mbedtls_mpi_max
   value: 32
-  condition: [mbedtls_uses_psa_crypto]
 documentation:
   url: https://arm-software.github.io/psa-api/crypto/1.2/api/keys/types.html#c.PSA_ECC_FAMILY_SECP_R1
 metadata:

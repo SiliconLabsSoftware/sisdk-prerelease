@@ -225,6 +225,57 @@ TEST(cpc_api, init_then_close_rejects_unopened_ep)
   cpc_test_ep_discard(&ep);
 }
 
+TEST(cpc_api, deinit_succeeds_after_init_without_open)
+{
+  sl_status_t status;
+  sl_cpc_ep_t ep;
+
+  status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, api_event_cb, NULL);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
+
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, sl_cpc_ep_deinit(&ep));
+}
+
+TEST(cpc_api, deinit_succeeds_when_attached_but_never_opened)
+{
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+  sl_status_t status;
+  sl_cpc_ep_t ep;
+
+  status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, api_event_cb, NULL);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
+
+  // Control bring-up attaches before connect/listen; connect may fail with the
+  // endpoint still CLOSED and only the attach-list reference held.
+  status = sli_cpc_ep_attach(&ep, bus);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
+  TEST_ASSERT_EQUAL(1, ep.ref_cnt);
+  TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSED, ep.state);
+
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, sl_cpc_ep_deinit(&ep));
+  TEST_ASSERT_NULL(ep.bus);
+  TEST_ASSERT_EQUAL(0, ep.ref_cnt);
+}
+
+TEST(cpc_api, deinit_rejects_while_endpoint_open)
+{
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+  sl_status_t status;
+  sl_cpc_ep_t ep;
+
+  status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, api_event_cb, NULL);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
+
+  status = sl_cpc_ep_listen(&ep, bus);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
+
+  TEST_ASSERT_EQUAL(SL_STATUS_INVALID_STATE, sl_cpc_ep_deinit(&ep));
+
+  sl_cpc_ep_close(&ep);
+  cpc_test_pump(bus);
+  cpc_test_ep_discard(&ep);
+}
+
 TEST(cpc_api, init_rejects_missing_event_callback)
 {
   sl_status_t status;
@@ -1042,6 +1093,9 @@ TEST_GROUP_RUNNER(cpc_api)
   RUN_TEST_CASE(cpc_api, init_rejects_rx_size_above_max_payload);
   RUN_TEST_CASE(cpc_api, init_rejects_unaligned_rx_size);
   RUN_TEST_CASE(cpc_api, init_then_close_rejects_unopened_ep);
+  RUN_TEST_CASE(cpc_api, deinit_succeeds_after_init_without_open);
+  RUN_TEST_CASE(cpc_api, deinit_succeeds_when_attached_but_never_opened);
+  RUN_TEST_CASE(cpc_api, deinit_rejects_while_endpoint_open);
   RUN_TEST_CASE(cpc_api, init_rejects_missing_event_callback);
   RUN_TEST_CASE(cpc_api, push_recv_buf_rejects_NULL_buffer);
   RUN_TEST_CASE(cpc_api, push_recv_buf_rejects_NULL_data_ptr);

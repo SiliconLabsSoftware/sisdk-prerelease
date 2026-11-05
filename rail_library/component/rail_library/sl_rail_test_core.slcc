@@ -43,6 +43,13 @@ requires:
   condition:
   - device_generic_family_sixx353
 
+- name: sl_rail_util_dual_pa
+  condition:
+  - device_sdid_220
+- name: sl_rail_util_dual_pa
+  condition:
+  - device_sdid_245
+
   # emlib
 - name: emlib_rmu
   condition:
@@ -2423,7 +2430,6 @@ template_contribution:
     - type: uint32
       help: VDET delay in us. Min of 5, max of 100,000
   condition:
-  - device_sdid_220
   - sl_rail_util_vdet
 
 - name: cli_command
@@ -2432,7 +2438,6 @@ template_contribution:
     handler: getVdetConfig
     help: ' Get the VDET plugin configuration'
   condition:
-  - device_sdid_220
   - sl_rail_util_vdet
 
 - name: cli_command

@@ -4,21 +4,18 @@ This test bypasses the full pycalcmodel infrastructure to test just the core fun
 """
 import sys
 
-# Python 2/3 compatibility
 if sys.version_info[0] >= 3:
     basestring = str
     long = int
 
 def test_dict_in_supported_types():
     """Test that dict is in the supported types tuple"""
-    # This mirrors the check from variable.py line 102
     supported_types = (basestring, bool, complex, float, int, long, str, dict)
     assert dict in supported_types
     print("dict is in supported types")
 
 def test_dict_type_string():
     """Test that dict returns correct type string"""
-    # This mirrors the logic from _get_type_str method
     test_types = (bool, complex, float, int, long, dict)
     
     for var_type in test_types:
@@ -32,20 +29,16 @@ def test_dict_xml_conversion():
     """Test dict XML conversion using ast.literal_eval"""
     import ast
     
-    # Test single dict
     test_dict = {'key1': 'value1', 'key2': 42}
     dict_str = str(test_dict)
     
-    # Test serialization (to XML string)
     xml_values = [dict_str]
     print(f"Dict serialized to: {xml_values}")
     
-    # Test deserialization (from XML string) 
     recovered_dict = ast.literal_eval(xml_values[0])
     assert recovered_dict == test_dict
     print("Dict XML round trip works")
     
-    # Test array of dicts
     test_dicts = [{'a': 1}, {'b': 2}]
     dict_strs = [str(d) for d in test_dicts]
     

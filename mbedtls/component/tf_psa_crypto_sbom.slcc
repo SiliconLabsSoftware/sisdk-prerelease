@@ -12,7 +12,7 @@ metadata:
     license: "Apache-2.0"
     upstream:
       name: "TF-PSA-Crypto"
-      version: "1.1.0"
+      version: "1.1.1"
       supplier: "Trusted Firmware"
       url: "https://github.com/Mbed-TLS/TF-PSA-Crypto.git"
       comment: >

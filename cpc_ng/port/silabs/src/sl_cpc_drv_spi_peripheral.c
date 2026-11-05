@@ -101,15 +101,15 @@ static uint8_t rx_dummy_byte;
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 
-static inline sl_cpc_drv_spi_peripheral_t *to_drv(sl_cpc_bus_t *bus)
+static inline struct sl_cpc_drv_spi_peripheral *to_drv(sl_cpc_bus_t *bus)
 {
-  return container_of(bus, sl_cpc_drv_spi_peripheral_t, bus);
+  return container_of(bus, struct sl_cpc_drv_spi_peripheral, bus);
 }
 
 /***************************************************************************/ /**
  * Notifies the core when a frame has been sent on the wire.
  ******************************************************************************/
-static inline void flush_rx(sl_cpc_drv_spi_peripheral_t *drv)
+static inline void flush_rx(struct sl_cpc_drv_spi_peripheral *drv)
 {
   if (drv->rx.current_frame == NULL) {
     // Noting to flush to the core
@@ -126,7 +126,7 @@ static inline void flush_rx(sl_cpc_drv_spi_peripheral_t *drv)
 /***************************************************************************/ /**
  * Notifies the core when a frame has been sent on the wire.
  ******************************************************************************/
-static inline void flush_tx(sl_cpc_drv_spi_peripheral_t *drv)
+static inline void flush_tx(struct sl_cpc_drv_spi_peripheral *drv)
 {
   if (drv->tx.current_frame == NULL) {
     // Nothing to notify the core about if there is no current TX entry
@@ -145,7 +145,7 @@ static inline void flush_tx(sl_cpc_drv_spi_peripheral_t *drv)
   drv->tx.current_frame = NULL;
 }
 
-static inline void spi_ldma_start_transfer(const sl_cpc_drv_spi_peripheral_t *drv, uint8_t channel,
+static inline void spi_ldma_start_transfer(const struct sl_cpc_drv_spi_peripheral *drv, uint8_t channel,
                                            const sl_hal_ldma_transfer_config_t *transfer,
                                            const sl_hal_ldma_descriptor_t *descriptor)
 {
@@ -158,7 +158,7 @@ SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_spi_peripheral_caps, 4);
 
 static void get_local_capabilities(sl_cpc_bus_t *bus, const void **caps_p, uint16_t *caps_size_p)
 {
-  const sl_cpc_drv_spi_peripheral_t *drv = to_drv(bus);
+  const struct sl_cpc_drv_spi_peripheral *drv = to_drv(bus);
 
   *caps_p = &drv->local_caps;
   *caps_size_p = sizeof(drv->local_caps);
@@ -169,7 +169,7 @@ static void get_local_capabilities(sl_cpc_bus_t *bus, const void **caps_p, uint1
  ******************************************************************************/
 static sl_status_t spi_drv_start_rx(sl_cpc_bus_t *bus)
 {
-  const sl_cpc_drv_spi_peripheral_t *drv = to_drv(bus);
+  const struct sl_cpc_drv_spi_peripheral *drv = to_drv(bus);
   const uint32_t tx_ready_window_trig_bit_mask = 1UL << drv->tx_availability_synctrig_ch;
   LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)drv->dma_handle->dma_peripheral);
 
@@ -197,7 +197,7 @@ static sl_status_t spi_drv_start_rx(sl_cpc_bus_t *bus)
  ******************************************************************************/
 static sl_status_t spi_drv_read_data(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames)
 {
-  sl_cpc_drv_spi_peripheral_t *drv = to_drv(bus);
+  struct sl_cpc_drv_spi_peripheral *drv = to_drv(bus);
   sli_cpc_frame_list_t rx_pending_frames;
   sli_cpc_frame_list_t free_frames;
   uint16_t computed_crc;
@@ -245,7 +245,8 @@ static sl_status_t spi_drv_read_data(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *fr
  * and start the RX DMA channel.
  * Returns if the DMA was successfully started for reception.
  ******************************************************************************/
-static bool prime_dma_for_reception(sl_cpc_drv_spi_peripheral_t *drv, size_t payload_size, bool received_valid_header)
+static bool prime_dma_for_reception(struct sl_cpc_drv_spi_peripheral *drv, size_t payload_size,
+                                    bool received_valid_header)
 {
   sl_status_t status;
 #if defined(SL_CATALOG_CPC_DRIVER_HW_CRC_PRESENT) // With HW CRC
@@ -466,7 +467,7 @@ start_transfer:
   *
   * We assume the TX DMA channel is not running and we are in interrupt context
   ******************************************************************************/
-static void prime_dma_for_transmission(sl_cpc_drv_spi_peripheral_t *drv)
+static void prime_dma_for_transmission(struct sl_cpc_drv_spi_peripheral *drv)
 {
   const sli_cpc_hdr_t *header;
   bool tx_pending;
@@ -573,7 +574,7 @@ start_transfer:
  ******************************************************************************/
 static uint32_t spi_drv_write(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames)
 {
-  sl_cpc_drv_spi_peripheral_t *drv = to_drv(bus);
+  struct sl_cpc_drv_spi_peripheral *drv = to_drv(bus);
   uint32_t num_frames = sli_cpc_frame_list_get_len(frames);
   sl_cpc_frame_t *frame;
 
@@ -597,7 +598,7 @@ static uint32_t spi_drv_write(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames)
  ******************************************************************************/
 static uint32_t spi_drv_get_available_write_frame_slots(sl_cpc_bus_t *bus)
 {
-  const sl_cpc_drv_spi_peripheral_t *drv = to_drv(bus);
+  const struct sl_cpc_drv_spi_peripheral *drv = to_drv(bus);
   uint32_t num_available_slots;
 
   MCU_ATOMIC_SECTION(num_available_slots
@@ -638,7 +639,7 @@ static inline void log_header(const sli_cpc_drv_spi_header_t *header)
 /**************************************************************************/ /**
  * Allocate RX frames until the free list reaches the maximum number of frames.
  ******************************************************************************/
-static void alloc_rx_frames(sl_cpc_drv_spi_peripheral_t *drv)
+static void alloc_rx_frames(struct sl_cpc_drv_spi_peripheral *drv)
 {
   sl_cpc_frame_t *frame;
   while ((frame = sli_cpc_frame_new(&drv->bus, true))) {
@@ -646,7 +647,7 @@ static void alloc_rx_frames(sl_cpc_drv_spi_peripheral_t *drv)
   }
 }
 
-static void end_of_header_xfer(sl_cpc_drv_spi_peripheral_t *drv)
+static void end_of_header_xfer(struct sl_cpc_drv_spi_peripheral *drv)
 {
   bool received_valid_header = false;
   size_t rx_payload_length = 0;
@@ -694,7 +695,7 @@ static void end_of_header_xfer(sl_cpc_drv_spi_peripheral_t *drv)
  * @return true  : "end_of_header_xfer" needs to be tail chained to this routine
  *         false : The DMA callback can return after this function
  ******************************************************************************/
-static bool end_of_payload_xfer(sl_cpc_drv_spi_peripheral_t *drv)
+static bool end_of_payload_xfer(struct sl_cpc_drv_spi_peripheral *drv)
 {
   bool tfer_done;
   // Used to keep track of whether the buffer held in "drv->tx.current_frame" did go out on the wire
@@ -766,7 +767,7 @@ static void rx_dma_callback(void)
   sl_status_t status = sl_dma_manager_retrieve_current_channel_user_data(&ch, &user_data);
   SLI_CPC_ASSERT(status == SL_STATUS_OK);
 
-  sl_cpc_drv_spi_peripheral_t *drv = user_data;
+  struct sl_cpc_drv_spi_peripheral *drv = user_data;
   SLI_CPC_ASSERT(drv != NULL);
 
   if (drv->rx.irq_state == SL_CPC_DRV_SPI_PERIPHERAL_IRQ_STATE_HEADER) {
@@ -798,7 +799,7 @@ static void rx_dma_callback(void)
 /**************************************************************************/ /**
  * Allocate and configure LDMA channels for RX, TX, and optional GPCRC.
  ******************************************************************************/
-static sl_status_t ldma_init(sl_cpc_drv_spi_peripheral_t *drv)
+static sl_status_t ldma_init(struct sl_cpc_drv_spi_peripheral *drv)
 {
   sl_status_t ret = sl_dma_manager_get_default_handle(&drv->dma_handle);
   if (ret != SL_STATUS_OK) {
@@ -890,7 +891,7 @@ static sl_status_t ldma_init(sl_cpc_drv_spi_peripheral_t *drv)
  * chip select to the PRS channel. If chip select was high, this will make the LDMA
  * see a rising edge for all devices, and consequently the sync bit will be set.
  ******************************************************************************/
-static void ldma_setup_synctrig(const sl_cpc_drv_spi_peripheral_t *drv)
+static void ldma_setup_synctrig(const struct sl_cpc_drv_spi_peripheral *drv)
 {
   LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)drv->dma_handle->dma_peripheral);
 
@@ -918,7 +919,7 @@ static void ldma_setup_synctrig(const sl_cpc_drv_spi_peripheral_t *drv)
 /**************************************************************************/ /**
  * Connect E/USART TXC and CS producers to their configured PRS channels.
  ******************************************************************************/
-static void ldma_init_prs(const sl_cpc_drv_spi_peripheral_t *drv)
+static void ldma_init_prs(const struct sl_cpc_drv_spi_peripheral *drv)
 {
   sl_hal_prs_async_producer_signal_t signal;
 
@@ -962,7 +963,7 @@ static void ldma_init_prs(const sl_cpc_drv_spi_peripheral_t *drv)
 /**************************************************************************/ /**
  * Prepare the reception DMA descriptor chain (and optional GPCRC chain).
  ******************************************************************************/
-static void prepare_rx_descriptors(sl_cpc_drv_spi_peripheral_t *drv)
+static void prepare_rx_descriptors(struct sl_cpc_drv_spi_peripheral *drv)
 {
   const uint32_t irq_pin_mask = 1UL << drv->irq.pin;
   volatile uint32_t *const irq_gpio_set_reg = &GPIO->P_SET[drv->irq.port].DOUT;
@@ -1259,7 +1260,7 @@ static void prepare_rx_descriptors(sl_cpc_drv_spi_peripheral_t *drv)
 /**************************************************************************/ /**
  * Prepare the transmission DMA descriptor chain.
  ******************************************************************************/
-static void prepare_tx_descriptors(sl_cpc_drv_spi_peripheral_t *drv)
+static void prepare_tx_descriptors(struct sl_cpc_drv_spi_peripheral *drv)
 {
   const uint32_t irq_pin_mask = 1UL << drv->irq.pin;
   volatile uint32_t *const irq_gpio_clr_reg = &GPIO->P_CLR[drv->irq.port].DOUT;
@@ -1396,7 +1397,7 @@ static void gpcrc_setup(void)
  ******************************************************************************/
 static void spi_drv_on_rx_frame_free(sl_cpc_bus_t *bus)
 {
-  sl_cpc_drv_spi_peripheral_t *drv = to_drv(bus);
+  struct sl_cpc_drv_spi_peripheral *drv = to_drv(bus);
   MCU_DECLARE_IRQ_STATE;
 
   MCU_ENTER_ATOMIC();
@@ -1417,7 +1418,7 @@ static void spi_drv_on_rx_frame_free(sl_cpc_bus_t *bus)
  ******************************************************************************/
 static sl_status_t spi_drv_init(sl_cpc_bus_t *bus)
 {
-  sl_cpc_drv_spi_peripheral_t *drv = to_drv(bus);
+  struct sl_cpc_drv_spi_peripheral *drv = to_drv(bus);
   sl_status_t ret;
 
   // Initialize the lists
@@ -1459,7 +1460,7 @@ static sl_status_t spi_drv_init(sl_cpc_bus_t *bus)
  * Clocks, GPIOs, and the (E)USART peripheral must already be configured by the
  * USART/EUSART-specific public init before this is called.
  ******************************************************************************/
-sl_status_t sli_cpc_drv_spi_peripheral_init(sl_cpc_drv_spi_peripheral_t *drv, const sl_cpc_bus_config_t *bus_cfg)
+sl_status_t sli_cpc_drv_spi_peripheral_init(struct sl_cpc_drv_spi_peripheral *drv, const sl_cpc_bus_config_t *bus_cfg)
 {
   static const sli_cpc_drv_ops_t ops = {
     .init = &spi_drv_init,

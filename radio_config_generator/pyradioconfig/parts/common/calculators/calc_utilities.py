@@ -32,7 +32,6 @@ class CALC_Utilities(ICalculator):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Insert new block variables here
         self._addModelVariable(model, 'max_timing_window',  float, ModelVariableFormat.DECIMAL )
         self._addModelVariable(model, 'timing_window',      float, ModelVariableFormat.DECIMAL ) 
         self._addModelVariable(model, 'rx_bitrate_error',   float, ModelVariableFormat.DECIMAL ) 
@@ -40,7 +39,9 @@ class CALC_Utilities(ICalculator):
         self._addModelVariable(model, 'rx_deviation_error', float, ModelVariableFormat.DECIMAL )
         self._addModelVariable(model, 'tx_deviation_error', float, ModelVariableFormat.DECIMAL )
         self._addModelVariable(model, 'bw_error',           float, ModelVariableFormat.DECIMAL )
-        
+        self._addModelVariable(model, 'preamble_duration_us',  float, ModelVariableFormat.DECIMAL )
+        self._addModelVariable(model, 'syncword_duration_us',  float, ModelVariableFormat.DECIMAL )
+
         
         
 
@@ -62,7 +63,6 @@ class CALC_Utilities(ICalculator):
         else:
             m_values = xrange(max_m, 0, -1)
 
-        # start with the highest allowed mantissa and find best m, e pair
         for m in m_values:
             e = py2round(math.log(frac / m, 2))
             diff = abs(frac - m * 2**e)
@@ -117,7 +117,6 @@ class CALC_Utilities(ICalculator):
         model.vars.oversampling_rate_actual.value = 2.0 * model.vars.rxbrfrac_actual.value
 
     def calc_ook_ebno(self,model):
-        #Set the EbN0 for OOK on Dumbo, Jumbo, Nerio as 21.5
         model.vars.ook_ebno.value = 21.5
 
     def calc_target_sensitivity(self, model):
@@ -128,7 +127,6 @@ class CALC_Utilities(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-#TODO: update based on the  numbers from Performance Review presentation
 
         bitrate = model.vars.bitrate.value
         bandwidth = model.vars.bandwidth_hz.value
@@ -136,7 +134,6 @@ class CALC_Utilities(ICalculator):
         spreading_factor = model.vars.dsss_spreading_factor.value * 1.0
         modformat = model.vars.modulation_type.value
 
-        # approximate EbNo number to use for our PHY
         if modformat == model.vars.modulation_type.var_enum.FSK4.value:
             ebno = 14.0
         elif modformat == model.vars.modulation_type.var_enum.OOK.value:
@@ -144,7 +141,6 @@ class CALC_Utilities(ICalculator):
         else:
             ebno = 13.0
 
-        # approximate noise figure to use for each band
         if freq < 500e6:
             nf = 6.5
         elif freq < 1e9:
@@ -155,8 +151,6 @@ class CALC_Utilities(ICalculator):
         model.vars.sensitivity.value = -173.9 + 10*math.log(bitrate,10) + ebno + nf
 
         if model.vars.modulation_type.value == model.vars.modulation_type.var_enum.OOK:
-            #If the modulation type is OOK, try to better estimate sensitivity based on channel bandwidth (useful for dynamic slicing)
-            #Since the ENBW is a combination of the channel filter and downstream averaging filters, using emperical data here
             if bandwidth/bitrate < 10:
                 sensitivity_bw_adjust = 0
             elif bandwidth/bitrate < 20:
@@ -242,8 +236,6 @@ class CALC_Utilities(ICalculator):
         else:
             rx_deviation_error = 0.0
 
-        #if rx_deviation_error > 0.2:
-        #    print("  WARNING: RX frequency deviation is more than 10% away from target!")
 
         if tx_deviation > 0:
             tx_deviation_error = abs(target_deviation - tx_deviation) * 1.0 / target_deviation
@@ -274,7 +266,17 @@ class CALC_Utilities(ICalculator):
         model.vars.tx_deviation_error.value = tx_deviation_error
         model.vars.bw_error.value           = bw_error
                                             
+    def calc_preamble_syncword_duration(self, model):
+        baudrate = model.vars.baudrate.value
+        encoding = model.vars.symbol_encoding.value
+        spreading_factor = model.vars.dsss_spreading_factor.value
 
+        if encoding == model.vars.symbol_encoding.var_enum.DSSS:
+            preamble_duration_us = (model.vars.preamble_length.value * spreading_factor) / baudrate * 1e6
+            syncword_duration_us = (model.vars.syncword_length.value * spreading_factor) / baudrate * 1e6
+        else:
+            preamble_duration_us = model.vars.preamble_length.value / baudrate * 1e6
+            syncword_duration_us = model.vars.syncword_length.value / baudrate * 1e6
 
-
-
+        model.vars.preamble_duration_us.value = preamble_duration_us
+        model.vars.syncword_duration_us.value = syncword_duration_us

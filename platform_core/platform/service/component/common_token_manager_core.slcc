@@ -9,6 +9,7 @@ metadata:
   sbom:
     license: Zlib
 requires:
+- name: log_none
 - name: component_catalog
 recommends:
 - id: common_token_manager

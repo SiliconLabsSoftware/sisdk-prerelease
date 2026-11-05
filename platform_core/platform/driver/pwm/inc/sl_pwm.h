@@ -36,6 +36,10 @@
 #include "sl_component_catalog.h"
 #endif
 
+#if defined(SL_CATALOG_GPIO_PERIPHERAL_PIN_LATCHING_PRESENT)
+#define PWM_USES_GPIO_LATCHING
+#endif
+
 #include "sl_status.h"
 #include "sl_enum.h"
 #include <stdint.h>
@@ -59,6 +63,13 @@ extern "C" {
  *
  * @note If several PWM driver instances are set up to use the same TIMER
  * instance, the PWM frequency of these instances must be the same.
+ * @note On devices with GPIO pin-latching support, @ref sl_pwm_timer_stop()
+ * latches the GPIO pins for enabled TIMER CC routes before stopping the TIMER.
+ * @ref sl_pwm_timer_start() resumes the TIMER and releases those pins.
+ * Devices without GPIO pin-latching support retain their existing behavior.
+ * The per-channel @ref sl_pwm_start() and @ref sl_pwm_stop() APIs enable and
+ * disable their GPIO routes; stopping a channel also releases its pin if it
+ * was latched by @ref sl_pwm_timer_stop().
  * ### PWM Example Code
  *
  * Basic example for generating PWM waveform:
@@ -137,6 +148,13 @@ typedef struct sl_pwm_config {
  * @brief
  *   Initialize PWM driver.
  *
+ * @details
+ *   On devices with GPIO output latching, adding a channel to a running TIMER
+ *   that already has an active PWM channel returns @ref SL_STATUS_INVALID_STATE.
+ *   Stop the TIMER with @ref sl_pwm_timer_stop() before adding the channel;
+ *   enabled TIMER CC output pins are latched during the stop and released when
+ *   the TIMER is resumed with @ref sl_pwm_timer_start().
+ *
  * @param[in] pwm
  *   PWM driver instance
  *
@@ -144,13 +162,19 @@ typedef struct sl_pwm_config {
  *   Driver configuration
  *
  * @return
- *   SL_STATUS_OK if there are no errors.
+ *   SL_STATUS_OK on success, or an error for an invalid configuration, a
+ *   channel that is already initialized, or an active TIMER that was not
+ *   stopped before adding a channel on devices with GPIO output latching.
  *****************************************************************************/
 sl_status_t sl_pwm_init(sl_pwm_instance_t *pwm, sl_pwm_config_t *config);
 
 /**************************************************************************//**
  * @brief
  *   Deinitialize PWM driver.
+ *
+ * @details
+ *   Disables the PWM route, returns the pin to disabled GPIO mode, and releases
+ *   the GPIO latch if it was latched by @ref sl_pwm_timer_stop().
  *
  * @param[in] pwm
  *   PWM driver instance
@@ -164,6 +188,11 @@ sl_status_t sl_pwm_deinit(sl_pwm_instance_t *pwm);
  * @brief
  *   Start generating PWM waveform
  *
+ * @details
+ *   Enables the PWM output route. The TIMER and GPIO latch state are not
+ *   changed. Use @ref sl_pwm_timer_start() to resume a TIMER stopped with
+ *   @ref sl_pwm_timer_stop().
+ *
  * @param[in] pwm
  *   PWM driver instance
  *****************************************************************************/
@@ -173,10 +202,55 @@ void sl_pwm_start(sl_pwm_instance_t *pwm);
  * @brief
  *   Stop generating PWM waveform
  *
+ * @details
+ *   Disables the PWM output route. The TIMER remains running. If the pin was
+ *   latched by @ref sl_pwm_timer_stop(), this releases that pin after
+ *   disabling its route.
+ *
  * @param[in] pwm
  *   PWM driver instance
  *****************************************************************************/
 void sl_pwm_stop(sl_pwm_instance_t *pwm);
+
+/**************************************************************************//**
+ * @brief
+ *   Stop a TIMER used by PWM without changing its output routes.
+ *
+ * @details
+ *   On Series 3, waits for the TIMER to stop and retains PWM channel settings
+ *   so they can be restored by @ref sl_pwm_timer_start(). On devices with GPIO
+ *   pin-latching support, GPIO pins for enabled TIMER CC routes are latched
+ *   before the TIMER stops. Devices without GPIO pin-latching support use the
+ *   native TIMER stop behavior without changing GPIO latch state.
+ *
+ * @param[in] timer
+ *   TIMER instance initialized for PWM
+ *
+ * @return
+ *   SL_STATUS_OK on success, or an error for an invalid TIMER.
+ *****************************************************************************/
+sl_status_t sl_pwm_timer_stop(TIMER_TypeDef *timer);
+
+/**************************************************************************//**
+ * @brief
+ *   Resume a TIMER stopped with @ref sl_pwm_timer_stop().
+ *
+ * @details
+ *   Restores the PWM channel configuration and starts the TIMER at a cycle
+ *   boundary on Series 3. On Series 2, this enables the TIMER using the native
+ *   TIMER control. After the TIMER resumes, GPIO pins for enabled TIMER CC
+ *   pins latched by @ref sl_pwm_timer_stop() are released on devices with GPIO
+ *   pin-latching support. PWM output routes are not changed.
+ *
+ * @param[in] timer
+ *   TIMER instance initialized for PWM
+ *
+ * @return
+ *   SL_STATUS_OK on success, SL_STATUS_INVALID_PARAMETER for an invalid TIMER,
+ *   or SL_STATUS_INVALID_STATE if no PWM channel is configured on devices that
+ *   retain PWM TIMER state.
+ *****************************************************************************/
+sl_status_t sl_pwm_timer_start(TIMER_TypeDef *timer);
 
 /**************************************************************************//**
  * @brief

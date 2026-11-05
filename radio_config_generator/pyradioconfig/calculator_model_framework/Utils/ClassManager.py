@@ -3,7 +3,7 @@ import inspect
 import os.path
 import os
 import glob
-from pyradioconfig.calculator_model_framework.interfaces.ipcollector import IPCollector_Base
+from pyradioconfig.calculator_model_framework.interfaces.ipcollector import IPCollector_Base, IPCategory
 from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICalculator
 from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 
@@ -24,9 +24,6 @@ class ClassManager(object):
             classes = inspect.getmembers(fooModule, inspect.isclass)
             for (classname, classvalue) in classes:
                 if issubclass(classvalue, class_type) and inspect.getmodule(classvalue) == fooModule:
-                    # Make sure it is a class
-                    # and
-                    # Make sure it was defined in module, not just imported
                     class_list.append(classvalue)
 
         return class_list
@@ -40,7 +37,7 @@ class ClassManager(object):
             return False
 
     @staticmethod
-    def get_calc_ips(import_path, part_family, part_rev, return_ip_obj=True):
+    def get_calc_ips(import_path, part_family, part_rev, ip_category, return_ip_obj=True):
         """
         Searches for IPCalcFactory class type in import_path.
         Instantiates the first one found and collect calculations
@@ -58,7 +55,7 @@ class ClassManager(object):
             classes = inspect.getmembers(fooModule, inspect.isclass)
             for (classname, classvalue) in classes:
                 if issubclass(classvalue, IPCollector_Base) and classname != 'IPCollector_Base':
-                    ip_collector = classvalue(part_family, part_rev)
+                    ip_collector = classvalue(part_family, part_rev, ip_category)
                     for ip_obj in ip_collector.perip_dict.values():
                         peripheral_name = ip_obj.peripheral_name
                         calc_path = ip_obj.get_calc_module_path(part_family)
@@ -79,7 +76,6 @@ class ClassManager(object):
 
     @staticmethod
     def merge_lists_classes(common_classes, part_specific_classes):
-        # Loop through common calculators and remove and parent classes from part rev specific instance
         for common_class in common_classes[:]:
             common_calculator_name = str(common_class().__class__.__name__)
             for part_specific_class in part_specific_classes:

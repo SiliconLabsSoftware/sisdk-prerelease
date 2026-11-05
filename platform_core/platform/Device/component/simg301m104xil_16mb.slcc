@@ -1,21 +1,20 @@
-!!omap
-- id: SIMG301M104XIL_16MB
-- package: platform_core
-- description: Silicon Labs CMSIS-Device part headers for SIMG301M104XIL with 16 MB external flash.
-- category: Platform|Device|SIMG301
-- quality: production
-- provides:
-  - name: simg301m104xil_16mb
-- requires:
-  - name: simg301m104xil
-  - name: external_flash_16mb_s3
-- tag:
-  - device:opn:simg301m104xil_16mb
-  - device:ram:512k
-  - device:flash:16192k
-- ui_hints:
-    visibility: never
-- metadata:
-    sbom:
-      license: Zlib
-- root_path: platform_core
+id: SIMG301M104XIL_16MB
+package: platform_core
+description: Silicon Labs CMSIS-Device part headers for SIMG301M104XIL with 16 MB external flash.
+category: Platform|Device|SIMG301
+quality: production
+provides:
+- name: simg301m104xil_16mb
+requires:
+- name: simg301m104xil
+- name: external_flash_16mb_s3
+tag:
+- device:opn:simg301m104xil_16mb
+- device:ram:512k
+- device:flash:16192k
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core

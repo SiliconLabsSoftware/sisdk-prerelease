@@ -1,0 +1,52 @@
+id: i3c_core
+package: platform_core
+label: I3C Core
+description: >
+  This is an I3C High-Level Driver that supports controller and target modes
+  with blocking transfers (PIO),
+  CCC commands, address assignment, and I2C backward compatibility.
+
+  This component includes only the I3C driver core. To configure and create
+  instances of this driver, the I3C component should be included in the
+  project.
+
+  The driver core provides essential functionalities for I3C communication
+  such as initialization, configuration, and data transfer management.
+category: Platform|Driver|I3C
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+root_path: platform_core/platform/driver/i3c
+provides:
+- name: i3c_core
+requires:
+- name: status
+- name: sl_assert
+- name: hal_i3c
+- name: sleeptimer
+- name: clock_manager_runtime
+- name: interrupt_manager
+include:
+- path: inc
+  file_list:
+  - path: sl_i3c.h
+- path: src
+  file_list:
+  - path: sli_i3c.h
+source:
+- path: src/sl_i3c.c
+template_file:
+- path: init/sl_i3c_init.c.jinja
+  condition: [i3c]
+- path: init/sl_i3c_instances.h.jinja
+  condition: [i3c]
+template_contribution:
+- name: event_handler
+  condition: [i3c]
+  value:
+    event: driver_init
+    include: "sl_i3c_instances.h"
+    handler: sl_i3c_init_instances

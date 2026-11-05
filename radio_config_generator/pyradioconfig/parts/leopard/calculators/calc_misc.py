@@ -3,23 +3,18 @@ from pyradioconfig.parts.lynx.calculators.calc_misc import CALC_Misc_lynx
 class calc_misc_leopard(CALC_Misc_lynx):
 
     def calc_lnamixlowcur_reg(self, model):
-        #This field is now programmed by PTE and so don't set it in the Radio Configurator
         pass
 
     def calc_misc_ifadcenhalfmode(self, model):
-        #This calculation is moved to calc_synth for Leopard
         pass
 
     def calc_misc_sylodivrloadcclksel(self, model):
-        # This calculation is moved to calc_synth for Leopard
         pass
 
     def calc_misc_bbssdebouncetim(self, model):
-        #Now moved to calc_demodulator as this is used for log2x4 for A1
         pass
 
     def calc_misc_Lynx(self, model):
-        # Omitting writes to CLKMULT regs in calc_misc_leopard
         pass
 
     def calc_misc_Leopard(self, model):
@@ -31,10 +26,7 @@ class calc_misc_leopard(CALC_Misc_lynx):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # All of the registers here are new in Lynx (and are read-write; read-only and write-only are omitted)
-        # Many IF, IEN, and RAC registers are intentionally ommitted
 
-        #AGC default values are located in calc_agc.py and the calc_agc_misc() function
 
         self._reg_write(model.vars.FRC_DFLCTRL_DFLBOIOFFSET, 0)
         self._reg_write(model.vars.FRC_CTRL_WAITEOFEN, 0)
@@ -94,9 +86,6 @@ class calc_misc_leopard(CALC_Misc_lynx):
         self._reg_write_default(model.vars.RAC_IFADCTRIM0_IFADCSIDETONEAMP)
         self._reg_write_default(model.vars.FRC_AUTOCG_AUTOCGEN)
 
-        #Fairly confident that these CAL values are not actually used, but can not modify validated PHYs
-        #at this point and Design can not confirm these are unused. So if the value isn't forced then these
-        #are a do not care.
         if model.vars.SYNTH_LPFCTRL1CAL_OP1BWCAL.value_forced is None:
             self._reg_do_not_care(model.vars.SYNTH_LPFCTRL1CAL_OP1BWCAL)
         if model.vars.SYNTH_LPFCTRL1CAL_OP1COMPCAL.value_forced is None:

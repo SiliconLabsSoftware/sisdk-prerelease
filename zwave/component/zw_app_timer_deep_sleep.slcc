@@ -6,6 +6,10 @@ description: >
   This module wraps a Z-Wave SwTimerLiaison and presents it as a "singleton", easing its
   availability among the Application modules. For detailed documentation see SwTimerLiaison.h
   under `Componets/SwTimer`.
+documentation:
+  docset: z-wave
+  document: zwave-api/apptimer
+
 package: zwave
 quality: production
 metadata:

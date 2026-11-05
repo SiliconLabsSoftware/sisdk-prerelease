@@ -20,7 +20,6 @@ class ITarget(object):
     """
     @abstractmethod
     def getName(self):
-        # Since this is used in code to reference the target, it cannot have white space or spaces
         name = self._targetName.strip()
         name = name.replace(" ", "_")
         return name

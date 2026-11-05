@@ -1250,7 +1250,6 @@ typedef enum EZwaveReceiveType{
   EZWAVERECEIVETYPE_MULTI,                                             /**< EZWAVERECEIVETYPE_MULTI */
   EZWAVERECEIVETYPE_NODE_UPDATE,                                       /**< EZWAVERECEIVETYPE_NODE_UPDATE */
   EZWAVERECEIVETYPE_SECURITY_EVENT,                                    /**< EZWAVERECEIVETYPE_SECURITY_EVENT */
-  EZWAVERECEIVETYPE_STAY_AWAKE,                                        /**< EZWAVERECEIVETYPE_STAY_AWAKE */
   EZWAVERECEIVETYPE_SECURE_FRAME_RECEIVED,                             /**< Event received from the SECURE module. */
   EZWAVERECEIVETYPE_REQUEST_ENCRYPTION_FRAME,                          /**< EZWAVERECEIVETYPE_REQUEST_ENCRYPTION_FRAME */
   EZWAVERECEIVETYPE_SINGLE_URGENT,                                     /**< Urgent/priority frame requiring immediate processing */

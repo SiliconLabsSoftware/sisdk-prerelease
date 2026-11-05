@@ -7,10 +7,8 @@ class CALC_Global_ocelot(CALC_Global_lynx):
 
     def buildVariables(self, model):
 
-        # Build variables from the Lynx calculations
         super().buildVariables(model)
 
-        #Add variables for Ocelot
         self._addModelVariable(model,  'lock_bwsel'            , float,   ModelVariableFormat.DECIMAL, units='Hz', desc='reduced bwsel after oneshot AFC. ')
         self._addModelVariable(model,  'datapath_delay_samp', int, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model,  'afc_scale_tx'          ,  float,  ModelVariableFormat.DECIMAL)
@@ -26,7 +24,6 @@ class CALC_Global_ocelot(CALC_Global_lynx):
         self._addModelVariable(model, 'ppnd_3', int, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'ksi3wb', int, ModelVariableFormat.DECIMAL)
 
-        # new actual variables for Ocelot
         self._addModelActual(model,    'syncbits'               , int,     ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'afc_scale_tx'               , float,     ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'lock_bandwidth'            , int,     ModelVariableFormat.DECIMAL)
@@ -34,8 +31,6 @@ class CALC_Global_ocelot(CALC_Global_lynx):
 
         self._addModelVariable(model,    'deviation_tol_ppm', int,         ModelVariableFormat.DECIMAL, units='ppm',  desc='Maximum deviation offset expected')
         self._addModelVariable(model, 'tx_preamble_length', int, ModelVariableFormat.DECIMAL, units='bits', desc='Preamble length to TX')
-        # Owner: Rossano Pantaleoni
-        # Jira Link: https://jira.silabs.com/browse/MCUW_RADIO_CFG-2231
         member_data = [
             ['INTERNAL', 0, 'Internal compensation only'],
             ['ONE_SHOT', 2, 'AFC One Shot mode, AFC occurs at DSA detection and internal compensation always active'],
@@ -45,21 +40,12 @@ class CALC_Global_ocelot(CALC_Global_lynx):
             'List of supported AFC Run Modes',
             member_data)
 
-        # These were extracted from Lynx register model and identified as new (and non-existent in the Panther map)
-
-        # TODO: decide if all of these really belong in the calculator. For instance: enables, interrupt enables, etc.
-        # TODO: do we really want the calculator to explicitly re-write these to their reset/default values a la MCUW_RADIO_CFG-734?
 
 
-        # Must have a corresponding ModelVariableContainer entry in pyradioconfig/parts/common/profiles/ocelot_regs.py build_modem_regs_ocelot.
-        # MCUW_RADIO_CFG-734 Panther: PHY/MAC Design requests more registers added (all MODEM, AGC, etc.) with re-writes of reset values
 
-        # Any registers here are new in Ocelot (and are read-write; read-only and write-only are omitted) and do not exist in Lynx
 
-        # Right now, these are all writen here without specific details if these are PTE-owned, RAIL-owned, or otherwise
-        # now-to-be-written by Radio Configurator. Other groups may weigh in if any fields should be removed from RC.
 
-        # Add register groups
+
         self._add_MODEM_RXRESTART(model)
         self._add_RAC_RX_LNAMIXENRFPKDLOTHRESH_regs(model)
         self._add_RAC_SYTRIM_regs(model)
@@ -583,7 +569,6 @@ class CALC_Global_ocelot(CALC_Global_lynx):
         self._addModelRegister(model, 'RAC.TXRAMP.TXMODEPHASEFLIP', int, ModelVariableFormat.HEX)
 
     def _add_bitrate_variable(self, model):
-        # For Ocelot+ the bitrate variable in the calculator represents net bitrate before coding
         self._addModelVariable(model, 'bitrate', int, ModelVariableFormat.DECIMAL, units='bps',
                                desc='Bit rate before any coding')
 

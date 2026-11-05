@@ -65,7 +65,6 @@ class Pro2ApiList(object):
     def _add_seq_cfg(self, modem_calc, api_list):
         pass
     def _add_chflt_rx_apis(self, modem_calc, api_list):
-        #SSR register
         rtl_chflt_list = [RxChFlt_rtl(modem_calc.demodulator.fields.rx1coearray),
                           RxChFlt_rtl(modem_calc.demodulator.fields.rx2coearray)]
         flt = 1
@@ -104,7 +103,6 @@ class Pro2ApiList(object):
         
         if (zero_if == 1):
             api_list['MODEM_ADC_CTRL'] = adc_hgain * 16 + adc_en_drst * 8 + realadc * 2
-            # DC filter
             api_list['MODEM_DC_CONTROL'] = dc_follow * 2 ** 5 + dc_rst * 2 ** 4 + dc_freez * 2 ** 3 + dc_gear
         if (zero_if == 1 and not (enook(modem_calc.inputs.API_modulation_type))):
             api_list['MODEM_AFC_ZIFOFF'] = afczifoff
@@ -121,7 +119,6 @@ class Pro2ApiList(object):
                 api_list['PKT_WHT_SEED_7_0'] = 170
             api_list['PKT_FIELD_1_CONFIG'] = 4
             if api_list == self._api_dict['legacy']:
-                # config modulator
                 api_list['MODEM_OOKZEROIF_RB_2'] = (modem_calc.modulator.fields.ook_zero_IF_txdr >> 16) & 0xff
                 api_list['MODEM_OOKZEROIF_RB_1'] = (modem_calc.modulator.fields.ook_zero_IF_txdr >> 8) & 0xff
                 api_list['MODEM_OOKZEROIF_RB_0'] = modem_calc.modulator.outputso.ok_zero_IF_txdr & 0xff
@@ -149,7 +146,6 @@ class Pro2ApiList(object):
     def _add_rssi_group(self, modem_calc, api_list):
         pass
 
-    # jira 1658: to add 3 fields into OOK_MISC in pro2+
     def _add_modem_ook_misc(self, api_list, modem_calc):
         fast_ma = modem_calc.demodulator.fields.fast_ma
         detector = modem_calc.demodulator.fields.detector
@@ -157,11 +153,6 @@ class Pro2ApiList(object):
 
     def _add_modem_bcr_misc0(self, api_list, modem_calc):
         pass
-        # BCR_MISC0 defaults to 0, never touched by calculator before 9/18/2014
-        # revC2 adds bits [3] and [0] 
-        # jira si4440-1362 -> 1539 -> set MISC0[3]=res_lockup_byp in BERT mode
-        # jira si4440-1120 -> 1435 -> clr MISC0[0]=diff0rst_en in recv0/1 or BERT mode;  only set in revC2+ DSA enabled (maybe never set)
-        # api_list['MODEM_BCR_MISC0'] = int(adcwatch*128 + adcrst*64 + distogg*32 + ph0size*16) 
     
     def _add_modem_if_control(self, api_list, modem_calc):
         zero_if = modem_calc.demodulator.fields.zero_if
@@ -299,7 +290,6 @@ class Pro2ApiList(object):
         self._add_ook_blopk(modem_calc, api_list)
         api_list['MODEM_OOK_CNT1'] = s2p_map * 2 ** 6 + ookfrz_en * 2 ** 5 + ma_freqdwn * 2 ** 4 + raw_syn * 2 ** 3 + slicer_fast * 2 ** 2 + Squelch # change API doc
 
-        #api_list['MODEM_OOK_MISC'] = int(fast_ma * 128 + detector) # change API doc, remove frzen
         self._add_modem_ook_misc(api_list, modem_calc)
 
         self._add_modem_raw_search_api(modem_calc, api_list)
@@ -307,7 +297,6 @@ class Pro2ApiList(object):
         self._add_modem_raw_eye_api(modem_calc, api_list)
         api_list['MODEM_ANT_DIV_MODE'] = ant_mode #default ANT_mode
         api_list['MODEM_ANT_DIV_CONTROL'] = ant2pm_thd * 2 ** 4 + matap * 2 ** 3 + antdiv # check API doc
-        # add RSSI API group (on PRO2 already but used default values) <-> only put in pro2+ as we don't want to touch pro2 calc
         self._add_rssi_group(modem_calc, api_list)
         api_list['MODEM_RSSI_COMP'] = RSSI_comp
 
@@ -325,9 +314,6 @@ class Pro2ApiList(object):
         modem_property_list = []
         for key in self._object_api_list.keys():
             prop = radio_api.properties.get_property(key)
-            # The radio_api object in here is not checked agains any features,
-            # so need to prevent an exception when the radio_api instance does not have
-            # properties that are configured in the modem calculator.
             if prop is not None:
                 prop.set_value(self._object_api_list[key])
                 modem_property_list.append(prop)

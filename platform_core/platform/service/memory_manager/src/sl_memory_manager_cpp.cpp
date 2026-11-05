@@ -34,6 +34,7 @@
 #include "sl_memory_manager.h"
 #include "sli_memory_manager.h"
 #include "sl_assert.h"
+#include "sl_log_helper.h"
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
 #include "SEGGER_RTT.h"
@@ -201,7 +202,7 @@ static inline void sli_cpp_delete_free(void *ptr)
 
   status = sl_memory_free(ptr);
   if (status != SL_STATUS_OK) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
   }
 }
 

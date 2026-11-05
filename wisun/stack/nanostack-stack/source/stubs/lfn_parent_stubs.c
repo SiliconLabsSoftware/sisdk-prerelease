@@ -36,15 +36,29 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef uint_fast32_t uint_fast24_t;
 struct protocol_interface_info_entry;
 struct mcps_data_ind_s;
 struct mcps_data_ie_list;
+struct ws_flus_ie;
+struct ws_lbs_ie;
+struct ws_lnd_ie;
+struct ws_lto_ie;
+struct ws_panid_ie;
+struct ws_lbc_ie;
+struct ws_lfn_session_ie;
+struct ws_lfn_version_ie;
+struct ws_lgtk_hash_ie;
+struct ws_lbats_ie;
 typedef struct mac_neighbor_table_entry mac_neighbor_table_entry_t;
 typedef struct ws_lutt_ie ws_lutt_ie_t;
 typedef struct ws_lus_ie ws_lus_ie_t;
 typedef struct rpl_instance rpl_instance_t;
 typedef struct rpl_dao_target rpl_dao_target_t;
 typedef struct buffer buffer_t;
+typedef struct wh_ie_sub_list wh_ie_sub_list_t;
+typedef struct wp_nested_ie_sub_list wp_nested_ie_sub_list_t;
+typedef struct prepare_ies_params prepare_ies_params_t;
 
 uint8_t ws_config_lfn_limit_get(void)
 {
@@ -91,26 +105,20 @@ bool lfn_parent_set_lfn_timings(struct protocol_interface_info_entry *interface,
 
 void lfn_parent_lpas_analyse(struct protocol_interface_info_entry *cur,
                              const struct mcps_data_ind_s *data,
-                             const struct mcps_data_ie_list *ie_ext,
-                             ws_lutt_ie_t *ws_lutt,
-                             ws_lus_ie_t *ws_lus)
+                             const struct mcps_data_ie_list *ie_ext)
 {
     (void)cur;
     (void)data;
     (void)ie_ext;
-    (void)ws_lutt;
-    (void)ws_lus;
 }
 
 void lfn_parent_lpcs_analyse(struct protocol_interface_info_entry *cur,
                              const struct mcps_data_ind_s *data,
-                             const struct mcps_data_ie_list *ie_ext,
-                             ws_lutt_ie_t *ws_lutt)
+                             const struct mcps_data_ie_list *ie_ext)
 {
     (void)cur;
     (void)data;
     (void)ie_ext;
-    (void)ws_lutt;
 }
 
 void lfn_parent_prepare_broadcast_lpc(struct protocol_interface_info_entry *cur)
@@ -121,6 +129,14 @@ void lfn_parent_prepare_broadcast_lpc(struct protocol_interface_info_entry *cur)
 void lfn_parent_cannot_route(struct protocol_interface_info_entry *cur)
 {
     (void)cur;
+}
+
+bool lfn_parent_pan_config_analyse(struct protocol_interface_info_entry *cur, const struct mcps_data_ie_list *ie_ext, const uint8_t *gtkhash_ptr)
+{
+    (void)cur;
+    (void)ie_ext;
+    (void)gtkhash_ptr;
+    return false;
 }
 
 bool lfn_parent_add_lfn_in_mc_list(struct protocol_interface_info_entry *cur,
@@ -168,4 +184,127 @@ void ws_rpl_proxy_handle_dao_ack(rpl_instance_t *rpl_instance, rpl_dao_target_t 
     (void)target;
     (void)status;
     (void)r_flag;
+}
+
+uint8_t *ws_wh_lbt_prepare(uint8_t *ptr)
+{
+    return ptr;
+}
+
+uint8_t *ws_wh_lbt_complete(uint8_t *ptr, uint16_t lfn_broadcast_slot_number, uint_fast24_t lfn_broadcast_interval_offset)
+{
+    (void)lfn_broadcast_slot_number;
+    (void)lfn_broadcast_interval_offset;
+    return ptr;
+}
+
+uint8_t *ws_wh_flus_write(uint8_t *ptr, struct ws_flus_ie *flus_ie)
+{
+    (void)flus_ie;
+    return ptr;
+}
+
+uint8_t *ws_wh_lbs_write(uint8_t *ptr, struct ws_lbs_ie *lbs_ie)
+{
+    (void)lbs_ie;
+    return ptr;
+}
+
+uint8_t *ws_wh_lto_write(uint8_t *ptr, uint_fast24_t offset_ms, uint_fast24_t adjusted_interval_ms)
+{
+    (void)offset_ms;
+    (void)adjusted_interval_ms;
+    return ptr;
+}
+
+uint8_t *ws_wh_panid_write(uint8_t *ptr, uint16_t pan_id)
+{
+    (void)pan_id;
+    return ptr;
+}
+
+uint8_t *ws_wh_lbc_write(uint8_t *ptr, struct ws_lbc_ie *lbc_ie)
+{
+    (void)lbc_ie;
+    return ptr;
+}
+
+uint8_t *sl_ws_wh_lfn_session_write(uint8_t *ptr, uint8_t lfn_session_id)
+{
+    (void)lfn_session_id;
+    return ptr;
+}
+
+uint16_t ws_wp_nested_lfn_parent_ie_length(struct protocol_interface_info_entry *interface, wp_nested_ie_sub_list_t *requested_list)
+{
+    (void)interface;
+    (void)requested_list;
+    return 0;
+}
+
+uint8_t *ws_wp_nested_lfn_parent_ie_write(uint8_t *ptr, struct protocol_interface_info_entry *interface, wp_nested_ie_sub_list_t *requested_list)
+{
+    (void)interface;
+    (void)requested_list;
+    return ptr;
+}
+
+bool ws_wh_lutt_read(const uint8_t *data, uint16_t length, struct ws_lutt_ie *lutt_ie)
+{
+    (void)data;
+    (void)length;
+    (void)lutt_ie;
+    return false;
+}
+
+bool ws_wh_lus_read(const uint8_t *data, uint16_t length, struct ws_lus_ie *lus_ie)
+{
+    (void)data;
+    (void)length;
+    (void)lus_ie;
+    return false;
+}
+
+bool ws_wh_lnd_read(const uint8_t *data, uint16_t length, struct ws_lnd_ie *lnd_ie)
+{
+    (void)data;
+    (void)length;
+    (void)lnd_ie;
+    return false;
+}
+
+bool ws_wh_lbc_read(const uint8_t *data, uint16_t length, struct ws_lbc_ie *lbc_ie)
+{
+    (void)data;
+    (void)length;
+    (void)lbc_ie;
+    return false;
+}
+
+void ws_llc_lfn_parent_indication(const struct mcps_data_ind_s *data, const struct mcps_data_ie_list *ie_ext, struct mac_neighbor_table_entry *neighbor)
+{
+    (void)data;
+    (void)ie_ext;
+    (void)neighbor;
+}
+
+uint16_t ws_wh_lfn_parent_ie_length(wh_ie_sub_list_t *requested_list)
+{
+    (void)requested_list;
+    return 0;
+}
+
+uint8_t *ws_wh_lfn_parent_ie_write(uint8_t *ptr, struct protocol_interface_info_entry *interface, prepare_ies_params_t *params)
+{
+    (void)interface;
+    (void)params;
+    return ptr;
+}
+
+void ws_neighbor_calculate_lutt_drift(mac_neighbor_table_entry_t *neighbor, ws_lutt_ie_t *ws_lutt, uint64_t timestamp, bool has_lus_ie)
+{
+    (void)neighbor;
+    (void)ws_lutt;
+    (void)timestamp;
+    (void)has_lus_ie;
 }

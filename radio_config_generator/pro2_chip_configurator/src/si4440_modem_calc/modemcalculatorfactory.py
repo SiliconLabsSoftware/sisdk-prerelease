@@ -28,8 +28,6 @@ def _matlabdatafile(filename, radio):
                 inputparams += [float(item)]
             except ValueError:
                 raise RuntimeError('{:s} file has invalid file content'.format(filename))
-    # Legacy matlab format input file specified frequency in MHz, but the
-    # calculator core works with HZ.
     inputparams[16] *= 1e6
     if radio == 'pro2':
         if not(len(inputparams) in [24, 27]):
@@ -48,18 +46,13 @@ def _xmlparse(filename):
     parser.ParseFile(open(filename, 'rU'))
 
 def _createmodeminput(testplan, radio):
-#     try:
         open(testplan, 'rU')
         try:
             _xmlparse(testplan)
         except Exception:
             pass
-#             print('Not XML file')
         
         return _matlabdatafile(testplan, radio)
-#     except IOError:
-#         pass
-#         print('Not a file. Try parsing XML stream')
 
 def create_modem_calculator(testplan, radio='pro2'):
     inputs = _createmodeminput(testplan, radio)

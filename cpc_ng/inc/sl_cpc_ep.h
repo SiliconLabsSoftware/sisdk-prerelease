@@ -73,15 +73,44 @@ typedef struct sl_cpc_ep sl_cpc_ep_t;
 /// Maximum CPC application payload size, in bytes.
 #define SL_CPC_EP_MAX_PAYLOAD_SIZE 4096U
 
-/// Endpoint ID reserved for the CPC control endpoint.
-#define SL_CPC_EP_ID_CONTROL 0U
+/// Reserved endpoint IDs.
+///
+/// IDs 0–1 are reserved for CPC services.
+/// IDs 2–89 are reserved for Silicon Labs services.
+/// IDs 90–99 are reserved for application-defined endpoints.
+/// IDs 100–255 are reserved for temporary endpoints allocated dynamically at runtime.
+typedef enum sl_cpc_reserved_ep_id {
+  SL_CPC_EP_ID_CONTROL = 0,           ///< CPC control endpoint.
+  SL_CPC_EP_ID_SECURITY = 1,          ///< Security-related functionality.
+  SL_CPC_EP_ID_BLUETOOTH = 2,         ///< Bluetooth endpoint.
+  SL_CPC_EP_ID_RAIL_DOWNSTREAM = 3,   ///< RAIL downstream endpoint.
+  SL_CPC_EP_ID_RAIL_UPSTREAM = 4,     ///< RAIL upstream endpoint.
+  SL_CPC_EP_ID_ZIGBEE = 5,            ///< Zigbee EZSP endpoint.
+  SL_CPC_EP_ID_ZWAVE = 6,             ///< Z-Wave endpoint.
+  SL_CPC_EP_ID_CONNECT = 7,           ///< Connect endpoint.
+  SL_CPC_EP_ID_GPIO = 8,              ///< GPIO endpoint.
+  SL_CPC_EP_ID_OPENTHREAD = 9,        ///< OpenThread Spinel endpoint.
+  SL_CPC_EP_ID_WISUN = 10,            ///< Wi-SUN endpoint.
+  SL_CPC_EP_ID_WIFI = 11,             ///< Wi-Fi endpoint (main control).
+  SL_CPC_EP_ID_15_4 = 12,             ///< 802.15.4 endpoint.
+  SL_CPC_EP_ID_CLI = 13,              ///< ASCII-based CLI for stacks and applications.
+  SL_CPC_EP_ID_BLUETOOTH_RCP = 14,    ///< Bluetooth RCP endpoint.
+  SL_CPC_EP_ID_ACP = 15,              ///< ACP endpoint.
+  SL_CPC_EP_ID_SE = 16,               ///< Secure Engine endpoint.
+  SL_CPC_EP_ID_NVM3 = 17,             ///< NVM3 endpoint.
+  SL_CPC_EP_ID_MATTER = 18,           ///< Matter endpoint.
+  SL_CPC_EP_ID_USER_START = 90,       ///< First application-defined endpoint ID.
+  SL_CPC_EP_ID_USER_END = 99,         ///< Last application-defined endpoint ID.
+  SL_CPC_EP_ID_TEMPORARY_START = 100, ///< First dynamically allocated temporary endpoint ID.
+  SL_CPC_EP_ID_TEMPORARY_END = 255    ///< Last dynamically allocated temporary endpoint ID.
+} sl_cpc_reserved_ep_id_t;
 
 /// Endpoint events delivered to @ref sl_cpc_ep_event_cb_t.
 typedef enum sl_cpc_ep_event_type {
   SL_CPC_EP_EVENT_RECV,      ///< Data received.
   SL_CPC_EP_EVENT_SEND_DONE, ///< Transmission completed (acknowledged or aborted).
   SL_CPC_EP_EVENT_CONNECTED, ///< Endpoint connected.
-  SL_CPC_EP_EVENT_CLOSED,    ///< Endpoint closed; resources have been returned.
+  SL_CPC_EP_EVENT_CLOSED,    ///< Endpoint closed, safe to reconnect or deinit after this event.
   SL_CPC_EP_EVENT_ERROR,     ///< Fatal error on the endpoint.
 } sl_cpc_ep_event_type_t;
 
@@ -280,12 +309,21 @@ sl_status_t sl_cpc_ep_init(sl_cpc_ep_t *ep, uint8_t id, uint16_t rx_size, sl_cpc
 /***************************************************************************/ /**
  * Deinitialize an endpoint.
  *
- * The endpoint must have been closed with @ref sl_cpc_ep_close, or never have
- * successfully called @ref sl_cpc_ep_listen / @ref sl_cpc_ep_connect.
+ * If the endpoint was opened with @ref sl_cpc_ep_listen or @ref sl_cpc_ep_connect,
+ * it must be closed with @ref sl_cpc_ep_close prior to calling this function.
+ * Note that @sl_cpc_ep_close is asynchronous, refer to its documentation for
+ * proper usage.
+ *
+ * After a successful return, the endpoint is invalid and must be reinitialized with
+ * @ref sl_cpc_ep_init before it can be used again.
  *
  * @param[in] ep Endpoint to deinitialize.
+ *
+ * @retval SL_STATUS_OK            Endpoint deinitialized.
+ * @retval SL_STATUS_INVALID_STATE Endpoint is still open, closing, or has
+ *                                 already been deinitialized.
  ******************************************************************************/
-void sl_cpc_ep_deinit(sl_cpc_ep_t *ep);
+sl_status_t sl_cpc_ep_deinit(sl_cpc_ep_t *ep);
 
 /***************************************************************************/ /**
  * Get an endpoint's ID.
@@ -386,10 +424,16 @@ sl_status_t sl_cpc_ep_listen(sl_cpc_ep_t *ep, sl_cpc_bus_t *bus);
 sl_status_t sl_cpc_ep_connect(sl_cpc_ep_t *ep, sl_cpc_bus_t *bus);
 
 /***************************************************************************/ /**
- * Close an endpoint.
+ * Start the closure of an endpoint.
  *
- * Asynchronous; @ref SL_CPC_EP_EVENT_CLOSED is delivered when the endpoint can
- * be reused.
+ * Pending sends are cancelled and complete with status @ref SL_STATUS_TRANSMIT_INCOMPLETE.
+ * If the application needs to wait for buffers to be transmitted before
+ * closing, it must wait for @ref SL_CPC_EP_EVENT_SEND_DONE with status @ref
+ * SL_STATUS_OK for every outstanding send.
+ *
+ * When endpoint is closed, event callback is called with event @ref SL_CPC_EP_EVENT_CLOSED.
+ * It can then be re-opened with @ref sl_cpc_ep_listen or @ref sl_cpc_ep_connect,
+ * or destroyed with @ref sl_cpc_ep_deinit.
  *
  * @param[in] ep Endpoint to close.
  ******************************************************************************/

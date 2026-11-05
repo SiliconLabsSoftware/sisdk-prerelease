@@ -3,7 +3,7 @@ from pyradioconfig.parts.rainier.phys.Phys_RAIL_Base_Standard_IEEE802154 import 
 from pyradioconfig.parts.common.phys.phy_common import PHY_COMMON_FRAME_BLE_CODED, PHY_COMMON_FRAME_BLE_AOX
 from py_2_and_3_compatibility import *
 from pyradioconfig.calculator_model_framework.decorators.phy_decorators import do_not_inherit_prod_phys
-from pyradioconfig.parts.rainier.phys.Phys_common import fast_detection_agc_settings
+from pyradioconfig.parts.rainier.phys._Phys_common import fast_detection_agc_settings
 
 
 @do_not_inherit_prod_phys
@@ -97,11 +97,8 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_outputs.MODEM_SICORR_CORRTHRESH2SYMB.override = 219
 
     def _BLE_fast_hopping_settings(self, phy, model):
-    #     #Not yet defined in Rainier reg model
-    #     pass
         self.Bluetooth_LE_Viterbi_noDSA_base(phy, model)
 
-        # default bandwidth will cause halfrate unless forced
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
         phy.profile_inputs.target_bwsel.value = 0.261  # chosen to deliver DEC0=4 and DEC1=2
         phy.profile_inputs.bandwidth_hz.value = 1225000
@@ -109,7 +106,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_inputs.syncword_0.value = long(0x6E8E)
         phy.profile_inputs.syncword_length.value = 16
 
-        ## SYNC-word
         phy.profile_outputs.MODEM_SYNC2_SYNC2.override = 167
         phy.profile_outputs.MODEM_SYNC3_SYNC3.override = 47
         phy.profile_outputs.MODEM_SYNCWORDCTRL_SYNCDET2TH.override = 1
@@ -117,7 +113,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_outputs.MODEM_SYNCWORDCTRL_SYNCBITS2TH.override = 7
         phy.profile_outputs.MODEM_SYNCWORDCTRL_SYNCSWFEC.override = 0
 
-        # AGC settings (consistent with 802154 fast switching AGC settings)
         fast_detection_agc_settings(phy, model)
         phy.profile_outputs.AGC_CTRL0_MODE.override = 4 #Temporary until testing is complete
 
@@ -162,19 +157,13 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_outputs.MODEM_EHDSSSCFG3_DSSSFOETRACKGEAR.override = 2
         phy.profile_outputs.MODEM_EHDSSSCFG3_OPMODE.override = 0
 
-        ### CH power Qualification
         phy.profile_outputs.MODEM_PHDMODCTRL_CHPWRQUAL.override = 1
         phy.profile_outputs.MODEM_LONGRANGE1_AVGWIN.override = 3
         phy.profile_outputs.MODEM_COH0_COHCHPWRTH0.override = 216
         phy.profile_outputs.AGC_CTRL7_SUBPERIOD.override = 1
-        ### Using CH power to detect false DSA detection
-        ### After DSA is detected within 2 DSSS symbol
         phy.profile_outputs.MODEM_COH0_COHCHPWRTH1.override = 64
-        ### If CH power is belower than the thrshold that is configured in COH0_COHCHPWRTH0
-        ### for 8 chips, the DSA detection will be reset
         phy.profile_outputs.MODEM_COH0_COHCHPWRTH2.override = 8
 
-        # # AFC
         phy.profile_outputs.MODEM_AFCADJTX_AFCSCALEE.override = 0
         phy.profile_outputs.MODEM_AFCADJTX_AFCSCALEM.override = 0
         phy.profile_outputs.MODEM_AFCADJRX_AFCSCALEE.override = 3
@@ -182,7 +171,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_outputs.MODEM_AFC_AFCGEAR.override = 3
         phy.profile_outputs.MODEM_VITERBIDEMOD_SYNTHAFC.override = 1
 
-        # Signal Identifier
         self.BLE_1M_Signal_Identifier_Regs(phy, model)
         self.BLE_1M_Signal_Identifier_fast_hopping_overrides(phy, model)
 
@@ -231,7 +219,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
         phy.profile_inputs.base_frequency_hz.value = long(2494630022)
 
-        # default bandwidth will cause halfrate unless forced
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
         phy.profile_inputs.target_bwsel.value = 0.261  # chosen to deliver DEC0=4 and DEC1=2
         phy.profile_inputs.bandwidth_hz.value = 1225000
@@ -271,7 +258,7 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_inputs.shaping_filter_param.value = 0.5
 
         """ Frequency """
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.rx_xtal_error_ppm.value = 62
         phy.profile_inputs.tx_xtal_error_ppm.value = 62
 
@@ -291,27 +278,22 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_inputs.frequency_comp_mode.value = model.vars.frequency_comp_mode.var_enum.INTERNAL_ALWAYS_ON
 
         """ Advanced Overrides """
-        # Decimation and Demod Overrides
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 56831
         phy.profile_outputs.MODEM_CTRL0_FRAMEDETDEL.override = 2
         phy.profile_outputs.MODEM_CTRL6_RXBRCALCDIS.override = 1
         
-        # FRC Overrides
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
         phy.profile_outputs.FRC_PUNCTCTRL_PUNCT0.override = 1
         phy.profile_outputs.FRC_PUNCTCTRL_PUNCT1.override = 1
 
-        # This should be set only on DSA PHYs (PGLYNX-566), so we can clear it.
         phy.profile_outputs.FRC_CTRL_WAITEOFEN.override = 0
 
-        # Viterbi Demod Overrides
         phy.profile_outputs.MODEM_VITERBIDEMOD_SYNTHAFC.override = 1
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI1.override = 65
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI2.override = 45
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI3.override = 24
         phy.profile_outputs.MODEM_VTCORRCFG1_EXPECTHT.override = 5
 
-        #Half rate 1M  and full rate
         phy.profile_outputs.MODEM_VTCORRCFG1_VTFRQLIM.override = 120
         phy.profile_outputs.MODEM_VTCORRCFG0_EXPECTPATT.override = 2491575950
 
@@ -349,7 +331,7 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_inputs.shaping_filter_param.value = 0.5
 
         """ Frequency """
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.rx_xtal_error_ppm.value = 62
         phy.profile_inputs.tx_xtal_error_ppm.value = 62
 
@@ -375,11 +357,9 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_inputs.header_excludesubframewcnt_en.value = True # With Dynamic frame length (DFL) mode, we need to exclude the header (subframe 0) from Word Counter
         phy.profile_inputs.header_white_en.value = False # No whitening in the header (subframe 0)
 
-        # FIXME :MR Do we need this for LR?
         phy.profile_outputs.FRC_FECCTRL_CONVDECODEMODE.override = 0
 
         """ Advanced Overrides """
-        #phy.profile_inputs.target_osr.value = 4
         phy.profile_inputs.src1_range_available_minimum.value = 128
         phy.profile_inputs.demod_select.value = model.vars.demod_select.var_enum.LONGRANGE
         phy.profile_inputs.frequency_comp_mode.value = model.vars.frequency_comp_mode.var_enum.INTERNAL_ALWAYS_ON
@@ -463,11 +443,9 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
 
 
     def BLE_DSA(selfs, phy, model):
-        # Removed from Viper/Rainier
         pass
 
     def BLE_2M_DSA(self, phy, model):
-        # Removed from Viper/Rainier
         pass
 
     def PHY_Bluetooth_LE_Viterbi_noDSA_Hop(self, model, phy_name=None):
@@ -494,7 +472,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_outputs.MODEM_EHDSSSCFG2_DSSSCORRSCHWIN.override = 2
         phy.profile_outputs.MODEM_EHDSSSCFG2_ONESYMBOLMBDD.override = 1
 
-        #### enable SID
 
         phy.profile_outputs.MODEM_SICTRL0_SIMODE.override = 3
         phy.profile_outputs.MODEM_SICTRL0_PEAKNUMTHRESHLW.override = 4
@@ -539,14 +516,12 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
 
         phy.profile_inputs.hop_enable.value = model.vars.hop_enable.var_enum.ENABLED
 
-        # default bandwidth will cause halfrate unless forced
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
         phy.profile_inputs.target_bwsel.value = 0.261  # chosen to deliver DEC0=4 and DEC1=2
         phy.profile_inputs.bandwidth_hz.value = 1225000
         phy.profile_inputs.baudrate_tol_ppm.value = 80
         phy.profile_inputs.syncword_0.value = long(0x6E8E)
         phy.profile_inputs.syncword_length.value = 16
-        ## force
         phy.profile_outputs.AGC_GAINRANGE_PNGAINSTEP.override = 3
         phy.profile_outputs.AGC_HICNTREGION0_HICNTREGION0.override = 4
         phy.profile_outputs.AGC_HICNTREGION0_HICNTREGION1.override = 5
@@ -576,8 +551,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_outputs.MODEM_PHDMODCTRL_PMDETTHD.override = 3
         phy.profile_outputs.MODEM_PRE_PREERRORS.override = 0
 
-        #Force CH filter COE set-1 as same as enhanced DSSS scan phy
-        #to reduce APB register reconfiguration
 
         phy.profile_outputs.MODEM_CHFCOE10_SET1COEFF0.override = 30
         phy.profile_outputs.MODEM_CHFCOE10_SET1COEFF1.override = 87
@@ -595,9 +568,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_outputs.MODEM_CHFCOE16_SET1COEFF13.override = 6813
         phy.profile_outputs.MODEM_CHFCOE16_SET1COEFF14.override = 7436
 
-        # phy.profile_inputs.syncword_dualsync.value = False
-        # phy.profile_inputs.syncword_trisync.value = False
-        # Enhanced DSSS demod settings
         phy.profile_outputs.MODEM_EHDSSSCTRL_EHDSSSEN.override = 0
         phy.profile_outputs.MODEM_EHDSSSCTRL_DSSSTIMEACQUTHD.override = 16
         phy.profile_outputs.MODEM_EHDSSSCTRL_FOEBIAS.override = 1
@@ -615,7 +585,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_outputs.MODEM_FRMSCHTIME_DSARSTSYCNEN.override = 1
 
 
-        #### enable SID
 
         phy.profile_outputs.MODEM_SICTRL0_SIMODE.override = 3
         phy.profile_outputs.MODEM_SICTRL0_PEAKNUMTHRESHLW.override = 4
@@ -660,7 +629,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         self.Bluetooth_LE_Viterbi_noDSA_base(phy, model)
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
 
-        # default bandwidth will cause halfrate unless forced
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
         phy.profile_inputs.target_bwsel.value = 0.23  # chosen to deliver DEC0=4 and DEC1=2
 
@@ -671,8 +639,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
                             phy_name=phy_name)
         self.Bluetooth_LE_Viterbi_noDSA_halfrate_base(phy, model)
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
-        # Increase DCCOMPGEAR to match DC compensation speed with fullrate PHYs.
-        # See https://jira.silabs.com/browse/PGRAINIERVALTEST-91
         phy.profile_outputs.MODEM_DCCOMP_DCCOMPGEAR.override = 4
 
         phy.profile_outputs.rx_sync_delay_ns.override = 50000
@@ -697,7 +663,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_2M
 
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
-        # 2M Full rate
         phy.profile_outputs.MODEM_VTCORRCFG1_VTFRQLIM.override = 60
 
         phy.profile_outputs.rx_sync_delay_ns.override = 12492
@@ -790,7 +755,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
 
         return phy
 
-    # BLE 1M Viterbi
     def Bluetooth_LE_Viterbi_base(self, phy, model):
         PHY_COMMON_FRAME_BLE_AOX(phy, model)
         self.BLE_AGC(phy, model)
@@ -823,7 +787,7 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_inputs.shaping_filter_param.value = 0.5
 
         """ Frequency """
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
         phy.profile_inputs.rx_xtal_error_ppm.value = 20
 
@@ -849,7 +813,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
 
 
     def override_other_shaping_coeff_to_zero(self, phy, start_coeff = 0):
-        # this method is to be used to override unused coefficients to zero.
         total_coeff = 64 # for Viper we have maximum of 64 filter tap coefficients
         for coeff in range(start_coeff, total_coeff):
             register_group = int(coeff / 4)
@@ -857,21 +820,11 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
             exec(command)
 
     def PHY_Bluetooth_1M_Concurrent(self, model, phy_name='PHY_Bluetooth_1M_Concurrent'):
-        # Copied from bobcat and changed base PHY from DSA to noDSA
-        # Start with the BLE LR 125k PHY
         phy = self.PHY_Bluetooth_LongRange_NOdsa_125kbps(model, phy_name=phy_name)
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.CONCURRENT
         phy.profile_inputs.preamble_pattern.value = 0b10
 
-        # The concurrent PHY needs to have:
-        # Enable concurrent mode
-        # FRC = BLE LR 125k, with added sub-frame description for BLE 1M uncoded
-        # Demod = BLE LR 125k
-        # TRECS/Viterbi = BLE 1M
-        # BLE LR = BLE LR 125k
-        # DSA = No DSA
 
-        # Enable concurrent mode
         phy.profile_outputs.MODEM_COCURRMODE_CONCURRENT.override = 1
 
         phy.profile_outputs.MODEM_VITERBIDEMOD_SYNTHAFC.override = 1
@@ -886,7 +839,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_outputs.MODEM_VTCORRCFG1_VTFRQLIM.override = 130
         phy.profile_outputs.MODEM_VTCORRCFG0_EXPECTPATT.override = 2491575950
 
-        # Overrides for TX mode (copied from BLE 1M Fullrate)
         phy.profile_inputs.base_frequency_hz.value = long(2402000000)
         phy.profile_inputs.channel_spacing_hz.value = 1000000
         phy.profile_outputs.FRC_FCD0_ADDTRAILTXDATA.override = 0
@@ -902,12 +854,9 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
 
         phy.profile_outputs.FRC_FECCTRL_CONVMODE.override = 0
 
-        # : Set for both Bobcat and Lynx
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 56831  # : copy clock gating settings from BLE 1M
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI3.override = 32  # Needed because BW is wider than non-concurrent 1M
 
-        # : needed as part of IPMCUSRW-771 workaround
-        # : https://jira.silabs.com/browse/IPMCUSRW-771
         phy.profile_outputs.MODEM_LONGRANGE1_LOGICBASEDLRDEMODGATE.override = 0
         phy.profile_outputs.MODEM_LONGRANGE6_LRSPIKETHD.override = 0 # MCUW_RADIO_CFG-1705, RAIL_LIB-6014 to be compatible with lynx workaround of MCUW_RADIO_CFG-1701
 
@@ -927,10 +876,8 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         phy.profile_outputs.AGC_CTRL7_SUBPERIOD.override = 1
         phy.profile_outputs.MODEM_LONGRANGE_LRBLEDSA.override = 0
         """
-        # Enable noise detector
         self.BLE_1M_Signal_Identifier_fast_hopping_overrides(phy, model)
         self.BLE_1M_Signal_Identifier_Regs(phy, model)
-        # Reduce RF settling time by 5 us (cannot be used in 2 channel mode)
         model.vars.adc_clock_mode.var_value = model.vars.adc_clock_mode.var_enum.VCODIV
         phy.profile_inputs.rxdc_power_save_mode.value = model.vars.rxdc_power_save_mode.var_enum.SYNTH
         phy.profile_inputs.rxdc_power_save_time_us.value = 20
@@ -952,21 +899,13 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
 
 
 
-    # ##############
-    # Prod PHY definition with new names
-    # #############
 
     def PHY_Bluetooth_1M_AOX(self, model, phy_name='PHY_Bluetooth_1M_AOX'):
-        # bobcat uses half-rate PHY compared to Lynx, due to jitter and settling improvements
-        # For Bobcat BLE 1M, use PHY_Bluetooth_1M_AOX_prod as there is no difference in TX SYNTH PLL BW
         phy = self.PHY_Bluetooth_LE_Viterbi_noDSA(model, phy_name=phy_name)
         phy.profile_inputs.aox_enable.value = model.vars.aox_enable.var_enum.ENABLED
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.AOX_1M
         self.BLE_RX_AOX_CHF_Coeffs(phy, model)
 
-        # Override for AoX
-        # 1 Mbps AoX SYNTH PLL should track the non-AOX PHY for whatever is needed for emissions / PA-VCO coupling.
-        # Both 1 MHz BW, 1.5 MHz BW pass AoX mod char, do whatever it takes in the non-AOX PHY to make it pass mod char.
 
         phy.profile_outputs.rx_sync_delay_ns.override = 50000
         phy.profile_outputs.rx_eof_delay_ns.override = 11000
@@ -976,15 +915,11 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         return phy
 
     def PHY_Bluetooth_2M_AOX(self, model, phy_name="PHY_Bluetooth_2M_AOX"):
-        # always use full-rate PHY on all parts
-        # For Bobcat BLE 2M, there are separate PHY_Bluetooth_2M_AOX_prod and PHY_Bluetooth_2M_prod to meet emissions
-        # Both PHYs must support AoX RX, the difference is in the SYNTH PLL setting + shaping filter for TX
         phy = self.PHY_Bluetooth_LE_2M_Viterbi_noDSA_fullrate(model, phy_name)
         phy.profile_inputs.aox_enable.value = model.vars.aox_enable.var_enum.ENABLED
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.AOX_2M
         self.BLE_RX_AOX_CHF_Coeffs(phy, model)
 
-        # Override for AoX
         self.BLE_2M_AOX_TX_Shaping_Coeffs(phy, model)
         model.vars.synth_tx_mode.value_forced = model.vars.synth_tx_mode.var_enum.MODE4  # 3M PLL BW - this is important for CTE modulation characteristic
         """
@@ -1001,13 +936,8 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         return phy
 
 
-    # ##############
-    # Define BLE TX shaping coeffs for Rainier
-    # #############
 
     def BLE_TX_Shaping_Coeffs(self, phy, model):
-        # BLE1M Bandwidth Setting = Gear9
-        # PGRAINIER-1908
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 3
 
         phy.profile_outputs.MODEM_SHAPING0_COEFF0.override = 1
@@ -1062,8 +992,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         self.override_other_shaping_coeff_to_zero(phy, start_coeff=48)
 
     def BLE_2M_TX_Shaping_Coeffs(self, phy, model):
-        # BLE2M Bandwidth Setting = Gear12
-        # PGRAINIER-1908
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 3
 
         phy.profile_outputs.MODEM_SHAPING0_COEFF0.override = -1
@@ -1118,7 +1046,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         self.override_other_shaping_coeff_to_zero(phy, start_coeff=48)
 
     def BLE_2M_AOX_TX_Shaping_Coeffs(self, phy, model):
-        # not yet compensated for synth response on rainier. Currently a copy from Bobcat
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 3
 
         phy.profile_outputs.MODEM_SHAPING0_COEFF0.override = 0
@@ -1173,7 +1100,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         self.override_other_shaping_coeff_to_zero(phy, start_coeff=48)
 
     def BLE_TX_Shaping_Coeffs_IQMOD(self, phy, model):
-        # to be used with IQMOD
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 2
 
         phy.profile_outputs.MODEM_SHAPING0_COEFF0.override = 6
@@ -1188,7 +1114,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         self.override_other_shaping_coeff_to_zero(phy, start_coeff=8)
 
     def BLE_2M_TX_Shaping_Coeffs_IQMOD(self, phy, model):
-        # to be used with IQMOD
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 2
 
         phy.profile_outputs.MODEM_SHAPING0_COEFF0.override = 6
@@ -1203,7 +1128,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         self.override_other_shaping_coeff_to_zero(phy, start_coeff=8)
 
     def BLE_2M_TX_Shaping_Coeffs_2bt_IQMOD(self, phy, model):
-        # to be used with IQMOD for bt = 2.0
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 2
 
         phy.profile_outputs.MODEM_SHAPING0_COEFF0.override = 0
@@ -1218,9 +1142,6 @@ class PhysRailBaseStandardBleRainier(PHYS_Bluetooth_LE_Bobcat):
         self.override_other_shaping_coeff_to_zero(phy, start_coeff=8)
 
     def BLE_2M_AOX_TX_Shaping_Coeffs_IQMOD(self, phy, model):
-        # to be used with IQMOD
-        # Fb=2mbps, bw=2.5 MHz 2dB df2 boost from Optimized shaping coefficients for panther PLL_Ranga_MSW_v2.xlsx
-        # This should be used with MODE4 = 3 MHz PLL BW (Column S)
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 3
 
         phy.profile_outputs.MODEM_SHAPING0_COEFF0.override = 0

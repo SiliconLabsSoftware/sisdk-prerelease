@@ -86,14 +86,10 @@ extern void Reset_Handler_C(void);
     (is_core_reset) = (_reset_flag != 0);                \
   } while (0)
 
-/** @brief Resume: Verifies if the wake-up is from EM2 deep sleep AND a valid saved context exists,
-   then restores CONTROL, MSP, PSP from saved_stack, pop; branch to Reset_Handler_C if not. */
+/** @brief Resume if EM2 was entered and a valid saved context exists.
+    Otherwise branches to Reset_Handler_C. */
 #define SLI_POWER_MANAGER_RESUME()                                                   \
   __ASM volatile (                                                                   \
-    "ldr   r0, [%[emu], %[rstcause_off]]\n"         /* RSTCAUSE */                   \
-    "lsr   r0, r0, %[em2_shift]\n"                  /* EM2 bit to LSB */             \
-    "and   r0, r0, #1\n"                                                             \
-    "cbz   r0, 1f\n"                                                                 \
     "ldr   r0, [%[stack], %[marker_off]]\n"         /* marker at offsetof(marker) */ \
     "cmp   r0, %[marker]\n"                                                          \
     "bne   1f\n"                                                                     \
@@ -106,13 +102,10 @@ extern void Reset_Handler_C(void);
     "bx    lr\n"                                                                     \
     "1: bx %[reset_handler]\n"                                                       \
     :                                                                                \
-    :[emu] "r" (EMU),                                                                \
-    [rstcause_off] "r" (offsetof(EMU_TypeDef, RSTCAUSE)),                            \
-    [em2_shift] "I" (_EMU_RSTCAUSE_EM2_SHIFT),                                       \
-    [stack] "r" (&sli_power_manager_saved_stack),                                    \
+    :[stack] "r" (&sli_power_manager_saved_stack),                                   \
     [marker_off] "I" (offsetof(sli_power_manager_saved_stack_t, marker)),            \
     [marker] "r" (SLI_POWER_MANAGER_SUSPEND_MARKER),                                 \
-    [reset_handler] "r" (Reset_Handler_C)                                             \
+    [reset_handler] "r" (Reset_Handler_C)                                            \
     : "r0", "r1", "r2", "r3", "memory"                                               \
     );
 

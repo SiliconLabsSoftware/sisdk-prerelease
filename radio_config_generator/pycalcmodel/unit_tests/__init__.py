@@ -15,16 +15,12 @@ Test modules:
 - test_dict_standalone: Standalone dictionary functionality tests
 
 Usage:
-    # Run all tests
     python -m pytest
 
-    # Run specific test module
     python -m pytest test_variable.py
 
-    # Run with coverage
     python -m pytest --cov=pycalcmodel
 
-    # Use the test runner
     python run_tests.py
 """
 

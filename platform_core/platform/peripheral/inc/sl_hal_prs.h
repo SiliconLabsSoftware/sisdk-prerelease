@@ -456,7 +456,8 @@ __INLINE void sl_hal_prs_sync_connect_channel_producer(uint8_t channel,
  *          This output is used as the output of channel A.
  *
  * @param[in] channel_a PRS Channel for the A input.
- * @param[in] channel_b PRS Channel for the B input.
+ * @param[in] channel_b PRS Channel for the B input, or
+ *                      `_PRS_ASYNC_CH_CTRL_AUXSEL_DEFAULT` when no aux input is used.
  * @param[in] logic The logic function to use when combining the Channel A and Channel B.
  *                  The output of the logic function is the output of Channel A.
  *                  Function like AND, OR, XOR, NOT and more are available.
@@ -468,7 +469,8 @@ __INLINE void sl_hal_prs_async_combine_signals(uint8_t channel_a,
   SL_LOG_DEBUG_ASSERT(channel_a < SL_HAL_PRS_ASYNC_CHAN_COUNT);
 
 #if defined(_PRS_ASYNC_CH_CTRL_AUXSEL_MASK)
-  SL_LOG_DEBUG_ASSERT(channel_b < SL_HAL_PRS_ASYNC_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT((channel_b < SL_HAL_PRS_ASYNC_CHAN_COUNT)
+                      || (channel_b == (uint8_t)_PRS_ASYNC_CH_CTRL_AUXSEL_DEFAULT));
 
   PRS->ASYNC_CH[channel_a].CTRL = (PRS->ASYNC_CH[channel_a].CTRL
                                    & ~(_PRS_ASYNC_CH_CTRL_FNSEL_MASK

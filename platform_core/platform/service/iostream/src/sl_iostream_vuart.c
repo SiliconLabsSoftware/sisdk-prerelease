@@ -44,8 +44,6 @@
 #include "sl_iostream.h"
 #include "sl_iostream_swo.h"
 #include "sl_status.h"
-#include "sl_assert.h"
-
 #include "SEGGER_RTT.h"
 #include "sl_rtt_buffer_index.h"
 

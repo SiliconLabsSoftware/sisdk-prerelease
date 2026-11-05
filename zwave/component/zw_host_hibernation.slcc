@@ -12,6 +12,9 @@ description: >
   frame (0xFE).
 
   Configure SL_HOST_HIBERNATION_DEVICE_TABLE_SIZE and SL_HOST_HIBERNATION_KEEP_ALIVE_CHECK_PERIOD_MS
+documentation:
+  docset: z-wave
+  document: zwave-api/serial-api
 
 package: zwave
 quality: evaluation

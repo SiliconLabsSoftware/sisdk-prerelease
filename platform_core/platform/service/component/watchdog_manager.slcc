@@ -34,6 +34,7 @@ include:
 provides:
 - name: watchdog_manager
 requires:
+- name: log_none
 - name: status
 - name: hal_wdog
 - name: hal_emu

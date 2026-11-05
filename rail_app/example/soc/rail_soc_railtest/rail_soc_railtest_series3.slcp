@@ -146,6 +146,14 @@ configuration:
     value: 1
   - name: SL_RAIL_UTIL_INIT_CALIBRATION_ONETIME_NOTIFY_INST0_ENABLE
     value: 1
+# --------------------------- RAIL init, FIFO settings -------------------------
+  - name: SL_RAIL_UTIL_INIT_TX_FIFO_INST0_BYTES
+    value: 2048
+  - name: SL_RAIL_UTIL_INIT_RX_FIFO_INST0_BYTES
+    value: 2048
+# --------------------------- RAIL init, queue settings ------------------------
+  - name: SL_RAIL_UTIL_INIT_RX_PACKET_QUEUE_INST0_ENTRIES
+    value: 16
 # ------------------------ RAIL init, Auto Transitions -------------------------
   - name: SL_RAIL_UTIL_INIT_TRANSITIONS_INST0_ENABLE
     value: 1

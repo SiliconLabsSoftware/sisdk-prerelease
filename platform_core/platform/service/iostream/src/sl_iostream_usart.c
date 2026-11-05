@@ -54,6 +54,7 @@
 #include "em_usart.h"
 #include "em_gpio.h"
 
+#include "sl_log_helper.h"
 /*******************************************************************************
  *********************   LOCAL FUNCTION PROTOTYPES   ***************************
  ******************************************************************************/
@@ -253,7 +254,7 @@ void sl_iostream_usart_irq_handler(sl_iostream_uart_t *iostream_uart)
   #endif
 
   // Unhandled IRQ Flag. Please check what bit is set in IF and open a bug report.
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 }
 
 /*******************************************************************************

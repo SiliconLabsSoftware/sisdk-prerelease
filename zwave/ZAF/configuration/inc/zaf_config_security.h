@@ -8,6 +8,13 @@
 #include "zaf_config.h"
 #include "ZW_security_api.h"
 
+/**
+ * @addtogroup ZAF
+ * @{
+ * @addtogroup ZAF_ConfigSecurity Configuration Security
+ * @{
+ */
+
 #if ZAF_CONFIG_REQUEST_KEY_S0 == 1
 #define S0_BIT                  SECURITY_KEY_S0_BIT
 #else
@@ -33,5 +40,10 @@
 #endif
 
 #define ZAF_CONFIG_REQUESTED_SECURITY_KEYS (S0_BIT | S2_UNAUTHENTICATED_BIT | S2_AUTHENTICATED_BIT | S2_ACCESS_BIT)
+
+/**
+ * @}
+ * @}
+ */
 
 #endif /* ZAF_CONFIG_SECURITY_H_ */

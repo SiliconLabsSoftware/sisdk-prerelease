@@ -31,7 +31,7 @@
 #include "em_device.h"
 #include "sl_common.h"
 #include "sl_core.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sli_interrupt_manager.h"
 #include "sl_memory_manager_region.h"
 
@@ -236,13 +236,14 @@ sl_interrupt_manager_irq_handler_t *sli_interrupt_manager_set_irq_table(sl_inter
   sl_interrupt_manager_irq_handler_t * current;
 
   // ASSERT if misaligned with respect to the VTOR register implementation.
-  EFM_ASSERT(((uint32_t)table & ~SCB_VTOR_TBLOFF_Msk) == 0U);
+  SL_LOG_DEBUG_ASSERT(((uint32_t)table & ~SCB_VTOR_TBLOFF_Msk) == 0U);
 
   // ASSERT if misaligned with respect to the vector table size.
   // The vector table address must be aligned at its size rounded up to nearest 2^n.
-  EFM_ASSERT(((uint32_t)table
+  SL_LOG_DEBUG_ASSERT(((uint32_t)table
               & ((1UL << (32UL - __CLZ((handler_count * 4UL) - 1UL))) - 1UL))
              == 0UL);
+  (void)handler_count;
 
   // Disable all interrupts while updating the vector table.
   sl_interrupt_manager_disable_interrupts();
@@ -333,7 +334,7 @@ void sl_interrupt_manager_init(void)
 
   for (int32_t irqn = 0; irqn < EXT_IRQ_COUNT; irqn++) {
     sli_interrupt_manager_irq_access_t access = sli_interrupt_manager_get_irq_access(irqn);
-    EFM_ASSERT(access != SLI_INTERRUPT_MANAGER_IRQ_ACCESS_INVALID);
+    SL_LOG_DEBUG_ASSERT(access != SLI_INTERRUPT_MANAGER_IRQ_ACCESS_INVALID);
     // Skipping an inaccessible interrupt leaves its priority at the reset
     // value. That is intended.
     if (access == SLI_INTERRUPT_MANAGER_IRQ_ACCESS_ACCESSIBLE) {
@@ -382,9 +383,9 @@ void sl_interrupt_manager_enable_interrupts(void)
  ******************************************************************************/
 void sl_interrupt_manager_disable_irq(int32_t irqn)
 {
-  EFM_ASSERT((irqn >= 0) && (irqn < EXT_IRQ_COUNT));
+  SL_LOG_DEBUG_ASSERT((irqn >= 0) && (irqn < EXT_IRQ_COUNT));
 #if SLI_INTERRUPT_MANAGER_CHECK_IRQ_ACCESS == 1
-  EFM_ASSERT(sli_interrupt_manager_get_irq_access(irqn)
+  SL_LOG_DEBUG_ASSERT(sli_interrupt_manager_get_irq_access(irqn)
              == SLI_INTERRUPT_MANAGER_IRQ_ACCESS_ACCESSIBLE);
 #endif
   disable_interrupt(irqn);
@@ -396,9 +397,9 @@ void sl_interrupt_manager_disable_irq(int32_t irqn)
  ******************************************************************************/
 void sl_interrupt_manager_enable_irq(int32_t irqn)
 {
-  EFM_ASSERT((irqn >= 0) && (irqn < EXT_IRQ_COUNT));
+  SL_LOG_DEBUG_ASSERT((irqn >= 0) && (irqn < EXT_IRQ_COUNT));
 #if SLI_INTERRUPT_MANAGER_CHECK_IRQ_ACCESS == 1
-  EFM_ASSERT(sli_interrupt_manager_get_irq_access(irqn)
+  SL_LOG_DEBUG_ASSERT(sli_interrupt_manager_get_irq_access(irqn)
              == SLI_INTERRUPT_MANAGER_IRQ_ACCESS_ACCESSIBLE);
 #endif
   enable_interrupt(irqn);
@@ -410,7 +411,7 @@ void sl_interrupt_manager_enable_irq(int32_t irqn)
  ******************************************************************************/
 bool sl_interrupt_manager_is_irq_disabled(int32_t irqn)
 {
-  EFM_ASSERT((irqn >= 0) && (irqn < EXT_IRQ_COUNT));
+  SL_LOG_DEBUG_ASSERT((irqn >= 0) && (irqn < EXT_IRQ_COUNT));
 
   return (NVIC->ISER[irqn >> 5U] & (1UL << (irqn & 0x1FUL))) == 0UL;
 }
@@ -427,10 +428,10 @@ bool sl_interrupt_manager_is_irq_blocked(int32_t irqn)
 #if (__CORTEX_M >= 3)
   uint32_t basepri;
 
-  EFM_ASSERT((irqn >= MemoryManagement_IRQn)
+  SL_LOG_DEBUG_ASSERT((irqn >= MemoryManagement_IRQn)
              && (irqn < (IRQn_Type)EXT_IRQ_COUNT));
 #else
-  EFM_ASSERT((irqn >= SVCall_IRQn) && ((IRQn_Type)irqn < EXT_IRQ_COUNT));
+  SL_LOG_DEBUG_ASSERT((irqn >= SVCall_IRQn) && ((IRQn_Type)irqn < EXT_IRQ_COUNT));
 #endif
 
   if ((__get_PRIMASK() & 1U) != 0U) {
@@ -615,9 +616,9 @@ uint32_t sl_interrupt_manager_get_irq_priority(int32_t irqn)
 {
   uint32_t irq_priority = 0;
 
-  EFM_ASSERT((irqn >= -CORTEX_INTERRUPTS) && (irqn < EXT_IRQ_COUNT));
+  SL_LOG_DEBUG_ASSERT((irqn >= -CORTEX_INTERRUPTS) && (irqn < EXT_IRQ_COUNT));
 #if SLI_INTERRUPT_MANAGER_CHECK_IRQ_ACCESS == 1
-  EFM_ASSERT(sli_interrupt_manager_get_irq_access(irqn)
+  SL_LOG_DEBUG_ASSERT(sli_interrupt_manager_get_irq_access(irqn)
              == SLI_INTERRUPT_MANAGER_IRQ_ACCESS_ACCESSIBLE);
 #endif
 
@@ -632,10 +633,10 @@ uint32_t sl_interrupt_manager_get_irq_priority(int32_t irqn)
  ******************************************************************************/
 void sl_interrupt_manager_set_irq_priority(int32_t irqn, uint32_t priority)
 {
-  EFM_ASSERT((irqn >= -CORTEX_INTERRUPTS) && (irqn < EXT_IRQ_COUNT));
-  EFM_ASSERT(priority <= LOWEST_NVIC_PRIORITY);
+  SL_LOG_DEBUG_ASSERT((irqn >= -CORTEX_INTERRUPTS) && (irqn < EXT_IRQ_COUNT));
+  SL_LOG_DEBUG_ASSERT(priority <= LOWEST_NVIC_PRIORITY);
 #if SLI_INTERRUPT_MANAGER_CHECK_IRQ_ACCESS == 1
-  EFM_ASSERT(sli_interrupt_manager_get_irq_access(irqn)
+  SL_LOG_DEBUG_ASSERT(sli_interrupt_manager_get_irq_access(irqn)
              == SLI_INTERRUPT_MANAGER_IRQ_ACCESS_ACCESSIBLE);
 #endif
 

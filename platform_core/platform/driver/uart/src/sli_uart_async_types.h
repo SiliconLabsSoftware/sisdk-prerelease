@@ -31,7 +31,7 @@
 #ifndef SLI_UART_ASYNC_TYPES_H
 #define SLI_UART_ASYNC_TYPES_H
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_dma_channel_device.h"
 #include "sl_slist.h"
 
@@ -117,7 +117,7 @@ static inline sli_uart_async_tx_transfer_t *sli_uart_async_tx_transfer_from_node
  ******************************************************************************/
 static inline sli_uart_async_transfer_t *sli_uart_transfer_list_pop(sl_slist_node_t **list_head)
 {
-  EFM_ASSERT(list_head != NULL);
+  SL_LOG_DEBUG_ASSERT(list_head != NULL);
 
   return sli_uart_async_transfer_from_node(sl_slist_pop(list_head));
 }
@@ -132,8 +132,8 @@ static inline sli_uart_async_transfer_t *sli_uart_transfer_list_pop(sl_slist_nod
 static inline void sli_uart_transfer_list_push_back(sl_slist_node_t **list_head,
                                                     sli_uart_async_transfer_t *async_tfer)
 {
-  EFM_ASSERT(list_head != NULL);
-  EFM_ASSERT(async_tfer != NULL);
+  SL_LOG_DEBUG_ASSERT(list_head != NULL);
+  SL_LOG_DEBUG_ASSERT(async_tfer != NULL);
 
   sl_slist_push_back(list_head, &async_tfer->node);
 }
@@ -148,8 +148,8 @@ static inline void sli_uart_transfer_list_push_back(sl_slist_node_t **list_head,
 static inline void sli_uart_transfer_list_push(sl_slist_node_t **list_head,
                                                sli_uart_async_transfer_t *async_tfer)
 {
-  EFM_ASSERT(list_head != NULL);
-  EFM_ASSERT(async_tfer != NULL);
+  SL_LOG_DEBUG_ASSERT(list_head != NULL);
+  SL_LOG_DEBUG_ASSERT(async_tfer != NULL);
 
   sl_slist_push(list_head, &async_tfer->node);
 }

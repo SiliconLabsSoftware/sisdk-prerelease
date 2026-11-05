@@ -4,9 +4,7 @@
 {% block content -%}
 #include "em_device.h"
 #include "{{filename}}.h"
-{%- if rail_secondary_config and series == 3 %}
-#include "sl_code_classification.h"
-{%- endif %}
+{{-storeInRamInclude()-}}
 {%- if not rail_secondary_config %}
 {%- if multiPhyConfig.commonStructures.convDecodeBufferSize > 0 %}
 
@@ -46,13 +44,11 @@ void RAILCb_ConfigFrameTypeLength(RAIL_Handle_t railHandle,
 {% endif %}
 {%- endfor %}
 {%- for frameTypeEntryName, frameTypeEntry in multiPhyConfig.commonStructures.frameTypeEntries.items() %}
-{{storeInRam()-}}
 static RAIL_FrameType_t {{frameTypeEntryName}} = {
   (uint16_t *)&{{frameTypeEntry.frameLen.value._uniqueName}}[0], {{frameTypeEntry.offset}}, {{frameTypeEntry.mask}}, {{frameTypeEntry.isValid|listToHexEncoding}}, {{frameTypeEntry.addressFilter|listToHexEncoding}}
 };
 {% endfor %}
 {%- for lookupTableEntryName, lookupTableEntry in multiPhyConfig.commonStructures.lookupTableEntries.items() %}
-{{storeInRam()-}}
 uint32_t {{lookupTableEntry['tableName']}}[] = {
   {%- for items in lookupTableEntry['values']|batch(4) %}
   {{ items|join(", ") -}},
@@ -171,7 +167,6 @@ __ALIGNED(4) static const uint8_t {{stackInfoName}}[{{stackInfoEntry|length}}] =
 {% endif %}
 
 {%- for entryName, entry in multiPhyConfig.commonStructures.railChannelConfigEntryAttrEntries.items() %}
-{{storeInRam()-}}
 static RAIL_ChannelConfigEntryAttr_t {{entryName}} = {
 #if RAIL_SUPPORTS_OFDM_PA
   {
@@ -275,6 +270,8 @@ static const uint32_t {{phyInfoEntryName}}[] = {
   (uint32_t) NULL,
 {%- endif %}
   (uint32_t) {{phyInfoEntry.phyInfoData.trecsPreBitsToSync}}UL,
+  (uint32_t) {{phyInfoEntry.phyInfoData.preambleDurationUs}}UL,
+  (uint32_t) {{phyInfoEntry.phyInfoData.syncwordDurationUs}}UL,
 };
 {% endfor %}
 {%- for modemConfigName, modemConfig in multiPhyConfig.commonStructures.modemConfigEntriesBase.items() %}

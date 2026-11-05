@@ -1,5 +1,4 @@
 
-# -*- coding: utf-8 -*-
 
 from . static import Base_RM_Register
 from . SEQ_S_field import *

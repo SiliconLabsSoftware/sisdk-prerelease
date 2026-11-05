@@ -1,8 +1,11 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from pyradioconfig.parts.margay.phys.Phys_Studio_Connect import PHYS_connect_Margay
+from pycalcmodel.core.common import IPCategory
 
 
 class PHYS_Studio_Connect_Serval(IPhy):
+
+    ip_category = IPCategory.LPW
 
     def PHY_Studio_Connect_915MHz_2GFSK_500kbps(self, model):
         phy = PHYS_connect_Margay().PHY_Studio_Connect_915MHz_2GFSK_500kbps(model)

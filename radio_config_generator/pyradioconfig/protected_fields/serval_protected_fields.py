@@ -18,7 +18,6 @@ class ProtectedFieldsServal(ProtectedFieldsBase):
 
     """
 
-    # Copy-pasted from Margay
     PTE_PROTECTED_FIELD_DICT = {
         'RAC_RFBIASCAL_RFBIASCALTC': 0x1A,
         'RAC_RFBIASCAL_RFBIASCALVREF': 'cal',
@@ -86,7 +85,6 @@ class ProtectedFieldsServal(ProtectedFieldsBase):
         'RAC_CLKMULTEN0_CLKMULTREG2ADJV': 0x0,
     }
 
-    # : List of fields found in PTE, but allow radio configurator to override the value
     PTE_PROTECTED_FIELD_EXCEPTIONS = [
         'RAC_PGACAL_PGAOFFPCALQ',  #: 'cal',  # : cal by fw
         'RAC_PGACAL_PGAOFFPCALI',  #: 'cal',  # : cal by fw
@@ -98,7 +96,6 @@ class ProtectedFieldsServal(ProtectedFieldsBase):
         'MODEM_IRCALCOEFWR1_CIVWD',  # : Set by RAIL
     ]
 
-    # : List of fields protected by RAIL
     RAIL_PROTECTED_FIELDS = [
         'AGC_CTRL0_RSSISHIFT',
         'AGC_CTRL1_CCATHRSH',
@@ -132,6 +129,5 @@ class ProtectedFieldsServal(ProtectedFieldsBase):
         'RAC_CLKMULTEN0_CLKMULTREG2ADJV',
     ]
 
-    # : List of fields that are found in PTE list, but does not need to be protected by RAIL
     RAIL_PROTECTED_FIELD_EXCEPTIONS = [
     ]

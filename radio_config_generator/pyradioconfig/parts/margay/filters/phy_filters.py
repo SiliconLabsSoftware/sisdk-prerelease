@@ -2,10 +2,10 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy_filter import IPhy
 
 
 class PhyFilters(IPhyFilter):
-    # Studio black list (files removed before Studio distribution)
+    included_in_distribution_release = True
+
     customer_phy_groups = []
 
-    # Studio white list (these PHYs show in Studio as proprietary starting points)
     simplicity_studio_phy_groups = [
         'Phys_Default',
         'Phys_Studio_Base',
@@ -25,11 +25,14 @@ class PhyFilters(IPhyFilter):
         'Phys_Studio_IEEE802154_BPSK',
     ]
 
-    # Special designation for simulation PHYs
+    simplicity_studio_non_ui_phy_groups = [
+        'Phys_RAIL_Base_Standard_BLE',
+        'Phys_RAIL_Base_Standard_IEEE802154',
+        'Phys_RAIL_Base_Standard_IEEE802154GB',
+    ]
+
     sim_tests_phy_groups = []
 
-    # Special designation for non-functional PHYs
     non_functional_phy_groups = []
 
-    # PHYs to exclude from regression
     virtual_phy_groups = ['phys_studio_wisun_fan_1_1_virtual', 'Phys_Internal_Base_ValOnly_aliases']

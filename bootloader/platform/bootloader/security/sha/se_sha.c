@@ -59,7 +59,7 @@ int sha_x_process(SHA_Type_t algo,
   sli_se_mailbox_command_add_output(&command, &iv_out);
 
   sli_se_mailbox_execute_command(&command);
-  volatile sli_se_mailbox_response_t res = sli_se_mailbox_read_response();
+  sli_se_mailbox_response_t res = sli_se_mailbox_read_response();
 
   if (res == SLI_SE_RESPONSE_OK) {
     return BOOTLOADER_OK;

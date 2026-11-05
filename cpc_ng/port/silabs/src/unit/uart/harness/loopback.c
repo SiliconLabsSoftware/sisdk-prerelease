@@ -37,12 +37,10 @@
 #include "sl_iostream.h"
 #include "sl_iostream_handles.h"
 #include "sl_iostream_init_eusart_instances.h"
-#include "sl_iostream_uart.h"
 
 #include "loopback.h"
 
 #define CPC_DRV_UART_TEST_INJECTOR_IOSTREAM_HANDLE sl_iostream_exp_2_handle
-#define CPC_DRV_UART_TEST_INJECTOR_UART_HANDLE sl_iostream_uart_exp_2_handle
 
 typedef struct {
   sl_iostream_t *injector;
@@ -58,8 +56,6 @@ sl_status_t loopback_bind(void)
 
   s_loopback.injector = CPC_DRV_UART_TEST_INJECTOR_IOSTREAM_HANDLE;
 
-  sl_iostream_uart_set_read_block(CPC_DRV_UART_TEST_INJECTOR_UART_HANDLE, false);
-
   return SL_STATUS_OK;
 }
 
@@ -70,10 +66,9 @@ void loopback_inject_bytes_at(unsigned int lineno, const uint8_t *data, size_t l
   }
 
   UNITY_TEST_ASSERT_NOT_NULL(data, lineno, "loopback_inject_bytes: data is NULL");
+  UNITY_TEST_ASSERT_NOT_NULL(s_loopback.injector, lineno, "loopback_inject_bytes: injector UART is not bound");
 
-  for (size_t i = 0; i < length; i++) {
-    sl_status_t status = sl_iostream_write(s_loopback.injector, &data[i], 1U);
+  sl_status_t status = sl_iostream_write(s_loopback.injector, data, length);
 
-    UNITY_TEST_ASSERT_EQUAL_INT(SL_STATUS_OK, (int)status, lineno, "loopback_inject_bytes: iostream write failed");
-  }
+  UNITY_TEST_ASSERT_EQUAL_INT(SL_STATUS_OK, (int)status, lineno, "loopback_inject_bytes: iostream write failed");
 }

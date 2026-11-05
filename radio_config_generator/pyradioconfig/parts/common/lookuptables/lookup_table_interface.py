@@ -7,8 +7,6 @@ class LookupTableResult(TypedDict):
     Type definition for the expected format of lookup table results.
     Keys should be register/table names (strings) and values should be lists of integers.
     """
-    # This allows any string key with list[int] values
-    # Example: {'reg1': [1, 2, 3], 'reg2': [4, 5, 6]}
     pass
 
 
@@ -84,7 +82,6 @@ class LookupTableInterface(ABC):
         
         for key, value in result.items():
             if key.startswith('_') and key.endswith('_metadata'):
-                # Validate metadata structure (handles both single table and concatenated table metadata)
                 if not isinstance(value, dict):
                     raise TypeError(f"{key} must be a dictionary")
                 validated_result[key] = value
@@ -96,7 +93,6 @@ class LookupTableInterface(ABC):
             if not isinstance(value, list):
                 raise TypeError(f"Dictionary values must be lists, got {type(value)} for key: {key}")
             
-            # Convert all values to integers and validate
             try:
                 validated_values = [int(v) for v in value]
                 validated_result[key] = validated_values
@@ -104,29 +100,22 @@ class LookupTableInterface(ABC):
             except (ValueError, TypeError) as e:
                 raise ValueError(f"All values in list must be convertible to integers for key '{key}': {e}")
         
-        # Add input parameters to metadata if not already present
-        # Use a single shared metadata entry for all tables generated from the same inputs
         if table_keys:
-            # Create metadata key by concatenating all table names
             metadata_key = f"_{'_'.join(sorted(table_keys))}_metadata"
             
             if metadata_key not in validated_result:
-                # Check if any table-specific metadata already exists
                 has_table_specific_metadata = any(f'_{key}_metadata' in validated_result for key in table_keys)
                 
                 if not has_table_specific_metadata:
-                    # Create indexed metadata for multiple input parameter sets
                     metadata_dict = {
                         'table_count': len(table_keys),
                         'table_names': sorted(table_keys)
                     }
                     
-                    # If we have multiple input parameter sets, add index mapping instead of input_parameters
                     if isinstance(self.input_parameters, list) and len(self.input_parameters) > 1:
                         for i, input_param in enumerate(self.input_parameters):
                             metadata_dict[f'_index_{i}'] = input_param
                     else:
-                        # For single input parameter set, use the traditional input_parameters field
                         metadata_dict['input_parameters'] = self.input_parameters
                     
                     validated_result[metadata_key] = metadata_dict

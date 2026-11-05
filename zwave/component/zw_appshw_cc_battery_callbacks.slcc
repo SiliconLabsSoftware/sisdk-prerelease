@@ -3,6 +3,9 @@ label: Command Class Battery AppsHw
 category: Z-Wave|AppsHw
 description: >
   Provides Command Class Battery callback implementations for Z-Wave battery-powered applications.  Reports battery status including full, empty states or remaining energy percentage to communicate  battery level information to the Z-Wave network for device monitoring.
+documentation:
+  docset: z-wave
+  document: zwave-api/apps-hw
 package: zwave
 quality: production
 ui_hints:

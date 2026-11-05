@@ -18,31 +18,11 @@ class ProtectedFieldsSol(ProtectedFieldsBase):
 
     """
 
-    # From https://confluence.silabs.com/pages/viewpage.action?spaceKey=PGSOL&title=Test+Plan+-+Feature+Write
-    # Omitting CMU, ULFRCO/LFRCO/HFRCO, EMU, DCDC, USB, ACMP, IADC, VDAC, cal fields
     PTE_PROTECTED_FIELD_DICT = {
-        # "DPLL0_OFFSET_K0": "cal",
-        # "PLL_VTRTRIM_CALTC": 0x1A,
-        # "PLL_VTRTRIM_CALVREF": "cal",
-        # "PLL_VTRTRIM_CALBIAS": "cal",
-        # "PLL_TRIM_DCOTEMPADJ": "cal",
         "RFFPLL0_RFBIASCAL_CALVREF": "cal",
         "RFFPLL0_RFBIASCAL_CALBIAS": "cal",
         "RFFPLL0_RFBIASCAL1_LDOHIGHCURRENT": "cal",
         "RFFPLL0_RFBIASCAL1_NONFLASHMODE": "cal",
-        # "HFXO0_TRIM_SHUNTLVLANA": "cal",
-        # "HFXO0_TRIM_VTRREGTRIMANA": "cal",
-        # "HFXO0_TRIM_VTRCORETRIMANA": "cal",
-        # "HFXO0_LOWPWRCTRL_SHUNTBIASANA": "cal",
-        # "HFXO0_INTERNALCTRL_ENCLKMULTANA": 0x1,
-        # "HFXO0_INTERNALCTRL_SQBUFFILTANA": 0x2,
-        # "HFXO0_XTALCTRL_CTUNEFIXANA": 0x2,
-        # "HFXO0_XTALCTRL1_COREBIASBUFOUTDELTA": 0x7,
-        # "HFXO0_XTALCTRL1_CTUNEXIBUFOUTDELTA": 0x3,
-        # "HFXO0_PKDETCTRL_PKDDETTHHIGH": 0x6,
-        # "HFXO0_XOUTTRIM_VREGBIASTRIMIBCOREANA": "cal",
-        # "HFXO0_XOUTTRIM_VREGBIASTRIMIBNDIOANA": "cal",
-        # "HFXO0_BUFOUTTRIM_VTRTRIMANA": "cal",
         "RAC_RFBIASCAL_RFBIASCALTC": 0x1A,
         "RAC_RFBIASCAL_RFBIASCALVREF": "cal",
         "RAC_RFBIASCAL_RFBIASCALBIAS": "cal",
@@ -113,7 +93,6 @@ class ProtectedFieldsSol(ProtectedFieldsBase):
         "FEFILT0_IRCAL_MUISHF": 0x0
     }
 
-    # : List of fields found in PTE, but allow radio configurator to override the value
     PTE_PROTECTED_FIELD_EXCEPTIONS = [
         "RAC_SYTRIM0_SYTRIMCHPREGAMPBIAS", # : PTE Set and forget value. Radio Configurator also sets to the same val.
         "RAC_SYTRIM0_SYTRIMCHPREGAMPBW", # : PTE Set and forget value. Radio Configurator also sets to the same val.
@@ -129,7 +108,6 @@ class ProtectedFieldsSol(ProtectedFieldsBase):
         "FEFILT0_IRCALCOEFWR1_CIVWD",  # : set by RAIL
     ]
 
-    # : List of fields protected by RAIL
     RAIL_PROTECTED_FIELDS = [
         'AGC_CTRL0_RSSISHIFT',
         'AGC_CTRL1_CCATHRSH',
@@ -168,11 +146,9 @@ class ProtectedFieldsSol(ProtectedFieldsBase):
         'RAC_IFADCTRIM0_IFADCLDOSHUNTCURLVL1',
         'RAC_PGACTRL_PGAPOWERMODE',
         'MODEM_ANARAMPCTRL_ANARAMPLUTODEV',
-        # : TODO These fields should be protected but it is missing from the rail_script list
         'RAC_PATRIM3_TXTRIMOREGPSR',
         'RAC_CLKMULTEN0_CLKMULTREG2ADJV',
     ]
 
-    # : List of fields that are found in PTE list, but does not need to be protected by RAIL
     RAIL_PROTECTED_FIELD_EXCEPTIONS = [
     ]

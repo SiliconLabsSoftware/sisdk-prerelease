@@ -14,6 +14,8 @@
 #ifndef SL_RAIL_UTIL_RF_SWITCH_H
 #define SL_RAIL_UTIL_RF_SWITCH_H
 
+#include <stdbool.h>
+
 // Antenna-id -> control-pin GPIO pattern presets. These associate a GPIO drive
 // pattern with each antenna id for an external RF switch driven from the
 // antenna-switch GPIO(s) (configured via the AoX Antenna utility). bit0 drives
@@ -35,5 +37,10 @@
  * Configure the external RF switch from compile-time settings.
  */
 void sl_rail_util_rf_switch_init(void);
+
+/**
+ * @return True if RF switch settings may be changed.
+ */
+bool sl_rail_util_rf_switch_config_allowed(void);
 
 #endif // SL_RAIL_UTIL_RF_SWITCH_H

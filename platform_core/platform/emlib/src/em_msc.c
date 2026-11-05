@@ -31,7 +31,7 @@
 #include "em_msc.h"
 #if defined(MSC_COUNT) && (MSC_COUNT > 0)
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_cmu.h"
 #include "sl_common.h"
 #include "em_core.h"
@@ -40,7 +40,7 @@
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
 #if defined(__ICCARM__)
-/* Suppress warnings originating from use of EFM_ASSERT() with IAR Embedded Workbench */
+/* Suppress warnings originating from use of SL_LOG_DEBUG_ASSERT() with IAR Embedded Workbench */
 #pragma diag_suppress=Ta022,Ta023
 #endif
 
@@ -541,7 +541,7 @@ MSC_Status_TypeDef MSC_ErasePage(uint32_t *startAddress)
   bool wasLocked;
 
   // Address must be aligned to page boundary
-  EFM_ASSERT((((uint32_t)startAddress) & (FLASH_PAGE_SIZE - 1U)) == 0);
+  SL_LOG_DEBUG_ASSERT((((uint32_t)startAddress) & (FLASH_PAGE_SIZE - 1U)) == 0);
 
 #if defined(_CMU_CLKEN1_MASK)
   CMU->CLKEN1_SET = CMU_CLKEN1_MSC;
@@ -617,9 +617,9 @@ MSC_Status_TypeDef MSC_WriteWord(uint32_t *address,
   bool wasLocked;
 
   // Check alignment (must be aligned to words)
-  EFM_ASSERT(((uint32_t)address & 0x3U) == 0);
+  SL_LOG_DEBUG_ASSERT(((uint32_t)address & 0x3U) == 0);
   // Check number of bytes, must be divisable by four
-  EFM_ASSERT((numBytes & 0x3U) == 0);
+  SL_LOG_DEBUG_ASSERT((numBytes & 0x3U) == 0);
 
 #if defined(_CMU_CLKEN1_MASK)
   CMU->CLKEN1_SET = CMU_CLKEN1_MSC;
@@ -724,7 +724,7 @@ MSC_Status_TypeDef MSC_WriteWordDma(int ch,
   uint32_t dst = (uint32_t) address;
   bool wasLocked;
 
-  EFM_ASSERT((ch >= 0) && (ch < (int)DMA_CHAN_COUNT));
+  SL_LOG_DEBUG_ASSERT((ch >= 0) && (ch < (int)DMA_CHAN_COUNT));
 
   LDMA->EN_SET = 0x1;
   LDMAXBAR->CH[ch].REQSEL = LDMAXBAR_CH_REQSEL_SOURCESEL_MSC
@@ -805,8 +805,8 @@ void MSC_Init(void)
 
 #if defined(_EMU_STATUS_VSCALE_MASK) && defined(_SILICON_LABS_32B_SERIES_1)
   /* VSCALE must be done. Flash erase and write requires VSCALE2. */
-  EFM_ASSERT(!(EMU->STATUS & _EMU_STATUS_VSCALEBUSY_MASK));
-  EFM_ASSERT((EMU->STATUS & _EMU_STATUS_VSCALE_MASK) == EMU_STATUS_VSCALE_VSCALE2);
+  SL_LOG_DEBUG_ASSERT(!(EMU->STATUS & _EMU_STATUS_VSCALEBUSY_MASK));
+  SL_LOG_DEBUG_ASSERT((EMU->STATUS & _EMU_STATUS_VSCALE_MASK) == EMU_STATUS_VSCALE_VSCALE2);
 #endif
 
   /* Unlock the MSC module. */
@@ -1049,7 +1049,7 @@ MSC_Status_TypeDef MSC_LoadWriteData(uint32_t* data,
   /* Write the rest as a double word write if wordsPerDataPhase == 2 */
   if (numWords > 0) {
     /* Requires a system core clock at 1MHz or higher */
-    EFM_ASSERT(SystemCoreClock >= 1000000);
+    SL_LOG_DEBUG_ASSERT(SystemCoreClock >= 1000000);
     wordIndex = 0;
     while (wordIndex < numWords) {
       if (!useWDouble) {
@@ -1126,15 +1126,15 @@ MSC_Status_TypeDef MSC_WriteWordI(uint32_t *address,
   MSC->LOCK = MSC_LOCK_LOCKKEY_UNLOCK;
 
   /* Check alignment (must be aligned to words). */
-  EFM_ASSERT(((uint32_t) address & 0x3) == 0);
+  SL_LOG_DEBUG_ASSERT(((uint32_t) address & 0x3) == 0);
 
   /* Check a number of bytes. Must be divisible by four. */
-  EFM_ASSERT((numBytes & 0x3) == 0);
+  SL_LOG_DEBUG_ASSERT((numBytes & 0x3) == 0);
 
 #if defined(_EMU_STATUS_VSCALE_MASK) && defined(_SILICON_LABS_32B_SERIES_1)
   /* VSCALE must be done and flash write requires VSCALE2. */
-  EFM_ASSERT(!(EMU->STATUS & _EMU_STATUS_VSCALEBUSY_MASK));
-  EFM_ASSERT((EMU->STATUS & _EMU_STATUS_VSCALE_MASK) == EMU_STATUS_VSCALE_VSCALE2);
+  SL_LOG_DEBUG_ASSERT(!(EMU->STATUS & _EMU_STATUS_VSCALEBUSY_MASK));
+  SL_LOG_DEBUG_ASSERT((EMU->STATUS & _EMU_STATUS_VSCALE_MASK) == EMU_STATUS_VSCALE_VSCALE2);
 #endif
 
   /* Enable writing to the MSC module. */
@@ -1142,7 +1142,7 @@ MSC_Status_TypeDef MSC_WriteWordI(uint32_t *address,
 
   /* Convert bytes to words. */
   numWords = numBytes >> 2;
-  EFM_ASSERT(numWords > 0);
+  SL_LOG_DEBUG_ASSERT(numWords > 0);
 
   /* The following loop splits the data into chunks corresponding to flash pages.
      The address is loaded only once per page because the hardware automatically
@@ -1244,11 +1244,11 @@ MSC_Status_TypeDef MSC_ErasePage(uint32_t *startAddress)
   MSC->LOCK = MSC_LOCK_LOCKKEY_UNLOCK;
 
   /* An address must be aligned to pages. */
-  EFM_ASSERT((((uint32_t) startAddress) & (FLASH_PAGE_SIZE - 1)) == 0);
+  SL_LOG_DEBUG_ASSERT((((uint32_t) startAddress) & (FLASH_PAGE_SIZE - 1)) == 0);
 #if defined(_EMU_STATUS_VSCALE_MASK) && defined(_SILICON_LABS_32B_SERIES_1)
   /* VSCALE must be done and flash erase requires VSCALE2. */
-  EFM_ASSERT(!(EMU->STATUS & _EMU_STATUS_VSCALEBUSY_MASK));
-  EFM_ASSERT((EMU->STATUS & _EMU_STATUS_VSCALE_MASK) == EMU_STATUS_VSCALE_VSCALE2);
+  SL_LOG_DEBUG_ASSERT(!(EMU->STATUS & _EMU_STATUS_VSCALEBUSY_MASK));
+  SL_LOG_DEBUG_ASSERT((EMU->STATUS & _EMU_STATUS_VSCALE_MASK) == EMU_STATUS_VSCALE_VSCALE2);
 #endif
 
   /* Enable writing to the MSC module. */
@@ -1439,11 +1439,11 @@ MSC_Status_TypeDef MSC_WriteWordDma(int ch,
   uint32_t dst = (uint32_t) address;
   bool wasLocked;
 
-  EFM_ASSERT((ch >= 0) && (ch < (int)DMA_CHAN_COUNT));
+  SL_LOG_DEBUG_ASSERT((ch >= 0) && (ch < (int)DMA_CHAN_COUNT));
 
   // Verify that the data argument is in RAM
   if (((uint32_t)data < SRAM_BASE) || ((uint32_t)data > (SRAM_BASE + SRAM_SIZE))) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return mscReturnInvalidAddr;
   }
 
@@ -1595,14 +1595,14 @@ static void mscEccReadWriteExistingPio(const MSC_EccBank_Typedef *eccBank)
   } else if (eccBank->base == ECC_RAM1_MEM_BASE) {
     ctrlreg = &ECC_CTRL1_REG;
   } else {
-    EFM_ASSERT(0);
+    SL_LOG_DEBUG_ASSERT(0);
     return;
   }
 #else
   ctrlreg = &ECC_CTRL_REG;
 #endif /* defined(DMEM_COUNT) && (DMEM_COUNT == 2) */
 
-  EFM_ASSERT(ramptr < endptr);
+  SL_LOG_DEBUG_ASSERT(ramptr < endptr);
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
   || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_7) \
@@ -1710,12 +1710,12 @@ static void mscEccReadWriteExistingDma(uint32_t start,
   volatile uint32_t dmaDesc[ECC_DMA_DESCS][4];
   uint32_t chMask = (1 << channels[0]) | (1 << channels[1]);
   /* Assert that the 2 DMA channel numbers are different. */
-  EFM_ASSERT(channels[0] != channels[1]);
+  SL_LOG_DEBUG_ASSERT(channels[0] != channels[1]);
 
   /* Make sure ECC_RAM_SIZE_MAX is a multiple of ECC_DMA_DESC_SIZE in order
      to match the total xfer size of the descriptor chain with the largest
      ECC RAM bank. */
-  EFM_ASSERT((ECC_RAM_SIZE_MAX % ECC_DMA_DESC_SIZE) == 0);
+  SL_LOG_DEBUG_ASSERT((ECC_RAM_SIZE_MAX % ECC_DMA_DESC_SIZE) == 0);
 
   /* Initialize LDMA descriptor chain. */
   do {
@@ -1746,7 +1746,7 @@ static void mscEccReadWriteExistingDma(uint32_t start,
      dmaDesc array. */
   if ((descCnt < 2) || (descCnt > ECC_DMA_DESCS)) {
     while (true) {
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
     }
   }
 
@@ -1999,12 +1999,12 @@ void MSC_DmemPortMapSet(MSC_DmemMaster_TypeDef master, uint8_t port)
   /* make sure master is within the mask of port map that can be changed
    * make sure port is a sensible value
    */
-  EFM_ASSERT(((1 << master) & _SYSCFG_DMEM0PORTMAPSEL_MASK) != 0x0);
+  SL_LOG_DEBUG_ASSERT(((1 << master) & _SYSCFG_DMEM0PORTMAPSEL_MASK) != 0x0);
 
 #if defined(DMEM_COUNT) && (DMEM_COUNT == 1)
-  EFM_ASSERT(port < DMEM_NUM_PORTS);
+  SL_LOG_DEBUG_ASSERT(port < DMEM_NUM_PORTS);
 #elif defined(DMEM_COUNT) && (DMEM_COUNT == 2)
-  EFM_ASSERT(port < DMEM0_NUM_PORTS);
+  SL_LOG_DEBUG_ASSERT(port < DMEM0_NUM_PORTS);
 #endif
 
 #if defined(CMU_CLKEN0_SYSCFG)
@@ -2048,13 +2048,13 @@ void MSC_DmemPortMapSet(MSC_DmemMaster_TypeDef master, uint8_t port)
 void MSC_PortSetPriority(MSC_PortPriority_TypeDef portPriority)
 {
 #if defined(DMEM_COUNT) && (DMEM_COUNT == 1)
-  EFM_ASSERT(portPriority < ((DMEM_NUM_PORTS + 1) << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT));
+  SL_LOG_DEBUG_ASSERT(portPriority < ((DMEM_NUM_PORTS + 1) << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT));
 
   BUS_RegMaskedWrite(&DMEM->CTRL,
                      _MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK,
                      (uint32_t)portPriority << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT);
 #elif defined(DMEM_COUNT) && (DMEM_COUNT == 2)
-  EFM_ASSERT(portPriority < ((DMEM0_NUM_PORTS + 1) << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT));
+  SL_LOG_DEBUG_ASSERT(portPriority < ((DMEM0_NUM_PORTS + 1) << _MPAHBRAM_CTRL_AHBPORTPRIORITY_SHIFT));
 
   BUS_RegMaskedWrite(&DMEM0->CTRL,
                      _MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK,

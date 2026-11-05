@@ -4,6 +4,9 @@ category: Z-Wave
 description: >
   The AppsHw component collects the board-specific description files. It configures and initializes
   the LED to show different working states, and configures the board's ADC.
+documentation:
+  docset: z-wave
+  document: zwave-api/apps-hw
 package: zwave
 quality: production
 metadata:

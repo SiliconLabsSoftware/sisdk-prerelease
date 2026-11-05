@@ -34,7 +34,7 @@
 #include "sli_memory_manager.h"
 #include "sli_memory_manager_log.h"
 #include "sli_memory_manager_retention_control.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_bit.h"
 #include "em_device.h"
 #include "sl_core.h"
@@ -133,10 +133,10 @@ sl_status_t sl_memory_create_pool_advanced(sl_memory_reservation_t *reservation_
   bool user_reservation = true;
 
   // Validate arguments.
-  EFM_ASSERT(block_size > 0);
-  EFM_ASSERT(block_count > 0);
+  SL_LOG_DEBUG_ASSERT(block_size > 0);
+  SL_LOG_DEBUG_ASSERT(block_count > 0);
   // Check proper alignment characteristics.
-  EFM_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
+  SL_LOG_DEBUG_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
              || (SL_MATH_IS_PWR2(align)
                  && (align <= SL_MEMORY_BLOCK_ALIGN_512_BYTES)));
 
@@ -283,11 +283,11 @@ sl_status_t sl_memory_pool_alloc(sl_memory_pool_t *pool_handle,
   cur_bank = cur_free_cnt->bank_head;
 
   // We should have at least one bank.
-  EFM_ASSERT(cur_bank != NULL);
+  SL_LOG_DEBUG_ASSERT(cur_bank != NULL);
   cur_block = cur_bank->block_head;
 
   // We should have at least one free block.
-  EFM_ASSERT(cur_block != NULL);
+  SL_LOG_DEBUG_ASSERT(cur_block != NULL);
   *block = CLEAR_ODD_FLAG(cur_block->block_addr);
 
   // Increment bank counter for this new block (retained size is updated inside the macro).
@@ -593,10 +593,10 @@ sl_status_t sl_memory_heap_create_pool_advanced(sl_memory_heap_t *heap,
   sl_status_t status;
 
   // Validate arguments.
-  EFM_ASSERT(block_size > 0);
-  EFM_ASSERT(block_count > 0);
+  SL_LOG_DEBUG_ASSERT(block_size > 0);
+  SL_LOG_DEBUG_ASSERT(block_count > 0);
   // Check proper alignment characteristics.
-  EFM_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
+  SL_LOG_DEBUG_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
              || (SL_MATH_IS_PWR2(align)
                  && (align <= SL_MEMORY_BLOCK_ALIGN_512_BYTES)));
 

@@ -32,8 +32,6 @@ class CalcModulatorRainier(Calc_Modulator_Bobcat):
                                desc='Flag used treat clk_dac as synchronous to clk_mod and bypass afifo')
 
     def calc_tx_mode(self, model):
-        # for rainier we will be using PHMOD by default
-        # https://confluence.silabs.com/display/PGRAINIER/PGRAINIERVALTEST+-+2023-08-09+-+Meeting+Note+-+IQMOD+vs.+PHMOD+in+Production
         model.vars.modulator_select.value = model.vars.modulator_select.var_enum.PH_MOD
 
     def calc_txmod_reg(self, model):
@@ -80,8 +78,6 @@ class CalcModulatorRainier(Calc_Modulator_Bobcat):
         baudrate = model.vars.baudrate.value
         fxo = model.vars.xtal_frequency.value * 1.0
 
-        # given baud_rate and fxo we should choose BR2M so that SRC is as close to 1.0
-        # as possible to get best performance
         src_distance_to_1 = float("inf")  # set
         br2m = 0  # set default value
         for br2m_value in range(2 ** model.vars.MODEM_TXCTRL_BR2M.get_bit_width()):
@@ -103,18 +99,13 @@ class CalcModulatorRainier(Calc_Modulator_Bobcat):
         modulator_select = model.vars.modulator_select.value
         br2m = model.vars.br2m.value
 
-        # If IQMOD data path is selected
         if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD:
             if br2m:
-                # modulation multiplier is running at (f_xo/2)
                 mod_samp_rate_factor = 2
             else:
-                # modulation multiplier is running at (f_xo/4)
                 mod_samp_rate_factor = 4
 
-        # If PHMOD data path is selected
         else:
-            # modulation multiplier is running at f_xo
             mod_samp_rate_factor = 1
 
         return mod_samp_rate_factor
@@ -137,14 +128,10 @@ class CalcModulatorRainier(Calc_Modulator_Bobcat):
         br2m = model.vars.br2m.value
         baudrate = model.vars.baudrate.value
 
-        # setup inputs for modindex calculations
         mod_samp_rate_factor = self.get_mod_sample_rate_factor(model)
 
-        # calculate modindex
         if modformat == model.vars.modulation_type.var_enum.OQPSK:
             src_output_rate = fxo / 2 if br2m else fxo / 4
-            # conv_gain = shaping_filter_output_rate/ src_output_rate
-            # conv_gain = (T_fxo * 2 / T_shape), freq --> phase --> freq
             conv_gain = 8 * baudrate / src_output_rate
             modindex = 0.5 * mod_samp_rate_factor * baudrate / (2 * shaping_filter_gain * conv_gain * fxo)
 
@@ -170,29 +157,13 @@ class CalcModulatorRainier(Calc_Modulator_Bobcat):
         max_m = (2 ** model.vars.MODEM_MODINDEX_MODINDEXM.get_bit_width()) - 1
         max_e = (2 ** model.vars.MODEM_MODINDEX_MODINDEXE.get_bit_width()) - 1
 
-        # convert fractional modindex into m * 2^e format
         m, e = CALC_Utilities().frac2exp(max_m, modindex, up=True)
 
-        # ############
-        # In series 3, RTL implementation of the modindex multiplier is as follows
-        # input -> 16bit fractional value (fixed point implementation, signed 5.11, sign bit included)
-        # output -> 20bit fractional value (fixed point implementation, signed 1.19, sign bit included)
-        # mod_index -> mantissa * 2^exp
-        # for any fractional value 'a' with fixed point binary implementation of lets say 5.11
-        # a = (value of 16 bit assuming no implied binary point) * 2^-11
-        # therefore,
-        # output = input * 2^-11 * (mantissa * 2^exp) = input * (mantissa * 2^exp) * 2^-11
-        # since required output is needed with 19 fractional bits, output can be re-written as
-        # output = input * (mantissa * 2^exp * 2^8) * 2^-19 = input * (mantissa * 2^exp+8) * 2^-19
-        # therefore we need to make this adjustment in exp(e)
-        # ############
         e = e + 8
 
-        # MODEINDEXE is a signed value, therefore wrap if value is negative
         if e < 0:
             e += (2 ** model.vars.MODEM_MODINDEX_MODINDEXE.get_bit_width())
 
-        # verify number fits into register
         if m > max_m:
             m = max_m
         if e > max_e:
@@ -213,7 +184,6 @@ class CalcModulatorRainier(Calc_Modulator_Bobcat):
                 self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE_DOUBLED_MODINDEXE, int(modindex_e+1))
                 self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE_DOUBLED_MODINDEXM, int(modindex_m))
             else:
-                # check if we can double Mantisaa
                 if modindex_m * 2 < pow(2, model.vars.SEQ_MODINDEX_CALC_MODINDEXM.get_bit_width()) - 1:
                     self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE_DOUBLED_MODINDEXE, int(modindex_e))
                     self._reg_write(model.vars.SEQ_MODINDEX_CALC_MODINDEXE_DOUBLED_MODINDEXM, int(modindex_m*2))
@@ -235,11 +205,9 @@ class CalcModulatorRainier(Calc_Modulator_Bobcat):
         m = model.vars.MODEM_MODINDEX_MODINDEXM.value
         e = model.vars.MODEM_MODINDEX_MODINDEXE.value
 
-        # MODEINDEXE is a signed value
         if e > 15:
             e -= 32
 
-        # removing the adjustment from exp(e) done for bit fixed point implementation adjustment
         e = e - 8
         model.vars.modindex_actual.value = 1.0 * m * 2**e
 
@@ -290,20 +258,16 @@ class CalcModulatorRainier(Calc_Modulator_Bobcat):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # Load model values into local variables
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
         baudrate = model.vars.baudrate.value
 
-        # calculate baudrate to fxo ratio
         interp_factor = 2.0 if model.vars.br2m.value else 4.0
         ratio = (8.0 * baudrate) / (xtal_frequency_hz / interp_factor)
-        # Load local variables back into model variables
         model.vars.txbr_ratio.value = ratio
 
     def calc_txbr_reg(self, model):
 
         ratio = model.vars.txbr_ratio.value
-        # TXBRNUM is a 16bits fractional number
         self._reg_write(model.vars.MODEM_TXBR_TXBRNUM, int(round(ratio * (2 ** 16))))
 
     def calc_txbr_actual(self, model):
@@ -315,17 +279,14 @@ class CalcModulatorRainier(Calc_Modulator_Bobcat):
         """
 
         num = model.vars.MODEM_TXBR_TXBRNUM.value * 1.0
-        # TXBRNUM is a 16bits fractional number
         ratio = num / (2 ** 16)
         model.vars.txbr_ratio_actual.value = ratio
 
     def calc_synchronous_mixdac_clk(self, model):
-        # default to disabled, only HADM PHYs will set the profile input
         model.vars.synchronous_mixdac_clk.value = False
 
     def calc_synchronous_mixdac_clk_regs(self, model):
         if not model.vars.synchronous_mixdac_clk.value:
-            # normal async front filtering
             self._reg_write(model.vars.MODEM_TXCTRL_TXAFIFOBYP, 0)
         else:
             self._reg_write(model.vars.MODEM_TXCTRL_TXAFIFOBYP, 1)

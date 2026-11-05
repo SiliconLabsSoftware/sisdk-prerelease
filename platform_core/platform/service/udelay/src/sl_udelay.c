@@ -29,7 +29,7 @@
  ******************************************************************************/
 #include "sl_udelay.h"
 #include "em_device.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include <stdbool.h>
 
 /* The cycle count per loop iteration varies by architecture.
@@ -54,13 +54,13 @@ void sl_udelay_wait(unsigned us)
 
   freq_khz = SystemCoreClockGet() / 1000U;
   if (freq_khz == 0) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return;
   }
 
   ns_period = 1000000U / freq_khz;
   if (ns_period == 0) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return;
   }
 

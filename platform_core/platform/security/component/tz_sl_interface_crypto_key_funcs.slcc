@@ -12,28 +12,54 @@ requires:
 - name: trustzone_nonsecure
 template_contribution:
 - name: tfm_interface_func
-  value: tfm_crypto_get_key_attributes
+  value:
+    function: tfm_crypto_get_key_attributes
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_reset_key_attributes
+  value:
+    function: tfm_crypto_reset_key_attributes
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_import_key
+  value:
+    function: tfm_crypto_import_key
+    key_checks:
+    - source: key_attributes
+      invec: 1
 
 - name: tfm_interface_func
-  value: tfm_crypto_destroy_key
+  value:
+    function: tfm_crypto_destroy_key
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_export_key
+  value:
+    function: tfm_crypto_export_key
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_export_public_key
+  value:
+    function: tfm_crypto_export_public_key
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_purge_key
+  value:
+    function: tfm_crypto_purge_key
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_copy_key
+  value:
+    function: tfm_crypto_copy_key
+    key_checks:
+    - source: packed_key_id
+    - source: key_attributes
+      invec: 1
 
 
 documentation:

@@ -1,6 +1,3 @@
-# Access WeakSet through the weakref module.
-# This code is separated-out because it is needed
-# by abc.py to load everything else at startup.
 
 from _weakref import ref
 
@@ -8,13 +5,8 @@ __all__ = ['WeakSet']
 
 
 class _IterationGuard(object):
-    # This context manager registers itself in the current iterators of the
-    # weak container, such as to delay all removals until the context manager
-    # exits.
-    # This technique should be relatively thread-safe (since sets are).
 
     def __init__(self, weakcontainer):
-        # Don't create cycles
         self.weakcontainer = ref(weakcontainer)
 
     def __enter__(self):
@@ -43,7 +35,6 @@ class WeakSet(object):
                 else:
                     self.data.discard(item)
         self._remove = _remove
-        # A list of keys to be removed
         self._pending_removals = []
         self._iterating = set()
         if data is not None:
@@ -60,8 +51,6 @@ class WeakSet(object):
             for itemref in self.data:
                 item = itemref()
                 if item is not None:
-                    # Caveat: the iterator will keep a strong reference to
-                    # `item` until it is resumed or closed.
                     yield item
 
     def __len__(self):

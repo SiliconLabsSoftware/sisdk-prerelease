@@ -348,7 +348,6 @@ int32_t sl_hal_gpio_configure_external_interrupt(const sl_gpio_t *gpio,
                           (unsigned long)flags);
   }
 
-  SL_LOG_DEBUG_ASSERT(int_no != SL_GPIO_INTERRUPT_UNAVAILABLE);
   return int_no;
 }
 
@@ -386,7 +385,6 @@ int32_t sl_hal_gpio_configure_wakeup_em4_external_interrupt(const sl_gpio_t *gpi
 #if defined(HSIO_PRESENT)
   bool is_hsio = sl_hal_gpio_is_hsio_port(gpio->port);
   if (is_hsio) {
-    SL_LOG_DEBUG_ASSERT(false);
     return SL_GPIO_INTERRUPT_UNAVAILABLE;
   }
 #endif
@@ -398,7 +396,6 @@ int32_t sl_hal_gpio_configure_wakeup_em4_external_interrupt(const sl_gpio_t *gpi
   }
 
   if (em4_int_no == SL_GPIO_INTERRUPT_UNAVAILABLE || int_no != em4_int_no) {
-    SL_LOG_DEBUG_ASSERT(false);
     return SL_GPIO_INTERRUPT_UNAVAILABLE;
   }
 

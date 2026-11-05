@@ -498,15 +498,15 @@ SL_ENUM(sl_hal_emu_dcdc_vrl_pulse_num_t) {
 
 /// DCDC VRL regulator-off delay before applying the load.
 SL_ENUM(sl_hal_emu_dcdc_vrl_regulator_off_delay_t) {
-  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_0US    = _DCDC_VRLCFG_VRLCNTLOAD_regoff0us,           ///< 0 us regulator-off delay.
-  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_2P5US  = _DCDC_VRLCFG_VRLCNTLOAD_regoff2p5us,         ///< 2.5 us regulator-off delay.
-  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_5US    = _DCDC_VRLCFG_VRLCNTLOAD_regoff5us,           ///< 5 us regulator-off delay.
-  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_7P5US  = _DCDC_VRLCFG_VRLCNTLOAD_regoff7p5us,         ///< 7.5 us regulator-off delay.
-  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_10US   = _DCDC_VRLCFG_VRLCNTLOAD_regoff10us_default,  ///< 10 us regulator-off delay.
-  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_12P5US = _DCDC_VRLCFG_VRLCNTLOAD_regoff12p5us,        ///< 12.5 us regulator-off delay.
-  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_15US   = _DCDC_VRLCFG_VRLCNTLOAD_regoff15us,          ///< 15 us regulator-off delay.
-  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_17P5US = _DCDC_VRLCFG_VRLCNTLOAD_regoff17p5us,        ///< 17.5 us regulator-off delay.
-  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_20US   = _DCDC_VRLCFG_VRLCNTLOAD_regoff20us           ///< 20 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_0US    = _DCDC_VRLCFG_VRLCNTLOAD_delay_0us,     ///< 0 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_2P5US  = _DCDC_VRLCFG_VRLCNTLOAD_delay_2p5us,   ///< 2.5 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_5US    = _DCDC_VRLCFG_VRLCNTLOAD_delay_5us,     ///< 5 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_7P5US  = _DCDC_VRLCFG_VRLCNTLOAD_delay_7p5us,   ///< 7.5 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_10US   = _DCDC_VRLCFG_VRLCNTLOAD_delay_10us,    ///< 10 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_12P5US = _DCDC_VRLCFG_VRLCNTLOAD_delay_12p5us,  ///< 12.5 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_15US   = _DCDC_VRLCFG_VRLCNTLOAD_delay_15us,    ///< 15 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_17P5US = _DCDC_VRLCFG_VRLCNTLOAD_delay_17p5us,  ///< 17.5 us regulator-off delay.
+  SL_HAL_EMU_DCDC_VRL_REGULATOR_OFF_DELAY_20US   = _DCDC_VRLCFG_VRLCNTLOAD_delay_20us     ///< 20 us regulator-off delay.
 };
 #endif /* defined(DCDC_VRLCFG_VRLEN) */
 
@@ -1254,6 +1254,16 @@ __INLINE void sl_hal_emu_clear_reset_cause(void)
   EMU->CMD_SET = EMU_CMD_RSTCAUSECLR;
 }
 
+/***************************************************************************//**
+ * @brief
+ *   Check whether the last reset was caused by an EM4 wake-up.
+ *
+ * @return
+ *   True if the last reset was caused by an EM4 wake-up, false otherwise or
+ *   if the device does not report EM4 as a reset cause.
+ ******************************************************************************/
+bool sl_hal_emu_is_reset_cause_em4(void);
+
 #if defined(_EMU_RSTCTRL_MASK)
 /***************************************************************************//**
  * @brief
@@ -1775,6 +1785,14 @@ __INLINE void sl_hal_emu_dcdc_clear_pending_interrupts(uint32_t flags)
  *    #if defined(SL_HAL_EMU_DCDC_BUCK_PRESENT)
  *    // Initialize clocks for DCDC
  *    sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_DCDC);
+ *    #if defined(_DCDC_EN_EN_MASK)
+ *    // Enable the DCDC before writing its registers
+ *    sl_hal_emu_enable_dcdc();
+ *    #endif
+ *    #if defined(_DCDC_LOCK_MASK)
+ *    // Unlock DCDC registers before writing them
+ *    sl_hal_emu_dcdc_unlock();
+ *    #endif
  *    // Initialize DCDC regulator
  *    sl_hal_emu_dcdc_init_t init = SL_HAL_EMU_DCDC_INIT_DEFAULT;
  *    sl_hal_emu_init_dcdc(&init);

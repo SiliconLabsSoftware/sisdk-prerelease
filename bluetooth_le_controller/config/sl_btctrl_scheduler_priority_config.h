@@ -121,6 +121,24 @@
 #define SL_BT_CONTROLLER_SCHEDULER_PRI_CONN_MAX         0
 #endif // SL_BT_CONTROLLER_SCHEDULER_PRI_CONN_MAX
 
+// <o SL_BT_CONTROLLER_SCHEDULER_PRI_ISO_CONN_MIN> ISO Connection - Min
+// <0-255:1>
+// <i> Default: 120
+// <i> Define the lowest permitted BLE ISO connection priority. [0-255]
+// <i> A lower value indicates a higher priority.
+#ifndef SL_BT_CONTROLLER_SCHEDULER_PRI_ISO_CONN_MIN
+#define SL_BT_CONTROLLER_SCHEDULER_PRI_ISO_CONN_MIN    120
+#endif // SL_BT_CONTROLLER_SCHEDULER_PRI_ISO_CONN_MIN
+
+// <o SL_BT_CONTROLLER_SCHEDULER_PRI_ISO_CONN_MAX> ISO Connection - Max
+// <0-255:1>
+// <i> Default: 64
+// <i> Define the highest permitted BLE ISO connection priority. [0-255]
+// <i> A lower value indicates a higher priority.
+#ifndef SL_BT_CONTROLLER_SCHEDULER_PRI_ISO_CONN_MAX
+#define SL_BT_CONTROLLER_SCHEDULER_PRI_ISO_CONN_MAX      64
+#endif // SL_BT_CONTROLLER_SCHEDULER_PRI_ISO_CONN_MAX
+
 // <o SL_BT_CONTROLLER_SCHEDULER_PRI_INIT_MIN> Connection Initiation - Min
 // <0-255:1>
 // <i> Default: 55
@@ -229,7 +247,9 @@
     .pawr_tx_min = SL_BT_CONTROLLER_SCHEDULER_PRI_PAWR_TX_MIN,                \
     .pawr_tx_max = SL_BT_CONTROLLER_SCHEDULER_PRI_PAWR_TX_MAX,                \
     .pawr_rx_min = SL_BT_CONTROLLER_SCHEDULER_PRI_PAWR_RX_MIN,                \
-    .pawr_rx_max = SL_BT_CONTROLLER_SCHEDULER_PRI_PAWR_RX_MAX                 \
+    .pawr_rx_max = SL_BT_CONTROLLER_SCHEDULER_PRI_PAWR_RX_MAX,                \
+    .iso_conn_min = SL_BT_CONTROLLER_SCHEDULER_PRI_ISO_CONN_MIN,              \
+    .iso_conn_max = SL_BT_CONTROLLER_SCHEDULER_PRI_ISO_CONN_MAX               \
 }
 
 #endif // SL_BTCTRL_SCHEDULER_PRIORITY_CONFIG_H

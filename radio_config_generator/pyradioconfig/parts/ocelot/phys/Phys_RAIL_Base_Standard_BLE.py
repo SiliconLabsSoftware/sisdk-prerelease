@@ -1,9 +1,12 @@
 from pyradioconfig.parts.common.phys.phy_common import PHY_COMMON_FRAME_BLE
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 
 class PHYS_Bluetooth_LE_Ocelot(IPhy):
+
+    ip_category = IPCategory.LPW
 
     def BLE_TX_Shaping_Coeffs(self, phy, model):
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 3
@@ -196,7 +199,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy.profile_outputs.MODEM_DSATHD4_POWABSTHDLO.override = 1000
         phy.profile_outputs.MODEM_DSATHD4_SWTHD.override = 1
 
-    # BLE 1M Legacy
     def Bluetooth_LE_base(self, phy, model):
         PHY_COMMON_FRAME_BLE(phy, model)
         self.BLE_AGC(phy, model)
@@ -230,7 +232,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy.profile_inputs.timing_detection_threshold.value = 140
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy, xtal_freq_hz=39000000)
         phy.profile_inputs.demod_select.value = model.vars.demod_select.var_enum.LEGACY
 
         model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.VCODIV
@@ -257,7 +259,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy.profile_outputs.AGC_CTRL4_RFPKDCNTEN.override = 1
         return phy
 
-    # BLE 1M Viterbi
     def Bluetooth_LE_Viterbi_base(self, phy, model):
         PHY_COMMON_FRAME_BLE(phy, model)
         self.BLE_AGC(phy, model)
@@ -291,7 +292,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy.profile_inputs.timing_detection_threshold.value = 140
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy, xtal_freq_hz=39000000)
         model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.VCODIV
 
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
@@ -312,7 +313,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         self.Bluetooth_LE_Viterbi_base(phy, model)
         return phy
 
-    # BLE 2M Viterbi
     def Bluetooth_LE_2M_Viterbi_base(self, phy, model):
         PHY_COMMON_FRAME_BLE(phy, model)
         self.BLE_AGC(phy, model)
@@ -346,7 +346,7 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy.profile_inputs.timing_detection_threshold.value = 140
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy, xtal_freq_hz=39000000)
         phy.profile_inputs.src1_range_available_minimum.value = 133
         phy.profile_inputs.frequency_comp_mode.value = model.vars.frequency_comp_mode.var_enum.AFC_LOCK_AT_FRAME_DETECT
         model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.VCODIV
@@ -372,7 +372,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         self.Bluetooth_LE_2M_Viterbi_base(phy, model)
         return phy
 
-    # BLE 1M TRecS + Viterbi
     def Bluetooth_LE_Viterbi_noDSA_base(self, phy, model):
         phy.profile_inputs.bandwidth_hz.value = 1099233
         phy.profile_inputs.base_frequency_hz.value = long(2402000000)
@@ -403,31 +402,25 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy.profile_inputs.timing_detection_threshold.value = 140
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy, xtal_freq_hz=39000000)
         model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.VCODIV
 
-        # Decimation and Demod Overrides
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 56831
         phy.profile_outputs.MODEM_CTRL0_FRAMEDETDEL.override = 2
         phy.profile_outputs.MODEM_CTRL6_RXBRCALCDIS.override = 1
         phy.profile_outputs.MODEM_PRE_BASE.override = 2
 
-        # Shaping overrides
         self.BLE_TX_Shaping_Coeffs(phy, model)
 
-        # FRC Overrides
         PHY_COMMON_FRAME_BLE(phy, model)
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
         phy.profile_outputs.FRC_PUNCTCTRL_PUNCT0.override = 1
         phy.profile_outputs.FRC_PUNCTCTRL_PUNCT1.override = 1
 
-        # This should be set only on DSA PHYs (PGLYNX-566), sowe can clear it.
         phy.profile_outputs.FRC_CTRL_WAITEOFEN.override = 0
 
-        # Radio Controller Overrides
         phy.profile_outputs.RAC_SYNTHREGCTRL_MMDLDOVREFTRIM.override = 3
 
-        # Viterbi Demod Overrides
         phy.profile_outputs.MODEM_VITERBIDEMOD_SYNTHAFC.override = 1
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI1.override = 65
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI2.override = 45
@@ -436,7 +429,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy.profile_outputs.MODEM_VTCORRCFG1_VTFRQLIM.override = 100
         phy.profile_outputs.MODEM_VTCORRCFG0_EXPECTPATT.override = 2491575950
 
-        # KSI overrides
         model.vars.ksi3wb.value_forced = 28
 
         phy.profile_outputs.rx_sync_delay_ns.override = 50000
@@ -469,7 +461,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy.profile_outputs.AGC_STEPDWN_STEPDWN4.override = 3
         phy.profile_outputs.AGC_STEPDWN_STEPDWN5.override = 5
 
-        # Frequency limiting
         phy.profile_outputs.MODEM_VTCORRCFG1_VTFRQLIM.override = 120
 
     def PHY_Bluetooth_LE_Viterbi_noDSA(self, model, phy_name=None):
@@ -489,7 +480,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
 
         phy.profile_outputs.AGC_CTRL2_DISRFPKD.override = 0
         phy.profile_outputs.AGC_CTRL4_RFPKDCNTEN.override = 1
-        # Additional settings
         phy.profile_outputs.rx_eof_delay_ns.override = 10855
         phy.profile_outputs.tx_sync_delay_ns.override = 104
         phy.profile_outputs.tx_eof_delay_ns.override = 104
@@ -512,7 +502,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         self.Bluetooth_LE_Viterbi_noDSA_base(phy, model)
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
 
-        # default bandwidth will cause halfrate unless forced
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
 
         return phy
@@ -524,7 +513,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         self.Bluetooth_LE_Viterbi_noDSA_base(phy, model)
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.LE_1M
 
-        # default bandwidth will cause halfrate unless forced
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
 
         phy.profile_outputs.AGC_CTRL2_DISRFPKD.override = 0
@@ -532,7 +520,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
 
         return phy
 
-    # BLE 2M TRecs + Viterbi
     def Bluetooth_LE_2M_Viterbi_noDSA_base(self, phy, model):
         self.Bluetooth_LE_Viterbi_noDSA_base(phy, model)
         self.BLE_2M_TX_Shaping_Coeffs(phy, model)
@@ -544,7 +531,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_1500KHz
         phy.profile_inputs.src1_range_available_minimum.value = 133
 
-        #AGC overrides
         phy.profile_outputs.AGC_HICNTREGION0_HICNTREGION0.override = 4
         phy.profile_outputs.AGC_HICNTREGION0_HICNTREGION1.override = 5
         phy.profile_outputs.AGC_HICNTREGION0_HICNTREGION2.override = 6
@@ -555,7 +541,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy.profile_outputs.AGC_STEPDWN_STEPDWN2.override = 3
         phy.profile_outputs.AGC_STEPDWN_STEPDWN4.override = 3
 
-        #Frequency limiting
         phy.profile_outputs.MODEM_VTCORRCFG1_VTFRQLIM.override = 60
 
         phy.profile_outputs.rx_sync_delay_ns.override = 14500
@@ -584,7 +569,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
 
         phy.profile_outputs.AGC_CTRL2_DISRFPKD.override = 0
         phy.profile_outputs.AGC_CTRL4_RFPKDCNTEN.override = 1
-        # Additional settings
         phy.profile_outputs.rx_eof_delay_ns.override = 5865
         phy.profile_outputs.tx_sync_delay_ns.override = 61
         phy.profile_outputs.tx_eof_delay_ns.override = 61
@@ -593,7 +577,6 @@ class PHYS_Bluetooth_LE_Ocelot(IPhy):
         phy = self.PHY_Bluetooth_LE_Viterbi_noDSA_fullrate(model, phy_name='PHY_Bluetooth_1M_AOX')
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.AOX_1M
 
-        # force fullrate and dec1 = 1 to match LYNX AOX config (which uses DEC1 switching)
         model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.VCODIV
         model.vars.adc_rate_mode.value_forced = model.vars.adc_rate_mode.var_enum.FULLRATE
         model.vars.dec0.value_forced = 4

@@ -7,9 +7,12 @@ from pyradioconfig.parts.common.profiles.profile_modem import buildModemInfoOutp
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 from py_2_and_3_compatibility import *
 from pyradioconfig.calculator_model_framework.CalcManager import CalcManager
+from pycalcmodel.core.common import IPCategory
 
 
 class ProfileIEEE802154OQPSKPanther(IProfile):
+
+    ip_category = IPCategory.LPW
 
     def __init__(self):
         super().__init__()
@@ -23,16 +26,13 @@ class ProfileIEEE802154OQPSKPanther(IProfile):
 
     def buildProfileModel(self, model):
 
-        # Build profile object and append it to the model
         profile = self._makeProfile(model)
 
-        # Build inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
         self.build_hidden_profile_inputs(model, profile)
 
-        # Build outputs
         buildFrameOutputs(model, profile)
         buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
@@ -48,7 +48,6 @@ class ProfileIEEE802154OQPSKPanther(IProfile):
                                      value_limit_max=40000000, units_multiplier=UnitsMultiplier.MEGA)
 
     def build_optional_profile_inputs(self, model, profile):
-        # No optional inputs for this profile
         pass
 
     def build_advanced_profile_inputs(self, model, profile):
@@ -56,7 +55,6 @@ class ProfileIEEE802154OQPSKPanther(IProfile):
         pass
 
     def build_hidden_profile_inputs(self, model, profile):
-        # Hidden inputs to allow for fixed frame length testing
         self.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                readable_name="Frame Length Algorithm")
         self.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
@@ -64,13 +62,11 @@ class ProfileIEEE802154OQPSKPanther(IProfile):
         self.make_hidden_input(profile, model.vars.frame_bitendian, category='frame_general',
                                readable_name="Frame Bit Endian")
 
-        # Hidden input for changing syncword
         self.make_hidden_input(profile, model.vars.syncword_0, "syncword", readable_name="Sync Word 0",
                                      value_limit_min=long(0), value_limit_max=long(0xffffffff))
         self.make_hidden_input(profile, model.vars.syncword_1, "syncword", readable_name="Sync Word 1",
                                      value_limit_min=long(0), value_limit_max=long(0xffffffff))
 
-        # Hidden input for CRC
         IProfile.make_hidden_input(profile, model.vars.payload_crc_en, category='frame_payload', readable_name="Insert/Check CRC after payload")
         IProfile.make_hidden_input(profile, model.vars.crc_poly, category='crc', readable_name="CRC Polynomial")
         IProfile.make_hidden_input(profile, model.vars.crc_seed,        category='crc', readable_name="CRC Seed", value_limit_min=long(0), value_limit_max=long(0xffffffff))
@@ -80,7 +76,6 @@ class ProfileIEEE802154OQPSKPanther(IProfile):
         IProfile.make_hidden_input(profile, model.vars.crc_input_order, category='crc', readable_name="CRC Input Bit Endian")
         IProfile.make_hidden_input(profile, model.vars.crc_invert, category='crc', readable_name="CRC Invert")
 
-        # Hidden input for BER testing
         IProfile.make_hidden_input(profile, model.vars.test_ber, category="testing", readable_name="Reconfigure for BER testing")
 
     def build_metadata_profile_inputs(self, model, profile):
@@ -88,7 +83,6 @@ class ProfileIEEE802154OQPSKPanther(IProfile):
                                  readable_name="Channel Config Base Channel Frequency", value_limit_min=100000000,
                                  value_limit_max=2500000000, units_multiplier=UnitsMultiplier.MEGA)
 
-        # Hidden input needed for rail_test generation
         self.make_metadata_input(profile, model.vars.chcfg_channel_spacing_hz, "metadata",
                                  readable_name="Channel Config Channel Spacing", value_limit_min=0,
                                  value_limit_max=10000000,
@@ -169,6 +163,7 @@ class ProfileIEEE802154OQPSKPanther(IProfile):
         profile.outputs.append(ModelOutput(model.vars.rx_eof_delay_ns, '', ModelOutputType.RAIL_CONFIG, readable_name='Receive end of frame delay ns'))
         profile.outputs.append(ModelOutput(model.vars.tx_sync_delay_ns, '', ModelOutputType.RAIL_CONFIG, readable_name='Time needed from TXEN to start of preamble on-air'))
         profile.outputs.append(ModelOutput(model.vars.tx_eof_delay_ns, '', ModelOutputType.RAIL_CONFIG, readable_name='Time from end of frame on-air to TX EOF timestamp'))
+        IProfile.make_hidden_input(profile, model.vars.phy_mode_id, "RAIL", readable_name="Stack info PHY mode ID", value_limit_min=0, value_limit_max=255)
 
     def profile_calculate(self, model):
         model.vars.protocol_id.value_forced = model.vars.protocol_id.var_enum.Zigbee
@@ -206,24 +201,5 @@ class ProfileIEEE802154OQPSKPanther(IProfile):
             model.vars.tx_eof_delay_ns.value_forced = 0
 
     def _copy_model_variables_from_phy(self, model, phy_name):
-
-        non_prod_phy_model = CalcManager(part_family=model.part_family, part_rev=model.part_revision,
-                                         target=model.target).calc_config(phy_name, None)
-
-        for non_prod_profile_input in non_prod_phy_model.profile.inputs:
-            model_var = getattr(model.vars, non_prod_profile_input.var_name)
-            model_var.value_forced = non_prod_profile_input.var_value
-
-        for non_prod_profile_output in non_prod_phy_model.profile.outputs:
-            model_var = getattr(model.vars, non_prod_profile_output.var_name)
-            if non_prod_profile_output.override is not None:
-                model_var.value_forced = non_prod_profile_output.override
-
-        for non_prod_model_var in non_prod_phy_model.vars:
-            if non_prod_model_var.value_forced is not None:
-                model_var = getattr(model.vars, non_prod_model_var.name)
-                model_var.value_forced = non_prod_model_var.value
-
-        if model.phy is not None:
-            model.phy.phy_points_to = phy_name
+        CalcManager._copy_model_variables_from_phy(model, phy_name)
 

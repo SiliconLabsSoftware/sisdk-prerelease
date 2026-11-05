@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
     python %prog [options] <in_schema.xsd>  <out_schema.xsd>
 Synopsis:
@@ -10,8 +9,6 @@ Examples:
     cat infile.xsd | python %prog > outfile.xsd
 """
 
-#
-# Imports
 
 import sys
 import os
@@ -33,23 +30,13 @@ except ImportError:
     Inner_name_map = None
 
 
-#
-# Globals and constants
 
-#
-# Do not modify the following VERSION comments.
-# Used by updateversion.py.
-##VERSION##
 VERSION = '2.28a'
-##VERSION##
 
 CatalogDict = {}
-# the base url to use for all relative paths in the catalog
 CatalogBaseUrl = None
 
 
-#
-# Exceptions
 
 class SchemaIOError(IOError):
     pass
@@ -68,8 +55,6 @@ def load_catalog(catalogpath):
                 "{urn:oasis:names:tc:entity:xmlns:xml:catalog}public"):
             CatalogDict[elements.get("publicId")] = elements.get("uri")
 
-#
-# Functions for external use
 
 
 def process_include_files(
@@ -106,8 +91,6 @@ def get_all_root_file_paths(
     return rootPaths
 
 
-#
-# Classes
 
 class Params(object):
     members = ('base_url', 'already_processed', 'parent_url', )
@@ -124,8 +107,6 @@ class Params(object):
         self.__dict__[name] = value
 
 
-#
-# Functions for internal use and testing
 
 
 def clear_includes_and_imports(node):
@@ -139,15 +120,11 @@ def clear_includes_and_imports(node):
 
 
 def get_ref_info(node, params):
-    # first look for the schema location in the catalog, if not
-    # there, then see if it's specified in the node
     namespace = node.get('namespace')
     url = None
     baseUrl = None
     if namespace in CatalogDict:
         url = CatalogDict[namespace]
-        # setup the base url in case the path
-        # in the catalog was a relative path
         baseUrl = CatalogBaseUrl
     if not url:
         url = node.get('schemaLocation')
@@ -157,9 +134,6 @@ def get_ref_info(node, params):
             params.parent_url, )
         sys.stderr.write(msg)
         return (None, None)
-    # Uncomment the next lines to help track down missing schemaLocation etc.
-    # print '(resolve_ref) url: %s\n    parent-url: %s' % (
-    #     url, params.parent_url, )
 
     if not baseUrl:
         baseUrl = params.base_url
@@ -190,12 +164,6 @@ def resolve_ref(node, params, options):
     if locn is not None:
         if schema_name not in params.already_processed:
             params.already_processed.add(schema_name)
-##             print 'trace --'
-##             print '    url:        : %s' % (url, )
-##             print '    base        : %s' % (params.base_url, )
-##             print '    parent      : %s' % (params.parent_url, )
-##             print '    locn        : %s' % (locn, )
-##             print '    schema_name : %s\n' % (schema_name, )
             if locn.startswith('http:') or locn.startswith('ftp:'):
                 if sys.version_info.major == 2:
                     urllib_urlopen = urllib2.urlopen
@@ -228,10 +196,6 @@ def resolve_ref(node, params, options):
                     msg = "Can't find file %s referenced in %s." % (
                         locn, params.parent_url, )
                     raise SchemaIOError(msg)
-##     if content is None:
-##         msg = "Can't find file %s referenced in %s." % (
-##             locn, params.parent_url, )
-##         raise SchemaIOError(msg)
     return content
 
 
@@ -350,7 +314,6 @@ def prep_schema(inpath, outpath, options):
 
 
 def process_groups(root):
-    # Get all the xs:group definitions at top level.
     if root.prefix:
         namespaces = {root.prefix: root.nsmap[root.prefix]}
         pattern = './%s:group' % (root.prefix, )
@@ -359,7 +322,6 @@ def process_groups(root):
         pattern = './group'
         defs = root.xpath(pattern)
     defs = [node for node in defs if node.get('name') is not None]
-    # Get all the xs:group references (below top level).
     if root.prefix:
         namespaces = {root.prefix: root.nsmap[root.prefix]}
         pattern = './*//%s:group' % (root.prefix, )
@@ -368,7 +330,6 @@ def process_groups(root):
         pattern = './*//group'
         refs = root.xpath(pattern)
     refs = [node for node in refs if node.get('ref') is not None]
-    # Create a dictionary of the named model groups (definitions).
     def_dict = {}
     for node in defs:
         def_dict[trim_prefix(node.get('name'))] = node
@@ -391,7 +352,6 @@ def fix_type_names(root, options):
             newname = '%sxx' % (oldname, )
         else:
             continue
-        # Change the name (name attribute) of the complexType.
         pat = './/%s:complexType[@name="%s"]' % (
             root.prefix, oldname)
         elements = xpath_find(root, pat)
@@ -407,7 +367,6 @@ def fix_type_names(root, options):
                 "Changing first." % (oldname, ))
         element = elements[0]
         element.set('name', newname)
-        # Change the reference (type attribute) of child elements.
         pat = './/%s:element' % (root.prefix, )
         elements = xpath_find(root, pat)
         for element in elements:
@@ -425,7 +384,6 @@ def fix_type_names(root, options):
                 continue
             if not element.getchildren():
                 element.set('type', newname)
-        # Change the extensions ('base' attribute) that refer to the old type.
         pat = './/%s:extension' % (root.prefix, )
         elements = xpath_find(root, pat)
         for element in elements:
@@ -469,7 +427,6 @@ def replace_group_defs(def_dict, refs):
                 for node in content:
                     if not isinstance(node, etree._Comment):
                         new_node = deepcopy(node)
-                        # Copy minOccurs and maxOccurs attributes to new node.
                         value = ref_node.get('minOccurs')
                         if value is not None:
                             new_node.set('minOccurs', value)
@@ -486,13 +443,6 @@ def raise_anon_complextypes(root):
     """
     def_names = collect_type_names(root)
     def_count = 0
-    # Find all complexTypes below top level.
-    #   Raise them to top level and name them.
-    #   Re-name if there is a duplicate (simpleType, complexType, or
-    #   previous renamed type).
-    #   Change the parent (xs:element) so the "type" attribute refers to
-    #   the raised and renamed type.
-    #   Collect the new types.
     el = etree.Comment(text="Raised anonymous complexType definitions")
     el.tail = "\n\n"
     root.append(el)
@@ -522,15 +472,12 @@ def raise_anon_complextypes(root):
         def_names.add(type_name)
         parent.set('type', type_name)
         node.set('name', type_name)
-        # Move the complexType node to top level.
         root.append(node)
 
 
 def map_inner_name(node, inner_name_map):
     """Use a user-supplied mapping table to look up a name for this class/type.
     """
-    # find the name for the enclosing type definition and
-    # the name of the type definition that encloses that.
     node1 = node
     name2 = node1.get('name')
     while name2 is None:
@@ -555,16 +502,11 @@ def map_inner_name(node, inner_name_map):
     return new_name
 
 
-#
-# Collect the names of all currently defined types (complexType,
-#   simpleType, element).
 def collect_type_names(node):
     prefix = node.prefix
     if prefix is not None and prefix.strip():
         pattern = './/%s:complexType|.//%s:simpleType|.//%s:element' % (
             prefix, prefix, prefix)
-        # Must make sure that we have a namespace dictionary that does *not*
-        # have a key None.
         namespaces = {prefix: node.nsmap[prefix]}
         elements = node.xpath(pattern, namespaces=namespaces)
     else:
@@ -639,5 +581,4 @@ def main():
 
 
 if __name__ == "__main__":
-    #import pdb; pdb.set_trace()
     main()

@@ -30,6 +30,8 @@ _COMMANDER_ZIP_URL = (
 
 class DdpHostRecipe(ConanFile):
     name = "wisun_ddp_host"
+    user = "silabs"
+    release_stream_channel = "2026-12"
 
     description = "Wi-SUN DDP host-side Python tooling."
     license = "www.silabs.com/about-us/legal/master-software-license-agreement"

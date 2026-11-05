@@ -4,6 +4,9 @@ category: Z-Wave
 description: >
   This component changes the DC-DC configuration when the controller enters a lower energy usage state (EM2 or EM4 mode). It also handles voltage monitoring during the boot operation.
   The possible configuration values that can be set are: AUTO, BYPASS, and DCDC_LOW_NOISE.
+documentation:
+  docset: gecko-platform
+  document: platform-service/device-init-dcdc
 package: zwave
 quality: production
 metadata:

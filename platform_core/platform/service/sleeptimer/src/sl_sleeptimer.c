@@ -41,6 +41,7 @@
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
 #endif
+#include "sl_log_helper.h"
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #include "sli_power_manager.h"
@@ -624,7 +625,7 @@ void sli_sleeptimer_get_remaining_time_of_first_timers(uint8_t timer_count,
   sl_sleeptimer_timer_handle_t *current;
   uint32_t time = 0;
 
-  EFM_ASSERT(timer_count < 32);
+  SL_LOG_DEBUG_ASSERT(timer_count < 32);
   uint32_t bitfield_timers = (1UL << timer_count) - 1;
 
   CORE_ENTER_ATOMIC();
@@ -1707,7 +1708,7 @@ static void process_expired_timer(sl_sleeptimer_timer_handle_t *timer)
   // and compensate for any deviation from the periodic timer frequency.
   if (timer->timeout_periodic != 0u && skip_remove != true) {
     timeout_temp -= periodic_correction;
-    EFM_ASSERT(timeout_temp > 0);
+    SL_LOG_DEBUG_ASSERT(timeout_temp > 0);
     // Compensate for drift caused by ms to ticks conversion
     if (timer->conversion_error > 0) {
       // Increment accumulated error by the ms to ticks conversion error

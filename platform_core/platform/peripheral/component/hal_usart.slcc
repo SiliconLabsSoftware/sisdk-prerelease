@@ -20,6 +20,7 @@ provides:
 - name: hal_generic_usart
   condition: [device_series_3]
 requires:
+- name: log_none
 - name: device
 - name: device_has_uart
 - name: hal_common

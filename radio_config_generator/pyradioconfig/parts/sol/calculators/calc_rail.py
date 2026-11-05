@@ -24,7 +24,6 @@ class CalcRailSol(CalcRailOcelot):
         is_soft_demod = demod_sel == model.vars.demod_select.var_enum.SOFT_DEMOD.value
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
 
-        # : MCUW_RADIO_CFG-2285 - set to 0 for Soft Modem OFDM PHYs
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
             txdone = 0
         else:

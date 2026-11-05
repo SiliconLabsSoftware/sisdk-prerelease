@@ -15,13 +15,14 @@ provides:
   condition: [device_generic_family_sixx301]
 - name: clock_manager_init_hal_s3
 requires:
+- name: log_none
 - name: device_series_3
 - name: clock_manager_init_selection
 - name: status
-- name: sl_assert
 - name: sl_core
 - name: hal_syscfg
 - name: hal_system
+- name: hal_emu
 - name: se_manager
 - name: gpio
 - name: common_token_manager_static

@@ -25,4 +25,4 @@ template_contribution:
   value: uart_eusart
 documentation:
   docset: gecko-platform
-  document: platform-driver/uartdrv
+  document: platform-driver/uart

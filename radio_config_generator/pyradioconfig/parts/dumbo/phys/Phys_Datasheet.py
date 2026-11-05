@@ -2,10 +2,12 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from pyradioconfig.parts.dumbo.phys.phy_internal_base import Phy_Internal_Base
 
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 class PHYS_Datasheet(IPhy):
 
-    ###Unique PHYs###
+    ip_category = IPCategory.LPW
+
 
     def PHY_Datasheet_2450M_2GFSK_2Mbps_1M(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='2450M 2GFSK 2Mbps 1M', phy_name=phy_name)
@@ -18,10 +20,6 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.agc_settling_delay.value = 39 #Allowing this as no DEC values have changed
 
     def PHY_Datasheet_915M_2GFSK_2Mbps_500K(self, model, phy_name=None):
-        # Formerly PHY_Internal_915M_2GFSK_2Mbps_500K in Package/pyradioconfig/parts/dumbo/phys/Phys_Internal.py
-        # Migrated to here during MCUW_RADIO_CFG-815 Purge stale internal PHYs
-        # and restored as a datasheet PHY in
-        # MCUW_RADIO_CFG-1017 restore Internal PHY as Datasheet PHY on Dumbo and Jumbo PHY_Internal_915M_2GFSK_2Mbps_500K
         phy = self._makePhy(model, model.profiles.Base, readable_name='915M 2GFSK 2Mbps 500K', phy_name=phy_name)
 
         Phy_Internal_Base.GFSK_915M_base(phy, model)
@@ -45,7 +43,6 @@ class PHYS_Datasheet(IPhy):
 
         Phy_Internal_Base.GFSK_915M_base(phy, model)
 
-        # Add values to existing inputs
         phy.profile_inputs.bitrate.value = 500000
         phy.profile_inputs.deviation.value = 175000
         phy.profile_inputs.agc_settling_delay.value = 29 #Allowing this as no DEC values have changed
@@ -64,7 +61,6 @@ class PHYS_Datasheet(IPhy):
 
         Phy_Internal_Base.GFSK_915M_base(phy, model)
 
-        # Add values to existing inputs
         phy.profile_inputs.bitrate.value = 50000
         phy.profile_inputs.deviation.value = 25000
         phy.profile_inputs.agc_power_target.value = -8
@@ -78,7 +74,6 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.bitrate.value = 10000
         phy.profile_inputs.deviation.value = 5000
 
-    ###Base Functions###
 
     def Datasheet_2GFSK_500Kbps_125K_base(self, phy, model):
 
@@ -108,7 +103,6 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.bitrate.value = 2400
         phy.profile_inputs.deviation.value = 1200
 
-    ###Derivative PHYs###
 
     def PHY_Datasheet_868M_2GFSK_500Kbps_125K(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='868M 2GFSK 500Kbps 125K', phy_name=phy_name)

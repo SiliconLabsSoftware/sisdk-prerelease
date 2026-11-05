@@ -23,5 +23,6 @@ source:
 provides:
 - name: power_manager_state_retention
 requires:
+- name: log_none
 - name: power_manager_core_retention
 - name: power_manager_periph_retention

@@ -107,7 +107,6 @@ sl_status_t sl_gpio_set_pin_direction(const sl_gpio_t *gpio,
   CORE_DECLARE_IRQ_STATE;
 
   if (gpio == NULL) {
-    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
   SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
@@ -135,7 +134,6 @@ sl_status_t sl_gpio_set_pin_mode(const sl_gpio_t *gpio,
   CORE_DECLARE_IRQ_STATE;
 
   if (gpio == NULL) {
-    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
   SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_MODE_IS_VALID(mode));
@@ -158,7 +156,6 @@ sl_status_t sl_gpio_get_pin_config(const sl_gpio_t *gpio,
   CORE_DECLARE_IRQ_STATE;
 
   if (gpio == NULL || pin_config == NULL) {
-    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NULL_POINTER;
   }
   SL_LOG_DEBUG_ASSERT(SL_HAL_GPIO_PORT_PIN_IS_VALID(gpio->port, gpio->pin));
@@ -402,7 +399,6 @@ sl_status_t sl_gpio_configure_external_interrupt(const sl_gpio_t *gpio,
     }
   } else {
     CORE_EXIT_ATOMIC();
-    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NOT_FOUND;
   }
 
@@ -491,7 +487,6 @@ sl_status_t sl_gpio_configure_wakeup_em4_interrupt(const sl_gpio_t *gpio,
     }
   } else {
     CORE_EXIT_ATOMIC();
-    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NOT_FOUND;
   }
 
@@ -736,22 +731,4 @@ void GPIO_ODD_IRQHandler(void)
   sl_hal_gpio_clear_interrupts(odd_flags);
 
   sl_gpio_dispatch_interrupt(odd_flags);
-}
-
-/***************************************************************************//**
- * Weak default: latch all GPIO pins routed to a peripheral.
- ******************************************************************************/
-SL_WEAK sl_status_t sl_gpio_latch_peripheral_pins(sl_peripheral_t peripheral)
-{
-  (void)peripheral;
-  return SL_STATUS_OK;
-}
-
-/***************************************************************************//**
- * Weak default: unlatch all GPIO pins routed to a peripheral.
- ******************************************************************************/
-SL_WEAK sl_status_t sl_gpio_unlatch_peripheral_pins(sl_peripheral_t peripheral)
-{
-  (void)peripheral;
-  return SL_STATUS_OK;
 }

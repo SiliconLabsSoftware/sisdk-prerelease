@@ -1,0 +1,2 @@
+src/si4010_modem_calc
+src/version_info

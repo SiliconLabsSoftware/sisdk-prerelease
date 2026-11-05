@@ -48,6 +48,6 @@
  * @retval SL_STATUS_OK Bus initialized successfully.
  * @retval Other        An error occurred.
  ******************************************************************************/
-sl_status_t sli_cpc_drv_spi_peripheral_init(sl_cpc_drv_spi_peripheral_t *drv, const sl_cpc_bus_config_t *bus_cfg);
+sl_status_t sli_cpc_drv_spi_peripheral_init(struct sl_cpc_drv_spi_peripheral *drv, const sl_cpc_bus_config_t *bus_cfg);
 
 #endif /* SLI_CPC_DRV_SPI_PERIPHERAL_H */

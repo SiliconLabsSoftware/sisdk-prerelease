@@ -19,6 +19,7 @@ metadata:
 provides:
 - name: iostream
 requires:
+- name: log_none
 - name: component_catalog
 - name: cmsis_os2_ext_task_register
   condition:

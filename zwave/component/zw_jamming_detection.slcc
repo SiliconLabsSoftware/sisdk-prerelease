@@ -10,6 +10,9 @@ description: >
   while the controller continues normal Z-Wave stack operation.
 
   Compile-time defaults are in zw_jamming_detection_config.h (buffer window size and default report interval).
+documentation:
+  docset: z-wave
+  document: zwave-api/jamming-detection
 
 package: zwave
 quality: evaluation

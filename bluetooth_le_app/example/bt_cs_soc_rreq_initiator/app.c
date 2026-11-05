@@ -489,7 +489,9 @@ void sl_bt_on_event(sl_bt_msg_t * evt)
       }
       initiator->read_capabilities = false;
       // Check supported capabilities
-      app_cs_check_supported_capabilities(evt);
+      if (app_cs_check_supported_capabilities(evt) != SL_STATUS_OK) {
+        break;
+      }
       // Optimize parameters
       app_cs_optimize_parameters(connection);
 

@@ -47,17 +47,57 @@ enum {
 
 
 // Crypto service
-{% for fp in tfm_interface_func|unique -%}
-#define SLI_TZ_HAS_{{ fp|upper }}_SID 1
+{% for fp in tfm_interface_func|unique(attribute='function') -%}
+#define SLI_TZ_HAS_{{ fp.function|upper }}_SID 1
 {% endfor %}
 
 enum {
     TFM_CRYPTO_SID_MIN = -1,
-  {% for fp in tfm_interface_func|unique -%}
-    {{ fp|upper }}_SID,
+  {% for fp in tfm_interface_func|unique(attribute='function') -%}
+    {{ fp.function|upper }}_SID,
   {% endfor %}
     TFM_CRYPTO_SID_MAX,
 };
+
+// Key-check metadata is required for every contributed function, including
+// functions whose key_checks list is empty. Each item in a non-empty list is
+// emitted below as one rule; only the function SID, key source, and vector
+// index are copied into the runtime table. Functions with an empty list are
+// intentionally omitted because the dispatcher has already validated their
+// SID and they have no key ID to check.
+{% for fp in tfm_interface_func|unique(attribute='function') -%}
+{% if fp.key_checks is not defined -%}
+#error "Missing key-check metadata for {{ fp.function }}"
+{% else -%}
+{% for check in fp.key_checks -%}
+{% if check.source not in ['packed_key_id', 'in_vec_key_id', 'key_attributes'] -%}
+#error "Invalid key-check source for {{ fp.function }}"
+{% endif -%}
+{% if check.source != 'packed_key_id' and (check.invec is not defined or check.invec < 1) -%}
+#error "Key-check source for {{ fp.function }} requires an input vector index"
+{% endif -%}
+{% if check.source != 'packed_key_id' and check.invec is defined and check.invec > 255 -%}
+#error "Key-check input vector index for {{ fp.function }} exceeds uint8_t"
+{% endif -%}
+{% endfor -%}
+{% endif -%}
+{% endfor -%}
+// If no contribution has a key check, emit a sentinel so the C initializer
+// remains valid. The sentinel SID is outside the valid crypto SID range.
+#define SLI_TZ_CRYPTO_KEY_CHECK_RULES { \
+{% set ns = namespace(has_rules=false) -%}
+{% for fp in tfm_interface_func|unique(attribute='function') -%}
+{% if fp.key_checks -%}
+{% set ns.has_rules = true -%}
+{% for check in fp.key_checks -%}
+  { (uint16_t){{ fp.function|upper }}_SID, SLI_TZ_KEY_ID_SOURCE_{{ check.source|upper }}, {{ check.invec|default(0) }}u }, \
+{% endfor -%}
+{% endif -%}
+{% endfor -%}
+{% if not ns.has_rules -%}
+  { UINT16_MAX, SLI_TZ_KEY_ID_SOURCE_NONE, 0u }, \
+{% endif -%}
+}
 
 // Simple services without a function parameter
 enum {

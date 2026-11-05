@@ -27,6 +27,7 @@ template_contribution:
 - name: component_catalog
   value: iostream_usart
 requires:
+- name: log_none
 - name: iostream
 - name: iostream_uart_common
 - name: status
@@ -36,3 +37,6 @@ requires:
 - name: atomic
 - name: power_manager_sleep_hooks
   condition: [power_manager]
+documentation:
+  docset: gecko-platform
+  document: platform-service/iostream-usart

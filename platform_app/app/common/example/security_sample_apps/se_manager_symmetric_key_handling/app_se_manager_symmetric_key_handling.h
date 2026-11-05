@@ -38,8 +38,10 @@
 /// Custom key size
 #define CUSTOM_KEY_SIZE         (28)
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /// Internal SE key slot used for symmetric key
 #define SYMMETRIC_KEY_SLOT      (SL_SE_KEY_SLOT_VOLATILE_0)
+#endif
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -111,6 +113,7 @@ sl_status_t export_wrap_symmetric_key(sl_se_key_type_t key_type);
  ******************************************************************************/
 sl_status_t create_wrap_symmetric_key(sl_se_key_type_t key_type);
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /***************************************************************************//**
  * Generate a non-exportable symmetric key into a volatile SE key slot.
  *
@@ -146,6 +149,7 @@ sl_status_t transfer_wrap_symmetric_key_to_volatile(sl_se_key_type_t key_type);
  * @returns Returns status code, @ref sl_status.h.
  ******************************************************************************/
 sl_status_t transfer_volatile_symmetric_key_to_wrap(sl_se_key_type_t key_type);
+#endif // defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 #endif
 
 #endif  // APP_SE_MANAGER_SYMMETRIC_KEY_HANDLING_H

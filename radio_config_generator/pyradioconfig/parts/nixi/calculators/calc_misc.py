@@ -42,22 +42,22 @@ class CALC_Misc_nixi(CALC_Misc_jumbo):
         self._reg_write(model.vars.MODEM_DSACTRL_FREQAVGSYM, 1)
         self._reg_write(model.vars.MODEM_DSACTRL_DSARSTON, 1)
         self._reg_write(model.vars.MODEM_DSACTRL_LOWDUTY, 0)
-        if model.part_family.lower() not in ['lynx', 'leopard', 'lion']:
+        if model.part_family.lower() not in ['lynx', 'leopard', 'lionu', 'lion']:
             self._reg_write(model.vars.MODEM_VTTRACK_FREQTRACKMODE, 0)
             self._reg_write(model.vars.MODEM_VTTRACK_TIMTRACKTHD, 2)
             self._reg_write(model.vars.MODEM_VTTRACK_TIMEACQUTHD, 0xEE)
         self._reg_write(model.vars.MODEM_VTTRACK_TIMCHK, 0)
         self._reg_write(model.vars.MODEM_VTTRACK_TIMEOUTMODE, 1)
-        if model.part_family.lower() not in ['lynx', 'leopard', 'lion']:
+        if model.part_family.lower() not in ['lynx', 'leopard', 'lionu', 'lion']:
             self._reg_write(model.vars.MODEM_VTTRACK_TIMGEAR, 0)
             self._reg_write(model.vars.MODEM_VTTRACK_FREQBIAS, 0)
             self._reg_write(model.vars.MODEM_VTTRACK_HIPWRTHD, 1)
         self._reg_write(model.vars.MODEM_VTCORRCFG1_CORRSHFTLEN, 0x20)
-        if model.part_family.lower() not in ['lynx', 'leopard', 'lion']:
+        if model.part_family.lower() not in ['lynx', 'leopard', 'lionu', 'lion']:
             self._reg_write(model.vars.MODEM_VTCORRCFG1_VTFRQLIM, 0xC0)
             self._reg_write(model.vars.MODEM_VTCORRCFG1_EXPSYNCLEN, 8)
         self._reg_write(model.vars.MODEM_VTCORRCFG1_BUFFHEAD, 2)
-        if model.part_family.lower() not in ['lynx', 'leopard', 'lion']:
+        if model.part_family.lower() not in ['lynx', 'leopard', 'lionu', 'lion']:
             self._reg_write(model.vars.MODEM_VITERBIDEMOD_VTDEMODEN, 0)
             self._reg_write(model.vars.MODEM_VITERBIDEMOD_HARDDECISION, 0)
             self._reg_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI1, 0x40)
@@ -123,7 +123,6 @@ class CALC_Misc_nixi(CALC_Misc_jumbo):
         self._reg_write(model.vars.MODEM_LONGRANGE5_LRCHPWRSH10,    0)
         self._reg_write(model.vars.MODEM_LONGRANGE5_LRCHPWRSH11,    0)
 
-        #These writes should only happen in Nixi (not in later families)
         if model.part_family.lower() == 'nixi':
             self._reg_write(model.vars.MODEM_VTCORRCFG0_EXPECTPATT, long(0x123556B7))
             self._reg_write(model.vars.MODEM_VTCORRCFG1_EXPECTHT, 5)
@@ -139,8 +138,7 @@ class CALC_Misc_nixi(CALC_Misc_jumbo):
             self._reg_write(model.vars.SYNTH_CTRL_DEMMODE, 1)
 
 
-        #These writes should happen for all families except Lynx / Leopard
-        if model.part_family.lower() not in ['lynx', 'leopard', 'lion']:
+        if model.part_family.lower() not in ['lynx', 'leopard', 'lionu', 'lion']:
             self._reg_write(model.vars.MODEM_CTRL5_DSSSCTD, 0)
             self._reg_write(model.vars.MODEM_CTRL5_BBSS, 0)
             self._reg_write(model.vars.MODEM_CTRL5_POEPER, 0)
@@ -196,9 +194,7 @@ class CALC_Misc_nixi(CALC_Misc_jumbo):
             self._reg_write(model.vars.MODEM_DSATHD2_POWABSTHDLOG, 100)
 
     def calc_ook_rssi_offset(self,model):
-        #OOK RSSI offset measured experimentally for Nixi
         model.vars.ook_rssi_offset.value = 16
 
     def calc_dynamic_bbss_values(self, model):
-        #Do not inherit dynamic BBSS calculations on Nixi
         pass

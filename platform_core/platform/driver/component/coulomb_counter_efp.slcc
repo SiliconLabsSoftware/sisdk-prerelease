@@ -16,6 +16,7 @@ include:
   file_list:
   - path: sl_coulomb_counter.h
 requires:
+- name: log_none
 - name: efp_driver
 - name: slist
 provides:

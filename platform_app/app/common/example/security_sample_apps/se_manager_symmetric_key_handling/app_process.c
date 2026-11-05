@@ -181,12 +181,17 @@ void app_process_action(void)
       printf("  + Generate a non-exportable wrapped symmetric key... ");
       if (create_wrap_symmetric_key(symmetric_key_size[symmetric_key_size_select])
           == SL_STATUS_OK) {
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
         app_state = CREATE_VOLATILE_KEY;
+#else
+        print_startup();
+#endif
       } else {
         app_state = SE_MANAGER_EXIT;
       }
       break;
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
     case CREATE_VOLATILE_KEY:
       printf("\n  . Volatile symmetric key\n");
       printf("  + Generate a non-exportable symmetric key into a volatile SE "
@@ -239,6 +244,7 @@ void app_process_action(void)
         app_state = SE_MANAGER_EXIT;
       }
       break;
+#endif // defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 #endif
 
     case SE_MANAGER_EXIT:

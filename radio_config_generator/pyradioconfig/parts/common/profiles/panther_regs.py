@@ -3,68 +3,15 @@ from pycalcmodel.core.output import ModelOutput, ModelOutputType
 
 def build_modem_regs_panther(model,profile):
 
-    # These were extracted from Panther register model. Only writeable registers that are new (do not exist in EFR90nm) are listed here.
-    # Must have a corresponding _addModelRegister entry in pyradioconfig/parts/panther/calculators/calc_global.py buildAdditionalPantherVariables
-    # MCUW_RADIO_CFG-734 Panther: PHY/MAC Design requests more registers added (all MODEM, AGC, etc.) with re-writes of reset values
 
-    # AGC peripheral has 133 writeable fields in total
 
-    # All Panther PHY cfg files show 133 AGC field writes
 
-    # Except _EN_EN and _IEN_
 
-    # Note that 39 Panther AGC fields were explicitly omitted as they exist on EFR90nm.
-    # HOWEVER, those fields may not have been added to the Radio Configurator in the EFR90nm era.
-    # Thus they will need to be manually added here:
 
-    # An error such as
-    # AttributeError: 'ModelOutputOverrideContainer' object has no attribute 'AGC_CTRL1_RSSIPERIOD'
-    # indicates a line below needs to be uncommented (enabled)
 
-    # AGC.CTRL0.PWRTARGET
-    # AGC.CTRL0.MODE
-    # AGC.CTRL0.RSSISHIFT
-    # AGC.CTRL0.DISCFLOOPADJ
-    # AGC.CTRL0.AGCCLKUNDIVREQ
-    # AGC.CTRL0.DISRESETCHPWR
-    # AGC.CTRL1.RSSIPERIOD
-    # AGC.CTRL1.SUBPERIOD
-    # AGC.CTRL1.SUBNUM
-    # AGC.CTRL1.SUBDEN
-    # AGC.CTRL1.SUBINT
-    # AGC.CTRL2.DMASEL
-    # AGC.RSSISTEPTHR.POSSTEPTHR
-    # AGC.RSSISTEPTHR.NEGSTEPTHR
-    # AGC.MANGAIN.MANGAINIFPGA
-    # AGC.MANGAIN.MANGAINEN
-    # AGC.IF.RSSIVALID
-    # AGC.IF.CCA
-    # AGC.IF.RSSIPOSSTEP
-    # AGC.IF.RSSINEGSTEP
-    # AGC.IF.RSSIDONE
-    # AGC.IEN.RSSIVALID
-    # AGC.IEN.CCA
-    # AGC.IEN.RSSIPOSSTEP
-    # AGC.IEN.RSSINEGSTEP
-    # AGC.IEN.RSSIDONE
-    # AGC.CMD.RSSISTART
-    # AGC.GAINSTEPLIM.CFLOOPSTEPMAX
-    # AGC.CTRL0.ENRSSIRESET
-    # AGC.RSSISTEPTHR.STEPPER
-    # AGC.RSSISTEPTHR.DEMODRESTARTPER
-    # AGC.RSSISTEPTHR.DEMODRESTARTTHR
-    # AGC.LBT.CCARSSIPERIOD
-    # AGC.LBT.ENCCARSSIPERIOD
-    # AGC.LBT.ENCCAGAINREDUCED
-    # AGC.LBT.ENCCARSSIMAX
-    # AGC.IF.SHORTRSSIPOSSTEP
-    # AGC.IEN.SHORTRSSIPOSSTEP
-    # AGC.MIRRORIF.IFMIRRORCLEAR
 
-    # This function is too big for Jython, so had to split it up into multiple functions
     build_modem_regs_panther_lynx_common_part1(model, profile)
     build_modem_regs_panther_lynx_common_part2(model, profile)
-    # Panther-specific. Not in Lynx.
     if model.part_family.lower() in ["panther"]:
         build_modem_regs_panther_only(model, profile)
 
@@ -116,7 +63,6 @@ def build_modem_regs_panther_lynx_common_part1(model, profile):
     profile.outputs.append(ModelOutput(model.vars.AGC_MANGAIN_MANRFLATRST, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.MANGAIN.MANRFLATRST'           ))
     profile.outputs.append(ModelOutput(model.vars.AGC_MANGAIN_MANIFLOLATRST, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.MANGAIN.MANIFLOLATRST'           ))
     profile.outputs.append(ModelOutput(model.vars.AGC_MANGAIN_MANIFHILATRST, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.MANGAIN.MANIFHILATRST'           ))
-    # profile.outputs.append(ModelOutput(model.vars.AGC_CMD_RSSISTART, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.CMD.RSSISTART'           ))
     profile.outputs.append(ModelOutput(model.vars.AGC_GAINRANGE_LNAINDEXBORDER, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.GAINRANGE.LNAINDEXBORDER'           ))
     profile.outputs.append(ModelOutput(model.vars.AGC_GAINRANGE_PGAINDEXBORDER, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.GAINRANGE.PGAINDEXBORDER'           ))
     profile.outputs.append(ModelOutput(model.vars.AGC_GAINRANGE_GAININCSTEP, '',         ModelOutputType.SVD_REG_FIELD, readable_name='AGC.GAINRANGE.GAININCSTEP'           ))
@@ -463,11 +409,6 @@ def build_modem_regs_panther_lynx_common_part1(model, profile):
     profile.outputs.append(ModelOutput(model.vars.MODEM_VTBLETIMING_FLENOFF, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.VTBLETIMING.FLENOFF'           ))
 
 def build_modem_regs_panther_lynx_common_part2(model, profile):
-    # MSW: this is write-only... do not touch it!
-    # profile.outputs.append(ModelOutput(model.vars.MODEM_CMD_PRESTOP, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CMD.PRESTOP'           ))
-    # profile.outputs.append(ModelOutput(model.vars.MODEM_CMD_AFCTXLOCK, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CMD.AFCTXLOCK'           ))
-    # profile.outputs.append(ModelOutput(model.vars.MODEM_CMD_AFCTXCLEAR, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CMD.AFCTXCLEAR'           ))
-    # profile.outputs.append(ModelOutput(model.vars.MODEM_CMD_AFCRXCLEAR, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CMD.AFCRXCLEAR'           ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_BLEIQDSA_BLEIQDSAEN, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.BLEIQDSA.BLEIQDSAEN'           ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_BLEIQDSA_BLEIQDSATH, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.BLEIQDSA.BLEIQDSATH'           ))
     profile.outputs.append(ModelOutput(model.vars.MODEM_BLEIQDSA_BLEIQDSAIIRCOEFPWR, '',         ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.BLEIQDSA.BLEIQDSAIIRCOEFPWR'           ))
@@ -496,8 +437,7 @@ def build_modem_regs_panther_lynx_common_part2(model, profile):
     profile.outputs.append(ModelOutput(model.vars.RAC_IFADCDBG_IFADCENREFBUF, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.IFADCDBG.IFADCENREFBUF'           ))
     profile.outputs.append(ModelOutput(model.vars.RAC_IFADCDBG_IFADCENCLK, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.IFADCDBG.IFADCENCLK'           ))
     profile.outputs.append(ModelOutput(model.vars.RAC_LNAMIXEN_LNAMIXENLDO, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.LNAMIXEN.LNAMIXENLDO'           ))
-    # Not in Ocelot.
-    if model.part_family.lower() in ["panther", "lynx", "leopard", "lion", "curl"]:
+    if model.part_family.lower() in ["panther", "lynx", "leopard", "lionu", "lion", "curl"]:
         profile.outputs.append(ModelOutput(model.vars.RAC_LNAMIXTRIM0_LNAMIXLOWCUR, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.LNAMIXTRIM0.LNAMIXLOWCUR'           ))
         profile.outputs.append(ModelOutput(model.vars.RAC_PGACTRL_LNAMIXRFPKDTHRESHSEL, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.PGACTRL.LNAMIXRFPKDTHRESHSEL'           ))
     profile.outputs.append(ModelOutput(model.vars.RAC_PGACTRL_PGAENLATCHI, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.PGACTRL.PGAENLATCHI'           ))
@@ -506,16 +446,7 @@ def build_modem_regs_panther_lynx_common_part2(model, profile):
     profile.outputs.append(ModelOutput(model.vars.RAC_PGACTRL_PGATHRPKDLOSEL, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.PGACTRL.PGATHRPKDLOSEL'           ))
     profile.outputs.append(ModelOutput(model.vars.RAC_VCOCTRL_VCOAMPLITUDE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.VCOCTRL.VCOAMPLITUDE'           ))
     profile.outputs.append(ModelOutput(model.vars.RAC_VCOCTRL_VCODETAMPLITUDE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.VCOCTRL.VCODETAMPLITUDE'           ))
-    # profile.outputs.append(ModelOutput(model.vars.RFCRC_CTRL_BITREVERSE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFCRC.CTRL.BITREVERSE'           ))
-    # profile.outputs.append(ModelOutput(model.vars.RFCRC_CTRL_BITSPERWORD, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFCRC.CTRL.BITSPERWORD'           ))
-    # profile.outputs.append(ModelOutput(model.vars.RFCRC_CTRL_BYTEREVERSE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFCRC.CTRL.BYTEREVERSE'           ))
-    # profile.outputs.append(ModelOutput(model.vars.RFCRC_CTRL_CRCWIDTH, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFCRC.CTRL.CRCWIDTH'           ))
-    # profile.outputs.append(ModelOutput(model.vars.RFCRC_CTRL_INPUTBITORDER, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFCRC.CTRL.INPUTBITORDER'           ))
     profile.outputs.append(ModelOutput(model.vars.RFCRC_CTRL_INPUTINV, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFCRC.CTRL.INPUTINV'           ))
-    # profile.outputs.append(ModelOutput(model.vars.RFCRC_CTRL_OUTPUTINV, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFCRC.CTRL.OUTPUTINV'           ))
-    # profile.outputs.append(ModelOutput(model.vars.RFCRC_CTRL_PADCRCINPUT, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFCRC.CTRL.PADCRCINPUT'           ))
-    # profile.outputs.append(ModelOutput(model.vars.RFCRC_INIT_INIT, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFCRC.INIT.INIT'           ))
-    # profile.outputs.append(ModelOutput(model.vars.RFCRC_POLY_POLY, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RFCRC.POLY.POLY'           ))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_CHSP_CHSP, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.CHSP.CHSP'           ))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DIVCTRL_LODIVFREQCTRL, '',   ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DIVCTRL.LODIVFREQCTRL'     ))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_FREQ_FREQ, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.FREQ.FREQ'           ))
@@ -575,8 +506,7 @@ def build_modem_regs_panther_lynx_common_part2(model, profile):
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DSMCTRLTX_LSBFORCETX, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DSMCTRLTX.LSBFORCETX'           ))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DSMCTRLTX_MASHORDERTX, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DSMCTRLTX.MASHORDERTX'           ))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DSMCTRLTX_REQORDERTX, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DSMCTRLTX.REQORDERTX'           ))
-    # Not in Ocelot.
-    if model.part_family.lower() in ["panther", "lynx", "leopard", "lion", "curl"]:
+    if model.part_family.lower() in ["panther", "lynx", "leopard", "lionu", "lion", "curl"]:
         profile.outputs.append(ModelOutput(model.vars.RAC_SYNTHCTRL_MMDPOWERBALANCEDISABLE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYNTHCTRL.MMDPOWERBALANCEDISABLE'           ))
     profile.outputs.append(ModelOutput(model.vars.RAC_SYNTHREGCTRL_MMDLDOVREFTRIM, '',         ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYNTHREGCTRL.MMDLDOVREFTRIM'           ))
 

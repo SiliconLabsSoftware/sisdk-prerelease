@@ -26,7 +26,6 @@ requires:
 - name: device_manager
 - name: hal_gpio
 - name: hal_sdio_device
-- name: status
 template_contribution:
 - name: event_handler
   value:
@@ -34,3 +33,4 @@ template_contribution:
     handler: sl_cpc_drv_sdio_device_instances_start_buses
 template_file:
 - path: template/sl_cpc_drv_sdio_device_config.h.jinja
+- path: template/sl_cpc_drv_sdio_device_instances.c.jinja

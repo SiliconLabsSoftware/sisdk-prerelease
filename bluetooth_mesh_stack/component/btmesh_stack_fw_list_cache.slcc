@@ -27,4 +27,7 @@ template_contribution:
 metadata:
   sbom:
     reference: btmesh_stack_models
+documentation:
+  docset: btmesh
+  document: bluetooth-mesh-api/sl-btmesh-ncp-fw-list
 root_path: bluetooth_mesh_stack

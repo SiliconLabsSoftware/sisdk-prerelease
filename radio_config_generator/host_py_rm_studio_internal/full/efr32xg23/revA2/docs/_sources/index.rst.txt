@@ -1,0 +1,17 @@
+
+EFR32XG23A000F512GM40 Rev A2 Studio Register Map Package
+===========================================================================
+
+Contents:
+
+.. toctree::
+   :maxdepth: 3
+
+   EFR32XG23A000F512GM40
+
+Indices and Tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

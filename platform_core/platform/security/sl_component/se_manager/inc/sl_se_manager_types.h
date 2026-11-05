@@ -87,6 +87,19 @@ typedef struct {
   uint32_t host_id_size;     ///< size in bytes of the Host ID certificate
 } sl_se_cert_size_type_t;
 
+#if defined(SLI_SE_SUPPORTS_TLS_IDENTITY_KEY)
+/// Certificate size data structure, extended with the TLS identity certificate
+/// @note This is a distinct type rather than an extra member of
+///   #sl_se_cert_size_type_t, because that struct's size is part of the mailbox
+///   and TrustZone interfaces.
+typedef struct {
+  uint32_t batch_id_size;    ///< size in bytes of the Batch certificate
+  uint32_t se_id_size;       ///< size in bytes of the SE ID certificate
+  uint32_t host_id_size;     ///< size in bytes of the Host ID certificate
+  uint32_t tls_id_size;      ///< size in bytes of the TLS identity certificate
+} sl_se_cert_size_type_incl_tls_t;
+#endif // SLI_SE_SUPPORTS_TLS_IDENTITY_KEY
+
 /// SE certificate types
 typedef uint8_t sl_se_cert_type_t;
 

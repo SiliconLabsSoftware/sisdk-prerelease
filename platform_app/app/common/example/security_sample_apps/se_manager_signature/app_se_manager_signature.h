@@ -71,8 +71,10 @@
 /// Plain message buffer size
 #define PLAIN_MSG_SIZE            (4096)
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /// Internal SE key slot used for asymmetric key
 #define ASYMMETRIC_KEY_SLOT       (SL_SE_KEY_SLOT_VOLATILE_0)
+#endif
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -142,6 +144,7 @@ sl_status_t create_plain_asymmetric_key(sl_se_key_type_t key_type);
  ******************************************************************************/
 sl_status_t create_wrap_asymmetric_key(sl_se_key_type_t key_type);
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /***************************************************************************//**
  * Generate a non-exportable asymmetric key into a volatile SE key slot.
  *
@@ -160,6 +163,7 @@ sl_status_t create_volatile_asymmetric_key(sl_se_key_type_t key_type);
  *       be equal to those of the key that was previously placed in the slot.
  ******************************************************************************/
 sl_status_t delete_volatile_asymmetric_key(sl_se_key_type_t key_type);
+#endif
 #endif
 
 /***************************************************************************//**

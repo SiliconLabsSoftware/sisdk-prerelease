@@ -14,27 +14,20 @@ class ImportISCFiles(object):
 
         inputs = dict()
 
-        # Loop through file line by line
         with open(file_path, "r") as f:
             for line in f:
                 line = line.strip()
                 if len(line) > 0:
                     if line == '{setupId:efr32RadioConfig':
-                        # found start of input section
                         found_start = True
                     elif line == '}' and found_start:
-                        # found end of input section
                         found_end = True
                         break
                     elif line.startswith('#') and found_start:
-                        # ignore commented out line
                         LogMgr.Debug("Ignoring line: " + line)
                     elif line.startswith('RAIL_API') and found_start:
-                        # ignore RAIL_API=enum:Efr32RailApi:API_V_1_X
-                        # This was added for RAIL 1 vs RAIL 2--we need to ignore it
                         LogMgr.Debug("Ignoring line: " + line)
                     else:
-                        # We found start and are in input section
                         if found_start and not found_end:
                             if '=' in line:
                                 pair = line.split("=")
@@ -52,22 +45,16 @@ class ImportISCFiles(object):
                                         elif str.lower(value) == 'true':
                                             value = True
 
-                                    # Check if we need to ignore input
                                     if key not in self.keys_ignored:
-                                        # Add to key/value dictionary
                                         inputs[key] = value
-                                        #print("phy.profile_inputs." + key + ".value = " + str(value))
                                     else:
-                                        # Known invalid inputs are caught here
                                         if hasattr(self, key):
-                                            # Store to member variable
                                             LogMgr.Info("self." + key + " = " + value)
                                             setattr(self, key, value)
                                 else:
                                     LogMgr.Error("Invalid value " + value_pair)
                             else:
                                 LogMgr.Error("Invalid line: " + line)
-        # Return key/value dictionary
         return inputs
 
 
@@ -87,8 +74,6 @@ class ImportISCFiles(object):
             for profile_input in model.phy.profile_inputs:
                 var_type = profile_input._var._get_type_str()
                 value = profile_input.value
-                # if value is None:
-                #    value = profile_input.default
 
                 if value is not None:
                     if var_type == 'bool':
@@ -125,5 +110,4 @@ class ImportISCFiles(object):
             outputfile.write(output_string)
             outputfile.close()
 
-        #print(output_string)
         return output_string

@@ -31,8 +31,6 @@ class CALC_Viterbi(ICalculator):
         Args:
             model (ModelRoot) : Builds the variables specific to this calculator
         """
-        #self._addModelActual(model,   'agcperiod'             ,float, ModelVariableFormat.DECIMAL)
-        #self._addModelVariable(model, 'agc_settling_delay'    ,  int, ModelVariableFormat.DECIMAL, desc='Delay between two AGC gain adjustments in AGC clock cycles'	)
 
 
 

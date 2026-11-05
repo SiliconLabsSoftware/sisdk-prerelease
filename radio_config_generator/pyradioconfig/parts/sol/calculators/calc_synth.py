@@ -13,7 +13,6 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
 
     def calc_adc_rate_mode_reg(self, model):
 
-        #This function handles writes to the registers impacting ADC clock mode and HFXO multiplier
         adc_rate_mode = model.vars.adc_rate_mode.value
 
         if(model.vars.adc_rate_mode.var_enum.FULLRATE == adc_rate_mode):
@@ -21,7 +20,6 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
         elif (model.vars.adc_rate_mode.var_enum.HALFRATE == adc_rate_mode):            
             reg = 1
         else:
-            # Eigthrate
             reg = 0 # really a don't care in this mode
 
         self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXADCSEL, reg)
@@ -41,7 +39,6 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
         else:
             loside = 0
 
-        # Write the registers
         self._reg_write(model.vars.SYNTH_IFFREQ_LOSIDE, loside)
 
     def calc_digmixctrl_regs(self, model):
@@ -58,7 +55,6 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
         mixerconj = 0
 
 
-        # Write the registers
         self._reg_write_by_name_concat(model, fefilt_selected, 'DIGMIXCTRL_DIGIQSWAPEN', digiqswapen)
         self._reg_write_by_name_concat(model, fefilt_selected, 'DIGMIXCTRL_MIXERCONJ', mixerconj)
 
@@ -73,16 +69,11 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
             CALC_Synth_ocelot.calc_tx_mode(self,model)
 
     def calc_adc_freq_actual(self, model):
-        #For Sol this has been moved to the calc_fpll file
         pass
 
     def calc_if_frequency_target(self,model):
-        #This function calculates the target IF frequency
 
-        #The lower bound for signal content is determined by the lowest usable frequency range of the ADC (DC filtering produces noise near DC, varies based on sample rate)
-        #This upper bound for signal content is determined by the highest usable frequency range of the ADC (noise shaping, varies based on sample rate)
 
-        #Load model variables into local variables
         bandwidth_hz = model.vars.bandwidth_hz.value
         bandwidth_forced = (model.vars.bandwidth_hz.value_forced != None)
         adc_rate_mode = model.vars.adc_rate_mode.value #We can't use the actual rate mode, because the IF goes into calculating the actual VCO, which goes into final ADC divider
@@ -101,7 +92,6 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
 
         if (modulation_type == model.vars.modulation_type.var_enum.OFDM) and not bandwidth_forced:
             ofdm_option = int(model.vars.ofdm_option.value)
-            #Setting the IF freq at 1/2 chsp
             if_frequency_hz = self.lookup_ofdm_if_freq(ofdm_option)
         else:
             if_frequency_hz = self.get_if_freq(band_edge_min, bandwidth_hz)
@@ -116,7 +106,6 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
         if ( (if_frequency_hz + bandwidth_hz / 2) > bandwidth_adc_hz):
             LogMgr.Warning("WARNING: IF + BW/2 > ADC Bandwidth")
 
-        #Load local variables back into model variables
         model.vars.min_if_hz.value = min_if_hz
         model.vars.if_frequency_hz.value = int(if_frequency_hz)
 
@@ -138,44 +127,24 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
 
     def calc_pga_lna_bw_reg(self, model):
 
-        # For Sol, the initial approach is to scale this to 4 ranges for the 4 filter options
-        # 1:  BW3dB = 5 MHz -> max IF BW = 2.5 MHz
-        # 2:  BW3dB = 2.5 MHz -> max IF BW = 1.25 MHz
-        # 4:  BW3dB = 1.25 MHz -> max IF BW = 0.625 MHz
-        # 8:  BW3dB = 0.625 MHz -> max IF BW = 0.3125 MHz
 
         if_frequency_hz = model.vars.if_frequency_hz.value
         bandwidth_hz = model.vars.bandwidth_hz.value
         if_bandwidth_hz = if_frequency_hz + bandwidth_hz / 2.0
 
-        # Initial Ocelot approach:  same BW3dB for both poles, H(f) > -2dB at IF bandwidth edge
-        # Adjusted thresholds by -15% for -2dB frequency based on Ocelot Silicon measurements
         if if_bandwidth_hz < 0.260e6:
-            # eighth-rate modes
-            # LNABWADJ = 15 for BW3dB = 0.625 MHz
-            # PGABWMODE = 8 for BW3dB = 0.625 MHz
             mixer_bw_sel = 15
             pga_bw_sel = 8
         elif if_bandwidth_hz < 0.85*0.625e6:
-            # half-rate modes
-            # LNABWADJ = 7 for BW3dB = 1.25 MHz
-            # PGABWMODE = 4 for BW3dB = 1.25 MHz
             mixer_bw_sel = 7
             pga_bw_sel = 4
         elif if_bandwidth_hz < 0.85*1.25e6:
-            # half-rate modes
-            # LNABWADJ = 3 for BW3dB = 2.5 MHz
-            # PGABWMODE = 2 for BW3dB = 2.5 MHz
             mixer_bw_sel = 3
             pga_bw_sel = 2
         else:
-            # full-rate modes
-            # LNABWADJ = 0 for BW3dB = 5 MHz
-            # PGABWMODE = 1 for BW3dB = 5 MHz
             mixer_bw_sel = 0
             pga_bw_sel = 1
 
-        #For now, set mixer_bw_sel_boost to the same value as mixer_bw_sel (MCUW_RADIO_CFG-1174)
         mixer_bw_sel_boost = mixer_bw_sel
 
         self._reg_write(model.vars.RAC_PGACTRL_PGABWMODE, pga_bw_sel)
@@ -189,7 +158,6 @@ class Calc_Synth_Sol(CALC_Synth_ocelot):
         pass
 
     def calc_adc_clock_config(self, model):
-        #Always use FULLRATE for Wi-SUN Concurrent PHYs
         conc_ofdm_option = model.vars.conc_ofdm_option.value
 
         if conc_ofdm_option != model.vars.conc_ofdm_option.var_enum.NONE:

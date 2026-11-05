@@ -33,7 +33,7 @@
 #include "sli_power_manager.h"
 #include "sli_power_manager_private.h"
 #include "sli_clock_manager.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_atomic.h"
 #include "sl_common.h"
 #include "sl_code_classification.h"
@@ -304,7 +304,7 @@ void sli_power_manager_notify_em_transition(sl_power_manager_em_t from,
       break;
 
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
   }
 
   switch (from) {
@@ -321,7 +321,7 @@ void sli_power_manager_notify_em_transition(sl_power_manager_em_t from,
       break;
 
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
   }
 
   SL_SLIST_FOR_EACH_ENTRY(power_manager_em_transition_event_list, handle, sl_power_manager_em_transition_event_handle_t, node) {

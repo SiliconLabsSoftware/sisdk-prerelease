@@ -40,13 +40,10 @@ class CALC_Mbus_Ocelot(CALC_Mbus):
                     sync_a = long(0x3d)
                     sync_b = long(0)
                 elif mode == model.vars.mbus_mode.var_enum.ModeN_6p4k:
-                    #New logic for ModeN 6.4kbps
                     len = 16
                     sync_a = long(0xf68d)
                     sync_b = long(0xf672)
 
-                # Set syncword 0/1 based on whether frame format A or B is selected
-                # If only one syncword exists, don't flip them for frame B format
                 if model.vars.mbus_frame_format.value != model.vars.mbus_frame_format.var_enum.FrameB or sync_b == 0:
                     syncword_0 = sync_a
                     syncword_1 = sync_b
@@ -59,5 +56,4 @@ class CALC_Mbus_Ocelot(CALC_Mbus):
                 model.vars.syncword_length.value = len
 
             else:
-                #Call existing logic for other Mbus modes
                 super().calc_mbus_syncwords(model)

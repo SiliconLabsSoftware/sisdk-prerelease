@@ -489,6 +489,75 @@ TEST(cpc_syn, connect_then_reset_notifies_error)
 }
 
 /**
+ * @brief Active open times out when the peer never answers the SYN.
+ *
+ * Leaves the connect SYN unacked so the retransmit timer fires
+ * SLI_CPC_RE_TRANSMIT times, then once more to raise SL_STATUS_TIMEOUT.
+ * The endpoint must notify ERROR and enter CLOSING without ever becoming
+ * CONNECTED.
+ */
+TEST(cpc_syn, connect_then_syn_retransmit_timeout_notifies_error)
+{
+  sl_cpc_bus_t *bus = CPC_TEST_MOCK_BUS(0);
+
+  mock_cpc_tx_packet_t *dut_syn;
+  sl_status_t status;
+  sl_cpc_ep_t ep;
+
+  status = sl_cpc_ep_init(&ep, CPC_TEST_EP_ID, CPC_TEST_RX_SIZE, cpc_test_event_cb, NULL);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
+
+  status = sl_cpc_ep_connect(&ep, bus);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, status);
+  TEST_ASSERT_EQUAL(SLI_CPC_STATE_SYN_SENT, ep.state);
+
+  // First active-open SYN; leave it unacked.
+  dut_syn = TEST_POP_OUTGOING(bus, {
+                                     .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                                     .len = CPC_TEST_RX_SIZE,
+                                     .dst = CPC_TEST_EP_ID,
+                                     .seq = -1,
+                                     .ack = -1,
+                                     .wnd = -1,
+                                   });
+  mock_cpc_tx_packet_free(&dut_syn);
+  cpc_test_pump(bus);
+  cpc_test_wait_retx_timer(bus);
+
+  // Exhaust the retransmit retries: each expiry retransmits the outstanding SYN.
+  for (unsigned int i = 0; i < SLI_CPC_RE_TRANSMIT; i++) {
+    TEST_ASSERT_TRUE_MESSAGE(mock_cpc_timer_fire_next(), "Expected retransmit timer to be armed");
+    cpc_test_pump(bus);
+
+    TEST_ASSERT_OUTGOING(bus, {
+                                .flags = CPC_EXPECT_FLAG_ACK_REQ | CPC_EXPECT_FLAG_SYN,
+                                .len = CPC_TEST_RX_SIZE,
+                                .dst = CPC_TEST_EP_ID,
+                                .seq = -1,
+                                .ack = -1,
+                                .wnd = -1,
+                              });
+    cpc_test_wait_retx_timer(bus);
+  }
+
+  // Final expiry: packet_re_transmit_count >= SLI_CPC_RE_TRANSMIT -> TIMEOUT.
+  TEST_ASSERT_TRUE_MESSAGE(mock_cpc_timer_fire_next(), "Expected final retransmit timer to be armed");
+  cpc_test_pump(bus);
+
+  TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSING, ep.state);
+  TEST_ASSERT_BIT_HIGH(SL_CPC_EP_EVENT_ERROR, cpc_test_event_mask);
+  TEST_ASSERT_BIT_LOW(SL_CPC_EP_EVENT_CONNECTED, cpc_test_event_mask);
+  TEST_ASSERT_DRV_PENDING_TX(bus, 0);
+
+  sl_cpc_ep_close(&ep);
+  cpc_test_pump(bus);
+
+  TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSED, ep.state);
+
+  cpc_test_ep_discard(&ep);
+}
+
+/**
  * @brief Passive open: listen() then peer RST is ignored, endpoint stays OPEN.
  */
 TEST(cpc_syn, listen_then_reset_is_ignored)
@@ -2149,6 +2218,7 @@ TEST_GROUP_RUNNER(cpc_syn)
   RUN_TEST_CASE(cpc_syn, connect_then_handshake_completes);
   RUN_TEST_CASE(cpc_syn, connect_then_immediate_write_after_syn_ack);
   RUN_TEST_CASE(cpc_syn, connect_then_reset_notifies_error);
+  RUN_TEST_CASE(cpc_syn, connect_then_syn_retransmit_timeout_notifies_error);
   RUN_TEST_CASE(cpc_syn, listen_then_reset_is_ignored);
   RUN_TEST_CASE(cpc_syn, connect_then_data_with_expected_seq_notifies_error);
   RUN_TEST_CASE(cpc_syn, connect_then_data_with_random_seq_notifies_error);

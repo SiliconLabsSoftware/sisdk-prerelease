@@ -11,4 +11,13 @@
 #define MBEDTLS_MPI_MAX_SIZE  {{mbedtls_mpi_max|max}}
 {% endif %}
 
+{% if psa_vendor_rsa_max_key_bits is defined %}
+#define PSA_VENDOR_RSA_MAX_KEY_BITS  {{psa_vendor_rsa_max_key_bits|max}}u
+#if defined(MBEDTLS_MPI_MAX_SIZE)
+#if MBEDTLS_MPI_MAX_SIZE < ((PSA_VENDOR_RSA_MAX_KEY_BITS + 7) / 8)
+#error "MBEDTLS_MPI_MAX_SIZE is too small for PSA_VENDOR_RSA_MAX_KEY_BITS"
+#endif
+#endif
+{% endif %}
+
 #endif // SLI_PSA_BUILTIN_CONFIG_AUTOGEN_H

@@ -43,7 +43,6 @@
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #include "cmsis_os2.h"
-#include "sl_cpc_kernel_config.h"
 #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
 #include "sl_cmsis_os2_common.h"
 #endif
@@ -93,6 +92,11 @@ typedef struct sl_cpc_bus_config {
   bool is_secondary;
   uint16_t rx_frame_pool_count;
   uint16_t tx_frame_pool_count;
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  osPriority_t task_priority;
+  void *task_stack_ptr;
+  uint32_t task_stack_len;
+#endif
 #if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
   // local sleep configuration if used
   sl_cpc_power_mode_t power_mode;
@@ -115,7 +119,6 @@ struct sl_cpc_bus_kernel {
   alignas(4) uint8_t eps_list_mutex_cb[osMutexCbSize];
   alignas(4) uint8_t event_signal_semaphore_cb[osSemaphoreCbSize];
   alignas(4) uint8_t thread_cb[osThreadCbSize];
-  alignas(8) uint8_t thread_stack[(SL_CPC_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u];
 #endif
 
   osMutexId_t ep_list_lock;        ///< endpoints list lock

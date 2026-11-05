@@ -75,18 +75,22 @@ include:
   - path: utils.h
   - path: window_functions.h
 library:
-- path: lib/gcc/cortex-m33/libCMSISDSP.a
-  condition:
-  - toolchain_gcc
-  - cortexm33
-  unless:
-  - toolchain_llvm
 - path: lib/gcc/cortex-m4/libCMSISDSP.a
   condition:
   - toolchain_gcc
   - cortexm4
-  unless:
+- path: lib/iar/cortex-m4/libCMSISDSP.a
+  condition:
+  - toolchain_iar
+  - cortexm4
+- path: lib/llvm/cortex-m4/libCMSISDSP.a
+  condition:
   - toolchain_llvm
+  - cortexm4
+- path: lib/gcc/cortex-m33/libCMSISDSP.a
+  condition:
+  - toolchain_gcc
+  - cortexm33
 - path: lib/iar/cortex-m33/libCMSISDSP.a
   condition:
   - toolchain_iar
@@ -95,7 +99,15 @@ library:
   condition:
   - toolchain_llvm
   - cortexm33
-- path: lib/llvm/cortex-m4/libCMSISDSP.a
+- path: lib/gcc/cortex-m55/libCMSISDSP.a
+  condition:
+  - toolchain_gcc
+  - cortexm55
+- path: lib/iar/cortex-m55/libCMSISDSP.a
+  condition:
+  - toolchain_iar
+  - cortexm55
+- path: lib/llvm/cortex-m55/libCMSISDSP.a
   condition:
   - toolchain_llvm
-  - cortexm4
+  - cortexm55

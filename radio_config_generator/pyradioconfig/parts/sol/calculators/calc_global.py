@@ -6,15 +6,12 @@ class Calc_Global_Sol(CALC_Global_ocelot):
 
     def buildVariables(self, model):
 
-        # Build variables from the Ocelot calculations
         super().buildVariables(model)
 
-        # new actual variables for Ocelot
         self._addModelActual(model,    'srcsrd'            , int,   ModelVariableFormat.DECIMAL)
 
     def _add_common_regs(self, model):
         super()._add_common_regs(model)
-        # new model variables for Sol
         self._addModelRegister(model, 'RFFPLL0.RFFPLLCTRL1.DIVXADCSEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RFFPLL0.RFFPLLCTRL1.DIVXDACSEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RFFPLL0.RFFPLLCTRL1.DIVX', int, ModelVariableFormat.HEX)
@@ -220,7 +217,6 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'AGC.COLLDETTHD.MATHRESHOLD', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.COLLDETTHD.OVRTHRESHOLD', int, ModelVariableFormat.HEX)
 
-        # SEQ Peripheral - MODEMINFO register
         self._addModelRegister(model, 'SEQ.MODEMINFO.LEGACY_EN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SEQ.MODEMINFO.DSA_VITERBI_EN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SEQ.MODEMINFO.TRECS_EN', int, ModelVariableFormat.HEX)
@@ -231,9 +227,7 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'SEQ.MODEMINFO.SOFTMODEM_MOD_EN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SEQ.MODEMINFO.SOFTMODEM_SPARE', int, ModelVariableFormat.HEX)
 
-        ### Defining SoftModem Regs ###
 
-        # CW Peripheral
         self._addModelRegister(model, 'CW.VREGS.MAJORVERSION', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'CW.VREGS.MINORVERSION', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'CW.CFG1.MODULATION', int, ModelVariableFormat.HEX)
@@ -245,7 +239,6 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'CW.CFG2.AMP', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'CW.CFG3.XTALFREQ', int, ModelVariableFormat.HEX)
 
-        # SUNOFDM Peripheral
         self._addModelRegister(model, 'SUNOFDM.VREGS.MAJORVERSION', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNOFDM.VREGS.MINORVERSION', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNOFDM.CFG1.MODULATION', int, ModelVariableFormat.HEX)
@@ -362,7 +355,6 @@ class Calc_Global_Sol(CALC_Global_ocelot):
             self._addModelRegister(model, 'SUNOFDM.PREEMPHCOGR%d.COEFF%d' % (i//4, i), int, ModelVariableFormat.HEX)
 
 
-        # SUNOQPSK Peripheral
         self._addModelRegister(model, 'SUNOQPSK.VREGS.MAJORVERSION', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNOQPSK.VREGS.MINORVERSION', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNOQPSK.CFG1.MODULATION', int, ModelVariableFormat.HEX)
@@ -371,7 +363,6 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'SUNOQPSK.CFG2.MACFCSTYPE', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNOQPSK.CFG2.XTALFREQ', int, ModelVariableFormat.HEX)
 
-        # LEGOQPSK Peripheral
         self._addModelRegister(model, 'LEGOQPSK.VREGS.MAJORVERSION', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'LEGOQPSK.VREGS.MINORVERSION', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'LEGOQPSK.CFG1.MODULATION', int, ModelVariableFormat.HEX)
@@ -379,7 +370,6 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'LEGOQPSK.CFG1.BANDFREQMHZ', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'LEGOQPSK.CFG2.XTALFREQ', int, ModelVariableFormat.HEX)
 
-        # SUNFSK Peripheral
         self._addModelRegister(model, 'SUNFSK.VREGS.MAJORVERSION', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNFSK.VREGS.MINORVERSION', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SUNFSK.CFG1.MODULATION', int, ModelVariableFormat.HEX)
@@ -440,14 +430,11 @@ class Calc_Global_Sol(CALC_Global_ocelot):
         self._addModelRegister(model, 'SMCTRL.TXDONE.TXDONE', int, ModelVariableFormat.HEX)
 
 
-        # ECO implementation of DEC1 bug fix
         self._addModelRegister(model, 'MODEM.SPARE.SPARE', int, ModelVariableFormat.HEX)
 
 
     def _add_modulation_type_variable(self, model):
 
-        #This method is called in the inherited Common calculations
-        #Adding the method here overrides the modulation type for Sol
 
         var = self._addModelVariable(model, 'modulation_type', Enum, ModelVariableFormat.DECIMAL,
                                      'Defines the modulation type.')

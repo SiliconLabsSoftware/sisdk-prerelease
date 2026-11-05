@@ -589,6 +589,10 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
 
 // Initialize HCI
 
+#if defined(SL_CATALOG_BLUETOOTH_HCI_TRANSPORT_PRESENT)
+  hci_common_transport_init();
+#endif // SL_CATALOG_BLUETOOTH_HCI_TRANSPORT_PRESENT
+
 #if defined(SL_CATALOG_BLUETOOTH_HCI_UART_RTOS_PRESENT)
   sl_btctrl_hci_uart_rtos_init();
 #endif // SL_CATALOG_BLUETOOTH_HCI_UART_RTOS_PRESENT
@@ -602,10 +606,6 @@ sl_status_t sl_btctrl_init_functional(struct sl_btctrl_config *config)
   sl_hci_uart_init();
 #endif // SL_CATALOG_BLUETOOTH_HCI_UART_PRESENT || SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
 #endif // SL_CATALOG_BLUETOOTH_RCP_PRESENT
-
-#if defined(SL_CATALOG_BLUETOOTH_HCI_TRANSPORT_PRESENT)
-  hci_common_transport_init();
-#endif // SL_CATALOG_BLUETOOTH_HCI_TRANSPORT_PRESENT
 
 #if defined(SL_CATALOG_BLUETOOTH_RCP_PRESENT)
   sl_bthci_init_upper();

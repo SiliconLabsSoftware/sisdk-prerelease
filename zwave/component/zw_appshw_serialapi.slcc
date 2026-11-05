@@ -6,6 +6,10 @@ description: >
   application. The component makes sure that both Series 1 and Series 2 devices have the right
   USART pin configuration. Interrupt and deep sleep functionalities are also handled for the
   SerialAPI application.
+documentation:
+  docset: z-wave
+  document: z-wave-serial-api-host-app-programming-guide
+
 package: zwave
 quality: production
 metadata:

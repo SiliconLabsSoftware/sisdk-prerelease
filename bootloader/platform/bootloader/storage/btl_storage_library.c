@@ -36,6 +36,9 @@
 #include "ddfu/patch.h"
 #include "core/btl_reset.h"
 #include "btl_reset_info.h"
+#if defined(BTL_DELTA_DFU_EXTRACT_TO_RAM)
+#include <stdlib.h>
+#endif
 #endif
 
 #if defined(BTL_ENFORCE_GLITCH_MITIGATION) && (BTL_ENFORCE_GLITCH_MITIGATION == 1)
@@ -552,22 +555,50 @@ int32_t delta_dfu_init(struct callback_streams *user_ctx, uint32_t slotId)
 }
 
 #if defined(MAIN_BOOTLOADER_TEST)
-int32_t storage_getDeltaDfuInitSlotInfo(uint32_t slotId, BootloaderStorageSlot_t *slot)
+size_t storage_delta_dfu_callback_streams_size(void)
 {
-  struct callback_streams user_ctx;
+  return sizeof(struct callback_streams);
+}
 
-  int32_t status;
+bool storage_test_read_old_firmware(size_t offset,
+                                    size_t nbytes,
+                                    uint8_t out_buf[],
+                                    void *user_ctx)
+{
+  return read_old_firmware(offset,
+                           nbytes,
+                           out_buf,
+                           user_ctx);
+}
 
-  if (slot == NULL) {
-    return BOOTLOADER_ERROR_STORAGE_INVALID_SLOT;
-  }
+bool storage_test_read_patch(size_t nbytes,
+                             void *out_buf,
+                             void *user_ctx)
+{
+  return read_patch(nbytes,
+                    out_buf,
+                    user_ctx);
+}
 
-  status = delta_dfu_init(&user_ctx, slotId);
-  if (status != BOOTLOADER_OK) {
-    return status;
-  }
-  *slot = user_ctx.slotInfo;
-  return BOOTLOADER_OK;
+bool storage_test_write_new_firmware(uint8_t data[],
+                                     size_t length,
+                                     void *user_ctx)
+{
+  return write_new_firmware(data,
+                            length,
+                            user_ctx);
+}
+
+bool storage_test_seek_new_firmware(size_t nbyte,
+                                    void *user_ctx)
+{
+  return seek_new_firmware(nbyte,
+                           user_ctx);
+}
+
+bool storage_test_is_end_of_patch(void *user_ctx)
+{
+  return is_end_of_patch(user_ctx);
 }
 #endif
 
@@ -715,7 +746,6 @@ static bool bootloadFromSlot(BootloaderParserContext_t         *context,
     read_patch,
     is_end_of_patch
   };
-
   uint32_t gblLength = context->parserContext.gblLength;
   uint32_t endOfSlot = context->parserContext.endOfStorageSlot;
 #endif //BTL_PARSER_SUPPORT_DELTA_DFU

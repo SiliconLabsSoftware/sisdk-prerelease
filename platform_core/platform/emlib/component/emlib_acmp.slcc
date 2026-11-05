@@ -19,6 +19,7 @@ provides:
 - name: hal_generic_acmp
   condition: [device_series_2]
 requires:
+- name: log_none
 - name: device
 - name: device_has_acmp
 - name: emlib_common

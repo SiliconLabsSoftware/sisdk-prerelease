@@ -28,7 +28,6 @@ class CALC_Shaping_jumbo(CALC_Shaping):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # for gaussian pulse shapes pulse_shape_parameter holds BT value
         bt = model.vars.shaping_filter_param.value
         max_filter_taps = model.vars.max_filter_taps.value
         req_filter_taps = self.get_required_filter_taps(bt)
@@ -39,43 +38,28 @@ class CALC_Shaping_jumbo(CALC_Shaping):
             LogMgr.Error("ERROR: BT < {} not supported on this part, overriding the current BT to {}".format(minumum_bt_supported, minumum_bt_supported))
 
 
-        # Even mode uses 16 taps (c0, c1...c7, c7, c6... c1, c0). Therefore anything that needs less than 16 taps can be
-        # implemented using Even mode
         if req_filter_taps < 17:
             shaping = 2 # sets shaping filter in Even mode
-            # map BT value to standard deviation
             std = 1.05 / bt
 
-            # generate gaussian pulse shape
             w = self.gaussian(17, std)
-            # scale for unit DC gain
             w = tinynumpy.divide(w, w.sum())
-            # convolve with square wave of oversampling rate width which is 8 for the shaping filter
             f_hack = tinynumpy.convolve(w, tinynumpy.ones((1, 8)).flatten())
-            # scale and quantize coefficients
             c_hack = tinynumpy.round_((84.5 * f_hack))
-            # keep only 8 coeffs from the peak filter tap
             coeff = c_hack[4:12]
 
             return coeff, shaping
 
         else:
             shaping = 3 # sets shaping filter in Asymmetric mode
-            # map BT value to standard deviation
             std = 1.05 / bt
 
-            # generate gaussian pulse shape
             w = self.gaussian(int(max_filter_taps + 1 - 8), std) # To get max_filter_taps points after convolution
-            # scale for unit DC gain
             w = tinynumpy.divide(w, w.sum())
-            # convolve with square wave of oversampling rate width which is 8 for the shaping filter
             f_hack = tinynumpy.convolve(w, tinynumpy.ones((1, 8)).flatten())
-            # scale and quantize coefficients
             c_hack = tinynumpy.round_((scaling_fac * f_hack))
-            # keep only non 0 coeffs as 0 coeffs in the beginning add unnecessary delay to the TX chain
             c_hack = np.array(c_hack)
             coeff = c_hack[c_hack != 0]
-            # return coeffs
             return coeff, shaping
 
     def calc_shaping_filter_gain_actual(self, model):
@@ -152,7 +136,6 @@ class CALC_Shaping_jumbo(CALC_Shaping):
         model.vars.shaping_filter_gain_actual.value = int(shaping_filter_gain)
 
     def calc_max_available_filter_taps(self, model):
-        # this is fixed for a family of parts
         model.vars.max_filter_taps.value = 40
 
     def calc_shaping_reg(self, model):
@@ -173,22 +156,13 @@ class CALC_Shaping_jumbo(CALC_Shaping):
         elif shaping_filter_option.value == model.vars.shaping_filter.var_enum.Gaussian.value:
             calc_coeff_error = True
             scaling_fac = 127
-            # The loop here uses "check_coeff_write_error" to make sure we are not writing any filter tap coefficient
-            # with a value greater than its bit-width capacity. If "check_coeff_write_error" returns True, we scale the
-            # coefficients down and keep scaling the coefficients down untill all coefficients fit the respective
-            # signed bit-wdith fields.
-            # This is to handle the special case of Nerio, Nixi and Jumbo where not all filter taps coefficients are
-            # 8-bit signed registers
             while calc_coeff_error:
-                # adding an exit condition
                 if scaling_fac < 0:
                     c = np.zeros(max_filter_taps)
                     shaping = 3
                 else:
                     c, shaping = self.gaussian_shaping_filter(model, scaling_fac)
-                    # Create temporary coeff
                     temp_coeff = np.zeros(max_filter_taps)
-                    # read values in temporary coffs
                     temp_coeff = self.update_coeffs(model, c, temp_coeff)
                     calc_coeff_error = self.check_coeff_write_error(model, temp_coeff)
                     scaling_fac = scaling_fac - 10
@@ -196,7 +170,6 @@ class CALC_Shaping_jumbo(CALC_Shaping):
             coeff = self.update_coeffs(model, c, coeff)
 
         elif shaping_filter_option.value == model.vars.shaping_filter.var_enum.Custom_OQPSK.value:
-            # Not sure what filter this is
             coeff[0] = coeff[1] = 1
             coeff[2] = 16
             coeff[3] = 48
@@ -293,7 +266,6 @@ class CALC_Shaping_jumbo(CALC_Shaping):
             coeff: coefficents with calculated coeffs
         """
         max_filter_taps = model.vars.max_filter_taps.value
-        # replace calculated coefficients and keep others as 0
         for idx in range(len(calc_c)):
             if idx > max_filter_taps:
                 coeff[idx] = 0
@@ -369,7 +341,6 @@ class CALC_Shaping_jumbo(CALC_Shaping):
         else:
             coeff_ceil = np.array(coeff_ceil)
             temp_coeffs = np.array(temp_coeffs)
-            # check if any temp_coeffs is greater than coeff_ceil
             error = np.any((coeff_ceil - temp_coeffs) < 0)
 
             return error

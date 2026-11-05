@@ -16,12 +16,32 @@
   "uart_eusart": (cpc_ng_drv_uart_eusart_instances, cpc_ng_drv_uart_eusart_role_secondary),
   "uart_usart": (cpc_ng_drv_uart_usart_instances, cpc_ng_drv_uart_usart_role_secondary),
 } -%}
+{% set drv_without_wake = ["mock"] -%}
 
 {% for drv_name, drv_instances_role in drv_instances_dict.items() %}
 {% for instance in drv_instances_role.0 %}
 #include "sl_cpc_drv_{{ drv_name }}_{{ instance }}_config.h"
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+#include "sl_cpc_drv_{{ drv_name }}_{{ instance }}_kernel_config.h"
+#endif
+{% if drv_name not in drv_without_wake %}
+#if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
+#include "sl_cpc_drv_{{ drv_name }}_{{ instance }}_pm_runtime_config.h"
+#endif
+#if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
+#include "sl_cpc_drv_{{ drv_name }}_{{ instance }}_wake_host_config.h"
+#endif
+{% endif %}
 {% endfor %}
 {% endfor %}
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+{% for drv_name, drv_instances_role in drv_instances_dict.items() %}
+{% for instance in drv_instances_role.0 %}
+alignas(8) static uint8_t sl_cpc_bus_{{ drv_name }}_{{ instance }}_task_stack[(SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u];
+{% endfor %}
+{% endfor %}
+#endif
 
 sl_status_t sl_cpc_drv_instances_init(void)
 {
@@ -38,10 +58,8 @@ sl_status_t sl_cpc_drv_instances_init(void)
   {% endfor %}
 
   {% for instance in cpc_ng_drv_sdio_host_instances -%}
-  /* SDHCCORE is a CMSIS pointer macro. Hide it so the pin-tool name pastes as a token. */
-#undef SDHCCORE
   const sl_cpc_drv_sdio_host_config_t sl_cpc_drv_sdio_host_{{ instance }}_cfg = {
-    .peripheral = SL_CONCAT_PASTER_2(SL_PERIPHERAL_, SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_PERIPHERAL),
+    .peripheral = SL_CONCAT_PASTER_2(SL_PERIPHERAL_SDHC, SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_PERIPHERAL_NO),
     .clk = { .port = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_CLK_PORT, .pin = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_CLK_PIN },
     .cmd = { .port = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_CMD_PORT, .pin = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_CMD_PIN },
     .dat0 = { .port = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_DAT0_PORT, .pin = SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_DAT0_PIN },
@@ -153,8 +171,13 @@ sl_status_t sl_cpc_drv_instances_init(void)
     .is_secondary = {{ (instance in drv_instances_role.1)|string|lower }},
     .rx_frame_pool_count = SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_RX_FRAME_POOL_COUNT,
     .tx_frame_pool_count = SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_TX_FRAME_POOL_COUNT,
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+    .task_priority = SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_TASK_PRIORITY,
+    .task_stack_ptr = sl_cpc_bus_{{ drv_name }}_{{ instance }}_task_stack,
+    .task_stack_len = (uint32_t)sizeof(sl_cpc_bus_{{ drv_name }}_{{ instance }}_task_stack),
+#endif
+{% if drv_name not in drv_without_wake %}
 #if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
-#if defined(SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_POWER_MODE)
     .power_mode = SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_POWER_MODE,
     .wake_in_response = SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_WAKE_IN_RESPONSE,
 #if defined(SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_WAKE_IN_PORT)
@@ -164,9 +187,7 @@ sl_status_t sl_cpc_drv_instances_init(void)
     },
 #endif
 #endif
-#endif
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-#if defined(SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_WAKE_OUT_MODE)
     .wake_out_mode = SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_WAKE_OUT_MODE,
 #if defined(SL_CPC_DRV_{{ drv_name|upper }}_{{ instance|upper }}_WAKE_OUT_PORT)
     .wake_out_pin = {
@@ -175,7 +196,7 @@ sl_status_t sl_cpc_drv_instances_init(void)
     },
 #endif
 #endif
-#endif
+{% endif %}
   };
   {% endfor %}
   {% endfor %}

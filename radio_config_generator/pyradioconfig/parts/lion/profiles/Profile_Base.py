@@ -22,29 +22,22 @@ class ProfileBaseLion(profile_base_leopard):
 
         family = self._family
 
-        # Build profile
         profile = self._makeProfile(model)
 
-        # Add inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
         self.build_hidden_profile_inputs(model, profile)
         self.build_deprecated_profile_inputs(model, profile)
 
-        # Frame configuration Inputs
         self.build_frame_configuration_inputs(model, profile)
 
-        # Modem Advanced Inputs
         buildModemAdvancedInputs(model, profile)
 
-        # Informational Output
         buildModemInfoOutputs(model, profile)
 
-        # RAIL Outputs
         buildRailOutputs(model, profile)
 
-        # Output fields
         buildFrameOutputs(model, profile)
         buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)

@@ -22,7 +22,7 @@ __all__ = [ 'ModelPhy', 'ModelPhyContainer', 'ModelPhyTypeXml', 'ModelPhyInstanc
 
 class ModelPhy(object):
 
-    def __init__(self, name, desc, profile, group_name, readable_name=None, act_logic='', tags='', phy_points_to=None, locked=False, guid=None):
+    def __init__(self, name, desc, profile, group_name, readable_name=None, act_logic='', tags='', phy_points_to=None, locked=False, guid=None, ip_category=IPCategory.LPW):
         self.name = name
         if readable_name is None:
             self.readable_name = name
@@ -46,12 +46,12 @@ class ModelPhy(object):
 
         self.locked = locked
 
-        # backward compatibility
         if tags is None:
             tags = ''
         self.tags = tags
 
         self.guid = guid
+        self.ip_category = ip_category
 
     @property
     def name(self):
@@ -134,8 +134,16 @@ class ModelPhy(object):
             assert isinstance(value, basestring)
         self._guid = value
 
+    @property
+    def ip_category(self):
+        return self._ip_category
+
+    @ip_category.setter
+    def ip_category(self, value):
+        assert isinstance(value, IPCategory)
+        self._ip_category = value
+
     def register_parser(self, eval_act_logic_func):
-        # called by the append() method in ModelPhyContainer
         assert callable(eval_act_logic_func)
         self.zz_eval_act_logic = eval_act_logic_func
 
@@ -156,7 +164,8 @@ class ModelPhy(object):
                                   profile_outputs=self.profile_outputs.to_type_xml(),
                                   tags=self.tags,
                                   locked=self.locked,
-                                  guid=self.guid)
+                                  guid=self.guid,
+                                  ip_category=self.ip_category.name)
 
     def to_instance_xml(self):
         return model_inst.phyType(name=self.name,
@@ -169,7 +178,8 @@ class ModelPhy(object):
                                   profile_outputs=self.profile_outputs.to_instance_xml(),
                                   tags=self.tags,
                                   locked=self.locked,
-                                  guid=self.guid)
+                                  guid=self.guid,
+                                  ip_category=self.ip_category.name)
 
     def __str__(self):
         out = '\n  Phy - {}:\n'.format(self.name)
@@ -298,7 +308,6 @@ class ModelPhyTypeXml(ModelPhy):
                     values = cast_value_from_xml(var, xml_value)
                 else:
                     values = None
-            # assign casted values to inputs object
             self.profile_inputs.get_input_value(var.name).value = values
         for profile_output in phy_root.get_profile_outputs().get_profile_output():
             var = vars.get_var(profile_output.var_name)
@@ -312,7 +321,6 @@ class ModelPhyTypeXml(ModelPhy):
                     overrides = cast_value_from_xml(var, xml_value)
                 else:
                     overrides = None
-            # assign casted values to outputs override
             self.profile_outputs.get_output_override(var.name).override = overrides
 
 
@@ -324,6 +332,7 @@ class ModelPhyInstanceXml(ModelPhy):
         assert isinstance(vars, ModelVariableContainer)
         assert isinstance(profiles, ModelProfileContainer)
         assert isinstance(phy_root, model_inst.phyType)
+        ip_category = IPCategory[phy_root.ip_category] if phy_root.ip_category is not None else IPCategory.LPW
         profile = profiles.get_profile(phy_root.profile_name)
         super(ModelPhyInstanceXml, self).__init__(phy_root.name,
                                                   phy_root.desc,
@@ -334,7 +343,8 @@ class ModelPhyInstanceXml(ModelPhy):
                                                   phy_root.tags,
                                                   None,  # phy_points_to
                                                   phy_root.locked,
-                                                  phy_root.guid)
+                                                  phy_root.guid,
+                                                  ip_category=ip_category)
         for profile_input in phy_root.get_profile_inputs().get_profile_input():
             var = vars.get_var(profile_input.var_name)
             if profile_input.is_array:
@@ -347,7 +357,6 @@ class ModelPhyInstanceXml(ModelPhy):
                     values = cast_value_from_xml(var, xml_value)
                 else:
                     values = None
-            # assign casted values to inputs object
             self.profile_inputs.get_input_value(var.name).value = values
         for profile_output in phy_root.get_profile_outputs().get_profile_output():
             var = vars.get_var(profile_output.var_name)
@@ -362,5 +371,4 @@ class ModelPhyInstanceXml(ModelPhy):
                     overrides = cast_value_from_xml(var, xml_value)
                 else:
                     overrides = None
-            # assign casted values to outputs override
             self.profile_outputs.get_output_override(var.name).override = overrides

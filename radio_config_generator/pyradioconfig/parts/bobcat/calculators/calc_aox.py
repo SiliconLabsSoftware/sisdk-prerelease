@@ -3,7 +3,6 @@ from enum import Enum
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
 
 class Calc_AoX_Bobcat(ICalculator):
-    ###AoX Calculations###
 
     def buildVariables(self, model):
         var = self._addModelVariable(model, 'aox_enable', Enum, ModelVariableFormat.DECIMAL, units='',
@@ -20,7 +19,6 @@ class Calc_AoX_Bobcat(ICalculator):
             member_data)
 
     def calc_aox_enable(self, model):
-        #Disable by default
         model.vars.aox_enable.value = model.vars.aox_enable.var_enum.DISABLED
 
     def calc_timeperiod_reg(self, model):

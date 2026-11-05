@@ -67,14 +67,12 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
         self.make_hidden_input(profile, model.vars.demod_select, 'Advanced', readable_name="Demod Selection")
         self.make_hidden_input(profile, model.vars.trecs_enabled, 'Advanced', readable_name="trecs_enabled")
 
-        # Hidden input for dual front-end filter support
         self.make_hidden_input(profile, model.vars.dual_fefilt, "Advanced", readable_name="Dual front-end filter enable")
         self.make_hidden_input(profile, model.vars.softmodem_antdivmode, "Advanced",
                                readable_name="Antenna diversity mode for soft modem")
         self.make_hidden_input(profile, model.vars.ofdm_stf_length, "Advanced",
                                readable_name="OFDM STF length (1 unit = 120us)",
                                value_limit_min=4, value_limit_max=25)
-        # Add additional inputs for Antenna diversity
         self.make_hidden_input(profile, model.vars.antdivmode, 'Advanced', readable_name="Antenna diversity mode")
         self.make_hidden_input(profile, model.vars.antdivrepeatdis, 'Advanced', readable_name="Diversity Select-Best repeat")
         self.make_hidden_input(profile, model.vars.skip2ant, 'Advanced', 'Skip 2nd antenna check with phase demod antenna diversity')
@@ -88,9 +86,7 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
         pass
 
     def _lookup_from_wisun_mode(self, model):
-        # This function calculates some variables/registers based on the PhyModeID
 
-        # Read the mode and fec_en from the profile inputs (not yet written to model vars)
         wisun_phy_mode_id_select = model.profile.inputs.wisun_phy_mode_id_select.var_value.value
         shaping_filter = model.profile.inputs.shaping_filter.var_value
         shaping_filter_param = model.profile.inputs.shaping_filter_param.var_value
@@ -98,18 +94,13 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
 
         PhyType = wisun_phy_mode_id_select >> 4  # Top 4 bits of PhyModeID
 
-        # Set FEC enable and modulation type based on PhyType
         if PhyType <= 1:
-            # Wi-SUN FSK
-            # Use the calculations from Ocelot
             super()._lookup_from_wisun_mode(model)
             super()._fixed_wisun_vars(model)
         else:
-            #Wi-SUN OFDM
             model.vars.fec_tx_enable.value_forced = model.vars.fec_tx_enable.var_enum.DISABLED
             model.vars.modulation_type.value_forced = model.vars.modulation_type.var_enum.OFDM
 
-            # Set defaults for shaping and whitening (for OFDM)
             if shaping_filter is None:
                 model.vars.shaping_filter.value_forced = model.vars.shaping_filter.var_enum.Gaussian
             if shaping_filter_param is None:
@@ -117,53 +108,40 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
             if payload_white_en is None:
                 model.vars.payload_white_en.value_forced = False
 
-            # Set bitrate to the highest rate for given option # up to 2400 with MCS6
             if PhyType == 2:
-                #OPT 1
                 model.vars.ofdm_option.value_forced = model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz
                 model.vars.bitrate.value_forced = 2400000
             elif PhyType == 3:
-                #OPT 2
                 model.vars.ofdm_option.value_forced = model.vars.ofdm_option.var_enum.OPT2_OFDM_BW_0p8MHz
                 model.vars.bitrate.value_forced = 1200000
             elif PhyType == 4:
-                # OPT 3
                 model.vars.ofdm_option.value_forced = model.vars.ofdm_option.var_enum.OPT3_OFDM_BW_0p4MHz
                 model.vars.bitrate.value_forced = 600000
             elif PhyType == 5:
-                # OPT 4
                 model.vars.ofdm_option.value_forced = model.vars.ofdm_option.var_enum.OPT4_OFDM_BW_0p2MHz
                 model.vars.bitrate.value_forced = 300000
 
-            # Set other fixed vars for Wi-SUN OFDM
             self._fixed_wisun_ofdm_vars(model)
 
     def _lookup_syncword_from_fec(self, model):
         modulation_type = model.vars.modulation_type.value #This is set by the _lookup_from_wisun_mode() method
 
         if modulation_type == model.vars.modulation_type.var_enum.FSK2:
-            # Call method from Ocelot for 2FSK
-            # For OFDM, syncword is set in fixed vars
             super()._lookup_syncword_from_fec(model)
 
     def _fixed_wisun_ofdm_vars(self, model):
 
-        #AGC
         self._fixed_wisun_ofdm_agc(model,ofdm_option_int=int(model.vars.ofdm_option.value)+1)
 
-        #OFDM modulation
         model.vars.modulation_type.value_forced = model.vars.modulation_type.var_enum.OFDM
 
-        #Use fullrate ADC (needs further study, improves sensitivity esp for OPT4 PHY)
         model.vars.adc_rate_mode.value_forced = model.vars.adc_rate_mode.var_enum.FULLRATE
 
-        #Tolerance
         model.vars.rx_xtal_error_ppm.value_forced = 0
         model.vars.tx_xtal_error_ppm.value_forced = 0
         model.vars.baudrate_tol_ppm.value_forced = 0
         model.vars.deviation_tol_ppm.value_forced = 0
 
-        #Encoding and Whitening (unused)
         model.vars.diff_encoding_mode.value_forced = model.vars.diff_encoding_mode.var_enum.DISABLED
         model.vars.dsss_chipping_code.value_forced = 0
         model.vars.dsss_len.value_forced = 0
@@ -175,7 +153,6 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
         model.vars.white_seed.value_forced = 0
         model.vars.white_output_bit.value_forced = 0
 
-        #Preamble and syncword (unused)
         model.vars.preamble_length.value_forced = 2
         model.vars.preamble_pattern.value_forced = 1
         model.vars.preamble_pattern_len.value_forced = 2
@@ -183,11 +160,9 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
         model.vars.syncword_1.value_forced = 0x12345678
         model.vars.syncword_length.value_forced = 16
 
-        #Modulation parameters (unused)
         model.vars.deviation.value_forced = 0
         model.vars.fsk_symbol_map.value_forced = model.vars.fsk_symbol_map.var_enum.MAP0
 
-        #Frame settings (unused)
         model.vars.frame_bitendian.value_forced = model.vars.frame_bitendian.var_enum.LSB_FIRST
         model.vars.frame_length_type.value_forced = model.vars.frame_length_type.var_enum.FIXED_LENGTH
         model.vars.payload_white_en.value_forced = False
@@ -240,12 +215,10 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
         model.vars.frame_type_loc.value_forced = 0
         model.vars.frame_type_lsbit.value_forced = 0
 
-        #Other
         model.vars.asynchronous_rx_enable.value_forced = False
         model.vars.syncword_tx_skip.value_forced = False
 
     def _fixed_wisun_ofdm_agc(self, model, ofdm_option_int):
-        # Read in model variables
         softmodem_antdivmode = getattr(model.profile.inputs.softmodem_antdivmode, 'var_value', None)
 
         model.vars.RAC_LNAMIXTRIM4_LNAMIXRFPKDTHRESHSELHI.value_forced = 5  # 60mVrms
@@ -270,8 +243,6 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
         model.vars.AGC_CTRL7_SUBINT.value_forced = 16
         model.vars.AGC_CTRL7_SUBNUM.value_forced = 0
         model.vars.AGC_CTRL7_SUBPERIOD.value_forced = 1
-        # : Set alternate pwrperiod and rssiperiod based on 2-FSK PHY
-        # : https://jira.silabs.com/browse/MCUW_RADIO_CFG-2450
         model.vars.alt_agc_ctrl1_pwrperiod.value_forced = 1
         model.vars.alt_agc_ctrl1_rssiperiod.value_forced = 3
 
@@ -303,14 +274,10 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
             else:
                 model.vars.AGC_CTRL1_PWRPERIOD.value_forced = 2
         else:
-            # In OFDM antenna diversity, we do not need the measurement of the power after channel filtering.
-            # The power period is cut to the minimum.
             model.vars.AGC_CTRL1_PWRPERIOD.value_forced = 0
 
     def _handle_concurrent_ofdm(self, model):
 
-            # This method is called when we are calculating a Wi-SUN FSK PHY and also have the concurrent_ofdm_opt set
-            # In this case we need to call the Radio Configurator for the OFDM PHY and then merge the PHYs together
 
             conc_ofdm_option = model.profile.inputs.conc_ofdm_option.var_value
             wisun_reg_domain = model.profile.inputs.wisun_reg_domain.var_value
@@ -321,7 +288,6 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
 
             if conc_ofdm_option != model.vars.conc_ofdm_option.var_enum.NONE:
 
-                #Load in additional model vars that were previously populated
                 fec_tx_enable = (model.vars.fec_tx_enable.value == model.vars.fec_tx_enable.var_enum.ENABLED)
                 fec_factor = 2 if fec_tx_enable else 1
                 deviation = model.vars.deviation.value
@@ -329,8 +295,6 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
                 rx_xtal_error_ppm = model.vars.rx_xtal_error_ppm.value
                 tx_xtal_error_ppm = model.vars.tx_xtal_error_ppm.value
 
-                # Placeholder calculation for wisun_channel_plan_id
-                # This is probably a don't care anyway since alternate base freq and channel spacing will come from multiphy config
                 if conc_ofdm_option == model.vars.conc_ofdm_option.var_enum.OPT1:
                     wisun_channel_plan_id = 5
                 elif conc_ofdm_option == model.vars.conc_ofdm_option.var_enum.OPT2:
@@ -340,14 +304,12 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
                 else:
                     wisun_channel_plan_id = 1
 
-                # Pre-calculate bandwidth of FSK PHY
                 modulation_index = 2.0 * deviation / baudrate
                 bw_carson = baudrate + 2 * deviation
                 freq_offset_hz = int(round(base_frequency_hz / 1e6 * (rx_xtal_error_ppm + tx_xtal_error_ppm)))
                 alpha = Calc_Demodulator_Sol().get_alpha(model, modulation_index, shaping_filter, shaping_filter_param)
                 fsk_bandwidth = Calc_Demodulator_Sol().get_target_2fsk_bandwidth(bw_carson, freq_offset_hz, alpha)
 
-                # Pre-calculate what IF frequency we will use for both FSK and OFDM PHYs
                 fsk_if_frequency = Calc_Synth_Sol().get_if_freq(100e3, fsk_bandwidth)
                 ofdm_if_frequency = Calc_Synth_Sol().lookup_ofdm_if_freq(int(conc_ofdm_option)-1)
                 if_frequency_hz = max(fsk_if_frequency, ofdm_if_frequency)
@@ -362,7 +324,6 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
                 else:
                     wisun_phy_mode_id = 0x22
 
-                # Calculate the OFDM PHY
                 input_dict = {
                     'wisun_reg_domain': wisun_reg_domain,
                     'wisun_phy_mode_id_select': wisun_phy_mode_id,  # Corresponds to MCS0, the MCS is really a don't care
@@ -375,7 +336,6 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
                                              target=model.target).calc_config_profile(profile_name='wisun_fan_1_1',
                                                                                       optional_inputs=input_dict)
 
-                # Assign special concurrent PHY variables
                 model.vars.alt_min_if_hz.value_forced = ofdm_phy_model.vars.min_if_hz.value
                 model.vars.alt_softmodem_used.value_forced = 1  # softmodem always used for OFDM
                 model.vars.alt_wisun_mode_switch_phr.value_forced = ofdm_phy_model.vars.wisun_mode_switch_phr.value
@@ -384,8 +344,6 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
                 model.vars.alt_rssi_adjust_db.value_forced = ofdm_phy_model.vars.rssi_adjust_db.value
                 model.vars.softmodem_antdivmode.value_forced = ofdm_phy_model.vars.softmodem_antdivmode.value
 
-                # Finally loop go through the Profile Outputs for the concurrent PHY and copy them over
-                # (?!REG1)(REG2) matches REG2 unless REG2 = REG1
                 reg_fields_from_ofdm = sol_regs.concurrent_ofdm_regfield_list
                 for reg_field in reg_fields_from_ofdm:
                     for profile_output in ofdm_phy_model.profile.outputs:
@@ -395,6 +353,4 @@ class ProfileWisunFan1v1Sol(ProfileWisunFan1v1Ocelot):
                             if fsk_phy_model_var.override is None: #If already forced then use that value
                                 fsk_phy_model_var.override = profile_output.var_value
 
-                #Add fixed Wi-SUN OFDM AGC settings
-                #This time we pass in the OFDM option from the conc_ofdm_option variable
                 self._fixed_wisun_ofdm_agc(model, int(conc_ofdm_option))

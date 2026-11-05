@@ -8,6 +8,12 @@ description: >
   A device which supports the Firmware Update CC must support the Version CC and the Manufacturer-Specific
   CC to enable other devices to select the correct firmware for a specific target. The
   Version Command Class may be used to verify that the intended firmware version is installed.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/cc-firmware-update
+  - page: zwave-api/md-content-firmware-update-images-and-bootloader
+
 package: zwave
 quality: production
 metadata:

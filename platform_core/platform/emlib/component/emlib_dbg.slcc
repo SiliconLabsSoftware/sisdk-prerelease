@@ -17,6 +17,7 @@ include:
 provides:
 - name: emlib_dbg
 requires:
+- name: log_none
 - name: device
 - name: emlib_common
 - name: emlib_cmu

@@ -49,6 +49,7 @@
 
 #include <string.h>
 
+#include "sl_log_helper.h"
 //****************************************************************************
 
 #if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE) && defined(_USART_ROUTEPEN_CTSPEN_MASK)
@@ -164,7 +165,7 @@ static void em1RequestAdd(UARTDRV_Handle_t handle)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_UARTDRV, SL_CODE_CLASS_TIME_CRITICAL)
 static void em1RequestRemove(UARTDRV_Handle_t handle)
 {
-  EFM_ASSERT(handle->em1RequestCount > 0);
+  SL_LOG_DEBUG_ASSERT(handle->em1RequestCount > 0);
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   CORE_DECLARE_IRQ_STATE;
 
@@ -739,7 +740,7 @@ static void ReceiveDmaComplete(sl_dma_channel_handle_t * dma_handle,
     em1RequestRemove(handle);
   }
 
-  EFM_ASSERT(buffer != NULL);
+  SL_LOG_DEBUG_ASSERT(buffer != NULL);
 
 #if defined(USART_IF_FERR)
   if (handle->type == uartdrvUartTypeUart
@@ -854,7 +855,7 @@ static uint32_t calculateSleeptimerTicksToFlushTxBuffers(UARTDRV_Handle_t handle
       break;
     }
   }
-  EFM_ASSERT(baud > 0);
+  SL_LOG_DEBUG_ASSERT(baud > 0);
   if (baud != 0) {  // Avoid division by 0
     // Calculate the number of sleeptimer ticks for:
     // 3 bytes: two in FIFO and one in shift register.
@@ -963,7 +964,7 @@ static void TransmitDmaComplete(sl_dma_channel_handle_t * dma_handle,
   em1RequestRemove(handle);
 #endif
 
-  EFM_ASSERT(buffer != NULL);
+  SL_LOG_DEBUG_ASSERT(buffer != NULL);
 
   buffer->transferStatus = ECODE_EMDRV_UARTDRV_OK;
   buffer->itemsRemaining = 0;
@@ -1752,6 +1753,7 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
     || defined(_SILICON_LABS_32B_SERIES_3)
     CMU_CLOCK_SELECT_SET(EUSART0CLK, LFRCO);
@@ -1774,6 +1776,7 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)  \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
     || defined(_SILICON_LABS_32B_SERIES_3)
     CMU_CLOCK_SELECT_SET(EUSART0CLK, EM01GRPCCLK);
@@ -1989,12 +1992,22 @@ Ecode_t UARTDRV_DeInit(UARTDRV_Handle_t handle)
 
   // Deinitialize DMA channel handles (disables interrupts, resets peripheral
   // signal, unregisters IRQ callbacks, clears handle state)
-  EFM_ASSERT(sl_dma_channel_deinit(&handle->txDmaCh) == SL_STATUS_OK);
-  EFM_ASSERT(sl_dma_channel_deinit(&handle->rxDmaCh) == SL_STATUS_OK);
+  sl_status_t status = sl_dma_channel_deinit(&handle->txDmaCh);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
+
+  status = sl_dma_channel_deinit(&handle->rxDmaCh);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   // Release channel allocations back to the DMA manager
-  EFM_ASSERT(sl_dma_manager_free_channel(NULL, txChNum) == SL_STATUS_OK);
-  EFM_ASSERT(sl_dma_manager_free_channel(NULL, rxChNum) == SL_STATUS_OK);
+  status = sl_dma_manager_free_channel(NULL, txChNum);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
+
+  status = sl_dma_manager_free_channel(NULL, rxChNum);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   handle->rxQueue->head = 0;
   handle->rxQueue->tail = 0;
@@ -2498,7 +2511,7 @@ UARTDRV_Count_t UARTDRV_ForceReceive(UARTDRV_Handle_t handle,
     rxState = (handle->peripheral.euart->STATUS & EUSART_STATUS_RXENS);
 #endif
   } else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     rxState = 0;
   }
 
@@ -2587,7 +2600,7 @@ Ecode_t  UARTDRV_ForceTransmit(UARTDRV_Handle_t handle,
     txState = uartdrv_eusart_get_status(handle->peripheral.euart) & EUSART_STATUS_TXENS;
 #endif
   } else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     txState = 0;
   }
 
@@ -2851,7 +2864,7 @@ Ecode_t UARTDRV_Transmit(UARTDRV_Handle_t handle,
   } else if (handle->type == uartdrvUartTypeLeuart) {
     txState = (handle->peripheral.leuart->STATUS & LEUART_STATUS_TXENS);
   } else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     txState = 0;
   }
 #elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
@@ -2863,7 +2876,7 @@ Ecode_t UARTDRV_Transmit(UARTDRV_Handle_t handle,
   } else if (handle->type == uartdrvUartTypeEuart) {
     txState = uartdrv_eusart_get_status(handle->peripheral.euart) & EUSART_STATUS_TXENS;
   } else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     txState = 0;
   }
 #else
@@ -2931,7 +2944,7 @@ Ecode_t UARTDRV_TransmitB(UARTDRV_Handle_t handle,
   } else if (handle->type == uartdrvUartTypeLeuart) {
     txState = (handle->peripheral.leuart->STATUS & LEUART_STATUS_TXENS);
   } else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     txState = 0;
   }
 #elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
@@ -2943,7 +2956,7 @@ Ecode_t UARTDRV_TransmitB(UARTDRV_Handle_t handle,
   } else if (handle->type == uartdrvUartTypeEuart) {
     txState = uartdrv_eusart_get_status(handle->peripheral.euart) & EUSART_STATUS_TXENS;
   } else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     txState = 0;
   }
 #else

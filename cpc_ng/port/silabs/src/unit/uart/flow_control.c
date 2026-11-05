@@ -42,11 +42,11 @@
 #include <unity_fixture.h>
 
 #include "sl_cpc_drv_uart_eusart.h"
-#include "sl_cpc_drv_uart_eusart_vcom_config.h"
+#include "sl_cpc_drv_uart_eusart_exp_config.h"
 
 #include "harness/uart.h"
 
-#define FLOW_CONTROL_FRAME_COUNT (SL_CPC_DRV_UART_EUSART_VCOM_RX_FRAME_POOL_COUNT + 1U)
+#define FLOW_CONTROL_FRAME_COUNT (SL_CPC_DRV_UART_EUSART_EXP_RX_FRAME_POOL_COUNT + 1U)
 
 static const uint8_t s_payloads[FLOW_CONTROL_FRAME_COUNT][2] = {
   {0x10U, 0x11U}, {0x20U, 0x21U}, {0x30U, 0x31U}, {0x40U, 0x41U}, {0x50U, 0x51U},

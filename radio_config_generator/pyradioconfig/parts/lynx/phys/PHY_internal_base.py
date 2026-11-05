@@ -7,7 +7,6 @@ class Phy_Internal_Base_Lynx(object):
 
     def __init__(self):
 
-        #These are the "Modified Lynx Style" AGC Settings
         self.modified_lynx_style_agc_dict = {
         'AGC_AGCPERIOD_MAXHICNTTHD': 9,
         'AGC_AGCPERIOD_PERIODHI': 18,
@@ -141,7 +140,6 @@ class Phy_Internal_Base_Lynx(object):
         'RAC_PGACTRL_LNAMIXRFPKDTHRESHSEL': 2
         }
 
-        # These are the "Modified Panther Style" AGC Settings
         self.modified_panther_style_agc_dict = {
         'AGC_AGCPERIOD_MAXHICNTTHD': 9,
         'AGC_AGCPERIOD_PERIODHI': 14,
@@ -271,7 +269,6 @@ class Phy_Internal_Base_Lynx(object):
         'RAC_PGACTRL_LNAMIXRFPKDTHRESHSEL': 2
         }
 
-        # These are the "Panther Style" AGC Settings
         self.panther_style_agc_dict = dict(self.modified_panther_style_agc_dict)
         self.panther_style_agc_dict['AGC_CTRL2_DISRFPKD'] = 0
         self.panther_style_agc_dict['AGC_CTRL2_DEBCNTRST'] = 1
@@ -279,7 +276,6 @@ class Phy_Internal_Base_Lynx(object):
         self.panther_style_agc_dict['AGC_GAINRANGE_LNAINDEXBORDER'] = 7
         self.panther_style_agc_dict['AGC_GAINRANGE_PGAINDEXBORDER'] = 8
 
-        # This list can prevent writes to deleted registers
         self.agc_fastmode_reg_exclude_list = []
 
     def AGC_MODIFIED_LYNX_STYLE(self, phy, model):
@@ -308,7 +304,6 @@ class Phy_Internal_Base_Lynx(object):
         phy.profile_outputs.AGC_CTRL4_RFPKDCNTEN.override = 0
 
     def set_reg_overrides_from_dict(self,phy, register_dict):
-        # Use the dictionary of register:value pairs to create the override statements
         for register in register_dict:
             if register not in self.agc_fastmode_reg_exclude_list:
                 register_object = getattr(phy.profile_outputs,register)

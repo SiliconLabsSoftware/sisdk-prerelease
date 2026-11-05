@@ -1,0 +1,28 @@
+id: se_manager_math
+label: BigInt Math
+package: platform_core
+description: >-
+  SE Manager API for modular big-integer arithmetic using the SE bigint math
+  command.
+category: Platform|Security|SE Manager
+quality: production
+source:
+- path: src/sl_se_manager_math.c
+
+include:
+- path: inc
+  file_list:
+  - path: sl_se_manager_math.h
+
+requires:
+- name: se_manager
+- name: device
+- name: status
+
+provides:
+- name: se_manager_math
+
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core/platform/security/sl_component/se_manager

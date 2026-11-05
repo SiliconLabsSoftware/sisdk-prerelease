@@ -21,6 +21,7 @@ provides:
 - name: memory_manager_pool_implementation
 - name: memory_manager_pool_power_aware
 requires:
+- name: log_none
 - name: bit
 - name: sl_core
 - name: sl_assert

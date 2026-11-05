@@ -148,6 +148,9 @@ extern "C" {
 #endif // SLI_SE_SUPPORTS_RSA
 
   #define SLI_SE_COMMAND_TRNG_GET_RANDOM          0x07000000UL
+#if defined(_SILICON_LABS_32B_SERIES_3)
+  #define SLI_SE_COMMAND_BIGINT_MATH               0x07010000UL
+#endif // _SILICON_LABS_32B_SERIES_3
 #if defined(SLI_SE_SUPPORTS_SAE)
   #define SLI_SE_COMMAND_SAE_PREPARE_COMMIT       0x07030000UL
   #define SLI_SE_COMMAND_SAE_PROCESS_COMMIT       0x07040000UL
@@ -334,6 +337,13 @@ extern "C" {
   #define SLI_SE_COMMAND_CERT_BATCH               0x00000100UL
   #define SLI_SE_COMMAND_CERT_SE                  0x00000200UL
   #define SLI_SE_COMMAND_CERT_HOST                0x00000300UL
+#if defined(SLI_SE_SUPPORTS_TLS_IDENTITY_KEY)
+  #define SLI_SE_COMMAND_CERT_TLS                 0x00000400UL
+// Report the size of every certificate rather than only the three which
+// predate the TLS identity. Omitting it keeps the original output length.
+// This is the option0 boolean; option1 must stay zero for this command.
+  #define SLI_SE_COMMAND_OPTION_CERT_SIZE_ALL     0x00000100UL
+#endif
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// Use SHA384 as hash algorithm

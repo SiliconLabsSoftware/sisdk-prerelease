@@ -92,11 +92,9 @@ class ModelForceContainer(object):
         return forces
 
     def remove_force(self, var_name):
-        # Remove attribute
         if hasattr(self, var_name):
             delattr(self, var_name)
 
-        #Remove from dictionary
         if var_name in self.ZZ_FORCE_KEYS:
             force = self.ZZ_FORCE_KEYS.pop(var_name)
             force = None # Tag for garbage collector

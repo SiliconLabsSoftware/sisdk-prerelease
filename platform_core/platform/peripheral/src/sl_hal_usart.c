@@ -33,6 +33,7 @@
 #if defined(USART_PRESENT)
 
 #include "sl_hal_prs.h"
+#include "sl_log_helper.h"
 
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
@@ -84,7 +85,7 @@ void sl_hal_usart_init_async(USART_TypeDef *usart,
                              const sl_hal_usart_async_init_t *init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // Initialize USART registers to hardware reset state.
   sl_hal_usart_reset(usart);
@@ -137,7 +138,7 @@ void sl_hal_usart_init_sync(USART_TypeDef *usart,
                             const sl_hal_usart_sync_init_t *init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // Initialize USART registers to hardware reset state.
   sl_hal_usart_reset(usart);
@@ -188,7 +189,7 @@ uint32_t sl_hal_usart_async_calculate_baudrate(uint32_t ref_freq,
 
   // Make sure clock divider value is valid.
   clk_div <<= _USART_CLKDIV_DIV_SHIFT;
-  EFM_ASSERT(clk_div <= _USART_CLKDIV_DIV_MASK);
+  SL_LOG_DEBUG_ASSERT(clk_div <= _USART_CLKDIV_DIV_MASK);
 
   // Use integer division to avoid forcing in float division
   // utils and yet keep rounding effect errors to a minimum.
@@ -268,7 +269,7 @@ uint32_t sl_hal_usart_async_calculate_clock_div(uint32_t ref_freq,
   uint32_t oversample = 0;
 
   // Inhibit divide by 0
-  EFM_ASSERT(baudrate);
+  SL_LOG_DEBUG_ASSERT(baudrate);
 
   // Map oversampling.
   oversample = usart_map_oversampling(ref_freq, baudrate, ovs);
@@ -283,9 +284,9 @@ uint32_t sl_hal_usart_async_calculate_clock_div(uint32_t ref_freq,
   clk_div *= 8;
 
   // Verify that the resulting clock divider is within limits.
-  EFM_ASSERT(clk_div <= _USART_CLKDIV_DIV_MASK);
+  SL_LOG_DEBUG_ASSERT(clk_div <= _USART_CLKDIV_DIV_MASK);
 
-  // If the EFM_ASSERT is not enabled, make sure not to write to reserved bits.
+  // If the SL_LOG_DEBUG_ASSERT is not enabled, make sure not to write to reserved bits.
   clk_div = (clk_div & _USART_CLKDIV_DIV_MASK) >> _USART_CLKDIV_DIV_SHIFT;
 
   return clk_div;
@@ -302,7 +303,7 @@ uint32_t sl_hal_usart_sync_calculate_baudrate(uint32_t ref_freq,
 
   // Make sure clock divider value is valid.
   clk_div <<= _USART_CLKDIV_DIV_SHIFT;
-  EFM_ASSERT(clk_div <= _USART_CLKDIV_DIV_MASK);
+  SL_LOG_DEBUG_ASSERT(clk_div <= _USART_CLKDIV_DIV_MASK);
 
   // Baudrate calculation for synchronous mode.
   // This function expects clk_div to have integer-only division (fractional bits cleared)
@@ -326,7 +327,7 @@ uint32_t sl_hal_usart_sync_calculate_clock_div(uint32_t ref_freq,
   uint32_t clk_div;
 
   // Inhibit divide by 0
-  EFM_ASSERT(baudrate);
+  SL_LOG_DEBUG_ASSERT(baudrate);
 
   // The clock divider computation is done by using unsigned integer.
   // The goal is to force integer-only division by clearing the fractional part.
@@ -343,9 +344,9 @@ uint32_t sl_hal_usart_sync_calculate_clock_div(uint32_t ref_freq,
   clk_div = clk_div << 8;
 
   // Verify that resulting clock divider is within limits.
-  EFM_ASSERT(clk_div <= _USART_CLKDIV_DIV_MASK);
+  SL_LOG_DEBUG_ASSERT(clk_div <= _USART_CLKDIV_DIV_MASK);
 
-  // If the EFM_ASSERT is not enabled, make sure not to write to reserved bits.
+  // If the SL_LOG_DEBUG_ASSERT is not enabled, make sure not to write to reserved bits.
   clk_div = (clk_div & _USART_CLKDIV_DIV_MASK) >> _USART_CLKDIV_DIV_SHIFT;
 
   return clk_div;
@@ -360,7 +361,7 @@ void sl_hal_usart_init_irda(USART_TypeDef *usart,
                             const sl_hal_usart_irda_init_t *init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // Initialize USART as an async device.
   sl_hal_usart_init_async(usart, &(init->async));
@@ -388,7 +389,7 @@ void sl_hal_usart_init_i2s(USART_TypeDef *usart,
                            const sl_hal_usart_i2s_init_t *init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // Disable TX before init I2S
   sl_hal_usart_disable_tx(usart);
@@ -411,7 +412,7 @@ void sl_hal_usart_init_i2s(USART_TypeDef *usart,
 void sl_hal_usart_reset(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   usart->EN_SET = USART_EN_EN;
 
@@ -442,10 +443,10 @@ void sl_hal_usart_enable_rx_prs_trigger(USART_TypeDef *usart,
                                         uint8_t channel)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // The peripheral must be enabled to configure the PRS trigger.
-  EFM_ASSERT(usart->EN == USART_EN_EN);
+  SL_LOG_DEBUG_ASSERT(usart->EN == USART_EN_EN);
 
   if (usart == USART0) {
     sl_hal_prs_connect_channel_consumer(channel,
@@ -467,7 +468,7 @@ void sl_hal_usart_enable_rx_prs_trigger(USART_TypeDef *usart,
   }
 #endif
   else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
   }
   usart->TRIGCTRL_SET = USART_TRIGCTRL_RXTEN;
 }
@@ -478,10 +479,10 @@ void sl_hal_usart_enable_rx_prs_trigger(USART_TypeDef *usart,
 void sl_hal_usart_disable_rx_prs_trigger(USART_TypeDef *usart)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // The peripheral must be enabled to configure the PRS trigger.
-  EFM_ASSERT(usart->EN == USART_EN_EN);
+  SL_LOG_DEBUG_ASSERT(usart->EN == USART_EN_EN);
 
   usart->TRIGCTRL_CLR = USART_TRIGCTRL_RXTEN;
 }
@@ -493,10 +494,10 @@ void sl_hal_usart_enable_tx_prs_trigger(USART_TypeDef *usart,
                                         uint8_t channel)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // The peripheral must be enabled to configure the PRS trigger.
-  EFM_ASSERT(usart->EN == USART_EN_EN);
+  SL_LOG_DEBUG_ASSERT(usart->EN == USART_EN_EN);
 
   if (usart == USART0) {
     sl_hal_prs_connect_channel_consumer(channel,
@@ -518,7 +519,7 @@ void sl_hal_usart_enable_tx_prs_trigger(USART_TypeDef *usart,
   }
 #endif
   else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
   }
   usart->TRIGCTRL_SET = USART_TRIGCTRL_TXTEN;
 }
@@ -529,10 +530,10 @@ void sl_hal_usart_enable_tx_prs_trigger(USART_TypeDef *usart,
 void sl_hal_usart_disable_tx_prs_trigger(USART_TypeDef *usart)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // The peripheral must be enabled to configure the PRS trigger.
-  EFM_ASSERT(usart->EN == USART_EN_EN);
+  SL_LOG_DEBUG_ASSERT(usart->EN == USART_EN_EN);
 
   usart->TRIGCTRL_CLR = USART_TRIGCTRL_TXTEN;
 }
@@ -563,7 +564,7 @@ static void usart_prs_input(USART_TypeDef *usart,
   }
 #endif
   else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
   }
   usart->CTRLX_SET = USART_CTRLX_RXPRSEN;
 }
@@ -582,31 +583,36 @@ static uint8_t usart_map_oversampling(uint32_t ref_freq,
                                       sl_hal_usart_ovs_t ovs)
 {
   uint8_t oversample = 0;
+
+  // Used only by SL_LOG_DEBUG_ASSERT below.
+  (void)ref_freq;
+  (void)baudrate;
+
   // Map oversampling.
   switch (ovs) {
     case SL_HAL_USART_OVS_16:
-      EFM_ASSERT(baudrate <= (ref_freq / 16));
+      SL_LOG_DEBUG_ASSERT(baudrate <= (ref_freq / 16));
       oversample = 16;
       break;
 
     case SL_HAL_USART_OVS_8:
-      EFM_ASSERT(baudrate <= (ref_freq / 8));
+      SL_LOG_DEBUG_ASSERT(baudrate <= (ref_freq / 8));
       oversample = 8;
       break;
 
     case SL_HAL_USART_OVS_6:
-      EFM_ASSERT(baudrate <= (ref_freq / 6));
+      SL_LOG_DEBUG_ASSERT(baudrate <= (ref_freq / 6));
       oversample = 6;
       break;
 
     case SL_HAL_USART_OVS_4:
-      EFM_ASSERT(baudrate <= (ref_freq / 4));
+      SL_LOG_DEBUG_ASSERT(baudrate <= (ref_freq / 4));
       oversample = 4;
       break;
 
     default:
       // Invalid input
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 

@@ -3,6 +3,9 @@ label: Z-Wave Production
 category: Z-Wave
 description: >
   This component provides the toolchain settings for Z-Wave release and debug builds.
+documentation:
+  docset: z-wave
+  document: z-wave-getting-started-for-end-devices/08-debug-a-z-wave-application
 package: zwave
 quality: production
 ui_hints:

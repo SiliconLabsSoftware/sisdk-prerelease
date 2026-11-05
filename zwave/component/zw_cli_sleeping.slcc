@@ -6,6 +6,9 @@ description: >
   peripheral is not available by default in the sleeping applications. If the user presses the reset button
   on the device (or using `commander reset`), the device will wake up and the UART will be available for a short period
   of time, which allows to disable sleeping with the 'sleeping' CLI commands provided by this component.
+documentation:
+  docset: z-wave
+  document: z-wave-development-basics/#z-wave-plus-device-type-and-role-type-specifications
 package: zwave
 quality: production
 metadata:

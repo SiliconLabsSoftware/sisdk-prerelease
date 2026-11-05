@@ -35,7 +35,7 @@
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 
 #include "sl_core.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 #endif
 
@@ -246,7 +246,7 @@ void SE_addDataOutput(SE_Command_t *command,
 void SE_addParameter(SE_Command_t *command, uint32_t parameter)
 {
   if (command->num_parameters >= SE_MAX_PARAMETERS) {
-    EFM_ASSERT(command->num_parameters < SE_MAX_PARAMETERS);
+    SL_LOG_DEBUG_ASSERT(command->num_parameters < SE_MAX_PARAMETERS);
     return;
   }
 
@@ -272,7 +272,7 @@ void SE_executeCommand(SE_Command_t *command)
 {
   // Don't overflow our struct
   if (command->num_parameters > SE_MAX_PARAMETERS) {
-    EFM_ASSERT(command->num_parameters <= SE_MAX_PARAMETERS);
+    SL_LOG_DEBUG_ASSERT(command->num_parameters <= SE_MAX_PARAMETERS);
     return;
   }
 
@@ -349,7 +349,7 @@ void SE_executeCommand(SE_Command_t *command)
     inData = (uint32_t*) inDataDesc->data;
     for (i = 0; i < (inDataDesc->length & SE_DATATRANSFER_LENGTH_MASK) / sizeof(uint32_t); i++) {
       // Make sure we do not overflow the input mailbox.
-      EFM_ASSERT(mbDataLen < ROOT_MAILBOX_SIZE);
+      SL_LOG_DEBUG_ASSERT(mbDataLen < ROOT_MAILBOX_SIZE);
       mbData[mbDataLen++] = inData[i];
       inDataLen++;
     }
@@ -806,11 +806,11 @@ SE_Response_t SE_ackCommand(SE_Command_t *command)
  ******************************************************************************/
 SE_Response_t SE_readPubkey(uint32_t key_type, void *pubkey, uint32_t numBytes, bool signature)
 {
-  EFM_ASSERT((key_type == SE_KEY_TYPE_BOOT)
+  SL_LOG_DEBUG_ASSERT((key_type == SE_KEY_TYPE_BOOT)
              || (key_type == SE_KEY_TYPE_AUTH));
 
-  EFM_ASSERT(numBytes == 64);
-  EFM_ASSERT(!((size_t)pubkey & 3U));
+  SL_LOG_DEBUG_ASSERT(numBytes == 64);
+  SL_LOG_DEBUG_ASSERT(!((size_t)pubkey & 3U));
 
   // SE command structures
   uint32_t commandWord =

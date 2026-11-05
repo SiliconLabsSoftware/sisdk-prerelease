@@ -2,17 +2,17 @@ from pyradioconfig.parts.common.phys.phy_common import PHY_COMMON_FRAME_154
 from pyradioconfig.parts.panther.phys.PHY_internal_base import Phy_Internal_Base
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 
 class PhysRAILBaseStandardIEEE802154Panther(IPhy):
 
-    ################################################################################################
-    # "base" definitions - allows usage in multiple PHYs
+    ip_category = IPCategory.LPW
+
 
     def IEEE802154_2p4GHz_cohdsa_base(self, phy, model):
 
         PHY_COMMON_FRAME_154(phy, model)
-        # Override min length for 802.15.4E Seq# Suppression
         phy.profile_inputs.var_length_minlength.value = 4
         Phy_Internal_Base.AGC_FAST_LOOP_base(phy, model)
 
@@ -49,10 +49,9 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
         phy.profile_inputs.timing_detection_threshold.value = 65
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.target_osr.value = 5 # Calc SRC
 
-		# Additional overrides introduced when Series 2 AGC calculations added. These prevent the PHY from changing versus what was used during Validation.
         phy.profile_outputs.AGC_GAINRANGE_BOOSTLNA.override = 1
 
         phy.profile_outputs.AGC_GAINRANGE_LNABWADJ.override = 0
@@ -101,7 +100,6 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
         phy.profile_outputs.MODEM_CTRL6_TIMTHRESHGAIN.override = 2
         phy.profile_outputs.MODEM_DIGIGAINCTRL_DIGIGAINEN.override = 1
         phy.profile_outputs.MODEM_DIGIGAINCTRL_DIGIGAINSEL.override = 20
-        # phy.profile_outputs.MODEM_DIGMIXCTRL_DIGMIXFREQ.override = 150020 # Calc SRC
         phy.profile_outputs.MODEM_DSACTRL_ARRTHD.override = 4 # Was missed
         phy.profile_outputs.MODEM_INTAFC_FOEPREAVG0.override = 1
         phy.profile_outputs.MODEM_INTAFC_FOEPREAVG1.override = 3
@@ -134,7 +132,6 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
         phy.profile_outputs.MODEM_LONGRANGE6_LRCHPWRSPIKETH.override = 40
         phy.profile_outputs.MODEM_LONGRANGE6_LRSPIKETHD.override = 105
 
-        # phy.profile_outputs.MODEM_SRCCHF_SRCRATIO2.override = 15689 # Calc SRC
         phy.profile_outputs.MODEM_TIMING_TIMTHRESH.override = 35
         phy.profile_outputs.MODEM_TXBR_TXBRDEN.override = 105
         phy.profile_outputs.MODEM_TXBR_TXBRNUM.override = 252
@@ -153,15 +150,12 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
         phy.profile_outputs.SYNTH_LPFCTRL1CAL_RFBVALCAL.override = 0
         phy.profile_outputs.SYNTH_LPFCTRL1CAL_RPVALCAL.override = 0
         phy.profile_outputs.SYNTH_LPFCTRL1CAL_RZVALCAL.override = 9
-        # Derived empirically
-        # https://confluence.silabs.com/display/RAIL/Panther+Weaksymbols+WifiBlocker+Characterization
         phy.profile_outputs.MODEM_CTRL2_SQITHRESH.override = 56
 
 
     def IEEE802154_2p4GHz_base(self, phy, model):
 
         PHY_COMMON_FRAME_154(phy, model)
-        # Override min length for 802.15.4E Seq# Suppression
         phy.profile_inputs.var_length_minlength.value = 4
         Phy_Internal_Base.AGC_FAST_LOOP_base(phy, model)
 
@@ -198,19 +192,16 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
         phy.profile_inputs.timing_resync_period.value = 2
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
 
         phy.profile_outputs.AGC_CTRL1_PWRPERIOD.override = 4
-        # phy.profile_outputs.AGC_CTRL1_RSSIPERIOD.override = 3
 
-        # Additional overrides introduced when Series 2 AGC calculations added. These prevent the PHY from changing versus what was used during Validation.
         phy.profile_outputs.AGC_GAINRANGE_BOOSTLNA.override = 1
         phy.profile_outputs.AGC_GAINRANGE_LNABWADJ.override = 1
 
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 0x1003  # 0, 1, 12
         phy.profile_outputs.MODEM_TIMING_TIMTHRESH.override = 75
-        # phy.profile_outputs.MODEM_SRCCHF_SRCENABLE1.override = 1 # Calc SRC
 
         phy.profile_outputs.RAC_PGACTRL_LNAMIXRFPKDTHRESHSEL.override = 2
         phy.profile_outputs.RAC_PGACTRL_PGATHRPKDHISEL.override = 5
@@ -225,8 +216,6 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
         phy.profile_outputs.SYNTH_LPFCTRL1CAL_RPVALCAL.override = 0
         phy.profile_outputs.SYNTH_LPFCTRL1CAL_RZVALCAL.override = 9
 
-    ################################################################################################
-    # "PHY" definitions - official PHY created here, simulation PHYs in Phys_sim_tests.py
 
     def PHY_IEEE802154_2p4GHz_cohdsa(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='802154 2p4GHz cohdsa', phy_name=phy_name)
@@ -244,7 +233,6 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
         model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.LEGACY
 
     def PHY_IEEE802154_2p4GHz_antdiv(self, model, phy_name=None):
-        #  PHY_IEEE802154_2p4GHz legacy, plus RSSI-based select best with antdiv repeat = NOREPEATFIRST
         phy = self._makePhy(model, model.profiles.Base, readable_name='IEEE802.15.4 2p4GHz antenna diversity PHY for Panther', phy_name=phy_name)
 
         self.IEEE802154_2p4GHz_base(phy, model)
@@ -257,10 +245,8 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
         phy.profile_outputs.rx_eof_delay_ns.override = 6625
 
     def PHY_IEEE802154_2p4GHz_antdiv_fastswitch(self, model, phy_name=None):
-        #  PHY_IEEE802154_2p4GHz legacy, plus RSSI-based select best with antdiv repeat = NOREPEATFIRST
         phy = self._makePhy(model, model.profiles.Base, readable_name='IEEE802.15.4 2p4GHz Concurrent PHY for Panther', phy_name=phy_name)
 
-        ### same settings as PHY_IEEE802154_2p4GHz_antdiv_prod below
         self.IEEE802154_2p4GHz_base(phy, model)
         model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.FCS
 
@@ -270,12 +256,10 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
         phy.profile_outputs.rx_sync_delay_ns.override = 6625
         phy.profile_outputs.rx_eof_delay_ns.override = 6625
 
-        ### New PHY settings for 802154 fast channel switching below
 
         """ Bandwidth """
         phy.profile_inputs.pll_bandwidth_rx.value = model.vars.pll_bandwidth_rx.var_enum.FASTSWITCH
 
-        # additional registers set in: RFHAL_IEEE802154_ConfigAntdivForRxChSwitching
         phy.profile_outputs.MODEM_INTAFC_FOEPREAVG2.override = 4
         phy.profile_outputs.MODEM_INTAFC_FOEPREAVG1.override = 2
         phy.profile_outputs.MODEM_INTAFC_FOEPREAVG0.override = 1
@@ -293,8 +277,6 @@ class PhysRAILBaseStandardIEEE802154Panther(IPhy):
         phy.profile_outputs.MODEM_TIMING_TIMTHRESH.override = 92
         phy.profile_outputs.SYNTH_DSMCTRLRX_DITHERDSMOUTPUTRX.override = 3
 
-        # : improve +10 MHz cw blocking performance
-        # : MCUW_RADIO_CFG-2298
         phy.profile_outputs.MODEM_DCCOMP_DCCOMPGEAR.override = 7
 
 

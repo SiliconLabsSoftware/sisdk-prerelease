@@ -49,7 +49,6 @@ static void EventHandlerZwRx(void)
 #ifdef ZW_SLAVE
       case EZWAVERECEIVETYPE_SECURITY_EVENT:
 #endif
-      case EZWAVERECEIVETYPE_STAY_AWAKE:
       case EZWAVERECEIVETYPE_NODE_UPDATE:
       case EZWAVERECEIVETYPE_SINGLE:
         break;

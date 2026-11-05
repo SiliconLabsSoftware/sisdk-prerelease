@@ -54,6 +54,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "sl_log_helper.h"
 /*******************************************************************************
  ******************************   DEFINES   ************************************
  ******************************************************************************/
@@ -150,7 +151,7 @@ SL_WEAK void sl_power_manager_em4_presleep_hook(void)
 __NO_RETURN void sl_power_manager_enter_em4(void)
 {
 #if (DEVICE_SUPPORTS_EM4 == 0)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
   while (true) {
     // DC-DC unable to enter EM4 in Boost mode
   }
@@ -158,7 +159,11 @@ __NO_RETURN void sl_power_manager_enter_em4(void)
   // Make sure that we are not interrupted while we are entering em4
   CORE_CRITICAL_IRQ_DISABLE();
 
-  EFM_ASSERT(is_em4_blocked() == false);
+  {
+    bool em4_blocked = is_em4_blocked();
+    SL_LOG_DEBUG_ASSERT(em4_blocked == false);
+    (void)em4_blocked;
+  }
 
 #if defined(SL_CATALOG_METRIC_EM4_WAKE_PRESENT)
   sli_metric_em4_wake_init();
@@ -183,7 +188,7 @@ __NO_RETURN void sl_power_manager_enter_em4(void)
   ramp_dvdd_and_switch_to_dcdc_bypass_mode();
   #else
   if (EMU_DCDCModeSet(emuDcdcMode_Bypass) != SL_STATUS_OK) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     while (true) {
       // DC-DC failed to enter bypass
     }
@@ -192,7 +197,7 @@ __NO_RETURN void sl_power_manager_enter_em4(void)
 
 #if defined(_DCDC_STATUS_RUNNING_MASK)
   if ((DCDC->STATUS & _DCDC_STATUS_RUNNING_MASK) != 0U) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     while ((DCDC->STATUS & _DCDC_STATUS_RUNNING_MASK) != 0U) {
       // DC-DC failed to enter bypass
     }
@@ -333,7 +338,7 @@ static void ramp_dvdd_and_switch_to_dcdc_bypass_mode(void)
     // bypass anyways.
     if (iter >= 500) {
       DCDC->CTRL_CLR = DCDC_CTRL_MODE;
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return;
     }
 

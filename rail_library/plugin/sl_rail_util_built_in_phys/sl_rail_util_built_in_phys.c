@@ -177,25 +177,24 @@ const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsAox =
 
 #if SL_RAIL_BLE_SUPPORTS_CS
 // Bobcat only runs CS on 40 MHz
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG != 4)
-#if SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
+#if SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000 \
+  && (_SILICON_LABS_32B_SERIES_2_CONFIG != 4)
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbiCs =
   &sl_rail_ble_phy_1Mbps_viterbi_cs_38M4Hz_channelConfig;
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbiCs =
   &sl_rail_ble_phy_2Mbps_viterbi_cs_38M4Hz_channelConfig;
-#elif SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 39000000
+#elif SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 39000000 \
+  && (_SILICON_LABS_32B_SERIES_2_CONFIG != 4)
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbiCs =
   &sl_rail_ble_phy_1Mbps_viterbi_cs_39MHz_channelConfig;
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbiCs =
   &sl_rail_ble_phy_2Mbps_viterbi_cs_39MHz_channelConfig;
-#endif // SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 39000000
-#endif // (_SILICON_LABS_32B_SERIES_2_CONFIG != 4)
-#if SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 40000000
+#elif SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 40000000
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbiCs =
   &sl_rail_ble_phy_1Mbps_viterbi_cs_40MHz_channelConfig;
 const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbiCs =
   &sl_rail_ble_phy_2Mbps_viterbi_cs_40MHz_channelConfig;
-#endif // SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 40000000
+#endif // SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
 #endif // SL_RAIL_BLE_SUPPORTS_CS
 
 #if SL_RAIL_BLE_SUPPORTS_CODED_PHY

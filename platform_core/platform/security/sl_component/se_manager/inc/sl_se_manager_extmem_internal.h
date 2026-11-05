@@ -87,6 +87,21 @@ SL_ENUM(sli_se_deep_power_down_mode_t) {
   SLI_SE_DEEP_POWER_DOWN_MODE_EXIT = 3,    ///< Exit Deep Power Down mode.
 };
 
+/// Cache operation.
+SL_ENUM( sli_se_cache_operation_t) {
+  SLI_SE_CACHE_OPERATION_DISABLE = 0,  ///< Disable cache.
+  SLI_SE_CACHE_OPERATION_ENABLE = 1, ///< Enable cache.
+  SLI_SE_CACHE_OPERATION_RETENTION_DISABLE = 2,   ///< Disable retention.
+  SLI_SE_CACHE_OPERATION_RETENTION_ENABLE = 3, ///< Enable retention.
+  SLI_SE_CACHE_OPERATION_DATACACHE_DISABLE = 4,   ///< Disable data cache.
+  SLI_SE_CACHE_OPERATION_DATACACHE_ENABLE = 5, ///< Enable data cache.
+  SLI_SE_CACHE_OPERATION_FLUSH_ALL = 6,   ///< Flush all cache.
+};
+
+/// Cache target.
+SL_ENUM( sli_se_cache_target_t) {
+  SLI_SE_CACHE_TARGET_L2ICACHE = 0,  ///< L2 ICache.
+};
 /// @} (end addtogroup sl_se_memory_region_utils)
 
 // -----------------------------------------------------------------------------
@@ -139,6 +154,25 @@ sl_status_t sli_se_psram_region_apply_config(sl_se_command_context_t *cmd_ctx,
                                              sli_se_psram_configs_t *regions_array);
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+/***************************************************************************//**
+ * @brief
+ *   Configure Cache.
+ *
+ * @param[in] cmd_ctx
+ *   Pointer to an SE command context object.
+ * @param[in] cache_target
+ *   Cache target, one of \ref sli_se_cache_target_t
+ * @param[in] operation
+ *   Cache operation, one of \ref sli_se_cache_operation_t
+ *
+ * @return SL_STATUS_OK if the operation is successful, or error code
+ *         defined in sl_status.h.
+ ******************************************************************************/
+ sl_status_t sli_se_configure_cache(sl_se_command_context_t *cmd_ctx,
+                                    sli_se_cache_target_t cache_target,
+                                    sli_se_cache_operation_t operation);
+#endif
 /// @} (end addtogroup sl_se_memory_region_utils)
 /// @} (end addtogroup sl_se_manager_extmem)
 /// @} (end addtogroup sl_se_manager)

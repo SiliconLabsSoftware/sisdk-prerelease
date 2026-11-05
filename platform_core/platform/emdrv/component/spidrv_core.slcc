@@ -18,6 +18,7 @@ root_path: platform_core/platform/emdrv/spidrv
 provides:
 - name: spidrv_core
 requires:
+- name: log_none
 - name: device
 - name: clock_manager_runtime
 - name: device_manager

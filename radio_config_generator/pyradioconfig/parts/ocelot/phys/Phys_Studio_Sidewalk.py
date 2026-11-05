@@ -2,5 +2,4 @@ from pyradioconfig.parts.nerio.phys.Phys_Studio_Sidewalk import PhysStudioSidewa
 
 
 class PhysStudioSidewalkOcelot(PhysStudioSidewalkNerio):
-    #Import all from Nerio
     pass

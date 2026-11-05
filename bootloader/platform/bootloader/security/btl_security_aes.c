@@ -27,6 +27,13 @@
 #include "sx_errors.h"
 #endif
 
+#if defined(SEMAILBOX_PRESENT)
+#include "sli_se_manager_mailbox.h"
+#if defined(SE_MANAGER_CONFIG_FILE)
+#include SE_MANAGER_CONFIG_FILE
+#endif
+#endif
+
 /***************************************************************************//**
  * @brief Enable the AES accelerator clock for this device class.
  ******************************************************************************/
@@ -41,12 +48,6 @@ static void btl_aes_enable_clock(void)
 }
 
 #if defined(SEMAILBOX_PRESENT)
-
-#include "sli_se_manager_mailbox.h"
-
-#if defined(SE_MANAGER_CONFIG_FILE)
-#include SE_MANAGER_CONFIG_FILE
-#endif
 
 #ifndef SLI_SE_AES_CTR_NUM_BLOCKS_BUFFERED
 #if defined(BOOTLOADER_AES_CTR_NUM_BLOCKS_BUFFERED)
@@ -117,7 +118,7 @@ static int btl_aes_se_mailbox_ecb(uint32_t keyspec,
 
   sli_se_mailbox_execute_command(&command);
 
-  volatile sli_se_mailbox_response_t response = sli_se_mailbox_read_response();
+  sli_se_mailbox_response_t response = sli_se_mailbox_read_response();
   return (response == SLI_SE_RESPONSE_OK) ? BOOTLOADER_OK : BOOTLOADER_ERROR_SECURITY_REJECTED;
 }
 
@@ -162,100 +163,145 @@ static void btl_aes_se_prepare_nonce_counter(uint8_t nonce_counter[BTL_AES_BLOCK
 }
 #endif // BTL_AES_CTR_NUM_BLOCKS_BUFFERED > 1U
 
+/// Parameters for SE mailbox AES-CTR helpers.
+typedef struct {
+  uint32_t       keyspec;
+  const uint8_t *key;
+  unsigned int   keySizeBytes;
+  uint8_t       *nonce_counter;
+  uint8_t       *stream_block;
+  const uint8_t *input;
+  uint8_t       *output;
+} btl_aes_se_ctr_params_t;
+
+/***************************************************************************//**
+ * @brief Run multi-block AES-CTR via SE mailbox (whole blocks only).
+ ******************************************************************************/
+static int btl_aes_se_mailbox_ctr_bulk(const btl_aes_se_ctr_params_t *p,
+                                       size_t processed,
+                                       size_t iterations)
+{
+  size_t byte_len = iterations * BTL_AES_BLOCK_SIZE_BYTES;
+
+  sli_se_mailbox_command_t command = SLI_SE_MAILBOX_COMMAND_DEFAULT(
+    SLI_SE_COMMAND_AES_ENCRYPT
+    | SLI_SE_COMMAND_OPTION_MODE_CTR
+    | SLI_SE_COMMAND_OPTION_CONTEXT_ADD);
+
+  sli_se_mailbox_command_add_parameter(&command, p->keyspec);
+  sli_se_mailbox_command_add_parameter(&command, (uint32_t)byte_len);
+
+  sli_se_datatransfer_t auth = SLI_SE_DATATRANSFER_DEFAULT(NULL, 0);
+  sli_se_datatransfer_t key_in = SLI_SE_DATATRANSFER_DEFAULT(
+    (p->key != NULL) ? (uint8_t *)p->key : NULL,
+    (p->key != NULL) ? p->keySizeBytes : 0U);
+  sli_se_mailbox_command_add_input(&command, &auth);
+  sli_se_mailbox_command_add_input(&command, &key_in);
+
+  sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(p->nonce_counter,
+                                                            BTL_AES_BLOCK_SIZE_BYTES);
+  sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(
+    (uint8_t *)&p->input[processed],
+    byte_len);
+  sli_se_mailbox_command_add_input(&command, &iv_in);
+  sli_se_mailbox_command_add_input(&command, &in);
+
+  sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(
+    &p->output[processed],
+    byte_len);
+  sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(p->nonce_counter,
+                                                             BTL_AES_BLOCK_SIZE_BYTES);
+  sli_se_mailbox_command_add_output(&command, &out);
+  sli_se_mailbox_command_add_output(&command, &iv_out);
+
+  sli_se_mailbox_execute_command(&command);
+
+  sli_se_mailbox_response_t response = sli_se_mailbox_read_response();
+  if (response != SLI_SE_RESPONSE_OK) {
+    return BOOTLOADER_ERROR_SECURITY_REJECTED;
+  }
+
+  return BOOTLOADER_OK;
+}
+
+/***************************************************************************//**
+ * @brief Refill CTR keystream via ECB when the stream offset wraps to zero.
+ ******************************************************************************/
+static int btl_aes_se_mailbox_ctr_refill_stream(const btl_aes_se_ctr_params_t *p)
+{
+  const uint8_t *counter_ptr;
+
+#if (BTL_AES_CTR_NUM_BLOCKS_BUFFERED > 1U)
+  btl_aes_se_prepare_nonce_counter(p->nonce_counter, p->stream_block);
+  counter_ptr = p->stream_block;
+#else
+  counter_ptr = p->nonce_counter;
+#endif
+
+  if (btl_aes_se_mailbox_ecb(p->keyspec,
+                             p->key,
+                             p->keySizeBytes,
+                             true,
+                             counter_ptr,
+                             p->stream_block,
+                             BTL_AES_CTR_STREAM_BYTES) != BOOTLOADER_OK) {
+    return BOOTLOADER_ERROR_SECURITY_REJECTED;
+  }
+
+  btl_aes_se_increment_counter_at(BTL_AES_BLOCK_SIZE_BYTES - 1U, p->nonce_counter);
+  return BOOTLOADER_OK;
+}
+
+/***************************************************************************//**
+ * @brief Process remaining partial-block CTR bytes after bulk encryption.
+ ******************************************************************************/
+static int btl_aes_se_mailbox_ctr_residual(const btl_aes_se_ctr_params_t *p,
+                                           size_t length,
+                                           size_t *processed,
+                                           size_t *n)
+{
+  while ((length - *processed) > 0U) {
+    if ((*n == 0U)
+        && (btl_aes_se_mailbox_ctr_refill_stream(p) != BOOTLOADER_OK)) {
+      return BOOTLOADER_ERROR_SECURITY_REJECTED;
+    }
+
+    p->output[*processed] = (uint8_t)(p->input[*processed] ^ p->stream_block[*n]);
+    *n = (*n + 1U) & BTL_AES_CTR_STREAM_MASK;
+    (*processed)++;
+  }
+
+  return BOOTLOADER_OK;
+}
+
 /***************************************************************************//**
  * @brief Run AES-CTR via direct SE mailbox commands.
- *
  ******************************************************************************/
-static int btl_aes_se_mailbox_ctr(uint32_t keyspec,
-                                  const uint8_t *key,
-                                  unsigned int keySizeBytes,
+static int btl_aes_se_mailbox_ctr(const btl_aes_se_ctr_params_t *p,
                                   size_t length,
-                                  size_t *nc_off,
-                                  uint8_t nonce_counter[BTL_AES_BLOCK_SIZE_BYTES],
-                                  uint8_t stream_block[BTL_AES_CTR_STREAM_BYTES],
-                                  const uint8_t *input,
-                                  uint8_t *output)
+                                  size_t *nc_off)
 {
   size_t n = (nc_off != NULL) ? *nc_off : 0U;
   size_t processed = 0U;
 
   while (processed < length) {
     if (n > 0U) {
-      output[processed] = (uint8_t)(input[processed] ^ stream_block[n]);
+      p->output[processed] = (uint8_t)(p->input[processed] ^ p->stream_block[n]);
       n = (n + 1U) & BTL_AES_CTR_STREAM_MASK;
       processed++;
-    } else {
-      size_t iterations = (length - processed) / BTL_AES_BLOCK_SIZE_BYTES;
+      continue;
+    }
 
-      if (iterations > 0U) {
-        sli_se_mailbox_command_t command = SLI_SE_MAILBOX_COMMAND_DEFAULT(
-          SLI_SE_COMMAND_AES_ENCRYPT
-          | SLI_SE_COMMAND_OPTION_MODE_CTR
-          | SLI_SE_COMMAND_OPTION_CONTEXT_ADD);
-
-        sli_se_mailbox_command_add_parameter(&command, keyspec);
-        sli_se_mailbox_command_add_parameter(&command,
-                                             (uint32_t)(iterations * BTL_AES_BLOCK_SIZE_BYTES));
-
-        sli_se_datatransfer_t auth = SLI_SE_DATATRANSFER_DEFAULT(NULL, 0);
-        sli_se_datatransfer_t key_in = SLI_SE_DATATRANSFER_DEFAULT(
-          (key != NULL) ? (uint8_t *)key : NULL,
-          (key != NULL) ? keySizeBytes : 0U);
-        sli_se_mailbox_command_add_input(&command, &auth);
-        sli_se_mailbox_command_add_input(&command, &key_in);
-
-        sli_se_datatransfer_t iv_in = SLI_SE_DATATRANSFER_DEFAULT(nonce_counter,
-                                                                  BTL_AES_BLOCK_SIZE_BYTES);
-        sli_se_datatransfer_t in = SLI_SE_DATATRANSFER_DEFAULT(
-          (uint8_t *)&input[processed],
-          iterations * BTL_AES_BLOCK_SIZE_BYTES);
-        sli_se_mailbox_command_add_input(&command, &iv_in);
-        sli_se_mailbox_command_add_input(&command, &in);
-
-        sli_se_datatransfer_t out = SLI_SE_DATATRANSFER_DEFAULT(
-          &output[processed],
-          iterations * BTL_AES_BLOCK_SIZE_BYTES);
-        sli_se_datatransfer_t iv_out = SLI_SE_DATATRANSFER_DEFAULT(nonce_counter,
-                                                                   BTL_AES_BLOCK_SIZE_BYTES);
-        sli_se_mailbox_command_add_output(&command, &out);
-        sli_se_mailbox_command_add_output(&command, &iv_out);
-
-        sli_se_mailbox_execute_command(&command);
-
-        volatile sli_se_mailbox_response_t response = sli_se_mailbox_read_response();
-        if (response != SLI_SE_RESPONSE_OK) {
-          return BOOTLOADER_ERROR_SECURITY_REJECTED;
-        }
-
-        processed += iterations * BTL_AES_BLOCK_SIZE_BYTES;
+    size_t iterations = (length - processed) / BTL_AES_BLOCK_SIZE_BYTES;
+    if (iterations > 0U) {
+      if (btl_aes_se_mailbox_ctr_bulk(p, processed, iterations) != BOOTLOADER_OK) {
+        return BOOTLOADER_ERROR_SECURITY_REJECTED;
       }
+      processed += iterations * BTL_AES_BLOCK_SIZE_BYTES;
+    }
 
-      while ((length - processed) > 0U) {
-        if (n == 0U) {
-          const uint8_t *counter_ptr;
-
-#if (BTL_AES_CTR_NUM_BLOCKS_BUFFERED > 1U)
-          btl_aes_se_prepare_nonce_counter(nonce_counter, stream_block);
-          counter_ptr = stream_block;
-#else
-          counter_ptr = nonce_counter;
-#endif
-
-          if (btl_aes_se_mailbox_ecb(keyspec,
-                                     key,
-                                     keySizeBytes,
-                                     true,
-                                     counter_ptr,
-                                     stream_block,
-                                     BTL_AES_CTR_STREAM_BYTES) != BOOTLOADER_OK) {
-            return BOOTLOADER_ERROR_SECURITY_REJECTED;
-          }
-          btl_aes_se_increment_counter_at(BTL_AES_BLOCK_SIZE_BYTES - 1U, nonce_counter);
-        }
-        output[processed] = (uint8_t)(input[processed] ^ stream_block[n]);
-        n = (n + 1U) & BTL_AES_CTR_STREAM_MASK;
-        processed++;
-      }
+    if (btl_aes_se_mailbox_ctr_residual(p, length, &processed, &n) != BOOTLOADER_OK) {
+      return BOOTLOADER_ERROR_SECURITY_REJECTED;
     }
   }
 
@@ -426,7 +472,7 @@ void btl_processAesBlock(void    *ctx,
                          bool    encryptNotDecrypt)
 {
   btl_aes_enable_clock();
-  AesContext_t *context = (AesContext_t *)ctx;
+  const AesContext_t *context = (const AesContext_t *)ctx;
 
 #if defined(SEMAILBOX_PRESENT)
   uint32_t keyspec = btl_aes_se_keyspec(false, context->keybits);
@@ -502,18 +548,17 @@ void btl_processAesCtrData(void          *ctx,
   AesCtrContext_t *context = (AesCtrContext_t *)ctx;
 
 #if defined(SEMAILBOX_PRESENT)
-  uint32_t keyspec = btl_aes_se_keyspec(context->useInternalSeKey, context->keybits);
-  const uint8_t *key = context->useInternalSeKey ? NULL : context->key;
+  btl_aes_se_ctr_params_t ctr_params = {
+    .keyspec = btl_aes_se_keyspec(context->useInternalSeKey, context->keybits),
+    .key = context->useInternalSeKey ? NULL : context->key,
+    .keySizeBytes = context->keybits / 8U,
+    .nonce_counter = context->counter,
+    .stream_block = context->streamBlock,
+    .input = input,
+    .output = output,
+  };
 
-  (void)btl_aes_se_mailbox_ctr(keyspec,
-                               key,
-                               context->keybits / 8U,
-                               length,
-                               &context->offsetInBlock,
-                               context->counter,
-                               context->streamBlock,
-                               input,
-                               output);
+  (void)btl_aes_se_mailbox_ctr(&ctr_params, length, &context->offsetInBlock);
 #elif defined(CRYPTOACC_PRESENT)
   (void)btl_aes_cryptoacc_ctr(context->key,
                               context->keybits,

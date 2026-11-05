@@ -59,11 +59,9 @@ class ProtectedFieldsOcelot(ProtectedFieldsBase):
         'RAC_PATRIM1_TXTRIMHPAVPCAS': 'cal',
     }
 
-    # : List of fields found in PTE, but allow radio configurator to override the value
     PTE_PROTECTED_FIELD_EXCEPTIONS = [
     ]
 
-    # : List of fields protected by RAIL
     RAIL_PROTECTED_FIELDS = [
         'AGC_CTRL0_RSSISHIFT',
         'AGC_CTRL1_CCATHRSH',
@@ -94,7 +92,6 @@ class ProtectedFieldsOcelot(ProtectedFieldsBase):
         'SYNTH_LPFCTRL2TX_CALCTX',
     ]
 
-    # : List of fields that are found in PTE list, but does not need to be protected by RAIL
     RAIL_PROTECTED_FIELD_EXCEPTIONS = [
         'RAC_RFBIASCTRL_RFBIASNONFLASHMODE',
         'RAC_EN_EN',

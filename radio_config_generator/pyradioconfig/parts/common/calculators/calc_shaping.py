@@ -37,7 +37,6 @@ class CALC_Shaping(ICalculator):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Insert variables used by this block here
 
         var = self._addModelVariable(model, 'shaping_filter', Enum, ModelVariableFormat.DECIMAL, desc='Defines the shaping filter to be used in the TX side.')
         member_data = [
@@ -64,7 +63,6 @@ class CALC_Shaping(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # for gaussian pulse shapes pulse_shape_parameter holds BT value
         bt = model.vars.shaping_filter_param.value
 
         max_filter_taps = model.vars.max_filter_taps.value
@@ -74,26 +72,17 @@ class CALC_Shaping(ICalculator):
             minumum_bt_supported = 8 / max_filter_taps
             LogMgr.Error("ERROR: BT < {} not supported on this part".format(minumum_bt_supported))
 
-        # map BT value to standard deviation
         std = 1.05 / bt
 
-        # generate gaussian pulse shape
         w = self.gaussian(17, std)
-        # scale for unit DC gain
         w = tinynumpy.divide(w, w.sum())
-        # convolve with square wave of oversampling rate width which is 8 for the shaping filter
         f_hack = tinynumpy.convolve(w, tinynumpy.ones((1, 8)).flatten())
-        # scale and quantize coefficients
         c_hack = tinynumpy.round_(85 * f_hack)
-        # keep only first half of 17 coeffs - also skip convolution artifacts
-        #coeff = c_hack[4:13]
         coeff = []
         for i in range(4,14):
             coeff.append(c_hack[i])
 
-        # c8 is not used in gaussian pulse shapes
         coeff[8] = 0
-        # return coeffs
         return coeff
 
     @staticmethod
@@ -145,7 +134,6 @@ class CALC_Shaping(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # for raised cosine pulse shapes pulse_shape_parameter holds roll off factor value
         bt = model.vars.shaping_filter_param.value
 
         if bt > 1.0 or bt < 0.0:
@@ -153,15 +141,10 @@ class CALC_Shaping(ICalculator):
                          "Please ensure that 0 <= shaping_filter_param <= 1. "
                          "Overriding the current shaping_filter_param value to 1.")
             bt = 1.0
-        # create empty coefficient array
-        #h = tinynumpy.zeros((17,), dtype=float)
         h = [0.0] * 17
-        # for each coeff to be calculated
         for x in tinynumpy.arange(0, 17):
-            # get time index
             x = int(x)
             t = (x - 8) / 8.0
-            # handle special cases and calculate the coeffs
             if t == 0.0:
                 h[x] = 127
             elif bt != 0 and t == 1/(2*bt):
@@ -170,7 +153,6 @@ class CALC_Shaping(ICalculator):
                 h[x] = py2round(127*(math.pi/4)*(math.sin(math.pi*t)/(math.pi*t)))
             else:
                 h[x] = py2round(127*(math.sin(math.pi*t)/(math.pi*t))*(math.cos(math.pi*bt*t)/(1-(((2*bt*t))*((2*bt*t))))))
-        # keep only first half of coeffs
         coeff = h[0:9]
 
         return coeff
@@ -182,7 +164,6 @@ class CALC_Shaping(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # for raised cosine pulse shapes pulse_shape_parameter holds roll off factor value
         bt = model.vars.shaping_filter_param.value
 
         if bt > 1.0 or bt < 0.0:
@@ -192,15 +173,10 @@ class CALC_Shaping(ICalculator):
             bt = 0.0
 
         pi = math.pi
-        # create empty coefficient array
-        #h = tinynumpy.zeros((17,), dtype=float)
         h = [0.0] * 17
-        # for each coeff to be calculated
         for x in tinynumpy.arange(0, 17):
-            # get time index
             x = int(x)
             t = (x - 8) / 8.0
-            # handle special cases and calculate the coeffs
             if t == 0.0:
                 h[x] = (1-bt)+4*bt/pi
             elif bt != 0 and t == 1/(4*bt):
@@ -210,36 +186,17 @@ class CALC_Shaping(ICalculator):
             else:
                 h[x] = (math.sin(pi*t*(1-bt)) + 4*bt*t*math.cos(pi*t*(1+bt)))/( pi*t*(1-(4*bt*t)*(4*bt*t)) )
 
-        # scale so that the peak tap is 127
         peak = max(h)
         for x in tinynumpy.arange(0, 17):
             x = int(x)
             h[x] = py2round(h[x] / peak * 127 - 0.5)
             if h[x] < 0:
-                # Guner Arslan added a comment - 3 days ago Looks like we have couple issues in the
-                # root_raised_cosine_filter(self, model) function: the shaping filter coefficients (
-                # MODEM.SHAPINGx.COEFFy) are unsigned registers but root raised cosine filters can have negative
-                # coefficients at the edges. So technically the HW does not support generic root raised cosine filters.
-                #
-                # We have a number of PHYs that use root raised cosine but all of them use BT = 0 in which case all
-                # coeffs end up greater or equal to zero.
-                #
-                # For BT > 0 The negative coeffs will be very small at the edges I think we should be able to get away
-                # with setting them to zero. So let's just set all negative coeffs to zero before writing to the
-                # registers.
-                #
-                # Above issue is only present for Nerio and Nixi. In all other parts, the shaping filter coefficients (
-                # MODEM.SHAPINGx.COEFFy) are signed registers. Therefore using a method floor_filter_coefficients to make
-                # sure this applies only to Nerio and Nixi
                 h[x] = self.floor_filter_coefficients(h[x])
 
-        # keep only needed half of symmetric coeffs
         coeff = h[0:9]
 
         return coeff
 
-    # TODO: add shaping filters for BT = 0.1 to 1.0 in 0.1 steps for now
-    #       or alternatively we can implement filter design in Python
     def calc_shaping_reg(self, model):
         """
         given shaping filter input parameter set shaping filter coeffs and type
@@ -255,12 +212,10 @@ class CALC_Shaping(ICalculator):
             shaping = 0
     
         elif shaping_filter_option.value == model.vars.shaping_filter.var_enum.Gaussian.value:
-            # always sing even mode, asymmetric mode version not possible as only 9 filter taps available.
             c = self.gaussian_shaping_filter(model)
             shaping = 2
     
         elif shaping_filter_option.value == model.vars.shaping_filter.var_enum.Custom_OQPSK.value:
-            # Not sure what filter this is
             c[0] = c[1] = 1
             c[2] = 16
             c[3] = 48
@@ -339,10 +294,6 @@ class CALC_Shaping(ICalculator):
         model.vars.shaping_filter_gain_actual.value = int(shaping_filter_gain)
 
     def calc_max_available_filter_taps(self, model):
-        # this is fixed for a family of parts
-        # for jumbo, in asymmetric mode, the maximum taps available are 9
-        # for even mode, max filter taps available are 16
-        # for odd mode, max filter taps available are 17
         model.vars.max_filter_taps.value = 17
 
     def get_required_filter_taps(self, bt):
@@ -357,6 +308,4 @@ class CALC_Shaping(ICalculator):
         return req_filter_taps
 
     def floor_filter_coefficients(self, h):
-        # this part supports negative coefficients, so no need to overwrite h[x] to 0 when h[x] < 0.
-        # for now not allowing any negative values untill MCUW_RADIO_CFG-2007 is resolved
         return 0

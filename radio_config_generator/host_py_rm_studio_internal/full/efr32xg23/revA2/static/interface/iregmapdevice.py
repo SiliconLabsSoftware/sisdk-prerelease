@@ -26,7 +26,6 @@ class IRegMapDevice(object):
     """
     __metaclass__ = ABCMeta
 
-    # SVD Info Property
 
     @property
     @abstractmethod
@@ -38,7 +37,6 @@ class IRegMapDevice(object):
         """
         pass
 
-    # Name Access Methods
 
     @abstractmethod
     def addressToName(self, address):
@@ -199,7 +197,6 @@ class IRegMapDevice(object):
         """
         pass
 
-    # Accessed Flag Methods
 
     @abstractmethod
     def enableAccessedFlags(self):
@@ -251,7 +248,6 @@ class IRegMapDevice(object):
         """
         pass
 
-    # Data Dictionary Methods
 
     @staticmethod
     @abstractmethod
@@ -348,7 +344,6 @@ class IRegMapDevice(object):
         """
         pass
 
-    # Dump Methods
 
     @abstractmethod
     def getExcludedDumpRegisterNames(self):
@@ -435,7 +430,6 @@ class IRegMapDevice(object):
 
         .. code-block:: py
 
-            # example filter listing
 
             regFilterList = [
              'MODEM.AFC',
@@ -469,6 +463,7 @@ class IRegMapDevice(object):
         :rtype: ``list`` of ``str``
         :return: The list of register names that were written to the python source file
         """
+        pass
 
     @abstractmethod
     def dump(self, filename, regFilterList=None, userMsg=''):
@@ -613,6 +608,7 @@ class IRegMapDevice(object):
 
         :raises: RegMapLoggingError
         """
+        pass
 
     @abstractmethod
     def disablePyLangLogger(self):
@@ -628,7 +624,7 @@ class IRegMapDevice(object):
     @abstractmethod
     def closePyLangLogger(self):
         """
-        End register map read and write logging to a C source file. The
+        End register map read and write logging to a Python source file. The
         current handler is flushed and closed. The user may call
         openPyLangLogger() again to reopen, for example to use a different
         filename.

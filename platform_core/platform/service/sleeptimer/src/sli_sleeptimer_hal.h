@@ -37,6 +37,7 @@
 #include "em_device.h"
 #include "sli_sleeptimer.h"
 
+#include "sl_log_helper.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -170,14 +171,14 @@ __STATIC_INLINE uint32_t sleeptimer_hal_presc_to_log2(uint32_t presc)
   uint32_t log2;
 
   // Integer prescalers take argument less than 32768.
-  EFM_ASSERT(presc < 32768U);
+  SL_LOG_DEBUG_ASSERT(presc < 32768U);
 
   // Count leading zeroes and "reverse" result. Consider divider value to get
   // exponent n from 2^n, so ('presc' +1).
   log2 = 31UL - __CLZ(presc + (uint32_t) 1);
 
   // Check that prescaler is a 2^n number.
-  EFM_ASSERT(presc == (SL_Log2ToDiv(log2) - 1U));
+  SL_LOG_DEBUG_ASSERT(presc == (SL_Log2ToDiv(log2) - 1U));
 
   return log2;
 }

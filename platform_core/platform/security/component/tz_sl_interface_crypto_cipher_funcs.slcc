@@ -12,31 +12,53 @@ requires:
 - name: trustzone_nonsecure
 template_contribution:
 - name: tfm_interface_func
-  value: tfm_crypto_cipher_encrypt
+  value:
+    function: tfm_crypto_cipher_encrypt
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_cipher_decrypt
+  value:
+    function: tfm_crypto_cipher_decrypt
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_cipher_encrypt_setup
+  value:
+    function: tfm_crypto_cipher_encrypt_setup
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_cipher_decrypt_setup
+  value:
+    function: tfm_crypto_cipher_decrypt_setup
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_cipher_generate_iv
+  value:
+    function: tfm_crypto_cipher_generate_iv
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_cipher_set_iv
+  value:
+    function: tfm_crypto_cipher_set_iv
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_cipher_update
+  value:
+    function: tfm_crypto_cipher_update
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_cipher_finish
+  value:
+    function: tfm_crypto_cipher_finish
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_cipher_abort
+  value:
+    function: tfm_crypto_cipher_abort
+    key_checks: []
 
 documentation:
   url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf

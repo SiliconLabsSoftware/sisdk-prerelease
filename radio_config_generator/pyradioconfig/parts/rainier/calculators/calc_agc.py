@@ -6,7 +6,6 @@ from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEn
 class CalcAgcRainier(Calc_AGC_Bobcat):
 
     def buildVariables(self, model):
-        # Build variables from Panther
         super().buildVariables(model)
 
         var = self._addModelVariable(model, 'agc_power_mode', Enum, ModelVariableFormat.DECIMAL, 'AGC power mode')
@@ -30,20 +29,15 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
             member_data)
 
     def calc_agc_series2(self, model):
-        # Override method to account for IFPKD settling time
         periodhi_reg = model.vars.AGC_AGCPERIOD0_PERIODHI.value
         periodhistl_reg = model.vars.AGC_AGCPERIOD0_PERIODHISTL.value
         settletimeif_reg = model.vars.AGC_AGCPERIOD0_SETTLETIMEIF.value
 
         if periodhistl_reg == 0:
-            # We start the period counter alongside the IFPKD settling, so we have to acccount for
-            # the settling time (blanking period)
             periodhi_usable = periodhi_reg - settletimeif_reg
         else:
             periodhi_usable = periodhi_reg
 
-        # % There are many possible ways to handle the table but the simplest would be:
-        # % this is based on sine wave tripping N times at different gain settings
         self._reg_write(model.vars.AGC_STEPDWN_STEPDWN0, 0)
         self._reg_write(model.vars.AGC_STEPDWN_STEPDWN1, 1)
         self._reg_write(model.vars.AGC_STEPDWN_STEPDWN2, 2)
@@ -71,7 +65,6 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
         self._reg_write(model.vars.AGC_HICNTREGION0_HICNTREGION3, hicntregion3)
         self._reg_write(model.vars.AGC_HICNTREGION1_HICNTREGION4, hicntregion4)
 
-        # % safe way of setting this.
         self._reg_write(model.vars.AGC_AGCPERIOD0_MAXHICNTTHD, hicntregion4)
 
     def calc_rssiperiod_val(self, model):
@@ -82,11 +75,8 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
         self._reg_write(model.vars.AGC_ANTDIV_GAINMODE, 0)
 
     def calc_antdiv_debouncecntthd(self, model):
-        #This is do not care (functionality disabled)
         self._reg_do_not_care(model.vars.AGC_ANTDIV_DEBOUNCECNTTHD)
 
-    # override Bobcat calc_frzpkden_reg (register has been removed in Rainier)
-    # Also removed in common/profiles/lynx_regs.py for Rainier only
     def calc_frzpkden_reg(self, model):
         pass
 
@@ -94,15 +84,12 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
         lnaindexborder = 5 # Pre-silicon from Chris 10/23/23
         pgaindexborder = 5 # From Chris 1/16/25
         pnindexborder = 0  # New for Series3
-                           # 0: RFPAD at end of RFPKD schedule
-                           # 1: RFPAD at end of IFPKD schedule
 
         self._reg_write(model.vars.AGC_GAINRANGE_LNAINDEXBORDER, lnaindexborder)
         self._reg_write(model.vars.AGC_GAINRANGE_PGAINDEXBORDER, pgaindexborder)
         self._reg_write(model.vars.AGC_GAINRANGE_PNINDEXBORDER, pnindexborder)
 
     def calc_lnamixslice_reg(self, model):
-        # From Mohamed - https://jira.silabs.com/browse/MCUW_RADIO_CFG-2574
         agc_power_mode =  model.vars.agc_power_mode.value
 
         if agc_power_mode == model.vars.agc_power_mode.var_enum.LP:
@@ -142,11 +129,9 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
 
     def calc_lnamixrfatt_reg(self, model):
 
-        #Values from Mohamed - https://jira.silabs.com/browse/MCUW_RADIO_CFG-2574
         lnamixrfatt = [0x0, 0x3, 0x6, 0xB, 0x10, 0x18, 0x1F, 0x23, 0x33, 0x60, 0x71, 0x9F, 0xFF, 0x6FF, 0xFFF, 0xFFF]
         pnindexmax = 15 # Set to 15 to include RF PAD
 
-        #Write registers
         self._reg_write(model.vars.AGC_PNRFATT0_LNAMIXRFATT1, lnamixrfatt[0])
         self._reg_write(model.vars.AGC_PNRFATT0_LNAMIXRFATT2, lnamixrfatt[1])
         self._reg_write(model.vars.AGC_PNRFATT1_LNAMIXRFATT3, lnamixrfatt[2])
@@ -166,8 +151,6 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
         self._reg_write(model.vars.AGC_GAINSTEPLIM1_PNINDEXMAX, pnindexmax)
 
     def calc_pngaindb_reg(self, model):
-        # New in Rainier - initializing to reset values
-        # 8-bit signed values including 2-bit fraction
         self._reg_write(model.vars.AGC_PNGAIN1_PNGAINDB1, 38)
         self._reg_write(model.vars.AGC_PNGAIN1_PNGAINDB2, 30)
         self._reg_write(model.vars.AGC_PNGAIN1_PNGAINDB3, 23)
@@ -187,8 +170,6 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
 
 
     def calc_lnagaindb_reg(self, model):
-        # New in Rainier - initializing to reset values
-        # 8-bit signed values including 2-bit fraction
         agc_power_mode = model.vars.agc_power_mode.value
 
         if agc_power_mode == model.vars.agc_power_mode.var_enum.LP:
@@ -226,8 +207,6 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
         self._reg_write(model.vars.AGC_LNAGAIN3_LNAGAINDB10, lnagaindb10)
 
     def calc_lnamixcuren_reg(self, model):
-        # Corresponds to lnamix_doublecur1_en
-        # LSB->agcindex1, MSB->agcindex10
         agc_power_mode =  model.vars.agc_power_mode.value
 
         if agc_power_mode == model.vars.agc_power_mode.var_enum.LP:
@@ -238,7 +217,6 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
         self._reg_write(model.vars.AGC_LNAMIXCODE2_LNAMIXCUREN, lnamixcurr)
 
     def calc_tiacomp_reg(self, model):
-        # New in Rainier
         self._reg_write(model.vars.AGC_TIACODE0_TIACOMP1, 0)
         self._reg_write(model.vars.AGC_TIACODE0_TIACOMP2, 0)
         self._reg_write(model.vars.AGC_TIACODE0_TIACOMP3, 0)
@@ -252,8 +230,6 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
         self._reg_write(model.vars.AGC_TIACODE1_TIACOMP11, 4)
 
     def calc_pgagaindb_reg(self, model):
-        # New in Rainier - initializing to reset values
-        # 9-bit signed values including 2-bit fraction
         self._reg_write(model.vars.AGC_PGAGAIN1_PGAGAINDB1, 136)
         self._reg_write(model.vars.AGC_PGAGAIN1_PGAGAINDB2, 128)
         self._reg_write(model.vars.AGC_PGAGAIN1_PGAGAINDB3, 120)
@@ -267,11 +243,9 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
         self._reg_write(model.vars.AGC_PGAGAIN4_PGAGAINDB11, 56)
 
     def calc_periodhistl_reg(self, model):
-        # New in Rainier
         self._reg_write(model.vars.AGC_AGCPERIOD0_PERIODHISTL, 1)
 
     def calc_periodlostl_reg(self, model):
-        # New in Rainier
         self._reg_write(model.vars.AGC_AGCPERIOD0_PERIODLOSTL, 1)
 
     def calc_agc_rfpkd_enable(self, model):
@@ -298,7 +272,6 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
         self._reg_write(model.vars.AGC_CTRL6_ENDUALRFPKD, endualrfpkd)
 
     def calc_agc_misc(self, model):
-        # copied from ocelot, removed deprecated registers
         self._reg_write(model.vars.AGC_AGCPERIOD0_SETTLETIMEIF,6)
         self._reg_write(model.vars.AGC_AGCPERIOD0_SETTLETIMERF,14)
         self._reg_write(model.vars.AGC_CTRL0_AGCRST,0)
@@ -362,7 +335,6 @@ class CalcAgcRainier(Calc_AGC_Bobcat):
         self._reg_write(model.vars.AGC_GAINSTEPLIM0_HYST, 0)
 
     def calc_agc_pwr_mode(self, model):
-        #High performance by default, allow override
         model.vars.agc_power_mode.value = model.vars.agc_power_mode.var_enum.HP
 
     def calc_agc_lock_mode(self, model):

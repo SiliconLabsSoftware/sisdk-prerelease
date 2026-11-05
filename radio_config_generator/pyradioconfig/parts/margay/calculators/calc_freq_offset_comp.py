@@ -2,12 +2,9 @@ from pyradioconfig.parts.ocelot.calculators.calc_freq_offset_comp import CALC_Fr
 
 
 class CALC_Freq_Offset_Comp_Margay(CALC_Freq_Offset_Comp_ocelot):
-    #Inherit all from Ocelot
 
     def calc_afc_scale_value(self, model):
-        # Overriding this function due to variable name change
 
-        # Load model values into local variables
         freqgain = model.vars.freq_gain_actual.value
         mod_format = model.vars.modulation_type.value
         mode = model.vars.frequency_comp_mode.value
@@ -31,7 +28,6 @@ class CALC_Freq_Offset_Comp_Margay(CALC_Freq_Offset_Comp_ocelot):
         else:
             res = synth_res
 
-        # AFC to synth for Legacy
         if(demod_sel==model.vars.demod_select.var_enum.LEGACY):
             if mode_index >= 4 and freqgain > 0:
                 if mod_format == model.vars.modulation_type.var_enum.FSK2 or \
@@ -57,11 +53,9 @@ class CALC_Freq_Offset_Comp_Margay(CALC_Freq_Offset_Comp_ocelot):
                 afcscale = 1.0 * baudrate * phscale / (256 * res)
                 afcscale_tx = baudrate * phscale / (256 * synth_res)
 
-                # Reduce afc scale by eighth if oneshot is disabled. Following BLE case
                 if afc_oneshot == 0 and bcr_det_en == 1:
                     afcscale = afcscale / 8.0
         elif (demod_sel == model.vars.demod_select.var_enum.BCR):
-            # digital mixer frequency comp
             afcscale =  model.vars.pro2_afc_gain.value /  res
             afcscale_tx = model.vars.pro2_afc_gain.value / synth_res
         else:
@@ -70,8 +64,6 @@ class CALC_Freq_Offset_Comp_Margay(CALC_Freq_Offset_Comp_ocelot):
 
         afcscale = afcscale * scale
 
-        #Special case to set afc_scale_tx to 0 to disable TX AFC adjust when using oneshot
-        #See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1510
         if (afc_tx_adjust_enable == False) and afc_oneshot:
             afcscale_tx = 0.0
 

@@ -747,7 +747,7 @@ bool zpal_radio_is_region_supported(zpal_radio_region_t region);
  * @return True if node shall use Long Range channel only.
  *
  */
-bool zpal_radio_is_transmit_allowed(uint8_t channel, uint8_t frame_length, bool cca);
+bool zpal_radio_is_transmit_allowed(uint8_t channel, uint16_t frame_length, bool cca);
 
 /**
  * @brief Function to reduce Tx power of classic non-listening devices.

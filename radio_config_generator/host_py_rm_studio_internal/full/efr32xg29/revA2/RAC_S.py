@@ -1,5 +1,4 @@
 
-# -*- coding: utf-8 -*-
 
 __all__ = [ 'RM_Peripheral_RAC_S' ]
 

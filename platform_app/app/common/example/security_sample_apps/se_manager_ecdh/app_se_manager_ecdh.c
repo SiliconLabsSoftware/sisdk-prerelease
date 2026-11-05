@@ -486,6 +486,7 @@ sl_status_t export_asymmetric_pubkey_from_wrap(sl_se_key_type_t key_type,
                                             &plain_pubkey), &cmd_ctx);
 }
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /***************************************************************************//**
  * Generate a non-exportable asymmetric key into a volatile SE key slot.
  ******************************************************************************/
@@ -618,6 +619,7 @@ sl_status_t delete_volatile_asymmetric_key(sl_se_key_type_t key_type,
 
   print_error_cycle(sl_se_delete_key(&cmd_ctx, &volatile_key), &cmd_ctx);
 }
+#endif // defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 
 /***************************************************************************//**
  * Compute ECDH shared secret from wrapped key.
@@ -705,6 +707,7 @@ sl_status_t compute_wrap_shared_secret(sl_se_key_type_t key_type, bool client)
                                                      &shared_secret), &cmd_ctx);
 }
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /***************************************************************************//**
  * Compute ECDH shared secret from volatile key.
  ******************************************************************************/
@@ -784,6 +787,7 @@ sl_status_t compute_volatile_shared_secret(sl_se_key_type_t key_type,
                                                      &pub_key,
                                                      &shared_secret), &cmd_ctx);
 }
+#endif // defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 #endif
 
 // -----------------------------------------------------------------------------

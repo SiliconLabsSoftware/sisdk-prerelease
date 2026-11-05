@@ -29,7 +29,7 @@
  ******************************************************************************/
 
 #include <stddef.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_status.h"
 #include "cmsis_os2.h"
 
@@ -57,7 +57,7 @@ sl_status_t sl_cmsis_os_convert_status(osStatus_t os_status)
       return SL_STATUS_PERMISSION;
     case osStatusReserved:
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       return SL_STATUS_FAIL;
   }
 }

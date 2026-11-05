@@ -34,7 +34,7 @@
 #include "em_emu.h"
 #if defined(EMU_PRESENT) && (EMU_COUNT > 0)
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "sl_common.h"
@@ -219,8 +219,10 @@ static errataFixDcdcHs_TypeDef errataFixDcdcHsState = errataFixDcdcHsInit;
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
 #define RAM0_BLOCKS           16U
 #define RAM0_BLOCK_SIZE   0x4000U // 16 kB blocks
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)
+#define RAM0_BLOCKS           5U
+#define RAM0_BLOCK_SIZE   0x8000U // 32 kB blocks
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
 #define RAM0_BLOCKS           16U
 #define RAM0_BLOCK_SIZE   0x8000U // 32 kB blocks
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)
@@ -570,7 +572,7 @@ __STATIC_INLINE bool getErrataFixEmuE107En(void)
   return (majorMinorRev <= 0x0103) || (majorMinorRev == 0x0204) || (majorMinorRev == 0x0205);
 #else
   /* Invalid configuration. */
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
   /* Return when assertions are disabled. */
   return false;
 #endif
@@ -609,7 +611,7 @@ __STATIC_INLINE bool getErrataFixEmuE110En(void)
   return (majorMinorRev == 0x0204);
 #else
   /* Invalid configuration. */
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
   /* Return when assertions are disabled. */
   return false;
 #endif
@@ -824,7 +826,7 @@ void EMU_EM23Init(const EMU_EM23Init_TypeDef *em23Init)
 #if defined(CMU_HFXOCTRL_AUTOSTARTSELEM0EM1)
   if (em23Init->vScaleEM23Voltage == emuVScaleEM23_LowPower) {
     /* Voltage scaling is not compatible with HFXO auto start and select. */
-    EFM_ASSERT((CMU->HFXOCTRL & CMU_HFXOCTRL_AUTOSTARTSELEM0EM1) == 0U);
+    SL_LOG_DEBUG_ASSERT((CMU->HFXOCTRL & CMU_HFXOCTRL_AUTOSTARTSELEM0EM1) == 0U);
   }
 #endif
 #endif
@@ -1477,7 +1479,7 @@ __NO_RETURN void EMU_EnterEM4(void)
    * have BYPASS switch so DC-DC converter can not be set to bypass mode. */
 #if (defined(_SILICON_LABS_DCDC_FEATURE) \
   && (_SILICON_LABS_DCDC_FEATURE == _SILICON_LABS_DCDC_FEATURE_DCDC_BOOST))
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 
 #if defined(SL_CATALOG_METRIC_EM4_WAKE_PRESENT)
@@ -1602,7 +1604,7 @@ __NO_RETURN void EMU_EnterEM4(void)
 
 #if defined(_DCDC_IF_EM4ERR_MASK)
   /* If EM4ERR flag in DCDC->IF is set, mean that device cannot enter EM4, device will be suspended in this assertion */
-  EFM_ASSERT((DCDC->IF & _DCDC_IF_EM4ERR_MASK) == 0);
+  SL_LOG_DEBUG_ASSERT((DCDC->IF & _DCDC_IF_EM4ERR_MASK) == 0);
 #endif
 
   // Wait for EM4 entry using WFI.
@@ -1728,9 +1730,10 @@ void EMU_RamPowerDown(uint32_t start, uint32_t end)
     // Leopard has 3 blocks. We do no shut off block 0 because we dont want to disable all RAM0
     mask |= ADDRESS_NOT_IN_BLOCK(start, 0x20006000UL) << 1; // Block 1, 8 kB
     mask |= ADDRESS_NOT_IN_BLOCK(start, 0x20008000UL) << 2; // Block 2, 32 kB
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
-    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
-    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)   \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)  \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
@@ -1838,7 +1841,7 @@ void EMU_RamPowerUp(void)
  ******************************************************************************/
 void EMU_PeripheralRetention(EMU_PeripheralRetention_TypeDef periMask, bool enable)
 {
-  EFM_ASSERT(!enable);
+  SL_LOG_DEBUG_ASSERT(!enable);
   EMU->EM23PERNORETAINCTRL = (uint32_t)periMask
                              & (uint32_t)emuPeripheralRetention_ALL;
 }
@@ -1956,7 +1959,7 @@ void EMU_VScaleEM01(EMU_VScaleEM01_TypeDef voltage, bool wait)
   hfSrcClockFrequency = hfFreq;
 
   if (voltage == emuVScaleEM01_LowPower) {
-    EFM_ASSERT(hfSrcClockFrequency <= CMU_VSCALEEM01_LOWPOWER_VOLTAGE_CLOCK_MAX);
+    SL_LOG_DEBUG_ASSERT(hfSrcClockFrequency <= CMU_VSCALEEM01_LOWPOWER_VOLTAGE_CLOCK_MAX);
     /* Update wait states before scaling down voltage. */
     CMU_UpdateWaitStates(hfFreq, VSCALE_EM01_LOW_POWER);
   }
@@ -1969,6 +1972,8 @@ void EMU_VScaleEM01(EMU_VScaleEM01_TypeDef voltage, bool wait)
   for (uint32_t i = 0; i < loops; i++) {
     __NOP();
   }
+#else
+  (void)hfSrcClockFrequency;
 #endif
 
   CORE_ENTER_CRITICAL();
@@ -1980,7 +1985,7 @@ void EMU_VScaleEM01(EMU_VScaleEM01_TypeDef voltage, bool wait)
   // because hardware does not set the VSCALEBUSY flag immediately.
   while (((EMU->IF & EMU_IF_VSCALEDONE) == 0U)
          && ((EMU->STATUS & EMU_STATUS_VSCALEFAILED) == 0U)) {
-    EFM_ASSERT((EMU->STATUS & EMU_STATUS_VSCALEFAILED) == 0U);
+    SL_LOG_DEBUG_ASSERT((EMU->STATUS & EMU_STATUS_VSCALEFAILED) == 0U);
     // Wait for VSCALE completion.
     // SRAM accesses will fault the core while scaling.
   }
@@ -1993,10 +1998,11 @@ void EMU_VScaleEM01(EMU_VScaleEM01_TypeDef voltage, bool wait)
   hfSrcClockFrequency = hfFreq * hfPresc;
 
   if (voltage == emuVScaleEM01_LowPower) {
-    EFM_ASSERT(hfSrcClockFrequency <= CMU_VSCALEEM01_LOWPOWER_VOLTAGE_CLOCK_MAX);
+    SL_LOG_DEBUG_ASSERT(hfSrcClockFrequency <= CMU_VSCALEEM01_LOWPOWER_VOLTAGE_CLOCK_MAX);
     /* Update wait states before scaling down voltage. */
     CMU_UpdateWaitStates(hfFreq, VSCALE_EM01_LOW_POWER);
   }
+  (void)hfSrcClockFrequency;
 
   EMU->CMD = vScaleEM01Cmd(voltage);
 
@@ -2080,8 +2086,8 @@ void EMU_BUPDInit(const EMU_BUPDInit_TypeDef *bupdInit)
  ******************************************************************************/
 void EMU_BUThresholdSet(EMU_BODMode_TypeDef mode, uint32_t value)
 {
-  EFM_ASSERT(value < 8);
-  EFM_ASSERT(value <= (_EMU_BUACT_BUEXTHRES_MASK >> _EMU_BUACT_BUEXTHRES_SHIFT));
+  SL_LOG_DEBUG_ASSERT(value < 8);
+  SL_LOG_DEBUG_ASSERT(value <= (_EMU_BUACT_BUEXTHRES_MASK >> _EMU_BUACT_BUEXTHRES_SHIFT));
 
   switch (mode) {
     case emuBODMode_Active:
@@ -2105,8 +2111,8 @@ void EMU_BUThresholdSet(EMU_BODMode_TypeDef mode, uint32_t value)
  ******************************************************************************/
 void EMU_BUThresRangeSet(EMU_BODMode_TypeDef mode, uint32_t value)
 {
-  EFM_ASSERT(value < 4);
-  EFM_ASSERT(value <= (_EMU_BUACT_BUEXRANGE_MASK >> _EMU_BUACT_BUEXRANGE_SHIFT));
+  SL_LOG_DEBUG_ASSERT(value < 4);
+  SL_LOG_DEBUG_ASSERT(value <= (_EMU_BUACT_BUEXRANGE_MASK >> _EMU_BUACT_BUEXRANGE_SHIFT));
 
   switch (mode) {
     case emuBODMode_Active:
@@ -2352,7 +2358,7 @@ static bool dcdcConstCalibrationLoad(void)
 
     return true;
   }
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
   /* Return when assertions are disabled. */
   return false;
 
@@ -2462,8 +2468,8 @@ static void currentLimitersUpdate(void)
   lncLimSel <<= _EMU_DCDCMISCCTRL_LNCLIMILIMSEL_SHIFT;
 
   /* Check for overflow. */
-  EFM_ASSERT((lncLimSel & ~_EMU_DCDCMISCCTRL_LNCLIMILIMSEL_MASK) == 0x0U);
-  EFM_ASSERT((lpcLimSel & ~_EMU_DCDCMISCCTRL_LPCLIMILIMSEL_MASK) == 0x0U);
+  SL_LOG_DEBUG_ASSERT((lncLimSel & ~_EMU_DCDCMISCCTRL_LNCLIMILIMSEL_MASK) == 0x0U);
+  SL_LOG_DEBUG_ASSERT((lpcLimSel & ~_EMU_DCDCMISCCTRL_LPCLIMILIMSEL_MASK) == 0x0U);
 
   EMU->DCDCMISCCTRL = (EMU->DCDCMISCCTRL & ~(_EMU_DCDCMISCCTRL_LNCLIMILIMSEL_MASK
                                              | _EMU_DCDCMISCCTRL_LPCLIMILIMSEL_MASK))
@@ -2487,7 +2493,7 @@ static void currentLimitersUpdate(void)
     zdetLimSel <<= _EMU_DCDCZDETCTRL_ZDETILIMSEL_SHIFT;
 
     /* Check for overflow. */
-    EFM_ASSERT((zdetLimSel & ~_EMU_DCDCZDETCTRL_ZDETILIMSEL_MASK) == 0x0U);
+    SL_LOG_DEBUG_ASSERT((zdetLimSel & ~_EMU_DCDCZDETCTRL_ZDETILIMSEL_MASK) == 0x0U);
 
     EMU->DCDCZDETCTRL = (EMU->DCDCZDETCTRL & ~_EMU_DCDCZDETCTRL_ZDETILIMSEL_MASK)
                         | zdetLimSel;
@@ -2531,7 +2537,7 @@ static void compCtrlSet(EMU_DcdcLnCompCtrl_TypeDef comp)
       break;
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 }
@@ -2599,7 +2605,7 @@ static bool lpCmpHystCalibrationLoad(bool lpAttenuation,
         break;
 
       default:
-        EFM_ASSERT(false);
+        SL_LOG_DEBUG_ASSERT(false);
         /* Return when assertions are disabled. */
         return false;
     }
@@ -2610,7 +2616,7 @@ static bool lpCmpHystCalibrationLoad(bool lpAttenuation,
     /* Make sure the sel value is within the field range. */
     lpcmpHystSel <<= _GENERIC_DCDCLPCTRL_LPCMPHYSSELEM234H_SHIFT;
     if ((lpcmpHystSel & ~_GENERIC_DCDCLPCTRL_LPCMPHYSSELEM234H_MASK) != 0U) {
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       /* Return when assertions are disabled. */
       return false;
     }
@@ -2622,7 +2628,7 @@ static bool lpCmpHystCalibrationLoad(bool lpAttenuation,
     /* Make sure the sel value is within the field range. */
     lpcmpHystSel <<= _EMU_DCDCLPEM01CFG_LPCMPHYSSELEM01_SHIFT;
     if ((lpcmpHystSel & ~_EMU_DCDCLPEM01CFG_LPCMPHYSSELEM01_MASK) != 0U) {
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       /* Return when assertions are disabled. */
       return false;
     }
@@ -2723,7 +2729,7 @@ static void lpGetDevinfoVrefLowHigh(uint32_t *vrefL,
       break;
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
   *vrefL = vrefLow;
@@ -2759,7 +2765,7 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
   if ((EMU->PWRCFG & _EMU_PWRCFG_PWRCFG_MASK) != EMU_PWRCFG_PWRCFG_DCDCTODVDD) {
     /* If this assert triggers unexpectedly, power cycle the
        kit to reset the power configuration. */
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     /* Return when assertions are disabled. */
     return false;
   }
@@ -2769,18 +2775,18 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
   (void)dcdcConstCalibrationLoad();
 
   /* Check current parameters */
-  EFM_ASSERT(dcdcInit->maxCurrent_mA <= 200U);
-  EFM_ASSERT(dcdcInit->em01LoadCurrent_mA <= dcdcInit->maxCurrent_mA);
-  EFM_ASSERT(dcdcInit->reverseCurrentControl <= 200);
+  SL_LOG_DEBUG_ASSERT(dcdcInit->maxCurrent_mA <= 200U);
+  SL_LOG_DEBUG_ASSERT(dcdcInit->em01LoadCurrent_mA <= dcdcInit->maxCurrent_mA);
+  SL_LOG_DEBUG_ASSERT(dcdcInit->reverseCurrentControl <= 200);
 
   if (dcdcInit->dcdcMode == emuDcdcMode_LowNoise) {
     /* DCDC low-noise supports max 200 mA. */
-    EFM_ASSERT(dcdcInit->em01LoadCurrent_mA <= 200U);
+    SL_LOG_DEBUG_ASSERT(dcdcInit->em01LoadCurrent_mA <= 200U);
   }
 #if (_SILICON_LABS_GECKO_INTERNAL_SDID != 80)
   else if (dcdcInit->dcdcMode == emuDcdcMode_LowPower) {
     /* Up to 10 mA is supported for EM01-LP mode. */
-    EFM_ASSERT(dcdcInit->em01LoadCurrent_mA <= 10U);
+    SL_LOG_DEBUG_ASSERT(dcdcInit->em01LoadCurrent_mA <= 10U);
   }
 #endif
   else {
@@ -2788,7 +2794,7 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
   }
 
   /* EM2/3/4 current above 10 mA is not supported. */
-  EFM_ASSERT(dcdcInit->em234LoadCurrent_uA <= 10000U);
+  SL_LOG_DEBUG_ASSERT(dcdcInit->em234LoadCurrent_uA <= 10000U);
 
   if (dcdcInit->em234LoadCurrent_uA < 75U) {
     lpCmpBiasSelEM234H  = 0;
@@ -2843,7 +2849,7 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
 
   /* Set DCDC output voltage. */
   if (!EMU_DCDCOutputVoltageSet(dcdcInit->mVout, true, true)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     /* Return when assertions are disabled. */
     return false;
   }
@@ -3032,7 +3038,7 @@ bool EMU_DCDCPowerOff(void)
   EMU->DCDCCTRL = EMU_DCDCCTRL_DCDCMODE_OFF;
 
   dcdcModeSet = (EMU->DCDCCTRL == EMU_DCDCCTRL_DCDCMODE_OFF);
-  EFM_ASSERT(dcdcModeSet);
+  SL_LOG_DEBUG_ASSERT(dcdcModeSet);
 
   return dcdcModeSet;
 }
@@ -3073,7 +3079,7 @@ void EMU_DCDCConductionModeSet(EMU_DcdcConductionMode_TypeDef conductionMode,
       EMU_DCDCLnRcoBandSet(emuDcdcLnRcoBand_3MHz);
     } else {
       /* emuDcdcConductionMode_DiscontinuousLN supports up to 4MHz LN RCO. */
-      EFM_ASSERT(rcoBand <= emuDcdcLnRcoBand_4MHz);
+      SL_LOG_DEBUG_ASSERT(rcoBand <= emuDcdcLnRcoBand_4MHz);
     }
   } else {
     EMU->DCDCMISCCTRL |= EMU_DCDCMISCCTRL_LNFORCECCM;
@@ -3128,7 +3134,7 @@ bool EMU_DCDCOutputVoltageSet(uint32_t mV,
                     && (mV <= PWRCFG_DCDCTODVDD_VMAX);
 
   if (!validOutVoltage) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     /* Return when assertions are disabled. */
     return false;
   }
@@ -3206,7 +3212,7 @@ bool EMU_DCDCOutputVoltageSet(uint32_t mV,
 #endif
       || (vrefVal[dcdcTrimMode_EM234H_LP] > vrefHigh[dcdcTrimMode_EM234H_LP])
       || (vrefVal[dcdcTrimMode_EM234H_LP] < vrefLow[dcdcTrimMode_EM234H_LP])) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     /* Return when assertions are disabled. */
     return false;
   }
@@ -3221,7 +3227,7 @@ bool EMU_DCDCOutputVoltageSet(uint32_t mV,
   if (setLpVoltage) {
     /* Load LP EM234H comparator hysteresis calibration. */
     if (!(lpCmpHystCalibrationLoad(attenuationSet, lpcmpBias[dcdcTrimMode_EM234H_LP], dcdcTrimMode_EM234H_LP))) {
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       /* Return when assertions are disabled. */
       return false;
     }
@@ -3229,7 +3235,7 @@ bool EMU_DCDCOutputVoltageSet(uint32_t mV,
 #if defined(_EMU_DCDCLPEM01CFG_LPCMPBIASEM01_MASK)
     /* Load LP EM234H comparator hysteresis calibration. */
     if (!(lpCmpHystCalibrationLoad(attenuationSet, lpcmpBias[dcdcTrimMode_EM01_LP], dcdcTrimMode_EM01_LP))) {
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       /* Return when assertions are disabled. */
       return false;
     }
@@ -3291,7 +3297,7 @@ void EMU_DCDCOptimizeSlice(uint32_t em0LoadCurrentmA)
   } else {
     /* This configuration is not recommended. @ref EMU_DCDCInit() applies a recommended
        configuration. */
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
   }
 
   /* The selected slices are PSLICESEL + 1. */
@@ -3321,7 +3327,7 @@ void EMU_DCDCLnRcoBandSet(EMU_DcdcLnRcoBand_TypeDef band)
   forcedCcm = BUS_RegBitRead(&EMU->DCDCMISCCTRL, _EMU_DCDCMISCCTRL_LNFORCECCM_SHIFT);
 
   /* DCM mode supports up to 4 MHz LN RCO. */
-  EFM_ASSERT(((forcedCcm == 0U) && band <= emuDcdcLnRcoBand_4MHz)
+  SL_LOG_DEBUG_ASSERT(((forcedCcm == 0U) && band <= emuDcdcLnRcoBand_4MHz)
              || (forcedCcm != 0U));
 
   EMU->DCDCLNFREQCTRL = (EMU->DCDCLNFREQCTRL & ~_EMU_DCDCLNFREQCTRL_RCOBAND_MASK)
@@ -3491,9 +3497,13 @@ void EMU_DCDCLedboostOutputVoltageSet(const EMU_DcdcLedboostOutputVoltage_TypeDe
   EMU_DCDCSync(_DCDC_SYNCBUSY_MASK);
 #endif
 
+#if defined(_DCDC_LEDVDDBCTRL_CMDLEDVSCALE_MASK)
   BUS_RegMaskedWrite(&DCDC->LEDVDDBCTRL,
                      _DCDC_LEDVDDBCTRL_CMDLEDVSCALE_MASK,
                      ((uint32_t)boostVoltage << _DCDC_LEDVDDBCTRL_CMDLEDVSCALE_SHIFT));
+#else
+  (void)boostVoltage;
+#endif
 
   EMU_DCDCUpdatedHook();
 }
@@ -3555,10 +3565,10 @@ sl_status_t EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
 #if defined(LEDSINK_PRESENT)
     bool isLedvddEnabled = ((DCDC->STATUS & DCDC_STATUS_LEDVDDON) != 0);
     if (!isLedvddEnabled) {
-      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE1;
+      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVDDVSCALE1;
       DCDC->OUTEN_SET = DCDC_OUTEN_LEDVDDOUTEN;
       DCDC->LEDVDDBCTRL_SET = DCDC_LEDVDDBCTRL_LEDVDDEN;
-      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE2
+      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVDDVSCALE2
                           | DCDC_LEDVDDBCTRL_LEDVDDEN;
       DCDC->IF_CLR = DCDC_IF_BOOSTPOSEDG;
       while ((DCDC->IF & DCDC_IF_BOOSTPOSEDG) == 0U);
@@ -3589,10 +3599,10 @@ sl_status_t EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode)
 #if defined(LEDSINK_PRESENT)
     if (!isLedvddEnabled) {
       DCDC->OUTEN_CLR = DCDC_OUTEN_LEDVDDOUTEN;
-      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE1
+      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVDDVSCALE1
                           | DCDC_LEDVDDBCTRL_LEDVDDEN;
       DCDC->LEDVDDBCTRL_CLR = DCDC_LEDVDDBCTRL_LEDVDDEN;
-      DCDC->LEDVDDBCTRL_CLR = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE1;
+      DCDC->LEDVDDBCTRL_CLR = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVDDVSCALE1;
     }
 #endif
     }
@@ -3724,7 +3734,7 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
           outenTimeout++;
         }
         if (outenTimeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
-          EFM_ASSERT(false);
+          SL_LOG_DEBUG_ASSERT(false);
         }
         break;
 
@@ -3734,7 +3744,7 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
           outenTimeout++;
         }
         if (outenTimeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
-          EFM_ASSERT(false);
+          SL_LOG_DEBUG_ASSERT(false);
         }
         break;
 
@@ -3745,12 +3755,12 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
           outenTimeout++;
         }
         if (outenTimeout >= EMU_DCDC_MODE_SET_TIMEOUT) {
-          EFM_ASSERT(false);
+          SL_LOG_DEBUG_ASSERT(false);
         }
         break;
 
       default:
-        EFM_ASSERT(false);
+        SL_LOG_DEBUG_ASSERT(false);
         break;
     }
   }
@@ -3841,7 +3851,7 @@ void EMU_DCDCSetPFMXModePeakCurrent(uint32_t value)
 
   /* Verification that the parameter is in range. */
   /* if not, restrict value to maximum allowed.   */
-  EFM_ASSERT(value <= (_DCDC_PFMXCTRL_IPKVAL_MASK >> _DCDC_PFMXCTRL_IPKVAL_SHIFT));
+  SL_LOG_DEBUG_ASSERT(value <= (_DCDC_PFMXCTRL_IPKVAL_MASK >> _DCDC_PFMXCTRL_IPKVAL_SHIFT));
   if (value > (_DCDC_PFMXCTRL_IPKVAL_MASK >> _DCDC_PFMXCTRL_IPKVAL_SHIFT)) {
     value = (_DCDC_PFMXCTRL_IPKVAL_MASK >> _DCDC_PFMXCTRL_IPKVAL_SHIFT);
   }
@@ -3976,7 +3986,7 @@ void EMU_DCDCSetRegulationType(EMU_DcdcRegulationType_TypeDef regulationType)
       break;
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 #endif
@@ -4217,7 +4227,7 @@ static uint32_t vmonCalibratedThreshold(EMU_VmonChannel_TypeDef channel,
       break;
 #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 
@@ -4260,7 +4270,7 @@ void EMU_VmonInit(const EMU_VmonInit_TypeDef *vmonInit)
   uint32_t thresholdCoarse, thresholdFine;
   uint32_t threshold;
 
-  EFM_ASSERT((vmonInit->threshold >= 1620) && (vmonInit->threshold <= 3400));
+  SL_LOG_DEBUG_ASSERT((vmonInit->threshold >= 1620) && (vmonInit->threshold <= 3400));
 
   threshold = vmonCalibratedThreshold(vmonInit->channel, vmonInit->threshold);
   thresholdFine = threshold % 10U;
@@ -4324,7 +4334,7 @@ void EMU_VmonInit(const EMU_VmonInit_TypeDef *vmonInit)
       break;
 #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return;
   }
 }
@@ -4348,10 +4358,10 @@ void EMU_VmonHystInit(const EMU_VmonHystInit_TypeDef *vmonInit)
   uint32_t fallThreshold;
 
   /* VMON supports voltages between 1620 mV and 3400 mV (inclusive). */
-  EFM_ASSERT((vmonInit->riseThreshold >= 1620) && (vmonInit->riseThreshold <= 3400));
-  EFM_ASSERT((vmonInit->fallThreshold >= 1620) && (vmonInit->fallThreshold <= 3400));
+  SL_LOG_DEBUG_ASSERT((vmonInit->riseThreshold >= 1620) && (vmonInit->riseThreshold <= 3400));
+  SL_LOG_DEBUG_ASSERT((vmonInit->fallThreshold >= 1620) && (vmonInit->fallThreshold <= 3400));
   /* The fall threshold has to be lower than rise threshold. */
-  EFM_ASSERT(vmonInit->fallThreshold <= vmonInit->riseThreshold);
+  SL_LOG_DEBUG_ASSERT(vmonInit->fallThreshold <= vmonInit->riseThreshold);
 
   riseThreshold = vmonCalibratedThreshold(vmonInit->channel, vmonInit->riseThreshold);
   fallThreshold = vmonCalibratedThreshold(vmonInit->channel, vmonInit->fallThreshold);
@@ -4367,7 +4377,7 @@ void EMU_VmonHystInit(const EMU_VmonHystInit_TypeDef *vmonInit)
                           | (vmonInit->enable     ? EMU_VMONAVDDCTRL_EN     : 0U);
       break;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return;
   }
 }
@@ -4417,7 +4427,7 @@ void EMU_VmonEnable(EMU_VmonChannel_TypeDef channel, bool enable)
       break;
 #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return;
   }
 
@@ -4462,7 +4472,7 @@ bool EMU_VmonChannelStatusGet(EMU_VmonChannel_TypeDef channel)
 #endif
     default:
       bit = 0;
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 
@@ -4678,7 +4688,7 @@ void EMU_DCDCVrlInit(const EMU_DCDCVrlInit_TypeDef *init)
   uint32_t trim;
 #endif
 
-  EFM_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(init != NULL);
 
   vrlcfg = (((uint32_t)init->mode << _DCDC_VRLCFG_VRLMODE_SHIFT)
              & _DCDC_VRLCFG_VRLMODE_MASK)

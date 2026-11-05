@@ -5,6 +5,10 @@ description: >
   This component provides the NVM implementation of the IO Interface for the Multilevel Switch
   Command Class. It can be used in case the state of the Command Class should be persisted across
   resets by storing the state into the NVM.
+documentation:
+  docset: z-wave
+  document: zwave-api/multilevel-switch
+
 package: zwave
 quality: production
 metadata:

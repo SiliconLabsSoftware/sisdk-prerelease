@@ -55,13 +55,15 @@ class CALC_Misc(ICalculator):
         self._addModelVariable(model, 'stack_info', int, ModelVariableFormat.DECIMAL,
                                desc='information dedicated to stack', is_array=True)
 
+        self._addModelVariable(model, 'phy_mode_id', int, ModelVariableFormat.DECIMAL,
+                               desc='PHY mode ID', is_array=False)
+
 
     def _build_misc_regs(self, model):
         self._addModelRegister(model, 'MODEM.CTRL0.FRAMEDETDEL', int, ModelVariableFormat.HEX)
 
         self._addModelRegister(model, 'MODEM.CTRL1.SYNC1INV', int, ModelVariableFormat.HEX)
 
-        # FIXME: amtudave: Restore the conditional after tri sync detection added to sync det
         self._addModelRegister(model, 'MODEM.CTRL1.SYNCERRORS', int, ModelVariableFormat.HEX)
 
         self._addModelRegister(model, 'MODEM.CTRL2.BRDIVA', int, ModelVariableFormat.HEX)
@@ -112,30 +114,23 @@ class CALC_Misc(ICalculator):
 
         self._reg_write(model.vars.SEQ_MISC_SQBMODETX, 0)
 
-    #Disable dynamic slicer on Dumbo by default
     def calc_dynamic_slicer_sw_en(self, model):
         model.vars.dynamic_slicer_enabled.value = False
 
-    #If someone enables dynamic slicing then use a simple schedule by default (can be overridden)
-    #This is a very rough guess and may not work with some PHY configurations, hence disabling the feature by default
     def calc_dynamic_slicer_values(self, model):
 
-        # Check if this feature is enabled
         if model.vars.dynamic_slicer_enabled.value == True:
             slicer_level = model.vars.ook_slicer_level.value
 
-            #Calculate the slicing schedule
             model.vars.dynamic_slicer_level_values.value=[slicer_level,5,10]
             model.vars.dynamic_slicer_threshold_values.value = [-65,-35]
 
-            # Finally, set the register field to let the firmware know this feature is enabled
             model.vars.SEQ_MISC_DYNAMIC_SLICER_SW_EN.value = 1
         else:
             model.vars.SEQ_MISC_DYNAMIC_SLICER_SW_EN.value = 0
 
     def calc_in_2fsk_opt_scope(self, model):
 
-        # This function determines if a PHY is in 2FSK optimization scope
 
         modulation_type = model.vars.modulation_type.value
         antdivmode = model.vars.antdivmode.value
@@ -158,6 +153,11 @@ class CALC_Misc(ICalculator):
     def calc_protocol_id(self, model):
         model.vars.protocol_id.value = model.vars.protocol_id.var_enum.Custom
 
+    def calc_phy_mode_id(self, model):
+        model.vars.phy_mode_id.value = 0
+
     def calc_stack_info(self, model):
         protocol_id = model.vars.protocol_id.value
-        model.vars.stack_info.value = [int(protocol_id), 0]
+        phy_mode_id = model.vars.phy_mode_id.value
+
+        model.vars.stack_info.value = [int(protocol_id), phy_mode_id]

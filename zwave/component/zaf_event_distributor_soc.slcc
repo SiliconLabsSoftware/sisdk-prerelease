@@ -5,6 +5,10 @@ description: >
   It includes the event distributor needed by System on a Chip (SOC) Applications. It can handle
   invalid states (e.g. maximum node inclusion reached), as well as different process flows (e.g.
   learn mode or reset). It initializes some subsystems at system start, such as the EventQueue.
+documentation:
+  docset: z-wave
+  document: zwave-api/event-distributor
+
 package: zwave
 quality: production
 metadata:

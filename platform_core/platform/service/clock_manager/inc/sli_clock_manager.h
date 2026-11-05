@@ -297,6 +297,7 @@ sl_status_t sli_clock_manager_set_rf_friendly_clock_mode(bool enable);
  * @note This feature is only available with the
  *       SL_CLOCK_MANAGER_SYSCLK_OSPI_DYNAMIC_CFG_EN configuration enabled.
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CLOCK_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 bool sli_clock_manager_clock_mode_is_rf_friendly(void);
 
 #endif // defined (SL_CLOCK_MANAGER_SYSCLK_OSPI_DYNAMIC_CFG_EN) && (SL_CLOCK_MANAGER_SYSCLK_OSPI_DYNAMIC_CFG_EN == 1)

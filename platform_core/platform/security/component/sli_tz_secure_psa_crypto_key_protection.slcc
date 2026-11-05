@@ -16,8 +16,12 @@ requires:
   condition: [trustzone_nonsecure]
 - name: tz_service_psa_crypto
   condition: [trustzone_secure]
+- name: tz_common
 
 include:
+- path: inc/common
+  file_list:
+  - path: sli_tz_key_check.h
 - path: inc
   file_list:
   - path: sli_tz_secure_psa_key_protection.h

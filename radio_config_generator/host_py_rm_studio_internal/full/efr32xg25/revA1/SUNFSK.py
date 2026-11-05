@@ -1,5 +1,4 @@
 
-# -*- coding: utf-8 -*-
 
 __all__ = [ 'RM_Peripheral_SUNFSK' ]
 
@@ -12,7 +11,7 @@ class RM_Peripheral_SUNFSK(Base_RM_Peripheral):
         super(RM_Peripheral_SUNFSK, self).__init__(rmio, label,
             0xB500FC00, 'SUNFSK',
             u"",
-            ['CW', 'LEGOQPSK', 'LRSWKOFDM', 'SUNOFDM', 'SUNOQPSK'])
+            ['CW', 'LEGOQPSK', 'LRSWKOFDM', 'PROPOQPSK', 'SUNOFDM', 'SUNOQPSK'])
         self.CFG1 = RM_Register_SUNFSK_CFG1(self.zz_rmio, self.zz_label)
         self.zz_rdict['CFG1'] = self.CFG1
         self.CFG2 = RM_Register_SUNFSK_CFG2(self.zz_rmio, self.zz_label)

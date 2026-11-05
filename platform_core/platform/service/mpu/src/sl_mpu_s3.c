@@ -37,6 +37,7 @@
 #include <math.h>
 #include <stdbool.h>
 
+#include "sl_log_helper.h"
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
 #endif
@@ -229,184 +230,217 @@ void sl_mpu_disable_execute_from_ram(void)
 
     if (DMEM_RAMFUNC_SPILL_BEGIN > (uint32_t)DMEM_MEM_BASE) {
       status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-      EFM_ASSERT(status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+      (void)status;
       status = sl_mpa_manager_configure_region(temp_region_handle,
                                                (void *)DMEM_MEM_BASE,
                                                (size_t)(DMEM_RAMFUNC_SPILL_BEGIN - (uint32_t)DMEM_MEM_BASE),
                                                SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-      EFM_ASSERT(status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+      (void)status;
     }
 
     status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
     status = sl_mpa_manager_configure_region(temp_region_handle,
                                              (void *)DMEM_RAMFUNC_SPILL_BEGIN,
                                              (size_t)DMEM_RAMFUNC_SPILL_SIZE,
                                              SL_MPA_MANAGER_ATTRIBUTE_READ_ONLY);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
 
     if (DMEM_RAMFUNC_SPILL_END < dmem_end) {
       status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-      EFM_ASSERT(status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
       status = sl_mpa_manager_configure_region(temp_region_handle,
                                                (void *)DMEM_RAMFUNC_SPILL_END,
                                                (size_t)(dmem_end - DMEM_RAMFUNC_SPILL_END),
                                                SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-      EFM_ASSERT(status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+      (void)status;
     }
   } else {
     status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
     status = sl_mpa_manager_configure_region(temp_region_handle,
                                              (void*)DMEM_MEM_BASE,
                                              (size_t)DMEM_MAX_SIZE,
                                              SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
   }
   #endif /* defined(DMEM_MEM_BASE) */
 
   #if defined(ITCM_BASE)
   // Configure ITCM as fully read-only.
   status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   status = sl_mpa_manager_configure_region(temp_region_handle,
                                            (void*)ITCM_BASE,
                                            (size_t)ITCM_MAX_SIZE,
                                            SL_MPA_MANAGER_ATTRIBUTE_READ_ONLY);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   #endif /* defined(ITCM_BASE) */
 
   #if defined(DTCM_BASE)
   // Configure DTCM as fully non-executable.
   status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   status = sl_mpa_manager_configure_region(temp_region_handle,
                                            (void*)DTCM_BASE,
                                            (size_t)DTCM_MAX_SIZE,
                                            SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   #endif /* defined(DTCM_BASE) */
 
   if ( RAMFUNC_SECTION_SIZE > 0 ) {
     // Configure address range before the RAMFUNC section as non-executable.
     status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
     status = sl_mpa_manager_configure_region(temp_region_handle,
                                              (void*)RAMFUNC_MEM_BASE,
                                              (size_t)(RAMFUNC_SECTION_BEGIN - RAMFUNC_MEM_BASE),
                                              SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
 
     #if !defined(ITCM_BASE)
     // Configure the RAMFUNC section as read-only in the non-aliased SRAM, since
     // it is possible to modify RAM functions from that address space to
     // conduct code injection attacks.
     status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
     status = sl_mpa_manager_configure_region(temp_region_handle,
                                              (void*)RAMFUNC_SECTION_NON_ALIASED_BEGIN,
                                              (size_t)RAMFUNC_SECTION_SIZE,
                                              SL_MPA_MANAGER_ATTRIBUTE_READ_ONLY);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
     #endif /* !defined(ITCM_BASE) */
 
     // Configure address range after the RAMFUNC section as non-executable.
     status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
     status = sl_mpa_manager_configure_region(temp_region_handle,
                                              (void*)RAMFUNC_SECTION_END,
                                              (size_t)(RAMFUNC_MEM_END - RAMFUNC_SECTION_END),
                                              SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
   } else {
     // When there are no RAM functions, configure the entire range to be non-executable.
     status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
     status = sl_mpa_manager_configure_region(temp_region_handle,
                                              (void*)RAMFUNC_MEM_BASE,
                                              (size_t)RAMFUNC_MEM_SIZE,
                                              SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
   }
 
   #if (RAMFUNC_SECTION_IS_IN_SRAM_ALIAS == 1)
   // Configure SRAM as fully non-executable.
   status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   status = sl_mpa_manager_configure_region(temp_region_handle,
                                            (void*)SRAM_BASE,
                                            (size_t)SRAM_SIZE,
                                            SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   #elif defined(SRAM_ALIAS_BASE)
   // Configure SRAM_ALIAS as fully non-executable.
   status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   status = sl_mpa_manager_configure_region(temp_region_handle,
                                            (void*)SRAM_ALIAS_BASE,
                                            (size_t)SRAM_SIZE,
                                            SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   #endif
 
   #if defined(SRAM_ALTERNATE_TZ_BASE)
   // Configure alternate TrustZone address space of DMEM as fully
   // non-executable.
   status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   status = sl_mpa_manager_configure_region(temp_region_handle,
                                            (void*)SRAM_ALTERNATE_TZ_BASE,
                                            (size_t)SRAM_SIZE,
                                            SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   #endif /* defined(SRAM_ALTERNATE_TZ_BASE) */
 
   #if defined(SRAM_ALIAS_ALTERNATE_TZ_BASE)
   // Configure alternate TrustZone address space of DMEM_ALIAS as fully
   // non-executable.
   status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   status = sl_mpa_manager_configure_region(temp_region_handle,
                                            (void*)SRAM_ALIAS_ALTERNATE_TZ_BASE,
                                            (size_t)SRAM_SIZE,
                                            SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   #endif /* defined(SRAM_ALIAS_ALTERNATE_TZ_BASE) */
 
   #if defined(DMEM_MEM_ALTERNATE_TZ_BASE)
   // Configure alternate TrustZone address space of DMEM as fully
   // non-executable.
   status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   status = sl_mpa_manager_configure_region(temp_region_handle,
                                            (void*)DMEM_MEM_ALTERNATE_TZ_BASE,
                                            (size_t)DMEM_MAX_SIZE,
                                            SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   #endif /* defined(DMEM_MEM_ALTERNATE_TZ_BASE) */
 
   #if defined(ITCM_ALTERNATE_TZ_BASE)
   // Configure alternate TrustZone address space of ITCM as fully
   // non-executable.
   status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   status = sl_mpa_manager_configure_region(temp_region_handle,
                                            (void*)ITCM_ALTERNATE_TZ_BASE,
                                            (size_t)ITCM_MAX_SIZE,
                                            SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   #endif /* defined(ITCM_ALTERNATE_TZ_BASE) */
 
   #if defined(DTCM_ALTERNATE_TZ_BASE)
   // Configure alternate TrustZone address space of DTCM as fully
   // non-executable.
   status = sl_mpa_manager_alloc_region_handle(&temp_region_handle);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   status = sl_mpa_manager_configure_region(temp_region_handle,
                                            (void*)DTCM_ALTERNATE_TZ_BASE,
                                            (size_t)DTCM_MAX_SIZE,
                                            SL_MPA_MANAGER_ATTRIBUTE_NON_EXECUTABLE);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   #endif /* defined(DTCM_ALTERNATE_TZ_BASE) */
 #endif /* !defined(SL_RAM_LINKER) */
 }

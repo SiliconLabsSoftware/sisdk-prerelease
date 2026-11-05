@@ -3,8 +3,10 @@ package: platform_core
 label: ASN.1 Parsing
 description: >-
   This component provides support for ASN.1 parsing and writing using Mbed TLS.
+  This component is DEPRECATED and is replaced by a set of components including
+  mbedtls_asn1_parse and mbedtls_asn1_write.
 category: Platform|Security|Mbed TLS|Upper Layer
-quality: production
+quality: deprecated
 provides:
 - name: mbedtls_asn1
 requires:

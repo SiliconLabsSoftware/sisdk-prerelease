@@ -7,9 +7,12 @@ from pyradioconfig.parts.common.profiles.profile_modem import *
 
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfile
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
+from pycalcmodel.core.common import IPCategory
 
 
 class Profile_Sigfox_TX(IProfile):
+
+    ip_category = IPCategory.LPW
 
     def __init__(self):
         self._profileName = "Sigfox_TX"
@@ -29,27 +32,19 @@ class Profile_Sigfox_TX(IProfile):
 
         family = self._family
 
-        # Build profile
         profile = self._makeProfile(model)
 
-        # Add required and optional inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
 
-        #Frame configuration inputs
         self.build_frame_configuration_inputs(model, profile)
 
-        # Sigfox profile does not include advanced inputs, but we do need an output for IR cal power level for rail_scripts to consume
-        # So add that here. It will default to 0 (which triggers to change to IR cal).
         profile.outputs.append(ModelOutput(model.vars.ircal_power_level, '', ModelOutputType.RAIL_CONFIG, readable_name='IR cal power level (amplitude)'))
 
-        # Informational Output
         buildModemInfoOutputs(model, profile)
 
-        # RAIL Outputs
         buildRailOutputs(model, profile)
 
-        # Output fields
         buildFrameOutputs(model, profile)
         buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
@@ -69,26 +64,18 @@ class Profile_Sigfox_TX(IProfile):
 
         build_ircal_sw_vars(model, profile)
 
-        # The above code is really just a copy/paste of the Base profile with some inputs commnted out.
-        # It should be diff'ed against the Base profile for accuracy.
-        # Now set default values for all of the above inputs.  Assume any defaults above
-        # were just copy/pasted from the base profile and set the correct values here
 
-        # Modem related input defaults
         profile.inputs.bitrate.value_limit_min = 100
         profile.inputs.bitrate.value_limit_max = 600
         profile.inputs.xtal_frequency_hz.default = 38400000
         profile.inputs.preamble_length.default = 16
 
-        # Frame configuration related defaults
 
-        # Packet Inputs
         profile.inputs.frame_bitendian.default = model.vars.frame_bitendian.var_enum.LSB_FIRST
         profile.inputs.frame_length_type.default = model.vars.frame_length_type.var_enum.VARIABLE_LENGTH
         profile.inputs.payload_white_en.default = False
         profile.inputs.payload_crc_en.default = True
 
-        # Variable length includes header
         profile.inputs.header_en.default = True
         profile.inputs.header_size.default = 1
         profile.inputs.header_calc_crc.default = False
@@ -102,7 +89,6 @@ class Profile_Sigfox_TX(IProfile):
         profile.inputs.var_length_includecrc.default = True
         profile.inputs.var_length_adjust.default = 0
 
-        # CRC Inputs
         profile.inputs.crc_poly.default = model.vars.crc_poly.var_enum.CCITT_16
         profile.inputs.crc_seed.default = long(0x00000000)
         profile.inputs.crc_input_order.default = model.vars.crc_input_order.var_enum.LSB_FIRST
@@ -112,7 +98,6 @@ class Profile_Sigfox_TX(IProfile):
         profile.inputs.crc_invert.default = False
 
 
-        # Misc default inputs that now have to be forced
         profile.inputs.fec_en.default = model.vars.fec_en.var_enum.NONE
         profile.inputs.fixed_length_size.default = 1
 
@@ -203,7 +188,6 @@ class Profile_Sigfox_TX(IProfile):
         model.vars.timing_sample_threshold.value_forced = 0
         model.vars.number_of_timing_windows.value_forced = 0
         model.vars.timing_detection_threshold.value_forced = 75
-        #profile.outputs.SEQ_SYNTHLPFCTRLTX_SYNTHLPFCTRLTX.override = 0x3C00F
         model.vars.pll_bandwidth_tx.value_forced = model.vars.pll_bandwidth_tx.var_enum.BW_3000KHz
         model.vars.asynchronous_rx_enable.value_forced = False
 

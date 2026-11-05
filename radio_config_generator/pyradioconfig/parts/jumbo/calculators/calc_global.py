@@ -18,19 +18,16 @@ class CALC_Global_jumbo(CALC_Global):
 
     def buildVariables(self, model):
 
-        # Build variables from the global calculations
         super().buildVariables(model)
 
-        # Add register groups
         self._add_SHAPING_regs(model)
         self._add_PREDIST_regs(model)
 
-        # Internal variable
         self._addModelVariable(model, 'src1',                 int,   ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'src2',                 int,   ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'bwsel',                float, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'if_center_analog_hz',  int,   ModelVariableFormat.DECIMAL)
-        if model.part_family.lower() in ["jumbo","nerio","nixi","lynx","panther","leopard","caracal","lion"]:
+        if model.part_family.lower() in ["jumbo","nerio","nixi","lynx","panther","leopard","caracal","lionu", "lion"]:
             self._addModelVariable(model, 'viterbi_enable',       bool,  ModelVariableFormat.DECIMAL, desc='Enable Viterbi demodulator')
         self._addModelVariable(model, 'dsa_enable',           bool,  ModelVariableFormat.DECIMAL, desc='Disable DSA')
         self._addModelVariable(model, 'target_osr',           int, ModelVariableFormat.DECIMAL, desc='Target oversampling rate')
@@ -82,7 +79,6 @@ class CALC_Global_jumbo(CALC_Global):
             'List of supported AFC Run Modes',
             member_data)
 
-        # Variables for the reverse path
         self._addModelActual(model,   'src1_ratio',                       float, ModelVariableFormat.DECIMAL)
         self._addModelActual(model,   'src2_ratio',                       float, ModelVariableFormat.DECIMAL)
         self._addModelActual(model,   'bwsel',                            float, ModelVariableFormat.DECIMAL)

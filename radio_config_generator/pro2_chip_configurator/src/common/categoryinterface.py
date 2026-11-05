@@ -16,14 +16,8 @@ class CategoryInterface(object):
     def get_options(self):
         return self.__dict__
     
-    # set_option() returns the 'coerced' value. 'Coercion' can be multi-faceted since the parameter 'value'
-    # could be of completely type from that of what's behind the option. Any derived class that implements this
-    # method needs to have this in mind.
     def set_option(self, option, value):
         
-#             return
-        # getattr() will throw AttributeError if the option does 
-        # not exist
         opt = getattr(self, option)
         opt_type = type(opt)
         if type(opt) is type(value):

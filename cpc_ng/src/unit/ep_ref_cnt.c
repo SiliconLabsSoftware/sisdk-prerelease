@@ -88,7 +88,7 @@ TEST(cpc_ep_ref_cnt, listen_then_close_notifies_closed)
   TEST_ASSERT_BIT_HIGH(SL_CPC_EP_EVENT_CLOSED, cpc_test_event_mask);
   TEST_ASSERT_EQUAL(SLI_CPC_STATE_CLOSED, ep.state);
 
-  sl_cpc_ep_deinit(&ep);
+  TEST_ASSERT_EQUAL(SL_STATUS_OK, sl_cpc_ep_deinit(&ep));
 }
 
 /**

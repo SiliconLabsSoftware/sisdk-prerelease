@@ -35,7 +35,7 @@
 #include "sli_power_manager_log.h"
 #include "sli_sleeptimer.h"
 #include "sli_clock_manager.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_atomic.h"
 #include "sl_clock_manager.h"
 
@@ -470,7 +470,7 @@ void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
                                              bool add)
 {
   // EM0 and EM3 aren't allowed.
-  EFM_ASSERT((em > SL_POWER_MANAGER_EM0) && (em < SL_POWER_MANAGER_EM3));
+  SL_LOG_DEBUG_ASSERT((em > SL_POWER_MANAGER_EM0) && (em < SL_POWER_MANAGER_EM3));
 
   if (em == SL_POWER_MANAGER_EM2) {
     // Do nothing when adding a requirement on EM2.
@@ -478,12 +478,12 @@ void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
   }
 
   // Cannot increment above 255 (wraparound not allowed)
-  EFM_ASSERT(!((requirement_em1 == UINT8_MAX) && (add == true)));
+  SL_LOG_DEBUG_ASSERT(!((requirement_em1 == UINT8_MAX) && (add == true)));
   if ((requirement_em1 == UINT8_MAX) && (add == true)) {
     return;
   }
   // Cannot decrement below 0 (wraparound not allowed)
-  EFM_ASSERT(!((requirement_em1 == 0) && (add == false)));
+  SL_LOG_DEBUG_ASSERT(!((requirement_em1 == 0) && (add == false)));
   if ((requirement_em1 == 0) && (add == false)) {
     return;
   }
@@ -535,19 +535,19 @@ void sli_power_manager_update_hf_clock_settings_preservation_requirement(bool ad
 
   CORE_ENTER_CRITICAL();
   // Cannot increment above 255 (wraparound not allowed)
-  EFM_ASSERT(!((requirement_high_accuracy_hf_clock_counter == UINT8_MAX) && (add == true)));
+  SL_LOG_DEBUG_ASSERT(!((requirement_high_accuracy_hf_clock_counter == UINT8_MAX) && (add == true)));
   if ((requirement_high_accuracy_hf_clock_counter == UINT8_MAX) && (add == true)) {
     CORE_EXIT_CRITICAL();
     return;
   }
   // Cannot decrement below 0 (wraparound not allowed)
-  EFM_ASSERT(!((requirement_high_accuracy_hf_clock_counter == 0) && (add == false)));
+  SL_LOG_DEBUG_ASSERT(!((requirement_high_accuracy_hf_clock_counter == 0) && (add == false)));
   if ((requirement_high_accuracy_hf_clock_counter == 0) && (add == false)) {
     CORE_EXIT_CRITICAL();
     return;
   }
   // Cannot add requirement if the "normal" clock settings are not currently applied
-  EFM_ASSERT(!((current_em > SL_POWER_MANAGER_EM2) && (add == true)));
+  SL_LOG_DEBUG_ASSERT(!((current_em > SL_POWER_MANAGER_EM2) && (add == true)));
 
   // Increment (add) or decrement (remove) energy mode counter.
   requirement_high_accuracy_hf_clock_counter += add ? 1 : -1;
@@ -918,7 +918,7 @@ static void evaluate_wakeup(sl_power_manager_em_t to)
           sl_atomic_load(cfg_overhead_tick, wakeup_time_config_overhead_tick);
           wakeup_delay += cfg_overhead_tick;
           wakeup_delay += sli_power_manager_get_wakeup_process_time_overhead();
-          EFM_ASSERT(wakeup_delay >= 0);
+          SL_LOG_DEBUG_ASSERT(wakeup_delay >= 0);
           if (tick_remaining <= (uint32_t)wakeup_delay) {
             // Add EM1 requirement if time remaining is smaller than wake-up delay.
             update_em1_requirement(true);
@@ -951,7 +951,7 @@ static void evaluate_wakeup(sl_power_manager_em_t to)
       break;
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
   }
 }
 #endif
@@ -974,12 +974,12 @@ static void evaluate_wakeup(sl_power_manager_em_t to)
 static void update_em1_requirement(bool add)
 {
   // Cannot increment above 255 (wraparound not allowed)
-  EFM_ASSERT(!((requirement_em1 == UINT8_MAX) && (add == true)));
+  SL_LOG_DEBUG_ASSERT(!((requirement_em1 == UINT8_MAX) && (add == true)));
   if ((requirement_em1 == UINT8_MAX) && (add == true)) {
     return;
   }
   // Cannot decrement below 0 (wraparound not allowed)
-  EFM_ASSERT(!((requirement_em1 == 0) && (add == false)));
+  SL_LOG_DEBUG_ASSERT(!((requirement_em1 == 0) && (add == false)));
   if ((requirement_em1 == 0) && (add == false)) {
     return;
   }

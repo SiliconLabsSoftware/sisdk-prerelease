@@ -41,6 +41,20 @@ openapi_validated = FlaskOpenAPIViewDecorator(openapi)
 _EXECUTION_LOGGER_NAMES = ('executor', 'wisunpki')
 
 
+def _background_python_executable():
+    """Interpreter used to daemonize the HTTP server.
+
+    On Windows prefer pythonw.exe that avoids creating a console window.
+    """
+    if sys.platform == "win32":
+        exe = Path(sys.executable)
+        if exe.name.lower() == "python.exe":
+            pythonw = exe.with_name("pythonw.exe")
+            if pythonw.is_file():
+                return str(pythonw)
+    return sys.executable
+
+
 class WebSocketLogHandler(logging.Handler):
     """Captures log records and sends them to a callback (e.g. WebSocket) without modifying executor/wisunpki."""
 
@@ -263,7 +277,7 @@ class HttpServer:
         @self.app.route('/pki/ca', methods=['GET'])
         @openapi_validated
         def get_pki():
-            ret = executor.get_pki()
+            ret = executor.get_pki(**request.openapi.parameters.query)
             print(ret)
             if ret:
                 return jsonify(ret), 200
@@ -429,8 +443,12 @@ class HttpServer:
         try:
             if sys.platform == "win32":
                 # Windows
-                result = subprocess.run(['tasklist', '/FI', f'PID eq {pid}'],
-                                      capture_output=True, text=True)
+                result = subprocess.run(
+                    ['tasklist', '/FI', f'PID eq {pid}'],
+                    capture_output=True,
+                    text=True,
+                    creationflags=subprocess.CREATE_NO_WINDOW,
+                )
                 return str(pid) in result.stdout
             else:
                 # Unix-like systems
@@ -485,7 +503,12 @@ class HttpServer:
         try:
             if sys.platform == "win32":
                 # Windows - use netstat to find what's using the port
-                result = subprocess.run(['netstat', '-ano'], capture_output=True, text=True)
+                result = subprocess.run(
+                    ['netstat', '-ano'],
+                    capture_output=True,
+                    text=True,
+                    creationflags=subprocess.CREATE_NO_WINDOW,
+                )
                 lines = result.stdout.split('\n')
                 for line in lines:
                     if f':{port}' in line and 'LISTENING' in line:
@@ -494,8 +517,12 @@ class HttpServer:
                             pid = parts[-1]
                             # Try to get process name
                             try:
-                                proc_result = subprocess.run(['tasklist', '/FI', f'PID eq {pid}'],
-                                                           capture_output=True, text=True)
+                                proc_result = subprocess.run(
+                                    ['tasklist', '/FI', f'PID eq {pid}'],
+                                    capture_output=True,
+                                    text=True,
+                                    creationflags=subprocess.CREATE_NO_WINDOW,
+                                )
                                 proc_lines = proc_result.stdout.split('\n')
                                 for proc_line in proc_lines:
                                     if pid in proc_line:
@@ -558,22 +585,22 @@ class HttpServer:
         # Check if the requested port is available (unless forced)
         if not force and not self.is_port_available():
             port_usage = self.get_port_usage_info()
-            print(f"⚠️  Port {self.port} is already in use (used by: {port_usage})")
+            print(f"Port {self.port} is already in use (used by: {port_usage})")
 
             # Automatically find and use an alternative port
             alternative_port = self.find_available_port(self.port + 1)
             if alternative_port:
-                print(f"🔄 Automatically switching to port {alternative_port}")
+                print(f"Automatically switching to port {alternative_port}")
                 self.port = alternative_port
             else:
-                print("❌ No alternative ports found in the range")
+                print("No alternative ports found in the range")
                 print("   Try specifying a different port with --port <number>")
-                print("💡 Tip: Use --force to override port protection")
+                print("Tip: Use --force to override port protection")
                 return False
         elif force and not self.is_port_available():
             port_usage = self.get_port_usage_info()
-            print(f"⚠️  Warning: Port {self.port} is busy (used by: {port_usage})")
-            print(f"🔧 Force mode enabled - attempting to start anyway...")
+            print(f"Warning: Port {self.port} is busy (used by: {port_usage})")
+            print(f"Force mode enabled - attempting to start anyway...")
 
         print(f"Starting production server on {self.host}:{self.port}...")
 
@@ -587,7 +614,7 @@ class HttpServer:
         script_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), 'server.py')
         cmd = [
-            sys.executable, script_path, '_run_server',
+            _background_python_executable(), script_path, '_run_server',
             '--host', self.host, '--port', str(self.port),
             '--cwd', os.path.abspath(self.cwd),
         ]
@@ -600,23 +627,24 @@ class HttpServer:
             'close_fds': True,
         }
         if sys.platform == "win32":
-            popen_kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
+            popen_kwargs['creationflags'] = (
+                subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP)
         else:
             popen_kwargs['start_new_session'] = True
         try:
             subprocess.Popen(cmd, **popen_kwargs)
         except OSError as exc:
-            print(f"❌ Failed to start server process: {exc}")
+            print(f"Failed to start server process: {exc}")
             return False
 
         if not self._wait_for_server_start():
-            print("❌ Failed to start server process (timeout)")
+            print("Failed to start server process (timeout)")
             if force:
                 print("   This might be due to the port conflict that was ignored")
             return False
 
-        print(f"✅ Server started successfully")
-        print(f"🌐 Access it at: http://{self.host}:{self.port}")
+        print(f"Server started successfully")
+        print(f"Access it at: http://{self.host}:{self.port}")
         # This is the trigger line for the UI
         print(
             f"WISUN_DDP_READY|{{\"host\":\"{self.host}\",\"port\":{self.port}}}", flush=True)
@@ -659,7 +687,7 @@ class HttpServer:
                 if sys.platform == "win32":
                     # Use Waitress for Windows (and as fallback)
                     from waitress import serve
-                    print(f"Starting production server (Waitress) with WebSocket support on {self.host}:{self.port}")
+                    print(f"Starting production server (Waitress) with Socket.IO polling on {self.host}:{self.port}")
                     serve(self.app, host=self.host, port=self.port)
                 else:
                     # Try eventlet-based SocketIO server for Unix systems, fallback to Waitress
@@ -683,7 +711,7 @@ class HttpServer:
                         from waitress import serve
                         print(f"Falling back to Waitress server on {self.host}:{self.port}")
                         print("Note: WebSocket will use polling fallback")
-                        serve(self.socketio, host=self.host, port=self.port)
+                        serve(self.app, host=self.host, port=self.port)
             except ImportError as e:
                 print(f"Error: Production server not available: {e}")
                 print("Please install dependencies with: pip install eventlet")
@@ -717,7 +745,11 @@ class HttpServer:
         try:
             if sys.platform == "win32":
                 # Windows
-                subprocess.run(['taskkill', '/F', '/PID', str(pid)], check=True)
+                subprocess.run(
+                    ['taskkill', '/F', '/PID', str(pid)],
+                    check=True,
+                    creationflags=subprocess.CREATE_NO_WINDOW,
+                )
             else:
                 # Unix-like systems
                 os.kill(pid, signal.SIGTERM)
@@ -748,15 +780,15 @@ class HttpServer:
         print(f"Checking port {port} on {host}...")
 
         if self.is_port_available(host, port):
-            print(f"✅ Port {port} is available")
+            print(f"Port {port} is available")
             return True
         else:
             port_usage = self.get_port_usage_info(host, port)
-            print(f"❌ Port {port} is busy")
+            print(f"Port {port} is busy")
             print(f"   Used by: {port_usage}")
 
             # Suggest alternatives
-            print(f"\n🔍 Looking for alternative ports...")
+            print(f"\nLooking for alternative ports...")
             alternatives = []
             for i in range(1, 11):
                 alt_port = port + i
@@ -766,9 +798,9 @@ class HttpServer:
                         break
 
             if alternatives:
-                print(f"💡 Available alternatives: {', '.join(map(str, alternatives))}")
+                print(f"Available alternatives: {', '.join(map(str, alternatives))}")
             else:
-                print("❌ No nearby alternatives found")
+                print("No nearby alternatives found")
 
             return False
 
@@ -793,9 +825,9 @@ class HttpServer:
 
             # Also check if the port is still available (someone else might have taken it)
             if not self.is_port_available(pid_info['host'], pid_info['port']):
-                print("✅ Port is properly bound")
+                print("Port is properly bound")
             else:
-                print("⚠️  Warning: Port appears to be available (server might not be listening)")
+                print("Warning: Port appears to be available (server might not be listening)")
 
             return True
         else:

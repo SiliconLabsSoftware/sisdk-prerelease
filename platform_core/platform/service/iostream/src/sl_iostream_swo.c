@@ -33,6 +33,7 @@
 #include "sl_debug_swo.h"
 #include "sl_iostream_swo_config.h"
 #include "sl_code_classification.h"
+#include "sl_log_helper.h"
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
@@ -129,7 +130,7 @@ sl_status_t sl_iostream_swo_init(void)
   m_attr.name = "SWO Component Lock";
 
   swo_context.lock = osMutexNew(&m_attr);
-  EFM_ASSERT(swo_context.lock != NULL);
+  SL_LOG_DEBUG_ASSERT(swo_context.lock != NULL);
   // Save context reference in SWO stream object
   sl_iostream_swo.context = &swo_context;
 #endif
@@ -159,7 +160,9 @@ sl_status_t sl_iostream_swo_deinit(void)
   }
 
   // Delete Mutex
-  EFM_ASSERT(osMutexDelete(swo_context.lock) == osOK);
+  osStatus_t os_status = osMutexDelete(swo_context.lock);
+  SL_LOG_DEBUG_ASSERT(os_status == osOK);
+  (void)os_status;
 #endif
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
@@ -248,7 +251,8 @@ static sl_status_t swo_write(void *context,
   if (osKernelGetState() == osKernelRunning) {
     // Bypass lock if we print before the kernel is running
     os_status = osMutexRelease(swo_context->lock);
-    EFM_ASSERT(os_status == osOK || os_status == osErrorISR);
+    SL_LOG_DEBUG_ASSERT(os_status == osOK || os_status == osErrorISR);
+    (void)os_status;
   }
 #endif
 
@@ -263,7 +267,8 @@ static void sli_iosteam_swo_em_transition(sl_power_manager_em_t from,
                                           sl_power_manager_em_t to)
 {
   (void)to;
-  EFM_ASSERT(from == SL_POWER_MANAGER_EM0);
+  SL_LOG_DEBUG_ASSERT(from == SL_POWER_MANAGER_EM0);
+  (void)from;
   while (ITM->TCR & ITM_TCR_BUSY_Msk) ;
 }
 #endif

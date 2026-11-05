@@ -482,8 +482,9 @@ RAIL_ENUM(RAIL_PacketTimePosition_t) {
    * Request the time stamp corresponding to the first preamble bit
    * sent or received.
    * Indicate that time stamp did require using totalPacketBytes or
-   * packetDurationUs if totalPacketBytes was set to \ref
-   * RAIL_RX_STARTED_BYTES.
+   * packetDurationUs (when totalPacketBytes was \ref
+   * RAIL_RX_STARTED_BYTES, or for SUN OFDM / SUN OQPSK / PROP OQPSK
+   * RX which always adjust using packetDurationUs).
    *
    * @deprecated RAIL 2.x synonym of \ref SL_RAIL_PACKET_TIME_AT_PREAMBLE_START_USED_TOTAL.
    */
@@ -500,8 +501,9 @@ RAIL_ENUM(RAIL_PacketTimePosition_t) {
    * Request the time stamp corresponding to right after its last
    * SYNC word bit has been sent or received.
    * Indicate that time stamp did require using totalPacketBytes or
-   * packetDurationUs if totalPacketBytes was set to \ref
-   * RAIL_RX_STARTED_BYTES.
+   * packetDurationUs (when totalPacketBytes was \ref
+   * RAIL_RX_STARTED_BYTES, or for SUN OFDM / SUN OQPSK / PROP OQPSK
+   * RX which always adjust using packetDurationUs).
    *
    * @deprecated RAIL 2.x synonym of \ref SL_RAIL_PACKET_TIME_AT_SYNC_END_USED_TOTAL.
    */
@@ -572,6 +574,9 @@ typedef struct RAIL_PacketTimeStamp {
    * used when calculating the packetTime requested by the timePosition
    * field. This should account for all bytes sent over the air after
    * the Preamble and Sync word(s) including CRC bytes.
+   * @note Ignored for RX of SUN OFDM, SUN OQPSK, and PROP OQPSK; those
+   *   adjustments use \ref RAIL_PacketTimeStamp_t::packetDurationUs
+   *   instead.
    *
    * @deprecated RAIL 2.x synonym of \ref sl_rail_packet_time_stamp_t::total_packet_bytes.
    */
@@ -1232,12 +1237,27 @@ RAIL_ENUM(RAIL_TaskType_t) {
    * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TASK_TYPE_OTHER.
    */
   RAIL_TASK_TYPE_OTHER = 1,
+  /**
+   * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TASK_TYPE_RX.
+   */
+  RAIL_TASK_TYPE_RX = 2,
+  /**
+   * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TASK_TYPE_TX.
+   */
+  RAIL_TASK_TYPE_TX = 3,
+  /**
+   * @deprecated RAIL 2.x synonym of \ref SL_RAIL_TASK_TYPE_ACK.
+   */
+  RAIL_TASK_TYPE_ACK = 4,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
 #define RAIL_TASK_TYPE_START_RX ((RAIL_TaskType_t) RAIL_TASK_TYPE_START_RX)
 #define RAIL_TASK_TYPE_OTHER    ((RAIL_TaskType_t) RAIL_TASK_TYPE_OTHER)
+#define RAIL_TASK_TYPE_RX       ((RAIL_TaskType_t) RAIL_TASK_TYPE_RX)
+#define RAIL_TASK_TYPE_TX       ((RAIL_TaskType_t) RAIL_TASK_TYPE_TX)
+#define RAIL_TASK_TYPE_ACK      ((RAIL_TaskType_t) RAIL_TASK_TYPE_ACK)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /** @} */ // end of group Multiprotocol

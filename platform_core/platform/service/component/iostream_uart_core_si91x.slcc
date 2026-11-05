@@ -13,4 +13,7 @@ provides:
 - name: iostream_uart_core_si91x
 requires:
 - name: iostream
+documentation:
+  docset: gecko-platform
+  document: platform-service/iostream-uart
 root_path: platform_core

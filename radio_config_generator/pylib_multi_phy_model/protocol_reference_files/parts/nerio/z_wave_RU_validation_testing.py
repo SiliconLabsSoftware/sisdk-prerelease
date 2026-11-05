@@ -16,11 +16,6 @@ class z_wave_RU_validation_testing(IProtocol):
         base_channel_configuration.phy = phyType(phy_name)
 
         profile_input_overrides = base_channel_configuration.phy.profile_input_overrides
-        # profile_input_overrides.add_override(overrideType("bitrate", 50001))
-        # profile_input_overrides.add_override(overrideType("agc_hysteresis", ModelDiffCodes.OK.value))
-        # profile_input_overrides.add_override(overrideType("diff_encoding_mode", 'DISABLED'))
-        # profile_input_overrides.add_override(overrideType("syncword_0", long(0x904E)))
-        # profile_input_overrides.add_override(overrideType("syncword_1", long(0x7a0e)))
 
 
         channel_config_entry = channel_config_entryType(name="PHY_ZWave_40kbps_908MHz_RU_ch1",
@@ -31,17 +26,7 @@ class z_wave_RU_validation_testing(IProtocol):
                                             channel_number_start=1,
                                             channel_number_end=2,
                                             max_power=-1)
-        # input_override = overrideType("bitrate", 150000)
-        # channel_config_entry.profile_input_overrides.add_override(input_override)
-        # input_override = overrideType("base_frequency_hz", 908.40e6)
-        # channel_config_entry.profile_input_overrides.add_override(input_override)
-        # input_override = overrideType("frame_length_type", 'FIXED_LENGTH')
-        # channel_config_entry.profile_input_overrides.add_override(input_override)
-        # input_override = overrideType("fixed_length_size", 20)
-        # channel_config_entry.profile_input_overrides.add_override(input_override)
 
-        # input_override = overrideType("rx_ch_hopping_order_num", 0)
-        # channel_config_entry.profile_input_overrides.add_override(input_override)
 
         base_channel_configuration.channel_config_entries.add_channel_config_entry(channel_config_entry)
 
@@ -53,17 +38,7 @@ class z_wave_RU_validation_testing(IProtocol):
                                             channel_number_start=2,
                                             channel_number_end=3,
                                             max_power=0)
-        # input_override = overrideType("bitrate", 50002)
-        # channel_config_entry.profile_input_overrides.add_override(input_override)
-        # input_override = overrideType("base_frequency_hz", 908.42e6)
-        # channel_config_entry.profile_input_overrides.add_override(input_override)
-        # input_override = overrideType("frame_length_type", 'FIXED_LENGTH')
-        # channel_config_entry.profile_input_overrides.add_override(input_override)
-        # input_override = overrideType("fixed_length_size", 20)
-        # channel_config_entry.profile_input_overrides.add_override(input_override)
 
-        # input_override = overrideType("rx_ch_hopping_order_num", 1)
-        # channel_config_entry.profile_input_overrides.add_override(input_override)
 
         base_channel_configuration.channel_config_entries.add_channel_config_entry(channel_config_entry)
 

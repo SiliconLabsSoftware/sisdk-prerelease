@@ -412,6 +412,7 @@ sl_status_t export_asymmetric_pubkey_from_wrap(sl_se_key_type_t key_type)
                                             &plain_pubkey), &cmd_ctx);
 }
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /***************************************************************************//**
  * Generate a non-exportable asymmetric key into a volatile SE key slot.
  ******************************************************************************/
@@ -611,6 +612,7 @@ sl_status_t transfer_volatile_asymmetric_key_to_wrap(sl_se_key_type_t key_type)
   print_error_cycle(sl_se_transfer_key(&cmd_ctx, &volatile_key, &wrap_key),
                     &cmd_ctx);
 }
+#endif // defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 #endif
 
 // -----------------------------------------------------------------------------

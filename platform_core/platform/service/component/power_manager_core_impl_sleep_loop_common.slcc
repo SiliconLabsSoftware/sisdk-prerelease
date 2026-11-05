@@ -17,5 +17,7 @@ include:
 source:
 - path: sl_power_manager.c
 - path: sl_power_manager_debug.c
+requires:
+- name: log_none
 provides:
 - name: power_manager_core_impl_sleep_loop_common

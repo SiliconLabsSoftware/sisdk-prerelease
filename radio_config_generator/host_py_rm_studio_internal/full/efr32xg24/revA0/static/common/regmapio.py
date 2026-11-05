@@ -21,24 +21,26 @@ __all__ = [
 try:
     unicode = unicode
 except NameError:
-    # 'unicode' is undefined, must be Python 3
     str = str
     unicode = str
     bytes = bytes
     basestring = (str,bytes)
     long = int
 else:
-    # 'unicode' exists, must be Python 2
     str = str
     unicode = unicode
     bytes = str
     basestring = basestring
-import os
 import logging
 import logging.handlers
+from pathlib import Path
 
 from .. interface import IRegMapIO
 from .. common import RegMapAccessError, RegMapLoggingError
+
+
+reg_rw_error_kb_url = (r'https://confluence.silabs.com/spaces/LabATE/pages/840537468/'
+                       r'Debug+Knowledge+Base#DebugKnowledgeBase-Case%23001%3ARegisterreadwriteaccessfailure')
 
 
 def GetFieldValue(regValue, lsb, fsize):
@@ -154,7 +156,6 @@ class RegisterMapInterface(IRegMapIO):
         :type Dumper: T(<address>)
         :param Dumper: The read address function pointer for dumping.  To log failed reads.
         """
-        # register the reader and writer functions
         self._ReadAddress = Reader
         self._WriteAddress = Writer
         self.simulated = simulated
@@ -178,7 +179,6 @@ class RegisterMapInterface(IRegMapIO):
             self._DumpAddress = Dumper
 
     def _read(self, address, reg=None):
-        # print("Reading address {0:#010x}".format(address))
         try:
             if self._address_overrides:
                 for override in self._address_overrides.values():
@@ -189,13 +189,15 @@ class RegisterMapInterface(IRegMapIO):
                 return self._ReadAddress(address)
         except BaseException as exc:
             if reg is not None and 'ReadMem32: Failure' in exc.args[0]:
-                raise RegMapAccessError("Read Failure: Register '{}' is not accessible. Check power/clock config and "
-                                        "access restrictions to the {} peripheral.".format(reg.name, reg.pername))
+                err_msg = ("Read Failure: Register '{}' is not accessible. Check power/clock config and "
+                           "access restrictions to the {} peripheral. \nSee {} for more details."
+                           .format(reg.name, reg.pername, reg_rw_error_kb_url))
+                logging.error(err_msg)
+                raise RegMapAccessError(err_msg)
             else:
                 raise exc
 
     def _write(self, address, value, reg=None):
-        # print("Writing '{:#010x}' to address {:#010x}".format(value, address))
         try:
             if self._address_overrides:
                 for override in self._address_overrides.values():
@@ -206,8 +208,11 @@ class RegisterMapInterface(IRegMapIO):
                 return self._WriteAddress(address, value)
         except BaseException as exc:
             if reg is not None and 'WriteMem32: Failure' in exc.args[0]:
-                raise RegMapAccessError("Write Failure: Register '{}' is not accessible. Check power/clock config and "
-                                        "access restrictions to the {} peripheral.".format(reg.name, reg.pername))
+                err_msg = ("Write Failure: Register '{}' is not accessible. Check power/clock config and "
+                           "access restrictions to the {} peripheral. \nSee {} for more details."
+                           .format(reg.name, reg.pername, reg_rw_error_kb_url))
+                logging.error(err_msg)
+                raise RegMapAccessError(err_msg)
             else:
                 raise exc
 
@@ -225,11 +230,9 @@ class RegisterMapInterface(IRegMapIO):
         return self._DumpAddress(reg.baseAddress + reg.addressOffset)
 
     def readRegister(self, reg):
-        # Per LABATEPDB-642, allow reads of all access types
         return self._read(reg.baseAddress + reg.addressOffset, reg)
 
     def readRegisterField(self, reg, field):
-        # Per LABATEPDB-642, allow reads of all access types
         return GetFieldValue(self._read(reg.baseAddress + reg.addressOffset, reg),
                              field.bitOffset, field.bitWidth)
 
@@ -285,11 +288,8 @@ class RegisterMapInterface(IRegMapIO):
                                SetFieldValue(regValue, field.bitOffset, field.bitWidth, fieldValue), reg)
         elif field.access in ['write-only', 'writeOnce']:
             if reg.access in [None, 'read-only', 'read-write', 'read-writeOnce']:
-                # PSC40NMP-31, a write-only field may live in read-write register
-                # Any other write-only fields will be lost, no logger available here
                 regValue = self._read(reg.baseAddress + reg.addressOffset, reg)
             else:
-                # normal case, parent register is write-only so use zero
                 regValue = 0
             return self._write(reg.baseAddress + reg.addressOffset,
                                SetFieldValue(regValue, field.bitOffset, field.bitWidth, fieldValue), reg)
@@ -313,11 +313,8 @@ class RegisterMapInterface(IRegMapIO):
                                    SetFieldValue(0, field.bitOffset, field.bitWidth, maskValue), reg)
             else:
                 if reg.access in [None, 'read-only', 'read-write', 'read-writeOnce']:
-                    # PSC40NMP-31, a write-only field may live in read-write register
-                    # Any other write-only fields will be lost, no logger available here
                     regValue = self._read(reg.baseAddress + reg.addressOffset, reg)
                 else:
-                    # normal case, parent register is write-only so use zero
                     regValue = 0
                 fieldValue = GetFieldValue(regValue, field.bitOffset, field.bitWidth)
                 return self._write(reg.baseAddress + reg.addressOffset,
@@ -343,11 +340,8 @@ class RegisterMapInterface(IRegMapIO):
                                    SetFieldValue(0, field.bitOffset, field.bitWidth, maskValue), reg)
             else:
                 if reg.access in [None, 'read-only', 'read-write', 'read-writeOnce']:
-                    # PSC40NMP-31, a write-only field may live in read-write register
-                    # Any other write-only fields will be lost, no logger available here
                     regValue = self._read(reg.baseAddress + reg.addressOffset, reg)
                 else:
-                    # normal case, parent register is write-only so use zero
                     regValue = 0
                 fieldValue = GetFieldValue(regValue, field.bitOffset, field.bitWidth)
                 fieldValue = ((~maskValue) & (0xFFFFFFFF >> (32 - field.bitWidth))) & fieldValue
@@ -374,12 +368,9 @@ class RegisterMapInterface(IRegMapIO):
                                    SetFieldValue(0, field.bitOffset, field.bitWidth, maskValue), reg)
             else:
                 if reg.access in [None, 'read-only', 'read-write', 'read-writeOnce']:
-                    # PSC40NMP-31, a write-only field may live in read-write register
-                    # Any other write-only fields will be lost, no logger available here
                     regValue = self._read(reg.baseAddress + reg.addressOffset, reg)
                     fieldValue = GetFieldValue(regValue, field.bitOffset, field.bitWidth)
                 else:
-                    # normal case, parent register is write-only so use zero
                     regValue = 0
                     fieldValue = GetFieldValue(regValue, field.bitOffset, field.bitWidth)
                 return self._write(reg.baseAddress + reg.addressOffset,
@@ -413,9 +404,9 @@ class RegisterMapInterface(IRegMapIO):
             self.c_logger_label = logger_label
             self.c_logger = logging.getLogger(self.c_logger_label)
             self.c_logger.setLevel(logging.DEBUG)
-            dirname = os.path.dirname(logger_fn)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
+            dirname = Path(logger_fn).parent
+            if not dirname.exists():
+                dirname.mkdir(parents=True, exist_ok=True)
             handler = logging.FileHandler(logger_fn, mode='w')
             formatter = logging.Formatter("%(message)s")
             handler.setFormatter(formatter)
@@ -474,9 +465,9 @@ class RegisterMapInterface(IRegMapIO):
             self.py_logger_label = logger_label
             self.py_logger = logging.getLogger(self.py_logger_label)
             self.py_logger.setLevel(logging.DEBUG)
-            dirname = os.path.dirname(logger_fn)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
+            dirname = Path(logger_fn).parent
+            if not dirname.exists():
+                dirname.mkdir(parents=True, exist_ok=True)
             handler = logging.FileHandler(logger_fn, mode='w')
             formatter = logging.Formatter("%(message)s")
             handler.setFormatter(formatter)

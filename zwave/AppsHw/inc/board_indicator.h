@@ -12,6 +12,13 @@
 #include <stdint.h>
 
 /**
+ * @addtogroup Apps
+ * @{
+ * @addtogroup AppsHw Application Hardware Abstraction
+ * @{
+ */
+
+/**
  * Board status type
  */
 typedef enum {
@@ -73,5 +80,10 @@ bool Board_IndicatorControl(uint32_t on_time_ms,
  *                or not active at all
  */
 bool Board_IsIndicatorActive(void);
+
+/**
+ * @}
+ * @}
+ */
 
 #endif /* BOARD_INDICATOR_H_ */

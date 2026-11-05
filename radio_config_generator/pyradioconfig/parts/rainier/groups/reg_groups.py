@@ -1,17 +1,8 @@
-# Notes:
-#   * File name must be reg_groups.py
-#   * Group names, as derived from the list names
-#   * Class group MUST be named "PhyGroups"
-#   * Can use regex expressions to match group registers
-#   * Regex expression can only be at the register level
-#   * Each register output can belong to None, 1 or more groups
 
-# from .reg_groups_hack import PhyGroups as PhyGroupsBase
 
 class PhyGroups(object):
 
     rx_critical = [
-        # Double-buffered regs only
         "MODEM_CF",
         "MODEM_DIGMIXCTRL",
         "MODEM_LOG2X4",

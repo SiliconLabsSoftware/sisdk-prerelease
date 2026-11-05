@@ -50,15 +50,8 @@ void ZAF_Reset(void);
  */
 TaskHandle_t ZAF_getAppTaskHandle(void);
 
-/**
- * Makes the node stay awake for either 2 or 10 seconds.
- *
- * For an LS (listening sleeping) node, the node will stay awake for 2 seconds. If the node supports
- * CC Wake Up, it will stay awake for 10 seconds, if CC Wake Up is active.
- *
- * For RS (reporting sleeping), the node will stay awake for 10 seconds, if CC Wake Up is active.
- */
-void zaf_stay_awake(void);
+/** @deprecated Stay-awake handling is managed by the Z-Wave stack. */
+void zaf_stay_awake(void) __attribute__((deprecated("Deprecated since SDK 8.2.0. Stay-awake handling is managed by the Z-Wave stack")));
 
 /**
  * Function called when the \ref EVENT_SYSTEM_LEARNMODE_FINISHED is received

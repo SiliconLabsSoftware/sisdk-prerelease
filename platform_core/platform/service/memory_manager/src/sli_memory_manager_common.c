@@ -38,7 +38,7 @@
 #include "sl_memory_manager.h"
 #include "sli_memory_manager.h"
 #include "sli_code_classification.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_bit.h"
 #include "sl_common.h"
 
@@ -312,7 +312,7 @@ sli_block_metadata_t *sli_memory_find_head_free_block(sl_memory_heap_t *heap,
     current_block_metadata = (type == BLOCK_TYPE_LONG_TERM) ? (sli_block_metadata_t *)heap->base_addr : (sli_block_metadata_t *)heap->free_st_list_head;
   }
   // Make sure the block isn't NULL to prevent dereferencing a NULL pointer.
-  EFM_ASSERT(current_block_metadata != NULL);
+  SL_LOG_DEBUG_ASSERT(current_block_metadata != NULL);
 
   // Long-term block: find the first free block closest to the heap start.
   // Short-term block: find the first free block closest to the heap end.
@@ -393,7 +393,7 @@ sl_status_t sli_memory_create_heap(void *base_addr,
                                    sl_memory_heap_t *heap)
 {
   // Verify parameters.
-  EFM_ASSERT((base_addr != NULL)
+  SL_LOG_DEBUG_ASSERT((base_addr != NULL)
              && (size > 0)
              && (attrib <= SL_MEMORY_HEAP_ALLOC_EXTERNAL_RAM)
              && (heap != NULL));
@@ -401,7 +401,7 @@ sl_status_t sli_memory_create_heap(void *base_addr,
 #if defined(SLI_MEMORY_MANAGER_SUPPORT_ALLOCATION_FALLBACK)
   // Make sure either the general purpose heap is initialized or that it's
   // the heap being initialized.
-  EFM_ASSERT((sli_general_purpose_heap.base_addr != NULL)
+  SL_LOG_DEBUG_ASSERT((sli_general_purpose_heap.base_addr != NULL)
              || (attrib == SL_MEMORY_HEAP_ALLOC_GENERAL_RAM));
 
   // Only link to general purpose heap if it has been initialized (base_addr != NULL).
@@ -520,7 +520,7 @@ sl_memory_region_t sli_memory_heap_get_heap_region(const sl_memory_heap_t *heap)
     heap_region = sl_memory_get_dtcm_heap_region();
 #endif
   } else {
-    EFM_ASSERT(false); // Unknown heap.
+    SL_LOG_DEBUG_ASSERT(false); // Unknown heap.
   }
 
   return heap_region;
@@ -536,11 +536,12 @@ void sli_memory_create_stack(sl_memory_heap_t *heap)
 {
   void *stack;
 
-  EFM_ASSERT(heap != NULL);
+  SL_LOG_DEBUG_ASSERT(heap != NULL);
 
   // Reserve the Stack at the end of the target heap.
   sl_status_t status = sl_memory_heap_reserve_no_retention(heap, SL_STACK_SIZE, SL_MEMORY_BLOCK_ALIGN_DEFAULT, &stack);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
   // On Baremetal applications, the Stack need to be retained.
@@ -550,7 +551,8 @@ void sli_memory_create_stack(sl_memory_heap_t *heap)
 #if defined(DEBUG_EFM) || defined(DEBUG_EFM_USER)
   // Verify that the reserved block matches the Stack region.
   sl_memory_region_t region = sl_memory_get_stack_region();
-  EFM_ASSERT(stack == region.addr);
+  SL_LOG_DEBUG_ASSERT(stack == region.addr);
+  (void)region;
 #else
   (void)stack;
 #endif
@@ -813,7 +815,7 @@ void sli_memory_manager_increment_bank_counter(sl_memory_heap_t *heap,
                                                uint32_t start_id,
                                                uint32_t end_id)
 {
-  EFM_ASSERT(start_id <= end_id);
+  SL_LOG_DEBUG_ASSERT(start_id <= end_id);
   sli_retention_control_t *retention_control = (sli_retention_control_t *)heap->retention_control;
   uint16_t *banks_counter = retention_control->banks_counter;
 
@@ -831,7 +833,7 @@ void sli_memory_manager_decrement_bank_counter(sl_memory_heap_t *heap,
                                                uint32_t start_id,
                                                uint32_t end_id)
 {
-  EFM_ASSERT(start_id <= end_id);
+  SL_LOG_DEBUG_ASSERT(start_id <= end_id);
   sli_retention_control_t *retention_control = (sli_retention_control_t *)heap->retention_control;
   uint16_t *banks_counter = retention_control->banks_counter;
 

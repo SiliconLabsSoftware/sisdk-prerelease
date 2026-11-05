@@ -36,10 +36,7 @@ class CALC_Frame(ICalculator):
         """
 
         """
-        #Inputs
         """
-        #-------- General Frame Configurations --------
-        # BIT_ORDER
         var = self._addModelVariable(model, 'frame_bitendian', Enum, ModelVariableFormat.DECIMAL, 'Define how the payload bits are transmitted over the air')
         member_data = [
             ['LSB_FIRST' , 0, 'Least significant bit is transmitted first over the air'],
@@ -50,13 +47,9 @@ class CALC_Frame(ICalculator):
             'Define how the payload bits are transmitted over the air',
             member_data)
 
-        #FIRSTFRAME_BITSPERWORD
         self._addModelVariable(model, 'firstframe_bitsperword', int, ModelVariableFormat.DECIMAL, units='bits', desc='On reception, create the first received bytes from less than 8 bits. This can be used to "bitshift" the frame. Upper bits are padded with 0 in the downloaded frame.')
 
-        #UART_MODE
-        #self._addModelVariable(model, 'uart_coding', bool, ModelVariableFormat.ASCII, 'Set to true to enable uart coding of the frame.')
 
-        #FRAME_LENGTH
         var = self._addModelVariable(model, 'frame_length_type', Enum, ModelVariableFormat.DECIMAL, 'Possible Length Configurations')
         member_data = [
             ['FIXED_LENGTH' , 0, 'The frame length is fixed and never changes'],
@@ -68,50 +61,27 @@ class CALC_Frame(ICalculator):
             'List of supported frame length configurations',
             member_data)
 
-        #-------- Payload Configurations --------
-        #PAYLOAD_WHITE_EN
         self._addModelVariable(model, 'payload_white_en', bool, ModelVariableFormat.ASCII, 'Set to true to whiten the payload')
-        #PAYLOAD_CRC_EN
         self._addModelVariable(model, 'payload_crc_en', bool, ModelVariableFormat.ASCII, 'Set to true to check/transmit crc after the payload')
-        #ACCEPT_CRC_ERRORS
         self._addModelVariable(model, 'accept_crc_errors', bool, ModelVariableFormat.ASCII, 'Set to true if you want to accept invalid crcs')
 
-        # Jumbo and Nerio specific, for now we have it here to avoid adding a new different class
-        #PAYLOAD_ADDTRAILTXDATA_EN
         self._addModelVariable(model, 'payload_addtrailtxdata_en', bool, ModelVariableFormat.ASCII, 'Set to true to add Trail TX data at the end of the frame')
 
-        # Nerio specific, for now we have it here to avoid adding a new different class
-        #PAYLOAD_EXCLUDESUBFRAMEWCNT_EN
         self._addModelVariable(model, 'payload_excludesubframewcnt_en', bool, ModelVariableFormat.ASCII, 'Set to true to exclude words in the subframe from the Word Counter (WCNT), useful in Dynamic Frame Length (DFL) mode')
 
-        #-------- Header Configurations --------
-        #HEADER_ENABLE
         self._addModelVariable(model, 'header_en', bool, ModelVariableFormat.ASCII, 'Set to true to enable a distinct header from the payload.')
-        #HEADER_SIZE
         self._addModelVariable(model, 'header_size', int, ModelVariableFormat.DECIMAL, units='bytes', desc='Define the number of bytes that make up the header. Include the variable length byte(s).')
-        #HEADER_CALC_CRC
         self._addModelVariable(model, 'header_calc_crc', bool, ModelVariableFormat.ASCII, 'Set to true to include the header bytes in the payload CRC.')
-        #HEADER_INCLUDE_CRC
         self._addModelVariable(model, 'header_include_crc', bool, ModelVariableFormat.ASCII, 'Set to true to check/transmit crc specifically for the header')
-        #HEADER_WHITE_EN
         self._addModelVariable(model, 'header_white_en', bool, ModelVariableFormat.ASCII, 'Set to true to enable whitening over the header')
 
-        # Jumbo and Nerio specific, for now we have it here to avoid adding a new different class
-        #HEADER_ADDTRAILTXDATA_EN
         self._addModelVariable(model, 'header_addtrailtxdata_en', bool, ModelVariableFormat.ASCII, 'Set to true to add Trail TX data at the end of the frame')
 
-        # Nerio specific, for now we have it here to avoid adding a new different class
-        #HEADER_EXCLUDESUBFRAMEWCNT_EN
         self._addModelVariable(model, 'header_excludesubframewcnt_en', bool, ModelVariableFormat.ASCII, 'Set to true to exclude words in the subframe from the Word Counter (WCNT), useful in Dynamic Frame Length (DFL) mode')
 
-        #-------- Fixed Length Configurations --------
-        #FIXED_LENGTH_SIZE
         self._addModelVariable(model, 'fixed_length_size', int, ModelVariableFormat.DECIMAL, units='bytes', desc='Define the number of bytes in the payload. This does not include the length of the header if used. Header + Payload must be less than 4096 bytes.')
 
-        #-------- Variable Length Configurations --------
-        #VARIABLE_LENGTH_NUMBITS
         self._addModelVariable(model, 'var_length_numbits', int, ModelVariableFormat.DECIMAL, units='bits', desc='Define the size of the variable length field in bits.')
-        #VARIABLE_LENGTH_BYTEENDIAN
         var = self._addModelVariable(model, 'var_length_byteendian', Enum, ModelVariableFormat.DECIMAL, 'Define the byte endianness of the variable length field')
         member_data = [
             ['LSB_FIRST' , 0, 'The least significant byte of the variable length field is transmitted over the air first.'],
@@ -121,7 +91,6 @@ class CALC_Frame(ICalculator):
             'VarLengthByteEndian',
             'Define how the variable length byte(s) are transmitted over the air',
             member_data)
-        #VARIABLE_LENGTH_BITENDIAN
         var = self._addModelVariable(model, 'var_length_bitendian', Enum, ModelVariableFormat.DECIMAL, 'Define the bit endianness of the variable length field')
         member_data = [
             ['LSB_FIRST' , 0, 'The variable length field is transmitted least signficant bit first.'],
@@ -131,19 +100,12 @@ class CALC_Frame(ICalculator):
             'VarLengthBitEndian',
             'Define how the variable length bits are transmitted over the air',
             member_data)
-        #VARIABLE_LENGTH_SHIFT
         self._addModelVariable(model, 'var_length_shift', int, ModelVariableFormat.DECIMAL, 'Define the location of the least significant bit of the variable length field.')
-        #VARIABLE_LENGTH_MINLENGTH
         self._addModelVariable(model, 'var_length_minlength', int, ModelVariableFormat.DECIMAL, units='bytes', desc='Define the minimum value of the variable length field.')
-        #VARIABLE_LENGTH_MAXLENGTH
         self._addModelVariable(model, 'var_length_maxlength', int, ModelVariableFormat.DECIMAL, units='bytes', desc='Define the maximum value of the variable length field. Cannot exceed the variable length size.')
-        #VARIABLE_LENGTH_INCLUDECRC
         self._addModelVariable(model, 'var_length_includecrc', bool, ModelVariableFormat.ASCII, 'Set to true if the crc bytes are included in the variable length')
-        #VARIABLE_LENGTH_OFFSET
         self._addModelVariable(model, 'var_length_adjust', int, ModelVariableFormat.DECIMAL, 'Value to add to the variable length extracted from the packet when calculating the total payload length to receive.  A positive number here indicates the payload will be larger than the length value extracted from the variable length bits.')
 
-        #-------- Frame Type Configurations --------
-        #FRAME_TYPE
         self._addModelVariable(model, 'frame_type_loc', int, ModelVariableFormat.DECIMAL, 'Define the zero-based start location in the frame that holds the frame type encoding.')
         self._addModelVariable(model, 'frame_type_mask', int, ModelVariableFormat.HEX, 'Define the bitmask to extract the frame type in the byte.')
         self._addModelVariable(model, 'frame_type_bits', int, ModelVariableFormat.DECIMAL, desc='Define the number of bits of the frame type field.', units='bits')
@@ -152,8 +114,6 @@ class CALC_Frame(ICalculator):
         self._addModelVariable(model, 'frame_type_valid', bool, ModelVariableFormat.ASCII, desc='Define the valid frame types.', is_array=True)
         self._addModelVariable(model, 'frame_type_filter', bool, ModelVariableFormat.ASCII, desc='Define the frame types that should have address filtering applied.', is_array=True)
 
-        #@bug https://jira.silabs.com/browse/MCUW_RADIO_CFG-37
-        # This is a temporary measure to not use is_array
         self._addModelVariable(model, 'frame_type_0_length', int, ModelVariableFormat.DECIMAL, desc='Define the frame length of each frame type.', units='bytes')
         self._addModelVariable(model, 'frame_type_1_length', int, ModelVariableFormat.DECIMAL, desc='Define the frame length of each frame type.', units='bytes')
         self._addModelVariable(model, 'frame_type_2_length', int, ModelVariableFormat.DECIMAL, desc='Define the frame length of each frame type.', units='bytes')
@@ -184,19 +144,14 @@ class CALC_Frame(ICalculator):
         """
         Internal variables
         """
-        #VARIABLE_LENGTH_LOCATION
         self._addModelVariable(model, 'var_length_loc', int, ModelVariableFormat.DECIMAL, 'Define the zero-based start location in the header that holds the first byte of the variable length field.')
-        #VARIABLE_LENGTH_NUMBYTES
         self._addModelVariable(model, 'var_length_numbytes', int, ModelVariableFormat.DECIMAL, units='bytes', desc='Define the size of the variable length field in bytes.')
 
-        #Internal HEADER_SIZE
         self._addModelVariable(model, 'header_size_internal', int, ModelVariableFormat.DECIMAL, units='bytes', desc='Internal representation of header size. 0 for no header.')
 
-        #Internal FCDX.WORDS register size
         self._addModelVariable(model, 'fcdx_words_bitwidth', int, ModelVariableFormat.DECIMAL, units='bytes', desc='FCD_WORDS bitwidth.')
 
         """
-        #Outputs
         """
         self._build_frame_regs(model)
 
@@ -264,7 +219,6 @@ class CALC_Frame(ICalculator):
         self._reg_write(model.vars.FRC_DFLCTRL_DFLSHIFT, 0)
         self._reg_write(model.vars.FRC_DFLCTRL_DFLBITORDER, 0)
         if (model.vars.ber_force_infinite_length.value == True):
-            # Infinite length
             self._reg_write(model.vars.FRC_DFLCTRL_DFLMODE, 5)
         else:
             self._reg_write(model.vars.FRC_DFLCTRL_DFLMODE, 0)
@@ -318,7 +272,6 @@ class CALC_Frame(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        #Header Configuration
         fcdDict = {
             "excludesubframewcnt": int(model.vars.header_excludesubframewcnt_en.value == True),
             "addtrailtxdata": int(model.vars.header_addtrailtxdata_en.value == True),
@@ -328,9 +281,7 @@ class CALC_Frame(ICalculator):
             "includecrc": int(model.vars.header_include_crc.value == True),
             "words": model.vars.header_size_internal.value - 1,
         }
-        #Configure TX FCD
         self._configure_fcd(model, fcdindex="0", buf=0, **fcdDict)
-        #Configure RX FCD
         self._configure_fcd(model, fcdindex="2", buf=1, **fcdDict)
         return
 
@@ -341,12 +292,8 @@ class CALC_Frame(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # FCDX_WORDS is being set to max value. To figure out the max value, reading the bitwidth.
-        # assuming FCD0/1/2/3 will always have same bitwidth in future as well.
-        # checking the value for None in case the register does not exist (for e.g. unit_test_part)
         fcdx_words_bitwidth = model.vars.fcdx_words_bitwidth.value
 
-        #Payload Configuration
         fcdDict = {
             "excludesubframewcnt": int(model.vars.payload_excludesubframewcnt_en.value == True),
             "addtrailtxdata": int(model.vars.payload_addtrailtxdata_en.value == True),
@@ -356,9 +303,7 @@ class CALC_Frame(ICalculator):
             "includecrc": int(model.vars.payload_crc_en.value == True),
             "words": 2 ** fcdx_words_bitwidth - 1,
         }
-        #Configure TX FCD
         self._configure_fcd(model, fcdindex="1", buf=0, **fcdDict)
-        #Configure RX FCD
         self._configure_fcd(model, fcdindex="3", buf=1, **fcdDict)
         return
 
@@ -371,13 +316,10 @@ class CALC_Frame(ICalculator):
 
         self._reg_write(model.vars.FRC_WCNTCMP0_FRAMELENGTH, model.vars.fixed_length_size.value + model.vars.header_size_internal.value - 1)
 
-        #Header Configuration
         self._configure_header(model)
 
-        #Payload Configuration
         self._configure_payload_with_header(model)
 
-        #Use FCD0/2 for first subframe then FCD1/3 is used for all following subframes
         self._reg_write(model.vars.FRC_CTRL_TXFCDMODE, 2)
         self._reg_write(model.vars.FRC_CTRL_RXFCDMODE, 2)
         return
@@ -388,9 +330,6 @@ class CALC_Frame(ICalculator):
         Args:
             model (ModelRoot) : Data model to read and write variables from
         """
-        # FCDX_WORDS is being set to max value. To figure out the max value, reading the bitwidth.
-        # assuming FCD0/1/2/3 will always have same bitwidth in future as well.
-        # checking the value for None in case the register does not exist (for e.g. unit_test_part)
         fcdx_words_bitwidth = model.vars.fcdx_words_bitwidth.value
 
         self._reg_write(model.vars.FRC_WCNTCMP0_FRAMELENGTH, model.vars.fixed_length_size.value - 1)
@@ -403,9 +342,7 @@ class CALC_Frame(ICalculator):
             "includecrc": int(model.vars.payload_crc_en.value == True),
             "words": 2 ** fcdx_words_bitwidth - 1,
         }
-        #Configure TX FCD
         self._configure_fcd(model, fcdindex="0", buf=0, **fcdDict)
-        #Configure RX FCD
         self._configure_fcd(model, fcdindex="2", buf=1, **fcdDict)
 
         self._configure_fcd(model, 1)   # Turn off this fcd
@@ -418,12 +355,8 @@ class CALC_Frame(ICalculator):
 
     def _configure_fcd_for_frame_type(self, model):
 
-        # FCDX_WORDS is being set to max value. To figure out the max value, reading the bitwidth.
-        # assuming FCD0/1/2/3 will always have same bitwidth in future as well.
-        # checking the value for None in case the register does not exist (for e.g. unit_test_part)
         fcdx_words_bitwidth = model.vars.fcdx_words_bitwidth.value
 
-        # Only use one frame descriptor
         fcdDict = {
             "excludesubframewcnt": int(model.vars.payload_excludesubframewcnt_en.value == True),
             "addtrailtxdata": int(model.vars.payload_addtrailtxdata_en.value == True),
@@ -433,10 +366,8 @@ class CALC_Frame(ICalculator):
             "includecrc": int(model.vars.payload_crc_en.value == True),
             "words":  2 ** fcdx_words_bitwidth - 1,
         }
-        #Configure TX FCD
         self._configure_fcd(model, fcdindex="0", buf=0, **fcdDict)
         self._reg_write(model.vars.FRC_CTRL_TXFCDMODE, 0)
-        #Configure RX FCD
         self._configure_fcd(model, fcdindex="2", buf=1, **fcdDict)
         self._reg_write(model.vars.FRC_CTRL_RXFCDMODE, 0)
 
@@ -460,8 +391,6 @@ class CALC_Frame(ICalculator):
 
         self._reg_write(model.vars.FRC_DFLCTRL_DFLINCLUDECRC, int(model.vars.var_length_includecrc.value == True))
 
-        # Add a condition where var_length_numbits == 0 and frame_length_type == 1 generates an error, invalid length configuration
-        # Handle Invalid Variable Frame Length Configuration: MCUW_RADIO_CFG-3095
         if model.vars.var_length_numbits.value == 0 and model.vars.frame_length_type.value == model.vars.frame_length_type.var_enum.VARIABLE_LENGTH:
             raise CalculationException("ERROR: var_length_numbits == 0 and frame_length_type == VARIABLE_LENGTH is not allowed.")
 
@@ -474,19 +403,14 @@ class CALC_Frame(ICalculator):
         else:
             self._reg_write(model.vars.FRC_DFLCTRL_DFLBITORDER, 0)
 
-        #DFLMODE
         if (model.vars.ber_force_infinite_length.value == True):
-            # Infinite length
             self._reg_write(model.vars.FRC_DFLCTRL_DFLMODE, 5)
         elif (model.vars.var_length_numbytes.value == 1):
-            #SINGLEBYTE
             self._reg_write(model.vars.FRC_DFLCTRL_DFLMODE, 1)
         else: #Two bytes
             if (model.vars.var_length_byteendian.value == model.vars.var_length_byteendian.var_enum.LSB_FIRST):
-                #DUALBYTELSBFIRST
                 self._reg_write(model.vars.FRC_DFLCTRL_DFLMODE, 3)
             else:
-                #DUALBYTEMSBFIRST
                 self._reg_write(model.vars.FRC_DFLCTRL_DFLMODE, 4)
         return
 
@@ -498,9 +422,7 @@ class CALC_Frame(ICalculator):
         """
 
         BIT_MASK = {0: 0x00, 1: 0x01, 2: 0x03, 3: 0x07}
-        # Handle Code Generation in RAIL Adapter to create C structures
 
-        #Move from discrete inputs to a list
         num_entries = (2**model.vars.frame_type_bits.value)
         model.vars.frame_type_lengths.value = []
         model.vars.frame_type_valid.value = []
@@ -510,10 +432,6 @@ class CALC_Frame(ICalculator):
           model.vars.frame_type_valid.value.append(eval("model.vars.frame_type_{}_valid.value".format(i)))
           model.vars.frame_type_filter.value.append(eval("model.vars.frame_type_{}_filter.value".format(i)))
 
-        #Set FRC_WCNTCMP0 to the size of the header
-        # The seqeuncer will write this register after it decodes the frame type
-        # We just want to provide enough room in advance so that we don't complete the frame too early
-        # Init to the smallest valid length
         min_size = 0xFF
         for i in range(len(model.vars.frame_type_lengths.value)):
           if (model.vars.frame_type_valid.value[i] == True):
@@ -528,7 +446,6 @@ class CALC_Frame(ICalculator):
 
     def calc_possible_future_inputs(self, model):
         """
-        # This routine initializes variables that could be possible future inputs
 
         Args:
             model (ModelRoot) : Data model to read and write variables from
@@ -536,17 +453,10 @@ class CALC_Frame(ICalculator):
 
         model.vars.header_include_crc.value = False
 
-        #
-        # The following variables are exposed in the profile in hidden inputs.  They are set here, but can be overwritten
-        # by profile inputs.
-        #
 
-        # These variables are only supported on Jumbo and Nerio
-        # They are set here, but will be overwritten by profile variables if the user specifies one.
         model.vars.header_addtrailtxdata_en.value = False
         model.vars.payload_addtrailtxdata_en.value = False
 
-        # These variables are only supported on Nerio
         model.vars.header_excludesubframewcnt_en.value = False
         model.vars.payload_excludesubframewcnt_en.value = False
 
@@ -560,11 +470,8 @@ class CALC_Frame(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # Nominal calculation
-        # Account for +1 in register
         model.vars.firstframe_bitsperword.value = 8
 
-        # Unless specied via advanced input
         bitsperword_reg = model.vars.firstframe_bitsperword.value - 1
 
         self._reg_write(model.vars.FRC_CTRL_BITSPERWORD, bitsperword_reg)
@@ -591,23 +498,18 @@ class CALC_Frame(ICalculator):
                 self._fixed_length_no_header(model)
 
         elif (model.vars.frame_length_type.value == model.vars.frame_length_type.var_enum.VARIABLE_LENGTH and model.vars.header_en.value == True):
-            #Variable Length requires headers
             self._configure_header(model)
 
-            #Configure rest of payload options
             self._configure_payload_with_header(model)
 
-            #Variable Length
             self._configure_variable_length(model)
 
-            #Use FCD0/2 for first subframe then FCD1/3 is used for all following subframes
             self._reg_write(model.vars.FRC_CTRL_TXFCDMODE, 2)
             self._reg_write(model.vars.FRC_CTRL_RXFCDMODE, 2)
         elif (model.vars.frame_length_type.value == model.vars.frame_length_type.var_enum.FRAME_TYPE):
             self._calc_frame_length_defaults(model)
             self._configure_fcd_for_frame_type(model)
 
-            #Frame Type
             self._configure_frame_type(model)
             pass
         return
@@ -620,8 +522,6 @@ class CALC_Frame(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # If the number of variable length bit plus the amount needed to shift exceeds 8
-        # then the number of bytes needed to contain the variable length field is two.
         quotient, remainder = divmod((model.vars.var_length_numbits.value + model.vars.var_length_shift.value), 8)
         if (remainder > 0):
             model.vars.var_length_numbytes.value = quotient + 1
@@ -636,13 +536,9 @@ class CALC_Frame(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # MCUW_RADIO_CFG-642
 
-        # Calculate length location as normal
         model.vars.var_length_loc.value = model.vars.header_size_internal.value - model.vars.var_length_numbytes.value
 
-        # We should never have the var_length_numbytes larger than the total header size.  If it is, var_length_loc
-        # will go negative.  If it does, fix it.
         if model.vars.var_length_loc.value < 0:
             model.vars.var_length_loc.value = 0
 
@@ -652,10 +548,6 @@ class CALC_Frame(ICalculator):
         else:
             model.vars.header_size_internal.value = 0
 
-    #
-    # If crc is enabled for the header or the payload, then the crc should not be set to NONE.
-    # Verify that this is set correctly
-    #
     def calc_check_crc_poly(self, model):
 
         header_include_crc = model.vars.header_include_crc.value
@@ -667,8 +559,6 @@ class CALC_Frame(ICalculator):
                 raise CalculationException("ERROR: CRC enabled with crc polynomial set to NONE")
 
     def calc_fcdx_words_bitwidth(self, model):
-        # This is the bitwidth for FCDX_WORDS
-        # check if the register is part of the register model, e.g. unit_test_part does not
         if model.vars.FRC_FCD0_WORDS.rm is None:
             val = 8
         else:

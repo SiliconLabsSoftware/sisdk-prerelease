@@ -1,11 +1,12 @@
 
 from pycalcmodel.core.variable import ModelVariable
-from enum import Enum
+from enum import Enum, unique
 import ast
 
 from pycalcmodel.py2_and_3_compatibility import *
 
-__all__ = [ 'get_xml_str_values',
+__all__ = [ 'IPCategory',
+            'get_xml_str_values',
             'cast_value_from_xml',
             'get_dummy_var_value' ]
 
@@ -19,6 +20,12 @@ DUMMY_VAR_VALUE = {
     str     : '',
 }
 
+@unique
+class IPCategory(Enum):
+    COMMON = 0
+    LPW = 1
+    WIFI = 2
+
 
 def get_xml_str_values(is_array, value):
     if value is None:
@@ -31,7 +38,6 @@ def get_xml_str_values(is_array, value):
 
 
 def cast_value_from_xml(var, xml_value):
-    #print("variable {} with type {} and value {}".format(var.name, type(xml_value), xml_value))
     assert isinstance(var, ModelVariable), "FATAL ERROR: var must be ModelVariable instance"
     assert isinstance(xml_value, list), "FATAL ERROR: xml_value should be a list"
     if xml_value == []:
@@ -91,9 +97,7 @@ def cast_value_from_xml(var, xml_value):
 def get_dummy_var_value(var):
     assert isinstance(var, ModelVariable)
     if var.var_type == Enum:
-        # get first value in the enum - Python 2/3 compatible
         return list(var.var_enum.__members__.values())[0].value
     else:
-        # get a standard dummy value
         return DUMMY_VAR_VALUE[var.var_type]
 

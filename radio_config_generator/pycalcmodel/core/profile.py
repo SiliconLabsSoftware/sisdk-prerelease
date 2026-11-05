@@ -30,7 +30,7 @@ class ModelProfileMissingVariable(Exception):
 
 class ModelProfile(object):
 
-    def __init__(self, name, category, desc, default=False, readable_name=None, act_logic='', skip_target_calc=None):
+    def __init__(self, name, category, desc, default=False, readable_name=None, act_logic='', skip_target_calc=None, ip_category=IPCategory.LPW):
         self.name = name
         if readable_name is None:
             self.readable_name = name
@@ -46,6 +46,7 @@ class ModelProfile(object):
         self.default_phys = default_phy.ModelDefaultPhyContainer()
         self.zz_eval_act_logic = None
         self.skip_target_calculation = skip_target_calc
+        self.ip_category = ip_category
 
     @property
     def name(self):
@@ -110,6 +111,15 @@ class ModelProfile(object):
         assert isinstance(value, basestring)
         self._act_logic = value
 
+    @property
+    def ip_category(self):
+        return self._ip_category
+
+    @ip_category.setter
+    def ip_category(self, value):
+        assert isinstance(value, IPCategory)
+        self._ip_category = value
+
     def validate(self, variables):
         assert isinstance(variables, ModelVariableContainer)
         for input in self.inputs:
@@ -140,25 +150,20 @@ class ModelProfile(object):
 
     def get_outputs(self, output_types=[], only_in_public_log=False):
         if len(output_types) == 0:
-            # return all
             for output in self.outputs:
-                # skip non-public outputs if requested
                 if only_in_public_log and not output.in_public_log:
                     continue
                 yield output
         else:
-            # return only requested
             for output in self.outputs:
                 for output_type in output_types:
                     if output.output_type == output_type:
-                        # skip non-public outputs if requested
                         if only_in_public_log and not output.in_public_log:
                             continue
                         yield output
                         break
 
     def register_parser(self, eval_act_logic_func):
-        # called by the append() method in ModelProfileContainer
         assert callable(eval_act_logic_func)
         self.zz_eval_act_logic = eval_act_logic_func
 
@@ -179,7 +184,8 @@ class ModelProfile(object):
                                       inputs=self.inputs.to_type_xml(),
                                       forces=self.forces.to_type_xml(),
                                       outputs=self.outputs.to_type_xml(),
-                                      default_phys=self.default_phys.to_type_xml(phy_group_incl_list))
+                                      default_phys=self.default_phys.to_type_xml(phy_group_incl_list),
+                                      ip_category=self.ip_category.name)
 
     def to_instance_xml(self, phy_group_incl_list):
         assert isinstance(phy_group_incl_list, (list, type(None)))
@@ -192,7 +198,8 @@ class ModelProfile(object):
                                       inputs=self.inputs.to_instance_xml(),
                                       forces=self.forces.to_instance_xml(),
                                       outputs=self.outputs.to_instance_xml(),
-                                      default_phys=self.default_phys.to_instance_xml(phy_group_incl_list))
+                                      default_phys=self.default_phys.to_instance_xml(phy_group_incl_list),
+                                      ip_category=self.ip_category.name)
 
     def __str__(self):
         out = '\n  Profile -  {}:\n'.format(self.name)
@@ -284,11 +291,9 @@ class ModelProfileContainer(object):
         return profiles
 
     def clear(self):
-        # clear attributes
         for key in self.ZZ_PROFILE_KEYS:
             if hasattr(self, key):
                 delattr(self, key)
-        # clear dictionary
         self.ZZ_PROFILE_KEYS.clear()
 
 
@@ -306,7 +311,6 @@ class ModelProfileTypeXml(ModelProfile):
         for input_root in profile_root.get_inputs().get_input():
             var = vars.get_var(input_root.var_name)
 
-            # backward compatibilit
             if input_root.default_visiblity is not None:
                 default_visiblity = ModelInputDefaultVisibilityType[input_root.default_visiblity]
             else:
@@ -345,12 +349,14 @@ class ModelProfileInstanceXml(ModelProfile):
     def __init__(self, vars, profile_root):
         assert isinstance(vars, ModelVariableContainer)
         assert isinstance(profile_root, model_inst.profileType)
+        ip_category = IPCategory[profile_root.ip_category] if profile_root.ip_category is not None else IPCategory.LPW
         super(ModelProfileInstanceXml, self).__init__(profile_root.name,
                                                       profile_root.category,
                                                       profile_root.desc,
                                                       profile_root.default,
                                                       profile_root.readable_name,
-                                                      profile_root.act_logic)
+                                                      profile_root.act_logic,
+                                                      ip_category=ip_category)
         for input_root in profile_root.get_inputs().get_input():
             var = vars.get_var(input_root.var_name)
             if input_root.defaults is None:
@@ -358,7 +364,6 @@ class ModelProfileInstanceXml(ModelProfile):
             else:
                 default = cast_value_from_xml(var, input_root.defaults.get_value())
 
-            # Handle backward compatibility
             if hasattr(input_root, 'default_visiblity'):
                 if input_root.default_visiblity is not None:
                     default_visiblity = ModelInputDefaultVisibilityType[input_root.default_visiblity]
@@ -390,8 +395,6 @@ class ModelProfileInstanceXml(ModelProfile):
                 override = None
             else:
                 override = cast_value_from_xml(var, output_root.var_overrides.get_value())
-            # note that var_values is handled in the overall variables assignment, as it is
-            # only a read property to the var.value
             self.outputs.append(ModelOutput(var,
                                             output_root.category,
                                             ModelOutputType[output_root.output_type],

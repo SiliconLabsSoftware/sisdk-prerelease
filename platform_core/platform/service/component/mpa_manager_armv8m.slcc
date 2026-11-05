@@ -19,6 +19,7 @@ provides:
 - name: mpa_manager_arch
   condition: [cortexm55]
 requires:
+- name: log_none
 - name: device
 - name: enum
 - name: status

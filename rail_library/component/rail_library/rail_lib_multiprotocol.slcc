@@ -17,6 +17,10 @@ requires:
 - name: sl_rail_util_mp_transition_time
   condition:
   - device_series_3
+  # Drain HWSCHED deferred START/FAIL/RESUME from process_action / RTOS worker.
+- name: sl_rail_util_scheduler
+  condition:
+  - device_has_hwsched
 recommends:
 - id: rail_lib_multiprotocol_alpha_chips
   vendor: silabs

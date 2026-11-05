@@ -8,10 +8,8 @@ class calc_fpll_sol(calc_fpll_ocelot):
 
     def buildVariables(self, model):
 
-        #Build variables from Ocelot
         super().buildVariables(model)
 
-        #Add calculator model variables
         self._addModelVariable(model, 'fpll_divx', int, ModelVariableFormat.DECIMAL, desc='RFFPLL X divider')
         self._addModelVariable(model, 'fpll_divy', int, ModelVariableFormat.DECIMAL, desc='RFFPLL Y divider')
         self._addModelVariable(model, 'fpll_divn', int, ModelVariableFormat.DECIMAL, desc='RFFPLL N divider')
@@ -54,7 +52,6 @@ class calc_fpll_sol(calc_fpll_ocelot):
         else:
             fpll_band = fpll_band_enum.BAND_928
 
-        # Write the model var
         model.vars.fpll_band.value = fpll_band
 
     def calc_fpll_dividers(self, model):
@@ -185,7 +182,6 @@ class calc_fpll_sol(calc_fpll_ocelot):
             divn = 80
             divy = 16
 
-        # Write the model vars
         model.vars.fpll_divx.value = divx
         model.vars.fpll_divy.value = divy
         model.vars.fpll_divn.value = divn
@@ -206,14 +202,11 @@ class calc_fpll_sol(calc_fpll_ocelot):
         fpll_divy = model.vars.fpll_divy.value
         divr = 2 #Assumption
 
-        # Calculate the VCO frequency given PLL settings
         fvco = xtal_frequency_hz * fpll_divn / divr  # Pull range 1.6 - 2.25GHz
 
-        # Calculate the output rates
         fpll_divx_freq = fvco / fpll_divx
         fpll_divy_freq = fvco / fpll_divy
 
-        #Write the model vars
         model.vars.fpll_divx_freq.value = fpll_divx_freq
         model.vars.fpll_divy_freq.value = fpll_divy_freq
 
@@ -228,7 +221,6 @@ class calc_fpll_sol(calc_fpll_ocelot):
 
     def calc_adc_freq_actual(self, model):
 
-        #Read in model variables
         fpll_divx_freq = model.vars.fpll_divx_freq.value
         divxadcsel = model.vars.RFFPLL0_RFFPLLCTRL1_DIVXADCSEL.value + 1
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
@@ -238,10 +230,8 @@ class calc_fpll_sol(calc_fpll_ocelot):
         adc_vco_div_actual = model.vars.adc_vco_div_actual.value
         adc_clock_mode_actual = model.vars.adc_clock_mode_actual.value
 
-        # Calculate ADC rate based on xtal PLL settings
         fadc = fpll_divx_freq / divxadcsel         # ADC clock frequency
 
-        # If using XO bypass, then calculate ADC rate based on xtal only
         if adc_clock_mode_actual == model.vars.adc_clock_mode.var_enum.HFXOMULT:
             if 1 == rx_ifadc_en_xo_bypass:
                 adc_freq_actual = xtal_frequency_hz
@@ -250,10 +240,8 @@ class calc_fpll_sol(calc_fpll_ocelot):
         else:
             adc_freq_actual = int(fsynth / adc_vco_div_actual)
 
-        # Compute the final ADC frequency percent error
         ferror = 100 * (fadc_target - adc_freq_actual) / float(fadc_target)
 
-        # Load local variables back into model variables
         model.vars.adc_freq_actual.value = adc_freq_actual
         model.vars.adc_freq_error.value = ferror
 
@@ -261,14 +249,11 @@ class calc_fpll_sol(calc_fpll_ocelot):
 
     def calc_dac_freq_actual(self, model):
 
-        # Read in model variables
         fpll_divx_freq = model.vars.fpll_divx_freq.value
         divxdacsel = 8
 
-        # Calculate the DAC frequency given PLL settings
         fdac = fpll_divx_freq / divxdacsel  # DAC clock frequency
 
-        # Write model variables
         model.vars.dac_freq_actual.value = fdac
 
     def calc_fpll_sim_regs(self, model):
@@ -277,7 +262,6 @@ class calc_fpll_sol(calc_fpll_ocelot):
         fpll_divy = model.vars.fpll_divy.value
         fpll_divn = model.vars.fpll_divn.value
 
-        #Only write these in the case of Sim target
         if model.target == ITarget.SIM_str:
             self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVX, fpll_divx)
             self._reg_write(model.vars.RFFPLL0_RFFPLLCTRL1_DIVY, fpll_divy)

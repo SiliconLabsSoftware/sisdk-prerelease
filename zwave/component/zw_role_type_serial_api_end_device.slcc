@@ -5,6 +5,10 @@ description: >
   The Serial API End Device role type is specific to serial_api_end device and is intended for a end device to operate in any possible role type: always-on, FLiRS or never-listening.
   It is based on the always-on configuration but allows the application to enter sleep mode at runtime using a Serial API command.
   The ZAF_CONFIG_DEVICE_OPTION_MASK is automatically set to always-on by default by this component.
+documentation:
+  docset: z-wave
+  document: z-wave-serial-api-host-app-programming-guide
+
 package: zwave
 quality: production
 metadata:

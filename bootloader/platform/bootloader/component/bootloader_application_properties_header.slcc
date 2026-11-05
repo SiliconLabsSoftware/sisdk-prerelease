@@ -12,9 +12,9 @@ quality: production
 ui_hints:
   visibility: never
 include:
-- path: platform/bootloader/common/api
+- path: platform/bootloader/common
   file_list:
-  - path: application_properties.h
+  - path: api/application_properties.h
 provides:
 - name: bootloader_application_properties_header
 metadata:

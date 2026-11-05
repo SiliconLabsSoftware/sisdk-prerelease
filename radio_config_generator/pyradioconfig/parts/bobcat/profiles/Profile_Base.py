@@ -39,10 +39,6 @@ class Profile_Base_Bobcat(Profile_Base_Ocelot):
                                    readable_name="Fast preamble detect")
         IProfile.make_linked_io(profile, model.vars.lo_injection_side, "Advanced",
                                 readable_name="Injection side")
-        # The origin of the value used for the channel bandwidth upper limit isn't obvious.  The decimators can be set to
-        # get a bandwidth of up to 3.4 MHz (DEC0 = 3 and DEC1 = 1). The ADC bandwidth, however, is limited to about 2.5 MHz.
-        # We should set the limt to to the ADC limit, since the overall bandwidth is limited by the ADC bandwidth, not the
-        # limit by the decimators.   See https://jira.silabs.com/browse/MCUW_RADIO_CFG-554 for additional discussion on this.
         bandwidth_limit_decimators = 3400000
         bandwidth_limit_adc = 2530000
         IProfile.make_linked_io(profile, model.vars.bandwidth_hz, 'Advanced',
@@ -56,7 +52,6 @@ class Profile_Base_Bobcat(Profile_Base_Ocelot):
         IProfile.make_linked_io(profile, model.vars.etsi_cat1_compatible, 'Advanced',
                                 readable_name="ETSI Category 1 Compatibility")
 
-        # Expose diversity registers as advanced inputs
         IProfile.make_linked_io(profile, model.vars.antdivmode, 'Advanced', readable_name="Antenna diversity mode")
         IProfile.make_linked_io(profile, model.vars.antdivrepeatdis, 'Advanced',
                                 readable_name="Diversity Select-Best repeat")
@@ -142,7 +137,6 @@ class Profile_Base_Bobcat(Profile_Base_Ocelot):
                                    readable_name="Frequency Compensation Mode")
         IProfile.make_hidden_input(profile, model.vars.dsa_enable, 'Advanced', readable_name="Enable DSA")
         IProfile.make_hidden_input(profile, model.vars.agc_scheme, 'Advanced', readable_name="AGC backoff scheme")
-        # BCR demod in Ocelot allows for much larger OSR
         IProfile.make_hidden_input(profile, model.vars.target_osr, 'Advanced',
                                    readable_name="Target oversampling rate", value_limit_min=3,
                                    value_limit_max=127)

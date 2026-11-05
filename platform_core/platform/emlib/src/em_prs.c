@@ -31,7 +31,7 @@
 #include "em_prs.h"
 #if defined(PRS_COUNT) && (PRS_COUNT > 0)
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup prs PRS - Peripheral Reflex System
@@ -179,7 +179,7 @@ uint32_t PRS_ConvertToSyncSource(uint32_t asyncSource)
       break;
 #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
   return syncSource;
@@ -243,7 +243,7 @@ uint32_t PRS_ConvertToSyncSignal(uint32_t asyncSource, uint32_t asyncSignal)
           syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMERCC2;
           break;
         default:
-          EFM_ASSERT(false);
+          SL_LOG_DEBUG_ASSERT(false);
           break;
       }
       break;
@@ -260,7 +260,7 @@ uint32_t PRS_ConvertToSyncSignal(uint32_t asyncSource, uint32_t asyncSignal)
           syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_IADC0SINGLEDONE;
           break;
         default:
-          EFM_ASSERT(false);
+          SL_LOG_DEBUG_ASSERT(false);
           break;
       }
       break;
@@ -275,7 +275,7 @@ uint32_t PRS_ConvertToSyncSignal(uint32_t asyncSource, uint32_t asyncSignal)
           syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_VDAC0CH1DONESYNC;
           break;
         default:
-          EFM_ASSERT(false);
+          SL_LOG_DEBUG_ASSERT(false);
           break;
       }
       break;
@@ -290,7 +290,7 @@ uint32_t PRS_ConvertToSyncSignal(uint32_t asyncSource, uint32_t asyncSignal)
           syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_VDAC1CH1DONESYNC;
           break;
         default:
-          EFM_ASSERT(false);
+          SL_LOG_DEBUG_ASSERT(false);
           break;
       }
       break;
@@ -327,11 +327,11 @@ void PRS_SourceSignalSet(unsigned int ch,
 {
 #if defined(_PRS_SYNC_CH_CTRL_MASK)
   (void) edge;
-  EFM_ASSERT(ch < PRS_SYNC_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(ch < PRS_SYNC_CHAN_COUNT);
   PRS->SYNC_CH[ch].CTRL = (source & _PRS_SYNC_CH_CTRL_SOURCESEL_MASK)
                           | (signal & _PRS_SYNC_CH_CTRL_SIGSEL_MASK);
 #else
-  EFM_ASSERT(ch < PRS_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(ch < PRS_CHAN_COUNT);
   PRS->CH[ch].CTRL = (source & _PRS_CH_CTRL_SOURCESEL_MASK)
                      | (signal & _PRS_CH_CTRL_SIGSEL_MASK)
                      | (uint32_t)edge << _PRS_CH_CTRL_EDSEL_SHIFT;
@@ -395,7 +395,7 @@ SL_WEAK void PRS_SourceAsyncSignalSet(unsigned int ch,
 void PRS_GpioOutputLocation(unsigned int ch,
                             unsigned int location)
 {
-  EFM_ASSERT(ch < PRS_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(ch < PRS_CHAN_COUNT);
 
 #if defined(_PRS_ROUTE_MASK)
   PRS->ROUTE |= (location << _PRS_ROUTE_LOCATION_SHIFT)
@@ -501,12 +501,12 @@ void PRS_ConnectSignal(unsigned int ch, PRS_ChType_t type, PRS_Signal_t signal)
   uint32_t signalField = ((uint32_t)signal & _PRS_ASYNC_CH_CTRL_SIGSEL_MASK)
                          >> _PRS_ASYNC_CH_CTRL_SIGSEL_SHIFT;
   if (type == prsTypeAsync) {
-    EFM_ASSERT(ch < PRS_ASYNC_CHAN_COUNT);
+    SL_LOG_DEBUG_ASSERT(ch < PRS_ASYNC_CHAN_COUNT);
     PRS->ASYNC_CH[ch].CTRL = PRS_ASYNC_CH_CTRL_FNSEL_A
                              | (sourceField << _PRS_ASYNC_CH_CTRL_SOURCESEL_SHIFT)
                              | (signalField << _PRS_ASYNC_CH_CTRL_SIGSEL_SHIFT);
   } else {
-    EFM_ASSERT(ch < PRS_SYNC_CHAN_COUNT);
+    SL_LOG_DEBUG_ASSERT(ch < PRS_SYNC_CHAN_COUNT);
     signalField = PRS_ConvertToSyncSignal(sourceField, signalField);
     sourceField = PRS_ConvertToSyncSource(sourceField);
     PRS->SYNC_CH[ch].CTRL = (sourceField << _PRS_SYNC_CH_CTRL_SOURCESEL_SHIFT)
@@ -518,13 +518,13 @@ void PRS_ConnectSignal(unsigned int ch, PRS_ChType_t type, PRS_Signal_t signal)
                                               | _PRS_CH_CTRL_SIGSEL_MASK);
   if (type == prsTypeAsync) {
 #if defined(PRS_ASYNC_SUPPORTED)
-    EFM_ASSERT(ch < PRS_ASYNC_CHAN_COUNT);
+    SL_LOG_DEBUG_ASSERT(ch < PRS_ASYNC_CHAN_COUNT);
     PRS->CH[ch].CTRL = PRS_CH_CTRL_EDSEL_OFF
                        | PRS_CH_CTRL_ASYNC
                        | signalField;
 #endif
   } else {
-    EFM_ASSERT(ch < PRS_SYNC_CHAN_COUNT);
+    SL_LOG_DEBUG_ASSERT(ch < PRS_SYNC_CHAN_COUNT);
     PRS->CH[ch].CTRL = PRS_CH_CTRL_EDSEL_OFF
                        | signalField;
   }
@@ -553,7 +553,7 @@ void PRS_ConnectSignal(unsigned int ch, PRS_ChType_t type, PRS_Signal_t signal)
  ******************************************************************************/
 SL_WEAK void PRS_ConnectConsumer(unsigned int ch, PRS_ChType_t type, PRS_Consumer_t consumer)
 {
-  EFM_ASSERT((uint32_t)consumer <= 0xFFF);
+  SL_LOG_DEBUG_ASSERT((uint32_t)consumer <= 0xFFF);
   volatile uint32_t * addr = (volatile uint32_t *) PRS;
   uint32_t offset = (uint32_t) consumer;
   addr = addr + offset / 4;
@@ -630,7 +630,8 @@ SL_WEAK void PRS_PinOutput(unsigned int ch, PRS_ChType_t type, GPIO_Port_TypeDef
  *   PRS Channel for the A input.
  *
  * @param[in] chB
- *   PRS Channel for the B input.
+ *   PRS Channel for the B input, or `_PRS_ASYNC_CH_CTRL_AUXSEL_DEFAULT`
+ *   when no aux input is used.
  *
  * @param[in] logic
  *   The logic function to use when combining the Channel A and Channel B. The
@@ -639,11 +640,17 @@ SL_WEAK void PRS_PinOutput(unsigned int ch, PRS_ChType_t type, GPIO_Port_TypeDef
  ******************************************************************************/
 SL_WEAK void PRS_Combine(unsigned int chA, unsigned int chB, PRS_Logic_t logic)
 {
-  EFM_ASSERT(chA < PRS_ASYNC_CHAN_COUNT);
-  EFM_ASSERT(chB < PRS_ASYNC_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(chA < PRS_ASYNC_CHAN_COUNT);
+#if defined(_PRS_ASYNC_CH_CTRL_AUXSEL_MASK)
+  SL_LOG_DEBUG_ASSERT((chB < PRS_ASYNC_CHAN_COUNT)
+                      || (chB == (unsigned int)_PRS_ASYNC_CH_CTRL_AUXSEL_DEFAULT));
+#else
+  SL_LOG_DEBUG_ASSERT(chB < PRS_ASYNC_CHAN_COUNT);
+#endif
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
-  EFM_ASSERT(chA == ((chB + 1) % PRS_ASYNC_CHAN_COUNT));
+  SL_LOG_DEBUG_ASSERT(chA == ((chB + 1) % PRS_ASYNC_CHAN_COUNT));
+  (void)chB;
   PRS->ASYNC_CH[chA].CTRL = (PRS->ASYNC_CH[chA].CTRL & ~_PRS_ASYNC_CH_CTRL_FNSEL_MASK)
                             | ((uint32_t)logic << _PRS_ASYNC_CH_CTRL_FNSEL_SHIFT);
 

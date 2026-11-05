@@ -94,7 +94,6 @@ class Pro2PlusModemCalcInputs(Pro2ModemCalcInputs):
         super(Pro2PlusModemCalcInputs, self).__init__(input_data)
 
     def get_defaults(self):
-        # Need a copy of the parent defaults, and then append a few more items.
         defaults = super(Pro2PlusModemCalcInputs, self).get_defaults().copy()
         defaults["Fdev_error"] = 0.0
         defaults["API_dsa_mode"] = 0

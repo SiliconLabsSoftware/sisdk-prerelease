@@ -5,6 +5,12 @@ description: >
   Battery Command Class is used to request and report the battery types,
   status and levels of a given device. Defined levels are LOW, HIGH, FULL and WARNING. It is
   possible to configure the minimum Hysteresis value to request a report on the battery status.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/battery
+  - page: z-wave-battery-support-basics
+
 package: zwave
 quality: production
 metadata:

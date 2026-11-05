@@ -25,8 +25,6 @@ class CALC_DSA_ocelot(ICalculator):
         if demod_select == model.vars.demod_select.var_enum.COHERENT:
             preamble_pattern_time_us = preamble_pattern_len * (1 / bitrate_gross) * 1e6
 
-            # : timeout [us] = LRTIMEOUTTHD / demod_rate_MHz
-            # : wait twice preamble pattern length
             demod_rate_MHz = demod_rate / 1e6
             lrtimeoutthd_reg = int(round(demod_rate_MHz * preamble_pattern_time_us * 2.0))
         else:
@@ -66,14 +64,12 @@ class CALC_DSA_ocelot(ICalculator):
     def calc_cohdsa_dynamic_iir_filter_coefficient(self, model):
         demod_select = model.vars.demod_select.value
         if demod_select == model.vars.demod_select.var_enum.COHERENT:
-            # : Set to maximum filtering
             dyniircoef = 3
         else:
             dyniircoef = 0
         self._reg_write(model.vars.MODEM_COH3_DYNIIRCOEFOPTION, dyniircoef)
 
     def calc_cohdsa_check_peak_index_length(self, model):
-        # : Disable check if difference in the indices of prefilter correlation peaks is less than dsapeakindlen
         self._reg_write(model.vars.MODEM_COH3_DSAPEAKCHKEN, 0)
         self._reg_write(model.vars.MODEM_COH3_DSAPEAKINDLEN, 0)
 
@@ -82,15 +78,8 @@ class CALC_DSA_ocelot(ICalculator):
         target_osr = model.vars.target_osr.value
         dsss_len = model.vars.dsss_len_actual.value
 
-        # : For coherent demod, advance timing window from DSA detection by half symbol
-        # : This is assuming that DSA detection occured on 3rd or 4th preamble.
-        # : For now, choosing to detect dsa on 3rd or 4th preamble so that the difference between peak and noise will be
-        # : high. This may result in sensitivity degradation since the static DSA threshold will be set high.
-        # : If DSA detection occurs on 1st or 2nd preamble, need to DELAY (negative) by 2 symbols
         if demod_select == model.vars.demod_select.var_enum.COHERENT:
             wndsize = target_osr * dsss_len / 2.0
-            #wndsize = math.pow(2,10) - (target_osr * 2.0 * dsss_len)
-            #wndsize = math.pow(2, 10) - (target_osr * 3.0 * dsss_len)
         else:
             wndsize = 0
 
@@ -100,7 +89,6 @@ class CALC_DSA_ocelot(ICalculator):
     def calc_cohdsa_signal_select(self, model):
         demod_select = model.vars.demod_select.value
 
-        # : For coherent demod, use 4 bits from 10 bit complex multiplier output for pre filter
         if demod_select == model.vars.demod_select.var_enum.COHERENT:
             number_of_bits_from_prefilter = 4
         else:
@@ -119,11 +107,9 @@ class CALC_DSA_ocelot(ICalculator):
 
     def calc_arrthd_reg(self, model):
 
-        # Read in model variables
         phdsa_enabled = (model.vars.MODEM_DSACTRL_DSAMODE.value == 1)
         preamble_detection_length = model.vars.preamble_detection_length.value
 
-        # If the phase DSA is disabled then set to do not care
         if phdsa_enabled:
             if preamble_detection_length < 12:
                 arrthd = 4
@@ -136,10 +122,8 @@ class CALC_DSA_ocelot(ICalculator):
 
     def calc_dsactrl_lowduty(self, model):
 
-        #Read in model variables
         phdsa_enabled = (model.vars.MODEM_DSACTRL_DSAMODE.value == 1)
 
-        # If the phase DSA is disabled then set to do not care
         if phdsa_enabled:
             do_not_care = False
         else:
@@ -152,10 +136,8 @@ class CALC_DSA_ocelot(ICalculator):
 
     def calc_phdsa_defaults(self, model):
 
-        # Read in model variables
         phdsa_enabled = (model.vars.MODEM_DSACTRL_DSAMODE.value == 1)
 
-        #If the phase DSA is disabled then set all to do not care
         if phdsa_enabled:
             do_not_care = False
             ampjupthd = 0
@@ -173,7 +155,6 @@ class CALC_DSA_ocelot(ICalculator):
             arrtolerthd1lo = 31
             powabsthdlog = 255
 
-        #Write the registers
         self._reg_write(model.vars.MODEM_DSACTRL_AGCBAUDEN, 0, do_not_care=do_not_care)
         self._reg_write(model.vars.MODEM_DSACTRL_AMPJUPTHD, ampjupthd, do_not_care=False) #We always care about this
         self._reg_write(model.vars.MODEM_DSACTRL_ARRTOLERTHD0, 2, do_not_care=do_not_care)

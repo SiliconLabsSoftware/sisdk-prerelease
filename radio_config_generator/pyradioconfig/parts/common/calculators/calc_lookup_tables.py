@@ -38,7 +38,6 @@ class CALC_LUT(ICalculator):
             'coding_array': coding_array,
             'width': width
         })
-        # Create frame coding calculator using the interface
         calculator = FrameCodingLookupTable(
             input_parameters=input_parameters
         )

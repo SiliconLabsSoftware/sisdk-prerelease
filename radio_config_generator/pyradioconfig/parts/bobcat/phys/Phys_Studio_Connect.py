@@ -2,15 +2,13 @@ from pyradioconfig.parts.nixi.phys.Phys_connect import PHYS_connect_Nixi
 from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
+
 
 class PHYS_connect_Bobcat(IPhy):
-    # inherit from Nixi (Jumbo)
 
-    def _set_xtal_frequency(self, phy, xtal_freq=None):
-        if xtal_freq is None:
-            phy.profile_inputs.xtal_frequency_hz.value = 39000000
-        else:
-            phy.profile_inputs.xtal_frequency_hz.value = xtal_freq
+    ip_category = IPCategory.LPW
+    default_xtal_frequency_hz = 39000000
 
     def _part_specific_phy_overrides(self, phy, model):
         pass
@@ -43,8 +41,6 @@ class PHYS_connect_Bobcat(IPhy):
         self._part_specific_phy_overrides(phy, model)
 
 
-    # Owner     : Young-Joon Choi
-    # Jira Link : https://jira.silabs.com/browse/PGBOBCATVALTEST-211
     def PHY_Studio_Connect_2_4GHz_OQPSK_2Mcps_250kbps(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Connect, phy_description='2.4GHz OQPSK 2Mcps 250kbps',
                                 readable_name="Connect 2.4GHz OQPSK 2Mcps 250kbps", phy_name=phy_name)
@@ -85,7 +81,6 @@ class PHYS_connect_Bobcat(IPhy):
         phy.profile_inputs.syncword_tx_skip.value = False
 
         """ Frame Configurations """
-        # Packet Inputs
         phy.profile_inputs.crc_byte_endian.value = model.vars.crc_byte_endian.var_enum.MSB_FIRST
         phy.profile_inputs.crc_bit_endian.value = model.vars.crc_bit_endian.var_enum.MSB_FIRST
         phy.profile_inputs.white_poly.value = model.vars.white_poly.var_enum.NONE

@@ -140,15 +140,7 @@ class Pro2DemodulatorFields(object):
         self.ant2pm_thd = 0
         self.matap = 0
         self.antdiv = 0
-	# default RSSI group values 
-        # self.RSSI_thresh = 255  # calculator doesn't write 
-        # self.RSSI_jump_th = 12  # 12 for revB; 4 for revC
-        #self.RSSI_ctrl = 1 # default
-	#self.RSSI_ctrl_latch = 1
-        #self.RSSI_ctrl_average = 0
-        #self.RSSI_ctrl_chthd = 0
         self.RSSI_comp = 64
-	#
         self.rx1coearray = 0
         self.rx2coearray = 0
         self.adc_hgain = 0
@@ -167,7 +159,6 @@ class Pro2DemodulatorFields(object):
 
         self.bw_peak = 0
 
-        # include now as calc may change this bit
         self.enrssijmp = 0
 
         self._add_fields()

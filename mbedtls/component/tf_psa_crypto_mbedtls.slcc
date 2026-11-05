@@ -41,6 +41,7 @@ include:
 - path: drivers/builtin/include
   file_list:
   - path: mbedtls/private_access.h
+  - path: mbedtls/private/aes.h
   - path: mbedtls/private/bignum.h
   - path: mbedtls/private/ccm.h
   - path: mbedtls/private/chachapoly.h

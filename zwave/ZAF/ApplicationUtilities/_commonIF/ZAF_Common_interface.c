@@ -12,7 +12,6 @@
 
 static SApplicationHandles * m_pAppHandles;
 static CP_Handle_t m_CmdPublisherHandle;
-static zaf_wake_up_callback_t wake_up_callback;
 
 void ZAF_setAppHandle(SApplicationHandles* pAppHandle)
 {
@@ -122,14 +121,4 @@ bool isRfRegionValid(zpal_radio_region_t region)
 bool ZAF_isLongRangeRegion(zpal_radio_region_t eRegion)
 {
   return zpal_radio_region_is_long_range(eRegion);
-}
-
-void zaf_set_stay_awake_callback(zaf_wake_up_callback_t callback)
-{
-  wake_up_callback = callback;
-}
-
-zaf_wake_up_callback_t zaf_get_stay_awake_callback(void)
-{
-  return wake_up_callback;
 }

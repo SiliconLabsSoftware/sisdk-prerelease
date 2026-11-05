@@ -2,12 +2,10 @@ from pyradioconfig.parts.ocelot.phys.Phys_Studio_Sidewalk import PhysStudioSidew
 
 
 class PhysStudioSidewalkMargay(PhysStudioSidewalkOcelot):
-    # Inherit all from Ocelot
 
     def PHY_Sidewalk_2GFSK_50Kbps_EU(self, model):
         phy = super().PHY_Sidewalk_2GFSK_50Kbps(model)
 
-        # Base freq and channel spacing
         phy.profile_inputs.base_frequency_hz.value = 865100000
         phy.profile_inputs.channel_spacing_hz.value = 200000
 

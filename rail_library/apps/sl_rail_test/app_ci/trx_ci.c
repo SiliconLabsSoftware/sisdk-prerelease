@@ -598,7 +598,7 @@ void sleep(sl_cli_command_arg_t *args)
 #else
   char* em4State = "";
   uint8_t emMode = (uint8_t)sl_cli_get_argument_string(args, 0)[0] - '0';
-#if defined(_SILICON_LABS_32B_SERIES_2) && !defined(FPGA)
+#if defined(_SILICON_LABS_32B_SERIES_2) && SL_RAIL_SUPPORTS_SLEEP
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   void (*em4Function)(void) = &sl_power_manager_enter_em4;
 #else
@@ -776,7 +776,7 @@ void sleep(sl_cli_command_arg_t *args)
     wakeReasons_t wakeReasons[2] = { { 0, 0, }, { 0, 0, }, };
    #endif//DEBUG_SLEEP_LOOP
 
-#ifndef FPGA
+#if SL_RAIL_SUPPORTS_SLEEP
     // Used for wakeup from sleep
     buttonWakeEvent = false;
 
@@ -810,7 +810,7 @@ void sleep(sl_cli_command_arg_t *args)
       CORE_ENTER_CRITICAL(); // but shut back off in case we loop
       rfSensed = sl_rail_is_rf_sensed(railHandle);
     } while (!rfSensed && !serEvent && !rxPacketEvent && !buttonWakeEvent);
-#endif // not FPGA
+#endif //SL_RAIL_SUPPORTS_SLEEP
 
 #if defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)
     // Enable EUSART after waking up from sleep on platforms that use EUSART

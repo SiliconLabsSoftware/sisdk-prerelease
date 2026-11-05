@@ -43,15 +43,12 @@ def _build_resample_taps(window, up_reduced, down_reduced, x_dtype):
     resample_poly designs a low-pass FIR via firwin when `window` is not
     precomputed taps. This helper builds that same FIR so we can reuse it.
     """
-    # SciPy derives cutoff and filter length from the reduced ratio.
     max_rate = max(up_reduced, down_reduced)
     f_c = 1.0 / max_rate
     half_len = 10 * max_rate
 
     taps = sp.firwin(2 * half_len + 1, f_c, window=window)
 
-    # Match SciPy behavior: for float/complex input arrays, cast taps to the
-    # same dtype family as x to avoid unnecessary dtype promotions later.
     dtype = np.dtype(x_dtype)
     if np.issubdtype(dtype, np.complexfloating) or np.issubdtype(dtype, np.floating):
         taps = taps.astype(dtype, copy=False)
@@ -79,27 +76,19 @@ def _get_cached_resample_taps(window, up, down, x_dtype):
     """
     up_reduced, down_reduced = _reduce_ratio(up, down)
     if up_reduced == 1 and down_reduced == 1:
-        # scipy has a fast copy path for this; no filter design needed.
         return None
 
-    # Key uses the resulting tap precision and reduced ratio so equivalent
-    # requests map to the same taps entry without mixing float32/float64 or
-    # complex64/complex128 caches.
     key = (window, up_reduced, down_reduced, _get_resample_tap_dtype_key(x_dtype))
 
     with _resample_taps_cache_lock:
         cached = _resample_taps_cache.get(key)
         if cached is not None:
-            # OrderedDict is used as an LRU: moving to end marks recent use.
             _resample_taps_cache.move_to_end(key)
             return cached
 
-    # Build outside the lock to avoid blocking other threads during firwin.
     taps = _build_resample_taps(window, up_reduced, down_reduced, x_dtype)
 
     with _resample_taps_cache_lock:
-        # Double-check in case another thread inserted the same key while this
-        # thread was computing taps.
         cached = _resample_taps_cache.get(key)
         if cached is not None:
             _resample_taps_cache.move_to_end(key)
@@ -107,7 +96,6 @@ def _get_cached_resample_taps(window, up, down, x_dtype):
 
         _resample_taps_cache[key] = taps
         if len(_resample_taps_cache) > _RESAMPLE_TAPS_CACHE_MAXSIZE:
-            # Pop least-recently-used entry.
             _resample_taps_cache.popitem(last=False)
 
     return taps
@@ -121,8 +109,6 @@ def resample_poly_cached(x, up, down, axis=0, window=_DEFAULT_RESAMPLE_WINDOW, p
     if not _ADVANCED_CACHE_EN:
         return sp.resample_poly(x, up, down, axis=axis, window=window, padtype=padtype, cval=cval)
 
-    # Keep behavior conservative: optimize only default SciPy path where we can
-    # safely reuse FIR taps. Custom windows go through untouched.
     if window != _DEFAULT_RESAMPLE_WINDOW:
         return sp.resample_poly(x, up, down, axis=axis, window=window, padtype=padtype, cval=cval)
 
@@ -130,11 +116,8 @@ def resample_poly_cached(x, up, down, axis=0, window=_DEFAULT_RESAMPLE_WINDOW, p
         x_array = np.asarray(x)
         taps = _get_cached_resample_taps(window, up, down, x_array.dtype)
         if taps is None:
-            # No-op ratio (1/1): preserve standard SciPy behavior.
             return sp.resample_poly(x_array, up, down, axis=axis, window=window, padtype=padtype, cval=cval)
 
-        # Passing explicit taps skips repeated firwin/kaiser construction.
         return sp.resample_poly(x_array, up, down, axis=axis, window=taps, padtype=padtype, cval=cval)
     except Exception:
-        # Fall back to exact scipy path for safety.
         return sp.resample_poly(x, up, down, axis=axis, window=window, padtype=padtype, cval=cval)

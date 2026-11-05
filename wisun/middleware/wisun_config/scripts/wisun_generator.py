@@ -163,42 +163,17 @@ def get_allowed_channels(allowed_channels_config: list()) -> list():
     return [(allowed_channel_mask & (bit_mask << ((31 - num) * 8))) for num in range(32)]
 
 
-def bit_pos_to_byte_bit(bit_pos: int) -> tuple:
-    return (int(bit_pos / 8), bit_pos % 8,)
-
-def set_ch_mask_range(dest_lst: list, num_a:int, num_b:int):
-    num_a_byte_bit:tuple = bit_pos_to_byte_bit(int(num_a))
-    num_b_byte_bit:tuple = bit_pos_to_byte_bit(int(num_b))
-    for i in range(num_b_byte_bit[0] - num_a_byte_bit[0] + 1):
-        offset = i + num_a_byte_bit[0]
-
-        if offset == num_a_byte_bit[0]:
-            msk_val = 0xff & (0xff << num_a_byte_bit[1])
-        elif offset == (num_b_byte_bit[0]):
-            msk_val = 0xff & (0xff >> (7 - num_b_byte_bit[1]))
-        else:
-            msk_val = 0xff
-
-        dest_lst[offset] = (dest_lst[offset] | msk_val)
-
-def set_ch_mask_single(dest_lst: list, num:int):
-    num_byte_bit:tuple = bit_pos_to_byte_bit(int(num))
-    msk_val = 0xff & (0x01 << num_byte_bit[1])
-    dest_lst[num_byte_bit[0]] = (dest_lst[num_byte_bit[0]] | msk_val)
-
-def calculate_channel_mask(dest_lst: list, allowed_channels: list):
-    # reset array
-    for i in range(32):
-        ch_int_lst.append(0)
+def calculate_channel_mask(allowed_channels: list) -> list:
+    result = [0] * 32
     for msk_str in allowed_channels:
-        m = re.match(r"(\d+)\-(\d+)",msk_str)
-        if (m != None):
-            num_a: int = m.group(1)
-            num_b: int = m.group(2)
-            set_ch_mask_range(dest_lst, num_a, num_b)
-        else:
-            num: int = msk_str
-            set_ch_mask_single(dest_lst, num)
+        m = re.match(r'(\d+)-(\d+)', msk_str)
+        if (m):  # range
+            start, end = int(m[1]), int(m[2])
+        else:  # single
+            start = end = int(msk_str)
+        for chan in range(start, end + 1):
+            result[chan // 8] |= 1 << (chan % 8)
+    return result
 
 if __name__ == "__main__":
 
@@ -212,15 +187,13 @@ if __name__ == "__main__":
 
     # getting configuration structure
     config_struct = get_wisun_config_struct()
-    ch_int_lst: list = []
 
     if wisunconf['allowedChannels']:
-        calculate_channel_mask(ch_int_lst, wisunconf['allowedChannels'])
+        ch_int_lst = calculate_channel_mask(wisunconf['allowedChannels'])
         wisunconf['allowedChannelsStr'] = ','.join(wisunconf['allowedChannels'])
     else:
-        for _ in range(32):
-            ch_int_lst.append(255)
-        wisunconf['allowedChannelsStr'] = "0-255"
+        ch_int_lst = [255] * 32
+        wisunconf['allowedChannelsStr'] = '0-255'
     wisunconf['allowedChannels'] = [hex(ch) for ch in ch_int_lst]
 
     if wisunconf['modeSwitchPhys']:

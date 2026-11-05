@@ -9,6 +9,9 @@ description: >
   code, to save resources.
   To take advantage of the non-volatile memory and add the ability to read
   the application name externally, use the ZAF Application Name - NVM component.
+documentation:
+  docset: z-wave
+  document: zwave-api/app-name
 package: zwave
 quality: production
 metadata:

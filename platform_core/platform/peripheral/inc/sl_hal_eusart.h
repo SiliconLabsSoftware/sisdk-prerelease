@@ -39,7 +39,7 @@
 extern "C" {
 #endif
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include <stdbool.h>
 #include "sl_enum.h"
 
@@ -1357,7 +1357,7 @@ __INLINE void sl_hal_eusart_wait_sync(EUSART_TypeDef *eusart,
                                       uint32_t mask)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // Wait for any pending previous write operation to have been completed
   // in the low-frequency domain.
@@ -1374,7 +1374,7 @@ __INLINE void sl_hal_eusart_wait_sync(EUSART_TypeDef *eusart,
 __INLINE void sl_hal_eusart_enable(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // Wait for synchronization to complete.
   sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
@@ -1392,7 +1392,7 @@ __INLINE void sl_hal_eusart_enable(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_disable(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   if (eusart->EN != EUSART_EN_EN) {
     return;
@@ -1420,7 +1420,8 @@ __INLINE void sl_hal_eusart_disable(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_wait_ready(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  (void)eusart;
 
 #if defined(_EUSART_EN_DISABLING_MASK)
   while (eusart->EN & _EUSART_EN_DISABLING_MASK) {
@@ -1439,7 +1440,7 @@ __INLINE void sl_hal_eusart_wait_ready(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_enable_rx(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // Wait for synchronization to complete.
   sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
@@ -1462,7 +1463,7 @@ __INLINE void sl_hal_eusart_enable_rx(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_disable_rx(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // Wait for synchronization to complete.
   sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
@@ -1485,7 +1486,7 @@ __INLINE void sl_hal_eusart_disable_rx(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_enable_tx(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // Wait for synchronization to complete.
   sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
@@ -1508,7 +1509,7 @@ __INLINE void sl_hal_eusart_enable_tx(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_disable_tx(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // Wait for synchronization to complete.
   sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
@@ -1532,7 +1533,7 @@ __INLINE void sl_hal_eusart_disable_tx(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_enable_block_rx(EUSART_TypeDef *eusart)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   sl_hal_eusart_wait_sync(eusart, EUSART_SYNCBUSY_RXBLOCKEN);
   eusart->CMD_SET = EUSART_CMD_RXBLOCKEN;
@@ -1549,7 +1550,7 @@ __INLINE void sl_hal_eusart_enable_block_rx(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_disable_block_rx(EUSART_TypeDef *eusart)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   sl_hal_eusart_wait_sync(eusart, EUSART_SYNCBUSY_RXBLOCKDIS);
   eusart->CMD_SET = EUSART_CMD_RXBLOCKDIS;
@@ -1565,7 +1566,7 @@ __INLINE void sl_hal_eusart_disable_block_rx(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_enable_tx_tristate(EUSART_TypeDef *eusart)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   sl_hal_eusart_wait_sync(eusart, EUSART_SYNCBUSY_TXTRIEN);
   eusart->CMD_SET = EUSART_CMD_TXTRIEN;
@@ -1581,7 +1582,7 @@ __INLINE void sl_hal_eusart_enable_tx_tristate(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_disable_tx_tristate(EUSART_TypeDef *eusart)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   sl_hal_eusart_wait_sync(eusart, EUSART_SYNCBUSY_TXTRIDIS);
   eusart->CMD_SET = EUSART_CMD_TXTRIDIS;
@@ -1597,10 +1598,10 @@ __INLINE void sl_hal_eusart_disable_tx_tristate(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_clear_rx(EUSART_TypeDef *eusart)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // Make sure receiver is disabled.
-  EFM_ASSERT(((eusart->STATUS & _EUSART_STATUS_RXENS_MASK) >> _EUSART_STATUS_RXENS_SHIFT) == 0);
+  SL_LOG_DEBUG_ASSERT(((eusart->STATUS & _EUSART_STATUS_RXENS_MASK) >> _EUSART_STATUS_RXENS_SHIFT) == 0);
 
 #if defined(EUSART_CMD_CLEARRX)
   eusart->CMD_SET = EUSART_CMD_CLEARRX;
@@ -1625,15 +1626,15 @@ __INLINE void sl_hal_eusart_clear_rx(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_clear_tx(EUSART_TypeDef *eusart)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
 #if defined(_EUSART_CFG0_SYNC_MASK)
   // CLEARTX is only applicable in async mode.
-  EFM_ASSERT((eusart->CFG0 & _EUSART_CFG0_SYNC_MASK) == EUSART_CFG0_SYNC_ASYNC);
+  SL_LOG_DEBUG_ASSERT((eusart->CFG0 & _EUSART_CFG0_SYNC_MASK) == EUSART_CFG0_SYNC_ASYNC);
 #endif
 
   // CLEARTX is only allowed once TX has been fully disabled, as indicated by STATUS_TXENS.
-  EFM_ASSERT(((eusart->STATUS & _EUSART_STATUS_TXENS_MASK) >> _EUSART_STATUS_TXENS_SHIFT) == 0);
+  SL_LOG_DEBUG_ASSERT(((eusart->STATUS & _EUSART_STATUS_TXENS_MASK) >> _EUSART_STATUS_TXENS_SHIFT) == 0);
 
   eusart->CMD_SET = EUSART_CMD_CLEARTX;
 
@@ -1653,7 +1654,7 @@ __INLINE void sl_hal_eusart_clear_tx(EUSART_TypeDef *eusart)
 __INLINE void sl_hal_eusart_stop_timer(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   sl_hal_eusart_wait_sync(eusart, EUSART_SYNCBUSY_TSTOP);
   eusart->CMD_SET = EUSART_CMD_TSTOP;
@@ -1672,7 +1673,7 @@ __INLINE void sl_hal_eusart_stop_timer(EUSART_TypeDef *eusart)
 __INLINE uint32_t sl_hal_eusart_get_status(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   return eusart->STATUS;
 }
@@ -1691,10 +1692,10 @@ __INLINE void sl_hal_eusart_uart_set_clock_div(EUSART_TypeDef *eusart,
                                                uint32_t clock_divider)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // Make sure clock divider value is valid.
-  EFM_ASSERT(clock_divider <= (_EUSART_CLKDIV_DIV_MASK >> _EUSART_CLKDIV_DIV_SHIFT));
+  SL_LOG_DEBUG_ASSERT(clock_divider <= (_EUSART_CLKDIV_DIV_MASK >> _EUSART_CLKDIV_DIV_SHIFT));
 
   sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
 
@@ -1714,10 +1715,10 @@ __INLINE void sl_hal_eusart_uart_set_clock_div(EUSART_TypeDef *eusart,
 __INLINE uint32_t sl_hal_eusart_uart_get_clock_div(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // Make sure module is enabled
-  EFM_ASSERT(eusart->EN & _EUSART_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(eusart->EN & _EUSART_EN_EN_MASK);
 
   sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
 
@@ -1737,7 +1738,7 @@ __INLINE uint32_t sl_hal_eusart_uart_get_clock_div(EUSART_TypeDef *eusart)
 __INLINE sl_hal_eusart_ovs_t sl_hal_eusart_uart_get_oversampling(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_MASK);
 
@@ -1760,7 +1761,7 @@ __INLINE void sl_hal_eusart_clear_interrupts(EUSART_TypeDef *eusart,
                                              uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   eusart->IF_CLR = flags;
 }
@@ -1781,7 +1782,7 @@ __INLINE void sl_hal_eusart_disable_interrupts(EUSART_TypeDef *eusart,
                                                uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   eusart->IEN_CLR = flags;
 }
@@ -1802,7 +1803,7 @@ __INLINE void sl_hal_eusart_enable_interrupts(EUSART_TypeDef *eusart,
                                               uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   eusart->IEN_SET = flags;
 }
@@ -1820,7 +1821,7 @@ __INLINE void sl_hal_eusart_enable_interrupts(EUSART_TypeDef *eusart,
 __INLINE uint32_t sl_hal_eusart_get_pending_interrupts(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   return eusart->IF;
 }
@@ -1841,7 +1842,7 @@ __INLINE uint32_t sl_hal_eusart_get_pending_interrupts(EUSART_TypeDef *eusart)
 __INLINE uint32_t sl_hal_eusart_get_enabled_interrupts(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   return eusart->IEN;
 }
@@ -1862,7 +1863,7 @@ __INLINE uint32_t sl_hal_eusart_get_enabled_interrupts(EUSART_TypeDef *eusart)
 __INLINE uint32_t sl_hal_eusart_get_enabled_pending_interrupts(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   uint32_t tmp;
 
@@ -1890,7 +1891,7 @@ __INLINE void sl_hal_eusart_set_interrupts(EUSART_TypeDef *eusart,
                                            uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   eusart->IF_SET = flags;
 }

@@ -18,4 +18,7 @@ template_contribution:
 metadata:
   sbom:
     reference: btmesh_stack
+documentation:
+  docset: btmesh
+  document: bluetooth-mesh-api/sl-btmesh-sar-config-client
 root_path: bluetooth_mesh_stack

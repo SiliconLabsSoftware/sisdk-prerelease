@@ -3,20 +3,15 @@ from pyradioconfig.parts.jumbo.phys.phys_studio_wisun_fan_1_1 import PhysStudioW
 
 
 class WisunFan1v1ChannelParamsOcelot(WisunFan1v1ChannelParamsJumbo):
-    #Inherit all
     pass
 
 
 class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
 
-    def _set_xtal_frequency(self, model, phy):
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+    default_xtal_frequency_hz = 39000000
 
-    # Adding FEC-enabled PHYs
 
-    ### EU Region PHYs From Wi-SUN FAN 1.1 Spec###
 
-    # ChanPlanID 32
 
     def PHY_WISUN_FAN_1v1_863MHz_Plan32_2FSK_1a_EU_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('EU', 17, 32, 100000, 863100000,
@@ -24,7 +19,6 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # ChanPlanID 33
 
     def PHY_WISUN_FAN_1v1_863MHz_Plan33_2FSK_2a_EU_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('EU', 19, 33, 200000, 863100000,
@@ -38,7 +32,6 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # ChanPlanID 34
 
     def PHY_WISUN_FAN_1v1_870MHz_Plan34_2FSK_1a_EU_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('EU', 17, 34, 100000, 870100000,
@@ -46,7 +39,6 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # ChanPlanID 35
 
     def PHY_WISUN_FAN_1v1_870MHz_Plan35_2FSK_2a_EU_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('EU', 19, 35, 200000, 870200000,
@@ -60,7 +52,6 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # ChanPlanID 36
 
     def PHY_WISUN_FAN_1v1_863MHz_Plan36_2FSK_1a_EU_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('EU', 17, 36, 100000, 863100000,
@@ -68,7 +59,6 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # ChanPlanID 37
 
     def PHY_WISUN_FAN_1v1_863MHz_Plan37_2FSK_2a_EU_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('EU', 19, 37, 200000, 863100000,
@@ -82,9 +72,7 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    ### NA Region PHYs From Wi-SUN FAN 1.1 Spec###
 
-    # ChanPlanID 1
 
     def PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_1b_NA_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('NA', 18, 1, 200000, 902200000,
@@ -98,7 +86,6 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # ChanPlanID 2
 
     def PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_3_NA_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('NA', 21, 2, 400000, 902400000,
@@ -112,7 +99,6 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # ChanPlanID 3
 
     def PHY_WISUN_FAN_1v1_915MHz_Plan3_2FSK_5_NA_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('NA', 24, 3, 600000, 902600000,
@@ -120,9 +106,7 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    ### BZ Region PHYs From Wi-SUN FAN 1.1 Spec###
 
-    # ChanPlanID 1
 
     def PHY_WISUN_FAN_1v1_915MHz_Plan1_2FSK_1b_BZ_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('BZ', 18, 1, 200000, 902200000,
@@ -136,7 +120,6 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # ChanPlanID 2
 
     def PHY_WISUN_FAN_1v1_915MHz_Plan2_2FSK_3_BZ_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('BZ', 21, 2, 400000, 902400000,
@@ -150,7 +133,6 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # ChanPlanID 3
 
     def PHY_WISUN_FAN_1v1_915MHz_Plan3_2FSK_5_BZ_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('BZ', 24, 3, 600000, 902600000,
@@ -158,9 +140,7 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    ### JP Region PHYs From Wi-SUN FAN 1.1 Spec###
 
-    # ChanPlanID 21
 
     def PHY_WISUN_FAN_1v1_920MHz_Plan21_2FSK_1b_JP_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('JP', 18, 21, 200000, 920600000,
@@ -168,7 +148,6 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # ChanPlanID 22
 
     def PHY_WISUN_FAN_1v1_920MHz_Plan22_2FSK_2b_JP_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('JP', 20, 22, 400000, 920900000,
@@ -183,7 +162,6 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # ChanPlanID 23
 
     def PHY_WISUN_FAN_1v1_920MHz_Plan23_2FSK_4b_JP_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('JP', 23, 23, 600000, 920800000,
@@ -198,15 +176,12 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         return phy
 
 
-    ### IN Region PHYs From Wi-SUN FAN 1.1 Spec###
 
-    # ChanPlanID 39
     def PHY_WISUN_FAN_1v1_866MHz_Plan39_2FSK_1a_IN_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('IN', 17, 39, 100000, 865100000, 'Wi-SUN FAN, IN 865-867 MHz, Mode1a (2FSK 50kbps mi=0.5), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
         return phy
 
-    # ChanPlanID 40
     def PHY_WISUN_FAN_1v1_866MHz_Plan40_2FSK_2a_IN_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('IN', 19, 40, 200000, 865100000, 'Wi-SUN FAN, IN 865-867 MHz, Mode2a (2FSK 100kbps mi=0.5), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)
@@ -218,9 +193,7 @@ class PhysStudioWisunFan1v1Ocelot(PhysStudioWisunFan1v1Jumbo):
         return phy
 
 
-    ### SG Region PHYs From Wi-SUN FAN 1.1 Spec###
 
-    # ChanPlanID 43
     def PHY_WISUN_FAN_1v1_867MHz_Plan43_2FSK_4a_SG_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsJumbo('SG', 22, 43, 400000, 866300000, 'Wi-SUN FAN, SG 866-869 MHz, Mode4a (2FSK 200kbps mi=0.5), FEC')
         phy = self._make_wisun_fan_phy(model, params, phy_name=phy_name)

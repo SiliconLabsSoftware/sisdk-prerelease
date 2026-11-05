@@ -175,6 +175,23 @@ source:
 
 #-------------- Template Contribution ----------------
 template_contribution:
+  - name: default_stack_size_override
+    value: 1024
+    condition:
+      - freertos
+      - device_series_2
+
+  - name: default_stack_size_override
+    value: 16384
+    condition:
+      - device_series_3
+
+  - name: default_stack_size_override
+    value: 512
+    condition:
+      - micriumos_kernel
+      - device_series_2
+
 #------------------ CLI commands ---------------------
   - name: cli_group
     value:

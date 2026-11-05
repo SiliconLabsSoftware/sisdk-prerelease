@@ -34,7 +34,7 @@
 #include "sli_memory_manager_retention_control.h"
 #include "sli_code_classification.h"
 #include "em_device.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 #if !defined(DMEM_MEM_BASE)
 #define DMEM_MEM_BASE  SRAM_BASE
@@ -103,7 +103,7 @@ uint32_t sli_memory_manager_get_bank_id_by_addr(const sl_memory_heap_t *heap,
                                                 void *addr)
 {
   // Validate given address.
-  EFM_ASSERT((addr >= heap->base_addr) && (addr <= (void *)((uint8_t *)heap->base_addr + heap->size)));
+  SL_LOG_DEBUG_ASSERT((addr >= heap->base_addr) && (addr <= (void *)((uint8_t *)heap->base_addr + heap->size)));
   uint32_t bank_id;
   sli_retention_control_t *retention_control = (sli_retention_control_t *)heap->retention_control;
 
@@ -124,7 +124,7 @@ uintptr_t sli_memory_manager_get_bank_start_address_by_id(const sl_memory_heap_t
   sli_retention_control_t *retention_control =
     (sli_retention_control_t *)heap->retention_control;
 
-  EFM_ASSERT(retention_control != NULL);
+  SL_LOG_DEBUG_ASSERT(retention_control != NULL);
   return retention_control->get_bank_start_address_by_id(bank_id);
 }
 

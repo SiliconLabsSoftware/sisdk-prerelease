@@ -1083,6 +1083,7 @@ static sl_status_t get_already_received_cnt(uint16_t *already_recvd_cnt)
   return SL_STATUS_OK;
 }
 
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CPC, SL_CODE_CLASS_TIME_CRITICAL)
 static void swap_descriptors(void)
 {
   rx_descriptor_head = SL_HAL_LDMA_DESCRIPTOR_LINKABS_LINKADDR_TO_ADDR(rx_descriptor_head->xfer.link_addr);
@@ -2031,6 +2032,7 @@ static void rx_dma_complete_hwfc(void)
 #endif
 
 #if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == WITHOUT_HWFC)
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_CPC, SL_CODE_CLASS_TIME_CRITICAL)
 static void rx_dma_complete_no_hwfc(void)
 {
   MCU_DECLARE_IRQ_STATE;

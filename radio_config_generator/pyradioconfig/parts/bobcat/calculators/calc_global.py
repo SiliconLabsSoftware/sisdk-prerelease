@@ -6,10 +6,8 @@ class Calc_Global_Bobcat(CALC_Global_ocelot):
 
     def buildVariables(self, model):
 
-        # Build variables from the Ocelot calculations
         super().buildVariables(model)
 
-        #Add variables for Bobcat
 
         self._add_ADQUAL_regs(model)
         self._add_ADFSM0_regs(model)
@@ -263,12 +261,7 @@ class Calc_Global_Bobcat(CALC_Global_ocelot):
         self._addModelRegister(model, 'AGC.FENOTCHFILT9.FENOTCHEN20', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.FENOTCHFILT9.FENOTCHRATTNEN19', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.FENOTCHFILT9.FENOTCHRATTNEN20', int, ModelVariableFormat.HEX)
-        #self._addModelRegister(model, 'AGC.PNRFATT0.LNAMIXRFATT1', int, ModelVariableFormat.HEX)
-        #self._addModelRegister(model, 'AGC.PNRFATT0.LNAMIXRFATT2', int, ModelVariableFormat.HEX)
-        #self._addModelRegister(model, 'AGC.PNRFATT0.LNAMIXRFATT3', int, ModelVariableFormat.HEX)
-        #self._addModelRegister(model, 'AGC.PNRFATT1.LNAMIXRFATT4', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.PNRFATT1.LNAMIXRFATT5', int, ModelVariableFormat.HEX)
-        #self._addModelRegister(model, 'AGC.PNRFATT1.LNAMIXRFATT6', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.PNRFATT2.LNAMIXRFATT7', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.PNRFATT2.LNAMIXRFATT8', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'AGC.PNRFATT2.LNAMIXRFATT9', int, ModelVariableFormat.HEX)

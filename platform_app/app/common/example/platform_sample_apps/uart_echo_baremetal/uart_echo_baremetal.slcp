@@ -1,0 +1,47 @@
+project_name: uart_echo_baremetal
+package: platform_app
+quality: production
+label: Platform - UART IRQ Echo Baremetal
+description: >
+  Demonstrates interrupt-driven UART echo with optional RTS/CTS hardware flow 
+  control. The receive and transmit-complete interrupts coordinate the echo 
+  sequencing: the receive interrupt signals that UART data is ready to be read, 
+  while the transmit-complete interrupt re-enables reception after the 
+  transmission completes. Use this example for bare-metal applications that 
+  transfer data without continuously polling the UART.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+source:
+  - path: app.c
+  - path: app_uart_echo.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: app_uart_echo.h
+component:
+  - id: sl_main
+  - id: device_init
+  - id: clock_manager
+  - id: uart_eusart
+    instance: [vcom]
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+define:
+  - name: UART_TEST_HANDLE
+    value: sl_uart_eusart_vcom_handle
+  - name: DEBUG_EFM
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - hwfilter:device:device_has_euart
+  - hwfilter:board:hardware_board_has_vcom

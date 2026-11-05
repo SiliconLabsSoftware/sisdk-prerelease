@@ -23,6 +23,7 @@ source:
 provides:
 - name: memory_manager_monitor
 requires:
+- name: log_none
 - name: memory_manager
 - name: memory_manager_region
 - name: device

@@ -20,6 +20,7 @@ include:
 source:
 - path: src/sl_dma_descriptor_allocator.c
 requires:
+- name: log_none
 - name: memory_manager
 - name: device_peripheral
 - name: status

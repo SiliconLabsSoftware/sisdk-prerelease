@@ -8,6 +8,9 @@ description: >
 
   Defines ZAF_CONFIG_DEVICE_OPTION_MASK and ZAF_CONFIG_APP_ROLE_TYPE are automatically set by this component.
 
+documentation:
+  docset: z-wave
+  document: z-wave-development-basics/#z-wave-plus-device-type-and-role-type-specifications
 package: zwave
 quality: production
 metadata:

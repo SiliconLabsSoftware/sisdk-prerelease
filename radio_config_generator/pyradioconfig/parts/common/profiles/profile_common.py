@@ -48,7 +48,6 @@ def buildCrcInputs(model, profile):
 
 
 def buildCrcOutputs(model, profile):
-    # These are named differently in 90nm parts vs Panther
     if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('CRC_CTRL_PADCRCINPUT', 'crc')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('CRC_CTRL_BITSPERWORD', 'crc')))
@@ -117,9 +116,6 @@ def buildFecOutputs(model, profile):
     profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FECCTRL_FORCE2FSK', 'fec')))
     profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FECCTRL_CONVHARDERROR', 'fec')))
 
-    # NOTE: We are purposely removing FRC_CONVRAMADDR_CONVRAMADDR from the profile outputs because it needs to be
-    # written by the SW to a buffer allocated in a specific RAM region, no point simply writing it to 0x00000000
-    # profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_CONVRAMADDR_CONVRAMADDR', 'fec')))
 
     profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_TRAILTXDATACTRL_TRAILTXDATA', 'fec')))
     profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_TRAILTXDATACTRL_TRAILTXDATACNT', 'fec')))
@@ -146,7 +142,6 @@ def buildFrameInputs(model, profile):
     MIN_HEADER_LENGTH = 1
     MAX_HEADER_LENGTH = 254
     MAX_FRAME_TYPE_LENGTH = 0xffff
-    # Inputs
     IProfile.make_optional_input(profile, model.vars.frame_bitendian, 'frame_general',
                                  default=model.vars.frame_bitendian.var_enum.LSB_FIRST,
                                  readable_name="Frame Bit Endian")
@@ -157,9 +152,7 @@ def buildFrameInputs(model, profile):
                                  readable_name="Header Enable")
     IProfile.make_optional_input(profile, model.vars.frame_coding, 'frame_general',
                                  default=model.vars.frame_coding.var_enum.NONE, readable_name="Frame Coding Method")
-    # IProfile.make_required_input(profile, model.vars.accept_crc_errors, 'frame', default=False)
 
-    # -- Payload --
     IProfile.make_optional_input(profile, model.vars.payload_white_en, 'frame_payload', default=False,
                                  readable_name="Payload Whitening Enable")
     IProfile.make_optional_input(profile, model.vars.payload_crc_en, 'frame_payload', default=True,
@@ -171,31 +164,24 @@ def buildFrameInputs(model, profile):
         IProfile.make_hidden_input(profile, model.vars.payload_excludesubframewcnt_en, 'frame_payload',
                                    readable_name="Exclude words in subframe from Word Couunter")
 
-    # -- Header --
     IProfile.make_optional_input(profile, model.vars.header_size, 'frame_header', default=1,
                                  readable_name="Header Size", value_limit_min=MIN_HEADER_LENGTH,
                                  value_limit_max=MAX_HEADER_LENGTH)
     IProfile.make_optional_input(profile, model.vars.header_calc_crc, 'frame_header', default=False,
                                  readable_name="CRC Header")
-    # IProfile.make_required_input(profile, model.vars.header_include_crc, 'frame_header', readable_name="Insert/Check CRC after header", default=False, default_visibility=ModelInputDefaultVisibilityType.HIDDEN))
     IProfile.make_optional_input(profile, model.vars.header_white_en, 'frame_header', default=False,
                                  readable_name="Whiten Header")
     if model.part_family.lower() not in ['dumbo', 'unit_test_part']:
         IProfile.make_hidden_input(profile, model.vars.header_addtrailtxdata_en, 'frame_header',
                                    readable_name="Add Trail TX Data to subframe")
     if model.part_family.lower() not in ["dumbo", "jumbo", "unit_test_part"]:
-        # TODO Is this correct?  Do we include this in Nixi?
         IProfile.make_hidden_input(profile, model.vars.header_excludesubframewcnt_en, 'frame_payload',
                                    readable_name="Exclude words in subframe from Word Couunter")
 
-    # -- Fixed Length --
-    # RAIL doesn't support packets longer than 255 (appended info inclusive) so restrict this.
-    # I do realize that header+frame_fixed_length can possibly exceed this.
     IProfile.make_optional_input(profile, model.vars.fixed_length_size, 'frame_fixed_length', default=1,
                                  readable_name="Fixed Payload Size", value_limit_min=MIN_FRAME_LENGTH,
                                  value_limit_max=MAX_FRAME_LENGTH)
 
-    # -- Variable Length --
     IProfile.make_optional_input(profile, model.vars.var_length_numbits, 'frame_var_length', default=8,
                                  readable_name="Variable Length Bit Size", value_limit_min=1, value_limit_max=12)
     IProfile.make_optional_input(profile, model.vars.var_length_bitendian, 'frame_var_length',
@@ -216,7 +202,6 @@ def buildFrameInputs(model, profile):
                                  readable_name="Variable Frame Length Adjust", value_limit_min=-4096,
                                  value_limit_max=4095)
 
-    # -- Frame Type --
     IProfile.make_optional_input(profile, model.vars.frame_type_loc, 'frame_type_length', default=0,
                                  readable_name="Frame Type Location", value_limit_min=0, value_limit_max=255)
     IProfile.make_optional_input(profile, model.vars.frame_type_bits, 'frame_type_length', default=3,
@@ -303,7 +288,6 @@ def buildFrameOutputs(model, profile):
 
     profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_MAXLENGTH_MAXLENGTH', 'frame')))
 
-    # These are named differently in 90nm parts vs Panther
     if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
 
         if model.part_family.lower() not in ['dumbo', 'unit_test_part']:
@@ -358,7 +342,6 @@ def buildFrameOutputs(model, profile):
             profile.outputs.append(ModelOutput(model.vars.FRC_CTRL_RATESELECT, '', ModelOutputType.SVD_REG_FIELD,
                                                readable_name='FRC.CTRL.RATESELECT'))
 
-    # These are named differently in 90nm parts vs Panther
     if model.part_family.lower() not in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD0_ADDTRAILTXDATA', 'frame')))
         profile.outputs.append(eval(_buildModelOutputStringFromRegisterField('FRC_FCD0_SKIPWHITE', 'frame')))
@@ -403,7 +386,6 @@ def buildFrameOutputs(model, profile):
         profile.outputs.append(ModelOutput(model.vars.FRC_CTRL_RATESELECT, '', ModelOutputType.SVD_REG_FIELD,
                                            readable_name='FRC.CTRL.RATESELECT'))
 
-    # Output software variables
     profile.outputs.append(ModelOutput(model.vars.generic_lookup_tables, '', ModelOutputType.SW_VAR,
                                        readable_name='Generic Lookup Tables'))
 
@@ -486,7 +468,6 @@ def buildLongRangeOutputs(model, profile):
 
 
 def build_ircal_sw_vars(model, profile):
-    # Output Software Variables
     profile.outputs.append(
         ModelOutput(model.vars.ircal_auxndiv, '', ModelOutputType.SW_VAR, readable_name='IRCAL auxndiv'))
     profile.outputs.append(
@@ -516,7 +497,6 @@ def build_ircal_sw_vars(model, profile):
     profile.outputs.append(
         ModelOutput(model.vars.ircal_bestconfig, '', ModelOutputType.SW_VAR, readable_name='IRCAL bestconfig'))
 
-    # All but one (agcrssiperiod) of these were created for backwards compatibility with RAIL 1.x - remove in RAIL 2.x
     profile.outputs.append(
         ModelOutput(model.vars.ircal_agcrssiperiod, '', ModelOutputType.SW_VAR, readable_name='IRCAL agcrssiperiod'))
     profile.outputs.append(ModelOutput(model.vars.ircal_useswrssiaveraging2, '', ModelOutputType.SW_VAR,

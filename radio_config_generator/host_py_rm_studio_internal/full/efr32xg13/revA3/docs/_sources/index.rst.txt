@@ -1,0 +1,17 @@
+
+EFR32XG13XFULL Rev A3 Studio Register Map Package
+===========================================================================
+
+Contents:
+
+.. toctree::
+   :maxdepth: 3
+
+   EFR32XG13XFULL
+
+Indices and Tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

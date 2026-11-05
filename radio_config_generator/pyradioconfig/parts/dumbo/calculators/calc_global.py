@@ -6,5 +6,4 @@ class CALC_Global_dumbo(CALC_Global):
 
     def buildVariables(self, model):
 
-        #Build variables from the global calculations
         super().buildVariables(model)

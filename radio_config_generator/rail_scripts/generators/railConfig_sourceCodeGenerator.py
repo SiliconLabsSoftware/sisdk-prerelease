@@ -46,6 +46,7 @@ class RAILConfig_generator:
     self.jinja_env.filters['last16'] = self.last16
     self.jinja_env.filters['endOfSequence'] = self.endOfSequence
     self.jinja_env.globals['storeInRam'] = self.storeInRam
+    self.jinja_env.globals['storeInRamInclude'] = self.storeInRamInclude
     self.jinja_env.globals['zip'] = zip
 
     # Register the templates
@@ -218,8 +219,21 @@ class RAILConfig_generator:
   def storeInRam(self):
     string = ""
 
-    if self.series == 3 and self.context.get("rail_secondary_config", False):
+    if self.series == 3 and self.context.get("rail_secondary_config", False) and 'ble' not in self.context['filename']:
       string = "SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)\n"
+    return string
+
+  def storeInRamInclude(self):
+    string = ""
+
+    if self.series == 3 and self.context.get("rail_secondary_config", False) and 'ble' not in self.context['filename']:
+      string = """
+#if defined(__ICCARM__)
+// IAR doesn't support copying const data (in flash) to RAM.
+#define SL_CODE_CLASSIFY(a, ...) /* no-op */
+#else
+#include "sl_code_classification.h"
+#endif"""
     return string
 
   # Render function to encapsulate jinja

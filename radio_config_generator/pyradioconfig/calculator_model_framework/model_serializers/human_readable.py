@@ -15,21 +15,16 @@ class Human_Readable(object):
     git_branch = None
     git_commit = None
 
-    #
-    # Print a modem_model object to a humanly readable file.
-    #
     @staticmethod
     def print_modem_model_values_v2(outputfilename, phy_name, modem_model, show_do_not_care=True, phy_guid=None):
 
         output_lines = list()
 
-        # meta data here
         output_lines.append('metadata.version = {}'.format(__version__))
         Human_Readable._get_git_branch_and_commit()
         output_lines.append('metadata.git_branch = {}'.format(Human_Readable.git_branch))
         output_lines.append('metadata.git_commit = {}'.format(Human_Readable.git_commit))
 
-        #Show the PHY name
         line = 'info.config_name = ' + str(phy_name)
         output_lines.append(line)
 
@@ -37,13 +32,11 @@ class Human_Readable(object):
             line = 'info.phy_guid = ' + str(phy_guid)
             output_lines.append(line)
 
-        #Show the part family and revision
         line = 'info.part_family = ' + str(modem_model.part_family)
         output_lines.append(line)
         line = 'info.part_revision = ' + str(modem_model.part_revision)
         output_lines.append(line)
 
-        #Show the execution target
         line = 'info.target = ' + str(modem_model.target)
         output_lines.append(line)
 
@@ -54,7 +47,6 @@ class Human_Readable(object):
             line = 'info.phy.locked = ' + str(phy_locked)
             output_lines.append(line)
 
-        #If this is a PROD PHY, then also print the PHY this points to
         phy_obj = getattr(modem_model,'phy',None)  #When processing ISC files, phy may be None
         if phy_obj is not None:
             phy_points_to = phy_obj.phy_points_to
@@ -64,7 +56,6 @@ class Human_Readable(object):
 
         profile = modem_model.profile # should only be one profile!
 
-        #Print all non-register calculator variables that are forced as "config" (includes profile inputs, other forced vars)
         for var in modem_model.vars:
             if var._value_forced is not None and var.svd_mapping is None:
                 line = "config.%s = %s" % (var.name, Human_Readable._py2_str_format(var._value_forced))
@@ -72,7 +63,6 @@ class Human_Readable(object):
 
         for output in profile.outputs:
 
-            # Print all overridden Profile Outputs as "forced"
             if output.override is not None:
                 if (output.output_type is ModelOutputType.SVD_REG_FIELD) or (output.output_type is ModelOutputType.SEQ_REG_FIELD):
                     var = getattr(modem_model.vars, output.var_name)
@@ -86,14 +76,12 @@ class Human_Readable(object):
             if (output.var_value is not None and not output.var.value_do_not_care) or (output.var.value_do_not_care and show_do_not_care):
                 var = getattr(modem_model.vars, output.var_name)
 
-                # Print all non-overridden register Profile Outputs as "rm"
                 if (output.output_type is ModelOutputType.SVD_REG_FIELD) or (output.output_type is ModelOutputType.SEQ_REG_FIELD):
                     if var.value_do_not_care:
                         line = "rm.%s = X" % (var.svd_mapping)
                     else:
                         line = "rm.%s = %s" % (var.svd_mapping, Human_Readable._py2_str_format(output.var_value))
 
-                # Print all non-overridden non-register Profile Outputs as "info" (e.g. RAIL outputs)
                 else:
                     line = "info.%s = %s" % (output.var_name, Human_Readable._py2_str_format(output.var_value, output.var.var_type))
                 if len(var._access_write) > 0:
@@ -108,16 +96,13 @@ class Human_Readable(object):
                 try:
                     if var._value_calc is not None:
 
-                        #Only output actual or calculated information if the variable is not forced
                         if not ((var._value_forced is not None) or
                            hasattr(profile.forces, var.name) or
                            hasattr(profile.outputs, var.name)):
 
-                            #Print all _actual variables as "actual"
                             if var.name.endswith(ICalculator.actual_suffix):
                                 line = "actual.%s = %s" % (var.name, Human_Readable._py2_str_format(var._value_calc))
 
-                            #Print all other non-register variables as "calculated"
                             else:
                                 line = "calculated.%s = %s" % (var.name, Human_Readable._py2_str_format(var._value_calc, name=var.name))
 
@@ -130,15 +115,12 @@ class Human_Readable(object):
                 except ModelVariableEmptyValue:
                     pass
 
-        # Sort once and reuse across all three output files
         sorted_lines = sorted(output_lines)
 
-        # Sort the lines and write them to a file
         outputfile = open(outputfilename, 'w')
         outputfile.write('\n'.join(sorted_lines) + '\n')
         outputfile.close()
 
-        # For easier diffing of values only between part families, output same data without [access_write] data to a second file
         outputfile = open(outputfilename.replace('.cfg','.cfg_values_only'), 'w')
         outputfile.write('\n'.join(
             line[:line.find('[')].strip() if line.find('[') > 0 else line
@@ -154,15 +136,12 @@ class Human_Readable(object):
                 if var._value_calc is not None:
                     if var._value_calc == var._value_forced:
                         line = "        %s = %d:  Calculated value matches forced value." % (var.name, var.value_forced)
-                        #print(line)
                         output_lines.append(line)
 
         return output_lines
 
     @staticmethod
     def _py2_str_format(var_value, var_type=None, name=None):
-        # special function catch differences in Python 2 and 3
-        # Python 2 rounds floats to 12 significant digits when converting to string, actual values are identical
         value = var_value
         if sys.version_info[0] > 2:
             if type(var_value) == float:
@@ -174,7 +153,6 @@ class Human_Readable(object):
             elif isinstance(var_value, list):
                 if var_type == long:
                     if any(abs(n)>(0x7fffffff) for n in var_value):
-                        # Py3 doesn't add the "L" suffix to long values, since there are no longs, everything is an int
                         value = str(var_value)
                         if 'L' not in value:
                             value = value.replace(',', 'L,')

@@ -16,7 +16,7 @@
  *           |                                             |                                       |
  *   Critical App Event                                2sec timeout                        Stay-awake expires
  *   Update 2 sec stay-awake                            (extend if needed)                  (automatic sleep)
- *   zpal_radio_update_stay_awake(2000ms)                                                          |
+ *   Stack linger delay configured in ZW_linger module                                            |
  *           |                                                                                     |
  *           |<------------- Application Event Processing --------->|                              |
  *           |                                                      |                              |
@@ -24,11 +24,6 @@
  *        Event                                                App Event                     after timeout
  *
  * @endverbatim
- *
- * - If the device is a sleeping listening (FLiRS) device, the ZAF_FLiRS_StayAwake
- *   function will be called when calling zaf_stay_awake. If the device is a
- *   sleeping reporting (never listening) device supporting CC_Wake_Up, the
- *   CC_WakeUp_stay_awake_if_active function will be called when calling zaf_stay_awake.
  *
  */
 
@@ -47,7 +42,6 @@
 #include <ZAF_nvm_app.h>
 #include <ZAF_nvm.h>
 #include "zpal_nvm.h"
-#include "zaf_config_api.h"
 #include <zaf_cc_list_generator.h>
 #include <ZW_system_startup_api.h>
 #include "zaf_event_distributor.h"
@@ -66,8 +60,6 @@ static SCommandClassSet_t m_CCSet;
 #define CP_MAX_SUBSCRIBERS  3
 
 #define PM_STAY_AWAKE_DURATION_LEARN_MODE   (1000 * 10)         // [ms]
-
-static void ZAF_FLiRS_StayAwake(void);
 
 static bool invoke_init(CC_handler_map_latest_t const * const p_cc_entry, __attribute__((unused)) zaf_cc_context_t context)
 {
@@ -140,31 +132,12 @@ void ZAF_Init(TaskHandle_t AppTaskHandle, SApplicationHandles *pAppHandles)
     assert(false);
   }
 
-  // Reset the wake up callback.
-  zaf_set_stay_awake_callback(NULL);
-
   // Initialize command classes that have registered an init function.
   // Don't pass a context because invoke_init() doesn't require it.
   ZAF_CC_foreach(invoke_init, NULL);
 
   // All command class init callbacks have completed. Start command class startup callbacks.
   ZAF_CC_foreach(invoke_startup, NULL);
-
-  // Check if the wake up callback was NOT set by a command class (CC Wake Up).
-  if (NULL == zaf_get_stay_awake_callback()) {
-    // The wake up callback was NOT set. Hence, CC Wake Up is not linked. Now check the role type.
-
-    uint8_t role_type = zaf_config_get_role_type();
-
-    if (ZWAVEPLUS_INFO_REPORT_ROLE_TYPE_END_NODE_SLEEPING_LISTENING == role_type) {
-      // Role type is "sleeping listening" (FLiRS) - set the stay awake callback.
-      zaf_set_stay_awake_callback(ZAF_FLiRS_StayAwake);
-    } else {
-      // Role type doesn't require a stay awake function - do nothing.
-    }
-  } else {
-    // The wake up callback was set by a command class - do nothing.
-  }
 
   Transport_OnApplicationInitSW();
 
@@ -187,33 +160,10 @@ void ZAF_Reset(void)
   ZAF_CC_foreach(invoke_reset, NULL);
 }
 
-/**
- * Keeps a FLiRS application awake for 2 seconds.
- *
- * The 2 seconds are specified for the Listening Sleeping role type.
- *
- * RT:08.11.0005.1 The LSEN MUST stay awake for at least 2 seconds after communicating.
- */
-static void ZAF_FLiRS_StayAwake(void)
-{
-  static zpal_radio_stay_awake_id_t stay_awake_id = 0;
-  ZPAL_LOG_DEBUG(ZPAL_LOG_ZAF_COMMON, "\r\nZAF_FLiRS_StayAwake\r\n");
-  zpal_radio_update_stay_awake(&stay_awake_id, 2000);
-}
-
 TaskHandle_t ZAF_getAppTaskHandle(void)
 {
   assert(m_AppTaskHandle);
   return m_AppTaskHandle;
-}
-
-void zaf_stay_awake(void)
-{
-  zaf_wake_up_callback_t callback = zaf_get_stay_awake_callback();
-
-  if (NULL != callback) {
-    callback();
-  }
 }
 
 ZW_WEAK void

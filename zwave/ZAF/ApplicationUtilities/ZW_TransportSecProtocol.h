@@ -55,26 +55,6 @@ ApplicationCommandHandler(void *pSubscriberContext, SZwaveReceivePackage* pRxPac
  */
 uint8_t Transport_OnApplicationInitSW(void);
 /**
- * @brief Register the new node id in the transport layer after learn mode completes.
- *
- * This function must be called in LearnCompleted application function
- *
- * @deprecated Use ZAF_Transport_OnLearnCompleted().
- *
- * @param nodeID The newly assigned node id.
- * @return true on success.
- */
-uint8_t
-Transport_OnLearnCompleted(node_id_t nodeID);
-
-/**
- * Updates the active NIF depending on learn mode result.
- *
- * Must be invoked when learn mode has completed (on inclusion/exclusion).
- */
-void ZAF_Transport_OnLearnCompleted(void);
-
-/**
  * Returns whether a given command is supported.
  *
  * @param commandClass Command class to check for.

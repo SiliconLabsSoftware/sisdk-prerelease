@@ -883,7 +883,7 @@ extern "C" {
     }                                                                          \
   } while (0)
 #else
-#define SL_PRINT_FMT_INFO(fmt, ...)  do { sl_printf_common(INFO, fmt, ##__VA_ARGS__); } while (0)
+#define SL_PRINT_FMT_INFO(fmt, ...)  do { (void)sizeof(fmt); } while (0)
 #endif
 
 /** @brief Print debug-level message via the active backend's target-side printf. */
@@ -896,7 +896,7 @@ extern "C" {
     }                                                                          \
   } while (0)
 #else
-#define SL_PRINT_FMT_DEBUG(fmt, ...) do { sl_printf_common(DBG, fmt, ##__VA_ARGS__); } while (0)
+#define SL_PRINT_FMT_DEBUG(fmt, ...) do { (void)sizeof(fmt); } while (0)
 #endif
 
 /** @brief Print warning-level message via the active backend's target-side printf. */
@@ -909,7 +909,7 @@ extern "C" {
     }                                                                          \
   } while (0)
 #else
-#define SL_PRINT_FMT_WARN(fmt, ...)  do { sl_printf_common(WRN, fmt, ##__VA_ARGS__); } while (0)
+#define SL_PRINT_FMT_WARN(fmt, ...)  do { (void)sizeof(fmt); } while (0)
 #endif
 
 /** @brief Print error-level message via the active backend's target-side printf. */
@@ -922,7 +922,7 @@ extern "C" {
     }                                                                          \
   } while (0)
 #else
-#define SL_PRINT_FMT_ERROR(fmt, ...) do { sl_printf_common(ERR, fmt, ##__VA_ARGS__); } while (0)
+#define SL_PRINT_FMT_ERROR(fmt, ...) do { (void)sizeof(fmt); } while (0)
 #endif
 
 /** @brief Print crash-level message via the active backend's target-side printf.

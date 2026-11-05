@@ -2,5 +2,4 @@ from pyradioconfig.parts.nerio.calculators.calc_sidewalk import CalcSidewalkNeri
 
 
 class CalcSidewalkOcelot(CalcSidewalkNerio):
-    #Import all from Nerio
     pass

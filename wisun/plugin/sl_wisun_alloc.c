@@ -45,15 +45,6 @@ static void sli_wisun_heap_init(void)
     }
 }
 
-static uint32_t sli_wisun_get_block_length(void *ptr)
-{
-    if (!sl_wisun_is_heap_block(ptr)) {
-        return 0;
-    }
-    sli_block_metadata_t *block = (sli_block_metadata_t *)((uint8_t *)ptr - SLI_BLOCK_METADATA_SIZE_BYTE);
-    return SLI_BLOCK_LEN_DWORD_TO_BYTE(sli_block_len_dword_decode(block));
-}
-
 /*****************************************************************************/
 // Public APIs
 // These APIs are used by the security components to allocate and free memory
@@ -95,7 +86,7 @@ void *sl_wisun_realloc(void *ptr, size_t size)
         sl_wisun_trace_debug("wisun_realloc(%"PRIu32"): fallback", (uint32_t)size);
         new_ptr = sl_malloc(size);
         if (new_ptr) {
-            memcpy(new_ptr, ptr, MIN(sli_wisun_get_block_length(ptr), size));
+            memcpy(new_ptr, ptr, MIN(sli_memory_get_block_length(ptr), size));
             sl_wisun_free(ptr);
         }
     }

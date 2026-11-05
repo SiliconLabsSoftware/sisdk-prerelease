@@ -167,11 +167,6 @@
 // <i> is placed in the Secure domain.
 #define SL_MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS 1
 
-// <q SL_PSA_DRIVERS_ENABLED> Enable Silicon Labs' PSA Crypto drivers.
-// <i> Default: 1
-// <i> Enable PSA drivers for hardware acceleration and secure key handling.
-#define SL_PSA_DRIVERS_ENABLED 1
-
 // </h>
 
 // <<< end of configuration section >>>
@@ -179,6 +174,7 @@
 // -----------------------------------------------------------------------------
 // Sub-files
 
+#include "sl_psa_driver_enable_config.h"
 #include "sli_mbedtls_omnipresent.h"
 
 #if SL_PSA_DRIVERS_ENABLED

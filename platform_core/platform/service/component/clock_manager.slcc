@@ -213,9 +213,6 @@ template_contribution:
   condition: [device_has_ext_mem]
 validation_helper:
 - path: clock_manager_validation.lua
-  condition: [device_series_2]
-- path: clock_manager_validation.lua
-  condition: [device_generic_family_sixx301]
 documentation:
   docset: gecko-platform
   document: platform-service/clock-manager

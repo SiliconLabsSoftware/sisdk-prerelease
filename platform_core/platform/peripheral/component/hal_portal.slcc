@@ -16,6 +16,7 @@ provides:
 - name: hal_portal
   condition: [device_has_portal]
 requires:
+- name: log_none
 - name: device
 - name: device_portal
 - name: cmsis_core

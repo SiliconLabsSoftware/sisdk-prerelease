@@ -12,31 +12,49 @@ requires:
 - name: trustzone_nonsecure
 template_contribution:
 - name: tfm_interface_func
-  value: tfm_crypto_hash_compute
+  value:
+    function: tfm_crypto_hash_compute
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_hash_compare
+  value:
+    function: tfm_crypto_hash_compare
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_hash_setup
+  value:
+    function: tfm_crypto_hash_setup
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_hash_update
+  value:
+    function: tfm_crypto_hash_update
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_hash_finish
+  value:
+    function: tfm_crypto_hash_finish
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_hash_compute
+  value:
+    function: tfm_crypto_hash_compute
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_hash_verify
+  value:
+    function: tfm_crypto_hash_verify
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_hash_abort
+  value:
+    function: tfm_crypto_hash_abort
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_hash_clone
+  value:
+    function: tfm_crypto_hash_clone
+    key_checks: []
 
 documentation:
   url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf

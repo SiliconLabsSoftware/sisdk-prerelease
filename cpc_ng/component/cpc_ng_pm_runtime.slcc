@@ -6,7 +6,7 @@ description: |
   when idle while still waking on peer traffic or GPIO.
 
   Install on any end that uses wake-in or driver runtime PM; configuration lives
-  in the CPC driver instance headers.
+  in each CPC driver instance's pm_runtime config header.
 category: Services|CPC-NG|Internal
 quality: experimental
 label: CPC-NG Runtime PM

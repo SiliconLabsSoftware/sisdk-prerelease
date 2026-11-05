@@ -3,10 +3,12 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from pyradioconfig.parts.jumbo.phys.phy_internal_base import Phy_Internal_Base
 
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 class PHYS_Datasheet(IPhy):
 
-    ###Unique PHYs###
+    ip_category = IPCategory.LPW
+
 
     def PHY_Datasheet_2450M_2GFSK_2Mbps_1M(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='2450M 2GFSK 2Mbps 1M', phy_name=phy_name)
@@ -20,10 +22,6 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.bandwidth_hz.value = 2400000
 
     def PHY_Datasheet_915M_2GFSK_2Mbps_500K(self, model, phy_name=None):
-        # Formerly PHY_Internal_915M_2GFSK_2Mbps_500K in Package/pyradioconfig/parts/dumbo/phys/Phys_Internal.py
-        # Migrated to here during MCUW_RADIO_CFG-815 Purge stale internal PHYs
-        # and restored as a datasheet PHY in
-        # MCUW_RADIO_CFG-1017 restore Internal PHY as Datasheet PHY on Dumbo and Jumbo PHY_Internal_915M_2GFSK_2Mbps_500K
         phy = self._makePhy(model, model.profiles.Base, readable_name='915M 2GFSK 2Mbps 500K', phy_name=phy_name)
 
         Phy_Internal_Base.GFSK_915M_base(phy, model)
@@ -113,11 +111,8 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.symbols_in_timing_window.value = 14
 
         if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
-            # Series 1
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_297KHz
         else:
-            #  Series 2
-            #TODO: FIXME: 750KHz is the narrowest TX BW Series 2 has defined..... Much larger than Series 1
             LogMgr.Warning("  WARNING: 750KHz is the narrowest TX BW Series 2 has defined..... Much larger than Series 1")
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_750KHz
 
@@ -169,7 +164,6 @@ class PHYS_Datasheet(IPhy):
         if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_297KHz
         else:
-            #  Series 2
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_750KHz
 
         phy.profile_inputs.antdivmode.value = model.vars.antdivmode.var_enum.ANTSELRSSI
@@ -191,7 +185,6 @@ class PHYS_Datasheet(IPhy):
 
         Phy_Internal_Base.GFSK_915M_base(phy, model)
 
-        # Add values to existing inputs
         phy.profile_inputs.base_frequency_hz.value =  long(434000000)
         phy.profile_inputs.bitrate.value = 9600
         phy.profile_inputs.channel_spacing_hz.value = 1000000
@@ -227,12 +220,9 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.bandwidth_hz.value = 10000
         phy.profile_inputs.symbols_in_timing_window.value = 14
         if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
-            # Series 1
             phy.profile_inputs.pll_bandwidth_rx.value = model.vars.pll_bandwidth_rx.var_enum.BW_354KHz
         else:
-            # Series 2
             LogMgr.Warning("  WARNING: 300KHz is the widest RX BW Series 2 has defined..... Series 1 used 354kHz here")
-            # TODO: FIXME: 300KHz is the widest RX BW Series 2 has defined..... Series 1 used 354kHz here
             phy.profile_inputs.pll_bandwidth_rx.value = model.vars.pll_bandwidth_rx.var_enum.BW_300KHz
 
     def PHY_Datasheet_169M_2GFSK_2p4Kbps_1p2K_ETSI(self, model, phy_name=None):
@@ -263,7 +253,6 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.bitrate.value = 600
         phy.profile_inputs.deviation.value = 300
 
-    ###Base Functions###
 
     def Datasheet_2GFSK_500Kbps_125K_base(self, phy, model):
 
@@ -300,7 +289,6 @@ class PHYS_Datasheet(IPhy):
         phy.profile_inputs.bitrate.value = 2400
         phy.profile_inputs.deviation.value = 1200
 
-    ###Derivative PHYs###
 
     def PHY_Datasheet_868M_2GFSK_500Kbps_125K(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='868M 2GFSK 500Kbps 125K', phy_name=phy_name)

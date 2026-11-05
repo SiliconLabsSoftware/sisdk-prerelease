@@ -6,6 +6,9 @@ description: >
   for 800 series processor types, both for end devices and controllers.
   This component is mandatory for the SiliconLabs provided Z-Wave sample applications and
   it is essential for the proper functioning of the Z-Wave production environment.
+documentation:
+  docset: z-wave
+  document: z-wave-getting-started-for-end-devices/08-debug-a-z-wave-application
 package: zwave
 quality: production
 ui_hints:

@@ -136,7 +136,7 @@ static void send_frame(sl_uart_handle_t *uart_handle, struct sli_cpc_drv_uart_tx
   const sl_cpc_frame_t *frame = tx->frame;
   sl_status_t status;
 
-  // process_tx() ensures send_frame is protected until tx->frame is cleared again.
+  // process_tx() only calls send_frame() while the UART driver TX is idle.
   SLI_CPC_ASSERT(frame != NULL);
   tx->header.sof = SLI_CPC_DRV_UART_SOF;
   memcpy(&tx->header.hdr, &frame->hdr, sizeof(tx->header.hdr));
@@ -295,24 +295,17 @@ static bool process_header(struct sl_cpc_drv_uart *drv)
  ******************************************************************************/
 static void process_tx(sl_uart_handle_t *uart_handle, struct sl_cpc_drv_uart *drv)
 {
-  sl_cpc_frame_t *frame;
   struct sli_cpc_drv_uart_tx *tx = &drv->tx;
-  MCU_DECLARE_IRQ_STATE;
 
-  // Atomically set tx->frame if it is not already NULL (active transfer)
-  // or the pending frame list is empty.
-  MCU_ENTER_ATOMIC();
-  frame = NULL;
-  if (tx->frame == NULL) {
-    frame = sli_cpc_frame_list_pop(&tx->pending_frame_list);
-    if (frame != NULL) {
-      tx->frame = frame;
-    }
+  if (sl_uart_async_is_tx_active(uart_handle)) {
+    // Driver is active, the TX-complete callback will pick up the next frame.
+    return;
   }
-  MCU_EXIT_ATOMIC();
 
-  // send_frame is only called if the tx->frame validations above are successful.
-  if (frame != NULL) {
+  // Driver is idle, so drv->tx is safe to handle, as no TX-complete interrupts can occur.
+  SLI_CPC_ASSERT(tx->frame == NULL);
+  tx->frame = sli_cpc_frame_list_pop(&tx->pending_frame_list);
+  if (tx->frame != NULL) {
     send_frame(uart_handle, tx);
   }
 }
@@ -446,7 +439,7 @@ static void on_rx_frame_free(sl_cpc_bus_t *bus)
  * A payload frame consists of multiple UART writes, so intermediate write
  * completions are ignored. The final write completion notifies the frame to
  * the core.
-   ******************************************************************************/
+ ******************************************************************************/
 static void on_async_tx_complete(sl_uart_handle_t *uart_handle, const void *data, size_t size, void *user_data,
                                  bool aborted)
 {

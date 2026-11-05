@@ -32,7 +32,7 @@
 #include "sli_watchdog_manager.h"
 #include "sl_watchdog_manager_config.h"
 #include "sli_watchdog_manager_hal.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_common.h"
 #include "sl_core.h"
 #include "sl_hal_emu.h"
@@ -391,7 +391,7 @@ void sl_watchdog_manager_init(void)
 
   // Initialize HAL.
   sl_status_t status = sli_watchdog_manager_hal_init(SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
   (void)status; // Suppress unused variable warning in release builds.
 
   manager_state.initialized = true;
@@ -402,11 +402,11 @@ void sl_watchdog_manager_init(void)
  ******************************************************************************/
 void sl_watchdog_manager_start(void)
 {
-  EFM_ASSERT(manager_state.initialized);
+  SL_LOG_DEBUG_ASSERT(manager_state.initialized);
 
   if (!manager_state.started) {
     sl_status_t status = sli_watchdog_manager_hal_start();
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
     (void)status; // Suppress unused variable warning in release builds.
 
 #if SLI_WATCHDOG_MANAGER_USE_EM_TRANSITION_HOOK
@@ -447,7 +447,7 @@ sl_status_t sl_watchdog_manager_create(sl_watchdog_handle_t *handle,
     return SL_STATUS_NO_MORE_RESOURCE;
   }
 
-  EFM_ASSERT(new_handle < SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS);
+  SL_LOG_DEBUG_ASSERT(new_handle < SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS);
 
   // Store UID for this slot (for debugging / reset cause).
   manager_state.watchdog_uids[new_handle] = watchdog_uid;
@@ -494,7 +494,7 @@ sl_status_t sl_watchdog_manager_delete(sl_watchdog_handle_t *handle)
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
 
-  EFM_ASSERT(is_valid_handle(*handle));
+  SL_LOG_DEBUG_ASSERT(is_valid_handle(*handle));
 
   // Clear UID for this slot.
   manager_state.watchdog_uids[*handle] = 0;
@@ -570,7 +570,7 @@ sl_status_t sl_watchdog_manager_disable(sl_watchdog_handle_t *handle)
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
 
-  EFM_ASSERT(is_valid_handle(*handle));
+  SL_LOG_DEBUG_ASSERT(is_valid_handle(*handle));
   manager_state.enabled_mask &= ~(1u << *handle);
 
   // Update hardware watchdog state based on remaining enabled watchdogs.
@@ -602,7 +602,7 @@ sl_status_t sl_watchdog_manager_is_enabled(sl_watchdog_handle_t *handle,
     return SL_STATUS_INVALID_HANDLE;
   }
 
-  EFM_ASSERT(is_valid_handle(*handle));
+  SL_LOG_DEBUG_ASSERT(is_valid_handle(*handle));
   *is_enabled = (manager_state.enabled_mask & (1u << *handle)) != 0;
 
   return SL_STATUS_OK;
@@ -628,7 +628,7 @@ sl_status_t sl_watchdog_manager_enable(sl_watchdog_handle_t *handle)
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
 
-  EFM_ASSERT(is_valid_handle(*handle));
+  SL_LOG_DEBUG_ASSERT(is_valid_handle(*handle));
   manager_state.enabled_mask |= (1u << *handle);
 
   // Update hardware watchdog state based on enabled watchdogs.

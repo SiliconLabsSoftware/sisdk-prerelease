@@ -8,7 +8,7 @@
 #if defined(SL_CATALOG_KERNEL_PRESENT) && SL_CLI_TICK_ENABLE
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #endif // defined(SL_CATALOG_KERNEL_PRESENT)
 
 {% for instance in cli_instances %}#include "sl_cli_config_{{ instance }}.h"
@@ -79,7 +79,7 @@ void sl_cli_instances_init(void)
   instance_parameters.thread_cb = {{ instance }}_thread_cb;
   instance_parameters.stack = {{ instance }}_task_stack;
   instance_parameters.stack_size = (SL_CLI_{{ instance  | upper }}_TASK_STACK_SIZE * sizeof(void *)) & 0xFFFFFFF8u;
-  EFM_ASSERT(SL_CLI_{{ instance  | upper }}_TASK_PRIORITY < osPriorityISR);
+  SL_LOG_DEBUG_ASSERT(SL_CLI_{{ instance  | upper }}_TASK_PRIORITY < osPriorityISR);
   instance_parameters.prio = (osPriority_t)SL_CLI_{{ instance  | upper }}_TASK_PRIORITY;
   instance_parameters.start_delay_ms = SL_CLI_{{ instance  | upper }}_TASK_START_DELAY_MS;
   instance_parameters.loop_delay_ms = SL_CLI_{{ instance  | upper }}_TASK_LOOP_DELAY_MS;

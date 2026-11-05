@@ -308,7 +308,7 @@ bool sli_zigbee_direct_security_decrypt_packet(sl_802154_long_addr_t sourceEui, 
   uint32_t counter_from_packet;
   uint16_t ciphertext_len;
 
-  if (sli_zigbee_direct_ccm_key_id == 0 || dataLen <= ZIGBEE_DIRECT_DECRYPT_OVERHEAD
+  if (sli_zigbee_direct_ccm_key_id == 0 || dataLen < ZIGBEE_DIRECT_DECRYPT_OVERHEAD
       || (dataLen - ZIGBEE_DIRECT_DECRYPT_OVERHEAD) > 255) {
     return false;
   }

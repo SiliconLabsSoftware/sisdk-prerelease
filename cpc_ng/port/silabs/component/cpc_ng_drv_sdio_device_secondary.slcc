@@ -13,6 +13,15 @@ instantiable:
 config_file:
 - path: config/sl_cpc_drv_sdio_device_{{instance}}_config.h
   file_id: cpc_ng_drv_sdio_device_config
+- path: config/sl_cpc_drv_sdio_device_{{instance}}_kernel_config.h
+  file_id: cpc_ng_drv_sdio_device_kernel_config
+  condition: [kernel]
+- path: config/sl_cpc_drv_sdio_device_{{instance}}_pm_runtime_config.h
+  file_id: cpc_ng_drv_sdio_device_pm_runtime_config
+  condition: [cpc_ng_pm_runtime]
+- path: config/sl_cpc_drv_sdio_device_{{instance}}_wake_host_config.h
+  file_id: cpc_ng_drv_sdio_device_wake_host_config
+  condition: [cpc_ng_wake_host]
 provides:
 - name: cpc_ng_drv_sdio_device_secondary
 - name: cpc_ng_drv_secondary_instance

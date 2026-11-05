@@ -116,7 +116,7 @@ class RAILAdapter(object):
 
   # -------- Internal ---------------------------------------------------------
   # // TODO: Rename if we ever support anything other than writes
-  def _encodeWriteAddress(self, reg_address, write_length=1, radio_action=0):
+  def _encodeWriteAddress(self, reg_address, write_length=1, radio_action=0, set_clr_offset=0):
 
     if self.pte_script is False and self.wifi_script is False:
       try:
@@ -125,6 +125,7 @@ class RAILAdapter(object):
         # Toggle the address in the event of trustzone mismatch.
         reg_base = self._regBases[int((reg_address ^ 0x10000000)) & self._baseAddrMask]
       reg_offset = int(reg_address) & self._offsetAddrMask
+      reg_offset |= set_clr_offset  # offset to _SET or _CLR
 
       encodedAddress = (radio_action << 28) \
                        | (reg_base << 24) \
@@ -182,7 +183,7 @@ class RAILAdapter(object):
     elif self.series == 2:
       regBases = self._REG_BASES_EFR32XG2x
 
-      if family in ["sol"]:
+      if family in ["sol", "mercurio"]:
         # Sol has 16 base addresses because of its virtual registers defined at the same address.
         # So let's consider basePos is 24 which is not true since bit position 24 is for the VERIFY bit
         # but it's not used anyway
@@ -247,7 +248,7 @@ class RAILAdapter(object):
   def _getSeriesFromFamily(family):
     if family in ["dumbo", "jumbo", "nerio", "nixi"]:
       series = 1
-    elif family in ["panther", "lynx", "ocelot", "bobcat", "leopard", "margay", "caracal", "lion", "sol", "serval", "curl"]:
+    elif family in ["panther", "lynx", "ocelot", "bobcat", "leopard", "margay", "caracal", "lion", "lionu", "sol", "serval", "curl", "mercurio"]:
       series = 2
     else:
       series = 3

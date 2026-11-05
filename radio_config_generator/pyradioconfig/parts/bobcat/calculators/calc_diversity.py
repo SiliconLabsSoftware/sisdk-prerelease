@@ -11,11 +11,9 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Build variables from Ocelot
         calc_diversity_ocelot_obj = CALC_Diversity_Ocelot()
         calc_diversity_ocelot_obj.buildVariables(model)
 
-        # Internal variables
         self._addModelVariable(model, 'antdiv_switch_delay_us', float, ModelVariableFormat.DECIMAL, desc='Delay correlation samples after antenna switch.')
         self._addModelVariable(model, 'antdiv_switch_skip_us', float, ModelVariableFormat.DECIMAL, desc='Skip correlation samples after antenna switch.')
         self._addModelVariable(model, 'antdiv_freq_offset_bias', int, ModelVariableFormat.DECIMAL, desc='Antenna diversity frequency offset bias.')
@@ -29,7 +27,6 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
     def calc_diversity_default_configs(self, model):
         demod_sel = model.vars.demod_select.value
 
-        # : Assign default values to antenna diversity profile inputs on non-diversity phys
         model.vars.antdiv_enable_parallel_correlation.value = False
         model.vars.antdiv_switch_delay_us.value = 0.0
         model.vars.antdiv_switch_skip_us.value = 0.0
@@ -37,7 +34,6 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
         model.vars.antdiv_adpcsigampthr.value = 0
         model.vars.antdiv_adbbss_refamp.value = 0
 
-        # : Disable freq offset bias for coherent mode
         if demod_sel == model.vars.demod_select.var_enum.COHERENT:
             freq_offset_bias = 0
         else:
@@ -72,7 +68,6 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
         adpcwndsizechip = model.vars.MODEM_ADPC1_ADPCWNDSIZECHIP.value
         adpcwndcnt = model.vars.MODEM_ADPC1_ADPCWNDCNT.value
 
-        # : Calculate number of bauds (window size in chips times total number of windows)
         adpctimingbauds = adpcwndsizechip * adpcwndcnt
 
         self._reg_write(model.vars.MODEM_ADPC1_ADPCTIMINGBAUDS, adpctimingbauds)
@@ -108,21 +103,16 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
         baudrate_actual = model.vars.rx_baud_rate_actual.value
         adpcwndsizechip = model.vars.MODEM_ADPC1_ADPCWNDSIZECHIP.value
 
-        # : calculate chip period in us
         chip_period_us = 1.0 / baudrate_actual * 1e6  # chip_us
 
-        # : Convert delay/skip in us to number of chips
         delay_chips = delay_us / chip_period_us
         skip_chips = skip_us / chip_period_us
 
-        # : calculate buffer size and write size
         adpcantsampbuf = delay_chips * oversampling_rate_actual
         adpcantsampwrite = adpcantsampbuf + skip_chips * oversampling_rate_actual
 
-        # : calculate how long to stay on one antenna in number of adc samples
         adpcantsampswitch = (adpcwndsizechip + skip_chips) * oversampling_rate_actual
 
-        # : convert to int
         adpcantsampbuf_int = int(round(adpcantsampbuf))
         adpcantsampwrite_int = int(round(adpcantsampwrite))
         adpcantsampswitch_int = int(round(adpcantsampswitch))
@@ -143,24 +133,18 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
         adbacorrthr = model.vars.MODEM_ADQUAL6_ADBACORRTHR.value
         adbacorrdiff = model.vars.MODEM_ADQUAL6_ADBACORRDIFF.value
 
-        # : Enable or disable correlation threshold decision
         adbacorrthr_dis_val = 1 if adbacorrthr == 0 else 0
 
 
-        # : Enable or disable correlation difference decision
         adbacorrdiff_dis_val = 1 if adbacorrdiff == 0 else 0
 
-        # : Calculate frequency offset bias by converting to two's complement
         frequency_offset_bias_val = frequency_offset_bias + 32 if frequency_offset_bias < 0 else frequency_offset_bias
 
-        # : calculate
         if demod_sel == model.vars.demod_select.var_enum.COHERENT:
             adbarssithr_dis_val = 1
         else:
             adbarssithr_dis_val = 0
 
-        # : Register field definitions for adctrl1 does not exists in cmsis.
-        # : Manually define offsets for each field within adctrl1 register
         field_offsets_vals = {
             'QUAL_UPDATE_TDS'   : [0, 1],
             'FSM_RESET'         : [1, 0],
@@ -191,7 +175,6 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
             'FREQ_BIAS'         : [26, frequency_offset_bias_val],
         }
 
-        # : calculate ctrl1 register by applying offsets to each field
         adctrl1 = 0
         if adpcen == 1:
             adctrl1 = 0
@@ -212,8 +195,6 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
             wnd_rst_amp = 0
 
 
-        # : Register field definitions for adctrl2 does not exists in cmsis.
-        # : Manually define offsets for each field within adctrl2 register
         field_offsets_vals = {
             'PCORR_EN_BC' : [0,  1],
             'ANTSEL_DELAY': [11, 1],
@@ -226,7 +207,6 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
             'WND_RST_BBSS': [27, 0],
         }
 
-        # : calculate ctrl2 register by applying offsets to each field
         if adpcen == 1:
             adctrl2 = 0
             for field_name in field_offsets_vals:
@@ -239,7 +219,6 @@ class Calc_Diversity_Bobcat(CALC_Diversity_Ocelot):
     def calc_adpcsigampthr_reg(self, model):
         sigampthr_dec = model.vars.antdiv_adpcsigampthr.value
 
-        # compress ampthr to adpcsigampthr (ampthr = [7:4] << [3:0])
         i = 0
         while i < 16:
             div = round(sigampthr_dec / float(pow(2, i)))

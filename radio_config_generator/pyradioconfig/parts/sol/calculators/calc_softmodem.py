@@ -119,16 +119,12 @@ class calc_softmodem_sol(ICalculator):
                                desc='Band frequency (in MHz) for SUN PHYs')
 
     def calc_softmodem_defaults(self, model):
-        #This function assigns defaults to the softmodem vars so that other Profiles will correctly populate the vars
         model.vars.ofdm_option.value = model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz
         model.vars.sun_oqpsk_chiprate.value = model.vars.sun_oqpsk_chiprate.var_enum._100_KCPS
         model.vars.sun_oqpsk_spreading_mode.value = model.vars.sun_oqpsk_spreading_mode.var_enum.DSSS
 
     def calc_softmodem_modulation_type(self, model):
-        #For now, calculate the softmodem modulation type as None by default (must be manually set per softmodem PHY)
-        #We can sometimes predict this based on the modulation type and demod selected
 
-        #Read in model vars
         demod_select = model.vars.demod_select.value
         modulation_type = model.vars.modulation_type.value
 
@@ -137,8 +133,6 @@ class calc_softmodem_sol(ICalculator):
             if modulation_type == model.vars.modulation_type.var_enum.OFDM:
                 softmodem_modulation_type = model.vars.softmodem_modulation_type.var_enum.SUN_OFDM
             elif modulation_type == model.vars.modulation_type.var_enum.OQPSK:
-                #Assume SUN OQPSK for now, but need to either add code to predict LEGACY OQPSK or hard code this
-                #Probably calculate this based on the Profile selected once all Profiles are complete
                 softmodem_modulation_type = model.vars.softmodem_modulation_type.var_enum.SUN_OQPSK
             elif modulation_type == model.vars.modulation_type.var_enum.FSK2 or \
                     modulation_type == model.vars.modulation_type.var_enum.FSK4:
@@ -149,17 +143,14 @@ class calc_softmodem_sol(ICalculator):
         else:
             softmodem_modulation_type = model.vars.softmodem_modulation_type.var_enum.NONE
 
-        #Write the variable
         model.vars.softmodem_modulation_type.value = softmodem_modulation_type
 
     def calc_ofdm_interleaving_depth(self, model):
-        #By default set the interleaving depth to 1 symbol
 
         model.vars.ofdm_interleaving_depth.value = model.vars.ofdm_interleaving_depth.var_enum.ONE_SYMBOL
 
     def calc_fcs_type_802154(self, model):
 
-        #For the Wi-SUN Profiles, calc the CRC from the FCS that is specified in the Profile
         if 'sun' in model.profile.name.lower():
             fcs_type_802154 = model.vars.fcs_type_802154.value
             if fcs_type_802154 == model.vars.fcs_type_802154.var_enum.TWO_BYTE:
@@ -168,7 +159,6 @@ class calc_softmodem_sol(ICalculator):
                 crc_poly = model.vars.crc_poly.var_enum.ANSIX366_1979
             model.vars.crc_poly.value = crc_poly
 
-        #For the other Profiles, calculate the FCS type variable from the CRC Profile Input
         else:
             crc_poly = model.vars.crc_poly.value
             if crc_poly == model.vars.crc_poly.var_enum.CCITT_16:
@@ -179,10 +169,8 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_sun_fsk_fecsel(self, model):
 
-        #Read in model variables
         fec_en = model.vars.fec_en.value
 
-        #Translate between fec_en variable and the new FSK FEC variable
         if fec_en == model.vars.fec_en.var_enum.FEC_154G_NRNSC_INTERLEAVING:
             sun_fsk_fecsel = model.vars.sun_fsk_fecsel.var_enum.NRNSC_INTERLEAVING
         elif fec_en == model.vars.fec_en.var_enum.FEC_154G_RSC_INTERLEAVING:
@@ -192,21 +180,17 @@ class calc_softmodem_sol(ICalculator):
         else:
             sun_fsk_fecsel = model.vars.sun_fsk_fecsel.var_enum.NONE
 
-        #Write the variable
         model.vars.sun_fsk_fecsel.value = sun_fsk_fecsel
 
     def calc_sun_fsk_sfd(self, model):
 
-        #For now, always set to 0 by default
         model.vars.sun_fsk_sfd.value = 0
 
     def calc_band_freq_mhz_802154(self, model):
 
-        #Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         base_frequency_hz = model.vars.base_frequency_hz.value
 
-        #From 802154-2020 Table 10-14—Channel numbering for SUN PHYs
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OQPSK:
             if base_frequency_hz < 779.2e6:
                 band_freq_mhz_802154 = 470
@@ -221,18 +205,13 @@ class calc_softmodem_sol(ICalculator):
             else:
                 band_freq_mhz_802154 = 920
 
-            #Write the model var
             model.vars.band_freq_mhz_802154.value = band_freq_mhz_802154
 
     def calc_softmodem_dont_cares(self, model):
-        # We must be very careful with softmodem virtual regs and don't cares,
-        # because multiple regs share the same memory space
 
-        #Read in the softmodem modulation type used
         softmodem_modulation_type_actual = model.vars.softmodem_modulation_type.value
         softmodem_modulation_type_enum = model.vars.softmodem_modulation_type.var_enum
 
-        #Store softmodem reg prefixes in a dict
         softmodem_reg_prefixes = {
             softmodem_modulation_type_enum.SUN_OFDM:'SUNOFDM_',
             softmodem_modulation_type_enum.SUN_OQPSK:'SUNOQPSK_',
@@ -241,13 +220,11 @@ class calc_softmodem_sol(ICalculator):
             softmodem_modulation_type_enum.CW:'CW_'
         }
 
-        #Build a tuple of prefix strings we want to don't care
         prefix_tuple = ()
         for modulation_type in softmodem_reg_prefixes:
             if modulation_type != softmodem_modulation_type_actual:
                 prefix_tuple += (softmodem_reg_prefixes[modulation_type],)
 
-        #Set the don't cares
         for model_var in model.vars:
             if (model_var.name.startswith(prefix_tuple)) and (model_var.svd_mapping is not None):
                     model_var.value_do_not_care = True
@@ -258,7 +235,6 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_cw(self, model):
 
-        #Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
         dac_freq_actual = model.vars.dac_freq_actual.value
@@ -278,24 +254,18 @@ class calc_softmodem_sol(ICalculator):
             softmodem_tx_interpolation1_actual = model.vars.TXFRONT_INT1CFG_RATIO.value + 1
             softmodem_tx_interpolation2_actual = model.vars.TXFRONT_INT2CFG_RATIO.value + 1
 
-            #Copy modulation type into CW register
             modulation_field = softmodem_modulation_type
 
-            #Calculate tone frequency
-            # CW_tone_freq (Hz) = sampFreqHz * (freq/(2**16))
             freq_field = cw_freq / dac_freq_actual * softmodem_tx_interpolation1_actual * softmodem_tx_interpolation2_actual * (2**16)
 
-            #Calculate dual path and signal type
             dual_path_field = cw_dual_path
             sig_type_field = cw_signal_type
 
             nfft_log2_field = cw_nfft_log2
             fft_analyze_field = cw_fft_analyze
 
-            #Set digital amplitude to fullscale for now
             amp_field = cw_amp # CW tone amplitude [0:32767] - TX only - max 24000 to consider no saturation at TX FrontEnd output
 
-            #Write crystal frequency
             xtal_freq_field = xtal_frequency_hz / 1000
 
         else:
@@ -308,9 +278,7 @@ class calc_softmodem_sol(ICalculator):
             dual_path_field = model.vars.cw_dual_path.var_enum.RXF1
             sig_type_field = model.vars.cw_signal_type.var_enum.COMPLEX
 
-        #Note that tone amplitude is managed by RAIL firmware
 
-        #Write the registers
         self._reg_write(model.vars.CW_CFG1_MODULATION, int(modulation_field))
         self._reg_write(model.vars.CW_CFG1_NFFTLOG2, int(nfft_log2_field))
         self._reg_write(model.vars.CW_CFG1_DUALPATH, int(dual_path_field))
@@ -326,7 +294,6 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_sunofdm_cfg1_regs(self, model):
 
-        # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         ofdm_option = model.vars.ofdm_option.value
         ofdm_interleaving_depth = model.vars.ofdm_interleaving_depth.value
@@ -335,19 +302,14 @@ class calc_softmodem_sol(ICalculator):
 
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
 
-            # Copy modulation type into SUNOFDM register
             modulation_field = softmodem_modulation_type
 
-            # Write OFDM option (the field is stored as option number minus one)
             ofdmoption_field = ofdm_option
 
-            # Write interleaving PIB
             interleaving_field = ofdm_interleaving_depth
 
-            # Write FCS type
             macfcstype_field = fcs_type_802154
 
-            # Write crystal frequency
             xtal_freq_field = xtal_frequency_hz / 1000
 
         else:
@@ -357,7 +319,6 @@ class calc_softmodem_sol(ICalculator):
             macfcstype_field = 0
             xtal_freq_field = 0
 
-        #Write the registers
         self._reg_write(model.vars.SUNOFDM_CFG1_MODULATION, int(modulation_field))
         self._reg_write(model.vars.SUNOFDM_CFG1_OFDMOPTION, int(ofdmoption_field))
         self._reg_write(model.vars.SUNOFDM_CFG1_INTERLEAVING, int(interleaving_field))
@@ -378,7 +339,6 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_sunofdm_rxcfg1_regs(self, model):
 
-        # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         ofdm_option = model.vars.ofdm_option.value
         base_frequency_hz = model.vars.base_frequency_hz.value
@@ -442,7 +402,6 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_sunofdm_afc_regs(self, model):
 
-        # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         lodiv_actual = model.vars.lodiv_actual.value
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
@@ -483,7 +442,6 @@ class calc_softmodem_sol(ICalculator):
 
         softmodem_antdivmode = model.vars.softmodem_antdivmode.value
 
-        # Handle supported softmodem antdiv modes here
         if softmodem_antdivmode == model.vars.softmodem_antdivmode.var_enum.ANTENNA1:
             sunofdm_ant_antsel = 1
         elif softmodem_antdivmode == model.vars.softmodem_antdivmode.var_enum.ANTSELFIRST:
@@ -499,7 +457,6 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_sunofdm_pdet_regs(self, model):
 
-        # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         softmodem_antdivmode = model.vars.softmodem_antdivmode.value
 
@@ -593,7 +550,6 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_sunofdm_decfilt_regs(self, model):
 
-        # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
 
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
@@ -668,7 +624,6 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_sunofdm_txfilt_regs(self, model):
 
-        # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
 
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
@@ -709,7 +664,6 @@ class calc_softmodem_sol(ICalculator):
         self._reg_write(model.vars.SUNOFDM_PAPR_GAINATT, 0)
 
     def calc_softmodem_sunofdm_preemphasis_regs(self, model):
-        # https://jira.silabs.com/browse/MCUW_RADIO_CFG-2374
 
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
 
@@ -736,7 +690,6 @@ class calc_softmodem_sol(ICalculator):
             self._reg_do_not_care(model.vars.SUNOFDM_PREEMPH_MCSTABLE)
 
     def calc_softmodem_sunofdm_preemphasis_coeffs(self, model):
-        # https://jira.silabs.com/browse/MCUW_RADIO_CFG-2367
 
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         ofdm_subcarrier_count = model.vars.ofdm_subcarrier_count.value
@@ -757,20 +710,16 @@ class calc_softmodem_sol(ICalculator):
     def return_preemphasis_coeff(self, n_subs, n_filtered_subs):
         n_subs = n_subs//2  # The filtering values are applied symmetrically
 
-        # Lower subcarrier power by 1 * index dB (filtered[0]: -1dB, filtered[1]: -2dB...)
         filtered_subs_buffer = [int(128 * 10 ** (-(i+1)/20)) for i in range(n_filtered_subs)]
         unfiltered_subs_buffer = [128] * (n_subs - n_filtered_subs)  # 128: no filter
         preemphasis_coeff = filtered_subs_buffer[::-1] + unfiltered_subs_buffer
 
-        # Calculate filtered and unfiltered channel power
         power_wo_filter = (n_subs * 128 ** 2)
         power_w_filter = sum(filter_value ** 2 for filter_value in preemphasis_coeff)
 
-        # Compensate for filter loss
         for i in range(n_subs):
             preemphasis_coeff[i] = int(preemphasis_coeff[i] * (power_wo_filter/power_w_filter) ** 0.5)
 
-        # Fill the buffer with the coefficient of unused subs
         preemphasis_coeff += [128] * (52 - n_subs)
 
         return preemphasis_coeff
@@ -781,7 +730,6 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_sunoqpsk(self, model):
 
-        # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         base_frequency_hz = model.vars.base_frequency_hz.value
         fcs_type_802154 = model.vars.fcs_type_802154.value
@@ -791,19 +739,14 @@ class calc_softmodem_sol(ICalculator):
             sun_oqpsk_chiprate = model.vars.sun_oqpsk_chiprate.value
             band_freq_mhz_802154 = model.vars.band_freq_mhz_802154.value
 
-            # Copy modulation type into SUNOQPSK register
             modulation_field = softmodem_modulation_type
 
-            #Write OQPSK chiprate
             chiprate_field = sun_oqpsk_chiprate
 
-            #Write band freq
             bandfreqmhz_field = band_freq_mhz_802154
 
-            # Write FCS type
             macfcstype_field = fcs_type_802154
 
-            # Write crystal frequency
             xtal_freq_field = xtal_frequency_hz / 1000
 
         else:
@@ -813,7 +756,6 @@ class calc_softmodem_sol(ICalculator):
             macfcstype_field = 0
             xtal_freq_field = 0
 
-        #Write the registers
         self._reg_write(model.vars.SUNOQPSK_CFG1_MODULATION, int(modulation_field))
         self._reg_write(model.vars.SUNOQPSK_CFG1_CHIPRATE, int(chiprate_field))
         self._reg_write(model.vars.SUNOQPSK_CFG1_BANDFREQMHZ, int(bandfreqmhz_field))
@@ -826,7 +768,6 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_legoqpsk(self, model):
 
-        # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         base_frequency_hz = model.vars.base_frequency_hz.value
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
@@ -834,16 +775,12 @@ class calc_softmodem_sol(ICalculator):
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.LEGACY_OQPSK:
             sun_oqpsk_chiprate = model.vars.sun_oqpsk_chiprate.value
 
-            # Copy modulation type into LEGOQPSK register
             modulation_field = softmodem_modulation_type
 
-            # Write OQPSK chiprate
             chiprate_field = sun_oqpsk_chiprate
 
-            # Write band freq
             bandfreqmhz_field = int(base_frequency_hz / 1e6)
 
-            # Write crystal frequency
             xtal_freq_field = xtal_frequency_hz / 1000
 
         else:
@@ -852,7 +789,6 @@ class calc_softmodem_sol(ICalculator):
             bandfreqmhz_field = 0
             xtal_freq_field = 0
 
-        # Write the registers
         self._reg_write(model.vars.LEGOQPSK_CFG1_MODULATION, int(modulation_field))
         self._reg_write(model.vars.LEGOQPSK_CFG1_CHIPRATE, int(chiprate_field))
         self._reg_write(model.vars.LEGOQPSK_CFG1_BANDFREQMHZ, int(bandfreqmhz_field))
@@ -864,12 +800,7 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_sunfsk(self, model):
 
-        #Here we will copy results from many TRECS register calculations into the soft demod registers
-        #At some point we will want to stop calculating hard demod registers and make them don't care
-        #When we do this we will have to separate calculation of the field values and the reg writes themselves
-        #by making additional model variables and then replacing register accesses here with those variables
 
-        # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         modulation_type = model.vars.modulation_type.value
         sun_fsk_sfd = model.vars.sun_fsk_sfd.value
@@ -879,7 +810,6 @@ class calc_softmodem_sol(ICalculator):
 
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_FSK:
 
-            #This access is inside the SUN_FSK case as shaping_filter_param is not defined for some Mbus PHYs
             shaping_filter_param = model.vars.shaping_filter_param.value
 
             modulation_field = int(softmodem_modulation_type)
@@ -937,7 +867,6 @@ class calc_softmodem_sol(ICalculator):
     def calc_sunfsk_modindex(self, model):
 
         modulation_index = model.vars.modulation_index.value
-        # modulation index = 0.25 + (Modulation Index field value) × 0.05
         modindex_field = int((modulation_index - 0.25) // 0.5) if modulation_index >= 0.25 else 0
         self._reg_write(model.vars.SUNFSK_CFG1_MODINDEX, modindex_field)
 
@@ -951,63 +880,40 @@ class calc_softmodem_sol(ICalculator):
         self._reg_write(model.vars.SUNFSK_CFG1_FECSEL, int(sun_fsk_fecsel))
 
     def calc_sunfsk_sdfcostthd_reg(self, model):
-        # this function sets the threshold for frame (sync) detection
-        # note that compared to hard modem frequency samples the soft modem samples are scaled by 4
-        # value optimized for 16-bit SUN FSK sync words
         sync_len = model.vars.syncword_length.value
         val = 1500
         self._reg_write(model.vars.SUNFSK_CFG10_SFDCOSTTHD, round(val/16*sync_len))
 
     def calc_sunfsk_sfderrors_reg(self, model):
-        # this function sets the number of bit errors allowed in the sync word for valid frame (sync) detection
         syncword_length = model.vars.syncword_length.value
-        # value optimized for SUN FSK where detected sync words determines if FEC is enabled or disabled
         val = round(syncword_length/8)
         self._reg_write(model.vars.SUNFSK_CFG11_SFDERRORS, val)
 
     def calc_sunfsk_sfdtimeout_reg(self, model):
-        # this function sets the timeout in symbols between timing (preamble) detection and frame (sync) detection
         preamble_length = model.vars.preamble_length.value
         sync_len = model.vars.syncword_length.value
         batch_size = model.vars.SUNFSK_CFG12_NBSYMBBATCH.value
 
-        # set timeout to preamble length + sync word length + number of symbols processed in one batch
         self._reg_write(model.vars.SUNFSK_CFG11_SFDTIMEOUT, preamble_length + sync_len + batch_size)
 
     def calc_sunfsk_afcscale_reg(self, model):
-        # AFSCALE has a slightly different meaning compared to the HW AFCSCALE register
-        # In HW this value holds the value needed to translate estimated offset in terms of frequency scale (nominal 64)
-        # to digital mixer scale. Sometimes that value is scaled to feedback more or less than the nominal estimate.
-        # In the soft modem the translation part is handled by FW and this scale only determines the desired scale.
-        # 1024 results in no scaling. 512 would feeback only half of the estimated offset to the digital mixer.
         val = 1024
         self._reg_write(model.vars.SUNFSK_CFG13_AFCSCALE, val)
 
     def calc_sunfsk_afcadjlim_reg(self, model):
-        # adjustment limit disabled in soft modem SUN FSK PHYs until we see the need for it
-        #freq_limit = model.vars.freq_offset_hz.value
         freq_limit = 0
         digmix_res = model.vars.digmix_res_actual.value
         self._reg_write(model.vars.SUNFSK_CFG14_AFCADJLIM, int(round(freq_limit / digmix_res)))
 
     def calc_sunfsk_afcadjperiod_reg(self, model):
-        # continues frequency tracking disabled in soft modem SUN FSK PHYs until we see the need for it
-        # if non zero frequency is estimated and updated every period 32-bit intervals during payload decoding
-        # e.g. period = 1 updated every 32 bits, period = 2 update every 64 bits etc.
         period = 0
         self._reg_write(model.vars.SUNFSK_CFG15_AFCADJPERIOD, period)
 
     def calc_sunfsk_afcostthd_reg(self, model):
-        # when frequency tracking is enabled this threshold determines if the frequency estimate should be used or not
-        # if the cost value is higher than this threshold the estimate is deemed unreliable and not used
-        # in this case we skip that periods update for frequency offset
-        # cost value is calclated over 32 bits so this threshold should be set accordingly
-        # if tracking is disabled with AFCADJPERIOD=0 this field is not used
         val = 8
         self._reg_write(model.vars.SUNFSK_CFG15_AFCCOSTTHD, val)
 
     def calc_sunfsk_veqen_reg(self, model):
-        # this function sets the VEQ mode: 0 for no Viterbi equalization, 1 for hard decision, 2 for soft decision
         mi = model.vars.modulation_index.value
 
         veqen = 2 if mi < 1.0 else 0
@@ -1015,12 +921,10 @@ class calc_softmodem_sol(ICalculator):
         self._reg_write(model.vars.SUNFSK_CFG2_VEQEN, veqen)
 
     def calc_sunfsk_osr_reg(self, model):
-        # this function sets the oversampling rate at the SW demod
         osr = int(model.vars.oversampling_rate_actual.value)
         self._reg_write(model.vars.SUNFSK_CFG3_OSR, osr)
 
     def calc_sunfsk_phscale_reg(self, model):
-        # this function sets the shift value to adjust phase value from the CORDIC
         mi = model.vars.modulation_index.value
         if mi > 0:
             phscale = int(round(log(2 * mi, 2)))
@@ -1032,72 +936,48 @@ class calc_softmodem_sol(ICalculator):
         self._reg_write(model.vars.SUNFSK_CFG3_PHASESCALE, phscale)
 
     def calc_sunfsk_preamblelen_reg(self, model):
-        # this function set the preamble length used in timing search
         preamsch_len = 32
         self._reg_write(model.vars.SUNFSK_CFG5_PREAMBLELEN, preamsch_len)
 
     def calc_sunfsk_preamblecntthd_reg(self, model):
-        # this function sets the number of times the cost value must go velow PREAMBLECOSTTHD within PREABMLECNTWIN
-        # symbols for timing detection
         preamsch_len = model.vars.preamsch_len.value
         reg = 2 if preamsch_len <= 16 else 3
         self._reg_write(model.vars.SUNFSK_CFG4_PREAMBLECNTTHD, reg)
 
     def calc_sunfsk_preamblecostthd_reg(self, model):
-        # this function sets the threshold for preamble detection
-        # val below is optimized for 32-bit SUN FSK preamble
         preamsch_len = model.vars.preamsch_len.value
-        #val = 3000
         val = 3072 #temporary fix as PREAMBLECOSTMAX is on 8 bits (instead of 16) and then set to 12*256=3072
         self._reg_write(model.vars.SUNFSK_CFG4_PREAMBLECOSTTHD, round(val/32*preamsch_len))
 
     def calc_sunfsk_preamblecntwin_reg(self, model):
-        # this function sets window size in symbols over which we count the number of threshold crossing for valid
-        # timing (preamble) detection
-        # cnt below is optmized for 32-bit SUN FSK premble
         preamsch_len = model.vars.preamsch_len.value
         cnt = 12
         self._reg_write(model.vars.SUNFSK_CFG4_PREAMBLECNTWIN, round(cnt/32*preamsch_len))
 
     def calc_sunfsk_preambleerrors_reg(self, model):
-        # this function sets the number of bit errors we allow for valid preamble (timing) detection
-        # errors below is optimized for 32-bit SUN FSK preamble
-        # SNR is lower with FEC enabled which can cause bit errors in the preamble
-        # setting this to 6 prevents us from missing frames due to bit errors in the preamble
         preamsch_len = model.vars.preamsch_len.value
         errors = 6
         self._reg_write(model.vars.SUNFSK_CFG5_PREAMBLEERRORS, round(errors/32*preamsch_len))
 
     def calc_sunfsk_preamblecostmax_reg(self, model):
-        # this function sets threshold for min cost above which we ignore timing (preamble) detection
-        # currently set to the same value as PREAMBLECOSTTHD which means this is inactive
-        # PREAMBLECOSTTHD is set higher than usual because when FEC is enabled and SNR is low the cost can be high
-        #val = 3000
         val = 12 #temporary fix as PREAMBLECOSTMAX is on 8 bits instead of 16 : 12*256=3072
         self._reg_write(model.vars.SUNFSK_CFG7_PREAMBLECOSTMAX, val)
 
     def calc_sunfsk_preamblefreqlim_reg(self, model):
-        # this function sets the limit on the estimated frequency offset when detecting the preamble
-        # this feature is currently disabled by setting this register to 0
         self._reg_write(model.vars.SUNFSK_CFG7_PREAMBLEFREQLIM, 0)
 
     def calc_sunfsk_sfd1_reg(self, model):
-        # this function writes the first sync word in reverse bit order compared to the 802.15.4 definition
-        # this is the sync word for coded format
         sync_len = model.vars.syncword_length.value
         sync = CALC_Frame_Detect.flip_bits(model.vars.syncword_1.value, sync_len)
         self._reg_write(model.vars.SUNFSK_CFG8_SFD1, sync)
 
     def calc_sunfsk_sfd2_reg(self, model):
-        # this function writes the second sync word in reverse bit order compared to the 802.15.4 definition
-        # this is the sync word for uncoded format
         sync_len = model.vars.syncword_length.value
         sync = CALC_Frame_Detect.flip_bits(model.vars.syncword_0.value, sync_len)
 
         self._reg_write(model.vars.SUNFSK_CFG9_SFD2, sync)
 
     def calc_softmodem_ksi_reg(self, model):
-        # this function writes ksi values
 
         ksi1 = model.vars.ksi1.value
         ksi2 = model.vars.ksi2.value
@@ -1110,12 +990,9 @@ class calc_softmodem_sol(ICalculator):
         self._reg_sat_write(model.vars.SUNFSK_CFG3_KSI3W, ksi3wb)
 
     def calc_softmodem_clken(self, model):
-        #Read in model vars
         demod_select = model.vars.demod_select.value
         conc_ofdm_option = model.vars.conc_ofdm_option.value
 
-        #Need to set CLKEN=1 for RTL sims, but this is ignored in rail_scripts
-        #Avoid disabling clock for hardmodem PHYs as this could impact LabATE testing
         if (demod_select == model.vars.demod_select.var_enum.SOFT_DEMOD) or \
                 (conc_ofdm_option != model.vars.conc_ofdm_option.var_enum.NONE):
             self._reg_write(model.vars.RAC_SOFTMCTRL_CLKEN, 1)
@@ -1123,13 +1000,10 @@ class calc_softmodem_sol(ICalculator):
             self._reg_do_not_care(model.vars.RAC_SOFTMCTRL_CLKEN)
 
     def calc_sunfsk_mode_reg(self, model):
-        # MODE = 0 forces FW to read parameters from the calculator settings of SUNFSK_CFG registers
-        # Should become 'do_not_care' once the firmware handles MAJORVERSION = 1
         self._reg_sat_write(model.vars.SUNFSK_CFG16_MODE, 0)
 
     def calc_sunofdm_antdivdly_reg(self, model):
 
-        # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         softmodem_antdivmode = model.vars.softmodem_antdivmode.value
 
@@ -1214,7 +1088,6 @@ class calc_softmodem_sol(ICalculator):
 
     def calc_softmodem_sunfsk_afc_regs(self, model):
 
-        # Read in model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         lodiv_actual = model.vars.lodiv_actual.value
         bitrate = model.vars.bitrate.value

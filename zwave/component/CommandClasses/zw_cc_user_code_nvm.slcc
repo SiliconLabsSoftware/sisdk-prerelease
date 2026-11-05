@@ -10,6 +10,12 @@ description: >
   Besides the Read and Write functionalities, a migration API is also present. This aids the
   migration process, which requires updating the NVM, when coming from an SDK version that is
   older than 7.19.0.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/user-code
+  - page: zwave-api/user-code-events
+
 package: zwave
 quality: production
 metadata:

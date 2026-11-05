@@ -7,10 +7,12 @@ from pyradioconfig.parts.common.profiles.profile_modem import buildModemInfoOutp
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
     buildWhiteOutputs, build_ircal_sw_vars, buildStudioLogOutput
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
+from pycalcmodel.core.common import IPCategory
 
 
 class ProfileWisunFanJumbo(IProfile):
 
+    ip_category = IPCategory.LPW
     phySunFskSfd_0_uncoded = 0b1001000001001110
     phySunFskSfd_1_uncoded = 0b0111101000001110
     phySunFskSfd_0_coded = 0b0110111101001110
@@ -26,10 +28,8 @@ class ProfileWisunFanJumbo(IProfile):
         self._family = "jumbo"
 
     def buildProfileModel(self, model):
-        # Build profile object and append it to the model
         profile = self._makeProfile(model)
 
-        # Build inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
@@ -37,7 +37,6 @@ class ProfileWisunFanJumbo(IProfile):
         self.build_metadata_profile_inputs(model, profile)
         self.build_deprecated_profile_inputs(model, profile)
 
-        # Build outputs
         self.build_register_profile_outputs(model, profile)
         self.build_variable_profile_outputs(model, profile)
         self.build_info_profile_outputs(model, profile)
@@ -87,13 +86,11 @@ class ProfileWisunFanJumbo(IProfile):
                                      units_multiplier=UnitsMultiplier.KILO)
 
     def build_hidden_profile_inputs(self, model, profile):
-        # Hidden inputs to allow for fixed frame length testing
         IProfile.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                    readable_name="Frame Length Algorithm")
         IProfile.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
                                    readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=4095)
 
-        # Hidden inputs to allow for keeping absolute tolerance the same when testing at 915M
         IProfile.make_hidden_input(profile, model.vars.rx_xtal_error_ppm, category="general",
                                    readable_name="Set desired xtal tolerance on RX side", value_limit_min=0,
                                    value_limit_max=100)
@@ -109,7 +106,6 @@ class ProfileWisunFanJumbo(IProfile):
         IProfile.make_hidden_input(profile, model.vars.fec_tx_enable, 'Channel_Coding',
                                      readable_name="Enable FEC")
 
-        #Hidden inputs to allow for control of channel BW (CSMA-CA)
         bandwidth_limit_adc = 2530000
         IProfile.make_hidden_input(profile, model.vars.bandwidth_hz, 'Advanced',
                                    readable_name="Acquisition Channel Bandwidth", value_limit_min=0,
@@ -156,7 +152,6 @@ class ProfileWisunFanJumbo(IProfile):
                                  value_limit_min=0, value_limit_max=25_000)
 
     def build_deprecated_profile_inputs(self, model, profile):
-        #No deprecated Profile Inputs on Jumbo
         pass
 
     def build_register_profile_outputs(self, model, profile):
@@ -176,26 +171,21 @@ class ProfileWisunFanJumbo(IProfile):
                                            readable_name='WiSUN PhyModeID'))
         profile.outputs.append(ModelOutput(model.vars.wisun_mode_switch_phr, '', ModelOutputType.RAIL_CONFIG,
                                            readable_name='WiSUN Mode Switch PHR'))
+        profile.outputs.append(ModelOutput(model.vars.mode_str, '', ModelOutputType.INFO,
+                                           readable_name='WiSUN PhyMode string representation'))
 
     def build_info_profile_outputs(self, model, profile):
         buildModemInfoOutputs(model, profile)
 
     def _fixed_wisun_vars(self, model):
-        # Calculate all of the fixed values (forces) unique to this profile
 
-        # All spec references are to IEEE Std 802.15.4-2015 (shortened to 802154)
 
-        # All WiSUN PHYs have sufficient preamble to disable TSAMPLIM
-        # Also force the frequency comp mode
         self._fixed_wisun_thresholds(model)
 
-        # Always use fast AGC
         self._fixed_wisun_agc(model)
 
-        # Disable FEC for now (untested)
         self._fixed_wisun_fec(model)
 
-        # Variable Length and Endianness Inputs
         model.vars.frame_bitendian.value_forced = model.vars.frame_bitendian.var_enum.LSB_FIRST  # 802154 17.2.2 (Reference Modulator Diagram)
         model.vars.frame_length_type.value_forced = model.vars.frame_length_type.var_enum.VARIABLE_LENGTH  # 802154 20.2.2 (PHR Field Format)
         model.vars.var_length_bitendian.value_forced = model.vars.var_length_bitendian.var_enum.MSB_FIRST  # 802154 20.2.2 (PHR Field Format)
@@ -207,31 +197,25 @@ class ProfileWisunFanJumbo(IProfile):
         model.vars.var_length_includecrc.value_forced = True  # Length is the total number of octets contained in the PSDU
         model.vars.var_length_adjust.value_forced = 0
 
-        # Header Inputs
         model.vars.header_calc_crc.value_forced = False  # No CRC on the header itself
         model.vars.header_en.value_forced = True  # 802154 20.2.2 (PHR Field Format)
         model.vars.header_size.value_forced = 2  # Header size is 16 bits
         model.vars.header_white_en.value_forced = False  # When whitening is enabled it shall be applied only over the PSDU
 
-        # FEC settings (note that there is a separate variable fec_tx_enable that determines if FEC is on/off in TX)
         model.vars.fec_en.value_forced = model.vars.fec_en.var_enum.FEC_154G_NRNSC_INTERLEAVING
 
-        # Whitening Inputs set consistent with 802154 17.2.3
         model.vars.white_poly.value_forced = model.vars.white_poly.var_enum.PN9_802154
         model.vars.white_seed.value_forced = 0xFF  # This has been tested, need a 0 in position 8 due to EFR32 whitening architecture
         model.vars.white_output_bit.value_forced = 8
 
-        # CRC Inputs set to match 802.15.4 settings in PHY_COMMON_FRAME_154
         self._fixed_wisun_crc(model)
         model.vars.payload_crc_en.value_forced = True
         model.vars.crc_bit_endian.value_forced = model.vars.crc_bit_endian.var_enum.MSB_FIRST
         model.vars.crc_byte_endian.value_forced = model.vars.crc_byte_endian.var_enum.MSB_FIRST
         model.vars.crc_input_order.value_forced = model.vars.crc_input_order.var_enum.LSB_FIRST
 
-        # Modulation type
         model.vars.modulation_type.value_forced = model.vars.modulation_type.var_enum.FSK2
 
-        # Symbol mapping and encoding
         model.vars.diff_encoding_mode.value_forced = model.vars.diff_encoding_mode.var_enum.DISABLED
         model.vars.dsss_chipping_code.value_forced = 0
         model.vars.dsss_len.value_forced = 0
@@ -239,15 +223,12 @@ class ProfileWisunFanJumbo(IProfile):
         model.vars.fsk_symbol_map.value_forced = model.vars.fsk_symbol_map.var_enum.MAP0  # 802154 Table 20.8 and 20.9
         model.vars.symbol_encoding.value_forced = model.vars.symbol_encoding.var_enum.NRZ
 
-        # Preamble and syncword definition
         model.vars.preamble_pattern.value_forced = 1  # 802154 20.2.1.1 (Preamble field)
         model.vars.preamble_pattern_len.value_forced = 2
         model.vars.syncword_length.value_forced = 16
 
-        # Tolerance values
         model.vars.baudrate_tol_ppm.value_forced = 300
 
-        # Variables that are optional inputs in the Base profile and need to be explicitly set
         model.vars.asynchronous_rx_enable.value_forced = False
         model.vars.manchester_mapping.value_forced = model.vars.manchester_mapping.var_enum.Default
         model.vars.syncword_tx_skip.value_forced = False
@@ -299,20 +280,15 @@ class ProfileWisunFanJumbo(IProfile):
         model.vars.fec_tx_enable.value_forced = model.vars.fec_tx_enable.var_enum.DISABLED
 
     def _lookup_from_wisun_mode(self, model):
-        # This function calculates some variables/registers based on the wisun_mode
 
-        # Read the mode and fec_en from the profile inputs (not yet written to model vars)
         wisun_mode = model.profile.inputs.wisun_mode.var_value
         wisun_reg_domain = model.profile.inputs.wisun_reg_domain.var_value
 
-        # Set basic parameters based on the mode
-        # Note that for series 1, the bitrate variable represents chiprate, and so is unchanged between FEC on/off
         if wisun_mode == model.vars.wisun_mode.var_enum.Mode1a:
             model.vars.bitrate.value_forced = 50000
             model.vars.deviation.value_forced = 12500
             model.vars.preamble_length.value_forced = 8*8
 
-            #Performance optimizations
             model.vars.number_of_timing_windows.value_forced = 2
             model.vars.timing_detection_threshold.value_forced = 16
             model.vars.timing_resync_period.value_forced = 1
@@ -324,7 +300,6 @@ class ProfileWisunFanJumbo(IProfile):
             model.vars.deviation.value_forced = 25000
             model.vars.preamble_length.value_forced = 8 * 8
 
-            # Performance optimizations
             if wisun_reg_domain == model.vars.wisun_reg_domain.var_enum.CN:
                 model.vars.number_of_timing_windows.value_forced = 2 #Applies only to CN
 
@@ -333,7 +308,6 @@ class ProfileWisunFanJumbo(IProfile):
             model.vars.deviation.value_forced = 25000
             model.vars.preamble_length.value_forced = 8 * 8
 
-            # Performance optimizations
             model.vars.timing_detection_threshold.value_forced = 30
 
         elif wisun_mode == model.vars.wisun_mode.var_enum.Mode2b:
@@ -346,7 +320,6 @@ class ProfileWisunFanJumbo(IProfile):
             model.vars.deviation.value_forced = 37500
             model.vars.preamble_length.value_forced = 12 * 8
 
-            # Performance optimizations
             model.vars.number_of_timing_windows.value_forced = 4
 
         elif wisun_mode == model.vars.wisun_mode.var_enum.Mode4a:
@@ -354,7 +327,6 @@ class ProfileWisunFanJumbo(IProfile):
             model.vars.deviation.value_forced = 50000
             model.vars.preamble_length.value_forced = 12 * 8
 
-            #Performance optimizations
             model.vars.MODEM_MODINDEX_FREQGAINM.value_forced = 7 #Only way to achieve this is with reg overrides currently
             model.vars.MODEM_MODINDEX_FREQGAINE.value_forced = 1
             model.vars.MODEM_CTRL2_DEVWEIGHTDIS.value_forced = 1
@@ -369,12 +341,10 @@ class ProfileWisunFanJumbo(IProfile):
             model.vars.deviation.value_forced = 75000
             model.vars.preamble_length.value_forced = 24 * 8
 
-            #Performance optimizations
             model.vars.MODEM_MODINDEX_FREQGAINM.value_forced = 6 #Only way to achieve this is with reg overrides currently
             model.vars.MODEM_MODINDEX_FREQGAINE.value_forced = 1
             model.vars.MODEM_CTRL2_DEVWEIGHTDIS.value_forced = 1
 
-        #Also calculate xtal error based on mode
         if wisun_mode == model.vars.wisun_mode.var_enum.Mode1a:
             model.vars.rx_xtal_error_ppm.value_forced = 20
             model.vars.tx_xtal_error_ppm.value_forced = 20
@@ -383,24 +353,16 @@ class ProfileWisunFanJumbo(IProfile):
             model.vars.tx_xtal_error_ppm.value_forced = 10
 
     def _lookup_syncword_from_fec(self, model):
-        #This function sets sync0 and sync1 based on whether FEC is enabled or not
-        #This is because we need sync0 to be correct for the active FEC setting (RAIL assumes this)
 
-        # Read the FEC setting
         if model.profile.inputs.fec_tx_enable.var_value is not None:
-            # This is to accommodate a hidden input for now
             fec_tx_enable = model.profile.inputs.fec_tx_enable.var_value
         else:
-            # This is set in the fixed variable section
             fec_tx_enable = model.vars.fec_tx_enable.value
 
-        #Lookup the syncword to use
         if fec_tx_enable == model.vars.fec_tx_enable.var_enum.DISABLED:
-            #Not compatible with dynamic FEC, uncoded as sync0
             syncword_0 = self.phySunFskSfd_0_uncoded
             syncword_1 = 0x00000000
         else:
-            #Dynamic FEC ready with coded as sync0
             syncword_0 = self.phySunFskSfd_0_coded
             syncword_1 = self.phySunFskSfd_0_uncoded
 

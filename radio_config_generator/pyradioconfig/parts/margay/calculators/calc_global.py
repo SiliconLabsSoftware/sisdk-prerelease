@@ -5,7 +5,6 @@ class CALC_Global_Margay(CALC_Global_ocelot):
 
     def buildVariables(self, model):
 
-        # Build variables from the Lynx calculations
         super().buildVariables(model)
 
     def _add_common_regs(self, model):

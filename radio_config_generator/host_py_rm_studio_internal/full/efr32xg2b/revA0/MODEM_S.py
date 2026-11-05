@@ -1,5 +1,4 @@
 
-# -*- coding: utf-8 -*-
 
 __all__ = [ 'RM_Peripheral_MODEM_S' ]
 
@@ -209,8 +208,10 @@ class RM_Peripheral_MODEM_S(Base_RM_Peripheral):
         self.zz_rdict['BLEIQDSAEXT2'] = self.BLEIQDSAEXT2
         self.SPARE = RM_Register_MODEM_S_SPARE(self.zz_rmio, self.zz_label)
         self.zz_rdict['SPARE'] = self.SPARE
-        self.IRCALCOEFWR = RM_Register_MODEM_S_IRCALCOEFWR(self.zz_rmio, self.zz_label)
-        self.zz_rdict['IRCALCOEFWR'] = self.IRCALCOEFWR
+        self.IRCALCOEFWR0 = RM_Register_MODEM_S_IRCALCOEFWR0(self.zz_rmio, self.zz_label)
+        self.zz_rdict['IRCALCOEFWR0'] = self.IRCALCOEFWR0
+        self.IRCALCOEFWR1 = RM_Register_MODEM_S_IRCALCOEFWR1(self.zz_rmio, self.zz_label)
+        self.zz_rdict['IRCALCOEFWR1'] = self.IRCALCOEFWR1
         self.CHFCTRL = RM_Register_MODEM_S_CHFCTRL(self.zz_rmio, self.zz_label)
         self.zz_rdict['CHFCTRL'] = self.CHFCTRL
         self.CHFCSDCOE00 = RM_Register_MODEM_S_CHFCSDCOE00(self.zz_rmio, self.zz_label)

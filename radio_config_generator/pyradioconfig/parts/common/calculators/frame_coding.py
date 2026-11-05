@@ -34,9 +34,7 @@ class CALC_Whitening(ICalculator):
         """
 
         """
-        #Inputs
         """
-        #-------- Frame Coding--------
         var = self._addModelVariable(model, 'frame_coding', Enum, ModelVariableFormat.DECIMAL, 'List of supported frame coding methods')
         member_data = [
             ['NONE',        0, 'No Frame Coding'],
@@ -61,7 +59,6 @@ class CALC_Whitening(ICalculator):
         self._addModelVariable(model, 'frame_coding_poly_val', int, ModelVariableFormat.HEX)
 
         """
-        #Outputs
         """
         self._build_fecctrl_reg(model)
 
@@ -97,22 +94,12 @@ class CALC_Whitening(ICalculator):
             else:
                 content.append(0x8000 + ((received >> 1) & 0xFF))
 
-        # Transmit table
         for i in range(256):
             content.append(0x200 + (i << 1))
         return content
 
 
-    #
-    # This implements the 3 of 6 encoding and decoding tables as defined in
-    # \\silabs.com\mcuandwireless\026 Shared Docs\0260_Standards\std_body\MBUS\En13757-4-2013_wMBUS_standard.pdf
-    #
-    # See table 10 on page 16 in section 6.4.2.1 for a table describing the details.
-    #
-    # This creates a table that first stores the 6-bit entries, followed by the 4-bit entries.
-    #
     def _frame_coding_3of6(self):
-        # List the lookup data with 4-bit sequence as keys, 6-bit sequence as values.
         coding_table = {
             0b0000: 0b010110,
             0b0001: 0b001101,
@@ -145,19 +132,13 @@ class CALC_Whitening(ICalculator):
 
     def _create_content_table(self, message_bits, coded_bits, array_width, coding_table_is_msb_first, coding_table):
 
-        # Notice that everything below this line could be refactored into common code.  The only
-        # thing specific to a given coding scheme is the table above and parameters above
 
         error_value = 1 << (array_width-1)
 
-        # Calculate the tx table from the coded table.  It's just flipping the endianness of
-        # the bits if the table was initially expressed in msb first format
 
         tx_map_table = dict()
         for message_value in coding_table.keys():
             coded_value = coding_table[message_value]
-            # if the coding_table was entered msb first for sanity reasons,
-            # flip the input and output values to match the hardware which is always lsb first
             if coding_table_is_msb_first:
                 message_value = CALC_Frame_Detect.flip_bits(message_value, message_bits)
                 coded_value = CALC_Frame_Detect.flip_bits(coded_value, coded_bits)
@@ -165,18 +146,13 @@ class CALC_Whitening(ICalculator):
             tx_map_table[message_value] = coded_value
 
 
-        # Create a receive data map from the transmit table.
-        # Just flip the keys and values from the transmit table.
         rx_map_table = dict()
-        # Now add the valid values from the tx map table to the rx_map_table
         for message_value in tx_map_table.keys():
             coded_value = tx_map_table[message_value]
             rx_map_table[coded_value] = message_value
 
-        # Now create a list where we list all 64 receive values first, followed by the 16 transmit values.
         content = []
 
-        # Receive table
         rx_table_size = 1 << coded_bits
         for rx_data in range(rx_table_size):
             if rx_data in rx_map_table.keys():
@@ -184,13 +160,11 @@ class CALC_Whitening(ICalculator):
             else:
                 content.append(error_value)
 
-        # Transmit table
         tx_table_size = 1 << message_bits
         for tx_data in range(tx_table_size):
             content.append(int(tx_map_table[tx_data]))
 
         if message_bits == 1 and array_width == 8:
-            # Extend with zeros bytes to respect the RAM table 4 bytes boundary
             content.extend([0, 0])
 
         return content
@@ -214,7 +188,6 @@ class CALC_Whitening(ICalculator):
             model.vars.frame_coding.var_enum.MBUS_3OF6.value: (4, 6, 8, self._frame_coding_3of6)
         }
 
-        # Need to use block coding in efr
         frameCodingParams = FRAME_CODING_LOOKUP[model.vars.frame_coding.value]
         model.vars.frame_coding_message_bits.value = frameCodingParams[0]
         model.vars.frame_coding_coded_bits.value = frameCodingParams[1]
@@ -229,9 +202,6 @@ class CALC_Whitening(ICalculator):
             self._reg_write(model.vars.FRC_CTRL_UARTMODE, 0)
 
 
-    # The values that get written to the whitening registers will be calculated here.  We won't actually write
-    # them to the registers here though.  These registers are shared with the whitening registers.  Set the variables
-    # here, and write the registers over in the whitening code if whitening is disabled.
     def calc_frame_coding_reg_values(self, model):
         if model.vars.frame_coding_array_width.value > 0:
             model.vars.frame_coding_fshroutputsel_val.value = model.vars.frame_coding_message_bits.value - 1
@@ -247,7 +217,6 @@ class CALC_Whitening(ICalculator):
         word_being_built = long(0)
 
         for list_item in input_list:
-            #word_being_built = (word_being_built << width) | list_item                # Use this line for Big Endian
             word_being_built = (word_being_built >> width) | (list_item << (32-width)) # Use this line for Little Endian
             total_bits += width
             if total_bits % 32 == 0:
@@ -256,10 +225,7 @@ class CALC_Whitening(ICalculator):
         return packed_list
 
     def calc_blockwhitemode(self, model):
-        # This method calculates the FRC_FECCTRL_BLOCKWHITEMODE field
 
-        #The LFSR used for whitening is also used for block coding forward-error-correction.
-        # This means that it is not possible to perform both whitening and block coding on the same frame.
 
         class BlockWhiteEnum(Enum):
             """
@@ -274,7 +240,6 @@ class CALC_Whitening(ICalculator):
             BLOCKCODEREPLACE = 6
             BLOCKLOOKUP = 7
 
-        #Read in model variables
         ber_force_whitening = model.vars.ber_force_whitening.value
         payload_white_en = model.vars.payload_white_en.value
         header_white_en = model.vars.header_white_en.value
@@ -283,35 +248,23 @@ class CALC_Whitening(ICalculator):
         fec_enabled = model.vars.fec_enabled.value
 
         if ber_force_whitening:
-            # Force whitening when desired for BER testing
             blockwhitemode = BlockWhiteEnum.WHITE.value
         elif frame_coding_array_width > 0:
-            # Using block coding
             blockwhitemode = BlockWhiteEnum.BLOCKLOOKUP.value
         elif payload_white_en or header_white_en:
-            # Whitening is turned on for either header or payload
             if 'byte' in white_poly.name.lower():
-                # Using whitening polynomial enum corresponding to bytewhite
                 blockwhitemode = BlockWhiteEnum.BYTEWHITE.value
             elif fec_enabled:
                 if payload_white_en and header_white_en:
-                    # Using FEC with whitening of header and payload
-                    # Should work with interleaving enabled, need to verify operation with interleaving disabled
                     blockwhitemode = BlockWhiteEnum.INTERLEAVEDWHITE0.value
                 elif payload_white_en:
-                    #Using FEC with whitening of only payload (skip whitening of first 16*interleavewidth bits)
                     blockwhitemode = BlockWhiteEnum.INTERLEAVEDWHITE1.value
             else:
-                # Standard whitening
                 blockwhitemode = BlockWhiteEnum.WHITE.value
         elif white_poly != model.vars.white_poly.var_enum.NONE:
-            #If a whitening polynomial is present, then enable standard whitening
-            #This still allows disabling whitening via the SKIPWHITE field in each FCD
             blockwhitemode = BlockWhiteEnum.WHITE.value
         else:
-            # Disable whitening
             blockwhitemode = BlockWhiteEnum.DIRECT.value
 
-        #Write the register
         self._reg_write(model.vars.FRC_FECCTRL_BLOCKWHITEMODE,blockwhitemode)
 

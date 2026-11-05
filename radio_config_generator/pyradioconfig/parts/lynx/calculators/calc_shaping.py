@@ -4,7 +4,6 @@ import numpy as np
 class CALC_Shaping_lynx(CALC_Shaping_panther):
 
     def calc_shaping_filter_gain_actual(self, model):
-        #The Lynx shaping filter registers have changed in the register map, so need to override this function
 
         shaping_filter_mode = model.vars.MODEM_CTRL0_SHAPING.value
         c0 = model.vars.MODEM_SHAPING0_COEFF0.value #SHAPING0
@@ -78,10 +77,8 @@ class CALC_Shaping_lynx(CALC_Shaping_panther):
         model.vars.shaping_filter_gain_actual.value = int(shaping_filter_gain)
 
     def get_coeff_ceil(self, model):
-        # all filter taps are 8 bit signed registers
         max_filter_taps = model.vars.max_filter_taps.value
         coeff_ceil = np.empty(max_filter_taps)
-        # all filter taps are 8 bit signed registers
         coeff_ceil.fill((2 ** (8 - 1)) - 1)
         return coeff_ceil
 
@@ -139,11 +136,9 @@ class CALC_Shaping_lynx(CALC_Shaping_panther):
         self._reg_write(model.vars.MODEM_CTRL0_SHAPING, shaping)
 
     def calc_max_available_filter_taps(self, model):
-        # this is fixed for a family of parts
         model.vars.max_filter_taps.value = 48
 
     def get_shaping_filter(self, model):
-        # Construct shaping filter from register settings
 
         shaping_filter_mode = model.vars.MODEM_CTRL0_SHAPING.value
         c0 = model.vars.MODEM_SHAPING0_COEFF0.value  # SHAPING0

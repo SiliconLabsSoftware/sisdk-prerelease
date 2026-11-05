@@ -33,7 +33,6 @@
 #include "sl_hal_wdog.h"
 #include "sl_clock_manager.h"
 #include "sl_core.h"
-#include "sl_assert.h"
 #include "sl_watchdog_manager_config.h"
 #include "sli_watchdog_manager.h"
 #include "sl_interrupt_manager.h"

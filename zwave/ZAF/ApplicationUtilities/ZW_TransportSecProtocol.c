@@ -10,11 +10,11 @@
 #include <ZW_TransportSecProtocol.h>
 #include <ZAF_command_class_utils.h>
 #include <ZW_transport_api.h>
-#include <ZAF_Common_helper.h>
 #include <ZAF_Common_interface.h>
 #include <zaf_cc_list_generator.h>
 #include <ZW_TransportEndpoint.h>
 #include <ZW_classcmd.h>
+#include "zpal_radio.h"
 #include "zpal_log.h"
 
 /****************************************************************************/
@@ -149,19 +149,6 @@ GetCommandClassList(
   return &empty_list;
 }
 
-uint8_t
-Transport_OnLearnCompleted(__attribute__((unused)) node_id_t nodeID)
-{
-  zaf_stay_awake();
-
-  return true;
-}
-
-void ZAF_Transport_OnLearnCompleted(void)
-{
-  Transport_OnLearnCompleted(0);
-}
-
 void
 ApplicationCommandHandler(__attribute__((unused)) void *pSubscriberContext, SZwaveReceivePackage* pRxPackage)
 {
@@ -179,8 +166,6 @@ ApplicationCommandHandler(__attribute__((unused)) void *pSubscriberContext, SZwa
 #endif /* ACCEPT_ALL_CMD_CLASSES */
   {
     Transport_ApplicationCommandHandler(pCmd, cmdLength, rxOpt);
-
-    zaf_stay_awake();
   }
 #ifndef ACCEPT_ALL_CMD_CLASSES
   else {

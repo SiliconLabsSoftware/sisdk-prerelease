@@ -1,10 +1,11 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from pyradioconfig.parts.panther.phys.PHY_internal_base import Phy_Internal_Base
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 class PHYS_Datasheet_Lynx(IPhy):
-    # duplicated from Package/pyradioconfig/parts/jumbo/phys/Phys_Datasheet.py
-    # did not inherit as we only want 2.4GHz PHYs
+
+    ip_category = IPCategory.LPW
 
     def PHY_Datasheet_2450M_2GFSK_1Mbps_500K(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='2450M 2GFSK 1Mbps 500K', phy_name=phy_name)

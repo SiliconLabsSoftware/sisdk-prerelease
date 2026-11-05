@@ -31,7 +31,7 @@
 #include "em_pdm.h"
 #if defined(PDM_PRESENT) && (PDM_COUNT == 1)
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup pdm PDM - Pulse Density Modulation
@@ -76,9 +76,9 @@ void PDM_DeInit(PDM_TypeDef *pdm)
  ******************************************************************************/
 void PDM_Init(PDM_TypeDef *pdm, const PDM_Init_TypeDef *init)
 {
-  EFM_ASSERT(init->dsr <= (_PDM_CTRL_DSR_MASK >> _PDM_CTRL_DSR_SHIFT));
-  EFM_ASSERT(init->gain <= (_PDM_CTRL_GAIN_MASK >> _PDM_CTRL_GAIN_SHIFT));
-  EFM_ASSERT(init->prescaler <= (_PDM_CFG1_PRESC_MASK >> _PDM_CFG1_PRESC_SHIFT));
+  SL_LOG_DEBUG_ASSERT(init->dsr <= (_PDM_CTRL_DSR_MASK >> _PDM_CTRL_DSR_SHIFT));
+  SL_LOG_DEBUG_ASSERT(init->gain <= (_PDM_CTRL_GAIN_MASK >> _PDM_CTRL_GAIN_SHIFT));
+  SL_LOG_DEBUG_ASSERT(init->prescaler <= (_PDM_CFG1_PRESC_MASK >> _PDM_CFG1_PRESC_SHIFT));
 
   while (pdm->SYNCBUSY != 0U) {
     // Wait for any pending CMD synchronization

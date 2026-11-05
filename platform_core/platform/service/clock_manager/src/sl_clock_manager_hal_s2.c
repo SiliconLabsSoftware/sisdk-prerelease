@@ -38,6 +38,7 @@
 #include "em_bus.h"
 #include "em_device.h"
 #include "em_gpio.h"
+#include "sl_log_helper.h"
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
 #endif
@@ -1213,7 +1214,7 @@ sl_status_t sli_clock_manager_hal_get_sysclk_source(sl_oscillator_t *source)
       break;
 #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 

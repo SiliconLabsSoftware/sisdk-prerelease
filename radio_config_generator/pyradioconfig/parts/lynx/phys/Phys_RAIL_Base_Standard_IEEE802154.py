@@ -1,27 +1,25 @@
 from pyradioconfig.parts.common.phys.phy_common import PHY_COMMON_FRAME_154
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
+
 
 
 class PhysRAILBaseStandardIEEE802154Lynx(IPhy):
 
-    def _set_xtal_frequency(self, phy, xtal_freq=None):
-        if xtal_freq is None:
-            phy.profile_inputs.xtal_frequency_hz.value = 38400000
-        else:
-            phy.profile_inputs.xtal_frequency_hz.value = xtal_freq
+    ip_category = IPCategory.LPW
+
+    default_xtal_frequency_hz = 38400000
 
     def _part_specific_phy_overrides(self, phy, model):
         pass
 
     def IEEE802154_2p4GHz_base(self, phy, model):
 
-        # Use the commmon ZB frame definition and override min length for 802.15.4E Seq# Suppression
         PHY_COMMON_FRAME_154(phy, model)
         model.vars.zigbee_feature.value_forced = model.vars.zigbee_feature.var_enum.LEGACY
         phy.profile_inputs.var_length_minlength.value = 4
 
-        # Configure non-framing Profile Inputs
         phy.profile_inputs.bandwidth_hz.value = 2524800
         phy.profile_inputs.base_frequency_hz.value = long(2405000000)
         phy.profile_inputs.baudrate_tol_ppm.value = 4000
@@ -54,20 +52,15 @@ class PhysRAILBaseStandardIEEE802154Lynx(IPhy):
         phy.profile_inputs.timing_resync_period.value = 2
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        # phy.profile_inputs.xtal_frequency_hz.value = 38400000
         self._set_xtal_frequency(phy)
 
-        # Gate clocks (reduce current)
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 0x1003  # 0, 1, 12
 
-        # Set RSSI period differently than the standard LUT on Lynx
         phy.profile_outputs.AGC_CTRL1_RSSIPERIOD.override = 8
 
-        # Configure synth cal registers (likely not needed, but avoids regression)
         self._set_synth_cal_regs(phy)
 
-        # RAIL timings
         phy.profile_outputs.rx_sync_delay_ns.override = 6125
         phy.profile_outputs.rx_eof_delay_ns.override = 6125
 

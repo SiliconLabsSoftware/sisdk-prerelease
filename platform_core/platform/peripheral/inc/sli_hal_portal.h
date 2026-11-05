@@ -37,7 +37,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sli_device_portal.h"
 
 #ifdef __cplusplus
@@ -78,7 +78,7 @@ extern "C" {
  ******************************************************************************/
 __STATIC_INLINE void sli_hal_portal_request_domain_powerup(sli_portal_domain_t domain)
 {
-  EFM_ASSERT(SLI_PORTAL_VALIDATE_DOMAIN(domain));
+  SL_LOG_DEBUG_ASSERT(SLI_PORTAL_VALIDATE_DOMAIN(domain));
 
   PORTAL->HOSTCTRL_SET = (1UL << domain);
 }
@@ -101,7 +101,7 @@ __STATIC_INLINE void sli_hal_portal_request_domain_powerup(sli_portal_domain_t d
  ******************************************************************************/
 __STATIC_INLINE void sli_hal_portal_request_domain_powerdown(sli_portal_domain_t domain)
 {
-  EFM_ASSERT(SLI_PORTAL_VALIDATE_DOMAIN(domain));
+  SL_LOG_DEBUG_ASSERT(SLI_PORTAL_VALIDATE_DOMAIN(domain));
 
   PORTAL->HOSTCTRL_CLR = (1UL << domain);
 }
@@ -128,7 +128,7 @@ __STATIC_INLINE void sli_hal_portal_request_domain_powerdown(sli_portal_domain_t
  ******************************************************************************/
 __STATIC_INLINE bool sli_hal_portal_is_domain_powered_up(sli_portal_domain_t domain)
 {
-  EFM_ASSERT(SLI_PORTAL_VALIDATE_DOMAIN(domain));
+  SL_LOG_DEBUG_ASSERT(SLI_PORTAL_VALIDATE_DOMAIN(domain));
 
   return (PORTAL->HOSTSTATUS & (1UL << domain));
 }
@@ -148,7 +148,7 @@ __STATIC_INLINE bool sli_hal_portal_is_domain_powered_up(sli_portal_domain_t dom
  ******************************************************************************/
 __STATIC_INLINE void sli_hal_portal_enable_domain_interrupt(sli_portal_domain_t domain)
 {
-  EFM_ASSERT(SLI_PORTAL_VALIDATE_DOMAIN(domain));
+  SL_LOG_DEBUG_ASSERT(SLI_PORTAL_VALIDATE_DOMAIN(domain));
 
   PORTAL->HOSTIEN_SET = (1UL << domain);
 }
@@ -171,7 +171,7 @@ __STATIC_INLINE void sli_hal_portal_enable_domain_interrupt(sli_portal_domain_t 
  ******************************************************************************/
 __STATIC_INLINE bool sli_hal_portal_is_domain_interrupt_enabled(sli_portal_domain_t domain)
 {
-  EFM_ASSERT(SLI_PORTAL_VALIDATE_DOMAIN(domain));
+  SL_LOG_DEBUG_ASSERT(SLI_PORTAL_VALIDATE_DOMAIN(domain));
 
   return (PORTAL->HOSTIEN & (1UL << domain));
 }
@@ -198,7 +198,7 @@ __STATIC_INLINE bool sli_hal_portal_is_domain_interrupt_enabled(sli_portal_domai
  ******************************************************************************/
 __STATIC_INLINE bool sli_hal_portal_is_domain_interrupt_flag_set(sli_portal_domain_t domain)
 {
-  EFM_ASSERT(SLI_PORTAL_VALIDATE_DOMAIN(domain));
+  SL_LOG_DEBUG_ASSERT(SLI_PORTAL_VALIDATE_DOMAIN(domain));
 
   return (PORTAL->HOSTIF & (1UL << domain));
 }

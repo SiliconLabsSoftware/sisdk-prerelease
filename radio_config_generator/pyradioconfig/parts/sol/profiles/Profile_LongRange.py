@@ -20,13 +20,10 @@ class Profile_Long_Range_Sol(Profile_Long_Range_Ocelot):
         pass
 
     def _lookup_from_longrange_mode(self, model):
-        #This function calculates some variables/registers based on the longrange mode
 
-        #Read the mode and fec_en from the profile inputs (not yet written to model vars)
         longrange_mode = model.profile.inputs.longrange_mode.var_value
         fec_en = model.profile.inputs.fec_en.var_value
 
-        # We need to modify the net bitrate (data rate) based on whether FEC is enabled or not
         if fec_en is not None and fec_en != model.vars.fec_en.var_enum.NONE:
             fec_factor=2
         else:
@@ -62,8 +59,6 @@ class Profile_Long_Range_Sol(Profile_Long_Range_Ocelot):
             model.vars.bitrate.value_forced = 80000//fec_factor
             model.vars.deviation.value_forced = 160000
 
-        # Owner: Rossano Pantaleoni
-        # Jira Link: https://jira.silabs.com/browse/MCUW_RADIO_CFG-2364
         elif longrange_mode == model.vars.longrange_mode.var_enum.LR_76p8k:
             model.vars.bitrate.value_forced = 76800//fec_factor
             model.vars.deviation.value_forced = 76800*2

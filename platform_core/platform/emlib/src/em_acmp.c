@@ -33,7 +33,7 @@
 
 #include <stdbool.h>
 #include "em_bus.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_gpio.h"
 
 /***************************************************************************//**
@@ -165,11 +165,11 @@
  ******************************************************************************/
 void ACMP_CapsenseInit(ACMP_TypeDef *acmp, const ACMP_CapsenseInit_TypeDef *init)
 {
-  EFM_ASSERT(ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(ACMP_REF_VALID(acmp));
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
-  EFM_ASSERT(init->vrefDiv < 64);
-  EFM_ASSERT(init->biasProg
+  SL_LOG_DEBUG_ASSERT(init->vrefDiv < 64);
+  SL_LOG_DEBUG_ASSERT(init->biasProg
              <= (_ACMP_CFG_BIAS_MASK >> _ACMP_CFG_BIAS_SHIFT));
 
   ACMP_Disable(acmp);
@@ -185,9 +185,9 @@ void ACMP_CapsenseInit(ACMP_TypeDef *acmp, const ACMP_CapsenseInit_TypeDef *init
   }
 
 #elif defined(_SILICON_LABS_32B_SERIES_1)
-  EFM_ASSERT(init->vddLevelLow < 64);
-  EFM_ASSERT(init->vddLevelHigh < 64);
-  EFM_ASSERT(init->biasProg
+  SL_LOG_DEBUG_ASSERT(init->vddLevelLow < 64);
+  SL_LOG_DEBUG_ASSERT(init->vddLevelHigh < 64);
+  SL_LOG_DEBUG_ASSERT(init->biasProg
              <= (_ACMP_CTRL_BIASPROG_MASK >> _ACMP_CTRL_BIASPROG_SHIFT));
 
   /* Set the control register. No need to set interrupt modes. */
@@ -206,8 +206,8 @@ void ACMP_CapsenseInit(ACMP_TypeDef *acmp, const ACMP_CapsenseInit_TypeDef *init
   BUS_RegBitWrite(&acmp->CTRL, _ACMP_CTRL_EN_SHIFT, init->enable);
 
 #elif defined(_SILICON_LABS_32B_SERIES_0)
-  EFM_ASSERT(init->vddLevel < 64);
-  EFM_ASSERT(init->biasProg
+  SL_LOG_DEBUG_ASSERT(init->vddLevel < 64);
+  SL_LOG_DEBUG_ASSERT(init->biasProg
              <= (_ACMP_CTRL_BIASPROG_MASK >> _ACMP_CTRL_BIASPROG_SHIFT));
 
   /* Set the control register. No need to set interrupt modes. */
@@ -248,20 +248,20 @@ void ACMP_CapsenseInit(ACMP_TypeDef *acmp, const ACMP_CapsenseInit_TypeDef *init
 void ACMP_CapsenseChannelSet(ACMP_TypeDef *acmp, ACMP_Channel_TypeDef channel)
 {
   /* Make sure the module exists on the selected chip. */
-  EFM_ASSERT(ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(ACMP_REF_VALID(acmp));
 
 #if defined(_ACMP_INPUTSEL_POSSEL_CH7)
   /* Make sure that only external channels are used. */
-  EFM_ASSERT(channel <= _ACMP_INPUTSEL_POSSEL_CH7);
+  SL_LOG_DEBUG_ASSERT(channel <= _ACMP_INPUTSEL_POSSEL_CH7);
 #elif defined(_ACMP_INPUTCTRL_POSSEL_PD15)
-  EFM_ASSERT(channel != _ACMP_INPUTCTRL_NEGSEL_CAPSENSE);
-  EFM_ASSERT(_ACMP_INPUTCTRL_POSSEL_PA0 <= channel);
-  EFM_ASSERT(channel <= _ACMP_INPUTCTRL_POSSEL_PD15);
+  SL_LOG_DEBUG_ASSERT(channel != _ACMP_INPUTCTRL_NEGSEL_CAPSENSE);
+  SL_LOG_DEBUG_ASSERT(_ACMP_INPUTCTRL_POSSEL_PA0 <= channel);
+  SL_LOG_DEBUG_ASSERT(channel <= _ACMP_INPUTCTRL_POSSEL_PD15);
 #endif
 
 #if defined(_ACMP_INPUTCTRL_MASK)
   /* Make sure that the ACMP is enabled before changing INPUTCTRL. */
-  EFM_ASSERT(acmp->EN & ACMP_EN_EN);
+  SL_LOG_DEBUG_ASSERT(acmp->EN & ACMP_EN_EN);
 
   while (acmp->SYNCBUSY != 0U) {
     /* Wait for synchronization to finish */
@@ -286,7 +286,7 @@ void ACMP_CapsenseChannelSet(ACMP_TypeDef *acmp, ACMP_Channel_TypeDef channel)
 void ACMP_Disable(ACMP_TypeDef *acmp)
 {
   /* Make sure the module exists on the selected chip. */
-  EFM_ASSERT(ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(ACMP_REF_VALID(acmp));
 
 #if defined(_ACMP_EN_MASK)
   while ((acmp->EN != 0U) && (acmp->SYNCBUSY != 0U)) {
@@ -315,7 +315,7 @@ void ACMP_Disable(ACMP_TypeDef *acmp)
 void ACMP_Enable(ACMP_TypeDef *acmp)
 {
   /* Make sure the module exists on the selected chip. */
-  EFM_ASSERT(ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(ACMP_REF_VALID(acmp));
 
 #if defined(_ACMP_EN_MASK)
   acmp->EN_SET = ACMP_EN_EN;
@@ -367,7 +367,7 @@ void ACMP_ExternalInputSelect(ACMP_TypeDef *acmp, ACMP_ExternalInput_Typedef apo
 void ACMP_Reset(ACMP_TypeDef *acmp)
 {
   /* Make sure the module exists on the selected chip */
-  EFM_ASSERT(ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(ACMP_REF_VALID(acmp));
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
 #if defined(ACMP_SWRST_SWRST)
@@ -425,10 +425,10 @@ void ACMP_GPIOSetup(ACMP_TypeDef *acmp, GPIO_Port_TypeDef port,
   int acmpIndex = ACMP_DEVICE_ID(acmp);
 
   /* Make sure the module exists on the selected chip */
-  EFM_ASSERT(ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(ACMP_REF_VALID(acmp));
 
   /* Make sure that the port/pin combination is valid. */
-  EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
 
   /* Set GPIO inversion */
   acmp->CTRL = (acmp->CTRL & _ACMP_CTRL_NOTRDYVAL_MASK)
@@ -462,10 +462,10 @@ void ACMP_GPIOSetup(ACMP_TypeDef *acmp, GPIO_Port_TypeDef port,
 void ACMP_GPIOSetup(ACMP_TypeDef *acmp, uint32_t location, bool enable, bool invert)
 {
   /* Make sure the module exists on the selected chip */
-  EFM_ASSERT(ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(ACMP_REF_VALID(acmp));
 
   /* Sanity checking of location */
-  EFM_ASSERT(location <= _ACMP_ROUTE_LOCATION_MAX);
+  SL_LOG_DEBUG_ASSERT(location <= _ACMP_ROUTE_LOCATION_MAX);
 
   /* Set GPIO inversion */
   BUS_RegMaskedWrite(&acmp->CTRL, _ACMP_CTRL_GPIOINV_MASK,
@@ -508,35 +508,35 @@ void ACMP_ChannelSet(ACMP_TypeDef *acmp, ACMP_Channel_TypeDef negSel,
                      ACMP_Channel_TypeDef posSel)
 {
   /* Make sure the module exists on the selected chip. */
-  EFM_ASSERT(ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(ACMP_REF_VALID(acmp));
 
   /* Make sure that posSel and negSel channel selectors are valid. */
 #if defined(_ACMP_INPUTSEL_NEGSEL_DAC0CH1)
-  EFM_ASSERT(negSel <= _ACMP_INPUTSEL_NEGSEL_DAC0CH1);
+  SL_LOG_DEBUG_ASSERT(negSel <= _ACMP_INPUTSEL_NEGSEL_DAC0CH1);
 #elif defined(_ACMP_INPUTSEL_NEGSEL_CAPSENSE)
-  EFM_ASSERT(negSel <= _ACMP_INPUTSEL_NEGSEL_CAPSENSE);
+  SL_LOG_DEBUG_ASSERT(negSel <= _ACMP_INPUTSEL_NEGSEL_CAPSENSE);
 #endif
 
 #if defined(_ACMP_INPUTSEL_POSSEL_CH7)
-  EFM_ASSERT(posSel <= _ACMP_INPUTSEL_POSSEL_CH7);
+  SL_LOG_DEBUG_ASSERT(posSel <= _ACMP_INPUTSEL_POSSEL_CH7);
 #endif
 
   /* Make sure that posSel and negSel channel selectors are valid. */
 #if defined(_ACMP_INPUTCTRL_POSSEL_PD15)
-  EFM_ASSERT(negSel <= _ACMP_INPUTCTRL_POSSEL_PD15);
-  EFM_ASSERT(posSel <= _ACMP_INPUTCTRL_POSSEL_PD15);
-  EFM_ASSERT(posSel != _ACMP_INPUTCTRL_NEGSEL_CAPSENSE);
+  SL_LOG_DEBUG_ASSERT(negSel <= _ACMP_INPUTCTRL_POSSEL_PD15);
+  SL_LOG_DEBUG_ASSERT(posSel <= _ACMP_INPUTCTRL_POSSEL_PD15);
+  SL_LOG_DEBUG_ASSERT(posSel != _ACMP_INPUTCTRL_NEGSEL_CAPSENSE);
 
   /* Make sure that posSel and negSel channel selectors don't both
    * use odd or even pins. */
 #if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
-  EFM_ASSERT(!((((posSel >= _ACMP_INPUTCTRL_POSSEL_EXTPA)
+  SL_LOG_DEBUG_ASSERT(!((((posSel >= _ACMP_INPUTCTRL_POSSEL_EXTPA)
                  && (posSel <= _ACMP_INPUTCTRL_POSSEL_EXTPD))
                 || (posSel >= _ACMP_INPUTCTRL_POSSEL_PA0))
                && (negSel >= _ACMP_INPUTCTRL_NEGSEL_PA0)
                && (posSel % 2 == negSel % 2)));
 #else
-  EFM_ASSERT(!((posSel >= _ACMP_INPUTCTRL_POSSEL_PA0)
+  SL_LOG_DEBUG_ASSERT(!((posSel >= _ACMP_INPUTCTRL_POSSEL_PA0)
                && (negSel >= _ACMP_INPUTCTRL_NEGSEL_PA0)
                && (posSel % 2 == negSel % 2)));
 
@@ -545,7 +545,7 @@ void ACMP_ChannelSet(ACMP_TypeDef *acmp, ACMP_Channel_TypeDef negSel,
 
 #if defined(_ACMP_INPUTCTRL_MASK)
   /* Make sure that the ACMP is enabled before changing INPUTCTRL. */
-  EFM_ASSERT(acmp->EN & ACMP_EN_EN);
+  SL_LOG_DEBUG_ASSERT(acmp->EN & ACMP_EN_EN);
   while (acmp->SYNCBUSY != 0U) {
     /* Wait for synchronization to finish */
   }
@@ -580,18 +580,18 @@ void ACMP_ChannelSet(ACMP_TypeDef *acmp, ACMP_Channel_TypeDef negSel,
 void ACMP_Init(ACMP_TypeDef *acmp, const ACMP_Init_TypeDef *init)
 {
   /* Make sure the module exists on the selected chip. */
-  EFM_ASSERT(ACMP_REF_VALID(acmp));
+  SL_LOG_DEBUG_ASSERT(ACMP_REF_VALID(acmp));
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
-  EFM_ASSERT(init->biasProg
+  SL_LOG_DEBUG_ASSERT(init->biasProg
              <= (_ACMP_CFG_BIAS_MASK >> _ACMP_CFG_BIAS_SHIFT));
 
 // PM-5507: enforce that biasProg is a functional value
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
-  EFM_ASSERT(init->biasProg >= 4);
+  SL_LOG_DEBUG_ASSERT(init->biasProg >= 4);
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13)
   // Allow customer to use BIASPROG in [2; 3]
-  EFM_ASSERT(init->biasProg >= 2);
+  SL_LOG_DEBUG_ASSERT(init->biasProg >= 2);
 #else
   // Allow customer to use BIASPROG in [0; 3]
   // but the implementation of the wait operation would be their responsibility
@@ -610,7 +610,7 @@ void ACMP_Init(ACMP_TypeDef *acmp, const ACMP_Init_TypeDef *init)
                      init->vrefDiv << _ACMP_INPUTCTRL_VREFDIV_SHIFT);
 
 #elif defined(_SILICON_LABS_32B_SERIES_1)
-  EFM_ASSERT(init->biasProg
+  SL_LOG_DEBUG_ASSERT(init->biasProg
              <= (_ACMP_CTRL_BIASPROG_MASK >> _ACMP_CTRL_BIASPROG_SHIFT));
   /* Make sure the ACMP is disabled since ACMP power source might be changed.*/
   ACMP_Disable(acmp);
@@ -628,7 +628,7 @@ void ACMP_Init(ACMP_TypeDef *acmp, const ACMP_Init_TypeDef *init)
   acmp->HYSTERESIS1 = init->hysteresisLevel_1;
 
 #elif defined(_SILICON_LABS_32B_SERIES_0)
-  EFM_ASSERT(init->biasProg
+  SL_LOG_DEBUG_ASSERT(init->biasProg
              <= (_ACMP_CTRL_BIASPROG_MASK >> _ACMP_CTRL_BIASPROG_SHIFT));
   /* Make sure the ACMP is disabled since ACMP power source might be changed.*/
   ACMP_Disable(acmp);
@@ -667,8 +667,8 @@ void ACMP_Init(ACMP_TypeDef *acmp, const ACMP_Init_TypeDef *init)
  ******************************************************************************/
 void ACMP_VASetup(ACMP_TypeDef *acmp, const ACMP_VAConfig_TypeDef *vaconfig)
 {
-  EFM_ASSERT(vaconfig->div0 < 64);
-  EFM_ASSERT(vaconfig->div1 < 64);
+  SL_LOG_DEBUG_ASSERT(vaconfig->div0 < 64);
+  SL_LOG_DEBUG_ASSERT(vaconfig->div1 < 64);
 
   BUS_RegMaskedWrite(&acmp->INPUTSEL, _ACMP_INPUTSEL_VASEL_MASK,
                      vaconfig->input << _ACMP_INPUTSEL_VASEL_SHIFT);
@@ -693,8 +693,8 @@ void ACMP_VASetup(ACMP_TypeDef *acmp, const ACMP_VAConfig_TypeDef *vaconfig)
  ******************************************************************************/
 void ACMP_VBSetup(ACMP_TypeDef *acmp, const ACMP_VBConfig_TypeDef *vbconfig)
 {
-  EFM_ASSERT(vbconfig->div0 < 64);
-  EFM_ASSERT(vbconfig->div1 < 64);
+  SL_LOG_DEBUG_ASSERT(vbconfig->div0 < 64);
+  SL_LOG_DEBUG_ASSERT(vbconfig->div1 < 64);
 
   BUS_RegMaskedWrite(&acmp->INPUTSEL, _ACMP_INPUTSEL_VBSEL_MASK,
                      vbconfig->input << _ACMP_INPUTSEL_VBSEL_SHIFT);

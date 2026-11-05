@@ -37,21 +37,16 @@ class ModelDiff(object):
         :return:  Processed multi phy data model
         """
         try:
-            # Verify uniqueness of protocol and channel names
             if not ModelDiff._verify_protocol_channel_naming_uniqueness(multi_phy_model):
                 raise Exception('Protocol and channel names are not unique')
 
-            # Loop through each base channel configuration
             for base_channel_configuration in multi_phy_model.base_channel_configurations.base_channel_configuration:
                 base_channel_configuration.phy_config_delta_subtract = dict()  # Init dictionary
-                #LogMgr.Debug("Processing: {}".format(base_channel_configuration.name))
                 channel_config_entry_counter = 0
-                # Loop through each channel config entry
                 for channel_config_entry in base_channel_configuration.channel_config_entries.channel_config_entry:
                     channel_config_entry_registers = dict()  # Init dictionary
                     chcfg_entry_dontcare_bitmasks = dict()
 
-                    # Create default register model for the part_family
                     if (multi_phy_model.part_revision == 'ANY'
                             or multi_phy_model.part_family.upper() in RM_S1_PART_FAMILY_NAMES
                             or multi_phy_model.part_family.upper() in RM_S2_PART_FAMILY_NAMES
@@ -59,19 +54,15 @@ class ModelDiff(object):
                         register_model = RM_Factory(multi_phy_model.part_family.upper())()
                     else:
                         register_model = RM_Factory(multi_phy_model.part_family.upper(), multi_phy_model.part_revision)()
-                    # channel_config_entry.full_register_model = register_model
 
-                    # Run radio configurator for this channel config entry
                     if not skip_running_radio_config_on_channel:
                         radio_config_model = ModelDiff._run_radio_configurator(multi_phy_model.part_family, multi_phy_model.part_revision, base_channel_configuration, channel_config_entry, multi_phy_model.target)
-                        # Only check the result  code if we actually run the Radio Configurator calculations for this channel
                         if radio_config_model.result_code != CalcStatus.Success.value:
                             channel_config_entry.radio_configurator_output_model = radio_config_model
                             raise CalculationException('channel_config_entry {} : {}'.format(channel_config_entry.name, radio_config_model.error_message))
                     else:
                         radio_config_model = channel_config_entry.radio_configurator_output_model
 
-                    # clean some fat off the radio config model
                     for var in radio_config_model.vars:
                         var._access_read.clear()
                         var._access_write.clear()
@@ -87,8 +78,6 @@ class ModelDiff(object):
                         build_register_groups = False
                         register_groups_dict = None
 
-                    # Loop through radio configurator profile outputs that match
-                    # "register type" (i.e. SVD_REG_FIELD or SEQ_REG_FIELD)
                     for profile_output in radio_config_model.profile.get_outputs([ModelOutputType.SVD_REG_FIELD,
                                                                                   ModelOutputType.SEQ_REG_FIELD]):
                         reg_var = radio_config_model.vars.get_var(profile_output.var_name)
@@ -98,7 +87,6 @@ class ModelDiff(object):
                         field = register_model.getObjectByName(field_name)
 
                         if profile_output.var_value is not None and profile_output._var.value_do_not_care != True:
-                            # Load profile output value into register model
                             try:
                                 field.io = profile_output.var_value
                             except BaseException as e:
@@ -111,14 +99,11 @@ class ModelDiff(object):
                                 raise e
 
                         elif profile_output._var.value_do_not_care == True:
-                            # Create dont-care bitmask model
                             try:
                                 if register_name not in chcfg_entry_dontcare_bitmasks:
                                     chcfg_entry_dontcare_bitmasks[register_name] = 0xFFFFFFFF       # Initialize with 1's (all-care)
 
-                                # Create a bitmask with the given bitwidth
                                 dont_care_reg_bitmask = (1 << field.bitWidth) - 1
-                                # Shift the bitmask to the correct bitoffset
                                 dont_care_reg_bitmask <<= field.bitOffset
                                 inverted_bitmask = ~dont_care_reg_bitmask & 0xFFFFFFFF
                                 chcfg_entry_dontcare_bitmasks[register_name] &= inverted_bitmask
@@ -131,10 +116,8 @@ class ModelDiff(object):
                                     e.message = error_message
                                 raise e
 
-                        # Save register for later diff use
                         channel_config_entry_registers[register_name] = register
 
-                        # Build register groups if required
                         if build_register_groups:
                             group_list = profile_output.groups
                             for group in group_list:
@@ -143,23 +126,18 @@ class ModelDiff(object):
                                 if register_name not in register_groups_dict[group]:
                                     register_groups_dict[group].append(register_name)
 
-                    # Store completed dont-care bitmasks in multiPHY model
                     channel_config_entry.phy_config_dont_care_bitmasks = chcfg_entry_dontcare_bitmasks
                     channel_config_entry.phy_config_chosen_aliases = alias_map
 
                     if channel_config_entry_counter == 0:
-                        # if this is the first entry in collection (e.g. this is the first iteration) then use this as the base configuration set of registers
                         base_channel_configuration.phy_config_base = channel_config_entry_registers
                         channel_config_entry.phy_config_delta_add = dict()
                     else:
-                        # find differences in [base_channel_config.phy_config_base] vs [channel_config_entry_registers]
                         add_registers, subtract_registers = ModelDiff._find_diff_and_reset_values_from_reference(base_channel_configuration.phy_config_base,
                                                                                                                  channel_config_entry_registers)
 
-                        # store [register] differences into [channel_config_entry.phy_config_delta_add]
                         channel_config_entry.phy_config_delta_add = add_registers
 
-                        # merge [base_channel_config.phy_config_base] registers into [base_channel_config.phy_config_delta_subtract]
                         base_channel_configuration.phy_config_delta_subtract.update(subtract_registers)
 
                     channel_config_entry_counter += 1  # increment loop counter
@@ -173,9 +151,6 @@ class ModelDiff(object):
                         2) We can switch just once (PHY1 to PHY2), provided we modify phy_config_delta_add
                             The modification is shown below.
                     """
-                    # When true, copy all missing values back into "add" dictionary.  And then empty out "subtract" dictionary.
-                    # This is used as a speed optimization, at the cost of a larger "add" size.
-                    # Remove registers from "baseline" that already exist in the "add" collection.
                     for channel_config_entry in base_channel_configuration.channel_config_entries.channel_config_entry:
                         phy_config_delta_add = channel_config_entry.phy_config_delta_add
                         for key, subtract in base_channel_configuration.phy_config_delta_subtract.items():
@@ -191,10 +166,6 @@ class ModelDiff(object):
 
 
                 if base_channel_configuration.force_empty_phy_config_delta_subtract and base_channel_configuration.apply_dontcares_across_deltas:
-                    ## The add and subtract algorithm does not accomodate don't care registers, hence we apply don't cares after phy_delta has been prepared
-                    ## We apply don't care mask to the same registers of all channel configs' phy deltas
-                    ## If all register values are the same, then we can safely remove the register from the phy delta
-                    ## This algorithm does not work if force_empty_phy_config_delta_subtract=false
 
                     new_phy_delta_dict = dict()
                     for chcfg_num, chcfg_entry in enumerate(base_channel_configuration.channel_config_entries.channel_config_entry):
@@ -207,13 +178,11 @@ class ModelDiff(object):
                             if len(all_regvals_masked) == 1:        # Only 1 value in set, which means we can safely remove register in copy
                                 del new_phy_delta_dict[chcfg_num][reg_with_dont_cares]
 
-                    # Rebuild phy deltas
                     for chcfg_num, chcfg_entry in enumerate(
                         base_channel_configuration.channel_config_entries.channel_config_entry):
                         chcfg_entry.phy_config_delta_add = new_phy_delta_dict[chcfg_num]
 
                 if base_channel_configuration.prune_aliases_in_deltas:
-                    ## Now prune registers not chosen for aliasing
 
                     for chcfg_num, chcfg_entry in enumerate(
                             base_channel_configuration.channel_config_entries.channel_config_entry):
@@ -223,9 +192,6 @@ class ModelDiff(object):
                                 del phy_config_delta_add_copy[regname]
                         chcfg_entry.phy_config_delta_add = phy_config_delta_add_copy
 
-                ## REGISTER GROUPS ##
-                # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-2616
-                # If build_register_groups, we shall "move" registers from phy_config_delta_add into phy_config_delta_grouped_add
                 if build_register_groups:
                     for channel_config_entry in base_channel_configuration.channel_config_entries.channel_config_entry:
                         phy_config_delta_add = channel_config_entry.phy_config_delta_add
@@ -242,11 +208,9 @@ class ModelDiff(object):
                                                                 phy_config_delta_grouped_add=phy_config_delta_grouped_add)
                             register_groups.add_register_group(register_group)
 
-                            # Now remove registers from phy_config_delta_add
                             for register_name in phy_config_delta_grouped_add:
                                 phy_config_delta_add.pop(register_name, None)
 
-            # Check if z-wave concurrent PHYs exists. If not, skip dont-care optimizations on base phys
             conc_phy_exists = False
             for base_channel_configuration in multi_phy_model.base_channel_configurations.base_channel_configuration:
                 conc_phy_opt_hop_found = False if len(base_channel_configuration.optional_arguments.argument) == 0 else \
@@ -256,7 +220,6 @@ class ModelDiff(object):
                     break
 
             if not conc_phy_exists:
-                # No concurrent PHYs found, proceed with pruning base PHY configs with dont-cares
                 for base_channel_configuration in multi_phy_model.base_channel_configurations.base_channel_configuration:
                     if base_channel_configuration.prune_aliases_in_deltas:
                         chosen_aliases = set()
@@ -269,11 +232,9 @@ class ModelDiff(object):
                                 del phy_config_base_copy[regname]
                         base_channel_configuration.phy_config_base = phy_config_base_copy
 
-            # Now that we've gone through and calculated all the base channel configs, let's ee if we need to do optimize any base_channel_references
             base_channel_diffs = dict()
             ind_base_channel_diffs = dict()
             for base_channel_configuration in multi_phy_model.base_channel_configurations.base_channel_configuration:
-                # if force_empty_phy_config_delta_subtract is True, and base_channel_reference is not an empty string.. then this name is the reference regsiter set used to optimize space across multiple base_channel_configs
                 if base_channel_configuration.force_empty_phy_config_delta_subtract:
                     if base_channel_configuration.base_channel_reference:
                         if len(base_channel_configuration.base_channel_reference) > 0:
@@ -289,9 +250,7 @@ class ModelDiff(object):
 
                             ind_base_channel_diffs[base_channel_reference_name][base_channel_configuration.name] = ModelDiff._generate_collection_of_diff_register_names(base_channel_config_ref.phy_config_base, base_channel_configuration.phy_config_base)
 
-                            # merge lists
                             base_channel_diffs[base_channel_reference_name] = list(set().union(base_channel_diffs[base_channel_reference_name], ind_base_channel_diffs[base_channel_reference_name][base_channel_configuration.name]))
-                            # LogMgr.Debug("register {} diff merge: {}, original {}".format(base_channel_configuration.phy.name, len(ind_base_channel_diffs[base_channel_reference_name][base_channel_configuration.name]), len(base_channel_diffs[base_channel_reference_name])))
 
             for base_channel_reference_name, list_diff_reg_names in base_channel_diffs.items():
                 for base_channel_configuration in multi_phy_model.base_channel_configurations.base_channel_configuration:
@@ -300,13 +259,9 @@ class ModelDiff(object):
                     if base_channel_configuration.name == base_channel_reference_name or base_channel_configuration.base_channel_reference == base_channel_reference_name:
                         conc_phy_opt_hop_found = False
                         if (len(base_channel_configuration.optional_arguments.argument) > 0):
-                            # Let's see if this is a concurrent PHY
                             conc_phy_opt_hop_found = RAIL_ConcPhy.RAIL_IsConcPhyVt(base_channel_configuration.optional_arguments.argument)
 
                         if (conc_phy_opt_hop_found == True) and (base_channel_configuration.base_channel_reference is not None):
-                            # if virtual concurrent PHY, only apply the diff compare to the base channel
-                            #LogMgr.Debug("Found virtual PHY {}".format(base_channel_configuration.phy.name))
-                            # First, make sure MODEM.VITERBIDEMOD is on the diffs
                             if not RAIL_OptArgInput.viterbidemod in ind_base_channel_diffs[base_channel_reference_name][base_channel_configuration.name]:
                                 ind_base_channel_diffs[base_channel_reference_name][base_channel_configuration.name].append(RAIL_OptArgInput.viterbidemod)
                             for list_diff_reg in ind_base_channel_diffs[base_channel_reference_name][base_channel_configuration.name]:
@@ -317,29 +272,21 @@ class ModelDiff(object):
                                 if list_diff_reg in phy_config_base:                    # If reg in ref_base_delta, delete (since they are all now in ref_chx_deltas)
                                     del phy_config_base[list_diff_reg]
                         else:
-                            # if non-(virtual concurrent) PHY, apply the diff compare to the list_diff_reg_names
                             for list_diff_reg in list_diff_reg_names:
                                 for channel_config_entry in base_channel_configuration.channel_config_entries.channel_config_entry:
                                     phy_config_delta_add = channel_config_entry.phy_config_delta_add
                                     if not list_diff_reg in phy_config_delta_add:       # If reg not in ref_ch1_delta, add from ref_base_delta
-                                        # list_diff_reg (item of ind_base_channel_diffs) contains all registers that are different between base phy and base reference phys
-                                        # Due to don't-care and alias regs pruning, some registers in list_diff_reg may not exist in base phy
-                                        # This means that the reg is either don't-care for whole channel configuration, or already in phy deltas
-                                        # In both cases, it is safe to skip adding this register to phy delta
                                         if list_diff_reg in phy_config_base:
                                             phy_config_delta_add[list_diff_reg] = phy_config_base[list_diff_reg]
                                 if list_diff_reg in phy_config_base:                    # If reg in ref_base_delta, delete (since they are all now in ref_chx_deltas)
                                     del phy_config_base[list_diff_reg]
 
-                        #LogMgr.Debug("register base {} orig: {}, final: {}".format(base_channel_configuration.phy.name, phy_config_base_orig_len, len(phy_config_base)))
                         if base_channel_configuration.base_channel_reference == base_channel_reference_name:
-                            # Clear out all the base registers, except the base reference list
                             phy_config_base.clear()
 
             if isinstance(multi_phy_model.status_code, str):
                 multi_phy_model.status_code = int(multi_phy_model.status_code)
         except Exception as ex:
-            # LogMgr.Error(ex)
             LogMgr.Error(traceback.print_exc())
             multi_phy_model.status_message = str(ex)
             multi_phy_model.status_code = ModelDiffCodes.UNKNOWN_ERROR.value
@@ -348,7 +295,6 @@ class ModelDiff(object):
 
     @staticmethod
     def _run_radio_configurator(part_family, part_rev, base_channel_configuration, channel_config_entry, part_target=None):
-        # Hack to pass in base_frequency_hz from channel config entry as an override
         channel_config_properties = dict()
         if channel_config_entry.base_frequency:
             channel_config_properties["base_frequency_hz"] = channel_config_entry.base_frequency
@@ -397,7 +343,6 @@ class ModelDiff(object):
         inputs = ModelDiff._convert_xml_inputs_to_dict(inputs)
         channel_overrides_dict = ModelDiff._convert_xml_inputs_to_dict(channel_entry_input_overrides)
 
-        # merge override dictionaries
         inputs.update(channel_config_properties)  # merge channel config properties to be passed in as overrides
         inputs.update(channel_overrides_dict)
 
@@ -423,7 +368,6 @@ class ModelDiff(object):
 
         channel_input_overrides_dict = ModelDiff._convert_xml_inputs_to_dict(channel_entry_input_overrides)
 
-        # merge override dictionaries
         input_overrides_dict.update(channel_config_properties) # merge channel config properties to be passed in as overrides
         input_overrides_dict.update(channel_input_overrides_dict)
 
@@ -446,10 +390,8 @@ class ModelDiff(object):
         input_dict = dict()
         if xml_input_list:
             for input in xml_input_list:
-                # key = input.key.lower()
                 key = input.key
                 if '.' in key:  # check for [category].[variable name]
-                    # remove category
                     key = key[key.index(".")+1:]
 
                 input_value = input.value
@@ -549,9 +491,7 @@ class ModelDiff(object):
 
     @staticmethod
     def _fix_protocol_channel_naming(nameStr):
-        # Make names compatible with ANSI C variable naming conventions (e.g. no spaces, cant start with a number)
         if nameStr is not None:
-            # nameStr = nameStr.replace(" ", "_")
             nameStr = re.sub("[^0-9a-zA-Z_]", "_", nameStr)
             if nameStr[0].isdigit():
                 nameStr = "_" + nameStr

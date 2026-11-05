@@ -10,5 +10,4 @@ class Target_IC_Caracal(Target_IC_Bobcat):
     _cfg_location = "caracal"
     _tag = ITarget.IC_str
 
-    # Inherit all target methods for now
     pass

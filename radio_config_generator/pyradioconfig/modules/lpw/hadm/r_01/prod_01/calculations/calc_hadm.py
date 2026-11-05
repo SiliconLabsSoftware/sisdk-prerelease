@@ -2,9 +2,9 @@ from pyradioconfig.calculator_model_framework.interfaces.ipcalculator import IPC
 from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import CalculationException
 
 class CalcHadmMisc(IPCalculator):
+    FRAC_BITS = 4 # fixed point representation to RAIL S32.4 (total,frac) bits
 
     def calc_hadm_enable_default(self, model):
-        # define hadm_enable as false by default
        model.vars.hadm_enable.value = model.vars.hadm_enable.var_enum.DISABLED
 
     def calc_hadm_do_not_care(self, model):
@@ -31,24 +31,42 @@ class CalcHadmMisc(IPCalculator):
         xtal = model.vars.xtal_frequency_hz.value
         hadm_do_not_care = model.vars.hadm_do_not_care.value
 
-        if xtal == 38e6:
-            xosel = 0
-        elif xtal == 38.4e6:
-            xosel = 1
-        elif xtal == 39e6:
-            xosel = 2
-        elif xtal == 40e6:
-            xosel = 3
-        else:
-            raise CalculationException('ERROR: unknown value for xtal frequency in calc_hadm_xosel')
+        match xtal:
+            case 38e6:
+                xosel = 0
+            case 38.4e6:
+                xosel = 1
+            case 39e6:
+                xosel = 2
+            case 40e6:
+                xosel = 3
+            case _:
+                raise CalculationException('ERROR: unknown value for xtal frequency in calc_hadm_xosel')
 
         self._ip_reg_write(model, 'RTTCTRL1_XOSEL', xosel, do_not_care=hadm_do_not_care)
+
+    def calc_hadm_physel_reg(self, model):
+        ble_feature = model.vars.ble_feature.value
+        hadm_do_not_care = model.vars.hadm_do_not_care.value
+        hadm_enable = model.vars.hadm_enable.value
+
+        match ble_feature:
+            case model.vars.ble_feature.var_enum.HADM_1M:
+                self._ip_reg_write(model, 'CTRL0_PHYSEL', 0, do_not_care=hadm_do_not_care)
+            case model.vars.ble_feature.var_enum.HADM_2M:
+                self._ip_reg_write(model, 'CTRL0_PHYSEL', 1, do_not_care=hadm_do_not_care)
+            case model.vars.ble_feature.var_enum.HADM_2M_2BT:
+                self._ip_reg_write(model, 'CTRL0_PHYSEL', 2, do_not_care=hadm_do_not_care)
+            case _:
+                if hadm_enable == model.vars.hadm_enable.var_enum.ENABLED:
+                    raise CalculationException('HADM is enabled but ble_feature is set to non-HADM in the PHY definition')
+                else:
+                    self._ip_reg_write(model, 'CTRL0_PHYSEL', 0, do_not_care=hadm_do_not_care)
 
     def calc_hadm_misc(self, model):
         hadm_do_not_care = model.vars.hadm_do_not_care.value
 
         self._ip_reg_write(model, 'CTRL0_ROLE',0, do_not_care=hadm_do_not_care)
-        self._ip_reg_write(model, 'CTRL0_PHYSEL',0, do_not_care=hadm_do_not_care)  # set correctly in PHY definition of 1M, 2M and 2M2BT HADM PHY
         self._ip_reg_write(model, 'CTRL0_SSAFCGEAR',0, do_not_care=hadm_do_not_care)
         self._ip_reg_write(model, 'CTRL0_TXUPSAMPOSR4',0, do_not_care=hadm_do_not_care)
         self._ip_reg_write(model, 'CTRL0_TGUARDPERIOD',4, do_not_care=hadm_do_not_care)
@@ -86,7 +104,7 @@ class CalcHadmMisc(IPCalculator):
         self._ip_reg_write(model, 'RTTTUNE_RTTINITTUNE',0, do_not_care=hadm_do_not_care)
         self._ip_reg_write(model, 'RTTTUNE_RTTREFLTUNE',0, do_not_care=hadm_do_not_care)
 
-        self._ip_reg_write(model, 'RTTRPTTIME0_REFBACKSYMB',8, do_not_care=hadm_do_not_care)
+        self._ip_reg_write(model, 'RTTRPTTIME0_REFBACKSYMB',0, do_not_care=hadm_do_not_care)
         self._ip_reg_write(model, 'RTTRPTTIME0_REFBACKCYCLE',0, do_not_care=hadm_do_not_care)
         self._ip_reg_write(model, 'RTTRPTTIME0_GROUPDLY',0, do_not_care=hadm_do_not_care)
         self._ip_reg_write(model, 'RTTRPTTIME0_RTTTIP1IDX',7, do_not_care=hadm_do_not_care)
@@ -100,7 +118,6 @@ class CalcHadmMisc(IPCalculator):
         self._ip_reg_write(model, 'RTTPKT2_RTTPAYLOAD2',32, do_not_care=hadm_do_not_care)
         self._ip_reg_write(model, 'RTTPKT3_RTTPAYLOAD3',32, do_not_care=hadm_do_not_care)
 
-        # kulee: hard coding the following NADM values
         self._ip_reg_write(model, 'NADMCONFIG_NADMDIFFD', 1, do_not_care=hadm_do_not_care)
         self._ip_reg_write(model, 'NADMCONFIG_REFMAPFSK', 0, do_not_care=hadm_do_not_care)
         self._ip_reg_write(model, 'NADMCONFIG_SNRNUMFASTSAMPLES', 3, do_not_care=hadm_do_not_care)
@@ -110,13 +127,12 @@ class CalcHadmMisc(IPCalculator):
         self._ip_reg_write(model, 'DFTECLDFREQ_DFTECLDFREQ', 0, do_not_care=hadm_do_not_care)
 
     def calc_nadm_recrewindsamples(self, model):
-        # This is chip-specific and must be overridden for every IC (based on FEFILT)
         hadm_do_not_care = model.vars.hadm_do_not_care.value
-        self._ip_reg_write(model, 'NADMCONFIG_RECREWINDSAMPLES', 135, do_not_care=hadm_do_not_care)
+        self._ip_reg_write(model, 'NADMCONFIG_RECREWINDSAMPLES', 131, do_not_care=hadm_do_not_care)
 
     def calc_rtt_ramaddrback(self, model):
         hadm_do_not_care = model.vars.hadm_do_not_care.value
-        self._ip_reg_write(model, 'RTTCTRL1_RAMRADDRBACK', 129, do_not_care=hadm_do_not_care)
+        self._ip_reg_write(model, 'RTTCTRL1_RAMRADDRBACK', 125, do_not_care=hadm_do_not_care)
 
     def calc_rtt_src(self, model):
         hadm_do_not_care = model.vars.hadm_do_not_care.value
@@ -124,33 +140,20 @@ class CalcHadmMisc(IPCalculator):
         phy_sel = model.vars.HADM_CTRL0_PHYSEL.value
 
         if (phy_sel==0):
-            self._ip_reg_write(model, 'RTTCTRL0_DFTSTARTOFF', 3, do_not_care=hadm_do_not_care)
+            self._ip_reg_write(model, 'RTTCTRL0_DFTSTARTOFF', 6, do_not_care=hadm_do_not_care)
             self._ip_reg_write(model, 'RTTCTRL2_SRCCOMPSAMPSKIPEN', 0, do_not_care=hadm_do_not_care)
             self._ip_reg_write(model, 'RTTCTRL2_SRCMUREFBACK', 0, do_not_care=hadm_do_not_care)
         else:
-            self._ip_reg_write(model, 'RTTCTRL0_DFTSTARTOFF', 5, do_not_care=hadm_do_not_care)
+            self._ip_reg_write(model, 'RTTCTRL0_DFTSTARTOFF', 9, do_not_care=hadm_do_not_care)
             self._ip_reg_write(model, 'RTTCTRL2_SRCCOMPSAMPSKIPEN', 1, do_not_care=hadm_do_not_care)
             self._ip_reg_write(model, 'RTTCTRL2_SRCMUREFBACK', 1, do_not_care=hadm_do_not_care)
 
     def calc_refgencoeff(self, model):
         hadm_do_not_care = model.vars.hadm_do_not_care.value
-        # TODO: implement with ip_read
         xo_sel = model.vars.HADM_RTTCTRL1_XOSEL.value
-        # | XOSEL   | xtal_freq
-        # | 0       | 38MHz
-        # | 1       | 38.4MHz
-        # | 2       | 39MHz
-        # | 3       | 40MHz
         phy_sel = model.vars.HADM_CTRL0_PHYSEL.value
-        # | PHYSEL  | HADM PHY
-        # | 0       | 1M
-        # | 1       | 2M
-        # | 2       | 2M, BT = 2
 
         refgencoeff_settings_LUT = {
-            # Format: REFGENCOEFFx[PHYSEL][XOSEL]
-            # for PHYSEL :   [     0                   ,      1                   ,      2                  ]
-            # for XOSEL :    [     0,    1,    2,    3], [    0,    1,    2,    3], [    0,    1,    2,    3]
             'REFGENCOEFF0':  [[    0,    0,    0,    0], [    0,    0,    0,    0], [    0,    0,    0,    0]],
             'REFGENCOEFF1':  [[    0,    0,    0,    0], [    0,    0,    0,    0], [    0,    0,    0,    0]],
             'REFGENCOEFF2':  [[    0,    0,    0,    0], [    0,    0,    0,    0], [    0,    0,    0,    0]],
@@ -219,3 +222,53 @@ class CalcHadmMisc(IPCalculator):
         self._ip_reg_write(model, 'REFGENCOEFFG14_REFGENCOEFF29', refgencoeff_settings_LUT['REFGENCOEFF29'][phy_sel][xo_sel], allow_neg=True, do_not_care=hadm_do_not_care)
         self._ip_reg_write(model, 'REFGENCOEFFG15_REFGENCOEFF30', refgencoeff_settings_LUT['REFGENCOEFF30'][phy_sel][xo_sel], allow_neg=True, do_not_care=hadm_do_not_care)
         self._ip_reg_write(model, 'REFGENCOEFFG15_REFGENCOEFF31', refgencoeff_settings_LUT['REFGENCOEFF31'][phy_sel][xo_sel], allow_neg=True, do_not_care=hadm_do_not_care)
+
+    def calc_rtt_group_delay(self, model):
+        phy_sel = model.vars.HADM_CTRL0_PHYSEL.value
+        refbacksym = model.vars.HADM_RTTRPTTIME0_REFBACKSYMB.value
+        bitrate = model.vars.bitrate.value
+        delay_adc_to_demod_ns = model.vars.rx_grp_delay_us.value * 1000 # only accounts for group delay, not implementation delay
+        fxo = model.vars.xtal_frequency_hz.value
+        fs = model.vars.demod_rate_actual.value
+        osr = model.vars.target_osr.value
+        preamble_length = model.vars.preamble_length.value
+        syncword_length = model.vars.syncword_length.value
+
+        dg_delay_samples = 1
+        cordic_delay_samples = 4
+        cfe_delay_samples = 2
+        xing_delay_cycles = 4
+        phdiff_delay_cycles = 1
+        trecs_delay_cyeles = 3
+        src2_to_demod_samples = dg_delay_samples + cordic_delay_samples + cfe_delay_samples
+        src2_to_demod_cycles = xing_delay_cycles + phdiff_delay_cycles + trecs_delay_cyeles
+
+        delay_adc_to_hadm_ns = delay_adc_to_demod_ns + src2_to_demod_samples/fs/1e-9 + src2_to_demod_cycles/fxo/1e-9
+
+        expectpatt_shift_symbols = -1
+        demod_offset_samples = (preamble_length + syncword_length -1 + 0.5 + expectpatt_shift_symbols)*osr
+        demod_offset_ns = demod_offset_samples / fs / 1e-9
+
+        cable_delay_ns = 53
+        external_delay_ns = 0.25
+
+        if phy_sel == 0:
+            tx_mod_present_offset_ns = 360
+            residual_dig_offset_ns = 2*(602 - cable_delay_ns) - 2*external_delay_ns
+        else:
+            tx_mod_present_offset_ns = 56
+            residual_dig_offset_ns = 2*(187 - cable_delay_ns) - 2*external_delay_ns
+        mod_offset_ns = (preamble_length -1 +0.5) / bitrate / 1e-9 - tx_mod_present_offset_ns
+
+
+        t_gd_ns = demod_offset_ns - mod_offset_ns + delay_adc_to_hadm_ns + residual_dig_offset_ns
+        refbacksym_ns = refbacksym / bitrate / 1e-9
+        t_gd_ns_remaining = t_gd_ns - refbacksym_ns
+
+        t_gd_ns_fp = int(round(t_gd_ns_remaining * 2**self.FRAC_BITS))
+        model.vars.cs_rtt_dig_delay_ns.value = t_gd_ns_fp
+
+    def calc_rbs_bias(self, model):
+        t_rbs_bias = 0
+        t_rbs_bias_fp = int(round(t_rbs_bias * 2 ** self.FRAC_BITS))
+        model.vars.cs_rtt_rbs_bias_ns.value = t_rbs_bias_fp

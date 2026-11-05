@@ -10,9 +10,6 @@ metadata:
   sbom:
     license: Zlib
 root_path: cpc_ng/port/silabs
-configuration:
-- name: SL_CLOCK_MANAGER_SDHC0CLK_SOURCE
-  value: SL_CLOCK_MANAGER_REFCLK_SOCPLL_FREQPLAN_100MHZ
 source:
 - path: src/sl_cpc_drv_sdio_host.c
 include:
@@ -29,7 +26,6 @@ requires:
 - name: hal_gpio
 - name: hal_sdhc
 - name: sdhc_core
-- name: status
 template_file:
 - path: template/sl_cpc_drv_sdio_host_config.h.jinja
 template_contribution:

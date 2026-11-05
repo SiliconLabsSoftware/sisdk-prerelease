@@ -1,0 +1,17 @@
+
+EFR32X21X000F1024XM32 Rev A1 Studio Register Map Package
+===========================================================================
+
+Contents:
+
+.. toctree::
+   :maxdepth: 3
+
+   EFR32X21X000F1024XM32
+
+Indices and Tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

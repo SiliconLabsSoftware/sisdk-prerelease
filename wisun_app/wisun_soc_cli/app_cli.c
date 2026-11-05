@@ -54,6 +54,9 @@
 #include "common/endian.h"
 #include "app_event_log.h"
 #include "sl_wisun_crash_handler.h"
+#if defined(SL_CATALOG_WISUN_LXPM_CLI_PRESENT)
+#include "sl_wisun_lxpm_cli.h"
+#endif
 
 #ifdef SL_CATALOG_POWER_MANAGER_PRESENT
 #include "sl_power_manager.h"
@@ -845,7 +848,7 @@ static void app_handle_fb_ready_ind(sl_wisun_evt_t *evt)
   printf("[First Breath ready]\r\n");
 }
 
-#if defined(HAVE_FFN) && defined(HAVE_FFN_POWER_SAVING)
+#if defined(SL_CATALOG_WISUN_FFN_POWER_SAVING_SUPPORT_PRESENT)
 static void app_handle_ffn_power_saving_state_ind(sl_wisun_evt_t *evt)
 {
   const char *state_name;
@@ -866,20 +869,7 @@ static void app_handle_ffn_power_saving_state_ind(sl_wisun_evt_t *evt)
   }
   printf("[FFN power saving state: %s]\r\n", state_name);
 }
-#endif // HAVE_FFN && HAVE_FFN_POWER_SAVING
-
-static void app_handle_lxpm_neighbor_updated_ind(sl_wisun_evt_t *evt)
-{
-  char ipv6_string[40];
-  ip6tos(&evt->evt.lxpm_neighbor_updated.link_local_ipv6.address, ipv6_string);
-  printf("[LXPM neighbor updated: %s", ipv6_string);
-  printf(" with %"PRIu16" group(s):\r\n", evt->evt.lxpm_neighbor_updated.group_count);
-  for (uint16_t i = 0; i < evt->evt.lxpm_neighbor_updated.group_count; i++) {
-    ip6tos(evt->evt.lxpm_neighbor_updated.groups[i].address, ipv6_string);
-    printf("    %s\r\n", ipv6_string);
-  }
-  printf("]\r\n");
-}
+#endif
 
 void sl_wisun_on_event(sl_wisun_evt_t *evt)
 {
@@ -969,14 +959,16 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
     case SL_WISUN_MSG_FB_READY_IND_ID:
       app_handle_fb_ready_ind(evt);
       break;
-#if defined(HAVE_FFN) && defined(HAVE_FFN_POWER_SAVING)
+#if defined(SL_CATALOG_WISUN_FFN_POWER_SAVING_SUPPORT_PRESENT)
     case SL_WISUN_MSG_FFN_POWER_SAVING_STATE_IND_ID:
       app_handle_ffn_power_saving_state_ind(evt);
       break;
 #endif
+#if defined(SL_CATALOG_WISUN_LXPM_CLI_PRESENT)
     case SL_WISUN_MSG_LXPM_NEIGHBOR_UPDATED_IND_ID:
-      app_handle_lxpm_neighbor_updated_ind(evt);
+      sl_wisun_lxpm_cli_handle_neighbor_updated(evt);
       break;
+#endif
     default:
       printf("[Unknown event: %d]\r\n", evt->header.id);
   }
@@ -2755,6 +2747,8 @@ void app_reset_statistics(sl_cli_command_arg_t *arguments)
     goto cleanup;
   }
 
+  ret = sl_wisun_reset_statistics(SL_WISUN_STATISTICS_TYPE_FFN_POWER_SAVING);
+
 cleanup:
 
   if (ret == SL_STATUS_OK) {
@@ -2785,7 +2779,7 @@ void app_set_lfn_support(sl_cli_command_arg_t *arguments)
   app_wisun_cli_mutex_unlock();
 }
 
-#if defined(HAVE_FFN) && defined(HAVE_FFN_POWER_SAVING)
+#ifdef SL_CATALOG_WISUN_FFN_POWER_SAVING_SUPPORT_PRESENT
 void app_set_ffn_power_saving_schedule(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret;
@@ -2807,7 +2801,7 @@ void app_set_ffn_power_saving_schedule(sl_cli_command_arg_t *arguments)
 
   app_wisun_cli_mutex_unlock();
 }
-#endif // HAVE_FFN && HAVE_FFN_POWER_SAVING
+#endif
 
 void app_set_leaf(sl_cli_command_arg_t *arguments)
 {
@@ -3967,38 +3961,3 @@ void app_reset_parameters(void)
 
   app_wisun_cli_mutex_unlock();
 }
-
-#if defined(SL_CATALOG_WISUN_LXPM_PRESENT)
-void app_set_lxpm_prefix(sl_cli_command_arg_t *arguments)
-{
-  sl_status_t ret;
-  int32_t retval = SOCKET_RETVAL_ERROR;
-  char *prefix_str = NULL;
-  int_fast16_t prefix_length;
-  in6_addr_t sin6_addr;
-
-  app_wisun_cli_mutex_lock();
-
-  prefix_str = sl_cli_get_argument_string(arguments, 0);
-  if (!prefix_str) {
-    printf("[Failed: invalid prefix parameter]\r\n");
-    goto cleanup;
-  }
-
-  retval = stoip6_prefix(prefix_str, sin6_addr.address, &prefix_length);
-  if (retval != 0 || prefix_length <= 0) {
-    printf("[Failed: invalid prefix: %s]\r\n", prefix_str);
-    goto cleanup;
-  }
-
-  ret = sl_wisun_set_lxpm_prefix(sin6_addr.address, (uint8_t)prefix_length);
-  if (ret != SL_STATUS_OK) {
-    printf("[Failed: unable to set LXPM prefix: %"PRIu32"]\r\n", ret);
-  } else {
-    printf("[LXPM prefix set]\r\n");
-  }
-
-cleanup:
-  app_wisun_cli_mutex_unlock();
-}
-#endif

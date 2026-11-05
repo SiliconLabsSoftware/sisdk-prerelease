@@ -36,11 +36,6 @@
  * @{
  ******************************************************************************/
 
-#if defined(_CMU_CLKEN1_ACMP0_SHIFT)
-/// Define ACMP0 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_ACMP0_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_ACMP0_SHIFT;
-#endif
-
 #if defined(_CMU_CLKEN0_AMUXCP0_SHIFT)
 /// Define AMUXCP0 peripheral bus clock value.
 const uint32_t SL_BUS_CLOCK_AMUXCP0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_AMUXCP0_SHIFT;
@@ -61,19 +56,14 @@ const uint32_t SL_BUS_CLOCK_BURAM_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX
 const uint32_t SL_BUS_CLOCK_BURTC_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_BURTC_SHIFT;
 #endif
 
-#if defined(_CMU_CLKEN1_SEMAILBOXHOST_SHIFT)
-/// Define SEMAILBOX peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_SEMAILBOX_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_SEMAILBOXHOST_SHIFT;
+#if defined(_CMU_CLKEN0_DCDC_SHIFT)
+/// Define DCDC peripheral bus clock value.
+const uint32_t SL_BUS_CLOCK_DCDC_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_DCDC_SHIFT;
 #endif
 
 #if defined(_CMU_CLKEN1_DMEM_SHIFT)
 /// Define DMEM peripheral bus clock value.
 const uint32_t SL_BUS_CLOCK_DMEM_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_DMEM_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN0_DCDC_SHIFT)
-/// Define DCDC peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_DCDC_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_DCDC_SHIFT;
 #endif
 
 #if defined(_CMU_CLKEN0_DPLL0_SHIFT)
@@ -101,6 +91,16 @@ const uint32_t SL_BUS_CLOCK_EUSART1_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKE
 const uint32_t SL_BUS_CLOCK_FSRCO_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_FSRCO_SHIFT;
 #endif
 
+#if defined(_CMU_CLKEN0_GPCRC0_SHIFT)
+/// Define GPCRC0 peripheral bus clock value.
+const uint32_t SL_BUS_CLOCK_GPCRC0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_GPCRC0_SHIFT;
+#endif
+
+#if defined(_CMU_CLKEN2_GPCRC1_SHIFT)
+/// Define GPCRC1 peripheral bus clock value.
+const uint32_t SL_BUS_CLOCK_GPCRC1_VALUE = (BUS_CLOCK_CLKEN2 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN2_GPCRC1_SHIFT;
+#endif
+
 #if defined(_CMU_CLKEN0_GPIO_SHIFT)
 /// Define GPIO peripheral bus clock value.
 const uint32_t SL_BUS_CLOCK_GPIO_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_GPIO_SHIFT;
@@ -111,9 +111,19 @@ const uint32_t SL_BUS_CLOCK_GPIO_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_
 const uint32_t SL_BUS_CLOCK_HFRCO0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_HFRCO0_SHIFT;
 #endif
 
+#if defined(_CMU_CLKEN0_HFRCOEM23_SHIFT)
+/// Define HFRCOEM23 peripheral bus clock value.
+const uint32_t SL_BUS_CLOCK_HFRCOEM23_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_HFRCOEM23_SHIFT;
+#endif
+
 #if defined(_CMU_CLKEN0_HFXO0_SHIFT)
 /// Define HFXO0 peripheral bus clock value.
 const uint32_t SL_BUS_CLOCK_HFXO0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_HFXO0_SHIFT;
+#endif
+
+#if defined(_CMU_CLKEN1_HOSTMAILBOX_SHIFT)
+/// Define HOSTMAILBOX peripheral bus clock value.
+const uint32_t SL_BUS_CLOCK_HOSTMAILBOX_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_HOSTMAILBOX_SHIFT;
 #endif
 
 #if defined(_CMU_CLKEN0_I2C0_SHIFT)
@@ -121,14 +131,24 @@ const uint32_t SL_BUS_CLOCK_HFXO0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX
 const uint32_t SL_BUS_CLOCK_I2C0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_I2C0_SHIFT;
 #endif
 
-#if defined(_CMU_CLKEN0_I2C1_SHIFT)
-/// Define I2C1 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_I2C1_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_I2C1_SHIFT;
+#if defined(_CMU_CLKEN0_IADC0_SHIFT)
+/// Define IADC0 peripheral bus clock value.
+const uint32_t SL_BUS_CLOCK_IADC0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_IADC0_SHIFT;
 #endif
 
 #if defined(_CMU_CLKEN1_ICACHE0_SHIFT)
 /// Define ICACHE0 peripheral bus clock value.
 const uint32_t SL_BUS_CLOCK_ICACHE0_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_ICACHE0_SHIFT;
+#endif
+
+#if defined(_CMU_CLKEN0_LDMA_SHIFT)
+/// Define LDMA0 peripheral bus clock value.
+const uint32_t SL_BUS_CLOCK_LDMA0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_LDMA_SHIFT;
+#endif
+
+#if defined(_CMU_CLKEN0_LDMAXBAR_SHIFT)
+/// Define LDMAXBAR0 peripheral bus clock value.
+const uint32_t SL_BUS_CLOCK_LDMAXBAR0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_LDMAXBAR_SHIFT;
 #endif
 
 #if defined(_CMU_CLKEN0_LETIMER0_SHIFT)
@@ -151,6 +171,11 @@ const uint32_t SL_BUS_CLOCK_LFXO_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_
 const uint32_t SL_BUS_CLOCK_MSC_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_MSC_SHIFT;
 #endif
 
+#if defined(_CMU_CLKEN1_PCNT0_SHIFT)
+/// Define PCNT0 peripheral bus clock value.
+const uint32_t SL_BUS_CLOCK_PCNT0_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_PCNT0_SHIFT;
+#endif
+
 #if defined(_CMU_CLKEN0_PRS_SHIFT)
 /// Define PRS peripheral bus clock value.
 const uint32_t SL_BUS_CLOCK_PRS_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_PRS_SHIFT;
@@ -161,6 +186,16 @@ const uint32_t SL_BUS_CLOCK_PRS_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_S
 const uint32_t SL_BUS_CLOCK_RADIOAES_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_RADIOAES_SHIFT;
 #endif
 
+#if defined(_CMU_CLKEN1_RFFPLL0_SHIFT)
+/// Define RFFPLL0 peripheral bus clock value.
+const uint32_t SL_BUS_CLOCK_RFFPLL0_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_RFFPLL0_SHIFT;
+#endif
+
+#if defined(_CMU_CLKEN1_SEMAILBOXHOST_SHIFT)
+/// Define SEMAILBOX peripheral bus clock value.
+const uint32_t SL_BUS_CLOCK_SEMAILBOX_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_SEMAILBOXHOST_SHIFT;
+#endif
+
 #if defined(_CMU_CLKEN1_SMU_SHIFT)
 /// Define SMU peripheral bus clock value.
 const uint32_t SL_BUS_CLOCK_SMU_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_SMU_SHIFT;
@@ -169,6 +204,11 @@ const uint32_t SL_BUS_CLOCK_SMU_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_S
 #if defined(_CMU_CLKEN0_SYSCFG_SHIFT)
 /// Define SYSCFG peripheral bus clock value.
 const uint32_t SL_BUS_CLOCK_SYSCFG_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_SYSCFG_SHIFT;
+#endif
+
+#if defined(_CMU_CLKEN0_SYSRTC0_SHIFT)
+/// Define SYSRTC0 peripheral bus clock value.
+const uint32_t SL_BUS_CLOCK_SYSRTC0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_SYSRTC0_SHIFT;
 #endif
 
 #if defined(_CMU_CLKEN0_TIMER0_SHIFT)
@@ -204,101 +244,6 @@ const uint32_t SL_BUS_CLOCK_ULFRCO_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKEN
 #if defined(_CMU_CLKEN0_WDOG0_SHIFT)
 /// Define WDOG0 peripheral bus clock value.
 const uint32_t SL_BUS_CLOCK_WDOG0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_WDOG0_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN1_ACMP1_SHIFT)
-/// Define ACMP1 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_ACMP1_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_ACMP1_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN1_EUSART2_SHIFT)
-/// Define EUSART2 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_EUSART2_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_EUSART2_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN1_EUSART3_SHIFT)
-/// Define EUSART3 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_EUSART3_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_EUSART3_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN1_EUSART4_SHIFT)
-/// Define EUSART4 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_EUSART4_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_EUSART4_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN0_GPCRC_SHIFT)
-/// Define GPCRC0 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_GPCRC0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_GPCRC_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN0_HFRCOEM23_SHIFT)
-/// Define HFRCOEM23 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_HFRCOEM23_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_HFRCOEM23_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN1_HOSTMAILBOX_SHIFT)
-/// Define HOSTMAILBOX peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_HOSTMAILBOX_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_HOSTMAILBOX_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN0_IADC0_SHIFT)
-/// Define IADC0 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_IADC0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_IADC0_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN0_LDMA_SHIFT)
-/// Define LDMA0 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_LDMA0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_LDMA_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN0_LDMAXBAR_SHIFT)
-/// Define LDMAXBAR0 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_LDMAXBAR0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_LDMAXBAR_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN0_LESENSE_SHIFT)
-/// Define LESENSE peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_LESENSE_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_LESENSE_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN1_PCNT0_SHIFT)
-/// Define PCNT0 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_PCNT0_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_PCNT0_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN1_RFFPLL0_SHIFT)
-/// Define RFFPLL0 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_RFFPLL0_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_RFFPLL0_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN0_SYSRTC0_SHIFT)
-/// Define SYSRTC0 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_SYSRTC0_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_SYSRTC0_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN0_TIMER5_SHIFT)
-/// Define TIMER5 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_TIMER5_VALUE = (BUS_CLOCK_CLKEN0 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN0_TIMER5_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN1_TIMER6_SHIFT)
-/// Define TIMER6 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_TIMER6_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_TIMER6_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN1_TIMER7_SHIFT)
-/// Define TIMER7 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_TIMER7_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_TIMER7_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN1_USB_SHIFT)
-/// Define USB peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_USB_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_USB_SHIFT;
-#endif
-
-#if defined(_CMU_CLKEN1_VDAC0_SHIFT)
-/// Define VDAC0 peripheral bus clock value.
-const uint32_t SL_BUS_CLOCK_VDAC0_VALUE = (BUS_CLOCK_CLKEN1 << _BUS_CLOCK_CLKENX_SHIFT) | _CMU_CLKEN1_VDAC0_SHIFT;
 #endif
 
 #if defined(_CMU_CLKEN1_WDOG1_SHIFT)

@@ -49,11 +49,12 @@ def _get_jlink_session(jlink_serial = None, jlink_host = None, ddp_app_path = No
         sw.connect()
         try:
             sw.rtt_start()
+            return sw
         except SerialWireTimeoutError:
+            logger.warning('Cached session RTT failed; re-injecting provisioning application')
             sw.close()
             _remove_jlink_session(sw)
-            raise
-        return sw
+            # Fall through and re-inject
 
     with open(ddp_app_path, 'rb') as f:
         ddp_app = f.read()
@@ -102,8 +103,8 @@ def _initialize_nvm(sw, nvm3_start_addr = None, nvm3_size = None):
     sw.nvm3_size = nvm3_size
     logger.debug(f'NVM initialized')
 
-def get_pki():
-    pki = wisunpki.get_pki()
+def get_pki(pki_path = None):
+    pki = wisunpki.get_pki(pki_path = pki_path)
     if not pki:
         return None
     if len(pki) == 3:
@@ -115,11 +116,11 @@ def get_pki():
     else:
         return None
 
-def create_pki(oem_company = None, oem_country = None, chain_length = None):
-    wisunpki.create_pki(oem_name = oem_company, oem_country = oem_country, chain_length = chain_length)
-    return get_pki()
+def create_pki(oem_company = None, oem_country = None, chain_length = None, pki_path = None):
+    wisunpki.create_pki(oem_name = oem_company, oem_country = oem_country, chain_length = chain_length, pki_path = pki_path)
+    return get_pki(pki_path = pki_path)
 
-def import_pki(root = None, mca = None, mica = None):
+def import_pki(root = None, mca = None, mica = None, pki_path = None):
     pki = {}
     pki['root_cert'] = root['cert_path']
     if 'key_path' in root:
@@ -130,19 +131,19 @@ def import_pki(root = None, mca = None, mica = None):
         pki['mica_cert'] = mica['cert_path']
         if 'key_path' in mica:
             pki['mica_key'] = mica['key_path']
-    wisunpki.setup_pki(**pki)
+    wisunpki.setup_pki(**pki, pki_path = pki_path)
 
-def get_certificate(mac_address = None):
-    return wisunpki.get_credential(hwserialnum = bytes.fromhex(mac_address))
+def get_certificate(mac_address = None, pki_path = None):
+    return wisunpki.get_credential(hwserialnum = bytes.fromhex(mac_address), pki_path = pki_path)
 
-def create_certificate_on_host(mac_address = None, oem_hwtype = None, device_type = None):
+def create_certificate_on_host(mac_address = None, oem_hwtype = None, device_type = None, pki_path = None):
     if device_type == 'router':
         device_type_enum = wisunpki.WisunDeviceType.ROUTER
     else:
         device_type_enum = wisunpki.WisunDeviceType.BORDER_ROUTER
-    return wisunpki.generate_on_host(hwtype_oid = oem_hwtype, hwserialnum=bytes.fromhex(mac_address), device_type = device_type_enum)
+    return wisunpki.generate_on_host(hwtype_oid = oem_hwtype, hwserialnum=bytes.fromhex(mac_address), device_type = device_type_enum, pki_path = pki_path)
 
-def create_certificate_on_device(mac_address = None, oem_hwtype = None, device_type = None, cert_id = None, key_id = None, nvm3_start_addr = None, nvm3_size = None, jlink_serial = None, jlink_host = None, ddp_app_path = None, ddp_app_board = None):
+def create_certificate_on_device(mac_address = None, oem_hwtype = None, device_type = None, cert_id = None, key_id = None, nvm3_start_addr = None, nvm3_size = None, jlink_serial = None, jlink_host = None, ddp_app_path = None, ddp_app_board = None, pki_path = None):
     if device_type == 'router':
         device_type_enum = wisunpki.WisunDeviceType.ROUTER
     else:
@@ -172,7 +173,7 @@ def create_certificate_on_device(mac_address = None, oem_hwtype = None, device_t
         logger.info('CSR generated')
         # Generate device certificate
         logger.info('Generating device certificate')
-        device = wisunpki.generate_from_csr(hwtype_oid=oem_hwtype, hwserialnum=bytes.fromhex(mac_address), device_type = device_type_enum, csr_data=resp.csr)
+        device = wisunpki.generate_from_csr(hwtype_oid=oem_hwtype, hwserialnum=bytes.fromhex(mac_address), device_type = device_type_enum, csr_data=resp.csr, pki_path = pki_path)
         logger.info('Device certificate generated')
         # Write device certificate to NVM
         with open(device['cert_path'], 'rb') as f:

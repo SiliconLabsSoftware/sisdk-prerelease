@@ -35,7 +35,6 @@ class CALC_Global(ICalculator):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Inputs
         self._add_modulation_type_variable(model)
         self._add_bitrate_variable(model)
         self._addModelVariable(model,    'xtal_frequency_hz', int,        ModelVariableFormat.DECIMAL, units='Hz',   desc='EFR32 crystal clock frequency.')
@@ -63,7 +62,6 @@ class CALC_Global(ICalculator):
         self._addModelVariable(model,    'shaping_filter_param',  float,  ModelVariableFormat.DECIMAL,               desc='BT value for Gaussian  and roll-off factor for Raised Cosine pulse shaping filter.')
         self._addModelVariable(model,    'ook_slicer_level',  int,        ModelVariableFormat.DECIMAL,               desc='Level to slice OOK symbols at as referenced from signal.')
 
-        # Preamble/sync variables
         self._addModelVariable(model,   'preamble_pattern',       int,    ModelVariableFormat.DECIMAL,               desc='Minimum repeated portion of the preamble such as binary 01 or 10. ')
         self._addModelVariable(model,   'preamble_pattern_len',   int,    ModelVariableFormat.DECIMAL, units='bits', desc='Length of the preamble pattern in bits. This will be set to 2 for a simple 01 or 10 preamble pattern.')
         self._addModelVariable(model,   'preamble_length',        int,    ModelVariableFormat.DECIMAL, units='bits', desc='Total length of the preamble.')
@@ -75,7 +73,6 @@ class CALC_Global(ICalculator):
         self._addModelVariable(model,   'asynchronous_rx_enable', bool,      ModelVariableFormat.ASCII, desc='Asynchronous RX mode enabled')
 
 
-        # FSK MAP
         var = self._addModelVariable(model, 'fsk_symbol_map', Enum, ModelVariableFormat.DECIMAL, 'List of FSK symbol mappings')
         member_data = [
             ['MAP0', 0, '4FSK: 11, 10, 00, 01 in decreasing frequency, 2FSK: 1 high, 0 low frequency'],
@@ -92,7 +89,6 @@ class CALC_Global(ICalculator):
             'List of supported FSK symbol mappings',
             member_data)
 
-        # DIFFENCMODE
         var = self._addModelVariable(model, 'diff_encoding_mode', Enum, ModelVariableFormat.DECIMAL, 'Differential encoding mode options')
         member_data = [
             ['DISABLED', 0, 'Differential encoding is disabled'],
@@ -125,16 +121,12 @@ class CALC_Global(ICalculator):
             member_data)
 
 
-        # Output fields
 
-        # Add granular vars
         self._add_baudrate_variable(model)
 
-        # Add register groups
         self._add_TXBR_regs(model)
         self._add_common_regs(model)
 
-        # Internal variables
         self._addModelVariable(model,    'base'                  ,  int,    ModelVariableFormat.DECIMAL)
         self._addModelVariable(model,    'basebits'              ,  int,    ModelVariableFormat.DECIMAL)
         self._addModelVariable(model,    'if_frequency_hz'       ,  int,    ModelVariableFormat.DECIMAL, units='Hz', desc='Intermediate Frequency')
@@ -167,18 +159,20 @@ class CALC_Global(ICalculator):
         self._addModelVariable(model,    'rx_baudrate_offset_hz' ,   int,   ModelVariableFormat.DECIMAL)
         self._addModelVariable(model,    'rx_bitrate_offset_hz'  ,   int,   ModelVariableFormat.DECIMAL, units='Hz', desc='Nominal Rx bit rate offset wrt the value set in entry field Bitrate')
         self._addModelVariable(model,    'afc_scale'             ,  float,  ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model,    'freq_offset_scale'     ,  float,  ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model,    'frequency_offset_factor',      float, ModelVariableFormat.DECIMAL)
-        self._addModelVariable(model,    'frequency_offset_factor_fxp',  long,  ModelVariableFormat.HEX)
+        self._addModelVariable(model,    'afcadjrx_res'        ,    float,  ModelVariableFormat.DECIMAL, units='Hz', desc='AFCADJRX register resolution in Hz')
+        self._addModelVariable(model,    'freq_offset_scale'     ,  float,  ModelVariableFormat.DECIMAL, desc='used to convert the value in FREQOFFEST to Hz')
+        self._addModelVariable(model,    'frequency_offset_factor',      float, ModelVariableFormat.DECIMAL,
+                               desc='used to convert the value in FREQOFFEST to synthesizer resolution units, '
+                                    'frequency_offset_factor = freqOffsetScale * (1.0/synthResolution)')
+        self._addModelVariable(model,    'frequency_offset_factor_fxp',  long,  ModelVariableFormat.HEX,
+                               desc='fixed point value of frequency_offset_factor')
         self._addModelVariable(model,    'dynamic_slicer_enabled',           bool, ModelVariableFormat.ASCII)
         self._addModelVariable(model,    'dynamic_slicer_threshold_values',  int,  ModelVariableFormat.DECIMAL, is_array=True)
         self._addModelVariable(model,    'dynamic_slicer_level_values',      int,  ModelVariableFormat.DECIMAL, is_array=True)
         self._addModelVariable(model,    'ook_ebno',                         float, ModelVariableFormat.DECIMAL)
 
-        # Common output variables
 
 
-        # Variables for the reverse path
         self._addModelActual(model,    'base_frequency', long,          ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'bandwidth',  int,               ModelVariableFormat.DECIMAL)
         self._addModelActual(model,    'syncword_length',  int,         ModelVariableFormat.DECIMAL)
@@ -232,7 +226,6 @@ class CALC_Global(ICalculator):
 
     def _add_modulation_type_variable(self, model):
 
-        #This method is needed so that we can easily override the modulation type in future parts
 
         var = self._addModelVariable(model, 'modulation_type', Enum, ModelVariableFormat.DECIMAL,
                                      'Defines the modulation type.')
@@ -257,7 +250,6 @@ class CALC_Global(ICalculator):
             member_data)
 
     def _add_bitrate_variable(self, model):
-        #On parts prior to Ocelot the bitrate variable in the calculator represents chiprate
         self._addModelVariable(model, 'bitrate', int, ModelVariableFormat.DECIMAL, units='bps',
                                desc='Chip rate after channel coding and before symbol coding.')
 

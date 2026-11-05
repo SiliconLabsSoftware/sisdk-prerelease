@@ -110,76 +110,33 @@ also generates member specifications in each class (in a dictionary).
 
 """
 import io
-## LICENSE
 
-## Copyright (c) 2003 Dave Kuhlman
 
-## Permission is hereby granted, free of charge, to any person obtaining
-## a copy of this software and associated documentation files (the
-## "Software"), to deal in the Software without restriction, including
-## without limitation the rights to use, copy, modify, merge, publish,
-## distribute, sublicense, and/or sell copies of the Software, and to
-## permit persons to whom the Software is furnished to do so, subject to
-## the following conditions:
 
-## The above copyright notice and this permission notice shall be
-## included in all copies or substantial portions of the Software.
 
-## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-## EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-## MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-## IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-## CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-## TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-## SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 import os.path
-# import time
 import getopt
-# import urllib2
 import imp
 import time
 from sys import argv, getdefaultencoding
 from xml.sax import handler, make_parser
 import logging
 import keyword
-# import StringIO
 import textwrap
 
-# Default logger configuration
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s %(levelname)s %(message)s',
-    #filemode='w',      # Can uncomment this line or change to append ('a')
-    #filename='generateDS.log'  # uncomment to send messages to file
 )
-# Disable logging messages level INFO and below (includes DEBUG).
 logging.disable(logging.INFO)
 
-## import warnings
-## warnings.warn('importing IPShellEmbed', UserWarning)
-## from IPython.Shell import IPShellEmbed
-## args = ''
-## ipshell = IPShellEmbed(args,
-##     banner = 'Dropping into IPython',
-##     exit_msg = 'Leaving Interpreter, back to program.')
-
-# Then use the following line where and when you want to drop into the
-# IPython shell:
-#    ipshell('<some message> -- Entering ipshell.\\nHit Ctrl-D to exit')
 
 
-#
-# Global variables etc.
-#
 
-#
-# Do not modify the following VERSION comments.
-# Used by updateversion.py.
-##VERSION##
+
 VERSION = '2.12d'
-##VERSION##
 
 GenerateProperties = 0
 UseGetterSetter = 'new'
@@ -220,10 +177,6 @@ RootElement = None
 AttributeGroups = {}
 ElementGroups = {}
 SubstitutionGroups = {}
-#
-# SubstitutionGroups can also include simple types that are
-#   not (defined) elements.  Keep a list of these simple types.
-#   These are simple types defined at top level.
 SimpleElementDict = {}
 SimpleTypeDict = {}
 ValidatorBodiesBasePath = None
@@ -242,7 +195,6 @@ ModuleSuffix = ""
 
 SchemaToPythonTypeMap = {}
 
-# Initialize constants.
 CurrentNamespacePrefix = None
 StringType = None
 TokenType = None
@@ -453,11 +405,7 @@ def set_type_constants(nameSpace):
     }
     SchemaToPythonTypeMap.update(dict((x, 'int') for x in IntegerType))
 
-#
-# For debugging.
-#
 
-# Print only if DEBUG is true.
 DEBUG = 0
 
 
@@ -471,9 +419,6 @@ def pplist(lst):
         print('%d. %s' % (count, item))
 
 
-#
-# Representation of element definition.
-#
 
 def showLevel(outfile, level):
     for idx in range(level):
@@ -491,15 +436,10 @@ class SimpleTypeElement(XschemaElementBase):
         self.name = name
         self.base = None
         self.collapseWhiteSpace = 0
-        # Attribute definitions for the current attributeGroup, if
-        #   there is one.
         self.attributeGroup = None
-        # Attribute definitions for the currect element.
         self.attributeDefs = {}
         self.complexType = 0
-        # Enumeration values for the current element.
         self.values = list()
-        # The other simple types this is a union of.
         self.unionOf = list()
         self.simpleType = 0
         self.listType = 0
@@ -591,7 +531,6 @@ class XschemaElement(XschemaElementBase):
                     referencedElement = fqnToElementDict[fqn]
                     type_val = referencedElement.getType()
                     if type_val == "NoneType":
-                        # anonymous types
                         type_val = referencedElement.getName()
                     name_val = ref_val
 
@@ -607,7 +546,6 @@ class XschemaElement(XschemaElementBase):
             self.attrs['type'] = type_val
         if ref_val:
             self.attrs['ref'] = ref_val
-        # fix_abstract
         abstract_type = attrs.get('abstract', 'false').lower()
         self.abstract_type = abstract_type in ('1', 'true')
         self.default = self.attrs.get('default')
@@ -622,25 +560,15 @@ class XschemaElement(XschemaElementBase):
         self.base = None
         self.mixedExtensionError = 0
         self.collapseWhiteSpace = 0
-        # Attribute definitions for the currect element.
         self.attributeDefs = {}
-        # Attribute definitions for the current attributeGroup, if
-        #   there is one.
         self.attributeGroup = None
-        # List of names of attributes for this element.
-        # We will add the attribute defintions in each of these groups
-        #   to this element in annotate().
         self.attributeGroupNameList = []
-        # similar things as above, for groups of elements
         self.elementGroup = None
         self.topLevel = 0
-        # Does this element contain an anyAttribute?
         self.anyAttribute = 0
         self.explicit_define = 0
         self.simpleType = None
-        # Enumeration values for the current element.
         self.values = list()
-        # The parent choice for the current element.
         self.choice = None
         self.listType = 0
         self.simpleBase = []
@@ -844,7 +772,6 @@ class XschemaElement(XschemaElementBase):
             showLevel(outfile, level)
             outfile.write('  - Attrs: %s\n' % self.attrs)
             showLevel(outfile, level)
-            #outfile.write('  - AttributeDefs: %s\n' % self.attributeDefs)
             outfile.write('  - AttributeDefs:\n')
             for key, value in self.getAttributeDefs().items():
                 showLevel(outfile, level + 1)
@@ -853,10 +780,8 @@ class XschemaElement(XschemaElementBase):
             child.show(outfile, level + 1)
 
     def annotate(self):
-        # resolve group references within groups
         for grp in ElementGroups.values():
             expandGroupReferences(grp)
-        # Recursively expand group references
         visited = set()
         self.expandGroupReferences_tree(visited)
         self.collect_element_dict()
@@ -906,9 +831,6 @@ class XschemaElement(XschemaElementBase):
             self.build_element_dict(self.element_dict)
         return self.element_dict.get(element_name)
 
-    # If it is a mixed-content element and it is defined as
-    #   an extension, then all of its bases (base, base of base, ...)
-    #   must be mixed-content.  Mark it as an error, if not.
     def checkMixedBases(self):
         self.rationalizeMixedBases()
         self.collectSimpleBases()
@@ -965,11 +887,9 @@ class XschemaElement(XschemaElementBase):
 
     def resolve_type(self):
         self.complex = 0
-        # If it has any attributes, then it's complex.
         attrDefs = self.getAttributeDefs()
         if len(attrDefs) > 0:
             self.complex = 1
-            # type_val = ''
         type_val = self.resolve_type_1()
         if type_val == AnyType:
             return AnyType
@@ -981,41 +901,16 @@ class XschemaElement(XschemaElementBase):
         if type_val:
             if type_val in ElementDict:
                 type_val1 = type_val
-                # The following loop handles the case where an Element's
-                # reference element has no sub-elements and whose type is
-                # another simpleType (potentially of the same name). Its
-                # fundamental function is to avoid the incorrect
-                # categorization of "complex" to Elements which are not and
-                # correctly resolve the Element's type as well as its
-                # potential values. It also handles cases where the Element's
-                # "simpleType" is so-called "top level" and is only available
-                # through the global SimpleTypeDict.
                 i = 0
                 while True:
                     element = ElementDict[type_val1]
-                    # Resolve our potential values if present
                     self.values = element.values
-                    # If the type is available in the SimpleTypeDict, we
-                    # know we've gone far enough in the Element hierarchy
-                    # and can return the correct base type.
                     t = element.resolve_type_1()
                     if t in SimpleTypeDict:
                         type_val1 = SimpleTypeDict[t].getBase()
                         if type_val1 and not is_builtin_simple_type(type_val1):
                             type_val1 = strip_namespace(type_val1)
                         break
-                    # If the type name is the same as the previous type name
-                    # then we know we've fully resolved the Element hierarchy
-                    # and the Element is well and truely "complex". There is
-                    # also a need to handle cases where the Element name and
-                    # its type name are the same (ie. this is our first time
-                    # through the loop). For example:
-                    #   <xsd:element name="ReallyCool" type="ReallyCool"/>
-                    #   <xsd:simpleType name="ReallyCool">
-                    #     <xsd:restriction base="xsd:string">
-                    #       <xsd:enumeration value="MyThing"/>
-                    #     </xsd:restriction>
-                    #   </xsd:simpleType>
                     if t == type_val1 and i != 0:
                         break
                     if t not in ElementDict:
@@ -1036,20 +931,16 @@ class XschemaElement(XschemaElementBase):
                     if type_val1 and not is_builtin_simple_type(type_val1):
                         type_val1 = strip_namespace(type_val1)
                     if type_val1 is None:
-                        # Something seems wrong.  Can't find base simple type.
-                        #   Give up and use default.
                         type_val = StringType[0]
                         break
                     if type_val1 in SimpleTypeDict:
                         count += 1
                         if count > 10:
-                            # Give up.  We're in a loop.  Use default.
                             type_val = StringType[0]
                             break
                     else:
                         type_val = type_val1
                         break
-                # Add the namespace prefix to the simple type if needed.
                 if len(type_val.split(':')) == 1:
                     type_val = CurrentNamespacePrefix + type_val
             else:
@@ -1071,7 +962,6 @@ class XschemaElement(XschemaElementBase):
             type_val = strip_namespace(self.attrs['ref'])
         elif 'name' in self.attrs:
             type_val = strip_namespace(self.attrs['name'])
-            #type_val = self.attrs['name']
         return type_val
 
     def annotate_find_type(self):
@@ -1088,27 +978,23 @@ class XschemaElement(XschemaElementBase):
             child.annotate_find_type()
 
     def annotate_tree(self):
-        # If there is a namespace, replace it with an underscore.
         if self.base:
             self.base = strip_namespace(self.base)
         self.unmappedCleanName = cleanupName(self.name)
         self.cleanName = mapName(self.unmappedCleanName)
         self.replace_attributeGroup_names()
-        # Resolve "maxOccurs" attribute
         if 'maxOccurs' in self.attrs.keys():
             maxOccurs = self.attrs['maxOccurs']
         elif self.choice and 'maxOccurs' in self.choice.attrs.keys():
             maxOccurs = self.choice.attrs['maxOccurs']
         else:
             maxOccurs = 1
-        # Resolve "minOccurs" attribute
         if 'minOccurs' in self.attrs.keys():
             minOccurs = self.attrs['minOccurs']
         elif self.choice and 'minOccurs' in self.choice.attrs.keys():
             minOccurs = self.choice.attrs['minOccurs']
         else:
             minOccurs = 1
-        # Cleanup "minOccurs" and "maxOccurs" attributes
         try:
             minOccurs = int(minOccurs)
             if minOccurs == 0:
@@ -1128,33 +1014,21 @@ class XschemaElement(XschemaElementBase):
         self.minOccurs = minOccurs
         self.maxOccurs = maxOccurs
 
-        # If it does not have a type, then make the type the same as the name.
         if self.type == 'NoneType' and self.name:
             self.type = self.name
-        # Is it a mixed-content element definition?
         if 'mixed' in self.attrs.keys():
             mixed = self.attrs['mixed'].strip()
             if mixed == '1' or mixed.lower() == 'true':
                 self.mixed = 1
-        # If this element has a base and the base is a simple type and
-        #   the simple type is collapseWhiteSpace, then mark this
-        #   element as collapseWhiteSpace.
         base = self.getBase()
         if base and base in SimpleTypeDict:
             parent = SimpleTypeDict[base]
             if (isinstance(parent, SimpleTypeElement) and
                     parent.collapseWhiteSpace):
                 self.collapseWhiteSpace = 1
-        # Do it recursively for all descendents.
         for child in self.children:
             child.annotate_tree()
 
-    #
-    # For each name in the attributeGroupNameList for this element,
-    #   add the attributes defined for that name in the global
-    #   attributeGroup dictionary.
-    # We do this recursively because an attribute group can reference
-    #   other attribute groups.
     def replace_attributeGroup_names(self):
         for groupName in self.attributeGroupNameList:
             self.replace_attributeGroup_names_1(groupName)
@@ -1164,7 +1038,6 @@ class XschemaElement(XschemaElementBase):
         if groupName in AttributeGroups:
             key = groupName
         else:
-            # Looking for name space prefix
             key1 = strip_namespace(groupName)
             if key1 != groupName and key1 in AttributeGroups:
                 key = key1
@@ -1188,16 +1061,10 @@ class XschemaElement(XschemaElementBase):
     __repr__ = __str__
 
     def fix_dup_names(self):
-        # Patch-up names that are used for both a child element and
-        #   an attribute.
-        #
         attrDefs = self.getAttributeDefs()
-        # Collect a list of child element names.
-        #   Must do this for base (extension) elements also.
         elementNames = set()
         self.collectElementNames(elementNames, 0)
         replaced = []
-        # Create the needed new attributes.
         keys = attrDefs.keys()
         for key in keys:
             attr = attrDefs[key]
@@ -1209,7 +1076,6 @@ class XschemaElement(XschemaElementBase):
                 newAttr.setOrig_name(name)
                 attrDefs[newName] = newAttr
                 replaced.append(name)
-        # Remove the old (replaced) attributes.
         for name in replaced:
             del attrDefs[name]
         for child in self.children:
@@ -1241,7 +1107,6 @@ class XschemaElement(XschemaElementBase):
                 attr.setData_type(StringType[0])
         for child in self.children:
             child.coerce_attr_types()
-# end class XschemaElement
 
 
 class XschemaAttributeGroup:
@@ -1282,13 +1147,11 @@ class XschemaAttributeGroup:
             return 1
         else:
             return 0
-# end class XschemaAttributeGroup
 
 
 class XschemaGroup:
     def __init__(self, ref):
         self.ref = ref
-# end class XschemaGroup
 
 
 class XschemaAttribute:
@@ -1302,10 +1165,7 @@ class XschemaAttribute:
         self.data_type = data_type
         self.use = use
         self.default = default
-        # Enumeration values for the attribute.
         self.values = list()
-        # If we change the name, e.g. because an attribute and child have
-        # the same name, save the old name here.
         self.orig_name = None
 
     def setName(self, name):
@@ -1358,12 +1218,8 @@ class XschemaAttribute:
 
     def getOrig_name(self):
         return self.orig_name
-# end class XschemaAttribute
 
 
-#
-# SAX handler
-#
 class XschemaHandler(handler.ContentHandler):
     def __init__(self):
         handler.ContentHandler.__init__(self)
@@ -1382,12 +1238,8 @@ class XschemaHandler(handler.ContentHandler):
         self.inRestrictionType = 0
         self.inAnnotationType = 0
         self.inDocumentationType = 0
-        # The last attribute we processed.
         self.lastAttribute = None
-        # Simple types that exist in the global context and may be used to
-        # qualify the type of many elements and/or attributes.
         self.topLevelSimpleTypes = list()
-        # The current choice type we're in
         self.currentChoice = None
         self.firstElement = True
 
@@ -1423,9 +1275,6 @@ class XschemaHandler(handler.ContentHandler):
             if len(self.stack) == 1:
                 element.setTopLevel(1)
             self.stack.append(element)
-            # If there is an attribute "xmlns" and its value is
-            #   "http://www.w3.org/2001/XMLSchema", then remember and
-            #   use that namespace prefix.
             for name, value in attrs.items():
                 if name[:6] == 'xmlns:':
                     prefix = name[6:]
@@ -1471,8 +1320,6 @@ class XschemaHandler(handler.ContentHandler):
                 element.choice = self.currentChoice
             self.stack.append(element)
         elif name == ComplexTypeType:
-            # If it have any attributes and there is something on the stack,
-            #   then copy the attributes to the item on top of the stack.
             if len(self.stack) > 1 and len(attrs) > 0:
                 parentDict = self.stack[-1].getAttrs()
                 for key in attrs.keys():
@@ -1515,24 +1362,17 @@ class XschemaHandler(handler.ContentHandler):
             else:
                 default = None
             if self.stack[-1].attributeGroup:
-                # Add this attribute to a current attributeGroup.
                 attribute = XschemaAttribute(name, data_type, use, default)
                 self.stack[-1].attributeGroup.add(name, attribute)
             else:
-                # Add this attribute to the element/complexType.
                 attribute = XschemaAttribute(name, data_type, use, default)
                 self.stack[-1].attributeDefs[name] = attribute
             self.lastAttribute = attribute
         elif name == AttributeGroupType:
             if self.attributeGroupLevel >= 1:
-                # We are in an attribute group and are declaring a reference
-                #   to another attribute group.
                 if 'ref' in attrs.keys():
                     self.stack[-1].attributeGroup.add(attrs['ref'], None)
             else:
-                # If it has attribute 'name', then we are defining a new
-                #   attribute group.
-                #   Prepare to save it as an attributeGroup.
                 if 'name' in attrs.keys():
                     name = strip_namespace(attrs['name'])
                     attributeGroup = XschemaAttributeGroup(name)
@@ -1541,8 +1381,6 @@ class XschemaHandler(handler.ContentHandler):
                         element.setTopLevel(1)
                     element.setAttributeGroup(attributeGroup)
                     self.stack.append(element)
-                # If it has attribute 'ref', add it to the list of
-                #   attributeGroups for this element/complexType.
                 if 'ref' in attrs.keys():
                     self.stack[-1].attributeGroupNameList.append(attrs['ref'])
             self.attributeGroupLevel += 1
@@ -1578,22 +1416,17 @@ class XschemaHandler(handler.ContentHandler):
                 else:
                     self.stack[-1].setBase(extensionBase)
         elif name == AnyAttributeType:
-            # Mark the current element as containing anyAttribute.
             self.stack[-1].setAnyAttribute(1)
         elif name == SimpleTypeType:
-            # fixlist
             if self.inAttribute:
                 pass
             elif self.inSimpleType <= 0:
-                # Save the name of the simpleType, but ignore everything
-                #   else about it (for now).
                 if 'name' in attrs.keys():
                     stName = cleanupName(attrs['name'])
                 elif len(self.stack) > 0:
                     stName = cleanupName(self.stack[-1].getName())
                 else:
                     stName = None
-                # If the parent is an element, mark it as a simpleType.
                 if len(self.stack) > 0:
                     self.stack[-1].setSimpleType(1)
                 element = SimpleTypeElement(stName)
@@ -1605,8 +1438,6 @@ class XschemaHandler(handler.ContentHandler):
                 if 'base' in attrs:
                     self.lastAttribute.setData_type(attrs['base'])
             else:
-                # If we are in a simpleType, capture the name of
-                #   the restriction base.
                 if ((self.inSimpleType >= 1 or self.inSimpleContent) and
                         'base' in attrs.keys()):
                     self.stack[-1].setBase(attrs['base'])
@@ -1616,15 +1447,8 @@ class XschemaHandler(handler.ContentHandler):
             self.inRestrictionType = 1
         elif name == EnumerationType:
             if self.inAttribute and 'value' in attrs:
-                # We know that the restriction is on an attribute and the
-                # attributes of the current element are un-ordered so the
-                # instance variable "lastAttribute" will have our attribute.
                 self.lastAttribute.values.append(attrs['value'])
             elif self.inElement and 'value' in attrs:
-                # We're not in an attribute so the restriction must have
-                # been placed on an element and that element will still be
-                # in the stack. We search backwards through the stack to
-                # find the last element.
                 element = None
                 if self.stack:
                     for entry in reversed(self.stack):
@@ -1637,11 +1461,8 @@ class XschemaHandler(handler.ContentHandler):
                     exit(1)
                 element.values.append(attrs['value'])
             elif self.inSimpleType >= 1 and 'value' in attrs:
-                # We've been defined as a simpleType on our own.
                 self.stack[-1].values.append(attrs['value'])
         elif name == UnionType:
-            # Union types are only used with a parent simpleType and we want
-            # the parent to know what it's a union of.
             parentelement = self.stack[-1]
             if (isinstance(parentelement, SimpleTypeElement) and
                     'memberTypes' in attrs):
@@ -1653,7 +1474,6 @@ class XschemaHandler(handler.ContentHandler):
                     self.stack[-1].collapseWhiteSpace = 1
         elif name == ListType:
             self.inListType = 1
-            # fixlist
             if self.inSimpleType >= 1:
                 self.stack[-1].setListType(1)
                 if 'itemType' in attrs:
@@ -1673,11 +1493,7 @@ class XschemaHandler(handler.ContentHandler):
             if self.inAttribute:
                 pass
             elif self.inSimpleType <= 0:
-                # If the simpleType is directly off the root, it may be used to
-                # qualify the type of many elements and/or attributes so we
-                # don't want to loose it entirely.
                 simpleType = self.stack.pop()
-                # fixlist
                 if len(self.stack) == 1:
                     self.topLevelSimpleTypes.append(simpleType)
                     self.stack[-1].setListType(simpleType.isListType())
@@ -1708,24 +1524,15 @@ class XschemaHandler(handler.ContentHandler):
             self.inAttribute = 0
         elif name == AttributeGroupType:
             if self.attributeGroupLevel >= 2:
-                # We are inside an attribute group.
                 pass
             else:
                 if self.stack[-1].attributeGroup:
-                    # The top of the stack contains an XschemaElement which
-                    #   contains the definition of an attributeGroup.
-                    #   Save this attributeGroup in the
-                    #   global AttributeGroup dictionary.
                     attributeGroup = self.stack[-1].attributeGroup
                     name = attributeGroup.getName()
                     AttributeGroups[name] = attributeGroup
                     self.stack[-1].attributeGroup = None
                     self.stack.pop()
                 else:
-                    # This is a reference to an attributeGroup.
-                    # We have already added it to the list of
-                    # attributeGroup names.
-                    # Leave it.  We'll fill it in during annotate.
                     pass
             self.attributeGroupLevel -= 1
         elif name == GroupType:
@@ -1734,17 +1541,13 @@ class XschemaHandler(handler.ContentHandler):
             elementGroup = XschemaGroup(element.name)
             ref = element.getAttrs().get('ref')
             if len(self.stack) == 1 and ref is None:
-                # This is the definition
                 ElementGroups[name] = element
             elif len(self.stack) > 1 and ref is not None:
-                # This is a reference. Add it to the parent's children. We
-                # need to preserve the order of elements.
                 element.setElementGroup(elementGroup)
                 self.stack[-1].addChild(element)
         elif name == SchemaType:
             self.inSchema = 0
             if len(self.stack) != 1:
-                # fixlist
                 err_msg('*** error stack.  len(self.stack): %d\n' % (
                     len(self.stack), ))
                 exit(1)
@@ -1773,7 +1576,6 @@ class XschemaHandler(handler.ContentHandler):
 
     def characters(self, chrs):
         if self.inDocumentationType:
-            # If there is an annotation/documentation element, save it.
             if len(self.stack) > 1 and len(chrs) > 0:
                 self.stack[-1].documentation += chrs
         elif self.inElement:
@@ -1786,9 +1588,6 @@ class XschemaHandler(handler.ContentHandler):
             pass
 
 
-#
-# Code generation
-#
 
 def generateExportFn_1(wrt, child, name, namespace, fill):
     cleanName = cleanupName(name)
@@ -1823,7 +1622,6 @@ def generateExportFn_1(wrt, child, name, namespace, fill):
             child_type in DateTimeGroupType):
         wrt('%s        if self.%s is not None:\n' % (fill, mappedName, ))
         wrt('%s            showIndent(outfile, level, pretty_print)\n' % fill)
-        # fixlist
         if (child.getSimpleType() in SimpleTypeDict and
                 SimpleTypeDict[child.getSimpleType()].isListType()):
             s1 = "%s            outfile.write('<%%s%s>%%s</%%s%s>%%s' %% " \
@@ -1913,7 +1711,6 @@ def generateExportFn_1(wrt, child, name, namespace, fill):
         wrt(s1)
     else:
         wrt("%s        if self.%s is not None:\n" % (fill, mappedName))
-        # name_type_problem
         if False:        # name == child.getType():
             s1 = "%s            self.%s.export(outfile, level, " \
                 "namespace_, pretty_print=pretty_print)\n" % \
@@ -1926,14 +1723,12 @@ def generateExportFn_1(wrt, child, name, namespace, fill):
                 "name_='%s', pretty_print=pretty_print)\n" % \
                 (fill, mappedName, namespace, name)
         wrt(s1)
-# end generateExportFn_1
 
 
 def generateExportFn_2(wrt, child, name, namespace, fill):
     cleanName = cleanupName(name)
     mappedName = mapName(cleanName)
     child_type = child.getType()
-    # fix_simpletype
     wrt("%s    for %s_ in self.%s:\n" % (fill, cleanName, mappedName, ))
     if child_type == DateTimeType:
         wrt('%s        showIndent(outfile, level, pretty_print)\n' % fill)
@@ -2031,7 +1826,6 @@ def generateExportFn_2(wrt, child, name, namespace, fill):
             (fill, name, name, cleanName, name, )
         wrt(s1)
     else:
-        # name_type_problem
         if False:        # name == child.getType():
             s1 = "%s        %s_.export(outfile, level, namespace_, " \
                 "pretty_print=pretty_print)\n" % (fill, cleanName)
@@ -2043,14 +1837,12 @@ def generateExportFn_2(wrt, child, name, namespace, fill):
                 "name_='%s', pretty_print=pretty_print)\n" % \
                 (fill, cleanName, namespace, name)
         wrt(s1)
-# end generateExportFn_2
 
 
 def generateExportFn_3(wrt, child, name, namespace, fill):
     cleanName = cleanupName(name)
     mappedName = mapName(cleanName)
     child_type = child.getType()
-    # fix_simpletype
     if child_type == DateTimeType:
         wrt('%s        if self.%s is not None:\n' % (fill, mappedName, ))
         wrt('%s            showIndent(outfile, level, pretty_print)\n' % fill)
@@ -2080,7 +1872,6 @@ def generateExportFn_3(wrt, child, name, namespace, fill):
             child_type in DateTimeGroupType):
         wrt('%s        if self.%s is not None:\n' % (fill, mappedName, ))
         wrt('%s            showIndent(outfile, level, pretty_print)\n' % fill)
-        # fixlist
         if (child.getSimpleType() in SimpleTypeDict and
                 SimpleTypeDict[child.getSimpleType()].isListType()):
             s1 = "%s            outfile.write('<%%s%s>%%s</%%s%s>%%s' %% " \
@@ -2167,7 +1958,6 @@ def generateExportFn_3(wrt, child, name, namespace, fill):
         wrt(s1)
     else:
         wrt("%s        if self.%s is not None:\n" % (fill, mappedName))
-        # name_type_problem
         if False:        # name == child.getType():
             s1 = "%s            self.%s.export(" \
                 "outfile, level, namespace_, pretty_print=pretty_print)\n" % \
@@ -2180,7 +1970,6 @@ def generateExportFn_3(wrt, child, name, namespace, fill):
                 "name_='%s', pretty_print=pretty_print)\n" % \
                 (fill, mappedName, namespace, name)
         wrt(s1)
-# end generateExportFn_3
 
 
 def generateToEtree(wrt, element, Targetnamespace):
@@ -2210,7 +1999,6 @@ def generateToEtree(wrt, element, Targetnamespace):
     wrt("        if mapping_ is not None:\n")
     wrt("            mapping_[self] = element\n")
     wrt("        return element\n")
-# end generateToEtree
 
 
 def generateToEtreeChildren(wrt, element, Targetnamespace):
@@ -2317,7 +2105,6 @@ def generateToEtreeChildren(wrt, element, Targetnamespace):
                         wrt("            %s_.to_etree(element, name_='%s', "
                             "mapping_=mapping_)\n" % (
                                 name, unmappedName,))
-#end generateToEtreeChildren
 
 
 def generateToEtreeAttributes(wrt, element):
@@ -2365,7 +2152,6 @@ def generateToEtreeAttributes(wrt, element):
             s1 = '''            element.set('%s', self.%s)\n''' % (
                 name, cleanName, )
         wrt(s1)
-# end generateToEtreeAttributes
 
 
 def generateExportAttributes(wrt, element, hasAttributes):
@@ -2448,7 +2234,6 @@ def generateExportAttributes(wrt, element, hasAttributes):
         wrt('''            outfile.write('''
             '''' xsi:type="%s"' % self.extensiontype_)\n''')
     return hasAttributes
-# end generateExportAttributes
 
 
 def generateExportChildren(wrt, element, hasChildren, namespace):
@@ -2469,7 +2254,6 @@ def generateExportChildren(wrt, element, hasChildren, namespace):
             for child in element.getChildren():
                 unmappedName = child.getName()
                 name = child.getCleanName()
-                # fix_abstract
                 type_element = None
                 abstract_child = False
                 type_name = child.getAttrs().get('type')
@@ -2512,7 +2296,6 @@ def generateExportChildren(wrt, element, hasChildren, namespace):
                     wrt("            self.anytypeobjs_.export(outfile, "
                         "level, namespace_, pretty_print=pretty_print)\n")
     return hasChildren
-# end generateExportChildren
 
 
 def countChildren(element, count):
@@ -2550,7 +2333,6 @@ def generateExportFn(wrt, prefix, element, namespace, nameSpacesDef):
     wrt("            eol_ = '\\n'\n")
     wrt('        else:\n')
     wrt("            eol_ = ''\n")
-    # We need to be able to export the original tag name.
     wrt("        if self.original_tagname_ is not None:\n")
     wrt("            name_ = self.original_tagname_\n")
     wrt('        showIndent(outfile, level, pretty_print)\n')
@@ -2560,10 +2342,8 @@ def generateExportFn(wrt, prefix, element, namespace, nameSpacesDef):
     wrt("        self.exportAttributes(outfile, level, "
         "already_processed, namespace_, name_='%s')\n" %
         (name, ))
-    # fix_abstract
     if base and base in ElementDict:
         base_element = ElementDict[base]
-        # fix_derived
         if base_element.isAbstract():
             pass
     if childCount == 0 and element.isMixed():
@@ -2573,7 +2353,6 @@ def generateExportFn(wrt, prefix, element, namespace, nameSpacesDef):
         wrt("        outfile.write('</%s%s>%s' % (namespace_, name_, eol_))\n")
     else:
         wrt("        if self.hasContent_():\n")
-        # Added to keep value on the same line as the tag no children.
         if element.getSimpleContent():
             wrt("            outfile.write('>')\n")
             if not element.isMixed():
@@ -2584,7 +2363,6 @@ def generateExportFn(wrt, prefix, element, namespace, nameSpacesDef):
         wrt("            self.exportChildren(outfile, level + 1, "
             "namespace_='%s', name_='%s', pretty_print=pretty_print)\n" %
             (namespace, name))
-        # Put a condition on the indent to require children.
         if childCount != 0:
             wrt('            showIndent(outfile, level, pretty_print)\n')
         wrt("            outfile.write('</%s%s>%s' % (namespace_, "
@@ -2642,8 +2420,6 @@ def generateExportFn(wrt, prefix, element, namespace, nameSpacesDef):
         "name_='%s', fromsubclass_=False, pretty_print=True):\n" %
         (namespace, name, ))
     hasChildren = 0
-    # Generate call to exportChildren in the superclass only if it is
-    #  an extension, but *not* if it is a restriction.
     parentName, parent = getParentName(element)
     if parentName and not element.getRestrictionBaseObj():
         hasChildren += 1
@@ -2654,12 +2430,8 @@ def generateExportFn(wrt, prefix, element, namespace, nameSpacesDef):
     hasChildren += generateExportChildren(wrt, element, hasChildren, namespace)
     if childCount == 0:   # and not element.isMixed():
         wrt("        pass\n")
-# end generateExportFn
 
 
-#
-# Generate exportLiteral method.
-#
 
 def generateExportLiteralFn_1(wrt, child, name, fill):
     cleanName = cleanupName(name)
@@ -2749,7 +2521,6 @@ def generateExportLiteralFn_1(wrt, child, name, fill):
             wrt(s1)
             wrt('%s            showIndent(outfile, level)\n' % fill)
             wrt("%s            outfile.write('),\\n')\n" % (fill, ))
-# end generateExportLiteralFn_1
 
 
 def generateExportLiteralFn_2(wrt, child, name, fill):
@@ -2806,7 +2577,6 @@ def generateExportLiteralFn_2(wrt, child, name, fill):
         wrt(s1)
         wrt('%s        showIndent(outfile, level)\n' % fill)
         wrt("%s        outfile.write('),\\n')\n" % (fill, ))
-# end generateExportLiteralFn_2
 
 
 def generateExportLiteralFn(wrt, prefix, element):
@@ -2927,7 +2697,6 @@ def generateExportLiteralFn(wrt, prefix, element):
             wrt("        showIndent(outfile, level)\n")
             wrt("        outfile.write('],\\n')\n")
         else:
-            # fix_abstract
             type_element = None
             abstract_child = False
             type_name = child.getAttrs().get('type')
@@ -2963,11 +2732,7 @@ def generateExportLiteralFn(wrt, prefix, element):
                 generateExportLiteralFn_1(wrt, child, type_name, '')
     if childCount == 0 or element.isMixed():
         wrt("        pass\n")
-# end generateExportLiteralFn
 
-#
-# Generate build method.
-#
 
 
 def generateBuildAttributes(wrt, element, hasAttributes):
@@ -3097,7 +2862,6 @@ def generateBuildAttributes(wrt, element, hasAttributes):
             wrt("            self.%s = ' '.join(self.%s.split())\n" %
                 (mappedName, mappedName, ))
         else:
-            # Assume attr['type'] in StringType or attr['type'] == DateTimeType
             wrt("        value = find_attr_value_('%s', node)\n" % (
                 orig_name, ))
             wrt("        if value is not None and '%s' not in "
@@ -3124,7 +2888,6 @@ def generateBuildAttributes(wrt, element, hasAttributes):
         wrt("            already_processed.add('xsi:type')\n")
         wrt("            self.extensiontype_ = value\n")
     return hasAttributes
-# end generateBuildAttributes
 
 
 def generateBuildMixed_1(wrt, prefix, child, headChild, keyword, delayed):
@@ -3225,8 +2988,6 @@ def generateBuildMixed_1(wrt, prefix, child, headChild, keyword, delayed):
             origName)
         wrt("            self.content_.append(obj_)\n")
     else:
-        # Perhaps it's a complexType that is defined right here.
-        # Generate (later) a class for the nested types.
         type_element = None
         abstract_child = False
         type_name = child.getAttrs().get('type')
@@ -3258,14 +3019,11 @@ def generateBuildMixed_1(wrt, prefix, child, headChild, keyword, delayed):
             origName)
         wrt("            self.content_.append(obj_)\n")
 
-        # Generate code to sort mixed content in their class
-        # containers
         s1 = "            if hasattr(self, 'add_%s'):\n" % (origName, )
         s1 += "              self.add_%s(obj_.value)\n" % (origName, )
         s1 += "            elif hasattr(self, 'set_%s'):\n" % (origName, )
         s1 += "              self.set_%s(obj_.value)\n" % (origName, )
         wrt(s1)
-# end generateBuildMixed_1
 
 
 def generateBuildMixed(wrt, prefix, element, keyword, delayed, hasChildren):
@@ -3273,8 +3031,6 @@ def generateBuildMixed(wrt, prefix, element, keyword, delayed, hasChildren):
         generateBuildMixed_1(wrt, prefix, child, child, keyword, delayed)
         hasChildren += 1
         keyword = 'elif'
-        # Does this element have a substitutionGroup?
-        #   If so generate a clause for each element in the substitutionGroup.
         if child.getName() in SubstitutionGroups:
             for memberName in SubstitutionGroups[child.getName()]:
                 if memberName in ElementDict:
@@ -3447,9 +3203,6 @@ def generateBuildStandard_1(
         else:
             wrt("            self.%s = bval_\n" % (mappedName, ))
     else:
-        # Perhaps it's a complexType that is defined right here.
-        # Generate (later) a class for the nested types.
-        # fix_abstract
         type_element = None
         abstract_child = False
         type_name = child.getAttrs().get('type')
@@ -3461,12 +3214,9 @@ def generateBuildStandard_1(
             DelayedElements.add(child)
             DelayedElements_subclass.add(child)
         wrt("        %s nodeName_ == '%s':\n" % (keyword, origName, ))
-        # Is this a simple type?
         if child.getSimpleType():
             wrt("            obj_ = None\n")
         else:
-            # name_type_problem
-            # fix_abstract
             if type_element:
                 type_name = type_element.getType()
             elif origName in ElementDict:
@@ -3503,17 +3253,12 @@ def generateBuildStandard_1(
             s1 = "            self.%s = obj_\n" % (mappedName, )
         wrt(s1)
         wrt("            obj_.original_tagname_ = '%s'\n" % (origName, ))
-    #
-    # If this child is defined in a simpleType, then generate
-    #   a validator method.
     typeName = None
     if child.getSimpleType():
-        #typeName = child.getSimpleType()
         typeName = cleanupName(child.getName())
     elif (childType in ElementDict and
             ElementDict[childType].getSimpleType()):
         typeName = ElementDict[childType].getType()
-    # fixlist
     if (child.getSimpleType() in SimpleTypeDict and
             SimpleTypeDict[child.getSimpleType()].isListType()):
         wrt("            self.%s = self.%s.split()\n" % (
@@ -3522,7 +3267,6 @@ def generateBuildStandard_1(
     if typeName and typeName in SimpleTypeDict:
         wrt("            self.validate_%s(self.%s)    # validate type %s\n" % (
             typeName, mappedName, typeName, ))
-# end generateBuildStandard_1
 
 
 def transitiveClosure(m, e):
@@ -3545,9 +3289,6 @@ def generateBuildStandard(wrt, prefix, element, keyword, delayed, hasChildren):
                 element, keyword, delayed)
             hasChildren += 1
             keyword = 'elif'
-            # Does this element have a substitutionGroup?
-            #   If so generate a clause for each element in the
-            #   substitutionGroup.
             childName = child.getName()
             if childName in SubstitutionGroups:
                 for memberName in transitiveClosure(
@@ -3582,7 +3323,6 @@ def generateBuildStandard(wrt, prefix, element, keyword, delayed, hasChildren):
             wrt('            %sself.set_anytypeobjs_(obj_)\n' % (fill, ))
         hasChildren += 1
     return hasChildren
-# end generateBuildStandard
 
 
 def generateBuildFn(wrt, prefix, element, delayed):
@@ -3625,8 +3365,6 @@ def generateBuildFn(wrt, prefix, element, delayed):
     else:      # not element.isMixed()
         hasChildren = generateBuildStandard(
             wrt, prefix, element, keyword, delayed, hasChildren)
-    # Generate call to buildChildren in the superclass only if it is
-    #  an extension, but *not* if it is a restriction.
     base = element.getBase()
     if base and not element.getSimpleContent():
         elName = element.getCleanName()
@@ -3634,7 +3372,6 @@ def generateBuildFn(wrt, prefix, element, delayed):
             "child_, node, nodeName_, True)\n" % (elName, ))
     if hasChildren == 0:
         wrt("        pass\n")
-# end generateBuildFn
 
 
 def countElementChildren(element, count):
@@ -3786,7 +3523,6 @@ def buildCtorArgs_aux(addedArgs, add, element):
                     add(', %s=%s' % (cleanName, default, ))
             else:
                 add(', %s=None' % cleanName)
-# end buildCtorArgs_aux
 
 
 MixedCtorInitializers = '''\
@@ -3807,10 +3543,6 @@ def generateCtor(wrt, element):
     childCount = countChildren(element, 0)
     s2 = buildCtorArgs_multilevel(element, childCount)
     wrt('    def __init__(self%s):\n' % s2)
-    # Save the original tag name.  This is needed when there is a
-    # xs:substitutionGroup and we later (e.g. during export) do not know
-    # which member of the xs:substitutionGroup this specific element
-    # came from.
     wrt('        self.original_tagname_ = None\n')
     parentName, parent = getParentName(element)
     if parentName:
@@ -3854,7 +3586,6 @@ def generateCtor(wrt, element):
             pythonType = SchemaToPythonTypeMap.get(attrDef.getType())
             attrVal = "_cast(%s, %s)" % (pythonType, name, )
             wrt('        self.%s = %s\n' % (name, attrVal, ))
-    # Generate member initializers in ctor.
     for child in element.getChildren():
         name = cleanupName(child.getCleanName())
         logging.debug("Constructor child: %s" % name)
@@ -3934,14 +3665,8 @@ def generateCtor(wrt, element):
         wrt('        self.extensiontype_ = extensiontype_\n')
     if element.isMixed():
         wrt(MixedCtorInitializers)
-# end generateCtor
 
 
-#
-# Attempt to retrieve the body (implementation) of a validator
-#   from a directory containing one file for each simpleType.
-#   The name of the file should be the same as the name of the
-#   simpleType with and optional ".py" extension.
 def getValidatorBody(stName):
     retrieved = 0
     if ValidatorBodiesBasePath:
@@ -3966,10 +3691,8 @@ def getValidatorBody(stName):
     if not retrieved:
         s1 = '        pass\n'
     return s1
-# end getValidatorBody
 
 
-# Generate get/set/add/insert member functions.
 def generateGettersAndSetters(wrt, element):
     for child in element.getChildren():
         if child.getType() == AnyTypeIdentifier:
@@ -4027,16 +3750,11 @@ def generateGettersAndSetters(wrt, element):
         wrt('    def set%s_(self, extensiontype_): '
             'self.extensiontype_ = extensiontype_\n' %
             (make_gs_name('extensiontype'), ))
-# end generateGettersAndSetters
 
 
-# Generate validator methods.
 def generateValidatorDefs(wrt, element):
     generatedSimpleTypes = []
     for child in element.getChildren():
-        #
-        # If this child is defined in a simpleType, then generate
-        #   a validator method.
         typeName = child.getSimpleType()
         if (typeName and
                 typeName in SimpleTypeDict and
@@ -4067,14 +3785,8 @@ def generateValidatorDefs(wrt, element):
             else:
                 wrt('        # validate type %s\n' % (typeName, ))
             wrt(getValidatorBody(typeName))
-# end generateValidatorDefs
 
 
-#
-# Generate a class variable whose value is a list of tuples, one
-#   tuple for each member data item of the class.
-#   Each tuble has 3 elements: (1) member name, (2) member data type,
-#   (3) container/list or not (maxoccurs > 1).
 def generateMemberSpec(wrt, element):
     generateDict = MemberSpecs and MemberSpecs == 'dict'
     if generateDict:
@@ -4116,7 +3828,6 @@ def generateMemberSpec(wrt, element):
             item = "        '%s': MemberSpec_('%s', %s, %d)," % (
                 item1, item1, item2, item3, )
         else:
-            #item = "        ('%s', '%s', %d)," % (item1, item2, item3, )
             item = "        MemberSpec_('%s', %s, %d)," % (
                 item1, item2, item3, )
         add(item)
@@ -4145,7 +3856,6 @@ def generateMemberSpec(wrt, element):
         add('    ]')
     wrt('\n'.join(content))
     wrt('\n')
-# end generateMemberSpec
 
 
 def generateUserMethods(wrt, element):
@@ -4204,8 +3914,6 @@ def generateClasses(wrt, prefix, element, delayed, nameSpacesDef=''):
         if element.isComplex() and element.getName() != element.getType():
             MappingTypes[element.getName()] = element.getType()
         return
-    # If this element is an extension (has a base) and the base has
-    #   not been generated, then postpone it.
     if parentName:
         if parentName not in AlreadyGenerated:
             PostponedExtensions.append(element)
@@ -4225,10 +3933,8 @@ def generateClasses(wrt, prefix, element, delayed, nameSpacesDef=''):
     else:
         s1 = 'class %s%s(GeneratedsSuper):\n' % (prefix, name)
     wrt(s1)
-    # If this element has documentation, generate a doc-string.
     if element.documentation:
         s2 = ' '.join(element.documentation.strip().split())
-        # s2 = s2.encode('utf-8')
         s2 = textwrap.fill(s2, width=68, subsequent_indent='    ')
         if s2[0] == '"' or s2[-1] == '"':
             s2 = '    """ %s """\n' % (s2, )
@@ -4273,28 +3979,11 @@ def generateClasses(wrt, prefix, element, delayed, nameSpacesDef=''):
     generateUserMethods(wrt, element)
     wrt('# end class %s\n' % name)
     wrt('\n\n')
-# end generateClasses
 
 
 TEMPLATE_HEADER = """\
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-#
-# Generated %s by generateDS.py%s.
-#
-# Command line options:
 %s
-#
-# Command line arguments:
-#   %s
-#
-# Command line:
-#   %s
-#
-# Current working directory (os.getcwd()):
-#   %s
-#
 
 import sys
 import getopt
@@ -4312,35 +4001,30 @@ Verbose_import_ = False
 ) = range(3)
 XMLParser_import_library = None
 try:
-    # lxml
     from lxml import etree as etree_
     XMLParser_import_library = XMLParser_import_lxml
     if Verbose_import_:
         print("running with lxml.etree")
 except ImportError:
     try:
-        # cElementTree from Python 2.5+
         import xml.etree.cElementTree as etree_
         XMLParser_import_library = XMLParser_import_elementtree
         if Verbose_import_:
             print("running with cElementTree on Python 2.5+")
     except ImportError:
         try:
-            # ElementTree from Python 2.5+
             import xml.etree.ElementTree as etree_
             XMLParser_import_library = XMLParser_import_elementtree
             if Verbose_import_:
                 print("running with ElementTree on Python 2.5+")
         except ImportError:
             try:
-                # normal cElementTree install
                 import cElementTree as etree_
                 XMLParser_import_library = XMLParser_import_elementtree
                 if Verbose_import_:
                     print("running with cElementTree")
             except ImportError:
                 try:
-                    # normal ElementTree install
                     import elementtree.ElementTree as etree_
                     XMLParser_import_library = XMLParser_import_elementtree
                     if Verbose_import_:
@@ -4353,18 +4037,10 @@ except ImportError:
 def parsexml_(*args, **kwargs):
     if (XMLParser_import_library == XMLParser_import_lxml and
             'parser' not in kwargs):
-        # Use the lxml ElementTree compatible parser so that, e.g.,
-        #   we ignore comments.
         kwargs['parser'] = etree_.ETCompatXMLParser()
     doc = etree_.parse(*args, **kwargs)
     return doc
 
-#
-# User methods
-#
-# Calls to the methods in these classes are generated by generateDS.py.
-# You can replace these methods by re-implementing the following class
-#   in a module named generatedssuper.py.
 
 try:
     from generatedssuper import GeneratedsSuper
@@ -4647,33 +4323,15 @@ except ImportError as exp:
             return dict(((v, k) for k, v in mapping.iteritems()))
 
 
-#
-# If you have installed IPython you can uncomment and use the following.
-# IPython is available from http://ipython.scipy.org/.
-#
 
-## from IPython.Shell import IPShellEmbed
-## args = ''
-## ipshell = IPShellEmbed(args,
-##     banner = 'Dropping into IPython',
-##     exit_msg = 'Leaving Interpreter, back to program.')
 
-# Then use the following line where and when you want to drop into the
-# IPython shell:
-#    ipshell('<some message> -- Entering ipshell.\\nHit Ctrl-D to exit')
 
-#
-# Globals
-#
 
 ExternalEncoding = '%s'
 Tag_pattern_ = re_.compile(r'({.*})?(.*)')
 String_cleanup_pat_ = re_.compile(r"[\\n\\r\\s]+")
 Namespace_extract_pat_ = re_.compile(r'{(.*)}(.*)')
 
-#
-# Support/utility functions.
-#
 
 
 def showIndent(outfile, level, pretty_print=True):
@@ -4764,12 +4422,10 @@ def raise_parse_error(node, msg):
 
 
 class MixedContainer:
-    # Constants for category:
     CategoryNone = 0
     CategoryText = 1
     CategorySimple = 2
     CategoryComplex = 3
-    # Constants for content_type:
     TypeNone = 0
     TypeText = 1
     TypeString = 2
@@ -4794,7 +4450,6 @@ class MixedContainer:
         return self.name
     def export(self, outfile, level, name, namespace, pretty_print=True):
         if self.category == MixedContainer.CategoryText:
-            # Prevent exporting empty content as empty lines.
             if self.value.strip():
                 outfile.write(self.value)
         elif self.category == MixedContainer.CategorySimple:
@@ -4821,7 +4476,6 @@ class MixedContainer:
                 self.name, base64.b64encode(self.value), self.name))
     def to_etree(self, element):
         if self.category == MixedContainer.CategoryText:
-            # Prevent exporting empty content as empty lines.
             if self.value.strip():
                 if len(element) > 0:
                     if element[-1].tail is None:
@@ -4899,14 +4553,9 @@ def _cast(typ, value):
         return value
     return typ(value)
 
-#
-# Data representation classes.
-#
 
 """
 
-# Fool (and straighten out) the syntax highlighting.
-# DUMMY = """
 
 
 def format_options_args(options, args):
@@ -4984,14 +4633,7 @@ def parse(inFileName=None, silence=False, xml_string=None):
         rootClass = %(prefix)s%(rootClass)s
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
-    # Enable Python to collect the space used by the DOM.
     doc = None
-#silence#    if not silence:
-#silence#        sys.stdout.write('<?xml version="1.0" ?>\\n')
-#silence#        rootObj.export(
-#silence#            sys.stdout, 0, name_=rootTag,
-#silence#            namespacedef_='%(namespacedef)s',
-#silence#            pretty_print=True)
     return rootObj
 
 
@@ -5004,17 +4646,10 @@ def parseEtree(inFileName, silence=False):
         rootClass = %(prefix)s%(rootClass)s
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
-    # Enable Python to collect the space used by the DOM.
     doc = None
     mapping = {}
     rootElement = rootObj.to_etree(None, name_=rootTag, mapping_=mapping)
     reverse_mapping = rootObj.gds_reverse_node_mapping(mapping)
-#silence#    if not silence:
-#silence#        content = etree_.tostring(
-#silence#            rootElement, pretty_print=True,
-#silence#            xml_declaration=True, encoding="utf-8")
-#silence#        sys.stdout.write(content)
-#silence#        sys.stdout.write('\\n')
     return rootObj, rootElement, mapping, reverse_mapping
 
 
@@ -5028,13 +4663,7 @@ def parseString(inString, silence=False):
         rootClass = %(prefix)s%(rootClass)s
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
-    # Enable Python to collect the space used by the DOM.
     doc = None
-#silence#    if not silence:
-#silence#        sys.stdout.write('<?xml version="1.0" ?>\\n')
-#silence#        rootObj.export(
-#silence#            sys.stdout, 0, name_=rootTag,
-#silence#            namespacedef_='%(namespacedef)s')
     return rootObj
 
 
@@ -5047,14 +4676,7 @@ def parseLiteral(inFileName, silence=False):
         rootClass = %(prefix)s%(rootClass)s
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
-    # Enable Python to collect the space used by the DOM.
     doc = None
-#silence#    if not silence:
-#silence#        sys.stdout.write('#from %(module_name)s import *\\n\\n')
-#silence#        sys.stdout.write('import %(module_name)s as model_\\n\\n')
-#silence#        sys.stdout.write('rootObj = model_.rootClass(\\n')
-#silence#        rootObj.exportLiteral(sys.stdout, 0, name_=rootTag)
-#silence#        sys.stdout.write(')\\n')
     return rootObj
 
 
@@ -5067,14 +4689,11 @@ def main():
 
 
 if __name__ == '__main__':
-    #import pdb; pdb.set_trace()
     main()
 
 """
 
 
-# Fool (and straighten out) the syntax highlighting.
-# DUMMY = '''
 
 
 def generateMain(outfile, prefix, root):
@@ -5142,8 +4761,6 @@ def buildCtorParams(element, parent, childCount):
     content = []
     addedArgs = {}
     add = content.append
-##     if not element.isMixed():
-##         buildCtorParams_aux(addedArgs, add, parent)
     buildCtorParams_aux(addedArgs, add, parent)
     if element.getSimpleContent() or element.isMixed():
         add("valueOf_, ")
@@ -5187,13 +4804,6 @@ def get_class_behavior_args(classBehavior):
     return argString
 
 
-#
-# Retrieve the implementation body via an HTTP request to a
-#   URL formed from the concatenation of the baseImplUrl and the
-#   implUrl.
-# An alternative implementation of get_impl_body() that also
-#   looks in the local file system is commented out below.
-#
 def get_impl_body(classBehavior, baseImplUrl, implUrl):
     impl = '        pass\n'
     if implUrl:
@@ -5209,39 +4819,11 @@ def get_impl_body(classBehavior, baseImplUrl, implUrl):
             err_msg('*** Connection refused for URL: %s\n' % implUrl)
     return impl
 
-###
-### This alternative implementation of get_impl_body() tries the URL
-###   via http first, then, if that fails, looks in a directory on
-###   the local file system (baseImplUrl) for a file (implUrl)
-###   containing the implementation body.
-###
-##def get_impl_body(classBehavior, baseImplUrl, implUrl):
-##    impl = '        pass\n'
-##    if implUrl:
-##        trylocal = 0
-##        if baseImplUrl:
-##            implUrl = '%s%s' % (baseImplUrl, implUrl)
-##        try:
-##            implFile = urllib2.urlopen(implUrl)
-##            impl = implFile.read()
-##            implFile.close()
-##        except:
-##            trylocal = 1
-##        if trylocal:
-##            try:
-##                implFile = file(implUrl)
-##                impl = implFile.read()
-##                implFile.close()
-##            except:
-##                print('*** Implementation at %s not found.' % implUrl)
-##    return impl
 
 
 def generateClassBehaviors(wrt, classBehaviors, baseImplUrl):
     for classBehavior in classBehaviors:
         behaviorName = classBehavior.getName()
-        #
-        # Generate the core behavior.
         argString = get_class_behavior_args(classBehavior)
         if argString:
             wrt('    def %s(self, %s, *args):\n' % (behaviorName, argString))
@@ -5251,8 +4833,6 @@ def generateClassBehaviors(wrt, classBehaviors, baseImplUrl):
         impl = get_impl_body(classBehavior, baseImplUrl, implUrl)
         wrt(impl)
         wrt('\n')
-        #
-        # Generate the ancillaries for this behavior.
         ancillaries = classBehavior.getAncillaries()
         if ancillaries:
             ancillaries = ancillaries.getAncillary()
@@ -5268,9 +4848,6 @@ def generateClassBehaviors(wrt, classBehaviors, baseImplUrl):
                 impl = get_impl_body(classBehavior, baseImplUrl, implUrl)
                 wrt(impl)
                 wrt('\n')
-        #
-        # Generate the wrapper method that calls the ancillaries and
-        #   the core behavior.
         argString = get_class_behavior_args(classBehavior)
         if argString:
             wrt('    def %s_wrapper(self, %s, *args):\n' %
@@ -5319,7 +4896,6 @@ def generateSubclass(wrt, element, prefix, xmlbehavior,  behaviors, baseUrl):
         wrt('        super(%s%s%s, self).__init__(*arglist_)\n' %
             (prefix, name, SubclassSuffix, ))
     else:
-        #wrt('        supermod.%s%s.__init__(%s)\n' % (prefix, name, s1))
         wrt('        super(%s%s%s, self).__init__(%s)\n' % (
             prefix, name, SubclassSuffix, s1, ))
     if xmlbehavior and behaviors:
@@ -5327,7 +4903,6 @@ def generateSubclass(wrt, element, prefix, xmlbehavior,  behaviors, baseUrl):
         wrt('    #\n')
         wrt('    # XMLBehaviors\n')
         wrt('    #\n')
-        # Get a list of behaviors for this class/subclass.
         classDictionary = behaviors.get_class_dictionary()
         if name in classDictionary:
             classBehaviors = classDictionary[name]
@@ -5341,23 +4916,8 @@ def generateSubclass(wrt, element, prefix, xmlbehavior,  behaviors, baseUrl):
 
 
 TEMPLATE_SUBCLASS_HEADER = """\
-#!/usr/bin/env python
 
-#
-# Generated %s by generateDS.py%s.
-#
-# Command line options:
 %s
-#
-# Command line arguments:
-#   %s
-#
-# Command line:
-#   %s
-#
-# Current working directory (os.getcwd()):
-#   %s
-#
 
 import sys
 
@@ -5371,35 +4931,30 @@ Verbose_import_ = False
 ) = range(3)
 XMLParser_import_library = None
 try:
-    # lxml
     from lxml import etree as etree_
     XMLParser_import_library = XMLParser_import_lxml
     if Verbose_import_:
         print("running with lxml.etree")
 except ImportError:
     try:
-        # cElementTree from Python 2.5+
         import xml.etree.cElementTree as etree_
         XMLParser_import_library = XMLParser_import_elementtree
         if Verbose_import_:
             print("running with cElementTree on Python 2.5+")
     except ImportError:
         try:
-            # ElementTree from Python 2.5+
             import xml.etree.ElementTree as etree_
             XMLParser_import_library = XMLParser_import_elementtree
             if Verbose_import_:
                 print("running with ElementTree on Python 2.5+")
         except ImportError:
             try:
-                # normal cElementTree install
                 import cElementTree as etree_
                 XMLParser_import_library = XMLParser_import_elementtree
                 if Verbose_import_:
                     print("running with cElementTree")
             except ImportError:
                 try:
-                    # normal ElementTree install
                     import elementtree.ElementTree as etree_
                     XMLParser_import_library = XMLParser_import_elementtree
                     if Verbose_import_:
@@ -5412,21 +4967,13 @@ except ImportError:
 def parsexml_(*args, **kwargs):
     if (XMLParser_import_library == XMLParser_import_lxml and
             'parser' not in kwargs):
-        # Use the lxml ElementTree compatible parser so that, e.g.,
-        #   we ignore comments.
         kwargs['parser'] = etree_.ETCompatXMLParser()
     doc = etree_.parse(*args, **kwargs)
     return doc
 
-#
-# Globals
-#
 
 ExternalEncoding = '%s'
 
-#
-# Data representation classes
-#
 
 
 """
@@ -5450,14 +4997,7 @@ def parse(inFilename, silence=False):
         rootClass = supermod.%(rootClass)s
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
-    # Enable Python to collect the space used by the DOM.
     doc = None
-#silence#    if not silence:
-#silence#        sys.stdout.write('<?xml version="1.0" ?>\\n')
-#silence#        rootObj.export(
-#silence#            sys.stdout, 0, name_=rootTag,
-#silence#            namespacedef_='%(namespacedef)s',
-#silence#            pretty_print=True)
     return rootObj
 
 
@@ -5470,17 +5010,10 @@ def parseEtree(inFilename, silence=False):
         rootClass = supermod.%(rootClass)s
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
-    # Enable Python to collect the space used by the DOM.
     doc = None
     mapping = {}
     rootElement = rootObj.to_etree(None, name_=rootTag, mapping_=mapping)
     reverse_mapping = rootObj.gds_reverse_node_mapping(mapping)
-#silence#    if not silence:
-#silence#        content = etree_.tostring(
-#silence#            rootElement, pretty_print=True,
-#silence#            xml_declaration=True, encoding="utf-8")
-#silence#        sys.stdout.write(content)
-#silence#        sys.stdout.write('\\n')
     return rootObj, rootElement, mapping, reverse_mapping
 
 
@@ -5494,13 +5027,7 @@ def parseString(inString, silence=False):
         rootClass = supermod.%(rootClass)s
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
-    # Enable Python to collect the space used by the DOM.
     doc = None
-#silence#    if not silence:
-#silence#        sys.stdout.write('<?xml version="1.0" ?>\\n')
-#silence#        rootObj.export(
-#silence#            sys.stdout, 0, name_=rootTag,
-#silence#            namespacedef_='%(namespacedef)s')
     return rootObj
 
 
@@ -5513,14 +5040,7 @@ def parseLiteral(inFilename, silence=False):
         rootClass = supermod.%(rootClass)s
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
-    # Enable Python to collect the space used by the DOM.
     doc = None
-#silence#    if not silence:
-#silence#        sys.stdout.write('#from %(super)s import *\\n\\n')
-#silence#        sys.stdout.write('import %(super)s as model_\\n\\n')
-#silence#        sys.stdout.write('rootObj = model_.rootClass(\\n')
-#silence#        rootObj.exportLiteral(sys.stdout, 0, name_=rootTag)
-#silence#        sys.stdout.write(')\\n')
     return rootObj
 
 
@@ -5543,7 +5063,6 @@ def main():
 
 
 if __name__ == '__main__':
-    #import pdb; pdb.set_trace()
     main()
 """
 
@@ -5551,7 +5070,6 @@ TEMPLATE_ABSTRACT_CLASS = """\
 class %(clsname)s(object):
     subclass = None
     superclass = None
-# fix valueof
     def __init__(self, valueOf_=''):
         raise NotImplementedError(
             'Cannot instantiate abstract class %(clsname)s (__init__)')
@@ -5563,7 +5081,6 @@ class %(clsname)s(object):
         raise NotImplementedError(
             'Cannot build abstract class %(clsname)s')
         attrs = node_.attributes
-        # fix_abstract
         type_name = attrs.getNamedItemNS(
             'http://www.w3.org/2001/XMLSchema-instance', 'type')
         if type_name is not None:
@@ -5572,7 +5089,6 @@ class %(clsname)s(object):
         else:
             raise NotImplementedError(
                 'Class %%s not implemented (build)' %% type_name.value)
-# end class %(clsname)s
 
 
 """
@@ -5617,14 +5133,11 @@ def generateSubclasses(root, subclassFilename, behaviorFilename,
     subclassFile = makeFile(subclassFilename)
     wrt = subclassFile.write
     if subclassFile:
-        # Read in the XMLBehavior file.
         xmlbehavior = None
         behaviors = None
         baseUrl = None
         if behaviorFilename:
             try:
-                # Add the currect working directory to the path so that
-                #   we use the user/developers local copy.
                 path.insert(0, '.')
                 import xmlbehavior_sub as xmlbehavior
             except ImportError:
@@ -5768,11 +5281,6 @@ def getImportsForExternalXsds(root):
 def generate(outfileName, subclassFilename, behaviorFilename,
              prefix, root, options, args, superModule):
     global DelayedElements, DelayedElements_subclass, AlreadyGenerated
-    # Create an output file.
-    # Note that even if the user does not request an output file,
-    #   we still need to go through the process of generating classes
-    #   because it produces data structures needed during generation of
-    #   subclasses.
     MappingTypes.clear()
     AlreadyGenerated = set()
     outfile = None
@@ -5784,7 +5292,6 @@ def generate(outfileName, subclassFilename, behaviorFilename,
     processed = []
     externalImports = getImportsForExternalXsds(root)
     generateHeader(wrt, prefix, options, args, externalImports)
-    #generateSimpleTypes(outfile, prefix, SimpleTypeDict)
     DelayedElements = set()
     DelayedElements_subclass = set()
     elements = root.getChildren()
@@ -5797,9 +5304,6 @@ def generate(outfileName, subclassFilename, behaviorFilename,
         if name not in processed:
             processed.append(name)
             generateClasses(wrt, prefix, element, 1)
-    #
-    # Generate the elements that were postponed because we had not
-    #   yet generated their base class.
     while 1:
         if len(PostponedExtensions) <= 0:
             break
@@ -5811,11 +5315,6 @@ def generate(outfileName, subclassFilename, behaviorFilename,
                 generateClasses(wrt, prefix, element, 1)
             else:
                 PostponedExtensions.insert(0, element)
-    #
-    # Disable the generation of SAX handler/parser.
-    # It failed when we stopped putting simple types into ElementDict.
-    # When there are duplicate names, the SAX parser probably does
-    #   not work anyway.
     generateMain(outfile, prefix, root)
     outfile.close()
     if subclassFilename:
@@ -5914,13 +5413,11 @@ def parseAndGenerate(
     AlreadyGenerated = set()
     AlreadyGenerated_subclass = set()
     if UserMethodsPath:
-        # UserMethodsModule = __import__(UserMethodsPath)
         path_list = UserMethodsPath.split('.')
         mod_name = path_list[-1]
         mod_path = os.sep.join(path_list[:-1])
         module_spec = imp.find_module(mod_name, [mod_path, ])
         UserMethodsModule = imp.load_module(mod_name, *module_spec)
-##    parser = saxexts.make_parser("xml.sax.drivers2.drv_pyexpat")
     if xschemaFileName == '-':
         infile = stdin
     else:
@@ -5928,7 +5425,6 @@ def parseAndGenerate(
     if SingleFileOutput:
         parser = make_parser()
         dh = XschemaHandler()
-    ##    parser.setDocumentHandler(dh)
         parser.setContentHandler(dh)
         if processIncludes:
             import process_includes
@@ -5943,16 +5439,9 @@ def parseAndGenerate(
         parser.parse(infile)
         root = dh.getRoot()
         root.annotate()
-##     print('-' * 60)
-##     root.show(sys.stdout, 0)
-##     print('-' * 60)
-    #debug_show_elements(root)
         generate(
             outfileName, subclassFilename, behaviorFilename,
             prefix, root, options, args, superModule)
-        # Generate __all__.  When using the parser as a module it is useful
-        # to isolate important classes from internal ones. This way one
-        # can do a reasonably safe "from parser import *"
         if outfileName:
             exportableClassList = [
                 '"%s"' % name
@@ -5995,16 +5484,11 @@ def parseAndGenerate(
             root.annotate()
             moduleName = None
             modulePath = None
-            # use the first root element to set
-            # up the module name and path
             for child in root.getChildren():
                 if child.isRootElement():
                     typeName = child.getType()
                     if typeName.startswith("xs:"):
-                        # no need to create a module for
-                        # xs: types
                         continue
-                    # convert to lower camel case if needed.
                     if "-" in typeName:
                         tokens = typeName.split("-")
                         typeName = ''.join([t.title() for t in tokens])
@@ -6024,10 +5508,6 @@ def parseAndGenerate(
                 generate(
                     modulePath, subclassFilename, behaviorFilename,
                     prefix, root, options, args, superModule)
-                # Generate __all__.  When using the parser as a module
-                # it is useful
-                # to isolate important classes from internal ones. This way one
-                # can do a reasonably safe "from parser import *"
                 exportableClassList = [
                     '"%s"' % name
                     for name in AlreadyGenerated]
@@ -6040,10 +5520,7 @@ def parseAndGenerate(
                 outfile.close()
 
 
-# Function that gets called recursively in order to expand nested references
-# to element groups
 def _expandGR(grp, visited):
-    # visited is used for loop detection
     children = []
     changed = False
     for child in grp.children:
@@ -6061,14 +5538,12 @@ def _expandGR(grp, visited):
             continue
         visited.add(id(grp))
         if id(referencedGroup) in visited:
-            #err_msg('*** Circular reference for %s' % groupRef.attrs['ref'])
             err_msg('*** Circular reference for %s\n' % groupRef.ref)
             continue
         changed = True
         _expandGR(referencedGroup, visited)
         children.extend(referencedGroup.children)
     if changed:
-        # Avoid replacing the list with a copy of the list
         grp.children = children
 
 
@@ -6078,27 +5553,16 @@ def expandGroupReferences(grp):
 
 
 def debug_show_elements(root):
-    #print('ElementDict:', ElementDict)
     print('=' * 50)
     for name, obj in ElementDict.iteritems():
         print('element:', name, obj.getName(), obj.type)
     print('=' * 50)
-    #ipshell('debug')
-##     root.show(sys.stdout, 0)
-##     print('=' * 50)
-##     response = raw_input('Press Enter')
-##     root.show(sys.stdout, 0)
-##     print('=' * 50)
-##     print(']]] root: ', root, '[[[')
 
 
 def load_config():
     try:
-        #print('1. updating NameTable')
         import generateds_config
         NameTable.update(generateds_config.NameTable)
-        #print('2. updating NameTable')
-        #print('3. NameTable:', NameTable)
     except ImportError:
         pass
 
@@ -6330,7 +5794,6 @@ def main():
 
 
 if __name__ == '__main__':
-    #"-o ..\Bindings.py --super=Bindings -s ..\Template.py --subclass-suffix="" --member-specs=list -m -f --silence .\multi_phy_configuration_model.xsd"
     current_dir = os.path.dirname(__file__)
     binding_path = os.path.realpath( os.path.join(current_dir, '..', '/Bindings.py') )
     argv.append('-o')

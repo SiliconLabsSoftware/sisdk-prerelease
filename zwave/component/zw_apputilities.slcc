@@ -6,6 +6,23 @@ description: >
   It includes utilities for ZAF (Z-Wave Application Framework) such as timers,
   ZAF NVM (non-volatile memory), and more.
   These utilities are essential for developing Z-Wave applications or new Command Classes and enhancing their functionality.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/actuator
+  - page: zwave-api/cc-invoker
+  - page: zwave-api/cc-utils
+  - page: zwave-api/cmd-publisher
+  - page: zwave-api/learn-mode
+  - page: zwave-api/misc
+  - page: zwave-api/network
+  - page: zwave-api/network-management
+  - page: zwave-api/zaf-if
+  - page: zwave-api/zaf-transport
+  - page: zwave-api/zaf-transport-endpoint
+  - page: zwave-api/zaf-transport-multicast
+  - page: zwave-api/zaf-transport-security
+
 package: zwave
 quality: production
 metadata:

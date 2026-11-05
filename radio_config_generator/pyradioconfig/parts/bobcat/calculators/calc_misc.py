@@ -4,11 +4,9 @@ class Calc_Misc_Bobcat(CALC_Misc_ocelot):
 
     def calc_misc(self, model):
 
-        #Call inherited calc_misc method
         super().calc_misc(model)
 
     def calc_misc_bobcat(self, model):
-        # Add LongRange reg writes
         self._reg_write(model.vars.MODEM_LONGRANGE_LRBLE, 0)
         self._reg_write(model.vars.MODEM_LONGRANGE_LRBLEDSA, 0)
         self._reg_write(model.vars.MODEM_LONGRANGE_LRCORRSCHWIN, 0xA)
@@ -22,15 +20,9 @@ class Calc_Misc_Bobcat(CALC_Misc_ocelot):
         pass
 
     def calc_clkmult_misc(self, model):
-        # do not inherit ocelot's clkmult overrides
-        # ocelot's dualbrx_adcpll != bobcat's dualbclk_mult
         pass
 
     def calc_aox_misc(self, model):
-        # Always force these to zero so all AoX features are disabled.
-        # RAIL will dynamically set these when an AoX  packet is detected.
-        # Still write them in the RC so other PHYs are guarenteed to have AoX features disabled and we can
-        # exclude ETSLOC, ANTSWTIMSTART, ANTSWTIMSTOP
         self._reg_write(model.vars.MODEM_ANTSWCTRL_ANTSWENABLE, 0)
         self._reg_write(model.vars.MODEM_ANTSWCTRL_CFGANTPATTEN, 0)
 

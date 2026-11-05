@@ -3,7 +3,6 @@ from pyradioconfig.parts.common.calculators.frame_coding import CALC_Whitening
 class CALC_Frame_Coding_Ocelot(CALC_Whitening):
 
     def calc_frame_coding_var(self, model):
-        #On Ocelot, we removed frame_coding as a Profile Input, so we need to calculate the variable from symbol_encoding
 
         symbol_encoding = model.vars.symbol_encoding.value
 
@@ -16,12 +15,9 @@ class CALC_Frame_Coding_Ocelot(CALC_Whitening):
         else:
             frame_coding = model.vars.frame_coding.var_enum.NONE
 
-        #Write the model variable
         model.vars.frame_coding.value = frame_coding
 
     def _frame_coding_manchester(self):
-        # List the lookup data with 1-bit sequence as keys, 2-bit sequence as values.
-        # From https://jira.silabs.com/browse/MCUW_RADIO_CFG-2046
         coding_table = {
             0b0: 0b01,
             0b1: 0b10
@@ -36,7 +32,6 @@ class CALC_Frame_Coding_Ocelot(CALC_Whitening):
                                              coding_table_is_msb_first, coding_table)
 
     def calc_frame_coding(self, model):
-        # In TRECS_VITERBI demod, the encoding of the data must be performed using the hardware block coder.
 
         symbol_encoding = model.vars.symbol_encoding.value
         demod_select = model.vars.demod_select.value

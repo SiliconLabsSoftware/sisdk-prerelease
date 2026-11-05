@@ -19,7 +19,6 @@ class Profile_Sigfox_TX_Ocelot(Profile_Sigfox_TX):
         self._sw_profile_outputs_common = sw_profile_outputs_common_ocelot()
 
     def buildProfileModel(self, model) -> ModelProfile:
-        # Build profile
         profile = self._makeProfile(model)
 
         self.build_profile_inputs(model, profile)
@@ -30,11 +29,8 @@ class Profile_Sigfox_TX_Ocelot(Profile_Sigfox_TX):
 
         self.build_outputs(model, profile)
 
-        # Deprecated inputs
-        # These inputs were exposed on or after Ocelot Alpha 1 release, so they may be present in radioconf XML
         self.make_deprecated_input(profile, model.vars.max_tx_power_dbm)
 
-        # Add register profile outputs
         self._add_reg_profile_outputs(model, profile)
 
         return profile
@@ -124,7 +120,6 @@ class Profile_Sigfox_TX_Ocelot(Profile_Sigfox_TX):
         model.vars.header_white_en.value_forced = False
 
     def set_packet_inputs_defaults(self, model) -> None:
-        # Packet Inputs
         model.vars.frame_bitendian.value_forced = model.vars.frame_bitendian.var_enum.MSB_FIRST
         model.vars.frame_length_type.value_forced = model.vars.frame_length_type.var_enum.FIXED_LENGTH
         model.vars.payload_white_en.value_forced = False
@@ -134,13 +129,8 @@ class Profile_Sigfox_TX_Ocelot(Profile_Sigfox_TX):
         pass
 
     def build_outputs(self, model, profile: ModelProfile) -> None:
-        # Sigfox profile does not include advanced inputs,
-        # but we do need an output for IR cal power level for rail_scripts to consume
-        # So add that here. It will default to 0 (which triggers to change to IR cal).
 
-        # Informational Output
         buildModemInfoOutputs(model, profile)
-        # Output fields
         pc.buildFrameOutputs(model, profile)
         pc.buildCrcOutputs(model, profile)
         pc.buildWhiteOutputs(model, profile)
@@ -178,7 +168,6 @@ class Profile_Sigfox_TX_Ocelot(Profile_Sigfox_TX):
                                      readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=4095)
 
     def build_hidden_profile_inputs(self, model: ModelRoot, profile: ModelProfile) -> None:
-        # Add Ocelot-specific variables
         IProfile.make_hidden_input(profile, model.vars.demod_select, 'Advanced',
                                    readable_name="Demod Selection")
         IProfile.make_hidden_input(profile, model.vars.synth_settling_mode, 'modem',
@@ -195,7 +184,6 @@ class Profile_Sigfox_TX_Ocelot(Profile_Sigfox_TX):
         IProfile.make_optional_input(profile, model.vars.test_ber, "testing", default=False,
                                      readable_name="Reconfigure for BER testing")
 
-        # Hidden inputs to allow for fixed frame length testing
         self.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                readable_name="Frame Length Algorithm")
 
@@ -212,10 +200,6 @@ class Profile_Sigfox_TX_Ocelot(Profile_Sigfox_TX):
 
     def build_frame_configuration_inputs(self, model: ModelRoot, profile: ModelProfile) -> None:
         pass
-        # self._frame_profile_inputs_common.build_frame_inputs(model, profile)
-        # pc.buildCrcInputs(model, profile)
-        # pc.buildWhiteInputs(model, profile)
-        # pc.buildFecInputs(model, profile)
 
     def _add_reg_profile_outputs(self, model: ModelRoot, profile: ModelProfile) -> None:
         build_modem_regs_ocelot(model, profile)
@@ -225,23 +209,16 @@ class Profile_Sigfox_TX_Ocelot(Profile_Sigfox_TX):
 
         self.set_frame_configuration_defaults(model)
 
-        # The above code is really just a copy/paste of the Base profile with some inputs commented out.
-        # It should be diffed against the Base profile for accuracy.
-        # Now set default values for all of the above inputs.  Assume any defaults above
-        # were just copy/pasted from the base profile and set the correct values here
         self._set_DBPSK_regs(model)
         self._set_transmit_shaping_coefficient(model)
         self._disable_analog_ramping(model)
 
-        # : preamble
         model.vars.preamble_pattern_len.value_forced = 1
         model.vars.preamble_length.value_forced = 2
 
-        # : sync
         model.vars.syncword_length.value_forced = 8
         model.vars.syncword_0.value_forced = int(0x0)
 
-        # : advanced
         model.vars.deviation_tol_ppm.value_forced = 0
         model.vars.agc_settling_delay.value_forced = 44
         model.vars.agc_power_target.value_forced = 254
@@ -250,17 +227,10 @@ class Profile_Sigfox_TX_Ocelot(Profile_Sigfox_TX):
         model.vars.timing_sample_threshold.value_forced = 10
 
     def _set_DBPSK_regs(self, model: ModelRoot):
-        # New Ocelot regs, need to determine how to calculate these for all DBPSK
         model.vars.MODEM_CTRL6_TXDBPSKINV.value_forced = 1
         model.vars.MODEM_CTRL6_TXDBPSKRAMPEN.value_forced = 1
 
     def _set_transmit_shaping_coefficient(self, model: ModelRoot):
-        # To be compliant with spectrum template required by Sigfox with digital ramping
-        # Symmetrical Shaping filter RRC alpha=0.5 with only 15 taps [-Ts:Ts]
-        # (15 taps provides better power envelope than 64 taps)
-        # This filter improves the Sriharsha filter which provides higher power envelope variation
-        # (see MCUW_RADIO_CFG-2573 and MCUW_RADIO_CFG-2592)
-        # transmit shaping coefficient
 
         model.vars.shaping_filter_param.value_forced = 0.5
 
@@ -331,5 +301,4 @@ class Profile_Sigfox_TX_Ocelot(Profile_Sigfox_TX):
         model.vars.MODEM_SHAPING15_COEFF63.value_forced = 0
 
     def _disable_analog_ramping(self, model: ModelRoot):
-        # Disable the Analog Ramping which it provides not compliant spectrum mask with the Sigfox standard in Tx
         model.vars.SEQ_MISC_DIG_RAMP_EN.value_forced = 1

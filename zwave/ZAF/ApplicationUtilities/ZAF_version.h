@@ -10,6 +10,13 @@
 #include <stdint.h>
 
 /**
+ * @addtogroup ZAF
+ * @{
+ * @addtogroup ZAF_Version Version Numbers
+ * @{
+ */
+
+/**
  * @brief Get the application build number.
  *
  * @deprecated Use the `APP_BUILD_NO` compile-time macro.
@@ -27,5 +34,10 @@ uint8_t SDK_GetVersionMajor(void);
 uint8_t SDK_GetVersionMinor(void);
 
 uint8_t SDK_GetVersionPatch(void);
+
+/**
+ * @}
+ * @}
+ */
 
 #endif /* ZAF_APPLICATIONUTILITIES_ZAF_VERSION_H_ */

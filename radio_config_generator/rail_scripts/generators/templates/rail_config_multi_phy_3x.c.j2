@@ -4,11 +4,8 @@
 {% block content -%}
 #include "em_device.h"
 #include "{{filename}}.h"
-{%- if rail_secondary_config and series == 3 %}
-#include "sl_code_classification.h"
-{%- endif %}
+{{-storeInRamInclude()-}}
 {% for frameLengthListEntryName, frameLengthListEntry in multiPhyConfig.commonStructures.frameLengthEntries.items() %}
-{{storeInRam()-}}
 static uint16_t {{frameLengthListEntryName}}[] = { {{""}}
   {%- for value in frameLengthListEntry[:-1] -%}
     {{value|int}}{{", "}}
@@ -18,7 +15,6 @@ static uint16_t {{frameLengthListEntryName}}[] = { {{""}}
 {%- endfor %}
 
 {%- for frameTypeEntryName, frameTypeEntry in multiPhyConfig.commonStructures.frameTypeEntries.items() %}
-{{storeInRam()-}}
 static sl_rail_frame_type_t {{frameTypeEntryName}} = {
   .p_frame_byte_lengths = &{{frameTypeEntry.frameLen.value._uniqueName}}[0],
   .offset_bytes = {{frameTypeEntry.offset}},
@@ -28,7 +24,6 @@ static sl_rail_frame_type_t {{frameTypeEntryName}} = {
 };
 {% endfor %}
 {%- for lookupTableEntryName, lookupTableEntry in multiPhyConfig.commonStructures.lookupTableEntries.items() %}
-{{storeInRam()-}}
 uint32_t {{lookupTableEntry['tableName']}}[] = {
   {%- for items in lookupTableEntry['values']|batch(4) %}
   {{ items|join(", ") -}},
@@ -146,7 +141,6 @@ __ALIGNED(4) static const uint8_t {{stackInfoName}}[{{stackInfoEntry|length}}] =
 {% endif %}
 
 {%- for entryName, entry in multiPhyConfig.commonStructures.railChannelConfigEntryAttrEntries.items() %}
-{{storeInRam()-}}
 static sl_rail_channel_config_entry_attr_t {{entryName}} = {
 #if SL_RAIL_SUPPORTS_OFDM_PA
   {
@@ -250,6 +244,8 @@ static const sl_rail_phy_info_t {{phyInfoEntryName}} = {
   .p_modem_tx_compensation = NULL,
 {%- endif %}
   .trecs_pre_bits_to_sync = {{phyInfoEntry.phyInfoData.trecsPreBitsToSync}}UL,
+  .preamble_duration_us = {{phyInfoEntry.phyInfoData.preambleDurationUs}}UL,
+  .syncword_duration_us = {{phyInfoEntry.phyInfoData.syncwordDurationUs}}UL,
 };
 {% endfor %}
 {%- for modemConfigName, modemConfig in multiPhyConfig.commonStructures.modemConfigEntriesBase.items() %}

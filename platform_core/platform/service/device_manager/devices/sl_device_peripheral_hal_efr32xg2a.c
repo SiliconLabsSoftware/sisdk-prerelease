@@ -38,24 +38,6 @@
  * @{
  ******************************************************************************/
 
-#if defined(ACMP0_BASE)
-// Define peripheral ACMP0.
-const sl_peripheral_val_t sl_peripheral_val_acmp0 = { .base = ACMP0_BASE,
-                                                      .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                      .bus_clock = SL_BUS_CLOCK_ACMP0,
-                                                      .gpio_routeen_offset = (uint16_t)offsetof(GPIO_TypeDef, ACMPROUTE[0].ROUTEEN),
-                                                      .gpio_routeen_mask = _GPIO_ACMP_ROUTEEN_MASK };
-#endif
-
-#if defined(ACMP1_BASE)
-// Define peripheral ACMP1.
-const sl_peripheral_val_t sl_peripheral_val_acmp1 = { .base = ACMP1_BASE,
-                                                      .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                      .bus_clock = SL_BUS_CLOCK_ACMP1,
-                                                      .gpio_routeen_offset = (uint16_t)offsetof(GPIO_TypeDef, ACMPROUTE[1].ROUTEEN),
-                                                      .gpio_routeen_mask = _GPIO_ACMP_ROUTEEN_MASK };
-#endif
-
 #if defined(BUFC_BASE)
 // Define peripheral BUFC.
 const sl_peripheral_val_t sl_peripheral_val_bufc = { .base = BUFC_BASE,
@@ -149,48 +131,6 @@ const sl_peripheral_eusart_val_t sl_peripheral_val_eusart1 = { .base = EUSART1_B
                                                                .dma_signal_tx_trigger = SL_DMA_SIGNAL_EUSART1_TXFL };
 #endif
 
-#if defined(EUSART2_BASE)
-// Define peripheral EUSART2.
-const sl_peripheral_eusart_val_t sl_peripheral_val_eusart2 = { .base = EUSART2_BASE,
-                                                               .clk_branch = SL_CLOCK_BRANCH_EM01GRPCCLK,
-                                                               .bus_clock = SL_BUS_CLOCK_EUSART2,
-                                                               .gpio_routeen_offset = (uint16_t)offsetof(GPIO_TypeDef, EUSARTROUTE[2].ROUTEEN),
-                                                               .gpio_routeen_mask = _GPIO_EUSART_ROUTEEN_MASK,
-                                                               .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
-                                                               .rx_irqn = EUSART2_RX_IRQn,
-                                                               .tx_irqn = EUSART2_TX_IRQn,
-                                                               .dma_signal_rx_trigger = SL_DMA_SIGNAL_EUSART2_RXFL,
-                                                               .dma_signal_tx_trigger = SL_DMA_SIGNAL_EUSART2_TXFL };
-#endif
-
-#if defined(EUSART3_BASE)
-// Define peripheral EUSART3.
-const sl_peripheral_eusart_val_t sl_peripheral_val_eusart3 = { .base = EUSART3_BASE,
-                                                               .clk_branch = SL_CLOCK_BRANCH_EM01GRPCCLK,
-                                                               .bus_clock = SL_BUS_CLOCK_EUSART3,
-                                                               .gpio_routeen_offset = (uint16_t)offsetof(GPIO_TypeDef, EUSARTROUTE[3].ROUTEEN),
-                                                               .gpio_routeen_mask = _GPIO_EUSART_ROUTEEN_MASK,
-                                                               .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
-                                                               .rx_irqn = EUSART3_RX_IRQn,
-                                                               .tx_irqn = EUSART3_TX_IRQn,
-                                                               .dma_signal_rx_trigger = SL_DMA_SIGNAL_EUSART3_RXFL,
-                                                               .dma_signal_tx_trigger = SL_DMA_SIGNAL_EUSART3_TXFL };
-#endif
-
-#if defined(EUSART4_BASE)
-// Define peripheral EUSART4.
-const sl_peripheral_eusart_val_t sl_peripheral_val_eusart4 = { .base = EUSART4_BASE,
-                                                               .clk_branch = SL_CLOCK_BRANCH_EM01GRPCCLK,
-                                                               .bus_clock = SL_BUS_CLOCK_EUSART4,
-                                                               .gpio_routeen_offset = (uint16_t)offsetof(GPIO_TypeDef, EUSARTROUTE[4].ROUTEEN),
-                                                               .gpio_routeen_mask = _GPIO_EUSART_ROUTEEN_MASK,
-                                                               .ip_type = SL_PERIPHERAL_SERIAL_TYPE_EUSART,
-                                                               .rx_irqn = EUSART4_RX_IRQn,
-                                                               .tx_irqn = EUSART4_TX_IRQn,
-                                                               .dma_signal_rx_trigger = SL_DMA_SIGNAL_EUSART4_RXFL,
-                                                               .dma_signal_tx_trigger = SL_DMA_SIGNAL_EUSART4_TXFL };
-#endif
-
 #if defined(FSRCO_BASE)
 // Define peripheral FSRCO.
 const sl_peripheral_val_t sl_peripheral_val_fsrco = { .base = FSRCO_BASE,
@@ -198,11 +138,18 @@ const sl_peripheral_val_t sl_peripheral_val_fsrco = { .base = FSRCO_BASE,
                                                       .bus_clock = SL_BUS_CLOCK_FSRCO };
 #endif
 
-#if defined(GPCRC_BASE)
+#if defined(GPCRC0_BASE)
 // Define peripheral GPCRC0.
-const sl_peripheral_val_t sl_peripheral_val_gpcrc0 = { .base = GPCRC_BASE,
+const sl_peripheral_val_t sl_peripheral_val_gpcrc0 = { .base = GPCRC0_BASE,
                                                        .clk_branch = SL_CLOCK_BRANCH_PCLK,
                                                        .bus_clock = SL_BUS_CLOCK_GPCRC0 };
+#endif
+
+#if defined(GPCRC1_BASE)
+// Define peripheral GPCRC1.
+const sl_peripheral_val_t sl_peripheral_val_gpcrc1 = { .base = GPCRC1_BASE,
+                                                       .clk_branch = SL_CLOCK_BRANCH_PCLK,
+                                                       .bus_clock = SL_BUS_CLOCK_GPCRC1 };
 #endif
 
 #if defined(GPIO_BASE)
@@ -251,17 +198,6 @@ const sl_peripheral_i2c_val_t sl_peripheral_val_i2c0 = { .base = I2C0_BASE,
                                                          .dma_signal_txbl = SL_DMA_SIGNAL_I2C0_TXBL };
 #endif
 
-#if defined(I2C1_BASE)
-// Define peripheral I2C1.
-const sl_peripheral_i2c_val_t sl_peripheral_val_i2c1 = { .base = I2C1_BASE,
-                                                         .clk_branch = SL_CLOCK_BRANCH_PCLK,
-                                                         .bus_clock = SL_BUS_CLOCK_I2C1,
-                                                         .gpio_routeen_offset = (uint16_t)offsetof(GPIO_TypeDef, I2CROUTE[1].ROUTEEN),
-                                                         .gpio_routeen_mask = _GPIO_I2C_ROUTEEN_MASK,
-                                                         .dma_signal_rxdatav = SL_DMA_SIGNAL_I2C1_RXDATAV,
-                                                         .dma_signal_txbl = SL_DMA_SIGNAL_I2C1_TXBL };
-#endif
-
 #if defined(IADC0_BASE)
 // Define peripheral IADC0.
 const sl_peripheral_iadc_val_t sl_peripheral_val_iadc0 = { .base = IADC0_BASE,
@@ -289,16 +225,6 @@ const sl_peripheral_ldmaxbar_val_t sl_peripheral_val_ldmaxbar0 = { .base = LDMAX
                                                                    .gpio_routeen_mask = 0,
                                                                    .dma_signal_prsreq0 = SL_DMA_SIGNAL_LDMAXBAR0_PRSREQ0,
                                                                    .dma_signal_prsreq1 = SL_DMA_SIGNAL_LDMAXBAR0_PRSREQ1 };
-#endif
-
-#if defined(LESENSE_BASE)
-// Define peripheral LESENSE.
-const sl_peripheral_lesense_val_t sl_peripheral_val_lesense = { .base = LESENSE_BASE,
-                                                                .clk_branch = SL_CLOCK_BRANCH_LESENSEHFCLK,
-                                                                .bus_clock = SL_BUS_CLOCK_LESENSE,
-                                                                .gpio_routeen_offset = 0xFFFF,
-                                                                .gpio_routeen_mask = 0,
-                                                                .dma_signal_fifo = SL_DMA_SIGNAL_LESENSE_FIFO };
 #endif
 
 #if defined(LETIMER0_BASE)
@@ -491,94 +417,11 @@ const sl_peripheral_timer_val_t sl_peripheral_val_timer4 = { .base = TIMER4_BASE
                                                              .dma_signal_ufof = SL_DMA_SIGNAL_TIMER4_UFOF };
 #endif
 
-#if defined(TIMER5_BASE)
-// Define peripheral TIMER5.
-const sl_peripheral_timer_val_t sl_peripheral_val_timer5 = { .base = TIMER5_BASE,
-                                                             .clk_branch = SL_CLOCK_BRANCH_EM01GRPACLK,
-                                                             .bus_clock = SL_BUS_CLOCK_TIMER5,
-                                                             .gpio_routeen_offset = (uint16_t)offsetof(GPIO_TypeDef, TIMERROUTE[5].ROUTEEN),
-                                                             .gpio_routeen_mask = _GPIO_TIMER_ROUTEEN_MASK,
-                                                             .dma_signal_cc0 = SL_DMA_SIGNAL_TIMER5_CC0,
-                                                             .dma_signal_cc1 = SL_DMA_SIGNAL_TIMER5_CC1,
-                                                             .dma_signal_cc2 = SL_DMA_SIGNAL_TIMER5_CC2,
-                                                             .dma_signal_cc3 = SL_DMA_SIGNAL_NONE,
-                                                             .dma_signal_cc4 = SL_DMA_SIGNAL_NONE,
-                                                             .dma_signal_cc5 = SL_DMA_SIGNAL_NONE,
-                                                             .dma_signal_cc6 = SL_DMA_SIGNAL_NONE,
-                                                             .dma_signal_ufof = SL_DMA_SIGNAL_TIMER5_UFOF };
-#endif
-
-#if defined(TIMER6_BASE)
-// Define peripheral TIMER6.
-const sl_peripheral_timer_val_t sl_peripheral_val_timer6 = { .base = TIMER6_BASE,
-                                                             .clk_branch = SL_CLOCK_BRANCH_EM01GRPACLK,
-                                                             .bus_clock = SL_BUS_CLOCK_TIMER6,
-                                                             .gpio_routeen_offset = (uint16_t)offsetof(GPIO_TypeDef, TIMERROUTE[6].ROUTEEN),
-                                                             .gpio_routeen_mask = _GPIO_TIMER_ROUTEEN_MASK,
-                                                             .dma_signal_cc0 = SL_DMA_SIGNAL_TIMER6_CC0,
-                                                             .dma_signal_cc1 = SL_DMA_SIGNAL_TIMER6_CC1,
-                                                             .dma_signal_cc2 = SL_DMA_SIGNAL_TIMER6_CC2,
-                                                             .dma_signal_cc3 = SL_DMA_SIGNAL_NONE,
-                                                             .dma_signal_cc4 = SL_DMA_SIGNAL_NONE,
-                                                             .dma_signal_cc5 = SL_DMA_SIGNAL_NONE,
-                                                             .dma_signal_cc6 = SL_DMA_SIGNAL_NONE,
-                                                             .dma_signal_ufof = SL_DMA_SIGNAL_TIMER6_UFOF };
-#endif
-
-#if defined(TIMER7_BASE)
-// Define peripheral TIMER7.
-const sl_peripheral_timer_val_t sl_peripheral_val_timer7 = { .base = TIMER7_BASE,
-                                                             .clk_branch = SL_CLOCK_BRANCH_EM01GRPACLK,
-                                                             .bus_clock = SL_BUS_CLOCK_TIMER7,
-                                                             .gpio_routeen_offset = (uint16_t)offsetof(GPIO_TypeDef, TIMERROUTE[7].ROUTEEN),
-                                                             .gpio_routeen_mask = _GPIO_TIMER_ROUTEEN_MASK,
-                                                             .dma_signal_cc0 = SL_DMA_SIGNAL_TIMER7_CC0,
-                                                             .dma_signal_cc1 = SL_DMA_SIGNAL_TIMER7_CC1,
-                                                             .dma_signal_cc2 = SL_DMA_SIGNAL_TIMER7_CC2,
-                                                             .dma_signal_cc3 = SL_DMA_SIGNAL_NONE,
-                                                             .dma_signal_cc4 = SL_DMA_SIGNAL_NONE,
-                                                             .dma_signal_cc5 = SL_DMA_SIGNAL_NONE,
-                                                             .dma_signal_cc6 = SL_DMA_SIGNAL_NONE,
-                                                             .dma_signal_ufof = SL_DMA_SIGNAL_TIMER7_UFOF };
-#endif
-
 #if defined(ULFRCO_BASE)
 // Define peripheral ULFRCO.
 const sl_peripheral_val_t sl_peripheral_val_ulfrco = { .base = ULFRCO_BASE,
                                                        .clk_branch = SL_CLOCK_BRANCH_INVALID,
                                                        .bus_clock = SL_BUS_CLOCK_ULFRCO };
-#endif
-
-#if defined(USB_APBS_BASE)
-// Define peripheral USB.
-const sl_peripheral_val_t sl_peripheral_val_usb = { .base = USB_APBS_BASE,
-                                                    .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                    .bus_clock = SL_BUS_CLOCK_USB };
-#endif
-
-#if defined(USBAHB_AHBS_BASE)
-// Define peripheral USBAHB.
-const sl_peripheral_val_t sl_peripheral_val_usbahb = { .base = USBAHB_AHBS_BASE,
-                                                       .clk_branch = SL_CLOCK_BRANCH_HCLK,
-                                                       .bus_clock = SL_BUS_CLOCK_INVALID };
-#endif
-
-#if defined(USBPLL0_BASE)
-// Define peripheral USBPLL0.
-const sl_peripheral_val_t sl_peripheral_val_usbpll0 = { .base = USBPLL0_BASE,
-                                                        .clk_branch = SL_CLOCK_BRANCH_INVALID,
-                                                        .bus_clock = SL_BUS_CLOCK_INVALID };
-#endif
-
-#if defined(VDAC0_BASE)
-// Define peripheral VDAC0.
-const sl_peripheral_vdac_val_t sl_peripheral_val_vdac0 = { .base = VDAC0_BASE,
-                                                           .clk_branch = SL_CLOCK_BRANCH_VDAC0CLK,
-                                                           .bus_clock = SL_BUS_CLOCK_VDAC0,
-                                                           .gpio_routeen_offset = 0xFFFF,
-                                                           .gpio_routeen_mask = 0,
-                                                           .dma_signal_ch0req = SL_DMA_SIGNAL_VDAC0_CH0REQ,
-                                                           .dma_signal_ch1req = SL_DMA_SIGNAL_VDAC0_CH1REQ };
 #endif
 
 #if defined(WDOG0_BASE)

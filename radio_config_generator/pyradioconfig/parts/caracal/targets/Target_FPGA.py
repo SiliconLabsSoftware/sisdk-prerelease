@@ -10,5 +10,4 @@ class Target_FPGA_Caracal(Target_FPGA_Bobcat):
     _cfg_location = join('target_fpga','caracal')
     _tag = "FPGA"
 
-    # Inherit all target methods for now
     pass

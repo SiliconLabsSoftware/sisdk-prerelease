@@ -1,14 +1,17 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 class PHYS_Studio(IPhy):
+
+    ip_category = IPCategory.LPW
 
     def PHY_Sigfox_868MHz_DBPSK_100bps_Studio(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Sigfox_TX, readable_name='Sigfox 868MHz DBPSK 100bps', phy_description="Transmit only configuration for Sigfox DBPSK modulation.", phy_name=phy_name)
         phy.profile_inputs.base_frequency_hz.value =  long(868000000)
         phy.profile_inputs.channel_spacing_hz.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.bitrate.value = 100
         phy.profile_inputs.preamble_length.value = 16
 
@@ -18,7 +21,7 @@ class PHYS_Studio(IPhy):
         phy = self._makePhy(model, model.profiles.Sigfox_TX, readable_name='Sigfox 915MHz DBPSK 600bps', phy_description="Transmit only configuration for Sigfox DBPSK modulation.",phy_name=phy_name)
         phy.profile_inputs.base_frequency_hz.value =  long(915000000)
         phy.profile_inputs.channel_spacing_hz.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.bitrate.value = 600
         phy.profile_inputs.preamble_length.value = 16
 

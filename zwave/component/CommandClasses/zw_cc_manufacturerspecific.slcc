@@ -7,6 +7,9 @@ description: >
   The data content MUST be vendor-specific and MUST be non-value added with respect to the Home
   Automation application in general. Manufacturer ID, Product Type ID, and Product ID can be sent
   with the command class
+documentation:
+  docset: z-wave
+  document: zwave-api/md-content-how-to-implement-a-new-command-class
 package: zwave
 quality: production
 metadata:

@@ -33,7 +33,7 @@
 
 #include "em_emu.h"
 #include "em_cmu.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_power_manager.h"
 #include "sli_power_manager.h"
 #include "sli_power_manager_private.h"
@@ -245,7 +245,7 @@ void sli_power_manager_init_hardware(void)
         break;
 
       default:
-        EFM_ASSERT(false);
+        SL_LOG_DEBUG_ASSERT(false);
         break;
     }
     if (freq > 0) { // Avoid division by 0
@@ -632,7 +632,7 @@ void sli_power_manager_apply_em(sl_power_manager_em_t em)
       break;
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 #else
@@ -671,7 +671,7 @@ void sli_power_manager_apply_em(sl_power_manager_em_t em)
       break;
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 #endif // SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT

@@ -1,0 +1,82 @@
+<!--Copyright 2014 by Silicon Laboratories.  All rights reserved.    -->
+
+<project name="Chip Configurator" default="isd-package" basedir=".">
+  
+  <property environment="env" />
+
+  <target name="isd-init">
+    <condition property="isdZipDestination" value="buildoutput/isd-package">
+      <not><isset property="isdZipDestination"/></not>
+    </condition>
+  </target>
+  
+  <target name="modem-calc-init">
+    <condition property="modemCalExeZipDestination" value="buildoutput/modem-calc-exe-package">
+      <not><isset property="modemCalExeZipDestination"/></not>
+    </condition>
+  </target>
+  
+  <target name="isd-package" description="Builds the ZIP files in the src" depends="isd-init">
+    <echo message="Creating: ${isdZipDestination}/configurator.si446x.zip"/>
+    <zip destfile="${isdZipDestination}/configurator.si446x.zip" 
+         basedir="src/" 
+         includes="common/*.py,
+                   version_info/master.properties,
+                   version_info/*.py,
+                   profiles/*.properties,
+                   si4440_modem_calc/*.py, 
+                   siradioapi/*.properties, 
+                   siradioapi_factory/*.properties, 
+                   siradioapifoundation/*.py, 
+                   siradiocfg/*.py">
+    </zip>
+    <echo message="Creating: ${isdZipDestination}/configurator.si4010.zip"/>
+    <zip destfile="${isdZipDestination}/configurator.si4010.zip" 
+         basedir="src/"
+         includes="si4010_modem_calc/*.py,
+                   common/*.py,
+                   version_info/master.properties,
+                   version_info/*.py">
+    </zip>
+  </target>
+  
+  <target name="modem-calc-exe-package" description="Builds the ZIP files of modem calculator executable package" depends="modem-calc-init">
+    <echo message="Creating: ${modemCalExeZipDestination}/modem-calc-exe.zip"/>
+    <zip destfile="${modemCalExeZipDestination}/modem-calc-exe.zip" 
+         basedir="dist/" 
+         includes="*,
+                   lib/*">
+    </zip>
+  </target>
+  
+  <target name="preprocess-build">
+    <!-- Don't be alarmed with the use of absolute path. This build process assumes that you have the Python 2.7 checked out in this location -->
+    <exec executable="C:\python27\python" failonerror="true">
+      <arg value="src/version_info/version_info.py" />
+      <arg value="--setbuildnumber" />
+      <arg value="${env.BUILD_NUMBER}" />
+    </exec>
+    <exec executable="git" failonerror="true">
+      <arg value="commit" />
+      <arg value="-a" />
+      <arg value="-m" />
+      <arg value="Updated build number for modem calculator executable to ${env.BUILD_NUMBER}" />
+    </exec>
+  </target>
+
+  <target name="postprocess-build">
+    <exec executable="git" failonerror="true">
+      <arg value="pull" />
+      <arg value="--rebase" /> 
+      <arg value="origin" />
+      <arg value="master" />
+    </exec>
+    <exec executable="git" failonerror="true">
+      <arg value="push" />
+      <arg value="origin" />
+      <arg value="master" />
+    </exec>
+
+  </target>
+
+  </project>

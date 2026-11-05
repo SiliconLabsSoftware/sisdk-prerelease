@@ -49,17 +49,6 @@ template_contribution:
 - name: psa_crypto_builtin_config
   value: "MBEDTLS_PSA_BUILTIN_ALG_ECDSA 1"
   condition: [mbedtls_ecdsa]
-- name: mbedtls_config
-  value: MBEDTLS_ECDSA_C
-  condition: [mbedtls_uses_psa_crypto]
-
-  # The ECDSA module depends on ASN.1.
-- name: mbedtls_config
-  value: MBEDTLS_ASN1_PARSE_C
-  condition: [mbedtls_uses_psa_crypto]
-- name: mbedtls_config
-  value: MBEDTLS_ASN1_WRITE_C
-  condition: [mbedtls_uses_psa_crypto]
 
 documentation:
   url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins

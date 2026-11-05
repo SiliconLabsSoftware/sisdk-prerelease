@@ -36,6 +36,10 @@
 #include "sl_assert.h"
 #include "sl_clock_manager.h"
 #include "sl_gpio.h"
+#include "sl_component_catalog.h"
+#if defined(SL_CATALOG_GPIO_PERIPHERAL_PIN_LATCHING_PRESENT)
+#include "sl_gpio_peripheral_pin_latching.h"
+#endif
 #include "sl_hal_keyscan.h"
 #include "keyscan_driver_hal.h"
 #include "keyscan_driver_config.h"
@@ -306,7 +310,9 @@ void sli_keyscan_driver_hal_start_scan(bool enable)
 {
   if (enable) {
     sl_hal_keyscan_enable();
+#if defined(SL_CATALOG_GPIO_PERIPHERAL_PIN_LATCHING_PRESENT)
     (void)sl_gpio_unlatch_peripheral_pins(SL_PERIPHERAL_KEYSCAN);
+#endif
   }
 
   sl_hal_keyscan_start_scan();
@@ -326,7 +332,9 @@ void sli_keyscan_driver_hal_stop_scan(void)
 
   sl_hal_keyscan_wait_sync();
 
+#if defined(SL_CATALOG_GPIO_PERIPHERAL_PIN_LATCHING_PRESENT)
   (void)sl_gpio_latch_peripheral_pins(SL_PERIPHERAL_KEYSCAN);
+#endif
 
   sl_hal_keyscan_disable();
 

@@ -33,7 +33,7 @@
 #if defined(LDMA_PRESENT) && (LDMA_COUNT == 1)
 
 #include <stddef.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_bus.h"
 #include "em_cmu.h"
 #include "em_core.h"
@@ -116,7 +116,7 @@ void LDMA_DeInit(void)
  ******************************************************************************/
 void LDMA_EnableChannelRequest(int ch, bool enable)
 {
-  EFM_ASSERT(ch < (int)DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(ch < (int)DMA_CHAN_COUNT);
 
   BUS_RegBitWrite(&LDMA->REQDIS, ch, !enable);
 }
@@ -142,11 +142,11 @@ void LDMA_EnableChannelRequest(int ch, bool enable)
 void LDMA_Init(const LDMA_Init_t *init)
 {
   uint32_t ldmaCtrlVal;
-  EFM_ASSERT(init != NULL);
-  EFM_ASSERT(!(((uint32_t)init->ldmaInitCtrlNumFixed << _LDMA_CTRL_NUMFIXED_SHIFT)
+  SL_LOG_DEBUG_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(!(((uint32_t)init->ldmaInitCtrlNumFixed << _LDMA_CTRL_NUMFIXED_SHIFT)
                & ~_LDMA_CTRL_NUMFIXED_MASK));
 
-  EFM_ASSERT(init->ldmaInitIrqPriority < (1 << __NVIC_PRIO_BITS));
+  SL_LOG_DEBUG_ASSERT(init->ldmaInitIrqPriority < (1 << __NVIC_PRIO_BITS));
 
   CMU_ClockEnable(cmuClock_LDMA, true);
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 1)
@@ -219,20 +219,20 @@ void LDMA_StartTransfer(int ch,
   CORE_DECLARE_IRQ_STATE;
   uint32_t chMask = 1UL << (uint8_t)ch;
 
-  EFM_ASSERT(ch < (int)DMA_CHAN_COUNT);
-  EFM_ASSERT(transfer != NULL);
+  SL_LOG_DEBUG_ASSERT(ch < (int)DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(transfer != NULL);
 
 #if defined (_LDMAXBAR_CH_REQSEL_MASK)
-  EFM_ASSERT(!(transfer->ldmaReqSel & ~_LDMAXBAR_CH_REQSEL_MASK));
+  SL_LOG_DEBUG_ASSERT(!(transfer->ldmaReqSel & ~_LDMAXBAR_CH_REQSEL_MASK));
 #elif defined (_LDMA_CH_REQSEL_MASK)
-  EFM_ASSERT(!(transfer->ldmaReqSel & ~_LDMA_CH_REQSEL_MASK));
+  SL_LOG_DEBUG_ASSERT(!(transfer->ldmaReqSel & ~_LDMA_CH_REQSEL_MASK));
 #endif
 
-  EFM_ASSERT(!(((uint32_t)transfer->ldmaCfgArbSlots << _LDMA_CH_CFG_ARBSLOTS_SHIFT)
+  SL_LOG_DEBUG_ASSERT(!(((uint32_t)transfer->ldmaCfgArbSlots << _LDMA_CH_CFG_ARBSLOTS_SHIFT)
                & ~_LDMA_CH_CFG_ARBSLOTS_MASK));
-  EFM_ASSERT(!(((uint32_t)transfer->ldmaCfgSrcIncSign << _LDMA_CH_CFG_SRCINCSIGN_SHIFT)
+  SL_LOG_DEBUG_ASSERT(!(((uint32_t)transfer->ldmaCfgSrcIncSign << _LDMA_CH_CFG_SRCINCSIGN_SHIFT)
                & ~_LDMA_CH_CFG_SRCINCSIGN_MASK));
-  EFM_ASSERT(!(((uint32_t)transfer->ldmaCfgDstIncSign << _LDMA_CH_CFG_DSTINCSIGN_SHIFT)
+  SL_LOG_DEBUG_ASSERT(!(((uint32_t)transfer->ldmaCfgDstIncSign << _LDMA_CH_CFG_DSTINCSIGN_SHIFT)
                & ~_LDMA_CH_CFG_DSTINCSIGN_MASK));
 
   /* Clear the pending channel interrupt. */
@@ -354,7 +354,7 @@ void LDMA_StartTransferExtend(int ch,
                               const LDMA_DescriptorExtend_t *descriptor_ext)
 {
   // Ensure destination interleaving supported for given channel.
-  EFM_ASSERT(((1 << ch) & LDMA_ILCHNL));
+  SL_LOG_DEBUG_ASSERT(((1 << ch) & LDMA_ILCHNL));
 
   LDMA_StartTransfer(ch,
                      transfer,
@@ -376,7 +376,7 @@ void LDMA_StopTransfer(int ch)
 {
   uint32_t chMask = 1UL << (uint8_t)ch;
 
-  EFM_ASSERT(ch < (int)DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(ch < (int)DMA_CHAN_COUNT);
 
 #if defined(_LDMA_CHDIS_MASK)
   CORE_ATOMIC_SECTION(
@@ -406,7 +406,7 @@ bool LDMA_TransferDone(int ch)
   bool     retVal = false;
   uint32_t chMask = 1UL << (uint8_t)ch;
 
-  EFM_ASSERT(ch < (int)DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(ch < (int)DMA_CHAN_COUNT);
 
 #if defined(_LDMA_CHSTATUS_MASK)
   CORE_ATOMIC_SECTION(
@@ -446,7 +446,7 @@ uint32_t LDMA_TransferRemainingCount(int ch)
   uint32_t done;
   uint32_t chMask = 1UL << (uint8_t)ch;
 
-  EFM_ASSERT(ch < (int)DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(ch < (int)DMA_CHAN_COUNT);
 
   CORE_ATOMIC_SECTION(
     done   = LDMA->CHDONE;

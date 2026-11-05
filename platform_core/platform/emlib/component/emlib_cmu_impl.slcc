@@ -39,6 +39,7 @@ provides:
 - name: emlib_cmu_impl
   condition: [device_sdid_265]
 requires:
+- name: log_none
 - name: emlib_cmu
 - name: device
 - name: device_has_cmu

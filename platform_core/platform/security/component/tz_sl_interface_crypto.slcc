@@ -9,6 +9,13 @@ ui_hints:
 provides:
 - name: tz_sl_interface_crypto
   condition: [trustzone_nonsecure]
+# Crypto-family components contribute `tfm_interface_func` metadata consumed
+# by the SID and key-check templates. Keep `key_checks` present for every
+# function; use an empty list when it carries no key ID. Add one item per key
+# ID to check. `packed_key_id` reads `tfm_crypto_pack_iovec.key_id`, while
+# `in_vec_key_id` and `key_attributes` read the input vector at `invec` (the
+# latter expects a `psa_key_attributes_t`). These declarations are the source
+# of truth for both SID registration and key-check rule generation.
 requires:
 - name: trustzone_nonsecure
    # Crypto interface

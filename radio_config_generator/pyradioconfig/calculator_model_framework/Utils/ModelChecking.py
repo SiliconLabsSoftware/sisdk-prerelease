@@ -32,8 +32,6 @@ class ModelChecking:
 
             missing_info = False
 
-            #We don't know which registers are signed, so for positive values all we can do is make sure
-            #they fit in an unsigned reg
             most_positive_allowed = (1 << bit_width) - 1
             most_negative_allowed = -1*(1 << (bit_width - 1))
 
@@ -59,12 +57,10 @@ class ModelChecking:
         part_family = model.part_family.lower()
         target = model.target.lower()
         if part_family in exclude_list:
-            # Skip model checking for legacy parts (Unit test coverage started from >lynx)
             LogMgr.Debug(f'Excluding {teststr} for {part_family}')
             skip = True
         elif target == 'sim' \
                 or (model.phy is not None and model.phy.group_name == 'Phys_sim_tests'):       # Edge case for Lynx and Leopard (no "Sim"-type target)
-            # Skip model checking for Sim parts (imperfect models expected)
             LogMgr.Debug(f'Excluding {teststr} for simulation PHYs')
             skip = True
 
@@ -84,7 +80,6 @@ class ModelChecking:
             phy_name = f"unnamed_phy_from_profile_{model.profile.name}"
         else:
             phy_name = model.phy.name
-        #Get the regmap object just once for the part (much more efficient than looping)
         if (model.part_revision == 'ANY'
                 or part_family.upper() in RM_S1_PART_FAMILY_NAMES
                 or part_family.upper() in RM_S2_PART_FAMILY_NAMES
@@ -95,19 +90,15 @@ class ModelChecking:
 
 
 
-        # Loop through every profile output looking for registers
         for profile_output in model.profile.outputs:
             if profile_output.output_type == ModelOutputType.SVD_REG_FIELD:
                 register_name = profile_output.var.svd_mapping
-                ## First, check if register exists
                 try:
                     reg = regmap_obj.getObjectByName(register_name)
                 except: # It does not
                     regexist_error_list.append((register_name))
                     continue        # Skip bitwidth validation
 
-                #Now that we found a register, we need to look at the current assigned value plus the
-                #field width in the register model
                 current_reg_value = profile_output.var_value
                 bit_width = reg.bitWidth
 
@@ -124,7 +115,6 @@ class ModelChecking:
                 if reg_overflow_err:
                     bitwidth_error_list.append((profile_output.var_name, current_reg_value, bit_width, phy_name))
 
-        # Print all of the errors
         if len(regexist_error_list) > 0:
             errorstr += "Failed register check for %s\n\n" % (part_family)
             for error in regexist_error_list:
@@ -181,22 +171,18 @@ class ModelChecking:
             phy_name = f"unnamed_phy_from_profile_{model.profile.name}"
         else:
             phy_name = model.phy.name
-        # Loop through every profile output and make sure a value is assigned
         for profile_output in model.profile.outputs:
             if profile_output.output_type.name == 'SVD_REG_FIELD' or check_non_reg == True:
                 if profile_output.var_value is None and not profile_output.var.value_do_not_care:
-                        # We found a profile output that we care about that has no value
                         error_list.append((profile_output.var_name, phy_name))
 
                 elif profile_output.value_limit_min is not None:
                     if profile_output.var_value < profile_output.value_limit_min:
-                        # We found a value that exists but is out of range
                         LogMgr.Warning("Warning! Profile output %s has value %d that is below min %d"
                               %(profile_output.var_name,profile_output.var_value,profile_output.value_limit_min))
 
                 elif profile_output.value_limit_max is not None:
                     if profile_output.var_value > profile_output.value_limit_max:
-                        # We found a value that exists but is out of range
                         LogMgr.Warning("Warning! Profile output %s has value %d that is above max %d"
                             % (profile_output.var_name, profile_output.var_value, profile_output.value_limit_max))
 
@@ -224,14 +210,12 @@ class ModelChecking:
             phy_name = f"unnamed_phy_from_profile_{model.profile.name}"
         else:
             phy_name = model.phy.name
-        # Check if any calculations failed
         calc_error_list = []
 
         if model.phy is not None and model.phy.locked:
             LogMgr.Debug('Skipping phy:{} for all-calcs-ran check because it is locked.'.format(phy_name))
         else:
             total_calcs = len(model.calc_routine_execution)
-            # failure_count = sum(value == False for value in model.calc_routine_execution.values())
 
             for calc_routine in model.calc_routine_execution:
                 if model.calc_routine_execution[calc_routine] == False:

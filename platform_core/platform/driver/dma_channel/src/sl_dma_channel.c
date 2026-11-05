@@ -38,7 +38,7 @@
 #include "sli_dma_manager_internal.h"
 #include "sl_dma_descriptor_allocator.h"
 #include "sl_memory_manager.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_core.h"
 #include <string.h>
 
@@ -286,7 +286,7 @@ static void sl_dma_channel_common_irq_handler(void);
  ******************************************************************************/
 sl_status_t sl_dma_channel_handle_alloc(sl_dma_channel_handle_t **handle)
 {
-  EFM_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
 
   sl_status_t status = sl_memory_calloc(1,
                                         sizeof(sl_dma_channel_handle_t),
@@ -304,10 +304,10 @@ sl_status_t sl_dma_channel_handle_alloc(sl_dma_channel_handle_t **handle)
  ******************************************************************************/
 sl_status_t sl_dma_channel_handle_free(sl_dma_channel_handle_t *handle)
 {
-  EFM_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
 
   uint8_t ch = handle->channel_number;
-  EFM_ASSERT(ch < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(ch < DMA_CHAN_COUNT);
 
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
@@ -339,10 +339,10 @@ size_t sl_dma_channel_handle_get_size(void)
 sl_status_t sl_dma_channel_descriptor_alloc(const sl_dma_channel_handle_t *handle,
                                             sl_dma_channel_xfer_descriptor_t **descriptor)
 {
-  EFM_ASSERT(handle != NULL);
-  EFM_ASSERT(descriptor != NULL);
-  EFM_ASSERT(handle->dma_peripheral != NULL);
-  EFM_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(descriptor != NULL);
+  SL_LOG_DEBUG_ASSERT(handle->dma_peripheral != NULL);
+  SL_LOG_DEBUG_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
 
   return sl_dma_descriptor_allocator_allocate((sl_peripheral_t)handle->dma_peripheral,
                                               handle->channel_number,
@@ -359,10 +359,10 @@ SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFOR
 sl_status_t sl_dma_channel_descriptor_free(const sl_dma_channel_handle_t *handle,
                                            sl_dma_channel_xfer_descriptor_t *descriptor)
 {
-  EFM_ASSERT(handle != NULL);
-  EFM_ASSERT(descriptor != NULL);
-  EFM_ASSERT(handle->dma_peripheral != NULL);
-  EFM_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(descriptor != NULL);
+  SL_LOG_DEBUG_ASSERT(handle->dma_peripheral != NULL);
+  SL_LOG_DEBUG_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
 
   sl_dma_descriptor_allocator_free((sl_peripheral_t)handle->dma_peripheral,
                                    handle->channel_number,
@@ -390,8 +390,8 @@ sl_status_t sl_dma_channel_init(sl_dma_channel_handle_t *handle,
                                 sl_dma_channel_callback_t callback,
                                 void *user_data)
 {
-  EFM_ASSERT(channel_number < DMA_CHAN_COUNT);
-  EFM_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(channel_number < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
 
   sl_peripheral_dma_t dma_peripheral;
   if ( peripheral == NULL ) {
@@ -401,7 +401,7 @@ sl_status_t sl_dma_channel_init(sl_dma_channel_handle_t *handle,
     dma_peripheral = (sl_peripheral_dma_t)peripheral;
   }
 
-  EFM_ASSERT(LDMA_NUM((LDMA_TypeDef *)dma_peripheral->base) != -1);
+  SL_LOG_DEBUG_ASSERT(LDMA_NUM((LDMA_TypeDef *)dma_peripheral->base) != -1);
   LDMA_TypeDef *ldma = (LDMA_TypeDef *)(dma_peripheral->base);
 
   CORE_DECLARE_IRQ_STATE;
@@ -467,8 +467,8 @@ sl_status_t sl_dma_channel_init(sl_dma_channel_handle_t *handle,
  ******************************************************************************/
 sl_status_t sl_dma_channel_deinit(sl_dma_channel_handle_t *handle)
 {
-  EFM_ASSERT(handle != NULL);
-  EFM_ASSERT(handle->channel_number < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(handle->channel_number < DMA_CHAN_COUNT);
 
   if (handle->dma_peripheral == NULL) {
     return SL_STATUS_OK;
@@ -524,12 +524,12 @@ sl_status_t sl_dma_channel_deinit(sl_dma_channel_handle_t *handle)
 sl_status_t sl_dma_channel_set_peripheral_signal(const sl_dma_channel_handle_t *handle,
                                                  sl_dma_signal_t signal)
 {
-  EFM_ASSERT(handle != NULL);
-  EFM_ASSERT(handle->dma_peripheral != NULL);
-  EFM_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(handle->dma_peripheral != NULL);
+  SL_LOG_DEBUG_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
 
   uint8_t ch = handle->channel_number;
-  EFM_ASSERT(ch < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(ch < DMA_CHAN_COUNT);
 
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
@@ -543,14 +543,14 @@ sl_status_t sl_dma_channel_set_peripheral_signal(const sl_dma_channel_handle_t *
   uint32_t ldma_instance_number = LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base);
 
   LDMAXBAR_TypeDef* ldma_xbar_instance = LDMAXBAR(ldma_instance_number);
-  EFM_ASSERT((uint32_t)ldma_xbar_instance != 0x0UL);
+  SL_LOG_DEBUG_ASSERT((uint32_t)ldma_xbar_instance != 0x0UL);
 #else
   LDMAXBAR_TypeDef* ldma_xbar_instance = LDMAXBAR;
 #endif
 
   if ( signal != NULL ) {
     // Set peripheral signal of the dma channel in the LDMAXBAR
-    EFM_ASSERT(!(*signal & ~_LDMAXBAR_CH_REQSEL_MASK));
+    SL_LOG_DEBUG_ASSERT(!(*signal & ~_LDMAXBAR_CH_REQSEL_MASK));
     ldma_xbar_instance->CH[ch].REQSEL = *signal;
   } else {
     ldma_xbar_instance->CH[ch].REQSEL = 0;
@@ -575,9 +575,9 @@ sl_status_t sl_dma_channel_set_peripheral_signal(const sl_dma_channel_handle_t *
  ******************************************************************************/
 sl_status_t sl_dma_channel_abort(sl_dma_channel_handle_t *handle)
 {
-  EFM_ASSERT(handle != NULL);
-  EFM_ASSERT(handle->dma_peripheral != NULL);
-  EFM_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(handle->dma_peripheral != NULL);
+  SL_LOG_DEBUG_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
 
   LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)handle->dma_peripheral);
   uint8_t ch = handle->channel_number;
@@ -618,13 +618,7 @@ sl_status_t sl_dma_channel_abort(sl_dma_channel_handle_t *handle)
 
   handle->mode = SL_DMA_CHANNEL_MODE_NORMAL;
 
-  ldma->CHDONE_SET = 1UL << ch;
   ldma->REQCLEAR = 1UL << ch;
-  ldma->CH[ch].CTRL = 0;
-  ldma->CH[ch].SRC = 0;
-  ldma->CH[ch].DST = 0;
-  ldma->CH[ch].LINK = 0UL;
-  __DMB();
 
 #if (_LDMA_IPVERSION_RESETVALUE == 0x10U)
   sl_hal_ldma_disable_channel_request(ldma, ch);
@@ -632,15 +626,26 @@ sl_status_t sl_dma_channel_abort(sl_dma_channel_handle_t *handle)
   sl_hal_ldma_disable_interrupts(ldma, 1UL << ch);
   __DMB();
 
-  // Do not restart a zeroed channel from IRQ: its DONE cannot be taken.
-  if (!CORE_IN_IRQ_CONTEXT()) {
-    sl_hal_ldma_enable_channel(ldma, ch);
-    while (sl_hal_ldma_channel_is_active(ldma, ch)) {
-      // Drain dma channel.
-    }
-    sl_hal_ldma_disable_channel(ldma, ch);
+  // LDMA IPVERSION 0x10 can leave CHBUSY set after CHDIS. Use REQABORT /
+  // ABORTSTATUS, which is safe from thread or IRQ. Issue REQABORT before
+  // clearing CHn_* so the engine can flush an in-flight block.
+  ldma->REQABORT_SET = 1UL << ch;
+  // ABORTSTATUS reset value is all-ones; the channel bit clears while abort is
+  // in progress and is set again when the abort has completed.
+  while ((ldma->ABORTSTATUS & (1UL << ch)) == 0U) {
   }
+  while (sl_hal_ldma_channel_is_active(ldma, ch)) {
+  }
+#endif
 
+  ldma->CHDONE_SET = 1UL << ch;
+  ldma->CH[ch].CTRL = 0;
+  ldma->CH[ch].SRC = 0;
+  ldma->CH[ch].DST = 0;
+  ldma->CH[ch].LINK = 0UL;
+  __DMB();
+
+#if (_LDMA_IPVERSION_RESETVALUE == 0x10U)
   sl_hal_ldma_enable_interrupts(ldma, 1UL << ch);
   sl_hal_ldma_enable_channel_request(ldma, ch);
   __DMB();
@@ -672,9 +677,9 @@ sl_status_t sl_dma_channel_abort(sl_dma_channel_handle_t *handle)
  ******************************************************************************/
 sl_status_t sl_dma_channel_suspend(const sl_dma_channel_handle_t *handle)
 {
-  EFM_ASSERT(handle != NULL);
-  EFM_ASSERT(handle->dma_peripheral != NULL);
-  EFM_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(handle->dma_peripheral != NULL);
+  SL_LOG_DEBUG_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
 
   LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)handle->dma_peripheral);
 
@@ -689,9 +694,9 @@ sl_status_t sl_dma_channel_suspend(const sl_dma_channel_handle_t *handle)
  ******************************************************************************/
 sl_status_t sl_dma_channel_resume(const sl_dma_channel_handle_t *handle)
 {
-  EFM_ASSERT(handle != NULL);
-  EFM_ASSERT(handle->dma_peripheral != NULL);
-  EFM_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(handle->dma_peripheral != NULL);
+  SL_LOG_DEBUG_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
 
   LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)handle->dma_peripheral);
 
@@ -708,10 +713,10 @@ SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFOR
 sl_status_t sl_dma_channel_get_status(sl_dma_channel_handle_t *handle,
                                       sl_dma_channel_status_t *status)
 {
-  EFM_ASSERT(handle != NULL);
-  EFM_ASSERT(handle->dma_peripheral != NULL);
-  EFM_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
-  EFM_ASSERT(status != NULL);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(handle->dma_peripheral != NULL);
+  SL_LOG_DEBUG_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
+  SL_LOG_DEBUG_ASSERT(status != NULL);
 
   LDMA_TypeDef *ldma_hw_instance = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)handle->dma_peripheral);
   status->bytes_completed = 0U;
@@ -778,13 +783,13 @@ sl_status_t sl_dma_channel_submit_transfer_list(sl_dma_channel_handle_t *handle,
   sl_status_t status = SL_STATUS_OK;
 
   // Validate programming errors
-  EFM_ASSERT(handle != NULL);
-  EFM_ASSERT(list_head != NULL);
-  EFM_ASSERT(handle->dma_peripheral != NULL);
-  EFM_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(list_head != NULL);
+  SL_LOG_DEBUG_ASSERT(handle->dma_peripheral != NULL);
+  SL_LOG_DEBUG_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
 
   LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)handle->dma_peripheral);
-  EFM_ASSERT(ldma != NULL);
+  SL_LOG_DEBUG_ASSERT(ldma != NULL);
   uint8_t ch = handle->channel_number;
 
   CORE_DECLARE_IRQ_STATE;
@@ -807,7 +812,7 @@ sl_status_t sl_dma_channel_submit_transfer_list(sl_dma_channel_handle_t *handle,
   // Build and link one or more descriptors for each transfer. Stop after one
   // pass of a cycle (do not rebuild cycle_start).
   while (current_transfer != NULL) {
-    EFM_ASSERT(current_transfer->unit_size <= SL_DMA_CTRL_SIZE_WORD);
+    SL_LOG_DEBUG_ASSERT(current_transfer->unit_size <= SL_DMA_CTRL_SIZE_WORD);
     uint32_t xfer_unit_size = (1U << current_transfer->unit_size);
 
     // Validate transfer size and buffer alignment
@@ -1011,9 +1016,9 @@ sl_status_t sl_dma_channel_submit_transfer_p2m(sl_dma_channel_handle_t *handle,
 sl_status_t sl_dma_channel_update_active_transfer(sl_dma_channel_handle_t *handle,
                                                   size_t new_size)
 {
-  EFM_ASSERT(handle != NULL);
-  EFM_ASSERT(handle->dma_peripheral != NULL);
-  EFM_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(handle->dma_peripheral != NULL);
+  SL_LOG_DEBUG_ASSERT(LDMA_NUM((LDMA_TypeDef *)handle->dma_peripheral->base) != -1);
 
   if (new_size == 0 || handle->descriptor_list == NULL) {
     return (handle->descriptor_list == NULL) ? SL_STATUS_INVALID_STATE : SL_STATUS_INVALID_PARAMETER;
@@ -1023,7 +1028,7 @@ sl_status_t sl_dma_channel_update_active_transfer(sl_dma_channel_handle_t *handl
   uint8_t ch = handle->channel_number;
   sl_dma_channel_xfer_descriptor_t* active_desc = NULL;
 
-  EFM_ASSERT(ch < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(ch < DMA_CHAN_COUNT);
 
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
@@ -1429,7 +1434,7 @@ static sl_dma_channel_xfer_descriptor_t *find_active_descriptor(const LDMA_TypeD
 static void link_descriptors(sl_dma_channel_xfer_descriptor_t* from,
                              sl_dma_channel_xfer_descriptor_t* to)
 {
-  EFM_ASSERT(from != NULL);
+  SL_LOG_DEBUG_ASSERT(from != NULL);
   ((sl_hal_ldma_descriptor_t*)from)->xfer.link = to ? 1 : 0;
   ((sl_hal_ldma_descriptor_t*)from)->xfer.link_mode = SL_HAL_LDMA_LINK_MODE_ABS;
   ((sl_hal_ldma_descriptor_t*)from)->xfer.link_addr = SL_HAL_LDMA_DESCRIPTOR_LINKABS_ADDR_TO_LINKADDR(to);
@@ -1437,7 +1442,7 @@ static void link_descriptors(sl_dma_channel_xfer_descriptor_t* from,
 
 static bool is_transfer_buffer_aligned(const sl_dma_channel_transfer_t *transfer)
 {
-  EFM_ASSERT(transfer != NULL);
+  SL_LOG_DEBUG_ASSERT(transfer != NULL);
 
   // Validate buffer alignment based on unit size
   // HALF requires 2-byte alignment, WORD requires 4-byte alignment
@@ -1551,7 +1556,7 @@ static sl_status_t build_descriptors_for_transfer(sl_dma_channel_transfer_t *cur
 {
   sl_status_t status = SL_STATUS_OK;
 
-  EFM_ASSERT(last_descriptor != NULL);
+  SL_LOG_DEBUG_ASSERT(last_descriptor != NULL);
   *last_descriptor = NULL;
 
   // Determine the number of transfer segments, and the number of units in the
@@ -1676,7 +1681,7 @@ static bool process_descriptor_list_head(sl_dma_channel_handle_t * handle,
                                          bool error,
                                          bool aborted)
 {
-  EFM_ASSERT(list_head != NULL);
+  SL_LOG_DEBUG_ASSERT(list_head != NULL);
   if (*list_head == NULL) {
     return false;
   }
@@ -1702,14 +1707,16 @@ static bool process_descriptor_list_head(sl_dma_channel_handle_t * handle,
     }
   }
 
-  // Call the user callback if present and if callback was requested for this descriptor.
-  if (handle->callback != NULL && current->flags.callback_on_complete) {
-    handle->callback(handle, handle->user_data, error, aborted);
-  }
+  bool callback_on_complete = current->flags.callback_on_complete;
 
   // Free driver-allocated descriptors only when consumed (not in a cycle), or on abort.
   if (current->flags.driver_allocated && (!current->flags.is_in_cycle || aborted)) {
     (void)sl_dma_channel_descriptor_free(handle, current);
+  }
+
+  // Call the user callback if present and if callback was requested for this descriptor.
+  if (handle->callback != NULL && callback_on_complete) {
+    handle->callback(handle, handle->user_data, error, aborted);
   }
 
   return next != NULL;
@@ -1718,11 +1725,11 @@ static bool process_descriptor_list_head(sl_dma_channel_handle_t * handle,
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
 static void process_completed_descriptors(sl_dma_channel_handle_t* handle)
 {
-  EFM_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
   LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)handle->dma_peripheral);
 
   uint8_t ch = handle->channel_number;
-  EFM_ASSERT(ch < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(ch < DMA_CHAN_COUNT);
 
   // Walk queue to process completed descriptors (before the active one).
   // In-cycle heads are rotated (not freed) via process_descriptor_list_head;
@@ -1784,7 +1791,8 @@ static void process_completed_descriptors(sl_dma_channel_handle_t* handle)
 
       // Reset the DMA channel to its original state.
       sl_status_t status = sl_dma_channel_abort(handle);
-      EFM_ASSERT(status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+      (void)status;
 
       // Only set the error flag for the first descriptor that caused the error.
       while (process_descriptor_list_head(handle, &aborted_head, (aborted_head == error_desc), true));
@@ -1804,12 +1812,12 @@ static void process_completed_descriptors(sl_dma_channel_handle_t* handle)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_DMA_CHANNEL, SL_CODE_CLASS_DMA_CHANNEL_PERFORMANCE)
 void sli_dma_channel_process_completed(sl_dma_channel_handle_t *handle)
 {
-  EFM_ASSERT(handle != NULL);
-  EFM_ASSERT(handle->dma_peripheral != NULL);
+  SL_LOG_DEBUG_ASSERT(handle != NULL);
+  SL_LOG_DEBUG_ASSERT(handle->dma_peripheral != NULL);
 
   LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)handle->dma_peripheral);
   uint8_t ch = handle->channel_number;
-  EFM_ASSERT(ch < DMA_CHAN_COUNT);
+  SL_LOG_DEBUG_ASSERT(ch < DMA_CHAN_COUNT);
 
   // Race protection rationale:
   // This function may run concurrently with the channel's real LDMA IRQ
@@ -1890,7 +1898,7 @@ void sli_dma_channel_process_completed(sl_dma_channel_handle_t *handle)
     // No IFH on this part -> channels 16+ should not exist. DMA_CHAN_COUNT
     // would already constrain us, but guard explicitly so the polling loop
     // cannot silently spin on an unsupported channel.
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
   }
 #endif
 #endif // !_SILICON_LABS_32B_SERIES_2
@@ -1937,9 +1945,12 @@ static void sl_dma_channel_common_irq_handler(void)
   uint8_t ch_num;
   void *user_data;
 
-  EFM_ASSERT(sl_dma_manager_retrieve_current_channel_user_data(&ch_num, &user_data) == SL_STATUS_OK);
-  EFM_ASSERT(ch_num < DMA_CHAN_COUNT);
-  EFM_ASSERT(user_data != NULL);
+  sl_status_t status = sl_dma_manager_retrieve_current_channel_user_data(&ch_num, &user_data);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
+  SL_LOG_DEBUG_ASSERT(ch_num < DMA_CHAN_COUNT);
+  (void)ch_num;
+  SL_LOG_DEBUG_ASSERT(user_data != NULL);
 
   sl_dma_channel_handle_t *handle = (sl_dma_channel_handle_t *)user_data;
 

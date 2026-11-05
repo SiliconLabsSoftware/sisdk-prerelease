@@ -62,7 +62,7 @@ class Sequences(object):
         except KeyError:
             for code_name in factory.RM_S3_PART_FAMILY_NAMES:
                 try:
-                    if factory.get_mod_name(code_name).upper() == self.chip:
+                    if factory.get_mod_name(code_name).upper() == self.chip or code_name in self.chip:
                         self.part = code_name
                         break
                 except KeyError:
@@ -505,9 +505,11 @@ class Action(object):
 
         # Actions that do use continuous write field for such purpose and not as an action indicator (like difference
         # between DELAY and DELAYABS).
-        actionContWrFree = ['WRITE', 'AND', 'XOR', 'OR', 'MOV', 'MOVNOINC', 'WRITENOINC', 'MOVBLOCK']
+        if self.name in ['WRITE', 'AND', 'XOR', 'OR', 'MOV', 'MOVNOINC', 'WRITENOINC', 'MOVBLOCK']:
+            isContWrReserved = False
+        else:
+            isContWrReserved = True
 
-        isContWrReserved = True if self.name not in actionContWrFree else False
         return eval(self.name), isContWrReserved
 
     @staticmethod
@@ -540,10 +542,11 @@ class Action(object):
                 firstAddr = baseAddr + data[0][0] # base address + offset
                 try:
                     # Retrieve the register name by its address and filter the _S and _NS in name
-                    register = self.rm.zz_reg_addr_to_name[firstAddr].replace('.', '_')
-                except KeyError:
-                    # Otherwise just get the raw address
-                    register = firstAddr
+                    register = self.rm.addressToNames(firstAddr)[0].replace('.', '_')
+                except Exception as e:
+                    if type(e).__name__ == 'RegMapAddressError':
+                        # Otherwise just get the raw address
+                        register = firstAddr
 
             # Print the start of the string except values that are dynamic
             traceStr += "{},{}.c,{},{},{},{},{}".format(seqName, fileName, lineNumber, wordOffset, opCode,
@@ -710,11 +713,14 @@ class Action(object):
         alias = self.alias.get(dest, dest)
         if alias != dest:
             # Alias found
-            offset = val.get('OFFSET')
-            assert offset is not None, 'Alias used: no OFFSET keyword defined, please define one.' \
-                                       'See example in rail_scripts/tests/seqacc_tests/reference_files/<chip>/seqacc_test.yml'
+            try:
+                offset = val.get('OFFSET')
+                if offset is not None:
+                    self.addOffset = '(' + str(offset) + ') & 0x{0:04X}'.format((2 ** self.contWrPos) - 1)
+            except AttributeError:
+                # No offset keyword found, let's assume it is wanted
+                pass
 
-            self.addOffset = '(' + str(offset) + ') & 0x{0:04X}'.format((2 ** self.contWrPos) - 1)
         return alias
 
     def store(self, baseAddrId, offset, value):
@@ -723,24 +729,33 @@ class Action(object):
                 self.data.setdefault(baseAddrId, {})[offset + i * 4] = el
         else:
             if offset in self.data.setdefault(baseAddrId, {}):
-                if type(self.data[baseAddrId][offset]) is dict:
-                    regValue = self.data[baseAddrId][offset]['VALUE']
-                else:
-                    regValue = self.data[baseAddrId][offset]
+                if self.name not in ['MOV', 'MOVBLOCK']:
+                    if type(self.data[baseAddrId][offset]) is dict:
+                        regValue = self.data[baseAddrId][offset]['VALUE']
+                    else:
+                        regValue = self.data[baseAddrId][offset]
 
-                if type(value) is dict:
-                    value = value['VALUE']
+                    if type(value) is dict:
+                        value = value['VALUE']
 
-                if type(value) is str:
-                    regValue += ' | ' + value
-                else:
-                    regValue |= value
+                    if type(value) is str:
+                        regValue += ' | ' + value
+                    else:
+                        regValue |= value
 
-                # store result
-                if type(self.data[baseAddrId][offset]) is dict:
-                    self.data[baseAddrId][offset]['VALUE'] = regValue
+                    # store result
+                    if type(self.data[baseAddrId][offset]) is dict:
+                        self.data[baseAddrId][offset]['VALUE'] = regValue
+                    else:
+                        self.data[baseAddrId][offset] = regValue
                 else:
-                    self.data[baseAddrId][offset] = regValue
+                    if self.name == 'MOV':
+                        self.data[baseAddrId][offset + 4 * len(self.data[baseAddrId])] = value
+                    elif self.name == 'MOVBLOCK':
+                        previous_offset = list(self.data[baseAddrId])[-1]
+                        self.data[baseAddrId][previous_offset + 4 * self.data[baseAddrId][previous_offset]['LENGTH']] = value
+                    else:
+                        raise (AttributeError, "Undefined parameter {}".format(self.name))
             else:
                 self.data[baseAddrId][offset] = value
 
@@ -821,17 +836,25 @@ class Action(object):
                 offsetContinuous = value[continuousIndex][0]
                 # Break the chain of action into subchains if either address are not continuous
                 # or the limit of continuous writes has been reached
-                if ((element[0] - prevOffset) > 4 and prevOffset != 0xFFFFFFFF) or (i - continuousIndex) == maxContinuousWr:
-                    instruction = self._opCode | (baseAddrId << self.basePos) | ((i - continuousIndex) << self.contWrPos) \
-                                  | offsetContinuous
+                offset = element[0]
+                if ((offset - prevOffset) > 4 and prevOffset != 0xFFFFFFFF) or (i - continuousIndex) == maxContinuousWr:
+                    try:
+                        continuousWrField = value[continuousIndex][1]['LENGTH']
+                    except (TypeError, KeyError):
+                        continuousWrField = i - continuousIndex
+
+                    instruction = (self._opCode
+                                   | (baseAddrId << self.basePos)
+                                   | (continuousWrField << self.contWrPos)
+                                   | offsetContinuous)
                     self.inst[instruction] = [el for el in value[continuousIndex:i]]
                     continuousIndex = i
-                prevOffset = element[0]
+                prevOffset = offset
 
-            if self.isContWrReserved is False:
+            if not self.isContWrReserved:
                 try:
-                    length = value[0][1]['LENGTH']
-                except:
+                    length = value[continuousIndex][1]['LENGTH']
+                except (TypeError, KeyError):
                     length = len(value) - continuousIndex
 
                 continuousWrField = length
@@ -975,8 +998,12 @@ class SequenceGenerator(object):
             regAddr = baseAddr + offset
             for regType, regOffset in self.REG_TYPE_OFFSETS.items():
                 baseRegAddr = regAddr & ~regOffset
-                if baseRegAddr in self.rm.zz_reg_addr_to_name:
-                    register = self.rm.zz_reg_addr_to_name[baseRegAddr] + regType
+                try:
+                    register = self.rm.addressToNames(baseRegAddr)[0] + regType
+                except Exception as e:
+                    if type(e).__name__ == 'RegMapAddressError':
+                        pass
+                else:
                     strPattern = " /* {} at {}, regBaseIdx: {} */".format(action.name, register, baseAddrId)
                     break
             else:

@@ -17,7 +17,6 @@
 #define NODE_CONTROLLER     0x01    /* network controller node */
 #define NODE_CONTROLLER_OLD 0xEF    /* pre 3.40 devkit NODE_CONTROLLER */
 #define NODE_BROADCAST      0xFF    /* broadcast */
-#define BEAM_BROADCAST      0xFF    /* broadcast address for wakeup beams */
 
 /** Define Long Range Node ID ranges
  *  According to Z-Wave Long Range MAC Layer Specification (Release 5.5.0 - chapter 6.3.1.2) */
@@ -29,6 +28,5 @@
 #define LOWEST_LONG_RANGE_VIRTUAL_NODE_ID   (0xFA2)
 #define HIGHEST_LONG_RANGE_VIRTUAL_NODE_ID  (0xFA5)
 #define NODE_BROADCAST_LR                   0xFFF    /* broadcast LR*/
-#define BEAM_BROADCAST_LR                   0xFFF    /* broadcast address for LR wakeup beams */
 
 #endif /* ZWAVE_ZW_PROTOCOL_DEF_H_ */

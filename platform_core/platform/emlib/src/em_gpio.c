@@ -30,6 +30,7 @@
  ******************************************************************************/
 
 #include "em_gpio.h"
+#include "sl_log_helper.h"
 
 #if defined(GPIO_COUNT) && (GPIO_COUNT > 0)
 
@@ -74,12 +75,12 @@
 void GPIO_DbgLocationSet(unsigned int location)
 {
 #if defined (_GPIO_ROUTE_SWLOCATION_MASK)
-  EFM_ASSERT(location < AFCHANLOC_MAX);
+  SL_LOG_DEBUG_ASSERT(location < AFCHANLOC_MAX);
 
   GPIO->ROUTE = (GPIO->ROUTE & ~_GPIO_ROUTE_SWLOCATION_MASK)
                 | (location << _GPIO_ROUTE_SWLOCATION_SHIFT);
 #elif defined (_GPIO_ROUTELOC0_SWVLOC_MASK)
-  EFM_ASSERT(location < AFCHANLOC_MAX);
+  SL_LOG_DEBUG_ASSERT(location < AFCHANLOC_MAX);
 
   GPIO->ROUTELOC0 = (GPIO->ROUTELOC0 & ~_GPIO_ROUTELOC0_SWVLOC_MASK)
                     | (location << _GPIO_ROUTELOC0_SWVLOC_SHIFT);
@@ -101,7 +102,7 @@ void GPIO_DbgLocationSet(unsigned int location)
  ******************************************************************************/
 void GPIO_DriveModeSet(GPIO_Port_TypeDef port, GPIO_DriveMode_TypeDef mode)
 {
-  EFM_ASSERT(GPIO_PORT_VALID(port) && GPIO_DRIVEMODE_VALID(mode));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_VALID(port) && GPIO_DRIVEMODE_VALID(mode));
 
   GPIO->P[port].CTRL = (GPIO->P[port].CTRL & ~(_GPIO_P_CTRL_DRIVEMODE_MASK))
                        | (mode << _GPIO_P_CTRL_DRIVEMODE_SHIFT);
@@ -122,7 +123,7 @@ void GPIO_DriveModeSet(GPIO_Port_TypeDef port, GPIO_DriveMode_TypeDef mode)
 void GPIO_DriveStrengthSet(GPIO_Port_TypeDef port,
                            GPIO_DriveStrength_TypeDef strength)
 {
-  EFM_ASSERT(GPIO_PORT_VALID(port) && GPIO_STRENGTH_VALID(strength));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_VALID(port) && GPIO_STRENGTH_VALID(strength));
   BUS_RegMaskedWrite(&GPIO->P[port].CTRL,
                      _GPIO_P_CTRL_DRIVESTRENGTH_MASK | _GPIO_P_CTRL_DRIVESTRENGTHALT_MASK,
                      strength);
@@ -188,9 +189,9 @@ void GPIO_ExtIntConfig(GPIO_Port_TypeDef port,
   (void)pin;
 #endif
 
-  EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
 #if defined(_GPIO_EXTIPINSELL_MASK)
-  EFM_ASSERT(GPIO_INTNO_PIN_VALID(intNo, pin));
+  SL_LOG_DEBUG_ASSERT(GPIO_INTNO_PIN_VALID(intNo, pin));
 #endif
 
   /* The EXTIPSELL register controls pins 0-7 and EXTIPSELH controls
@@ -305,7 +306,7 @@ void GPIO_EM4WUExtIntConfig(GPIO_Port_TypeDef port,
                             bool polarity,
                             bool enable)
 {
-  EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
 
   // GPIO pin mode set.
   GPIO_PinModeSet(port, pin, gpioModeInputPullFilter, (unsigned int)!polarity);
@@ -349,7 +350,7 @@ void GPIO_PinModeSet(GPIO_Port_TypeDef port,
                      GPIO_Mode_TypeDef mode,
                      unsigned int out)
 {
-  EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
 
   /* If disabling a pin, do not modify DOUT to reduce the chance of */
   /* a glitch/spike (may not be sufficient precaution in all use cases). */
@@ -398,7 +399,7 @@ void GPIO_PinModeSet(GPIO_Port_TypeDef port,
 GPIO_Mode_TypeDef GPIO_PinModeGet(GPIO_Port_TypeDef port,
                                   unsigned int pin)
 {
-  EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
   uint32_t mode = 0;
 
   if (pin < 8) {
@@ -430,10 +431,10 @@ GPIO_Mode_TypeDef GPIO_PinModeGet(GPIO_Port_TypeDef port,
  *****************************************************************************/
 void GPIO_EM4EnablePinWakeup(uint32_t pinmask, uint32_t polaritymask)
 {
-  EFM_ASSERT((pinmask & ~_GPIO_EM4WUEN_MASK) == 0);
+  SL_LOG_DEBUG_ASSERT((pinmask & ~_GPIO_EM4WUEN_MASK) == 0);
 
 #if defined(_GPIO_EM4WUPOL_MASK)
-  EFM_ASSERT((polaritymask & ~_GPIO_EM4WUPOL_MASK) == 0);
+  SL_LOG_DEBUG_ASSERT((polaritymask & ~_GPIO_EM4WUPOL_MASK) == 0);
   #if defined(GPIO_HAS_SET_CLEAR)
   GPIO->EM4WUPOL_CLR = pinmask;                   /* Set the wakeup polarity. */
   GPIO->EM4WUPOL_SET = pinmask & polaritymask;
@@ -442,7 +443,7 @@ void GPIO_EM4EnablePinWakeup(uint32_t pinmask, uint32_t polaritymask)
   GPIO->EM4WUPOL |= pinmask & polaritymask;
   #endif
 #elif defined(_GPIO_EXTILEVEL_MASK)
-  EFM_ASSERT((polaritymask & ~_GPIO_EXTILEVEL_MASK) == 0);
+  SL_LOG_DEBUG_ASSERT((polaritymask & ~_GPIO_EXTILEVEL_MASK) == 0);
   #if defined(GPIO_HAS_SET_CLEAR)
   GPIO->EXTILEVEL_CLR = pinmask;
   GPIO->EXTILEVEL_SET = pinmask & polaritymask;

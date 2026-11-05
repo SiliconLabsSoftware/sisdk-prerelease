@@ -31,9 +31,7 @@ component:
   - id: bluetooth_feature_legacy_advertiser
   - id: bluetooth_feature_extended_advertiser
   - id: bluetooth_feature_connection_role_peripheral
-  - id: bluetooth_feature_gatt
   - id: bluetooth_feature_gatt_server
-  - id: bluetooth_feature_extended_scanner
   - id: bluetooth_peer_security
   - id: bluetooth_feature_system
   - id: app_assert

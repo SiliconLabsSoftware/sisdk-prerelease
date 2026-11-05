@@ -33,7 +33,7 @@
 #include "sli_memory_manager_monitor.h"
 #include "sl_memory_manager.h"
 #include "sl_memory_manager_region.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -613,7 +613,7 @@ void sli_memory_monitor_init(void)
  ******************************************************************************/
 void sli_memory_monitor_get_dynamic(sli_memory_monitor_dynamic_t *info)
 {
-  EFM_ASSERT(info != NULL);
+  SL_LOG_DEBUG_ASSERT(info != NULL);
 
   // General-purpose heap (always present).
   info->general.present        = true;
@@ -667,7 +667,7 @@ size_t sli_memory_monitor_get_retained_ram(void)
  ******************************************************************************/
 void sli_memory_monitor_get_em2_snapshot(sli_memory_monitor_em2_t *info)
 {
-  EFM_ASSERT(info != NULL);
+  SL_LOG_DEBUG_ASSERT(info != NULL);
   *info = monitor_em2;
 }
 

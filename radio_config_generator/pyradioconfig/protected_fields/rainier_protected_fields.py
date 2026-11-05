@@ -113,7 +113,6 @@ class ProtectedFieldsRainier(ProtectedFieldsBase):
         'RAC_TIATRIM0_TIATRIMVREG': 'cal',
         'RAC_TIACTRL0_TIASETVCM': 'cal',
 
-        # : These are enable bits that RAIL Team has requested that calculator do not touch
         'RAC_CLKMULTEN0_CLKMULTENREG1IBIAS': 'cal',
         'RAC_CLKMULTEN0_CLKMULTENREG1': 'cal',
         'RAC_CLKMULTEN0_CLKMULTENREG1REPLICA': 'cal',
@@ -135,11 +134,9 @@ class ProtectedFieldsRainier(ProtectedFieldsBase):
         'RAC_ADCCTRL0_ADCCTRLRESERVEDLV': 'cal',
     }
 
-    # : List of fields found in PTE, but allow radio configurator to override the value
     PTE_PROTECTED_FIELD_EXCEPTIONS = [
     ]
 
-    # : List of fields protected by RAIL
     RAIL_PROTECTED_FIELDS = [
         'RAC_CLKMULTEN0_CLKMULTENREG1IBIAS',
         'RAC_CLKMULTEN0_CLKMULTENREG1',
@@ -180,6 +177,5 @@ class ProtectedFieldsRainier(ProtectedFieldsBase):
         'SYNTH_VCOGAIN_VCOKVCOARSE',
     ]
 
-    # : List of fields that are found in PTE list, but does not need to be protected by RAIL
     RAIL_PROTECTED_FIELD_EXCEPTIONS = [
     ]

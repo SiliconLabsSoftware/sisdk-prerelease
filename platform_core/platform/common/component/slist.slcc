@@ -17,6 +17,7 @@ source:
 provides:
 - name: slist
 requires:
+- name: log_none
 - name: status
 - name: sl_assert
 documentation:

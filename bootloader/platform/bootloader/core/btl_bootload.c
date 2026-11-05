@@ -33,7 +33,7 @@ MISRAC_ENABLE
 
 // Interface
 #include "api/btl_interface.h"
-#include "application_properties.h"
+#include "api/application_properties.h"
 
 // Image parser
 #include "parser/gbl/btl_gbl_parser.h"

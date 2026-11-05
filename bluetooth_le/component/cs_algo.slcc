@@ -58,8 +58,6 @@ requires:
   condition: [cs_acp_with_impl]
 - name: cs_result
   condition: [cs_acp_with_impl]
-- name: app_log
-  condition: [cs_acp_with_impl]
 - name: bluetooth_api
   condition: [cs_acp_with_impl]
 - name: bluetooth_feature_cs

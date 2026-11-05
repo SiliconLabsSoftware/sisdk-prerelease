@@ -26,3 +26,6 @@ recommends:
 - id: log_backend_iostream_compact
   vendor: silabs
 root_path: platform_core/platform/service/sl_log
+documentation:
+  docset: gecko-platform
+  document: platform-service/iostream

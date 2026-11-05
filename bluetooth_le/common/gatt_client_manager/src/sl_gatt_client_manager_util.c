@@ -28,10 +28,10 @@
  *
  ******************************************************************************/
 
-#include "sl_gatt_client_manager.h"
+#include "sl_component_catalog.h"
+ #include "sl_gatt_client_manager.h"
 #include "sli_gatt_client_manager.h"
 #include "sl_common.h"
-#include "sl_component_catalog.h"
 
 #if defined(SL_CATALOG_APP_LOG_PRESENT) && SL_GATT_CLIENT_MANAGER_LOG
 void gcm_log_uuid(const char *label, const sl_gatt_client_manager_uuid_t *uuid)

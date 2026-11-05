@@ -33,6 +33,13 @@ local socpll_divf = slc.config("SL_CLOCK_MANAGER_SOCPLL_DIVF")
 local socpll_divn = slc.config("SL_CLOCK_MANAGER_SOCPLL_DIVN")
 local socpll_freq = slc.config("SL_CLOCK_MANAGER_SOCPLL_FREQ")
 local clkin0_freq = slc.config("SL_CLOCK_MANAGER_CLKIN0_FREQ")
+local socpll0_enable = slc.config("SL_CLOCK_MANAGER_SOCPLL0_EN")
+local socpll0_freq = slc.config("SL_CLOCK_MANAGER_SOCPLL0_FREQ")
+local socpll0_out1_div = slc.config("SL_CLOCK_MANAGER_SOCPLL0_OUT1_DIV")
+local socpll0_outdivin = slc.config("SL_CLOCK_MANAGER_SOCPLL0_OUTDIVIN")
+local socpll1_freq = slc.config("SL_CLOCK_MANAGER_SOCPLL1_FREQ")
+local socpll1_outdivin = slc.config("SL_CLOCK_MANAGER_SOCPLL1_OUTDIVIN")
+local socpll1_out1_div = slc.config("SL_CLOCK_MANAGER_SOCPLL1_OUT1_DIV")
 local qspi_advanced_config_enable = slc.config("SL_CLOCK_MANAGER_QSPICLK_ADVANCED_CONFIG_EN")
 local qspi_custom_freq = slc.config("SL_CLOCK_MANAGER_QSPICLK_CUSTOM_FREQ")
 local ext_flash_max_freq = slc.config("SL_CLOCK_MANAGER_EXT_FLASH_MAX_FREQ")
@@ -58,6 +65,7 @@ local is_efr32xg2b = slc.is_provided("device_generic_family_efr32xg2b")
 local is_efr32xg2d = slc.is_provided("device_generic_family_efr32xg2d")
 local is_efr32xg2e = slc.is_provided("device_generic_family_efr32xg2e")
 local is_sixx301 = slc.is_provided("device_generic_family_sixx301")
+local is_series_3 = slc.is_provided("device_series_3")
 
 -- HELPER FUNCTIONS --
 
@@ -69,6 +77,96 @@ local function hfrco_band_to_frequency(band_config)
     return tonumber(freq) * 1000000
   else
     return tonumber(band_config)
+  end
+end
+
+-- Validate SOCPLL frequency within PPM range
+local function socpll_frequency_within_ppm(expected_hz, target_hz, max_ppm)
+  local range_max = expected_hz + max_ppm * expected_hz / 1000000
+  local range_min = expected_hz - max_ppm * expected_hz / 1000000
+  return target_hz >= range_min and target_hz <= range_max
+end
+
+-- Validate multi-output SOCPLL
+local function validate_socpll_instance(instance_num)
+  local config_prefix = "SOCPLL" .. tostring(instance_num)
+  local instance_label = config_prefix
+  local enable_cfg = slc.config("SL_CLOCK_MANAGER_" .. config_prefix .. "_EN")
+  if enable_cfg == nil or enable_cfg.value ~= "1" then
+    return
+  end
+
+  local refclk_define = "SL_CLOCK_MANAGER_" .. config_prefix .. "_REFCLK"
+  local freq_define = "SL_CLOCK_MANAGER_" .. config_prefix .. "_FREQ"
+  local advanced_cfg = slc.config("SL_CLOCK_MANAGER_" .. config_prefix .. "_ADVANCED_SETTINGS")
+  local refclk_cfg = slc.config(refclk_define)
+  local freq_cfg = slc.config(freq_define)
+  local fractional_cfg = slc.config("SL_CLOCK_MANAGER_" .. config_prefix .. "_FRACTIONAL_EN")
+  local divf_cfg = slc.config("SL_CLOCK_MANAGER_" .. config_prefix .. "_DIVF")
+  local divn_cfg = slc.config("SL_CLOCK_MANAGER_" .. config_prefix .. "_DIVN")
+  local outdivin_cfg = slc.config("SL_CLOCK_MANAGER_" .. config_prefix .. "_OUTDIVIN")
+
+  local refclk_sel
+  if advanced_cfg ~= nil and advanced_cfg.value == "1" and refclk_cfg ~= nil then
+    refclk_sel = refclk_cfg.value
+  elseif hfxo_enable.value ~= "0" and hfxo_enable.value ~= "SL_CLOCK_MANAGER_HFXO_EN_DISABLE" then
+    refclk_sel = "SOCPLL_CTRL_REFCLKSEL_REF_HFXO"
+  else
+    refclk_sel = "SOCPLL_CTRL_REFCLKSEL_REF_HFRCO"
+  end
+
+  local refclk_freq_hz = nil
+  if refclk_sel == "SOCPLL_CTRL_REFCLKSEL_REF_HFXO" then
+    if hfxo_enable.value == "0" or hfxo_enable.value == "SL_CLOCK_MANAGER_HFXO_EN_DISABLE" then
+      validation.error(
+        string.format("%s needs HFXO but SL_CLOCK_MANAGER_HFXO_EN is disabled", instance_label),
+        validation.target_for_defines({refclk_define}),
+        nil,
+        nil)
+    else
+      refclk_freq_hz = tonumber(hfxo_freq.value)
+    end
+  elseif refclk_sel == "SOCPLL_CTRL_REFCLKSEL_REF_HFRCO" then
+    if dpll_enable.value == "1" then
+      refclk_freq_hz = tonumber(dpll_freq.value)
+    else
+      refclk_freq_hz = hfrco_band_to_frequency(hfrco_band.value)
+    end
+  elseif refclk_sel == "SOCPLL_CTRL_REFCLKSEL_REF_EXTCLK" then
+    validation.error(
+      string.format("External clock is not supported as %s reference clock", instance_label),
+      validation.target_for_defines({refclk_define}),
+      nil,
+      nil)
+  end
+
+  if refclk_freq_hz ~= nil
+      and (refclk_freq_hz < 34000000 or refclk_freq_hz > 44000000) then
+    validation.error(
+      string.format("%s reference clock frequency must be between 34MHz and 44MHz inclusively", instance_label),
+      validation.target_for_defines({refclk_define}),
+      nil,
+      nil)
+  end
+
+  if advanced_cfg ~= nil and advanced_cfg.value == "1"
+      and refclk_freq_hz ~= nil and divn_cfg ~= nil and divf_cfg ~= nil and fractional_cfg ~= nil then
+    local divn_val = tonumber(divn_cfg.value)
+    local divf_val = 0
+    if fractional_cfg.value == "1" then
+      divf_val = tonumber(divf_cfg.value)
+    end
+    local dco_freq_hz = refclk_freq_hz * (divn_val + 2 + divf_val / 1024)
+    local dco_freq_hz_target = freq_cfg ~= nil and tonumber(freq_cfg.value) or nil
+    if dco_freq_hz_target ~= nil and not socpll_frequency_within_ppm(dco_freq_hz, dco_freq_hz_target, 41) then
+      validation.error(
+        string.format(
+          "Target frequency is not reachable based on %s settings and Reference clock",
+          instance_label),
+        validation.target_for_defines({freq_define}),
+        nil,
+        nil)
+    end
   end
 end
 
@@ -166,7 +264,13 @@ elseif is_series_2 and not is_efr32xg25 and hfrco_freq > 80000000 then
   validation.target_for_defines({"SL_CLOCK_MANAGER_HFRCO_BAND"}),
   nil,
   nil)
-elseif hfrco_freq > 100000000 then
+elseif is_series_3 and not is_sixx301 and hfrco_freq > 140000000 then
+  validation.error(
+  "HFRCO band frequency must not exceed 140MHz",
+  validation.target_for_defines({"SL_CLOCK_MANAGER_HFRCO_BAND"}),
+  nil,
+  nil)
+elseif (is_sixx301 or not is_series_3) and hfrco_freq > 100000000 then
   validation.error(
   "HFRCO band frequency must not exceed 100MHz",
   validation.target_for_defines({"SL_CLOCK_MANAGER_HFRCO_BAND"}),
@@ -216,7 +320,13 @@ end
     validation.target_for_defines({"SL_CLOCK_MANAGER_DPLL_FREQ"}),
     nil,
     nil)
-  elseif dpll_freq_expected > 100000000 then
+  elseif is_series_3 and not is_sixx301 and dpll_freq_expected > 140000000 then
+    validation.error(
+    "DPLL frequency must not exceed 140MHz",
+    validation.target_for_defines({"SL_CLOCK_MANAGER_DPLL_FREQ"}),
+    nil,
+    nil)
+  elseif (is_sixx301 or not is_series_3) and dpll_freq_expected > 100000000 then
     validation.error(
     "DPLL frequency must not exceed 100MHz",
     validation.target_for_defines({"SL_CLOCK_MANAGER_DPLL_FREQ"}),
@@ -238,11 +348,7 @@ end
     end
     socpll_refclk_freq = tonumber(hfxo_freq.value)
   elseif socpll_refclk.value == "SOCPLL_CTRL_REFCLKSEL_REF_HFRCO" then
-    if dpll_enable.value == "1" then
-      socpll_refclk_freq = tonumber(dpll_freq.value)
-    else
-      socpll_refclk_freq = hfrco_band_to_frequency(hfrco_band.value)
-    end
+    socpll_refclk_freq = hfrco_band_to_frequency(hfrco_band.value)
   end
   if socpll_refclk_freq ~= nil and socpll_advanced_settings ~= nil and socpll_advanced_settings.value == "1"
      and (socpll_refclk_freq < 34000000 or socpll_refclk_freq > 44000000) then
@@ -258,23 +364,26 @@ end
     local socpll_freq_expected = tonumber(socpll_freq.value)
     local socpll_divf_val = tonumber(socpll_divf.value)
     local socpll_divn_val = tonumber(socpll_divn.value)
+    local socpll_calc_freq_hz
     if socpll_fraq.value == "1" then
-      socpll_freq = socpll_refclk_freq * (socpll_divn_val + 2 + socpll_divf_val/1024) / 6
+      socpll_calc_freq_hz = socpll_refclk_freq * (socpll_divn_val + 2 + socpll_divf_val/1024) / 6
     else
-      socpll_freq = socpll_refclk_freq * (socpll_divn_val + 2) / 6
+      socpll_calc_freq_hz = socpll_refclk_freq * (socpll_divn_val + 2) / 6
     end
-    local socpll_max_ppm = 41
-    local socpll_range_max = socpll_freq + socpll_max_ppm * socpll_freq/1000000
-    local socpll_range_min = socpll_freq - socpll_max_ppm * socpll_freq/1000000
-    if socpll_freq_expected < socpll_range_min or socpll_freq_expected > socpll_range_max then
+    if not socpll_frequency_within_ppm(socpll_calc_freq_hz, socpll_freq_expected, 41) then
       validation.error(
-      "Target frequency is not reachable based on SOCPLL settings and Reference clock",
-      validation.target_for_defines({"SL_CLOCK_MANAGER_SOCPLL_FREQ"}),
-      nil,
-      nil)
+        "Target frequency is not reachable based on SOCPLL settings and Reference clock",
+        validation.target_for_defines({"SL_CLOCK_MANAGER_SOCPLL_FREQ"}),
+        nil,
+        nil)
     end
   end
 end
+
+-- Multi-output SOCPLLs
+validate_socpll_instance(0)
+validate_socpll_instance(1)
+validate_socpll_instance(2)
 
 -- EXTERNAL FLASH
 if ext_flash_max_freq ~= nil and ext_flash_max_freq.value == "0" then
@@ -324,16 +433,24 @@ if sysclk_source.value == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL" and socpll_enable ~= ni
     nil,
     nil)
 end
-if sysclk_source.value == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1" and socpll_enable ~= nil and socpll_enable.value == "0" then
+if sysclk_source.value == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1" and socpll0_enable ~= nil and socpll0_enable.value == "0" then
   validation.error(
     "SYSCLK source branch is configured on SOCPLL0, but SL_CLOCK_MANAGER_SOCPLL0_EN is disabled",
     validation.target_for_defines({"SL_CLOCK_MANAGER_SYSCLK_SOURCE"}),
     nil,
     nil)
 end
+if sysclk_source.value == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL1SOCCLK1" and socpll1_enable ~= nil and socpll1_enable.value == "0" then
+  validation.error(
+    "SYSCLK source branch is configured on SOCPLL1, but SL_CLOCK_MANAGER_SOCPLL1_EN is disabled",
+    validation.target_for_defines({"SL_CLOCK_MANAGER_SYSCLK_SOURCE"}),
+    nil,
+    nil)
+end
 
 -- EM01GRACLK
-if em01grpaclk_source.value == "CMU_EM01GRPACLKCTRL_CLKSEL_HFXO" and (hfxo_enable.value == "0" or hfxo_enable.value == "SL_CLOCK_MANAGER_HFXO_EN_DISABLE") then
+if em01grpaclk_source ~= nil then
+if em01grpaclk_source ~= nil and em01grpaclk_source.value == "CMU_EM01GRPACLKCTRL_CLKSEL_HFXO" and (hfxo_enable.value == "0" or hfxo_enable.value == "SL_CLOCK_MANAGER_HFXO_EN_DISABLE") then
   validation.error(
     "EM01GRPACLK source branch is configured on HFXO, but SL_CLOCK_MANAGER_HFXO_EN is disabled",
     validation.target_for_defines({"SL_CLOCK_MANAGER_EM01GRPACLK_SOURCE"}),
@@ -346,6 +463,7 @@ if em01grpaclk_source.value == "SL_CLOCK_MANAGER_DEFAULT_HF_CLOCK_SOURCE" and hf
     validation.target_for_defines({"SL_CLOCK_MANAGER_EM01GRPACLK_SOURCE"}),
     nil,
     nil)
+end
 end
 
 -- EM01GRPBCLK
@@ -414,6 +532,7 @@ end
 end
 
 -- EM23GRPACLK
+if em23grpaclk_source ~= nil then
 if em23grpaclk_source.value == "CMU_EM23GRPACLKCTRL_CLKSEL_LFXO" and lfxo_enable.value == "0" then
   validation.error(
     "EM23GRPACLK source branch is configured on LFXO, but SL_CLOCK_MANAGER_LFXO_EN is disabled",
@@ -428,8 +547,10 @@ if em23grpaclk_source.value == "SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE" and lf
     nil,
     nil)
 end
+end
 
 -- EM4GRPACLK
+if em4grpaclk_source ~= nil then
 if em4grpaclk_source.value == "CMU_EM4GRPACLKCTRL_CLKSEL_LFXO" and lfxo_enable.value == "0" then
   validation.error(
     "EM4GRPACLK source branch is configured on LFXO, but SL_CLOCK_MANAGER_LFXO_EN is disabled",
@@ -443,6 +564,7 @@ if em4grpaclk_source.value == "SL_CLOCK_MANAGER_DEFAULT_LF_CLOCK_SOURCE" and lf_
     validation.target_for_defines({"SL_CLOCK_MANAGER_EM4GRPACLK_SOURCE"}),
     nil,
     nil)
+end
 end
 
 -- WDOG0CLK
@@ -674,8 +796,12 @@ local function calculate_and_validate_clocks()
     sysclk_freq = tonumber(hfxo_freq.value)
   elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_CLKIN0" then
     sysclk_freq = tonumber(clkin0_freq.value)
-  elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL" or sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1" then
+  elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL" then
     sysclk_freq = tonumber(socpll_freq.value)
+  elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL0SOCCLK1" then
+    sysclk_freq = tonumber(socpll0_freq.value) / (tonumber(socpll0_outdivin.value) + 1) / (tonumber(socpll0_out1_div.value) + 2)
+  elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_SOCPLL1SOCCLK1" then
+    sysclk_freq = tonumber(socpll1_freq.value) / (tonumber(socpll1_outdivin.value) + 1) / (tonumber(socpll1_out1_div.value) + 2)
   elseif sysclk_source_val == "CMU_SYSCLKCTRL_CLKSEL_RFFPLL0SYS" then
     sysclk_freq = tonumber(rffpll_freq.value)
   else

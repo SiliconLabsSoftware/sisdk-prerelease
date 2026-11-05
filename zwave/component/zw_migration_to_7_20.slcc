@@ -8,6 +8,11 @@ description: >
 
 
   It is applicable only when the developer is on an older GSDK version and would like to port the application to the newer GSDK version. This component can be uninstalled if the user is already on  a later version of the GSDK.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/md-content-how-to-implement-a-new-migration-code-block
+  - page: zwave-api/migration-guide
 
 package: zwave
 quality: production

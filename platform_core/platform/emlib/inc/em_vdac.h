@@ -35,7 +35,7 @@
 
 #if defined(VDAC_COUNT) && (VDAC_COUNT > 0)
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -538,7 +538,7 @@ void VDAC_InitChannel(VDAC_TypeDef *vdac,
  ******************************************************************************/
 __STATIC_INLINE void VDAC_SineModeStart(VDAC_TypeDef *vdac, bool start)
 {
-  EFM_ASSERT(VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(VDAC_REF_VALID(vdac));
 
   while (0UL != (vdac->STATUS & VDAC_STATUS_SYNCBUSY)) {
   }
@@ -573,10 +573,10 @@ __STATIC_INLINE void VDAC_Channel0OutputSet(VDAC_TypeDef *vdac,
                                             uint32_t value)
 {
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
-  EFM_ASSERT(value <= _VDAC_CH0DATA_MASK);
+  SL_LOG_DEBUG_ASSERT(value <= _VDAC_CH0DATA_MASK);
   vdac->CH0DATA = value;
 #elif defined(_SILICON_LABS_32B_SERIES_2)
-  EFM_ASSERT(value <= _VDAC_CH0F_MASK);
+  SL_LOG_DEBUG_ASSERT(value <= _VDAC_CH0F_MASK);
   vdac->CH0F = value;
 #endif
 }
@@ -599,10 +599,10 @@ __STATIC_INLINE void VDAC_Channel1OutputSet(VDAC_TypeDef *vdac,
                                             uint32_t value)
 {
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
-  EFM_ASSERT(value <= _VDAC_CH1DATA_MASK);
+  SL_LOG_DEBUG_ASSERT(value <= _VDAC_CH1DATA_MASK);
   vdac->CH1DATA = value;
 #elif defined(_SILICON_LABS_32B_SERIES_2)
-  EFM_ASSERT(value <= _VDAC_CH1F_MASK);
+  SL_LOG_DEBUG_ASSERT(value <= _VDAC_CH1F_MASK);
   vdac->CH1F = value;
 #endif
 }

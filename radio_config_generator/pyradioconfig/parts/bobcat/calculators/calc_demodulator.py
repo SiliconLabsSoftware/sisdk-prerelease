@@ -11,13 +11,7 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
     def buildVariables(self, model):
         super().buildVariables(model)
 
-    # Helper calculation for FW calulation of SRC2
-    # These are phy specific calculations that is easier to do here
-    # than to reverse calculate in firmware
-    #
-    # Used by rail_scripts -> rfhal_synth.c:SYNTH_CalcSrc2
     def calc_src2_denominator(self, model):
-        # Load model variables into local variables
         osr = model.vars.oversampling_rate_actual.value
         datarate = model.vars.baudrate.value
         dec0 = model.vars.dec0_actual.value
@@ -28,10 +22,8 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
         if (model.vars.adc_clock_mode.var_enum.HFXOMULT == adc_clock_mode):
             src2_calcDenominator = 0
         else:
-            # This does not include the 8x downsampling polyphase filter after IFADC. Handled in RAIL code
             src2_calcDenominator = int(datarate * dec0 * dec1 * dec2 * osr)
 
-        # Load local variables back into model variables
         model.vars.src2_calcDenominator.value = src2_calcDenominator
 
     def calc_trecs_enabled(self, model):
@@ -47,9 +39,7 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
         model.vars.trecs_enabled.value = trecs_enabled
 
     def calc_baudrate_actual(self, model):
-        # This function calculates the actual baudrate based on register settings
 
-        # Load model variables into local variables
         adc_freq = model.vars.adc_freq_actual.value
         dec0_actual = model.vars.dec0_actual.value
         dec1_actual = model.vars.dec1_actual.value
@@ -57,16 +47,12 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
         src2ratio_actual = model.vars.src2_ratio_actual.value
         rxbrfrac_actual = model.vars.rxbrfrac_actual.value
 
-        # Calculate actual baudrate once the ADC, decimator, SRC, and rxbr settings are kown
         baudrate_actual = (adc_freq * src2ratio_actual) / (dec0_actual * dec1_actual * dec2_actual * 8 * 2 * rxbrfrac_actual)
 
-        # Load local variables back into model variables
         model.vars.rx_baud_rate_actual.value = baudrate_actual
 
     def calc_osr_actual(self,model):
-        #This function calculates the actual OSR based on the ADC rate and decimator/SRC values
 
-        #Load model variables into local variables
         adc_freq_actual = model.vars.adc_freq_actual.value
         dec0_actual = model.vars.dec0_actual.value
         dec1_actual = model.vars.dec1_actual.value
@@ -76,13 +62,11 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
 
         osr_actual = adc_freq_actual * src2_actual / (dec0_actual * dec1_actual * 8 * dec2_actual * baudrate_actual)
 
-        #Load local variables back into model variables
         model.vars.oversampling_rate_actual.value = osr_actual
 
 
     def get_limits(self, demod_select, withremod, relaxsrc2, model):
 
-        #Load model variables into local variables
         bandwidth = model.vars.bandwidth_hz.value #from calc_target_bandwidth
 
         baudrate = model.vars.baudrate.value #We don't know the actual bandrate yet
@@ -92,10 +76,7 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
         max_chfilt_osr = None
         osr_list = None
 
-        # Define constraints for osr, src2, dec2
         if demod_select == model.vars.demod_select.var_enum.BCR:
-            # FIXME:  osr_list and resulting target osr are really chfilt_osr, pro2 calculator defines target_osr
-            #       This doesn't cause an error but is confusing.
             osr_est = int(ceil(2 * float(bandwidth) / baudrate))
 
             min_osr = 8
@@ -120,8 +101,6 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
             if (modtype == model.vars.modulation_type.var_enum.FSK2 or \
                   modtype == model.vars.modulation_type.var_enum.FSK4 or \
                   modtype == model.vars.modulation_type.var_enum.MSK) and (mi<1):
-                # >=7 is better for sensitivity and frequency offset
-                # cost (sens degrade) increases with decreasing osr 6,5,4
                 osr_list = [7, 8, 9, 6, 5, 4]
                 min_osr = 4
             else:
@@ -173,7 +152,6 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
                 max_osr = 7
                 osr_list = [4, 5, 6, 7]
             else:
-                # Standard TRECs, no DEC2 or remod path
                 min_dec2 = 1
                 max_dec2 = 1
                 min_osr = 4
@@ -193,7 +171,6 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
         else:
             raise CalculationException('ERROR: invalid demod_select in return_osr_dec0_dec1()')
 
-        # save to use in other functions
         model.vars.min_bwsel.value = min_bwsel  # min value for normalized channel filter bandwidth
         model.vars.max_bwsel.value = max_bwsel  # max value for normalized channel filter bandwidth
         model.vars.min_src2.value = min_src2  # min value for SRC2
@@ -207,11 +184,7 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
 
 
     def calc_rxbr(self,model):
-        #This function calculates the receive baudrate settings
-        # based on actual dec0,dec1,dec2,src2, and desired baudrate
-        # then baudrate_actual will be calculated from rxbrfrac_actual
 
-        #Load model variables into local variables
         target_osr = model.vars.target_osr.value #We don't know the actual OSR yet, because that has to be based on the final baudrate
         targetmax_osr = model.vars.targetmax_osr.value
         targetmin_osr = model.vars.targetmin_osr.value
@@ -225,16 +198,11 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
         denlist = range(2, 31)
         error_limit = 0.5
 
-        # not using target_osr, because in some cases (e.g. BCR with fractional OSR)
-        # the OSR w.r.t desired baudrate and acutal decimators varies from the target
-        # allowing 0.01% variation from targetmin_osr and targetmax_osr for range check
-        # because this osr calculation uses src2_actual, which has some small quantization noise
         osr = float(adc_freq_actual * src2_actual) / float(dec0_actual * dec1_actual * 8 * dec2_actual * baudrate)
         osr_limit_min = targetmin_osr * (1 - 0.0001)
         osr_limit_max = targetmax_osr * (1 + 0.0001)
 
         if (osr >= osr_limit_min) and (osr <= osr_limit_max):
-            #search for best fraction
             rxbrint = int(floor(osr/2))
             frac = (osr/2) - float(rxbrint)
             numlist = range(0,31)
@@ -246,9 +214,6 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
                         min_error = frac_error
                         best_den = den
                         best_num = num
-            # calculate error in percent of baudrate, and require < 0.5% error
-            # matlab simulation sweeping osr with 0.01% step size, showed the max osr relative error = 0.4%
-            # using num=0:31, den=2:31
             error_percent = 100 * abs( 2 * ( rxbrint + float(best_num) / float(best_den) ) - osr ) / osr
             if error_percent < error_limit:
                 rxbrnum = best_num
@@ -261,48 +226,28 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
                     raise CalculationException('ERROR: num > den in calc_rxbr()')
 
             else:
-                #print("adc_freq = %f" % adc_freq_actual)
-                #print("baudrate = %f" % baudrate)
-                #print("target_osr = %f" % target_osr)
-                #print("adjust_osr = %f" % osr)
-                #print("rxbrint = %d" % rxbrint)
-                #print("best_num = %d" % best_num)
-                #print("best_den = %d" % best_den)
-                #print(model.vars.demod_select.value)
                 raise CalculationException('ERROR: baudrate error > 0.5% in calc_rxbr()')
         else:
-            #print("adc_freq = %f" % adc_freq_actual)
-            #print("baudrate = %f" % baudrate)
-            #print("target_osr = %f" % target_osr)
-            #print("adjust_osr = %f" % osr)
-            #print("targetmin_osr = %f" % targetmin_osr)
-            #print("targetmax_osr = %f" % targetmax_osr)
-            #print(str(model.vars.demod_select.value).split(".")[-1])
             raise CalculationException('ERROR: OSR out of range in calc_rxbr()')
 
-        #Load local variables back into model variables
         model.vars.rxbrint.value = rxbrint
         model.vars.rxbrnum.value = rxbrnum
         model.vars.rxbrden.value = rxbrden
 
     def calc_freq_dev_min(self, model):
-        # Reading variables from model variables
         fdeverror = model.vars.deviation_tol_ppm.value
         deviation = model.vars.deviation.value
         freq_dev_min = int(deviation - (fdeverror * deviation) / 1000000)
         model.vars.freq_dev_min.value = freq_dev_min
 
     def calc_freq_dev_max(self, model):
-        # Reading variables from model variables
         fdeverror = model.vars.deviation_tol_ppm.value
         deviation = model.vars.deviation.value
         freq_dev_max = int(deviation + (fdeverror * deviation) / 1000000)
         model.vars.freq_dev_max.value = freq_dev_max
 
     def calc_interpolation_gain_actual(self, model):
-        #This function calculates the actual interpolation gain
 
-        #Load model variables into local variables
         txbrnum = model.vars.MODEM_TXBR_TXBRNUM.value
         modformat = model.vars.modulation_type.value
 
@@ -328,27 +273,20 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
         else:
             interpolation_gain = txbrnum / 256.0
 
-        # following the rtl
         interpolation_gain = floor(interpolation_gain)
 
-        # calculate phase interpolation gain for OQPSK cases
         if modformat == model.vars.modulation_type.var_enum.OQPSK:
             interpolation_gain = 2 ** (ceil(log(interpolation_gain, 2)))
 
-        #Load local variables back into model variables
         model.vars.interpolation_gain_actual.value = float(interpolation_gain)
 
     def calc_lock_bandwidth(self, model):
-        # Load model variables into local variables
         bw_acq = model.vars.bandwidth_hz.value
         aox_enable = True if model.vars.aox_enable.value == model.vars.aox_enable.var_enum.ENABLED else False
 
         if not aox_enable:
             super().calc_lock_bandwidth(model)
         else:
-            # Widen channel filter bandwidth for faster settling time during CTE, controlled by CHFSWSEL
-            # See PGBOBCATVALTEST-807. 2xBW came from system study as default. Silicon may need further tweaks
-            # to limit step response overshoot, depending on the channel filter
             lock_bandwidth_hz = 2 * bw_acq
             model.vars.lock_bandwidth_hz.value = int(lock_bandwidth_hz)
 
@@ -356,20 +294,15 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
         model.vars.rssi_rf_adjust_db.value = -8.0
 
     def calc_directmode_regs(self, model):
-        # Set defaults to disabled for Bobcat (or 2.4GHz parts)
         model.vars.directmode_rx.value = model.vars.directmode_rx.var_enum.DISABLED
         model.vars.asynchronous_rx_enable.value = False
 
     def calc_bandwdith_tol(self, model):
-        # For 2.4GHz PHYs that use divided down LO for ADC, we inherently will have some bandwidth tolerance
-        # based on the amount the clock is allowed to change
 
         protocol_id = model.vars.protocol_id.value
         base_frequency_hz = model.vars.base_frequency_hz.value
 
         if protocol_id == model.vars.protocol_id.var_enum.Zigbee:
-            # Assume our target bandwidth_hz applies to center of band
-            # Therefore we are allowed tolerance based on how far away we currently are
             bandwidth_tol = abs((base_frequency_hz-2450e6)/base_frequency_hz)
         else:
             bandwidth_tol = 0.0
@@ -377,21 +310,15 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
         model.vars.bandwidth_tol.value = float(bandwidth_tol)
 
     def calc_bitrate_gross(self, model):
-        #This function calculates the gross bitrate (bitrate including redundant coding bits)
-        #Note that this gross bitrate excludes DSSS, because in RX the DSSS chips never make it
-        #through the demod path (they are only used for correlation)
 
-        #Read from model variables
         bitrate = model.vars.bitrate.value
         encoding = model.vars.symbol_encoding.value
         mbus_encoding = model.vars.mbus_symbol_encoding.value
         fec_enabled = model.vars.fec_enabled.value
         ble_concurrent = (model.vars.MODEM_LONGRANGE_LRBLE.value == 1) and (model.vars.MODEM_COCURRMODE_CONCURRENT.value == 1)
 
-        #Start by assuming the gross bitrate is equal to the net bitrate
         bitrate_gross = bitrate
 
-        #Calculate the encoded bitrate based on the encoding parameters
         if (encoding == model.vars.symbol_encoding.var_enum.Manchester or encoding == model.vars.symbol_encoding.var_enum.Inv_Manchester):
             bitrate_gross *= 2
         if (mbus_encoding == model.vars.mbus_symbol_encoding.var_enum.MBUS_3OF6):
@@ -399,5 +326,4 @@ class Calc_Demodulator_Bobcat(CALC_Demodulator_ocelot):
         if fec_enabled or ble_concurrent:
             bitrate_gross *= 2
 
-        #Write the model variable
         model.vars.bitrate_gross.value =  int(round(bitrate_gross))

@@ -4,7 +4,6 @@ from pycalcmodel.core.output import ModelOutput, ModelOutputType
 def build_modem_regs_leopard(model,profile):
     build_modem_regs_lynx(model, profile)
 
-    # Add CLKMULT variables from bobcat
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVADC, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENDRVADC'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTDISICO, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTDISICO'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTENBBDET, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTENBBDET'))
@@ -26,8 +25,6 @@ def build_modem_regs_leopard(model,profile):
 
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJI, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTREG2ADJI'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTREG1ADJV, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTREG1ADJV'))
-    # Commenting this out as this is a protected register field according to Package/pyradioconfig/protected_fields/leopard_protected_fields.py
-    # profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJV, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTREG2ADJV'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVN, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTDIVN'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVR, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTDIVR'))
     profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTCTRL.CLKMULTDIVX'))

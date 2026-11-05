@@ -11,16 +11,9 @@ from pycalcmodel.py2_and_3_compatibility import *
 __all__ = [ 'ModelFeature', 'ModelFeatureContainer',
             'ModelFeatureTypeXml', 'ModelFeatureInstanceXml' ]
 
-# ===========================================================================
-#  CONSTANTS
-# ===========================================================================
 
 
-# ===========================================================================
-#  CLASSES
-# ===========================================================================
 
-# ---------------------------------------------------------------------------
 class ModelFeature(object):
     """
     Defines a feature used as a feature variable in activation logic
@@ -29,9 +22,7 @@ class ModelFeature(object):
 
     def __init__(self, name, desc='', value=False):
         self.zz_parser_update = None
-        #: The feature name
         self.name = name
-        #: A string description of the feature
         self.desc = desc
         self.value = value
 
@@ -134,11 +125,9 @@ class ModelFeatureContainer(object):
         return features
 
     def remove_feature(self, name):
-        # Remove attribute
         if hasattr(self, name):
             delattr(self, name)
 
-        # Remove from dictionary
         if name in self.ZZ_FEATURE_KEYS:
             self.ZZ_FEATURE_KEYS.pop(name)
 

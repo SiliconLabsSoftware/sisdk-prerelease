@@ -47,7 +47,11 @@
 #include CMSIS_device_header
 #endif
 
+#if defined(SL_LOG_DEBUG_ASSERT_ENABLE) && (SL_LOG_DEBUG_ASSERT_ENABLE == 1)
+#include "sl_log_helper.h"
+#else
 #include "sl_assert.h"
+#endif
 #include "em_device.h"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
@@ -302,8 +306,13 @@
 /* Ensure Cortex-M port compatibility. */
 #define SysTick_Handler                         xPortSysTickHandler
 
-/* Implement FreeRTOS configASSERT as emlib assert. */
+/* Prefer SL_LOG_DEBUG_ASSERT when enabled; otherwise fall back to EFM_ASSERT. */
+#if defined(SL_LOG_DEBUG_ASSERT_ENABLE) && (SL_LOG_DEBUG_ASSERT_ENABLE == 1)
+#include "sl_log_helper.h"
+#define configASSERT(x)                               SL_LOG_DEBUG_ASSERT(x)
+#else
 #define configASSERT(x)                               EFM_ASSERT(x)
+#endif
 
 /* Energy saving modes. */
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)

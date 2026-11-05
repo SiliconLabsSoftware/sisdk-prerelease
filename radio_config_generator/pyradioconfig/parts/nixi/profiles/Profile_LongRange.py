@@ -19,7 +19,6 @@ class Profile_Long_Range_Nixi(Profile_Long_Range_Jumbo):
         buildLongRangeOutputs(model, profile)
 
     def _disable_dynamic_BBSS(self, model):
-        # Need only for Jumbo and Nerio
         pass
 
 

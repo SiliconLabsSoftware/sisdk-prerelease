@@ -287,6 +287,7 @@ static void on_closed(sli_cpc_control_t *ctrl)
 void sli_cpc_control_deinit(sli_cpc_control_t *ctrl)
 {
   sl_cpc_buf_t *buf;
+  sl_status_t status;
 
   SLI_CPC_ASSERT(ctrl);
 
@@ -294,7 +295,8 @@ void sli_cpc_control_deinit(sli_cpc_control_t *ctrl)
     SLI_CPC_ASSERT(buf == &ctrl->rx_buf);
   }
 
-  sl_cpc_ep_deinit(&ctrl->ep);
+  status = sl_cpc_ep_deinit(&ctrl->ep);
+  SLI_CPC_ASSERT(status == SL_STATUS_OK);
   ctrl->next_request_op_id = 0;
   ctrl->deinitializing = false;
   ctrl->initialized = false;

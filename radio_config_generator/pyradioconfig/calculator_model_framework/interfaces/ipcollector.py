@@ -3,25 +3,32 @@
 import importlib
 from host_py_rm_studio_internal import RM_Factory
 import inspect
-from pyradioconfig.calculator_model_framework.interfaces.ipcalculator import IPRegFields
+from pyradioconfig.calculator_model_framework.interfaces.ipcalculator import IPRegFields, IPCalculator
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 from pyradioconfig.calculator_model_framework.interfaces.design_status_tag import DesignStatusTag
-
+from pycalcmodel.core.common import IPCategory
 
 class IPCollector_Base(object):
     perip_dict = dict()
     part_status_tag = None
 
-    def __init__(self, part_family, part_rev):
+    def __init__(self, part_family, part_rev, ip_category):
         self.perip_dict.clear()
-        if part_rev == 'ANY':
-            self.reg_map = RM_Factory(part_family.upper())()
-        else:
-            self.reg_map = RM_Factory(part_family.upper(), part_rev.upper())()
+        self.part_family = part_family
+        self.part_rev = part_rev
+        self.ip_category = ip_category
+        self.reg_map = None
         self.build_peripherals()
 
-    def add_peripheral(self, peripheral_name:str, ip_name: str, ip_category: str, ip_version:int=None, prod_rev:int=None, skip_for_target_sim:bool=False):
+    def _category_matches(self, peripheral_category: IPCategory) -> bool:
+        return (
+            peripheral_category == IPCategory.COMMON or
+            peripheral_category == self.ip_category
+        )
+
+    def add_peripheral(self, peripheral_name:str, ip_name: str, ip_category: IPCategory, ip_version:int=None, prod_rev:int=None, skip_for_target_sim:bool=False,
+                       unversioned=False):
         """
         Adds peripheral to self.perip_dict with version details with status tag - 'in production'
 
@@ -31,11 +38,14 @@ class IPCollector_Base(object):
             ip_category : this tells whether the IP calculator is in pyradioconfig/modules/lpw or pyradioconfig/modules/wifi...
             ip_version : (Optional) this denotes the design revision r_X. r_01 means ip_version = 1 and matches with the value of IPREVISION.IPREVISION. If not specified, IPREVISION.IPREVISION of the peripheral is read and that ip_version is used.
             prod_rev : (Optional) this is used for a part with PROD tag to point the ip_collector to correct IP calculation snapshot revision. It should be left alone or set to 'None' for DEV parts.
+            unversioned: (Optional) if True, the peripheral will not have version info in its path. This is used for non-design registers  which are not expected to have multiple versions.
         """
+
         if ip_version is None:
             ip_version = self.read_ip_ver_from_reg_map(peripheral_name)
+        if not self._category_matches(ip_category):
+            return
 
-        # if chip tag is prod, set default prod_rev to 0
         if self.part_status_tag == DesignStatusTag.PROD and prod_rev is None:
             prod_rev = 0
 
@@ -46,19 +56,27 @@ class IPCollector_Base(object):
         pass
 
     def build_all_peripheral_regs(self, model, profile):
-        """For each ip, reg modules and build regs"""
+        """
+        For each ip, reg modules and build regs
+        A profile can only select and add IPs from one IP category (either LPW or Wi-Fi).
+        Valid inputs for ip_category are defined in IPCategory variable.
+        """
         for peripheral_name, ip_obj in self.perip_dict.items():
             if model.target.upper() == 'SIM' and ip_obj.skip_for_target_sim:
                 continue
-            self.build_peripheral_regs(model, profile, peripheral_name)
+            if self._category_matches(ip_obj.category):
+                self.build_peripheral_regs(model, profile, peripheral_name)
         pass
 
 
-    def get_ip_regfield_list(self, part_family, peripheral_name):
+    def get_ip_regfield_list(self, part_family, peripheral_name) -> list:
         peripheral = self.perip_dict[peripheral_name]
         module_path = peripheral.get_regfields_module_path(part_family)
 
-        module = importlib.import_module(module_path)
+        try:
+            module = importlib.import_module(module_path)
+        except ModuleNotFoundError:
+            raise Exception(f"IPRegFields class not found in {module_path}")
         classes = inspect.getmembers(module, inspect.isclass)
         ip_regfields_class = None
         for (classname, classvalue) in classes:
@@ -69,26 +87,83 @@ class IPCollector_Base(object):
         if ip_regfields_class is None:
             raise Exception(f"IPRegFields class not found in {module_path}")
 
+    def get_protected_ip_regfield_list(self, part_family, peripheral_name) -> list:
+        peripheral = self.perip_dict[peripheral_name]
+        module_path = peripheral.get_protected_regfields_module_path(part_family)
+
+        try:
+            module = importlib.import_module(module_path)
+        except ModuleNotFoundError:
+            raise Exception(f"Protected IPRegFields class not found in {module_path}")
+        classes = inspect.getmembers(module, inspect.isclass)
+        protected_ip_regfield = None
+        for (classname, classvalue) in classes:
+            if issubclass(classvalue, IPRegFields) and classname != 'IPRegFields':
+                protected_ip_regfield = classvalue
+                return protected_ip_regfield().reg_field_list
+
+        if protected_ip_regfield is None:
+            raise Exception(f"Protected IPRegFields class not found in {module_path}")
+
     def build_peripheral_regs(self, model, profile, peripheral_name):
+        """
+        Dividing the IP reg fields into two. One regular, another protected registers.
+        Protected reg fields are not added to model.vars for targets in
+        IPCalculator.should_skip_protected_reg_fields_for_target (e.g. 'IC'), so they must be
+        skipped here too - otherwise getattr below would raise AttributeError.
+        """
         reg_field_list = self.get_ip_regfield_list(model.part_family, peripheral_name)
         for reg_field in reg_field_list:
             reg_field_name = peripheral_name + "_" + reg_field.replace(".", "_")
             reg_model_var = getattr(model.vars, reg_field_name)
             profile.outputs.append(ModelOutput(reg_model_var, '', ModelOutputType.SVD_REG_FIELD,
                                                readable_name=reg_field_name.replace("_", ".")))
+
+        if not IPCalculator.should_skip_protected_reg_fields_for_target(target=model.target):
+            protected_reg_fields = self.get_protected_ip_regfield_list(model.part_family, peripheral_name)
+            for reg_field in protected_reg_fields:
+                reg_field_name = peripheral_name + "_" + reg_field.replace(".", "_")
+                try:
+                    reg_model_var = getattr(model.vars, reg_field_name)
+                except AttributeError:
+                    raise AttributeError(f"Protected reg field {reg_field_name} is not defined in model.vars. "
+                                 f"Please check if the protected reg field is defined in the IP calculator."
+                                 f"model.target: {model.target}")
+                profile.outputs.append(ModelOutput(reg_model_var, '', ModelOutputType.SVD_REG_FIELD,
+                                                   readable_name=reg_field_name.replace("_", ".")))
         pass
 
-    def read_ip_ver_from_reg_map(self, peripheral_name:str):
+    def read_ip_ver_from_reg_map(self, peripheral_name: str) -> int:
         """
-        Reads IP version from reg map
+        Reads IP version from the register map.
+
         Args:
-            ip_name: 'agc'
+            peripheral_name: Register model peripheral name, e.g. 'AGC'
 
         Returns:
+            Integer value of the peripheral's IPVERSION register.
 
+        Raises:
+            AttributeError: If the peripheral or its IPVERSION register is not defined in the register map.
         """
-        regmap_ver = getattr(self.reg_map, peripheral_name).IPVERSION.io
-        return regmap_ver
+        if self.reg_map is None:
+            if self.part_rev == 'ANY':
+                self.reg_map = RM_Factory(self.part_family.upper())()
+            else:
+                self.reg_map = RM_Factory(self.part_family.upper(), self.part_rev.upper())()
+        try:
+            peripheral = getattr(self.reg_map, peripheral_name)
+        except AttributeError as error:
+            message = f"Peripheral {peripheral_name} is not defined in {self.part_family.upper()} register map"
+            LogMgr.Error(message)
+            raise AttributeError(message) from error
+
+        try:
+            return peripheral.IPVERSION.io
+        except AttributeError as error:
+            message = f"IPVERSION register is not defined for {peripheral_name} in {self.part_family.upper()}"
+            LogMgr.Error(message)
+            raise AttributeError(message) from error
 
     def get_peri_regfields(self, ip_name):
         ip_obj = self.perip_dict.get(ip_name)
@@ -108,10 +183,10 @@ class IP_Peripheral_Base(object):
     ip_version = None
     prod_rev = None
 
-    def __init__(self, peripheral_name:str, ip_name: str, category: str, ip_version: int, prod_rev: int, skip_for_target_sim: bool):
+    def __init__(self, peripheral_name:str, ip_name: str, category: IPCategory, ip_version: int, prod_rev: int, skip_for_target_sim: bool):
         self.peripheral_name = peripheral_name
         self.ip_name = ip_name.lower()
-        self.category = category.lower()
+        self.category = category
         self.ip_version = f"{ip_version:02d}"
         self.prod_rev = f"{prod_rev:02d}" if isinstance(prod_rev, int) else None
         self.skip_for_target_sim = skip_for_target_sim
@@ -122,23 +197,20 @@ class IP_Peripheral_Base(object):
         :return:
             calculator path
         """
-        # read IP calculator tag
         try:
-            ip_calc_tag = self.get_ip_calc_status_tag(self.category,self.ip_name,self.ip_version)
+            ip_calc_tag = self.get_ip_calc_status_tag(self.category.name.lower(),self.ip_name,self.ip_version)
         except ModuleNotFoundError as error:
             message = (f"Please check if the IP version r_{self.ip_version} or a valid design status tag"
                        f" for {self.peripheral_name} exist.")
             raise ImportError(message) from error
 
         if ip_calc_tag == DesignStatusTag.DEV:
-            # part is tagged as dev
             if self.prod_rev is not None:
                 message_warning = (f"IP version r_{self.ip_version} of {self.ip_name} is tagged as dev.\n"
                                 f"However, IP collector points to a certain prod revision.\n"
                                 f"Set it as None to get rid of this warning.")
                 LogMgr.Warning(message_warning)
-            calc_path = f"pyradioconfig.modules.{self.category}.{self.ip_name}.r_{self.ip_version}.{part_family}".lower()
-            # check and throw error if path does not exists
+            calc_path = f"pyradioconfig.modules.{self.category.name.lower()}.{self.ip_name}.r_{self.ip_version}.{part_family}".lower()
             try:
                 mod = importlib.import_module(calc_path)
             except ModuleNotFoundError as error:
@@ -148,9 +220,7 @@ class IP_Peripheral_Base(object):
 
             return calc_path
         elif ip_calc_tag == DesignStatusTag.PROD:
-            # part is tagged as prod
-            calc_path = f"pyradioconfig.modules.{self.category}.{self.ip_name}.r_{self.ip_version}.prod_{self.prod_rev}".lower()
-            # check and throw error if path does not exists
+            calc_path = f"pyradioconfig.modules.{self.category.name.lower()}.{self.ip_name}.r_{self.ip_version}.prod_{self.prod_rev}".lower()
             try:
                 mod = importlib.import_module(calc_path)
             except ModuleNotFoundError as error:
@@ -169,6 +239,11 @@ class IP_Peripheral_Base(object):
     def get_regfields_module_path(self, part_family):
         module_path = self.get_ip_module_path(part_family)
         regfields_path = module_path + ".reg_fields"
+        return regfields_path
+
+    def get_protected_regfields_module_path(self, part_family):
+        module_path = self.get_ip_module_path(part_family)
+        regfields_path = module_path + ".protected_reg_fields"
         return regfields_path
 
     def get_ip_calc_status_tag(self, category, ip_name, ip_version):

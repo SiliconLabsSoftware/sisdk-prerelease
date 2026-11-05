@@ -50,7 +50,7 @@ configuration:
     value: 0
     condition: [iostream_uart]
   - name: SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD
-    value: SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_128M
+    value: SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_128K
   - name: SL_WATCHDOG_MANAGER_EM1_RUN
     value: 1
     condition: [power_manager]

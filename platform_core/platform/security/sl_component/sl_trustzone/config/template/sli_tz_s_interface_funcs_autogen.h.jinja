@@ -23,8 +23,8 @@ typedef uint32_t (*sli_tz_simple_fn_no_args) (void);
 
 #if defined(TZ_SERVICE_PSA_CRYPTO_PRESENT)
 static const iovec_fn crypto_function_table[] = {
-{% for fp in tfm_interface_func|unique -%}
-   (iovec_fn){{ fp }},
+{% for fp in tfm_interface_func|unique(attribute='function') -%}
+   (iovec_fn){{ fp.function }},
 {% endfor %}
 };
 #endif // TZ_SERVICE_PSA_CRYPTO_PRESENT

@@ -8,6 +8,13 @@ description: >
   This component provides functionality for supporting devices with multiple endpoints that can be
   controlled directly by the Multi Channel Command Class. One device can have multiple unique
   endpoints, but the Root device itself can be addressed as well.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/multichan
+  - page: zwave-api/md-content-when-and-how-to-use-multi-channel
+  - page: z-wave-multi-channel-basics
+
 package: zwave
 quality: production
 metadata:

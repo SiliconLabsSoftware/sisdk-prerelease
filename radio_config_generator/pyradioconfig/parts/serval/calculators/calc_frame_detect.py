@@ -16,7 +16,6 @@ class calc_frame_detect_serval(CALC_Frame_Detect_Margay):
         mod_format = model.vars.modulation_type.value
 
         if mod_format == model.vars.modulation_type.var_enum.ASK:
-            # Always use 1 timing window for ASK
             addtimseq = 0
             model.vars.number_of_timing_windows.value = int(addtimseq) + 1
         else:

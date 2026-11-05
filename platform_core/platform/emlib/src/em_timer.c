@@ -31,7 +31,7 @@
 #include "em_timer.h"
 #if defined(TIMER_COUNT) && (TIMER_COUNT > 0)
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup timer TIMER - Timer/Counter
@@ -141,7 +141,7 @@ static void timerPrsConfig(TIMER_TypeDef * timer, unsigned int cc, unsigned int 
 {
   int i = TIMER_DEVICE_ID(timer);
   volatile PRS_TIMERn_TypeDef * base = (volatile PRS_TIMERn_TypeDef *) &PRS->CONSUMER_TIMER0_CC0;
-  EFM_ASSERT(i >= 0);
+  SL_LOG_DEBUG_ASSERT(i >= 0);
 
   if (i >= 0) {
     if (async) {
@@ -178,7 +178,7 @@ static void timerPrsConfig(TIMER_TypeDef * timer, unsigned int cc, unsigned int 
  ******************************************************************************/
 void TIMER_Init(TIMER_TypeDef *timer, const TIMER_Init_TypeDef *init)
 {
-  EFM_ASSERT(TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(TIMER_REF_VALID(timer));
   uint32_t ctrlRegVal = 0;
 
 #if defined (_TIMER_CFG_PRESC_SHIFT)
@@ -267,8 +267,8 @@ void TIMER_InitCC(TIMER_TypeDef *timer,
                   unsigned int ch,
                   const TIMER_InitCC_TypeDef *init)
 {
-  EFM_ASSERT(TIMER_REF_VALID(timer));
-  EFM_ASSERT(TIMER_REF_CH_VALIDATE(timer, ch));
+  SL_LOG_DEBUG_ASSERT(TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(TIMER_REF_CH_VALIDATE(timer, ch));
 
 #if defined (_TIMER_CC_CFG_MASK)
   TIMER_SyncWait(timer);
@@ -333,7 +333,7 @@ void TIMER_InitCC(TIMER_TypeDef *timer,
  ******************************************************************************/
 void TIMER_InitDTI(TIMER_TypeDef *timer, const TIMER_InitDTI_TypeDef *init)
 {
-  EFM_ASSERT(TIMER_SupportsDTI(timer));
+  SL_LOG_DEBUG_ASSERT(TIMER_SupportsDTI(timer));
 
   /* Make sure the DTI unit is disabled while initializing. */
   TIMER_EnableDTI(timer, false);
@@ -435,7 +435,7 @@ void TIMER_Reset(TIMER_TypeDef *timer)
 {
   int i;
 
-  EFM_ASSERT(TIMER_REF_VALID(timer));
+  SL_LOG_DEBUG_ASSERT(TIMER_REF_VALID(timer));
 
 #if defined(TIMER_EN_EN)
   timer->EN_SET = TIMER_EN_EN;

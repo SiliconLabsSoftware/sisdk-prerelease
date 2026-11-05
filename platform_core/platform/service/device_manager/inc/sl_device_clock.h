@@ -285,6 +285,9 @@ SL_ENUM(sl_clock_branch_t) {
 /// Define for GPCRC0 peripheral bus clock pointer.
 #define SL_BUS_CLOCK_GPCRC0 (&SL_BUS_CLOCK_GPCRC0_VALUE)
 
+/// Define for GPCRC1 peripheral bus clock pointer.
+#define SL_BUS_CLOCK_GPCRC1 (&SL_BUS_CLOCK_GPCRC1_VALUE)
+
 /// Define for GPIO peripheral bus clock pointer.
 #define SL_BUS_CLOCK_GPIO (&SL_BUS_CLOCK_GPIO_VALUE)
 
@@ -657,6 +660,9 @@ extern const uint32_t SL_BUS_CLOCK_FSRCO_VALUE;
 
 // External declaration for GPCRC0 peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_GPCRC0_VALUE;
+
+// External declaration for GPCRC1 peripheral bus clock value.
+extern const uint32_t SL_BUS_CLOCK_GPCRC1_VALUE;
 
 // External declaration for GPIO peripheral bus clock value.
 extern const uint32_t SL_BUS_CLOCK_GPIO_VALUE;

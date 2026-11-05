@@ -17,6 +17,7 @@ provides:
 - name: iostream_transport
   allow_multiple: true
 requires:
+- name: log_none
 - name: iostream
 - name: debug_swo
 include:

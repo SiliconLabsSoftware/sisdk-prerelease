@@ -31,7 +31,7 @@
 #include "sl_event_system.h"
 #include "sl_event_system_config.h"
 #include "sl_component_catalog.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_core.h"
 #include "sl_memory_manager.h"
 #include "sli_event_system_log.h"
@@ -71,6 +71,7 @@ void sl_event_system_init(void)
 {
   sl_slist_init(&publishers);
   is_event_system_initialized = true;
+  (void)is_event_system_initialized;
 #if defined(SL_CATALOG_EVENT_SYSTEM_SUPERVISOR_MODE_PRESENT)
   // Create supervisor queue.
   if (sl_event_queue_create(SL_EVENT_SUPERVISOR_QUEUE_COUNT,
@@ -94,7 +95,7 @@ sl_status_t sl_event_publisher_register(sl_event_publisher_t *publisher,
   sl_event_publisher_t *publisher_entry;
 
   // Only register publishers if the event system has been initialized
-  EFM_ASSERT(is_event_system_initialized == true);
+  SL_LOG_DEBUG_ASSERT(is_event_system_initialized == true);
 
   // Parameter validation.
   if (publisher == NULL || event_class >= SL_EVENT_CLASS_MAX
@@ -141,7 +142,7 @@ sl_status_t sl_event_publisher_unregister(sl_event_publisher_t *publisher)
   }
 
   // Only unregister publishers if the event system has been initialized
-  EFM_ASSERT(is_event_system_initialized == true);
+  SL_LOG_DEBUG_ASSERT(is_event_system_initialized == true);
 
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
@@ -199,7 +200,7 @@ sl_status_t sl_event_subscribe(sl_event_class_t event_class,
   sl_event_subscriber_t *subscriber;
 
   // Only subscribe to events if the event system has been initialized.
-  EFM_ASSERT(is_event_system_initialized == true);
+  SL_LOG_DEBUG_ASSERT(is_event_system_initialized == true);
 
   // Input validation
   if (event_class >= SL_EVENT_CLASS_MAX || event_queue == NULL) {
@@ -230,7 +231,7 @@ sl_status_t sl_event_subscribe(sl_event_class_t event_class,
       subscriber->event_mask = event_mask;
       subscriber->event_queue = event_queue;
 
-      EFM_ASSERT(publisher->subscriber_count != UINT8_MAX);
+      SL_LOG_DEBUG_ASSERT(publisher->subscriber_count != UINT8_MAX);
       sl_slist_push(&publisher->subscribers, &subscriber->node);
       publisher->subscriber_count++;
     }
@@ -258,7 +259,7 @@ sl_status_t sl_event_unsubscribe(sl_event_class_t event_class,
   sl_event_subscriber_t *subscriber;
 
   // Only unsubscribe from events if the event system has been initialized
-  EFM_ASSERT(is_event_system_initialized == true);
+  SL_LOG_DEBUG_ASSERT(is_event_system_initialized == true);
 
   // Input validation
   if (event_class >= SL_EVENT_CLASS_MAX || event_mask == 0
@@ -563,7 +564,7 @@ static sl_status_t sli_event_publish(sl_event_publisher_t *publisher,
   bool event_pre_allocated = (event == NULL) ? false : true;
 
   // Only publish events if the event system has been initialized
-  EFM_ASSERT(is_event_system_initialized == true);
+  SL_LOG_DEBUG_ASSERT(is_event_system_initialized == true);
 
   // The event data cannot be NULL.
   if (publisher == NULL || event_mask == 0 || event_data == NULL) {
@@ -669,17 +670,17 @@ sl_status_t sli_event_push_to_subscriber_queues(sl_event_publisher_t* publisher,
         case osErrorParameter:
           // The event_queue is invalid. The publish fails but there is no
           // recovering from this.
-          EFM_ASSERT(false);
+          SL_LOG_DEBUG_ASSERT(false);
           break;
         case osErrorTimeout:
           // A timeout should not occur. The publish fails but there is no
           // recovering from this.
-          EFM_ASSERT(false);
+          SL_LOG_DEBUG_ASSERT(false);
           break;
         default:
           // An unknown error occurred. The publish fails but there is no
           // recovering from this.
-          EFM_ASSERT(false);
+          SL_LOG_DEBUG_ASSERT(false);
           break;
       }
     } else {
@@ -720,7 +721,7 @@ sl_status_t sl_event_irq_publisher_init(void)
 {
   sl_status_t status;
   // Make sure the event system has been initialized
-  EFM_ASSERT(is_event_system_initialized == true);
+  SL_LOG_DEBUG_ASSERT(is_event_system_initialized == true);
 
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();

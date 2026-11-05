@@ -2,11 +2,13 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from pyradioconfig.parts.common.phys.phy_common import PHY_COMMON_FRAME_INTERNAL
 
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 class PHYS_OOK(IPhy):
 
+    ip_category = IPCategory.LPW
+
     def OOK_Base(self, phy, model):
-        # Add values to existing inputs
         phy.profile_inputs.base_frequency_hz.value =  long(915000000)
         phy.profile_inputs.baudrate_tol_ppm.value = 1000
         phy.profile_inputs.channel_spacing_hz.value = 1000000
@@ -27,30 +29,20 @@ class PHYS_OOK(IPhy):
         phy.profile_inputs.syncword_1.value = long(0x0)
         phy.profile_inputs.syncword_length.value = 16
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.errors_in_timing_window.value = 0
 
         PHY_COMMON_FRAME_INTERNAL(phy, model)
 
-    # def PHY_Internal_915M_OOK_100kbps(self, model):
-    #     phy = self._makePhy(model, model.profiles.Base, '915M OOK 100kbps')
-    #
-    #     self.OOK_Base(phy, model)
-    #
-    #     # Add values to existing inputs
-    #     phy.profile_inputs.bitrate.value = 100000
-    #     phy.profile_inputs.bandwidth_hz.value = 600000
 
     def PHY_Datasheet_915M_OOK_4p8kbps(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='915M OOK 4.8kbps', phy_name=phy_name)
 
         self.OOK_Base(phy, model)
 
-        # Add values to existing inputs
         phy.profile_inputs.bitrate.value = 4800
         phy.profile_inputs.bandwidth_hz.value = 306000
 
-        # Other overrides needed to maintain validated PHY despite OOK calculator changes
         phy.profile_inputs.symbols_in_timing_window.value = 16
         phy.profile_inputs.timing_resync_period.value = 2
         phy.profile_inputs.frequency_comp_mode.value = model.vars.frequency_comp_mode.var_enum.INTERNAL_LOCK_AT_FRAME_DETECT
@@ -78,12 +70,10 @@ class PHYS_OOK(IPhy):
 
         self.OOK_Base(phy,model)
 
-        #Addvaluestoexistinginputs
         phy.profile_inputs.base_frequency_hz.value= long(433000000)
         phy.profile_inputs.bitrate.value=4800
         phy.profile_inputs.bandwidth_hz.value=306000
 
-        # Other overrides needed to maintain validated PHY despite OOK calculator changes
         phy.profile_inputs.symbols_in_timing_window.value = 16
         phy.profile_inputs.timing_resync_period.value = 2
         phy.profile_inputs.frequency_comp_mode.value = model.vars.frequency_comp_mode.var_enum.INTERNAL_LOCK_AT_FRAME_DETECT
@@ -106,7 +96,6 @@ class PHYS_OOK(IPhy):
         phy.profile_outputs.AGC_CTRL0_MODE.override = 1
         phy.profile_outputs.AGC_GAINSTEPLIM_CFLOOPSTEPMAX.override = 5
 
-    ### Customer OOK reference PHYs, use dynamic slicing ###
 
     def PHY_Reference_433M_OOK_4p8kbps(self,model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='433M OOK 4.8kbps', phy_name=phy_name)

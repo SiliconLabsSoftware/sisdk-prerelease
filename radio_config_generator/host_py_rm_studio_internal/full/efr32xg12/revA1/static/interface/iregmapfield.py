@@ -15,7 +15,7 @@ which implements this interface.
 
 __all__ = ['IRegMapField']
 
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 
 
 class IRegMapField(object):
@@ -25,7 +25,9 @@ class IRegMapField(object):
     """
     __metaclass__ = ABCMeta
 
-    def _getio(self):
+    @property
+    @abstractmethod
+    def io(self):
         """
         This is the io property getter to interact with the part's register
         field, which may be a live instance via J-Link or a simulated dictionary
@@ -37,7 +39,9 @@ class IRegMapField(object):
         """
         pass
 
-    def _setio(self, value):
+    @io.setter
+    @abstractmethod
+    def io(self, value):
         """
         This is the io property setter to interact with the part's register
         field, which may be a live instance via J-Link or a simulated dictionary
@@ -49,8 +53,7 @@ class IRegMapField(object):
         """
         pass
 
-    io = abstractproperty(_getio, _setio)
-
+    @abstractmethod
     def set(self, mask):
         """
         This is the bit-wise set method to interact with the part's register
@@ -66,7 +69,9 @@ class IRegMapField(object):
         Args:
             mask: The bit-wise set mask for the register field
         """
+        pass
 
+    @abstractmethod
     def clr(self, mask):
         """
         This is the bit-wise clear method to interact with the part's register
@@ -82,7 +87,9 @@ class IRegMapField(object):
         Args:
             mask: The bit-wise clear mask for the register field
         """
+        pass
 
+    @abstractmethod
     def tgl(self, mask):
         """
         This is the bit-wise toggle method to interact with the part's register
@@ -98,9 +105,10 @@ class IRegMapField(object):
         Args:
             mask: The bit-wise toggle mask for the register field
         """
+        pass
 
-    # Query Methods
 
+    @abstractmethod
     def getEnumNames(self):
         """
         Return a list of 'PERIPHERAL.REGISTER.FIELD.enum.ENUM' names for this field.
@@ -110,7 +118,6 @@ class IRegMapField(object):
         """
         pass
 
-    # I/O Access Methods
 
     @abstractmethod
     def isReadable(self):
@@ -132,7 +139,6 @@ class IRegMapField(object):
         """
         pass
 
-    # Accessed Flag Methods
 
     @abstractmethod
     def clearAccessedFlag(self):
@@ -173,7 +179,6 @@ class IRegMapField(object):
         """
         pass
 
-    # Dump - Public
 
     @abstractmethod
     def includeInDump(self):
@@ -199,7 +204,6 @@ class IRegMapField(object):
         """
         pass
 
-    # Dump - Private Helper
 
     @abstractmethod
     def dump(self, regValue, fieldCommentList):

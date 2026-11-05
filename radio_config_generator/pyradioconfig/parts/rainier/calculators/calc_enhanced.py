@@ -4,7 +4,6 @@ from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICal
 class CalcEnhancedRainier(ICalculator):
 
     def buildVariables(self, modem_model):
-        #Required method
         pass
 
     def calc_ehdsssen_reg(self, model):
@@ -26,12 +25,8 @@ class CalcEnhancedRainier(ICalculator):
             default = False
 
             if duty_cycled:
-                # For duty cycle, we have to disable DSSSDSAQUALEN to increase off time
-                # because if we're detecting the last 0 of the preamble, then we can't use the next symbol to qualify
-                # since the next symbol is not a 0 (start of SFD).
                 dsssdsaqualen = 0
             else:
-                # If not duty-cycled, DSSSDSAQALEN improves screening of false detects
                 dsssdsaqualen = 1
         else:
             dsssdsaqualen = 0
@@ -51,7 +46,6 @@ class CalcEnhancedRainier(ICalculator):
         else:
             do_not_care = True
 
-        #Set the following to POR values for now when Enhanced demod is selected, otherwise don't care
         self._reg_write(model.vars.MODEM_SICTRL0_SIMODE, default=True, do_not_care=do_not_care)
         self._reg_write(model.vars.MODEM_SICTRL0_NOISETHRESH, default=True, do_not_care=do_not_care)
         self._reg_write(model.vars.MODEM_SICTRL0_PEAKNUMTHRESHLW, default=True, do_not_care=do_not_care)
@@ -116,7 +110,6 @@ class CalcEnhancedRainier(ICalculator):
         dssscfecombomode = model.vars.MODEM_DIGMIXCTRL_DSSSCFECOMBO.value
         hop_enable = model.vars.hop_enable.value == model.vars.hop_enable.var_enum.ENABLED
 
-        # DSSSFRTCORRTHD is fast first symbol detection threshold
         if enhanced_en:
             do_not_care = False
             if hop_enable and dssscfecombomode != 2:
@@ -130,7 +123,6 @@ class CalcEnhancedRainier(ICalculator):
         self._reg_write(model.vars.MODEM_EHDSSSCFG2_DSSSFRTCORRTHD, dsssfrtcorrthd, do_not_care=do_not_care)
 
     def calc_enhanced_dssspatt_reg(self, model):
-        # Use DSSSPATT=0 for all cases for best frequency offset tolerance
         enhanced_en = (model.vars.MODEM_EHDSSSCTRL_EHDSSSEN.value == 1)
 
         dssspatt = 0

@@ -23,9 +23,6 @@ removes the register from the register map package altogether.
 """
 
 
-# To modify this list, locate the master copy under the rm_filters\[format]
-# package under the die rev subdirectories contained in the host_rm_svd_internal
-# container repo.
 
 EXCLUDED_REGS = [
 

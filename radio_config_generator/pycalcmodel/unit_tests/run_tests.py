@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Test runner for pycalcmodel unit tests.
 
@@ -10,7 +9,6 @@ import os
 import sys
 import subprocess
 
-# Add the Package directory to the path for imports
 test_dir = os.path.dirname(os.path.abspath(__file__))
 package_dir = os.path.join(test_dir, '..', '..')
 sys.path.insert(0, package_dir)
@@ -21,12 +19,10 @@ def run_tests():
     print("PYCALCMODEL UNIT TEST SUITE")
     print("=" * 70)
     
-    # Change to the test directory
     original_dir = os.getcwd()
     os.chdir(test_dir)
     
     try:
-        # Try to use pytest first
         try:
             import pytest
             cmd = [
@@ -52,7 +48,6 @@ def run_tests():
             return result.returncode
             
         except ImportError:
-            # Fallback to unittest
             print("pytest not available, using unittest...")
             return run_tests_with_unittest()
     finally:
@@ -62,7 +57,6 @@ def run_tests_with_unittest():
     """Run tests using unittest module."""
     import unittest
     
-    # Discover and run tests
     loader = unittest.TestLoader()
     suite = loader.discover('.', pattern='test_*.py')
     
@@ -112,7 +106,6 @@ def list_available_tests():
 def main():
     """Main function for command line execution."""
     if len(sys.argv) == 1:
-        # Run all tests
         return run_tests()
     
     elif len(sys.argv) == 2:
@@ -131,7 +124,6 @@ def main():
             return 0
         
         else:
-            # Run specific test
             test_files = list_available_tests()
             if arg in test_files:
                 return run_specific_test(arg)

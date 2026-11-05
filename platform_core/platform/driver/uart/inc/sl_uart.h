@@ -448,8 +448,8 @@ typedef void (*sl_uart_rx_err_cb_t)(sl_uart_handle_t *uart_handle,
  * @note The RX ready interrupt is level-based. While the interrupt remains enabled,
  *       the callback will be invoked again as long as RX data is present in the FIFO.
  *       To stop further notifications, either drain the FIFO from the callback using
- *       @ref sl_uart_read or @ref sl_uart_read_byte, or disable the interrupt with
- *       @ref sl_uart_disable_rx_ready_interrupt.
+ *       @ref sl_uart_read, @ref sl_uart_read_byte or @ref sl_uart_async_read,
+ *       or disable the interrupt with @ref sl_uart_disable_rx_ready_interrupt.
  *
  * @param uart_handle Handle to UART.
  *
@@ -468,8 +468,8 @@ typedef void (*sl_uart_rx_ready_cb_t)(sl_uart_handle_t *uart_handle,
  * @note The TX ready interrupt is level-based. While the interrupt remains enabled,
  *       the callback will be invoked again as long as there is space in the TX FIFO.
  *       To stop further notifications, either fill the FIFO from the callback using
- *       @ref sl_uart_write or @ref sl_uart_write_byte, or disable the interrupt with
- *       @ref sl_uart_disable_tx_ready_interrupt.
+ *       @ref sl_uart_write, @ref sl_uart_write_byte or @ref sl_uart_async_write,
+ *       or disable the interrupt with @ref sl_uart_disable_tx_ready_interrupt.
  *
  * @param uart_handle Handle to UART.
  *
@@ -540,8 +540,8 @@ typedef void (*sl_uart_tx_complete_cb_t)(sl_uart_handle_t *uart_handle,
 
 /**
  * Indicates if the driver is about to run out of buffer. If true, user is encouraged to submit
- *  new RX buffer via @ref sl_uart_async_read() to avoid losing data. See @ref sl_uart_async_on_rx_cb_t
- *  for more details.
+ * new RX buffer via @ref sl_uart_async_read() to avoid losing data. See @ref sl_uart_async_on_rx_cb_t
+ * for more details.
  */
 #define SL_UART_ASYNC_RX_EVENT_BUF_NEEDED   (1 << 2)
 
@@ -549,6 +549,12 @@ typedef void (*sl_uart_tx_complete_cb_t)(sl_uart_handle_t *uart_handle,
  * Indicates if transfer was aborted. See @ref sl_uart_async_on_rx_cb_t for more details.
  */
 #define SL_UART_ASYNC_RX_EVENT_ABORTED      (1 << 3)
+
+/**
+ * Indicates that async RX has stopped: the last queued buffer completed or was aborted
+ * and no further RX transfer is active. See @ref sl_uart_async_on_rx_cb_t for more details.
+ */
+#define SL_UART_ASYNC_RX_EVENT_STOPPED      (1 << 4)
 
 typedef uint8_t sl_uart_async_rx_event_t; ///< RX Event bitmap type.
 
@@ -632,13 +638,22 @@ typedef void (*sl_uart_async_on_tx_complete_cb_t)(sl_uart_handle_t *uart_handle,
  *       function is called in the middle of a buffer receive, @ref SL_UART_ASYNC_RX_EVENT_ABORTED
  *       and @ref SL_UART_ASYNC_RX_EVENT_BUF_RELEASED @p rx_event are set, and
  *       the value of @p size will represent the amount of bytes that were
- *       received before the transfer was aborted.
+ *       received before the transfer was aborted. On the last aborted buffer,
+ *       @ref SL_UART_ASYNC_RX_EVENT_STOPPED is also set unless a new transfer was
+ *       submitted from an earlier abort callback.
  *
  * @note In case a RX error occurs, for example a parity error is detected,
  *       transfers will be aborted with the @ref SL_UART_ASYNC_RX_EVENT_ABORTED
  *       and @ref SL_UART_ASYNC_RX_EVENT_BUF_RELEASED @p rx_event set. The callback
  *       specified with @ref sl_uart_set_rx_err_callback() will also be called and
- *       can be used to determine if/what error occurred.
+ *       can be used to determine if/what error occurred. As with
+ *       @ref sl_uart_async_disable_rx(), @ref SL_UART_ASYNC_RX_EVENT_STOPPED is
+ *       set on the last aborted buffer when no new transfer was submitted.
+ *
+ * @note When the last queued RX buffer completes successfully (nothing remains
+ *       active or pending), this callback is called with
+ *       @ref SL_UART_ASYNC_RX_EVENT_STOPPED and
+ *       @ref SL_UART_ASYNC_RX_EVENT_BUF_RELEASED set.
  *
  * @note In case of a RX timeout, this callback will be called with the
  *       @ref SL_UART_ASYNC_RX_EVENT_TIMEOUT @p rx_event set. The @p size argument will
@@ -683,12 +698,13 @@ typedef struct {
 } sl_uart_async_config_t;
 
 /// Default async configuration with auto-allocated DMA channels and a transfer pool of 5.
-#define SL_UART_ASYNC_CONFIG_DEFAULT (sl_uart_async_config_t) {                                      \
+#define SL_UART_ASYNC_CONFIG_DEFAULT                                              \
+        {                                                                                 \
           .async_tx_transfer_count = 5,                                           \
           .async_rx_transfer_count = 5,                                           \
           .async_tx_dma_channel_number = SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO,   \
           .async_rx_dma_channel_number = SL_UART_ASYNC_DMA_CHANNEL_CONFIG_AUTO,   \
-}
+        }
 
 /// UART handle state
 typedef enum {
@@ -772,10 +788,7 @@ sl_status_t sl_uart_handle_free(sl_uart_handle_t *uart_handle);
  *
  * @return  UART handle structure's size.
  ******************************************************************************/
-__STATIC_INLINE size_t sl_uart_handle_get_size(void)
-{
-  return sizeof(sl_uart_handle_t);
-}
+size_t sl_uart_handle_get_size(void);
 
 /***************************************************************************//**
  * Initializes given UART instance.
@@ -890,6 +903,11 @@ sl_status_t sl_uart_resume(sl_uart_handle_t *uart_handle);
  *       generated @c sl_uart_instances_init() using the settings from the
  *       instance configuration. Calling this function on such an instance
  *       re-configures the line at runtime.
+ *
+ * @note Enabling hardware flow control (@c SL_UART_FLOW_CONTROL_CTS_RTS) requires
+ *       valid CTS and RTS pins in the pin configuration passed to
+ *       @ref sl_uart_init(). An invalid pin configuration will cause this function
+ *       to return @ref SL_STATUS_INVALID_PARAMETER.
  *
  * @note Instances using the EUSART peripheral are limited to 7 or 8 data bits.
  *       Instances using the USART peripheral are limited to 4 to 8 data bits.
@@ -1015,10 +1033,13 @@ void sl_uart_set_tx_complete_callback(sl_uart_handle_t *uart_handle,
 /***************************************************************************//**
  * Enables the interrupt-driven RX-ready interrupt.
  *
+ * @note A callback must already be registered with @ref sl_uart_set_rx_ready_callback().
+ *
  * @note The RX ready interrupt is level-based. It fires while RX data is present
  *       in the FIFO. If the FIFO already contains data when this function is called,
- *       the interrupt will fire immediately. A callback must already be
- *       registered with @ref sl_uart_set_rx_ready_callback().
+ *       the callback will fire immediately. The callback will keep getting called
+ *       until the FIFO is emptied by reading it, or the interrupt is disabled
+ *       with @ref sl_uart_disable_rx_ready_interrupt.
  *
  * @param[in]  uart_handle Handle to UART.
  ******************************************************************************/
@@ -1027,10 +1048,13 @@ void sl_uart_enable_rx_ready_interrupt(sl_uart_handle_t *uart_handle);
 /***************************************************************************//**
  * Enables the interrupt-driven TX-ready interrupt.
  *
+ * @note A callback must already be registered with @ref sl_uart_set_tx_ready_callback().
+ *
  * @note The TX ready interrupt is level-based. It fires while there is room in
  *       the TX FIFO. If the FIFO already has space when this function is called,
- *       the interrupt will fire immediately. A callback must already be
- *       registered with @ref sl_uart_set_tx_ready_callback().
+ *       the callback will fire immediately. The callback will keep getting called
+ *       until the FIFO is completely filled by writing to it, or the interrupt
+ *       is disabled with @ref sl_uart_disable_tx_ready_interrupt().
  *
  * @param[in]  uart_handle Handle to UART.
  ******************************************************************************/
@@ -1381,12 +1405,40 @@ sl_status_t sl_uart_async_read(sl_uart_handle_t *uart_handle,
                                size_t size);
 
 /***************************************************************************//**
+ * Queues a DMA transfer that discards @p size bytes.
+ *
+ * The transfer is queued like a regular @ref sl_uart_async_read(), but drops
+ * every received byte. Users may combine discard and normal reads simultaneously to
+ * keep only the parts of a UART transaction that matter — for example, capture
+ * a sensor payload while discarding an uninteresting preamble or trailer.
+ *
+ * Completion is reported through the RX event callback just like regular transfers
+ * but with @p data set to NULL, and @p size set to the number of bytes discarded.
+ *
+ * @param[in] uart_handle Handle to UART.
+ * @param[in] size        Number of bytes to discard.
+ *
+ * @return @ref SL_STATUS_OK if successful.
+ *         @ref SL_STATUS_EMPTY if @p size is 0.
+ *         @ref SL_STATUS_INVALID_STATE if the handle is suspended.
+ *         @ref SL_STATUS_BUSY if the maximum number of queued RX transfers
+ *         has been reached.
+ *         Error code otherwise.
+ *
+ * @note This function can be called from an ISR.
+ ******************************************************************************/
+sl_status_t sl_uart_async_rx_discard(sl_uart_handle_t *uart_handle,
+                                     size_t size);
+
+/***************************************************************************//**
  * Aborts all queued and in-progress async DMA receives and disables RX.
  *
  * Releases every buffer submitted with @ref sl_uart_async_read(). Each
  * released buffer is reported through @ref sl_uart_async_on_rx_cb_t with
  * @ref SL_UART_ASYNC_RX_EVENT_ABORTED and
- * @ref SL_UART_ASYNC_RX_EVENT_BUF_RELEASED set.
+ * @ref SL_UART_ASYNC_RX_EVENT_BUF_RELEASED set. The last aborted buffer also
+ * has @ref SL_UART_ASYNC_RX_EVENT_STOPPED set unless a new transfer was
+ * submitted from an earlier abort callback.
  *
  * @param[in]  uart_handle Handle to UART.
  *

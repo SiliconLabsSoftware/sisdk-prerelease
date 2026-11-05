@@ -2,6 +2,8 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy_filter import IPhy
 
 
 class PhyFilters(IPhyFilter):
+    included_in_distribution_release = True
+
     customer_phy_groups = []
 
     sim_tests_phy_groups = ['Phys_sim_tests']
@@ -13,5 +15,10 @@ class PhyFilters(IPhyFilter):
         'Phys_Datasheet',
     ]
 
-    # PHYs to exclude from regression
+    simplicity_studio_non_ui_phy_groups = [
+        'PHY_internal_base',
+        'Phys_RAIL_Base_Standard_Bluetooth_LE',
+        'Phys_RAIL_Base_Standard_IEEE802154',
+    ]
+
     virtual_phy_groups = ['Phys_Internal_Base_ValOnly_aliases']

@@ -12,13 +12,23 @@ requires:
 - name: trustzone_nonsecure
 template_contribution:
 - name: tfm_interface_func
-  value: tfm_crypto_generate_random
+  value:
+    function: tfm_crypto_generate_random
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_generate_key
+  value:
+    function: tfm_crypto_generate_key
+    key_checks:
+    - source: key_attributes
+      invec: 1
 
 - name: tfm_interface_func
-  value: tfm_crypto_generate_key_custom
+  value:
+    function: tfm_crypto_generate_key_custom
+    key_checks:
+    - source: key_attributes
+      invec: 1
 
 documentation:
   url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf

@@ -44,8 +44,12 @@
  * bootloader_crc is linked. */
 #define SMP_RECORD_CRC32_INIT  (0xFFFFFFFFUL)
 
-static uint32_t smp_record_crc32_stream(const uint8_t *buffer, size_t length, uint32_t prevResult)
+uint32_t btl_smp_switch_record_crc32(const uint8_t *buffer, size_t length, uint32_t prevResult)
 {
+  if ((buffer == NULL) || (length == 0U)) {
+    // Nothing to feed into the CRC engine; the stream is unchanged.
+    return prevResult;
+  }
 #if defined(_CMU_CLKEN0_MASK)
   CMU->CLKEN0_SET = CMU_CLKEN0_GPCRC;
 #endif
@@ -142,7 +146,7 @@ static bool record_crc_ok(const btl_smp_switch_record_t *rec)
   if (rec->version != BTL_SMP_RECORD_VERSION) {
     return false;
   }
-  return smp_record_crc32_stream((const uint8_t *)rec, BTL_SMP_RECORD_HEADER_CRC_LEN, SMP_RECORD_CRC32_INIT) == rec->crc32;
+  return btl_smp_switch_record_crc32((const uint8_t *)rec, BTL_SMP_RECORD_HEADER_CRC_LEN, SMP_RECORD_CRC32_INIT) == rec->crc32;
 }
 
 bool btl_smp_switch_erase_page(bool use_page_1)
@@ -178,7 +182,7 @@ bool btl_smp_switch_write_record(bool use_page_1,
   rec.seq     = seq;
   rec.app_id  = app_id;
   rec.version = (uint8_t)BTL_SMP_RECORD_VERSION;
-  rec.crc32   = smp_record_crc32_stream((const uint8_t *)&rec, BTL_SMP_RECORD_HEADER_CRC_LEN, SMP_RECORD_CRC32_INIT);
+  rec.crc32   = btl_smp_switch_record_crc32((const uint8_t *)&rec, BTL_SMP_RECORD_HEADER_CRC_LEN, SMP_RECORD_CRC32_INIT);
 
   /* Flash write order: payload words first, then CRC, then magic last. */
   const uint32_t word4 = (uint32_t)seq | ((uint32_t)app_id << 16) | ((uint32_t)rec.version << 24);

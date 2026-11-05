@@ -552,7 +552,7 @@ sl_status_t sl_wisun_reset_regulation_duty_cycle(void);
  * key. Entries may also be evicted when the security neighbor table is full.
  *
  * @note On a 32-bit Cortex-M33, each allocated MAC neighbor table entry
- * consumes ~440 bytes of heap in Full/FFN libraries and ~416 bytes in BR/LFN
+ * consumes ~400 bytes of heap in Full/FFN libraries and ~376 bytes in BR/LFN
  * libraries (excluding the associated security neighbor entry).
  * Each allocated security neighbor table entry consumes ~48 bytes of heap.
  * These values include the 8-byte heap metadata associated with each
@@ -1461,54 +1461,6 @@ sl_status_t sl_wisun_set_last_gasp(bool enable);
  * Available in libraries: Full, FFN (see @ref API_AVAILABILITY)
  *****************************************************************************/
 sl_status_t sl_wisun_set_first_breath(bool enable);
-
-/**************************************************************************//**
- * Set the Local Cross-PAN Multicast (LXPM) prefix.
- *
- * @param[in] prefix LXPM prefix to set
- * @param[in] prefix_length Length of the LXPM prefix in bits (must be a multiple of 8)
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * This function sets the Local Cross-PAN Multicast (LXPM) prefix shared by all
- * LXPM groups. The prefix must be a valid IPv6 prefix.
- * LXPM groups are created by joining a multicast group matching the prefix through IPV6_JOIN_GROUP
- * socket option.
- * Unused bytes of the prefix will be used to identify group IDs.
- * Members of joined groups are notified through @ref SL_WISUN_MSG_LXPM_NEIGHBOR_UPDATED_IND_ID.
- *
- * @note Calling this function again with a different prefix will reset the LXPM groups
- *       and reinitialize it with the new prefix.
- *       Any existing multicast group matching the new prefix will now be used as LXPM group.
- *       Multicast groups matching the old prefix will no longer be used as LXPM group but
- *       are not removed.
- *
- * Available in libraries: Full, FFN (see @ref API_AVAILABILITY)
- *****************************************************************************/
-sl_status_t sl_wisun_set_lxpm_prefix(const uint8_t *prefix, uint8_t prefix_length);
-
-/**************************************************************************//**
- * Get the number of neighbors in an LXPM group.
- *
- * @param[in] group_address Group address
- * @param[out] neighbor_count Number of neighbors in the group
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * @note Available in libraries: Full, FFN (see @ref API_AVAILABILITY)
- *****************************************************************************/
-sl_status_t sl_wisun_get_lxpm_group_neighbor_count(const in6_addr_t *group_address, uint8_t *neighbor_count);
-
-/**************************************************************************//**
- * Get the neighbors in an LXPM group.
- *
- * @param[in] group_address Group address
- * @param[in,out] neighbor_count Maximum number of neighbors to read on input,
- *                               number of neighbors read on output
- * @param[out] neighbor_addresses Pointer to memory where to store neighbor link-local IPv6 addresses
- * @return SL_STATUS_OK if successful, an error code otherwise
- *
- * @note Available in libraries: Full, FFN (see @ref API_AVAILABILITY)
- *****************************************************************************/
-sl_status_t sl_wisun_get_lxpm_group_neighbors(const in6_addr_t *group_address, uint8_t *neighbor_count, in6_addr_t *neighbor_addresses);
 
 /**************************************************************************//**
  * Configure the FFN's unicast listen/sleep schedule for power saving.

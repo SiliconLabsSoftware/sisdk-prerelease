@@ -34,6 +34,7 @@
 #include "sl_common.h"
 #include "em_emu.h"
 #include "em_bus.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup rmu RMU - Reset Management Unit
@@ -255,7 +256,7 @@ void RMU_ResetControl(RMU_Reset_TypeDef reset, RMU_ResetMode_TypeDef mode)
 #if defined(_EMU_RSTCTRL_MASK)
   BUS_RegBitWrite(&EMU->RSTCTRL, (uint32_t)shift, mode ? 1 : 0);
 #elif defined(_RMU_CTRL_PINRMODE_MASK)
-  EFM_ASSERT(shift < 32);
+  SL_LOG_DEBUG_ASSERT(shift < 32);
   val = (uint32_t)mode << shift;
   RMU->CTRL = (RMU->CTRL & ~reset) | val;
 #else

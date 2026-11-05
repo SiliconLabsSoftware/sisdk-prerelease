@@ -19,22 +19,12 @@ __all__ = [ 'ModelOutput', 'ModelOutputContainer', 'ModelOutputType',
 
 @unique
 class ModelOutputType(Enum):
-    #: This output maps to a CMSIS SVD register field.
     SVD_REG_FIELD = 0
-    #: This output maps to a virtual memory-mapped register field in the sequencer RAM, which is accessed
-    #:   via a virtual SEQ peripheral.
     SEQ_REG_FIELD = 1
-    #: A purely informational output that is not directly used in the part configuration.
     INFO = 2
-    #: This output is used in the RAIL configuration structure.
     RAIL_CONFIG = 3
-    #: This output translates to a firmware configuration function, where the variable name is
-    #:   the function name and the variable value is the single parameter passed into the function.
     CONFIG_FUNCTION = 4
-    #: This output is automatically calculated and shown in GUI, use checkbox to explicitly set,
-    #:   ensures this output is tied to the input in a single control in the GUI.
     LINKED_IO = 5
-    #: This output is used as an input to the DUT as a variable (e.g. not a register).
     SW_VAR = 6
 
 
@@ -43,7 +33,6 @@ class ModelOutput(object):
                  value_limit_min=None, value_limit_max=None, override=None,
                  fractional_digits=None, in_public_log=False,
                  groups=None):
-        # assert isinstance(var, ModelVariable), "FATAL ERROR: var is not ModelVariable"
         self._var = var
         if readable_name is None:
             self.readable_name = self._var.name
@@ -52,9 +41,7 @@ class ModelOutput(object):
         self.category = category
         self.output_type = output_type
         self.override = override
-        #: The minimum limit of the value (inclusive)
         self.value_limit_min = value_limit_min
-        #: The maximum limit of the value (inclusive)
         self.value_limit_max = value_limit_max
         self.fractional_digits = fractional_digits
         self.in_public_log = in_public_log
@@ -244,8 +231,6 @@ class ModelOutputContainer(object):
         return self.ZZ_OUTPUT_KEYS[var_name]
 
     def append(self, output):
-        # assert isinstance(output, ModelOutput), \
-        #     "FATAL ERROR: output must be ModelOutput"
         if output.var_name in self:
             raise NameError("'{}' is already defined!".format(output.var_name))
         self.ZZ_OUTPUT_KEYS[output.var_name] = output

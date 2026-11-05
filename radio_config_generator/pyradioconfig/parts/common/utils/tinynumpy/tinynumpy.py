@@ -12,14 +12,11 @@ import math
 from math import sqrt
 import operator
 
-# Python 2/3 compat
 if sys.version_info >= (3, ):
     xrange = range
 
-# Define version numer
 __version__ = '0.0.1dev'
 
-# Define dtypes: struct name, short name, numpy name, ctypes type
 _dtypes = [('B', 'b1', 'bool', ctypes.c_bool),
            ('b', 'i1', 'int8', ctypes.c_int8),
            ('B', 'u1', 'uint8', ctypes.c_uint8),
@@ -34,7 +31,6 @@ _dtypes = [('B', 'b1', 'bool', ctypes.c_bool),
            ('f', 'f4', 'float', ctypes.c_float),
            ]
 
-# Inject common dtype names
 _known_dtypes = [d[2] for d in _dtypes]
 for d in _known_dtypes:
     globals()[d] = d
@@ -104,7 +100,6 @@ def squeeze_strides(s):
 def _shape_from_object(obj):
     
     shape = []
-    # todo: make more efficient, use len() etc
     def _shape_from_object_r(index, element, axis):
         try:
             for i, e in enumerate(element):
@@ -124,7 +119,6 @@ def _shape_from_object(obj):
 
 def _assign_from_object(array, obj):
     key = []
-    # todo: make more efficient, especially the try-except
     def _assign_from_object_r(element):
         try:
             for i, e in enumerate(element):
@@ -166,7 +160,6 @@ def _zerositer(n):
 
 
 
-## Public functions
 
 
 def array(obj, dtype=None, copy=True, order=None):
@@ -179,7 +172,6 @@ def array(obj, dtype=None, copy=True, order=None):
     dtype = _convert_dtype(dtype)
     
     if isinstance(obj, ndarray):
-        # From existing array
         a = obj.view()
         if dtype is not None and dtype != a.dtype:
             a = a.astype(dtype)
@@ -187,12 +179,8 @@ def array(obj, dtype=None, copy=True, order=None):
             a = a.copy()
         return a
     if hasattr(obj, '__array_interface__'):
-        # From something that looks like an array, we can create
-        # the ctypes array for this and use that as a buffer
         D = obj.__array_interface__
-        # Get dtype
         dtype_orig = _convert_dtype(D['typestr'][1:])
-        # Create array
         if D['strides']:
             itemsize = int(D['typestr'][-1])
             bufsize = D['strides'][0] * D['shape'][0] // itemsize
@@ -203,23 +191,19 @@ def array(obj, dtype=None, copy=True, order=None):
         buffer = BufType.from_address(D['data'][0])
         a = ndarray(D['shape'], dtype_orig,
                     buffer=buffer, strides=D['strides'], order=order)
-        # Convert or copy?
         if dtype is not None and dtype != dtype_orig:
             a = a.astype(dtype)
         elif copy:
             a = a.copy()
         return a
     else:
-        # From some kind of iterable
         shape = _shape_from_object(obj)
-        # Try to derive dtype
         if dtype is None:
             el = obj
             while isinstance(el, (tuple, list)) and el:
                 el = el[0]
             if isinstance(el, int):
                 dtype = 'int64'
-        # Create array
         a = ndarray(shape, dtype, order=None)
         _assign_from_object(a, obj)
         return a
@@ -487,12 +471,10 @@ def arange(*args, **kwargs):
     When using a non-integer step, such as 0.1, the results will often not
     be consistent.  It is better to use ``linspace`` for these cases.
     """
-    # Get dtype
     dtype = kwargs.pop('dtype', None)
     if kwargs:
         x = list(kwargs.keys())[0]
         raise TypeError('arange() got an unexpected keyword argument %r' % x)
-    # Parse start, stop, step
     if len(args) == 0:
         raise TypeError('Required argument "start" not found')
     elif len(args) == 1:
@@ -503,10 +485,8 @@ def arange(*args, **kwargs):
         start, stop, step = int(args[0]), int(args[1]), int(args[2])
     else:
         raise TypeError('Too many input arguments')
-    # Init
     iter = xrange(start, stop, step)
     a = empty((len(iter),), dtype=dtype)
-    #a[:] = list(iter)
     index = 0
     for x in list(iter):
         a[index] = x
@@ -521,17 +501,14 @@ def linspace(start, stop, num=50, endpoint=True, retstep=False, dtype=None):
     evenly spaced samples, calculated over the interval [start, stop].
     The endpoint of the interval can optionally be excluded.
     """
-    # Prepare
     start, stop = float(start), float(stop)
     ra = stop - start
     if endpoint:
         step = ra / (num-1)
     else:
         step = ra / num
-    # Create
     a = empty((num,), dtype)
     a[:] = [start + i * step for i in xrange(num)]
-    # Return
     if retstep:
         return a, step
     else:
@@ -575,7 +552,6 @@ def cross(u, v):
 
     uxv = []
 
-    # http://mathworld.wolfram.com/CrossProduct.html
     if uDim == vDim == 3:
         try:
             for i in range(uDim):
@@ -596,7 +572,6 @@ def dot(u, v):
     uDim = len(u)
     vDim = len(v)
 
-    # http://reference.wolfram.com/language/ref/Dot.html
     if uDim == vDim == 3:
         try:
             u_dot_v = sum(map(operator.mul, u, v))
@@ -606,7 +581,6 @@ def dot(u, v):
         raise IndexError('Vector has invalid dimensions')
     return u_dot_v
 
-## The class
 
 class ndarray(object):
     """ ndarray(shape, dtype='float64', buffer=None, offset=0,
@@ -707,43 +681,32 @@ class ndarray(object):
     
     def __init__(self, shape, dtype='float64', buffer=None, offset=0,
                  strides=None, order=None):
-        # Check order
         if order is not None:
             raise RuntimeError('ndarray order parameter is not supported')
-        # Check and set shape
         assert isinstance(shape, tuple)
         assert all([isinstance(x, int) for x in shape])
         self._shape = shape
-        # Check and set dtype
         dtype = _convert_dtype(dtype) if (dtype is not None) else 'float64'
         if dtype not in _known_dtypes:
             raise TypeError('data type %r not understood' % dtype)
         self._dtype = dtype
-        # Itemsize is directly derived from dtype
         self._itemsize = int(_convert_dtype(dtype, 'short')[-1])
         
         if buffer is None:
-            # New array
             self._base = None
-            # Check and set offset and strides
             assert offset == 0
             self._offset = 0
             assert strides is None
             self._strides = _strides_for_shape(self._shape, self.itemsize)
         
         else:
-            # Existing array
             if isinstance(buffer, ndarray) and buffer.base is not None:
                 buffer = buffer.base
-            # Keep a reference to avoid memory cleanup
             self._base = buffer
-            # for ndarray we use the data property
             if isinstance(buffer, ndarray):
                 buffer = buffer.data
-            # Check and set offset
             assert isinstance(offset, int) and offset >= 0
             self._offset = offset
-            # Check and set strides
             if strides is None:
                 strides = _strides_for_shape(shape, self.itemsize)
             assert isinstance(strides, tuple)
@@ -751,18 +714,13 @@ class ndarray(object):
             assert len(strides) == len(shape)
             self._strides = strides
         
-        # Define our buffer class
         buffersize = self._strides[0] * self._shape[0] // self._itemsize
         buffersize += self._offset
         BufferClass = _convert_dtype(dtype, 'ctypes') * buffersize
-        # Create buffer
         if buffer is None:
             self._data = BufferClass()
         else:
-        #elif isinstance(buffer, ctypes.Array):
             self._data = BufferClass.from_address(ctypes.addressof(buffer))
-        #else:
-        #    self._data = BufferClass.from_buffer(buffer)
     
     @property
     def __array_interface__(self):
@@ -770,9 +728,7 @@ class ndarray(object):
         http://docs.scipy.org/doc/numpy/reference/arrays.interface.html
         """
         readonly = False
-        # typestr
         typestr = '<' + _convert_dtype(self.dtype, 'short')
-        # Pointer
         if isinstance(self._data, ctypes.Array):
             ptr = ctypes.addressof(self._data)
         elif hasattr(self._data, '__array_interface__'):
@@ -785,15 +741,12 @@ class ndarray(object):
         else:
             raise TypeError('Cannot get address to underlying array data')
         ptr += self._offset * self.itemsize
-        #
         return dict(version=3,
                     shape=self.shape,
                     typestr=typestr,
                     descr=[('', typestr)],
                     data=(ptr, readonly),
                     strides=self.strides,
-                    #offset=self._offset,
-                    #mask=None,
                     )
     
     def __len__(self):
@@ -802,29 +755,22 @@ class ndarray(object):
     def __getitem__(self, key):
         offset, shape, strides = self._index_helper(key)
         if not shape:
-            # Return scalar
             return self._data[offset]
         else:
-            # Return view
             return ndarray(shape, self.dtype,
                            offset=offset, strides=strides, buffer=self)
     
     def __setitem__(self, key, value):
         
-        # Get info for view
         offset, shape, strides = self._index_helper(key)
         
-        # Is this easy?
         if not shape:
             self._data[offset] = value
             return
 
-        # Create view to set data to
         view = ndarray(shape, self.dtype,
                         offset=offset, strides=strides, buffer=self)
         
-        # Get data to set as a list (because getting slices from ctype
-        # arrays yield lists anyway). The list is our "contiguous array" 
         if type(value) is list:
             value_list = value
         elif type(value) is float:
@@ -838,14 +784,10 @@ class ndarray(object):
                 value = array(value, copy=False)
             value_list = value._toflatlist()
         
-        # Check if size match
         if view.size != len(value_list):
             raise ValueError('Number of elements in source does not match '
                                 'number of elements in target.')
         
-        # Assign data in most efficient way that we can. This code
-        # looks for the largest semi-contiguous block: the block that
-        # we can access as a 1D array with a stepsize.
         subviews = [view]
         value_index = 0
         count = 0
@@ -878,11 +820,9 @@ class ndarray(object):
             raise TypeError('Only length-1 arrays can be converted to scalar')
     
     def __repr__(self):
-        # If more than 100 elements, show short repr
         if self.size > 100:
             shapestr = 'x'.join([str(i) for i in self.shape])
             return '<ndarray %s %s at 0x%x>' % (shapestr, self.dtype, id(self))
-        # Otherwise, try to show in nice way
         def _repr_r(s, axis, offset):
             axisindent = min(2, max(0, (self.ndim - axis - 1)))
             if axis < len(self.shape):
@@ -918,14 +858,10 @@ class ndarray(object):
             out[:] = [i1==i2 for (i1, i2) in zip(self.flat, other.flat)]
             return out
     
-    ## Private helper functions
     
     def _index_helper(self, key):
         
-        # Indexing spec is located at:
-        # http://docs.scipy.org/doc/numpy/reference/arrays.indexing.html
 
-        # Promote to tuple.
         if not isinstance(key, tuple):
             key = (key,)
 
@@ -982,7 +918,6 @@ class ndarray(object):
                     subviews.append(subview[i])
         return value_list
     
-    ## Properties
     
     @property
     def ndim(self):
@@ -1005,28 +940,19 @@ class ndarray(object):
         if self.size != _size_for_shape(newshape):
             raise ValueError('Total size of new array must be unchanged')
         if _get_step(self) == 1:
-            # Contiguous, hooray!
             self._shape = tuple(newshape)
             self._strides = _strides_for_shape(self._shape, self.itemsize)
             return
         
-        # Else, try harder ... This code supports adding /removing
-        # singleton dimensions. Although it may sometimes be possible
-        # to split a dimension in two if the contiguous blocks allow
-        # this, we don't bother with such complex cases for now.
-        # Squeeze shape / strides 
         N = self.ndim
         shape = [self.shape[i] for i in range(N) if self.shape[i] > 1]
         strides = [self.strides[i] for i in range(N) if self.shape[i] > 1]
-        # Check if squeezed shapes match
         newshape_ = [newshape[i] for i in range(len(newshape)) 
                      if newshape[i] > 1]
         if newshape_ != shape:
             raise AttributeError('incompatible shape for non-contiguous array')
-        # Modify to make this data work in loop
         strides.append(strides[-1])
         shape.append(1)
-        # Form new strides
         i = -1
         newstrides = []
         try:
@@ -1037,10 +963,8 @@ class ndarray(object):
                     i -= 1
                     newstrides.append(strides[i])
         except IndexError:
-            # Fail
             raise AttributeError('incompatible shape for non-contiguous array')
         else:
-            # Success
             newstrides.reverse()
             self._shape = tuple(newshape)
             self._strides = tuple(newstrides)
@@ -1103,11 +1027,9 @@ class ndarray(object):
                     UPDATEIFCOPY=False,  # We don't support this feature
                )
     
-    ## Methods - managemenet
     
     def fill(self, value):
         assert isinstance(value, (int, float))
-        #self[:] = value
         for index in range(self.size):
             self._data[index] = value
     
@@ -1126,7 +1048,6 @@ class ndarray(object):
     
     def flatten(self):
         out = empty((self.size,), self.dtype)
-        #out[:] = self
         for index in range(self.size):
             out[index] = self._data[index]
         return out
@@ -1152,14 +1073,11 @@ class ndarray(object):
         return out
     
     def transpose(self):
-        # Numpy returns a view, but we cannot do that since we do not
-        # support Fortran ordering
         ndim = self.ndim
         if ndim < 2:
             return self.view()
         shape = self.shape[::-1]
         out = empty(shape, self.dtype)
-        #
         if ndim == 2:
             for i in xrange(self.shape[0]):
                 out[:, i] = self[i, :]
@@ -1190,10 +1108,7 @@ class ndarray(object):
         else:
             raise ValueError('new type not compatible with array.')
     
-    ## Methods - statistics
     
-    # We use the self.flat generator here. self._toflatlist() would be
-    # faster, but it might take up significantly more memory.
     
     def all(self, axis=None):
         if axis:
@@ -1214,7 +1129,6 @@ class ndarray(object):
         if axis:
             raise (TypeError, "axis argument is not supported")
         return max(self.flat)
-        #return max(self._toflatlist())  # almost twice as fast
     
     def sum(self, axis=None):
         if axis:
@@ -1278,7 +1192,6 @@ class ndarray(object):
         for x in self.flat:
             p *= x
             L.append(p)
-        #out[:] = L
         index = 0
         for x in L:
             out[index] = x
@@ -1295,7 +1208,6 @@ class ndarray(object):
         for x in self.flat:
             p += x
             L.append(p)
-        #out[:] = L
         index = 0
         for x in L:
             out[index] = x
@@ -1320,7 +1232,6 @@ class ndarray(object):
         for x in self.flat:
             p = x * y
             L.append(p)
-        #out[:] = L
         index = 0
         for x in L:
             out[index] = x
@@ -1333,7 +1244,6 @@ class ndarray(object):
         for x in self.flat:
             p = x * y
             L.append(p)
-        #out[:] = L
         index = 0
         for x in L:
             out[index] = x
@@ -1346,7 +1256,6 @@ class ndarray(object):
         for x in self.flat:
             p = x - y
             L.append(p)
-        #out[:] = L
         index = 0
         for x in L:
             out[index] = x
@@ -1359,7 +1268,6 @@ class ndarray(object):
         for x in self.flat:
             p = x - y
             L.append(p)
-        #out[:] = L
         index = 0
         for x in L:
             out[index] = x
@@ -1372,7 +1280,6 @@ class ndarray(object):
         for x in self.flat:
             p = math.pow(x,y)
             L.append(p)
-        #out[:] = L
         index = 0
         for x in L:
             out[index] = x
@@ -1385,7 +1292,6 @@ class ndarray(object):
         for x in self.flat:
             p = math.pow(x,y)
             L.append(p)
-        #out[:] = L
         index = 0
         for x in L:
             out[index] = x
@@ -1398,7 +1304,6 @@ class ndarray(object):
         for x in self.flat:
             p = -x
             L.append(p)
-        #out[:] = L
         index = 0
         for x in L:
             out[index] = x
@@ -1411,7 +1316,6 @@ class ndarray(object):
         for x in self.flat:
             p = x / y
             L.append(p)
-        #out[:] = L
         index = 0
         for x in L:
             out[index] = x
@@ -1424,7 +1328,6 @@ class ndarray(object):
         for x in self.flat:
             p = x / y
             L.append(p)
-        #out[:] = L
         index = 0
         for x in L:
             out[index] = x
@@ -1463,7 +1366,6 @@ class LinAlgError(Exception):
 def det(A):
     if len(A) == 3 and [len(vec)==3 for vec in A]:
         try:
-            # http://mathworld.wolfram.com/Determinant.html
             det_A = (A[0][0] * A[1][1] * A[2][2] + A[0][1] * A[1][2] *
                      A[2][0] + A[0][2] * A[1][0] * A[2][1] - (A[0][2] *
                      A[1][1] * A[2][0] + A[0][1] * A[1][0] * A[2][2] +

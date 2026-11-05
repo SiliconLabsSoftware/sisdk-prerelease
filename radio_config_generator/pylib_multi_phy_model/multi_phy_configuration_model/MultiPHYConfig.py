@@ -50,7 +50,6 @@ class MultiPHYConfig(object):
         self._model = model
 
     def validate(self):
-        # TODO: Add Jython compatible validation here
         return True
 
     def to_xml(self, filename):
@@ -108,10 +107,8 @@ class MultiPHYConfig(object):
             print("WARNING: Parsing XML with XSD version {} in MultiPHYConfig {}".format(MultiPHYConfig.xsd_version(),
                                                                                       self._model.xsd_version))
 
-        # Hack for channel power, which cna have strings and integers
         for base_channel_configuration in self._model.base_channel_configurations.base_channel_configuration:
             for channel_config_entry in base_channel_configuration.channel_config_entries.channel_config_entry:
-                # check if is numeric, isnumeric() doesn't handle negative values
                 try:
                     channel_config_entry.max_power = int(channel_config_entry.max_power)
                 except ValueError:
@@ -121,16 +118,13 @@ class MultiPHYConfig(object):
 
 
     def _preprocess_model(self, model):
-        # clear out some non-compatible object types before serialization
         processed_model = copy.copy(model)
         processed_model.base_channel_configurations = copy.copy(model.base_channel_configurations)
         processed_model.base_channel_configurations.base_channel_configuration = [
             copy.copy(c) for c in model.base_channel_configurations.base_channel_configuration
         ]
 
-        # Loop through each base channel configuration
         for base_channel_configuration in processed_model.base_channel_configurations.base_channel_configuration:
-            # process phy_config_base
             if not isinstance(base_channel_configuration.phy_config_base, phy_config_baseType):
                 phy_config_base_dict = base_channel_configuration.phy_config_base
                 phy_config_base = phy_config_baseType()
@@ -138,7 +132,6 @@ class MultiPHYConfig(object):
                     phy_config_base.add_register(self._conver_register_obj_to_xml(regsiter_obj))
                 base_channel_configuration.phy_config_base = phy_config_base
 
-            # process phy_config_delta_subtract
             if not isinstance(base_channel_configuration.phy_config_delta_subtract, phy_config_delta_subtractType):
                 phy_config_delta_subtract_dict = base_channel_configuration.phy_config_delta_subtract
                 phy_config_delta_subtract = phy_config_delta_subtractType()
@@ -151,10 +144,8 @@ class MultiPHYConfig(object):
                 copy.copy(c) for c in base_channel_configuration.channel_config_entries.channel_config_entry
             ]
 
-            # Loop through each channel config entry
             for channel_config_entry in base_channel_configuration.channel_config_entries.channel_config_entry:
                 if not isinstance(channel_config_entry.phy_config_delta_add, phy_config_delta_addType):
-                    # process phy_config_delta_add
                     phy_config_delta_add_dict = channel_config_entry.phy_config_delta_add
                     phy_config_delta_add = phy_config_delta_addType()
                     for register_name, regsiter_obj in phy_config_delta_add_dict.items():
@@ -162,7 +153,6 @@ class MultiPHYConfig(object):
                     channel_config_entry.phy_config_delta_add = phy_config_delta_add
 
                 if not isinstance(channel_config_entry.phy_config_dont_care_bitmasks, phy_config_dont_care_bitmasksType):
-                    # process phy_config_dont_care_bitmasks
                     phy_config_dont_care_bitmasks_dict = channel_config_entry.phy_config_dont_care_bitmasks
                     phy_config_dont_care_bitmasks = phy_config_dont_care_bitmasksType()
                     for register_name, register_obj in phy_config_dont_care_bitmasks_dict.items():
@@ -170,7 +160,6 @@ class MultiPHYConfig(object):
                     channel_config_entry.phy_config_dont_care_bitmasks = phy_config_dont_care_bitmasks
 
                 if not isinstance(channel_config_entry.phy_config_chosen_aliases, phy_config_chosen_aliasesType):
-                    # process phy_config_chosen_aliases
                     phy_config_chosen_aliases_dict = channel_config_entry.phy_config_chosen_aliases
                     phy_config_chosen_aliases = phy_config_chosen_aliasesType()
                     for address, address_alias in phy_config_chosen_aliases_dict.items():
@@ -178,12 +167,10 @@ class MultiPHYConfig(object):
                     channel_config_entry.phy_config_chosen_aliases = phy_config_chosen_aliases
 
                 if (channel_config_entry.radio_configurator_output_model is not None) and not type(channel_config_entry.radio_configurator_output_model) in [str, basestring, unicode]:
-                    # process radio_configurator_output_model
                     radio_configurator_output_model_obj = channel_config_entry.radio_configurator_output_model
                     channel_config_entry.radio_configurator_output_model = self.__radio_configurator_output_model_to_XML_str(radio_configurator_output_model_obj)
 
                 if (channel_config_entry.full_register_model is not None) and not type(channel_config_entry.full_register_model) in [str, basestring, unicode]:
-                    # process full_register_model
                     rm2xml = RMtoXML()
                     channel_config_entry.full_register_model = rm2xml.export_to_string(channel_config_entry.full_register_model)
 
@@ -272,7 +259,6 @@ class MultiPHYConfig(object):
     @staticmethod
     def generate_multi_phy_model_from_single_phy_models(single_phy_model_list):
 
-        # : generate multi phy configuration using info from first phy in the list
         single_phy_model = single_phy_model_list[0]
         multi_phy_model = multi_phy_configuration(part_family=single_phy_model.part_family.lower(),
                                                   part_revision=single_phy_model.part_revision,
@@ -281,12 +267,10 @@ class MultiPHYConfig(object):
                                                   status_code=ModelDiffCodes.OK.value,
                                                   target=single_phy_model.target)
 
-        # : create and add base channel configuration
         base_channel_configuration = base_channel_configurationType()
         base_channel_configuration.name = "UNKNOWN"
         multi_phy_model.base_channel_configurations.add_base_channel_configuration(base_channel_configuration)
 
-        # : loop through each phy and add channel config
         for single_phy_model in single_phy_model_list:
 
             channel_config_entry = channel_config_entryType(name=single_phy_model.phy.name,
@@ -301,7 +285,6 @@ class MultiPHYConfig(object):
 
             base_channel_configuration.channel_config_entries.add_channel_config_entry(channel_config_entry)
 
-        # : Process diffs
         from pylib_multi_phy_model.register_diff_tool.model_diff import ModelDiff
         ModelDiff.process_diffs(multi_phy_model, skip_running_radio_config_on_channel=True)
 

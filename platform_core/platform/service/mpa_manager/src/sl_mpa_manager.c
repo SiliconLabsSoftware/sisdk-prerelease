@@ -37,6 +37,7 @@
 
 #include <stdbool.h>
 
+#include "sl_log_helper.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -114,7 +115,7 @@ sl_status_t sl_mpa_manager_configure_region(sl_mpa_manager_region_t* handle,
   }
 
   // Assert architecture specific limitations on valid mpa regions.
-  EFM_ASSERT(sli_mpa_manager_device_region_validate((uint32_t)base_address,
+  SL_LOG_DEBUG_ASSERT(sli_mpa_manager_device_region_validate((uint32_t)base_address,
                                                     (uint32_t)size));
 
   CORE_DECLARE_IRQ_STATE;

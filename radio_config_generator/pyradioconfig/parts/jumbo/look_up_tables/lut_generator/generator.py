@@ -51,9 +51,7 @@ class Generator:
         modulation_dict = processor.generate_modulation()
         freq_dict_fan1v0 = processor.generate_frequency_channel_fan1v0()
         freq_dict_fan1v1 = processor.generate_frequency_channel_fan1v1()
-        # Generate Wisun1v0 LUTs
         self._generate_wisun1v0_luts(modulation_dict, freq_dict_fan1v0)
-        # Generate Wisun1v1 LUTs
         self._generate_wisun1v1_luts(modulation_dict, freq_dict_fan1v1)
 
     def _generate_wisun1v0_luts(self, modulation_dict: dict[str,dict], freq_dict_fan1v0: dict[str,dict]):

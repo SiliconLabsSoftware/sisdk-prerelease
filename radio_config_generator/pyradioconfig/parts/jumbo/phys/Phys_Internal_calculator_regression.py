@@ -1,18 +1,18 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
+from pycalcmodel.core.common import IPCategory
 
 class PHYS_Internal_calculator_regression_Jumbo(IPhy):
+
+    ip_category = IPCategory.LPW
 
 
     def PHY_Jira_MCUW_RADIO_CFG_827_test_timing_window_calc_longer_preamble_pattern (self, model):
         phy = self._makePhy(model, model.profiles.Base, readable_name='PHY_Jira_MCUW_RADIO_CFG_827_test_timing_window_calc_longer_preamble_pattern')
 
-        # Zoltan found if preamble_pattern_len > 2 (such as 4), calculated timing window may violate
-        # Max timing window = (preamble_length) / 2 rule
-        # This PHY tests the calculation in such a case.
 
 
 
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.rx_xtal_error_ppm.value = 2
         phy.profile_inputs.tx_xtal_error_ppm.value = 2
         phy.profile_inputs.deviation.value = 20000
@@ -24,13 +24,9 @@ class PHYS_Internal_calculator_regression_Jumbo(IPhy):
         phy.profile_inputs.baudrate_tol_ppm.value = 0
         phy.profile_inputs.shaping_filter_param.value = 0.5
 
-        # Test case
         phy.profile_inputs.preamble_pattern.value = 5
         phy.profile_inputs.preamble_pattern_len.value = 4
 
-        # Control case should yield same timing window config
-        # phy.profile_inputs.preamble_pattern.value = 1
-        # phy.profile_inputs.preamble_pattern_len.value = 2
 
 
         phy.profile_inputs.preamble_length.value = 48

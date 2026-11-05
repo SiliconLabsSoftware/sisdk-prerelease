@@ -12,10 +12,7 @@ class CALC_Diversity_Ocelot(CALC_Diversity):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Input variables
 
-        # Internal variables
-        # Must exposing the forced selection of a antenna 0 only as DISABLE enum
         var = self._addModelVariable(model, 'antdivmode', Enum, ModelVariableFormat.DECIMAL, 'Antenna diversity mode')
         member_data = [
             ['DISABLE', 0, 'Antenna 0 used'],
@@ -30,7 +27,6 @@ class CALC_Diversity_Ocelot(CALC_Diversity):
             'List of supported antenna diversity mode',
             member_data)
 
-        # Bools not allowed as advanced inputs due to GUI constraint. Using enum instead
         var = self._addModelVariable(model, 'antdivrepeatdis', Enum, ModelVariableFormat.DECIMAL,
                                      'Repeated measurement of first antenna when Select-Best algorithm is used')
         member_data = [
@@ -53,12 +49,10 @@ class CALC_Diversity_Ocelot(CALC_Diversity):
             'Enable or disable Skip 2nd antenna check with phase demod antenna diversity',
             member_data)
 
-        # Output software variables for RAIL to consume
         self._addModelVariable(model, 'div_antdivmode', int, ModelVariableFormat.DECIMAL, 'Antenna diversity mode')
         self._addModelVariable(model, 'div_antdivrepeatdis', int, ModelVariableFormat.DECIMAL,
                                'Repeated measurement of first antenna when Select-Best algorithm is used')
 
-        # Calculation variable for reset period
         if model.part_family.lower() in ["jumbo", "nerio", "nixi"]:
             self._addModelVariable(model, 'div_demod_reset_period_hemi_usec', int, ModelVariableFormat.DECIMAL,
                                    'Sequencer FW issues a reset to demod at this interval. Used in antenna diversity.')
@@ -75,12 +69,9 @@ class CALC_Diversity_Ocelot(CALC_Diversity):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # default value 0 ANTENNA0 Antenna 0 (ANT0=1, ANT1=0) is used. This is not exposed as one of the enums, so use 0 here.
-        # default ANTDIVREPEATDIS 0
         model.vars.antdivmode.value = model.vars.antdivmode.var_enum.DISABLE
         model.vars.antdivrepeatdis.value = model.vars.antdivrepeatdis.var_enum.REPEATFIRST
 
-        # # unless set otherwise by advanced inputs
         antdivmode = model.vars.antdivmode.value
         antdivrepeatdis = model.vars.antdivrepeatdis.value
 
@@ -99,7 +90,6 @@ class CALC_Diversity_Ocelot(CALC_Diversity):
 
         reg = 1 # : skip 2nd antenna check by default
 
-        # : For phase demod antdiv mode, set skip2ant register
         if antdivmode == model.vars.antdivmode.var_enum.PHDEMODANTDIV:
             if skip2ant == model.vars.skip2ant.var_enum.NOSKIP2ANT:
                 reg = 0
@@ -123,7 +113,6 @@ class CALC_Diversity_Ocelot(CALC_Diversity):
         demod_select = model.vars.demod_select.value
         antdivmode = model.vars.antdivmode.value
 
-        # : TODO update calculation since this value depends on the sensitivity
         if demod_select == model.vars.demod_select.var_enum.BCR:
             reg_val = 240
         elif demod_select == model.vars.demod_select.var_enum.TRECS_SLICER \
@@ -168,13 +157,11 @@ class CALC_Diversity_Ocelot(CALC_Diversity):
         demod_select = model.vars.demod_select.value
 
         if antdivmode == model.vars.antdivmode.var_enum.PHDEMODANTDIV:
-            # : if rssicorr{x} = 1, then for x region, use RSSI based decision to select best antenna
             rssicorr0 = 1
             rssicorr1 = 1
             rssicorr2 = 1
             rssicorr3 = 1
 
-            # : decision thresholds
             rssianddivthd = 20
             corranddivthd = 100
 
@@ -194,16 +181,12 @@ class CALC_Diversity_Ocelot(CALC_Diversity):
             self._reg_do_not_care(model.vars.MODEM_PHANTDECSION_CORRANDDIVTHD)
 
     def calc_phdemodantdiv_antenna_wait(self, model):
-        #Number of clock cycles to wait before switching to another antenna. Base clock is symbol rate.
-        #This field does matter even when antdiv is disabled
 
         antwait = 20 # : Recommended value by He Gou
 
         self._reg_write(model.vars.MODEM_PHDMODANTDIV_ANTWAIT, antwait)
 
     def calc_phdmodctrl_rssifltbyp(self, model):
-        # do not bypass rssi filter. otherwise, sensitivity degradation if signal power difference is small.
-        #This field does matter even when antdiv is disabled
         rssifltbyp = 0
 
         self._reg_write(model.vars.MODEM_PHDMODCTRL_RSSIFLTBYP, rssifltbyp)
@@ -212,11 +195,9 @@ class CALC_Diversity_Ocelot(CALC_Diversity):
         timthresh = model.vars.MODEM_TIMING_TIMTHRESH.value
         adprethresh_scale = model.vars.antdiv_adprethresh_scale.value
 
-        # : Per David Rault - Scale adprethresh by a factor of timing threshold
         adprethresh = adprethresh_scale * timthresh
         adprethresh_int = int(round(adprethresh))
 
-        # : if adprethresh register is non-zero, enable preamble threshold for antenna diversity
         if adprethresh_int > 0:
             self._reg_write(model.vars.MODEM_ANTDIVCTRL_ENADPRETHRESH, 1)
         else:

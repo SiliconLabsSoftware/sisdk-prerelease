@@ -8,6 +8,9 @@ description: >
   In situations when there are multiple Z-Wave devices are connected, this
   speeds up the process of determining which application is flashed on each
   device.
+documentation:
+  docset: z-wave
+  document: zwave-api/app-name
 package: zwave
 quality: production
 metadata:

@@ -10,10 +10,8 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Build variables from Lynx
         super().buildVariables(model)
 
-        # : Modify synth RX modes from Ocelot
         model.vars.synth_rx_mode.var_enum = CreateModelVariableEnum(
             enum_name='SynthRxModeEnum',
             enum_desc='Defined Synth RX Mode',
@@ -24,7 +22,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
             ])
         model.vars.synth_rx_mode_actual.var_enum = model.vars.synth_rx_mode.var_enum
 
-        # : Modify synth settling modes from Ocelot
         model.vars.synth_settling_mode.var_enum = CreateModelVariableEnum(
             enum_name='SynthSettlingMode',
             enum_desc='Synth Settling Mode',
@@ -34,7 +31,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
                 ['FAST', 2, 'Fast Settling Mode'],
             ])
 
-        # : Modify tx synth modes from Ocelot
         model.vars.synth_tx_mode.var_enum = CreateModelVariableEnum(
             enum_name='SynthTxModeEnum',
             enum_desc='Defined Synth TX Mode',
@@ -50,7 +46,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         model.vars.synth_tx_mode_actual.var_enum = model.vars.synth_tx_mode.var_enum
 
     def calc_synth_settling_mode(self, model):
-        #Set synth settling mode to Normal for now
         model.vars.synth_settling_mode.value = model.vars.synth_settling_mode.var_enum.NORMAL
 
     def calc_rx_mode(self, model):
@@ -68,7 +63,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         modulation_type = model.vars.modulation_type.value
         protocol_id = model.vars.protocol_id.value
 
-        # Set FSK and OQPSK settings based on baudrate
         if protocol_id == model.vars.protocol_id.var_enum.Zigbee:
             synth_tx_mode = model.vars.synth_tx_mode.var_enum.MODE_IEEE802154
         elif modulation_type == model.vars.modulation_type.var_enum.FSK2 \
@@ -83,7 +77,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
                 synth_tx_mode = model.vars.synth_tx_mode.var_enum.MODE2  # 1.5 MHz
             else:
                 synth_tx_mode = model.vars.synth_tx_mode.var_enum.MODE1  # 1 MHz
-        # Fixed settings for OOK, DBPSK, BPSK - transferred from Ocelot
         elif modulation_type == model.vars.modulation_type.var_enum.DBPSK:
             synth_tx_mode = model.vars.synth_tx_mode.var_enum.MODE4  # 3 MHz
         elif modulation_type == model.vars.modulation_type.var_enum.BPSK:
@@ -93,25 +86,17 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
 
         model.vars.synth_tx_mode.value = synth_tx_mode
 
-    # overwrite this function from Ocelot to make VCODIV the default clock for ADC
     def calc_adc_clock_config(self, model):
-        # This function calculates both the ADC mode (e.g. fullrate, halfrate, etc) as well as the ADC clock divider path
 
-        # Load model values into local variables
         bandwidth_hz = model.vars.bandwidth_hz.value
 
         if (bandwidth_hz < 1.25e6):
-            # 1/2 rate mode
-            # Use the HFXO along with DPLL for the ADC clock
             adc_rate_mode = model.vars.adc_rate_mode.var_enum.HALFRATE
             adc_clock_mode = model.vars.adc_clock_mode.var_enum.VCODIV
         else:
-            # Full rate mode
-            # Use the divided down VCO for the ADC clock
             adc_rate_mode = model.vars.adc_rate_mode.var_enum.FULLRATE
             adc_clock_mode = model.vars.adc_clock_mode.var_enum.VCODIV
 
-        # Load local variables back into model variables
         model.vars.adc_clock_mode.value = adc_clock_mode
         model.vars.adc_rate_mode.value = adc_rate_mode
 
@@ -133,11 +118,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         rx_mode = model.vars.synth_rx_mode.value
         ind = rx_mode.value
 
-        # Synth settings https://jira.silabs.com/browse/MCUW_RADIO_CFG-1529
-        # Settings copied over from Lynx Assert
-        # {workspace}\shared_files\lynx\radio_validation\ASSERTS
-        # BLK_SYNTH_RX_LP_BW_200KHZ.csv (BLE_LR mode)
-        # BLK_SYNTH_RX_LP_BW_250KHZ.csv (NORMAL mode)
 
         rx_mode_settings = {
             'SYNTH.LPFCTRL2RX.CASELRX':         [1,   1,   1],
@@ -184,8 +164,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         self._reg_write(model.vars.SYNTH_LPFCTRL2RX_LPFSWENRX,        rx_mode_settings['SYNTH.LPFCTRL2RX.LPFSWENRX'][ind])
         self._reg_write(model.vars.SYNTH_LPFCTRL2RX_LPFINCAPRX,       rx_mode_settings['SYNTH.LPFCTRL2RX.LPFINCAPRX'][ind])
 
-        # : Following registers are PTE Set & Forget but needs to be set by RC since they are different from reset value
-        # : See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1610
         self._reg_write(model.vars.SYNTH_DSMCTRLRX_MASHORDERRX,       rx_mode_settings['SYNTH.DSMCTRLRX.MASHORDERRX'][ind])
         self._reg_write(model.vars.SYNTH_DSMCTRLRX_LSBFORCERX,        rx_mode_settings['SYNTH.DSMCTRLRX.LSBFORCERX'][ind])
         self._reg_write(model.vars.SYNTH_DSMCTRLRX_DSMMODERX,         rx_mode_settings['SYNTH.DSMCTRLRX.DSMMODERX'][ind])
@@ -198,8 +176,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         self._reg_write(model.vars.RAC_SYTRIM0_SYCHPREPLICACURRADJ,   rx_mode_settings['RAC.SYTRIM0.SYCHPREPLICACURRADJ'][ind])
         self._reg_write(model.vars.RAC_SYTRIM0_SYCHPSRCENRX,          rx_mode_settings['RAC.SYTRIM0.SYCHPSRCENRX'][ind])
 
-        # : Following registers are added due to BW 1.5 MHz fast mode setting
-        # : See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1862
         self._reg_write(model.vars.SYNTH_DSMCTRLRX_DEMMODERX,         rx_mode_settings['SYNTH.DSMCTRLRX.DEMMODERX'][ind])
         self._reg_write(model.vars.RAC_SYTRIM0_SYCHPLEVPSRCRX,        rx_mode_settings['RAC.SYTRIM0.SYCHPLEVPSRCRX'][ind])
 
@@ -208,13 +184,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         tx_mode = model.vars.synth_tx_mode.value
         ind = tx_mode.value
 
-        # Synth settings https://jira.silabs.com/browse/MCUW_RADIO_CFG-1529
-        # Settings copied over from Lynx Assert
-        # {workspace}\shared_files\lynx\radio_validation\ASSERTS
-        # BLK_SYNTH_TX_BW_1000KHZ.csv (MODE 1)
-        # BLK_SYNTH_TX_BW_1500KHZ.csv (MODE 2)
-        # BLK_SYNTH_TX_BW_2500KHZ.csv (MODE 3)
-        # BLK_SYNTh_TX_BW_3000KHZ.csv (MODE 4)
 
         tx_mode_settings = {
             'SYNTH.LPFCTRL2TX.CASELTX':         [1,   1,   1,   1],
@@ -251,32 +220,23 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         self._reg_write(model.vars.SYNTH_LPFCTRL2TX_LPFSWENTX,          tx_mode_settings['SYNTH.LPFCTRL2TX.LPFSWENTX'][ind])
         self._reg_write(model.vars.SYNTH_LPFCTRL2TX_LPFINCAPTX,         tx_mode_settings['SYNTH.LPFCTRL2TX.LPFINCAPTX'][ind])
 
-        # : Following registers are PTE Set & Forget but needs to be set by RC since they are different from reset value
-        # : See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1610
         self._reg_write(model.vars.SYNTH_DSMCTRLTX_DEMMODETX,           tx_mode_settings['SYNTH.DSMCTRLTX.DEMMODETX'][ind])
         self._reg_write(model.vars.SYNTH_DSMCTRLTX_DITHERDACTX,         tx_mode_settings['SYNTH.DSMCTRLTX.DITHERDACTX'][ind])
         self._reg_write(model.vars.SYNTH_DSMCTRLTX_DITHERDSMOUTPUTTX,   tx_mode_settings['SYNTH.DSMCTRLTX.DITHERDSMOUTPUTTX'][ind])
         
     def calc_hfxo_retiming_table(self, model):
-        # Inherit Ocelot retiming
         super().calc_hfxo_retiming_table(model)
 
-        #setting for 2x HFXO frequency
         self.retime_print("calculating 2x HFXO freq")
         model.vars.lut_table_index.value.append(0)
         self.retime_main(model, model.vars.xtal_frequency_hz.value * 2, 1, model.vars.lut_table_index.value[0])
 
     def calc_synth_misc(self, model):
 
-        # Setting this value to POR
         self._reg_write_default(model.vars.SYNTH_LPFCTRL2TX_VCMLVLTX)
 
-        # : Set this value to 3 regardless of modem in OFF/TX/RX states
-        # : https://jira.silabs.com/browse/MCUW_RADIO_CFG-1745
         self._reg_write(model.vars.RAC_SYNTHREGCTRL_MMDLDOVREFTRIM, 3)
 
-        # Fairly confident that these CAL values are not actually used, but Design can not confirm these are unused.
-        # So if the value isn't forced then these are a do not care.
         if model.vars.SYNTH_LPFCTRL1CAL_OP1BWCAL.value_forced is None:
             self._reg_do_not_care(model.vars.SYNTH_LPFCTRL1CAL_OP1BWCAL)
         if model.vars.SYNTH_LPFCTRL1CAL_OP1COMPCAL.value_forced is None:
@@ -295,9 +255,7 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         pass
 
     def calc_adc_freq_actual(self,model):
-        #This function calculates the actual ADC sample frequency and error based on the registers
 
-        #Load model variables into local variables
         adc_clock_mode_actual = model.vars.adc_clock_mode_actual.value
         adc_vco_div_actual = model.vars.adc_vco_div_actual.value
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
@@ -306,7 +264,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         ifadc_halfrate = model.vars.RAC_IFADCTRIM0_IFADCENHALFMODE.value
 
         if adc_clock_mode_actual == model.vars.adc_clock_mode.var_enum.HFXOMULT:
-            #the ordering of the if statements is important - keep ifadcpll_en_xo_bypass on top
             if 1 == ifadc_halfrate:
                 adc_freq_actual = xtal_frequency_hz * 4
             else:
@@ -314,10 +271,8 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         else:
             adc_freq_actual = int(fsynth / adc_vco_div_actual)
 
-        # Compute the final ADC frequency percent error
         ferror = 100 * (fadc_target - adc_freq_actual) / float(fadc_target)
 
-        #Load local variables back into model variables
         model.vars.adc_freq_actual.value = adc_freq_actual
         model.vars.adc_freq_error.value = ferror
 
@@ -338,9 +293,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
         adc_vco_div = model.vars.adc_vco_div.value
         model.vars.adc_vco_div_actual.value = adc_vco_div
     def calc_pga_lna_bw_reg(self, model):
-        # : Bobcat calculation based on Lynx BW configuration of 5 MHz for all PHYs
-        # : Revert ocelot change that used narrower bandwidth in the baseband to improve blocking performance
-        # : https://jira.silabs.com/browse/MCUW_RADIO_CFG-1692
 
         lnaboost_boostlna = model.vars.AGC_LNABOOST_BOOSTLNA.value
         pgabwmode = 1
@@ -362,21 +314,18 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
 
         if adc_clock_mode_actual == model.vars.adc_clock_mode.var_enum.HFXOMULT:
             if adc_mode == model.vars.adc_rate_mode.var_enum.FULLRATE:
-                # adc_full_speed from dpll_utils.py (xo * 8); 8 = 48 / (3 * 2)
                 self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVR, 1)
                 self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVN, 48)
                 self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVX, 3)
                 self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTFREQCAL, 1)
                 self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTBWCAL, 1)
             else:
-                # adc_half_speed from dpll_utils.py (xo * 4); 4 = 40 / (5 * 2)
                 self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVR, 1)
                 self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVN, 40)
                 self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVX, 5)
                 self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTFREQCAL, 0)
                 self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTBWCAL, 0)
         else:
-            # reset values
             self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVR)
             self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVN)
             self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTDIVX)
@@ -386,14 +335,8 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
     def calc_clkmulten_reg(self, model):
         adc_clock_mode_actual = model.vars.adc_clock_mode_actual.value
 
-        # To enable clkmult the following additional registers must also be set, but are handled in RAIL
-        # SYXO0.INTERNALCTRL.ENCLKMULTANA = 1 # enable XO output to CLKMULT
-        # RAC.SYLOEN.SYLODIVRLO2P4GENEN = 0 # disable LODIV output buffer from SYLODIV (power saving)
 
         if adc_clock_mode_actual == model.vars.adc_clock_mode.var_enum.HFXOMULT:
-            # unless otherwise specified, the values are taken from dualbclk_mult_validation_20190516_lynx_revA0.pptx > dpll_utils.py > dualbclk_mult spec sheet
-            # based on the common settings for adc_full_speed, adc_full_speed_lp, adc_half_speed, adc_half_speed_lp
-            # in dpll_utils.py
             self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTDISICO, 0) # 0 = ENABLE ICO, 1 = DISABLE ICO
             self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENBBDET, 1)
             self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENBBXLDET, 1)
@@ -414,7 +357,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
             self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENROTDET, 1)
             self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTENBYPASS40MHZ, 0)
 
-            # regulators set to max voltage, current for hot temp performance EFRPTE-6618
             self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTREG1ADJV, 3)
             self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJV, 3)
             self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJI, 3)
@@ -430,7 +372,6 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
             self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTENRESYNC, 0)
             self._reg_write(model.vars.RAC_CLKMULTCTRL_CLKMULTVALID, 0)
         else:
-            # when using lodiv, turn off dualbclk_mult to reset values
             self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTDISICO)
             self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENBBDET)
             self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENBBXLDET)
@@ -465,6 +406,5 @@ class Calc_Synth_Bobcat(CALC_Synth_ocelot):
             self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTENRESYNC)
             self._reg_write_default(model.vars.RAC_CLKMULTCTRL_CLKMULTVALID)
 
-    # Need to recall this function from Ocelot otherwise not properly inherited
     def calc_synth_tx_tuning_step_actual(self, model):
         pass

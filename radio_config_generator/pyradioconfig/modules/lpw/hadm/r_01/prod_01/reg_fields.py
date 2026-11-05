@@ -2,7 +2,6 @@ from pyradioconfig.calculator_model_framework.interfaces.ipcalculator import IPR
 
 
 class HadmRegFields(IPRegFields):
-    reg_field_list = []
 
     def __init__(self):
         super().__init__()

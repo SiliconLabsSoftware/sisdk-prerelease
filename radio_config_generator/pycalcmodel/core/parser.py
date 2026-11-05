@@ -9,9 +9,6 @@ from pycalcmodel.py2_and_3_compatibility import *
 
 __all__ = [ 'ModelParser' ]
 
-# ===========================================================================
-#  CLASSES 
-# ===========================================================================
 
 class ModelParser(object):
 
@@ -31,13 +28,10 @@ class ModelParser(object):
         """
         if self.ignore_act_logic:
             return True
-        # return true for empty string
         if len(act_logic_str) == 0:
             return True
         eval_str = act_logic_str
-        # switch to Python boolean operators
         for (op, py_op) in (('!', ' not '), ('&&', ' and '), ('||', ' or ')):
             eval_str = eval_str.replace(op, py_op)
-        # TODO: guard against malicious code in eval() call?
         result = eval(eval_str, self.ZZ_EVAL_VARS)
         return result

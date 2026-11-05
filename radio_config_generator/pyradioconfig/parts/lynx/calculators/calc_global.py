@@ -5,10 +5,8 @@ class CALC_Global_lynx(CALC_Global_panther):
 
     def buildVariables(self, model):
 
-        # Build variables from the Panther calculations
         super().buildVariables(model)
 
-        #Add variables for Lynx
         self._addModelVariable(model, 'preamsch_len', int, ModelVariableFormat.DECIMAL)
 
         self._addModelVariable(model, 'grpdelay_to_demod', int, ModelVariableFormat.DECIMAL)
@@ -21,16 +19,9 @@ class CALC_Global_lynx(CALC_Global_panther):
         self._addModelVariable(model, 'ksi2', int, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'ksi3', int, ModelVariableFormat.DECIMAL)
 
-        # These were extracted from Lynx register model and identified as new (and non-existent in the Panther map)
 
-        # TODO: decide if all of these really belong in the calculator. For instance: enables, interrupt enables, etc.
-        # TODO: do we really want the calculator to explicitly re-write these to their reset/default values a la MCUW_RADIO_CFG-734?
 
-        # Must have a corresponding ModelVariableContainer entry in pyradioconfig/parts/common/profiles/lynx_regs.py build_modem_regs_lynx.
-        # MCUW_RADIO_CFG-734 Panther: PHY/MAC Design requests more registers added (all MODEM, AGC, etc.) with re-writes of reset values
 
-        # Add each register using a separate method
-        # This is best practice moving forward so that we can handle inheritance granularly
         self._add_etsctrl_regs(model)
         self._add_antswctrl_regs(model)
         self._add_antswstart_regs(model)
@@ -76,16 +67,9 @@ class CALC_Global_lynx(CALC_Global_panther):
         self._addModelRegister(model, 'FRC.DSLCTRL.STORESUP', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FRC.DSLCTRL.SUPSHFFACTOR', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'FRC.WCNTCMP4.SUPPLENGTH', int, ModelVariableFormat.HEX)
-        # These are removed from RC as they are RAIL-owned
-        # self._addModelRegister(model, 'FRC.PKTBUFCTRL.PKTBUFSTARTLOC', int, ModelVariableFormat.HEX)
-        # self._addModelRegister(model, 'FRC.PKTBUFCTRL.PKTBUFTHRESHOLD', int, ModelVariableFormat.HEX)
-        # self._addModelRegister(model, 'FRC.PKTBUFCTRL.PKTBUFTHRESHOLDEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.DIGMIXCTRL.DIGMIXFB', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.VTTRACK.SYNCTIMEOUTSEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.LRFRC.LRCORRMODE', int, ModelVariableFormat.HEX)
-        # self._addModelRegister(model, 'MODEM.RAMPCTRL.RAMPRATE0', int, ModelVariableFormat.HEX)
-        # self._addModelRegister(model, 'MODEM.RAMPCTRL.RAMPRATE1', int, ModelVariableFormat.HEX)
-        # self._addModelRegister(model, 'MODEM.RAMPCTRL.RAMPRATE2', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.REALTIMCFE.MINCOSTTHD', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.REALTIMCFE.RTSCHWIN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.REALTIMCFE.RTSCHMODE', int, ModelVariableFormat.HEX)
@@ -117,19 +101,12 @@ class CALC_Global_lynx(CALC_Global_panther):
         self._addModelRegister(model, 'RAC.CLKMULTEN0.CLKMULTENBYPASS40MHZ', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.CLKMULTEN0.CLKMULTREG3ADJV', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXDEBUG.LNAMIXDISMXR', int, ModelVariableFormat.HEX)
-        # Already added as model in Panther, but not an output
-        # self._addModelRegister(model, 'RAC.LNAMIXTRIM0.LNAMIXRFPKDBWSEL', int, ModelVariableFormat.HEX)
-        # self._addModelRegister(model, 'RAC.LNAMIXTRIM0.LNAMIXRFPKDCALDM', int, ModelVariableFormat.HEX)
-        # self._addModelRegister(model, 'RAC.LNAMIXTRIM0.LNAMIXTRIMVREG', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXTRIM1.LNAMIXIBIASADJ', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXTRIM1.LNAMIXLNACAPSEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXTRIM1.LNAMIXMXRBIAS', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXTRIM1.LNAMIXNCASADJ', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXTRIM1.LNAMIXPCASADJ', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXTRIM1.LNAMIXVOUTADJ', int, ModelVariableFormat.HEX)
-        # These are removed from RC as they are RAIL-owned
-        # self._addModelRegister(model, 'RAC.LNAMIXCAL.LNAMIXENIRCAL', int, ModelVariableFormat.HEX)
-        # self._addModelRegister(model, 'RAC.LNAMIXCAL.LNAMIXIRCALAMP', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.SYTRIM1.SYLODIVRLOADCCLKSEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.SYTRIM1.SYLODIVSGTESTDIV', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.SYMMDCTRL.SYMMDMODE', int, ModelVariableFormat.HEX)

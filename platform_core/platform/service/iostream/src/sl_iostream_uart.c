@@ -61,7 +61,7 @@
 
 #include "em_device.h"
 #include "sl_core.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 #if !defined(DMA_PRESENT) && !defined(LDMA_PRESENT)
 #error Missing (L)DMA peripheral
@@ -221,13 +221,13 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
   m_attr.cb_mem = context->read_lock_cb;
   m_attr.cb_size = osMutexCbSize;
   context->read_lock = osMutexNew(&m_attr);
-  EFM_ASSERT(context->read_lock != NULL);
+  SL_LOG_DEBUG_ASSERT(context->read_lock != NULL);
 
   m_attr.name = "Write Lock";
   m_attr.attr_bits = 0u;
   m_attr.cb_mem = context->write_lock_cb;
   context->write_lock = osMutexNew(&m_attr);
-  EFM_ASSERT(context->write_lock != NULL);
+  SL_LOG_DEBUG_ASSERT(context->write_lock != NULL);
 
   osEventFlagsAttr_t f_attr;
   f_attr.name = "RX Data Available Flag";
@@ -235,7 +235,7 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
   f_attr.cb_mem = context->rx_data_flag_cb;
   f_attr.cb_size = osEventFlagsCbSize;
   context->rx_data_flag = osEventFlagsNew(&f_attr);
-  EFM_ASSERT(context->rx_data_flag != NULL);
+  SL_LOG_DEBUG_ASSERT(context->rx_data_flag != NULL);
 
 #endif
 
@@ -370,7 +370,7 @@ void sl_iostream_uart_wakeup(sl_iostream_uart_t *iostream_uart)
   const uint8_t channel = uart_context->rx_dma.channel;
 
   status = sli_iostream_dmadrv_pause_transfer(channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
 
   write_ptr = (uint8_t*)LDMA_PERIPH->CH[channel].DST;
 
@@ -397,7 +397,8 @@ void sl_iostream_uart_wakeup(sl_iostream_uart_t *iostream_uart)
   }
 
   status = sli_iostream_dmadrv_resume_transfer(channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   // EM1 fallback never enters the EUSART EM2 callback, so this EM0 call is the
@@ -423,7 +424,7 @@ static bool wakeup_from_rx(const sl_iostream_uart_context_t *uart_context)
   bool rx_wakeup;
 
   status = sli_iostream_dmadrv_pause_transfer(channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
 
   write_ptr = (uint8_t*)LDMA_PERIPH->CH[channel].DST;
 
@@ -433,7 +434,8 @@ static bool wakeup_from_rx(const sl_iostream_uart_context_t *uart_context)
   rx_wakeup = !(write_ptr == &null_byte);
 
   status = sli_iostream_dmadrv_resume_transfer(channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   return rx_wakeup;
 }
@@ -608,7 +610,7 @@ static void set_read_block(void *context,
     // When re-enabling block mode, re-initialize the event flag to reflect the current state
     if (on == true && block == false) {
       // Read-signal should have been deinit when non-blocking
-      EFM_ASSERT(uart_context->rx_data_flag == NULL);
+      SL_LOG_DEBUG_ASSERT(uart_context->rx_data_flag == NULL);
 
       // Init the rx_data_flag boolean event flag
       osEventFlagsAttr_t f_attr;
@@ -617,18 +619,20 @@ static void set_read_block(void *context,
       f_attr.cb_mem = uart_context->rx_data_flag_cb;
       f_attr.cb_size = osEventFlagsCbSize;
       uart_context->rx_data_flag = osEventFlagsNew(&f_attr);
-      EFM_ASSERT(uart_context->rx_data_flag != NULL);
+      SL_LOG_DEBUG_ASSERT(uart_context->rx_data_flag != NULL);
 
       // Set the event flag to reflect the current state
       if (!rx_buffer_empty(uart_context)) {
         set_flags = osEventFlagsSet(uart_context->rx_data_flag, RX_DATA_AVAILABLE_FLAG);
-        EFM_ASSERT(set_flags == RX_DATA_AVAILABLE_FLAG);
+        SL_LOG_DEBUG_ASSERT(set_flags == RX_DATA_AVAILABLE_FLAG);
+        (void)set_flags;
       }
     }
     // When disabling block mode, deinit the rx_data_flag event flag
     else if (on == false && block == true) {
       status = osEventFlagsDelete(uart_context->rx_data_flag);
-      EFM_ASSERT(status == osOK);
+      SL_LOG_DEBUG_ASSERT(status == osOK);
+      (void)status;
       uart_context->rx_data_flag = NULL;
     }
   }
@@ -662,7 +666,7 @@ void sli_uart_txc(void *context)
 
   CORE_ENTER_ATOMIC();
   if (uart_context->tx_idle == false) {
-    EFM_ASSERT(uart_context->uart_periph->tx_completed != NULL);
+    SL_LOG_DEBUG_ASSERT(uart_context->uart_periph->tx_completed != NULL);
     uart_context->uart_periph->tx_completed(context, false);
     uart_context->tx_idle = true;
     sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
@@ -687,9 +691,12 @@ static sl_status_t uart_deinit(void *stream)
   sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)uart->stream.context;
   sl_iostream_t *default_stream;
   sl_status_t status = SL_STATUS_OK;
+#if (defined(SL_CATALOG_KERNEL_PRESENT))
+  osStatus_t os_status;
+#endif
 
   if (uart_context->async_tx_mode) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NOT_SUPPORTED;
   }
 
@@ -698,11 +705,14 @@ static sl_status_t uart_deinit(void *stream)
 #if (defined(SL_CATALOG_KERNEL_PRESENT))
   if (osKernelGetState() == osKernelRunning) {
     // Acquire locks to ensure no others task try to perform operation on the stream at sametime
-    EFM_ASSERT(osMutexAcquire(uart_context->write_lock, osWaitForever) == osOK);  // If deinit is called twice in a
-                                                                                  // row, the assert will trigger
+    os_status = osMutexAcquire(uart_context->write_lock, osWaitForever);  // If deinit is called twice in a
+                                                                          // row, the assert will trigger
+    SL_LOG_DEBUG_ASSERT(os_status == osOK);
     // Bypass lock if we print before the kernel is running
-    EFM_ASSERT(osMutexAcquire(uart_context->read_lock, osWaitForever) == osOK);   // If deinit is called twice in a
-                                                                                  //row, the assert will trigger
+    os_status = osMutexAcquire(uart_context->read_lock, osWaitForever);   // If deinit is called twice in a
+                                                                            //row, the assert will trigger
+    SL_LOG_DEBUG_ASSERT(os_status == osOK);
+    (void)os_status;
   }
 #endif
 
@@ -725,28 +735,32 @@ static sl_status_t uart_deinit(void *stream)
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   // Delete Kernel synchronization objects.
   if (uart_context->block) {
-    status = osEventFlagsDelete(uart_context->rx_data_flag);
-    EFM_ASSERT(status == osOK);
+    os_status = osEventFlagsDelete(uart_context->rx_data_flag);
+    SL_LOG_DEBUG_ASSERT(os_status == osOK);
+    (void)os_status;
   }
 
-  status = osMutexDelete(uart_context->read_lock);
-  EFM_ASSERT(status == osOK);
+  os_status = osMutexDelete(uart_context->read_lock);
+  SL_LOG_DEBUG_ASSERT(os_status == osOK);
+  (void)os_status;
 
-  status = osMutexDelete(uart_context->write_lock);
-  EFM_ASSERT(status == osOK);
+  os_status = osMutexDelete(uart_context->write_lock);
+  SL_LOG_DEBUG_ASSERT(os_status == osOK);
+  (void)os_status;
 #endif
 
   // Stop the DMA
   status = sli_iostream_dmadrv_stop_transfer(uart_context->rx_dma.channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
 
   // Free the DMA channel
   status = sli_iostream_dmadrv_free_channel(uart_context->rx_dma.channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
 
   // Try to deinit the DMADRV
   status = sli_iostream_dmadrv_deinit();
-  EFM_ASSERT(status == SL_STATUS_OK || status == SL_STATUS_BUSY);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK || status == SL_STATUS_BUSY);
+  (void)status;
 
   // Clear iostream struct and context
   uart->stream.context = NULL;
@@ -792,13 +806,13 @@ static void scan_for_ctrl_char(sl_iostream_uart_context_t * uart_context)
 
   // No data to be scanned
   if (rx_buffer_empty(uart_context)) {
-    EFM_ASSERT(uart_context->ctrl_char_scan_ptr == uart_context->rx_read_ptr);
+    SL_LOG_DEBUG_ASSERT(uart_context->ctrl_char_scan_ptr == uart_context->rx_read_ptr);
     return;
   }
 
   CORE_ENTER_ATOMIC();
   status = sli_iostream_dmadrv_pause_transfer(uart_context->rx_dma.channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
 
   // Get the newest byte received
   newest_byte = __get_write_ptr(uart_context) - 1;
@@ -810,12 +824,13 @@ static void scan_for_ctrl_char(sl_iostream_uart_context_t * uart_context)
   rx_empty = uart_context->rx_empty;
 
   status = sli_iostream_dmadrv_resume_transfer(uart_context->rx_dma.channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   // No data to be scanned
   if (rx_empty) {
     // Sanity check
-    EFM_ASSERT(uart_context->ctrl_char_scan_ptr == uart_context->rx_read_ptr);
+    SL_LOG_DEBUG_ASSERT(uart_context->ctrl_char_scan_ptr == uart_context->rx_read_ptr);
 
     goto exit;
   }
@@ -929,7 +944,8 @@ static sl_status_t uart_write(void *context,
   if (osKernelGetState() == osKernelRunning) {
     // Bypass lock if we print before the kernel is running
     status = osMutexRelease(uart_context->write_lock);
-    EFM_ASSERT(status == osOK);
+    SL_LOG_DEBUG_ASSERT(status == osOK);
+    (void)status;
   }
 #endif
   return SL_STATUS_OK;
@@ -947,7 +963,7 @@ static bool __uart_async_tx_dma_callback(unsigned int channel, unsigned int sequ
   sli_iostream_write_async_op_t *completed_async_op = (sli_iostream_write_async_op_t *)arg;
   sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)completed_async_op->context;
 
-  EFM_ASSERT(uart_context->async_transfer_in_progress);
+  SL_LOG_DEBUG_ASSERT(uart_context->async_transfer_in_progress);
 
   uart_context->async_transfer_in_progress = false;
   node = sl_slist_pop(&uart_context->pending_write_ops);
@@ -992,7 +1008,8 @@ static void __uart_async_start_write(sli_iostream_write_async_op_t *async_op)
                                                    &uart_context->tx_dma.desc,
                                                    __uart_async_tx_dma_callback,
                                                    async_op);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 }
 
 /***************************************************************************//**
@@ -1053,7 +1070,8 @@ static sl_status_t uart_read(void *context,
       // osFlagsNoClear used to unlock directly if data is still available. Flag cleared
       // when no more data is available to be read.
       set_flags = osEventFlagsWait(uart_context->rx_data_flag, RX_DATA_AVAILABLE_FLAG, osFlagsNoClear, osWaitForever);
-      EFM_ASSERT(set_flags == RX_DATA_AVAILABLE_FLAG);
+      SL_LOG_DEBUG_ASSERT(set_flags == RX_DATA_AVAILABLE_FLAG);
+      (void)set_flags;
     }
   }
   #endif
@@ -1076,7 +1094,9 @@ static sl_status_t uart_read(void *context,
   #if (defined(SL_CATALOG_KERNEL_PRESENT))
   if (osKernelGetState() == osKernelRunning) {
     // Bypass lock if we print before the kernel is running
-    EFM_ASSERT(osMutexRelease(uart_context->read_lock) == osOK);
+    status = osMutexRelease(uart_context->read_lock);
+    SL_LOG_DEBUG_ASSERT(status == osOK);
+    (void)status;
   }
   #endif
 
@@ -1100,7 +1120,8 @@ static inline bool __rx_buffer_full(const sl_iostream_uart_context_t *uart_conte
   bool dma_done;
 
   status = sli_iostream_dmadrv_transfer_done(uart_context->rx_dma.channel, &dma_done);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   // When the DMA is done, it means that the RX buffer was filled up. However, if
   // we went to sleep while the RX buffer was full, and the DMA is woken-up by something
@@ -1152,12 +1173,13 @@ static inline bool rx_buffer_empty(const sl_iostream_uart_context_t *uart_contex
 {
   bool empty;
   sl_status_t status = sli_iostream_dmadrv_pause_transfer(uart_context->rx_dma.channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
 
   empty = __rx_buffer_empty(uart_context);
 
   status = sli_iostream_dmadrv_resume_transfer(uart_context->rx_dma.channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   return empty;
 }
@@ -1179,7 +1201,7 @@ static inline uint8_t* __get_write_ptr(const sl_iostream_uart_context_t *uart_co
   }
 
   // Sanity check for buffer over/underflow
-  EFM_ASSERT(write_ptr <= (uart_context->rx_buffer + uart_context->rx_buffer_len)
+  SL_LOG_DEBUG_ASSERT(write_ptr <= (uart_context->rx_buffer + uart_context->rx_buffer_len)
              && write_ptr >= uart_context->rx_buffer);
 
   // Wrap dst around
@@ -1206,7 +1228,7 @@ static inline size_t __get_bytes_available(const sl_iostream_uart_context_t *uar
   } else {
     // write_ptr wrapped around. Read data from read_ptr to end of buffer.
     // Sanity check that the read pointer didn't overflow.
-    EFM_ASSERT(uart_context->rx_read_ptr < (uart_context->rx_buffer + uart_context->rx_buffer_len));
+    SL_LOG_DEBUG_ASSERT(uart_context->rx_read_ptr < (uart_context->rx_buffer + uart_context->rx_buffer_len));
 
     return (uart_context->rx_buffer + uart_context->rx_buffer_len) - uart_context->rx_read_ptr;
   }
@@ -1230,7 +1252,7 @@ static void update_ring_buffer(sl_iostream_uart_context_t * uart_context, size_t
 
   // Pause the DMA to update its registers
   status = sli_iostream_dmadrv_pause_transfer(uart_context->rx_dma.channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
 
   dma_full = __rx_buffer_full(uart_context);
 
@@ -1240,7 +1262,7 @@ static void update_ring_buffer(sl_iostream_uart_context_t * uart_context, size_t
   if (write_ptr > uart_context->rx_read_ptr) {
     // The DMA should never be full here, or else the write_ptr would have
     // wrapped behind the buffer.
-    EFM_ASSERT(!dma_full);
+    SL_LOG_DEBUG_ASSERT(!dma_full);
 
     // LDMA is writing ahead of read pointer. Make sure LDMA is wrapped to re-use
     // space made available from current read.
@@ -1303,7 +1325,7 @@ static void update_ring_buffer(sl_iostream_uart_context_t * uart_context, size_t
                                                      SL_DMA_CTRL_SIZE_BYTE,
                                                      __uart_async_rx_dma_callback,
                                                      uart_context);
-      EFM_ASSERT(status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
       // Disable DoneIEN (safe to do here, DMA is paused)
       LDMA_PERIPH->CH[uart_context->rx_dma.channel].CTRL &= ~LDMA_CH_CTRL_DONEIEN;
     }
@@ -1323,7 +1345,7 @@ static void update_ring_buffer(sl_iostream_uart_context_t * uart_context, size_t
   }
 
   // Sanity check rx_ptr didn't overflow
-  EFM_ASSERT(uart_context->rx_read_ptr < (uart_context->rx_buffer + uart_context->rx_buffer_len));
+  SL_LOG_DEBUG_ASSERT(uart_context->rx_read_ptr < (uart_context->rx_buffer + uart_context->rx_buffer_len));
 
   if (uart_context->rx_read_ptr == write_ptr) {
     // No more data available to be read. Arm the new data detection descriptor.
@@ -1337,7 +1359,8 @@ static void update_ring_buffer(sl_iostream_uart_context_t * uart_context, size_t
     if (uart_context->block) {
       // Unset event flag to wait for new data detection
       set_flags = osEventFlagsClear(uart_context->rx_data_flag, RX_DATA_AVAILABLE_FLAG);
-      EFM_ASSERT(set_flags == RX_DATA_AVAILABLE_FLAG);
+      SL_LOG_DEBUG_ASSERT(set_flags == RX_DATA_AVAILABLE_FLAG);
+      (void)set_flags;
     }
     #endif
 
@@ -1349,7 +1372,8 @@ static void update_ring_buffer(sl_iostream_uart_context_t * uart_context, size_t
 
   // Resume DMA after update
   status = sli_iostream_dmadrv_resume_transfer(uart_context->rx_dma.channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 }
 
 /***************************************************************************//**
@@ -1380,7 +1404,7 @@ static size_t read_rx_buffer(sl_iostream_uart_context_t * uart_context,
 
   // Limit read size to buffer size
   read_size = read_size > buffer_len ? buffer_len : read_size;
-  EFM_ASSERT(read_size > 0);
+  SL_LOG_DEBUG_ASSERT(read_size > 0);
 
   // Number of bytes written to user buffer can be different if control character are present
   ret_val = read_size;
@@ -1424,7 +1448,7 @@ static size_t read_rx_buffer(sl_iostream_uart_context_t * uart_context,
         uart_context->ctrl_char_scan_ptr = uart_context->rx_buffer;
       }
 
-      EFM_ASSERT(uart_context->ctrl_char_scan_ptr >= uart_context->rx_buffer
+      SL_LOG_DEBUG_ASSERT(uart_context->ctrl_char_scan_ptr >= uart_context->rx_buffer
                  && uart_context->ctrl_char_scan_ptr < (uart_context->rx_buffer + uart_context->rx_buffer_len));
 
       CORE_EXIT_ATOMIC();
@@ -1508,7 +1532,8 @@ static bool __uart_async_rx_dma_callback(unsigned int channel, unsigned int sequ
       // When waking up from sleep, kernel can be in Locked state. Make sure
       // to unlock the event flag in order to resume normal operation.
       set_flags = osEventFlagsSet(uart_context->rx_data_flag, RX_DATA_AVAILABLE_FLAG);
-      EFM_ASSERT(set_flags == RX_DATA_AVAILABLE_FLAG);
+      SL_LOG_DEBUG_ASSERT(set_flags == RX_DATA_AVAILABLE_FLAG);
+      (void)set_flags;
     }
   }
   #endif
@@ -1560,7 +1585,7 @@ static inline void set_new_data_detect(sl_iostream_uart_context_t *uart_context)
 
   // Pause the DMA to update it
   status = sli_iostream_dmadrv_pause_transfer(uart_context->rx_dma.channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
 
   *data_detect_desc = (sl_hal_ldma_descriptor_t)IOSTREAM_LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(&null_byte,
                                                                                          &null_byte,
@@ -1569,13 +1594,14 @@ static inline void set_new_data_detect(sl_iostream_uart_context_t *uart_context)
   if (__new_data_detect_armed(uart_context)) {
     // DMA is already waiting on new data to arrive, nothing to be done.
     status = sli_iostream_dmadrv_resume_transfer(uart_context->rx_dma.channel);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
     return;
   }
 
   // Check if DMA is running (note: pause != done)
   status = sli_iostream_dmadrv_transfer_done(uart_context->rx_dma.channel, &dma_done);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
 
   if (!dma_done) {
     // DMA is running. Save its current state in the rx_resume_desc and link the
@@ -1583,9 +1609,9 @@ static inline void set_new_data_detect(sl_iostream_uart_context_t *uart_context)
     // received.
     write_ptr = __get_write_ptr(uart_context);
     status = sli_iostream_dmadrv_transfer_remaining_count(uart_context->rx_dma.channel, &count);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
     // DMA is running, count should be greater than zero.
-    EFM_ASSERT(count > 0);
+    SL_LOG_DEBUG_ASSERT(count > 0);
 
     // Set idle desc to current LDMA state
     *resume_desc = (sl_hal_ldma_descriptor_t)IOSTREAM_LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(uart_context->rx_dma.cfg.src,
@@ -1618,9 +1644,10 @@ static inline void set_new_data_detect(sl_iostream_uart_context_t *uart_context)
                                                    data_detect_desc,
                                                    __uart_async_rx_dma_callback,
                                                    uart_context);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
 
   // Resume DMA
   status = sli_iostream_dmadrv_resume_transfer(uart_context->rx_dma.channel);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 }

@@ -1,9 +1,12 @@
 from pyradioconfig.parts.common.phys.phy_common import PHY_COMMON_FRAME_BLE
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 
 class PHYS_Bluetooth_LE_Sol(IPhy):
+
+    ip_category = IPCategory.LPW
 
     def BLE_TX_Shaping_Coeffs(self, phy, model):
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 3
@@ -65,7 +68,6 @@ class PHYS_Bluetooth_LE_Sol(IPhy):
         phy.profile_outputs.AGC_STEPDWN_STEPDWN4.override = 3
         phy.profile_outputs.AGC_STEPDWN_STEPDWN5.override = 5
 
-    # BLE 1M Legacy
     def Bluetooth_LE_base(self, phy, model):
         PHY_COMMON_FRAME_BLE(phy, model)
         self.BLE_AGC(phy, model)
@@ -99,7 +101,7 @@ class PHYS_Bluetooth_LE_Sol(IPhy):
         phy.profile_inputs.timing_detection_threshold.value = 140
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.demod_select.value = model.vars.demod_select.var_enum.LEGACY
         phy.profile_inputs.adc_clock_mode.value = model.vars.adc_clock_mode.var_enum.VCODIV
 
@@ -119,7 +121,6 @@ class PHYS_Bluetooth_LE_Sol(IPhy):
         self.Bluetooth_LE_base(phy, model)
         return phy
 
-    # BLE 1M TRecS + Viterbi
     def Bluetooth_LE_Viterbi_noDSA_base(self, phy, model):
         phy.profile_inputs.bandwidth_hz.value = 1099233
         phy.profile_inputs.base_frequency_hz.value = long(2402000000)
@@ -150,31 +151,25 @@ class PHYS_Bluetooth_LE_Sol(IPhy):
         phy.profile_inputs.timing_detection_threshold.value = 140
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.adc_clock_mode.value = model.vars.adc_clock_mode.var_enum.VCODIV
 
-        # Decimation and Demod Overrides
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 56831
         phy.profile_outputs.MODEM_CTRL0_FRAMEDETDEL.override = 2
         phy.profile_outputs.MODEM_CTRL6_RXBRCALCDIS.override = 1
         phy.profile_outputs.MODEM_PRE_BASE.override = 2
 
-        # Shaping overrides
         self.BLE_TX_Shaping_Coeffs(phy, model)
 
-        # FRC Overrides
         PHY_COMMON_FRAME_BLE(phy, model)
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
         phy.profile_outputs.FRC_PUNCTCTRL_PUNCT0.override = 1
         phy.profile_outputs.FRC_PUNCTCTRL_PUNCT1.override = 1
 
-        # This should be set only on DSA PHYs (PGLYNX-566), sowe can clear it.
         phy.profile_outputs.FRC_CTRL_WAITEOFEN.override = 0
 
-        # Radio Controller Overrides
         phy.profile_outputs.RAC_SYNTHREGCTRL_MMDLDOVREFTRIM.override = 3
 
-        # Viterbi Demod Overrides
         phy.profile_outputs.MODEM_VITERBIDEMOD_SYNTHAFC.override = 1
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI1.override = 65
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI2.override = 45
@@ -202,18 +197,6 @@ class PHYS_Bluetooth_LE_Sol(IPhy):
         phy.profile_outputs.AGC_HICNTREGION0_HICNTREGION2.override = 6
         phy.profile_outputs.AGC_HICNTREGION0_HICNTREGION3.override = 7
         phy.profile_outputs.AGC_HICNTREGION1_HICNTREGION4.override = 8
-        #FIXME phy.profile_outputs.AGC_PNRFATT1_LNAMIXRFATT3.override = 3
-        #FIXME phy.profile_outputs.AGC_PNRFATT1_LNAMIXRFATT4.override = 6
-        #FIXME phy.profile_outputs.AGC_PNRFATT2_LNAMIXRFATT5.override = 9
-        #FIXME phy.profile_outputs.AGC_PNRFATT2_LNAMIXRFATT6.override = 13
-        #FIXME phy.profile_outputs.AGC_PNRFATT3_LNAMIXRFATT7.override = 16
-        #FIXME phy.profile_outputs.AGC_PNRFATT3_LNAMIXRFATT8.override = 22
-        #FIXME phy.profile_outputs.AGC_PNRFATT4_LNAMIXRFATT9.override = 30
-        #FIXME phy.profile_outputs.AGC_PNRFATT4_LNAMIXRFATT10.override = 32
-        #FIXME phy.profile_outputs.AGC_PNRFATT5_LNAMIXRFATT11.override = 43
-        #FIXME phy.profile_outputs.AGC_PNRFATT5_LNAMIXRFATT12.override = 51
-        #FIXME phy.profile_outputs.AGC_PNRFATT6_LNAMIXRFATT13.override = 63
-        #FIXME phy.profile_outputs.AGC_PNRFATT6_LNAMIXRFATT14.override = 126
         phy.profile_outputs.AGC_STEPDWN_STEPDWN0.override = 1
         phy.profile_outputs.AGC_STEPDWN_STEPDWN1.override = 2
         phy.profile_outputs.AGC_STEPDWN_STEPDWN2.override = 3
@@ -225,7 +208,6 @@ class PHYS_Bluetooth_LE_Sol(IPhy):
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE Viterbi No DSA PHY for Lynx',
                             phy_name=phy_name)
         self.Bluetooth_LE_Viterbi_noDSA_halfrate_base(phy, model)
-        #FIXME AW has to override for viterbi phy
         phy.profile_outputs.MODEM_VTCORRCFG0_EXPECTPATT.override = 2491575950
         return phy
 
@@ -234,12 +216,10 @@ class PHYS_Bluetooth_LE_Sol(IPhy):
                             phy_name=phy_name)
         self.Bluetooth_LE_Viterbi_noDSA_base(phy, model)
 
-        # default bandwidth will cause halfrate unless forced
         phy.profile_inputs.adc_rate_mode.value = model.vars.adc_rate_mode.var_enum.FULLRATE
 
         return phy
 
-    # BLE 2M TRecs + Viterbi
     def Bluetooth_LE_2M_Viterbi_noDSA_base(self, phy, model):
         self.Bluetooth_LE_Viterbi_noDSA_base(phy, model)
 

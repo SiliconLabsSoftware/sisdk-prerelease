@@ -15,6 +15,7 @@ provides:
   condition: [device_generic_family_sixx301]
 - name: clock_manager_runtime_hal_s3
 requires:
+- name: log_none
 - name: device_series_3
 - name: clock_manager_selection
 - name: status

@@ -7,6 +7,10 @@ description: >
   support this Command Class if it can be reset to factory default. The reset operation MUST reset
   protocol data (HomeID, NodeID, and so on). For Z-Wave Plus nodes, additional requirements upon node
   reset are provided in documentation.
+documentation:
+  docset: z-wave
+  document: zwave-api/device-reset-locally
+
 package: zwave
 quality: production
 metadata:

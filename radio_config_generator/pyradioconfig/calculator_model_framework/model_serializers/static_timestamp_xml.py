@@ -6,9 +6,6 @@ from pyradioconfig.calculator_model_framework.Utils.FileUtilities import FileUti
 
 class Static_TimeStamp_XML(object):
 
-    #
-    # Print a modem_model object to a XML file, with a static timestamp
-    #
     @staticmethod
     def print_modem_model_values_xml(outputfilename, phy_name, model_instance, comment=None):
         phy = getattr(model_instance.phys, phy_name)
@@ -21,7 +18,6 @@ class Static_TimeStamp_XML(object):
         if comment is None:
             comment = phy_name + " instance"
 
-        # create dir path, if not exists
         FileUtilities.makedirs(os.path.dirname(outputfilename))
 
         model_instance.to_instance_xml(outputfilename, part_rev, comment, True, result_code, error_message, profile, phy, static_timestamp)

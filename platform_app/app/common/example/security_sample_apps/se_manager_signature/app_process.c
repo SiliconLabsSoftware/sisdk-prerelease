@@ -74,7 +74,9 @@ static uint8_t asymmetric_key_type_select;
 static const char *asymmetric_key_type_string[] = {
   "plaintext",
   "wrapped",
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
   "volatile"
+#endif
 };
 #endif
 
@@ -180,7 +182,11 @@ void app_process_action(void)
       if (space_press) {
         space_press = false;
         asymmetric_key_type_select++;
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
         if (asymmetric_key_type_select == 3) {
+#else
+        if (asymmetric_key_type_select == 2) {
+#endif
           asymmetric_key_type_select = 0;
         }
         printf("  + Current asymmetric key is a %s key.\n",
@@ -306,6 +312,7 @@ void app_process_action(void)
       }
       break;
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
     case CREATE_VOLATILE_KEY:
       printf("  + Generate a non-exportable asymmetric key into a volatile SE "
              "key slot... ");
@@ -325,6 +332,7 @@ void app_process_action(void)
         app_state = SE_MANAGER_EXIT;
       }
       break;
+#endif
 #endif
 
     case SIGN_MESSAGE:
@@ -383,9 +391,12 @@ void app_process_action(void)
 #endif
       if (verify_signature(hash_algo[hash_algo_select]) == SL_STATUS_OK) {
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
         if (asymmetric_key_type_select == 2) {
           app_state = DELETE_VOLATILE_KEY;
-        } else {
+        } else
+#endif
+        {
           print_startup();
         }
 #else
@@ -438,11 +449,18 @@ static void print_startup(void)
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   printf("\n  . Current asymmetric key is a %s key.\n",
          asymmetric_key_type_string[asymmetric_key_type_select]);
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
   printf("  + Press SPACE to select a %s or %s or %s key, press ENTER to next "
          "option.\n",
          asymmetric_key_type_string[0],
          asymmetric_key_type_string[1],
          asymmetric_key_type_string[2]);
+#else
+  printf("  + Press SPACE to select a %s or %s key, press ENTER to next "
+         "option.\n",
+         asymmetric_key_type_string[0],
+         asymmetric_key_type_string[1]);
+#endif
   app_state = SELECT_KEY_TYPE;
 #else
   printf("\n  . Current asymmetric key algorithm is %s.\n",
@@ -509,8 +527,10 @@ static void print_key_algo(void)
     app_state = CREATE_PLAIN_KEY;
   } else if (asymmetric_key_type_select == 1) {
     app_state = CREATE_WRAP_KEY;
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
   } else {
     app_state = CREATE_VOLATILE_KEY;
+#endif
   }
 #else
   app_state = CREATE_PLAIN_KEY;

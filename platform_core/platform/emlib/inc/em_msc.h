@@ -39,7 +39,7 @@
 #include "em_bus.h"
 #include "em_msc_compat.h"
 #include "em_ramfunc.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -412,7 +412,7 @@ __STATIC_INLINE void MSC_ReadCTRLSet(uint32_t value)
  ******************************************************************************/
 __STATIC_INLINE void MSC_PageLockSetLocked(uint32_t page_number)
 {
-  EFM_ASSERT(page_number < (FLASH_SIZE / FLASH_PAGE_SIZE));
+  SL_LOG_DEBUG_ASSERT(page_number < (FLASH_SIZE / FLASH_PAGE_SIZE));
 
   #if defined(_MSC_PAGELOCK0_MASK)
   volatile uint32_t *pagelock_registers = &MSC->PAGELOCK0;
@@ -436,7 +436,7 @@ __STATIC_INLINE void MSC_PageLockSetLocked(uint32_t page_number)
  ******************************************************************************/
 __STATIC_INLINE bool MSC_PageLockGetLocked(uint32_t page_number)
 {
-  EFM_ASSERT(page_number < (FLASH_SIZE / FLASH_PAGE_SIZE));
+  SL_LOG_DEBUG_ASSERT(page_number < (FLASH_SIZE / FLASH_PAGE_SIZE));
 
   #if defined(_MSC_PAGELOCK0_MASK)
   const volatile uint32_t *pagelock_registers = (const volatile uint32_t *)&MSC->PAGELOCK0;

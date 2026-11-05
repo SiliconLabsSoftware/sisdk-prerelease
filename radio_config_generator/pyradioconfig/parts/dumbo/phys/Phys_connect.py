@@ -1,8 +1,11 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 class PHYS_connect(IPhy):
+
+    ip_category = IPCategory.LPW
 
     def Connect_base(self, phy, model):
 
@@ -15,7 +18,7 @@ class PHYS_connect(IPhy):
         phy.profile_inputs.shaping_filter.value = model.vars.shaping_filter.var_enum.Gaussian
         phy.profile_inputs.shaping_filter_param.value = 0.5
         phy.profile_inputs.symbol_encoding.value = model.vars.symbol_encoding.var_enum.NRZ
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.diff_encoding_mode.value = model.vars.diff_encoding_mode.var_enum.DISABLED
         phy.profile_inputs.crc_byte_endian.value = model.vars.crc_byte_endian.var_enum.MSB_FIRST
         phy.profile_inputs.crc_bit_endian.value = model.vars.crc_bit_endian.var_enum.MSB_FIRST
@@ -213,13 +216,13 @@ class PHYS_connect(IPhy):
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
         phy.profile_inputs.white_poly.value = model.vars.white_poly.var_enum.NONE
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
 
     def PHY_Connect_915mhz_oqpsk_2Mcps_250kbps(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Connect, 'DSSS 250', readable_name="Connect 915MHz OQPSK 2Mcps 250kbps")
 
         self.Connect_base(phy, model)
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.rx_xtal_error_ppm.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
         phy.profile_inputs.syncword_0.value = long(167)
@@ -294,4 +297,4 @@ class PHYS_connect(IPhy):
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
         phy.profile_inputs.white_poly.value = model.vars.white_poly.var_enum.NONE
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 

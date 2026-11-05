@@ -11,6 +11,7 @@ root_path: platform_core/platform/driver/coulomb
 source:
 - path: src/sl_coulomb_counter_hal_dcdc.c
 requires:
+- name: log_none
 - name: hal_dcdc_coulomb_counter
 - name: coulomb_counter
 - name: clock_manager_runtime

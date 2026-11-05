@@ -201,7 +201,8 @@ typedef enum
   app_statistics_domain_wisun      = 0x03,
   app_statistics_domain_network    = 0x04,
   app_statistics_domain_regulation = 0x05,
-  app_statistics_domain_heap       = 0x06
+  app_statistics_domain_heap       = 0x06,
+  app_statistics_domain_ffn_power_saving = 0x07
 } app_statistics_domain_t;
 
 const char *app_statistics_domain_str[] =
@@ -213,6 +214,7 @@ const char *app_statistics_domain_str[] =
   "network",
   "regulation",
   "heap",
+  "ffn_power_saving",
   NULL,
 };
 
@@ -1229,6 +1231,19 @@ const app_settings_entry_t app_settings_entries[] =
     .set_handler = NULL,
     .get_handler = app_settings_get_statistics_regulation,
     .description = "Regional regulation statistics and errors"
+  },
+  {
+    .key = "ffn_power_saving",
+    .domain = app_settings_domain_statistics,
+    .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = (void *)SL_WISUN_STATISTICS_TYPE_FFN_POWER_SAVING,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_statistics,
+    .description = "Local FFN power-saving statistics"
   },
   {
     .key = "printable_data_as_hex",
@@ -2763,6 +2778,71 @@ static const app_settings_entry_t app_statistics_entries[] =
     .description = "Total transmission duration since boot"
   },
   {
+    .key = "nominal_sleep_ratio",
+    .domain = app_statistics_domain_ffn_power_saving,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT16,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.ffn_power_saving.nominal_sleep_ratio,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Configured sleep ratio (0..10000 represents 0..100.00%)"
+  },
+  {
+    .key = "actual_sleep_ratio",
+    .domain = app_statistics_domain_ffn_power_saving,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT16,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.ffn_power_saving.actual_sleep_ratio,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Observed sleep ratio (0..10000 represents 0..100.00%)"
+  },
+  {
+    .key = "max_sleep_duration_ms",
+    .domain = app_statistics_domain_ffn_power_saving,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.ffn_power_saving.max_sleep_duration_ms,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Longest observed sleep interval in milliseconds"
+  },
+  {
+    .key = "avg_sleep_duration_ms",
+    .domain = app_statistics_domain_ffn_power_saving,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.ffn_power_saving.avg_sleep_duration_ms,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Mean closed sleep interval in milliseconds"
+  },
+  {
+    .key = "max_awake_duration_ms",
+    .domain = app_statistics_domain_ffn_power_saving,
+    .value_size = APP_SETTINGS_VALUE_SIZE_UINT32,
+    .input = APP_SETTINGS_INPUT_FLAG_DEFAULT,
+    .output = APP_SETTINGS_OUTPUT_FLAG_DEFAULT,
+    .value = &app_statistics.ffn_power_saving.max_awake_duration_ms,
+    .input_enum_list = NULL,
+    .output_enum_list = NULL,
+    .set_handler = NULL,
+    .get_handler = app_settings_get_integer,
+    .description = "Longest observed awake interval in milliseconds"
+  },
+  {
     .key = NULL,
     .domain = 0,
     .value_size = APP_SETTINGS_VALUE_SIZE_NONE,
@@ -3283,6 +3363,12 @@ static sl_status_t app_settings_get_statistics(char *value_str,
 
   // Update statistics
   ret = sl_wisun_get_statistics(statistics_type, &app_statistics);
+  if (statistics_type == SL_WISUN_STATISTICS_TYPE_FFN_POWER_SAVING
+      && (ret == SL_STATUS_NOT_READY || ret == SL_STATUS_NOT_AVAILABLE)) {
+    // FFN power saving statistics not available yet or not supported, skip error message.
+    return SL_STATUS_FAIL;
+  }
+
   if (ret != SL_STATUS_OK) {
     printf("[Failed to retrieve statistics: %"PRIu32"]\r\n", ret);
     return SL_STATUS_FAIL;

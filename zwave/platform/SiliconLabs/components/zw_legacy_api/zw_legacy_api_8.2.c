@@ -7,9 +7,30 @@
 #include <stdint.h>
 
 #include "ZAF_version.h"
+#include "ZAF_Common_helper.h"
+#include "ZAF_Common_interface.h"
 #include "ZW_product_infos.h"
+#include "ZW_linger.h"
 #include "zpal_misc.h"
 #include "zw_version_config.h"
+
+extern void ZW_LingerUpdate(void);
+extern zaf_wake_up_callback_t ZW_LingerGetCallback(void);
+
+void zaf_stay_awake(void)
+{
+  ZW_LingerUpdate();
+}
+
+void zaf_set_stay_awake_callback(zaf_wake_up_callback_t callback)
+{
+  ZW_LingerSetCallback(callback);
+}
+
+zaf_wake_up_callback_t zaf_get_stay_awake_callback(void)
+{
+  return ZW_LingerGetCallback();
+}
 
 uint16_t ZAF_GetBuildNumber(void)
 {

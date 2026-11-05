@@ -43,6 +43,7 @@
 #include "em_device.h"
 #include "sl_common.h"
 #include "sl_core.h"
+#include "sl_log_helper.h"
 
 #if (_SILICON_LABS_32B_SERIES < 3)
 #include "em_eusart.h"
@@ -176,7 +177,7 @@ static inline sl_hal_eusart_parity_t iostream_to_hal_parity(sl_iostream_eusart_u
       return SL_HAL_EUSART_NO_PARITY;
     default:
       // Unknown parity type
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_EUSART_NO_PARITY;
   }
 }
@@ -194,7 +195,7 @@ static inline sl_hal_eusart_stop_bits_t iostream_to_hal_stop(sl_iostream_eusart_
       return SL_HAL_EUSART_STOP_BITS_2;
     default:
       // Unknown stop bit type
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_EUSART_STOP_BITS_1;
   }
 }
@@ -213,7 +214,7 @@ static inline sl_hal_eusart_hw_flow_control_t iostream_to_hal_flow_control(sl_io
       return SL_HAL_EUSART_HW_FLOW_CONTROL_CTS_RTS;
     default:
       // Unknown flow control type
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_EUSART_HW_FLOW_CONTROL_NONE;
   }
 }
@@ -230,7 +231,7 @@ static inline EUSART_Parity_TypeDef iostream_to_hal_parity(sl_iostream_eusart_ua
       return eusartOddParity;
     default:
       // Unknown parity type
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return eusartNoParity;
   }
 }
@@ -248,7 +249,7 @@ static inline EUSART_Stopbits_TypeDef iostream_to_hal_stop(sl_iostream_eusart_ua
       return eusartStopbits2;
     default:
       // Unknown stop bit type
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return eusartStopbits1;
   }
 }
@@ -267,7 +268,7 @@ static inline EUSART_HwFlowControl_TypeDef iostream_to_hal_flow_control(sl_iostr
       return eusartHwFlowControlCtsAndRts;
     default:
       // Unknown flow control type
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return eusartHwFlowControlNone;
   }
 }
@@ -304,7 +305,7 @@ static inline CMU_Clock_TypeDef get_cmu_clock(uint8_t eusart_nbr)
     #endif // > 1
     default:
       // Invalid EUSART peripheral number
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_IOSTREAM_EUSART_CLOCK_REF(0);
   }
 }
@@ -392,7 +393,8 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
   uint32_t freq;
   sl_clock_branch_t clock_branch = sl_device_peripheral_get_clock_branch(eusart_config->eusart);
   status = sl_clock_manager_get_clock_branch_frequency(clock_branch, &freq);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   eusart_init.clock_div = sl_hal_eusart_uart_calculate_clock_div(freq,
                                                                  eusart_config->baudrate,
@@ -606,7 +608,7 @@ void sl_iostream_eusart_irq_handler(sl_iostream_uart_t *iostream_uart)
   #endif
 
   // Unhandled IRQ Flag. Please check what bit is set in IF and open a bug report.
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 }
 
 /*******************************************************************************

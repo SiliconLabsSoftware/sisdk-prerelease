@@ -1,5 +1,4 @@
 
-# -*- coding: utf-8 -*-
 
 from . static import Base_RM_Field
 
@@ -5214,41 +5213,81 @@ class RM_Field_MODEM_S_SPARE_SPARE(Base_RM_Field):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_MODEM_S_IRCALCOEFWR_CRVWD(Base_RM_Field):
+class RM_Field_MODEM_S_IRCALCOEFWR0_CRVWD(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_MODEM_S_IRCALCOEFWR_CRVWD, self).__init__(register,
-            'CRVWD', 'MODEM_S.IRCALCOEFWR.CRVWD', 'read-write',
+        super(RM_Field_MODEM_S_IRCALCOEFWR0_CRVWD, self).__init__(register,
+            'CRVWD', 'MODEM_S.IRCALCOEFWR0.CRVWD', 'read-write',
             u"",
             0, 15)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_MODEM_S_IRCALCOEFWR_CRVWEN(Base_RM_Field):
+class RM_Field_MODEM_S_IRCALCOEFWR0_CRVWEN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_MODEM_S_IRCALCOEFWR_CRVWEN, self).__init__(register,
-            'CRVWEN', 'MODEM_S.IRCALCOEFWR.CRVWEN', 'read-write',
+        super(RM_Field_MODEM_S_IRCALCOEFWR0_CRVWEN, self).__init__(register,
+            'CRVWEN', 'MODEM_S.IRCALCOEFWR0.CRVWEN', 'read-write',
             u"",
             15, 1)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_MODEM_S_IRCALCOEFWR_CIVWD(Base_RM_Field):
+class RM_Field_MODEM_S_IRCALCOEFWR0_CIVWD(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_MODEM_S_IRCALCOEFWR_CIVWD, self).__init__(register,
-            'CIVWD', 'MODEM_S.IRCALCOEFWR.CIVWD', 'read-write',
+        super(RM_Field_MODEM_S_IRCALCOEFWR0_CIVWD, self).__init__(register,
+            'CIVWD', 'MODEM_S.IRCALCOEFWR0.CIVWD', 'read-write',
             u"",
             16, 15)
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Field_MODEM_S_IRCALCOEFWR_CIVWEN(Base_RM_Field):
+class RM_Field_MODEM_S_IRCALCOEFWR0_CIVWEN(Base_RM_Field):
     def __init__(self, register):
         self.__dict__['zz_frozen'] = False
-        super(RM_Field_MODEM_S_IRCALCOEFWR_CIVWEN, self).__init__(register,
-            'CIVWEN', 'MODEM_S.IRCALCOEFWR.CIVWEN', 'read-write',
+        super(RM_Field_MODEM_S_IRCALCOEFWR0_CIVWEN, self).__init__(register,
+            'CIVWEN', 'MODEM_S.IRCALCOEFWR0.CIVWEN', 'read-write',
+            u"",
+            31, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_MODEM_S_IRCALCOEFWR1_CRVWD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_MODEM_S_IRCALCOEFWR1_CRVWD, self).__init__(register,
+            'CRVWD', 'MODEM_S.IRCALCOEFWR1.CRVWD', 'read-write',
+            u"",
+            0, 15)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_MODEM_S_IRCALCOEFWR1_CRVWEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_MODEM_S_IRCALCOEFWR1_CRVWEN, self).__init__(register,
+            'CRVWEN', 'MODEM_S.IRCALCOEFWR1.CRVWEN', 'read-write',
+            u"",
+            15, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_MODEM_S_IRCALCOEFWR1_CIVWD(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_MODEM_S_IRCALCOEFWR1_CIVWD, self).__init__(register,
+            'CIVWD', 'MODEM_S.IRCALCOEFWR1.CIVWD', 'read-write',
+            u"",
+            16, 15)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_MODEM_S_IRCALCOEFWR1_CIVWEN(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_MODEM_S_IRCALCOEFWR1_CIVWEN, self).__init__(register,
+            'CIVWEN', 'MODEM_S.IRCALCOEFWR1.CIVWEN', 'read-write',
             u"",
             31, 1)
         self.__dict__['zz_frozen'] = True

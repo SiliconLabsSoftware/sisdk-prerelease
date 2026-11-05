@@ -5,19 +5,14 @@ class Calc_Freq_Offset_Comp_Bobcat(CALC_Freq_Offset_Comp_ocelot):
 
     def calc_offsub_reg(self, model):
 
-        #calculate OFFSUBDEN and OFFSUBNUM register for more accurate frequency offset estimation
-        #described in Section 5.7.7.1 of EFR32 Reference Manual (internal.pdf)
 
-        # TODO: implement case when AFC is enabled
         rxbrfrac = 2*model.vars.rxbrfrac_actual.value
         timing_window = model.vars.timing_window_actual.value
         demod_sel = model.vars.demod_select.value
 
-        # : Variables used in case of antenna diversity enabled
         enable_parallel_correlation = model.vars.antdiv_enable_parallel_correlation.value
         oversampling_rate_actual = model.vars.oversampling_rate_actual.value
 
-        # : Calculate based on parallel window size if antenna diversity parallel correlator is enabled
         if enable_parallel_correlation and demod_sel != model.vars.demod_select.var_enum.COHERENT:
             adpcwndsizechip = model.vars.antdiv_adpcwndsize.value
             exp = adpcwndsizechip * oversampling_rate_actual / 128.0
@@ -49,7 +44,6 @@ class Calc_Freq_Offset_Comp_Bobcat(CALC_Freq_Offset_Comp_ocelot):
             else:
                 error_min = 1e9
 
-                # find best den, num pair that gets us closest to 2**N
                 for den in xrange(1, 16):
                     for num in xrange(1, 16):
 
@@ -65,3 +59,57 @@ class Calc_Freq_Offset_Comp_Bobcat(CALC_Freq_Offset_Comp_ocelot):
 
         self._reg_write(model.vars.MODEM_TIMING_OFFSUBDEN, best_den)
         self._reg_write(model.vars.MODEM_TIMING_OFFSUBNUM, best_num)
+
+    def calc_afcadjrx_res(self, model):
+        digmixfb = model.vars.MODEM_DIGMIXCTRL_DIGMIXFB.value
+        vtafcframe = model.vars.MODEM_REALTIMCFE_VTAFCFRAME.value
+        vtdemoden = model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value
+
+        if digmixfb:
+            model.vars.afcadjrx_res.value = model.vars.digmix_res_actual.value
+        else:
+            model.vars.afcadjrx_res.value = model.vars.synth_res_actual.value
+        
+        if not vtafcframe and vtdemoden:
+            model.vars.afcadjrx_res.value = 0.0
+
+    def calc_freq_offset_scale_value(self, model):
+        """
+        Series 2 scaling fixes of freq_offset_scale
+        
+        Fixes and improvements:
+        - Original calculation did not count with SRC1 and SRC2; experimental results
+        show that using demod_rate_actual is correct way to go.
+        - Coherent demod is MODEM_CTRL1_PHASEDEMOD == 2
+        - BLE LR PHYs use 2x divider
+        
+        Args:
+            model (ModelRoot) : Data model to read and write variables from
+        """
+        demod_rate = model.vars.demod_rate_actual.value
+        osr = model.vars.oversampling_rate_actual.value # This is (2*RXBRFRAC)
+        mod_format = model.vars.modulation_type.value
+        chip_rate = model.vars.baudrate.value # In the calculator chiprate = baudrate
+        freq_gain = model.vars.freq_gain_actual.value
+        
+        try:
+            if model.vars.MODEM_CTRL1_PHASEDEMOD.value == 2: # (COH)
+                freq_offset_scale = (chip_rate//(2**13))*1.0 # force a float #
+            else:
+                if mod_format == model.vars.modulation_type.var_enum.FSK2 or \
+                    mod_format == model.vars.modulation_type.var_enum.MSK or \
+                    mod_format == model.vars.modulation_type.var_enum.FSK4:
+                    freq_offset_scale = demod_rate / (freq_gain * 256.0)
+                elif mod_format == model.vars.modulation_type.var_enum.OQPSK or \
+                    mod_format == model.vars.modulation_type.var_enum.BPSK or \
+                    mod_format == model.vars.modulation_type.var_enum.DBPSK:
+                    freq_offset_scale = demod_rate / (osr * 256.0)
+                else:
+                    freq_offset_scale = 0.0
+        except ZeroDivisionError:
+            freq_offset_scale = 0.0
+            
+        if model.vars.MODEM_LONGRANGE_LRBLE.value == 1:
+            freq_offset_scale /= 2.0
+        
+        model.vars.freq_offset_scale.value = freq_offset_scale

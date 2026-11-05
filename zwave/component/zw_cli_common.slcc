@@ -5,6 +5,9 @@ description: >
   This component provides common CLI (Command Line Interface), that can be used to send commands to the Z-wave device,
   instead of using the buttons, e.g initiating learn mode on a device or performing a factory reset.
   This component also provides functionalities for getting DSK and current region of the device.
+documentation:
+  docset: z-wave
+  document: z-wave-getting-started-for-end-devices/08-debug-a-z-wave-application#command-line-interface
 package: zwave
 quality: production
 metadata:

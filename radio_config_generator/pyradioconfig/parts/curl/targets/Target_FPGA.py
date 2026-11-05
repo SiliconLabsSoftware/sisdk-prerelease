@@ -14,57 +14,42 @@ class Target_FPGA_Curl(ITarget):
 
     def target_calculate(self, model):
 
-        #FPGA can only run in full rate mode
         model.vars.adc_rate_mode.value_forced = model.vars.adc_rate_mode.var_enum.FULLRATE
         model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.HFXOMULT
 
-        # Use Zero-IF
         model.vars.if_frequency_hz.value_forced = 0
 
-        #Disable IQ swap
         model.vars.MODEM_MIXCTRL_DIGIQSWAPEN.value_forced = 0
 
-        #Disable DCCOMP
         model.vars.MODEM_DCCOMP_DCCOMPEN.value_forced = 0
 
-        #38.4 MHz XO Frequency
         model.vars.xtal_frequency_hz.value_forced = int(38.4e6)
 
-        # MCUW_RADIO_CFG-3330 - add shaping filter overrides
 
-        # First, pre-calculate the PHY in IC target once to see model variables are set
         calc_manager = CalcManager(part_family=model.part_family, part_rev='ANY', target='IC')
         IC_model_instance_copy = deepcopy(model)
         IC_model_instance_copy.target = 'IC'
         calc_manager.calculate(IC_model_instance_copy)
 
-        # : PHY-specific rules (to be replaced globally once we figure out how calculate where they need to apply)
-        # : shaping filter specific overrides
         self.modem_shaping_overrides(model, IC_model_instance_copy)
 
     def modem_shaping_overrides(self, model, IC_model_instance_copy):
 
-        # Usually BLE PHYs use PLL compensated shaping filters for Gaussian shapes. We need to override them for
-        # FPGA target to use uncompensated shaping filter coefficient.
         if (
                 IC_model_instance_copy.vars.shaping_filter.value == IC_model_instance_copy.vars.shaping_filter.var_enum.Gaussian
                 and IC_model_instance_copy.vars.shaping_filter_param.value == 0.5
         ):
-            # covers all BLE PHYs (including AOX, HADM and LR)
             self.GAUSSIAN_BT_0p5_MODEM_SHAPING_OVERRIDE(model)
         if (
                 IC_model_instance_copy.vars.shaping_filter.value == IC_model_instance_copy.vars.shaping_filter.var_enum.Gaussian
                 and float(IC_model_instance_copy.vars.shaping_filter_param.value) == 2.0
                 and IC_model_instance_copy.vars.hadm_enable.value == IC_model_instance_copy.vars.hadm_enable.var_enum.ENABLED
         ):
-            # covers the HADM 2BT case
             self.GAUSSIAN_BT_2_MODEM_SHAPING_OVERRIDE(model)
         return
 
     def modem_reg_override(self, model, register_name, override_value=None, disable_override=False):
         if disable_override:
-            # just force the value_forced to be same as its value in profile_output.override
-            # is profile_output.override = None, the value will be eventually set by calculator
             model.vars.get_var(register_name).value_forced = model.profile.outputs.get_output(register_name).override
         else:
             if override_value is None:
@@ -73,9 +58,6 @@ class Target_FPGA_Curl(ITarget):
                 model.vars.get_var(register_name).value_forced = override_value
 
     def GAUSSIAN_BT_0p5_MODEM_SHAPING_OVERRIDE(self, model, disable_override=False):
-        # this shaping coeff give uncompensated Gaussian Shape with BT = 0.5
-        # these coeffs are what radio calculator generated for given shaping_filter and shaping_filter_param
-        # using more taps here now because of MCUW_RADIO_CFG-3073
 
         self.modem_reg_override(model, 'MODEM_CTRL0_SHAPING', 3, disable_override)
 
@@ -100,7 +82,6 @@ class Target_FPGA_Curl(ITarget):
         self.modem_reg_override(model, 'MODEM_SHAPING4_COEFF18', 2, disable_override)
         self.modem_reg_override(model, 'MODEM_SHAPING4_COEFF19', 1, disable_override)
 
-        # override other shaping coeff to zero
         self.modem_reg_override(model, 'MODEM_SHAPING5_COEFF20', 0, disable_override)
         self.modem_reg_override(model, 'MODEM_SHAPING5_COEFF21', 0, disable_override)
         self.modem_reg_override(model, 'MODEM_SHAPING5_COEFF22', 0, disable_override)
@@ -131,9 +112,6 @@ class Target_FPGA_Curl(ITarget):
         self.modem_reg_override(model, 'MODEM_SHAPING11_COEFF47', 0, disable_override)
 
     def GAUSSIAN_BT_2_MODEM_SHAPING_OVERRIDE(self, model, disable_override=False):
-        # this shaping coeff give uncompensated Gaussian Shape with BT = 2.0
-        # these coeffs are what radio calculator generated for given shaping_filter and shaping_filter_param
-        # using more taps here now because of MCUW_RADIO_CFG-3073
 
         self.modem_reg_override(model, 'MODEM_CTRL0_SHAPING', 3, disable_override)
 
@@ -147,7 +125,6 @@ class Target_FPGA_Curl(ITarget):
         self.modem_reg_override(model, 'MODEM_SHAPING1_COEFF7', 127, disable_override)
         self.modem_reg_override(model, 'MODEM_SHAPING2_COEFF8', 111, disable_override)
         self.modem_reg_override(model, 'MODEM_SHAPING2_COEFF9', 16, disable_override)
-        # override other shaping coeff to zero
         self.modem_reg_override(model, 'MODEM_SHAPING2_COEFF10', 0, disable_override)
         self.modem_reg_override(model, 'MODEM_SHAPING2_COEFF11', 0, disable_override)
         self.modem_reg_override(model, 'MODEM_SHAPING3_COEFF12', 0, disable_override)

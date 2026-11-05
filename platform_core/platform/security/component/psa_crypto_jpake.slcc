@@ -19,7 +19,9 @@ requires:
   # PAKE driver. On HSE (device_has_semailbox) the transparent SE driver
   # provides EC J-PAKE; MBEDTLS_ECJPAKE_ALT / se_jpake.c are being removed.
 - name: mbedtls_jpake
-  unless: [device_has_semailbox]
+  condition: [device_security_base]
+- name: mbedtls_jpake
+  condition: [device_security_rot]
 
 template_contribution:
 - name: psa_crypto_config

@@ -4,8 +4,11 @@ from pyradioconfig.parts.common.profiles.jumbo_regs import *
 from pyradioconfig.parts.common.profiles.profile_modem import buildModemInfoOutputs, buildRailOutputs
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
     buildWhiteOutputs, build_ircal_sw_vars, buildStudioLogOutput
+from pycalcmodel.core.common import IPCategory
 
 class Profile_Long_Range_Jumbo(IProfile):
+
+    ip_category = IPCategory.LPW
 
     def __init__(self):
         self._profileName = "Long Range"
@@ -18,17 +21,14 @@ class Profile_Long_Range_Jumbo(IProfile):
 
     def buildProfileModel(self, model):
 
-        # Build profile object and append it to the model
         profile = self._makeProfile(model)
 
-        # Build inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
         self.build_hidden_profile_inputs(model, profile)
         self.build_deprecated_profile_inputs(model, profile)
 
-        # Build outputs
         self.build_register_profile_outputs(model, profile)
         self.build_variable_profile_outputs(model, profile)
         self.build_info_profile_outputs(model, profile)
@@ -50,18 +50,15 @@ class Profile_Long_Range_Jumbo(IProfile):
         IProfile.make_required_input(profile, model.vars.longrange_mode, "long_range", readable_name="Long Range Mode")
 
     def build_optional_profile_inputs(self, model, profile):
-        # No optional inputs for this profile
         pass
 
     def build_advanced_profile_inputs(self, model, profile):
         IProfile.make_linked_io(profile, model.vars.fec_en, 'Channel_Coding', readable_name="FEC Algorithm")
 
     def build_hidden_profile_inputs(self, model, profile):
-        #No hidden inputs for this profile
         pass
 
     def build_deprecated_profile_inputs(self, model, profile):
-        #No deprecated inputs for this profile
         pass
 
     def build_register_profile_outputs(self, model, profile):
@@ -87,20 +84,9 @@ class Profile_Long_Range_Jumbo(IProfile):
         self._disable_dynamic_BBSS(model)
 
     def _fixed_longrange_vars(self, model):
-        # Calculate all of the fixed values (forces) unique to this profile
 
-        # "base" definitions of the non-FEC PHY. allows usage in multiple PHYs
 
-        # -----------------------------------------------------------------------------------------------
-        # LONG RANGE PHYs BASE, CORE CONFIGURATION
-        # -----------------------------------------------------------------------------------------------
-        # -----------------------------------------------------------------------------------------------
-        # Note: Based on Lijun's profile found in the third testrun's excel sheet in https://jira.silabs.com/browse/MCUW_RADIO_CFG-717,
-        # but slightly modofied to get back the reference rail_config.c that was given by Lijun to BP
-        # office for testing (remeasured and validated sensitivity first by Tibor P. @ BP office).
-        # -----------------------------------------------------------------------------------------------
 
-        # Frame inputs
         model.vars.frame_bitendian.value_forced = model.vars.frame_bitendian.var_enum.LSB_FIRST
         model.vars.frame_length_type.value_forced = model.vars.frame_length_type.var_enum.VARIABLE_LENGTH
         model.vars.payload_white_en.value_forced = False
@@ -123,7 +109,6 @@ class Profile_Long_Range_Jumbo(IProfile):
         model.vars.crc_pad_input.value_forced = False
         model.vars.crc_invert.value_forced = False
 
-        # Assorted app parameters
         model.vars.diff_encoding_mode.value_forced = model.vars.diff_encoding_mode.var_enum.DISABLED
         model.vars.fsk_symbol_map.value_forced = model.vars.fsk_symbol_map.var_enum.MAP0
         model.vars.preamble_pattern.value_forced = 0
@@ -153,7 +138,6 @@ class Profile_Long_Range_Jumbo(IProfile):
         model.vars.syncword_1.value_forced = 0x0
         model.vars.target_osr.value_forced = 5
 
-        # Variables that are optional inputs in the Base profile and need to be explicitly set
         model.vars.test_ber.value_forced = False
         model.vars.manchester_mapping.value_forced = model.vars.manchester_mapping.var_enum.Default
         model.vars.syncword_tx_skip.value_forced = False
@@ -193,7 +177,6 @@ class Profile_Long_Range_Jumbo(IProfile):
         model.vars.var_length_adjust.value_forced = 0
         model.vars.var_length_byteendian.value_forced = model.vars.var_length_byteendian.var_enum.LSB_FIRST
 
-        # Output registers
         model.vars.AGC_CTRL2_ADCRSTSTARTUP.value_forced = 0
         model.vars.AGC_CTRL2_FASTLOOPDEL.value_forced = 5
         model.vars.AGC_GAINSTEPLIM_CFLOOPSTEPMAX.value_forced = 4
@@ -231,9 +214,7 @@ class Profile_Long_Range_Jumbo(IProfile):
         model.vars.MODEM_CTRL0_DUALCORROPTDIS.value_forced = 0
 
     def _lookup_from_longrange_mode(self, model):
-        #This function calculates some variables/registers based on the longrange mode
 
-        #Read the mode from the profile inputs (not yet written to model vars)
         longrange_mode = model.profile.inputs.longrange_mode.var_value
 
         if longrange_mode == model.vars.longrange_mode.var_enum.LR_1p2k:
@@ -299,6 +280,5 @@ class Profile_Long_Range_Jumbo(IProfile):
             model.vars.MODEM_CTRL5_BBSS.value_forced = 5
 
     def _disable_dynamic_BBSS(self, model):
-        #Need only for Jumbo and Nerio
         model.vars.SEQ_MISC_DYNAMIC_BBSS_SW_EN.value_forced = 0
         pass

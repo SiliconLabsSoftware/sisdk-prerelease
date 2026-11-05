@@ -38,42 +38,29 @@ class CALC_Freq_Offset_Comp_jumbo(CALC_Freq_Offset_Comp):
         modulation = model.vars.modulation_type.value
         in_2fsk_opt_scope = model.vars.in_2fsk_opt_scope.value
 
-        # We seem to not be able to get reliable AFC loop for low datarates
-        # any rate below 5 Kbps we prefer INTERNAL compensation. For 4-FSK
-        # this limit is 10 Kbps bitrate, or 5Kbps baudrate
         baudrate_limit = 5000
 
-        #Default to continuous AFC
         afc_mode = model.vars.afc_run_mode.var_enum.CONTINUOUS
 
         if in_2fsk_opt_scope:
             if baudrate < 1900000:
-                # Use INTERNAL_LOCK_AT_PREAMBLE_DETECT for most proprietary 2FSK PHYs
                 freq_mode = model.vars.frequency_comp_mode.var_enum.INTERNAL_LOCK_AT_PREAMBLE_DETECT
             else:
                 freq_mode = model.vars.frequency_comp_mode.var_enum.DISABLED
 
-        # choose one-shot AFC in 2-FSK if preamble is between 16 and 32 bits
         elif modulation == model.vars.modulation_type.var_enum.FSK2 and 16 <= preamble_len < 32:
             afc_mode = model.vars.afc_run_mode.var_enum.ONE_SHOT
             freq_mode = model.vars.frequency_comp_mode.var_enum.AFC_LOCK_AT_FRAME_DETECT
 
-        # for amplitude modulation the frequency offset estimator is used to estimate
-        # peak amplitude level which is used in slicer level determination.
-        # best option for this modulation is to lock at FRAME detect
         elif modulation == model.vars.modulation_type.var_enum.ASK:
             freq_mode = model.vars.frequency_comp_mode.var_enum.INTERNAL_LOCK_AT_FRAME_DETECT
 
-        # For OOK, set the comp mode to always on to enable the dynamic slicer to write the slicer level any time
-        # The dynamic slicer code intelligently detects the DEMODSTATE and handles when to actually read RSSI and write the level
         elif modulation == model.vars.modulation_type.var_enum.OOK:
             freq_mode = model.vars.frequency_comp_mode.var_enum.INTERNAL_ALWAYS_ON
 
-        # For other modulation types enable AFC if we have at least 40 preamble bits and not too low a baudrate
         elif preamble_len >= 32 and baudrate > baudrate_limit:
             freq_mode = model.vars.frequency_comp_mode.var_enum.AFC_LOCK_AT_PREAMBLE_DETECT
 
-        # else default to INTERNAL compensation that is always running
         else:
             freq_mode = model.vars.frequency_comp_mode.var_enum.INTERNAL_ALWAYS_ON
 
@@ -114,18 +101,12 @@ class CALC_Freq_Offset_Comp_jumbo(CALC_Freq_Offset_Comp):
 
     def afc_adj_limit(self, model):
 
-        #FIXME: check if afc limit needs to be doubled (it uses both +/- frequencies)
         freq_limit = model.vars.freq_offset_hz.value
         res = model.vars.synth_res_actual.value
         afclimreset = model.vars.afc_lim_reset_actual.value
 
-        # calculate limit
         afcadjlim = freq_limit / res
 
-        # if AFC_LIM_RESET is enabled we reset to the center frequency
-        # once the accumulated offset reaches the limit. In this mode we
-        # like to set the limit to about 10% higher than where we like the
-        # limit to be
         if afclimreset:
             afcadjlim *= 1.1
 
@@ -139,8 +120,6 @@ class CALC_Freq_Offset_Comp_jumbo(CALC_Freq_Offset_Comp):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        #FIXME: verify the way we use src1ratio and src2ratio in equation
-        #FIXME: may need to scale down afcscale by 3/4 to get better sensitivity numbers when afc is enabled
         fxo = model.vars.xtal_frequency.value
         dec0 = model.vars.dec0_actual.value
         dec1 = model.vars.dec1_actual.value
@@ -185,7 +164,6 @@ class CALC_Freq_Offset_Comp_jumbo(CALC_Freq_Offset_Comp):
             best_e = 0
         else:
             best_diff = 99e9
-            # start with the highest allowed mantissa and find best m, e pair
             for m in xrange(1, 31, 1):
                 e = py2round(math.log(afc_scale / m, 2))
                 diff = abs(afc_scale - m * 2**e)

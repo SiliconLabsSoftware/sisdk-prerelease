@@ -10,26 +10,9 @@ from pyradioconfig.parts.jumbo.calculators.calc_shaping import CALC_Shaping_jumb
 class CALC_Shaping_nerio(CALC_Shaping_jumbo):
 
     def floor_filter_coefficients(self, h):
-        # Guner Arslan added a comment - 3 days ago Looks like we have couple issues in the
-        # root_raised_cosine_filter(self, model) function: the shaping filter coefficients (
-        # MODEM.SHAPINGx.COEFFy) are unsigned registers but root raised cosine filters can have negative
-        # coefficients at the edges. So technically the HW does not support generic root raised cosine filters.
-        #
-        # We have a number of PHYs that use root raised cosine but all of them use BT = 0 in which case all
-        # coeffs end up greater or equal to zero.
-        #
-        # For BT > 0 The negative coeffs will be very small at the edges I think we should be able to get away
-        # with setting them to zero. So let's just set all negative coeffs to zero before writing to the
-        # registers.
-        #
-        # Above issue is only present for Nerio and Nixi. In all other parts, the shaping filter coefficients (
-        # MODEM.SHAPINGx.COEFFy) are signed registers. Therefore using a method floor_filter_coefficients to make
-        # sure this applies only to Nerio and Nixi.
-        # floor_filter_coefficients returns 0 and is called when h[x] < 0
         return 0
 
     def write_coeff_registers(self, model, coeff, shaping):
-        # No negative values allowed
         self._reg_write(model.vars.MODEM_SHAPING0_COEFF0, int(coeff[0]))
         self._reg_write(model.vars.MODEM_SHAPING0_COEFF1, int(coeff[1]))
         self._reg_write(model.vars.MODEM_SHAPING0_COEFF2, int(coeff[2]))

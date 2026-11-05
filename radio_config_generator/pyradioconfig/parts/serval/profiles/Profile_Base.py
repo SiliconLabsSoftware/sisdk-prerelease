@@ -16,39 +16,25 @@ class Profile_Base_Serval(Profile_Base):
         self._sw_profile_outputs_common = sw_profile_outputs_common_serval()
         self._frame_profile_inputs_common = frame_profile_inputs_common_serval()
 
-    # def buildProfileModel(self, model):
-    #     # All profile I/O for Serval should be defined here (no splitting up between files)
-    #     # If this needs to be inherited, split up into multiple sub-methods and then override those as needed (e.g. to remove profile I/O or remap)
-    #     # Do not add if/then statements based on part family
-    #
-    #     # TODO: Clean this up so that all of the profile I/O is bubbled up to the top level
-    #
-    #     return super(Profile_Baseserval, self).buildProfileModel(model)
 
     def buildProfileModel(self, model):
 
         family = self._family
 
-        # Build profile
         profile = self._makeProfile(model)
 
-        # Add inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
         self.build_hidden_profile_inputs(model, profile)
         self.build_deprecated_profile_inputs(model, profile)
 
-        # Frame configuration Inputs
         self.build_frame_configuration_inputs(model, profile)
 
-        # Informational Output
         self._sw_profile_outputs_common.build_info_outputs(model, profile)
 
-        # RAIL Outputs
         self._sw_profile_outputs_common.build_rail_outputs(model, profile)
 
-        # Output fields
         buildFrameOutputs(model, profile)
         buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
@@ -138,10 +124,6 @@ class Profile_Base_Serval(Profile_Base):
         IProfile.make_linked_io(profile, model.vars.fast_detect_enable, 'Advanced',
                                    readable_name="Fast preamble detect")
 
-        # The origin of the value used for the channel bandwidth upper limit isn't obvious.  The decimators can be set to
-        # get a bandwidth of up to 3.4 MHz (DEC0 = 3 and DEC1 = 1). The ADC bandwidth, however, is limited to about 2.5 MHz.
-        # We should set the limt to to the ADC limit, since the overall bandwidth is limited by the ADC bandwidth, not the
-        # limit by the decimators.   See https://jira.silabs.com/browse/MCUW_RADIO_CFG-554 for additional discussion on this.
         bandwidth_limit_decimators = 3400000
 
         IProfile.make_linked_io(profile, model.vars.bandwidth_hz, 'Advanced',
@@ -154,7 +136,6 @@ class Profile_Base_Serval(Profile_Base):
         IProfile.make_linked_io(profile, model.vars.etsi_cat1_compatible, 'Advanced',
                                     readable_name="ETSI Category 1 Compatibility")
 
-        # Expose diversity registers as advanced inputs
         IProfile.make_linked_io(profile, model.vars.antdivmode, 'Advanced', readable_name="Antenna diversity mode")
         IProfile.make_linked_io(profile, model.vars.antdivrepeatdis, 'Advanced',
                                 readable_name="Diversity Select-Best repeat")
@@ -237,7 +218,6 @@ class Profile_Base_Serval(Profile_Base):
                                    readable_name="Frequency Compensation Mode")
         IProfile.make_hidden_input(profile, model.vars.dsa_enable, 'Advanced', readable_name="Enable DSA")
         IProfile.make_hidden_input(profile, model.vars.agc_scheme, 'Advanced', readable_name="AGC backoff scheme")
-        # BCR demod in Serval allows for much larger OSR
         IProfile.make_hidden_input(profile, model.vars.target_osr, 'Advanced',
                                    readable_name="Target oversampling rate", value_limit_min=3,
                                    value_limit_max=127)
@@ -263,8 +243,6 @@ class Profile_Base_Serval(Profile_Base):
         IProfile.make_hidden_input(profile, model.vars.agc_lock_mode, 'Advanced', readable_name="AGC lock mode")
         IProfile.make_hidden_input(profile, model.vars.agc_enable_adc_attenuation, 'Advanced',
                                    readable_name="Enable ADC attenuation")
-        # Owner: Rossano Pantaleoni
-        # Jira Link: https://jira.silabs.com/browse/MCUW_RADIO_CFG-2231
         IProfile.make_hidden_input(profile, model.vars.afc_run_mode, 'Advanced', readable_name="AFC Run mode")
         IProfile.make_hidden_input(profile, model.vars.ask_mod_depth_perc, 'modem',
                                      readable_name="ASK modulation depth (percent)", value_limit_min=0.0, value_limit_max=100.0)
@@ -276,7 +254,6 @@ class Profile_Base_Serval(Profile_Base):
         buildFecInputs(model, profile)
 
     def build_deprecated_profile_inputs(self, model, profile):
-        #These inputs were exposed on or after Serval Alpha 1 release, so they may be present in radioconf XML
         self.make_deprecated_input(profile, model.vars.max_tx_power_dbm)
         self.make_deprecated_input(profile, model.vars.tx_preamble_length)
         self.make_deprecated_input(profile, model.vars.manchester_mapping)
@@ -296,13 +273,10 @@ class Profile_Base_Serval(Profile_Base):
         frame_coding_input = model.profile.inputs.frame_coding.var_value
         symbol_encoding_input = model.profile.inputs.symbol_encoding.var_value
 
-        #Handle deprecated vars
         if manchester_mapping_input == model.vars.manchester_mapping.var_enum.Inverted and \
             manchester_mapping_input == model.vars.symbol_encoding.var_enum.Manchester:
-            #If an old CFG specified manchester + inverted, then use the new var to do the same thing
             symbol_encoding_input = model.vars.symbol_encoding.var_enum.Inv_Manchester
         elif frame_coding_input != model.vars.frame_coding.var_enum.NONE:
-            #If an old CFG specified frame coding, use the new var to do the same thing
             if frame_coding_input == model.vars.frame_coding.var_enum.UART_NO_VAL:
                 symbol_encoding_input = model.vars.symbol_encoding.var_enum.UART_NO_VAL
             elif frame_coding_input == model.vars.frame_coding.var_enum.UART_VAL:

@@ -17,6 +17,7 @@ include:
 provides:
 - name: emlib_pdm
 requires:
+- name: log_none
 - name: device
 - name: device_has_pdm
 - name: emlib_common

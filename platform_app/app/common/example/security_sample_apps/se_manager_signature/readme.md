@@ -22,7 +22,11 @@ On reset, the app fills a **4096-byte** plain-message buffer (`PLAIN_MSG_SIZE` i
 |----------|----------------------|----------------------|
 | **Plaintext** in RAM | Yes | Yes |
 | **Wrapped** in RAM | Yes | No |
-| **Volatile** in SE slot | Yes (deleted after verify) | No |
+| **Volatile** in SE slot | Yes\* (deleted after verify) | No |
+
+> **Note:** SE volatile key support may not be supported on all platforms. On platforms
+> without volatile SE key storage, the volatile key-type menu option is omitted.
+> Plaintext and wrapped key paths still work where available.
 
 ### Algorithms and curves
 
@@ -86,7 +90,7 @@ One of:
 ### Menu sequence
 
 **Vault High**
-1. **Key type:** plaintext / wrapped / volatile
+1. **Key type:** plaintext / wrapped / volatile (volatile only where supported)
 2. **Algorithm:** ECC Weierstrass Prime or EdDSA (Ed25519)
 3. If Weierstrass: **curve** (P192/P256/… per device)
 4. If Weierstrass: **hash** (SHA-1 … SHA-512 per device)
@@ -112,6 +116,7 @@ Define **`SE_MANAGER_PRINT=0`** in preprocessor symbols.
 | Ed25519 sign/verify fails | SE firmware version (see above); HSE-only curve |
 | P384/P521/secp256k1 missing | Vault **Mid** or S3 config without High curves |
 | Wrapped/volatile options missing | **Vault Mid** — plaintext only |
+| Volatile key option missing | Expected on platforms that do not support SE volatile key storage |
 | Verify failed | Hash/curve mismatch; message length selection |
 | Volatile key errors | Slot in use; delete step after verify |
 | Garbled console | Line terminator **None** in Device Console |

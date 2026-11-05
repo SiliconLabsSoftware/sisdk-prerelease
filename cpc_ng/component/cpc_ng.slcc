@@ -27,8 +27,6 @@ metadata:
 config_file:
 - path: config/sl_cpc_config.h
   file_id: cpc_ng_config
-- path: config/sl_cpc_kernel_config.h
-  file_id: cpc_ng_kernel_config
 include:
 - path: inc
   file_list:
@@ -92,6 +90,8 @@ requires:
 - name: component_catalog
 - name: hal_emu
 - name: sl_string
+- name: slist
+- name: status
 - name: memory_manager
 template_contribution:
 - name: component_catalog

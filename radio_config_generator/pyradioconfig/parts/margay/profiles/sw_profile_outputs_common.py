@@ -2,5 +2,4 @@ from pyradioconfig.parts.ocelot.profiles.sw_profile_outputs_common import sw_pro
 
 
 class sw_profile_outputs_common_margay(sw_profile_outputs_common_ocelot):
-    #Inherit all from Ocelot
     pass

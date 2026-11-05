@@ -11,9 +11,12 @@ from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfil
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 
 class Profile_Base(IProfile):
+
+    ip_category = IPCategory.LPW
 
     """
     Init internal variables
@@ -31,7 +34,6 @@ class Profile_Base(IProfile):
     """
     def buildProfileModel(self, model):
 
-        # Build profile
         profile = self._makeProfile(model)
 
         IProfile.make_required_input(profile, model.vars.base_frequency_hz,      "operational_frequency", readable_name="Base Channel Frequency",     value_limit_min=long(100000000), value_limit_max=long(2500000000), units_multiplier=UnitsMultiplier.MEGA)
@@ -71,31 +73,23 @@ class Profile_Base(IProfile):
         IProfile.make_linked_io(profile, model.vars.lo_injection_side,      "Advanced", readable_name="Injection side")
 
         if model.part_family.lower() not in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
-            # 40nm Series 2 enable optional input for SRC range minimum
             IProfile.make_hidden_input(profile, model.vars.src1_range_available_minimum, "modem", readable_name="SRC range minimum",      value_limit_min=125,         value_limit_max=155)
 
-            # Series 2: optional input to disallow DEC0 enums of DEC3/DEC8 (any width)
-            # Not allowed to use bools per Attila, so int flag instead
             IProfile.make_hidden_input(profile, model.vars.input_decimation_filter_allow_dec3, "modem", readable_name="1=Allow input decimation filter decimate by 3 in cost function",      value_limit_min=0,         value_limit_max=1)
             IProfile.make_hidden_input(profile, model.vars.input_decimation_filter_allow_dec8, "modem", readable_name="1=Allow input decimation filter decimate by 8 in cost function",      value_limit_min=0,         value_limit_max=1)
 
 
-        # Frame configuration Inputs
         buildFrameInputs(model, profile)
         buildCrcInputs(model, profile)
         buildWhiteInputs(model, profile)
         buildFecInputs(model, profile)
 
-        # Modem Advanced Inputs
         buildModemAdvancedInputs(model, profile)
 
-        # Informational Output
         buildModemInfoOutputs(model, profile)
 
-        # RAIL Outputs
         buildRailOutputs(model, profile)
 
-        # Output fields
         buildFrameOutputs(model, profile)
         buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
@@ -114,8 +108,6 @@ class Profile_Base(IProfile):
             buildLongRangeOutputs(model, profile)
         elif family == "panther":
             build_modem_regs_panther(model, profile)    # Clean this up as a next step...
-            # Already defined elsewhere for Panther
-            # buildLongRangeOutputs(model, profile)
         elif family == "lynx":
             build_modem_regs_lynx(model, profile)    # Clean this up as a next step...
 

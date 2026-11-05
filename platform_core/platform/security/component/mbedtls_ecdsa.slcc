@@ -12,7 +12,8 @@ provides:
 - name: mbedtls_ecdsa
 requires:
 - name: mbedtls_ecc
-- name: mbedtls_asn1
+- name: mbedtls_asn1_parse
+- name: mbedtls_asn1_write
 - name: psa_crypto_ecdsa
   condition: [psa_crypto]
 recommends:

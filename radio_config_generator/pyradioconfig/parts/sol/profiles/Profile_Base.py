@@ -13,11 +13,8 @@ class Profile_Base_Sol(Profile_Base_Ocelot):
 
     def profile_calculate(self, model):
 
-        #Call existing profile calculations
         super().profile_calculate(model)
 
-        #Fixed variables (required inputs for other Profiles)
-        #Using .value only so that we can force this in internal test PHYs
         model.vars.ofdm_option.value = model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz
 
     def build_optional_profile_inputs(self, model, profile):

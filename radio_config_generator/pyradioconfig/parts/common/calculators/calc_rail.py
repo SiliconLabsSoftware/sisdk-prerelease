@@ -33,7 +33,6 @@ class CalcRail(ICalculator):
         """
 
         """
-        #Inputs
         """
 
         self._addModelVariable(model,    'rx_sync_delay_ns'         ,    int, ModelVariableFormat.DECIMAL)
@@ -47,7 +46,6 @@ class CalcRail(ICalculator):
         Args:
             model (ModelRoot) : Data model to read and write variables from
         """
-        # On chips that don't calculate anything, our best guess is no delay
         model.vars.rx_sync_delay_ns.value = 0
         model.vars.rx_eof_delay_ns.value = 0
         model.vars.tx_sync_delay_ns.value = 0

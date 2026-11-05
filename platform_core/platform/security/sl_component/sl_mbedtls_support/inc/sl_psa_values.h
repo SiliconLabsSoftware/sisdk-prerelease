@@ -135,6 +135,16 @@
   #define SL_SE_BUILTIN_KEY_TRUSTZONE_ID  (MBEDTLS_PSA_KEY_ID_BUILTIN_MIN + 6)
 #endif
 
+#if defined(SLI_PSA_DRIVER_FEATURE_TLS_IDENTITY)
+  #ifndef SL_SE_BUILTIN_KEY_TLS_IDENTITY_ID
+/// Vendor Key ID for the built-in TLS identity key on devices which provision
+/// one. Unlike the attestation keys, this key may sign arbitrary digests, so it
+/// can be used for TLS client authentication, for example through
+/// mbedtls_pk_setup_opaque().
+    #define SL_SE_BUILTIN_KEY_TLS_IDENTITY_ID (MBEDTLS_PSA_KEY_ID_BUILTIN_MIN + 7)
+  #endif
+#endif // SLI_PSA_DRIVER_FEATURE_TLS_IDENTITY
+
 #ifndef SL_SE_BUILTIN_KEY_AES128_ALG
 /// Algorithm with which the #SL_SE_BUILTIN_KEY_AES128_ID key will be used.
 // PSA Crypto only allows one specific usage algorithm per built-in key ID.

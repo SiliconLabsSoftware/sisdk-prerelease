@@ -5,6 +5,10 @@ description: >
   The Indicator Command Class is used to manipulate indicator resources in a supporting node. An
   indicator may be an LED, an LCD display or a buzzer. The Indicator Get Command is used to request
   the state of the indicator resource.
+documentation:
+  docset: z-wave
+  document: zwave-api/indicator
+
 package: zwave
 quality: production
 metadata:

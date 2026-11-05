@@ -1,0 +1,8 @@
+src/common
+src/profiles
+src/si4440_modem_calc
+src/siradioapi
+src/siradioapifoundation
+src/siradioapi_factory
+src/siradiocfg
+src/version_info

@@ -30,7 +30,6 @@
 #include <stdbool.h>
 #include "sl_common.h"
 #include "sl_event_handler.h"
-#include "sl_assert.h"
 #include "sl_event_handler.h"
 #include "sl_main_init.h"
 

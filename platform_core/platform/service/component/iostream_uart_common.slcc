@@ -28,6 +28,7 @@ template_contribution:
   value: true
   condition: [hardware_board_has_vcom]
 requires:
+- name: log_none
 - name: atomic
 - name: configuration_over_swo
   condition: [hardware_board_has_vcom]

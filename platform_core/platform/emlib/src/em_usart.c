@@ -34,7 +34,7 @@
 
 #include "em_cmu.h"
 #include "em_bus.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #if defined(USART_CTRLX_CTSEN)
 #include "em_gpio.h"
 #endif
@@ -338,7 +338,7 @@ void USART_BaudrateAsyncSet(USART_TypeDef *usart,
   uint32_t oversample = 0;
 
   /* Inhibit divide by 0 */
-  EFM_ASSERT(baudrate);
+  SL_LOG_DEBUG_ASSERT(baudrate);
 
   /*
    * Use integer division to avoid forcing in float division
@@ -388,28 +388,28 @@ void USART_BaudrateAsyncSet(USART_TypeDef *usart,
   /* Map oversampling. */
   switch (ovs) {
     case usartOVS16:
-      EFM_ASSERT(baudrate <= (refFreq / 16));
+      SL_LOG_DEBUG_ASSERT(baudrate <= (refFreq / 16));
       oversample = 16;
       break;
 
     case usartOVS8:
-      EFM_ASSERT(baudrate <= (refFreq / 8));
+      SL_LOG_DEBUG_ASSERT(baudrate <= (refFreq / 8));
       oversample = 8;
       break;
 
     case usartOVS6:
-      EFM_ASSERT(baudrate <= (refFreq / 6));
+      SL_LOG_DEBUG_ASSERT(baudrate <= (refFreq / 6));
       oversample = 6;
       break;
 
     case usartOVS4:
-      EFM_ASSERT(baudrate <= (refFreq / 4));
+      SL_LOG_DEBUG_ASSERT(baudrate <= (refFreq / 4));
       oversample = 4;
       break;
 
     default:
       /* Invalid input */
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 
@@ -432,7 +432,7 @@ void USART_BaudrateAsyncSet(USART_TypeDef *usart,
   #endif
 
     /* Verify that the resulting clock divider is within limits. */
-    EFM_ASSERT(clkdiv <= CLKDIV_MASK);
+    SL_LOG_DEBUG_ASSERT(clkdiv <= CLKDIV_MASK);
 
     /* Make sure that reserved bits are not written to. */
     clkdiv &= CLKDIV_MASK;
@@ -489,7 +489,7 @@ uint32_t USART_BaudrateCalc(uint32_t refFreq,
   uint32_t br;
 
   /* Out of bound clkdiv. */
-  EFM_ASSERT(clkdiv <= CLKDIV_MASK);
+  SL_LOG_DEBUG_ASSERT(clkdiv <= CLKDIV_MASK);
 
   /* Mask out unused bits */
   clkdiv &= CLKDIV_MASK;
@@ -685,7 +685,7 @@ void USART_BaudrateSyncSet(USART_TypeDef *usart, uint32_t refFreq, uint32_t baud
   uint32_t clkdiv;
 
   /* Prevent dividing by 0. */
-  EFM_ASSERT(baudrate);
+  SL_LOG_DEBUG_ASSERT(baudrate);
 
   /*
    * CLKDIV in synchronous mode is given by:
@@ -729,7 +729,7 @@ void USART_BaudrateSyncSet(USART_TypeDef *usart, uint32_t refFreq, uint32_t baud
   clkdiv = clkdiv << 8;
 
   /* Verify that resulting clock divider is within limits. */
-  EFM_ASSERT(!(clkdiv & ~CLKDIV_MASK));
+  SL_LOG_DEBUG_ASSERT(!(clkdiv & ~CLKDIV_MASK));
 
   usart->CLKDIV = clkdiv;
 }
@@ -754,7 +754,7 @@ void USART_Enable(USART_TypeDef *usart, USART_Enable_TypeDef enable)
   uint32_t tmp;
 
   /* Make sure the module exists on the selected chip. */
-  EFM_ASSERT(USART_REF_VALID(usart)
+  SL_LOG_DEBUG_ASSERT(USART_REF_VALID(usart)
              || USARTRF_REF_VALID(usart)
              || UART_REF_VALID(usart));
 
@@ -803,7 +803,7 @@ void USART_Enable(USART_TypeDef *usart, USART_Enable_TypeDef enable)
 void USART_InitAsync(USART_TypeDef *usart, const USART_InitAsync_TypeDef *init)
 {
   /* Make sure the module exists on the selected chip. */
-  EFM_ASSERT(USART_REF_VALID(usart)
+  SL_LOG_DEBUG_ASSERT(USART_REF_VALID(usart)
              || USARTRF_REF_VALID(usart)
              || UART_REF_VALID(usart));
 
@@ -909,7 +909,7 @@ void USART_InitAsync(USART_TypeDef *usart, const USART_InitAsync_TypeDef *init)
 void USART_InitSync(USART_TypeDef *usart, const USART_InitSync_TypeDef *init)
 {
   /* Make sure the module exists on the selected chip. */
-  EFM_ASSERT(USART_REF_VALID(usart) || USARTRF_REF_VALID(usart) );
+  SL_LOG_DEBUG_ASSERT(USART_REF_VALID(usart) || USARTRF_REF_VALID(usart) );
 
   /* Initialize USART registers to hardware reset state. */
   USART_Reset(usart);
@@ -992,7 +992,7 @@ void USART_InitSync(USART_TypeDef *usart, const USART_InitSync_TypeDef *init)
  ******************************************************************************/
 void USARTn_InitIrDA(USART_TypeDef *usart, const USART_InitIrDA_TypeDef *init)
 {
-  EFM_ASSERT(USART_IRDA_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(USART_IRDA_VALID(usart));
 
   /* Initialize USART as an async device. */
   USART_InitAsync(usart, &(init->async));
@@ -1058,7 +1058,7 @@ void USART_InitI2s(USART_TypeDef *usart, USART_InitI2s_TypeDef *init)
   USART_Enable_TypeDef enable;
 
   /* Make sure the module exists on the selected chip. */
-  EFM_ASSERT(USART_I2S_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(USART_I2S_VALID(usart));
 
   /* Override the enable setting. */
   enable            = init->sync.enable;
@@ -1130,7 +1130,7 @@ void USART_InitPrsTrigger(USART_TypeDef *usart, const USART_PrsTriggerInit_TypeD
 void USART_Reset(USART_TypeDef *usart)
 {
   /* Make sure the module exists on the selected chip. */
-  EFM_ASSERT(USART_REF_VALID(usart)
+  SL_LOG_DEBUG_ASSERT(USART_REF_VALID(usart)
              || USARTRF_REF_VALID(usart)
              || UART_REF_VALID(usart) );
 

@@ -30,19 +30,16 @@ class CALC_Ber(ICalculator):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # BER Mode Input variable
         self._addModelVariable(model, 'test_per',                   bool, ModelVariableFormat.ASCII, 'Enable to reconfigure for PER testing')
         self._addModelVariable(model, 'test_ber',                   bool, ModelVariableFormat.ASCII, 'Enable to reconfigure for BER testing')
 
 
-        # Internal enables for different ber functions 
         self._addModelVariable(model, 'ber_force_fdm0',             bool, ModelVariableFormat.ASCII, 'Force fdm0 mode for ber testing')
         self._addModelVariable(model, 'ber_force_sync',             bool, ModelVariableFormat.ASCII, 'Force a specific sync word for ber testing')
         self._addModelVariable(model, 'ber_force_bitorder',         bool, ModelVariableFormat.ASCII, 'Force a specific bit ordering for ber testing')
         self._addModelVariable(model, 'ber_force_whitening',        bool, ModelVariableFormat.ASCII, 'Force a specific de-whitening configuration for ber testing')
         self._addModelVariable(model, 'ber_force_infinite_length',  bool, ModelVariableFormat.ASCII, 'Force infinite length mode for ber testing')
         self._addModelVariable(model, 'ber_force_freq_comp_off',    bool, ModelVariableFormat.ASCII, 'Disable frequency compensation during BER testing')
-        #self._addModelVariable(model, '', bool, ModelVariableFormat.ASCII, '')
         
 
 

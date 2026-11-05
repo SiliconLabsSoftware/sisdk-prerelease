@@ -41,6 +41,8 @@ define:
     condition: [brd4408a]
   - name: SIMG301_BRD4407A
     condition: [brd4407a]
+  - name: EFR32MG2B_BRD2612A
+    condition: [brd2612a]
   - name: EFR32MG2B_BRD4418A
     condition: [brd4418a]
   - name: EFR32BG2B_BRD4419A

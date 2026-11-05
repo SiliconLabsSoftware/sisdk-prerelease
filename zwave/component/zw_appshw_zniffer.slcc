@@ -5,6 +5,9 @@ description: >
   This SLC component provides support for Z-Wave Zniffer (beta) Application.
   The Z-Wave Zniffer Application provides functionality for capturing and analyzing Z-Wave network traffic and sends it
   through a Serial connection. The Z-Wave PTI appliction is supported in the PC Zniffer application out of the box.
+documentation:
+  docset: z-wave
+  document: zwave-api/zniffer
 package: zwave
 quality: production
 metadata:

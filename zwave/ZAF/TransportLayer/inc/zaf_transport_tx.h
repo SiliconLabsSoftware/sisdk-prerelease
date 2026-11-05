@@ -22,6 +22,8 @@
  * @{
  * @addtogroup ZAF_Transport
  * @{
+ * @addtogroup ZAF_Transport_Tx Transport TX Queue
+ * @{
  */
 
 typedef struct {
@@ -81,6 +83,7 @@ void zaf_transport_pause(void);
 void zaf_transport_init(void);
 
 /**
+ * @} // ZAF_Transport_Tx
  * @} // ZAF_Transport
  * @} // ZAF
  */

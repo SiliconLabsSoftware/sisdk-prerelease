@@ -7,6 +7,10 @@ description: >
   Protocol Configuration.
   This component can be used by NCP and SOC applications and it is mandatory for
   all applications.
+documentation:
+  docset: z-wave
+  document: zwave-api/zaf-protocol-config
+
 package: zwave
 quality: production
 metadata:

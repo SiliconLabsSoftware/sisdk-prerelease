@@ -17,5 +17,4 @@ from pyradioconfig.parts.common.calculators.calc_utilities import CALC_Utilities
 
 class CALC_Utilities_Nixi(CALC_Utilities):
     def calc_ook_ebno(self,model):
-        # Set the EbN0 for OOK on Nixi as 19
         model.vars.ook_ebno.value = 19.0

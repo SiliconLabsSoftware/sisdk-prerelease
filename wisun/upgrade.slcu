@@ -121,3 +121,8 @@ upgrade:
           upgraded projects keep prior DC server behavior and APIs.
         add:
           - wisun_stack_dc_server
+      - trigger: wisun_stack_ffn
+        description: >
+          LFN parenting has been moved to its own component and is not provided by wisun_stack_ffn by default.
+        add:
+          - wisun_lfn_parent

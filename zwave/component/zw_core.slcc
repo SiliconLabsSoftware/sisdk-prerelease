@@ -7,6 +7,49 @@ description: >
   It also includes the region configuration files, as well as hardware dependencies (non-volatile
   memory usage, RAIL usage, etc.) Configuration can be done in the component by clicking the gear
   icon.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/actuator
+  - page: zwave-api/app-nodeinfo
+  - page: zwave-api/app-transport-interface
+  - page: zwave-api/basis
+  - page: zwave-api/end-device
+  - page: zwave-api/event-distributor
+  - page: zwave-api/mfg-tokens
+  - page: zwave-api/node-mask
+  - page: zwave-api/queue
+  - page: zwave-api/queue-notifying
+  - page: zwave-api/receive-status
+  - page: zwave-api/sec-key-bitmask
+  - page: zwave-api/sw-timer
+  - page: zwave-api/sw-timer-liasion
+  - page: zwave-api/sync-event
+  - page: zwave-api/system-startup
+  - page: zwave-api/timer
+  - page: zwave-api/transmit-complete-codes
+  - page: zwave-api/transmit-option
+  - page: zwave-api/transport-api
+  - page: zwave-api/tse
+  - page: zwave-api/typedefs
+  - page: zwave-api/update-state
+  - page: zwave-api/user-task
+  - page: zwave-api/zaf-if
+  - page: zwave-api/zpal-bootloader
+  - page: zwave-api/zpal-entropy
+  - page: zwave-api/zpal-init
+  - page: zwave-api/zpal-misc
+  - page: zwave-api/zpal-nvm
+  - page: zwave-api/zpal-radio
+  - page: zwave-api/zpal-radio-num-channels
+  - page: zwave-api/zpal-radio-utils
+  - page: zwave-api/zpal-retention-register
+  - page: zwave-api/zpal-status
+  - page: zwave-api/zpal-uart
+  - page: zwave-api/zpal-watchdog
+  - page: zwave-api/zw-route-update
+  - page: zwave-api/zw-security-api
+
 package: zwave
 quality: production
 metadata:
@@ -77,6 +120,7 @@ include:
   - path: "ZW_slave_api.h"
   - path: "ZW_UserTask.h"
   - path: "ZW_dynamic_tx_power_algorithm_api.h"
+  - path: "ZW_linger.h"
   - path: "ZW_classcmd.h"
   - path: "ZW_wake_on_critical_message.h"
 - path: "dist/include/zpal"

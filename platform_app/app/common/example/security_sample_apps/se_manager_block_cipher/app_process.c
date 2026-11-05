@@ -92,11 +92,15 @@ static uint8_t symmetric_key_type_select;
 static const char *symmetric_key_type_string[] = {
   "plaintext",
   "wrapped",
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
   "volatile"
+#endif
 };
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /// Symmetric key size when creating volatile key
 static uint8_t create_volatile_key_size = 0xff;
+#endif
 #endif
 
 /// Symmetric key size selection
@@ -179,7 +183,11 @@ void app_process_action(void)
       if (space_press) {
         space_press = false;
         symmetric_key_type_select++;
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
         if (symmetric_key_type_select == 3) {
+#else
+        if (symmetric_key_type_select == 2) {
+#endif
           symmetric_key_type_select = 0;
         }
         printf("  + Current symmetric key is a %s key.\n",
@@ -584,6 +592,7 @@ static void create_symmetric_key(void)
       ret = create_wrap_symmetric_key(symmetric_key_size[symmetric_key_size_select]);
       break;
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
     case 2:
       if (create_volatile_key_size != 0xff) {
         printf("  + Delete a non-exportable symmetric key in a volatile SE "
@@ -598,6 +607,7 @@ static void create_symmetric_key(void)
              symmetric_key_size[symmetric_key_size_select] * 8);
       ret = create_volatile_symmetric_key(symmetric_key_size[symmetric_key_size_select]);
       break;
+#endif
 
     default:
       ret = SL_STATUS_FAIL;
@@ -630,11 +640,18 @@ static void print_key_type(void)
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   printf("\n  . Current symmetric key is a %s key.\n",
          symmetric_key_type_string[symmetric_key_type_select]);
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
   printf("  + Press SPACE to select a %s or %s or %s key, press ENTER to next "
          "option.\n",
          symmetric_key_type_string[0],
          symmetric_key_type_string[1],
          symmetric_key_type_string[2]);
+#else
+  printf("  + Press SPACE to select a %s or %s key, press ENTER to next "
+         "option.\n",
+         symmetric_key_type_string[0],
+         symmetric_key_type_string[1]);
+#endif
   app_state = SELECT_KEY_TYPE;
 #else
   printf("\n  . Current symmetric key length is %lu-bit.\n",

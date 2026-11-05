@@ -5,6 +5,10 @@ description: >
   The Mulitilevel Switch Command Class is used to request the supported Switch Types of a
   supporting devices, such as a wall controller or a wall switch.
   Devices with multilevel capability can be controlled by the Command Class, for example dimming lights.
+documentation:
+  docset: z-wave
+  document: zwave-api/multilevel-switch
+
 package: zwave
 quality: production
 metadata:

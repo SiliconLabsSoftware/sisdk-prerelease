@@ -22,6 +22,7 @@ provides:
 - name: power_manager_core_impl
   condition: [device_generic_family_sixx301]
 requires:
+- name: log_none
 - name: emlib_cmu
   condition: [device_series_2]
 - name: emlib_emu

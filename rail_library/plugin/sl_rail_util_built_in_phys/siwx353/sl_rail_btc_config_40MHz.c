@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
- *   Radio Configurator Version: 2604.3.0rc1
+ *   Radio Configurator Version: 2604.3.0rc3
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -102,8 +102,8 @@ static const uint32_t phyInfo[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
-  (uint32_t) 0UL,
-  (uint32_t) 0UL,
+  (uint32_t) 4UL,
+  (uint32_t) 16UL,
   (uint32_t) 0UL,
 };
 
@@ -310,7 +310,7 @@ const uint32_t sl_rail_btc_phy_40MHz_modemConfigBase[] = {
   /*    8088 */ 0x00800005UL,
   0x00098094UL, 0x21084207UL,
   /*    8098 */ 0x3212A587UL,
-  0x000D80A4UL, 0x6AAACCCFUL,
+  0x000D80A4UL, 0x9AAACCCFUL,
   /*    80A8 */ 0x6777BBBFUL,
   /*    80AC */ 0x0000000BUL,
   0x000580B4UL, 0x00800E03UL,
@@ -334,6 +334,7 @@ const uint32_t sl_rail_btc_phy_40MHz_modemConfigBase[] = {
   0x01078180UL, 0x00000148UL,
   0x0107A18CUL, 0xFFF0FFFFUL,
   0x0107918CUL, 0x06200000UL,
+  0x01078254UL, 0x00000000UL,
   0x0107825CUL, 0x00000031UL,
   0x010F8280UL, 0x004BF32EUL,
   /*    8284 */ 0x195871D8UL,
@@ -408,7 +409,7 @@ const uint32_t sl_rail_btc_phy_40MHz_modemConfigBase[] = {
   0x020401DCUL, 0x00000000UL,
   0x02080420UL, 0x0000B16FUL,
   /*    0424 */ 0x00000000UL,
-  0x02040440UL, 0x001E1489UL,
+  0x02040440UL, 0x021E1489UL,
   0x02042448UL, 0xFFFFFE00UL,
   0x02041448UL, 0x00000C00UL,
   0x02080454UL, 0x00500003UL,

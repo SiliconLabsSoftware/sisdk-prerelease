@@ -7,13 +7,17 @@ class PhyFilterGroupTypes(IntEnum):
     simplicity_studio_phys = 3
     non_functional_phys = 4
     virtual_phys = 5
+    simplicity_studio_non_ui_phys = 6
 
 
 class IPhyFilter(object):
 
+    included_in_distribution_release = False
+
     customer_phy_groups = []
     sim_tests_phy_groups = []
     simplicity_studio_phy_groups = []
+    simplicity_studio_non_ui_phy_groups = []
     non_functional_phy_groups = []
     virtual_phy_groups = []
 
@@ -28,6 +32,8 @@ class IPhyFilter(object):
             return self.sim_tests_phy_groups
         elif filter_type == PhyFilterGroupTypes.simplicity_studio_phys:
             return self.simplicity_studio_phy_groups
+        elif filter_type == PhyFilterGroupTypes.simplicity_studio_non_ui_phys:
+            return self.simplicity_studio_non_ui_phy_groups
         elif filter_type == PhyFilterGroupTypes.non_functional_phys:
             return self.non_functional_phy_groups
         elif filter_type == PhyFilterGroupTypes.virtual_phys:

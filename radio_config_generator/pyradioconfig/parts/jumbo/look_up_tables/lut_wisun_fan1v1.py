@@ -137,7 +137,6 @@ class LutWisunFan1v1:
 
     @staticmethod
     def get_group(reg_domain: str, channel_plan_id: int, model: ModelRoot):
-        #TODO: Refactor, currently hardcoded
         key = LutWisunFan1v1.__generate_frequency_key(reg_domain, channel_plan_id)
         if key is None:
             return None

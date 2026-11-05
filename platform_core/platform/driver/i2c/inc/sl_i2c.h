@@ -32,6 +32,7 @@
 #define SL_I2C_H
 
 #include <stddef.h>
+#include <stdbool.h>
 #include "sl_status.h"
 #include "sl_enum.h"
 #include "sl_device_peripheral.h"
@@ -98,7 +99,14 @@ SL_ENUM(sl_i2c_event_t) {
   SL_I2C_EVENT_BUFFER_FULL = 12         /// Buffer full, cannot receive more data
 };
 
-/// I2C state enum
+/// I2C power / activity state (suspend / idle / active).
+SL_ENUM(sl_i2c_power_state_t) {
+  SL_I2C_POWER_STATE_SUSPENDED = 0,    /// Hardware torn down for EM2; only resume/deinit allowed
+  SL_I2C_POWER_STATE_IDLE,             /// Initialized and ready for a transfer
+  SL_I2C_POWER_STATE_ACTIVE,           /// A blocking or non-blocking transfer is in progress
+};
+
+/// I2C transaction protocol state enum
 SL_ENUM(sl_i2c_transaction_state_t) {
   SL_I2C_STATE_ERROR = 0,                                    /// Indicates an error occurred.
   SL_I2C_STATE_IDLE = 1,                                     /// I2C is idle.
@@ -224,7 +232,7 @@ typedef struct sl_i2c_handle_t {
   uint32_t                        rx_offset;               ///< Number of bytes received (RX)
 
   // Transaction state and event
-  sl_i2c_transaction_state_t      state;                  ///< Current transaction state
+  sl_i2c_transaction_state_t      transaction_state;      ///< On-wire protocol transaction state
   sl_i2c_event_t                  event;                  ///< Current event
   sl_i2c_transfer_direction_t     transfer_direction;     ///< Transfer direction (Read/Write)
   uint8_t                         addr_buffer[3];         ///< Address buffer.
@@ -233,6 +241,9 @@ typedef struct sl_i2c_handle_t {
   sl_i2c_transfer_complete_callback_t transfer_complete_callback;  ///< Transfer complete callback
   sl_i2c_event_callback_t             event_callback;              ///< Event callback
   void*                               user_data;                   ///< User defined data
+
+  bool                            is_10bit_addr;          ///< True if follower own-address is 10-bit
+  sl_i2c_power_state_t            power_state;            ///< Power / activity state: suspended / idle / active
   /// @endcond
 } sl_i2c_handle_t;
 
@@ -647,6 +658,54 @@ sl_status_t sl_i2c_set_transfer_complete_callback(sl_i2c_handle_t *i2c_handle,
  ******************************************************************************/
 sl_status_t sl_i2c_set_event_callback(sl_i2c_handle_t *i2c_handle,
                                       sl_i2c_event_callback_t callback);
+
+/***************************************************************************//**
+ * Suspends the I2C peripheral hardware.
+ *
+ * De-initializes the underlying I2C hardware (peripheral, clocks, pins, and
+ * interrupts as required) while leaving the driver handle and its software
+ * state unchanged. Intended to be called before EM2 entry.
+ *
+ * @note The only valid API calls after this function are @ref sl_i2c_resume() or
+ *       @ref sl_i2c_deinit(). Other APIs that touch hardware return
+ *       @ref SL_STATUS_INVALID_STATE.
+ *
+ * @param[in] i2c_handle Handle to I2C.
+ *
+ * @return @ref SL_STATUS_OK if successful.
+ *         @ref SL_STATUS_NOT_INITIALIZED if the I2C is not initialized.
+ *         @ref SL_STATUS_BUSY if the I2C peripheral is busy processing a transfer.
+ *         Error code otherwise.
+ *
+ * @note This is not equivalent to @ref sl_i2c_deinit(). The handle remains
+ *       initialized from the driver's perspective; only the hardware is torn
+ *       down so it can be restored with @ref sl_i2c_resume().
+ *
+ * @note Suspend is allowed only when the instance is idle (no transfer in
+ *       progress). Call this only when the I2C bus is quiet.
+ ******************************************************************************/
+sl_status_t sl_i2c_suspend(sl_i2c_handle_t *i2c_handle);
+
+/***************************************************************************//**
+ * Resumes the I2C peripheral hardware after @ref sl_i2c_suspend().
+ *
+ * Re-initializes the underlying I2C hardware using the configuration stored
+ * in the handle (operating mode, frequency, pins, and follower address as
+ * applicable). Sets @ref sl_i2c_power_state_t back to idle when successful.
+ *
+ * @note Unlike @ref sl_i2c_init(), resume does not run leader bus recovery
+ *       (SCL clocking). Bus recovery is performed once during init. Suspend
+ *       requires an idle instance, so the bus is expected to still be free
+ *       when resume restores clocks, pins, and the peripheral.
+ *
+ * @param[in] i2c_handle Handle to I2C.
+ *
+ * @return @ref SL_STATUS_OK if successful.
+ *         @ref SL_STATUS_NULL_POINTER if handle is NULL.
+ *         @ref SL_STATUS_NOT_INITIALIZED if the I2C is not initialized.
+ *         Error code otherwise.
+ ******************************************************************************/
+sl_status_t sl_i2c_resume(sl_i2c_handle_t *i2c_handle);
 
 /** @} (end addtogroup i2c driver) */
 

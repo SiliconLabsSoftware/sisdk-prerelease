@@ -45,7 +45,6 @@ class Pro2ModemCalcInputs(CategoryInterface):
         return DefaultInputs().get()
 
     def _init_from_input_array(self, input_array):
-        ## read in API params
         try:
             self.API_freq_xo          = input_array[0]  # crystal frequency, unit is Hz  ([25.6, 33] MHz) => [25,32]MHz data sheet
             self.API_crystal_tol      = input_array[1]  # Crystal tolerance, unit is ppm ( [0,100] )
@@ -68,13 +67,10 @@ class Pro2ModemCalcInputs(CategoryInterface):
             self.API_fc               = input_array[16]  # in Hz, RF carrier frequency
             self.API_TC               = input_array[17]  # PA ramp time
             self.API_fhst             = input_array[18]  # FH step size in Hz
-            # updated 4/3/2012:  in (G)FSK if API_inputBW=1 then use RXBW w/o ppm calculation
             self.API_inputBW          = input_array[19]  # (0/1) to indicate whether use input RXBW or ppm 
             self.API_BER_mode         = input_array[20]  # (0/1) BER mode enable 
             self.API_raw_demod        = input_array[21]  # (0/1) o/p raw bits w/o BCR
         
-            # updated 03/23/2012: WDS will combine input 3 fields to form 5 MSBs of
-            # MODEM_MOD_TYPE dsource = MOD_SOURCE + TX_DIRECT_MODE_GPIO*2**2 + TX_DIRECT_MODE_TYPE*2**4
             self.API_dsource          = input_array[22]  # (0=pk/1=dir/2=async dir/3=mcu) mode; updated 3/23/2012 to include direct-mode inputs
             self.API_hi_pfm_div_mode  = input_array[23]   # (0/1)
         except:
@@ -82,7 +78,6 @@ class Pro2ModemCalcInputs(CategoryInterface):
         
     def __init__(self, input_data=None):
         super(Pro2ModemCalcInputs, self).__init__()
-        # First, need to initialize the class with right attributes.
         self._init_from_input_array([0.0]*len(self.get_defaults()))
         if (input_data == None):
             self.set_inputs_from_dict( self.get_defaults())

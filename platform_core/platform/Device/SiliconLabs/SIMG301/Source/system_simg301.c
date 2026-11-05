@@ -658,13 +658,7 @@ void SystemSOCPLLClockSet(uint8_t instance, uint8_t output, uint32_t freq)
   }
 
   // Update core clock frequency if SOCPLL is used to clock the core
-  if ((CMU->SYSCLKCTRL & _CMU_SYSCLKCTRL_CLKSEL_MASK)
-      == _CMU_SYSCLKCTRL_CLKSEL_SOCPLL
-#if defined (_CMU_SYSCLKCTRL_CLKSEL_SOCPLL1)
-      || (CMU->SYSCLKCTRL & _CMU_SYSCLKCTRL_CLKSEL_MASK)
-      == _CMU_SYSCLKCTRL_CLKSEL_SOCPLL1
-#endif
-      ) {
+  if ((CMU->SYSCLKCTRL & _CMU_SYSCLKCTRL_CLKSEL_MASK) == _CMU_SYSCLKCTRL_CLKSEL_SOCPLL) {
     // This function will update the global variable
     SystemHCLKGet();
   }

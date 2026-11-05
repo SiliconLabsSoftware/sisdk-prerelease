@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
- *   Radio Configurator Version: 2604.3.0rc1
+ *   Radio Configurator Version: 2604.3.0rc3
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -144,8 +144,8 @@ static const uint32_t phyInfo_0[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
-  (uint32_t) 0UL,
-  (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 32UL,
   (uint32_t) 0UL,
 };
 
@@ -171,8 +171,8 @@ static const uint32_t phyInfo_1[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
-  (uint32_t) 0UL,
-  (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 16UL,
   (uint32_t) 0UL,
 };
 
@@ -198,8 +198,8 @@ static const uint32_t phyInfo_2[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
-  (uint32_t) 0UL,
-  (uint32_t) 0UL,
+  (uint32_t) 20UL,
+  (uint32_t) 32UL,
   (uint32_t) 0UL,
 };
 
@@ -225,8 +225,8 @@ static const uint32_t phyInfo_3[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
-  (uint32_t) 0UL,
-  (uint32_t) 0UL,
+  (uint32_t) 20UL,
+  (uint32_t) 32UL,
   (uint32_t) 0UL,
 };
 
@@ -252,8 +252,8 @@ static const uint32_t phyInfo_4[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
-  (uint32_t) 0UL,
-  (uint32_t) 0UL,
+  (uint32_t) 20UL,
+  (uint32_t) 32UL,
   (uint32_t) 0UL,
 };
 
@@ -279,8 +279,8 @@ static const uint32_t phyInfo_5[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
-  (uint32_t) 0UL,
-  (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 32UL,
   (uint32_t) 0UL,
 };
 
@@ -306,8 +306,8 @@ static const uint32_t phyInfo_6[] = {
   (uint32_t) NULL,
   (uint32_t) NULL,
   (uint32_t) 0UL,
-  (uint32_t) 0UL,
-  (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 16UL,
   (uint32_t) 0UL,
 };
 
@@ -517,6 +517,7 @@ const uint32_t sl_rail_ble_phy_1Mbps_viterbi_38M4Hz_modemConfigBase[] = {
   0x01078180UL, 0x00000148UL,
   0x0107A18CUL, 0xFFF0FFFFUL,
   0x0107918CUL, 0x06200000UL,
+  0x01078254UL, 0x00000000UL,
   0x0107825CUL, 0x00000031UL,
   0x010F8280UL, 0x00400301UL,
   /*    8284 */ 0x016070D8UL,
@@ -824,6 +825,7 @@ const uint32_t sl_rail_ble_phy_1Mbps_viterbi_cs_38M4Hz_modemConfigBase[] = {
   0x01078180UL, 0x00000148UL,
   0x0107A18CUL, 0xFFF0FFFFUL,
   0x0107918CUL, 0x06200000UL,
+  0x01078254UL, 0x00000002UL,
   0x0107825CUL, 0x00000031UL,
   0x010F8280UL, 0x004BF32EUL,
   /*    8284 */ 0x195871D8UL,

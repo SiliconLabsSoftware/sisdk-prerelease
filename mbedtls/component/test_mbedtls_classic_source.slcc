@@ -16,12 +16,14 @@ requires:
 - name: test_psa_framework_source
 source:
 - path: mbedtls/tests/src/certs.c
+- path: mbedtls/tests/src/ssl_context_reset_verifier.c
 - path: mbedtls/tests/src/test_helpers/ssl_helpers.c
 include:
 - path: mbedtls/tests/include
   file_list:
   - path: test/certs.h
   - path: test/ssl_helpers.h
+  - path: test/ssl_helpers_internal.h
 - path: generated/include
   file_list:
   - path: test/test_certs.h

@@ -15,6 +15,7 @@ include:
   - path: em_cmu_compat.h
   - path: sli_em_cmu.h
 requires:
+- name: log_none
 - name: emlib_cmu_impl
 - name: device_has_cmu
 - name: enum

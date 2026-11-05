@@ -2,13 +2,6 @@ from pyradioconfig.parts.panther.calculators.calc_misc import CALC_Misc_panther
 
 class CALC_Misc_lynx(CALC_Misc_panther):
 
-    # def calc_misc(self, model):
-    #     """
-    #     These aren't really calculating right now.  Just using defaults or forced values.
-    #
-    #     Args:
-    #         model (ModelRoot) : Data model to read and write variables from
-    #     """
 
     def calc_misc_Lynx(self, model):
         """
@@ -19,10 +12,7 @@ class CALC_Misc_lynx(CALC_Misc_panther):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # All of the registers here are new in Lynx (and are read-write; read-only and write-only are omitted)
-        # Many IF, IEN, and RAC registers are intentionally ommitted
 
-        #AGC default values are located in calc_agc.py and the calc_agc_misc() function
 
         self._reg_write(model.vars.FRC_DFLCTRL_DFLBOIOFFSET, 0)
         self._reg_write(model.vars.FRC_CTRL_WAITEOFEN, 0)
@@ -88,9 +78,6 @@ class CALC_Misc_lynx(CALC_Misc_panther):
         self._reg_write_default(model.vars.RAC_IFADCTRIM0_IFADCSIDETONEAMP)
         self._reg_write_default(model.vars.FRC_AUTOCG_AUTOCGEN)
 
-        #Fairly confident that these CAL values are not actually used, but can not modify validated PHYs
-        #at this point and Design can not confirm these are unused. So if the value isn't forced then these
-        #are a do not care.
         if model.vars.SYNTH_LPFCTRL1CAL_OP1BWCAL.value_forced is None:
             self._reg_do_not_care(model.vars.SYNTH_LPFCTRL1CAL_OP1BWCAL)
         if model.vars.SYNTH_LPFCTRL1CAL_OP1COMPCAL.value_forced is None:

@@ -17,6 +17,7 @@
             "gcc/cortex-m4",
             "gcc/cortex-m33",
             "iar/cortex-m33",
+            "iar/cortex-m4",
             "llvm/cortex-m4",
             "llvm/cortex-m33"
           ],

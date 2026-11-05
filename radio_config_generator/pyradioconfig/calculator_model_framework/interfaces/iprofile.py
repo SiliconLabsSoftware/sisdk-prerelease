@@ -5,6 +5,7 @@ from pycalcmodel.core.input import ModelInput, ModelInputType, ModelInputDefault
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 """
 Profile interface file
@@ -18,13 +19,13 @@ class IProfile(object):
     _readable_name = ""
     _activation_logic = ""
     _skip_target_calculation = False
+    ip_category = IPCategory.LPW    # Default category
 
     """
     Returns profile readable and searchable nmae
     """
     @abstractmethod
     def getName(self):
-        # Since this is used in code to reference the profile, it cannot have white space or spaces
         name = self._profileName.strip()
         name = name.replace(" ", "_")
         return name
@@ -41,13 +42,14 @@ class IProfile(object):
     Returns: Populated profile model
     """
     @abstractmethod
-    def _makeProfile(self, modem_model, category=None, description=None,
+    def _makeProfile(self, modem_model, category=None, description=None, ip_category=None,
                      default=None, readable_name=None, activation_logic=None, skip_target_calculation=None):
-        # Build profile from name, category, and description
         if category is None:
             category = self._category
         if description is None:
             description = self._description
+        if ip_category is None:
+            ip_category = self.ip_category
         if default is None:
             default = self._default
         if readable_name is None:
@@ -56,7 +58,7 @@ class IProfile(object):
             activation_logic = self._activation_logic
         if skip_target_calculation is None:
             skip_target_calculation = self._skip_target_calculation
-        profile_model = ModelProfile(self.getName(), category, description,
+        profile_model = ModelProfile(self.getName(), category, description, ip_category=self.ip_category,
                                      default=default, readable_name=readable_name, act_logic=activation_logic,
                                      skip_target_calc=skip_target_calculation)
         modem_model.profiles.append(profile_model)
@@ -67,8 +69,6 @@ class IProfile(object):
     """
     def _removeVariableFromInputs(self, profile, varInput, value=None):
         assert isinstance(varInput, ModelVariable), "FATAL ERROR: var is not ModelVariable"
-        # Remove from inputs
-        # Loop through aliases and find the right var name
         for input in profile.inputs:
             if input.var_name == varInput.name:
                 input_alias = input.var_name
@@ -93,7 +93,6 @@ class IProfile(object):
             if value_limit_min is None or value_limit_max is None:
                 raise Exception("Min/max values not defined for profile input %s" % var._name)
 
-        # Make input
         profile_input = ModelInput(var, category, ModelInputType.LINKED_IO, default=None,
                         readable_name=readable_name, var_value=None,
                         value_limit_min=value_limit_min, value_limit_max=value_limit_max,
@@ -102,7 +101,6 @@ class IProfile(object):
                         units_multiplier=units_multiplier)
         profile.inputs.append(profile_input)
 
-        # Make output
         output = ModelOutput(var, category, ModelOutputType.LINKED_IO, readable_name,
                              value_limit_min, value_limit_max, override=None, in_public_log=in_public_log)
         profile.outputs.append(output)
@@ -154,11 +152,6 @@ class IProfile(object):
                         units_multiplier = units_multiplier)
         profile.inputs.append(profile_input)
 
-    #
-    # From our perspective, an input is considered optional if some isc files may not have that input and we need
-    # to specify a default value that will be used if that input does not exist.  This happens when an input is added
-    # to a profile after it has been defined and is out there in use.
-    #
     @staticmethod
     def make_optional_input(profile, var, category=None, readable_name=None, default=None,
                         value_limit_min=None, value_limit_max=None,
@@ -191,7 +184,6 @@ class IProfile(object):
                         value_limit_min=None, value_limit_max=None,
                         fractional_digits=None, units_multiplier=None):
 
-        #We don't really need a category for deprecated inputs, as they will not show in Studio GUI
         if category is None:
             category = 'None'
 

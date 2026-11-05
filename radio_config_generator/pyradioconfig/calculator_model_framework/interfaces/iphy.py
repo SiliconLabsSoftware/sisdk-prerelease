@@ -15,8 +15,12 @@ This has been updated to handle 3 scenarios:
 
 This allows a lot of flexibility in how PHYs are created, and should make PHYs "just work" in most cases.
 """
+from pycalcmodel.core.common import IPCategory
+from pyradioconfig.calculator_model_framework.mixins.xtal_frequency import XtalFrequencyMixin
 
-class IPhy(object):
+class IPhy(XtalFrequencyMixin):
+
+    ip_category = IPCategory.LPW       # Default category
 
     """
     Returns list of callable phy functions
@@ -27,7 +31,6 @@ class IPhy(object):
         for functionName, functionPointer in inspect.getmembers(self, predicate=inspect.ismethod):
                 if str(functionName).lower().startswith('phy_'):  # Check if the function name starts with "phy_"
                     if isinstance(functionPointer, types.MethodType):
-                        #functionList.append(self.__class__.__name__ + "." + functionName)
                         functionList.append(functionPointer)
         return functionList
 
@@ -36,12 +39,11 @@ class IPhy(object):
     """
     @abstractmethod
     def _makePhy(self, modem_model, profile, phy_description=None, phy_group_name=None, readable_name=None, act_logic='', tags='', phy_name=None, locked=False):
-        #Check to see if a higher-level PHY has already been created higher in the stack
+        assert self.ip_category == profile.ip_category, "Error: IP category of PHY does not match IP category of profile, check that the profile assigned to this PHY has the corresponding IP category"
+
         existing_phy = self.__get_phy_already_created(modem_model)
         if existing_phy == None:
-            # Build phy from name, version, and class path
             if phy_name is None:
-                #Use name of method if no phy name given
                 phy_name = self.__highest_caller_phy()
             if phy_description is None:
                 if readable_name is None:
@@ -49,14 +51,12 @@ class IPhy(object):
                 else:
                     phy_description = readable_name
             if phy_group_name is None:
-                # Use file name if no group name given
                 phy_group_name = self.__highest_caller_group()
             if readable_name is None:
                 readable_name = phy_name.replace("_", " ")
             if tags is None:
                 tags = ""
             if '_prod' in phy_name.lower():
-                #If this is a PROD PHY, then also get the name of the PHY that the PROD PHY points to
                 phy_points_to = self.__get_points_to_phy()
             else:
                 phy_points_to = None
@@ -66,19 +66,16 @@ class IPhy(object):
             else:
                 guid = None
 
-            phy = ModelPhy(phy_name, phy_description, profile, phy_group_name, readable_name=readable_name, act_logic=act_logic, tags=tags, phy_points_to = phy_points_to, locked=locked, guid=guid)
-            #Before appending, make sure that this PHY doesn't already exist in the model
+            phy = ModelPhy(phy_name, phy_description, profile, phy_group_name, readable_name=readable_name, act_logic=act_logic, tags=tags, phy_points_to = phy_points_to, locked=locked, guid=guid, ip_category=self.ip_category)
             try:
                 duplicate_phy = getattr(modem_model, phy_name)
             except AttributeError:
-                #If no duplicates found then go ahead and append the phy
                 modem_model.phys.append(phy)
             else:
                 raise Exception("Error: duplicate definition found for %s" %phy_name)
 
             return phy
         else:
-            #Return the already existing PHY
             return existing_phy
 
     """
@@ -86,8 +83,6 @@ class IPhy(object):
     """
 
     def __highest_caller_phy(self):
-        #Get the call stack and go through it in reverse order, looking for any entry with PHY_ in its name
-        # Use sys._getframe() for much faster stack traversal
         frame = sys._getframe()
         phy_callers = []
         try:
@@ -102,12 +97,9 @@ class IPhy(object):
         if phy_callers:
             return phy_callers[-1]  #Return the highest level caller with PHY_ in its name
 
-        #If we did not find a caller name then raise an exception
         raise AssertionError('Did not find a PHY method to name the PHY, check that the method is named correctly')
 
     def __highest_caller_group(self):
-        #Get the call stack and go through it in reverse order, looking for any entry with PHY_ in its name
-        # Use sys._getframe() for much faster stack traversal
         frame = sys._getframe()
         phy_file_path = None
         try:
@@ -124,14 +116,10 @@ class IPhy(object):
             file_name_no_ext = os.path.splitext(file_name)[0]
             return file_name_no_ext #Return the file name of the highest level caller with PHY_ in its name
 
-        #If we did not find a caller name then raise an exception
         raise AssertionError('Did not find a PHY method to name the PHY group, check that the method is named correctly')
 
     def __get_phy_already_created(self, model):
 
-        #This method allows, in certain cases, for an existing PHY object in the model to be reused instead of creating
-        #a new one. This is intended to be used when a top-level PHY calls makePhy, and then calls a sub-PHY that
-        #also calls makePhy. In this case we want the sub-PHY to act on the top-level PHY object.
 
         stack_frame = inspect.currentframe()
         last_frame = None
@@ -141,9 +129,6 @@ class IPhy(object):
         while lowest_phy_frame is None or highest_phy_frame is None:
             frame_name = stack_frame.f_code.co_name
             frame_file = stack_frame.f_code.co_filename
-            # Decorator wrapper frames (e.g. concurrent_phy, phy_guid) have co_name=="wrapped"
-            # but originate from phy_decorators.py.  Treat them as transparent so they don't
-            # break the contiguous PHY-frame detection.
             is_decorator_frame = frame_name == "wrapped" and "phy_decorators" in frame_file
             if frame_name.startswith("PHY_"):
                 if lowest_phy_frame is None:
@@ -155,33 +140,22 @@ class IPhy(object):
                 last_frame = stack_frame
                 stack_frame = stack_frame.f_back
             except AttributeError:
-                #End of stack, abort
                 break
 
         if lowest_phy_frame is None:
-            # We did not find any PHYs, raise an exception
             raise Exception('Did not find a PHY method to name the PHY, check that the method is named correctly')
         elif lowest_phy_frame == highest_phy_frame:
-            # If there are no PHYs calling other PHYs, then we will check for duplicates later when appending the
-            # new PHY to the model
             return None
         else:
-            # We have one PHY calling another, so we will reuse the parent PHY in the model if it exists
             try:
                 highest_phy_name = highest_phy_frame.f_code.co_name
                 highest_phy = getattr(model.phys, highest_phy_name)
             except AttributeError:
-                # If we can't find a phy in the model that matches the calling PHY, then don't return anything
                 return None
             else:
-                # If we can find a PHY in the model that matches the calling PHY, we can just use that phy object
-                # in place of creating a new phy. The caveat to this is that we are assuming the top-level PHY
-                # method name matches its entry in the model -- any renaming is going to break this
                 return highest_phy
 
     def __get_points_to_phy(self):
-        # Get the call stack and go through it in reverse order, looking for a PROD PHY
-        # Use sys._getframe() for much faster stack traversal
         frame = sys._getframe()
         phy_callers = []
         try:
@@ -196,10 +170,8 @@ class IPhy(object):
         found_prod_phy = False
         for caller_name in reversed(phy_callers):
             if "_prod" in caller_name.lower():
-                #We found a PROD PHY
                 found_prod_phy = True
             elif found_prod_phy:
-                #If we previously found a PROD PHY, then the next PHY down in the stack is the "points to" PHY
                 return caller_name
 
         return None

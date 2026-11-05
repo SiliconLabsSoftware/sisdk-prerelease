@@ -33,7 +33,7 @@
 #include "sli_memory_manager_log.h"
 #include "sl_memory_manager_config.h"
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_core.h"
 #include "sl_bit.h"
 
@@ -102,7 +102,8 @@ sl_status_t sl_memory_create_pool_advanced(sl_memory_reservation_t *reservation,
                                            sl_memory_pool_t *pool_handle)
 {
   // Reservations are not supported in this implementation.
-  EFM_ASSERT(reservation == NULL);
+  SL_LOG_DEBUG_ASSERT(reservation == NULL);
+  (void)reservation;
   return sl_memory_heap_create_pool_advanced(&sli_general_purpose_heap, block_size, block_count, align, pool_handle);
 }
 
@@ -131,7 +132,7 @@ sl_status_t sl_memory_delete_pool_force(sl_memory_pool_t *pool_handle)
 sl_status_t sl_memory_delete_pool_no_unreserve(sl_memory_pool_t *pool_handle)
 {
   (void) pool_handle;
-  EFM_ASSERT(false); // This is not supported in this implementation.
+  SL_LOG_DEBUG_ASSERT(false); // This is not supported in this implementation.
                      // In the case that asserts are disabled, return an error.
   return SL_STATUS_NOT_SUPPORTED;
 }
@@ -300,14 +301,14 @@ sl_status_t sl_memory_heap_create_pool_advanced(sl_memory_heap_t *heap,
                                                 sl_memory_pool_t *pool_handle)
 {
   // Check proper alignment characteristics.
-  EFM_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
+  SL_LOG_DEBUG_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
              || (SL_MATH_IS_PWR2(align)
                  && (align <= SL_MEMORY_BLOCK_ALIGN_512_BYTES)));
 
   // Check that the parameters are valid.
-  EFM_ASSERT(heap != NULL);
-  EFM_ASSERT(block_count > 0);
-  EFM_ASSERT(block_size > 0);
+  SL_LOG_DEBUG_ASSERT(heap != NULL);
+  SL_LOG_DEBUG_ASSERT(block_count > 0);
+  SL_LOG_DEBUG_ASSERT(block_size > 0);
 
   sl_status_t status = SL_STATUS_OK;
   uint8_t *block = NULL;

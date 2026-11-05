@@ -283,6 +283,17 @@
     <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
+  <demo name="brd4407a.demo.mp-zb-ot-rcp-spi" label="MultiProtocol (OpenThread + Zigbee) - RCP SPI">
+    <ns1:description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over SPI.
+</ns1:description>
+    <property key="demos.blurb" value="MultiProtocol (OpenThread + Zigbee) - RCP SPI" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4407a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-zb-ot-rcp-spi-brd4407a.s37" />
+    <property key="core.readmeFiles" value="zb-ot/rcp/mp-zb-ot-rcp/README.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
   <demo name="brd4180b.demo.mp-zb-ot-rcp-spi" label="MultiProtocol (OpenThread + Zigbee) - RCP SPI">
     <ns1:description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over SPI.
 </ns1:description>
@@ -327,17 +338,6 @@
     <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
     <property key="core.quality" value="PRODUCTION" />
   </demo>
-  <demo name="brd4407a.demo.mp-zb-ot-rcp-spi" label="MultiProtocol (OpenThread + Zigbee) - RCP SPI">
-    <ns1:description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over SPI.
-</ns1:description>
-    <property key="demos.blurb" value="MultiProtocol (OpenThread + Zigbee) - RCP SPI" />
-    <property key="core.partCompatibility" value=".*" />
-    <property key="core.boardCompatibility" value="brd4407a" />
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-zb-ot-rcp-spi-brd4407a.s37" />
-    <property key="core.readmeFiles" value="zb-ot/rcp/mp-zb-ot-rcp/README.md" />
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-    <property key="core.quality" value="PRODUCTION" />
-  </demo>
   <demo name="brd4186c.demo.mp-zb-ot-rcp-uart" label="OpenThread Zigbee CMP - RCP UART">
     <ns1:description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over UART.
 </ns1:description>
@@ -356,17 +356,6 @@
     <property key="core.partCompatibility" value=".*" />
     <property key="core.boardCompatibility" value="brd4180b" />
     <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4180b/mp-zb-ot-rcp-uart-brd4180b.s37" />
-    <property key="core.readmeFiles" value="zb-ot/rcp/mp-zb-ot-rcp/README.md" />
-    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
-    <property key="core.quality" value="PRODUCTION" />
-  </demo>
-  <demo name="brd4407a.demo.mp-zb-ot-rcp-uart" label="OpenThread Zigbee CMP - RCP UART">
-    <ns1:description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over UART.
-</ns1:description>
-    <property key="demos.blurb" value="OpenThread Zigbee CMP - RCP UART" />
-    <property key="core.partCompatibility" value=".*" />
-    <property key="core.boardCompatibility" value="brd4407a" />
-    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-zb-ot-rcp-uart-brd4407a.s37" />
     <property key="core.readmeFiles" value="zb-ot/rcp/mp-zb-ot-rcp/README.md" />
     <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
     <property key="core.quality" value="PRODUCTION" />
@@ -400,6 +389,17 @@
     <property key="core.partCompatibility" value=".*" />
     <property key="core.boardCompatibility" value="brd4180a" />
     <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4180a/mp-zb-ot-rcp-uart-brd4180a.s37" />
+    <property key="core.readmeFiles" value="zb-ot/rcp/mp-zb-ot-rcp/README.md" />
+    <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
+    <property key="core.quality" value="PRODUCTION" />
+  </demo>
+  <demo name="brd4407a.demo.mp-zb-ot-rcp-uart" label="OpenThread Zigbee CMP - RCP UART">
+    <ns1:description>Demonstrates Multiprotocol Radio Co-Processor (RCP) running OpenThread and Zigbee concurrently using CMP/multi-PAN on a shared 802.15.4 channel. Host communicates via CPC over UART.
+</ns1:description>
+    <property key="demos.blurb" value="OpenThread Zigbee CMP - RCP UART" />
+    <property key="core.partCompatibility" value=".*" />
+    <property key="core.boardCompatibility" value="brd4407a" />
+    <property key="demos.imageFile" value="asset://com.silabs.sdk.stack.sisdk_2026.12.0/multiprotocol_app/brd4407a/mp-zb-ot-rcp-uart-brd4407a.s37" />
     <property key="core.readmeFiles" value="zb-ot/rcp/mp-zb-ot-rcp/README.md" />
     <property key="filters" value="Capability|Multiprotocol Device\ Type|RCP Project\ Difficulty|Advanced Wireless\ Technology|Thread Wireless\ Technology|Zigbee" />
     <property key="core.quality" value="PRODUCTION" />

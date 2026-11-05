@@ -5,9 +5,12 @@ from pyradioconfig.parts.common.profiles.ocelot_regs import build_modem_regs_oce
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
     buildWhiteOutputs
+from pycalcmodel.core.common import IPCategory
 
 
 class Profile_Connect_OFDM_Sol(IProfile):
+
+    ip_category = IPCategory.LPW
 
     def __init__(self):
         self._profileName = "Connect_OFDM"
@@ -21,16 +24,13 @@ class Profile_Connect_OFDM_Sol(IProfile):
 
     def buildProfileModel(self, model):
 
-        # Build profile object and append it to the model
         profile = self._makeProfile(model)
 
-        # Build inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
         self.build_hidden_profile_inputs(model, profile)
 
-        # Build outputs
         self.build_register_profile_outputs(model, profile)
         self.build_variable_profile_outputs(model, profile)
         self.build_info_profile_outputs(model, profile)
@@ -59,14 +59,12 @@ class Profile_Connect_OFDM_Sol(IProfile):
         IProfile.make_required_input(profile, model.vars.ofdm_option, "ofdm", readable_name="OFDM Bandwidth Mode")
 
     def build_optional_profile_inputs(self, model, profile):
-        # No optional inputs for this profile
         pass
 
     def build_advanced_profile_inputs(self, model, profile):
         self.make_linked_io(profile, model.vars.fpll_band, 'crystal', readable_name="RF Frequency Planning Band")
 
     def build_hidden_profile_inputs(self, model, profile):
-        # Hidden inputs to allow for fixed frame length testing
         self.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                    readable_name="Frame Length Algorithm")
         self.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
@@ -94,22 +92,16 @@ class Profile_Connect_OFDM_Sol(IProfile):
         self._sw_profile_outputs_common.build_info_outputs(model, profile)
 
     def _lookup_from_ofdm_bw_mode(self, model):
-        #This function calculates some variables/registers based on the ofdm bw mode
 
-        #Read the mode from the profile inputs (not yet written to model vars)
         ofdm_bw_mode = model.profile.inputs.ofdm_option.var_value
 
         if ofdm_bw_mode == model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz:
-            # OPT 1
             model.vars.bitrate.value_forced = 2400000
         elif ofdm_bw_mode == model.vars.ofdm_option.var_enum.OPT2_OFDM_BW_0p8MHz:
-            # OPT 2
             model.vars.bitrate.value_forced = 1200000
         elif ofdm_bw_mode == model.vars.ofdm_option.var_enum.OPT3_OFDM_BW_0p4MHz:
-            # OPT 3
             model.vars.bitrate.value_forced = 600000
         elif ofdm_bw_mode == model.vars.ofdm_option.var_enum.OPT4_OFDM_BW_0p2MHz:
-            # OPT 4
             model.vars.bitrate.value_forced = 300000
 
         self._fixed_ofdm_agc(model)
@@ -118,23 +110,18 @@ class Profile_Connect_OFDM_Sol(IProfile):
     def _fixed_ofdm_vars(self, model):
         model.vars.fec_tx_enable.value_forced = model.vars.fec_tx_enable.var_enum.DISABLED
 
-        # Set defaults for shaping and whitening (for OFDM)
         model.vars.shaping_filter.value_forced = model.vars.shaping_filter.var_enum.Gaussian
         model.vars.shaping_filter_param.value_forced = 2.0
 
-        # OFDM modulation
         model.vars.modulation_type.value_forced = model.vars.modulation_type.var_enum.OFDM
 
-        # Use fullrate ADC (needs further study, improves sensitivity esp for OPT4 PHY)
         model.vars.adc_rate_mode.value_forced = model.vars.adc_rate_mode.var_enum.FULLRATE
 
-        # Tolerance
         model.vars.rx_xtal_error_ppm.value_forced = 0
         model.vars.tx_xtal_error_ppm.value_forced = 0
         model.vars.baudrate_tol_ppm.value_forced = 0
         model.vars.deviation_tol_ppm.value_forced = 0
 
-        # Encoding and Whitening (unused)
         model.vars.diff_encoding_mode.value_forced = model.vars.diff_encoding_mode.var_enum.DISABLED
         model.vars.dsss_chipping_code.value_forced = 0
         model.vars.dsss_len.value_forced = 0
@@ -146,7 +133,6 @@ class Profile_Connect_OFDM_Sol(IProfile):
         model.vars.white_seed.value_forced = 0
         model.vars.white_output_bit.value_forced = 0
 
-        # Preamble and syncword (unused)
         model.vars.preamble_length.value_forced = 2
         model.vars.preamble_pattern.value_forced = 1
         model.vars.preamble_pattern_len.value_forced = 2
@@ -154,11 +140,9 @@ class Profile_Connect_OFDM_Sol(IProfile):
         model.vars.syncword_1.value_forced = 0x12345678
         model.vars.syncword_length.value_forced = 16
 
-        # Modulation parameters (unused)
         model.vars.deviation.value_forced = 0
         model.vars.fsk_symbol_map.value_forced = model.vars.fsk_symbol_map.var_enum.MAP0
 
-        # Frame settings (unused)
         model.vars.frame_bitendian.value_forced = model.vars.frame_bitendian.var_enum.LSB_FIRST
         model.vars.frame_length_type.value_forced = model.vars.frame_length_type.var_enum.FIXED_LENGTH
         model.vars.payload_white_en.value_forced = True
@@ -212,14 +196,12 @@ class Profile_Connect_OFDM_Sol(IProfile):
         model.vars.frame_type_loc.value_forced = 0
         model.vars.frame_type_lsbit.value_forced = 0
 
-        # Other
         model.vars.asynchronous_rx_enable.value_forced = False
         model.vars.syncword_tx_skip.value_forced = False
 
     def _fixed_ofdm_agc(self, model):
         ofdm_bw_mode = model.profile.inputs.ofdm_option.var_value
 
-        # AGC - from Wisun OFDM
         model.vars.RAC_LNAMIXTRIM4_LNAMIXRFPKDTHRESHSELHI.value_forced = 5  # 60mVrms
         model.vars.RAC_PGACTRL_PGATHRPKDHISEL.value_forced = 3  # 125mV
         model.vars.RAC_PGACTRL_PGATHRPKDLOSEL.value_forced = 1  # 75mV per pg_sol_book_v2

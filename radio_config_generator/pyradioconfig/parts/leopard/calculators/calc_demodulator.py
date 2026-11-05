@@ -33,13 +33,7 @@ class calc_demodulator_leopard(CALC_Demodulator_lynx):
         self._addModelActual(model, 'c_divider', int, ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'adc_freq_error', float, ModelVariableFormat.DECIMAL)
 
-    # Helper calculation for FW calulation of SRC2
-    # These are phy specific calculations that is easier to do here
-    # than to reverse calculate in firmware
-    #
-    # Used by rail_scripts -> rfhal_synth.c:SYNTH_CalcSrc2
     def calc_src2_denominator(self, model):
-        # Load model variables into local variables
         osr = model.vars.oversampling_rate_actual.value
         datarate = model.vars.baudrate.value
         dec0 = model.vars.dec0_actual.value
@@ -50,15 +44,12 @@ class calc_demodulator_leopard(CALC_Demodulator_lynx):
         if (model.vars.adc_clock_mode.var_enum.HFXOMULT == adc_clock_mode):
             src2_calcDenominator = 0
         else:
-            # This does not include the 8x downsampling polyphase filter after IFADC. Handled in RAIL code
             src2_calcDenominator = int(datarate * dec0 * dec1 * dec2 * osr)
 
         model.vars.src2_calcDenominator.value = src2_calcDenominator
 
     def calc_fxo_or_fdec8(self, model):
 
-        #Read in model vars
-        # We can not use rx_synth_freq_actual in these calculations due to circular dependency
         flag_using_half_rate_mode = (model.vars.RAC_IFADCTRIM0_IFADCENHALFMODE.value == 1)
         adc_clock_mode = model.vars.adc_clock_mode.value
         xtal_frequency = model.vars.xtal_frequency.value
@@ -71,25 +62,20 @@ class calc_demodulator_leopard(CALC_Demodulator_lynx):
         else:
             fxo_or_fdec8 = xtal_frequency * 1.0
 
-        #Write the variable
         model.vars.fxo_or_fdec8.value = fxo_or_fdec8
 
     def calc_log2x4_reg(self, model):
-        # given DEC1 decimation ratio calculate log2 in 4Q2 format
         dec1 = model.vars.dec1_actual.value
         log2df = floor(4.0*log2(dec1))
         log2df = min(63,log2df) #Limit to 6 bits
 
-        #Store log2x4 value in [6:1] and last bit is enable
         reg = (log2df << 1) | 1
 
         self._reg_write(model.vars.MODEM_BLEIQDSAEXT2_BBSSDEBOUNCETIM, reg)
 
     def calc_rssi_rf_adjust_db(self, model):
 
-        #Adjustment determined based on char data
         model.vars.rssi_rf_adjust_db.value = -12.35
 
     def calc_adc_freq_actual(self, model):
-        # moved to calc_synth for leopard to follow Ocelot
         pass

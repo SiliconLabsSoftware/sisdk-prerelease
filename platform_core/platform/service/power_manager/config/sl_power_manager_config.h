@@ -35,14 +35,6 @@
 
 // <h>Power Manager Configuration
 
-// <q SL_POWER_MANAGER_CUSTOM_HF_OSCILLATOR_IRQ_HANDLER> Enable custom IRQ handler for external HF oscillator.
-// <i> Enable if CMU_IRQHandler/HFXO0_IRQHandler is needed from your application.
-// <i> The function sl_power_manager_irq_handler() will have to be called from your custom handler if this is enabled.
-// <i> Default: 0
-#ifndef SL_POWER_MANAGER_CUSTOM_HF_OSCILLATOR_IRQ_HANDLER
-#define SL_POWER_MANAGER_CUSTOM_HF_OSCILLATOR_IRQ_HANDLER  0
-#endif
-
 // <q SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP> Enable fast wakeup (disable voltage scaling in EM2/3 mode)
 // <i> Enable or disable voltage scaling in EM2/3 modes (when available). This decreases wakeup time by about 30 us.
 // <i> Deprecated. It is replaced by the function sl_power_manager_em23_voltage_scaling_enable_fast_wakeup()

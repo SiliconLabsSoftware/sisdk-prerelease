@@ -222,7 +222,7 @@ static void em1RequestAdd(SPIDRV_Handle_t handle)
 
 static void em1RequestRemove(SPIDRV_Handle_t handle)
 {
-  EFM_ASSERT(handle->em1RequestCount > 0);
+  SL_LOG_DEBUG_ASSERT(handle->em1RequestCount > 0);
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_ATOMIC();
@@ -2170,11 +2170,11 @@ static void PrepareDMATransfer(SPIDRV_Handle_t handle,
                                sl_dma_ctrl_size_t *outSize,
                                size_t *outByteCount)
 {
-  EFM_ASSERT(handle);
-  EFM_ASSERT(outRxPort);
-  EFM_ASSERT(outTxPort);
-  EFM_ASSERT(outSize);
-  EFM_ASSERT(outByteCount);
+  SL_LOG_DEBUG_ASSERT(handle);
+  SL_LOG_DEBUG_ASSERT(outRxPort);
+  SL_LOG_DEBUG_ASSERT(outTxPort);
+  SL_LOG_DEBUG_ASSERT(outSize);
+  SL_LOG_DEBUG_ASSERT(outByteCount);
 
   handle->blockingCompleted  = false;
   handle->transferCount      = count;
@@ -2663,6 +2663,7 @@ static Ecode_t spidrvCheckDuplicateHandle(SPIDRV_Handle_t handle)
    @verbatim
 #include "spidrv.h"
 
+#include "sl_log_helper.h"
 SPIDRV_HandleData_t handleData;
 SPIDRV_Handle_t handle = &handleData;
 

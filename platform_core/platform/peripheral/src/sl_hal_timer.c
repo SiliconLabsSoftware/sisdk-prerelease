@@ -31,7 +31,7 @@
 #include "sl_hal_timer.h"
 #if defined(TIMER_COUNT) && (TIMER_COUNT > 0)
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup timer TIMER - Timer/Counter
@@ -127,7 +127,7 @@ extern __INLINE uint32_t sl_hal_timer_get_pending_interrupts(TIMER_TypeDef *time
 extern __INLINE uint32_t sl_hal_timer_get_enabled_pending_interrupts(TIMER_TypeDef *timer);
 extern __INLINE void sl_hal_timer_set_interrupts(TIMER_TypeDef *timer,
                                                  uint32_t flags);
-#if defined(TIMER_CC_IEN_CC)
+#if defined(TIMER_CC_IEN_CC) && defined(TIMER_CC_IF_CC)
 extern __INLINE void sl_hal_timer_channel_clear_interrupts(TIMER_TypeDef *timer,
                                                            uint8_t channel,
                                                            uint32_t flags);
@@ -146,6 +146,41 @@ extern __INLINE void sl_hal_timer_channel_set_interrupts(TIMER_TypeDef *timer,
                                                          uint32_t flags);
 #endif
 
+#if defined(_TIMER_IPVERSION_RESETVALUE) && (_TIMER_IPVERSION_RESETVALUE == 3)
+static void timer_clear_init_state(TIMER_TypeDef *timer)
+{
+  uint8_t i;
+  const uint8_t channel_num = SL_HAL_TIMER_CHANNEL_NUM(timer);
+
+  // Enable and stop the timer before clearing registers that require it.
+  sl_hal_timer_enable(timer);
+  sl_hal_timer_wait_sync(timer);
+  sl_hal_timer_stop(timer);
+
+  timer->TOPB = _TIMER_TOPB_RESETVALUE;
+  // Write TOP after TOPB to invalidate TOPB (clear TIMER_STATUS_TOPBV).
+  timer->TOP = _TIMER_TOP_RESETVALUE;
+  timer->CNT = _TIMER_CNT_RESETVALUE;
+
+  for (i = 0; i < channel_num; i++) {
+    timer->CC[i].OCB = _TIMER_CC_OCB_RESETVALUE;
+    timer->CC[i].OC = _TIMER_CC_OC_RESETVALUE;
+#if defined(_TIMER_CC_PHASE_MASK)
+    timer->CC[i].PHASEB = _TIMER_CC_PHASEB_RESETVALUE;
+    timer->CC[i].PHASE = _TIMER_CC_PHASE_RESETVALUE;
+#endif
+#if defined(_TIMER_CC_DITHER_MASK)
+    timer->CC[i].DITHERB = _TIMER_CC_DITHERB_RESETVALUE;
+    timer->CC[i].DITHER = _TIMER_CC_DITHER_RESETVALUE;
+#endif
+  }
+
+  sl_hal_timer_wait_sync(timer);
+  sl_hal_timer_disable(timer);
+  sl_hal_timer_wait_ready(timer);
+}
+#endif
+
 /***************************************************************************//**
  * @brief
  *   Initialize TIMER.
@@ -155,8 +190,13 @@ void sl_hal_timer_init(TIMER_TypeDef *timer,
 {
   SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(timer));
 
+#if defined(_TIMER_IPVERSION_RESETVALUE) && (_TIMER_IPVERSION_RESETVALUE == 3)
+  // Emulate the prior clean init behavior for writable retained state.
+  timer_clear_init_state(timer);
+#else
   sl_hal_timer_disable(timer);
   sl_hal_timer_wait_ready(timer);
+#endif
 
   // Set config register.
   timer->CFG = (init->input_enable_sync         ?   TIMER_CFG_SYNC : 0)
@@ -190,12 +230,12 @@ void sl_hal_timer_init(TIMER_TypeDef *timer,
   sl_hal_timer_disable(timer);
   sl_hal_timer_wait_ready(timer);
   SL_PRINT_STRING_DEBUG("mode=%d clk=%d\r\n",
-    (int)init->count_mode,
-    (int)init->clock_select);
+                        (int)init->count_mode,
+                        (int)init->clock_select);
 
   SL_PRINT_STRING_DEBUG("presc=%d debug=%d\r\n",
-    (int)init->prescaler,
-    (int)init->debug_run);
+                        (int)init->prescaler,
+                        (int)init->debug_run);
 }
 
 /***************************************************************************//**
@@ -355,6 +395,12 @@ void sl_hal_timer_reset(TIMER_TypeDef *timer)
     timer->CC[i].CTRL     = _TIMER_CC_CTRL_RESETVALUE;
     timer->CC[i].OC       = _TIMER_CC_OC_RESETVALUE;
     timer->CC[i].OCB      = _TIMER_CC_OCB_RESETVALUE;
+#if defined(_TIMER_CC_IF_RESETVALUE)
+    timer->CC[i].IF       = _TIMER_CC_IF_RESETVALUE;
+#endif
+#if defined(_TIMER_CC_IEN_RESETVALUE)
+    timer->CC[i].IEN      = _TIMER_CC_IEN_RESETVALUE;
+#endif
 #if defined(_TIMER_CC_PHASE_MASK)
     timer->CC[i].PHASE    = _TIMER_CC_PHASE_RESETVALUE;
     timer->CC[i].PHASEB   = _TIMER_CC_PHASEB_RESETVALUE;
@@ -378,6 +424,9 @@ void sl_hal_timer_reset(TIMER_TypeDef *timer)
   sl_hal_timer_wait_ready(timer);
 
   timer->CFG = _TIMER_CFG_RESETVALUE;
+#if defined(_TIMER_CFG2_RESETVALUE)
+  timer->CFG2 = _TIMER_CFG2_RESETVALUE;
+#endif
   for (i = 0; i < channel_num; i++) {
     timer->CC[i].CFG = _TIMER_CC_CFG_RESETVALUE;
   }

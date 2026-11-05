@@ -1,8 +1,6 @@
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 from pyradioconfig.calculator_model_framework.interfaces.itarget import ITarget
 
-# Regex fields to match registers used for OFDM in concurrent mode
-# To be used in concurrent_phy decorators
 concurrent_ofdm_regfield_list = [
     '(?!AGC_ANTDIV_GAINMODE)(AGC_.*)',  # (?!REG1)(REG2) matches REG2 and not REG1
     'FEFILT1_*',
@@ -207,17 +205,14 @@ def build_modem_regs_sol_only(model, profile):
     profile.outputs.append(ModelOutput(model.vars.AGC_COLLDETTHD_MATHRESHOLD, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.COLLDETTHD.MATHRESHOLD'))
     profile.outputs.append(ModelOutput(model.vars.AGC_COLLDETTHD_OVRTHRESHOLD, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.COLLDETTHD.OVRTHRESHOLD'))
 
-    # RFFPLL Configuration
     profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXADCSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVXADCSEL'))
     if model.target == ITarget.SIM_str:
-        #These fields are owned by RAIL, but are written by the calculator for RTL sim and wired FPGA as RAIL is not running
         profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXDACSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVXDACSEL'))
         profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVX'))
         profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVY, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVY'))
         profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVN, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVN'))
         profile.outputs.append(ModelOutput(model.vars.RFFPLL0_RFFPLLCTRL1_DIVXMODEMSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RFFPLL0.RFFPLLCTRL1.DIVXMODEMSEL'))
 
-    # SEQ Peripheral - MODEMINFO register
     profile.outputs.append(ModelOutput(model.vars.SEQ_MODEMINFO_LEGACY_EN, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SEQ.MODEMINFO.LEGACY_EN'           ))
     profile.outputs.append(ModelOutput(model.vars.SEQ_MODEMINFO_DSA_VITERBI_EN, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SEQ.MODEMINFO.DSA_VITERBI_EN'           ))
     profile.outputs.append(ModelOutput(model.vars.SEQ_MODEMINFO_TRECS_EN, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SEQ.MODEMINFO.TRECS_EN'           ))
@@ -228,9 +223,7 @@ def build_modem_regs_sol_only(model, profile):
     profile.outputs.append(ModelOutput(model.vars.SEQ_MODEMINFO_SOFTMODEM_MOD_EN, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SEQ.MODEMINFO.SOFTMODEM_MOD_EN'           ))
     profile.outputs.append(ModelOutput(model.vars.SEQ_MODEMINFO_SOFTMODEM_SPARE, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SEQ.MODEMINFO.SOFTMODEM_SPARE'           ))
 
-    ### Defining SoftModem Regs
 
-    #CW Peripheral
     profile.outputs.append(ModelOutput(model.vars.CW_VREGS_MAJORVERSION, '', ModelOutputType.SVD_REG_FIELD, readable_name='CW.VREGS.MAJORVERSION'))
     profile.outputs.append(ModelOutput(model.vars.CW_VREGS_MINORVERSION, '', ModelOutputType.SVD_REG_FIELD, readable_name='CW.VREGS.MINORVERSION'))
     profile.outputs.append(ModelOutput(model.vars.CW_CFG1_MODULATION, '', ModelOutputType.SVD_REG_FIELD, readable_name='CW.CFG1.MODULATION'))
@@ -242,7 +235,6 @@ def build_modem_regs_sol_only(model, profile):
     profile.outputs.append(ModelOutput(model.vars.CW_CFG2_AMP, '', ModelOutputType.SVD_REG_FIELD, readable_name='CW.CFG2.AMP'))
     profile.outputs.append(ModelOutput(model.vars.CW_CFG3_XTALFREQ, '', ModelOutputType.SVD_REG_FIELD, readable_name='CW.CFG3.XTALFREQ'))
 
-    #SUNOFDM Peripheral
     profile.outputs.append(ModelOutput(model.vars.SUNOFDM_VREGS_MAJORVERSION, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.VREGS.MAJORVERSION'))
     profile.outputs.append(ModelOutput(model.vars.SUNOFDM_VREGS_MINORVERSION, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.VREGS.MINORVERSION'))
     profile.outputs.append(ModelOutput(model.vars.SUNOFDM_CFG1_MODULATION, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.CFG1.MODULATION'))
@@ -358,7 +350,6 @@ def build_modem_regs_sol_only(model, profile):
         profile.outputs.append(ModelOutput(getattr(model.vars, "SUNOFDM_PREEMPHCOGR%d_COEFF%d" % (i//4, i)), '',
                                            ModelOutputType.SVD_REG_FIELD, readable_name='SUNOFDM.PREEMPHCOGR%d.COEFF%d' % (i//4, i)))
 
-    #SUNOQPSK Peripheral
     profile.outputs.append(ModelOutput(model.vars.SUNOQPSK_VREGS_MAJORVERSION, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOQPSK.VREGS.MAJORVERSION'))
     profile.outputs.append(ModelOutput(model.vars.SUNOQPSK_VREGS_MINORVERSION, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOQPSK.VREGS.MINORVERSION'))
     profile.outputs.append(ModelOutput(model.vars.SUNOQPSK_CFG1_MODULATION, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOQPSK.CFG1.MODULATION'))
@@ -367,7 +358,6 @@ def build_modem_regs_sol_only(model, profile):
     profile.outputs.append(ModelOutput(model.vars.SUNOQPSK_CFG2_MACFCSTYPE, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOQPSK.CFG2.MACFCSTYPE'))
     profile.outputs.append(ModelOutput(model.vars.SUNOQPSK_CFG2_XTALFREQ, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNOQPSK.CFG2.XTALFREQ'))
 
-    #LEGOQPSK Peripheral
     profile.outputs.append(ModelOutput(model.vars.LEGOQPSK_VREGS_MAJORVERSION, '', ModelOutputType.SVD_REG_FIELD, readable_name='LEGOQPSK.VREGS.MAJORVERSION'))
     profile.outputs.append(ModelOutput(model.vars.LEGOQPSK_VREGS_MINORVERSION, '', ModelOutputType.SVD_REG_FIELD, readable_name='LEGOQPSK.VREGS.MINORVERSION'))
     profile.outputs.append(ModelOutput(model.vars.LEGOQPSK_CFG1_MODULATION, '', ModelOutputType.SVD_REG_FIELD, readable_name='LEGOQPSK.CFG1.MODULATION'))
@@ -375,7 +365,6 @@ def build_modem_regs_sol_only(model, profile):
     profile.outputs.append(ModelOutput(model.vars.LEGOQPSK_CFG1_BANDFREQMHZ, '', ModelOutputType.SVD_REG_FIELD, readable_name='LEGOQPSK.CFG1.BANDFREQMHZ'))
     profile.outputs.append(ModelOutput(model.vars.LEGOQPSK_CFG2_XTALFREQ, '', ModelOutputType.SVD_REG_FIELD, readable_name='LEGOQPSK.CFG2.XTALFREQ'))
 
-    #SUNFSK Peripheral
     profile.outputs.append(ModelOutput(model.vars.SUNFSK_VREGS_MAJORVERSION, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNFSK.VREGS.MAJORVERSION'))
     profile.outputs.append(ModelOutput(model.vars.SUNFSK_VREGS_MINORVERSION, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNFSK.VREGS.MINORVERSION'))
     profile.outputs.append(ModelOutput(model.vars.SUNFSK_CFG1_MODULATION, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNFSK.CFG1.MODULATION'))
@@ -431,11 +420,8 @@ def build_modem_regs_sol_only(model, profile):
     profile.outputs.append(ModelOutput(model.vars.SUNFSK_ANT_ANTDIV, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNFSK.ANT.ANTDIV'))
     profile.outputs.append(ModelOutput(model.vars.SUNFSK_ANT_ANTSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='SUNFSK.ANT.ANTSEL'))
 
-    # FRC Spare
     profile.outputs.append(ModelOutput(model.vars.FRC_SPARE_SPARE, '', ModelOutputType.SVD_REG_FIELD, readable_name='FRC.SPARE.SPARE'))
 
-    #SMCTRL
     profile.outputs.append(ModelOutput(model.vars.SMCTRL_TXDONE_TXDONE, '', ModelOutputType.SVD_REG_FIELD, readable_name='SMCTRL.TXDONE.TXDONE'))
 
-    # Add SPARE register for ECO fix for DEC1 gain log2 calculation
     profile.outputs.append(ModelOutput(model.vars.MODEM_SPARE_SPARE, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SPARE.SPARE'))

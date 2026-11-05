@@ -35,7 +35,7 @@
 #include "sl_memory_manager.h"
 #include "sli_memory_manager.h"
 #include "sli_memory_manager_log.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_bit.h"
 #include "sl_common.h"
 #include "sl_core.h"
@@ -193,8 +193,8 @@ sl_status_t sl_memory_init_psram(void)
 
   sl_memory_region_t psram_heap_region = sl_memory_get_psram_heap_region();
 
-  EFM_ASSERT(psram_heap_region.addr != NULL);
-  EFM_ASSERT(psram_heap_region.size > 0);
+  SL_LOG_DEBUG_ASSERT(psram_heap_region.addr != NULL);
+  SL_LOG_DEBUG_ASSERT(psram_heap_region.size > 0);
 
   // Create PSRAM heap.
   status = sli_memory_create_heap(psram_heap_region.addr,
@@ -223,8 +223,8 @@ sl_status_t sl_memory_init_dtcm(void)
 
   sl_memory_region_t dtcm_heap_region = sl_memory_get_dtcm_heap_region();
 
-  EFM_ASSERT(dtcm_heap_region.addr != NULL);
-  EFM_ASSERT(dtcm_heap_region.size > 0);
+  SL_LOG_DEBUG_ASSERT(dtcm_heap_region.addr != NULL);
+  SL_LOG_DEBUG_ASSERT(dtcm_heap_region.size > 0);
 
   // Create DTCM heap.
   status = sli_memory_create_heap(dtcm_heap_region.addr,
@@ -560,17 +560,17 @@ sl_status_t sl_memory_heap_reserve_no_retention(sl_memory_heap_t *heap,
                                                 void **block)
 {
   // Check proper alignment characteristics.
-  EFM_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
+  SL_LOG_DEBUG_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
              || (SL_MATH_IS_PWR2(align)
                  && (align <= SL_MEMORY_BLOCK_ALIGN_512_BYTES)));
 
 #if defined(DEBUG_EFM) || defined(DEBUG_EFM_USER)
   // Assert block reservation with retention is done prior to any other allocations types.
-  EFM_ASSERT(reserve_no_retention_first == true);
+  SL_LOG_DEBUG_ASSERT(reserve_no_retention_first == true);
 #endif
 
   // Make sure the heap handle isn't NULL.
-  EFM_ASSERT(heap != NULL);
+  SL_LOG_DEBUG_ASSERT(heap != NULL);
 
   size_t block_align = align;
   void *data_payload_start = NULL;
@@ -684,12 +684,12 @@ sl_status_t sl_memory_heap_alloc_advanced(sl_memory_heap_t *heap,
 {
 
   // Check proper alignment characteristics.
-  EFM_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
+  SL_LOG_DEBUG_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
              || (SL_MATH_IS_PWR2(align)
                  && (align <= SL_MEMORY_BLOCK_ALIGN_512_BYTES)));
 
   // Make sure the heap handle isn't NULL.
-  EFM_ASSERT(heap != NULL);
+  SL_LOG_DEBUG_ASSERT(heap != NULL);
 
   sli_block_metadata_t *current_block_metadata = NULL;
   sli_block_metadata_t *allocated_blk = NULL;
@@ -1153,7 +1153,7 @@ sl_status_t sl_memory_heap_realloc(sl_memory_heap_t *heap,
                                    void **block)
 {
   // Make sure the heap handle isn't NULL.
-  EFM_ASSERT(heap != NULL);
+  SL_LOG_DEBUG_ASSERT(heap != NULL);
 
   sl_status_t status = SL_STATUS_OK;
   sli_block_metadata_t *current_block = NULL;

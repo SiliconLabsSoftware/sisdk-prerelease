@@ -15,6 +15,7 @@ provides:
   condition: [device_series_2]
 - name: clock_manager_runtime_hal_s2
 requires:
+- name: log_none
 - name: device_series_2
 - name: status
 - name: enum

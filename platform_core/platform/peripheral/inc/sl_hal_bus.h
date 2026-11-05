@@ -31,7 +31,7 @@
 #ifndef SL_HAL_BUS_H
 #define SL_HAL_BUS_H
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_core.h"
 #include "em_device.h"
 #include "sl_code_classification.h"
@@ -113,7 +113,7 @@ __STATIC_INLINE void sl_hal_bus_reg_write_bit(volatile uint32_t *addr,
                                               uint32_t bit,
                                               uint32_t val)
 {
-  EFM_ASSERT(bit < 32U);
+  SL_LOG_DEBUG_ASSERT(bit < 32U);
 
 #if defined(PER_REG_BLOCK_SET_OFFSET) && defined(PER_REG_BLOCK_CLR_OFFSET)
   uint32_t aliasAddr;

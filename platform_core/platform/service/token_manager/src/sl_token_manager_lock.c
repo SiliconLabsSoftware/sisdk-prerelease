@@ -39,6 +39,7 @@
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
 #include "cmsis_os2.h"
+#include "sl_log_helper.h"
 #endif
 
 //****************************************************************************
@@ -46,7 +47,7 @@
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 #if defined(SL_CATALOG_KERNEL_PRESENT) && !defined(_SILICON_LABS_32B_SERIES_2)
 static osMutexId_t ctm_mutex;   // Common token manager lock mutex
-#define CTM_ERROR_ASSERT()   do { EFM_ASSERT(false); } while (0)
+#define CTM_ERROR_ASSERT()   do { SL_LOG_DEBUG_ASSERT(false); } while (0)
 #else
 static CORE_DECLARE_IRQ_STATE;
 #endif

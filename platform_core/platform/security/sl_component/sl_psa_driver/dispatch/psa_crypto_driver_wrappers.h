@@ -135,6 +135,7 @@
 #define SLI_CRYPTO_TRANSPARENT_DRIVER_ID (7)
 #define SLI_HOSTCRYPTO_TRANSPARENT_DRIVER_ID (8)
 #define SLI_CRYPTO_SI91X_DRIVER_ID (9)
+#define SLI_CRYPTO_SI91X_SHA3_DRIVER_ID (10)
 #endif
 
 /* END-driver id */
@@ -1860,7 +1861,7 @@ static inline psa_status_t psa_driver_wrapper_cipher_encrypt(
                         output_size,
                         output_length ) );
 #endif
-#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU) && defined(SLI_MBEDTLS_DEVICE_HC)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_hostcrypto_opaque_cipher_encrypt(
                         attributes,
@@ -2069,7 +2070,7 @@ static inline psa_status_t psa_driver_wrapper_cipher_decrypt(
                         output_size,
                         output_length ) );
 #endif
-#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU) && defined(SLI_MBEDTLS_DEVICE_HC)
         case SL_PSA_KEY_LOCATION_KSU_0:
             return ( sli_hostcrypto_transparent_cipher_decrypt(
                         attributes,
@@ -2258,7 +2259,7 @@ static inline psa_status_t psa_driver_wrapper_cipher_encrypt_setup(
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
 #endif
-#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU) && defined(SLI_MBEDTLS_DEVICE_HC)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_hostcrypto_transparent_cipher_encrypt_setup(
                         &operation->ctx.sli_hostcrypto_transparent_ctx,
@@ -2442,7 +2443,7 @@ static inline psa_status_t psa_driver_wrapper_cipher_decrypt_setup(
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
 #endif
-#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU) && defined(SLI_MBEDTLS_DEVICE_HC)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_hostcrypto_transparent_cipher_decrypt_setup(
                         &operation->ctx.sli_hostcrypto_transparent_ctx,
@@ -2817,6 +2818,12 @@ static inline psa_status_t psa_driver_wrapper_hash_compute(
     if( status != PSA_ERROR_NOT_SUPPORTED )
       return( status );
 #endif
+#if defined(SLI_SHA3_DEVICE_SI91X)
+    status = sli_si91x_crypto_sha3_hash_compute(
+                alg, input, input_length, hash, hash_size, hash_length );
+    if( status != PSA_ERROR_NOT_SUPPORTED )
+      return( status );
+#endif
 #endif /* SL_PSA_DRIVERS_ENABLED */
 
     /* If software fallback is compiled in, try fallback */
@@ -2898,6 +2905,14 @@ static inline psa_status_t psa_driver_wrapper_hash_setup(
     if( status != PSA_ERROR_NOT_SUPPORTED )
       return( status );
 #endif
+#if defined(SLI_SHA3_DEVICE_SI91X)
+    status = sli_si91x_crypto_sha3_hash_setup(&operation->ctx.sli_si91x_crypto_sha3_ctx,
+                                              alg );
+    if( status == PSA_SUCCESS )
+        operation->id = SLI_CRYPTO_SI91X_SHA3_DRIVER_ID;
+    if( status != PSA_ERROR_NOT_SUPPORTED )
+      return( status );
+#endif
 #endif
 
     /* If software fallback is compiled in, try fallback */
@@ -2968,6 +2983,10 @@ static inline psa_status_t psa_driver_wrapper_hash_clone(
         case SLI_CRYPTO_SI91X_DRIVER_ID:
             return( PSA_ERROR_NOT_SUPPORTED );
 #endif
+#if defined(SLI_SHA3_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_SHA3_DRIVER_ID:
+            return( PSA_ERROR_NOT_SUPPORTED );
+#endif
 #endif /* SL_PSA_DRIVERS_ENABLED */
         default:
             (void) target_operation;
@@ -3022,6 +3041,11 @@ static inline psa_status_t psa_driver_wrapper_hash_update(
         case SLI_CRYPTO_SI91X_DRIVER_ID:
             return( sli_si91x_crypto_hash_update(&operation->ctx.sli_si91x_crypto_sha_ctx,
                                                  input, input_length) );
+#endif
+#if defined(SLI_SHA3_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_SHA3_DRIVER_ID:
+            return( sli_si91x_crypto_sha3_hash_update(&operation->ctx.sli_si91x_crypto_sha3_ctx,
+                                                      input, input_length) );
 #endif
 #endif /* SL_PSA_DRIVERS_ENABLED */
         default:
@@ -3080,6 +3104,11 @@ static inline psa_status_t psa_driver_wrapper_hash_finish(
             return ( sli_si91x_crypto_hash_finish(&operation->ctx.sli_si91x_crypto_sha_ctx,
                                           hash, hash_size, hash_length ) );
 #endif
+#if defined(SLI_SHA3_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_SHA3_DRIVER_ID:
+            return ( sli_si91x_crypto_sha3_hash_finish(&operation->ctx.sli_si91x_crypto_sha3_ctx,
+                                          hash, hash_size, hash_length ) );
+#endif
 #endif /* SL_PSA_DRIVERS_ENABLED */
         default:
             (void) hash;
@@ -3127,6 +3156,10 @@ static inline psa_status_t psa_driver_wrapper_hash_abort(
 #if defined(SLI_SHA_DEVICE_SI91X)
         case SLI_CRYPTO_SI91X_DRIVER_ID:
             return( sli_si91x_crypto_hash_abort(&operation->ctx.sli_si91x_crypto_sha_ctx ) );
+#endif
+#if defined(SLI_SHA3_DEVICE_SI91X)
+        case SLI_CRYPTO_SI91X_SHA3_DRIVER_ID:
+            return( sli_si91x_crypto_sha3_hash_abort(&operation->ctx.sli_si91x_crypto_sha3_ctx ) );
 #endif
 #endif /* SL_PSA_DRIVERS_ENABLED */
         default:
@@ -3444,7 +3477,7 @@ static inline psa_status_t psa_driver_wrapper_xof_abort(
             return status;
 #endif
 #endif
-#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU) && defined(SLI_MBEDTLS_DEVICE_HC)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_hostcrypto_transparent_aead_encrypt(
                         attributes, key_buffer, key_buffer_size,
@@ -3640,7 +3673,7 @@ static inline psa_status_t psa_driver_wrapper_aead_decrypt(
             return status;
 #endif
 #endif
-#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU) && defined(SLI_MBEDTLS_DEVICE_HC)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_hostcrypto_transparent_aead_decrypt(
                         attributes, key_buffer, key_buffer_size,
@@ -3782,7 +3815,7 @@ static inline psa_status_t psa_driver_wrapper_aead_encrypt_setup(
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
 #endif
-#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU) && defined(SLI_MBEDTLS_DEVICE_HC)
         case SL_PSA_KEY_LOCATION_KSU_0:
             operation->id = SLI_HOSTCRYPTO_TRANSPARENT_DRIVER_ID;
             status = sli_hostcrypto_transparent_aead_encrypt_setup(
@@ -3923,7 +3956,7 @@ static inline psa_status_t psa_driver_wrapper_aead_decrypt_setup(
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
 #endif
-#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU) && defined(SLI_MBEDTLS_DEVICE_HC)
         case SL_PSA_KEY_LOCATION_KSU_0:
             operation->id = SLI_HOSTCRYPTO_TRANSPARENT_DRIVER_ID;
             status = sli_hostcrypto_transparent_aead_decrypt_setup(
@@ -4608,7 +4641,7 @@ static inline psa_status_t psa_driver_wrapper_mac_compute(
                         input, input_length,
                         mac, mac_size, mac_length ) );
 #endif
-#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU) && defined(SLI_MBEDTLS_DEVICE_HC)
         case SL_PSA_KEY_LOCATION_KSU_0:
             return sli_hostcrypto_transparent_mac_compute(
                         attributes, key_buffer, key_buffer_size, alg,
@@ -4776,7 +4809,7 @@ static inline psa_status_t psa_driver_wrapper_mac_sign_setup(
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
 #endif
-#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU) && defined(SLI_MBEDTLS_DEVICE_HC)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_hostcrypto_transparent_mac_sign_setup(
                 &operation->ctx.sli_hostcrypto_transparent_ctx,
@@ -4944,7 +4977,7 @@ static inline psa_status_t psa_driver_wrapper_mac_verify_setup(
                 operation->id = SLI_SE_OPAQUE_DRIVER_ID;
             return( status );
 #endif
-#if defined(SLI_PSA_DRIVER_FEATURE_KSU)
+#if defined(SLI_PSA_DRIVER_FEATURE_KSU) && defined(SLI_MBEDTLS_DEVICE_HC)
         case SL_PSA_KEY_LOCATION_KSU_0:
             status = sli_hostcrypto_transparent_mac_verify_setup(
                 &operation->ctx.sli_hostcrypto_transparent_ctx,

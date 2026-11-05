@@ -43,6 +43,7 @@ provides:
 - name: hal_generic_prs
   condition: [device_sdid_265]
 requires:
+- name: log_none
 - name: device
 - name: device_has_prs
 - name: hal_generic_common

@@ -1350,8 +1350,13 @@ void halPrintCrashData(uint8_t port);
 // Signature written to NO_INIT RAM when WDOG LWM capture succeeds.
 #define HAL_WATCHDOG_LWM_CAPTURE_SIGNATURE  0x5744474Cu
 
+#define HAL_WATCHDOG_LWM_SW_CAPTURE_SIGNATURE  0x57445357u
+#define HAL_WATCHDOG_LWM_SW_UID_MAX            32U
+
 // Mark that a valid LWM capture is present for the next EXPIRED reset.
 void halWatchdogLwmCaptureMark(uint32_t pc);
+
+void halWatchdogLwmCaptureSetSwUids(const uint32_t *uids, uint32_t count);
 
 // Return true if the LWM capture marker and stored PC are valid.
 bool halWatchdogLwmCaptureIsValid(void);

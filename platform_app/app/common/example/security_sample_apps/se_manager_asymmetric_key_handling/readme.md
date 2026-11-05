@@ -33,7 +33,11 @@ After reset, use the serial menu to choose an **ECC algorithm family** and curve
 |---------|------------------|-------------------|
 | **Plaintext key in RAM** | Yes | Yes |
 | **Wrapped key in RAM** | No | Yes |
-| **Volatile key in SE slot** | No | Yes |
+| **Volatile key in SE slot** | No | Yes\* |
+
+> **Note:** SE volatile key support may not be supported on all platforms. On platforms
+> without volatile SE key storage, the volatile menu option and volatile/transfer demo
+> steps are omitted. Plaintext and wrapped key paths still work where available.
 
 ### Operations demonstrated
 
@@ -44,8 +48,8 @@ After reset, use the serial menu to choose an **ECC algorithm family** and curve
 3. Import plain key into an **exportable wrapped** key (`sl_se_import_key`)
 4. Export wrapped key back to plain (`sl_se_export_key`) and **verify** public key matches
 5. Generate a **non-exportable wrapped** key and export its public key
-6. Generate a **volatile SE slot** key, export public key, then delete it (`sl_se_delete_key`)
-7. **Transfer** wrapped ↔ volatile keys (`sl_se_transfer_key`) and verify public key consistency
+6. Generate a **volatile SE slot** key, export public key, then delete it (`sl_se_delete_key`) — where supported
+7. **Transfer** wrapped ↔ volatile keys (`sl_se_transfer_key`) and verify public key consistency — where supported
 **Components used:** `se_manager`, `sl_main`, `device_init`, `clock_manager`, VCOM stdio retargeting. Requires **`device_has_semailbox`**.
 
 ## Prerequisites / Setup Requirements
@@ -76,7 +80,7 @@ After reset, use the serial menu to choose an **ECC algorithm family** and curve
    - Press **ENTER** to open curve selection (Weierstrass / Montgomery) or run immediately (Ed25519).
    - Press **SPACE** to cycle curves, then **ENTER** to start the demo.
 6. Watch the log for each step (`Generate…`, `Export…`, `Import…`, `Transfer…`, `Compare… OK`) and per-operation timing when `SE_MANAGER_PRINT` is enabled.
-7. On **Secure Vault High**, the full sequence runs through plain, wrapped, volatile, and transfer paths, then returns to the startup menu. On **Secure Vault Mid**, only the plain-key path runs, then the menu reappears.
+7. On **Secure Vault High**, the full sequence runs through plain, wrapped, volatile, and transfer paths where supported, then returns to the startup menu. On platforms without volatile SE key storage, plain and wrapped paths run and volatile/transfer steps are skipped. On **Secure Vault Mid**, only the plain-key path runs, then the menu reappears.
 
 ## Troubleshooting
 
@@ -85,6 +89,7 @@ After reset, use the serial menu to choose an **ECC algorithm family** and curve
 | No serial output | VCOM 115200 8-N-1, line terminator **None**; `SL_BOARD_ENABLE_VCOM=1` |
 | SE manager init failed | Latest SE firmware; board has Secure Vault + SE mailbox |
 | Wrapped / volatile / transfer steps missing | Expected on **Secure Vault Mid** — upgrade to Secure Vault High board for full flow |
+| Volatile key option / steps missing | Expected on platforms that do not support SE volatile key storage |
 | X25519 or Ed25519 failures on Mid HSE | SE firmware version (see Prerequisites) |
 | `Compare export/transfer… Failed` | Rebuild and rerun; confirm no other app holds the volatile key slot |
 | Programming fails | AEM switch position (see Prerequisites image) |

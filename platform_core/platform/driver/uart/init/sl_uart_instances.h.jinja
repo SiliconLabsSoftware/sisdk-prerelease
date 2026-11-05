@@ -51,13 +51,6 @@ extern "C" {
 
 {% for instance in uart_instances_it %}
 extern sl_uart_handle_t sl_uart_{{ instance }}_handle;
-#if defined(SL_CATALOG_UART_ASYNC_PRESENT) \
-  && defined(SL_UART_{{ instance | upper }}_ASYNC_ENABLE) \
-  && (SL_UART_{{ instance | upper }}_ASYNC_ENABLE == 1)
-extern const sl_uart_async_config_t sl_uart_{{ instance }}_async_config;
-#endif
-extern const sl_uart_pin_config_t sl_uart_{{ instance }}_pin_config;
-extern const sl_uart_config_t sl_uart_{{ instance }}_line_config;
 {% endfor %}
 
 /***************************************************************************//**

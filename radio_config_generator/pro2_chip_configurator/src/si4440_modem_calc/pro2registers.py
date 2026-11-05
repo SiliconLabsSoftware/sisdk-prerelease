@@ -18,7 +18,6 @@ class Pro2Registers(object):
         Constructor
         '''
         self.registers = {}
-        # rtl_tx_sfr_reg
         self.registers['rtl_txdata_rate_reg2'] = (int(modem_calc.modulator.fields.txdr) >> 16) & 0xff
         self.registers['rtl_txdata_rate_reg1'] = (int(modem_calc.modulator.fields.txdr) >> 8) & 0xff
         self.registers['rtl_txdata_rate_reg0'] = int(modem_calc.modulator.fields.txdr) & 0xff
@@ -31,7 +30,6 @@ class Pro2Registers(object):
         self.registers['rtl_fc_frac_reg2'] = ((modem_calc.modulator.fields.ramp_dly*2**21 + modem_calc.modulator.fields.fc_frac) >> 16) & 0xff
         self.registers['rtl_fc_frac_reg1'] = ((modem_calc.modulator.fields.ramp_dly*2**21 + modem_calc.modulator.fields.fc_frac) >> 8) & 0xff
         self.registers['rtl_fc_frac_reg0'] = (modem_calc.modulator.fields.ramp_dly*2**21 + modem_calc.modulator.fields.fc_frac) & 0xff
-        # rtl_tx_ssr_reg
         self.registers['rtl_txnco_mod_reg3'] = (modem_calc.modulator.fields.txncomod_reg >> 24) & 0Xff
         self.registers['rtl_txnco_mod_reg2'] = (modem_calc.modulator.fields.txncomod_reg >> 16) & 0Xff
         self.registers['rtl_txnco_mod_reg1'] = (modem_calc.modulator.fields.txncomod_reg >> 8) & 0Xff
@@ -40,7 +38,6 @@ class Pro2Registers(object):
         self.registers['rtl_vco_cali_count_tx0'] = int(modem_calc.modulator.fields.vco_cali_count_tx) & 0xff
         self.registers['rtl_DSM_CTRL'] = modem_calc.modulator.fields.DSM_CTRL
         self.registers['rtl_sy_sel_Band'] = modem_calc.modulator.fields.sy_sel_Band
-        # rtl_rx_sfr_reg
         self.registers['rtl_ndec_reg'] = 64*modem_calc.demodulator.fields.ndec2 + 16*modem_calc.demodulator.fields.ndec1+ 2*modem_calc.demodulator.fields.ndec0 + modem_calc.demodulator.fields.rxgainx2
         self.registers['rtl_osr_rx_reg1'] = ((int(modem_calc.demodulator.fields.chflt_lopw*2**15) + int(modem_calc.demodulator.fields.ph0size*2**12) + int(modem_calc.demodulator.fields.OSR_rx_BCR)) >> 8) & 0xff 
         self.registers['rtl_osr_rx_reg0'] = (int(modem_calc.demodulator.fields.chflt_lopw*2**15) + int(modem_calc.demodulator.fields.ph0size*2**12)+ int(modem_calc.demodulator.fields.OSR_rx_BCR)) & 0xff
@@ -57,7 +54,6 @@ class Pro2Registers(object):
         self.registers['rtl_bcr_gain_reg0'] = CR_gain_reg & 0xff
         self.registers['rtl_crgear_reg'] = (modem_calc.demodulator.fields.dwn3byp*2**7+ modem_calc.demodulator.fields.dwn2byp*2**6+(modem_calc.demodulator.fields.crfast*8+modem_calc.demodulator.fields.crslow)) & 0xff
 
-        # rtl_rx_ssr_reg
         rtl_chflt1 = RxChFlt_rtl(modem_calc.demodulator.fields.rx1coearray)
         rtl_chflt2 = RxChFlt_rtl(modem_calc.demodulator.fields.rx2coearray)
 
@@ -127,7 +123,6 @@ class Pro2Registers(object):
                                         modem_calc.demodulator.fields.dc_freez*2**3 + \
                                         modem_calc.demodulator.fields.dc_gear
         
-        # IF freq reg
         if (modem_calc.demodulator.fields.zero_if==1):
             if_diff_2s = 0 
         else:

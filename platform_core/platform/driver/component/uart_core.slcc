@@ -25,13 +25,13 @@ source:
 provides:
 - name: uart_core
 requires:
+- name: log_none
 - name: clock_manager_runtime
 - name: device_peripheral
 - name: device_uart
 - name: hal_gpio
 - name: interrupt_manager
 - name: status
-- name: sl_assert
 - name: sl_core
 template_contribution:
 - name: component_catalog

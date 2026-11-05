@@ -48,6 +48,20 @@ config_file:
   file_id: psa_crypto_config
   condition: [trustzone_unaware]
 
+- path: config/template/host/sl_psa_driver_enable_config.h
+  file_id: sl_psa_driver_enable_config
+  condition: [trustzone_unaware, device_host]
+  unless: [se_cpc_primary]
+  # CPC primary also provides device_host. List it separately so the default
+  # config applies there while other hosts use the host config.
+- path: config/template/sl_psa_driver_enable_config.h
+  file_id: sl_psa_driver_enable_config
+  condition: [trustzone_unaware]
+  unless: [device_host]
+- path: config/template/sl_psa_driver_enable_config.h
+  file_id: sl_psa_driver_enable_config
+  condition: [trustzone_unaware, se_cpc_primary]
+
 - path: config/template/sl_psa_trustzone_config.h
   file_id: psa_crypto_config
   export: true
@@ -69,7 +83,6 @@ config_file:
   condition: [trustzone_nonsecure]
 
 define:
-
 - name: TF_PSA_CRYPTO_CONFIG_FILE
   value: "<psa_crypto_config.h>"
   condition: [trustzone_unaware]
@@ -87,7 +100,9 @@ define:
 template_contribution:
 - name: psa_crypto_config
   value: MBEDTLS_PSA_CRYPTO_CONFIG
-
+- name: psa_crypto_config
+  value: MBEDTLS_PSA_BUILTIN_GET_ENTROPY
+  condition: [device_host, mbedtls_random]
   # When defining MBEDTLS_PSA_CRYPTO_CONFIG, we are responsible for setting
   # PSA_WANT_xxx and PSA_ACCEL_xxx based on what's available. If a user has
   # selected mbedtls_xxx components for inclusion, we need to translate that

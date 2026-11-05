@@ -1,0 +1,28 @@
+---
+Base:
+    subGHz:
+        min_datarate: "100000"
+        max_datarate: "500000"
+        codind_prority: "FSK2"
+    2p4GHz:
+        min_datarate: "100000"
+        max_datarate: "1000000"
+        codind_prority: "FSK2"
+Connect:
+    subGHz:
+        min_datarate: "100000"
+        max_datarate: "500000"
+        codind_prority: "FSK2"
+    2p4GHz:
+        min_datarate: "100000"
+        max_datarate: "1000000"
+        codind_prority: "OQPSK"
+Mbus:
+    subGHz:
+        min_datarate: "0"
+        max_datarate: "0"
+        codind_prority: "Mbus"
+    2p4GHz:
+        min_datarate: "0"
+        max_datarate: "0"
+        codind_prority: "Mbus"  

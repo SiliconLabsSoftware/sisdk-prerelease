@@ -36,8 +36,8 @@
 #include "sli_clock_manager_hal.h"
 #include "sli_clock_manager_perpll.h"
 #include "sli_clock_manager_log.h"
-#include "sl_assert.h"
 #include "sli_clock_manager_selection.h"
+#include "sl_log_helper.h"
 #include "sl_common.h"
 #include "sl_core.h"
 #include "sl_gpio.h"
@@ -183,11 +183,8 @@ static bool ext_flash_clk_source_depends_on_hfxo(sl_oscillator_t source)
 #if defined(CMU_OSPI0CLKCTRL_CLKSEL_SOCPLL0SOCCLK0) \
       || defined(CMU_QSPI0CLKCTRL_CLKSEL_SOCPLL0SOCCLK0)
     case SL_OSCILLATOR_SOCPLL0_OUT0:
-    {
-      uint32_t refclksel = SOCPLL0->CTRL & _SOCPLL_CTRL_REFCLKSEL_MASK;
-      return (refclksel == SOCPLL_CTRL_REFCLKSEL_REF_HFXO)
-             || (refclksel == SOCPLL_CTRL_REFCLKSEL_DEFAULT_HFXO);
-    }
+      return (SOCPLL0->CTRL & _SOCPLL_CTRL_REFCLKSEL_MASK)
+             == SOCPLL_CTRL_REFCLKSEL_REF_HFXO;
 #endif
 
 #if defined(CMU_QSPI0CLKCTRL_CLKSEL_QSPIHFRCO0)
@@ -624,15 +621,15 @@ sl_status_t sli_clock_manager_hal_set_gpio_clock_output(sl_clock_manager_export_
   (void)port;
   (void)pin;
 
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
   return SL_STATUS_FAIL;
 #else
   uint32_t tmp = 0;
   uint32_t mask;
   CORE_DECLARE_IRQ_STATE;
 
-  EFM_ASSERT(pin <= (_GPIO_CMU_CLKOUT0ROUTE_PIN_MASK >> _GPIO_CMU_CLKOUT0ROUTE_PIN_SHIFT));
-  EFM_ASSERT(divider <= 32U);
+  SL_LOG_DEBUG_ASSERT(pin <= (_GPIO_CMU_CLKOUT0ROUTE_PIN_MASK >> _GPIO_CMU_CLKOUT0ROUTE_PIN_SHIFT));
+  SL_LOG_DEBUG_ASSERT(divider <= 32U);
 
   sl_gpio_t gpio;
   gpio.port = (sl_gpio_port_t)port;
@@ -641,13 +638,13 @@ sl_status_t sli_clock_manager_hal_set_gpio_clock_output(sl_clock_manager_export_
   switch (output_select) {
     case SL_CLOCK_MANAGER_EXPORT_CLOCK_OUTPUT_SELECT_0:
     case SL_CLOCK_MANAGER_EXPORT_CLOCK_OUTPUT_SELECT_1:
-      EFM_ASSERT((port == 2U) || (port == 3U));
+      SL_LOG_DEBUG_ASSERT((port == 2U) || (port == 3U));
       break;
     case SL_CLOCK_MANAGER_EXPORT_CLOCK_OUTPUT_SELECT_2:
-      EFM_ASSERT((port == 0U) || (port == 1U));
+      SL_LOG_DEBUG_ASSERT((port == 0U) || (port == 1U));
       break;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 
@@ -673,7 +670,7 @@ sl_status_t sli_clock_manager_hal_set_gpio_clock_output(sl_clock_manager_export_
       break;
 
     case SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_HFEXPCLK:
-      EFM_ASSERT(divider > 0U);
+      SL_LOG_DEBUG_ASSERT(divider > 0U);
       tmp  = CMU_EXPORTCLKCTRL_CLKOUTSEL0_HFEXPCLK;
       break;
 
@@ -2357,7 +2354,7 @@ sl_status_t sli_clock_manager_hal_set_rc_oscillator_calibration(sl_oscillator_t 
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_HFRCO0)
     case SL_OSCILLATOR_HFRCODPLL:
       sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_HFRCO0);
-      EFM_ASSERT(val <= (_HFRCO_CAL_TUNING_MASK >> _HFRCO_CAL_TUNING_SHIFT));
+      SL_LOG_DEBUG_ASSERT(val <= (_HFRCO_CAL_TUNING_MASK >> _HFRCO_CAL_TUNING_SHIFT));
       val &= _HFRCO_CAL_TUNING_MASK >> _HFRCO_CAL_TUNING_SHIFT;
       while ((HFRCO0->STATUS & HFRCO_STATUS_SYNCBUSY) != 0UL) {
         // Wait for any ongoing synchronization to finish.
@@ -2369,7 +2366,7 @@ sl_status_t sli_clock_manager_hal_set_rc_oscillator_calibration(sl_oscillator_t 
 
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_HFRCOEM23)
     case SL_OSCILLATOR_HFRCOEM23:
-      EFM_ASSERT(val <= (_HFRCO_CAL_TUNING_MASK >> _HFRCO_CAL_TUNING_SHIFT));
+      SL_LOG_DEBUG_ASSERT(val <= (_HFRCO_CAL_TUNING_MASK >> _HFRCO_CAL_TUNING_SHIFT));
       val &= _HFRCO_CAL_TUNING_MASK >> _HFRCO_CAL_TUNING_SHIFT;
       while ((HFRCOEM23->STATUS & HFRCO_STATUS_SYNCBUSY) != 0UL) {
         // Wait for any ongoing synchronization to finish.
@@ -2382,7 +2379,7 @@ sl_status_t sli_clock_manager_hal_set_rc_oscillator_calibration(sl_oscillator_t 
 #if defined(_LFRCO_CAL_FREQTRIM_MASK) && defined(SLI_CLOCK_MANAGER_RUNTIME_LFRCO)
     case SL_OSCILLATOR_LFRCO:
       CMU->CLKEN0_SET = CMU_CLKEN0_LFRCO;
-      EFM_ASSERT(val <= (_LFRCO_CAL_FREQTRIM_MASK
+      SL_LOG_DEBUG_ASSERT(val <= (_LFRCO_CAL_FREQTRIM_MASK
                          >> _LFRCO_CAL_FREQTRIM_SHIFT));
       val &= _LFRCO_CAL_FREQTRIM_MASK >> _LFRCO_CAL_FREQTRIM_SHIFT;
       while (LFRCO->SYNCBUSY != 0U) {
@@ -2406,7 +2403,7 @@ sl_status_t sli_clock_manager_hal_set_rc_oscillator_calibration(sl_oscillator_t 
     || !defined(SLI_CLOCK_MANAGER_RUNTIME_HFRCOEM23) \
     || (defined(_LFRCO_CAL_FREQTRIM_MASK) && !defined(SLI_CLOCK_MANAGER_RUNTIME_LFRCO))
     // Reachable only when the runtime may not program this RC oscillator.
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_FAIL;
 #endif
 
@@ -2445,10 +2442,10 @@ sl_status_t sli_clock_manager_hal_set_hfxo_calibration(uint32_t val)
 #endif
 
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_HFXO0);
-  EFM_ASSERT(val <= (_HFXO_XTALCTRL_COREBIASANA_MASK >> _HFXO_XTALCTRL_COREBIASANA_SHIFT));
+  SL_LOG_DEBUG_ASSERT(val <= (_HFXO_XTALCTRL_COREBIASANA_MASK >> _HFXO_XTALCTRL_COREBIASANA_SHIFT));
 
   // Make sure HFXO is disabled.
-  EFM_ASSERT((HFXO0->STATUS & HFXO_STATUS_ENS) == 0);
+  SL_LOG_DEBUG_ASSERT((HFXO0->STATUS & HFXO_STATUS_ENS) == 0);
   if ((HFXO0->STATUS & HFXO_STATUS_ENS) != 0) {
 #if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)    \
     || defined(_SILICON_LABS_32B_SERIES_3_CONFIG_302) \
@@ -2497,7 +2494,7 @@ sl_status_t sli_clock_manager_hal_set_hfxo_calibration(uint32_t val)
   return status;
 #else
   (void)val;
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
   return SL_STATUS_FAIL;
 #endif
 }
@@ -2594,7 +2591,7 @@ sl_status_t sli_clock_manager_hal_hfxo_set_ctune(uint32_t ctune)
   return hfxo_set_ctune(ctune, true);
 #else
   (void)ctune;
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
   return SL_STATUS_FAIL;
 #endif
 }
@@ -2605,7 +2602,7 @@ sl_status_t sli_clock_manager_hal_hfxo_set_ctune(uint32_t ctune)
 sl_status_t sli_clock_manager_hal_hfxo_get_ctune(uint32_t *ctune)
 {
   if (ctune == NULL) {
-    EFM_ASSERT(ctune != NULL);
+    SL_LOG_DEBUG_ASSERT(ctune != NULL);
     return SL_STATUS_NULL_POINTER;
   }
 
@@ -2702,7 +2699,7 @@ sl_status_t sli_clock_manager_hal_hfxo_calibrate_ctune(uint32_t ctune)
   return status;
 #else
   (void)ctune;
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
   return SL_STATUS_FAIL;
 #endif
 }
@@ -2846,7 +2843,7 @@ sl_status_t sli_clock_manager_hal_set_lfxo_calibration(uint32_t val)
     LFXO->LOCK = LFXO_LOCK_LOCKKEY_UNLOCK;
   }
 
-  EFM_ASSERT(val <= (_LFXO_CAL_CAPTUNE_MASK >> _LFXO_CAL_CAPTUNE_SHIFT));
+  SL_LOG_DEBUG_ASSERT(val <= (_LFXO_CAL_CAPTUNE_MASK >> _LFXO_CAL_CAPTUNE_SHIFT));
   // Max internal capacitance tuning value is 0x59 (29.1 pF)
   ctune = (uint8_t) SL_MIN(0x59U, (uint8_t)val);
 
@@ -2867,7 +2864,7 @@ sl_status_t sli_clock_manager_hal_set_lfxo_calibration(uint32_t val)
   return SL_STATUS_OK;
 #else
   (void)val;
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
   return SL_STATUS_FAIL;
 #endif
 }
@@ -2903,7 +2900,7 @@ sl_status_t sli_clock_manager_hal_configure_rco_calibration(uint32_t cycles,
                      & ~(_CMU_CALCTRL_UPSEL_MASK
                          | _CMU_CALCTRL_DOWNSEL_MASK);
   // Check for cycle count overflow
-  EFM_ASSERT(cycles <= (_CMU_CALTOP_CALTOP_MASK >> _CMU_CALTOP_CALTOP_SHIFT));
+  SL_LOG_DEBUG_ASSERT(cycles <= (_CMU_CALTOP_CALTOP_MASK >> _CMU_CALTOP_CALTOP_SHIFT));
   CMU->CALTOP = cycles << _CMU_CALTOP_CALTOP_SHIFT;
 
   // Set down counting clock source selector
@@ -3006,7 +3003,7 @@ sl_status_t sli_clock_manager_hal_configure_rco_calibration(uint32_t cycles,
   (void)down_counter_selection;
   (void)up_counter_selection;
   (void)continuous_calibration;
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
   return SL_STATUS_FAIL;
 #endif
 }
@@ -3021,7 +3018,7 @@ void sli_clock_manager_hal_start_rco_calibration(void)
 
   SLI_CLOCK_MANAGER_LOG_DEBUG("RCO calibration started");
 #else
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 }
 
@@ -3035,7 +3032,7 @@ void sli_clock_manager_hal_stop_rco_calibration(void)
 
   SLI_CLOCK_MANAGER_LOG_DEBUG("RCO calibration stopped");
 #else
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 }
 
@@ -3051,7 +3048,7 @@ void sli_clock_manager_hal_wait_rco_calibration(void)
     while ((CMU->STATUS & CMU_STATUS_CALRDY) == 0UL) ;
   }
 #else
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 }
 
@@ -3159,7 +3156,7 @@ sl_status_t sli_clock_manager_hal_set_sysclk_source(sl_oscillator_t source)
   return return_status;
 #else
   (void)source;
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
   return SL_STATUS_FAIL;
 #endif
 }
@@ -3201,7 +3198,7 @@ sl_status_t sli_clock_manager_hal_get_sysclk_source(sl_oscillator_t *source)
       break;
 #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 
@@ -3323,10 +3320,6 @@ sl_status_t sli_clock_manager_hal_get_ext_flash_clk(sl_oscillator_t *oscillator)
   return SL_STATUS_OK;
 #elif defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
   switch (CMU->OSPI0CLKCTRL & _CMU_OSPI0CLKCTRL_CLKSEL_MASK) {
-    case CMU_OSPI0CLKCTRL_CLKSEL_DISABLED:
-      *oscillator = SL_OSCILLATOR_INVALID;
-      break;
-
     case CMU_OSPI0CLKCTRL_CLKSEL_FSRCO:
       *oscillator = SL_OSCILLATOR_FSRCO;
       break;
@@ -3489,12 +3482,13 @@ static void perpll_reprogram(uint8_t perpll_num,
   sl_status_t status;
   bool forceen_was_set;
 
-  EFM_ASSERT(perpll != NULL);
+  SL_LOG_DEBUG_ASSERT(perpll != NULL);
 
   // The PERPLL bus clock is normally already enabled by the Clock Manager init,
   // but the caller may reach this point before or independently from it.
   status = sl_clock_manager_enable_bus_clock(PERPLL_RUNTIME_CONFIG_BUS_CLOCK);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   // Unlock register interface.
   perpll->LOCKKEY = PERPLL_LOCKKEY_LOCKKEY_UNLOCK;
@@ -3651,7 +3645,7 @@ static sl_status_t bus_clock_get_register_info(sl_bus_clock_t module,
 
 #if defined (_SILICON_LABS_32B_SERIES_3_CONFIG_381)
   if (*module == SL_BUS_CLOCK_NOT_OWNED_VALUE) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_NOT_AVAILABLE;
   }
 #endif

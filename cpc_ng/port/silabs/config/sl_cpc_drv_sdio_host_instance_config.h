@@ -31,8 +31,7 @@
 #ifndef SL_CPC_DRV_SDIO_HOST_INSTANCE_CONFIG_H
 #define SL_CPC_DRV_SDIO_HOST_INSTANCE_CONFIG_H
 
-#include "sl_cpc_wake.h"
-#include "sl_gpio.h"
+#include "sl_device_gpio.h"
 #include "sl_sdhc_host_types.h"
 
 // <<< Use Configuration Wizard in Context Menu >>>
@@ -76,42 +75,6 @@
 // <SL_SDHC_CD_SOURCE_SDCD_PIN=> SDCD# pin (hardware, with IP debounce)
 // <SL_SDHC_CD_SOURCE_EXTERNAL_GPIO=> External GPIO (driver updates CDTL)
 #define SL_CPC_DRV_SDIO_HOST_INSTANCE_CARD_DETECT_SOURCE SL_SDHC_CD_SOURCE_SDCD_PIN
-
-// <h> Wake / power configuration
-
-// <o SL_CPC_DRV_SDIO_HOST_INSTANCE_POWER_MODE> Local power mode
-// <SL_CPC_POWER_MODE_ALWAYS_ON=> Always on
-// <SL_CPC_POWER_MODE_WAKE_FROM_GPIO=> Wake from GPIO
-// <i> Default: Always on
-#define SL_CPC_DRV_SDIO_HOST_INSTANCE_POWER_MODE SL_CPC_POWER_MODE_ALWAYS_ON
-
-// <o SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_OUT_MODE> Wake-out ready mode
-// <SL_CPC_WAKE_OUT_DISABLED=> Disabled
-// <SL_CPC_WAKE_OUT_MODE_CONFIRM=> Wait for peer AWAKE then transmit
-// <i> Default: Disabled
-// <i> When not disabled, set WAKE_OUT PORT/PIN below.
-#define SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_OUT_MODE SL_CPC_WAKE_OUT_DISABLED
-
-// <o SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_IN_RESPONSE> Wake-in response
-// <SL_CPC_WAKE_IN_RESPONSE_NONE=> None
-// <SL_CPC_WAKE_IN_RESPONSE_AWAKE=> Send AWAKE
-// <i> Default: None
-// <i> Used when this end also has a wake-in GPIO (bidirectional).
-#define SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_IN_RESPONSE SL_CPC_WAKE_IN_RESPONSE_NONE
-
-// <<< sl:start pin_tool >>>
-// <gpio optional> SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_OUT
-// $[GPIO_SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_OUT]
-// #define SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_OUT_PORT  SL_GPIO_PORT_A
-// #define SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_OUT_PIN   0
-// [GPIO_SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_OUT]$
-
-// <gpio optional> SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_IN
-// $[GPIO_SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_IN]
-// #define SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_IN_PORT  SL_GPIO_PORT_A
-// #define SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_IN_PIN   0
-// [GPIO_SL_CPC_DRV_SDIO_HOST_INSTANCE_WAKE_IN]$
-// <<< sl:end pin_tool >>>
 // </h>
 
 // <h> SDIO Host Configuration
@@ -161,7 +124,7 @@
 // <i> CLK, CMD, and DAT0-DAT3 are required.
 // $[SDHC_SL_CPC_DRV_SDIO_HOST_INSTANCE]
 #warning "CPC SDIO host peripheral and pins not configured"
-// #define SL_CPC_DRV_SDIO_HOST_INSTANCE_PERIPHERAL            SDHCCORE
+// #define SL_CPC_DRV_SDIO_HOST_INSTANCE_PERIPHERAL            SDHC0
 // #define SL_CPC_DRV_SDIO_HOST_INSTANCE_PERIPHERAL_NO         0
 
 // #define SL_CPC_DRV_SDIO_HOST_INSTANCE_CLK_PORT              SL_GPIO_PORT_E

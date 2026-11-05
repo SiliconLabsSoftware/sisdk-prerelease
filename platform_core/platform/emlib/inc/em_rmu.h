@@ -33,7 +33,7 @@
 
 #include "em_device.h"
 #if (defined(RMU_COUNT) && (RMU_COUNT > 0)) || (_EMU_RSTCTRL_MASK)
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 #include <stdbool.h>
 
@@ -147,7 +147,7 @@ uint32_t RMU_ResetCauseGet(void);
  ******************************************************************************/
 __STATIC_INLINE void RMU_UserResetStateSet(uint32_t userState)
 {
-  EFM_ASSERT(!(userState
+  SL_LOG_DEBUG_ASSERT(!(userState
                & ~(_RMU_CTRL_RESETSTATE_MASK >> _RMU_CTRL_RESETSTATE_SHIFT)));
   RMU->CTRL = (RMU->CTRL & ~_RMU_CTRL_RESETSTATE_MASK)
               | (userState << _RMU_CTRL_RESETSTATE_SHIFT);

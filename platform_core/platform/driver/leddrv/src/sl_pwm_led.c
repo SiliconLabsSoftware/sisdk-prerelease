@@ -32,6 +32,7 @@
 
 #include "sl_pwm_led.h"
 
+#include "sl_log_helper.h"
 // -----------------------------------------------------------------------------
 //                                Static Variables
 // -----------------------------------------------------------------------------
@@ -87,7 +88,7 @@ static sl_bus_clock_t pwm_led_get_timer_clock(TIMER_TypeDef *timer)
       break;
 #endif
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
   return timer_clock;
@@ -146,7 +147,7 @@ static uint32_t pwm_led_get_timer_routeen(TIMER_TypeDef *timer)
     case 3:
       return GPIO->TIMER3ROUTE[0].ROUTEEN;
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       // Report all outputs as routed so the TIMER is never disabled.
       return UINT32_MAX;
   }
@@ -166,7 +167,7 @@ static void pwm_led_write_compare(sl_led_pwm_t *led, bool immediate)
   uint32_t compare = led->level * level_increments;
 
   // Ensure that the color level value does not exceed the timer's size.
-  EFM_ASSERT(compare <= SL_HAL_TIMER_MAX_COUNT(led->timer));
+  SL_LOG_DEBUG_ASSERT(compare <= SL_HAL_TIMER_MAX_COUNT(led->timer));
 
   if (immediate) {
     sl_hal_timer_channel_set_compare(led->timer, led->channel, compare);
@@ -230,7 +231,7 @@ void sl_pwm_led_start(void *led_handler)
       GPIO->TIMER3ROUTE_SET[0].ROUTEEN = 1 << (led->channel + _GPIO_TIMER3_ROUTEEN_CC0PEN_SHIFT);
       break;
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 #else
@@ -275,7 +276,7 @@ void sl_pwm_led_stop(void *led_handler)
       GPIO->TIMER3ROUTE_CLR[0].ROUTEEN = 1 << (led->channel + _GPIO_TIMER3_ROUTEEN_CC0PEN_SHIFT);
       break;
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 #else
@@ -302,10 +303,10 @@ sl_status_t sl_pwm_led_init(void *led_handler)
 
   // Validate that the selected channel exist in the selected timer.
 #if defined(_SILICON_LABS_32B_SERIES_2)
-  EFM_ASSERT(TIMER_REF_VALID(led->timer));
-  EFM_ASSERT(TIMER_CH_VALID(led->channel));
+  SL_LOG_DEBUG_ASSERT(TIMER_REF_VALID(led->timer));
+  SL_LOG_DEBUG_ASSERT(TIMER_CH_VALID(led->channel));
 #else
-  EFM_ASSERT(SL_HAL_TIMER_REF_VALID(led->timer));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_TIMER_REF_VALID(led->timer));
 #endif
   led->set_color = sl_pwm_led_set_color;
   led->get_color = sl_pwm_led_get_color;
@@ -416,7 +417,7 @@ sl_status_t sl_pwm_led_init(void *led_handler)
                                          | (led->pin << _GPIO_TIMER3_CC0ROUTE_PIN_SHIFT);
       break;
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       return SL_STATUS_FAIL;
   }
 #else
@@ -460,7 +461,7 @@ void sl_pwm_led_set_color(void *led_handler, uint16_t color)
   led->level = color;
 
   // Ensure that the color level value does not exceed the timer's size.
-  EFM_ASSERT((led->level * level_increments) <= TIMER_MaxCount(led->timer));
+  SL_LOG_DEBUG_ASSERT((led->level * level_increments) <= TIMER_MaxCount(led->timer));
 
   sl_pwm_led_stop(led);
   TIMER_CompareBufSet(led->timer, led->channel, led->level * level_increments);

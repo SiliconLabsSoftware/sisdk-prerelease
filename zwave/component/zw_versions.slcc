@@ -7,6 +7,11 @@ description: >
   the ZAF_VERSION_* version numbers according to their needs. This can be done in this component.
   Application version, which is generated during release of SDK,
   the application developer can freely alter the version numbers according to his needs.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/zaf-version
+  - page: zwave-api/product-infos
 package: zwave
 quality: production
 metadata:

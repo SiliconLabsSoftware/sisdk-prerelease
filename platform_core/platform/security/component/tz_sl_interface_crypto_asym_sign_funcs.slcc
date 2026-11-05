@@ -12,22 +12,40 @@ requires:
 - name: trustzone_nonsecure
 template_contribution:
 - name: tfm_interface_func
-  value: tfm_crypto_sign_message
+  value:
+    function: tfm_crypto_sign_message
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_verify_message
+  value:
+    function: tfm_crypto_verify_message
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_sign_hash
+  value:
+    function: tfm_crypto_sign_hash
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_verify_hash
+  value:
+    function: tfm_crypto_verify_hash
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_asymmetric_encrypt
+  value:
+    function: tfm_crypto_asymmetric_encrypt
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_asymmetric_decrypt
+  value:
+    function: tfm_crypto_asymmetric_decrypt
+    key_checks:
+    - source: packed_key_id
 
 
 documentation:

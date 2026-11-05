@@ -5,6 +5,7 @@ from pyradioconfig.calculator_model_framework.Utils.Version import Version
 from pycalcmodel.core.variable import ModelVariable
 from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 from host_py_rm_studio_internal.full.efr32xg1.revA2.static.common import errors
+from pycalcmodel.core.common import IPCategory
 
 """
 Calculations interface file
@@ -15,8 +16,9 @@ class ICalculator(object):
     _minor = 0
     _patch = 0
 
-    # Static variables
     actual_suffix = "_actual"
+
+    _calc_ip_category = IPCategory.LPW        # Specify whether this calculator should be specific to PHY/Profile IP category
 
     """
     Returns profile version
@@ -34,7 +36,6 @@ class ICalculator(object):
         for functionName, functionPointer in inspect.getmembers(self, predicate=inspect.ismethod):
                 if str(functionName).lower().startswith('calc_'):  # Check if the function name starts with "calc_"
                     if isinstance(functionPointer,types.MethodType):
-                        #functionList.append(self.__class__.__name__ + "." + functionName)
                         functionList.append(functionPointer)
         return functionList
 
@@ -113,16 +114,12 @@ class ICalculator(object):
     """
     Calculator Helper function
     """
-    ### These are the main calls that should be use as they are flexible
 
     def _reg_write(self, varname, value=None, default=False, do_not_care=False, limit_upper=None,
                    limit_lower=None, check_saturation=False, allow_neg=False, neg_twos_comp=True):
 
-        #First handle writing the register value
 
         if value is not None:
-            #If there was a value passed in, use that
-            #Negative values are not allowed, so if negative then use one's or two's compliment depending on neg_twos_comp
             if value >= 0:
                value_before_limiting = value
             else:
@@ -134,14 +131,12 @@ class ICalculator(object):
                 else:
                     LogMgr.Error('Error: attempting to assign negative value to %s when it is not allowed' % varname.name)
 
-            #Now handle saturating or limiting the register value
             self._reg_limit_write(varname, value_before_limiting, limit_upper=limit_upper, limit_lower=limit_lower,
                                   check_saturation=check_saturation)
 
         elif default:
             self._reg_write_default(varname)
 
-        #Now handle the don't care attribute
         if do_not_care:
             self._reg_do_not_care(varname)
 
@@ -165,7 +160,6 @@ class ICalculator(object):
                                 do_not_care=do_not_care, limit_upper=limit_upper, limit_lower=limit_lower,
                                 check_saturation=check_saturation, neg_twos_comp=neg_twos_comp, allow_neg=allow_neg)
 
-    ### These are lower-level calls that are used in some places in the calculator, but not recommended
 
     def _reg_write_default(self, varname):
         varname.set_to_reset_val()
@@ -175,7 +169,6 @@ class ICalculator(object):
 
     def _reg_limit_write(self, varname, value, limit_upper=None, limit_lower=None, check_saturation=False):
 
-        #First check the value vs limit_upper and limit_lower parameters
         if limit_upper is not None:
             if value > limit_upper:
                 value_after_upper_limit = limit_upper
@@ -183,7 +176,6 @@ class ICalculator(object):
             else:
                 value_after_upper_limit = value
         else:
-            # No limit defined
             value_after_upper_limit = value
 
         if limit_lower is not None:
@@ -195,7 +187,6 @@ class ICalculator(object):
         else:
             value_after_lower_limit = value_after_upper_limit
 
-        #If we want to check for saturation, then do that
         if check_saturation:
             self._reg_sat_write(varname,value_after_lower_limit)
         else:
@@ -212,22 +203,17 @@ class ICalculator(object):
         if value >= 0:
             return value
         else:
-            #Return one's compliment plus one
             return self._convert_ones_comp(value, size) + 1
 
     def _convert_ones_comp(self, value, size):
         if value >= 0:
             return value
         else:
-            #Start with 1s filling all the bits and then add the negative value
-            #Example: if we have 4 bits and value is -5, we want 0xF - 0x5 = 0xA = 0b1010
             return (1 << size) - 1 + value
 
     def _covert_twos_complement_to_signed(self, value, size):
         max_value = 2 ** size
-        # Check if the number is negative (if the sign bit is set)
         if value >= max_value // 2:
-            # Calculate the negative value by subtracting from the maximum value
             signed_number = value - max_value
         else:
             signed_number = value

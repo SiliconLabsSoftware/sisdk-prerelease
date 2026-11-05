@@ -283,14 +283,22 @@ extern "C" {
   #define SL_SE_KEY_SLOT_VOLATILE_3 0x03 ///< Internal volatile slot 3
 #endif
 
-#if defined(SLI_SE_SUPPORTS_NVM3_INTERNAL_KEY)
+#if defined(SLI_SE_SUPPORTS_TLS_IDENTITY_KEY)
+/// Minimum key slot value for internal keys
+  #define SL_SE_KEY_SLOT_INTERNAL_MIN                   0xF5
+/// Internal immutable TLS identity key
+  #define SL_SE_KEY_SLOT_TLS_IDENTITY                   0xF5
+#elif defined(SLI_SE_SUPPORTS_NVM3_INTERNAL_KEY)
 /// Minimum key slot value for internal keys
   #define SL_SE_KEY_SLOT_INTERNAL_MIN                   0xF6
-/// Internal NVM3 key
-  #define SL_SE_KEY_SLOT_NVM3_KEY                       0xF6
 #else
 /// Minimum key slot value for internal keys
   #define SL_SE_KEY_SLOT_INTERNAL_MIN                   0xF7
+#endif
+
+#if defined(SLI_SE_SUPPORTS_NVM3_INTERNAL_KEY)
+/// Internal NVM3 key
+  #define SL_SE_KEY_SLOT_NVM3_KEY                       0xF6
 #endif
 /// Internal TrustZone root key
 #define SL_SE_KEY_SLOT_TRUSTZONE_ROOT_KEY             0xF7
@@ -343,6 +351,10 @@ extern "C" {
 #define SL_SE_CERT_DEVICE_SE                      0x02
 /// Host ID certificate
 #define SL_SE_CERT_DEVICE_HOST                    0x03
+#if defined(SLI_SE_SUPPORTS_TLS_IDENTITY_KEY)
+/// TLS identity certificate, matching #SL_SE_KEY_SLOT_TLS_IDENTITY
+  #define SL_SE_CERT_DEVICE_TLS                   0x04
+#endif
 
 /// @addtogroup sl_se_manager_util_tamper Tamper options
 /// @brief

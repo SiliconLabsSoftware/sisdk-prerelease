@@ -5,6 +5,10 @@ description: >
   Common types and definitions for all command classes.
 ui_hints:
   visibility: never
+documentation:
+  docset: z-wave
+  document: zwave-api/common
+
 package: zwave
 quality: production
 metadata:

@@ -29,7 +29,6 @@ class Profile_Mbus_Bobcat(Profile_Mbus_Ocelot):
     """
 
     def buildProfileModel(self, model):
-        # Build profile
         profile = self._makeProfile(model)
 
         IProfile.make_required_input(profile, model.vars.preamble_length, "general",
@@ -52,14 +51,12 @@ class Profile_Mbus_Bobcat(Profile_Mbus_Ocelot):
                                      readable_name="Crystal Frequency", value_limit_min=38000000,
                                      value_limit_max=40000000, units_multiplier=UnitsMultiplier.MEGA)
 
-        # Hidden test inputs
         IProfile.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
                                    readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=4095)
         IProfile.make_hidden_input(profile, model.vars.payload_crc_en, category='frame_payload',
                                    readable_name="Insert/Check CRC after payload")
 
         IProfile.make_hidden_input(profile, model.vars.crc_poly, category='crc', readable_name="CRC Polynomial")
-        # IProfile.make_hidden_input(profile, model.vars.crc_seed,        category='crc', readable_name="CRC Seed")
         IProfile.make_hidden_input(profile, model.vars.crc_byte_endian, category='crc', readable_name="CRC Byte Endian")
         IProfile.make_hidden_input(profile, model.vars.crc_bit_endian, category='crc',
                                    readable_name="CRC Output Bit Endian")
@@ -79,7 +76,6 @@ class Profile_Mbus_Bobcat(Profile_Mbus_Ocelot):
         IProfile.make_hidden_input(profile, model.vars.bitrate, category="modem", readable_name="Bitrate",
                                    value_limit_min=100, value_limit_max=2000000, units_multiplier=UnitsMultiplier.KILO)
 
-        # These can not be hidden because they are used in Studio PHYs. These can not be optional inputs because of the way the variables are forced in the Mbus code.
         IProfile.make_linked_io(profile, model.vars.rx_xtal_error_ppm, category="general",
                                 readable_name="Set desired xtal tolerance on RX side", value_limit_min=0,
                                 value_limit_max=100)
@@ -89,7 +85,6 @@ class Profile_Mbus_Bobcat(Profile_Mbus_Ocelot):
 
         IProfile.make_hidden_input(profile, model.vars.demod_select, 'Advanced', readable_name="Demod Selection")
 
-        # TODO:  Change this to MSB_FIRst in the lab phys, then remove this input and move it to the forced section below
         IProfile.make_hidden_input(profile, model.vars.frame_bitendian, category='frame_general',
                                    readable_name="Frame Bit Endian")
 
@@ -99,13 +94,10 @@ class Profile_Mbus_Bobcat(Profile_Mbus_Ocelot):
                                      readable_name="Maximum deviation offset expected in ppm", value_limit_min=0,
                                      value_limit_max=500000)
 
-        # Informational output
         self._sw_profile_outputs_common.build_info_outputs(model, profile)
 
-        # RAIL Outputs
         self._sw_profile_outputs_common.build_rail_outputs(model, profile)
 
-        # Output fields
         buildFrameOutputs(model, profile)
         buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)

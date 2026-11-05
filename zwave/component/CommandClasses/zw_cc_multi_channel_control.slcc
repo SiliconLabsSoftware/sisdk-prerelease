@@ -6,6 +6,13 @@ description: >
   Point destinations as well as to NodeID destinations. An association group sends an unsolicited
   command to the configured destinations when triggered by an event. The parameters of the command
   may be dynamic, e.g. the temperature of a sensor reading or the light level for a dimmer.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/multichan
+  - page: zwave-api/md-content-when-and-how-to-use-multi-channel
+  - page: z-wave-multi-channel-basics
+
 package: zwave
 quality: production
 metadata:

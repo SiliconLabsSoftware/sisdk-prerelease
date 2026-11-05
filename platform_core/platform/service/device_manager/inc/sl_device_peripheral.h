@@ -165,6 +165,9 @@ extern "C" {
 /// Define pointer to GPCRC0 peripheral structure.
 #define SL_PERIPHERAL_GPCRC0 (&sl_peripheral_val_gpcrc0)
 
+/// Define pointer to GPCRC1 peripheral structure.
+#define SL_PERIPHERAL_GPCRC1 (&sl_peripheral_val_gpcrc1)
+
 /// Define pointer to GPIO peripheral structure.
 #define SL_PERIPHERAL_GPIO (&sl_peripheral_val_gpio)
 
@@ -749,6 +752,9 @@ extern const sl_peripheral_val_t sl_peripheral_val_fsrco;
 
 // External declaration for GPCRC0 peripheral structure.
 extern const sl_peripheral_val_t sl_peripheral_val_gpcrc0;
+
+// External declaration for GPCRC1 peripheral structure.
+extern const sl_peripheral_val_t sl_peripheral_val_gpcrc1;
 
 // External declaration for GPIO peripheral structure.
 extern const sl_peripheral_val_t sl_peripheral_val_gpio;

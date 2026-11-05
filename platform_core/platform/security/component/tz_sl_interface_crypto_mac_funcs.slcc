@@ -12,28 +12,48 @@ requires:
 - name: trustzone_nonsecure
 template_contribution:
 - name: tfm_interface_func
-  value: tfm_crypto_mac_compute
+  value:
+    function: tfm_crypto_mac_compute
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_mac_verify
+  value:
+    function: tfm_crypto_mac_verify
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_mac_sign_setup
+  value:
+    function: tfm_crypto_mac_sign_setup
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_mac_verify_setup
+  value:
+    function: tfm_crypto_mac_verify_setup
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_mac_update
+  value:
+    function: tfm_crypto_mac_update
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_mac_sign_finish
+  value:
+    function: tfm_crypto_mac_sign_finish
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_mac_verify_finish
+  value:
+    function: tfm_crypto_mac_verify_finish
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_mac_abort
+  value:
+    function: tfm_crypto_mac_abort
+    key_checks: []
 
 documentation:
   url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf

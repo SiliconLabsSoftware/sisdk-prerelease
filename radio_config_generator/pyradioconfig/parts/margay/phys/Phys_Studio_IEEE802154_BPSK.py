@@ -2,5 +2,4 @@ from pyradioconfig.parts.ocelot.phys.Phys_Studio_IEEE802154_BPSK import PhysStud
 
 
 class PhysStudioIEEE802154BPSKMargay(PhysStudioIEEE802154BPSKOcelot):
-    # Inherit all from Ocelot
     pass

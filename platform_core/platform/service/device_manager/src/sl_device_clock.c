@@ -129,6 +129,9 @@ __WEAK const uint32_t SL_BUS_CLOCK_FSRCO_VALUE = 0xFFFFFFFF;
 // External declaration for GPCRC0 peripheral bus clock value.
 __WEAK const uint32_t SL_BUS_CLOCK_GPCRC0_VALUE = 0xFFFFFFFF;
 
+// External declaration for GPCRC1 peripheral bus clock value.
+__WEAK const uint32_t SL_BUS_CLOCK_GPCRC1_VALUE = 0xFFFFFFFF;
+
 // External declaration for GPIO peripheral bus clock value.
 __WEAK const uint32_t SL_BUS_CLOCK_GPIO_VALUE = 0xFFFFFFFF;
 

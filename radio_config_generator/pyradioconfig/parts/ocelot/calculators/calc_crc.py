@@ -7,7 +7,6 @@ class CALC_CRC_ocelot(CALC_CRC_lynx):
     def buildVariables(self, model):
         super().buildVariables(model)
 
-        # 802154 FCS Type
         self._addModelVariable(model, 'fcs_type_802154', Enum, ModelVariableFormat.DECIMAL,
                                desc='FCS type for 802154 PHYs')
         model.vars.fcs_type_802154.var_enum = CreateModelVariableEnum(

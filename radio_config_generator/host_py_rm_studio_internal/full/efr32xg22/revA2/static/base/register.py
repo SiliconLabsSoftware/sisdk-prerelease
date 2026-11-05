@@ -65,8 +65,11 @@ class Base_RM_Register(IRegMapRegister):
             else:
                 raise AttributeError("ERROR: Unable to set '{}' to '{}'".format(name, value))
         else:
-            # self.__dict__[name] = value
             super().__setattr__(name, value)
+
+    def __iter__(self):
+        for key in self.zz_fdict:
+            yield self.zz_fdict[key]
 
     def set(self, value=None):
         if value is None:
@@ -108,7 +111,6 @@ class Base_RM_Register(IRegMapRegister):
                                                 simulated=True)
         reg_copy.io = latest_value
         reg_copy.zz_rmio.writeRegister(reg_copy, latest_value)
-        # remove binding to main device instance
         reg_copy.registerAddressToNamesCb(None)
         reg_copy.__dict__['zz_frozen'] = True
         self.zz_rmio = live_rmio
@@ -139,7 +141,6 @@ class Base_RM_Register(IRegMapRegister):
         return self.zz_rmio.readRegister(self)
 
     def _setio(self, value):
-        # unused due to the __setattr__ logic above
         pass
 
     io = property(_getio, _setio)
@@ -173,7 +174,6 @@ class Base_RM_Register(IRegMapRegister):
         return self.access in [None, 'write-only', 'read-write', 'writeOnce', 'read-writeOnce']
 
     def clearAccessedFlag(self):
-        # clear the overall register access and all the member fields
         self.__dict__['zz_accessed_flag'] = False
         for key in sorted(self.zz_fdict):
             self.zz_fdict[key].clearAccessedFlag()
@@ -186,8 +186,6 @@ class Base_RM_Register(IRegMapRegister):
 
     def getAccessedFieldNames(self):
         nameList = []
-        # access the whole register
-        # only partial access
         for key in sorted(self.zz_fdict):
             if self.zz_fdict[key].getAccessedFlag():
                 nameList.append(self.zz_fdict[key].fullname)
@@ -211,7 +209,6 @@ class Base_RM_Register(IRegMapRegister):
     def buildRegFilterList(self, outFH, filterList):
         if self.isReadable():
             filterList.append(self.fullname)
-            # store both the name and desc string to help user
             outFH.write(u"    '{}',\n".format(self.fullname))
             outFH.write(u"      # {}\n".format(self.getDesc()))
 
@@ -221,9 +218,6 @@ class Base_RM_Register(IRegMapRegister):
                 outFH = sys.stdout
             if valueDict is None:
                 valueDict = {}
-            # The initialization could fall back to simple read function,
-            # so inspect the return type.  The old method will raise an
-            # exception here.
             if ignoreFailures:
                 self._c_log_read()
                 self._py_log_read()
@@ -238,7 +232,6 @@ class Base_RM_Register(IRegMapRegister):
                 regValue = result
 
             if errMsg == "":
-                # read was successful, so log register and field details
                 outFH.write(u"    ('{}', {:#010x}),\n".format(self.fullname, regValue))
                 outFH.write(u"      # {}\n".format(self.getDesc()))
                 valueDict[self.fullname] = regValue
@@ -248,7 +241,6 @@ class Base_RM_Register(IRegMapRegister):
                 for msb, fullname, line in sorted(fieldCommentList, reverse=True):
                     outFH.write(line)
             else:
-                # read failed
                 outFH.write(u"    # skipping '{}' due to access error\n".format(self.fullname))
 
     def dump_field(self, outFH, valueDict, field_name, ignoreFailures=False):
@@ -266,7 +258,6 @@ class Base_RM_Register(IRegMapRegister):
                 regValue = result
 
             if errMsg == "":
-                # read was successful, so log field value and details
                 fieldObj = self.zz_fdict[field_name]
                 fieldValue = GetFieldValue(regValue, fieldObj.bitOffset, fieldObj.bitWidth)
                 outFH.write(u"    ('{}.{}', {:#x}),\n".format(self.fullname,
@@ -278,5 +269,4 @@ class Base_RM_Register(IRegMapRegister):
                 fieldObj.dump(regValue, fieldCommentList)
                 outFH.write(fieldCommentList[0][2])
             else:
-                # read failed
                 outFH.write(u"    # skipping '{}.{}' due to access error\n".format(self.fullname, field_name))

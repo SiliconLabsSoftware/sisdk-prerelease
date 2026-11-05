@@ -1,6 +1,7 @@
 import copy
 from pyradioconfig.protected_fields.rainier_protected_fields import ProtectedFieldsRainier
 from pyradioconfig.protected_fields.everest_protected_fields import ProtectedFieldsEverest
+from pyradioconfig.protected_fields.wifi74000_protected_fields import ProtectedFieldsWifi74000
 
 
 # These are registers that should not be touched by radio configs, as they are handled by the RAIL API
@@ -270,16 +271,21 @@ PROTECTED_FIELDS = {
     'ocelot': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_OCELOT),
     'bobcat': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_BOBCAT),
     'sol': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_SOL),
+    'mercurio': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_SOL),
     'leopard': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_LEOPARD),
     'margay': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_OCELOT),
     'caracal': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_CARACAL),
     'lion': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_LION),
+    'lionu': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_LION),
     'curl': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_LION),
     'serval': mergeDictionaries(PROTECTED_FIELDS_BASE, PROTECTED_FIELDS_OCELOT),
     'rainier': ProtectedFieldsRainier().get_rail_protected_field_dict(),
     'lpwh74000': ProtectedFieldsRainier().get_rail_protected_field_dict(),
+    'lpwln74010': ProtectedFieldsRainier().get_rail_protected_field_dict(),
+    'lpwlo74010': ProtectedFieldsRainier().get_rail_protected_field_dict(),
     'everest': ProtectedFieldsEverest().get_rail_protected_field_dict(),
-    'wifi74000': ProtectedFieldsRainier().get_rail_protected_field_dict(),
+    'wifi74000': ProtectedFieldsWifi74000().get_rail_protected_field_dict(),
+    'lincoln': ProtectedFieldsRainier().get_rail_protected_field_dict(),
 }
 
 # Radio config action "enum"

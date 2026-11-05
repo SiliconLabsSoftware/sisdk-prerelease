@@ -15,7 +15,3 @@ class CalcSidewalkNerio(ICalculator):
             'List of supported Sidewalk Modes',
             member_data)
 
-        # Note that 150kbps and 250kbps modes are not published in the Sidewalk spec
-        # Below are the definitions in case we want to add them in the future
-        # ['FSK_150kbps', 1, '2FSK 150kbps mi=0.5']
-        # ['FSK_250kbps', 2, '2FSK 250kbps mi=0.5']

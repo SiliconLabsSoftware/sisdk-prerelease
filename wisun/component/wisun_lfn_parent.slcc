@@ -7,11 +7,14 @@ description: "Provide Wi-SUN LFN parent library"
 root_path: "wisun/./stack"
 
 requires:
-- name: "a_wisun_stack"
+- name: "wisun_stack_ffn"
 
 provides:
 - name: "wisun_lfn_parent_implementation"
 - name: "wisun_lfn_parent"
+
+conflicts:
+- name: "wisun_br_stack"
 
 library:
 - path: "libwisun_lfn_parent_efr32xg2x_gcc_debug.a"

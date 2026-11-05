@@ -93,46 +93,32 @@ class ModelVariable(object):
 
     def __init__(self, name, var_type, is_array, desc='',
                  format=ModelVariableFormat.HEX, forceable=True):
-        #: The variable name
         self.name = name
 
         if not issubclass(var_type, Enum):
             assert var_type in (basestring, bool, complex, float, int, long, str, dict), \
                 "FATAL ERROR: Unsupported class for var_type: {}".format(var_type)
-        #: The class type of the variable
         self._var_type = var_type
         if self.var_type == Enum:
             assert not is_array, "FATAL ERROR: array of Enum not supported"
-        #: The value is an array
         self._is_array = is_array
-        #: Defines the display format of the variable
         self.format = format
-        #: A string description of the variable
         self.desc = desc
         assert isinstance(forceable, bool)
         self._forceable = forceable
-        #: The peripheral.register.field notation string
         self._svd_mapping = None
-        #: The reg model field object
         self._rm = None
-        #: The units string for the variable
         self._units = None
-        #: A forced value to use in place of the calculated value
         self._value_forced = None
-        #: The calculated value of the variable from an internal stage. \
-        #: Can be overridden with the value_force.
         self._value_calc = None
 
         self._var_enum = None
 
-        # List of functions that were used to read or writea variable
         self._access_read = list()
         self._access_write = list()
 
-        # Used for register or field types, do explicitly tag registers that are "don't cares", or "not needed", when in a specific mode.
         self._value_do_not_care = False
 
-        # Used for exposing variables on studio output log based on calculation
         self._in_public_log = None
 
     @property
@@ -213,7 +199,6 @@ class ModelVariable(object):
             return self._value_calc
         else:
             if self.function.name is not None:
-                # Only raise the exception if we are inside the calc functions
                 raise ModelVariableEmptyValue("Value is empty for variable '{}'".format(self.name))
             else:
                 return None
@@ -224,7 +209,6 @@ class ModelVariable(object):
             if len(self._access_write) == 0:
                 self._access_write.append(self.function.name)
             elif self._access_write[0] != self.function.name:
-                # Can only have one function write to a variable at a time
                 raise ModelVariableWriteAccess("Function: " + self.function.name + " tried to access variable: " + self.name + ". This variable was already written to by: " + str(self._access_write[0]))
 
         self.validate_type(value)
@@ -280,7 +264,6 @@ class ModelVariable(object):
         :return: True if variable is none or defined an successfully eval
         """
         if variable is not None:
-            # test type
             if not self.validate_type(variable):
                 return False
 
@@ -401,7 +384,6 @@ class ModelVariable(object):
             out += '    SVD Mapping:      {}\n'.format(self.svd_mapping)
         if self.units is not None:
             out += '    Units:      {}\n'.format(self.units)
-        #TODO: Apply the format to view the value attributes
         if self.value_calc is not None:
             out += '    Value Calculated: {}\n'.format(self.value_calc)
         if self.value_forced is not None:
@@ -452,7 +434,6 @@ class ModelVariable(object):
         assert isinstance(value, bool)
         assert (value is False) or (self.svd_mapping is not None), "attempted to set non-register calculator variable to do not care"
         if self._value_forced is not None:
-            #If the reg value is forced, then we always do care
             self._value_do_not_care = False
         else:
             self._value_do_not_care = value
@@ -467,7 +448,6 @@ class ModelVariable(object):
         self._in_public_log = value
 
     def get_bit_width(self):
-        # This is a helper function to get bit width. It does not automatically run. Does not impact var object contents.
 
         reg = self.rm
         if reg is not None:
@@ -478,7 +458,6 @@ class ModelVariable(object):
         return bit_width
 
     def get_reset_val(self):
-        # This is a helper function to get reset val. It does not automatically run. Does not impact var object contents.
 
         reg = self.rm
         if reg is not None:
@@ -497,7 +476,6 @@ class ModelVariable(object):
         return reset_val
 
     def set_to_reset_val(self):
-        #This function resets a variable to its power-on-reset state (as defined in the reg model)
 
         reset_val = self.get_reset_val()
         if reset_val is not None:
@@ -610,7 +588,6 @@ class ModelVariableInstanceXml(ModelVariableXml):
         if var_root.units is not None:
             self.units = var_root.units
 
-        # assign values with the instance
         self.value_calc = core.common.cast_value_from_xml(self, var_root.values.calculated.value)
         self.value_forced = core.common.cast_value_from_xml(self, var_root.values.forced.value)
 

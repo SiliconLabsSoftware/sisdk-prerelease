@@ -64,7 +64,6 @@ class Wisun1v1Templates:
     """
 
     import_and_class: str = '''
-# THIS IS GENERATED CODE - DO NOT EDIT
 from pyradioconfig.parts.jumbo.look_up_tables.lut_dataclasses.wisun_dataclasses import BitrateModulation1v1, \\
     FrequencyChannel1v1
 
@@ -125,7 +124,6 @@ def _convert_bitrates(bitrates: list[int])->str:
     return new
 
 if __name__ == "__main__":
-    # Example usage 1v0
     print(Wisun1v0Templates.import_and_class)
     print(Wisun1v0Templates.bitrate_modulation_start)
     print(Wisun1v0Templates.bitrate_modulation("Mode1a", 0.5, [1000, 2000, 3000]))
@@ -133,7 +131,6 @@ if __name__ == "__main__":
     print(Wisun1v0Templates.frequency_channel_start)
     print(Wisun1v0Templates.frequency_channel("channel_example", 10, 2400.0, 2483.5))
     print(Wisun1v0Templates.close)
-    # Example usage 1v1
     print(Wisun1v1Templates.import_and_class)
     print(Wisun1v1Templates.bitrate_modulation_start)
     print(Wisun1v1Templates.bitrate_modulation("opt1", 0.5, [1000, 2000], [1, 2]))

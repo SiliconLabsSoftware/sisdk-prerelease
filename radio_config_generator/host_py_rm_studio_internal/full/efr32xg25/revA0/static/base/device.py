@@ -3,18 +3,17 @@ __all__ = [ 'Base_RM_Device' ]
 
 from collections import OrderedDict
 import io
+import importlib
 import warnings
 try:
     unicode = unicode
 except NameError:
-    # 'unicode' is undefined, must be Python 3
     str = str
     unicode = str
     bytes = bytes
     basestring = (str,bytes)
     long = int
 else:
-    # 'unicode' exists, must be Python 2
     str = str
     unicode = unicode
     bytes = str
@@ -61,17 +60,89 @@ class Base_RM_Device(IRegMapDevice):
         else:
             self.__dict__[name] = value
 
+    def __iter__(self):
+        self._load_all_peripherals()
+        for key in self.zz_pdict:
+            yield self.zz_pdict[key]
+
     def __repr__(self):
-        out = "{} ({} peripherals)\n".format(self.zz_name, len(self.zz_pdict))
-        for key in sorted(self.zz_pdict):
+        peripheral_names = self._get_declared_peripheral_names()
+        if peripheral_names:
+            keys = sorted(peripheral_names)
+        else:
+            keys = sorted(self.zz_pdict)
+        out = "{} ({} peripherals)\n".format(self.zz_name, len(keys))
+        for key in keys:
             out += "  {}\n".format(key)
         return out
+
+    def __dir__(self):
+        return sorted(set(object.__dir__(self)) |
+                      set(self._get_declared_peripheral_names()) |
+                      set(self.__dict__.get('zz_alias_to_per_name', {})))
+
+    def _get_declared_peripheral_names(self):
+        names = self.__dict__.get('zz_peripheral_names')
+        if names is None:
+            return tuple(self.__dict__.get('zz_pdict', {}).keys())
+        return tuple(names)
+
+    def _get_declared_peripheral_name_set(self):
+        name_set = self.__dict__.get('zz_peripheral_name_set')
+        if name_set is None:
+            return frozenset(self._get_declared_peripheral_names())
+        return name_set
+
+    def _load_peripheral(self, peripheral_name):
+        requested_name = peripheral_name
+        alias_map = self.__dict__.get('zz_alias_to_per_name', {})
+        if peripheral_name in alias_map:
+            peripheral_name = alias_map[peripheral_name]
+        try:
+            peripheral = self.zz_pdict[peripheral_name]
+            if requested_name != peripheral_name:
+                self.__dict__[requested_name] = peripheral
+            return peripheral
+        except KeyError:
+            pass
+        if peripheral_name not in self._get_declared_peripheral_name_set():
+            raise KeyError(peripheral_name)
+        class_module = importlib.import_module(self.__class__.__module__)
+        module = importlib.import_module('.' + peripheral_name, class_module.__package__)
+        peripheral_class = getattr(module, 'RM_Peripheral_' + peripheral_name)
+        peripheral = peripheral_class(self.zz_rmio, self.zz_label)
+        self.zz_pdict[peripheral_name] = peripheral
+        self.__dict__[peripheral_name] = peripheral
+        if self.offline:
+            peripheral.assignRegDefault()
+        peripheral.getAddressNameMap(self.zz_reg_addr_to_name)
+        peripheral.getAddressNamesMap(self.zz_reg_addr_to_names)
+        if peripheral.isAliased():
+            peripheral.registerAddressToNamesCb(self.addressToNames)
+        for alias_name in self.__dict__.get('zz_per_to_alias_names', {}).get(peripheral_name, ()):
+            self.__dict__[alias_name] = peripheral
+        return peripheral
+
+    def _load_all_peripherals(self):
+        if self.__dict__.get('zz_loaded_all_peripherals', False):
+            return
+        for peripheral_name in self._get_declared_peripheral_names():
+            self._load_peripheral(peripheral_name)
+        self.__dict__['zz_loaded_all_peripherals'] = True
+
+    def __getattr__(self, name):
+        if name.startswith('__') and name.endswith('__'):
+            raise AttributeError(name)
+        if name in self._get_declared_peripheral_name_set() or name in self.__dict__.get('zz_alias_to_per_name', {}):
+            return self._load_peripheral(name)
+        raise AttributeError("ERROR: Invalid peripheral '{}'\n".format(name))
 
     @property
     def svdInfo(self):
         return self.zz_svd_info
 
     def addressToName(self, address):
+        self._load_all_peripherals()
         warnings.warn("addressToName() is deprecated; use addressToNames() for aliased register support",
                       DeprecationWarning, stacklevel=2)
         if not isinstance(address, (int, long)):
@@ -82,6 +153,7 @@ class Base_RM_Device(IRegMapDevice):
             raise RegMapAddressError("No register found for address {:#010x}".format(address))
 
     def addressToNames(self, address):
+        self._load_all_peripherals()
         if not isinstance(address, (int, long)):
             raise RegMapAddressError("Invalid address '{}'".format(address))
         try:
@@ -93,32 +165,25 @@ class Base_RM_Device(IRegMapDevice):
         """TODO: Remove the update of legacy dict once the addressToName() is removed."""
         if not isinstance(peripheral, Base_RM_Peripheral):
             raise RegMapNameError("Invalid peripheral attribute {}".format(peripheral))
-        # prune legacy mapping, which uses single reg fullname string value
         for addr in list(self.zz_reg_addr_to_name.keys()):
             fullname = self.zz_reg_addr_to_name[addr]
             if fullname.split('.')[0] == peripheral.name:
-                # remove this peripheral's register fullname from dict
                 del self.zz_reg_addr_to_name[addr]
-        # assign legacy mapping with peripheral register names
         for reg_name in peripheral.zz_rdict:
             reg = peripheral.zz_rdict[reg_name]
             self.zz_reg_addr_to_name[reg.baseAddress + reg.addressOffset] = reg.fullname
-        # prune new mapping, which uses list of reg fullname strings value
         for addr in list(self.zz_reg_addr_to_names.keys()):
-            for fullname in self.zz_reg_addr_to_names[addr]:
-                if fullname.split('.')[0] == peripheral.name:
-                    # remove this peripheral's register name from value list
-                    self.zz_reg_addr_to_names[addr].remove(fullname)
-                    # assign legacy mapping with peripheral
-        # update new mapping with peripheral register names
+            self.zz_reg_addr_to_names[addr] = [
+                fn for fn in self.zz_reg_addr_to_names[addr]
+                if fn.split('.')[0] != peripheral.name
+            ]
         for reg_name in peripheral.zz_rdict:
             reg = peripheral.zz_rdict[reg_name]
-            try:
-                if reg.fullname not in self.zz_reg_addr_to_names[reg.baseAddress + reg.addressOffset]:
-                    self.zz_reg_addr_to_names[reg.baseAddress + reg.addressOffset].append(reg.fullname)
-            except KeyError:
-                # need assert on invalid reads in addressToNames(), so can't use defaultdict
-                self.zz_reg_addr_to_names[reg.baseAddress + reg.addressOffset] = [reg.fullname]
+            addr = reg.baseAddress + reg.addressOffset
+            if addr not in self.zz_reg_addr_to_names:
+                self.zz_reg_addr_to_names[addr] = [reg.fullname]
+            elif reg.fullname not in self.zz_reg_addr_to_names[addr]:
+                self.zz_reg_addr_to_names[addr].append(reg.fullname)
 
     def nameToAddress(self, name):
         reg_or_field = self.getObjectByName(name)
@@ -136,20 +201,10 @@ class Base_RM_Device(IRegMapDevice):
         if not isinstance(name, basestring):
             raise RegMapNameError("Invalid name '{}' must be str".format(name))
         items = name.split('.')
-        peripheral = None
-        # Check if the complete peripheral name exists
-        if items[0] in self.zz_pdict.keys():
-            peripheral = self.zz_pdict[items[0]]
-        # If using a dynamic default mapping for a peripheral, resolve the actual
-        # peripheral. Ensure the same object is being returned. The requested peripheral
-        # name and the returned peripheral class will differ for this case
-        else:
-            try:
-                if hasattr(self, getattr(self, items[0]).name) and \
-                        id(getattr(self, items[0])) == id(self.zz_pdict[getattr(self, items[0]).name]):
-                    peripheral = self.zz_pdict[getattr(self, items[0]).name]
-            except (KeyError, AttributeError):
-                raise RegMapNameError("Invalid peripheral name '{}'".format(name))
+        try:
+            peripheral = self._load_peripheral(items[0])
+        except KeyError:
+            raise RegMapNameError("Invalid peripheral name '{}'".format(name))
         if len(items) == 1:
             return peripheral
         elif len(items) == 2:
@@ -181,9 +236,10 @@ class Base_RM_Device(IRegMapDevice):
             raise RegMapNameError("Invalid name '{}', must be PER.REG or PER.REG.FIELD".format(name))
 
     def getPeripheralNames(self):
-        return sorted(self.zz_pdict.keys())
+        return sorted(self._get_declared_peripheral_names())
 
     def getRegisterNames(self):
+        self._load_all_peripherals()
         nameList = []
         for key in sorted(self.zz_pdict):
             nameList.extend(self.zz_pdict[key].getRegisterNames())
@@ -204,14 +260,17 @@ class Base_RM_Device(IRegMapDevice):
         self.zz_rmio.disableAccessedFlags()
 
     def clearAccessedFlags(self):
+        self._load_all_peripherals()
         for key in sorted(self.zz_pdict):
             self.zz_pdict[key].clearAccessedFlags()
 
     def setAccessedFlags(self):
+        self._load_all_peripherals()
         for key in sorted(self.zz_pdict):
             self.zz_pdict[key].setAccessedFlags()
 
     def getAccessedRegisterNames(self):
+        self._load_all_peripherals()
         nameList = []
         perObjIdList = []
         for key in sorted(self.zz_pdict):
@@ -221,6 +280,7 @@ class Base_RM_Device(IRegMapDevice):
         return nameList
 
     def getAccessedFieldNames(self):
+        self._load_all_peripherals()
         nameList = []
         perObjIdList = []
         for key in sorted(self.zz_pdict):
@@ -262,6 +322,7 @@ class Base_RM_Device(IRegMapDevice):
         return valueDict
 
     def getExcludedDumpRegisterNames(self):
+        self._load_all_peripherals()
         nameList = []
         for key in sorted(self.zz_pdict):
             nameList.extend(self.zz_pdict[key].getExcludedDumpRegisterNames())
@@ -276,6 +337,7 @@ class Base_RM_Device(IRegMapDevice):
                 raise RegMapNameError("Invalid name '{}', please use register or field name".format(name))
 
     def includeInDump(self):
+        self._load_all_peripherals()
         for key in self.zz_pdict:
             self.zz_pdict[key].includeInDump()
 
@@ -288,6 +350,7 @@ class Base_RM_Device(IRegMapDevice):
         self.__dict__['zz_dump_cb_functions'] = []
 
     def buildRegFilterList(self, filename, listname='regFilterList'):
+        self._load_all_peripherals()
         filterList = []
         with io.open(filename, mode='w', encoding='utf-8') as outFH:
             outFH.write(u"\n# -*- coding: utf-8 -*- \n")
@@ -299,6 +362,7 @@ class Base_RM_Device(IRegMapDevice):
         return filterList
 
     def dump(self, filename, regFilterList=None, userMsg='', ignoreFailures=False):
+        self._load_all_peripherals()
         valueDict = OrderedDict()
         with io.open(filename, mode='w', encoding='utf-8') as outFH:
             outFH.write(u"\n# -*- coding: utf-8 -*- \n")
@@ -332,8 +396,6 @@ class Base_RM_Device(IRegMapDevice):
                     else:
                         outFH.write(u"    # Skipping invalid name '{}'\n".format(name))
             else:
-                # no filter list, so call peripheral dump with check for dump
-                # flag, to allow skipping
                 for key in sorted(self.zz_pdict):
                     self.zz_pdict[key].dump(outFH, valueDict, ignoreFailures=ignoreFailures)
             outFH.write(u"])\n\n")
@@ -368,4 +430,5 @@ class Base_RM_Device(IRegMapDevice):
         self.zz_rmio.closePyLangLogger()
 
     def assignRawWordBlock(self, address, wordList):
+        self._load_all_peripherals()
         self.zz_rmio.assignRawWordBlock(address, wordList)

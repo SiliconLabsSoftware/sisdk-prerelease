@@ -9,6 +9,9 @@ description: >
   stack-overflow, and static-task-memory hooks.
   It depends on the platform abstraction layer for retention registers, watchdog, NVM, and
   initialization services.
+documentation:
+  docset: z-wave
+  document: zwave-api/system-startup
 package: zwave
 quality: production
 metadata:

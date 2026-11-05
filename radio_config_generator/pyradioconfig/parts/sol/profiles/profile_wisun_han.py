@@ -22,7 +22,6 @@ class ProfileWisunHanSol(ProfileWisunHanOcelot):
         self.make_hidden_input(profile, model.vars.demod_select, 'Advanced', readable_name="Demod Selection")
         self.make_hidden_input(profile, model.vars.trecs_enabled, 'Advanced', readable_name="trecs_enabled")
 
-        # Hidden input for dual front-end filter support
         self.make_hidden_input(profile, model.vars.dual_fefilt, "Advanced",
                                readable_name="Dual front-end filter enable")
 
@@ -31,8 +30,6 @@ class ProfileWisunHanSol(ProfileWisunHanOcelot):
         self.make_linked_io(profile, model.vars.fpll_band, 'crystal', readable_name="RF Frequency Planning Band")
 
     def _fixed_wisun_vars(self, model):
-        # Use the fixed wisun vars from Ocelot
         super()._fixed_wisun_vars(model)
 
-        # Add the ofdm_option variable
         model.vars.ofdm_option.value_forced = model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz

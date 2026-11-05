@@ -61,11 +61,9 @@ class ProtectedFieldsLynx(ProtectedFieldsBase):
         'MODEM_IRCAL_MUISHF': 'cal'
     }
 
-    # : List of fields found in PTE, but allow radio configurator to override the value
     PTE_PROTECTED_FIELD_EXCEPTIONS = [
     ]
 
-    # : List of fields protected by RAIL
     RAIL_PROTECTED_FIELDS = [
         'AGC_CTRL0_RSSISHIFT',
         'AGC_CTRL1_CCATHRSH',
@@ -89,7 +87,6 @@ class ProtectedFieldsLynx(ProtectedFieldsBase):
         'RAC_SYEN_SYLODIVEN',
     ]
 
-    # : List of fields that are found in PTE list, but does not need to be protected by RAIL
     RAIL_PROTECTED_FIELD_EXCEPTIONS = [
         'RAC_PGACTRL_PGAPOWERMODE',
         'RAC_IFADCTRIM0_IFADCLDOSHUNTAMPLVL1',

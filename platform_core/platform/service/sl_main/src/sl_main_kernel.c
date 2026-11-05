@@ -39,6 +39,7 @@
 #include "sl_assert.h"
 #include "sl_main_init.h"
 #include "sl_main_start_task_config.h"
+#include "sl_log_helper.h"
 
 #include <stdbool.h>
 
@@ -99,7 +100,7 @@ void sli_main_kernel_start_task_initialize(void)
   && (SL_MAIN_START_TASK_ALLOCATE_SHORT_TERM == 1)
   sli_freertos_heap_3_set_short_term_allocations(false);
 #endif
-  EFM_ASSERT(start_task_id != NULL);
+  SL_LOG_DEBUG_ASSERT(start_task_id != NULL);
 }
 
 /******************************************************************************

@@ -117,3 +117,10 @@ filter:
     value: [NCP]
   - name: Project Difficulty
     value: [Advanced]
+
+#-------------- Template Contribution ----------------
+template_contribution:
+  - name: default_stack_size_override
+    value: 4096
+    condition:
+      - cmsis_rtos2

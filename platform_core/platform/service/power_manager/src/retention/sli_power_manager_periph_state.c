@@ -29,10 +29,9 @@
  ******************************************************************************/
 
 #include "sli_power_manager_periph_state.h"
-#include "sli_power_manager_periph_bitmap.h"
 #include "sl_power_manager.h"
 #include "sli_power_manager_periph_retention_routines.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_clock_manager.h"
 #include "sl_status.h"
 #include "sl_device_clock.h"
@@ -46,24 +45,6 @@
  ***************************  LOCAL DEFINES   **********************************
  ******************************************************************************/
 
-#if defined(SL_TRUSTZONE_SECURE) || defined(SL_TZ_SECURE_EXECUTION)
-#define SMU_REG    SMU
-#define SLI_PM_PPUACCESSGATE(idx)         ((&SMU_REG->PPUACCESSGATE0)[(idx)])
-#define SLI_PM_PPUACCESSGATE_SET(idx)     ((&SMU_REG->PPUACCESSGATE0_SET)[(idx)])
-#define SLI_PM_PPUACCESSGATE_CLR(idx)     ((&SMU_REG->PPUACCESSGATE0_CLR)[(idx)])
-#define SLI_PM_PPUDIRTY(idx)              ((&SMU_REG->PPUDIRTY0)[(idx)])
-#define SLI_PM_PPUDIRTY_SET(idx)          ((&SMU_REG->PPUDIRTY0_SET)[(idx)])
-#define SLI_PM_PPUDIRTY_CLR(idx)          ((&SMU_REG->PPUDIRTY0_CLR)[(idx)])
-#else
-#define SMU_REG    SMU_CFGNS
-#define SLI_PM_PPUACCESSGATE(idx)         ((&SMU_REG->PPUNSACCESSGATE0)[(idx)])
-#define SLI_PM_PPUACCESSGATE_SET(idx)     ((&SMU_REG->PPUNSACCESSGATE0_SET)[(idx)])
-#define SLI_PM_PPUACCESSGATE_CLR(idx)     ((&SMU_REG->PPUNSACCESSGATE0_CLR)[(idx)])
-#define SLI_PM_PPUDIRTY(idx)              ((&SMU_REG->PPUNSDIRTY0)[(idx)])
-#define SLI_PM_PPUDIRTY_SET(idx)          ((&SMU_REG->PPUNSDIRTY0_SET)[(idx)])
-#define SLI_PM_PPUDIRTY_CLR(idx)          ((&SMU_REG->PPUNSDIRTY0_CLR)[(idx)])
-#endif
-
 // Mapping table: ppu_bit -> sli_power_manager_periph index
 static uint8_t sli_ppu_bit_to_periph_index[SLI_POWER_MANAGER_MAX_PPU_BITS];
 
@@ -71,10 +52,15 @@ static uint8_t sli_ppu_bit_to_periph_index[SLI_POWER_MANAGER_MAX_PPU_BITS];
 SLI_CLKEN_DECLARE_BACKUP_BUF(sli_clken_state);
 
 // Runtime retained-peripherals mask. Defaults to sli_pm_retained_default_mask in init.
-uint32_t sli_pm_retained_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS] SL_ATTRIBUTE_SECTION(".noinit");
+uint32_t sli_pm_retained_mask[SLI_PM_PPU_REG_COUNT] SL_ATTRIBUTE_SECTION(".noinit");
 
 // Runtime restore-on-wakeup mask. Defaults to sli_pm_restore_on_wakeup_default_mask in init.
-uint32_t sli_pm_restore_on_wakeup_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS] SL_ATTRIBUTE_SECTION(".noinit");
+uint32_t sli_pm_restore_on_wakeup_mask[SLI_PM_PPU_REG_COUNT] SL_ATTRIBUTE_SECTION(".noinit");
+
+// Device bitmap headers may narrow hardware bitmaps. The default keeps every bit.
+#ifndef SLI_PM_FILTER_BITMAP_WORD
+#define SLI_PM_FILTER_BITMAP_WORD(word, bits) (bits)
+#endif
 
 /*******************************************************************************
  ***************************  LOCAL FUNCTIONS   ********************************
@@ -108,8 +94,8 @@ static uint8_t find_ppu_bit_from_base(uint32_t base)
  ******************************************************************************/
 static sli_power_manager_periph_state_mgmt_t *find_peripheral_from_bfar(uint32_t bfar_address)
 {
-  for (uint8_t w = 0u; w < SLI_PM_SMU_REG_COUNT; w++) {
-    uint32_t bits = SLI_PM_PPUACCESSGATE(w);
+  for (uint8_t w = 0u; w < SLI_PM_PPU_REG_COUNT; w++) {
+    uint32_t bits = SLI_PM_FILTER_BITMAP_WORD(w, SLI_PM_PPUACCESSGATE(w));
 
     // Loop through all the set bits in the word
     while (bits != 0u) {
@@ -118,7 +104,7 @@ static sli_power_manager_periph_state_mgmt_t *find_peripheral_from_bfar(uint32_t
 
       uint8_t periph_idx = sli_ppu_bit_to_periph_index[ppu_bit];
       if (periph_idx != SLI_POWER_MANAGER_INVALID_PERIPH_INDEX) {
-        EFM_ASSERT(periph_idx < sli_power_manager_periph_count);
+        SL_LOG_DEBUG_ASSERT(periph_idx < sli_power_manager_periph_count);
 
         // Check if the bus fault address is within the base address of the peripheral
         uint32_t base = sli_power_manager_periph[periph_idx].base;
@@ -145,7 +131,7 @@ static void init_ppu_bit_mapping_table(void)
   // Populate mapping for each peripheral in the table
   for (uint8_t i = 0u; i < sli_power_manager_periph_count; i++) {
     uint8_t ppu_bit = sli_power_manager_periph[i].ppu_bit;
-    EFM_ASSERT(ppu_bit < SLI_POWER_MANAGER_MAX_PPU_BITS);
+    SL_LOG_DEBUG_ASSERT(ppu_bit < SLI_POWER_MANAGER_MAX_PPU_BITS);
     sli_ppu_bit_to_periph_index[ppu_bit] = i;
   }
 }
@@ -226,8 +212,8 @@ void sli_power_manager_save_peripherals(void)
   // Save the CMU clock enable state.
   sli_clken_state_save_restore(CMU_BASE, &sli_clken_state, true);
 
-  for (uint8_t w = 0u; w < SLI_PM_SMU_REG_COUNT; w++) {
-    uint32_t bits = SLI_PM_PPUDIRTY(w);
+  for (uint8_t w = 0u; w < SLI_PM_PPU_REG_COUNT; w++) {
+    uint32_t bits = SLI_PM_FILTER_BITMAP_WORD(w, SLI_PM_PPUDIRTY(w));
     // Loop through all the dirty bits in the word
     while (bits != 0u) {
       uint8_t bit_pos = (uint8_t)__CLZ(__RBIT(bits));
@@ -236,12 +222,12 @@ void sli_power_manager_save_peripherals(void)
       uint8_t periph_idx = sli_ppu_bit_to_periph_index[ppu_bit];
       if ((periph_idx != SLI_POWER_MANAGER_INVALID_PERIPH_INDEX)
           && SLI_PM_BITMAP_IS_BIT_SET(sli_pm_retained_mask, ppu_bit)) {
-        EFM_ASSERT(periph_idx < sli_power_manager_periph_count);
+        SL_LOG_DEBUG_ASSERT(periph_idx < sli_power_manager_periph_count);
 
         sli_power_manager_periph_state_mgmt_t *entry = &sli_power_manager_periph[periph_idx];
 
-        EFM_ASSERT(entry->routine != NULL);
-        EFM_ASSERT(entry->backup_buffer != NULL);
+        SL_LOG_DEBUG_ASSERT(entry->routine != NULL);
+        SL_LOG_DEBUG_ASSERT(entry->backup_buffer != NULL);
 
         if (entry->module_bus_clk != SL_BUS_CLOCK_INVALID) {
           sl_clock_manager_enable_bus_clock(entry->module_bus_clk);
@@ -271,19 +257,21 @@ void sli_power_manager_restore_peripherals(void)
                          >> _EMU_PWRSTATUS_DIGDOMOFF_SHIFT;
 
   // Build a combined bitmap of all peripherals belonging to shut-down domains.
-  uint32_t reset_periph_bitmap[SLI_PM_SMU_REG_COUNT] = { 0 };
+  uint32_t reset_periph_bitmap[SLI_PM_PPU_REG_COUNT] = { 0 };
   for (uint32_t d = 0u; d < sli_pm_power_domain_map_count; d++) {
     if ((domains_off & sli_pm_power_domain_map[d].domain_mask) != 0u) {
-      for (uint8_t w = 0u; w < SLI_PM_SMU_REG_COUNT; w++) {
+      for (uint8_t w = 0u; w < SLI_PM_PPU_REG_COUNT; w++) {
         reset_periph_bitmap[w] |= sli_pm_power_domain_map[d].periph_mask[w];
       }
     }
   }
 
   // Process each word: narrow to retained, restore on-wakeup, gate on-demand.
-  for (uint8_t w = 0u; w < SLI_PM_SMU_REG_COUNT; w++) {
+  for (uint8_t w = 0u; w < SLI_PM_PPU_REG_COUNT; w++) {
     // Narrow to peripherals with runtime retention enabled.
-    reset_periph_bitmap[w] &= sli_pm_retained_mask[w];
+    reset_periph_bitmap[w] = SLI_PM_FILTER_BITMAP_WORD(w,
+                                                      reset_periph_bitmap[w]
+                                                      & sli_pm_retained_mask[w]);
 
     uint32_t bits = reset_periph_bitmap[w];
     uint32_t restored_bits = 0u;
@@ -295,13 +283,13 @@ void sli_power_manager_restore_peripherals(void)
 
       uint8_t periph_idx = sli_ppu_bit_to_periph_index[ppu_bit];
       if (periph_idx != SLI_POWER_MANAGER_INVALID_PERIPH_INDEX) {
-        EFM_ASSERT(periph_idx < sli_power_manager_periph_count);
+        SL_LOG_DEBUG_ASSERT(periph_idx < sli_power_manager_periph_count);
 
         sli_power_manager_periph_state_mgmt_t *entry = &sli_power_manager_periph[periph_idx];
 
         if (SLI_PM_BITMAP_IS_BIT_SET(sli_pm_restore_on_wakeup_mask, ppu_bit)) {
-          EFM_ASSERT(entry->routine != NULL);
-          EFM_ASSERT(entry->backup_buffer != NULL);
+          SL_LOG_DEBUG_ASSERT(entry->routine != NULL);
+          SL_LOG_DEBUG_ASSERT(entry->backup_buffer != NULL);
 
           if (entry->module_bus_clk != SL_BUS_CLOCK_INVALID) {
             sl_clock_manager_enable_bus_clock(entry->module_bus_clk);
@@ -359,7 +347,8 @@ bool sl_power_manager_get_peripheral_dirty_state(const sl_peripheral_t periphera
   uint8_t reg = SLI_PM_BITMAP_WORD(ppu_bit);
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
-  bool is_dirty = (SLI_PM_PPUDIRTY(reg) & SLI_PM_BITMAP_MASK(ppu_bit)) != 0u;
+  bool is_dirty = (SLI_PM_FILTER_BITMAP_WORD(reg, SLI_PM_PPUDIRTY(reg))
+                   & SLI_PM_BITMAP_MASK(ppu_bit)) != 0u;
   CORE_EXIT_CRITICAL();
 
   return is_dirty;
@@ -389,7 +378,7 @@ bool sli_power_manager_busfault_restore_periph(uint32_t bfar_address)
   bool bus_clock_was_enabled = true;
 
   // Validate the PPUACCESSGATE bit for this peripheral before restoring.
-  if ((SLI_PM_PPUACCESSGATE(reg) & mask) == 0u) {
+  if ((SLI_PM_FILTER_BITMAP_WORD(reg, SLI_PM_PPUACCESSGATE(reg)) & mask) == 0u) {
     return false;
   }
 

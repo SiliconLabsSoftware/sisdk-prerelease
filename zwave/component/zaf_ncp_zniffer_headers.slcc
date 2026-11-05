@@ -2,9 +2,17 @@ id: zaf_ncp_zniffer_headers
 label: ZAF NCP Zniffer headers
 category: Z-Wave
 description: >
-  ZAF headers needed to build the zwave_ncp_zniffer sample app.
-  This needs to be 40 words long, it will be. This needs to be 40 words long, it will be.
-  This needs to be 40 words long, it will be. This needs to be 40 words long, it will be.
+  This component provides the ZAF header files required to build the zwave_ncp_zniffer sample application. It aggregates essential include files for Command Class frameworks such as Association, MultiChannel, Supervision, and Common, alongside CC List generation and ZAF configuration. Integrating these headers ensures consistent Z-Wave Application Framework compatibility, enabling protocol transport, device association, and event supervision functionality within the zniffer environment. Use this component when developing or maintaining NCP-based Z-Wave Zniffer solutions that rely on ZAF infrastructure and Command Class support for robust network analysis and protocol compliance workflows.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/association
+  - page: zwave-api/cc-list
+  - page: zwave-api/common
+  - page: zwave-api/multichan
+  - page: zwave-api/supervision
+  - page: zwave-api/supervision-events
+
 package: zwave
 quality: production
 metadata:

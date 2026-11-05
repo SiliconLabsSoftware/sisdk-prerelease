@@ -1,0 +1,132 @@
+/***************************************************************************//**
+ * @file
+ * @brief I3C driver instance initialization
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
+#include "sl_assert.h"
+#include "sl_i3c.h"
+
+// Include instance config {# Include instance config #}
+{% for instance in i3c_instances %}#include "sl_i3c_{{ instance }}_config.h"
+{% endfor %}
+
+// Handles
+{% for instance in i3c_instances %}static sl_i3c_handle_t sl_i3c_{{instance}}_handle_storage;
+sl_i3c_handle_t *sl_i3c_{{instance}}_handle = &sl_i3c_{{instance}}_handle_storage;
+{% endfor -%}
+
+{% for instance in i3c_instances %}
+#ifndef SL_I3C_{{ instance | upper }}_PERIPHERAL_NO
+#error "SL_I3C_{{ instance | upper }}_PERIPHERAL_NO is not defined. Please update your board config file."
+#endif
+
+#if (SL_I3C_{{ instance | upper }}_PERIPHERAL_NO == 0)
+#define SL_I3C_{{ instance | upper }}_PERIPHERAL    I3C0
+#else
+#error "Invalid I3C peripheral number for instance {{ instance | upper }}."
+#endif
+
+#if (SL_I3C_{{ instance | upper }}_OPERATING_MODE == 0)
+static sl_i3c_controller_config_t sl_i3c_{{instance}}_controller_cfg = {
+  .i3c_timing = {
+    .od_high_count = SL_I3C_{{ instance | upper }}_OD_HIGH_COUNT,
+    .od_low_count  = SL_I3C_{{ instance | upper }}_OD_LOW_COUNT,
+    .pp_high_count = SL_I3C_{{ instance | upper }}_PP_HIGH_COUNT,
+    .pp_low_count  = SL_I3C_{{ instance | upper }}_PP_LOW_COUNT,
+  },
+  .i2c_timing = {
+    .is_fmp_mode = false,
+    .high_count  = SL_I3C_{{ instance | upper }}_FM_HIGH_COUNT,
+    .low_count   = SL_I3C_{{ instance | upper }}_FM_LOW_COUNT,
+  },
+  .queue_thlds = {
+    .ibi_status_thld    = SL_I3C_{{ instance | upper }}_IBI_STATUS_THLD,
+    .ibi_data_thld      = SL_I3C_{{ instance | upper }}_IBI_DATA_THLD,
+    .resp_buf_thld      = SL_I3C_{{ instance | upper }}_RESP_BUF_THLD,
+    .cmd_empty_buf_thld = SL_I3C_{{ instance | upper }}_CMD_EMPTY_BUF_THLD,
+  },
+  .fifo_thlds = {
+    .rx_start_thld     = SL_HAL_I3C_THLD_1,
+    .tx_start_thld     = SL_HAL_I3C_THLD_1,
+    .rx_buf_thld       = SL_HAL_I3C_THLD_1,
+    .tx_empty_buf_thld = SL_HAL_I3C_THLD_1,
+  },
+  .dynamic_address   = SL_I3C_{{ instance | upper }}_DYNAMIC_ADDRESS,
+  .i2c_slave_present = SL_I3C_{{ instance | upper }}_I2C_SLAVE_PRESENT,
+  .bus_free_time     = SL_I3C_{{ instance | upper }}_BUS_FREE_TIME,
+};
+#elif (SL_I3C_{{ instance | upper }}_OPERATING_MODE == 1)
+static sl_i3c_slave_config_t sl_i3c_{{instance}}_slave_cfg = {
+  .queue_thlds = {
+    /* IBI queues are controller-only; IBI_DATA_THLD encoding 0 is invalid. */
+    .ibi_status_thld    = 0,
+    .ibi_data_thld      = 1,
+    .resp_buf_thld      = SL_I3C_{{ instance | upper }}_RESP_BUF_THLD,
+    .cmd_empty_buf_thld = SL_I3C_{{ instance | upper }}_CMD_EMPTY_BUF_THLD,
+  },
+  .fifo_thlds = {
+    .rx_start_thld     = SL_HAL_I3C_THLD_1,
+    .tx_start_thld     = SL_HAL_I3C_THLD_1,
+    .rx_buf_thld       = SL_HAL_I3C_THLD_1,
+    .tx_empty_buf_thld = SL_HAL_I3C_THLD_1,
+  },
+  .max_read_speed          = SL_HAL_I3C_MAX_RD_SPEED_12_5MHZ,
+  .clk_data_turnaround     = SL_HAL_I3C_CLK_DATA_TURN_8NS,
+  .idle_cnt_multiplier     = SL_HAL_I3C_IDLE_MULTIPLIER_1,
+  .mode_i2c                = false,
+  .adaptive_i2c_i3c        = false,
+  .bus_free_avail_timing   = SL_I3C_{{ instance | upper }}_BUS_AVAILABLE_TIME,
+  .bus_idle_timing         = 0,
+  .address_type            = SL_I3C_STATIC_ADDRESS,
+  .address                 = SL_I3C_{{ instance | upper }}_STATIC_ADDRESS,
+};
+#endif
+
+sl_i3c_init_params_t init_{{instance}} = {
+  .i3c_base_addr = SL_I3C_{{ instance | upper }}_PERIPHERAL,
+#if (SL_I3C_{{ instance | upper }}_OPERATING_MODE == 0)
+  .role           = SL_I3C_ROLE_CONTROLLER,
+  .controller_cfg = &sl_i3c_{{instance}}_controller_cfg,
+  .slave_cfg      = NULL,
+#elif (SL_I3C_{{ instance | upper }}_OPERATING_MODE == 1)
+  .role           = SL_I3C_ROLE_SLAVE,
+  .controller_cfg = NULL,
+  .slave_cfg      = &sl_i3c_{{instance}}_slave_cfg,
+#endif
+};
+{% endfor -%}
+{# whitespace #}
+void sl_i3c_init_instances(void)
+{
+  sl_status_t status;
+
+  {%- for instance in i3c_instances %}
+  status = sl_i3c_init(sl_i3c_{{instance}}_handle, &init_{{instance}});
+  EFM_ASSERT(SL_STATUS_OK == status);
+  {%- endfor %}
+}

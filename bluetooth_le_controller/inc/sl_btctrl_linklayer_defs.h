@@ -53,6 +53,8 @@ typedef struct {
   uint8_t pawr_tx_max;
   uint8_t pawr_rx_min;
   uint8_t pawr_rx_max;
+  uint8_t iso_conn_min;
+  uint8_t iso_conn_max;
 } sl_btctrl_ll_priorities;
 
 /**

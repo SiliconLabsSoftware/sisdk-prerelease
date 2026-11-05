@@ -19,17 +19,14 @@ class ProfileSidewalkServal(ProfileSidewalkNerio):
         self._sw_profile_outputs_common = sw_profile_outputs_common_serval()
 
     def buildProfileModel(self, model):
-        # Build profile object and append it to the model
         profile = self._makeProfile(model)
 
-        # Build inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
         self.build_hidden_profile_inputs(model, profile)
         self.build_deprecated_profile_inputs(model, profile)
 
-        # Build outputs
         self.build_register_profile_outputs(model, profile)
         self.build_variable_profile_outputs(model, profile)
         self.build_info_profile_outputs(model, profile)
@@ -40,19 +37,16 @@ class ProfileSidewalkServal(ProfileSidewalkNerio):
 
     def build_optional_profile_inputs(self, model, profile):
         super().build_optional_profile_inputs(model, profile)
-        # Add additional inputs
         self.make_optional_input(profile, model.vars.fec_tx_enable, 'Channel_Coding',
                                  readable_name="Enable FEC",
                                  default=model.vars.fec_tx_enable.var_enum.DISABLED)
 
     def build_hidden_profile_inputs(self, model, profile):
-        # Hidden inputs to allow for fixed frame length testing
         IProfile.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                    readable_name="Frame Length Algorithm")
         IProfile.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
                                    readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=0x7fffffff)
 
-        # Hidden inputs to allow for keeping absolute tolerance the same when testing at 915M
         IProfile.make_hidden_input(profile, model.vars.rx_xtal_error_ppm, category="general",
                                    readable_name="Set desired xtal tolerance on RX side", value_limit_min=0,
                                    value_limit_max=100)
@@ -84,12 +78,9 @@ class ProfileSidewalkServal(ProfileSidewalkNerio):
         self._sw_profile_outputs_common.build_ircal_outputs(model, profile)
 
     def _fixed_sidewalk_fec(self, model):
-        # There is an input for FEC on Serval
         pass
 
     def _set_sidewalk_tolerances(self, model):
-        # These tolerances are from the initial PHY definition and are updated for later parts
-        # Leaving alone for Nerio definition due to optimized timing detection threshold
         model.vars.baudrate_tol_ppm.value_forced = 300
         model.vars.rx_xtal_error_ppm.value_forced = 20
         model.vars.tx_xtal_error_ppm.value_forced = 20
@@ -101,23 +92,15 @@ class ProfileSidewalkServal(ProfileSidewalkNerio):
         model.vars.MODEM_REALTIMCFE_RTSCHMODE.value_forced = 1 #Need to use hard slicing for PMENDSCHEN to work
         model.vars.MODEM_FRMSCHTIME_PMENDSCHEN.value_forced = 1 #Enable timeout based on end of preamble
 
-        # Disable conservative pmmincostthd calculation that helps with false detect on CW blocker environment.
-        # Need to re-characterize and update datasheet before enabling this feature. Bench test shows sensitivity
-        # and freq offset degradation on sidewalk phy.
         model.vars.trecs_optimize_cost_thd.value_forced = False
 
     def _lookup_from_sidewalk_mode(self, model):
-        # This function calculates some variables/registers based on the sidewalk_mode
 
-        # Read the mode and fec_en from the profile inputs (not yet written to model vars)
         sidewalk_mode = model.profile.inputs.sidewalk_mode.var_value
         fec_tx_enable = (model.profile.inputs.fec_tx_enable.var_value == model.vars.fec_tx_enable.var_enum.ENABLED)
 
-        # We need to modify the net bitrate (data rate) based on whether FEC is enabled or not
         fec_factor = 2 if fec_tx_enable else 1
 
-        # Set basic parameters based on the mode
-        # Note that for series 1, the bitrate variable represents chiprate, and so is unchanged between FEC on/off
         if sidewalk_mode == model.vars.sidewalk_mode.var_enum.FSK_50kbps:
             model.vars.bitrate.value_forced = 50000//fec_factor
             model.vars.deviation.value_forced = 25000

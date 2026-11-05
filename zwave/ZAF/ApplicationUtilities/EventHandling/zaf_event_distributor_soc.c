@@ -116,11 +116,7 @@ EventHandlerZwRx(void)
         break;
 
       case EZWAVERECEIVETYPE_NODE_UPDATE:
-      case EZWAVERECEIVETYPE_STAY_AWAKE:
-      {
-        zaf_stay_awake();
         break;
-      }
       case EZWAVERECEIVETYPE_SECURITY_EVENT:
       default:
         break;
@@ -160,7 +156,6 @@ EventHandlerZwCommandStatus(void)
               .isFinished = TRANSMISSION_RESULT_UNKNOWN
             };
             callback(&result);
-            zaf_stay_awake();
           }
         }
 
@@ -185,7 +180,6 @@ EventHandlerZwCommandStatus(void)
             zafi_nvm_app_set_default_configuration();
           }
           zaf_event_distributor_enqueue_app_event(EVENT_SYSTEM_LEARNMODE_FINISHED);
-          ZAF_Transport_OnLearnCompleted();
         } else if (ELEARNSTATUS_SMART_START_IN_PROGRESS == Status.Content.LearnModeStatus.Status) {
           zaf_event_distributor_enqueue_app_event(EVENT_SYSTEM_SMARTSTART_IN_PROGRESS);
         } else if (ELEARNSTATUS_LEARN_MODE_COMPLETED_TIMEOUT == Status.Content.LearnModeStatus.Status) {

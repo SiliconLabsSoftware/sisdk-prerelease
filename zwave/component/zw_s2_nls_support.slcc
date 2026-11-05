@@ -8,6 +8,9 @@ description: >
 
   If this component is not installed, the device will report NLS as not available and won't process NLS-related commands
 
+documentation:
+  docset: z-wave
+  document: zwave-api/zaf-transport
 package: zwave
 quality: evaluation
 metadata:

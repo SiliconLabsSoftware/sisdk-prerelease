@@ -32,7 +32,6 @@
 #include <stdlib.h>
 #include "em_device.h"
 #include "sl_status.h"
-#include "sl_assert.h"
 #include "sl_bit.h"
 #include "sl_device_peripheral.h"
 #include "sli_dma_manager_internal.h"

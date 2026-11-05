@@ -18,6 +18,8 @@ requires:
   condition: [wisun_stack_dc_server]
 - name: wisun_dc_client_cli
   condition: [wisun_dc_client_plugin]
+- name: wisun_lxpm_cli
+  condition: [wisun_lxpm]
 
 metadata:
   sbom:

@@ -29,6 +29,7 @@ provides:
 - name: sleeptimer_arch
   condition: [device_cortexm]
 requires:
+- name: log_none
 - name: interrupt_manager
   condition: [device_efx]
 - name: clock_manager_runtime

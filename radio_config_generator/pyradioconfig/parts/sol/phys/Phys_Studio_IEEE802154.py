@@ -1,13 +1,16 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 
 class PhysStudioIEEE802154Sol(IPhy):
 
+    ip_category = IPCategory.LPW
+
     def PHY_IEEE802154_GB868_863MHz_PHR2_CH0_prod(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.IEEE802154, readable_name='Production IEEE 802.15.4 UK Metering 863 MHz Channel Config 0 PHY', phy_name=phy_name)
 
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.zigbee_feature.value = model.vars.zigbee_feature.var_enum.GB868_863
         phy.profile_inputs.fpll_band.value = model.vars.fpll_band.var_enum.BAND_9xx
 
@@ -25,7 +28,7 @@ class PhysStudioIEEE802154Sol(IPhy):
     def PHY_IEEE802154_GB868_863MHz_PHR2_CH1_prod(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.IEEE802154, readable_name='Production IEEE 802.15.4 UK Metering 863 MHz Channel Config 1 PHY', phy_name=phy_name)
 
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.zigbee_feature.value = model.vars.zigbee_feature.var_enum.GB868_863
         phy.profile_inputs.fpll_band.value = model.vars.fpll_band.var_enum.BAND_9xx
 
@@ -43,7 +46,7 @@ class PhysStudioIEEE802154Sol(IPhy):
     def PHY_IEEE802154_GB868_863MHz_PHR2_CH2_prod(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.IEEE802154, readable_name='Production IEEE 802.15.4 UK Metering 863 MHz Channel Config 2 PHY', phy_name=phy_name)
 
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.zigbee_feature.value = model.vars.zigbee_feature.var_enum.GB868_863
         phy.profile_inputs.fpll_band.value = model.vars.fpll_band.var_enum.BAND_9xx
 
@@ -61,7 +64,7 @@ class PhysStudioIEEE802154Sol(IPhy):
     def PHY_IEEE802154_GB868_863MHz_PHR2_CH3_prod(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.IEEE802154, readable_name='Production IEEE 802.15.4 UK Metering 863 MHz Channel Config 3 PHY', phy_name=phy_name)
 
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.zigbee_feature.value = model.vars.zigbee_feature.var_enum.GB868_863
         phy.profile_inputs.fpll_band.value = model.vars.fpll_band.var_enum.BAND_9xx
 
@@ -79,7 +82,7 @@ class PhysStudioIEEE802154Sol(IPhy):
     def PHY_IEEE802154_GB868_915MHz_PHR2_prod(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.IEEE802154, readable_name='Production IEEE 802.15.4 UK Metering 915 MHz PHY', phy_name=phy_name)
 
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.zigbee_feature.value = model.vars.zigbee_feature.var_enum.GB868_915
         phy.profile_inputs.fpll_band.value = model.vars.fpll_band.var_enum.BAND_9xx
 
@@ -97,7 +100,7 @@ class PhysStudioIEEE802154Sol(IPhy):
     def PHY_IEEE802154_915MHz_2GFSK_R23_NA_prod(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.IEEE802154, readable_name='Production IEEE 802.15.4 2GFSK R23 NA 915 MHz PHY', phy_name=phy_name)
 
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.zigbee_feature.value = model.vars.zigbee_feature.var_enum.NA915_R23
         phy.profile_inputs.fpll_band.value = model.vars.fpll_band.var_enum.BAND_9xx
 

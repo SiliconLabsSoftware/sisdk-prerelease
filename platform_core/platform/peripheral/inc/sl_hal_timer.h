@@ -535,6 +535,7 @@ typedef sl_hal_timer_dti_init_t sl_hal_timer_dti_config_t;
  *   initialization must be initialized separately if used, which should probably
  *   be done prior to using this function if configuring the TIMER to
  *   start when initialization is completed.
+ *   On devices with IPVersion 3, CCn_ICOF is read-only and is not reset when the module is disabled.
  *
  * @param[in] timer
  *   A pointer to the TIMER peripheral register block.
@@ -1601,7 +1602,7 @@ __INLINE void sl_hal_timer_set_interrupts(TIMER_TypeDef *timer,
   timer->IF_SET = flags;
 }
 
-#if defined(TIMER_CC_IEN_CC)
+#if defined(TIMER_CC_IEN_CC) && defined(TIMER_CC_IF_CC)
 /***************************************************************************//**
  * @brief
  *   Clear one or more pending TIMER compare/capture channel interrupts.
@@ -1778,7 +1779,7 @@ __INLINE void sl_hal_timer_channel_set_interrupts(TIMER_TypeDef *timer,
 
   timer->CC_SET[channel].IF = flags;
 }
-#endif // defined(TIMER_CC_IEN_CC)
+#endif // defined(TIMER_CC_IEN_CC) && defined(TIMER_CC_IF_CC)
 /** @} (end addtogroup timer) */
 
 #ifdef __cplusplus
@@ -1896,13 +1897,15 @@ __INLINE void sl_hal_timer_channel_set_interrupts(TIMER_TypeDef *timer,
  *    sl_hal_timer_init(TIMER0, &init);
  *    sl_hal_timer_channel_init(TIMER0, 0, &channel_config);
  *
+ *    // Enable timer before writing sync registers
+ *    sl_hal_timer_enable(TIMER0);
+ *    sl_hal_timer_wait_sync(TIMER0);
+ *
  *    // Set initial parameters
  *    sl_hal_timer_set_top(TIMER0, 10000);                // Set PWM period
  *    sl_hal_timer_channel_set_compare(TIMER0, 0, 5000);  // 50% duty cycle
  *
- *    // Enable timer and start counting
- *    sl_hal_timer_enable(TIMER0);
- *    sl_hal_timer_wait_sync(TIMER0);
+ *    // Start counting
  *    sl_hal_timer_start(TIMER0);
  *
  *    // Change PWM parameters using buffer registers

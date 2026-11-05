@@ -5,6 +5,12 @@ description: >
   The True Status Engine is used by the application framework. This module is used to notify the
   Lifeline (or any other association groups) of state changes for any Command Class.
   A state change can be triggered by a command from a remote note, or by a local change such as a button press.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/tse
+  - page: zwave-api/md-content-true-status-module
+
 package: zwave
 quality: production
 metadata:

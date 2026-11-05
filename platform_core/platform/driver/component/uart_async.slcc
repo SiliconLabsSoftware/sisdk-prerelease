@@ -21,6 +21,7 @@ source:
 provides:
 - name: uart_async
 requires:
+- name: log_none
 - name: dma_channel
 - name: dma_manager
 - name: memory_manager
@@ -31,4 +32,4 @@ template_contribution:
   value: uart_async
 documentation:
   docset: gecko-platform
-  document: platform-driver/uartdrv
+  document: platform-driver/uart

@@ -9,10 +9,8 @@ class CALC_AGC_lynx(CALC_AGC):
 
     def buildVariables(self, model):
 
-        #Build all of the variables from inherited CALC_AGC
         super().buildVariables(model)
 
-        #Add variables
         self._addModelActual(model, 'cfloopdel_us', float, ModelVariableFormat.DECIMAL)
 
         var = self._addModelVariable(model, 'agc_lock_mode', Enum, ModelVariableFormat.DECIMAL, 'AGC Lock Mode')
@@ -49,11 +47,7 @@ class CALC_AGC_lynx(CALC_AGC):
 
     def calc_agc_fastloop_defaults(self, model):
 
-        #We want to set the AGC defaults on Lynx to a set of static values
-        #These static values are stored in the PHY file PHY_internal_base.py
-        #because we might need to apply the override function where PHYs are inherited
 
-        #Use the values from PHY_internal_base so that we don't have to store the register values in two places
 
         phy_internal_base = Phy_Internal_Base_Lynx()
         register_dict = phy_internal_base.modified_panther_style_agc_dict
@@ -64,7 +58,6 @@ class CALC_AGC_lynx(CALC_AGC):
     def calc_agc_enable_adc_atten_mode(self, model):
         etsi = model.vars.etsi_cat1_compatible.value
 
-        # etsi_cat1_compatible takes priority
         if (etsi != model.vars.etsi_cat1_compatible.var_enum.Normal):
             model.vars.agc_enable_adc_attenuation.value = True
         else:
@@ -91,8 +84,6 @@ class CALC_AGC_lynx(CALC_AGC):
         fsrc2 = fxo / dec0 / dec1 * src1_actual * src2_actual
         model.vars.cfloopdel_us_actual.value = reg / fsrc2 * 1e6
 
-    #WE need to inherit from CALC_AGC otherwise the global functions will run and we will be writing to registers from two places (not allowed)
-    #The method overrides below disable the CALC_AGC functions
 
     def calc_agc_reg(self, model):
         pass

@@ -3,17 +3,14 @@ from pycalcmodel.core.variable import ModelVariableFormat
 import math
 
 class CALC_Synth_lynx(CALC_Synth_panther):
-    ## Retime Table Generation
 
     fvcomin = 4450e6
     fvcomax = 5950e6
 
     def buildVariables(self, model):
 
-        #Add all of the variables from the Panther synth calculator
         super().buildVariables(model)
 
-        # for HFXO/HFRCO retiming
         self._addModelVariable(model, 'lut_table_index', int, ModelVariableFormat.DECIMAL, is_array=True)
         self._addModelVariable(model, 'lut_freq', int, ModelVariableFormat.DECIMAL, is_array=True)
         self._addModelVariable(model, 'lut_freq_upper', int, ModelVariableFormat.DECIMAL, is_array=True)
@@ -29,24 +26,18 @@ class CALC_Synth_lynx(CALC_Synth_panther):
         if (hide == False):
             print(arg)
 
-    # Calculate the retiming smartmux divider setting
     def retime_calc_smuxdiv(self, freq):
         global SMUX_MAX_FREQ
         SMUX_MAX_FREQ = 625  # Define the maximum frequency in MHz that the smart mux can run
 
-        # Calculate LO frequency divider
         if (freq <= SMUX_MAX_FREQ):
-            # less than 625 MHz
             smuxdiv = 1
         elif (freq <= (2 * SMUX_MAX_FREQ)):
-            # less than 1250 MHz
             smuxdiv = 2
         else:
             smuxdiv = 4
         return (smuxdiv)
 
-    # Calculate the valid lowest synthesizer frequency
-    # This will ensure we honor the catchup duration limit
     def retime_calc_min_synth_freq(self, sysclk_freq, smuxdiv, num_clks):
         global NUM_LAG_CATCHUP_CLKS
         global MAX_CATCHUP_DURATION
@@ -54,23 +45,9 @@ class CALC_Synth_lynx(CALC_Synth_panther):
         NUM_LAG_CATCHUP_CLKS = 4.0  # max number of smart mux clock periods to catch up
         MAX_CATCHUP_DURATION = 10.0  # us
 
-        # Dur = CATCHUP_DURATION =catchup_period * (Time_Lag / delta_period)
-        # lag_time = NUM_LAG_CATCHUP_CLKS * lo_period;
-        # L = NUM_LAG_CATCHUP_CLKS  = 4 ....this is approximately 4 lo clocks of delay that we need to catch up
-        # cp = catchup_period = (smuxdiv  * num_clks) / freq
-        # delta_period = sysclk_period - catchup_period;  ....the incremental time that we catch up per clock
 
-        # Dur = cp * lagtime / delta
-        # Dur = cp * (cp * L/N) / (sp - cp)
-        # Dur = (L/N)*cp^2 / (sp - cp)
-        # (L/N)*cp^2 + Dur * cp - Dur * sp = 0
 
-        # cp = (-Dur +/- sqrt(Dur^2 + (4 * L * Dur * sp / N ) )/ (2 * (L/N) )
-        # 1/cp = cf = (2 * (L/N) )  /    (-Dur +/- sqrt(Dur^2 + (4 * L * Dur * sp / N) )
-        # freq = cf * (smuxdiv * N)
-        # freq = (2 * smuxdiv * L )  / (-Dur +/- sqrt(Dur^2 + (4 * L * Dur * sp / N) )
 
-        # =(2*L*smux)/((-1*Dur)+SQRT((Dur)^2 + 4*L*Dur*sp/num_clks))
         tmp = (float)(4.0 * NUM_LAG_CATCHUP_CLKS * MAX_CATCHUP_DURATION / sysclk_freq)
         tmp1 = (float)(num_clks)
         tmp = (float)(tmp / tmp1)
@@ -80,7 +57,6 @@ class CALC_Synth_lynx(CALC_Synth_panther):
 
         return (freq)
 
-    # Generate one retiming entry for the table, given the multiple
     def return_retime_gen_entry(self, sysclk_freq, valid_freq, multiple, model, table_idx, start_table_idx):
 
         synth_freq_low = valid_freq * multiple
@@ -100,8 +76,6 @@ class CALC_Synth_lynx(CALC_Synth_panther):
 
         synth_freq_min_catchup = self.retime_calc_min_synth_freq(sysclk_freq, smuxdiv, num_clks)
 
-        # If low end frequency is less than allowable catchup limit frequency
-        # then add an invalid entry region (from low to min_catchup)
         if (synth_freq_min_catchup > synth_freq_low):
             model.vars.lut_freq.value.append(int(synth_freq_low))
             if (synth_freq_min_catchup > (smuxdiv * SMUX_MAX_FREQ)):
@@ -117,8 +91,6 @@ class CALC_Synth_lynx(CALC_Synth_panther):
         else:
             model.vars.lut_freq.value.append(int(synth_freq_low))
 
-        # If smuxdiv the same, add the final valid entry
-        # from either low or catchup limit (see above) to final frequency
         if (smuxdiv_high == smuxdiv):
             model.vars.lut_freq_upper.value.append(int(synth_freq_high))
             model.vars.lut_valid.value.append(1)
@@ -135,7 +107,6 @@ class CALC_Synth_lynx(CALC_Synth_panther):
                 model.vars.lut_limith.value.append(int(limith))
                 model.vars.lut_table_index.value[table_idx] += 1
 
-            # If smuxdiv changes within a multiple, then recalculate the low limits
             num_clks = round(next_multiple / smuxdiv_high)
             limith = math.floor(num_clks / 2) #round(num_clks / 2); C tend to round down, while python tend to round up odd number
             limitl = num_clks - limith
@@ -169,7 +140,6 @@ class CALC_Synth_lynx(CALC_Synth_panther):
 
         return (next_multiple)
 
-    # Calculate the catchup duration
     def retime_calc_catchup_duration(self, sysclk_freq, freq, smuxdiv, num_clks):
         float_freq = (float)(freq / 1.0)
         min_sys_period = (float)(num_clks * (smuxdiv / float_freq))
@@ -182,9 +152,7 @@ class CALC_Synth_lynx(CALC_Synth_panther):
         catchup_duration = catchup_clocks * min_sys_period
         return (catchup_duration)
 
-    # Used to verify retime table
     def retime_check_table(self, count, sysclk_freq, synth_low_freq, synth_high_freq, valid_freq, model, table_idx_start):
-        # /Make sure table is properly built
         start_checking = 0
         valid = 1
         sticky_valid = 1
@@ -210,15 +178,11 @@ class CALC_Synth_lynx(CALC_Synth_panther):
             model.vars.lut_freq_upper.value[table_idx_start + count - 1], synth_high_freq))
             return 0
 
-        # Check each entry
         for k in range(count):
             valid = 1
-            # Checks against previous entries
             num_clks = model.vars.lut_limitl.value[table_idx_start + k] + model.vars.lut_limith.value[table_idx_start + k]
 
-            #print("k: %d" % (k))
             if ((k > 0) and (start_checking == 1)):
-                # Check LimitL vs LimitH
                 if (model.vars.lut_limitl.value[table_idx_start + k] < model.vars.lut_limith.value[table_idx_start + k]):
                     valid= 0
                     self.retime_print("ERROR: LimitL: {} is less than LimitH: {}".format(model.vars.lut_limitl.value[table_idx_start + k], model.vars.lut_limith.value[table_idx_start + k]))
@@ -226,40 +190,32 @@ class CALC_Synth_lynx(CALC_Synth_panther):
                     valid= 0
                     self.retime_print("Warning: LimitL: {}, LimitH: {}  is bigger than range".format(model.vars.lut_limitl.value[table_idx_start + k], model.vars.lut_limith.value[table_idx_start + k]))
 
-                # Check frequency sorted
                 if (model.vars.lut_freq.value[table_idx_start + k] <= model.vars.lut_freq.value[table_idx_start + k - 1]):
                     valid = 0
                     self.retime_print("ERROR: Frequency not sorted: {}".format(table_idx_start + k))
 
-                # Check that there is no consecutive invalids (except for first invalid)
                 if ((not model.vars.lut_valid.value[table_idx_start + k]) and (not model.vars.lut_valid.value[table_idx_start + k - 1])):
                     valid = 0
                     self.retime_print("ERROR: Consecutive invalids: {}".format(table_idx_start + k))
 
-                # Check that range is continuous across all entries
                 if (model.vars.lut_freq.value[table_idx_start + k] != model.vars.lut_freq_upper.value[table_idx_start + k - 1]):
                     valid = 0
                     self.retime_print("ERROR: Range not contiguous: {}".format(table_idx_start + k))
 
-                # Check entry frequency is increasing in the table
                 if (model.vars.lut_freq.value[table_idx_start + k] <= model.vars.lut_freq.value[table_idx_start + k - 1]):
                     valid = 0
                     self.retime_print("ERROR: Not increasing in frequency: %f %f" % (
                     model.vars.lut_freq.value[table_idx_start + k], model.vars.lut_freq.value[table_idx_start + k - 1]))
 
-                # Check entry number of clocks (limitl+limith) is incrementing in the table
                 if (model.vars.lut_smuxdiv.value[table_idx_start + k] == prev_smuxdiv):
-                    #                    print("prev_smuxdiv: %d" % (prev_smuxdiv))
                     if (num_clks != (prev_num_clks + 1)):
                         valid = 0
                         self.retime_print("ERROR: Num_clks not incrementing: %d %d" % (num_clks, prev_num_clks + 1))
 
-            # Check num_clks increments between multiples
             if (model.vars.lut_valid.value[table_idx_start + k]):
                 start_checking = 1
                 prev_num_clks = num_clks
                 prev_smuxdiv = model.vars.lut_smuxdiv.value[table_idx_start + k]
-                #                print("k: %d, prev_smuxdiv: %d" % (k, prev_smuxdiv))
 
                 if (model.vars.lut_freq_upper.value[table_idx_start + k] / num_clks / model.vars.lut_smuxdiv.value[table_idx_start + k] > valid_freq):
                     valid = 0
@@ -289,17 +245,14 @@ class CALC_Synth_lynx(CALC_Synth_panther):
 
         model.vars.lut_dpll_freq_hz.value.append(int(sysclk_freq*1000000))
         if (sysclk_freq <= 40):
-            # Max frequency in MHz @ 1.0V
             valid_freq = 46.0
         else:
             valid_freq = 89.4  # Max frequency in MHz @ 1.1V
 
-        # Get starting multiple
         smuxdiv  = self.retime_calc_smuxdiv(lo_low_freq)
         multiple = math.floor(lo_low_freq/smuxdiv/valid_freq)
         multiple = multiple * smuxdiv
 
-        # Generate Table
         while ((valid_freq * multiple) < lo_high_freq):
             (multiple) = self.return_retime_gen_entry(sysclk_freq, valid_freq, multiple, model, table_idx, start_table_idx)
 
@@ -336,7 +289,6 @@ class CALC_Synth_lynx(CALC_Synth_panther):
                                                                                           start_table_idx +  i]))))
 
     def calc_hfxo_retiming_table(self, model):
-        # Initialize Table
         model.vars.lut_table_index.value = [0]
         model.vars.lut_freq.value = []
         model.vars.lut_freq_upper.value = []
@@ -346,17 +298,14 @@ class CALC_Synth_lynx(CALC_Synth_panther):
         model.vars.lut_limith.value = []
         model.vars.lut_dpll_freq_hz.value = []
 
-        #setting for 1x HFXO frequency
         self.retime_print("calculating 1x HFXO freq")
         self.retime_main(model, model.vars.xtal_frequency_hz.value, 0, 0)
 
-        #setting for 2x HFXO frequency
         self.retime_print("calculating 2x HFXO freq")
         model.vars.lut_table_index.value.append(0)
         self.retime_main(model, model.vars.xtal_frequency_hz.value * 2, 1, model.vars.lut_table_index.value[0])
 
     def calc_adc_rate_mode_actual(self, model):
-        #This function calculates the actual value of the adc rate mode based on the reg value used
         ifadcenhalfmode = model.vars.RAC_IFADCTRIM0_IFADCENHALFMODE.value
 
         if ifadcenhalfmode == 1:
@@ -364,5 +313,4 @@ class CALC_Synth_lynx(CALC_Synth_panther):
         else:
             adc_rate_mode_actual = model.vars.adc_rate_mode.var_enum.FULLRATE
 
-        #Write the variable
         model.vars.adc_rate_mode_actual.value = adc_rate_mode_actual

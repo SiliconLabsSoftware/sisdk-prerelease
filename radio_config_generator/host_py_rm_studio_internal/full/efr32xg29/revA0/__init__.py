@@ -1,5 +1,4 @@
 
-# -*- coding: utf-8 -*-
 
 """
 
@@ -73,32 +72,7 @@ Features
 
         REGISTER_DUMP = {
         'RAC.STATUS': 0x00000000,
-          # 0x40084004  STATUS: Radio State Machine Status <read-only>
-            # [31] RXENS: 0x0
-            # [30] TXENS: 0x0
-            # [29] DEMODENS: 0x0
-            # [27:24] STATE: 0x0 (enum OFF: Radio is off)
-            # [21] TXAFTERFRAMEACTIVE: 0x0
-            # [20] TXAFTERFRAMEPEND: 0x0
-            # [19] FORCESTATEACTIVE: 0x0
-            # [15:0] RXMASK: 0x0
         'RAC.CTRL': 0x00000000,
-          # 0x4008400c  CTRL: Radio Control Register <read-write>
-            # [30:27] PRSCLRSEL: 0x0 (enum PRSCH0: PRS Channel 0 selected as input)
-            # [25:22] PRSTXENSEL: 0x0 (enum PRSCH0: PRS Channel 0 selected as input)
-            # [20:17] PRSFORCETXSEL: 0x0 (enum PRSCH0: PRS Channel 0 selected as input)
-            # [16] PRSFORCETX: 0x0
-            # [14:11] PRSRXDISSEL: 0x0 (enum PRSCH0: PRS Channel 0 selected as input)
-            # [10] PRSRXDIS: 0x0
-            # [9] LNAENPOL: 0x0
-            # [8] PAENPOL: 0x0
-            # [7] ACTIVEPOL: 0x0
-            # [6] TXPOSTPONE: 0x0
-            # [5] PRSCLR: 0x0
-            # [3] PRSMODE: 0x0
-            # [2] TXAFTERRX: 0x0
-            # [1] PRSTXEN: 0x0
-            # [0] FORCEDISABLE: 0x0
         }
 
 API

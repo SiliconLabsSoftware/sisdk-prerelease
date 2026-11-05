@@ -34,9 +34,14 @@ Use **SPACE** to cycle length, **ENTER** to run the sequence for that length.
 1. **Plain key** — `sl_se_generate_key`
 2. **Import / export** — import plain → wrapped, export wrapped → plain, **memcmp** verify
 3. **Wrapped key** — generate non-exportable wrapped key
-4. **Volatile key** — generate in SE slot, then **delete**
-5. **Transfer** — wrapped → volatile slot → wrapped, then delete volatile slot → return to menu
+4. **Volatile key** — generate in SE slot, then **delete** — where supported
+5. **Transfer** — wrapped → volatile slot → wrapped, then delete volatile slot → return to menu — where supported
 Plaintext, wrapped, and volatile paths match the key types described in AN1271 (Secure Key Storage).
+
+> **Note:** SE volatile key support may not be supported on all platforms. On platforms
+> without volatile SE key storage, steps 4–5 are omitted. Plaintext and wrapped key paths
+> still work where available.
+
 **Requires:** `device_has_semailbox`.
 **Related examples:** `se_manager_block_cipher`, `se_manager_stream_cipher` (use symmetric keys for crypto); `se_manager_asymmetric_key_handling` (ECC key patterns).
 
@@ -65,7 +70,7 @@ Plaintext, wrapped, and volatile paths match the key types described in AN1271 (
 |-------|--------|
 | **SPACE** | Cycle key length (Custom / AES-128 / AES-192 / AES-256) |
 | **ENTER** | Run the operation sequence for the selected length |
-3. On **Vault High**, watch each subsection (plain → import/export → wrapped → volatile → transfer) complete with **OK** on the export compare step.
+3. On **Vault High**, watch each subsection (plain → import/export → wrapped → volatile → transfer) complete with **OK** on the export compare step where supported. On platforms without volatile SE key storage, plain/import-export/wrapped run; volatile and transfer steps are skipped.
 4. When finished, the app returns to the key-length menu for another run.
 
 ### Optional: disable timing prints
@@ -79,6 +84,7 @@ Define **`SE_MANAGER_PRINT=0`** in preprocessor symbols.
 | No serial output | VCOM settings; `SL_BOARD_ENABLE_VCOM=1` |
 | Import/export compare **Failed** | Key type or length mismatch; buffer size (`KEY_BUF_SIZE`) |
 | Volatile slot errors | Prior run left slot occupied — delete step should run first |
+| Volatile / transfer steps missing | Expected on platforms that do not support SE volatile key storage |
 | Transfer failures | Vault **Mid** — transfer APIs are High-only |
 | Custom size issues | Must use `SL_SE_KEY_TYPE_SYMMETRIC` with 28-byte custom path |
 | Garbled console | Line terminator **None** in Device Console |

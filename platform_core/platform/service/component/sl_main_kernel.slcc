@@ -21,6 +21,7 @@ include:
 provides:
 - name: sl_main_kernel
 requires:
+- name: log_none
 - name: cmsis_rtos2
 - name: cmsis_rtos2_headers
 - name: cmsis_common

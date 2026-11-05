@@ -48,7 +48,7 @@ configuration:
     value: 0
     condition: [iostream_uart]
   - name: SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD
-    value: SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_256M
+    value: SL_WATCHDOG_MANAGER_TIMEOUT_PERIOD_256K
 define:
   - name: DEBUG_EFM
 readme:

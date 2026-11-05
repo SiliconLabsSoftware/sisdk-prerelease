@@ -37,11 +37,9 @@ class CALC_Frame_Detect(ICalculator):
         self._addModelVariable(model,  'syncword_string',  str,          ModelVariableFormat.ASCII, desc='Output string representing the sync word in binary')
         self._addModelVariable(model,  'syncword_dualsync',bool,         ModelVariableFormat.ASCII, desc='Enable dual syncword detection')
 
-        # Actual values
         self._addModelActual(model,    'syncword_0'     ,  long,         ModelVariableFormat.HEX, ) #  desc='Syncword 0 extracted from the register )
         self._addModelActual(model,    'syncword_1'     ,  long,         ModelVariableFormat.HEX, ) #  desc='Syncword 1 extracted from the register )
 
-        # FIXME: MW: Need to resolve after RTL fixed
         self._build_framedet_regs(model)
 
     def _build_framedet_regs(self, model):
@@ -63,7 +61,6 @@ class CALC_Frame_Detect(ICalculator):
         """
 
         output = long(0)
-        # find index of LSB
         first_bit = numbits
 
         for bitnum in range(numbits):
@@ -92,12 +89,7 @@ class CALC_Frame_Detect(ICalculator):
 
         if model.vars.ber_force_sync.value == True:
             syncword0_reg = long(0x1dd3d4a0)      # gdc:  Fix this after we get rid of the "_left" stuff above.
-                                              # gdc:  Fix it so we just write syncword_0 before it gets flipped
 
-        # When manchester invert is selected, then elsewhere we flip the entire fsk mapping,
-        # which also flips the preamble and sync word.  We don't want the the preamble and
-        # syncword flipped, so to fix it, we invert the preamble pattern and sync word register
-        # to undo the fsk mapping flip.
         encoding = model.vars.symbol_encoding.value
         manchester_map = model.vars.manchester_mapping.value
         if encoding == model.vars.symbol_encoding.var_enum.Manchester and \
@@ -139,7 +131,6 @@ class CALC_Frame_Detect(ICalculator):
 
         model.vars.syncword_length_actual.value = model.vars.MODEM_CTRL1_SYNCBITS.value + 1
     
-    # Calculate the actual syncword from the register
     def calc_syncword_actual(self, model):
         syncword_length = model.vars.syncword_length_actual.value
         syncword0_reg = model.vars.MODEM_SYNC0_SYNC0.value
@@ -153,11 +144,9 @@ class CALC_Frame_Detect(ICalculator):
             syncword0_reg ^= syncword_mask
             syncword1_reg ^= syncword_mask
 
-        # if MSbit is set, will need to trip the leading '-' character from the binary string
         model.vars.syncword_0_actual.value = long(bin(syncword0_reg).replace('-','')[2:].zfill(syncword_length)[::-1], 2)
         model.vars.syncword_1_actual.value = long(bin(syncword1_reg).replace('-','')[2:].zfill(syncword_length)[::-1], 2)
 
-    # Calculate a binary string that's
     def calc_syncword_string(self, model):
         syncword_length = model.vars.syncword_length_actual.value
         syncword = model.vars.syncword_0_actual.value
@@ -194,14 +183,11 @@ class CALC_Frame_Detect(ICalculator):
         baudrate = model.vars.baudrate.value
         dualsync = model.vars.syncword_dualsync.value
 
-        # Estimate what the baudrate tol is with an OSR of 7 and resyncper of 1, assuming a 16-bit window
         est_baudrate_tol_16sym = 1.0e6 / (2 * 7 * 16.0 * 1) # Factor of 2 is to be conservative
 
         if model.vars.asynchronous_rx_enable.value is True:
-            # when asynchronous direct mode is enabled set to max
             timingbases = 15
         elif encoding == model.vars.symbol_encoding.var_enum.DSSS:
-            # for DSSS set to 1
             timingbases = 1
         else:
             if modformat == model.vars.modulation_type.var_enum.FSK4:
@@ -237,8 +223,6 @@ class CALC_Frame_Detect(ICalculator):
                 elif preamblebits <= 32:
                     timingbases = 4
                 else:
-                    # MCUW_RADIO_CFG-827 Timing window is calculated wrongly if preamble pattern length is not 2
-                    # Enforce Window must be less than half the preamble length
                     if (basebits * 8) < ( preamblebits / 2):
                         timingbases = 8
                     elif (basebits * 4) < ( preamblebits / 2):
@@ -270,7 +254,6 @@ class CALC_Frame_Detect(ICalculator):
         self._reg_write(model.vars.MODEM_TIMING_TIMINGBASES,  timingbases)
     
     
-    # TODO: tweak equation based on new PHYs
     def calc_addtimseq_val(self, model):
         """
         calculate additional timing sequences to detect given preamble length
@@ -288,20 +271,15 @@ class CALC_Frame_Detect(ICalculator):
         in_2fsk_opt_scope = model.vars.in_2fsk_opt_scope.value
 
         if mod_format == model.vars.modulation_type.var_enum.OOK:
-            #Always use 1 timing window for OOK
             addtimseq = 0
         elif in_2fsk_opt_scope:
-            #Always use 1 timing window for 2FSK optimization
             addtimseq = 0
         else:
             if timingbases > 1:
-                # looks like it is easier to get a working setting when this is set to 0
-                # for now going to generate 0 until we find a better alternative
                 addtimseq = math.floor(preamblebits / timingwindow) - 2
             else:
                 addtimseq = 0
     
-        # saturate addtimseq to fit into 4 bits
         if addtimseq > 15:
             addtimseq = 15
     
@@ -319,7 +297,6 @@ class CALC_Frame_Detect(ICalculator):
 
         addtimseq = model.vars.number_of_timing_windows.value
 
-        # one search is done by default
         if addtimseq > 0:
             addtimseq -= 1
 
@@ -403,10 +380,6 @@ class CALC_Frame_Detect(ICalculator):
         preamble_pattern_len = model.vars.preamble_pattern_len.value
         preamble_pattern     = model.vars.preamble_pattern.value
 
-        # When manchester invert is selected, then elsewhere we flip the entire fsk mapping,
-        # which also flips the preamble and sync word.  We don't want the the preamble and
-        # syncword flipped, so to fix it, we invert the preamble pattern and sync word register
-        # to undo the fsk mapping flip.
         encoding = model.vars.symbol_encoding.value
         manchester_map = model.vars.manchester_mapping.value
         if encoding == model.vars.symbol_encoding.var_enum.Manchester and \
@@ -420,8 +393,6 @@ class CALC_Frame_Detect(ICalculator):
         self._reg_write(model.vars.MODEM_PRE_BASE,  modem_pre_base)
     
     
-    #TODO: do we need to add dependency to bandwidth when calculating the timing treshold?
-    #      we might want to reduce the threshold with increasing bandwidth
     def calc_timthresh_value(self, model):
         """
         calculate TIMTHRESH which is used in determining valid correlation values in timing detection
@@ -438,10 +409,8 @@ class CALC_Frame_Detect(ICalculator):
         freq_gain_scale = model.vars.freq_gain_scale.value
         in_2fsk_opt_scope = model.vars.in_2fsk_opt_scope.value
 
-        #Calculate the percentage of the actual BW vs Carson rule
         bw_ratio = bw_actual / bw_carson
     
-        # given modulation method determine nominal soft decision values
         if modformat == model.vars.modulation_type.var_enum.MSK or \
            modformat == model.vars.modulation_type.var_enum.OQPSK or \
            modformat == model.vars.modulation_type.var_enum.BPSK or \
@@ -460,15 +429,12 @@ class CALC_Frame_Detect(ICalculator):
         else:
             nominal_soft_decision = 0
     
-        # given nominal soft decision value and timing window size determine optimal threshold
-        # TODO: equation for thresh is empirically derived and does need tuning
         if nominal_soft_decision > 0:
             thresh = timingwindow * nominal_soft_decision / 32.0 - 1.0
         else:
             thresh = 0.0
 
 
-        # in direct mode set the threshold as high as possible
         if async_direct_mode_enabled:
             thresh = 255.0
     
@@ -510,7 +476,6 @@ class CALC_Frame_Detect(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # FIXME: consider adding +1 to errors when AFC is enbabled - seems to work better
 
         dssslen = model.vars.dsss_len_actual.value
         in_2fsk_opt_scope = model.vars.in_2fsk_opt_scope.value
@@ -524,7 +489,6 @@ class CALC_Frame_Detect(ICalculator):
         else:
             preerrors = dssslen / 2.0
 
-        # make sure we fit into 4 bits
         if preerrors > 15:
             preerrors = 15
 
@@ -761,18 +725,13 @@ class CALC_Frame_Detect(ICalculator):
         preamblebits = model.vars.preamble_length.value
 
         if model.vars.asynchronous_rx_enable.value is True:
-            # for asynchronous direct mode we don't want the demod to change states so
-            # keep the thresholds at the upper limit
             th = 65535
         elif modformat == model.vars.modulation_type.var_enum.OOK or \
            modformat == model.vars.modulation_type.var_enum.ASK:
-            # for amplitude modulated signal we need to turn off TSAMPMODE as enabling it
-            # switches the slicer level from FREQOFFESTLIM to TSAMPLIM which we don't want.
             th = 0
         elif in_2fsk_opt_scope and preamblebits >= 32:
             th = 0  # [MCUW_RADIO_CFG-1077] If we have at least 32 preamble bits then correlation is robust
         else:
-            # nominal threshold of 10 seems to work well for most PHYs
             th = 10
 
         model.vars.timing_sample_threshold.value = th
@@ -857,7 +816,6 @@ class CALC_Frame_Detect(ICalculator):
         dualsync = model.vars.syncword_dualsync.value
         timingbases = model.vars.timingbases_actual.value
 
-        # dualsync is disabled in FDM0 mode (MCUW_RADIO_CFG-1732)
         if dualsync == False:
             reg_value = 0
         elif dualsync == True and timingbases == 0:
@@ -882,7 +840,6 @@ class CALC_Frame_Detect(ICalculator):
         mod_type = model.vars.modulation_type.value
         timingbases = model.vars.timingbases_actual.value
 
-        #If using OOK and FDM0, enable FDM0DIFFDIS so that sliding window detection works properly
         if (mod_type==model.vars.modulation_type.var_enum.OOK) and timingbases==0:
             self._reg_write(model.vars.MODEM_CTRL0_FDM0DIFFDIS,1)
         else:

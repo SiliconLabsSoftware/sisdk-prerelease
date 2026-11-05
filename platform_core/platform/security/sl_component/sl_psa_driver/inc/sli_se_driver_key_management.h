@@ -381,6 +381,41 @@ psa_status_t sli_se_driver_validate_pubkey_with_fallback(psa_key_type_t key_type
                                                          size_t data_length);
 #endif // Software fallback for SE < 1.2.2
 
+#if defined(SLI_PSA_DRIVER_FEATURE_RSA_SIGN) && defined(SLI_SE_SUPPORTS_RSA)
+/**
+ * @brief Validate an RSA key for transparent SE import.
+ *
+ * Validates the PKCS#1 DER structure, RSA key parameters,
+ * and supported key sizes without MPI/BIGNUM.
+ *
+ * @param[in]  attributes   PSA key attributes.
+ * @param[in]  data         RSA key in PKCS#1 DER format.
+ * @param[in]  data_length  Length of the key data in bytes.
+ * @param[out] bits         RSA modulus size in bits.
+ *
+ * @return PSA_SUCCESS if valid, or an appropriate PSA error.
+ */
+psa_status_t sli_se_driver_validate_rsa_key(
+  const psa_key_attributes_t *attributes,
+  const uint8_t *data,
+  size_t data_length,
+  size_t *bits);
+
+/**
+ * @brief Export the public key from an RSA key pair.
+ *
+ * Encodes the RSA modulus and public exponent in PKCS#1 DER format
+ * without MPI/BIGNUM.
+ */
+psa_status_t sli_se_driver_export_rsa_public_key(
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  uint8_t *data,
+  size_t data_size,
+  size_t *data_length);
+#endif // SLI_PSA_DRIVER_FEATURE_RSA_SIGN && SLI_SE_SUPPORTS_RSA
+
 #ifdef __cplusplus
 }
 #endif

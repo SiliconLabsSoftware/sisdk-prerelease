@@ -32,7 +32,7 @@
 #include "sli_clock_manager.h"
 #include "sli_clock_manager_hal.h"
 #include "sli_clock_manager_log.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * Performs Clock Manager runtime initialization.
@@ -407,7 +407,7 @@ sl_status_t sl_clock_manager_wait_usbpll(void)
  ******************************************************************************/
 __WEAK void sl_clock_manager_hfxo_notify_consecutive_failed_startups(void)
 {
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 }
 
 /***************************************************************************//**

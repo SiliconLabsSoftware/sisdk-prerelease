@@ -7,6 +7,9 @@ description: >
   other Command Class is shared by two devices.
 
   This component provides support for Basic Command Class controlled by another device.
+documentation:
+  docset: z-wave
+  document: zwave-api/basic
 
 package: zwave
 quality: production

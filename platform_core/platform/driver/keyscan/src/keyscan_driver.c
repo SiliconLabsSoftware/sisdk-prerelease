@@ -38,6 +38,7 @@
 #include "sl_assert.h"
 #include "sl_core.h"
 
+#include "sl_log_helper.h"
 /*******************************************************************************
  **************************   LOCAL VARIABLES   ********************************
  ******************************************************************************/
@@ -81,8 +82,8 @@ sl_status_t sl_keyscan_driver_init(void)
  ******************************************************************************/
 void sl_keyscan_driver_subscribe_event(sl_keyscan_driver_process_keyscan_event_handle_t  *event_handle)
 {
-  EFM_ASSERT(event_handle != NULL);
-  EFM_ASSERT(event_handle->on_event != NULL);
+  SL_LOG_DEBUG_ASSERT(event_handle != NULL);
+  SL_LOG_DEBUG_ASSERT(event_handle->on_event != NULL);
 
   CORE_DECLARE_IRQ_STATE;
 
@@ -96,7 +97,7 @@ void sl_keyscan_driver_subscribe_event(sl_keyscan_driver_process_keyscan_event_h
  ******************************************************************************/
 void sl_keyscan_driver_unsubscribe_event(sl_keyscan_driver_process_keyscan_event_handle_t  *event_handle)
 {
-  EFM_ASSERT(event_handle != NULL);
+  SL_LOG_DEBUG_ASSERT(event_handle != NULL);
 
   CORE_DECLARE_IRQ_STATE;
 

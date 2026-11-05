@@ -12,13 +12,11 @@ class MultiPHYStudioPropFileImport(object):
     Runs Multi-PHY radioconf files through calculator and rail_scripts to generate a C/H, XML, and CFG file
     """
 
-    # ------------------------------------------------------------------------
     def __init__(self):
         pass
 
     def run(self, radioconf_filename, output_directory, output_filename=None, internal=False, secondary=False, sign=False, wifi_script=False, wifi_script_seqacc=False):
         xml_string = self.parse_file(radioconf_filename)
-        # print xml_string
 
         mphy_config = MultiPHYConfig()
         multi_phy_model = mphy_config.load_xml_string(xml_string)
@@ -28,7 +26,6 @@ class MultiPHYStudioPropFileImport(object):
 
         multi_phy_model = MultiPHYStudioPropFileImport.hack_to_account_for_capitalization_crap_from_studio(multi_phy_model)
 
-        # Create a unique output file name if one isn't given
         if not output_filename:
             output_filename = "rail_config_{}".format(os.path.splitext(os.path.basename(radioconf_filename))[0])
 
@@ -37,9 +34,7 @@ class MultiPHYStudioPropFileImport(object):
         if int(multi_phy_model.status_code) != ModelDiffCodes.UNKNOWN_ERROR.value:
             RAILScriptsWrapper.run_rail_scripts(multi_phy_model, output_filename=output_filename, internal=internal, secondary=secondary, sign=sign, wifi_script=wifi_script, wifi_script_seqacc=wifi_script_seqacc)
 
-            # Renaming the files for uniqueness
             for file in multi_phy_model.output_files.file:
-                # check if output for each file is not a null string
                 if len(file.source_code) == 0:
                     raise Exception('Error RAIL source file {}.'.format(file.name))
 
@@ -61,7 +56,6 @@ class MultiPHYStudioPropFileImport(object):
 
     @staticmethod
     def hack_to_account_for_capitalization_crap_from_studio(multi_phy_model):
-        # Hack to account for capitalization crap from Studio
         for base_channel_configuration in multi_phy_model.base_channel_configurations.base_channel_configuration:
             for profile_input in base_channel_configuration.profile_inputs.input:
                 if profile_input.key:

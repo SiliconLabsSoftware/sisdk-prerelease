@@ -69,6 +69,14 @@ psa_status_t sli_se_opaque_get_builtin_key(psa_drv_slot_number_t slot_number,
       psa_set_key_algorithm(attributes, PSA_ALG_ECDSA(PSA_ALG_ANY_HASH));
       break;
     #endif // SLI_PSA_DRIVER_FEATURE_ATTESTATION
+    #if defined(SLI_PSA_DRIVER_FEATURE_TLS_IDENTITY)
+    case SL_SE_KEY_SLOT_TLS_IDENTITY:
+      psa_set_key_bits(attributes, 256);
+      psa_set_key_type(attributes, PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1) );
+      psa_set_key_usage_flags(attributes, PSA_KEY_USAGE_SIGN_HASH);
+      psa_set_key_algorithm(attributes, PSA_ALG_ECDSA(PSA_ALG_ANY_HASH));
+      break;
+    #endif // SLI_PSA_DRIVER_FEATURE_TLS_IDENTITY
     case SL_SE_KEY_SLOT_APPLICATION_SECURE_BOOT_KEY:
       psa_set_key_bits(attributes, 256);
       psa_set_key_type(attributes, PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1) );
@@ -141,6 +149,11 @@ psa_status_t mbedtls_psa_platform_get_builtin_key(
       *slot_number = SL_SE_KEY_SLOT_SE_ATTESTATION_KEY;
       break;
     #endif // SLI_PSA_DRIVER_FEATURE_ATTESTATION
+    #if defined(SLI_PSA_DRIVER_FEATURE_TLS_IDENTITY)
+    case SL_SE_BUILTIN_KEY_TLS_IDENTITY_ID:
+      *slot_number = SL_SE_KEY_SLOT_TLS_IDENTITY;
+      break;
+    #endif // SLI_PSA_DRIVER_FEATURE_TLS_IDENTITY
     case SL_SE_BUILTIN_KEY_SECUREBOOT_ID:
       *slot_number = SL_SE_KEY_SLOT_APPLICATION_SECURE_BOOT_KEY;
       break;

@@ -6,6 +6,9 @@ description: >
   process of Z-Wave devices. It not only ensures that the device can safely power
   down while maintaining the integrity of the Z-Wave network and preserving critical
   data, but also allowing the device to go to a low-power state when not in use.
+documentation:
+  docset: z-wave
+  document: zwave-api/system-startup
 package: zwave
 quality: production
 metadata:

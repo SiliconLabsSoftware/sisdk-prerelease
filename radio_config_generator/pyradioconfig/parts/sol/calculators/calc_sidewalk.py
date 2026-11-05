@@ -2,5 +2,4 @@ from pyradioconfig.parts.ocelot.calculators.calc_sidewalk import CalcSidewalkOce
 
 
 class CalcSidewalkSol(CalcSidewalkOcelot):
-    #Import all from Ocelot
     pass

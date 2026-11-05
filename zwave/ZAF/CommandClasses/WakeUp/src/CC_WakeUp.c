@@ -11,33 +11,21 @@
  * @verbatim
  * Wake Up Post-Inclusion Radio Power Management Timeline:
  *
- * Time:     0sec     2sec     4sec     6sec     8sec    10sec    12sec    14sec    16sec    18sec    20sec
- * State:    |--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
- *           ^                                                                                   ^
- *           |                                                                                   |
- *   Post-Inclusion Start                                                              Stay-awake timeout
- *   Update stay-awake timeout                                                      (automatic sleep)
- *   zpal_radio_update_stay_awake(POST_INCLUSION_STAY_AWAKE_TIME)
- *           |                                                                                   |
- *           |<------------- Post-Inclusion Configuration Window ----------->|                   |
- *           |                                                               |                   |
- *        Start Post                                                     Config                Allow sleep
- *        Inclusion                                                      Complete              after timeout
+ * The stack linger duration is selected by the radio profile. The Wake Up
+ * Command Class callback may revoke it when the Wake Up destination indicates
+ * that no more information is available.
  *
  * @endverbatim
  *
- * - **Post-Inclusion Stay-Awake**: After successful inclusion, we update the stay-awake
- *   timeout to POST_INCLUSION_STAY_AWAKE_TIME using zpal_radio_update_stay_awake().
- *   This ensures the device remains awake for initial configuration commands from
- *   the controller.
+ * The linger request automatically expires after the configured timeout,
+ * allowing the device to return to its normal sleep/wake cycle without
+ * requiring explicit revocation.
  *
- * - **Configuration Window**: The stay-awake period provides a window for the controller
- *   to send initial configuration commands such as associations, parameters, and
- *   other setup commands.
- *
- * - **Automatic Timeout**: The stay-awake request automatically expires after the
- *   configured timeout, allowing the device to return to its normal sleep/wake cycle
- *   without requiring explicit revocation.
+ * For RSEN / Never Listening devices, the stack linger timeout and the
+ * Wake Up Command Class requirement are aligned on the same 10-second
+ * timeout. No additional handling is therefore required for this case; the
+ * only early termination is handled here when Wake Up No More Information is
+ * received.
  */
 
 /****************************************************************************/
@@ -60,28 +48,23 @@
 #include <ZAF_nvm.h>
 #include <ZW_system_startup_api.h>
 #include "zpal_log.h"
-#include "zpal_radio.h"
+#include "ZW_linger.h"
 
 /****************************************************************************/
 /*                      PRIVATE TYPES and DEFINITIONS                       */
 /****************************************************************************/
-
-#define POST_INCLUSION_STAY_AWAKE_TIME    10000  // [ms]
 
 /****************************************************************************/
 /*                              PRIVATE DATA                                */
 /****************************************************************************/
 
 static bool wakeUpIsActive              = false;
-static bool autoStayAwakeAfterInclusion = false;
 static bool firstNotificationSent       = false;
 static void (*ZCB_WakeUpTxCallback)(uint8_t txStatus, TX_STATUS_TYPE* pExtendedTxStatus);
 
 static SWakeupCcData gWakeupCcData;
 
 static SSwTimer WakeUpTimer;
-
-static zpal_radio_stay_awake_id_t stay_awake_id = 0;
 
 /****************************************************************************/
 /*                              EXPORTED DATA                               */
@@ -100,7 +83,7 @@ static zpal_radio_stay_awake_id_t stay_awake_id = 0;
  */
 static bool CmdClassWakeupNotification(void (*pCallback)(uint8_t txStatus, TX_STATUS_TYPE* pExtendedTxStatus));
 
-static void CC_WakeUp_stayAwakeIfActive(void);
+static void CC_WakeUp_lingerExpired(void);
 
 static void TimerCallback(__attribute__((unused)) SSwTimer *pTimer)
 {
@@ -177,7 +160,7 @@ init(void)
 
   LoadData();
 
-  zaf_set_stay_awake_callback(CC_WakeUp_stayAwakeIfActive);
+  ZW_LingerSetCallback(CC_WakeUp_lingerExpired);
 }
 
 void
@@ -231,7 +214,6 @@ void CC_WakeUp_notification_tx(void (*pCallback)(uint8_t txStatus, TX_STATUS_TYP
 
   ZCB_WakeUpTxCallback = pCallback;
   wakeUpIsActive = true;
-  CC_WakeUp_stayAwakeIfActive();
 
   if (true != CmdClassWakeupNotification(ZCB_WakeUpNotificationCallback)) {
     TX_STATUS_TYPE extendedTxStatus = { 0 };
@@ -402,10 +384,9 @@ CC_WakeUp_handler(
        * From the WakeUp CC perspective we're ready to stop radio immediately.
        * We signal that to the radio module.
        */
-      zpal_radio_revoke_stay_awake(&stay_awake_id);
+      ZW_LingerRevoke();
+      CC_WakeUp_startWakeUpNotificationTimer();
       wakeUpIsActive = false;
-
-      autoStayAwakeAfterInclusion = false;
 
       return RECEIVED_FRAME_STATUS_SUCCESS;
       break;
@@ -446,30 +427,8 @@ CC_WakeUp_handler(
   return RECEIVED_FRAME_STATUS_NO_SUPPORT;
 }
 
-/**
- * Ensures that the node stays awake for 10 seconds
- */
-static void
-CC_WakeUp_stayAwake10s(void)
+static void CC_WakeUp_lingerExpired(void)
 {
-  /* Keep radio alive the next 10 seconds */
-  zpal_radio_update_stay_awake(&stay_awake_id, POST_INCLUSION_STAY_AWAKE_TIME);
-}
-
-/**
- * Ensure that the node stays awake to wait for more messages from the
- * wake up destination node.
- *
- * Should be called to ensure that the node stays awake the next 10 seconds if
- * it is active because it has woken up and notified the wake up destination
- * node. (the wake up destination node can cancel the 10 second sleep delay
- * by sending a WAKE_UP_NO_MORE_INFORMATION)
- */
-static void CC_WakeUp_stayAwakeIfActive(void)
-{
-  if ((true == wakeUpIsActive) || (true == autoStayAwakeAfterInclusion)) {
-    CC_WakeUp_stayAwake10s();
-  }
   if (true == wakeUpIsActive) {
     CC_WakeUp_startWakeUpNotificationTimer();
   }
@@ -478,8 +437,8 @@ static void CC_WakeUp_stayAwakeIfActive(void)
 /**
  * Tell the device to auto extend the 10 second timer following an inclusion
  *
- * Every accepted application frame sent or received will normally cause a
- * device to stays awake for 10 seconds more when it has been woken up.
+ * The stack linger mechanism keeps the device awake for 10 seconds after
+ * each radio communication while it has been woken up.
  *
  * Since entering learn mode for a not-included node is not triggering the
  * usual wakeup logic this function must be called to tell the wakeup CC to
@@ -490,25 +449,9 @@ static void CC_WakeUp_stayAwakeIfActive(void)
  *     deep sleep. Next wakeup will therefore be a reset where this mode by
  *     default is off.
  */
-static void
-CC_WakeUp_AutoStayAwakeAfterInclusion(void)
-{
-  autoStayAwakeAfterInclusion = true;
-}
-
 void
 zaf_learn_mode_finished(void)
 {
-  // Make sure that the application stays awake for 10 s after learn mode finished
-  // to wait for more messages from the controller
-  CC_WakeUp_stayAwake10s();
-
-  /* Also tell application to automatically extend the stay awake period by 10
-   * seconds on message activities - even though we did not get here by a proper
-   * wakeup from Deep Sleep
-   */
-  CC_WakeUp_AutoStayAwakeAfterInclusion();
-
   // Start the wakeup timer if the learn mode operation finished in Included state
   if (EINCLUSIONSTATE_EXCLUDED != ZAF_GetInclusionState()) {
     CC_WakeUp_startWakeUpNotificationTimer();

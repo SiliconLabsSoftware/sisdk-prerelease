@@ -17,6 +17,7 @@ include:
 provides:
 - name: emlib_se
 requires:
+- name: log_none
 - name: device
 - name: hal_generic_common
 - name: cmsis_core

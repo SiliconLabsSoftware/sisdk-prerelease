@@ -19,4 +19,7 @@ template_contribution:
 metadata:
   sbom:
     reference: btmesh_stack_models
+documentation:
+  docset: btmesh
+  document: bluetooth-mesh-api/sl-btmesh-sensor-setup-server
 root_path: bluetooth_mesh_stack

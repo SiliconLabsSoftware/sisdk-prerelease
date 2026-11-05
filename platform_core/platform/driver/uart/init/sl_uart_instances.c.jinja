@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 #include <stdint.h>
+#include <assert.h>
 {# Build a single list of complete instance names (peripheral_type + instance). #}
 {% set ns = namespace(instances=[]) %}
 {% for instance in uart_eusart_instances | default([], true) | list %}
@@ -41,6 +42,7 @@
 #include "sl_common.h"
 #include "sl_device_peripheral.h"
 #include "sl_device_uart.h"
+#include "sl_log_helper.h"
 #include "sl_status.h"
 #include "sl_uart_instances.h"
 {% for instance in uart_instances_it %}
@@ -49,11 +51,21 @@
 #include "sl_uart.h"
 #include "sli_uart.h"
 
+#define SL_UART_INVALID_GPIO              (sl_gpio_t){.pin = 0xFF, .port = 0xFF}
 #define SL_UART_PERIPHERAL(periph)        SL_CONCAT_PASTER_2(SL_PERIPHERAL_, periph)
 #define SL_UART_RX_IRQHandler(periph)     SL_CONCAT_PASTER_2(periph, _RX_IRQHandler)
 #define SL_UART_TX_IRQHandler(periph)     SL_CONCAT_PASTER_2(periph, _TX_IRQHandler)
 {% for instance in uart_instances_it %}
 sl_uart_handle_t sl_uart_{{ instance }}_handle;
+#if !defined(SL_UART_{{ instance | upper }}_CTS_PORT)    \
+    || !defined(SL_UART_{{ instance | upper }}_CTS_PIN)  \
+    || !defined(SL_UART_{{ instance | upper }}_RTS_PORT) \
+    || !defined(SL_UART_{{ instance | upper }}_RTS_PIN)
+static_assert(SL_UART_{{ instance | upper }}_FLOW_CONTROL != SL_UART_FLOW_CONTROL_CTS_RTS,
+                "UART instance {{ instance }} enables hardware flow control, but is missing the necessary CTS & RTS pins. "
+                "Disable hardware flow control by setting SL_UART_{{ instance | upper }}_FLOW_CONTROL to SL_UART_FLOW_CONTROL_NONE, " 
+                "or add the required pin configuration under config/sl_uart_{{ instance }}_config.h");
+#endif
 #if defined(SL_UART_{{ instance | upper }}_ASYNC_ENABLE) && (SL_UART_{{ instance | upper }}_ASYNC_ENABLE == 1)
 #if !defined(SL_CATALOG_UART_ASYNC_PRESENT)
 #error "UART instance '{{ instance }}' enables asynchronous support. Add the uart_async component to the project."
@@ -65,26 +77,6 @@ const sl_uart_async_config_t sl_uart_{{ instance }}_async_config = SL_UART_ASYNC
 #else
 #define SL_UART_{{ instance | upper }}_ASYNC_CONFIG  NULL
 #endif
-
-const sl_uart_pin_config_t sl_uart_{{ instance }}_pin_config = {
-  .tx = { SL_UART_{{ instance | upper }}_TX_PORT, SL_UART_{{ instance | upper }}_TX_PIN },
-  .rx = { SL_UART_{{ instance | upper }}_RX_PORT, SL_UART_{{ instance | upper }}_RX_PIN },
-#if defined(SL_UART_{{ instance | upper }}_CTS_PORT) && defined(SL_UART_{{ instance | upper }}_CTS_PIN)
-  .cts = { SL_UART_{{ instance | upper }}_CTS_PORT, SL_UART_{{ instance | upper }}_CTS_PIN },
-#endif
-#if defined(SL_UART_{{ instance | upper }}_RTS_PORT) && defined(SL_UART_{{ instance | upper }}_RTS_PIN)
-  .rts = { SL_UART_{{ instance | upper }}_RTS_PORT, SL_UART_{{ instance | upper }}_RTS_PIN },
-#endif
-};
-
-const sl_uart_config_t sl_uart_{{ instance }}_line_config = {
-  .baudrate = SL_UART_{{ instance | upper }}_BAUDRATE,
-  .parity = SL_UART_{{ instance | upper }}_PARITY,
-  .stop_bits = SL_UART_{{ instance | upper }}_STOP_BITS,
-  .data_bits = SL_UART_{{ instance | upper }}_DATA_BITS,
-  .flow_control = SL_UART_{{ instance | upper }}_FLOW_CONTROL,
-  .oversampling = SL_UART_{{ instance | upper }}_OVERSAMPLING
-};
 
 void SL_UART_RX_IRQHandler(SL_UART_{{ instance | upper }}_PERIPHERAL)(void)
 {
@@ -103,15 +95,40 @@ void sl_uart_instances_init(void)
   sl_status_t status;
 
   {%- for instance in uart_instances_it %}
+  const sl_uart_pin_config_t sl_uart_{{ instance }}_pin_config = {
+    .tx = { SL_UART_{{ instance | upper }}_TX_PORT, SL_UART_{{ instance | upper }}_TX_PIN },
+    .rx = { SL_UART_{{ instance | upper }}_RX_PORT, SL_UART_{{ instance | upper }}_RX_PIN },
+  #if defined(SL_UART_{{ instance | upper }}_CTS_PORT) && defined(SL_UART_{{ instance | upper }}_CTS_PIN)
+    .cts = { SL_UART_{{ instance | upper }}_CTS_PORT, SL_UART_{{ instance | upper }}_CTS_PIN },
+  #else
+    .cts = SL_UART_INVALID_GPIO,
+  #endif
+  #if defined(SL_UART_{{ instance | upper }}_RTS_PORT) && defined(SL_UART_{{ instance | upper }}_RTS_PIN)
+    .rts = { SL_UART_{{ instance | upper }}_RTS_PORT, SL_UART_{{ instance | upper }}_RTS_PIN },
+  #else
+    .rts = SL_UART_INVALID_GPIO,
+  #endif
+  };
+
+  const sl_uart_config_t sl_uart_{{ instance }}_line_config = {
+    .baudrate = SL_UART_{{ instance | upper }}_BAUDRATE,
+    .parity = SL_UART_{{ instance | upper }}_PARITY,
+    .stop_bits = SL_UART_{{ instance | upper }}_STOP_BITS,
+    .data_bits = SL_UART_{{ instance | upper }}_DATA_BITS,
+    .flow_control = SL_UART_{{ instance | upper }}_FLOW_CONTROL,
+    .oversampling = SL_UART_{{ instance | upper }}_OVERSAMPLING
+  };
+
   status = sl_uart_init(&sl_uart_{{ instance }}_handle,
                         SL_UART_PERIPHERAL(SL_UART_{{ instance | upper }}_PERIPHERAL),
                         &sl_uart_{{ instance }}_pin_config,
                         SL_UART_{{ instance | upper }}_ASYNC_CONFIG);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
 
   status = sl_uart_configure_line(&sl_uart_{{ instance }}_handle,
                                   &sl_uart_{{ instance }}_line_config);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
   {%- endfor %}
+  (void)status;
   {%- endif %}
 }

@@ -762,10 +762,16 @@ cc_configuration_command_name_get(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
 static received_frame_status_t
 cc_configuration_command_set(__attribute__((unused)) RECEIVE_OPTIONS_TYPE_EX const *rxOpt,
                              ZW_APPLICATION_TX_BUFFER const *pCmd,
-                             __attribute__((unused)) const uint8_t cmdLength)
+                             const uint8_t cmdLength)
 {
   received_frame_status_t frame_status = RECEIVED_FRAME_STATUS_SUCCESS;
   ZW_CONFIGURATION_SET_4BYTE_V4_FRAME const* pCfgSetFrame = &pCmd->ZW_ConfigurationSet4byteV4Frame;
+  const size_t value_offset = offsetof(ZW_CONFIGURATION_SET_4BYTE_V4_FRAME, configurationValue1);
+
+  if (cmdLength < value_offset) {
+    return RECEIVED_FRAME_STATUS_FAIL;
+  }
+
   cc_config_parameter_size_t size  =   pCfgSetFrame->level & 0x07;
 
   if ((false == cc_configuration_is_valid_size(size))) {
@@ -775,6 +781,10 @@ cc_configuration_command_set(__attribute__((unused)) RECEIVE_OPTIONS_TYPE_EX con
   bool is_default                  = ((pCfgSetFrame->level & 0x80) == 0x80)?true:false;
 
   if (is_default == false) {
+    if (cmdLength < value_offset + size) {
+      return RECEIVED_FRAME_STATUS_FAIL;
+    }
+
     cc_config_parameter_value_t new_value = { 0 };
     const cc_config_parameter_value_t* pConfigValue = ( cc_config_parameter_value_t *)&pCmd->ZW_ConfigurationSet4byteV4Frame.configurationValue1;
     uint8_t size_of_configuration_values = (uint8_t)size;
@@ -1002,12 +1012,17 @@ cc_configuration_command_bulk_get(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
 static received_frame_status_t
 cc_configuration_command_bulk_set(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
                                   ZW_APPLICATION_TX_BUFFER const * pCmd,
-                                  __attribute__((unused)) const uint8_t cmdLength)
+                                  const uint8_t cmdLength)
 {
   received_frame_status_t frame_status = RECEIVED_FRAME_STATUS_SUCCESS;
   uint8_t const* p_raw_cmd = (uint8_t const*)pCmd;
   bool io_transaction_result = false;
   cc_config_parameter_buffer_t parameter_buffer;
+  const size_t values_offset = offsetof(ZW_CONFIGURATION_BULK_SET_1BYTE_V4_FRAME, variantgroup1);
+
+  if (cmdLength < values_offset) {
+    return RECEIVED_FRAME_STATUS_FAIL;
+  }
 
   uint8_t cmd_index = 0;
   cmd_index++; /*Command Class*/
@@ -1026,6 +1041,11 @@ cc_configuration_command_bulk_set(RECEIVE_OPTIONS_TYPE_EX *pRxOpt,
     return RECEIVED_FRAME_STATUS_FAIL;
   }
   cmd_index++;
+
+  if ((is_default == false)
+      && ((size_t)number_of_parameters * size > (size_t)cmdLength - values_offset)) {
+    return RECEIVED_FRAME_STATUS_FAIL;
+  }
 
   cc_config_parameter_value_t new_parameter_value;
   uint16_t updated_parameter_counter = 0;

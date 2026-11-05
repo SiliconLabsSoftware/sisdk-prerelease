@@ -6,10 +6,6 @@ except ModuleNotFoundError as mnfe:
 
 class FileUtilities(object):
 
-    #
-    # delete the output directory and recreate it.  Start with an empty
-    # directory for output files
-    #
     @staticmethod
     def cleandir(dir,file_types=None):
         if os.path.exists(dir):
@@ -22,10 +18,8 @@ class FileUtilities(object):
                 else:
                     os.remove(dir + "/" + file)
         else:
-            # Create missing parent directories as well (important for clean CI workspaces).
             os.makedirs(dir, exist_ok=True)
 
-    # Attempt to create a directory, and allow an already-existing directory.
     @staticmethod
     def makedirs(directory):
         try:

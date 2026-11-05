@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.4" xml:lang="en-US">
   <compounddef id="group__bluetooth__rtos__adaptation" kind="group">
     <compoundname>bluetooth_rtos_adaptation</compoundname>
     <title>Bluetooth RTOS adaptation</title>
-    <sectiondef kind="var">
+      <sectiondef kind="var">
       <memberdef kind="variable" id="group__bluetooth__rtos__adaptation_1ga10153dd9d6c691b664b879750cb7b0d6" prot="public" static="no" mutable="no">
         <type>sli_bgapi_component_init_func_t</type>
         <definition>sli_bgapi_component_init_func_t sli_bt_rtos_adaptation_init</definition>
@@ -34,8 +34,8 @@
         </inbodydescription>
         <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/inc/sl_bt_rtos_adaptation.h" line="133" column="35" bodyfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/inc/sl_bt_rtos_adaptation.h" bodystart="133" bodyend="-1"/>
       </memberdef>
-    </sectiondef>
-    <sectiondef kind="func">
+      </sectiondef>
+      <sectiondef kind="func">
       <memberdef kind="function" id="group__bluetooth__rtos__adaptation_1gac718122dcb73f19023423387fc9f6751" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
         <type>sl_status_t</type>
         <definition>sl_status_t sli_bt_rtos_adaptation_permanent_allocation</definition>
@@ -151,7 +151,7 @@
         </inbodydescription>
         <location file="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/inc/sl_bt_rtos_adaptation.h" line="166" column="13" declfile="/__w/bluetooth-le/bluetooth-le/bluetooth_le_host/inc/sl_bt_rtos_adaptation.h" declline="166" declcolumn="13"/>
       </memberdef>
-    </sectiondef>
+      </sectiondef>
     <briefdescription>
 <para>Bluetooth RTOS adaptation. </para>
     </briefdescription>
@@ -166,7 +166,7 @@
 </listitem><listitem><para>The stack will never internally obtain the <ref refid="group__bluetooth__rtos__adaptation_1gaa7b9592f6f990160875fc32fe5028e6c" kindref="member">sl_bt_bluetooth_pend()</ref> lock. It is safe for the application to obtain the lock also from within the sl_bt_on_event() callback.</para>
 </listitem></orderedlist>
 </para>
-<para>BGAPI commands are synchronous and pend on RTOS synchronization primitives. Do not call BGAPI commands or <ref refid="group__bluetooth__rtos__adaptation_1gaa7b9592f6f990160875fc32fe5028e6c" kindref="member">sl_bt_bluetooth_pend()</ref> from an interrupt context or from any other RTOS context that prohibits pending. See the Concurrency section of <ref refid="bgapi" kindref="compound">BGAPI</ref> for details and recommended alternatives. </para>
+<para>BGAPI commands are synchronous and pend on RTOS synchronization primitives. Do not call BGAPI commands or <ref refid="group__bluetooth__rtos__adaptation_1gaa7b9592f6f990160875fc32fe5028e6c" kindref="member">sl_bt_bluetooth_pend()</ref> from an interrupt context or from any other RTOS context that prohibits pending. See the Concurrency section of <ref refid="md_doc_bgapi_1bgapi" kindref="member">bgapi</ref> for details and recommended alternatives. </para>
     </detaileddescription>
   </compounddef>
 </doxygen>

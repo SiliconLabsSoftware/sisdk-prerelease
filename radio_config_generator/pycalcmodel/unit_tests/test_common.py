@@ -8,7 +8,6 @@ import unittest
 import sys
 from enum import Enum
 
-# Add the Package directory to the path for imports
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
@@ -17,7 +16,6 @@ from pycalcmodel.core.common import (
     cast_value_from_xml, get_dummy_var_value, get_xml_str_values, DUMMY_VAR_VALUE
 )
 
-# Python 2/3 compatibility
 try:
     long
 except NameError:
@@ -70,7 +68,6 @@ class TestDummyVarValue(unittest.TestCase):
         var = ModelVariable(name="test", var_type=Enum, is_array=False)
         var.var_enum = TestEnum
         result = get_dummy_var_value(var)
-        # Should return the value of the first enum member
         assert result == 100  # TestEnum.FIRST.value
 
 
@@ -120,11 +117,9 @@ class TestCastValueFromXML(unittest.TestCase):
         """Test casting None and empty values."""
         var = ModelVariable(name="test", var_type=int, is_array=False)
         
-        # Test empty list
         result = cast_value_from_xml(var, [])
         assert result is None
         
-        # Test list with None
         result = cast_value_from_xml(var, [None])
         assert result is None
     
@@ -134,7 +129,6 @@ class TestCastValueFromXML(unittest.TestCase):
         result = cast_value_from_xml(var, ['42'])
         assert result == 42
         
-        # Test array
         var_array = ModelVariable(name="test_array", var_type=int, is_array=True)
         result = cast_value_from_xml(var_array, ['1', '2', '3'])
         assert result == [1, 2, 3]
@@ -145,7 +139,6 @@ class TestCastValueFromXML(unittest.TestCase):
         result = cast_value_from_xml(var, ['3.14'])
         assert result == 3.14
         
-        # Test array
         var_array = ModelVariable(name="test_array", var_type=float, is_array=True)
         result = cast_value_from_xml(var_array, ['1.0', '2.5'])
         assert result == [1.0, 2.5]
@@ -156,7 +149,6 @@ class TestCastValueFromXML(unittest.TestCase):
         result = cast_value_from_xml(var, ['hello'])
         assert result == 'hello'
         
-        # Test array
         var_array = ModelVariable(name="test_array", var_type=str, is_array=True)
         result = cast_value_from_xml(var_array, ['a', 'b', 'c'])
         assert result == ['a', 'b', 'c']
@@ -167,7 +159,6 @@ class TestCastValueFromXML(unittest.TestCase):
         result = cast_value_from_xml(var, ['123456789'])
         assert result == long(123456789)
         
-        # Test array
         var_array = ModelVariable(name="test_array", var_type=long, is_array=True)
         result = cast_value_from_xml(var_array, ['1', '2'])
         assert result == [long(1), long(2)]
@@ -178,7 +169,6 @@ class TestCastValueFromXML(unittest.TestCase):
         result = cast_value_from_xml(var, ['(1+2j)'])
         assert result == (1+2j)
         
-        # Test array
         var_array = ModelVariable(name="test_array", var_type=complex, is_array=True)
         result = cast_value_from_xml(var_array, ['(1+0j)', '(0+1j)'])
         assert result == [(1+0j), (0+1j)]
@@ -192,7 +182,6 @@ class TestCastValueFromXML(unittest.TestCase):
         result = cast_value_from_xml(var, ['False'])
         assert result == False
         
-        # Test array
         var_array = ModelVariable(name="test_array", var_type=bool, is_array=True)
         result = cast_value_from_xml(var_array, ['True', 'False'])
         assert result == [True, False]
@@ -203,7 +192,6 @@ class TestCastValueFromXML(unittest.TestCase):
         result = cast_value_from_xml(var, ["{'key': 'value'}"])
         assert result == {'key': 'value'}
         
-        # Test array
         var_array = ModelVariable(name="test_array", var_type=dict, is_array=True)
         result = cast_value_from_xml(var_array, ["{'a': 1}", "{'b': 2}"])
         assert result == [{'a': 1}, {'b': 2}]
@@ -307,10 +295,8 @@ class TestComprehensiveIntegration(unittest.TestCase):
         for var_type, is_array, original_value in test_cases:
             var = ModelVariable(name="test", var_type=var_type, is_array=is_array)
             
-            # Convert to XML strings
             xml_strings = get_xml_str_values(is_array, original_value)
             
-            # Convert back from XML
             restored_value = cast_value_from_xml(var, xml_strings)
             
             assert restored_value == original_value
@@ -326,10 +312,8 @@ class TestComprehensiveIntegration(unittest.TestCase):
         var.var_enum = TestEnum
         
         for enum_value in TestEnum:
-            # Convert to XML string (manual since get_xml_str_values doesn't handle enums)
             xml_strings = [f"{TestEnum.__name__}.{enum_value.name}"]
             
-            # Convert back from XML
             restored_value = cast_value_from_xml(var, xml_strings)
             
             assert restored_value == enum_value

@@ -48,6 +48,7 @@
 #include "sl_slist.h"
 #include "sl_status.h"
 
+#include "sl_log_helper.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -94,7 +95,7 @@ sl_status_t sl_keyscan_driver_init(void);
  *   event_handle  Event handle to register
  *
  * @note
- *   An EFM_ASSERT is thrown if the handle is NULL.
+ *   An SL_LOG_DEBUG_ASSERT is thrown if the handle is NULL.
  * @note
  *   Must be called before init function.
  ******************************************************************************/
@@ -109,7 +110,7 @@ void sl_keyscan_driver_subscribe_event(sl_keyscan_driver_process_keyscan_event_h
  *                      registered previously).
  *
  * @note
- *   An EFM_ASSERT is thrown if the handle is not found or is NULL.
+ *   An SL_LOG_DEBUG_ASSERT is thrown if the handle is not found or is NULL.
  ******************************************************************************/
 void sl_keyscan_driver_unsubscribe_event(sl_keyscan_driver_process_keyscan_event_handle_t  *event_handle);
 
@@ -303,7 +304,7 @@ sl_status_t sl_keyscan_driver_stop_scan(void);
 ///     case SL_KEYSCAN_STATUS_KEYPRESS_RELEASED:
 ///       break;
 ///     default:
-///       EFM_ASSERT(false);
+///       SL_LOG_DEBUG_ASSERT(false);
 ///       break;
 ///   }
 /// }

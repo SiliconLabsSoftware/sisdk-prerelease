@@ -87,7 +87,7 @@ void sl_btmesh_cmt_on_init(void)
 
   #if SL_BTMESH_CMT_USE_UUID
   uuid_128 uuid = sl_btmesh_cmt_get_uuid();
-  sc = sl_btmesh_node_set_uuid(uuid);
+  sc = sl_btmesh_node_set_uuid_transient(uuid);
   log_status_error_f(sc, "Failed to set UUID" NL);
   #endif
 }

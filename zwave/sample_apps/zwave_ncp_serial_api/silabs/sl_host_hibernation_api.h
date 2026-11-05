@@ -40,6 +40,13 @@ void set_host_state(bool sleeping);
 void keep_alive_init(void);
 
 /**
+ * @addtogroup Apps
+ * @{
+ * @addtogroup HostWakeupGpio Host Wakeup GPIO
+ * @{
+ */
+
+/**
  * @brief Initialize the host-wake GPIO as push-pull, driven HIGH (idle).
  *
  * Requires the @c zw_host_wakeup_gpio component. Pin defaults to PA10;
@@ -56,6 +63,11 @@ void gpio_wakeup_host_init(void);
  * an unsolicited SerialAPI frame (0xFE).
  */
 void gpio_wakeup_host(void);
+
+/**
+ * @}
+ * @}
+ */
 
 /**
  * @brief Update the S2 message count for a given node

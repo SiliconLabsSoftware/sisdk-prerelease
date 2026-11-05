@@ -4,9 +4,7 @@ from pyradioconfig.parts.bobcat.calculators.calc_freq_offset_comp import Calc_Fr
 class CalcFreqOffsetCompRainier(Calc_Freq_Offset_Comp_Bobcat):
 
     def calc_afc_scale_value(self, model):
-        # Overriding this function due to variable name change
 
-        # Load model values into local variables
         freqgain = model.vars.freq_gain_actual.value
         mod_format = model.vars.modulation_type.value
         mode = model.vars.frequency_comp_mode.value
@@ -31,7 +29,6 @@ class CalcFreqOffsetCompRainier(Calc_Freq_Offset_Comp_Bobcat):
         else:
             res = synth_res
 
-        # AFC to synth for Legacy
         if(demod_sel==model.vars.demod_select.var_enum.LEGACY):
             if mode_index >= 4 and freqgain > 0:
                 if mod_format == model.vars.modulation_type.var_enum.FSK2 or \
@@ -55,22 +52,17 @@ class CalcFreqOffsetCompRainier(Calc_Freq_Offset_Comp_Bobcat):
                 afcscale_tx = baudrate * osr * phscale / (256 * freqgain * synth_res)
             else:
                 if vtafcframe == 0:
-                    #Digmix only updated one time, so use 100% scale to ensure we are in the channel bw
                     afcscale = 1.0 * baudrate * phscale / (256 * res)
                 else:
-                    #Digmix updated constantly, so use smaller scale to reduce jitter
                     afcscale = 0.8 * baudrate * phscale / (256 * res) #Less correction jitter if we use gain < 1
                 afcscale_tx = baudrate * phscale / (256 * synth_res)
 
-                # Reduce afc scale by eighth if oneshot is disabled. Following BLE case
                 if afc_oneshot == 0 and bcr_det_en == 1:
                     afcscale = afcscale / 8.0
         elif (demod_sel == model.vars.demod_select.var_enum.BCR):
-            # digital mixer frequency comp
             afcscale =  model.vars.pro2_afc_gain.value /  res
             afcscale_tx = model.vars.pro2_afc_gain.value / synth_res
         elif (demod_sel == model.vars.demod_select.var_enum.ENHANCED_DSSS):
-            # feedback 25% of estimated offset to digital mixer
             afcscale = 0.25 * baudrate / (256 * res)
             afcscale_tx = baudrate / (256 * synth_res)
         else:
@@ -79,8 +71,6 @@ class CalcFreqOffsetCompRainier(Calc_Freq_Offset_Comp_Bobcat):
 
         afcscale = afcscale * scale
 
-        #Special case to set afc_scale_tx to 0 to disable TX AFC adjust when using oneshot
-        #See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1510
         if (afc_tx_adjust_enable == False) and afc_oneshot:
             afcscale_tx = 0.0
 

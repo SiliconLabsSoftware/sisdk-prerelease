@@ -1,21 +1,20 @@
-!!omap
-- id: SIBG301M104XIL_32MB
-- package: platform_core
-- description: Silicon Labs CMSIS-Device part headers for SIBG301M104XIL with 32 MB external flash.
-- category: Platform|Device|SIBG301
-- quality: production
-- provides:
-  - name: sibg301m104xil_32mb
-- requires:
-  - name: sibg301m104xil
-  - name: external_flash_32mb_s3
-- tag:
-  - device:opn:sibg301m104xil_32mb
-  - device:ram:512k
-  - device:flash:32576k
-- ui_hints:
-    visibility: never
-- metadata:
-    sbom:
-      license: Zlib
-- root_path: platform_core
+id: SIBG301M104XIL_32MB
+package: platform_core
+description: Silicon Labs CMSIS-Device part headers for SIBG301M104XIL with 32 MB external flash.
+category: Platform|Device|SIBG301
+quality: production
+provides:
+- name: sibg301m104xil_32mb
+requires:
+- name: sibg301m104xil
+- name: external_flash_32mb_s3
+tag:
+- device:opn:sibg301m104xil_32mb
+- device:ram:512k
+- device:flash:32576k
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: platform_core

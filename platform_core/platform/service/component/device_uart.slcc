@@ -12,6 +12,7 @@ metadata:
 provides:
 - name: device_uart
 requires:
+- name: log_none
 - name: enum
 root_path: platform_core/platform/service/device_manager
 include:

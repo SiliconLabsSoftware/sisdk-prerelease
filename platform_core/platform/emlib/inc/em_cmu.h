@@ -34,7 +34,7 @@
 #if defined(CMU_PRESENT)
 
 #include <stdbool.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_bus.h"
 #include "em_cmu_compat.h"
 #include "em_gpio.h"
@@ -408,7 +408,7 @@ SL_ENUM_GENERIC(CMU_Clock_TypeDef, uint32_t) {
   cmuClock_GPCRC0 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                    | (_CMU_CLKEN0_GPCRC0_SHIFT << CMU_EN_BIT_POS),              /**< GPCRC0 clock. */
   cmuClock_GPCRC1 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
-                   | (_CMU_CLKEN1_GPCRC1_SHIFT << CMU_EN_BIT_POS),              /**< GPCRC1 clock. */
+                   | (_CMU_CLKEN2_GPCRC1_SHIFT << CMU_EN_BIT_POS),              /**< GPCRC1 clock. */
 #else
   cmuClock_GPCRC = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                    | (_CMU_CLKEN0_GPCRC_SHIFT << CMU_EN_BIT_POS),               /**< GPCRC clock. */
@@ -3517,7 +3517,7 @@ __STATIC_INLINE uint32_t CMU_DivToLog2(CMU_ClkDiv_TypeDef div)
   uint32_t log2;
 
   /* Fixed 2^n prescalers take argument of 32768 or less. */
-  EFM_ASSERT((div > 0U) && (div <= 32768U));
+  SL_LOG_DEBUG_ASSERT((div > 0U) && (div <= 32768U));
 
   /* Count leading zeroes and "reverse" result */
   log2 = 31UL - __CLZ(div);
@@ -3684,14 +3684,14 @@ __STATIC_INLINE uint32_t CMU_PrescToLog2(uint32_t presc)
   uint32_t log2;
 
   /* Integer prescalers take argument less than 32768. */
-  EFM_ASSERT(presc < 32768U);
+  SL_LOG_DEBUG_ASSERT(presc < 32768U);
 
   /* Count leading zeroes and "reverse" result. Consider divider value to get
    * exponent n from 2^n, so ('presc' +1). */
   log2 = 31UL - __CLZ(presc + (uint32_t) 1);
 
   /* Check that prescaler is a 2^n number. */
-  EFM_ASSERT(presc == (SL_Log2ToDiv(log2) - 1U));
+  SL_LOG_DEBUG_ASSERT(presc == (SL_Log2ToDiv(log2) - 1U));
 
   return log2;
 }

@@ -133,7 +133,7 @@
 #define SL_CLOCK_MANAGER_HFXO_SLEEPY_CRYSTAL_CTUNE_VALUE    64
 #endif
 
-// <o SL_CLOCK_MANAGER_HFXO_SLEEPY_CRYSTAL_CORE_BIAS_VALUE> HFXO_SLEEPY_CRYSTAL_CORE_BIAS <0-255>
+// <o SL_CLOCK_MANAGER_HFXO_SLEEPY_CRYSTAL_CORE_BIAS_VALUE> HFXO_SLEEPY_CRYSTAL_CORE_BIAS <0-511>
 // <i> This setting is temporarily used to force oscillation on sleepy crystal. Default values should be enough to wake-up sleepy crystals.
 // <d> 511
 #ifndef SL_CLOCK_MANAGER_HFXO_SLEEPY_CRYSTAL_CORE_BIAS_VALUE
@@ -158,8 +158,7 @@
 #ifndef SL_CLOCK_MANAGER_LFXO_MODE
 #define SL_CLOCK_MANAGER_LFXO_MODE    LFXO_CFG_MODE_XTAL
 #endif
-
-// <o SL_CLOCK_MANAGER_LFXO_CTUNE> CTUNE <0-127>
+// <o SL_CLOCK_MANAGER_LFXO_CTUNE> CTUNE <0-89>
 // <d> 63
 #ifndef SL_CLOCK_MANAGER_LFXO_CTUNE
 #define SL_CLOCK_MANAGER_LFXO_CTUNE    63
@@ -254,7 +253,7 @@
 // <i> Lock mode
 // <_DPLL_CFG_MODE_FLL=> Frequency-Lock Loop
 // <_DPLL_CFG_MODE_PLL=> Phase-Lock Loop
-// <d> cmuDPLLLockMode_Freq
+// <d> _DPLL_CFG_MODE_PLL
 #ifndef SL_CLOCK_MANAGER_DPLL_LOCKMODE
 #define SL_CLOCK_MANAGER_DPLL_LOCKMODE    _DPLL_CFG_MODE_PLL
 #endif

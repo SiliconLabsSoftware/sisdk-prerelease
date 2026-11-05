@@ -2,6 +2,7 @@ from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfil
 from pyradioconfig.parts.common.profiles.curl_regs import build_modem_regs_curl
 from pyradioconfig.parts.lion.profiles.Profile_BLE import ProfileBLELion
 from pyradioconfig.parts.curl.ip_collector.ip_collector_curl import IPCollector_Curl
+from pyradioconfig.parts.curl.profiles.Profile_Base import ProfileBaseCurl
 
 
 class ProfileBLECurl(ProfileBLELion):
@@ -19,7 +20,7 @@ class ProfileBLECurl(ProfileBLELion):
 
     def build_register_profile_outputs(self, model, profile):
         build_modem_regs_curl(model, profile)
-        IPCollector_Curl(model.part_family, model.part_revision).build_all_peripheral_regs(model, profile)
+        IPCollector_Curl(model.part_family, model.part_revision, self.ip_category).build_all_peripheral_regs(model, profile)
 
     def _build_feature_settings(self, model):
         ble_feature = model.profile.inputs.ble_feature.var_value
@@ -38,3 +39,7 @@ class ProfileBLECurl(ProfileBLELion):
             self._copy_model_variables_from_phy(model, 'PHY_Bluetooth_LE_2M_Viterbi_noDSA_fullrate')
         elif ble_feature == model.vars.ble_feature.var_enum.CONCURRENT:
             self._copy_model_variables_from_phy(model, 'PHY_Bluetooth_1M_Concurrent')
+
+    def buildRailOutputs(self, model, profile):
+        ProfileBLELion().buildRailOutputs(model, profile)
+        ProfileBaseCurl().buildHadmOutputs(model, profile)

@@ -6,6 +6,10 @@ description: >
   for the Color Switch Command Class.
   It can be used to ensure that the state of the Command Class persists across resets
   by saving the state into the NVM.
+documentation:
+  docset: z-wave
+  document: zwave-api/color-switch
+
 package: zwave
 quality: production
 metadata:

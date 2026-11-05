@@ -1,0 +1,18 @@
+id: sl_rail_util_dual_pa
+label: RAIL Utility, dual PA support (RAIL 3)
+description: Utility to provide RAIL dual PA support.
+package: rail_library
+category: Platform|Radio
+quality: production
+metadata:
+  sbom:
+    id: sl_rail_util_dual_pa
+    name: RAIL Utility, dual PA support (RAIL 3)
+    license: Zlib
+provides:
+- name: sl_rail_util_dual_pa
+requires:
+- name: device
+- name: rail_lib
+- name: component_catalog
+root_path: rail_library

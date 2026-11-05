@@ -11,6 +11,9 @@ provides:
 - name: device
 - name: device_host
 - name: native_host
+template_contribution:
+- name: component_catalog
+  value: native_host
 requires:
 - name: operating_system
 recommends:

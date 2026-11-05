@@ -44,7 +44,6 @@ class CalcLog(object):
                 self._log_list.append('# Symbol rate is {:6.0f} sps; OOK RX BW is {:6.0f} Hz\n'.format(modem_calc.inputs.API_Rsymb, modem_calc.inputs.API_RXBW))
             else:
                 self._log_list.append('# Symbol rate is {:6.0f} sps; Fd is {:6.0f} Hz; Modulation BW is {:6.0f} Hz; modulation index is {:2.3f} \n'.format(modem_calc.inputs.API_Rsymb, modem_calc.demodulator.fields.df, modem_calc.demodulator.BW_mod, modem_calc.demodulator.fields.hModInd))
-            #    print('3) Modulation BW is {:6.0f} Hz; modulation index is {:2.3f} \n'.format(BW_mod,hModInd/2**9))
             pro2bar = False
             try:
                 foo = modem_calc.demodulator.fields.ndec3
@@ -84,8 +83,6 @@ class CalcLog(object):
                             self._log_list.append('# Warning: {:d}-bit preamble is not long enough to run DSA rx-hopping for the super low data rate.\n'.format(int(modem_calc.inputs.API_pm_len)))
                             self._log_list.append('#          {:d}-bit preamble is required for the current application.\n'.format(modem_calc.demodulator.fields.fh_ch_number * 4 + 8))
 
-            # print('12)AFC loop gain is   {6.0f} \n'.format(afc_gain))
-            # print('13)AFC loop limiter is   {6.0f} \n'.format(rtl_afclim))
             if (modem_calc.demodulator.fields.nonstdpk == 1):
                 self._log_list.append('# async demodulator is used.\n')
             else:
@@ -95,7 +92,6 @@ class CalcLog(object):
                 self._log_list.append(modem_calc.warning2log)
         if self._filename == '':
             return
-        # write to calc_log.txt
         fid_log = open(self._filename, 'a');
         if (modem_calc.IQ_CAL_setting == 0):
             fid_log.write("".join(self._log_list))

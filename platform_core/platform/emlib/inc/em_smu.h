@@ -34,7 +34,7 @@
 #include "em_device.h"
 #if defined(SMU_COUNT) && (SMU_COUNT > 0)
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_bus.h"
 
 #include <stdint.h>
@@ -1603,7 +1603,7 @@ __STATIC_INLINE void SMU_Init(const SMU_Init_TypeDef *init)
 __STATIC_INLINE void SMU_SetPrivilegedAccess(SMU_Peripheral_TypeDef peripheral,
                                              bool privileged)
 {
-  EFM_ASSERT(peripheral < smuPeripheralEnd);
+  SL_LOG_DEBUG_ASSERT(peripheral < smuPeripheralEnd);
 
 #if !defined (SL_TRUSTZONE_SECURE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
   && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
@@ -1615,7 +1615,7 @@ __STATIC_INLINE void SMU_SetPrivilegedAccess(SMU_Peripheral_TypeDef peripheral,
 #if defined(_SMU_PPUNSPATD2_MASK)
     BUS_RegBitWrite(&SMU_NS_CFGNS->PPUNSPATD2, peripheral - 64, privileged);
 #else
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
 #endif //defined(_SMU_PPUNSPATD2_MASK)
   }
 #else
@@ -1627,7 +1627,7 @@ __STATIC_INLINE void SMU_SetPrivilegedAccess(SMU_Peripheral_TypeDef peripheral,
 #if defined(_SMU_PPUNSPATD2_MASK)
     BUS_RegBitWrite(&SMU_NS_CFGNS->PPUNSPATD2, peripheral - 64, privileged);
 #else
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
 #endif //defined(_SMU_PPUNSPATD2_MASK)
   }
 #endif //SL_TRUSTZONE_SECURE
@@ -1813,16 +1813,16 @@ __STATIC_INLINE void SMU_IntSet(uint32_t flags)
 void SMU_SECURE_IRQHandler(void)
 {
 #if (SMU_IF_PPUSEC != 0)
-  EFM_ASSERT(SMU->IF & SMU_IF_PPUSEC);
+  SL_LOG_DEBUG_ASSERT(SMU->IF & SMU_IF_PPUSEC);
 #endif
 
 #if (SMU_IF_BMPUSEC != 0)
-  EFM_ASSERT(SMU->IF & SMU_IF_BMPUSEC);
+  SL_LOG_DEBUG_ASSERT(SMU->IF & SMU_IF_BMPUSEC);
 #endif
 
   // PPUFS contains the ID of the peripheral caused the fault
   // The ID is ordered after the PPUSATD0-PPUSATD1 register bit fields.
-  EFM_ASSERT(SMU->PPUFS);
+  SL_LOG_DEBUG_ASSERT(SMU->PPUFS);
 
   while (1) {
     // do nothing

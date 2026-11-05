@@ -6,12 +6,10 @@ from scipy import interpolate
 from enum import Enum
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
 
-#This file contains calculations related to the configuring the AGC
 
 class CALC_AGC_ocelot(CALC_AGC_panther):
 
     def buildVariables(self, model):
-        # Build variables from Panther
         super().buildVariables(model)
         self._addModelActual(model, 'rssi_access_time_us', float, ModelVariableFormat.DECIMAL,
                              desc='Actual RSSI access time [us] after demod enable')
@@ -100,10 +98,8 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         self._reg_write(model.vars.AGC_GAINSTEPLIM0_CFLOOPSTEPMAX, 0)
         self._reg_write(model.vars.AGC_GAINSTEPLIM0_HYST, 0)
 
-        # numbers from Arup's email dated 7/2/19 to Xun
 
     def calc_lnamixslice_reg(self, model):
-        # numbers from Arup's email dated 7/2/19 to Xun
         self._reg_write(model.vars.AGC_LNAMIXCODE0_LNAMIXSLICE1,61)
         self._reg_write(model.vars.AGC_LNAMIXCODE0_LNAMIXSLICE2,46)
         self._reg_write(model.vars.AGC_LNAMIXCODE0_LNAMIXSLICE3,36)
@@ -117,11 +113,8 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
 
     def calc_pnupdisthd_reg(self, model):
 
-        #Read in model vars
         band = model.vars.rf_band.value
 
-        ## MCUW_RADIO_CFG-1856: Set PNUPDISTHD to 0 When Using RFPKD to Prevent AGC chattering at after PN exhaustion
-        # only acceptable to set to 0 when dual RFPKD THD can release the disgainup
         if model.vars.rf_band.value == model.vars.rf_band.var_enum.BAND_2400:
             pnupdisthd = 0
         else:
@@ -134,10 +127,8 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
 
     def calc_lnamixrfatt_reg(self, model):
 
-        #Load in model variables
         rf_band = model.vars.rf_band.value
 
-        #Calculate the LNAMIXRFATT values based on band
 
         if rf_band == model.vars.rf_band.var_enum.BAND_2400:
             lnamixrfatt = [0, 102, 365, 659, 1084, 1658, 2390, 3180, 4293, 5726, 7527, 9894, 12920, 16383, 16383, 16383,
@@ -168,7 +159,6 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
                            5630, 7160, 9180, 11700, 14800, 16383, 16383]
             pnindexmax = 17
 
-        #Write registers
         self._reg_write(model.vars.AGC_PNRFATT0_LNAMIXRFATT1,lnamixrfatt[0])
         self._reg_write(model.vars.AGC_PNRFATT0_LNAMIXRFATT2, lnamixrfatt[1])
         self._reg_write(model.vars.AGC_PNRFATT1_LNAMIXRFATT3, lnamixrfatt[2])
@@ -200,14 +190,11 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         f_if = model.vars.if_frequency_hz_actual.value
         baudrate = model.vars.baudrate.value
 
-        # period over which we count how many times we tripped the HI threshold - xtal PLL freq because AGC runs at this clock
         if f_if > 0:
             periodhi = int(py2round(modem_frequency_hz / (2 * f_if)))
         else:
             periodhi = 14  # for zero-IF used on FPGA tests fix periodhi to 14
 
-        # Function of PERIODHI and attack vs decay ratio needed. We currently use 3x
-        # The scaler 3 could be an input that tunes attack vs decay ratio.
 
         if (mod_format == model.vars.modulation_type.var_enum.OOK):
             periodlow = int(py2round((modem_frequency_hz / (baudrate * 0.9))))
@@ -218,11 +205,8 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         self._reg_write(model.vars.AGC_AGCPERIOD1_PERIODLOW, int(round(periodlow)))
 
     def calc_agc_series2(self, model):
-        #We need to override this function because the variable fxo_or_fdec8 will go away (replaced by ADC rate calculations)
         periodhi = model.vars.AGC_AGCPERIOD0_PERIODHI.value
 
-        # % There are many possible ways to handle the table but the simplest would be:
-        # % this is based on sine wave tripping N times at different gain settings
         self._reg_write(model.vars.AGC_STEPDWN_STEPDWN0, 0)
         self._reg_write(model.vars.AGC_STEPDWN_STEPDWN1, 1)
         self._reg_write(model.vars.AGC_STEPDWN_STEPDWN2, 2)
@@ -250,25 +234,20 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         self._reg_write(model.vars.AGC_HICNTREGION0_HICNTREGION3, hicntregion3)
         self._reg_write(model.vars.AGC_HICNTREGION1_HICNTREGION4, hicntregion4)
 
-        # % safe way of setting this.
         self._reg_write(model.vars.AGC_AGCPERIOD0_MAXHICNTTHD, hicntregion4)
 
     def calc_fastloopdel_reg(self, model):
-        #This register does not exist in Ocelot
         pass
 
     def calc_ifpgadel_reg(self, model):
-        #This register does not exist in Ocelot
         pass
 
     def calc_lnaslicesdel_reg(self, model):
-        # This register does not exist in Ocelot
         pass
 
     def calc_pngainstep_reg(self, model):
         etsi_cat1_compatability = model.vars.etsi_cat1_compatible.value
 
-        # PN gain step size should be 1 for ETSI Cat 1 case and 2 in all other cases
         if (etsi_cat1_compatability != model.vars.etsi_cat1_compatible.var_enum.Normal):
             reg = 1
         else:
@@ -281,10 +260,8 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
 
     def calc_agcperiod_actual(self, model):
 
-        #Read in the actual AGC period register (different name for Ocelot)
         agc_period_reg = model.vars.AGC_CTRL1_PWRPERIOD.value
 
-        #Calculate the actual period value based on the reg
         val = 2 ** (agc_period_reg * 1.0)
 
         model.vars.agcperiod_actual.value = val
@@ -329,16 +306,12 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         src2_actual = model.vars.src2_ratio_actual.value
 
         osr = adc_freq_actual * src2_actual / (dec0_actual * dec1_actual * 8 * dec2_actual * baudrate)
-        # when BCR demod is selected we the OSR can be as high as 127
-        # this does not fit into the RXBR register which is used in generating a baudrate clock
-        # we switch to using SUB registers instead of RXBR for this purpose when BCR is selected
         if (demod_sel == model.vars.demod_select.var_enum.BCR):
             rawndec = model.vars.MODEM_BCRDEMODOOK_RAWNDEC.value #Checking inside of the BCR condition to allow inheritance for Bobcat
             subperiod = 1
             dec = pow(2, rawndec)
             osr_bcr = osr / dec
 
-            # write half of sampling rate into SUB registers
             subfrac = osr_bcr / 2
 
             subint = math.floor(subfrac)
@@ -378,19 +351,16 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
 
     def calc_subfrac_actual(self, model):
 
-        # Load model variables into local variables
         subint_actual = model.vars.AGC_CTRL7_SUBINT.value
         subnum_actual = model.vars.AGC_CTRL7_SUBNUM.value
         subden_actual = model.vars.AGC_CTRL7_SUBDEN.value
         subperiod = model.vars.AGC_CTRL7_SUBPERIOD.value
 
-        # Calculate the sub fraction
         if subperiod and subden_actual > 0:
             subfrac_actual = float(subint_actual + float(subnum_actual) / subden_actual)
         else:
             subfrac_actual = 0.0
 
-        # Load local variables back into model variables
         model.vars.subfrac_actual.value = subfrac_actual
 
     def calc_agc_lock_mode(self, model):
@@ -402,9 +372,6 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED:
             mode = model.vars.agc_lock_mode.var_enum.CONTINUOUS            # OOK has DSA detection disabled. FSK has issue of LO leakage locking up detector
         elif (demod_sel == model.vars.demod_select.var_enum.TRECS_VITERBI or demod_sel == model.vars.demod_select.var_enum.TRECS_SLICER):
-            # we like AGC to freeze once timing is detected (MODE=1) to avoid AGC changes while receiving data
-            # the only exception to this is the case where we are directly searching for the sync word when using Viterbi
-            # in this case we need to set the MODE=2 to freeze the AGC when frame is detected
             if preamsch:
                 mode = model.vars.agc_lock_mode.var_enum.PREAMBLE_DETECTION
             else:
@@ -443,7 +410,6 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
     def calc_agc_enable_adc_atten_mode(self, model):
         etsi = model.vars.etsi_cat1_compatible.value
 
-        # etsi_cat1_compatible takes priority
         if (etsi != model.vars.etsi_cat1_compatible.var_enum.Normal):
             model.vars.agc_enable_adc_attenuation.value = True
         else:
@@ -463,7 +429,6 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         dualrfpkddec_val = 240296
         self._reg_write(model.vars.AGC_CTRL6_DUALRFPKDDEC, dualrfpkddec_val)
 
-    #Removing legacy AGC calculations
 
     def calc_agc_scheme(self, model):
         pass
@@ -496,7 +461,6 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         demod_select = model.vars.demod_select.value
 
         if demod_select == model.vars.demod_select.var_enum.COHERENT:
-            # : disable RX baudrate calculation used by AGC and instead assume OSR = 2 * RXBRFRAC
             self._reg_write(model.vars.MODEM_CTRL6_RXBRCALCDIS, 1)
         else:
             self._reg_write(model.vars.MODEM_CTRL6_RXBRCALCDIS, 0)
@@ -518,10 +482,6 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
             is_long_range = False
 
         if demod_select == model.vars.demod_select.var_enum.COHERENT:
-            # : accumulate channel power for preamble pattern duration
-            # : actual avgwin period is 2^(avgwin+2)*2^pwrperiod_s*OSR
-            # : agc_period_actual = 2^pwrperiod
-            # : actual avgwin time is 2^(avgwin+2)*agc_period_actual/baudrate
             preamble_time_us = preamble_pattern_len * (1 / bitrate) * 1e6
             target_avgwin_time_us = 4.0 * preamble_time_us
             target_avgwin_period = (target_avgwin_time_us / 1e6) * baudrate
@@ -536,11 +496,7 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
 
         if demod_select == model.vars.demod_select.var_enum.COHERENT and \
                         mod_format == model.vars.modulation_type.var_enum.OQPSK:
-            # : 0 - Channel power is locked when timing is detected
-            # : 1 - Channel power is locked when DSA is detected
             self._reg_write(model.vars.MODEM_COH0_COHCHPWRLOCK, 0)
-            # : Set to enable automatic restart of channel power - needed to make sure channel power is not dependent on
-            # : power of received frames
             self._reg_write(model.vars.MODEM_COH0_COHCHPWRRESTART, 1)
         else:
             self._reg_write(model.vars.MODEM_COH0_COHCHPWRLOCK, 0)
@@ -575,10 +531,8 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         estimated_adc_noise_dBm = -162.8694 #  This is measured value
         model_max_Q_list = []
         for dut_power in  dut_power_list:
-            # : Model ADC resolution
             adc_enob = (dut_power - estimated_adc_noise_dBm - 1.76) / 6.02
 
-            # : Model analog frontend noise
             minimum_detectable_signal_dBm = -173.9 + 10*math.log10(bitrate) + 4.0
             if bitrate <= 2.8e3:
                 analog_noise_bitwidth = 0.1938 * minimum_detectable_signal_dBm + 33.296
@@ -587,7 +541,6 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
             else:
                 analog_noise_bitwidth = 0.1599 * minimum_detectable_signal_dBm + 28.119
 
-            # : Determine signal + noise level
             signal_max_q = math.pow(2,adc_enob) + math.pow(2,analog_noise_bitwidth)
             signal_max_q_bitwidth = math.log2(signal_max_q)
             if signal_max_q_bitwidth > 17:
@@ -595,7 +548,6 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
 
             model_max_Q_list.append(signal_max_q_bitwidth)
                 
-        # : Calculate bbss shift based on the Q sample model
         bbss_model = []
         for model_max_Q in model_max_Q_list:
             bbss_at_max_Q_calc = round(model_max_Q - 5.5)
@@ -606,17 +558,14 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         for dut_power in dut_power_list:
             calc_chpwraccumux = dut_power + 139.0
 
-            # : Based on measurement, chpwraccumux does not go below 14 due to noise
             if calc_chpwraccumux < 14:
                 calc_chpwraccumux = 14
-            # : By design, maximum chpwraccumux is 80 due signal power after AGC
             elif calc_chpwraccumux > 80:
                 calc_chpwraccumux = 80
 
             model_chpwraccumux_list.append(calc_chpwraccumux)
         
         """  """
-        # : Calculate chpwraccumux at sensitivity. This can be used to calculate noise level
         chpwraccumux_interp_func = interpolate.interp1d(dut_power_list, model_chpwraccumux_list)
         chpwr_accumux_noise = float(chpwraccumux_interp_func(sens_calculated))
 
@@ -634,12 +583,10 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
                     bbss_transition.append(int(bbss_val))
                     bbss_transition_threshold.append(int(round(model_chpwraccumux_list[dut_power_index])))
 
-        # : Add two bbss transitions below sensitivity
         bbss_transition.insert(0, starting_BBSS)
         bbss_transition.insert(0, starting_BBSS - 1)
         bbss_transition_threshold.insert(0, int(round(chpwr_accumux_noise-6)))
 
-        # : fill up remaining registers
         max_bbss_shift = 12
         while len(bbss_transition_threshold) < 11:
             bbss_transition_threshold.append(80)
@@ -652,10 +599,8 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         """ Set registers related to dynamic bbss mode"""
         if demod_select == model.vars.demod_select.var_enum.COHERENT and \
                         mod_format == model.vars.modulation_type.var_enum.OQPSK:
-            # : Enable dynamic BBSS adjustment
             self._reg_write(model.vars.MODEM_COH0_COHDYNAMICBBSSEN, 1)
 
-            # : BBSS hysteresis
             self._reg_write(model.vars.MODEM_LONGRANGE1_HYSVAL, 3)
         else:
             self._reg_write(model.vars.MODEM_COH0_COHDYNAMICBBSSEN, 0)
@@ -663,7 +608,6 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
 
         """ Set registers related to dynamic thresholds """
         if demod_select == model.vars.demod_select.var_enum.COHERENT and is_long_range:
-            # : BBSS thresholds
             self._reg_write(model.vars.MODEM_LONGRANGE2_LRCHPWRTH1, bbss_transition_threshold[0])
             self._reg_write(model.vars.MODEM_LONGRANGE2_LRCHPWRTH2, bbss_transition_threshold[1])
             self._reg_write(model.vars.MODEM_LONGRANGE2_LRCHPWRTH3, bbss_transition_threshold[2])
@@ -676,7 +620,6 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
             self._reg_write(model.vars.MODEM_LONGRANGE4_LRCHPWRTH10, bbss_transition_threshold[9])
             self._reg_write(model.vars.MODEM_LONGRANGE6_LRCHPWRTH11, bbss_transition_threshold[10])
 
-            # : BBSS Shifts
             self._reg_limit_write(model.vars.MODEM_LONGRANGE4_LRCHPWRSH1, bbss_transition[0], max_bbss_shift)
             self._reg_limit_write(model.vars.MODEM_LONGRANGE4_LRCHPWRSH2, bbss_transition[1], max_bbss_shift)
             self._reg_limit_write(model.vars.MODEM_LONGRANGE4_LRCHPWRSH3, bbss_transition[2], max_bbss_shift)
@@ -715,12 +658,10 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
             self._reg_write(model.vars.MODEM_LONGRANGE6_LRCHPWRSH12, 0)
 
     def calc_antdiv_gainmode_reg(self, model):
-        #Antenna diversity has its own AGC gain restore mode that determines how to set the gain index based on previous packet
         antdivmode = model.vars.antdivmode.value
 
         if antdivmode == model.vars.antdivmode.var_enum.DISABLE or \
                 antdivmode == model.vars.antdivmode.var_enum.ANTENNA1:
-            #The value of this field does matter even when antdiv is disabled
             gainmode = 0
         else:
             gainmode = 1  # : Always enable gain restore mode - clear stored gain from last packet when RX is turned off.
@@ -750,7 +691,6 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
 
     def calc_gain_schedule_regs(self, model):
 
-        #Read in model vars
         rf_band = model.vars.rf_band.value
 
         if rf_band == model.vars.rf_band.var_enum.BAND_2400:
@@ -787,25 +727,19 @@ class CALC_AGC_ocelot(CALC_AGC_panther):
         rx_baud_rate_actual = model.vars.rx_baud_rate_actual.value
         rssi_period_sym_actual = model.vars.rssi_period_sym_actual.value
 
-        # : Demod startup delay from Michael Wu
         T1_us = 20 / xtal_freq * 1e6
         T2_us = 1 / dec0_rate
         T3_us = 2 / demod_rate_actual * 1e6
         demod_startup_time_us = T1_us + T2_us + T3_us
 
-        # : RSSI startup delay us
         scalar = 0 if rssi_fast else 2
         rssi_startup_time_us = scalar * pwrperiod_actual / rx_baud_rate_actual * 1e6
 
-        # : RSSI update period us
         rssi_update_period_us = rssi_period_sym_actual / rx_baud_rate_actual * 1e6
 
-        # : Corrected RSSI access time based on Ferenc Plesznik's measurement
-        # : MCUW_RADIO_CFG-1950
         correction_factor = 2 if rssi_fast else 3
         correction_us = correction_factor / rx_baud_rate_actual * 1e6
 
-        # : RSSI access time
         rssi_access_time_us = demod_startup_time_us + cfloopdel_actual_us + rssi_startup_time_us + \
                               rssi_update_period_us + correction_factor
         model.vars.rssi_access_time_us_actual.value = rssi_access_time_us

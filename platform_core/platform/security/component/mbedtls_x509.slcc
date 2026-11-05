@@ -4,14 +4,16 @@ label: X.509
 description: >-
   This component provides full support for handling X.509 standard-
   based certificates in Mbed TLS.
+  This component is DEPRECATED and is replaced by new set of components
+  including mbedtls_x509_use, mbedtls_x509_create, mbedtls_x509_crl_parse, mbedtls_x509_crt_parse,
+  mbedtls_x509_crt_write, mbedtls_x509_csr_parse, mbedtls_x509_csr_write, mbedtls_pem_write and mbedtls_pem_parse.
 category: Platform|Security|Mbed TLS|Upper Layer
-quality: production
+quality: deprecated
 provides:
 - name: mbedtls_x509
-- name: mbedtls_uses_psa_crypto
-  allow_multiple: true
 requires:
-- name: mbedtls_pem
+- name: mbedtls_pem_write
+- name: mbedtls_pem_parse
 - name: mbedtls_x509_use
 - name: mbedtls_x509_create
 - name: mbedtls_x509_crl_parse

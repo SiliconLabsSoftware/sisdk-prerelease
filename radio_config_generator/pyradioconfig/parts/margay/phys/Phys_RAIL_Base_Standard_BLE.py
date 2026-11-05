@@ -5,11 +5,7 @@ from pyradioconfig.parts.ocelot.phys.Phys_RAIL_Base_Standard_BLE import PHYS_Blu
 
 
 class PHYS_Bluetooth_LE_Margay(PHYS_Bluetooth_LE_Ocelot):
-    #Inherit all from Ocelot
-    # For Margay we decided to use different IFs for BLE1Mbps and BLE2Mbps - MCUW_RADIO_CFG-2149
-    # Overwriting only TRECs + Viterbi Ocelot Phy profiles that define IFs for BLE for now
 
-    # BLE 1M TRecS + Viterbi
     def Bluetooth_LE_Viterbi_noDSA_base(self, phy, model):
         phy.profile_inputs.bandwidth_hz.value = 1099233
         phy.profile_inputs.base_frequency_hz.value = long(2402000000)
@@ -40,30 +36,24 @@ class PHYS_Bluetooth_LE_Margay(PHYS_Bluetooth_LE_Ocelot):
         phy.profile_inputs.timing_detection_threshold.value = 140
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy, xtal_freq_hz=39000000)
         model.vars.adc_clock_mode.value_forced = model.vars.adc_clock_mode.var_enum.VCODIV
 
-        # Decimation and Demod Overrides
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 56831
         phy.profile_outputs.MODEM_CTRL0_FRAMEDETDEL.override = 2
         phy.profile_outputs.MODEM_CTRL6_RXBRCALCDIS.override = 1
 
-        # Shaping overrides
         self.BLE_TX_Shaping_Coeffs(phy, model)
 
-        # FRC Overrides
         PHY_COMMON_FRAME_BLE(phy, model)
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
         phy.profile_outputs.FRC_PUNCTCTRL_PUNCT0.override = 1
         phy.profile_outputs.FRC_PUNCTCTRL_PUNCT1.override = 1
 
-        # This should be set only on DSA PHYs (PGLYNX-566), sowe can clear it.
         phy.profile_outputs.FRC_CTRL_WAITEOFEN.override = 0
 
-        # Radio Controller Overrides
         phy.profile_outputs.RAC_SYNTHREGCTRL_MMDLDOVREFTRIM.override = 3
 
-        # Viterbi Demod Overrides
         phy.profile_outputs.MODEM_VITERBIDEMOD_SYNTHAFC.override = 1
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI1.override = 65
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI2.override = 45
@@ -72,7 +62,6 @@ class PHYS_Bluetooth_LE_Margay(PHYS_Bluetooth_LE_Ocelot):
         phy.profile_outputs.MODEM_VTCORRCFG1_VTFRQLIM.override = 100
         phy.profile_outputs.MODEM_VTCORRCFG0_EXPECTPATT.override = 2491575950
 
-        # KSI overrides
         model.vars.ksi3wb.value_forced = 28
 
         phy.profile_outputs.rx_sync_delay_ns.override = 50000
@@ -105,7 +94,6 @@ class PHYS_Bluetooth_LE_Margay(PHYS_Bluetooth_LE_Ocelot):
         phy.profile_outputs.AGC_STEPDWN_STEPDWN4.override = 3
         phy.profile_outputs.AGC_STEPDWN_STEPDWN5.override = 5
 
-        # Frequency limiting
         phy.profile_outputs.MODEM_VTCORRCFG1_VTFRQLIM.override = 120
 
     pass

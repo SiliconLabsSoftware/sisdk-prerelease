@@ -42,6 +42,10 @@ class Base_RM_Peripheral(IRegMapPeripheral):
             out += line
         return out
 
+    def __iter__(self):
+        for key in self.zz_rdict:
+            yield self.zz_rdict[key]
+
     def getRegisterNames(self):
         nameList = []
         for key in sorted(self.zz_rdict):
@@ -127,7 +131,6 @@ class Base_RM_Peripheral(IRegMapPeripheral):
         reg_list = []
         for key in self.zz_rdict:
             reg = self.zz_rdict[key]
-            # only append to list if dump flag is set
             if reg.dumpActive:
                 reg_list.append([reg.baseAddress + reg.addressOffset, reg])
         for regaddr, reg in sorted(reg_list):
@@ -146,7 +149,6 @@ class Base_RM_Peripheral(IRegMapPeripheral):
         reg_list = []
         for key in self.zz_rdict:
             reg = self.zz_rdict[key]
-            # only append to list if dump flag is set
             if reg.dumpActive:
                 reg_list.append([reg.baseAddress + reg.addressOffset, reg])
         for regaddr, reg in sorted(reg_list):

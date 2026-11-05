@@ -26,15 +26,11 @@ class CALC_Synth_jumbo(CALC_Synth):
 
         res = model.vars.synth_res_actual.value
 
-        # if IF frequency was forced we want to set the digital IF frequencies
-        # to the forced value. If not we want to set it to the value of the analog
-        # IF center frequency
         if model.vars.if_frequency_hz.value_forced == None:
             f_if = model.vars.if_center_analog_hz_actual.value
         else:
             f_if = model.vars.if_frequency_hz.value
 
-        # calculate if frequency
         iffreq = math.floor(f_if / res)
 
         self._reg_write(model.vars.SYNTH_IFFREQ_IFFREQ,  int(iffreq))

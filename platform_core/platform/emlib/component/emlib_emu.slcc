@@ -19,6 +19,7 @@ provides:
 - name: hal_generic_emu
   condition: [device_series_2]
 requires:
+- name: log_none
 - name: status
 - name: device
 - name: device_has_emu

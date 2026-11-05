@@ -41,24 +41,7 @@ import math
 
 def pll_setting_lut(modem_calc):
 
-    # modified 9/13/2012 according to Eric email
-    # 1) If DR <= 75kbps, use chip default loop BW (approx loop BW = 200 kHz)
-    # 2) If 75kbps < DR < 125kbps, use loop BW = 300 kHz
-    # 3) If 125kbs <= DR < 200kbps, use loop BW = 450kHz
-    # 4) If DR >= 200kbps, use loop BW = 600 kHz
 
-    # DOC week July 11-15, 2011: change PLLBW to default 200kHz, unless DataRate/Dev requires larger PLLBW
-    # use a LUT from test bench results provided by Tufan
-    # #  PLL_BW :  0 = 600 kHz loop BW
-    # #            1 = 450 kHz loop BW
-    # #            2 = 300 kHz loop BW
-    # #            3 = 200 kHz loop BW
-    # #            4 = 100 kHz loop BW
-    # #            5 = 65 kHz loop BW
-    # 
-    # modified on July 5, 2012 by request of Eric: instead of (PLLBW v modBW), 
-    # only DataRate is used to select PLL-BW: ensure PLLBW/Rs >=3 (PLLBW vs API_Rsymb)
-    # shall we differentiate TX and RX?  now it's decided for TX only
     if (modem_calc.inputs.API_modulation_type >1) : # FSK
         if (modem_calc.inputs.API_Rsymb <= 75e3) :
             PLL_BW = 3
@@ -77,7 +60,6 @@ def pll_setting_lut(modem_calc):
         pll_fc = 200000
 
 
-    # use LUT from empirical data to config, only depending on PLLBW
 
     LUT = [[0x01, 0x05, 0x0B, 0x05, 0x02, 0x00, 0x03],
            [0x39, 0x04, 0x0B, 0x05, 0x04, 0x01, 0x03],

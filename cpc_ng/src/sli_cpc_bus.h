@@ -32,7 +32,6 @@
 #define SLI_CPC_BUS_H
 
 #include "sl_component_catalog.h"
-#include "sl_cpc_kernel_config.h"
 #include "sl_memory_manager.h"
 #include "sl_slist.h"
 #include "sli_cpc.h"

@@ -35,7 +35,7 @@
 #if defined(BURTC_PRESENT)
 
 #include <stdbool.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_bus.h"
 
 #ifdef __cplusplus
@@ -412,7 +412,7 @@ __STATIC_INLINE void BURTC_Powerdown(bool enable)
  ******************************************************************************/
 __STATIC_INLINE void BURTC_RetRegSet(uint32_t num, uint32_t data)
 {
-  EFM_ASSERT(num <= 127);
+  SL_LOG_DEBUG_ASSERT(num <= 127);
 
   BURTC->RET[num].REG = data;
 }
@@ -429,7 +429,7 @@ __STATIC_INLINE void BURTC_RetRegSet(uint32_t num, uint32_t data)
  ******************************************************************************/
 __STATIC_INLINE uint32_t BURTC_RetRegGet(uint32_t num)
 {
-  EFM_ASSERT(num <= 127);
+  SL_LOG_DEBUG_ASSERT(num <= 127);
 
   return BURTC->RET[num].REG;
 }

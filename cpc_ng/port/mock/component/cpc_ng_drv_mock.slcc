@@ -15,6 +15,9 @@ instantiable:
 config_file:
 - path: config/sl_cpc_drv_mock_{{instance}}_config.h
   file_id: cpc_ng_drv_mock_config
+- path: config/sl_cpc_drv_mock_{{instance}}_kernel_config.h
+  file_id: cpc_ng_drv_mock_kernel_config
+  condition: [kernel]
 source:
 - path: src/sl_cpc_drv_mock.c
 include:

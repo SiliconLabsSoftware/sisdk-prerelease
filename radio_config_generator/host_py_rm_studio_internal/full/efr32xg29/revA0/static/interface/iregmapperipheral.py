@@ -23,7 +23,6 @@ class IRegMapPeripheral(object):
     """
     __metaclass__ = ABCMeta
 
-    # Query Methods
 
     @abstractmethod
     def getRegisterNames(self):
@@ -35,7 +34,6 @@ class IRegMapPeripheral(object):
         """
         pass
 
-    # Accessed Flag Methods
 
     @abstractmethod
     def clearAccessedFlags(self):
@@ -131,6 +129,7 @@ class IRegMapPeripheral(object):
             List[str]: The peripherals names or empty list.
 
         """
+        pass
 
     @abstractmethod
     def isAliased(self):
@@ -141,7 +140,8 @@ class IRegMapPeripheral(object):
             Bool: True if there are other peripherals mapped to this base address.
 
         """
-
+        pass
+    
     @abstractmethod
     def getExcludedDumpRegisterNames(self):
         """

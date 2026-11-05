@@ -7,6 +7,10 @@ description: >
   Z-Wave Plus device in question. The Z-Wave Plus Info Command Class defines two icon types. Icon
   types allow for a meaningful, homogeneous representation in user and installer Graphical User
   Interfaces (GUI), respectively.
+documentation:
+  docset: z-wave
+  document: zwave-api/z-wave-plus-info
+
 package: zwave
 quality: production
 metadata:

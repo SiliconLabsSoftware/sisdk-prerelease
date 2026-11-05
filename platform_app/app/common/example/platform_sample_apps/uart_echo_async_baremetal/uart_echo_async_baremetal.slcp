@@ -1,0 +1,48 @@
+project_name: uart_echo_async_baremetal
+package: platform_app
+quality: production
+label: Platform - UART Async Echo Baremetal
+description: >
+  Demonstrates DMA-accelerated asynchronous UART echo using two receive buffers
+  in ping-pong. The application echoes data when a receive buffer fills or when
+  no UART data arrives for 100 ms. After a full buffer has been echoed, it is
+  queued again for reception, with optional RTS/CTS hardware flow control.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+source:
+  - path: app.c
+  - path: app_uart_echo.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: app_uart_echo.h
+component:
+  - id: sl_main
+  - id: device_init
+  - id: clock_manager
+  - id: uart_async
+  - id: uart_eusart
+    instance: [vcom]
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_UART_EUSART_VCOM_ASYNC_ENABLE
+    value: 1
+define:
+  - name: UART_TEST_HANDLE
+    value: sl_uart_eusart_vcom_handle
+  - name: DEBUG_EFM
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - hwfilter:device:device_has_euart
+  - hwfilter:board:hardware_board_has_vcom

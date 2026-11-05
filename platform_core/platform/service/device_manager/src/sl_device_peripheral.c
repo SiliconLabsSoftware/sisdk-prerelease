@@ -323,6 +323,13 @@ __WEAK const sl_peripheral_val_t sl_peripheral_val_gpcrc0 = { .base = 0xFFFFFFFF
                                                               .gpio_routeen_offset = 0xFFFF,
                                                               .gpio_routeen_mask = 0 };
 
+// Weak definition of peripheral GPCRC1.
+__WEAK const sl_peripheral_val_t sl_peripheral_val_gpcrc1 = { .base = 0xFFFFFFFF,
+                                                              .clk_branch = SL_CLOCK_BRANCH_INVALID,
+                                                              .bus_clock = SL_BUS_CLOCK_INVALID,
+                                                              .gpio_routeen_offset = 0xFFFF,
+                                                              .gpio_routeen_mask = 0 };
+
 // Weak definition of peripheral GPIO.
 __WEAK const sl_peripheral_val_t sl_peripheral_val_gpio = { .base = 0xFFFFFFFF,
                                                             .clk_branch = SL_CLOCK_BRANCH_INVALID,

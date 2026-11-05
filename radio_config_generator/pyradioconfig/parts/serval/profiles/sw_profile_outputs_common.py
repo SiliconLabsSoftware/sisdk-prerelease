@@ -1,7 +1,7 @@
-from pyradioconfig.calculator_model_framework.interfaces.iprofile import ModelOutput, ModelOutputType
+from pyradioconfig.calculator_model_framework.interfaces.iprofile import ModelOutput, ModelOutputType, IProfile
+
 
 class sw_profile_outputs_common_serval(object):
-    # : Apps requested variables that need to be included in public studio log
     studio_log_output_list = {
         'base_frequency_actual': 'Actual Carrier Frequency [Hz]',
         'if_frequency_hz_actual': 'Actual Intermediate Frequency [Hz]',
@@ -40,13 +40,10 @@ class sw_profile_outputs_common_serval(object):
     """
     def buildStudioLogOutput(self, model, profile):
 
-        # : Apps requested variables that need to be included in public studio log
         studio_log_output_list = self.studio_log_output_list
 
-        # : create missing ModelOutput as INFO type
         for model_var_name, readable_name in studio_log_output_list.items():
 
-            # : check if duplicate exists in the profile output. If so, replace with log output defined above
             for profile_output in profile.outputs:
                 if profile_output._var.name == model_var_name:
                     profile.outputs.get_output(model_var_name).readable_name = readable_name
@@ -57,14 +54,12 @@ class sw_profile_outputs_common_serval(object):
                     profile.outputs.append(ModelOutput(model_vars_attr, '', ModelOutputType.INFO,
                                                        readable_name=readable_name))
 
-        # : Set flag to True and display model output in Studio log
         for var_name in model.profile.outputs.__dict__.keys():
             model_attr = getattr(model.profile.outputs, var_name)
             if 'ModelOutput' in str(type(model_attr)):
                 if var_name in studio_log_output_list.keys():
                     model_attr.in_public_log = True
 
-                # : include all linked io vars in public log
                 if model_attr.output_type == ModelOutputType.LINKED_IO:
                     model_attr.in_public_log = True
 
@@ -118,7 +113,6 @@ class sw_profile_outputs_common_serval(object):
         profile.outputs.append(ModelOutput(model.vars.ircal_muishf, '', ModelOutputType.SW_VAR,
                                            readable_name='IRCAL MUISHF'))
 
-        # All but one (agcrssiperiod) of these were created for backwards compatibility with RAIL 1.x - remove in RAIL 2.x
         profile.outputs.append(ModelOutput(model.vars.ircal_agcrssiperiod, '', ModelOutputType.SW_VAR,
                                            readable_name='IRCAL agcrssiperiod'))
         profile.outputs.append(ModelOutput(model.vars.ircal_useswrssiaveraging2, '', ModelOutputType.SW_VAR,
@@ -195,3 +189,4 @@ class sw_profile_outputs_common_serval(object):
                                                readable_name='Time from TX EOF timestamp to end of frame on-air'))
         profile.outputs.append(ModelOutput(model.vars.trecs_pre_bits_to_syncword, '', ModelOutputType.RAIL_CONFIG,
                                            readable_name='Number of preamble bits to move to syncword with TRECS'))
+        IProfile.make_hidden_input(profile, model.vars.phy_mode_id, "RAIL", readable_name="Stack info PHY mode ID", value_limit_min=0, value_limit_max=255)

@@ -17,6 +17,7 @@ include:
 provides:
 - name: emlib_usart
 requires:
+- name: log_none
 - name: device
 - name: device_has_uart
 - name: emlib_cmu

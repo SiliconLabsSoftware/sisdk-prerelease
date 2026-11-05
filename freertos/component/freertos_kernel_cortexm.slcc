@@ -8,13 +8,13 @@ category: RTOS|FreeRTOS
 quality: production
 metadata:
   sbom:
-    license: Apache 2.0
+    id: cmsis-freertos
+    license: Apache-2.0
     upstream:
       name: CMSIS-FreeRTOS
       version: 11.1.0
       supplier: ARM-software
       url: https://github.com/ARM-software/CMSIS-FreeRTOS
-      package_url: https://github.com/ARM-software/CMSIS-FreeRTOS/releases/tag/v11.1.0
       comment: CMSIS-FreeRTOS, Version 11.1.0
 source:
 - path: cmsis/Source/cmsis_os2.c

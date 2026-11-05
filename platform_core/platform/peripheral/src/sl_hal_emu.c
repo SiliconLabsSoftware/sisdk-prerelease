@@ -61,8 +61,10 @@
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
 #define RAM0_BLOCKS           16U
 #define RAM0_BLOCK_SIZE   0x4000U // 16 kB blocks
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10)
+#define RAM0_BLOCKS           5U
+#define RAM0_BLOCK_SIZE   0x8000U // 32 kB blocks
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
 #define RAM0_BLOCKS           16U
 #define RAM0_BLOCK_SIZE   0x8000U // 32 kB blocks
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)
@@ -212,9 +214,10 @@ void sl_hal_emu_ram_power_down(uint32_t start,
     // Leopard has 3 blocks. We do no shut off block 0 because we dont want to disable all RAM0.
     mask |= ADDRESS_NOT_IN_BLOCK(start, 0x20006000UL) << 1; // Block 1, 8 kB.
     mask |= ADDRESS_NOT_IN_BLOCK(start, 0x20008000UL) << 2; // Block 2, 32 kB.
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)  \
-    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8) \
-    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9) \
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_6)   \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_8)  \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_9)  \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_10) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_13) \
     || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_14)
@@ -311,6 +314,24 @@ uint32_t sl_hal_emu_get_soft_reset_cause(void)
 }
 #endif
 
+/***************************************************************************//**
+ * Check whether the last reset was caused by an EM4 wake-up.
+ ******************************************************************************/
+bool sl_hal_emu_is_reset_cause_em4(void)
+{
+#if defined(_EMU_RSTCTRL_MASK) \
+  && defined(_EMU_RSTCAUSE_MASK) \
+  && defined(_EMU_RSTCAUSE_EM4_MASK)
+  return (sl_hal_emu_get_reset_cause() & EMU_RSTCAUSE_EM4) != 0U;
+#elif defined(_EMU_SOFTRSTCTRL_MASK) \
+  && defined(_EMU_SOFTRST_CAUSE_MASK) \
+  && defined(_EMU_SOFTRST_CAUSE_EM4)
+  return (sl_hal_emu_get_soft_reset_cause() & EMU_SOFTRST_CAUSE_EM4) != 0U;
+#else
+  return false;
+#endif
+}
+
 #if defined(_SILICON_LABS_32B_SERIES_2)
 #if (defined(SL_HAL_EMU_DCDC_BUCK_PRESENT) \
   || defined(SL_HAL_EMU_DCDC_BOOST_PRESENT))
@@ -338,10 +359,10 @@ sl_status_t sl_hal_emu_set_dcdc_mode(sl_hal_emu_dcdc_mode_t dcdc_mode)
 #if defined(LEDSINK_PRESENT)
     bool is_ledvdd_enabled = ((DCDC->STATUS & DCDC_STATUS_LEDVDDON) == 0) ? false : true;
     if (!is_ledvdd_enabled) {
-      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE1;
+      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVDDVSCALE1;
       DCDC->OUTEN_SET = DCDC_OUTEN_LEDVDDOUTEN;
       DCDC->LEDVDDBCTRL_SET = DCDC_LEDVDDBCTRL_LEDVDDEN;
-      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE2
+      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVDDVSCALE2
                           | DCDC_LEDVDDBCTRL_LEDVDDEN;
       DCDC->IF_CLR = DCDC_IF_BOOSTPOSEDG ;
       while((DCDC->IF & DCDC_IF_BOOSTPOSEDG) == 0U);
@@ -373,10 +394,10 @@ sl_status_t sl_hal_emu_set_dcdc_mode(sl_hal_emu_dcdc_mode_t dcdc_mode)
 #if defined(LEDSINK_PRESENT)
     if (!is_ledvdd_enabled) {
       DCDC->OUTEN_CLR = DCDC_OUTEN_LEDVDDOUTEN;
-      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE1
+      DCDC->LEDVDDBCTRL = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVDDVSCALE1
                           | DCDC_LEDVDDBCTRL_LEDVDDEN;
       DCDC->LEDVDDBCTRL_CLR = DCDC_LEDVDDBCTRL_LEDVDDEN;
-      DCDC->LEDVDDBCTRL_CLR = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVSCALE1;
+      DCDC->LEDVDDBCTRL_CLR = DCDC_LEDVDDBCTRL_CMDLEDVSCALE_LEDVDDVSCALE1;
     }
 #endif
     }
@@ -537,9 +558,13 @@ void sl_hal_emu_set_dcdc_ledboost_output_voltage(const sl_hal_emu_dcdc_ledboost_
   sl_hal_emu_dcdc_sync(_DCDC_SYNCBUSY_MASK);
 #endif
 
+#if defined(_DCDC_LEDVDDBCTRL_CMDLEDVSCALE_MASK)
   sl_hal_bus_reg_write_mask(&DCDC->LEDVDDBCTRL,
                             _DCDC_LEDVDDBCTRL_CMDLEDVSCALE_MASK,
                             ((uint32_t)boost_voltage << _DCDC_LEDVDDBCTRL_CMDLEDVSCALE_SHIFT));
+#else
+  (void)boost_voltage;
+#endif
 
   sl_hal_emu_dcdc_updated_hook();
 }

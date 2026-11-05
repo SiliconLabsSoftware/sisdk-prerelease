@@ -18,8 +18,6 @@ class CALC_Viterbi_Margay(CALC_Viterbi_ocelot):
 
         if vtdemoden:
             if (rtschmode == 1) and not remoden:
-                # Special case for dual syncword detection case where hard slicing on syncword is required
-                # When RTSCHMODE=1, we can not use CFE for additional AFC corrections during syncword
                 freqtrackmode = 3
             else:
                 freqtrackmode = 1
@@ -29,9 +27,7 @@ class CALC_Viterbi_Margay(CALC_Viterbi_ocelot):
         self._reg_write(model.vars.MODEM_VTTRACK_FREQTRACKMODE, freqtrackmode)
 
     def calc_realtimcfe_trackingwin(self, model):
-        #This function calculates the REALTIMCFE_TRACKINGWIN reg field
 
-        #Read in model variables
         baudrate_tol_ppm = model.vars.baudrate_tol_ppm.value
         vtdemoden = model.vars.MODEM_VITERBIDEMOD_VTDEMODEN.value
         freq_offset_hz = model.vars.freq_offset_hz.value
@@ -39,7 +35,6 @@ class CALC_Viterbi_Margay(CALC_Viterbi_ocelot):
         baudrate = model.vars.baudrate.value
 
         if vtdemoden:
-            #If the tol request is at least 5000ppm, then reduce the tracking win size
             if baudrate_tol_ppm >= 5000:
                 trackingwin = 5
             elif (freq_offset_hz / baudrate) > 0.57 and modulation_index <= 0.5:
@@ -49,7 +44,6 @@ class CALC_Viterbi_Margay(CALC_Viterbi_ocelot):
         else:
             trackingwin = 0
 
-        #Write the reg
         self._reg_write(model.vars.MODEM_REALTIMCFE_TRACKINGWIN, trackingwin)
 
     def calc_pmoffset_reg(self, model):
@@ -60,11 +54,8 @@ class CALC_Viterbi_Margay(CALC_Viterbi_ocelot):
         pmwinsize = model.vars.pmacquingwin_actual.value
 
         if (rtschmode==1) and afc_oneshot_enabled:
-            #Special case for dual syncword detection case where hard slicing on syncword is required
-            #In this case we choose a minimal PMOFFSET to avoid a bad estimate due to AFC transient
             pmoffset = 2
         else:
-            # + 2 for processing delay. See expsynclen register description. These are used in the same way.
             pmoffset =  osr * pmwinsize + 2
 
         self._reg_write(model.vars.MODEM_TRECSCFG_PMOFFSET,  pmoffset)

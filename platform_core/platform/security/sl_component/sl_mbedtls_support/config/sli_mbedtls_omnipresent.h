@@ -35,7 +35,9 @@
   #include "sl_component_catalog.h"
 #endif
 
-#if !defined(SL_CATALOG_SE_CPC_PRIMARY_PRESENT)
+#if !defined(SL_CATALOG_SE_CPC_PRIMARY_PRESENT) \
+  && !defined(SL_CATALOG_NATIVE_PRESENT)        \
+  && !defined(SL_CATALOG_NATIVE_HOST_PRESENT)
   #include "em_device.h"
 #endif
 

@@ -53,7 +53,7 @@
 #include "em_device.h"
 #endif
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 #if defined(SL_CATALOG_CLI_STORAGE_NVM3_PRESENT)
 #include "sl_cli_storage_nvm3.h"
@@ -299,7 +299,9 @@ static void tick_task(void *arg)
 
   sl_iostream_set_default(handle->iostream_handle);
 
-  EFM_ASSERT(osDelay(handle->start_delay_tick) == osOK);
+  osStatus_t os_status = osDelay(handle->start_delay_tick);
+  SL_LOG_DEBUG_ASSERT(os_status == osOK);
+  (void)os_status;
 
 #if defined(SL_CATALOG_CLI_STORAGE_NVM3_PRESENT)
   sl_cli_storage_nvm3_tick(handle);
@@ -314,7 +316,9 @@ static void tick_task(void *arg)
       // Feed while CLI is idle/locked
       sli_watchdog_manager_platform_feed();
 #endif
-      EFM_ASSERT(osDelay(handle->loop_delay_tick) == osOK);
+      os_status = osDelay(handle->loop_delay_tick);
+      SL_LOG_DEBUG_ASSERT(os_status == osOK);
+      (void)os_status;
     }
   }
 }
@@ -339,7 +343,7 @@ static sl_status_t create_task(sl_cli_handle_t handle,
   attr.tz_module = 0u;
 
   thread_id = osThreadNew(&tick_task, handle, &attr);
-  EFM_ASSERT(thread_id != NULL);
+  SL_LOG_DEBUG_ASSERT(thread_id != NULL);
   handle->thread_id = thread_id;
   parameters->thread_id = thread_id;
 

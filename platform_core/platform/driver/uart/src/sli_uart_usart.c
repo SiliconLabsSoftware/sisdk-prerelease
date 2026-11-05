@@ -79,7 +79,7 @@ static inline sl_hal_usart_data_bits_t uart_data_bits_to_usart_hal_data_bits(sl_
     case SL_UART_DATA_BITS_16:
       return SL_HAL_USART_DATA_BITS_16;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_USART_DATA_BITS_8;
   }
 }
@@ -97,7 +97,7 @@ static inline sl_hal_usart_parity_t uart_parity_to_usart_hal_parity(sl_uart_pari
     case SL_UART_PARITY_EVEN:
       return SL_HAL_USART_EVEN_PARITY;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_USART_NO_PARITY;
   }
 }
@@ -117,7 +117,7 @@ static inline sl_hal_usart_stop_bits_t uart_stop_bits_to_usart_hal_stop_bits(sl_
     case SL_UART_STOP_BITS_2:
       return SL_HAL_USART_STOP_BITS_2;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_USART_STOP_BITS_1;
   }
 }
@@ -134,7 +134,7 @@ static inline sl_hal_usart_hw_flow_control_t uart_hwfc_to_usart_hal_hwfc(sl_uart
     case SL_UART_FLOW_CONTROL_NONE:
       return SL_HAL_USART_HW_FLOW_CONTROL_NONE;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_USART_HW_FLOW_CONTROL_NONE;
   }
 }
@@ -154,7 +154,7 @@ static inline sl_hal_usart_ovs_t uart_oversampling_to_usart_hal_oversampling(sl_
     case SL_UART_OVERSAMPLING_16:
       return SL_HAL_USART_OVS_16;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_USART_OVS_16;
   }
 }
@@ -176,7 +176,7 @@ static void usart_uart_init_transport_pins(sl_peripheral_t uart, const sl_uart_p
 {
   USART_TypeDef *usart = sl_device_peripheral_usart_get_base_addr(uart);
   GPIO_USARTROUTE_TypeDef *route = usart_uart_get_gpio_route(usart);
-  EFM_ASSERT(route != NULL);
+  SL_LOG_DEBUG_ASSERT(route != NULL);
 
   route->TXROUTE = (pin_config->tx.port << _GPIO_USART_TXROUTE_PORT_SHIFT)
                    | (pin_config->tx.pin << _GPIO_USART_TXROUTE_PIN_SHIFT);

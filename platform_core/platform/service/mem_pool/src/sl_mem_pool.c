@@ -31,7 +31,7 @@
 #include "sl_component_catalog.h"
 #endif
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_core.h"
 
 #include "sli_mem_pool.h"
@@ -50,12 +50,13 @@ void sli_mem_pool_create(sli_mem_pool_handle_t *mem_pool,
                          void* buffer,
                          uint32_t buffer_size)
 {
-  EFM_ASSERT(block_count != 0);
-  EFM_ASSERT(block_size != 0);
-  EFM_ASSERT(buffer_size >= block_count * (block_size + SLI_MEM_POOL_REQUIRED_PADDING(block_size)));
+  SL_LOG_DEBUG_ASSERT(block_count != 0);
+  SL_LOG_DEBUG_ASSERT(block_size != 0);
+  SL_LOG_DEBUG_ASSERT(buffer_size >= block_count * (block_size + SLI_MEM_POOL_REQUIRED_PADDING(block_size)));
+  (void)buffer_size;
 
   if ((mem_pool == NULL) || (buffer == NULL)) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return;
   }
 
@@ -84,7 +85,7 @@ void* sli_mem_pool_alloc(sli_mem_pool_handle_t *mem_pool)
   CORE_DECLARE_IRQ_STATE;
 
   if (mem_pool == NULL) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return NULL;
   }
 
@@ -113,10 +114,10 @@ void sli_mem_pool_free(sli_mem_pool_handle_t *mem_pool, void *block)
 {
   CORE_DECLARE_IRQ_STATE;
 
-  EFM_ASSERT(mem_pool != NULL);
+  SL_LOG_DEBUG_ASSERT(mem_pool != NULL);
 
   // Validate that the provided address is in the buffer range
-  EFM_ASSERT((block >= mem_pool->data) && ((uint32_t)block <= ((uint32_t)mem_pool->data + (mem_pool->block_size * mem_pool->block_count))));
+  SL_LOG_DEBUG_ASSERT((block >= mem_pool->data) && ((uint32_t)block <= ((uint32_t)mem_pool->data + (mem_pool->block_size * mem_pool->block_count))));
 
   CORE_ENTER_ATOMIC();
 

@@ -6,6 +6,6 @@ class PhysStudioConnectCurl(PhysStudioConnectLion):
     def PHY_Connect_2_4GHz_OQPSK_2Mcps_250kbps(self, model, phy_name=None):
         phy = super().PHY_Connect_2_4GHz_OQPSK_2Mcps_250kbps(model)
 
-        phy.profile_inputs.xtal_frequency_hz.value = 40000000
+        self._set_xtal_frequency(phy, xtal_freq_hz=40000000)
 
         return phy

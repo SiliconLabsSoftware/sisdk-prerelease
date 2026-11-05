@@ -4,7 +4,6 @@ Simple test script to verify dictionary support in ModelVariable
 import sys
 import os
 
-# Add the Package directory to path so pycalcmodel is importable
 package_dir = os.path.join(os.path.dirname(__file__), '..', '..')
 sys.path.insert(0, package_dir)
 
@@ -57,10 +56,8 @@ def test_dict_array_xml_round_trip():
     var = ModelVariable('test_dict_array', dict, True)
     original = [{'a': 1}, {'b': 2}]
     
-    # Serialize
     xml_strs = get_xml_str_values(var.is_array, original)
     
-    # Deserialize
     result = cast_value_from_xml(var, xml_strs)
     
     assert result == original

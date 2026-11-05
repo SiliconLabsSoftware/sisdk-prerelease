@@ -29,7 +29,7 @@
  ******************************************************************************/
 #include "em_device.h"
 #if defined(_SILICON_LABS_32B_SERIES_2)
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_core.h"
 #include "sli_hfxo_manager.h"
 #include "sli_hfxo_manager_log.h"
@@ -169,8 +169,8 @@ void sli_hfxo_manager_init_hardware(void)
 sl_status_t sli_hfxo_manager_update_sleepy_xtal_settings_hardware(const sl_hfxo_manager_sleepy_xtal_settings_t *settings)
 {
 #if (SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT == 1)
-  EFM_ASSERT(settings->ana_ctune <= (_HFXO_XTALCTRL_CTUNEXIANA_MASK >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT));
-  EFM_ASSERT(settings->core_bias_current <= (_HFXO_XTALCTRL_COREBIASANA_MASK >> _HFXO_XTALCTRL_COREBIASANA_SHIFT));
+  SL_LOG_DEBUG_ASSERT(settings->ana_ctune <= (_HFXO_XTALCTRL_CTUNEXIANA_MASK >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT));
+  SL_LOG_DEBUG_ASSERT(settings->core_bias_current <= (_HFXO_XTALCTRL_COREBIASANA_MASK >> _HFXO_XTALCTRL_COREBIASANA_SHIFT));
 
   sleepy_xtal_settings_ctuneana = settings->ana_ctune;
   sleepy_xtal_settings_corebias = settings->core_bias_current;
@@ -320,7 +320,7 @@ void sl_hfxo_manager_irq_handler(void)
 
 #if (SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT == 1)
     // We should not fail twice in a row
-    EFM_ASSERT(error_flag == false);
+    SL_LOG_DEBUG_ASSERT(error_flag == false);
 
     // Update global variables related to error.
     error_flag = true;

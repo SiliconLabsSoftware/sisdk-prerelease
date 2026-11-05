@@ -307,14 +307,19 @@ void app_process_action(void)
       printf("  + Export an asymmetric public key from wrapped asymmetric "
              "key... ");
       if (export_asymmetric_pubkey_from_wrap(selected_key) == SL_STATUS_OK) {
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
         // For compare public key after transferring key
         copy_public_key();
         app_state = CREATE_VOLATILE_KEY;
+#else
+        print_startup();
+#endif
       } else {
         app_state = SE_MANAGER_EXIT;
       }
       break;
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
     case CREATE_VOLATILE_KEY:
       printf("\n  . Volatile asymmetric key\n");
       printf("  + Generate a non-exportable asymmetric key into a volatile SE "
@@ -387,6 +392,7 @@ void app_process_action(void)
         app_state = SE_MANAGER_EXIT;
       }
       break;
+#endif // defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 #endif
 
     case SE_MANAGER_EXIT:
@@ -531,8 +537,10 @@ static void compare_public_key(void)
   printf("OK\n");
   if (app_state == COMPARE_EXPORT_PUBLIC_KEY) {
     app_state = CREATE_WRAP_KEY;
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
   } else {
     print_startup();
+#endif
   }
 }
 #endif

@@ -1,5 +1,4 @@
 
-# -*- coding: utf-8 -*-
 
 from . static import Base_RM_Field
 
@@ -161,6 +160,16 @@ class RM_Field_SUNOQPSK_TXCFG1_TXFCSERRORS(Base_RM_Field):
             'TXFCSERRORS', 'SUNOQPSK.TXCFG1.TXFCSERRORS', 'read-write',
             u"",
             2, 1)
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Field_SUNOQPSK_TXCFG1_TX_IQ_FILTER(Base_RM_Field):
+    def __init__(self, register):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Field_SUNOQPSK_TXCFG1_TX_IQ_FILTER, self).__init__(register,
+            'TX_IQ_FILTER', 'SUNOQPSK.TXCFG1.TX_IQ_FILTER', 'read-write',
+            u"",
+            28, 4)
         self.__dict__['zz_frozen'] = True
 
 

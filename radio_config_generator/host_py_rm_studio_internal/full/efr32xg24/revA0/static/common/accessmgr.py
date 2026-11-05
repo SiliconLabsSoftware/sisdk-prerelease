@@ -15,14 +15,12 @@ This package can raise a number of exceptions from the top-level device class.
 try:
     unicode = unicode
 except NameError:
-    # 'unicode' is undefined, must be Python 3
     str = str
     unicode = str
     bytes = bytes
     basestring = (str,bytes)
     long = int
 else:
-    # 'unicode' exists, must be Python 2
     str = str
     unicode = unicode
     bytes = str
@@ -56,7 +54,6 @@ class Offline_AccessManager(object):
         """
         assert isinstance(label, basestring)
         self._label = label
-        # will default to a value of zero
         self._sim_regs = defaultdict(long)
 
     def ReadRegister(self, address):
@@ -69,7 +66,6 @@ class Offline_AccessManager(object):
         Returns:
             long: The simulated register value.
         """
-        # TODO: Default to SVD XML reset value if the address has not been written
         return self._sim_regs[address]
 
     def WriteRegister(self, address, data):

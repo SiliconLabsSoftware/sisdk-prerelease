@@ -24,7 +24,6 @@ class RM_SVD_Info(object):
 
     .. code-block:: py
 
-          # show entire formatted info
           print(rm.svdInfo)
 
     :vartype filename: ``str``

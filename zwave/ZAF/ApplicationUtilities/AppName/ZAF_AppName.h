@@ -14,6 +14,13 @@
 #include <stdbool.h>
 #include "zaf_appname_config.h"
 
+/**
+ * @addtogroup ZAF
+ * @{
+ * @addtogroup AppName Application Name
+ * @{
+ */
+
 #if !defined(ZAF_APP_NAME)
 #error "The application's name is not defined"
 #endif
@@ -35,5 +42,10 @@ bool ZAF_AppName_Read(char * app_name);
  * @return status of the write operation
  */
 bool ZAF_AppName_Write(void);
+
+/**
+ * @}
+ * @}
+ */
 
 #endif /* ZAF_APPNAME_H */

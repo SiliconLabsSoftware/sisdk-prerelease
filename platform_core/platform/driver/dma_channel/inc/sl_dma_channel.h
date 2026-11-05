@@ -40,6 +40,7 @@
 #include "sl_device_peripheral.h"
 #include "sl_device_dma.h"
 
+#include "sl_log_helper.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -435,7 +436,7 @@ sl_status_t sl_dma_channel_get_status(sl_dma_channel_handle_t *handle,
  * @return SL_STATUS_OK on success.
  * @return SL_STATUS_ALLOCATION_FAILED if memory cannot be allocated.
  *
- * @note Invalid arguments (NULL pointer) trigger EFM_ASSERT in debug builds only.
+ * @note Invalid arguments (NULL pointer) trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  *       In release builds, passing NULL will result in undefined behavior.
  ******************************************************************************/
 sl_status_t sl_dma_channel_handle_alloc(sl_dma_channel_handle_t **handle);
@@ -451,7 +452,7 @@ sl_status_t sl_dma_channel_handle_alloc(sl_dma_channel_handle_t **handle);
  *
  * @return SL_STATUS_OK on success.
  *
- * @note Invalid arguments (NULL pointer) trigger EFM_ASSERT in debug builds
+ * @note Invalid arguments (NULL pointer) trigger SL_LOG_DEBUG_ASSERT in debug builds
  *       only. In release builds, passing NULL will result in undefined
  *       behavior.
  ******************************************************************************/
@@ -481,7 +482,7 @@ size_t sl_dma_channel_handle_get_size(void);
  * @return SL_STATUS_OK on success.
  * @return SL_STATUS_ALLOCATION_FAILED if descriptor allocation fails.
  *
- * @note Invalid arguments (NULL pointers) trigger EFM_ASSERT in debug builds only.
+ * @note Invalid arguments (NULL pointers) trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  *       In release builds, passing NULL will result in undefined behavior.
  ******************************************************************************/
 sl_status_t sl_dma_channel_descriptor_alloc(const sl_dma_channel_handle_t *handle,
@@ -499,7 +500,7 @@ sl_status_t sl_dma_channel_descriptor_alloc(const sl_dma_channel_handle_t *handl
  *
  * @return SL_STATUS_OK on success.
  *
- * @note Invalid arguments (NULL pointers) trigger EFM_ASSERT in debug builds only.
+ * @note Invalid arguments (NULL pointers) trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  *       In release builds, passing NULL will result in undefined behavior.
  ******************************************************************************/
 sl_status_t sl_dma_channel_descriptor_free(const sl_dma_channel_handle_t *handle,
@@ -542,7 +543,7 @@ size_t sl_dma_channel_descriptor_get_size(void);
  *       any pending transfers and disable the channel.
  *
  * @note Invalid arguments (NULL handle pointer, invalid channel number) trigger
- *       EFM_ASSERT in debug builds only. In release builds, passing invalid
+ *       SL_LOG_DEBUG_ASSERT in debug builds only. In release builds, passing invalid
  *       arguments will result in undefined behavior.
  ******************************************************************************/
 sl_status_t sl_dma_channel_init(sl_dma_channel_handle_t *handle,
@@ -567,7 +568,7 @@ sl_status_t sl_dma_channel_init(sl_dma_channel_handle_t *handle,
  *         must be disabled (either by completing all transfers naturally or by
  *         calling @ref sl_dma_channel_abort()) before it can be deinitialized.
  *
- * @note Invalid arguments (NULL handle pointer) trigger EFM_ASSERT in debug
+ * @note Invalid arguments (NULL handle pointer) trigger SL_LOG_DEBUG_ASSERT in debug
  *       builds only. In release builds, passing invalid arguments will result
  *       in undefined behavior.
  ******************************************************************************/
@@ -610,7 +611,7 @@ sl_status_t sl_dma_channel_deinit(sl_dma_channel_handle_t *handle);
  * @return SL_STATUS_OK on success.
  * @return SL_STATUS_BUSY when the DMA channel has active transfers.
  *
- * @note Invalid signal values trigger EFM_ASSERT in debug builds only.
+ * @note Invalid signal values trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  *
  * @note Invalid handle checks are performed via assertions in debug builds only.
  ******************************************************************************/
@@ -650,7 +651,7 @@ sl_status_t sl_dma_channel_set_peripheral_signal(const sl_dma_channel_handle_t *
  *       2-byte alignment, BYTE has no alignment requirement). The transfer size
  *       must be a multiple of the selected unit size.
  *
- * @note Invalid arguments (NULL pointers) trigger EFM_ASSERT in debug builds only.
+ * @note Invalid arguments (NULL pointers) trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  ******************************************************************************/
 sl_status_t sl_dma_channel_submit_transfer_m2m(sl_dma_channel_handle_t *handle,
                                                void *source,
@@ -701,7 +702,7 @@ sl_status_t sl_dma_channel_submit_transfer_m2m(sl_dma_channel_handle_t *handle,
  *       SL_DMA_CTRL_SIZE_BYTE has no alignment requirement. In practice,
  *       peripheral registers are always naturally aligned to their access size.
  *
- * @note Invalid arguments (NULL pointers) trigger EFM_ASSERT in debug builds only.
+ * @note Invalid arguments (NULL pointers) trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  ******************************************************************************/
 sl_status_t sl_dma_channel_submit_transfer_m2p(sl_dma_channel_handle_t *handle,
                                                void *source,
@@ -753,7 +754,7 @@ sl_status_t sl_dma_channel_submit_transfer_m2p(sl_dma_channel_handle_t *handle,
  *       SL_DMA_CTRL_SIZE_BYTE has no alignment requirement. In practice,
  *       peripheral registers are always naturally aligned to their access size.
  *
- * @note Invalid arguments (NULL pointers) trigger EFM_ASSERT in debug builds only.
+ * @note Invalid arguments (NULL pointers) trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  ******************************************************************************/
 sl_status_t sl_dma_channel_submit_transfer_p2m(sl_dma_channel_handle_t *handle,
                                                void *reg,
@@ -818,7 +819,7 @@ sl_status_t sl_dma_channel_submit_transfer_p2m(sl_dma_channel_handle_t *handle,
  *       Misaligned buffers will cause this function to return
  *       SL_STATUS_INVALID_PARAMETER.
  *
- * @note Invalid arguments (NULL pointers) trigger EFM_ASSERT in debug builds only.
+ * @note Invalid arguments (NULL pointers) trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  ******************************************************************************/
 sl_status_t sl_dma_channel_submit_transfer_list(sl_dma_channel_handle_t *handle,
                                                 sl_dma_channel_transfer_t *list_head);
@@ -860,7 +861,7 @@ sl_status_t sl_dma_channel_submit_transfer_list(sl_dma_channel_handle_t *handle,
  *       For SL_DMA_CTRL_SIZE_WORD, sources must be 4-byte aligned.
  *       SL_DMA_CTRL_SIZE_BYTE has no alignment requirement.
  *
- * @note Invalid arguments (NULL pointers) trigger EFM_ASSERT in debug builds only.
+ * @note Invalid arguments (NULL pointers) trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  ******************************************************************************/
 sl_status_t sl_dma_channel_submit_ping_pong_transfer_m2p(sl_dma_channel_handle_t *handle,
                                                          void *source,
@@ -908,7 +909,7 @@ sl_status_t sl_dma_channel_submit_ping_pong_transfer_m2p(sl_dma_channel_handle_t
  *       For SL_DMA_CTRL_SIZE_WORD, destinations must be 4-byte aligned.
  *       SL_DMA_CTRL_SIZE_BYTE has no alignment requirement.
  *
- * @note Invalid arguments (NULL pointers) trigger EFM_ASSERT in debug builds only.
+ * @note Invalid arguments (NULL pointers) trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  ******************************************************************************/
 sl_status_t sl_dma_channel_submit_ping_pong_transfer_p2m(sl_dma_channel_handle_t *handle,
                                                          void *source,
@@ -957,7 +958,7 @@ sl_status_t sl_dma_channel_submit_ping_pong_transfer_p2m(sl_dma_channel_handle_t
  *       For SL_DMA_CTRL_SIZE_WORD, sources must be 4-byte aligned.
  *       SL_DMA_CTRL_SIZE_BYTE has no alignment requirement.
  *
- * @note Invalid arguments (NULL pointers) trigger EFM_ASSERT in debug builds only.
+ * @note Invalid arguments (NULL pointers) trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  ******************************************************************************/
 sl_status_t sl_dma_channel_submit_triple_buffered_transfer_m2p(sl_dma_channel_handle_t *handle,
                                                                void *source,
@@ -1007,7 +1008,7 @@ sl_status_t sl_dma_channel_submit_triple_buffered_transfer_m2p(sl_dma_channel_ha
  *       For SL_DMA_CTRL_SIZE_WORD, destinations must be 4-byte aligned.
  *       SL_DMA_CTRL_SIZE_BYTE has no alignment requirement.
  *
- * @note Invalid arguments (NULL pointers) trigger EFM_ASSERT in debug builds only.
+ * @note Invalid arguments (NULL pointers) trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  ******************************************************************************/
 sl_status_t sl_dma_channel_submit_triple_buffered_transfer_p2m(sl_dma_channel_handle_t *handle,
                                                                void *source,
@@ -1048,7 +1049,7 @@ sl_status_t sl_dma_channel_submit_triple_buffered_transfer_p2m(sl_dma_channel_ha
  * @note It is up to the caller to ensure that 'new_size' is not larger than
  *       the buffer that was submitted earlier.
  *
- * @note Invalid arguments (NULL pointers) trigger EFM_ASSERT in debug builds only.
+ * @note Invalid arguments (NULL pointers) trigger SL_LOG_DEBUG_ASSERT in debug builds only.
  ******************************************************************************/
 sl_status_t sl_dma_channel_update_active_transfer(sl_dma_channel_handle_t *handle,
                                                   size_t new_size);

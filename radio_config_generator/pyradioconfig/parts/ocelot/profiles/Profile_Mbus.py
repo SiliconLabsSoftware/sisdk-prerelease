@@ -4,11 +4,14 @@ from pyradioconfig.parts.common.profiles.profile_common import *
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfile
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 from pyradioconfig.parts.ocelot.profiles.sw_profile_outputs_common import sw_profile_outputs_common_ocelot
+from pycalcmodel.core.common import IPCategory
 
 from pyradioconfig.parts.ocelot.profiles.profile_mbus_modes import *
 
 
 class Profile_Mbus_Ocelot(IProfile):
+
+    ip_category = IPCategory.LPW
 
     """
     Init internal variables
@@ -31,10 +34,8 @@ class Profile_Mbus_Ocelot(IProfile):
 
         family = self._family
 
-        # Build profile
         profile = self._makeProfile(model)
 
-        ### Required inputs ###
 
         IProfile.make_required_input(profile, model.vars.preamble_length, "general", readable_name="Preamble Length Total", value_limit_min=16, value_limit_max=2097151)
         IProfile.make_required_input(profile, model.vars.mbus_mode, category="general", readable_name="Mbus Mode")
@@ -54,7 +55,6 @@ class Profile_Mbus_Ocelot(IProfile):
                                      readable_name="Crystal Frequency", value_limit_min=38000000,
                                      value_limit_max=40000000, units_multiplier=UnitsMultiplier.MEGA)
 
-        ### Optional inputs ###
 
         IProfile.make_optional_input(profile, model.vars.test_ber, category="testing",
                                      readable_name="Reconfigure for BER testing", default=False)
@@ -66,9 +66,7 @@ class Profile_Mbus_Ocelot(IProfile):
                                      value_limit_max=4)
 
 
-        ### Hidden test inputs ###
 
-        # Hidden inputs to allow for fixed frame length testing
         IProfile.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                    readable_name="Frame Length Algorithm")
         IProfile.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
@@ -94,7 +92,6 @@ class Profile_Mbus_Ocelot(IProfile):
                                    readable_name="Frame Bit Endian")
         IProfile.make_hidden_input(profile, model.vars.synth_settling_mode, 'modem',
                                    readable_name="Synth Settling Mode")
-        # Hidden inputs to allow for keeping absolute tolerance the same when testing at 915M
         IProfile.make_hidden_input(profile, model.vars.rx_xtal_error_ppm, category="general",
                                    readable_name="Set desired xtal tolerance on RX side", value_limit_min=0,
                                    value_limit_max=100)
@@ -114,21 +111,15 @@ class Profile_Mbus_Ocelot(IProfile):
                                    readable_name="Enable ADC attenuation")
         self.make_hidden_input(profile, model.vars.afc_run_mode, 'Advanced', readable_name="AFC Run mode")
 
-        #Deprecated inputs
-        # These inputs were exposed on or after Ocelot Alpha 1 release, so they may be present in radioconf XML
         self.make_deprecated_input(profile, model.vars.max_tx_power_dbm)
 
 
-        # Informational output
         self._sw_profile_outputs_common.build_info_outputs(model, profile)
 
-        # RAIL Outputs
         self._sw_profile_outputs_common.build_rail_outputs(model, profile)
 
-        # IRCal outputs
         self._sw_profile_outputs_common.build_ircal_outputs(model, profile)
 
-        # Output fields
         buildFrameOutputs(model, profile)
         buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
@@ -144,25 +135,20 @@ class Profile_Mbus_Ocelot(IProfile):
 
     def mbus_profile_frame_format_common(self, model):
 
-        # Whitening
         model.vars.header_white_en.value_forced = False
         model.vars.payload_white_en.value_forced = False
         model.vars.white_poly.value_forced = model.vars.white_poly.var_enum.NONE
         model.vars.white_seed.value_forced = 0
         model.vars.white_output_bit.value_forced = 0
 
-        # General frame format
         model.vars.frame_bitendian.value_forced = model.vars.frame_bitendian.var_enum.MSB_FIRST
 
-        # -- Payload --
         model.vars.payload_addtrailtxdata_en.value_forced = False
         model.vars.payload_excludesubframewcnt_en.value_forced = False
 
-        # -- Header --
         model.vars.header_addtrailtxdata_en.value_forced = False
         model.vars.header_excludesubframewcnt_en.value_forced = False
 
-        # Frame type length variables
         model.vars.frame_type_loc.value_forced = 0
         model.vars.frame_type_bits.value_forced = 3
         model.vars.frame_type_lsbit.value_forced = 0
@@ -183,10 +169,8 @@ class Profile_Mbus_Ocelot(IProfile):
         model.vars.frame_type_6_valid.value_forced = False
         model.vars.frame_type_7_valid.value_forced = False
 
-        # FEC
         model.vars.fec_en.value_forced = model.vars.fec_en.var_enum.NONE
 
-        # CRC
         model.vars.crc_poly.value_forced = model.vars.crc_poly.var_enum.DNP_16
         model.vars.crc_seed.value_forced = default=long(0)
         model.vars.crc_byte_endian.value_forced = model.vars.crc_byte_endian.var_enum.MSB_FIRST
@@ -216,8 +200,6 @@ class Profile_Mbus_Ocelot(IProfile):
             model.vars.payload_crc_en.value_forced = False
 
         elif model.profile.inputs.mbus_frame_format.var_value == model.vars.mbus_frame_format.var_enum.FrameA:
-            # -- Header --
-            #Block 1 for frameA
             model.vars.header_en.value_forced = True
             model.vars.header_size.value_forced = 1 #This controls DFL location AND header size. We set it up for DFL loc
             model.vars.FRC_FCD0_WORDS.value_forced = 9 #and override the size to be 10B for TX
@@ -225,12 +207,9 @@ class Profile_Mbus_Ocelot(IProfile):
             model.vars.header_calc_crc.value_forced = True
             model.vars.header_include_crc.value_forced = True
 
-            #all subsequent blocks are handled as repating 16B subframes
             model.vars.FRC_FCD1_WORDS.value_forced = 15
             model.vars.FRC_FCD3_WORDS.value_forced = 15
-            #FCDMODE2 is the default, which is good for us
 
-            # -- Variable Length --
             model.vars.frame_length_type.value_forced = model.vars.frame_length_type.var_enum.VARIABLE_LENGTH
             model.vars.var_length_numbits.value_forced = 8
             model.vars.var_length_bitendian.value_forced = model.vars.var_length_bitendian.var_enum.MSB_FIRST
@@ -244,17 +223,13 @@ class Profile_Mbus_Ocelot(IProfile):
             model.vars.payload_crc_en.value_forced = True
 
         elif model.profile.inputs.mbus_frame_format.var_value == model.vars.mbus_frame_format.var_enum.FrameB:
-            # -- Header --
-            #Block 1 and 2 for frameB
             model.vars.header_en.value_forced = True
             model.vars.header_size.value_forced = 1 #This controls DFL location AND header size. We set it up for DFL loc
             model.vars.FRC_FCD0_WORDS.value_forced = 125 #and override the size to be 125B for TX
             model.vars.FRC_FCD2_WORDS.value_forced = 125 #and for RX
             model.vars.header_calc_crc.value_forced = True
             model.vars.header_include_crc.value_forced = True
-            #Block 3 is the remaining data, which is the payload from the configurator's perspective
 
-            # -- Variable Length --
             model.vars.frame_length_type.value_forced = model.vars.frame_length_type.var_enum.VARIABLE_LENGTH
             model.vars.var_length_numbits.value_forced = 8
             model.vars.var_length_bitendian.value_forced = model.vars.var_length_bitendian.var_enum.MSB_FIRST
@@ -273,7 +248,6 @@ class Profile_Mbus_Ocelot(IProfile):
 
     def mbus_profile_radio_common(self, model):
 
-        # Set some variables common to all modes
         model.vars.fsk_symbol_map.value_forced = model.vars.fsk_symbol_map.var_enum.MAP0
         model.vars.dsss_chipping_code.value_forced = long(0)
         model.vars.dsss_len.value_forced = 0

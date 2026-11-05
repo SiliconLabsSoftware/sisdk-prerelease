@@ -550,8 +550,44 @@ static inline void starve_capture(void)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_PLATFORM, SL_CODE_CLASS_TIME_CRITICAL)
 static void starve_callback(const sl_watchdog_manager_starve_context_t *context)
 {
-    (void)context;
     starve_capture();
+
+    if (context != NULL)
+    {
+        uint32_t uids[HAL_WATCHDOG_LWM_SW_UID_MAX];
+        uint32_t count = 0U;
+        uint32_t mask  = context->unfed_mask;
+
+        for (uint32_t handle = 0U; handle < HAL_WATCHDOG_LWM_SW_UID_MAX; handle++)
+        {
+            if ((mask == 0U) || (count >= HAL_WATCHDOG_LWM_SW_UID_MAX))
+            {
+                break;
+            }
+
+            if ((mask & (1U << handle)) == 0U)
+            {
+                continue;
+            }
+
+            mask &= ~(1U << handle);
+
+            sl_watchdog_handle_t h   = handle;
+            uint32_t             uid = 0U;
+
+            if (sl_watchdog_manager_get_uid(&h, &uid) == SL_STATUS_OK)
+            {
+                uids[count++] = uid;
+            }
+        }
+
+        if ((count == 0U) && (context->faulty_handle != UINT32_MAX))
+        {
+            uids[count++] = context->watchdog_uid;
+        }
+
+        halWatchdogLwmCaptureSetSwUids(uids, count);
+    }
 }
 
 // Register the platform Watchdog Manager starve callback for LWM crash capture.

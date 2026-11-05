@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 #include "em_burtc.h"
+#include "sl_log_helper.h"
 #if defined(BURTC_PRESENT)
 
 /***************************************************************************//**
@@ -62,7 +63,7 @@ __STATIC_INLINE uint32_t divToLog2(uint32_t div)
   uint32_t log2;
 
   /* Prescaler accepts an argument of 128 or less, valid values being 2^n. */
-  EFM_ASSERT((div > 0UL) && (div <= 32768UL));
+  SL_LOG_DEBUG_ASSERT((div > 0UL) && (div <= 32768UL));
 
   /* Count leading zeroes and "reverse" result, Cortex-M3 intrinsic. */
   log2 = (31UL - __CLZ(div));
@@ -128,19 +129,19 @@ void BURTC_Init(const BURTC_Init_TypeDef *burtcInit)
   uint32_t presc;
 
   /* Check initializer structure integrity. */
-  EFM_ASSERT(burtcInit != (BURTC_Init_TypeDef *) 0);
+  SL_LOG_DEBUG_ASSERT(burtcInit != (BURTC_Init_TypeDef *) 0);
   /* Clock divider must be between 1 and 128, really on the form 2^n. */
-  EFM_ASSERT((burtcInit->clkDiv >= 1) && (burtcInit->clkDiv <= 128));
+  SL_LOG_DEBUG_ASSERT((burtcInit->clkDiv >= 1) && (burtcInit->clkDiv <= 128));
 
   /* Ignored compare bits during low power operation must be less than 7. */
   /* Note! Giant Gecko revision C errata, do NOT use LPCOMP=7. */
-  EFM_ASSERT(burtcInit->lowPowerComp <= 6);
+  SL_LOG_DEBUG_ASSERT(burtcInit->lowPowerComp <= 6);
   /* You cannot enable the BURTC if mode is set to disabled. */
-  EFM_ASSERT((burtcInit->enable == false)
+  SL_LOG_DEBUG_ASSERT((burtcInit->enable == false)
              || ((burtcInit->enable == true)
                  && (burtcInit->mode != burtcModeDisable)));
   /* Low power mode is only available with LFRCO or LFXO as clock source. */
-  EFM_ASSERT((burtcInit->clkSel != burtcClkSelULFRCO)
+  SL_LOG_DEBUG_ASSERT((burtcInit->clkSel != burtcClkSelULFRCO)
              || ((burtcInit->clkSel == burtcClkSelULFRCO)
                  && (burtcInit->lowPowerMode == burtcLPDisable)));
 
@@ -264,7 +265,7 @@ void BURTC_Enable(bool enable)
 void BURTC_Enable(bool enable)
 {
   /* Note! If mode is disabled, BURTC counter will not start */
-  EFM_ASSERT(((enable == true)
+  SL_LOG_DEBUG_ASSERT(((enable == true)
               && ((BURTC->CTRL & _BURTC_CTRL_MODE_MASK)
                   != BURTC_CTRL_MODE_DISABLE))
              || (enable == false));
@@ -281,9 +282,9 @@ void BURTC_Enable(bool enable)
  ******************************************************************************/
 void BURTC_CompareSet(unsigned int comp, uint32_t value)
 {
-  (void) comp;  /* Unused parameter when EFM_ASSERT is undefined. */
+  (void) comp;  /* Unused parameter when SL_LOG_DEBUG_ASSERT is undefined. */
 
-  EFM_ASSERT(comp == 0U);
+  SL_LOG_DEBUG_ASSERT(comp == 0U);
 
 #if defined(_BURTC_COMP0_MASK)
   /* Modification of COMP0 register requires sync with potential ongoing
@@ -311,9 +312,9 @@ void BURTC_CompareSet(unsigned int comp, uint32_t value)
  ******************************************************************************/
 uint32_t BURTC_CompareGet(unsigned int comp)
 {
-  (void) comp;  /* Unused parameter when EFM_ASSERT is undefined. */
+  (void) comp;  /* Unused parameter when SL_LOG_DEBUG_ASSERT is undefined. */
 
-  EFM_ASSERT(comp == 0U);
+  SL_LOG_DEBUG_ASSERT(comp == 0U);
 #if defined(_BURTC_COMP0_MASK)
   return BURTC->COMP0;
 #else

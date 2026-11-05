@@ -21,7 +21,7 @@
 
 #include "btl_errorcode.h"
 #include "btl_reset_info.h"
-#include "application_properties.h"
+#include "api/application_properties.h"
 
 // Include component-specific interfaces
 #include "btl_interface_parser.h"
@@ -367,7 +367,9 @@ BootloaderResetCause_t bootloader_getResetReason(void);
 __STATIC_INLINE bool bootloader_pointerValid(const void *ptr);
 __STATIC_INLINE bool bootloader_pointerValid(const void *ptr)
 {
-#if BTL_MAIN_STAGE_BASE > 0U
+#if defined(MAIN_BOOTLOADER_TEST)
+  return (ptr != NULL);
+#elif BTL_MAIN_STAGE_BASE > 0U
   if (((size_t)ptr >= BTL_MAIN_STAGE_BASE)
       && ((size_t)ptr < (BTL_MAIN_STAGE_BASE + BTL_MAIN_STAGE_MAX_SIZE))) {
     return true;

@@ -7,7 +7,6 @@ Calculator functions must start with "calc_", if they are to be consumed by the 
 """
 
 from collections import OrderedDict
-#import math
 from enum import Enum
 from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICalculator
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
@@ -30,9 +29,7 @@ class CALC_Radio(ICalculator):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Output fields
         self._build_radio_regs(model)
-        #self._addModelVariable(model,  'synth_lpfbw',  int,          ModelVariableFormat.DECIMAL)
 
 
         var = self._addModelVariable(model, 'pll_bandwidth_rx', Enum, ModelVariableFormat.DECIMAL, 'PLL bandwidth in KHz in RX')
@@ -132,12 +129,9 @@ class CALC_Radio(ICalculator):
         self._addModelRegister(model, 'RAC.RFENCTRL.DEMEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.RFENCTRL.IFADCCAPRESET', int, ModelVariableFormat.HEX)
 
-        # Don't write this register directly any more.  Write the version in sequencer code instead.
-        # self._addModelRegister(model, 'RAC.LPFCTRL.LPFBW'              , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'SEQ.SYNTHLPFCTRLRX.SYNTHLPFCTRLRX', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SEQ.SYNTHLPFCTRLTX.SYNTHLPFCTRLTX', int, ModelVariableFormat.HEX)
 
-        # Misc fields that were being written by the firmware to non-default values
         self._addModelRegister(model, 'RAC.LNAMIXCTRL1.TRIMAUXPLLCLK', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXCTRL1.TRIMTRSWGATEV', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXCTRL1.TRIMVCASLDO', int, ModelVariableFormat.HEX)
@@ -147,9 +141,9 @@ class CALC_Radio(ICalculator):
         self._addModelRegister(model, 'RAC.LNAMIXCTRL1.ENBIASCAL', int, ModelVariableFormat.HEX)
 
         self._addModelRegister(model, 'RAC.VCOCTRL.VCOAMPLITUDE'       , int, ModelVariableFormat.HEX )   
-        if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi", "panther", "lynx", "leopard", "lion", "unit_test_part"]:
+        if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi", "panther", "lynx", "leopard", "lionu", "lion", "unit_test_part"]:
             self._addModelRegister(model, 'RAC.VCOCTRL.VCODETAMPLITUDE'    , int, ModelVariableFormat.HEX )
-        elif model.part_family.lower() not in ['bobcat', 'caracal']:
+        elif model.part_family.lower() not in ['pumau', 'bobcat', 'caracal']:
             self._addModelRegister(model, 'RAC.VCOCTRL.VCODETAMPLITUDERX', int, ModelVariableFormat.HEX)
             self._addModelRegister(model, 'RAC.VCOCTRL.VCODETAMPLITUDETX', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.VCOCTRL.VCODETEN', int, ModelVariableFormat.HEX)
@@ -167,13 +161,8 @@ class CALC_Radio(ICalculator):
         self._addModelRegister(model, 'SYNTH.CTRL.AUXLOCKTHRESHOLD', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.CTRL.PRSMUX0', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.CTRL.PRSMUX1', int, ModelVariableFormat.HEX)
-        # self._addModelRegister(model, 'SYNTH.CTRL.TRISTATEPOSTPONE'    , int, ModelVariableFormat.HEX )
-        # self._addModelRegister(model, 'SYNTH.CTRL.INTEGERMODE'         , int, ModelVariableFormat.HEX )
-        # self._addModelRegister(model, 'SYNTH.CTRL.MMDSCANTESTEN'       , int, ModelVariableFormat.HEX )
         
 
-    # table from section 10.0 in rx_iffilt_stop.docx
-    # maps register enum to IFFILT bandwidth and IF frequency
     iffilt_bw = OrderedDict()
     iffilt_bw[0] = 570000
     iffilt_bw[1] = 630000
@@ -203,9 +192,6 @@ class CALC_Radio(ICalculator):
     iffilt_ratio[7] = 0.7
 
 
-    #TODO: combine IFFILT bw and ratio calculations to ensure that
-    #  ratio*bw is close to fc that we already determined
-    # or at least the IF filter covers the digital filter span
     def calc_iffilt_bw_reg(self, model):
         """
         find smallest IFFILT bandwidth we can use with given digital filter
@@ -217,7 +203,6 @@ class CALC_Radio(ICalculator):
 
         bw_dig = model.vars.bandwidth_actual.value
 
-        # find smallest bandwidth setting that is larger than bw_dig
         for bw_reg, bw_ana in self.iffilt_bw.items():
             if bw_ana > bw_dig:
                 break
@@ -248,7 +233,6 @@ class CALC_Radio(ICalculator):
         fc = model.vars.if_frequency_hz_actual.value
         bw_ana = model.vars.iffilt_bandwidth_actual.value
 
-        # calculate IF (center) frequency to BW ratio
         target_ratio = float(fc) / bw_ana
 
         model.vars.iffilt_ratio.value = target_ratio
@@ -264,7 +248,6 @@ class CALC_Radio(ICalculator):
 
         target_ratio = model.vars.iffilt_ratio.value
 
-        # find smallest ratio that is larger than the target ratio
         best_error = 9e9
         for index, ratio in self.iffilt_ratio.items():
             error = abs(target_ratio - ratio)
@@ -312,9 +295,6 @@ class CALC_Radio(ICalculator):
 
         bw = model.vars.bandwidth_actual.value
 
-        # discovered that if RX signal fits into the ADC bandwidth we get better
-        # performance with real mode. So check if channel bandwidth is less than
-        # 1 MHz and choose real mode else choose default complex mode.
         if bw < 1e6:
             realmode = 1   # set ADC in real-mode
         else:
@@ -331,8 +311,6 @@ class CALC_Radio(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # Due to a HW problem with PLL overshooting choose target BW of frequency synthesize
-        # LPF as 1.5 times the channel bandwidth chosen.
         target_bw_khz = 1.5 * model.vars.bandwidth_actual.value / 1000.0
 
         if target_bw_khz < 250:
@@ -360,8 +338,6 @@ class CALC_Radio(ICalculator):
         else:
             model.vars.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_3000KHz
 
-        # anything smaller than 2 is not performing well at this point
-        # use 2 as the smallest setting for now based on feedback from Ravi
         if model.vars.pll_bandwidth_tx.value.value < 2:
             model.vars.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_354KHz
 
@@ -374,11 +350,8 @@ class CALC_Radio(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # John Wang recommends that we use the LPFBW=2 setting in the RX mode to improve the phase noise.
-        # The phase noise fundamentally limits the ACS (if the RX channel filter is not a limitation in itself).
         baudrate_hz = model.vars.baudrate.value
 
-        # based on Ravi's feedback we should do this only for PHYs with datarate < 100kbps
         if baudrate_hz < 100e3:
             model.vars.pll_bandwidth_rx.value = model.vars.pll_bandwidth_rx.var_enum.BW_354KHz
         else:
@@ -395,24 +368,8 @@ class CALC_Radio(ICalculator):
 
         pll_bandwidth_tx = model.vars.pll_bandwidth_tx.value.value
         pll_bandwidth_rx = model.vars.pll_bandwidth_rx.value.value
-        # We need to set some bits in the upper part of SYNTHLPFCTRL
-        # Since we don't have proper fields defined for them in the 
-        # sequencer register, just hard-code a constant... at least for today
-        #
-        # This is really setting:
-        #
-        # bit 17:       LPFGNDSWITCHINGEN = 1   - LPF input ground switching enable
-        # bit 16:       LPFSWITCHINGEN    = 1   - Enables switching in the LPF
-        # bits 15:14    LPFINPUTCAP       = 0x3 - Controls the input capacitance of the LPF
-        #
         synthlpfctrl_upper_bits = 0x3c000
 
-        #
-        # We also conditionally set bit 4, the miracle mode bit.  Usually this is
-        # cleared, but it can be forced to a 1.  So set the global variable to
-        # 0, then read it back.  The readback will be a 1 if it was forced to a 1,
-        # and otherwise it will get set to 0.
-        #
         model.vars.pll_bandwidth_miracle_mode.value = False
         if model.vars.pll_bandwidth_miracle_mode.value == True:
             synthlpfctrl_upper_bits |= 0x10
@@ -453,7 +410,6 @@ class CALC_Radio(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # The following will be written with constants from Ravi's spreadsheet
         self._reg_write(model.vars.RAC_IFPGACTRL_VLDO,          3)
         self._reg_write(model.vars.RAC_IFPGACTRL_CASCBIAS,      7)
         self._reg_write(model.vars.RAC_IFPGACTRL_TRIMVCASLDO,   1)
@@ -525,9 +481,6 @@ class CALC_Radio(ICalculator):
         self._reg_write(model.vars.SYNTH_CTRL_AUXLOCKTHRESHOLD,    5)    
         self._reg_write(model.vars.SYNTH_CTRL_PRSMUX0,             0)      
         self._reg_write(model.vars.SYNTH_CTRL_PRSMUX1,             0)    
-        #self._reg_write(model.vars.SYNTH_CTRL_TRISTATEPOSTPONE,    0)   
-        #self._reg_write(model.vars.SYNTH_CTRL_INTEGERMODE,         0)   
-        #self._reg_write(model.vars.SYNTH_CTRL_MMDSCANTESTEN,       0)   
 
     def calc_analog_misc(self, model):
         """
@@ -535,7 +488,4 @@ class CALC_Radio(ICalculator):
         Args:
             model (ModelRoot) : Data model to read and write variables from
         """
-        # Set this to a 1 just to match the register default
-        # It really is a don't care, but it makes sense to set it to 1
-        # to make some diff's simpler
         self._reg_write(model.vars.RAC_RFENCTRL_IFADCCAPRESET, 1)

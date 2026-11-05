@@ -1007,21 +1007,23 @@ ZW_ADD_CMD(FUNC_ID_MEMORY_PUT_BUFFER)
                           retVal=1 ==> OK (NVM no change)|
                           retVal>=2 ==> OK (NVM data bytes written + 1)]
    */
-  uint16_t length;
   uint8_t retVal = 0;
-  ///* Ignore if frame has no data to write */
-  length = ((uint16_t)(frame->payload[2] << 8)) + frame->payload[3];
-  /* Ignore write if length exceeds specified data-array */
-  if (length < BUF_SIZE_RX ) {
-    /* ignore request if length is larger than available buffer */
-    if (length < BUF_SIZE_RX) {
+  uint8_t funcID = 0;
+  const uint8_t payloadLength = frame_payload_len(frame);
+  if (payloadLength >= 4) {
+    const uint16_t length = ((uint16_t)(frame->payload[2] << 8)) + frame->payload[3];
+    // The 2-byte offset, the 2-byte length and the data must fit in the payload the host sent
+    if (4 + length <= payloadLength) {
       const uint8_t * const pSerInData = frame->payload + 4;
       uint16_t offset =  ((uint16_t)(frame->payload[0] << 8)) + frame->payload[1];
       retVal = SerialApiNvmWriteAppData(offset, pSerInData, length);
+      if (4 + length < payloadLength) {
+        funcID = frame->payload[4 + length];
+      }
     }
   }
   DoRespond(retVal);
-  funcID_ComplHandler_MemoryPutBuffer = frame->payload[4 + length];
+  funcID_ComplHandler_MemoryPutBuffer = funcID;
   if ((0 != retVal) && (0 != funcID_ComplHandler_MemoryPutBuffer) ) {
     ZCB_ComplHandler_MemoryPutBuffer();
   }

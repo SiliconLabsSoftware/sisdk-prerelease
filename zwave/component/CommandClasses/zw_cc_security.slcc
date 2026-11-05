@@ -7,6 +7,9 @@ description: >
   securely in a Z-Wave network.
 
   The supported security levels are: NONE, S0, S2_ACCESS, S2_AUTHENTICATED, S2_UNAUTHENTICATED
+documentation:
+  docset: z-wave
+  document: zwave-api/zaf-transport
 package: zwave
 quality: production
 metadata:

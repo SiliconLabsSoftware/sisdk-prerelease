@@ -15,6 +15,7 @@ include:
 provides:
 - name: emlib_smu
 requires:
+- name: log_none
 - name: device
 - name: device_has_smu
 - name: emlib_common

@@ -23,6 +23,7 @@ provides:
 - name: interrupt_manager_arch
   condition: [device_cortexm]
 requires:
+- name: log_none
 - name: device_cortexm
 - name: interrupt_manager_irq_access
   condition: [device_generic_family_sixx381]

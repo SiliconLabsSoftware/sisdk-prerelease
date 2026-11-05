@@ -14,6 +14,14 @@ include:
 - path: platform/bootloader/core/smp_switch
   file_list:
   - path: btl_smp_switch_record.h
+  # btl_smp_switch_record.h transitively includes core/btl_bootload.h when
+  # BTL_SMP_SUPPORT is defined. Expose it here so consumers (e.g. unit tests
+  # that don't pull in the full bootloader_core) can resolve the chain.
+- path: platform/bootloader
+  file_list:
+  - path: core/btl_bootload.h
+requires:
+- name: device
 provides:
 - name: bootloader_s2_smp_record_header
 metadata:

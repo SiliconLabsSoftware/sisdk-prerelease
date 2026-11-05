@@ -28,6 +28,7 @@ source:
 provides:
 - name: mpa_manager
 requires:
+- name: log_none
 - name: component_catalog
 - name: sl_common
 - name: enum

@@ -33,7 +33,7 @@
 
 #include "em_cmu.h"
 #include "em_bus.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
  #include <limits.h>
 
@@ -223,7 +223,7 @@ uint32_t I2C_BusFreqGet(I2C_TypeDef *i2c)
     freqHfper = CMU_ClockFreqGet(cmuClock_I2C3);
 #endif
   } else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
   }
 
   /* n = Nlow + Nhigh */
@@ -278,7 +278,7 @@ void I2C_BusFreqSet(I2C_TypeDef *i2c,
   int32_t div;
 
   /* Avoid dividing by 0. */
-  EFM_ASSERT(freqScl);
+  SL_LOG_DEBUG_ASSERT(freqScl);
   if (!freqScl) {
     return;
   }
@@ -308,7 +308,7 @@ void I2C_BusFreqSet(I2C_TypeDef *i2c,
       freqRef = CMU_ClockFreqGet(cmuClock_I2C3);
 #endif
     } else {
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
     }
   }
 
@@ -361,7 +361,8 @@ void I2C_BusFreqSet(I2C_TypeDef *i2c,
   }
 
   /* Frequency most be larger-than. */
-  EFM_ASSERT(freqRef > minFreq);
+  SL_LOG_DEBUG_ASSERT(freqRef > minFreq);
+  (void)minFreq;
 
   /* SCL frequency is given by:
    * freqScl = freqRef/((Nlow + Nhigh) * (DIV + 1) + I2C_CR_MAX)
@@ -378,14 +379,14 @@ void I2C_BusFreqSet(I2C_TypeDef *i2c,
 
   /* Explicitly ensure denominator is never zero. */
   if (denominator == 0) {
-    EFM_ASSERT(0);
+    SL_LOG_DEBUG_ASSERT(0);
     return;
   }
   /* Perform integer division so that div is rounded up. */
   div = (int32_t)(((freqRef - (I2C_CR_MAX * freqScl) + denominator - 1)
                    / denominator) - 1);
-  EFM_ASSERT(div >= 0);
-  EFM_ASSERT((uint32_t)div <= _I2C_CLKDIV_DIV_MASK);
+  SL_LOG_DEBUG_ASSERT(div >= 0);
+  SL_LOG_DEBUG_ASSERT((uint32_t)div <= _I2C_CLKDIV_DIV_MASK);
 
   /* The clock divisor must be at least 1 in slave mode according to the reference */
   /* manual (in which case there is normally no need to set the bus frequency). */
@@ -410,7 +411,7 @@ void I2C_BusFreqSet(I2C_TypeDef *i2c,
  ******************************************************************************/
 void I2C_Enable(I2C_TypeDef *i2c, bool enable)
 {
-  EFM_ASSERT(I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(I2C_REF_VALID(i2c));
 
 #if defined (_I2C_EN_MASK)
   BUS_RegBitWrite(&(i2c->EN), _I2C_EN_EN_SHIFT, enable);
@@ -431,7 +432,7 @@ void I2C_Enable(I2C_TypeDef *i2c, bool enable)
  ******************************************************************************/
 void I2C_Init(I2C_TypeDef *i2c, const I2C_Init_TypeDef *init)
 {
-  EFM_ASSERT(I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(I2C_REF_VALID(i2c));
 
   i2c->IEN = 0;
   I2C_IntClear(i2c, _I2C_IF_MASK);
@@ -518,7 +519,7 @@ I2C_TransferReturn_TypeDef I2C_Transfer(I2C_TypeDef *i2c)
   I2C_TransferSeq_TypeDef *seq;
   bool finished = false;
 
-  EFM_ASSERT(I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(I2C_REF_VALID(i2c));
 
   /* Support up to 2 I2C buses. */
   if (i2c == I2C0) {
@@ -878,8 +879,8 @@ I2C_TransferReturn_TypeDef I2C_TransferInit(I2C_TypeDef *i2c,
 {
   I2C_Transfer_TypeDef *transfer;
 
-  EFM_ASSERT(I2C_REF_VALID(i2c));
-  EFM_ASSERT(seq);
+  SL_LOG_DEBUG_ASSERT(I2C_REF_VALID(i2c));
+  SL_LOG_DEBUG_ASSERT(seq);
 
   /* Support up to 2 I2C buses. */
   if (i2c == I2C0) {

@@ -4,7 +4,6 @@ import argparse
 import logging
 import datetime
 from datetime import timezone
-import shutil
 import os
 import glob
 from cryptography import x509
@@ -27,6 +26,11 @@ pki_mica_cert = "wisun_mica_cert.pem"
 pki_mica_key = "wisun_mica_key.pem"
 pki_device_cert = "wisun_device_{0}_cert.pem"
 pki_device_key = "wisun_device_{0}_key.pem"
+_PKI_CA_FILES = (
+    pki_root_cert, pki_root_key,
+    pki_mca_cert, pki_mca_key,
+    pki_mica_cert, pki_mica_key,
+)
 pki_csr_cn = u"Wi-SUN CSR"
 pki_root_cn = u"Wi-SUN Root"
 pki_mca_cn = u"Wi-SUN MCA"
@@ -70,15 +74,53 @@ class WisunDeviceType(Enum):
     BORDER_ROUTER = 2
 
 
-def _delete_pki():
-    """Delete the local Public Key Infrastructure (PKI).
+def _pki_dir(pki_path: Optional[str] = None) -> str:
+    """Directory that holds PKI files. Defaults to process CWD.
+    Args:
+        pki_path: Absolute path to the PKI directory. If omitted, CWD is used.
+    Returns:
+        str: Absolute path to the PKI directory.
     """
-    for file in glob.glob('*.pem'):
-        try:
-            os.remove(file)
-            logger.debug(f'Deleted: {file}')
-        except OSError as e:
-            logger.debug(f'Error deleting {file}: {e}')
+    if pki_path is None or pki_path == "":
+        return os.getcwd()
+    return os.path.abspath(pki_path)
+
+
+def _pki_file(name: str, pki_path: str) -> str:
+    """Resolve a PKI filename under the PKI directory.
+    Args:
+        name: Basename of the PKI file.
+        pki_path: Absolute path to the PKI directory.
+    Returns:
+        str: Absolute path to the PKI file.
+    """
+    return os.path.join(_pki_dir(pki_path), name)
+
+
+def _safe_remove(path: str) -> None:
+    """Remove a file if it exists, logging failures.
+    Args:
+        path: Path to the file to remove.
+    """
+    try:
+        os.remove(path)
+        logger.debug(f'Deleted: {path}')
+    except FileNotFoundError:
+        pass
+    except OSError as e:
+        logger.error(f'Error deleting {path}: {e}')
+
+
+def _delete_pki(pki_path: str) -> None:
+    """Delete PKI files under the given directory.
+    Args:
+        pki_path: Absolute path to the PKI directory.
+    """
+    for name in _PKI_CA_FILES:
+        _safe_remove(_pki_file(name, pki_path))
+    for pattern in ("wisun_device_*_cert.pem", "wisun_device_*_key.pem"):
+        for path in glob.glob(_pki_file(pattern, pki_path)):
+            _safe_remove(path)
 
 
 def _load_certificate_data(cert_path: str) -> x509.Certificate:
@@ -143,32 +185,35 @@ def _hardware_module_name(hwtype_oid: str, hwserialnum: bytes) -> bytes:
     return encode(hardware_module_value)
 
 
-def _pki_chain_length() -> int:
+def _pki_chain_length(pki_path: str) -> int:
     """Return the number of CAs in the PKI chain.
+    Args:
+        pki_path: Absolute path to the PKI directory.
     Returns:
         int: The number of CAs in the PKI chain. 0 if none.
     """
     chain_length = 0
-    if os.path.exists(pki_root_cert) and os.path.exists(pki_root_key):
+    if os.path.exists(_pki_file(pki_root_cert, pki_path)):
         chain_length += 1
-    if os.path.exists(pki_mca_cert) and os.path.exists(pki_mca_key):
+    if os.path.exists(_pki_file(pki_mca_cert, pki_path)):
         chain_length += 1
-    if os.path.exists(pki_mica_cert) and os.path.exists(pki_mica_key):
+    if os.path.exists(_pki_file(pki_mica_cert, pki_path)):
         chain_length += 1
     return chain_length
 
 
-def _pki_issuing_ca(chain_length: int) -> Tuple[str, str]:
+def _pki_issuing_ca(chain_length: int, pki_path: str) -> Tuple[str, str]:
     """Return the issuing CA certificate and private key.
     Args:
         chain_length: The number of CAs in the PKI chain.
+        pki_path: Absolute path to the PKI directory.
     Returns:
         Tuple[str, str]: Paths to the issuing CA certificate and private key.
     """
     if chain_length == 1:
-        return (pki_root_cert, pki_root_key)
+        return (_pki_file(pki_root_cert, pki_path), _pki_file(pki_root_key, pki_path))
     else:
-        return (pki_mica_cert, pki_mica_key)
+        return (_pki_file(pki_mica_cert, pki_path), _pki_file(pki_mica_key, pki_path))
 
 
 def _generate_private_key(output_key_path: str) -> ec.EllipticCurvePrivateKey:
@@ -403,32 +448,44 @@ def _generate_device(hwtype_oid: str, hwserialnum: bytes, device_type: WisunDevi
         f.write(cert.public_bytes(serialization.Encoding.PEM))
 
 
-def create_pki(oem_name: str, oem_country: str, chain_length: int) -> None:
+def create_pki(oem_name: str, oem_country: str, chain_length: int,
+               pki_path: Optional[str] = None) -> None:
     """Create a local Public Key Infrastructure (PKI).
     Args:
         oem_name: OEM name.
         oem_country: OEM country.
         chain_length: The number of CAs in the PKI chain.
+        pki_path: Absolute path to the PKI directory. If omitted, CWD is used.
     """
-    _delete_pki()
+    pki_path = _pki_dir(pki_path)
+    os.makedirs(pki_path, exist_ok=True)
+    _delete_pki(pki_path)
+    root_cert = _pki_file(pki_root_cert, pki_path)
+    root_key = _pki_file(pki_root_key, pki_path)
+    mca_cert = _pki_file(pki_mca_cert, pki_path)
+    mca_key = _pki_file(pki_mca_key, pki_path)
+    mica_cert = _pki_file(pki_mica_cert, pki_path)
+    mica_key = _pki_file(pki_mica_key, pki_path)
     logger.debug("Generating a new root CA certificate and private key")
     _generate_root(oem_name=oem_name, oem_country=oem_country,
-                   output_cert_path=pki_root_cert, output_key_path=pki_root_key)
+                   output_cert_path=root_cert, output_key_path=root_key)
     if chain_length == 2:
         logger.debug("Generating a new MICA certificate and private key")
-        _generate_mica(oem_name=oem_name, oem_country=oem_country, sign_cert_path=pki_root_cert,
-                       sign_key_path=pki_root_key, output_cert_path=pki_mica_cert, output_key_path=pki_mica_key)
+        _generate_mica(oem_name=oem_name, oem_country=oem_country, sign_cert_path=root_cert,
+                       sign_key_path=root_key, output_cert_path=mica_cert, output_key_path=mica_key)
     if chain_length == 3:
         logger.debug("Generating a new MCA certificate and private key")
-        _generate_mca(oem_name=oem_name, oem_country=oem_country, sign_cert_path=pki_root_cert,
-                      sign_key_path=pki_root_key, output_cert_path=pki_mca_cert, output_key_path=pki_mca_key)
+        _generate_mca(oem_name=oem_name, oem_country=oem_country, sign_cert_path=root_cert,
+                      sign_key_path=root_key, output_cert_path=mca_cert, output_key_path=mca_key)
         logger.debug("Generating a new MICA certificate and private key")
-        _generate_mica(oem_name=oem_name, oem_country=oem_country, sign_cert_path=pki_mca_cert,
-                       sign_key_path=pki_mca_key, output_cert_path=pki_mica_cert, output_key_path=pki_mica_key)
+        _generate_mica(oem_name=oem_name, oem_country=oem_country, sign_cert_path=mca_cert,
+                       sign_key_path=mca_key, output_cert_path=mica_cert, output_key_path=mica_key)
     logger.debug("PKI successfully generated")
 
 
-def setup_pki(root_cert: str, root_key: Optional[str] = None, mca_cert: Optional[str] = None, mca_key: Optional[str] = None, mica_cert: Optional[str] = None, mica_key: Optional[str] = None) -> None:
+def setup_pki(root_cert: str, root_key: Optional[str] = None, mca_cert: Optional[str] = None,
+              mca_key: Optional[str] = None, mica_cert: Optional[str] = None,
+              mica_key: Optional[str] = None, pki_path: Optional[str] = None) -> None:
     """Setup an existing Public Key Infrastructure (PKI).
     Args:
         root_cert: Path to the root CA certificate.
@@ -437,59 +494,70 @@ def setup_pki(root_cert: str, root_key: Optional[str] = None, mca_cert: Optional
         mca_key: Path to the MCA private key.
         mica_cert: Path to the MICA certificate.
         mica_key: Path to the MICA private key.
+        pki_path: Absolute path to the destination PKI directory. If omitted, CWD is used.
     """
-    _delete_pki()
-    logger.debug("Copying an existing root CA certificate")
-    shutil.copy(root_cert, pki_root_cert)
-    if root_key:
-        logger.debug("Copying an existing root CA private key")
-        shutil.copy(root_key, pki_root_key)
-    if mca_cert:
-        logger.debug("Copying an existing MCA certificate")
-        shutil.copy(mca_cert, pki_mca_cert)
-    if mca_key:
-        logger.debug("Copying an existing MCA private key")
-        shutil.copy(mca_key, pki_mca_key)
-    if mica_cert:
-        logger.debug("Copying an existing MICA certificate")
-        shutil.copy(mica_cert, pki_mica_cert)
-    if mica_key:
-        logger.debug("Copying an existing MICA private key")
-        shutil.copy(mica_key, pki_mica_key)
+    pki_path = _pki_dir(pki_path)
+    os.makedirs(pki_path, exist_ok=True)
+    # Load the source files into memory before removing the current PKI to
+    # prevent data loss if source and destination directories overlap.
+    source_pki = (
+        (root_cert, pki_root_cert, "root CA certificate"),
+        (root_key, pki_root_key, "root CA private key"),
+        (mca_cert, pki_mca_cert, "MCA certificate"),
+        (mca_key, pki_mca_key, "MCA private key"),
+        (mica_cert, pki_mica_cert, "MICA certificate"),
+        (mica_key, pki_mica_key, "MICA private key"),
+    )
+    dest_pki = []
+    for src, name, label in source_pki:
+        if src is None:
+            continue
+        if not os.path.isfile(src):
+            raise FileNotFoundError(src)
+        logger.debug("Importing %s", label)
+        with open(src, "rb") as f:
+            dest_pki.append((name, f.read()))
+    _delete_pki(pki_path)
+    for name, data in dest_pki:
+        with open(_pki_file(name, pki_path), "wb") as f:
+            f.write(data)
     logger.debug("PKI successfully setup")
 
 
-def get_pki() -> Optional[List[Dict[str, str]]]:
+def get_pki(pki_path: Optional[str] = None) -> Optional[List[Dict[str, str]]]:
     """Return paths to existing PKI files.
+    Args:
+        pki_path: Absolute path to the PKI directory. If omitted, CWD is used.
     Returns:
         List[Dict[str, str]]: Paths to the existing PKI files. None if not found.
     """
+    pki_path = _pki_dir(pki_path)
     pki = []
-    root_cert = pki_root_cert if os.path.exists(pki_root_cert) else None
-    root_key = pki_root_key if os.path.exists(pki_root_key) else None
+    root_cert = _pki_file(pki_root_cert, pki_path)
+    root_key = _pki_file(pki_root_key, pki_path)
     root = {}
-    if root_cert:
-        root['cert_path'] = os.path.abspath(root_cert)
-    if root_key:
-        root['key_path'] = os.path.abspath(root_key)
+    if os.path.exists(root_cert):
+        root['cert_path'] = root_cert
+    if os.path.exists(root_key):
+        root['key_path'] = root_key
     if len(root):
         pki.append(root)
-    mca_cert = pki_mca_cert if os.path.exists(pki_mca_cert) else None
-    mca_key = pki_mca_key if os.path.exists(pki_mca_key) else None
+    mca_cert = _pki_file(pki_mca_cert, pki_path)
+    mca_key = _pki_file(pki_mca_key, pki_path)
     mca = {}
-    if mca_cert:
-        mca['cert_path'] = os.path.abspath(mca_cert)
-    if mca_key:
-        mca['key_path'] = os.path.abspath(mca_key)
+    if os.path.exists(mca_cert):
+        mca['cert_path'] = mca_cert
+    if os.path.exists(mca_key):
+        mca['key_path'] = mca_key
     if len(mca):
         pki.append(mca)
-    mica_cert = pki_mica_cert if os.path.exists(pki_mica_cert) else None
-    mica_key = pki_mica_key if os.path.exists(pki_mica_key) else None
+    mica_cert = _pki_file(pki_mica_cert, pki_path)
+    mica_key = _pki_file(pki_mica_key, pki_path)
     mica = {}
-    if mica_cert:
-        mica['cert_path'] = os.path.abspath(mica_cert)
-    if mica_key:
-        mica['key_path'] = os.path.abspath(mica_key)
+    if os.path.exists(mica_cert):
+        mica['cert_path'] = mica_cert
+    if os.path.exists(mica_key):
+        mica['key_path'] = mica_key
     if len(mica):
         pki.append(mica)
     if len(pki) == 0:
@@ -497,58 +565,68 @@ def get_pki() -> Optional[List[Dict[str, str]]]:
     return pki
 
 
-def generate_on_host(hwtype_oid: str, hwserialnum: bytes, device_type: WisunDeviceType) -> Dict[str, str]:
+def generate_on_host(hwtype_oid: str, hwserialnum: bytes, device_type: WisunDeviceType,
+                     pki_path: Optional[str] = None) -> Dict[str, str]:
     """Generate device certificate-key pair on the host.
     Args:
         hwtype_oid: Hardware Type OID.
         hwserialnum: Hardware Serial Number.
         device_type: Device type.
+        pki_path: Absolute path to the PKI directory. If omitted, CWD is used.
     Returns:
         Dict[str, str]: Paths to the device certificate and private key.
     """
-    sign_cert_path, sign_key_path = _pki_issuing_ca(_pki_chain_length())
-    output_cert_path = pki_device_cert.format(hwserialnum.hex())
-    output_key_path = pki_device_key.format(hwserialnum.hex())
+    pki_path = _pki_dir(pki_path)
+    sign_cert_path, sign_key_path = _pki_issuing_ca(
+        _pki_chain_length(pki_path), pki_path)
+    output_cert_path = _pki_file(pki_device_cert.format(hwserialnum.hex()), pki_path)
+    output_key_path = _pki_file(pki_device_key.format(hwserialnum.hex()), pki_path)
     logger.debug("Generating CSR and private key")
     csr_data = _generate_csr(output_key_path)
     logger.debug(f"Generating device certificate for {hwserialnum.hex()}")
     _generate_device(hwtype_oid=hwtype_oid, hwserialnum=hwserialnum, device_type=device_type, csr_data=csr_data,
                      sign_cert_path=sign_cert_path, sign_key_path=sign_key_path, output_cert_path=output_cert_path)
-    return {"cert_path": os.path.abspath(output_cert_path), "key_path": os.path.abspath(output_key_path)}
+    return {"cert_path": output_cert_path, "key_path": output_key_path}
 
 
-def generate_from_csr(hwtype_oid: str, hwserialnum: bytes, device_type: WisunDeviceType, csr_data: bytes) -> Dict[str, str]:
+def generate_from_csr(hwtype_oid: str, hwserialnum: bytes, device_type: WisunDeviceType,
+                      csr_data: bytes, pki_path: Optional[str] = None) -> Dict[str, str]:
     """Generate device certificate from a CSR.
     Args:
         hwtype_oid: Hardware Type OID.
         hwserialnum: Hardware Serial Number.
         device_type: Device type.
         csr_data: CSR data.
+        pki_path: Absolute path to the PKI directory. If omitted, CWD is used.
     Returns:
         Dict[str, str]: Paths to the device certificate.
     """
-    sign_cert_path, sign_key_path = _pki_issuing_ca(_pki_chain_length())
-    output_cert_path = pki_device_cert.format(hwserialnum.hex())
+    pki_path = _pki_dir(pki_path)
+    sign_cert_path, sign_key_path = _pki_issuing_ca(
+        _pki_chain_length(pki_path), pki_path)
+    output_cert_path = _pki_file(pki_device_cert.format(hwserialnum.hex()), pki_path)
     logger.debug(f"Generating device certificate for {hwserialnum.hex()}")
     _generate_device(hwtype_oid=hwtype_oid, hwserialnum=hwserialnum, device_type=device_type, csr_data=csr_data,
                      sign_cert_path=sign_cert_path, sign_key_path=sign_key_path, output_cert_path=output_cert_path)
-    return {"cert_path": os.path.abspath(output_cert_path)}
+    return {"cert_path": output_cert_path}
 
 
-def get_credential(hwserialnum: bytes) -> Optional[Dict[str, str]]:
+def get_credential(hwserialnum: bytes, pki_path: Optional[str] = None) -> Optional[Dict[str, str]]:
     """Return paths to device certificate and private key.
     Args:
         hwserialnum: Hardware Serial Number.
+        pki_path: Absolute path to the PKI directory. If omitted, CWD is used.
     Returns:
         Dict[str, str]: Paths to the device certificate and private key. None if not found.
     """
+    pki_path = _pki_dir(pki_path)
     pki = {}
-    cert_path = pki_device_cert.format(hwserialnum.hex())
-    key_path = pki_device_key.format(hwserialnum.hex())
+    cert_path = _pki_file(pki_device_cert.format(hwserialnum.hex()), pki_path)
+    key_path = _pki_file(pki_device_key.format(hwserialnum.hex()), pki_path)
     if os.path.exists(cert_path):
-        pki["cert_path"] = os.path.abspath(cert_path)
+        pki["cert_path"] = cert_path
     if os.path.exists(key_path):
-        pki["key_path"] = os.path.abspath(key_path)
+        pki["key_path"] = key_path
     if len(pki) == 0:
         return None
     return pki

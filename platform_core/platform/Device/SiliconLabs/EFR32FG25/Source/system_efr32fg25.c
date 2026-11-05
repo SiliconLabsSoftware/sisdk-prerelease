@@ -744,7 +744,6 @@ void SystemLFXOClockSet(uint32_t freq)
  *****************************************************************************/
 uint32_t SystemRFFPLLClockGet(void)
 {
-  // RFFPLL present?
 #if (RFFPLL_DEFAULT_FREQ > 0U) && !defined(SYSTEM_NO_STATIC_MEMORY)
   return SystemRFFPLLClock;
 #else
@@ -765,7 +764,6 @@ uint32_t SystemRFFPLLClockGet(void)
  *****************************************************************************/
 void SystemRFFPLLClockSet(uint32_t freq)
 {
-  // RFFPLL present?
 #if (RFFPLL_DEFAULT_FREQ > 0) && !defined(SYSTEM_NO_STATIC_MEMORY)
   SystemRFFPLLClock = freq;
 

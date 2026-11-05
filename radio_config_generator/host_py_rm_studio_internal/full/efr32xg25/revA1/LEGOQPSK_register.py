@@ -1,5 +1,4 @@
 
-# -*- coding: utf-8 -*-
 
 from . static import Base_RM_Register
 from . LEGOQPSK_field import *
@@ -110,7 +109,7 @@ class RM_Register_LEGOQPSK_TXCFG1(Base_RM_Register):
             0xb500fc00, 0x01C,
             'TXCFG1', 'LEGOQPSK.TXCFG1', 'read-write',
             u"",
-            0x00000000, 0x00000006,
+            0x00000000, 0xF0000006,
             0x00001000, 0x00002000,
             0x00003000)
 
@@ -118,6 +117,8 @@ class RM_Register_LEGOQPSK_TXCFG1(Base_RM_Register):
         self.zz_fdict['TXHCSERRORS'] = self.TXHCSERRORS
         self.TXFCSERRORS = RM_Field_LEGOQPSK_TXCFG1_TXFCSERRORS(self)
         self.zz_fdict['TXFCSERRORS'] = self.TXFCSERRORS
+        self.TX_IQ_FILTER = RM_Field_LEGOQPSK_TXCFG1_TX_IQ_FILTER(self)
+        self.zz_fdict['TX_IQ_FILTER'] = self.TX_IQ_FILTER
         self.__dict__['zz_frozen'] = True
 
 

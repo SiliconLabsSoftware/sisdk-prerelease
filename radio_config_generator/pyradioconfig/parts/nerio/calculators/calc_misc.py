@@ -61,7 +61,6 @@ class CALC_Misc_nerio(CALC_Misc_jumbo):
         self._reg_write(model.vars.MODEM_DSATHD1_PWRDETDIS, 1)
         self._reg_write(model.vars.MODEM_DSATHD1_FREQSCALE, 0)
 
-        #self._reg_write(model.vars.MODEM_DSACTRL_DSAMODE, 0)
 
         self._reg_write(model.vars.MODEM_DSACTRL_ARRTOLERTHD0, 2)
         self._reg_write(model.vars.MODEM_DSACTRL_ARRTOLERTHD1, 4)
@@ -190,22 +189,17 @@ class CALC_Misc_nerio(CALC_Misc_jumbo):
         self._reg_write(model.vars.FRC_CTRL_RATESELECT,             0)
 
     def calc_ook_rssi_offset(self,model):
-        #OOK RSSI offset measured experimentally for Nerio
         model.vars.ook_rssi_offset.value = 16
 
     def calc_dynamic_bbss_values(self, model):
 
-        #Read in model variables
         dynamic_bbss_en = model.vars.SEQ_MISC_DYNAMIC_BBSS_SW_EN.value
 
-        #If we are not using dynamic BBSS then the configuration fields are do-not-care
         if dynamic_bbss_en:
             do_not_care = False
         else:
             do_not_care = True
 
-        #For now we don't have a calculation (only a fixed lookup for 802154 coh PHYs)
-        # These values are from https://jira.silabs.com/browse/MCUW_RADIO_CFG-1619
         self._reg_write(model.vars.SEQ_BBSS_GROUP_1_IIR_SHIFT, 2, do_not_care=do_not_care)
         self._reg_write(model.vars.SEQ_BBSS_GROUP_1_BBSS_HYSTERESIS, 0, do_not_care=do_not_care)
         self._reg_write(model.vars.SEQ_BBSS_GROUP_1_BBSS_LEVEL_LOW, 98, do_not_care=do_not_care)

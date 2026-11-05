@@ -7,7 +7,6 @@ Calculator functions must start with "calc_", if they are to be consumed by the 
 """
 
 from collections import OrderedDict
-#import math
 from enum import Enum
 from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICalculator
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
@@ -34,14 +33,10 @@ class CALC_Radio_jumbo(CALC_Radio):
         bw_analog = model.vars.iffilt_bandwidth_actual.value
         bw_digital = model.vars.bandwidth_actual.value
 
-        # loop over all possible center frequencies the analog filter
-        # can be centered around given analog filter bandwidths
         for ratio_reg, ratio in self.iffilt_ratio.items():
 
             f_if = bw_analog * ratio
 
-            # pick first setting that ensures the lower edge of the band
-            # is beyond 107 KHz lower threshold
             if f_if - bw_digital / 2.0 > 107e3:
                 break
 
@@ -61,7 +56,6 @@ class CALC_Radio_jumbo(CALC_Radio):
 
         best_error = 99
 
-        # loop over all ratios and find best closest to target ratio
         for ratio_reg, ratio in self.iffilt_ratio.items():
 
             error = abs(ratio - ratio_target)
@@ -93,7 +87,6 @@ class CALC_Radio_jumbo(CALC_Radio):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # Always set to narrowest bandwidth
         model.vars.pll_bandwidth_rx.value = model.vars.pll_bandwidth_rx.var_enum.BW_250KHz
 
 
@@ -111,12 +104,6 @@ class CALC_Radio_jumbo(CALC_Radio):
         self._reg_write(model.vars.RAC_LPFCTRL_LPFBWRX,  pll_bandwidth_rx)
         self._reg_write(model.vars.RAC_LPFCTRL_LPFBWTX,  pll_bandwidth_tx)
 
-        #
-        # We also need to set the miracle mode bit.  Usually this is
-        # cleared, but it can be forced to a 1.  So set the global variable to
-        # 0, then read it back.  The readback will be a 1 if it was forced to a 1,
-        # and otherwise it will get set to 0.
-        #
         model.vars.pll_bandwidth_miracle_mode.value = False
         if model.vars.pll_bandwidth_miracle_mode.value == True:
             self._reg_write(model.vars.RAC_LPFCTRL_MIRACLEMODE, 1)
@@ -162,7 +149,6 @@ class CALC_Radio_jumbo(CALC_Radio):
 
         lodiv = model.vars.lodiv_actual.value
 
-        # https://jira.silabs.com/browse/LABATEPDB-154 set to 10 for subgig
         subgig_band = model.vars.subgig_band.value
 
         if subgig_band:

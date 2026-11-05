@@ -5,8 +5,7 @@ from pyradioconfig.parts.ocelot.phys.phys_studio_wisun_fan_1_1 import WisunFan1v
 
 class PhysStudioWisunFan1v1VirtualOcelot(PhysStudioWisunFan1v1VirtualJumbo):
 
-    def _set_xtal_frequency(self, model, phy):
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+    default_xtal_frequency_hz = 39000000
 
     def PHY_WISUN_FAN_1v1_915MHz_Plan48_2FSK_1b_AZ_NZ_FEC(self, model, phy_name=None):
         params = WisunFan1v1ChannelParamsOcelot('AZ_NZ', 0x12, 48, 200000, 915200000, 'Wi-SUN FAN, AZ_NZ 915-928 MHz, Mode1b (2FSK 50kbps mi=1.0), FEC')

@@ -198,6 +198,11 @@ SL_ENUM(cs_app_error_t) {
 
   // ---- Local / remote CS capability mismatches ----
   CS_APP_ERROR_CS_SYNC_PHY_NOT_SUPPORTED,
+  CS_APP_ERROR_CHANNEL_SELECTION_NOT_SUPPORTED,
+  CS_APP_ERROR_CS_ROLE_NOT_SUPPORTED,
+  CS_APP_ERROR_RTT_AA_ONLY_NOT_SUPPORTED,
+  CS_APP_ERROR_RTT_SOUNDING_NOT_SUPPORTED,
+  CS_APP_ERROR_RTT_RANDOM_NOT_SUPPORTED,
 
   // ---- Parameter optimization ----
   CS_APP_ERROR_PARAM_OPTIMIZATION_NOT_SUPPORTED,
@@ -313,8 +318,10 @@ void app_cs_delete_initiator_instance(uint8_t conn_handle);
 /**************************************************************************//**
  * Check supported capabilities.
  * @param[in] evt Event coming from the Bluetooth stack.
+ * @return SL_STATUS_OK if setup can continue, SL_STATUS_NOT_SUPPORTED on a
+ *         fatal capability mismatch (the connection is already being closed).
  *****************************************************************************/
-void app_cs_check_supported_capabilities(const sl_bt_msg_t *evt);
+sl_status_t app_cs_check_supported_capabilities(const sl_bt_msg_t *evt);
 
 /**************************************************************************//**
  * Check CLI values.

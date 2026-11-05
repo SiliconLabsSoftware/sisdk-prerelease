@@ -30,7 +30,7 @@
 
 #include "em_device.h"
 #if defined(_SILICON_LABS_32B_SERIES_3)
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sli_power_manager_private.h"
 #include "sl_power_manager.h"
 #include "sl_power_manager_config.h"
@@ -123,7 +123,8 @@ void sli_power_manager_apply_em(sl_power_manager_em_t em)
     case SL_POWER_MANAGER_EM3:
       // Retrieve SYSCLK frequency
       status = sl_clock_manager_get_clock_branch_frequency(SL_CLOCK_BRANCH_SYSCLK, &sysclk_freq);
-      EFM_ASSERT(status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+      (void)status;
       // Evaluate what HCLK divsion can be done in respect of the lowest LSPCLK branch frequency possible (1MHz)
       if (sysclk_freq >= 32000000) {
         // HCLK/16: Minimum SYSCLK frequency = 1MHz x (LSPCLK PRESC) x (HCLK PRESC 16) = 1MHz x 2 x 16 = 32MHz
@@ -162,7 +163,7 @@ void sli_power_manager_apply_em(sl_power_manager_em_t em)
 #endif
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 }
@@ -191,7 +192,8 @@ void sli_power_manager_em1hclkdiv_presleep_operations(void)
 
   // Retrieve SYSCLK oscillator
   status = sl_clock_manager_get_sysclk_source(&osc);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   // Change SYSCLK to HFXO if on SOCPLL to reduce power consumption
   if (osc == SL_OSCILLATOR_SOCPLL0) {
@@ -203,10 +205,12 @@ void sli_power_manager_em1hclkdiv_presleep_operations(void)
 #if defined(SL_POWER_MANAGER_QSPI_CLOCK_SWITCH_IN_SLEEP_EN) && (SL_POWER_MANAGER_QSPI_CLOCK_SWITCH_IN_SLEEP_EN == 1)
   // Save current QSPI reference clock.
   status = sl_clock_manager_get_ext_flash_clk(&qspi_reference_clock);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
   // Update QSPI clock source.
   status = sl_clock_manager_set_ext_flash_clk(SL_OSCILLATOR_FSRCO);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 #endif
 }
 
@@ -227,7 +231,8 @@ void sli_power_manager_em1hclkdiv_postsleep_operations(void)
   sl_status_t status;
   // Restore original QSPI clock source.
   status = sl_clock_manager_set_ext_flash_clk(qspi_reference_clock);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 #endif
 }
 #endif // _SILICON_LABS_32B_SERIES_3

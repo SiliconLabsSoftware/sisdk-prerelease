@@ -434,7 +434,7 @@ static void adma_rx_parse_bounce(sl_cpc_drv_sdio_host_t *drv)
 
     status = sli_cpc_alloc_rx_payload(&drv->bus, frame);
     if (status != SL_STATUS_OK) {
-      SLI_CPC_LOG_ERROR("RX - payload alloc failed: 0x%lx", (unsigned long)status);
+      SLI_CPC_LOG_DEBUG("RX - payload alloc failed: 0x%lx", (unsigned long)status);
       MCU_ATOMIC_SECTION(sli_cpc_frame_list_push_back(&drv->rx_free_frames, frame);)
       return;
     }
@@ -774,10 +774,10 @@ static sl_status_t init_hw(sl_cpc_drv_sdio_host_t *drv, const sl_cpc_drv_sdio_ho
 
   // sl_sdhc_sdio_init already arms host CARDINT. Mask it while enabling CCCR
   // IENM/FN1 INT_EN — otherwise DAT1 can assert mid-CMD52 and time out (0x7).
-  SDHCCORE_TypeDef *sdhc_base = sli_sdhc_get_base_addr(drv->sdio_handle.sdhc_controller.sdhc_peripheral);
+  SDHC_TypeDef *sdhc_base = sli_sdhc_get_base_addr(drv->sdio_handle.sdhc_controller.sdhc_peripheral);
 
-  sl_hal_sdhc_disable_normal_interrupt_status(sdhc_base, SDHCCORE_NORMALINTSTS_CARDINTSTS);
-  sl_hal_sdhc_disable_normal_interrupt_signal(sdhc_base, SDHCCORE_NORMALINTSTS_CARDINTSTS);
+  sl_hal_sdhc_disable_normal_interrupt_status(sdhc_base, SDHC_NORMALINTSTS_CARDINTSTS);
+  sl_hal_sdhc_disable_normal_interrupt_signal(sdhc_base, SDHC_NORMALINTSTS_CARDINTSTS);
 
   status = sl_sdhc_sdio_register_callbacks(&drv->sdio_handle, &callbacks);
   if (status != SL_STATUS_OK) {
@@ -839,7 +839,7 @@ static inline sl_cpc_drv_sdio_host_t *to_drv(sl_cpc_bus_t *bus)
 static sl_status_t cpc_drv_sdio_init(sl_cpc_bus_t *bus)
 {
   sl_cpc_drv_sdio_host_t *drv = to_drv(bus);
-  SDHCCORE_TypeDef *sdhc_base = sli_sdhc_get_base_addr(drv->sdio_handle.sdhc_controller.sdhc_peripheral);
+  SDHC_TypeDef *sdhc_base = sli_sdhc_get_base_addr(drv->sdio_handle.sdhc_controller.sdhc_peripheral);
 
   MCU_ATOMIC_STORE(drv->adma_state, SLI_CPC_DRV_SDIO_HOST_ADMA_STATE_IDLE);
   MCU_ATOMIC_STORE(drv->card_int_pending, false);
@@ -864,8 +864,8 @@ static sl_status_t cpc_drv_sdio_init(sl_cpc_bus_t *bus)
   }
 
   // Re-arm host CARDINT now that the driver is initialized and ready to receive data.
-  sl_hal_sdhc_enable_normal_interrupt_status(sdhc_base, SDHCCORE_NORMALINTSTS_CARDINTSTS);
-  sl_hal_sdhc_enable_normal_interrupt_signal(sdhc_base, SDHCCORE_NORMALINTSTS_CARDINTSTS);
+  sl_hal_sdhc_enable_normal_interrupt_status(sdhc_base, SDHC_NORMALINTSTS_CARDINTSTS);
+  sl_hal_sdhc_enable_normal_interrupt_signal(sdhc_base, SDHC_NORMALINTSTS_CARDINTSTS);
 
   // CPC-3336 Add support for SDIO frame aggregation in the host driver.
   drv->remote_caps.max_aggregation = 1;
@@ -897,13 +897,64 @@ static sl_status_t cpc_drv_sdio_read(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *fr
   return SL_STATUS_OK;
 }
 
+static sl_status_t validate_tx_batch(const sli_cpc_frame_list_t *frames)
+{
+  sl_cpc_frame_t *frame;
+  uint32_t desc_count = 0;
+
+  if (frames == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  // Check if any frame have a scatter-gather payload, return not supported if so.
+  // CPC-3361 [scatter gather] SDIO Device update device driver to support chained buffers
+  SLI_CPC_FRAME_LIST_FOR_EACH(frames, frame)
+  {
+    if (frame->payload == NULL) {
+      continue;
+    }
+    if (frame->payload->tot_len != frame->payload->len) {
+      return SL_STATUS_NOT_SUPPORTED;
+    }
+  }
+
+  // Returning SL_STATUS_INVALID_COUNT (and ultimately asserting) when there are
+  // not enough ADMA descriptors is the wrong approach. The driver should handle
+  // descriptor exhaustion itself. Fix incoming in a follow-up PR.
+  SLI_CPC_FRAME_LIST_FOR_EACH(frames, frame)
+  {
+    size_t payload_len = sli_cpc_header_get_payload_size(&frame->hdr);
+    if (payload_len > 0) {
+      // Unaligned payload requires two descriptors: one for the aligned portion and one for the unaligned portion.
+      if (payload_len % SL_CPC_BUF_MIN_ALIGNMENT != 0) {
+        desc_count += 2;
+      } else {
+        desc_count++;
+      }
+    }
+  }
+  if (desc_count > CPC_DRV_SDIO_DESC_COUNT) {
+    return SL_STATUS_INVALID_COUNT;
+  }
+
+  return SL_STATUS_OK;
+}
+
 static uint32_t cpc_drv_sdio_write(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames)
 {
-  sl_cpc_drv_sdio_host_t *drv = to_drv(bus);
   uint32_t num_frames = sli_cpc_frame_list_get_len(frames);
+  sl_cpc_drv_sdio_host_t *drv = to_drv(bus);
+  sl_status_t status;
 
   if (num_frames == 0) {
     goto exit;
+  }
+
+  status = validate_tx_batch(frames);
+  if (status != SL_STATUS_OK) {
+    SLI_CPC_LOG_ERROR("TX requirements cannot be satisfied: 0x%lx", (unsigned long)status);
+    SLI_CPC_ASSERT(false);
+    return 0;
   }
 
   // tx_header_pending_frames also accessed from IRQ to queue another CMD53 Read operation.

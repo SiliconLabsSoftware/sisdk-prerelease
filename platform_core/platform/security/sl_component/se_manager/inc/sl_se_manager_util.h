@@ -912,6 +912,35 @@ sl_status_t sl_se_disable_tamper(sl_se_command_context_t *cmd_ctx,
 sl_status_t sl_se_read_cert_size(sl_se_command_context_t *cmd_ctx,
                                  sl_se_cert_size_type_t *cert_size);
 
+#if defined(SLI_SE_SUPPORTS_TLS_IDENTITY_KEY) && !defined(SL_TRUSTZONE_NONSECURE)
+/***************************************************************************//**
+ * @brief
+ *   Read size of stored certificates in SE, including the TLS identity
+ *   certificate.
+ *
+ * @details
+ *   sl_se_read_cert_size() reports only the three certificate sizes which
+ *   predate the TLS identity, and its output length is fixed. This function
+ *   asks the SE for the full set instead, leaving the older command untouched
+ *   for existing callers.
+ *
+ * @note
+ *   Not available to TrustZone non-secure callers, which have no veneer for
+ *   this function.
+ *
+ * @param[in] cmd_ctx
+ *   Pointer to an SE command context object.
+ *
+ * @param[in,out] cert_size
+ *   Size of the certificates stored in SE.
+ *
+ * @return
+ *   Status code, @ref sl_status_t
+ ******************************************************************************/
+sl_status_t sl_se_read_cert_size_incl_tls(sl_se_command_context_t *cmd_ctx,
+                                    sl_se_cert_size_type_incl_tls_t *cert_size);
+#endif // SLI_SE_SUPPORTS_TLS_IDENTITY_KEY && !SL_TRUSTZONE_NONSECURE
+
 /***************************************************************************//**
  * @brief
  *   Read stored certificates in SE.
@@ -920,13 +949,18 @@ sl_status_t sl_se_read_cert_size(sl_se_command_context_t *cmd_ctx,
  *   Pointer to an SE command context object.
  *
  * @param[in] cert_type
- *   Type of the certificate stored in SE.
+ *   Type of the certificate stored in SE. One of #SL_SE_CERT_BATCH,
+ *   #SL_SE_CERT_DEVICE_SE, #SL_SE_CERT_DEVICE_HOST, or, on devices which
+ *   provision a TLS identity, #SL_SE_CERT_DEVICE_TLS.
  *
  * @param[in,out] cert
  *   Buffer to read certificate.
  *
  * @param[in] num_bytes
- *   Length of certificate in number of bytes.
+ *   Length of certificate in number of bytes. Note that
+ *   sl_se_read_cert_size() does not report the size of the TLS identity
+ *   certificate; use sl_se_read_cert_size_incl_tls() when requesting
+ *   #SL_SE_CERT_DEVICE_TLS.
  *
  * @return
  *   Status code, @ref sl_status_t

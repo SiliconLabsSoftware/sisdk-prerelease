@@ -8,6 +8,12 @@ description: >
   operation by sending a Supervision encapsulated command to a supporting node. The supporting node
   returns an immediate confirmation for the reception while advertising its ability to perform the
   requested operation.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/supervision
+  - page: zwave-api/supervision-events
+
 package: zwave
 quality: production
 metadata:

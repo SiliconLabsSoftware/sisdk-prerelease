@@ -86,4 +86,30 @@
 }
 #endif // !defined(_SILICON_LABS_32B_SERIES_3_CONFIG_301)
 
+
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+/***************************************************************************//**
+ * Configure Cache.
+ * SE Manager wrapper for mailbox command 0xFF18.
+ ******************************************************************************/
+ sl_status_t sli_se_configure_cache(sl_se_command_context_t *cmd_ctx,
+                                    sli_se_cache_target_t cache_target,
+                                    sli_se_cache_operation_t operation)
+{
+  (void)cache_target;
+
+  if ((cmd_ctx == NULL) || (cache_target != SLI_SE_CACHE_TARGET_L2ICACHE) || (operation > 6)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  uint32_t command_word = SLI_SE_COMMAND_CONFIGURE_CACHE;
+  command_word |= (cache_target << 8);
+  command_word |= (operation);
+  sli_se_command_init(cmd_ctx, command_word);
+
+  return sli_se_execute_and_wait(cmd_ctx);
+}
+#endif // defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+
+
 #endif // defined(_SILICON_LABS_32B_SERIES_3) && defined(SLI_MAILBOX_COMMAND_SUPPORTED)

@@ -15,8 +15,6 @@ class CalcFrameDetectPanther(CALC_Frame_Detect):
 
    def calc_preamble_string_actual(self, model):
       if model.vars.MODEM_CTRL0_CODING.value == 2 or model.vars.MODEM_PRE_DSSSPRE.value == 1:
-         # : Preamble base pattern is irrelevant if DSSS is enabled. Preamble bits are always substituted with
-         # : Base chip sequence (i.e. base patttern = 0)
          preamble_pattern_string = '0'
          preamble_length = model.vars.MODEM_CTRL0_DSSSLEN.value + 1  # This is the TX preamble length
          repeats = int(preamble_length)

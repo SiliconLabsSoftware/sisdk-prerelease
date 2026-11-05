@@ -151,6 +151,8 @@ typedef enum {
   SL_WISUN_STATISTICS_TYPE_LXPM       = 7,
   /// DMP statistics
   SL_WISUN_STATISTICS_TYPE_DMP        = 8,
+  /// Local FFN power-saving statistics
+  SL_WISUN_STATISTICS_TYPE_FFN_POWER_SAVING = 9,
 } sl_wisun_statistics_type_t;
 
 /// Enumerations for regulatory domain
@@ -601,6 +603,24 @@ typedef struct {
   uint32_t scheduler_internal_error_count;
 } sl_wisun_statistics_dmp_t;
 
+/// Local FFN power-saving statistics, measured only during ACTIVE operation.
+/// Sleep describes the Wi-SUN radio interface being off.
+/// The values are kept when leaving ACTIVE. They are cleared by an explicit reset, or when
+/// ACTIVE is entered again with a different listen/sleep schedule.
+typedef struct {
+  /// Configured sleep target. 0..10000 represents 0..100.00%, rounded to nearest.
+  uint16_t nominal_sleep_ratio;
+  /// Observed interface-off time / ACTIVE time, up to latest active time.
+  /// 0..10000 represents 0..100.00%, rounded to nearest, with ties upward.
+  uint16_t actual_sleep_ratio;
+  /// Longest sleep interval.
+  uint32_t max_sleep_duration_ms;
+  /// Mean duration of closed sleep intervals.
+  uint32_t avg_sleep_duration_ms;
+  /// Longest awake interval during ACTIVE.
+  uint32_t max_awake_duration_ms;
+} sl_wisun_statistics_ffn_power_saving_t;
+
 /// Statistics
 typedef union {
   /// PHY/RF statistics
@@ -621,6 +641,8 @@ typedef union {
   sl_wisun_statistics_lxpm_t lxpm;
   /// DMP statistics
   sl_wisun_statistics_dmp_t dmp;
+  /// Local FFN power-saving statistics
+  sl_wisun_statistics_ffn_power_saving_t ffn_power_saving;
 } sl_wisun_statistics_t;
 
 /// FAN1.0 PHY configuration

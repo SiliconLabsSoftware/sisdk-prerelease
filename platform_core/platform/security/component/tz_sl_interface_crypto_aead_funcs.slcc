@@ -12,40 +12,68 @@ requires:
 - name: trustzone_nonsecure
 template_contribution:
 - name: tfm_interface_func
-  value: tfm_crypto_aead_encrypt
+  value:
+    function: tfm_crypto_aead_encrypt
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_aead_decrypt
+  value:
+    function: tfm_crypto_aead_decrypt
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_aead_encrypt_setup
+  value:
+    function: tfm_crypto_aead_encrypt_setup
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_aead_decrypt_setup
+  value:
+    function: tfm_crypto_aead_decrypt_setup
+    key_checks:
+    - source: packed_key_id
 
 - name: tfm_interface_func
-  value: tfm_crypto_aead_generate_nonce
+  value:
+    function: tfm_crypto_aead_generate_nonce
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_aead_set_nonce
+  value:
+    function: tfm_crypto_aead_set_nonce
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_aead_set_lengths
+  value:
+    function: tfm_crypto_aead_set_lengths
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_aead_update_ad
+  value:
+    function: tfm_crypto_aead_update_ad
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_aead_update
+  value:
+    function: tfm_crypto_aead_update
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_aead_finish
+  value:
+    function: tfm_crypto_aead_finish
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_aead_verify
+  value:
+    function: tfm_crypto_aead_verify
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_aead_abort
+  value:
+    function: tfm_crypto_aead_abort
+    key_checks: []
 
 documentation:
   url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf

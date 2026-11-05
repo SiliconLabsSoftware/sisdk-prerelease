@@ -24,6 +24,7 @@ provides:
 - name: mpu
   condition: [device_series_3]
 requires:
+- name: log_none
 - name: status
 - name: device_has_mpu
 - name: mpa_manager

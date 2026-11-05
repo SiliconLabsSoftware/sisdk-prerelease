@@ -24,6 +24,8 @@ class CALC_WiSUN_Jumbo(ICalculator):
             'List of supported WiSUN Modes',
             member_data)
 
+        var = self._addModelVariable(model, 'mode_str', str, ModelVariableFormat.ASCII, 'PhyMode string representation')
+
         var = self._addModelVariable(model, 'wisun_han_mode', Enum, ModelVariableFormat.DECIMAL,
                                      'Wi-SUN Operating Mode (PhyMode)')
         member_data = [
@@ -120,7 +122,6 @@ class CALC_WiSUN_Jumbo(ICalculator):
         self._addModelVariable(model, 'meta_fec', bool, ModelVariableFormat.DECIMAL,
                                desc='WiSUN FEC')
 
-        # Retrieve info and create enums from profile table
         var = self._addModelVariable(model, 'wisun_channel_plan_id', Enum, ModelVariableFormat.DECIMAL,
                                      desc='WiSUN ChanPlanID')
         member_data = []
@@ -166,11 +167,8 @@ class CALC_WiSUN_Jumbo(ICalculator):
 
     def calc_wisun_freq_spacing(self, model):
 
-        # This calculation only applies to Wi-SUN FSK (FAN/HAN)
-        # Outside of profile logic to avoid duplication for both FAN 1.0 and HAN Profiles
         if model.profile.name.lower() in ['wisun_fan_1_0', 'wisun_han']:
 
-            # Read the reg domain and operating class
             wisun_reg_domain = model.vars.wisun_reg_domain.value
             wisun_operating_class = model.vars.wisun_operating_class.value
             reg_domain_enum = model.vars.wisun_reg_domain.var_enum
@@ -386,15 +384,10 @@ class CALC_WiSUN_Jumbo(ICalculator):
             if error:
                 LogMgr.Error("Error: Unsupported Wi-SUN Operating Class for selected Regulatory Domain")
 
-            #Write the model vars
             model.vars.base_frequency_hz.value = int(base_frequency_hz)
             model.vars.channel_spacing_hz.value = int(channel_spacing_hz)
 
     def calc_wisun_phy_mode_id(self, model):
-        # This function calculates the PhyModeID for Wi-SUN OFDM and Wi-SUN FSK PHYs
-        # For OFDM, the variable contains an array of MCS0-7 values
-        # For FSK, a PHY with FEC on can also be FEC off but the inverse is false
-        # Then the variable contains an array of either FEC off/on or FEC off values
 
         profile_name = model.profile.name.lower()
         fec_enabled = model.vars.fec_enabled.value
@@ -405,29 +398,21 @@ class CALC_WiSUN_Jumbo(ICalculator):
             wisun_phy_mode_id = [0]
             phy_mode = int(wisun_mode) + 1
 
-            # FEC off
             wisun_phy_mode_id[0] = (0 << 4) | phy_mode
             if fec_enabled:
-                # FEC on
                 wisun_phy_mode_id.append((1 << 4) | phy_mode)
         elif profile_name in ["wisun_fan_1_1"]:
             wisun_phy_mode_id_select = model.vars.wisun_phy_mode_id_select.value.value
             wisun_phy_mode_id = [0]
             if wisun_phy_mode_id_select >= 0x10:
-                #FEC is enabled
                 wisun_phy_mode_id[0] = wisun_phy_mode_id_select - 0x10
                 wisun_phy_mode_id.append(wisun_phy_mode_id_select)
             else:
-                #No FEC
                 wisun_phy_mode_id[0] = wisun_phy_mode_id_select
         if wisun_phy_mode_id is not None:
-            # Write the variable
             model.vars.wisun_phy_mode_id.value = wisun_phy_mode_id
 
     def calc_wisun_mode_switch_phr(self, model):
-        #This function calculates the PHR associated with the calculated PhyModeID
-        #For OFDM, the variable contains an array of MCS0-6 values
-        #For FSK, the variable contains an array of FEC off/on values
 
         profile_name = model.profile.name.lower()
 
@@ -437,9 +422,29 @@ class CALC_WiSUN_Jumbo(ICalculator):
             for phy_mode_id in wisun_phy_mode_id:
                 wisun_mode_switch_phr.append(self._make_phr(phy_mode_id))
 
-            #Write the variable
             model.vars.wisun_mode_switch_phr.value = wisun_mode_switch_phr
 
+    def calc_wisun_mode_str(self, model):
+        
+        profile_name = model.profile.name.lower()
+        if profile_name not in ["wisun_fan_1_0"]:
+            return
+        
+        mode_str_LUT = {
+            0: "1a",
+            1: "1b",
+            2: "2a",
+            3: "2b",
+            4: "3",
+            5: "4a",
+            6: "4b",
+            7: "5"
+        }
+
+        wisun_mode = model.vars.wisun_mode.value
+        mode_str = mode_str_LUT.get(wisun_mode, "Unknown")
+
+        model.vars.mode_str.value = mode_str
 
     def _make_phr(self, phy_mode_id):
 
@@ -464,35 +469,29 @@ class CALC_WiSUN_Jumbo(ICalculator):
 
         phr = (first_15_bits << 1) | (parity_field << parity_shift)
 
-        #Now we need to reverse the order of bits for transmission
         phr = int(format(phr, '016b')[::-1],2)
 
         return phr
 
     def _get_bch_15_11_checksum(self, data, gen_poly):
-        #This function calculates the BCH checksum, which is the shifted data divided by the generator polynomial
 
         data_shifted = data << 4 #The 4 here comes from the BCH(15,11) definition as 4 = 15-11
 
         data_bits = len("{0:b}".format(data_shifted))
         gen_poly_bits = len("{0:b}".format(gen_poly))
 
-        #Initialize checksum
         checksum = data_shifted
 
-        #Shift gen polynomial to left align with data
         gen_poly_shifted = gen_poly << (data_bits - gen_poly_bits)
 
         for bit_position in range (data_bits-gen_poly_bits+1):
             if (checksum & (1<<(data_bits-bit_position-1))) != 0:
-                #Only XOR if there is a 1 in the MSB of the current checksum
                 checksum = checksum ^ (gen_poly_shifted >> bit_position)
 
         return checksum
 
     def _get_parity(self, data):
 
-        #Optimized algorithm from Sophie Gault
         parity = 0
         while (data != 0):
             parity ^= 1  # toggle parity bit

@@ -35,3 +35,6 @@ requires:
 - name: iostream
 ui_hints:
   visibility: never
+documentation:
+  docset: gecko-platform
+  document: platform-service/iostream

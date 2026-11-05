@@ -18,34 +18,26 @@ class RAILScriptsWrapper(object):
         if railAdapter._railModelPopulated == False:
             return
 
-        # Debug yaml file
         if generate_debug_yaml:
             railModelContext = railAdapter.generateRailModelContext()
             rail_model_out = yaml.dump(railModelContext)
             multi_phy_model.output_files.file.append(fileType("rail_model.yml", rail_model_out))
 
-        # Setup the context for the rail config generator
         context = {'rail_internal': internal,
                    'rail_secondary_config': secondary,
                    'enable_timing': internal,
                    'filename': output_filename}
-        # Add commit information to internal builds assuming we're in a git
-        # repo and have access to this.
         if internal:
             railAdapterPath = os.path.abspath(RAILAdapter.current_dir)
             context['ra_commit'] = os.popen("git -C {} rev-parse HEAD".format(os.path.join(railAdapterPath))).read()[0:10]
             context['rc_commit'] = os.popen("git -C {} rev-parse HEAD".format(os.path.join(railAdapterPath, "..", ".."))).read()[0:10]
 
-        # If a signature is requested then use the rail_signature_function to do
-        # that. We need to ensure that something has set this function because
-        # it is kept external to this code intentionally.
         if sign:
             assert RAILScriptsWrapper.rail_signature_function != None, "No signature function available!"
             railModelContext = railAdapter.generateRailModelContext()
             signatures = RAILScriptsWrapper.rail_signature_function(railModelContext)
             railAdapter.setSignatures(signatures)
 
-        # Create and override the generator
         generator = RAILConfig_generator(railAdapter)
         generator.overrideContext(**context)
 

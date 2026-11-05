@@ -1483,6 +1483,32 @@ sl_status_t sl_se_read_cert_size(sl_se_command_context_t *cmd_ctx,
   return sli_se_execute_and_wait(cmd_ctx);
 }
 
+#if defined(SLI_SE_SUPPORTS_TLS_IDENTITY_KEY)
+/***************************************************************************//**
+ * Read size of stored certificates in SE, including the TLS identity.
+ ******************************************************************************/
+sl_status_t sl_se_read_cert_size_incl_tls(sl_se_command_context_t *cmd_ctx,
+                                    sl_se_cert_size_type_incl_tls_t *cert_size)
+{
+  if (cmd_ctx == NULL || cert_size == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  sli_se_mailbox_command_t *se_cmd = &cmd_ctx->command;
+
+  cert_size->tls_id_size = 0UL;
+
+  sli_se_command_init(cmd_ctx,
+                      SLI_SE_COMMAND_READ_USER_CERT_SIZE
+                      | SLI_SE_COMMAND_OPTION_CERT_SIZE_ALL);
+
+  sli_se_datatransfer_t out_data =
+    SLI_SE_DATATRANSFER_DEFAULT(cert_size, sizeof(*cert_size));
+  sli_se_mailbox_command_add_output(se_cmd, &out_data);
+
+  return sli_se_execute_and_wait(cmd_ctx);
+}
+#endif // SLI_SE_SUPPORTS_TLS_IDENTITY_KEY
+
 /***************************************************************************//**
  * Read stored certificates in SE.
  ******************************************************************************/
@@ -1509,6 +1535,12 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
     case SL_SE_CERT_DEVICE_HOST:
       se_cert_type = SLI_SE_COMMAND_CERT_HOST;
       break;
+
+#if defined(SLI_SE_SUPPORTS_TLS_IDENTITY_KEY)
+    case SL_SE_CERT_DEVICE_TLS:
+      se_cert_type = SLI_SE_COMMAND_CERT_TLS;
+      break;
+#endif
 
     default:
       return SL_STATUS_INVALID_PARAMETER;

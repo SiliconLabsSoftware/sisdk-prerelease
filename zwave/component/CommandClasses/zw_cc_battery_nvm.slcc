@@ -7,6 +7,12 @@ description: >
 
   It can be used to ensure that the sate of the Command Class persists across resets by
   saving the state of the battery into the NVM.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/battery
+  - page: z-wave-battery-support-basics
+
 package: zwave
 quality: production
 metadata:

@@ -13,10 +13,8 @@ class CalcModulatorCurl(CalcModulatorLion):
         num = 1275
         den = 255
 
-        # Stocks baudrate ratio
         txbr_num_err_map = {}
 
-        # Find best integer ratio that is below the tolerance
         found_best_ratio = False
         for den in range(txbr_max_den, 0, -1):
             num = ratio * den
@@ -28,7 +26,6 @@ class CalcModulatorCurl(CalcModulatorLion):
                     found_best_ratio = True
                     break
 
-        # If best integer ratio is not found, re-calculate and find the ratio that is closest to the tolerance
         if not found_best_ratio:
             if len(txbr_num_err_map) > 0:
                 den = min(txbr_num_err_map, key=txbr_num_err_map.get)

@@ -70,8 +70,10 @@
 /// Public key size = private key size x 2
 #define ECC_PUBKEY_SIZE           (ECC_PRIVKEY_SIZE * 2)
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /// Internal SE key slot used for asymmetric key
 #define ASYMMETRIC_KEY_SLOT       (SL_SE_KEY_SLOT_VOLATILE_0)
+#endif
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -166,6 +168,7 @@ sl_status_t create_wrap_asymmetric_key(sl_se_key_type_t key_type);
  ******************************************************************************/
 sl_status_t export_asymmetric_pubkey_from_wrap(sl_se_key_type_t key_type);
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /***************************************************************************//**
  * Generate a non-exportable asymmetric key into a volatile SE key slot.
  *
@@ -209,6 +212,7 @@ sl_status_t transfer_wrap_asymmetric_key_to_volatile(sl_se_key_type_t key_type);
  * @returns Returns status code, @ref sl_status.h.
  ******************************************************************************/
 sl_status_t transfer_volatile_asymmetric_key_to_wrap(sl_se_key_type_t key_type);
+#endif // defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 #endif
 
 #endif  // APP_SE_MANAGER_ASYMMETRIC_KEY_HANDLING_H

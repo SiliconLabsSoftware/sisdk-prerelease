@@ -20,6 +20,7 @@ include:
 provides:
 - name: udelay
 requires:
+- name: log_none
 - name: udelay_arch
 - name: hal_generic_common
   condition: [device_efx]

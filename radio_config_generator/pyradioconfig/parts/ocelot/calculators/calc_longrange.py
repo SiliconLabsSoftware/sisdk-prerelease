@@ -14,8 +14,6 @@ class CALC_longrange_ocelot(ICalculator):
             ['LR_19p2k', 4, 'OQPSK DSSS SF8 19.2k long range'],
             ['LR_38p4k', 5, 'OQPSK DSSS SF8 38.4k long range'],
             ['LR_80p0k', 6, 'OQPSK DSSS SF8 80.0k FCC 15.247 long range'],
-            # Owner: Rossano Pantaleoni
-            # Jira Link: https://jira.silabs.com/browse/MCUW_RADIO_CFG-2364
             ['LR_76p8k', 7, 'OQPSK DSSS SF8 76.8k long range'],
             ['LR_6p25k', 8, 'OQPSK DSSS SF8 6p25k long range'],
             ['LR_12p5k', 9, 'OQPSK DSSS SF8 12p5k long range']

@@ -16,14 +16,14 @@
 
 #include <ZW_application_transport_interface.h>
 
+typedef void (* zaf_wake_up_callback_t)(void);
+
 /**
  * @addtogroup ZAF
  * @{
  * @addtogroup ZAF_IF ZAF Interface
  * @{
  */
-
-typedef void (* zaf_wake_up_callback_t)(void);
 
 /**
  * Used to indicate node inclusion type that related to it working over Long Range or Z-Wave mode.
@@ -158,19 +158,11 @@ bool isRfRegionValid(zpal_radio_region_t region);
  */
 bool ZAF_isLongRangeRegion(zpal_radio_region_t eRegion);
 
-/**
- * Registers a wake up function to keep the node awake.
- *
- * The function will be invoked on every reception of a frame to keep the node awake.
- * @param callback Function to invoke to keep the node awake.
- */
-void zaf_set_stay_awake_callback(zaf_wake_up_callback_t callback);
+/** @deprecated Use ZW_LingerSetCallback(). */
+void zaf_set_stay_awake_callback(zaf_wake_up_callback_t callback) __attribute__((deprecated("Deprecated since SDK 8.2.0. Use ZW_LingerSetCallback instead")));
 
-/**
- * Returns the wake up callback.
- * @return Wake up callback
- */
-zaf_wake_up_callback_t zaf_get_stay_awake_callback(void);
+/** @deprecated Use ZW_LingerSetCallback(). */
+zaf_wake_up_callback_t zaf_get_stay_awake_callback(void) __attribute__((deprecated("Deprecated since SDK 8.2.0. Use ZW_LingerSetCallback instead")));
 
 /**
  * @} // ZAF_IF

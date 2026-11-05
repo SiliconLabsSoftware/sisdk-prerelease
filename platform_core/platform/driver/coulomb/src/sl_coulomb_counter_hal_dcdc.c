@@ -33,6 +33,7 @@
 #include "sl_hal_dcdc_coulomb_counter.h"
 
 
+#include "sl_log_helper.h"
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 #define ARRAY_SIZE(_array)  (sizeof(_array) / sizeof(_array[0]))
 
@@ -289,7 +290,7 @@ float sli_coulomb_counter_hal_cal_get_load_current(int8_t ccl_level)
       break;
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
   }
 
   return (0.2f * ccload);
@@ -365,7 +366,7 @@ sl_status_t sli_coulomb_counter_hal_cal_start(sli_coulomb_counter_output_t *outp
       break;
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
   }
 
   if (output == &output_dcdc_em2) {

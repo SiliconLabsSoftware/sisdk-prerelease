@@ -60,7 +60,6 @@ class RMtoXML(object):
                     sys.stderr.write("WARN: Skipping invalid register name '{}'\n".format(name))
                     pass
         else:
-            # no filter list, so export the whole register model
             for peripheral_name in sorted(rm.zz_pdict):
                 rm_per = rm.zz_pdict[peripheral_name]
                 self._load_peripheral(device_root, rm_per, load_regsiters=True)
@@ -68,7 +67,6 @@ class RMtoXML(object):
         return device_root
 
     def _validate(self):
-        # reserved for some future use
         return True
 
     def _load_peripheral(self, device_root, rm_per, load_regsiters=True):
@@ -146,7 +144,6 @@ class RMtoXML(object):
                 enumeratedValues = enumeratedValuesType()
                 enumeratedValues.name = rm_field.enum.name
                 enum_obj = field.enumeratedValues.add_enumeratedValues(enumeratedValues)
-                # TODO: Add additional logic to handle enum values here
                 pass
 
             register.fields.add_field(field)

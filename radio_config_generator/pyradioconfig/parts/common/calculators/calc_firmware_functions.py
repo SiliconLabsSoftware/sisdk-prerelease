@@ -29,7 +29,6 @@ class CALC_Firmware_Functions(ICalculator):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Variable name is the name of the DUT function to call
         var = self._addModelVariable(model, 'IR_CAL_StandardSet', Enum, ModelVariableFormat.DECIMAL, desc='The RPC config function to select the IRCAL value from CC page')
         member_data = [
             ['RADIO_IRCAL_SET_2P4_BLE' , 0, 'Select 2.4GHz BLE standard' ],
@@ -49,12 +48,7 @@ class CALC_Firmware_Functions(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # TODO: Fix this example hack.  For demonstraetion purposes only
 
-        # Variable value is the function parameter (only one allowed)
-        #model.vars.IR_CAL_StandardSet.value = model.vars.IR_CAL_StandardSet.var_enum.RADIO_IRCAL_SET_2P4_BLE
 
-        # Setting value to 'None' means the function will not be called
-        #model.vars.IR_CAL_StandardSet.value = None
         pass
 

@@ -8,6 +8,10 @@ description: >
   Both the NCP and SOC variations must implement their own event distributor table; the only
   difference in the usage is whether the application allows for polling the event distributor
   table, or is fully event-driven.
+documentation:
+  docset: z-wave
+  document: zwave-api/event-distributor
+
 package: zwave
 quality: production
 metadata:

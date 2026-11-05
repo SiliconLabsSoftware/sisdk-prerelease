@@ -13,7 +13,6 @@ class calc_agc_serval(CALC_AGC_Margay):
         if mod_format == model.vars.modulation_type.var_enum.ASK:
             periodlow = int(py2round((modem_frequency_hz / (baudrate * 0.9))))
 
-            # period over which we count how many times we tripped the HI threshold - xtal PLL freq because AGC runs at this clock
             if f_if > 0:
                 periodhi = int(py2round(modem_frequency_hz / (2 * f_if)))
             else:

@@ -36,12 +36,9 @@ class CalcRadioCurl(CalcRadioLion):
         self._addModelRegister(model, 'RAC.RFENCTRL.DEMEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.RFENCTRL.IFADCCAPRESET', int, ModelVariableFormat.HEX)
 
-        # Don't write this register directly any more.  Write the version in sequencer code instead.
-        # self._addModelRegister(model, 'RAC.LPFCTRL.LPFBW'              , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'SEQ.SYNTHLPFCTRLRX.SYNTHLPFCTRLRX', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SEQ.SYNTHLPFCTRLTX.SYNTHLPFCTRLTX', int, ModelVariableFormat.HEX)
 
-        # Misc fields that were being written by the firmware to non-default values
         self._addModelRegister(model, 'RAC.LNAMIXCTRL1.TRIMAUXPLLCLK', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXCTRL1.TRIMTRSWGATEV', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.LNAMIXCTRL1.TRIMVCASLDO', int, ModelVariableFormat.HEX)

@@ -49,11 +49,17 @@ requires:
 - name: cmsis_core
 - name: sl_assert
 - name: sl_common
+- name: code_classification
+define:
+- name: SL_CODE_COMPONENT_CPC
+  value: cpc
 documentation:
   docset: gecko-platform
   document: platform-cpc/cpc
 template_contribution:
 - name: component_catalog
+  value: cpc
+- name: code_classification_components
   value: cpc
 - name: event_handler
   value:

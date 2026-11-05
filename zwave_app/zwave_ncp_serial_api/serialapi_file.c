@@ -315,6 +315,11 @@ bool ObjectExist(zpal_nvm_object_key_t key)
   return true;
 }
 
+static bool AppDataRangeIsValid(uint32_t offset, uint32_t length)
+{
+  return (offset <= FILE_SIZE_APPLICATIONDATA) && (length <= FILE_SIZE_APPLICATIONDATA - offset);
+}
+
 /**
  * @brief Reads application data from file system.
  */
@@ -324,6 +329,10 @@ uint8_t SerialApiNvmReadAppData(uint32_t offset, uint8_t* pAppData, uint32_t iLe
 
   uint8_t dataIsRead = false;
   zpal_status_t status;
+
+  if (!AppDataRangeIsValid(offset, iLength)) {
+    return false;
+  }
 
   if (ObjectExist(FILE_ID_APPLICATIONDATA)) {
     status = ZAF_nvm_app_read(FILE_ID_APPLICATIONDATA, &tApplicationData, FILE_SIZE_APPLICATIONDATA);
@@ -345,6 +354,10 @@ uint8_t SerialApiNvmWriteAppData(uint32_t offset, const uint8_t* pAppData, uint3
   SApplicationData tApplicationData = { 0 };
   uint8_t dataIsWritten = false;
   zpal_status_t status;
+
+  if (!AppDataRangeIsValid(offset, iLength)) {
+    return false;
+  }
 
   status = ZAF_nvm_app_read(FILE_ID_APPLICATIONDATA, &tApplicationData, FILE_SIZE_APPLICATIONDATA);
   if (ZPAL_STATUS_OK == status) {

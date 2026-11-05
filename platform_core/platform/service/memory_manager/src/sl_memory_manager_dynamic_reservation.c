@@ -39,7 +39,7 @@
 #include "sli_memory_manager_log.h"
 #include "sli_memory_manager_retention_control.h"
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_bit.h"
 #include "sl_common.h"
 #include "sl_core.h"
@@ -398,12 +398,12 @@ sl_status_t sl_memory_heap_reserve_block(sl_memory_heap_t *heap,
                                          void **block)
 {
   // Check proper alignment characteristics.
-  EFM_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
+  SL_LOG_DEBUG_ASSERT((align == SL_MEMORY_BLOCK_ALIGN_DEFAULT)
              || (SL_MATH_IS_PWR2(align)
                  && (align <= SL_MEMORY_BLOCK_ALIGN_512_BYTES)));
 
   // Make sure the heap handle isn't NULL.
-  EFM_ASSERT(heap != NULL);
+  SL_LOG_DEBUG_ASSERT(heap != NULL);
 
   sli_block_metadata_t *free_block_metadata = NULL;
   void *reserved_blk = NULL;

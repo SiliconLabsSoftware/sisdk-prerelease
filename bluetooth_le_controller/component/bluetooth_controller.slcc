@@ -17,6 +17,7 @@ provides:
 source:
 - path: src/sl_btctrl_init.c
 - path: src/sl_btctrl_init_tasklets.c
+- path: generated/src/sli_ll_context_tables.c
 - path: utils/baremetal/src/sl_btctrl_baremetal.c
   unless:
   - kernel
@@ -29,6 +30,9 @@ include:
   - path: sl_btctrl_linklayer.h
   - path: sl_btctrl_linklayer_defs.h
   - path: sl_btctrl_packets.h
+- path: generated/inc
+  file_list:
+  - path: sli_ll_context_declarations.h
 requires:
 - name: bluetooth_agents_controller
 - name: bluetooth_common

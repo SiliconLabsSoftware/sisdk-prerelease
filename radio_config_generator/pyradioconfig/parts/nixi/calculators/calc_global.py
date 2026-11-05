@@ -5,13 +5,11 @@ class CALC_Global_nixi(CALC_Global_nerio):
 
     def buildVariables(self, model):
 
-        # Build variables from the Nerio calculations
         super().buildVariables(model)
 
     def _add_common_regs(self, model):
         super()._add_common_regs(model)
 
-        # Add additional Nerio variables
         self._addModelRegister(model, 'MODEM.VTCORRCFG1.EXPSYNCLEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.VTCORRCFG1.BUFFHEAD', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.VTCORRCFG1.EXPECTHT', int, ModelVariableFormat.HEX)

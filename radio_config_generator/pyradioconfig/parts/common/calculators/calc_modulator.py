@@ -6,7 +6,6 @@ Calculator functions must start with "calc_", if they are to be consumed by the 
         def getCalculationList(self):
 """
 
-#import math
 from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import CalculationException
 from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICalculator
 from pyradioconfig.parts.common.calculators.calc_utilities import CALC_Utilities
@@ -47,7 +46,6 @@ class CALC_Modulator(ICalculator):
             ['Manchester', 1, 'Manchester Coding'],
             ['DSSS', 2, 'Direct Sequence Spread Spectrum Coding'],
         ]
-        # Only Nerio (and Panther) support LINECODE Encoding, used for BLE Long Range
         if model.part_family.lower() not in ["dumbo", "jumbo", "nixi", "unit_test_part"]:
             member_data.append(['LINECODE', 3, 'Maps 0 to 0011 symbol and 1 to 1100 symbol'])
         var.var_enum = CreateModelVariableEnum(
@@ -56,14 +54,11 @@ class CALC_Modulator(ICalculator):
             member_data)
 
     def _get_modindex_field(self, modindex):
-        # convert fractional modindex into m * 2^e format
         m, e = CALC_Utilities().frac2exp(31, modindex)
 
-        # MODEINDEXE is a signed value
         if e < 0:
             e += 32
 
-        # verify number fits into register
         if m > 31:
             m = 31
 
@@ -97,10 +92,8 @@ class CALC_Modulator(ICalculator):
         baud_per_symbol = 1
         if model.part_family.lower() in ["nerio"]:
             if model.vars.MODEM_LONGRANGE_LRBLE.value == 1:
-                # In case of BLE LR 125 kps, baud_per_symbol is 8
                 if model.vars.FRC_CTRL_RATESELECT.value == 0:
                     baud_per_symbol = 8
-                # In case of BLE LR 500 kps, baud_per_symbol is 2
                 elif model.vars.FRC_CTRL_RATESELECT.value == 2:
                     baud_per_symbol = 2
                 else:
@@ -126,7 +119,6 @@ class CALC_Modulator(ICalculator):
                 bits_per_symbol = 1
         model.vars.bits_per_symbol_actual.value = bits_per_symbol
 
-    #TODO: add support for ASK modulation
     def calc_modindex_value(self, model):
         """
         calculate MODINDEX value
@@ -173,7 +165,6 @@ class CALC_Modulator(ICalculator):
 
         modindex = model.vars.modindex.value
 
-        # Extract M and E parameters from MODINDEX
         m, e = self._get_modindex_field(modindex)
 
         self._reg_write(model.vars.MODEM_MODINDEX_MODINDEXM,  int(m))
@@ -192,7 +183,6 @@ class CALC_Modulator(ICalculator):
         m = model.vars.MODEM_MODINDEX_MODINDEXM.value
         e = model.vars.MODEM_MODINDEX_MODINDEXE.value
 
-        # MODEINDEXE is a signed value
         if e > 15:
             e -= 32
 
@@ -239,8 +229,6 @@ class CALC_Modulator(ICalculator):
         model.vars.tx_deviation_actual.value = freq_dev_hz
 
 
-    # calculate TX baudrate ratio
-    # Using Equation (5.7) of EFR32 Reference Manual (internal.pdf)
     def calc_txbr_value(self, model):
         """
         calculate TX baudrate ratio
@@ -253,7 +241,6 @@ class CALC_Modulator(ICalculator):
         fxo = model.vars.xtal_frequency.value
         baudrate = model.vars.baudrate.value
 
-        # calculate baudrate to fxo ratio
         ratio = fxo / (baudrate * 8.0)
 
         model.vars.txbr_ratio.value = ratio
@@ -274,7 +261,6 @@ class CALC_Modulator(ICalculator):
 
         ratio = model.vars.txbr_ratio.value
 
-        # find best integer ratio to match desired ratio
         for den in xrange(255, 0, -1):
              num = ratio * den
              if abs(round(num) - num) < 0.003 and num < 32768:
@@ -310,12 +296,8 @@ class CALC_Modulator(ICalculator):
 
         txbases = model.vars.preamble_length.value / model.vars.preamble_pattern_len_actual.value
 
-        # Some input combinations can produce values out of range for the register fields,
-        # such as applying ludicrously long preamble lengths.
 
-        # MCUW_RADIO_CFG-793
 
-        # TODO: is would be best to query the register model to determine these two fields are 7 bits wide
 
         if (txbases) > 0xffff:
             raise CalculationException("Calculated TX preamble sequences (TXBASE) value of %s exceeds limit of 65535! Adjust preamble inputs." % txbases )
@@ -373,21 +355,13 @@ class CALC_Modulator(ICalculator):
         mapfsk = FSKMAP_LOOKUP[fsk_map.value]
 
         if mod_format != model.vars.modulation_type.var_enum.FSK4:
-            # if we're using Manchester encoding (or any FSK modulation actually),
-            # then only MAP0 and MAP1 are valid
             if mapfsk > 1:
                 raise CalculationException("Invalid fsk symbol map value for modulation type selected.")
 
         if encoding == model.vars.symbol_encoding.var_enum.Manchester:
-            # if we're using Manchester encoding,
-            # then only MAP0 and MAP1 are valid
             if mapfsk > 1:
                 raise CalculationException("Invalid fsk_symbol_map value for Manchester encoding")
 
-            # if we're using inverted Manchester encoding, then flip the polarity of the fsk
-            # map.  This flips the polarity of the entire transmission, including the preamble
-            # and syncword.  We don't want the preamble and syncword flipped, so we'll invert those
-            # registers elsewhere
             if manchester_map != model.vars.manchester_mapping.var_enum.Default:
                 mapfsk ^= 1
 

@@ -7,7 +7,6 @@ class CALC_FEC_Panther(CALC_FEC):
 
     def calc_convramaddr_reg(self, model):
 
-        #Value is static per part
         conv_ram_addr = 0x0000 >> 2
 
         self._reg_write(model.vars.FRC_CONVRAMADDR_CONVRAMADDR, conv_ram_addr)

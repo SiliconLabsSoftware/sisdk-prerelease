@@ -17,6 +17,7 @@ include:
   file_list:
   - path: sli_tz_iovec.h
   - path: sli_tz_s_interface.h
+  - path: sli_tz_key_check.h
 
 documentation:
   url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf

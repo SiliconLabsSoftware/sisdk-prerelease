@@ -31,6 +31,8 @@
 #ifndef SLI_EM_CMU_H
 #define SLI_EM_CMU_H
 
+#include "sl_log_helper.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1847,7 +1849,7 @@ void sli_em_cmu_HFClockSelectUSHFRCO(void);
 
 #define CMU_USBR_SELECT_HFXOX2                                                        \
   do {                                                                                \
-    EFM_ASSERT(SystemHFXOClockGet() <= 25000000u);                                    \
+    SL_LOG_DEBUG_ASSERT(SystemHFXOClockGet() <= 25000000u);                                    \
     CMU->HFXOCTRL |= CMU_HFXOCTRL_HFXOX2EN;                                           \
     CMU_OscillatorEnable(cmuOsc_HFXO, true, true);                                    \
     CMU->USBCTRL = (CMU->USBCTRL & ~_CMU_USBCTRL_USBCLKSEL_MASK)                      \

@@ -35,17 +35,14 @@ class CALC_Synth(ICalculator):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Inputs
         self._addModelVariable(model,  'channel_spacing_hz',   int,     ModelVariableFormat.DECIMAL, units='Hz', desc='Channel raster used for relative frequency configuration')
         self._addModelActual  (model,  'channel_spacing',      int,     ModelVariableFormat.DECIMAL)
         
         self._build_synth_regs(model)
 
-        # Tuning limits for the given LODIV setting
         self._addModelVariable(model, 'tuning_limit_min', long, ModelVariableFormat.DECIMAL, units='Hz', desc='Minimum center frequency allowed for the current configuration.')
         self._addModelVariable(model, 'tuning_limit_max', long, ModelVariableFormat.DECIMAL, units='Hz', desc='Maximum center frequency allowed for the current configuration.')
 
-        # A proper flag to determine sub-GHz
         self._addModelVariable(model, 'subgig_band', bool, ModelVariableFormat.DECIMAL, desc="Flag for sub-GHz")
 
         var = self._addModelVariable(model, 'lo_injection_side', Enum, ModelVariableFormat.DECIMAL, 'Possible LO injection sides')
@@ -68,12 +65,9 @@ class CALC_Synth(ICalculator):
         self._addModelRegister(model, 'SYNTH.IFFREQ.IFFREQ', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.IFFREQ.LOSIDE', int, ModelVariableFormat.HEX)
 
-        # These aren't really synth registers, but they must follow the synth register values,
-        # so we set them here.
         self._addModelRegister(model, 'MODEM.MIXCTRL.MODE', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'MODEM.MIXCTRL.DIGIQSWAPEN', int, ModelVariableFormat.HEX)
 
-    #TODO: add AFC adjustment term to rx_synth_freq once AFC is implemented
     def calc_rx_synth_freq_actual(self, model):
         """
         calculate synthesizer frequency for RX
@@ -100,8 +94,6 @@ class CALC_Synth(ICalculator):
         model.vars.rx_synth_freq_actual.value = long(round(rx_synth_freq))
 
 
-    #TODO: add AFC adjustment term to tx_synth_freq once AFC is implemented
-    #TODO: add calbiration offset to tx_synth_freq
     def calc_tx_synth_freq_actual(self, model):
         """
         calculate synthesizer frequency for TX
@@ -122,12 +114,6 @@ class CALC_Synth(ICalculator):
 
         model.vars.tx_synth_freq_actual.value = long(tx_synth_freq)
 
-    # This compares the synth frequency against limits.  I don't know the source of the
-    # synth min and max frequencies, but I got this from Rail C source code:
-    #
-    # define VCO_MAX_FREQ           2900000000
-    # define VCO_MIN_FREQ           2300000000
-    #
     def calc_check_synth_limits(self, model):
 
         tx_synth_freq_min = model.vars.tx_synth_freq_actual.value
@@ -157,7 +143,6 @@ class CALC_Synth(ICalculator):
         fxo = model.vars.xtal_frequency.value * 1.0
         lodiv = model.vars.lodiv_actual.value
 
-        # calculate frequency resolution
         res = fxo / lodiv / pow(2, 19)
 
         model.vars.synth_res_actual.value = res
@@ -193,12 +178,10 @@ class CALC_Synth(ICalculator):
         f0 = model.vars.base_frequency.value * 1.0
         res = model.vars.synth_res_actual.value
         
-        # channel spacing in terms of res
         chsp = py2round(ch_spacing / res)
 
         self._reg_write(model.vars.SYNTH_CHSP_CHSP,  int(chsp))
 
-        # frequency in terms of res
         freq = math.floor(f0 / res)
 
         self._reg_write(model.vars.SYNTH_FREQ_FREQ,  long(freq))
@@ -227,27 +210,14 @@ class CALC_Synth(ICalculator):
         f0 = model.vars.base_frequency.value
         part_family = model.part_family.lower()
 
-        # cannot calculate lodiv if RF frequency is not given
         if f0 == 0:
             return                  # gdc:  This is probably not the correct way to handle this error
 
-        #
-        # First, make a list of all unique lodiv values.  The total lodiv value is made up of
-        # three dividers chained together that can each have a divide value of 1,2,3,4,5.  The
-        # min divider is 1 and the max divider is 125.
-        #
         lodiv_section_a = [1, 2, 3, 4, 5]       # first in lodiv_chain_option tuple, high order bits in register
         lodiv_section_b = [1, 2, 3, 4, 5]       #
         lodiv_section_c = [1, 2, 3, 4, 5]       # last in lodiv_chain_option tuple, low order bits in register
 
-        # For parts after Dumbo, A divide by 7 option was added to one stage
         if part_family not in ["dumbo","unit_test_part"]:
-            # Now add a bit of a hack...
-            # We've already characterized Jumbo and Dumbo in the 169MHz range quite a bit using the divide by 15 lodiv.
-            # For now at least, if we're able to use a divide by 15 in that area, then we'll use it.  We'll not enable the
-            # divide by 7 option if we're in a range where we know the divide by 14 and divide by 15 ranges overlap.
-            # That overlap range covers 167MHz (divide by 14 min) to 191MHz (divide by 15 max).  We really only characterized
-            # things in the 169MHz band, so we'll only disable the divide by 14 option in the lower half of that overlap range.
             if (f0 < 166000000) or (f0 > 180000000):
                 lodiv_section_c.append(7)
 
@@ -256,40 +226,24 @@ class CALC_Synth(ICalculator):
         for lodiv_a in lodiv_section_a:
             for lodiv_b in lodiv_section_b:
                 for lodiv_c in lodiv_section_c:
-                    # Get total lodiv from the three sections
                     lodiv_total = lodiv_a * lodiv_b * lodiv_c
 
-                    # if this total lodiv value is unique, add it to the dictionary
-                    # The values for the three sections are added as a tuple for the
-                    # dictionary entry
                     if lodiv_total not in lodiv_chain_options.keys():
                         lodiv_chain_options[lodiv_total] = (lodiv_a, lodiv_b, lodiv_c)
 
-        # now lodiv_chain_options is a dictionary with each unique lodiv value for keys
-        # with the data for each key being a tuple representing the divider sections to be
-        # used to build the register value later
 
-        # The synth tuning range was found in:  https: // jira.silabs.com / browse / EFRPHY - 12
-        # According to that it is 4670 to 5740 MHz.  It's easier to think of half those number as
-        # being between 2335MHz and and 2870MHz
         synth_min, synth_max = self._get_synth_min_max()
 
-        # Now go through the valid lodiv options calculated above, and find the one that uses
-        # the lowest synth frequency that is still above the minimum value allowed
         best_lodiv_value = 0        # Use this for error checking
         for lodiv in sorted(lodiv_chain_options.keys()):
             synth_freq = lodiv * f0
 
-            #print("Trying lodiv = %d.   Synth freq = %d" % (lodiv, synth_freq))
             if synth_freq > synth_max:
                 continue
 
             if synth_freq < synth_min:
                 continue
 
-            # if we made it here, this is a valid lodiv value.  Use the first one (lowest)
-            # value we can, to make the synth frequency as low as possible, to give the
-            # greatest tuning range possible.
             best_lodiv_value = lodiv
             break
 
@@ -298,21 +252,14 @@ class CALC_Synth(ICalculator):
         if best_lodiv_value == 0:
             raise CalculationException("No valid LODIV value possible for channel frequency of %s MHz!" % float(f0/1000000))
 
-        # todo:  We really need to error check the min and max desired channel frequency.  We currently only
-        # todo:  error check the base frequency.  To do that, we need to add an input parameter from the user
-        # todo:  specifying how far they want to tune.  That input parameter can be either a max frequency in Hz,
-        # todo:  or a max channel number.  It seems like most people aren't as familiar with the desired channel
-        # todo:  spacing, so a max frequency might be a better choice for the input parameter.
 
 
-        # Now code up the register value from the individual pieces
         (lodiv_a, lodiv_b, lodiv_c) = lodiv_chain_options[best_lodiv_value]
         if lodiv_a == 1:
             lodiv_a = 0
         if lodiv_b == 1:
             lodiv_b = 0
 
-        # form register setting from dividers
         reg = (lodiv_a << 6) + (lodiv_b << 3) + lodiv_c
 
         self._reg_write(model.vars.SYNTH_DIVCTRL_LODIVFREQCTRL, reg)
@@ -331,12 +278,10 @@ class CALC_Synth(ICalculator):
         """
         reg = model.vars.SYNTH_DIVCTRL_LODIVFREQCTRL.value
 
-        # get divider ratios
         divA = (reg & 0x1C0) >> 6
         divB = (reg & 0x38) >> 3
         divC = reg & 0x7
 
-        # if disabled set ratio to 1
         if divA == 0:
             divA = 1
 
@@ -346,10 +291,8 @@ class CALC_Synth(ICalculator):
         if divC == 0:
             divC = 1
 
-        # calculate total factor
         model.vars.lodiv_actual.value = divA * divB * divC
 
-        # calculate proper variable flag to determine sub-GHz
         model.vars.subgig_band.value = bool(model.vars.lodiv_actual.value > 1)
 
     def calc_iffreq_reg(self, model):
@@ -370,7 +313,6 @@ class CALC_Synth(ICalculator):
         cfosr = model.vars.cfosr_actual.value
         lodiv = model.vars.lodiv_actual.value
 
-        # calculate if frequency
         iffreq = math.floor(lodiv * pow(2, 19) / dec0 / cfosr)
 
         self._reg_write(model.vars.SYNTH_IFFREQ_IFFREQ,  int(abs(iffreq)))

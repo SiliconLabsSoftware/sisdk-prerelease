@@ -15,6 +15,7 @@ provides:
 - name: printf_integration
   allow_multiple: true
 requires:
+- name: log_none
 - name: iostream
 template_contribution:
 - name: component_catalog

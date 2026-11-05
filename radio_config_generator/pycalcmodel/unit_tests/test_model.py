@@ -7,7 +7,6 @@ Tests cover ModelRoot creation, property access, and basic functionality.
 import unittest
 import sys
 
-# Add the Package directory to the path for imports
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
@@ -27,7 +26,6 @@ class TestModelRoot(unittest.TestCase):
         assert model.part_family == "EFR32MG12"
         assert model.calc_version == "1.0.0"
         assert model.part_revision == "ANY"
-        # target attribute is only set if target is provided
         assert not hasattr(model, 'target') or model.target is None
     
     def test_create_model_root_with_revision(self):
@@ -61,7 +59,6 @@ class TestModelRoot(unittest.TestCase):
             calc_version="1.0.0"
         )
         
-        # Check that all containers are created
         assert hasattr(model, 'parser')
         assert hasattr(model, 'features')
         assert hasattr(model, 'phys')
@@ -69,14 +66,11 @@ class TestModelRoot(unittest.TestCase):
         assert hasattr(model, 'vars')
         assert hasattr(model, '_reg_model')
         
-        # Check that containers are not None (except _reg_model which can be None for test scenarios)
         assert model.parser is not None
         assert model.features is not None
         assert model.phys is not None
         assert model.profiles is not None
         assert model.vars is not None
-        # _reg_model can be None for unsupported part families in test scenarios
-        # assert model._reg_model is not None
     
     def test_model_root_xsd_version(self):
         """Test that ModelRoot has XSD version set."""

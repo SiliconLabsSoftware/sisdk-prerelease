@@ -585,15 +585,15 @@ typedef enum {
 
 /** DCDC VRL regulator-off delay before applying load. */
 typedef enum {
-  emuDcdcVrlRegOffDelay_0us    = _DCDC_VRLCFG_VRLCNTLOAD_regoff0us,    /**< 0 us regulator-off delay. */
-  emuDcdcVrlRegOffDelay_2p5us  = _DCDC_VRLCFG_VRLCNTLOAD_regoff2p5us,   /**< 2.5 us regulator-off delay. */
-  emuDcdcVrlRegOffDelay_5us    = _DCDC_VRLCFG_VRLCNTLOAD_regoff5us,     /**< 5 us regulator-off delay. */
-  emuDcdcVrlRegOffDelay_7p5us  = _DCDC_VRLCFG_VRLCNTLOAD_regoff7p5us,   /**< 7.5 us regulator-off delay. */
-  emuDcdcVrlRegOffDelay_10us   = _DCDC_VRLCFG_VRLCNTLOAD_regoff10us_default, /**< 10 us regulator-off delay. */
-  emuDcdcVrlRegOffDelay_12p5us = _DCDC_VRLCFG_VRLCNTLOAD_regoff12p5us,  /**< 12.5 us regulator-off delay. */
-  emuDcdcVrlRegOffDelay_15us   = _DCDC_VRLCFG_VRLCNTLOAD_regoff15us,    /**< 15 us regulator-off delay. */
-  emuDcdcVrlRegOffDelay_17p5us = _DCDC_VRLCFG_VRLCNTLOAD_regoff17p5us,  /**< 17.5 us regulator-off delay. */
-  emuDcdcVrlRegOffDelay_20us   = _DCDC_VRLCFG_VRLCNTLOAD_regoff20us     /**< 20 us regulator-off delay. */
+  emuDcdcVrlRegOffDelay_0us    = _DCDC_VRLCFG_VRLCNTLOAD_delay_0us,    /**< 0 us regulator-off delay. */
+  emuDcdcVrlRegOffDelay_2p5us  = _DCDC_VRLCFG_VRLCNTLOAD_delay_2p5us,  /**< 2.5 us regulator-off delay. */
+  emuDcdcVrlRegOffDelay_5us    = _DCDC_VRLCFG_VRLCNTLOAD_delay_5us,    /**< 5 us regulator-off delay. */
+  emuDcdcVrlRegOffDelay_7p5us  = _DCDC_VRLCFG_VRLCNTLOAD_delay_7p5us,  /**< 7.5 us regulator-off delay. */
+  emuDcdcVrlRegOffDelay_10us   = _DCDC_VRLCFG_VRLCNTLOAD_delay_10us,   /**< 10 us regulator-off delay. */
+  emuDcdcVrlRegOffDelay_12p5us = _DCDC_VRLCFG_VRLCNTLOAD_delay_12p5us, /**< 12.5 us regulator-off delay. */
+  emuDcdcVrlRegOffDelay_15us   = _DCDC_VRLCFG_VRLCNTLOAD_delay_15us,   /**< 15 us regulator-off delay. */
+  emuDcdcVrlRegOffDelay_17p5us = _DCDC_VRLCFG_VRLCNTLOAD_delay_17p5us, /**< 17.5 us regulator-off delay. */
+  emuDcdcVrlRegOffDelay_20us   = _DCDC_VRLCFG_VRLCNTLOAD_delay_20us    /**< 20 us regulator-off delay. */
 } EMU_DcdcVrlRegOffDelay_TypeDef;
 
 /** DCDC VRL initialization structure. */

@@ -18,8 +18,6 @@ class Calc_Frame_Detect_Bobcat(CALC_Frame_Detect_Ocelot):
 
    def calc_preamble_string_actual(self, model):
       if model.vars.MODEM_CTRL0_CODING.value == 2 or model.vars.MODEM_PRE_DSSSPRE.value == 1:
-         # : Preamble base pattern is irrelevant if DSSS is enabled. Preamble bits are always substituted with
-         # : Base chip sequence (i.e. base patttern = 0)
          preamble_pattern_string = '0'
          preamble_length = model.vars.MODEM_CTRL0_DSSSLEN.value + 1  # This is the TX preamble length
          repeats = int(preamble_length)
@@ -36,12 +34,7 @@ class Calc_Frame_Detect_Bobcat(CALC_Frame_Detect_Ocelot):
       model.vars.preamble_string_actual.value = preamble_string
 
    def calc_timbases_val(self, model):
-      # Run existing Ocelot logic
       super().calc_timbases_val(model)
-      # JIRA MCUW_RADIO_CFG-3184: When ADPC (antenna-diversity parallel correlation) is enabled
-      # on a LEGACY or COHERENT demodulator, set TIMINGBASE = ADPCWNDCNT.
-      # This change cannot be applied on Ocelot, since ADPCEN is not available
-      # Bobcat-only additions (locals that Ocelot doesn't have)
       demod_select = model.vars.demod_select.value
       basebits = model.vars.preamble_pattern_len_actual.value
       antdiv_parallel_corr_en = model.vars.antdiv_enable_parallel_correlation.value

@@ -4,7 +4,6 @@ from pycalcmodel.core.variable import ModelVariableFormat
 
 class CalcGlobalRainier(Calc_Global_Bobcat):
     def buildVariables(self, model):
-        # Build variables from the Ocelot calculations
         super().buildVariables(model)
         self._add_SYNTH_S3_regs(model)
         self._add_syctrl_regs_s3(model)
@@ -250,9 +249,6 @@ class CalcGlobalRainier(Calc_Global_Bobcat):
     def _add_REALTIMECFE_EXTENSCHBYP_field(self, model):
         pass
 
-    #################################
-    # Update for Series 3 SYIF
-    #################################
     def _add_SYNTH_LPFCTRL_regs(self, model):
         self._addModelRegister(model, 'SYNTH.DLFCTRL.LOCKLPFBWGEAR0', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.DLFCTRL.LOCKLPFBWGEAR1', int, ModelVariableFormat.HEX)
@@ -305,14 +301,12 @@ class CalcGlobalRainier(Calc_Global_Bobcat):
         self._addModelRegister(model, 'SEQ.MMDDENOMINIT_CALC_DOUBLED.DENOMINIT1', int, ModelVariableFormat.HEX)
 
     def _add_SYNTH_S3_regs(self, model):
-        # Hopping
         self._addModelRegister(model, 'SYNTH.HOPPING.HOPLPFBWGEARSLOT', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.HOPPING.HOPHCAPDELAY', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.HOPPING.HCAPRETIMEEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.HOPPING.HCAPRETIMESEL', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.DLFCTRL.LPFBWDURINGHOP', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.DLFCTRL.LPFBWAFTERHOP', int, ModelVariableFormat.HEX)
-        # LMS
         self._addModelRegister(model, 'SYNTH.GLMS.GLMSENABLEDELAY', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.GLMS.GLMSGEAR0', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.GLMS.GLMSGEAR1', int, ModelVariableFormat.HEX)
@@ -329,7 +323,6 @@ class CalcGlobalRainier(Calc_Global_Bobcat):
         self._addModelRegister(model, 'SYNTH.PLMS.PLMSGEARSLOT', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.LMSOVERRIDE.GLMSOVERRIDEEN', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.LMSOVERRIDE.PLMSOVERRIDEEN', int, ModelVariableFormat.HEX)
-        # FCAL HW
         self._addModelRegister(model, 'SYNTH.COMPANION.COMPANION0', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.COMPANION.COMPANION1', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.COMPANION.COMPANION2', int, ModelVariableFormat.HEX)
@@ -339,7 +332,6 @@ class CalcGlobalRainier(Calc_Global_Bobcat):
         self._addModelRegister(model, 'SYNTH.COMPANION.COMPANION6', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.COMPANION.COMPANION7', int, ModelVariableFormat.HEX)
 
-        # self._addModelRegister(model, 'SYNTH.LOCNTCTRL.NUMCYCLE', int, ModelVariableFormat.HEX) #already defined
         self._addModelRegister(model, 'SYNTH.LOCNTCTRL.NUMCYCLE1', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.LOCNTCTRL.NUMCYCLE2', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.LOCNTCTRL.NUMCYCLE3', int, ModelVariableFormat.HEX)
@@ -364,7 +356,6 @@ class CalcGlobalRainier(Calc_Global_Bobcat):
         self._addModelRegister(model, 'SYNTH.FCALSTEPWAIT.STEPWAIT10', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'SYNTH.FCALCTRL.FCALMODE', int, ModelVariableFormat.HEX)
 
-        # RFSYNTH CTRL
         self._addModelRegister(model, 'RAC.SYLOCTRL0.SYLODIVDSMDACCLKDIVRATIO', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.SYLOCTRL0.SYLODIVREGTRIMVREG', int, ModelVariableFormat.HEX)
         self._addModelRegister(model, 'RAC.SYLOCTRLTX0.SYLODIVDSMDACCLKDIVRATIOTX', int, ModelVariableFormat.HEX)

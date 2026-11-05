@@ -19,6 +19,7 @@ include:
 provides:
 - name: emlib_msc
 requires:
+- name: log_none
 - name: device
 - name: device_has_msc
 - name: emlib_cmu

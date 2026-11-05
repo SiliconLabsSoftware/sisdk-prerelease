@@ -39,6 +39,8 @@ requires:
 - name: status
 - name: clock_manager_runtime
 - name: hal_gpio
+- name: emlib_cmu
+  condition: [device_series_2]
 - name: gpio
 - name: cmsis_core
 - name: component_catalog

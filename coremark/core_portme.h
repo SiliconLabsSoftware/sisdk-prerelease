@@ -116,6 +116,7 @@ typedef size_t ee_size_t;
 	This macro is used to align an offset to point to a 32b value. It is used in the Matrix algorithm to initialize the input memory blocks.
 */
 #define align_mem(x) (void *)(4 + (((ee_ptr_int)(x) - 1) & ~3))
+#define COREMARK_MEM_ALIGN 4
 
 /* Configuration : SEED_METHOD
 	Defines method to get seed values that cannot be computed at compile time.

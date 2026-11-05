@@ -7,6 +7,12 @@ description: >
   status when relevant. For example, when the door becomes unlocked by a User Code input, the Door Lock
   Mode is also updated to unlocked. This Command Class can be used in conjunction with Schedule
   Entry Lock Command Class in order to schedule access for users.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/user-code
+  - page: zwave-api/user-code-events
+
 package: zwave
 quality: production
 metadata:

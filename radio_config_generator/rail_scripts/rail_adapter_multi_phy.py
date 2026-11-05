@@ -11,7 +11,7 @@ from enum import IntEnum
 import itertools
 
 # Update kRAILVersion to be used in phyInfoData.
-kRAILVersion = 20
+kRAILVersion = 21
 
 class ConcPhyEnum(IntEnum):
   """
@@ -166,7 +166,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
 
         protectionMask = PROTECTED_FIELD_REG_VALUES[addressConflict]['protectionMask']
 
-        if self.pte_script is False:
+        if self.series == 1 and self.pte_script is False:
           # First clear out unprotected fields
           if ((values[currentLength] & ~protectionMask) != ~protectionMask) and (protectionMask != (2 ** 32 - 1)):
             encodedAddress = self._encodeWriteAddress(addressConflict, radio_action=config.RADIO_ACTION_AND)
@@ -190,27 +190,50 @@ class RAILAdapter_MultiPhy(RAILAdapter):
               newModemConfigEntry.length.value = 2
             if debug_print:
               print("OR with %08x" % newModemConfigEntry.encodedValues.value[0])
-
         else:
-          # For register with protected fields, we first CLR the non-protected fields
+          # First clear out unprotected fields
           if ((values[currentLength] & ~protectionMask) != ~protectionMask) and (protectionMask != (2 ** 32 - 1)):
-            encodedAddress = self._encodeWriteAddress(addressConflict, radio_action=config.RADIO_ACTION_PTE_CLR)
+            if self.pte_script:
+              encodedAddress = self._encodeWriteAddress(addressConflict,
+                                                        radio_action=config.RADIO_ACTION_PTE_CLR)
+            else:
+              # Get register name and fetch clr offset from it
+              register_name = self.rm.zz_reg_addr_to_name[addressConflict]
+              clrOffset = eval('self.rm.' + register_name + '.clrOffset')
+              encodedAddress = self._encodeWriteAddress(addressConflict,
+                                                        radio_action=config.RADIO_ACTION_WRITE,
+                                                        set_clr_offset=clrOffset)
+
             newModemConfigEntry = modemConfig.addNewElement()
             newModemConfigEntry.encodedAction.value = encodedAddress
             newModemConfigEntry.encodedValues.value = [0xFFFFFFFF & ~protectionMask]
             newModemConfigEntry.encodedRegNames.value = ["CLR: " + names[currentLength]]
+            if self.rail_version >= 3:
+              newModemConfigEntry.length.value = 2
             if debug_print:
-              print("AND with %08x" % newModemConfigEntry.encodedValues.value[0])
+              print("CLR with %08x" % newModemConfigEntry.encodedValues.value[0])
 
-          # Then only SET desried phy value for the non-protected fields
+          # We only need to OR things in if the value isn't 0
           if ((values[currentLength] & ~protectionMask) != 0) and (protectionMask != (2 ** 32 - 1)):
-            encodedAddress = self._encodeWriteAddress(addressConflict, radio_action=config.RADIO_ACTION_PTE_SET)
+            if self.pte_script:
+              encodedAddress = self._encodeWriteAddress(addressConflict,
+                                                        radio_action=config.RADIO_ACTION_PTE_SET)
+            else:
+              # Get register name and fetch set offset from it
+              register_name = self.rm.zz_reg_addr_to_name[addressConflict]
+              setOffset = eval('self.rm.' + register_name + '.setOffset')
+              encodedAddress = self._encodeWriteAddress(addressConflict,
+                                                        radio_action=config.RADIO_ACTION_WRITE,
+                                                        set_clr_offset=setOffset)
+
             newModemConfigEntry = modemConfig.addNewElement()
             newModemConfigEntry.encodedAction.value = encodedAddress
             newModemConfigEntry.encodedValues.value = [values[currentLength] & (0xFFFFFFFF & ~protectionMask)]
             newModemConfigEntry.encodedRegNames.value = ["SET: " + names[currentLength]]
+            if self.rail_version >= 3:
+              newModemConfigEntry.length.value = 2
             if debug_print:
-              print("OR with %08x" % newModemConfigEntry.encodedValues.value[0])
+              print("SET with %08x" % newModemConfigEntry.encodedValues.value[0])
 
       # Add one here, to account for the conflicted address. Keep in mind though, we don't
       # actually have to check if we found a conflicted address here though. If we didn't,
@@ -624,20 +647,6 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           print("Protected register found in register set, removing.")
           print(x)
 
-    # : remove register if the value from calculator is same as reset
-    if self.wifi_script is True or self.wifi_script_seqacc is True:
-      for register_set in [registers_base, registers_channel]:
-        remove_list = []
-        for register_name in register_set.keys():
-          reset_val = register_set[register_name].resetValue
-          io_val = register_set[register_name].io
-          if reset_val == io_val:
-            remove_list.append(register_name)
-        for register_name in remove_list:
-          # Let's keep LUT values even though value is the same as reset
-          if 'WIFILUTGAINLNA' not in register_name:
-            register_set.pop(register_name, None)
-
     self.registers_base = registers_base
     if self.rail_version >= 3:
       self.registers_common = registers_common
@@ -740,12 +749,20 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       if hasattr(model.vars, "MODEM_SRCCHF_BWSEL") and (model.vars.MODEM_SRCCHF_BWSEL.value is not None):
         cache40 |= (int(model.vars.MODEM_SRCCHF_BWSEL.value >= 2) << 21)
 
-      if hasattr(model.vars, "RAC_ADCCTRL1_ADCENHALFMODE") and (model.vars.RAC_ADCCTRL1_ADCENHALFMODE.value is not None):
-        cache40 |= model.vars.RAC_ADCCTRL1_ADCENHALFMODE.value << 24
-      elif hasattr(model.vars, "RAC_IFADCTRIM0_IFADCENHALFMODE") and (model.vars.RAC_IFADCTRIM0_IFADCENHALFMODE.value is not None):
-        cache40 |= model.vars.RAC_IFADCTRIM0_IFADCENHALFMODE.value << 24
-      else:
-        pass
+      # Derive ADC half-mode from the abstract calculator output. Each
+      # part's calc_adc_rate_mode_actual decodes the right physical
+      # register (RAC_IFADCTRIM0_*, RAC_ADCCTRL1_*, or RFCTRL_ADCCTRL1_*)
+      # into a stable HALFRATE/FULLRATE enum, so we don't chase register
+      # renames here. Pre-Lynx parts (e.g. panther) predate this
+      # abstraction; for them we keep the legacy HALFMODE = 0 pack since
+      # firmware on those parts never relied on the bit. For any part
+      # that defines the abstraction, missing data is a hard failure
+      # (silently packing 0 yields a wrong adc_frequency at runtime).
+      if hasattr(model.vars, "adc_rate_mode_actual"):
+        if model.vars.adc_rate_mode_actual.value is None:
+          raise Exception("Calculator did not populate adc_rate_mode_actual; cannot derive synth_cache HALFMODE bit")
+        if model.vars.adc_rate_mode_actual.value == model.vars.adc_rate_mode.var_enum.HALFRATE:
+          cache40 |= (1 << 24)
       data.synthCache.value |= cache40
 
     am_low_ramplev = getattr(outputs, 'am_low_ramplev', None)
@@ -759,6 +776,15 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       data.psmMaxSleepUs.value = 0
     else:
       data.psmMaxSleepUs.value = psm_max_sleep_us.var_value
+
+    if hasattr(model.vars, 'preamble_duration_us'):
+      data.preambleDurationUs.value = round(model.vars.preamble_duration_us.value or 0)
+    else:
+      data.preambleDurationUs.value = 0
+    if hasattr(model.vars, 'syncword_duration_us'):
+      data.syncwordDurationUs.value = round(model.vars.syncword_duration_us.value or 0)
+    else:
+      data.syncwordDurationUs.value = 0
 
     # Traverse existing irCalConfigEntries and check for duplicates
     entryFound = False
@@ -1005,7 +1031,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           newRailChannelConfigEntryAttr = commonStructures.railChannelConfigEntryAttrEntries.addNewElement("channel_config_entry_attr")
         else:
           newRailChannelConfigEntryAttr = commonStructures.railChannelConfigEntryAttrEntries.addNewElement("channelConfigEntryAttr")
-        if (self.partFamily.lower() in ["dumbo","jumbo","nerio","nixi", "lynx", "leopard", "lion", "curl"]):
+        if (self.partFamily.lower() in ["dumbo","jumbo","nerio","nixi", "lynx", "leopard", "lion", "lionu", "curl"]):
           newRailChannelConfigEntryAttr.calValues.value = 1
         else:
           newRailChannelConfigEntryAttr.calValues.value = 2 #panther has 2 RF paths
@@ -2014,16 +2040,48 @@ class RAILAdapter_MultiPhy(RAILAdapter):
                 "add": [(regs_channel, meta, regs_group_dict)],
               }
             else:
-              radio_configs[reference] = {
-                "base": regs_base,
-                "subtract": regs_subtract,
-                "add": [(regs_channel, meta)],
-              }
+              if self.wifi_script is True or self.wifi_script_seqacc is True:
+                # Take all registers and sort to keep the output ordered by address
+                merge_list = sorted(regs_base+regs_channel)
+                radio_configs[reference] = {
+                  "base": merge_list,
+                  "subtract": regs_subtract,
+                  "add": [([], meta)],
+                  "reset_register": [], # Add empty list to add element later
+                  "reference": None, # Set None because there is no reference.
+                }
+              else:
+                radio_configs[reference] = {
+                  "base": regs_base,
+                  "subtract": regs_subtract,
+                  "add": [(regs_channel, meta)],
+                }
           else:
             if self.rail_version >= 3:
               radio_configs[reference]["add"].append((regs_channel, meta, regs_group_dict))
             else:
-              radio_configs[reference]["add"].append((regs_channel, meta))
+              if self.wifi_script is True or self.wifi_script_seqacc is True:
+                # Find registers present in the new profile but not in the reference profile
+                # Register format: (address, value, name)
+                ref_base = set(radio_configs[reference]["base"])
+                profile_regs = set(regs_base + regs_channel)
+                diff = sorted(profile_regs - ref_base)
+
+                # Add newly introduced register names to the reference reset list
+                reset_register = radio_configs[reference]["reset_register"]
+
+                for _, _, register_name in diff:
+                  if register_name not in reset_register:
+                    reset_register.append(register_name)
+
+                radio_configs[meta[0]] = {
+                  "base": diff,
+                  "subtract": regs_subtract,
+                  "add": [([], meta)],
+                  "reference": reference, # Set the reference to using later
+                }
+              else:
+                radio_configs[reference]["add"].append((regs_channel, meta))
         else:
           self._railModelPopulated = False
           print('Radio configurator had a failure, exiting rail scripts.')
@@ -2055,6 +2113,42 @@ class RAILAdapter_MultiPhy(RAILAdapter):
           self._generateChannelStructures(multiPhyConfigEntry, phyConfigEntry, channelConfigEntry)
       else:
         for regs_channel, meta in radio_config["add"]:
+          if self.wifi_script is True or self.wifi_script_seqacc is True:
+            # Remove register if the value from calculator is the same as the reset value
+            # and the register is not explicitly listed in reset_register for the reference profile
+            reference = radio_config["reference"]
+
+            # If reference is None, the current profile reset_register list will be used.
+            # Otherwise, use the reset_register list defined by the referenced profile
+            if reference is None:
+              regs_reset = radio_config["reset_register"]
+            else:
+              regs_reset = radio_configs[reference]["reset_register"]
+
+            # Convert reset_register to a set to make register lookup faster
+            regs_reset = set(regs_reset)
+
+            # Store only the registers that still need to be written
+            filtered_regs = []
+
+            # Check every register generated by the calculator
+            for register_set in regs_base:
+              io_val = register_set[1]
+              register_name = register_set[2]
+
+              register = self.rm
+              for name in register_name.split("."):
+                register = getattr(register, name)
+
+              # Keep the register if one of the following conditions is true:
+              #   1. The calculated value is different from the register reset value
+              #   2. The register is explicitly listed in reset_register
+              if register.resetValue != io_val or register_name in regs_reset:
+                filtered_regs.append(register_set)
+
+            # Replace regs_base with the optimized register list
+            regs_base = filtered_regs
+
           configName = meta[0]
           phyConfigEntry = meta[1]
           multiPhyConfigEntry = meta[2]

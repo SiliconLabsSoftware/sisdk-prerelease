@@ -31,7 +31,7 @@
 #include <stddef.h>
 #include <string.h>
 #include "em_device.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_clock_manager.h"
 #include "sl_device_peripheral.h"
 #include "sl_udelay.h"
@@ -83,12 +83,12 @@ void I2CSPM_Init(I2CSPM_Init_TypeDef *init)
   sl_i2c_init_params_t i2c_init_params;
   sl_i2c_handle_t *handle;
 
-  EFM_ASSERT(init != NULL);
+  SL_LOG_DEBUG_ASSERT(init != NULL);
 
   // Get the instance from port number.
   i2cInstance = I2C_NUM(init->port);
   if (i2cInstance < 0 || i2cInstance >= I2C_COUNT) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return;
   }
 
@@ -101,7 +101,7 @@ void I2CSPM_Init(I2CSPM_Init_TypeDef *init)
   // Check if we got a valid peripheral
   if (i2c_init_params.i2c_peripheral == NULL) {
     // Invalid I2C port - cannot initialize
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return;
   }
 
@@ -120,7 +120,8 @@ void I2CSPM_Init(I2CSPM_Init_TypeDef *init)
     // Already initialized, just return
     return;
   }
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 }
 
 /*******************************************************************************
@@ -257,7 +258,7 @@ static sl_peripheral_t get_peripheral_from_i2c_port(I2C_TypeDef *port)
 #endif
     default:
       // Invalid I2C instance - this should never happen with proper usage
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return NULL; // Return NULL to indicate invalid peripheral
   }
 }

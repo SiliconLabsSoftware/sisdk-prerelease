@@ -4566,6 +4566,8 @@ RAIL_Status_t RAIL_GetRxTimePreambleStart(RAIL_Handle_t railHandle,
  *   that the preamble for this packet started on air.
  * @return \ref RAIL_STATUS_NO_ERROR if the packet time was successfully
  *   calculated, or an appropriate error code otherwise.
+ * @note For SUN OFDM, SUN OQPSK, and PROP OQPSK, totalPacketBytes is ignored
+ *   and the adjustment always uses packetDurationUs.
  *
  * @deprecated RAIL 2.x synonym of \ref sl_rail_get_rx_time_preamble_start().
  */
@@ -4619,6 +4621,8 @@ RAIL_Status_t RAIL_GetRxTimeSyncWordEnd(RAIL_Handle_t railHandle,
  *   that the sync word for this packet finished on air.
  * @return \ref RAIL_STATUS_NO_ERROR if the packet time was successfully
  *   calculated, or an appropriate error code otherwise.
+ * @note For SUN OFDM, SUN OQPSK, and PROP OQPSK, totalPacketBytes is ignored
+ *   and the adjustment always uses packetDurationUs.
  *
  * @deprecated RAIL 2.x synonym of \ref sl_rail_get_rx_time_sync_word_end().
  */

@@ -8,6 +8,9 @@ description: >
   specific RF transmit power level.
 
   NOTE: This Command Class is only used in an installation or test situation.
+documentation:
+  docset: z-wave
+  document: zwave-api/cc
 package: zwave
 quality: production
 metadata:

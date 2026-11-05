@@ -28,7 +28,6 @@
  *
  ******************************************************************************/
 
-#include "sl_assert.h"
 #include "sli_cmsis_os2_ext_task_register.h"
 #include "sl_cmsis_os2_common.h"
 

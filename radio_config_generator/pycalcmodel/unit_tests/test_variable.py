@@ -10,7 +10,6 @@ import unittest
 from enum import Enum, IntEnum
 from collections import OrderedDict
 
-# Add the Package directory to the path for imports
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
@@ -211,7 +210,6 @@ class TestModelVariableDummyValues(unittest.TestCase):
         var = ModelVariable(name="test", var_type=Enum, is_array=False)
         var.var_enum = SampleEnum
         dummy_value = get_dummy_var_value(var)
-        # Should return the value of the first enum member
         assert dummy_value == 1  # SampleEnum.OPTION_A.value
 
 
@@ -303,7 +301,6 @@ class TestModelVariableExceptions(unittest.TestCase):
         var = ModelVariable(name="test", var_type=Enum, is_array=False)
         var.var_enum = SampleEnum
         
-        # Missing dot separator
         with self.assertRaisesRegex(ValueError, "Invalid enum XML value"):
             cast_value_from_xml(var, ["OPTION_A"])
     
@@ -312,7 +309,6 @@ class TestModelVariableExceptions(unittest.TestCase):
         var = ModelVariable(name="test", var_type=Enum, is_array=False)
         var.var_enum = SampleEnum
         
-        # Wrong enum name
         with self.assertRaisesRegex(ValueError, "Invalid enum name"):
             cast_value_from_xml(var, ["WrongEnum.OPTION_A"])
     
@@ -321,7 +317,6 @@ class TestModelVariableExceptions(unittest.TestCase):
         var = ModelVariable(name="test", var_type=Enum, is_array=False)
         var.var_enum = SampleEnum
         
-        # Non-existent member
         with self.assertRaisesRegex(ValueError, "Invalid enum member"):
             cast_value_from_xml(var, ["SampleEnum.INVALID_OPTION"])
 
@@ -331,7 +326,6 @@ class TestModelVariableEnumCreation(unittest.TestCase):
     
     def test_create_model_variable_enum(self):
         """Test creating enum with CreateModelVariableEnum."""
-        # Test basic enum creation
         member_data = [
             ("FIRST", 0, "First option"),
             ("SECOND", 1, "Second option"),
@@ -348,7 +342,6 @@ class TestModelVariableEnumCreation(unittest.TestCase):
         assert TestDynamicEnum.SECOND == 1
         assert TestDynamicEnum.THIRD == 2
         
-        # Test description methods
         assert hasattr(TestDynamicEnum, 'getDesc')
         assert TestDynamicEnum.getDesc() == 'Test dynamic enum description'
         assert hasattr(TestDynamicEnum, 'getMemberDesc')

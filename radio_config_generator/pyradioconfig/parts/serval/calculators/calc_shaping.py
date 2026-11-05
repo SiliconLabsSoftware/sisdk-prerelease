@@ -35,9 +35,6 @@ class calc_shaping_serval(CALC_Shaping_Margay):
         max_filter_taps = model.vars.max_filter_taps.value
         coeff = np.zeros(max_filter_taps)
 
-        # If OOK shaping is enabled then we set the shaping coeffs according to this feature
-        # PA_max = (LUT_max * OOKSHAPINGSTEP * MODINDEX)  # 127 * 64 * MODINDEX, so scale modindex accordingly
-        # PA_min = (LUT_min * OOKSHAPINGSTEP * MODINDEX)
 
         if ookshapingen:
             high_level = 127  # Set statically

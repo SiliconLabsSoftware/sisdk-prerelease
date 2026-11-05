@@ -1,12 +1,9 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
+from pycalcmodel.core.common import IPCategory
 
 class PHYS_OQPSK_LoRa_Jumbo(IPhy):
-    ####################################################################################################################
-    # These PHYs originally developed for Nixi, then enabled for Jumbo and Nerio. Linked JIRA tickets points to Nixi PHYs
-    #
-    # ------------------------------------------------------------------------------------------------------------------
-    # 434 MHz Basic PHYs by Tibor Palvolgyi: IOTPA_PROP-914, IOTPA_PROP-916, IOTPA_PROP-882, IOTPA_PROP-922
-    # ------------------------------------------------------------------------------------------------------------------
+
+    ip_category = IPCategory.LPW
     def PHY_Datasheet_LongRange_434MHz_1p2k_NoFEC_Basic(self, model):
         phy = self._makePhy(model, model.profiles.Long_Range, readable_name='434 MHz 1.2 kbps OQPSK DSSS SF8',
                             phy_description = 'Sensitivity is -127.5 dBm at 1% PER on 19 byte long packets. Frequency \
@@ -57,13 +54,7 @@ class PHYS_OQPSK_LoRa_Jumbo(IPhy):
         phy.profile_inputs.channel_spacing_hz.value = 35000
         phy.profile_inputs.longrange_mode.value = model.vars.longrange_mode.var_enum.LR_19p2k
 
-    # -----------------------------------------------------------------------------------------------
-    # 915 MHz Basic PHYs
-    # -----------------------------------------------------------------------------------------------
 
-    # -----------------------------------------------------------------------------------------------
-    # 1p2k w/o FEC Basic -- original Long Range PHY by Lijun
-    # -----------------------------------------------------------------------------------------------
 
     def PHY_Datasheet_LongRange_915MHz_1p2k_NoFEC_Basic(self, model, phy_name = None):
         phy = self._makePhy(model, model.profiles.Long_Range, readable_name='915 MHz 1.2 kbps OQPSK DSSS SF8', phy_name=phy_name,
@@ -74,9 +65,6 @@ class PHYS_OQPSK_LoRa_Jumbo(IPhy):
         phy.profile_inputs.channel_spacing_hz.value = 25000
         phy.profile_inputs.longrange_mode.value = model.vars.longrange_mode.var_enum.LR_1p2k
 
-     # -----------------------------------------------------------------------------------------------
-     # Upscaling 1p2k PHYs to other data rates by Tibor
-     # -----------------------------------------------------------------------------------------------
 
     def PHY_Datasheet_LongRange_915MHz_4p8k_NoFEC_Basic(self, model):
         phy = self._makePhy(model, model.profiles.Long_Range, readable_name='915 MHz 4.8 kbps OQPSK DSSS SF8',
@@ -88,9 +76,6 @@ class PHYS_OQPSK_LoRa_Jumbo(IPhy):
         phy.profile_inputs.channel_spacing_hz.value = 35000
         phy.profile_inputs.longrange_mode.value = model.vars.longrange_mode.var_enum.LR_4p8k
 
-    # -----------------------------------------------------------------------------------------------
-    # Upscaling 9p6k PHY to 19p2k w/o FEC by Tibor Palvolgyi - https://jira.silabs.com/browse/IOTPA_PROP-712
-    # -----------------------------------------------------------------------------------------------
 
     def PHY_Datasheet_LongRange_915MHz_9p6k_NoFEC_Basic(self, model):
         phy = self._makePhy(model, model.profiles.Long_Range, readable_name='915 MHz 9.6 kbps OQPSK DSSS SF8',
@@ -102,9 +87,6 @@ class PHYS_OQPSK_LoRa_Jumbo(IPhy):
         phy.profile_inputs.channel_spacing_hz.value = 35000
         phy.profile_inputs.longrange_mode.value = model.vars.longrange_mode.var_enum.LR_9p6k
 
-    # -----------------------------------------------------------------------------------------------
-    # Upscaling 9p6k PHY to 19p2k w/o FEC by Tibor Palvolgyi - https://jira.silabs.com/browse/IOTPA_PROP-880
-    # -----------------------------------------------------------------------------------------------
 
     def PHY_Datasheet_LongRange_915MHz_19p2k_NoFEC_Basic(self, model):
         phy = self._makePhy(model, model.profiles.Long_Range, readable_name='915 MHz 19.2 kbps OQPSK DSSS SF8',
@@ -118,9 +100,6 @@ class PHYS_OQPSK_LoRa_Jumbo(IPhy):
 
     pass
 
-    # -----------------------------------------------------------------------------------------------
-    # Adding the missing PHY from LR profile list - https://jira.silabs.com/browse/MCUW_RADIO_CFG-1882
-    # -----------------------------------------------------------------------------------------------
 
     def PHY_Studio_LongRange_915MHz_38p4k_NoFEC_Basic(self, model):
         phy = self._makePhy(model, model.profiles.Long_Range, readable_name='915 MHz 38.4kbps OQPSK DSSS SF8',
@@ -134,9 +113,6 @@ class PHYS_OQPSK_LoRa_Jumbo(IPhy):
 
     pass
 
-    # -----------------------------------------------------------------------------------------------
-    # By Tibor Palvolgyi - https://jira.silabs.com/browse/MCUW_RADIO_CFG-1377
-    # -----------------------------------------------------------------------------------------------
 
     def PHY_Studio_LongRange_915MHz_80k_FCC(self, model):
         phy = self._makePhy(model, model.profiles.Long_Range, readable_name='915 MHz 80kbps OQPSK DSSS SF8',

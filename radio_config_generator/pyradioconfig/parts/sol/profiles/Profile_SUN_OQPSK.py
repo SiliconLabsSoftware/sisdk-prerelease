@@ -4,8 +4,11 @@ from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, 
     buildWhiteOutputs
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
 from pyradioconfig.parts.sol.profiles.sw_profile_outputs_common import sw_profile_outputs_common_sol
+from pycalcmodel.core.common import IPCategory
 
 class Profile_SUN_OQPSK_Sol(IProfile):
+
+    ip_category = IPCategory.LPW
 
     def __init__(self):
         self._profileName = "SUN_OQPSK"
@@ -18,17 +21,14 @@ class Profile_SUN_OQPSK_Sol(IProfile):
         self._sw_profile_outputs_common = sw_profile_outputs_common_sol()
 
     def buildProfileModel(self, model):
-        # Build profile object and append it to the model
         profile = self._makeProfile(model)
 
-        # Build inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
         self.build_hidden_profile_inputs(model, profile)
         self.build_deprecated_profile_inputs(model, profile)
 
-        # Build outputs
         self.build_register_profile_outputs(model, profile)
         self.build_variable_profile_outputs(model, profile)
         self.build_info_profile_outputs(model, profile)
@@ -57,22 +57,18 @@ class Profile_SUN_OQPSK_Sol(IProfile):
         self.make_linked_io(profile, model.vars.fpll_band, 'crystal', readable_name="RF Frequency Planning Band")
 
     def build_hidden_profile_inputs(self, model, profile):
-        # Hidden inputs to allow for fixed frame length testing
         self.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                readable_name="Frame Length Algorithm")
         self.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
                                readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=4095)
 
-        # Hidden inputs to allow for keeping absolute tolerance the same when testing at 915M
         self.make_hidden_input(profile, model.vars.freq_offset_hz, 'Advanced',
                                readable_name="Frequency Offset Compensation (AFC) Limit", value_limit_min=0,
                                value_limit_max=500000, units_multiplier=UnitsMultiplier.KILO)
 
-        # Hidden input for dual front-end filter support
         self.make_hidden_input(profile, model.vars.dual_fefilt, "Advanced",
                                readable_name="Dual front-end filter enable")
 
-        # Hidden inputs to allow for control of channel BW (CSMA-CA)
         bandwidth_limit_adc = 2530000
         self.make_hidden_input(profile, model.vars.bandwidth_hz, 'Advanced',
                                readable_name="Acquisition Channel Bandwidth", value_limit_min=0,
@@ -107,20 +103,16 @@ class Profile_SUN_OQPSK_Sol(IProfile):
 
     def _fixed_sun_oqpsk_vars(self, model):
 
-        #AGC
         self._fixed_sun_oqpsk_agc(model)
 
-        #OQPSK modulation on softmodem
         model.vars.modulation_type.value_forced = model.vars.modulation_type.var_enum.OQPSK
         model.vars.demod_select.value_forced = model.vars.demod_select.var_enum.SOFT_DEMOD
 
-        #Tolerance
         model.vars.rx_xtal_error_ppm.value_forced = 0
         model.vars.tx_xtal_error_ppm.value_forced = 0
         model.vars.baudrate_tol_ppm.value_forced = 40
         model.vars.deviation_tol_ppm.value_forced = 0
 
-        #Encoding and Whitening (unused)
         model.vars.diff_encoding_mode.value_forced = model.vars.diff_encoding_mode.var_enum.DISABLED
         model.vars.symbol_encoding.value_forced = model.vars.symbol_encoding.var_enum.NRZ
         model.vars.manchester_mapping.value_forced = model.vars.manchester_mapping.var_enum.Default
@@ -129,23 +121,24 @@ class Profile_SUN_OQPSK_Sol(IProfile):
         model.vars.white_seed.value_forced = 0
         model.vars.white_output_bit.value_forced = 0
 
-        #Preamble and syncword (unused)
-        model.vars.preamble_length.value_forced = 32
+        band_frequency = int(model.profile.inputs.base_frequency_hz.var_value / 1e6)
+        if band_frequency in (780, 902, 915, 917, 2450):
+            model.vars.preamble_length.value_forced = 56
+        else:
+            model.vars.preamble_length.value_forced = 32
+
         model.vars.preamble_pattern.value_forced = 0
         model.vars.preamble_pattern_len.value_forced = 4
-        model.vars.syncword_0.value_forced = 0xe5
-        model.vars.syncword_1.value_forced = 0
-        model.vars.syncword_length.value_forced = 8
+        model.vars.syncword_0.value_forced = 0x62
+        model.vars.syncword_1.value_forced = 0xeb
+        model.vars.syncword_length.value_forced = 16
 
-        #Shaping (unused)
         model.vars.shaping_filter.value_forced = model.vars.shaping_filter.var_enum.Custom_OQPSK
         model.vars.shaping_filter_param.value_forced = 0.0
 
-        #Modulation parameters (unused)
         model.vars.deviation.value_forced = 0
         model.vars.fsk_symbol_map.value_forced = model.vars.fsk_symbol_map.var_enum.MAP0
 
-        #Frame settings (unused)
         model.vars.frame_bitendian.value_forced = model.vars.frame_bitendian.var_enum.LSB_FIRST
         model.vars.frame_length_type.value_forced = model.vars.frame_length_type.var_enum.FIXED_LENGTH
         model.vars.payload_white_en.value_forced = False
@@ -197,7 +190,6 @@ class Profile_SUN_OQPSK_Sol(IProfile):
         model.vars.frame_type_loc.value_forced = 0
         model.vars.frame_type_lsbit.value_forced = 0
 
-        #Other
         model.vars.asynchronous_rx_enable.value_forced = False
         model.vars.syncword_tx_skip.value_forced = False
 
@@ -206,10 +198,8 @@ class Profile_SUN_OQPSK_Sol(IProfile):
 
     def _lookup_from_oqpsk_chiprate(self, model):
 
-        #Read in the chiprate
         sun_oqpsk_chiprate = model.profile.inputs.sun_oqpsk_chiprate.var_value
 
-        #Set the bitrate for SF1 (actual bitrate handled in softmodem since we don't know SF)
         if sun_oqpsk_chiprate == model.vars.sun_oqpsk_chiprate.var_enum._100_KCPS:
             bitrate = 100000
         elif sun_oqpsk_chiprate == model.vars.sun_oqpsk_chiprate.var_enum._400_KCPS:

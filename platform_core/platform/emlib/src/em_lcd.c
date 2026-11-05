@@ -30,7 +30,7 @@
 
 #include "em_lcd.h"
 #if defined(LCD_COUNT) && (LCD_COUNT > 0)
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_bus.h"
 #include "em_gpio.h"
 
@@ -67,7 +67,7 @@ void LCD_Init(const LCD_Init_TypeDef *lcdInit)
 {
   uint32_t dispCtrl = LCD->DISPCTRL;
 
-  EFM_ASSERT(lcdInit != (void *) 0);
+  SL_LOG_DEBUG_ASSERT(lcdInit != (void *) 0);
 
   /* Disable the controller before reconfiguration. */
   LCD_Enable(false);
@@ -190,10 +190,10 @@ void LCD_UpdateCtrl(LCD_UpdateCtrl_TypeDef ud)
  ******************************************************************************/
 void LCD_FrameCountInit(const LCD_FrameCountInit_TypeDef *fcInit)
 {
-  EFM_ASSERT(fcInit != (void *) 0);
+  SL_LOG_DEBUG_ASSERT(fcInit != (void *) 0);
 
   /* Verify that the FC Top Counter is within limits. */
-  EFM_ASSERT(fcInit->top < LCD_FRAME_COUNTER_VAL_MAX);
+  SL_LOG_DEBUG_ASSERT(fcInit->top < LCD_FRAME_COUNTER_VAL_MAX);
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   uint32_t bacfg = LCD->BACFG;
@@ -236,7 +236,7 @@ void LCD_AnimInit(const LCD_AnimInit_TypeDef *animInit)
 {
   uint32_t bactrl = LCD->BACTRL;
 
-  EFM_ASSERT(animInit != (void *) 0);
+  SL_LOG_DEBUG_ASSERT(animInit != (void *) 0);
 
   /* Set initial Animation Register Values. */
   /* Ensure no internal sync is in progress. */
@@ -308,7 +308,7 @@ void LCD_SegmentEnable(uint32_t seg_nbr, bool enable)
 {
   /* Series 2 parts support up to 20 segment lines. */
   /* Except for xG26 which supports up to 40 segment lines. and xG28 which supports up to 28 segment lines. */
-  EFM_ASSERT(seg_nbr < (int)LCD_SEGMENT_LINES_MAX);
+  SL_LOG_DEBUG_ASSERT(seg_nbr < (int)LCD_SEGMENT_LINES_MAX);
 
 #if defined(_GPIO_LCDSEGH_MASK)
   if (enable) {
@@ -348,7 +348,7 @@ void LCD_SegmentEnable(uint32_t seg_nbr, bool enable)
 void LCD_ComEnable(uint8_t com, bool enable)
 {
   /* Series 2 parts support up to 4 COM lines except for xG28, which supports up to 8 COM lines. */
-  EFM_ASSERT(com < LCD_COM_LINES_MAX);
+  SL_LOG_DEBUG_ASSERT(com < LCD_COM_LINES_MAX);
 
   if (com < LCD_COM_NUM) {
     if (enable) {
@@ -427,11 +427,11 @@ void LCD_SegmentSet(int com, int bit, bool enable)
 {
 #if defined(_SILICON_LABS_32B_SERIES_2)
   /* Series 2 parts support up to 4 COM lines except for xG26 and xG28, which supports up to 8 COM lines. */
-  EFM_ASSERT(com < (int)LCD_COM_LINES_MAX);
+  SL_LOG_DEBUG_ASSERT(com < (int)LCD_COM_LINES_MAX);
 
   /* Series 2 parts support up to 20 segment lines. */
   /* Except for xG26 which supports up to 40 segment lines. and xG28 which supports up to 28 segment lines. */
-  EFM_ASSERT(bit < (int)LCD_SEGMENT_LINES_MAX);
+  SL_LOG_DEBUG_ASSERT(bit < (int)LCD_SEGMENT_LINES_MAX);
 
   /* Ensure no internal sync is in progress. */
   LCD_LoadBusyWait();
@@ -551,23 +551,23 @@ void LCD_SegmentSet(int com, int bit, bool enable)
 #endif
 
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 #else
 #if defined(_LCD_SEGD7L_MASK)
   /* Tiny Gecko and Giant Gecko Families support up to 8 COM lines. */
-  EFM_ASSERT(com < 8);
+  SL_LOG_DEBUG_ASSERT(com < 8);
 #else
   /* Gecko Family supports up to 4 COM lines. */
-  EFM_ASSERT(com < 4);
+  SL_LOG_DEBUG_ASSERT(com < 4);
 #endif
 
 #if defined(_LCD_SEGD0H_MASK)
-  EFM_ASSERT(bit < 40);
+  SL_LOG_DEBUG_ASSERT(bit < 40);
 #else
   /* Tiny Gecko Family supports only "low" segment registers. */
-  EFM_ASSERT(bit < 32);
+  SL_LOG_DEBUG_ASSERT(bit < 32);
 #endif
 
   /* Use a bitband access for atomic bit set/clear of the segment. */
@@ -670,7 +670,7 @@ void LCD_SegmentSet(int com, int bit, bool enable)
 #endif
 
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 #endif
@@ -696,12 +696,12 @@ void LCD_SegmentSetLow(int com, uint32_t mask, uint32_t bits)
   uint32_t segData;
 
   /* Series 2 parts support up to 4 COM lines except for xG26 and xG28, which supports up to 8 COM lines. */
-  EFM_ASSERT(com < (int)LCD_COM_LINES_MAX);
+  SL_LOG_DEBUG_ASSERT(com < (int)LCD_COM_LINES_MAX);
 
   /* Series 2 parts support up to 20 segment lines. */
   /* Except for xG26 which supports up to 40 segment lines. and xG28 which supports up to 28 segment lines. */
-  EFM_ASSERT(!(mask & (~_LCD_SEGD0_MASK)));
-  EFM_ASSERT(!(bits & (~_LCD_SEGD0_MASK)));
+  SL_LOG_DEBUG_ASSERT(!(mask & (~_LCD_SEGD0_MASK)));
+  SL_LOG_DEBUG_ASSERT(!(bits & (~_LCD_SEGD0_MASK)));
 
   /* Ensure no internal sync is in progress. */
   LCD_LoadBusyWait();
@@ -772,7 +772,7 @@ void LCD_SegmentSetLow(int com, uint32_t mask, uint32_t bits)
 #endif
 
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 #else
@@ -780,10 +780,10 @@ void LCD_SegmentSetLow(int com, uint32_t mask, uint32_t bits)
 
   /* A maximum number of com lines. */
 #if defined(_LCD_SEGD7L_MASK)
-  EFM_ASSERT(com < 8);
+  SL_LOG_DEBUG_ASSERT(com < 8);
 #else
   /* Gecko Family supports up to 4 COM lines. */
-  EFM_ASSERT(com < 4);
+  SL_LOG_DEBUG_ASSERT(com < 4);
 #endif
 
   switch (com) {
@@ -844,7 +844,7 @@ void LCD_SegmentSetLow(int com, uint32_t mask, uint32_t bits)
       break;
 #endif
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 #endif
@@ -869,9 +869,9 @@ void LCD_SegmentSetHigh(int com, uint32_t mask, uint32_t bits)
   uint32_t segData;
 
 #if defined(_LCD_SEGD7H_MASK)
-  EFM_ASSERT(com < 8);
+  SL_LOG_DEBUG_ASSERT(com < 8);
 #else
-  EFM_ASSERT(com < 4);
+  SL_LOG_DEBUG_ASSERT(com < 4);
 #endif
 
   /* A maximum number of com lines. */
@@ -948,18 +948,18 @@ void LCD_SegmentSetHigh(int com, uint32_t mask, uint32_t bits)
 void LCD_ContrastSet(int level)
 {
 #if defined(_SILICON_LABS_32B_SERIES_0)
-  EFM_ASSERT(level < 32);
+  SL_LOG_DEBUG_ASSERT(level < 32);
 
   LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CONLEV_MASK)
                   | (level << _LCD_DISPCTRL_CONLEV_SHIFT);
 
 #elif defined(_SILICON_LABS_32B_SERIES_1)
-  EFM_ASSERT(level < 64);
+  SL_LOG_DEBUG_ASSERT(level < 64);
 
   LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CONTRAST_MASK)
                   | (level << _LCD_DISPCTRL_CONTRAST_SHIFT);
 #else
-  EFM_ASSERT(level < 32);
+  SL_LOG_DEBUG_ASSERT(level < 32);
 
   LCD->BIASCTRL = (LCD->BIASCTRL & ~_LCD_BIASCTRL_VLCD_MASK)
                   | (level << _LCD_BIASCTRL_VLCD_SHIFT);
@@ -1084,7 +1084,7 @@ void LCD_BiasSegmentSet(int segmentLine, int biasLevel)
       break;
     default:
       segmentRegister = NULL;
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 
@@ -1105,7 +1105,7 @@ void LCD_BiasSegmentSet(int segmentLine, int biasLevel)
       break;
     default:
       segmentRegister = NULL;
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 #endif /* defined(_GPIO_LCDSEGH_MASK) */
@@ -1113,7 +1113,7 @@ void LCD_BiasSegmentSet(int segmentLine, int biasLevel)
 #else
 
 #if !defined(_LCD_SEGD0H_MASK)
-  EFM_ASSERT(segmentLine < 20);
+  SL_LOG_DEBUG_ASSERT(segmentLine < 20);
 
   /* A bias configuration for 8 segment lines per SEGDnL register. */
   biasRegister = segmentLine / 8;
@@ -1134,11 +1134,11 @@ void LCD_BiasSegmentSet(int segmentLine, int biasLevel)
       break;
     default:
       segmentRegister = (uint32_t *)0x00000000;
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 #else
-  EFM_ASSERT(segmentLine < 40);
+  SL_LOG_DEBUG_ASSERT(segmentLine < 40);
 
   /* A bias configuration for 10 segment lines per SEGDn L+H registers. */
   biasRegister = segmentLine / 10;
@@ -1179,7 +1179,7 @@ void LCD_BiasSegmentSet(int segmentLine, int biasLevel)
       break;
     default:
       segmentRegister = (uint32_t *)0x00000000;
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 #endif
@@ -1240,7 +1240,7 @@ void LCD_BiasComSet(int comLine, int biasLevel)
       break;
     default:
       comRegister = NULL;
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 
@@ -1251,7 +1251,7 @@ void LCD_BiasComSet(int comLine, int biasLevel)
 
 #else
   int bitShift;
-  EFM_ASSERT(comLine < 8);
+  SL_LOG_DEBUG_ASSERT(comLine < 8);
 
   bitShift    = comLine * 4;
   BUS_RegMaskedWrite(&(LCD->SEGD4L), 0xF << bitShift, biasLevel << bitShift);
@@ -1287,7 +1287,7 @@ void LCD_ModeSet(LCD_Mode_Typedef mode)
  ******************************************************************************/
 void LCD_ChargeRedistributionCyclesSet(uint8_t cycles)
 {
-  EFM_ASSERT(cycles <= 4);
+  SL_LOG_DEBUG_ASSERT(cycles <= 4);
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   LCD_Enable(false); /* Ensure LCD disabled before writing WSTATIC fields. */

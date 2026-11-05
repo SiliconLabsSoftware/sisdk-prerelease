@@ -10,6 +10,10 @@ description: >
   This component should be replaced by using the zaf transport queue which
   removed the need for jobs in the applications because now it is possible to
   "send and forget" a frame.
+documentation:
+  docset: z-wave
+  document: zwave-api/event-handling
+
 package: zwave
 quality: production
 metadata:

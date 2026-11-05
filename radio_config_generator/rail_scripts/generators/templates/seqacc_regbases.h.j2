@@ -37,15 +37,13 @@ extern SeqAccBaseAddrCfg_t {{baseAddrName}};
 #define SEQACC_REGBASES_GET_BASE(addr) {{ "(((uint32_t)addr & 0x{0:08X}U) >> 16U)".format(RegBases['BaseAddrCfgDefault']['BaseAddrMask'])}}
 #define SEQACC_REGBASES_NORMALIZE_TZ(addr) (addr & ~0x3000U)
 #define SEQACC_REGBASES_GET_OFFSET(addr) ((uint32_t)addr & RADIO_INIT_ARG_RADIOACTION_OFFSET_MASK)
-#define SEQACC_REGBASES_GET_IDX(addr)                                                                            \
-  (                                                                                                              \
+{% set stringLength = 112 + ((RegBases['BaseAddrCfgDefault']['BaseAddr'] | length - 1) | string | length) -%}
+{% set formatString = "%%-%ds" | format(stringLength) -%}
+{{ formatString | format("#define SEQACC_REGBASES_GET_IDX(addr)") }}\
+{{ formatString | format("  (") }}\
 {%- for baseAddrName, baseAddrCfg in RegBases.items() -%}
   {%- for addr in baseAddrCfg['BaseAddr'].keys() %}
-    {%- if loop.index0 == 0 %}
-    SEQACC_REGBASES_NORMALIZE_TZ(SEQACC_REGBASES_GET_BASE(addr)) == SEQACC_REGBASES_NORMALIZE_TZ({{"{}".format(addr|printBaseAddr)}}) ? {{loop.index0}}U   \
-    {%- else %}
-    : SEQACC_REGBASES_NORMALIZE_TZ(SEQACC_REGBASES_GET_BASE(addr)) == SEQACC_REGBASES_NORMALIZE_TZ({{"{}".format(addr|printBaseAddr)}}) ? {{loop.index0}}U \
-    {%- endif %}
+{{ formatString | format('    %sSEQACC_REGBASES_NORMALIZE_TZ(SEQACC_REGBASES_GET_BASE(addr)) == SEQACC_REGBASES_NORMALIZE_TZ(%s) ? %dU' | format("" if loop.index0==0 else ": ", addr|printBaseAddr, loop.index0)) }}\
   {%- endfor %}
 {%- endfor %}
     : SEQACC_REGBASES_DYNAMIC_BASE_ENTRY)

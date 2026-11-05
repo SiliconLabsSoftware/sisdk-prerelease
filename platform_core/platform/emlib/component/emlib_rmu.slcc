@@ -17,6 +17,7 @@ include:
 provides:
 - name: emlib_rmu
 requires:
+- name: log_none
 - name: device
 - name: device_has_emu
 - name: emlib_common

@@ -14,4 +14,3 @@ main.py - Is the Executable interface\n
 
 from pyradioconfig._version import __version__ as __version__
 from pyradioconfig.calculator_model_framework.CalcManager import CalcManager as CalcManager
-# from pyradioconfig.to_be_deprecated.legacy_top_level import *

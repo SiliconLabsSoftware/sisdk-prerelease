@@ -260,6 +260,7 @@ sl_status_t create_wrap_symmetric_key(sl_se_key_type_t key_type)
                     &cmd_ctx);
 }
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /***************************************************************************//**
  * Delete a non-exportable symmetric key in a volatile SE key slot.
  ******************************************************************************/
@@ -294,6 +295,7 @@ sl_status_t create_volatile_symmetric_key(sl_se_key_type_t key_type)
   print_error_cycle(sl_se_generate_key(&cmd_ctx, &symmetric_key_desc),
                     &cmd_ctx);
 }
+#endif // defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 
 #endif
 

@@ -17,6 +17,7 @@ include:
 provides:
 - name: emlib_rtcc
 requires:
+- name: log_none
 - name: device
 - name: device_has_rtcc
 - name: emlib_common

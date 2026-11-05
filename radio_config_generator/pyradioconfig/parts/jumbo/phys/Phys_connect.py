@@ -2,8 +2,11 @@ from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 class PHYS_connect(IPhy):
+
+    ip_category = IPCategory.LPW
 
     def Connect_base(self, phy, model):
 
@@ -16,7 +19,7 @@ class PHYS_connect(IPhy):
         phy.profile_inputs.shaping_filter.value = model.vars.shaping_filter.var_enum.Gaussian
         phy.profile_inputs.shaping_filter_param.value = 0.5
         phy.profile_inputs.symbol_encoding.value = model.vars.symbol_encoding.var_enum.NRZ
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.diff_encoding_mode.value = model.vars.diff_encoding_mode.var_enum.DISABLED
         phy.profile_inputs.crc_byte_endian.value = model.vars.crc_byte_endian.var_enum.MSB_FIRST
         phy.profile_inputs.crc_bit_endian.value = model.vars.crc_bit_endian.var_enum.MSB_FIRST
@@ -261,10 +264,8 @@ class PHYS_connect(IPhy):
         phy.profile_inputs.manchester_mapping.value = model.vars.manchester_mapping.var_enum.Default
         phy.profile_inputs.modulation_type.value = model.vars.modulation_type.var_enum.OQPSK
         if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
-            # Series 1
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_2520KHz
         else:
-            # Series 2
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_2500KHz
         phy.profile_inputs.preamble_length.value = 32
         phy.profile_inputs.preamble_pattern.value = 0
@@ -281,123 +282,10 @@ class PHYS_connect(IPhy):
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
         phy.profile_inputs.white_poly.value = model.vars.white_poly.var_enum.NONE
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
 
         return phy
 
-    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    # def debug_PHY_Connect_IEEE802154_2p4GHz_coh(self, model):
-    #     phy = self._makePhy(model, model.profiles.Base, readable_name='test phy for porting coh demod from ieee to connect', phy_name=phy_name)
-    #
-    #     # Stuff from connect_base routine.
-    #     phy.profile_inputs.baudrate_tol_ppm.value = 0
-    #     phy.profile_inputs.dsss_chipping_code.value = long(0)
-    #     phy.profile_inputs.dsss_len.value = 0
-    #     phy.profile_inputs.dsss_spreading_factor.value = 0
-    #     phy.profile_inputs.fsk_symbol_map.value = model.vars.fsk_symbol_map.var_enum.MAP0
-    #     #phy.profile_inputs.modulation_type.value = model.vars.modulation_type.var_enum.FSK2
-    #     phy.profile_inputs.shaping_filter.value = model.vars.shaping_filter.var_enum.Gaussian
-    #     phy.profile_inputs.shaping_filter_param.value = 0.5
-    #     phy.profile_inputs.symbol_encoding.value = model.vars.symbol_encoding.var_enum.NRZ
-    #     phy.profile_inputs.xtal_frequency_hz.value = 38400000
-    #     phy.profile_inputs.diff_encoding_mode.value = model.vars.diff_encoding_mode.var_enum.DISABLED
-    #     phy.profile_inputs.crc_byte_endian.value = model.vars.crc_byte_endian.var_enum.MSB_FIRST
-    #     phy.profile_inputs.crc_bit_endian.value = model.vars.crc_bit_endian.var_enum.MSB_FIRST
-    #     phy.profile_inputs.preamble_pattern_len.value = 2
-    #     phy.profile_inputs.preamble_length.value = 32
-    #     phy.profile_inputs.preamble_pattern.value = 1
-    #     phy.profile_inputs.syncword_0.value = long(11732)
-    #     phy.profile_inputs.syncword_1.value = long(0)
-    #     phy.profile_inputs.syncword_length.value = 16
-    #     phy.profile_inputs.white_poly.value = model.vars.white_poly.var_enum.PN9
-    #
-    #     # Stuff from original Connect phy
-    #     phy.profile_inputs.agc_hysteresis.value = 0
-    #     phy.profile_inputs.agc_power_target.value = -6
-    #     phy.profile_inputs.agc_settling_delay.value = 40
-    #     phy.profile_inputs.base_frequency_hz.value = long(902000000)
-    #     phy.profile_inputs.baudrate_tol_ppm.value = 4000
-    #     phy.profile_inputs.bitrate.value = 100000
-    #     phy.profile_inputs.channel_spacing_hz.value = 2000000
-    #     #phy.profile_inputs.crc_bit_endian.value = model.vars.crc_bit_endian.var_enum.LSB_FIRST
-    #     #phy.profile_inputs.crc_byte_endian.value = model.vars.crc_byte_endian.var_enum.LSB_FIRST
-    #     phy.profile_inputs.deviation.value = 200000
-    #     phy.profile_inputs.diff_encoding_mode.value = model.vars.diff_encoding_mode.var_enum.DISABLED
-    #     phy.profile_inputs.dsss_chipping_code.value =  long(1951056795)
-    #     phy.profile_inputs.dsss_len.value = 32
-    #     phy.profile_inputs.dsss_spreading_factor.value = 8
-    #     phy.profile_inputs.fsk_symbol_map.value = model.vars.fsk_symbol_map.var_enum.MAP0
-    #     phy.profile_inputs.manchester_mapping.value = model.vars.manchester_mapping.var_enum.Default
-    #     phy.profile_inputs.modulation_type.value = model.vars.modulation_type.var_enum.OQPSK
-    #     phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_2520KHz
-    #     phy.profile_inputs.preamble_length.value = 32
-    #     phy.profile_inputs.preamble_pattern.value = 0
-    #     phy.profile_inputs.preamble_pattern_len.value = 4
-    #     phy.profile_inputs.rssi_period.value = 8
-    #     phy.profile_inputs.rx_xtal_error_ppm.value = 0
-    #     phy.profile_inputs.shaping_filter.value = model.vars.shaping_filter.var_enum.NONE
-    #     phy.profile_inputs.shaping_filter_param.value = 0.5
-    #     phy.profile_inputs.symbol_encoding.value = model.vars.symbol_encoding.var_enum.DSSS
-    #     phy.profile_inputs.syncword_0.value =  long(167)
-    #     phy.profile_inputs.syncword_1.value = long(0)
-    #     phy.profile_inputs.syncword_length.value = 8
-    #     phy.profile_inputs.timing_detection_threshold.value = 65
-    #     phy.profile_inputs.timing_sample_threshold.value = 0
-    #     phy.profile_inputs.tx_xtal_error_ppm.value = 0
-    #     phy.profile_inputs.white_poly.value = model.vars.white_poly.var_enum.NONE
-    #     phy.profile_inputs.xtal_frequency_hz.value = 38400000
-    #
-    #     # the rest of the stuff from the ieee phy...
-    #     phy.profile_inputs.agc_power_target.value = -11
-    #     phy.profile_inputs.agc_scheme.value = model.vars.agc_scheme.var_enum.SCHEME_3
-    #     phy.profile_inputs.agc_settling_delay.value = 40
-    #     phy.profile_inputs.bandwidth_hz.value = 2524800
-    #     phy.profile_inputs.baudrate_tol_ppm.value = 0
-    #     phy.profile_inputs.frequency_comp_mode.value = model.vars.frequency_comp_mode.var_enum.DISABLED
-    #     phy.profile_inputs.number_of_timing_windows.value = 7
-    #     phy.profile_inputs.shaping_filter.value = model.vars.shaping_filter.var_enum.Custom_OQPSK
-    #     phy.profile_inputs.symbols_in_timing_window.value = 12
-    #     phy.profile_inputs.timing_detection_threshold.value = 65
-    #
-    #     phy.profile_outputs.AGC_CTRL2_ADCRSTSTARTUP.override = 0
-    #     phy.profile_outputs.AGC_CTRL2_FASTLOOPDEL.override = 5
-    #     phy.profile_outputs.AGC_GAINSTEPLIM_CFLOOPSTEPMAX.override = 4
-    #     phy.profile_outputs.AGC_GAINSTEPLIM_SLOWDECAYCNT.override = 0
-    #     phy.profile_outputs.AGC_LOOPDEL_IFPGADEL.override = 7
-    #     phy.profile_outputs.AGC_LOOPDEL_LNASLICESDEL.override = 7
-    #     phy.profile_outputs.AGC_LOOPDEL_PKDWAIT.override = 15
-    #     #phy.profile_outputs.AGC_MANGAIN_MANGAINLNAATTEN.override = 0
-    #     phy.profile_outputs.AGC_RSSISTEPTHR_DEMODRESTARTPER.override = 5
-    #     phy.profile_outputs.AGC_RSSISTEPTHR_DEMODRESTARTTHR.override = 0xab
-    #     phy.profile_outputs.AGC_RSSISTEPTHR_POSSTEPTHR.override = 3
-    #     phy.profile_outputs.MODEM_AFC_AFCRXCLR.override = 1
-    #     phy.profile_outputs.MODEM_AFC_AFCSCALEM.override = 3
-    #     phy.profile_outputs.MODEM_AFCADJLIM_AFCADJLIM.override = 2750
-    #     phy.profile_outputs.MODEM_CTRL1_PHASEDEMOD.override = 3
-    #     phy.profile_outputs.MODEM_CTRL2_DATAFILTER.override = 7
-    #     phy.profile_outputs.MODEM_CTRL3_TSAMPDEL.override = 2
-    #     phy.profile_outputs.MODEM_CTRL5_BBSS.override = 5
-    #     phy.profile_outputs.MODEM_CTRL5_FOEPREAVG.override = 7
-    #     phy.profile_outputs.MODEM_CTRL5_LINCORR.override = 1
-    #     phy.profile_outputs.MODEM_CTRL5_POEPER.override = 1
-    #     phy.profile_outputs.MODEM_CTRL6_ARW.override = 1
-    #     phy.profile_outputs.MODEM_CTRL6_PSTIMABORT0.override = 1
-    #     phy.profile_outputs.MODEM_CTRL6_PSTIMABORT1.override = 1
-    #     phy.profile_outputs.MODEM_CTRL6_PSTIMABORT2.override = 1
-    #     phy.profile_outputs.MODEM_CTRL6_RXBRCALCDIS.override = 1
-    #     phy.profile_outputs.MODEM_CTRL6_TDREW.override = 64
-    #     phy.profile_outputs.MODEM_INTAFC_FOEPREAVG0.override = 1
-    #     phy.profile_outputs.MODEM_INTAFC_FOEPREAVG1.override = 3
-    #     phy.profile_outputs.MODEM_INTAFC_FOEPREAVG2.override = 5
-    #     phy.profile_outputs.MODEM_INTAFC_FOEPREAVG3.override = 5
-    #     phy.profile_outputs.MODEM_TIMING_OFFSUBDEN.override = 5
-    #     phy.profile_outputs.MODEM_TIMING_OFFSUBNUM.override = 12
-    #     phy.profile_outputs.MODEM_TIMING_TIMTHRESH.override = 80
-    #     phy.profile_outputs.MODEM_TIMING_TIMSEQSYNC.override = 1
-    #     phy.profile_outputs.MODEM_PRE_TXBASES.override = 7
-    #
-    #     # Enables Clock gating to reduce current consumption
-    #     phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 0x1E00  # 9,10,11,12
 
 
 
@@ -405,7 +293,7 @@ class PHYS_connect(IPhy):
         phy = self._makePhy(model, model.profiles.Connect, phy_description='DSSS 250', readable_name="Connect 915MHz OQPSK 2Mcps 250kbps", phy_name=phy_name)
 
         self.Connect_base(phy, model)
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.rx_xtal_error_ppm.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
         phy.profile_inputs.syncword_0.value =  long(167)
@@ -437,10 +325,8 @@ class PHYS_connect(IPhy):
         phy.profile_inputs.timing_detection_threshold.value = 65
         phy.profile_inputs.timing_sample_threshold.value = 0
         if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
-            # Series 1
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_2520KHz
         else:
-            # Series 2
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_2500KHz
         phy.profile_inputs.agc_power_target.value = -6
         phy.profile_inputs.rssi_period.value = 8
@@ -472,10 +358,8 @@ class PHYS_connect(IPhy):
         phy.profile_inputs.manchester_mapping.value = model.vars.manchester_mapping.var_enum.Default
         phy.profile_inputs.modulation_type.value = model.vars.modulation_type.var_enum.OQPSK
         if model.part_family.lower() in ['dumbo', 'jumbo', 'nerio', 'nixi', 'unit_test_part']:
-            # Series 1
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_2520KHz
         else:
-            # Series 2
             phy.profile_inputs.pll_bandwidth_tx.value = model.vars.pll_bandwidth_tx.var_enum.BW_2500KHz
         phy.profile_inputs.preamble_length.value = 32
         phy.profile_inputs.preamble_pattern.value = 0
@@ -492,6 +376,6 @@ class PHYS_connect(IPhy):
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
         phy.profile_inputs.white_poly.value = model.vars.white_poly.var_enum.NONE
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
 
         return phy

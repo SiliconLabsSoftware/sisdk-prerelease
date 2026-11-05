@@ -10,9 +10,6 @@ import math
 
 class CALC_Shaping_ocelot(CALC_Shaping_lynx):
 
-    # In mode 1 and 2, I think, the calculator only generates filters with up to 8 coefficients anyway so no need to
-    # update the gain calculations for those cases. If, however, we change shaping filter coefficient calculation we
-    # might need to update gain calculations as well. -- Guner
 
     def buildVariables(self, model):
         super().buildVariables(model)
@@ -20,7 +17,6 @@ class CALC_Shaping_ocelot(CALC_Shaping_lynx):
                                desc='Number of taps in the shaping filter')
 
     def calc_shaping_filter_gain_actual(self, model):
-        # The Ocelot shaping filter registers have changed in the register map, so need to override this function
 
         shaping_filter_mode = model.vars.MODEM_CTRL0_SHAPING.value
         sf = self.get_shaping_filter(model)
@@ -47,7 +43,6 @@ class CALC_Shaping_ocelot(CALC_Shaping_lynx):
         model.vars.shaping_filter_gain_actual.value = int(shaping_filter_gain)
 
     def get_shaping_filter(self, model):
-        # Construct shaping filter from register settings
 
         shaping_filter_mode = model.vars.MODEM_CTRL0_SHAPING.value
         c0 = self._covert_twos_complement_to_signed(model.vars.MODEM_SHAPING0_COEFF0.value, model.vars.MODEM_SHAPING0_COEFF1.get_bit_width())
@@ -150,7 +145,6 @@ class CALC_Shaping_ocelot(CALC_Shaping_lynx):
         model.vars.shaping_filter_taps.value = taps
 
     def calc_max_available_filter_taps(self, model):
-        # this is fixed for a family of parts
         model.vars.max_filter_taps.value = 64
 
     def write_coeff_registers(self, model, coeff, shaping):
@@ -223,16 +217,12 @@ class CALC_Shaping_ocelot(CALC_Shaping_lynx):
         self._reg_write(model.vars.MODEM_CTRL0_SHAPING, shaping)
 
     def get_coeff_ceil(self, model):
-        # all filter taps are 8 bit signed registers
         max_filter_taps = model.vars.max_filter_taps.value
         coeff_ceil = np.empty(max_filter_taps)
-        # all filter taps are 8 bit signed registers
         coeff_ceil.fill((2 ** (8 - 1)) - 1)
         return coeff_ceil
 
     def floor_filter_coefficients(self, h):
-        # return non negative h
-        # for now not allowing any negative values until we are working on MCUW_RADIO_CFG-2007
         return h
 
     def root_raised_cosine_filter(self, model):
@@ -242,7 +232,6 @@ class CALC_Shaping_ocelot(CALC_Shaping_lynx):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # for raised cosine pulse shapes pulse_shape_parameter holds roll off factor value
         bt = model.vars.shaping_filter_param.value
         max_filter_taps = model.vars.max_filter_taps.value
 
@@ -253,14 +242,10 @@ class CALC_Shaping_ocelot(CALC_Shaping_lynx):
             bt = 0.0
 
         pi = math.pi
-        # create empty coefficient array
         h = [0.0] * max_filter_taps
-        # for each coeff to be calculated
         for x in tinynumpy.arange(0, max_filter_taps):
-            # get time index
             x = int(x)
             t = (x - int(max_filter_taps/2)) / 8.0
-            # handle special cases and calculate the coeffs
             if t == 0.0:
                 h[x] = (1-bt)+4*bt/pi
             elif bt != 0 and t == 1/(4*bt):
@@ -270,7 +255,6 @@ class CALC_Shaping_ocelot(CALC_Shaping_lynx):
             else:
                 h[x] = (math.sin(pi*t*(1-bt)) + 4*bt*t*math.cos(pi*t*(1+bt)))/( pi*t*(1-(4*bt*t)*(4*bt*t)) )
 
-        # scale so that the peak tap is 127
         peak = max(h)
         for x in tinynumpy.arange(0, max_filter_taps):
             x = int(x)
@@ -298,22 +282,13 @@ class CALC_Shaping_ocelot(CALC_Shaping_lynx):
         elif shaping_filter_option.value == model.vars.shaping_filter.var_enum.Gaussian.value:
             calc_coeff_error = True
             scaling_fac = 127
-            # The loop here uses "check_coeff_write_error" to make sure we are not writing any filter tap coefficient
-            # with a value greater than its bit-width capacity. If "check_coeff_write_error" returns True, we scale the
-            # coefficients down and keep scaling the coefficients down untill all coefficients fit the respective
-            # signed bit-wdith fields.
-            # This is to handle the special case of Nerio, Nixi and Jumbo where not all filter taps coefficients are
-            # 8-bit signed registers
             while calc_coeff_error:
-                # adding an exit condition
                 if scaling_fac < 0:
                     c = np.zeros(max_filter_taps)
                     shaping = 3
                 else:
                     c, shaping = self.gaussian_shaping_filter(model, scaling_fac)
-                    # Create temporary coeff
                     temp_coeff = np.zeros(max_filter_taps)
-                    # read values in temporary coffs
                     temp_coeff = self.update_coeffs(model, c, temp_coeff)
                     calc_coeff_error = self.check_coeff_write_error(model, temp_coeff)
                     scaling_fac = scaling_fac - 10
@@ -321,7 +296,6 @@ class CALC_Shaping_ocelot(CALC_Shaping_lynx):
             coeff = self.update_coeffs(model, c, coeff)
 
         elif shaping_filter_option.value == model.vars.shaping_filter.var_enum.Custom_OQPSK.value:
-            # Not sure what filter this is
             coeff[0] = coeff[1] = 1
             coeff[2] = 16
             coeff[3] = 48

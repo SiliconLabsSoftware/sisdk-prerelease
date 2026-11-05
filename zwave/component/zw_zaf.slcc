@@ -6,6 +6,10 @@ description: >
   Framework. This component is mandatory for all applications. The Product ID can be defined, with
   a default value of 0 which is invalid in the context of Silicon Labs Z-Wave applications. The
   bootloader upgrade can be switched on or off. The icon type and security keys can also be defined.
+documentation:
+  docset: z-wave
+  document: z-wave-plus-v2-app-framework
+
 package: zwave
 quality: production
 metadata:

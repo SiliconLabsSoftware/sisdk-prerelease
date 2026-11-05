@@ -29,8 +29,6 @@ class FilterChainLuPlus(object):
             chBW = modem_calc.demodulator.Ch_Fil_Bw
             mod_ook = enook(modem_calc.inputs.API_modulation_type)
             OSRtune = modem_calc.inputs.API_OSRtune
-        #print('FilterChainLUPlus: highband = {:2d}, Rsymb = {:3f}ksps'.format(highband, Rsymb/1e3 ) )
-        #print('API_fc = {:.3f}MHz, Rsymb = {:.3f}ksps'.format( modem_calc.inputs.API_fc/1e6, Rsymb/1e3 ) )
 
         if (mod_ook==1) : # require ndec0>0, => OSR_rx_CH > 2*OOKminOSR=14
             OSR_rx_CH = max( (4*chBW*1000/Rsymb), modem_calc.demodulator.OOKminOSR*2 ) # set target > 14
@@ -47,22 +45,18 @@ class FilterChainLuPlus(object):
             idx = max( tableLU.index(True) - 1, 0)    # limit min to decim rate = 1 
     
         self.new_idx = idx          # index used in final decim ratio if OSRtune==0
-        #OSR_chfil_i = OSR_after_dec8/decim_table[idx]    # init OSR at chfil
     
     
-        # move decimation ratio up or down based on API_OSRtune (in FSK)
         if (not(mod_ook) and OSRtune!=0) : # FSK with non-default OSRtune
             self.new_idx = idx - OSRtune # new dec ratio stepped up/down
             if (OSRtune>0) : # step up OSR: always give a solution even if BW too big
                 if (self.new_idx <0) :             # absolute boundary of min decim-ratio
                     self.new_idx = 0
                     self.newOSRt = idx - self.new_idx    # true OSRtune applied
-                    #modem_calc.warning2log += '# No room to step up OSR by {:d} steps,  instead OSRtune={:d} steps is applied\n'.format(API_OSRtune, newOSRt)
             else : # API_OSRtune<0
                 if (self.new_idx>decimLEN-1) :      # absolute boundary of max decim-ratio
                     self.new_idx = decimLEN - 1
                     self.newOSRt = idx - self.new_idx    # true OSRtune applied
-                    #modem_calc.warning2log += '# No room to step up OSR by {:d} steps,  instead OSRtune={:d} steps is applied\n'.format(API_OSRtune, newOSRt)
                 OSR_chfil = OSR_after_dec8/self.decim_table[self.new_idx]   # OSR at chfil
                 if (OSR_chfil<7) :
                     self.newOSRt = idx - self.new_idx 
@@ -76,7 +70,6 @@ class FilterChainLuPlus(object):
         self.filter_k1 = 1
         self.decim_ratio_iqcal = 1
 
-        # run another time for IQ_CAL mode, save decim-ratio_iqcal
         if (modem_calc.IQ_CAL_setting==0) :
             self._init_newOSRt(modem_calc, 0, 1)
             self.decim_ratio_iqcal = self.decim_table[self.new_idx]
@@ -84,8 +77,6 @@ class FilterChainLuPlus(object):
         self._init_newOSRt(modem_calc, modem_calc.inputs.API_OSRtune, 0)
         prog_decim_rate = self.decim_table[self.new_idx]
         logd = math.log(prog_decim_rate, 2)
-        # determine register values from decim-ratio.  stick to old one, always use
-        # 1st poly decim-2 before ndec
         if (math.floor(logd)!=logd) :    # decim-3 is used
             self.pre_dec_val = 3 
             self.nDec = math.log(prog_decim_rate/3, 2)
@@ -97,7 +88,6 @@ class FilterChainLuPlus(object):
                 self.pre_dec_val = 2
                 self.nDec = logd - 1  # >=0
     
-        # determine channel filter index
         BW_norm = modem_calc.demodulator.Ch_Fil_Bw*self.pre_dec_val*2**self.nDec # unit is kHz
     
         tmp = [BW_norm > x for x in modem_calc.demodulator.BW_table]
@@ -105,11 +95,9 @@ class FilterChainLuPlus(object):
             self.filter_k1 = 15 
             if (( modem_calc.demodulator.BW_table[self.filter_k1-1]/BW_norm >1.1 ) and ( self.newOSRt>0 ) ) :
                 modem_calc.warning2log + '# Obtained channel filter bandwidth larger than required, try decrease OSRtune\n'
-                # print(('CALC:input:OSRtune', 'Obtained channel filter bandwidth larger than required, try decrease OSRtune\n'))
         elif ( tmp.index(True)==0 ) :
             self.filter_k1 = 1
             if  ((modem_calc.demodulator.BW_table[self.filter_k1-1]/BW_norm < 0.9 ) and ( self.newOSRt<0 )) :
                 modem_calc.warning2log += '# Obtained channel filter bandwidth less than desired, try increase OSRtune\n'
-                # print('CALC:input:OSRtune Obtained channel filter bandwidth less than desired, try increase OSRtune\n')
         else :
             self.filter_k1 = max( tmp.index(True), 0)

@@ -14,6 +14,8 @@ metadata:
 root_path: platform_core/platform/service/memory_manager
 source:
 - path: hal/sli_memory_manager_retention_control_hal_none.c
+requires:
+- name: log_none
 provides:
 - name: memory_manager_retention_control_hal_none
 template_contribution:

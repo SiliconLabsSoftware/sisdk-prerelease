@@ -1,6 +1,6 @@
 import re
 
-supported_sdid = ['device_sdid_205','device_sdid_215', 'device_sdid_230']
+supported_sdid = ['device_sdid_205', 'device_sdid_215', 'device_sdid_230', 'device_sdid_250']
 
 def check_aox_config_support(provides):
     for sdid in supported_sdid:

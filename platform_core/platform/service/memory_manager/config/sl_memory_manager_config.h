@@ -67,8 +67,8 @@
 // <q SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE> Enables the double free protection for the pool.
 // <i> Setting this configuration to 0 will disable the double free protection for the memory pool. saving ~100 bytes of code.
 // <i> This setting has no effect on the memory pools power aware version.
-// <i> Default: 1
-#define SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE 1
+// <i> Default: 0
+#define SL_MEMORY_MANAGER_POOL_DOUBLE_FREE_PROTECTION_ENABLE 0
 
 // </h>
 

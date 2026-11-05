@@ -1,7 +1,7 @@
 from pyradioconfig.calculator_model_framework.interfaces.itarget import ITarget
 
 
-class target_IC_lion(ITarget):
+class Target_IC_Lion(ITarget):
 
     _targetName = ITarget.IC_str
     _description = ""

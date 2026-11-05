@@ -23,6 +23,7 @@ source:
 provides:
 - name: simple_pwm_led_core
 requires:
+- name: log_none
 - name: status
 - name: hal_generic_timer
 - name: gpio

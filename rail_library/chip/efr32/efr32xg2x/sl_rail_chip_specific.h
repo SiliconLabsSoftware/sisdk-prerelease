@@ -429,7 +429,7 @@ sl_rail_timer_tick_t sl_rail_us_to_timer_ticks(sl_rail_time_t microseconds);
 #ifndef SL_RAIL_RF_PATHS_SUB_GHZ
 #if _SILICON_LABS_32B_SERIES_2_CONFIG == 3
 #define SL_RAIL_RF_PATHS_SUB_GHZ 2
-#elif  _SILICON_LABS_32B_SERIES_2_CONFIG == 5 || _SILICON_LABS_32B_SERIES_2_CONFIG == 10
+#elif  ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10))
 #define SL_RAIL_RF_PATHS_SUB_GHZ 2
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 8
 #define SL_RAIL_RF_PATHS_SUB_GHZ 1
@@ -708,7 +708,6 @@ struct sl_rail_channel_config_entry_attr {
 #endif //SL_RAIL_SUPPORTS_SUB_GHZ_BAND
 
 #if SL_RAIL_SUPPORTS_OFDM_PA
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 5 || _SILICON_LABS_32B_SERIES_2_CONFIG == 10
 /**
  * The maximum valid value for the \ref sl_rail_txpower_level_t when in \ref
  * SL_RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE mode on EFR32xG25.
@@ -723,7 +722,6 @@ struct sl_rail_channel_config_entry_attr {
  * SL_RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE mode on EFR32xG25.
  */
 #define SLI_RAIL_OFDM_PA_MIN      0U
-#endif
 
 /**
  * The maximum valid value for the \ref sli_rail_tx_power_level_t when in \ref

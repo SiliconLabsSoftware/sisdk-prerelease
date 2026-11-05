@@ -108,7 +108,11 @@ sl_status_t sl_se_ecdh_compute_shared_secret(sl_se_command_context_t *cmd_ctx,
     }
   }
   #else
-  if (key_in_priv->type == SL_SE_KEY_TYPE_ECC_X25519) {
+  if (key_in_priv->type == SL_SE_KEY_TYPE_ECC_X25519
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+      || key_in_priv->type == SL_SE_KEY_TYPE_ECC_X448
+#endif
+  ) {
     if (key_pubkey_size > key_out->storage.location.buffer.size) {
       return SL_STATUS_INVALID_PARAMETER;
     }
@@ -117,7 +121,7 @@ sl_status_t sl_se_ecdh_compute_shared_secret(sl_se_command_context_t *cmd_ctx,
       return SL_STATUS_INVALID_PARAMETER;
     }
   }
-  #endif
+#endif
 
   // Output of DH must be in RAW format
   if (key_out->type != SL_SE_KEY_TYPE_SYMMETRIC) {
@@ -160,7 +164,7 @@ sl_status_t sl_se_ecdh_compute_shared_secret(sl_se_command_context_t *cmd_ctx,
     return status;
   }
 
-  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
   if (key_in_pub->flags & SL_SE_KEY_FLAG_ASYMMETRIC_USES_CUSTOM_DOMAIN) {
     if (key_in_pub->flags & SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PUBLIC_KEY) {
       // If using custom domain, the key buffer stores domain parameters,
@@ -173,7 +177,7 @@ sl_status_t sl_se_ecdh_compute_shared_secret(sl_se_command_context_t *cmd_ctx,
       return SL_STATUS_INVALID_KEY;
     }
   }
-  #endif
+#endif
 
   sli_se_mailbox_command_add_input(&cmd_ctx->command, &pubkey_input_buffer);
 

@@ -64,10 +64,14 @@ static void cpc_task(void *arg)
  * @retval  SL_STATUS_OK    Resources allocated successfully.
  * @retval  Other sl_status_t if error occurred.
  ******************************************************************************/
-static sl_status_t init_kernel(sl_cpc_bus_t *bus)
+static sl_status_t init_kernel(sl_cpc_bus_t *bus, const sl_cpc_bus_config_t *cfg)
 {
   struct sl_cpc_bus_kernel *kernel = &bus->kernel;
   sl_status_t status = SL_STATUS_OK;
+
+  if ((cfg->task_stack_ptr == NULL) || (cfg->task_stack_len == 0U)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
 
   const osMutexAttr_t ep_list_mutex_attr = {
     .attr_bits = osMutexRecursive,
@@ -105,15 +109,13 @@ static sl_status_t init_kernel(sl_cpc_bus_t *bus)
 
   const osThreadAttr_t task_attr = {
     .name = "CPC Bus",
-    .priority = SL_CPC_TASK_PRIORITY,
+    .priority = cfg->task_priority,
+    .stack_mem = cfg->task_stack_ptr,
+    .stack_size = cfg->task_stack_len,
 #if defined(SL_CATALOG_CMSIS_OS_COMMON_PRESENT)
-    .stack_mem = &kernel->thread_stack[0],
-    .stack_size = sizeof(kernel->thread_stack),
     .cb_mem = &kernel->thread_cb[0],
     .cb_size = sizeof(kernel->thread_cb),
 #else
-    .stack_mem = NULL,
-    .stack_size = 0U,
     .cb_mem = NULL,
     .cb_size = 0U,
 #endif // SL_CATALOG_CMSIS_OS_COMMON_PRESENT
@@ -339,7 +341,7 @@ sl_status_t sli_cpc_bus_init(sl_cpc_bus_t *bus, const sl_cpc_bus_config_t *cfg, 
   bus->drv_ops = drv_ops;
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
-  status = init_kernel(bus);
+  status = init_kernel(bus, cfg);
   if (status != SL_STATUS_OK) {
     goto exit;
   }

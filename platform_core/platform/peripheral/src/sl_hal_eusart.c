@@ -29,12 +29,15 @@
  ******************************************************************************/
 
 #include "sl_hal_eusart.h"
+#include "sl_log_helper.h"
 #if defined(EUART_PRESENT) || defined(EUSART_PRESENT)
 
 #if defined(SL_HAL_EUSART_PRS_SUPPORTED)
 #include "sl_hal_prs.h"
 #endif // SL_HAL_EUSART_PRS_SUPPORTED
 #include <stddef.h>
+
+
 
 /*******************************************************************************
  **************************   LOCAL VARIABLES   ********************************
@@ -104,16 +107,16 @@ void sl_hal_eusart_init_uart_hf(EUSART_TypeDef *eusart,
                                 const sl_hal_eusart_uart_init_t *uart_init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
   // Init structure must be provided.
-  EFM_ASSERT(uart_init);
+  SL_LOG_DEBUG_ASSERT(uart_init);
 
   // Assert features specific to HF.
   // The oversampling must not be disabled when using a high frequency clock.
-  EFM_ASSERT(uart_init->oversampling != SL_HAL_EUSART_OVS_0);
+  SL_LOG_DEBUG_ASSERT(uart_init->oversampling != SL_HAL_EUSART_OVS_0);
 
   // Uart mode only supports up to 9 databits frame.
-  EFM_ASSERT(uart_init->data_bits <= SL_HAL_EUSART_DATA_BITS_9);
+  SL_LOG_DEBUG_ASSERT(uart_init->data_bits <= SL_HAL_EUSART_DATA_BITS_9);
 
   // Initialize EUSART with common features to HF and LF.
   eusart_async_init_common(eusart, uart_init);
@@ -126,18 +129,18 @@ void sl_hal_eusart_init_uart_lf(EUSART_TypeDef *eusart,
                                 const sl_hal_eusart_uart_init_t *uart_init)
 {
   // Make sure the module exists and is Low frequency capable.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart) && EUSART_EM2_CAPABLE(EUSART_NUM(eusart)));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart) && EUSART_EM2_CAPABLE(EUSART_NUM(eusart)));
   // Init structure must be provided.
-  EFM_ASSERT(uart_init);
+  SL_LOG_DEBUG_ASSERT(uart_init);
 
   // Uart mode only supports up to 9 databits frame.
-  EFM_ASSERT(uart_init->data_bits <= SL_HAL_EUSART_DATA_BITS_9);
+  SL_LOG_DEBUG_ASSERT(uart_init->data_bits <= SL_HAL_EUSART_DATA_BITS_9);
   // The oversampling must be disabled when using a low frequency clock.
-  EFM_ASSERT(uart_init->oversampling == SL_HAL_EUSART_OVS_0);
+  SL_LOG_DEBUG_ASSERT(uart_init->oversampling == SL_HAL_EUSART_OVS_0);
   // The Majority Vote must be disabled when using a low frequency clock.
-  EFM_ASSERT(uart_init->majority_vote == SL_HAL_EUSART_MAJORITY_VOTE_DISABLE);
+  SL_LOG_DEBUG_ASSERT(uart_init->majority_vote == SL_HAL_EUSART_MAJORITY_VOTE_DISABLE);
   // Number of stop bits can only be 1 or 2 in LF.
-  EFM_ASSERT((uart_init->stop_bits == SL_HAL_EUSART_STOP_BITS_1) || (uart_init->stop_bits == SL_HAL_EUSART_STOP_BITS_2));
+  SL_LOG_DEBUG_ASSERT((uart_init->stop_bits == SL_HAL_EUSART_STOP_BITS_1) || (uart_init->stop_bits == SL_HAL_EUSART_STOP_BITS_2));
 
   // Initialize EUSART with common features to HF and LF.
   eusart_async_init_common(eusart, uart_init);
@@ -151,19 +154,19 @@ void sl_hal_eusart_init_irda(EUSART_TypeDef *eusart,
                              const sl_hal_eusart_irda_init_t *irda_init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
   // Init structure must be provided.
-  EFM_ASSERT(irda_init);
+  SL_LOG_DEBUG_ASSERT(irda_init);
 
   if (irda_init->irda_mode == SL_HAL_EUSART_IRDA_MODE_LF) {
     // Validate the low frequency capability of the EUSART instance.
-    EFM_ASSERT(EUSART_EM2_CAPABLE(EUSART_NUM(eusart)));
+    SL_LOG_DEBUG_ASSERT(EUSART_EM2_CAPABLE(EUSART_NUM(eusart)));
     // The oversampling must be disabled when using a low frequency clock.
-    EFM_ASSERT(irda_init->eusart_init.oversampling == SL_HAL_EUSART_OVS_0);
+    SL_LOG_DEBUG_ASSERT(irda_init->eusart_init.oversampling == SL_HAL_EUSART_OVS_0);
     // Number of stop bits can only be 1 or 2 in LF.
-    EFM_ASSERT((irda_init->eusart_init.stop_bits == SL_HAL_EUSART_STOP_BITS_1) || (irda_init->eusart_init.stop_bits == SL_HAL_EUSART_STOP_BITS_2));
+    SL_LOG_DEBUG_ASSERT((irda_init->eusart_init.stop_bits == SL_HAL_EUSART_STOP_BITS_1) || (irda_init->eusart_init.stop_bits == SL_HAL_EUSART_STOP_BITS_2));
   } else {
-    EFM_ASSERT(irda_init->eusart_init.oversampling != SL_HAL_EUSART_OVS_0);
+    SL_LOG_DEBUG_ASSERT(irda_init->eusart_init.oversampling != SL_HAL_EUSART_OVS_0);
   }
 
   // Initialize EUSART with common features to HF and LF.
@@ -195,24 +198,24 @@ void sl_hal_eusart_init_dali(EUSART_TypeDef *eusart,
                              const sl_hal_eusart_dali_init_t *dali_init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
   // Init structure must be provided.
-  EFM_ASSERT(dali_init);
+  SL_LOG_DEBUG_ASSERT(dali_init);
 
   if (dali_init->eusart_init.loopback_enable) {
     // If LOOPBK in CFG0 is set to 1 in order to do loopback testing for DALI,
     // then in this case DALIRXENDT should be set to 1 and DALIRXDATABITS should
     // be set the same as DALITXDATABITS.
-    EFM_ASSERT(dali_init->tx_data_bits == dali_init->rx_data_bits);
+    SL_LOG_DEBUG_ASSERT(dali_init->tx_data_bits == dali_init->rx_data_bits);
   }
 
   if (dali_init->dali_low_frequency_enable) {
     // Validate the low frequency capability of the EUSART instance.
-    EFM_ASSERT(EUSART_EM2_CAPABLE(EUSART_NUM(eusart)));
+    SL_LOG_DEBUG_ASSERT(EUSART_EM2_CAPABLE(EUSART_NUM(eusart)));
     // The oversampling must be disabled when using a low frequency clock.
-    EFM_ASSERT(dali_init->eusart_init.oversampling == SL_HAL_EUSART_OVS_0);
+    SL_LOG_DEBUG_ASSERT(dali_init->eusart_init.oversampling == SL_HAL_EUSART_OVS_0);
   } else {
-    EFM_ASSERT(dali_init->eusart_init.oversampling != SL_HAL_EUSART_OVS_0);
+    SL_LOG_DEBUG_ASSERT(dali_init->eusart_init.oversampling != SL_HAL_EUSART_OVS_0);
   }
 
   // Initialize EUSART with common features to HF and LF.
@@ -260,9 +263,9 @@ void sl_hal_eusart_init_spi(EUSART_TypeDef *eusart,
                             const sl_hal_eusart_spi_init_t *spi_init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
   // Init structure must be provided.
-  EFM_ASSERT(spi_init);
+  SL_LOG_DEBUG_ASSERT(spi_init);
 
   eusart_sync_init_common(eusart, spi_init);
 }
@@ -277,20 +280,20 @@ void sl_hal_eusart_init_smartcard(EUSART_TypeDef *eusart,
                                   const sl_hal_eusart_smartcard_init_t *smartcard_init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
   // Init structure must be provided.
-  EFM_ASSERT(smartcard_init);
+  SL_LOG_DEBUG_ASSERT(smartcard_init);
 
   // Smart Card mode is only available in asynchronous mode (SYNC = 0)
   // This is handled by the eusart_async_init_common() function
 
   if (smartcard_init->eusart_init.oversampling == SL_HAL_EUSART_OVS_0) {
     // Validate the low frequency capability of the EUSART instance.
-    EFM_ASSERT(EUSART_EM2_CAPABLE(EUSART_NUM(eusart)));
+    SL_LOG_DEBUG_ASSERT(EUSART_EM2_CAPABLE(EUSART_NUM(eusart)));
     // Number of stop bits can only be 1 or 2 in LF.
-    EFM_ASSERT((smartcard_init->eusart_init.stop_bits == SL_HAL_EUSART_STOP_BITS_1) || (smartcard_init->eusart_init.stop_bits == SL_HAL_EUSART_STOP_BITS_2));
+    SL_LOG_DEBUG_ASSERT((smartcard_init->eusart_init.stop_bits == SL_HAL_EUSART_STOP_BITS_1) || (smartcard_init->eusart_init.stop_bits == SL_HAL_EUSART_STOP_BITS_2));
   } else {
-    EFM_ASSERT(smartcard_init->eusart_init.oversampling != SL_HAL_EUSART_OVS_0);
+    SL_LOG_DEBUG_ASSERT(smartcard_init->eusart_init.oversampling != SL_HAL_EUSART_OVS_0);
   }
 
   // Initialize EUSART with common features to HF and LF.
@@ -317,9 +320,9 @@ void sl_hal_eusart_init_lin(EUSART_TypeDef *eusart,
                             const sl_hal_eusart_lin_init_t *lin_init)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
   // Init structure must be provided.
-  EFM_ASSERT(lin_init);
+  SL_LOG_DEBUG_ASSERT(lin_init);
 
   // Initialize EUSART with common features to HF and LF.
   eusart_async_init_common(eusart, &lin_init->eusart_init);
@@ -342,7 +345,7 @@ void sl_hal_eusart_init_lin(EUSART_TypeDef *eusart,
 void sl_hal_eusart_reset(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // Properly disable the module
   sl_hal_eusart_disable_tx(eusart);
@@ -446,7 +449,7 @@ void sl_hal_eusart_reset(EUSART_TypeDef *eusart)
 uint16_t sl_hal_eusart_rx(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // If RX watermark has not been configured.
   if ((eusart->CFG1 & _EUSART_CFG1_RXFIW_MASK) == EUSART_CFG1_RXFIW_DEFAULT) {
@@ -476,7 +479,7 @@ uint16_t sl_hal_eusart_rx(EUSART_TypeDef *eusart)
 uint16_t sl_hal_eusart_rx_extended(EUSART_TypeDef *eusart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   while (!(eusart->STATUS & EUSART_STATUS_RXFL)) {
     // Wait for incoming data.
@@ -492,7 +495,7 @@ void sl_hal_eusart_tx(EUSART_TypeDef *eusart,
                       uint16_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   while (!(eusart->STATUS & _EUSART_STATUS_TXFL_MASK)) {
     // Check that transmit FIFO is not full.
@@ -508,7 +511,7 @@ void sl_hal_eusart_tx_extended(EUSART_TypeDef *eusart,
                                uint16_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   while (!(eusart->STATUS & EUSART_STATUS_TXFL)) {
     // Check that transmit FIFO is not full.
@@ -524,7 +527,7 @@ void sl_hal_eusart_tx_extended(EUSART_TypeDef *eusart,
 uint16_t sl_hal_eusart_spi_tx_rx(EUSART_TypeDef *eusart, uint16_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   while (!(eusart->STATUS & EUSART_STATUS_TXFL)) {
     // Check that transmit FIFO is not full.
@@ -547,7 +550,7 @@ void sl_hal_eusart_dali_tx(EUSART_TypeDef *eusart, uint32_t data)
   uint32_t packet;
 
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   while (!(eusart->STATUS & EUSART_STATUS_TXFL)) {
     // Check that transmit FIFO is not full.
@@ -577,7 +580,7 @@ uint32_t sl_hal_eusart_dali_rx(EUSART_TypeDef *eusart)
   uint32_t data = 0;
 
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   while (!(eusart->STATUS & EUSART_STATUS_RXFL)) {
     // Wait for incoming data.
@@ -603,10 +606,10 @@ uint32_t sl_hal_eusart_dali_rx(EUSART_TypeDef *eusart)
  ******************************************************************************/
 void sl_hal_eusart_set_lin_response_length(EUSART_TypeDef *eusart, uint8_t length_bytes)
 {
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // The number of bytes for the response must be between 1 and 8.
-  EFM_ASSERT(length_bytes > 0 && length_bytes <= 8);
+  SL_LOG_DEBUG_ASSERT(length_bytes > 0 && length_bytes <= 8);
 
   sl_hal_eusart_wait_sync(eusart, _EUSART_SYNCBUSY_DBYTE_MASK);
 
@@ -622,10 +625,10 @@ void sl_hal_eusart_set_lin_response_length(EUSART_TypeDef *eusart, uint8_t lengt
 void sl_hal_eusart_enable_rx_prs_trigger(EUSART_TypeDef *eusart, uint8_t channel)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // The peripheral must be enabled to configure the PRS trigger.
-  EFM_ASSERT(eusart->EN == EUSART_EN_EN);
+  SL_LOG_DEBUG_ASSERT(eusart->EN == EUSART_EN_EN);
 
   if (0) {
 #if defined(EUART0)
@@ -683,7 +686,7 @@ void sl_hal_eusart_enable_rx_prs_trigger(EUSART_TypeDef *eusart, uint8_t channel
                                         SL_HAL_PRS_CONSUMER_EUSART7_TRIGGER);
 #endif
   } else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
   }
 
   sl_hal_eusart_wait_sync(eusart, EUSART_SYNCBUSY_RXDIS | EUSART_SYNCBUSY_RXTEN);
@@ -696,10 +699,10 @@ void sl_hal_eusart_enable_rx_prs_trigger(EUSART_TypeDef *eusart, uint8_t channel
 void sl_hal_eusart_disable_rx_prs_trigger(EUSART_TypeDef *eusart)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // The peripheral must be enabled to configure the PRS trigger.
-  EFM_ASSERT(eusart->EN == EUSART_EN_EN);
+  SL_LOG_DEBUG_ASSERT(eusart->EN == EUSART_EN_EN);
 
   sl_hal_eusart_wait_sync(eusart, EUSART_SYNCBUSY_RXDIS | EUSART_SYNCBUSY_RXTEN);
   eusart->TRIGCTRL_CLR = EUSART_TRIGCTRL_RXTEN;
@@ -711,10 +714,10 @@ void sl_hal_eusart_disable_rx_prs_trigger(EUSART_TypeDef *eusart)
 void sl_hal_eusart_enable_tx_prs_trigger(EUSART_TypeDef *eusart, uint8_t channel)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // The peripheral must be enabled to configure the PRS trigger.
-  EFM_ASSERT(eusart->EN == EUSART_EN_EN);
+  SL_LOG_DEBUG_ASSERT(eusart->EN == EUSART_EN_EN);
 
   if (0) {
 #if defined(EUART0)
@@ -772,7 +775,7 @@ void sl_hal_eusart_enable_tx_prs_trigger(EUSART_TypeDef *eusart, uint8_t channel
                                         SL_HAL_PRS_CONSUMER_EUSART7_TRIGGER);
 #endif
   } else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
   }
 
   sl_hal_eusart_wait_sync(eusart, EUSART_SYNCBUSY_TXDIS | EUSART_SYNCBUSY_TXEN);
@@ -785,10 +788,10 @@ void sl_hal_eusart_enable_tx_prs_trigger(EUSART_TypeDef *eusart, uint8_t channel
 void sl_hal_eusart_disable_tx_prs_trigger(EUSART_TypeDef *eusart)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_EUSART_REF_VALID(eusart));
 
   // The peripheral must be enabled to configure the PRS trigger.
-  EFM_ASSERT(eusart->EN == EUSART_EN_EN);
+  SL_LOG_DEBUG_ASSERT(eusart->EN == EUSART_EN_EN);
 
   sl_hal_eusart_wait_sync(eusart, EUSART_SYNCBUSY_TXDIS | EUSART_SYNCBUSY_TXEN);
   eusart->TRIGCTRL_CLR = EUSART_TRIGCTRL_TXTEN;
@@ -805,14 +808,14 @@ uint32_t sl_hal_eusart_spi_calculate_clock_div(uint32_t ref_freq,
 {
   uint32_t clkdiv;
   // Prevent dividing by 0.
-  EFM_ASSERT(baudrate);
-  EFM_ASSERT(baudrate <= ref_freq);
+  SL_LOG_DEBUG_ASSERT(baudrate);
+  SL_LOG_DEBUG_ASSERT(baudrate <= ref_freq);
 
   clkdiv = ref_freq / baudrate - 1UL;
 
   // If the desired bit rate requires a divider larger than the Synchronous divider bitfield (CFG2_SDIV),
   // the resulting SPI master bus clock will be undefined because the result will be truncated.
-  EFM_ASSERT(clkdiv <= (_EUSART_CFG2_SDIV_MASK >> _EUSART_CFG2_SDIV_SHIFT));
+  SL_LOG_DEBUG_ASSERT(clkdiv <= (_EUSART_CFG2_SDIV_MASK >> _EUSART_CFG2_SDIV_SHIFT));
 
   return clkdiv;
 }
@@ -828,7 +831,7 @@ uint32_t sl_hal_eusart_uart_calculate_clock_div(uint32_t ref_freq,
   uint8_t oversample = 0;
 
   // Prevent dividing by 0.
-  EFM_ASSERT(baudrate);
+  SL_LOG_DEBUG_ASSERT(baudrate);
 
   // In asynchronous mode (ex: UART)
   oversample = eusart_map_oversampling(ref_freq, baudrate, ovs);
@@ -837,8 +840,8 @@ uint32_t sl_hal_eusart_uart_calculate_clock_div(uint32_t ref_freq,
   clkdiv -= 32;
   clkdiv *= 8;
   // Verify that the resulting clock divider is within limits.
-  EFM_ASSERT(clkdiv <= _EUSART_CLKDIV_MASK);
-  // If the EFM_ASSERT is not enabled, make sure not to write to reserved bits.
+  SL_LOG_DEBUG_ASSERT(clkdiv <= _EUSART_CLKDIV_MASK);
+  // If the SL_LOG_DEBUG_ASSERT is not enabled, make sure not to write to reserved bits.
   clkdiv = (clkdiv & _EUSART_CLKDIV_MASK) >> _EUSART_CLKDIV_DIV_SHIFT;
   return clkdiv;
 }
@@ -857,7 +860,7 @@ uint32_t sl_hal_eusart_uart_calculate_baudrate(uint32_t div,
   uint32_t baudrate;
 
   div <<= _EUSART_CLKDIV_DIV_SHIFT;
-  EFM_ASSERT(div <= _EUSART_CLKDIV_MASK);
+  SL_LOG_DEBUG_ASSERT(div <= _EUSART_CLKDIV_MASK);
 
   switch (ovs) {
     case _EUSART_CFG0_OVS_X16:
@@ -900,7 +903,7 @@ uint32_t sl_hal_eusart_uart_calculate_baudrate(uint32_t div,
 uint32_t sl_hal_eusart_spi_calculate_baudrate(uint32_t div, uint32_t freq)
 {
   // Prevent dividing by 0.
-  EFM_ASSERT(freq);
+  SL_LOG_DEBUG_ASSERT(freq);
 
   return freq / (div + 1);
 }
@@ -1074,7 +1077,7 @@ static void eusart_async_init_common(EUSART_TypeDef *eusart,
       }
 #endif
       else {
-        EFM_ASSERT(false);
+        SL_LOG_DEBUG_ASSERT(false);
       }
 #endif
     }
@@ -1225,7 +1228,7 @@ static void eusart_sync_init_common(EUSART_TypeDef *eusart,
       }
 #endif
       else {
-        EFM_ASSERT(false);
+        SL_LOG_DEBUG_ASSERT(false);
       }
     }
 
@@ -1286,7 +1289,7 @@ static void eusart_sync_init_common(EUSART_TypeDef *eusart,
       }
 #endif
       else {
-        EFM_ASSERT(false);
+        SL_LOG_DEBUG_ASSERT(false);
       }
     }
 #endif // #if defined(SL_HAL_EUSART_PRS_SUPPORTED)
@@ -1308,36 +1311,41 @@ static uint8_t eusart_map_oversampling(uint32_t ref_freq,
                                        sl_hal_eusart_ovs_t ovs)
 {
   uint8_t oversample = 0;
+
+  // Used only by SL_LOG_DEBUG_ASSERT below.
+  (void)ref_freq;
+  (void)baudrate;
+
   // Map oversampling.
   switch (ovs) {
     case SL_HAL_EUSART_OVS_16:
-      EFM_ASSERT(baudrate <= (ref_freq / 16));
+      SL_LOG_DEBUG_ASSERT(baudrate <= (ref_freq / 16));
       oversample = 16;
       break;
 
     case SL_HAL_EUSART_OVS_8:
-      EFM_ASSERT(baudrate <= (ref_freq / 8));
+      SL_LOG_DEBUG_ASSERT(baudrate <= (ref_freq / 8));
       oversample = 8;
       break;
 
     case SL_HAL_EUSART_OVS_6:
-      EFM_ASSERT(baudrate <= (ref_freq / 6));
+      SL_LOG_DEBUG_ASSERT(baudrate <= (ref_freq / 6));
       oversample = 6;
       break;
 
     case SL_HAL_EUSART_OVS_4:
-      EFM_ASSERT(baudrate <= (ref_freq / 4));
+      SL_LOG_DEBUG_ASSERT(baudrate <= (ref_freq / 4));
       oversample = 4;
       break;
 
     case SL_HAL_EUSART_OVS_0:
-      EFM_ASSERT(ref_freq >= (3 * baudrate));
+      SL_LOG_DEBUG_ASSERT(ref_freq >= (3 * baudrate));
       oversample = 1;
       break;
 
     default:
       // Invalid input
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 

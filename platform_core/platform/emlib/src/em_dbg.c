@@ -32,7 +32,7 @@
 
 #if defined(CoreDebug_DHCSR_C_DEBUGEN_Msk)
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "em_msc.h"
@@ -95,7 +95,7 @@ void DBG_SWOEnable(unsigned int location)
   pin = GPIO_SWV_PIN;
 
 #else
-  EFM_ASSERT(location < AFCHANLOC_MAX);
+  SL_LOG_DEBUG_ASSERT(location < AFCHANLOC_MAX);
   #if defined (AF_DBG_SWO_PORT)
   port = AF_DBG_SWO_PORT(location);
   pin  = AF_DBG_SWO_PIN(location);
@@ -110,7 +110,7 @@ void DBG_SWOEnable(unsigned int location)
 
   /* Port/pin location not defined for the device. */
   if ((pin < 0) || (port < 0)) {
-    EFM_ASSERT(0);
+    SL_LOG_DEBUG_ASSERT(0);
     return;
   }
 

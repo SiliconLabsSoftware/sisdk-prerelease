@@ -40,7 +40,7 @@
 extern "C" {
 #endif
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include <stdbool.h>
 #include "sl_enum.h"
 
@@ -650,7 +650,7 @@ void sl_hal_usart_reset(USART_TypeDef *usart);
 __INLINE void sl_hal_usart_tx(USART_TypeDef *usart, uint8_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   while (!(usart->STATUS & USART_STATUS_TXBL)) {
     // Wait for TX buffer to be empty or half full.
@@ -679,7 +679,7 @@ __INLINE void sl_hal_usart_tx(USART_TypeDef *usart, uint8_t data)
 __INLINE uint8_t sl_hal_usart_spi_transfer(USART_TypeDef *usart, uint8_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   while (!(usart->STATUS & USART_STATUS_TXBL)) {
     // Wait for TX buffer to be empty or half full.
@@ -720,7 +720,7 @@ __INLINE uint8_t sl_hal_usart_spi_transfer(USART_TypeDef *usart, uint8_t data)
 __INLINE void sl_hal_usart_tx_double(USART_TypeDef *usart, uint16_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   while (!(usart->STATUS & USART_STATUS_TXBL)) {
     // Wait for TX buffer to be empty or half full.
@@ -762,7 +762,7 @@ __INLINE void sl_hal_usart_tx_double(USART_TypeDef *usart, uint16_t data)
 __INLINE void sl_hal_usart_tx_double_ext(USART_TypeDef *usart, uint32_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   while (!(usart->STATUS & USART_STATUS_TXBL)) {
     // Wait for TX buffer to be empty or half full.
@@ -793,7 +793,7 @@ __INLINE void sl_hal_usart_tx_double_ext(USART_TypeDef *usart, uint32_t data)
 __INLINE void sl_hal_usart_tx_ext(USART_TypeDef *usart, uint16_t data)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   while (!(usart->STATUS & USART_STATUS_TXBL)) {
     // Wait for TX buffer to be empty or half full.
@@ -858,10 +858,10 @@ __INLINE void sl_hal_usart_async_set_clock_div(USART_TypeDef *usart,
                                                uint32_t clock_div)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // Make sure clock divider value is valid.
-  EFM_ASSERT(clock_div <= (_USART_CLKDIV_DIV_MASK >> _USART_CLKDIV_DIV_SHIFT));
+  SL_LOG_DEBUG_ASSERT(clock_div <= (_USART_CLKDIV_DIV_MASK >> _USART_CLKDIV_DIV_SHIFT));
 
   usart->CLKDIV = ((clock_div << _USART_CLKDIV_DIV_SHIFT) & _USART_CLKDIV_DIV_MASK);
 }
@@ -879,10 +879,10 @@ __INLINE void sl_hal_usart_async_set_clock_div(USART_TypeDef *usart,
 __INLINE uint32_t sl_hal_usart_async_get_clock_div(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // Make sure module is enabled
-  EFM_ASSERT(usart->EN & _USART_EN_EN_MASK);
+  SL_LOG_DEBUG_ASSERT(usart->EN & _USART_EN_EN_MASK);
 
   return ((usart->CLKDIV & _USART_CLKDIV_DIV_MASK) >> _USART_CLKDIV_DIV_SHIFT);
 }
@@ -897,7 +897,7 @@ __INLINE uint32_t sl_hal_usart_async_get_clock_div(USART_TypeDef *usart)
 __INLINE void sl_hal_usart_enable(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // Enable peripheral.
   usart->EN_SET = USART_EN_EN;
@@ -913,7 +913,7 @@ __INLINE void sl_hal_usart_enable(USART_TypeDef *usart)
 __INLINE void sl_hal_usart_disable(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   if (usart->EN != USART_EN_EN) {
     return;
@@ -933,7 +933,7 @@ __INLINE void sl_hal_usart_disable(USART_TypeDef *usart)
 __INLINE void sl_hal_usart_enable_rx(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   usart->CMD_SET = USART_CMD_RXEN;
 }
@@ -948,7 +948,7 @@ __INLINE void sl_hal_usart_enable_rx(USART_TypeDef *usart)
 __INLINE void sl_hal_usart_disable_rx(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   usart->CMD_SET = USART_CMD_RXDIS;
 }
@@ -963,7 +963,7 @@ __INLINE void sl_hal_usart_disable_rx(USART_TypeDef *usart)
 __INLINE void sl_hal_usart_enable_tx(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   usart->CMD_SET = USART_CMD_TXEN;
 }
@@ -978,7 +978,7 @@ __INLINE void sl_hal_usart_enable_tx(USART_TypeDef *usart)
 __INLINE void sl_hal_usart_disable_tx(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   usart->CMD_SET = USART_CMD_TXDIS;
 }
@@ -993,10 +993,10 @@ __INLINE void sl_hal_usart_disable_tx(USART_TypeDef *usart)
 __INLINE void sl_hal_usart_clear_rx(USART_TypeDef *usart)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // Make sure receiver is disabled.
-  EFM_ASSERT(((usart->STATUS & _USART_STATUS_RXENS_MASK) >> _USART_STATUS_RXENS_SHIFT) == 0);
+  SL_LOG_DEBUG_ASSERT(((usart->STATUS & _USART_STATUS_RXENS_MASK) >> _USART_STATUS_RXENS_SHIFT) == 0);
 
   usart->CMD_SET = USART_CMD_CLEARRX;
 }
@@ -1011,10 +1011,10 @@ __INLINE void sl_hal_usart_clear_rx(USART_TypeDef *usart)
 __INLINE void sl_hal_usart_clear_tx(USART_TypeDef *usart)
 {
   // Make sure that the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   // Make sure transmitter is disabled.
-  EFM_ASSERT(((usart->STATUS & _USART_STATUS_TXENS_MASK) >> _USART_STATUS_TXENS_SHIFT) == 0);
+  SL_LOG_DEBUG_ASSERT(((usart->STATUS & _USART_STATUS_TXENS_MASK) >> _USART_STATUS_TXENS_SHIFT) == 0);
 
   usart->CMD_SET = USART_CMD_CLEARTX;
 }
@@ -1046,7 +1046,7 @@ __INLINE void sl_hal_usart_clear_tx(USART_TypeDef *usart)
 __INLINE uint8_t sl_hal_usart_rx(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   while (!(usart->STATUS & USART_STATUS_RXDATAV)) {
     // Wait for data available in RX buffer.
@@ -1082,7 +1082,7 @@ __INLINE uint8_t sl_hal_usart_rx(USART_TypeDef *usart)
 __INLINE uint16_t sl_hal_usart_rx_double(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   while (!(usart->STATUS & USART_STATUS_RXFULL)) {
     // Wait for RX buffer to be full.
@@ -1118,7 +1118,7 @@ __INLINE uint16_t sl_hal_usart_rx_double(USART_TypeDef *usart)
 __INLINE uint32_t sl_hal_usart_rx_double_ext(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   while (!(usart->STATUS & USART_STATUS_RXFULL)) {
     // Wait for RX buffer to be full.
@@ -1154,7 +1154,7 @@ __INLINE uint32_t sl_hal_usart_rx_double_ext(USART_TypeDef *usart)
 __INLINE uint16_t sl_hal_usart_rx_ext(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   while (!(usart->STATUS & USART_STATUS_RXDATAV)) {
     // Wait for data available in RX buffer.
@@ -1194,7 +1194,7 @@ __INLINE uint16_t sl_hal_usart_rx_ext(USART_TypeDef *usart)
 __INLINE uint8_t sl_hal_usart_rx_data_get(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   return (uint8_t)usart->RXDATA;
 }
@@ -1234,7 +1234,7 @@ __INLINE uint8_t sl_hal_usart_rx_data_get(USART_TypeDef *usart)
 __INLINE uint16_t sl_hal_usart_rx_double_get(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   return (uint16_t)usart->RXDOUBLE;
 }
@@ -1272,7 +1272,7 @@ __INLINE uint16_t sl_hal_usart_rx_double_get(USART_TypeDef *usart)
 __INLINE uint32_t sl_hal_usart_rx_double_x_get(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   return usart->RXDOUBLEX;
 }
@@ -1309,7 +1309,7 @@ __INLINE uint32_t sl_hal_usart_rx_double_x_get(USART_TypeDef *usart)
 __INLINE uint16_t sl_hal_usart_rx_data_x_get(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   return (uint16_t)usart->RXDATAX;
 }
@@ -1329,7 +1329,7 @@ __INLINE uint16_t sl_hal_usart_rx_data_x_get(USART_TypeDef *usart)
 __INLINE void sl_hal_usart_clear_interrupts(USART_TypeDef *usart, uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   usart->IF_CLR = flags;
 }
@@ -1349,7 +1349,7 @@ __INLINE void sl_hal_usart_clear_interrupts(USART_TypeDef *usart, uint32_t flags
 __INLINE void sl_hal_usart_disable_interrupts(USART_TypeDef *usart, uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   usart->IEN_CLR = flags;
 }
@@ -1374,7 +1374,7 @@ __INLINE void sl_hal_usart_disable_interrupts(USART_TypeDef *usart, uint32_t fla
 __INLINE void sl_hal_usart_enable_interrupts(USART_TypeDef *usart, uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   usart->IEN_SET = flags;
 }
@@ -1396,7 +1396,7 @@ __INLINE void sl_hal_usart_enable_interrupts(USART_TypeDef *usart, uint32_t flag
 __INLINE uint32_t sl_hal_usart_get_pending_interrupts(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   return usart->IF;
 }
@@ -1415,7 +1415,7 @@ __INLINE uint32_t sl_hal_usart_get_pending_interrupts(USART_TypeDef *usart)
 __INLINE uint32_t sl_hal_usart_get_enabled_interrupts(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   return usart->IEN;
 }
@@ -1441,7 +1441,7 @@ __INLINE uint32_t sl_hal_usart_get_enabled_interrupts(USART_TypeDef *usart)
 __INLINE uint32_t sl_hal_usart_get_enabled_pending_interrupts(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   uint32_t ien;
 
@@ -1468,7 +1468,7 @@ __INLINE uint32_t sl_hal_usart_get_enabled_pending_interrupts(USART_TypeDef *usa
 __INLINE void sl_hal_usart_set_interrupts(USART_TypeDef *usart, uint32_t flags)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   usart->IF_SET = flags;
 }
@@ -1486,7 +1486,7 @@ __INLINE void sl_hal_usart_set_interrupts(USART_TypeDef *usart, uint32_t flags)
 __INLINE uint32_t sl_hal_usart_get_status(USART_TypeDef *usart)
 {
   // Make sure the module exists on the selected chip.
-  EFM_ASSERT(SL_HAL_USART_REF_VALID(usart));
+  SL_LOG_DEBUG_ASSERT(SL_HAL_USART_REF_VALID(usart));
 
   return usart->STATUS;
 }

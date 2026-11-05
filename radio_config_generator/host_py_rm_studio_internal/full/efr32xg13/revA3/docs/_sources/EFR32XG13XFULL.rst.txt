@@ -1,0 +1,6 @@
+
+.. toctree::
+    :maxdepth: 3
+
+.. automodule:: host_py_rm_studio_internal.full.efr32xg13.revA3
+

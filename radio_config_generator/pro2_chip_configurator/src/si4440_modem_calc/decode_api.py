@@ -71,7 +71,6 @@ Fdev is defined as inner deviation
     <---------Fdev--------> <---------Fdev------->
 '''
 def get_df(API_modulation_type, API_Fdev):
-    # API_Fdev unit is Hz, 19bit
     if (en4gfsk(API_modulation_type)) :
         df = API_Fdev*3     # in Hz, fsk outer deviation, 21-bit
     elif(enook(API_modulation_type)) :

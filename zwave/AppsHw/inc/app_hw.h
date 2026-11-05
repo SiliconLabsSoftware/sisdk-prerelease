@@ -8,6 +8,13 @@
 #define APP_HW_H_
 
 /**
+ * @addtogroup Apps
+ * @{
+ * @addtogroup AppsHw Application Hardware Abstraction
+ * @{
+ */
+
+/**
  * Initialize hardware modules specific to a given z-wave application.
  *
  * @note Each application/port combination MUST implement this function
@@ -20,5 +27,10 @@ extern void app_hw_init(void);
  * @note Each application/port combination CAN implement this function
  */
 void app_hw_deep_sleep_wakeup_handler(void);
+
+/**
+ * @}
+ * @}
+ */
 
 #endif /* APP_HW_H_ */

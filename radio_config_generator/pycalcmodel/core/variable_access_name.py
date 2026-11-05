@@ -1,7 +1,6 @@
 
 __all__ = [ 'VariableAccess' ]
 
-# Singleton object
 
 class VariableAccess(object):
     class __OnlyOne:

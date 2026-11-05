@@ -389,6 +389,10 @@ RAILModel:
                                 isPtr: True
                               - name: trecsPreBitsToSync
                                 dataType: FieldDataType.UINT32_T
+                              - name: preambleDurationUs
+                                dataType: FieldDataType.UINT32_T
+                              - name: syncwordDurationUs
+                                dataType: FieldDataType.UINT32_T
 
             - RAILModelObjectArray:
                 name: modemConfigEntries

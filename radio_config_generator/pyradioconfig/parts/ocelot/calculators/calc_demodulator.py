@@ -17,11 +17,7 @@ from pyradioconfig.calculator_model_framework.Utils.cache_flags import is_advanc
 
 _ADVANCED_CACHE_EN = is_advanced_cache_enabled()
 
-#This file contains calculations related to the digital signal path, including ADC clocking, decimators, SRCs, channel filter, datafilter, digital mixer, and baud rate
 
-# Module-level result cache for return_ksi2_ksi3_calc — keyed on all DSP inputs.
-# Avoids re-running expensive scipy.signal operations (kaiser/firwin/resample_poly)
-# when multiple PHYs share the same channel-filter + shaping-filter configuration.
 _KSI_CALC_CACHE_MAXSIZE = 1024
 _ksi_calc_cache = OrderedDict()
 
@@ -31,7 +27,6 @@ def _ksi_cache_get(key):
         return None
     cached = _ksi_calc_cache.get(key)
     if cached is not None:
-        # Mark as recently used.
         _ksi_calc_cache.move_to_end(key)
     return cached
 
@@ -43,7 +38,6 @@ def _ksi_cache_put(key, value):
         _ksi_calc_cache.move_to_end(key)
     _ksi_calc_cache[key] = value
 
-    # Evict least-recently-used entry when at capacity.
     if len(_ksi_calc_cache) > _KSI_CALC_CACHE_MAXSIZE:
         _ksi_calc_cache.popitem(last=False)
 
@@ -53,15 +47,11 @@ class CALC_Demodulator_ocelot(ICalculator):
     chf_required_clks_per_sample = 4
 
     def buildVariables(self, model):
-        #TODO: Clean this up and consolidate model variables
-        #A lot of code here for now, as we changed the CalcManager to not run Commmon code in Ocelot (use only inheritance)
 
-        #Build variables from Lynx
         calc_demod_lynx_obj = CALC_Demodulator_lynx()
         calc_demod_lynx_obj.buildVariables(model, add_demod_rate_var=False)
         self._add_demod_rate_variable(model)
 
-        #New variables
         self._addModelVariable(model, 'adc_clock_mode', Enum, ModelVariableFormat.DECIMAL)
         model.vars.adc_clock_mode.var_enum = CreateModelVariableEnum(
             enum_name = 'AdcClockModeEnum',
@@ -149,21 +139,11 @@ class CALC_Demodulator_ocelot(ICalculator):
 
     def return_solution(self, model, demod_select):
 
-        # Check if we have a solution for OSR, DEC0, and DEC1
         [target_osr, dec0, dec1, min_osr, max_osr] = self.return_osr_dec0_dec1(model, demod_select)
 
-        # If we have selected TRECS but did not find a solution with the above line try to find a solution
-        # with relaxed SRC2 limits (SRC2 > 0.55 instead of SRC2 > 0.8)
-        # FIXME: once we are comfortable with the limit at 0.55 we might want to make this the general limit and remove this call
 
         is_trecs = demod_select == model.vars.demod_select.var_enum.TRECS_SLICER or demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI
 
-        # is_vcodiv_high_bw widens the src2 limits for PHYs that would be affected by IPMCUSRW_876
-        # The issue occurs when the filter chain is in a VCODIV + dec=4,1 configuration. We'll want to constrain
-        # the filter to go to the next decimation factor (likely 3,2) and use fractional interpolation on the SRC2.
-        # We can't use dec0_actual, dec1_actual because those are the variables we are solving for
-        # instead, base the decision on if the bandwidth is in the range of what would use dec=4,1.
-        # the final check is handled by _channel_filter_clocks_valid
         bandwidth_hz_threshold = model.vars.adc_freq_actual.value / (8 * 4 * 1) * 0.2
         is_vcodiv_high_bw = model.vars.adc_clock_mode.value == model.vars.adc_clock_mode.var_enum.VCODIV and \
                             model.vars.bandwidth_hz.value > bandwidth_hz_threshold
@@ -172,13 +152,10 @@ class CALC_Demodulator_ocelot(ICalculator):
         if (is_trecs or is_vcodiv_high_bw) and no_solution:
             [target_osr, dec0, dec1, min_osr, max_osr] = self.return_osr_dec0_dec1(model, demod_select, relaxsrc2=True)
 
-        # If in TRECS SLICER mode we have one more chance to find a working solution this time with the remodulation
-        # path enabled.
         if demod_select == model.vars.demod_select.var_enum.TRECS_SLICER and (
                 target_osr == 0 or target_osr > max_osr):
             [target_osr, dec0, dec1, min_osr, max_osr] = self.return_osr_dec0_dec1(model, demod_select, withremod=True)
 
-        # return solution if we have found one
         return target_osr, dec0, dec1, min_osr, max_osr
 
     def calc_demod_sel(self, model):
@@ -207,12 +184,10 @@ class CALC_Demodulator_ocelot(ICalculator):
             [target_osr, dec0, dec1, min_osr, max_osr] = self.return_osr_dec0_dec1(model, demod_select)
 
         else:
-            # choose demod_select based on modulation and demod priority
             if (modtype == model.vars.modulation_type.var_enum.OOK) or \
                     (modtype==model.vars.modulation_type.var_enum.ASK):
                 demod_select = model.vars.demod_select.var_enum.BCR
                 [target_osr,dec0,dec1,min_osr,max_osr] = self.return_osr_dec0_dec1(model,demod_select)
-                # TODO: Is there a case where osr < 7
 
             elif (modtype == model.vars.modulation_type.var_enum.OQPSK):
                 if is_long_range:
@@ -235,7 +210,6 @@ class CALC_Demodulator_ocelot(ICalculator):
             elif (modtype == model.vars.modulation_type.var_enum.FSK2 or \
                     modtype == model.vars.modulation_type.var_enum.MSK):
 
-                # : for these antdivmode, can only use legacy or coherent demod
                 if antdivmode == model.vars.antdivmode.var_enum.ANTSELFIRST or \
                         antdivmode == model.vars.antdivmode.var_enum.ANTSELCORR or \
                         antdivmode == model.vars.antdivmode.var_enum.ANTSELRSSI:
@@ -248,7 +222,6 @@ class CALC_Demodulator_ocelot(ICalculator):
                     else:
                         if mi < 1.0:
                             if antdivmode == model.vars.antdivmode.var_enum.PHDEMODANTDIV:
-                                # : don't use legacy demod for this anntena diversity mode
                                 demod_select_list = [model.vars.demod_select.var_enum.TRECS_VITERBI,
                                                      model.vars.demod_select.var_enum.BCR]
                             else:
@@ -257,7 +230,6 @@ class CALC_Demodulator_ocelot(ICalculator):
                                                      model.vars.demod_select.var_enum.LEGACY]
                         else:
                             if antdivmode == model.vars.antdivmode.var_enum.PHDEMODANTDIV:
-                                # : don't use legacy demod for this anntena diversity mode
                                 demod_select_list = [model.vars.demod_select.var_enum.TRECS_SLICER,
                                                      model.vars.demod_select.var_enum.BCR]
                             else:
@@ -265,23 +237,18 @@ class CALC_Demodulator_ocelot(ICalculator):
                                                      model.vars.demod_select.var_enum.BCR,
                                                      model.vars.demod_select.var_enum.LEGACY]
 
-                        # loop over demod list and see if we can find a solution
                         for demod_select in demod_select_list:
                             [target_osr, dec0, dec1, min_osr, max_osr] = self.return_solution( model, demod_select)
 
-                            # stop at first solution
                             if target_osr != 0:
                                 break
 
         if target_osr == 0:
             raise CalculationException('WARNING: target_osr=0 in calc_choose_demod()')
 
-        # from https://jira.silabs.com/browse/MCUW_RADIO_CFG-1994
-        # do not support modulation index less than 0.4 for TRECS
         if (demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI \
                 or demod_select == model.vars.demod_select.var_enum.TRECS_SLICER) \
                 and 0.0 < mi < 0.4:
-            # Adding 0.0 < mi for CW PHYs
             LogMgr.Error("ERROR: Modulation indices less than 0.4 not supported for 2FSK on this part")
 
         model.vars.demod_select.value = demod_select
@@ -302,9 +269,7 @@ class CALC_Demodulator_ocelot(ICalculator):
         model.vars.trecs_enabled.value = trecs_enabled
 
     def calc_osr_actual(self,model):
-        #This function calculates the actual OSR based on the ADC rate and decimator/SRC values
 
-        #Load model variables into local variables
         adc_freq_actual = model.vars.adc_freq_actual.value
         dec0_actual = model.vars.dec0_actual.value
         dec1_actual = model.vars.dec1_actual.value
@@ -315,13 +280,10 @@ class CALC_Demodulator_ocelot(ICalculator):
 
         osr_actual = adc_freq_actual * src2_actual / (dec0_actual * dec1_actual * 8 * dec2_actual * bcr_remod_dec * baudrate_actual)
 
-        #Load local variables back into model variables
         model.vars.oversampling_rate_actual.value = osr_actual
 
     def calc_trecsosr_reg(self, model):
-        #This function writes the TRECSOSR register
 
-        #Load model variables into local variables
         demod_select = model.vars.demod_select.value
         osr_actual = model.vars.oversampling_rate_actual.value
         remoddwn = model.vars.MODEM_PHDMODCTRL_REMODDWN.value + 1
@@ -332,7 +294,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             trecsosr_reg = 0
 
-        #Write the register
         self._reg_write(model.vars.MODEM_TRECSCFG_TRECSOSR, int(round(trecsosr_reg)))
 
     def return_dec0_from_reg(self, reg):
@@ -353,68 +314,46 @@ class CALC_Demodulator_ocelot(ICalculator):
         return dec0
 
     def calc_dec0_reg(self,model):
-        #This function writes the register for dec0
 
-        #Load model variables into local variables
         dec0_value = model.vars.dec0.value
 
-        #Define a constant list for the (register data, value pairs)
         dec0_list = [(0, 3), (2, 4), (4, 8)]
-        # Search for the value in the list
         for dec0_pair in dec0_list:
             if (dec0_pair[1]==dec0_value):
                 dec0_reg = dec0_pair[0]
 
-        #Write the registers
         self._reg_write(model.vars.MODEM_CF_DEC0, dec0_reg)
 
     def calc_dec1_reg(self, model):
-        #This function writes the register for dec1
 
-        #Load model variables into local variables
         dec1_value = model.vars.dec1.value
 
-        #Dec1 register is simply one less than the value
         dec1_reg = dec1_value - 1
 
-        #Write the registers
         self._reg_write(model.vars.MODEM_CF_DEC1, dec1_reg)
 
     def calc_dec0_actual(self,model):
-        #This function calculates the actual dec0 based on the register value
 
-        #Load model variables into local variables
         dec0_reg = model.vars.MODEM_CF_DEC0.value
 
-        #Define a constant list for the (register data, value pairs)
         dec0_list = [(0, 3), (1, 4), (2, 4), (3, 8), (4, 8)]
-        #Search for the value in the list
         for dec0_pair in dec0_list:
             if (dec0_pair[0]==dec0_reg):
                 dec0_value = dec0_pair[1]
 
-        #Load local variables back into model variables
         model.vars.dec0_actual.value = dec0_value
 
     def calc_dec1_actual(self, model):
-        #This function calculates the actual dec1 based on the register value
 
-        #Load model variables into local variables
         dec1_reg = model.vars.MODEM_CF_DEC1.value
 
-        #Dec1 value is simply one more than the register setting
         dec1_value = dec1_reg + 1
 
-        #Load local variables back into model variables
         model.vars.dec1_actual.value = dec1_value
 
     def calc_src2_dec2(self,model):
-        #This function calculates dec2 and src2
 
-        # FIXME: need to have an options for TRecS where DEC2 is bypassed DEC2=1
-        #        unless the remod is enabled
 
-        #Load model variables into local variables
         adc_freq = model.vars.adc_freq_actual.value
         dec0 = model.vars.dec0_actual.value
         dec1 = model.vars.dec1_actual.value
@@ -428,24 +367,19 @@ class CALC_Demodulator_ocelot(ICalculator):
         max_src2 = model.vars.max_src2.value  # max value for SRC2
 
         if (demod_sel==model.vars.demod_select.var_enum.BCR):
-            # BCR demod, dec2 and src2 not enabled
             best_dec2 = 1
             best_src2 = 1.0
 
         else:
-            # Legacy, Coherent, Trecs/Viterbi Demods
-            #Calculate the OSR at the input to SRC2
             osr_src2_min = float(adc_freq) / (8 * dec0 * dec1 * baudrate) * min_src2
             osr_src2_max = float(adc_freq) / (8 * dec0 * dec1 * baudrate) * max_src2
 
-            #Calculate dec2 to achieve close to the target OSR
             dec2_min = max(int( ceil(osr_src2_min / target_osr)),min_dec2)
             dec2_max = min(int(floor(osr_src2_max / target_osr)),max_dec2)
 
             target_src2 = 1.0
             best_error = 999
 
-            # default values
             best_dec2 = 1
             best_src2 = (8 * dec0 * dec1 * baudrate) * target_osr / float(adc_freq)
 
@@ -457,14 +391,11 @@ class CALC_Demodulator_ocelot(ICalculator):
                     best_src2 = src2
                     best_dec2 = dec2
 
-        #Load local variables back into model variables
         model.vars.dec2.value = best_dec2
         model.vars.src2_ratio.value = best_src2
 
     def calc_src2_reg(self,model):
-        #This function calculates the src2 register writes
 
-        # Load model variables into local variables
         src2_value = model.vars.src2_ratio.value
         min_src2 = model.vars.min_src2.value  # min value for SRC2
         max_src2 = model.vars.max_src2.value  # max value for SRC2
@@ -479,56 +410,39 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             src2_en = 0
 
-        #Write to registers
         self._reg_write(model.vars.MODEM_SRCCHF_SRCRATIO2, src2_reg)
         self._reg_write(model.vars.MODEM_SRCCHF_SRCENABLE2, src2_en)
 
     def calc_dec2_reg(self,model):
-        #This function calculates the dec2 register value
 
-        #Load model variables into local variables
         dec2_value = model.vars.dec2.value
 
-        #The dec2 register is one less than the decimation value
         dec2_reg = dec2_value - 1
 
-        #Write to register
         self._reg_write(model.vars.MODEM_CF_DEC2, dec2_reg)
 
     def calc_src2_actual(self,model):
-        #This function calculates the actual SRC2 ratio from the register value
 
-        #Load model variables into local variables
         src2_reg = model.vars.MODEM_SRCCHF_SRCRATIO2.value
         src2_en_reg = model.vars.MODEM_SRCCHF_SRCENABLE2.value
 
         if src2_en_reg:
-            #The src2 ratio is simply 16384 divided by the register value
             src2_ratio_actual = 16384.0 / src2_reg
         else:
             src2_ratio_actual = 1.0
 
-        #Load local variables back into model variables
         model.vars.src2_ratio_actual.value = src2_ratio_actual
 
     def calc_dec2_actual(self,model):
-        #This function calculates the actual dec2 ratio from the register value
 
-        #Load model variables into local variables
         dec2_reg = model.vars.MODEM_CF_DEC2.value
 
-        #The actual dec2 value is the dec2 register plus one
         dec2_actual = dec2_reg + 1
 
-        #Load local variables back into model variables
         model.vars.dec2_actual.value = dec2_actual
 
     def calc_rxbr(self,model):
-        #This function calculates the receive baudrate settings
-        # based on actual dec0,dec1,dec2,src2, and desired baudrate
-        # then baudrate_actual will be calculated from rxbrfrac_actual
 
-        #Load model variables into local variables
         target_osr = model.vars.target_osr.value #We don't know the actual OSR yet, because that has to be based on the final baudrate
         targetmax_osr = model.vars.targetmax_osr.value
         targetmin_osr = model.vars.targetmin_osr.value
@@ -542,8 +456,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         bcr_demod_en = model.vars.bcr_demod_en.value
 
         if demod_select == model.vars.demod_select.var_enum.BCR:
-            # FIXME:  do we need to use the pro2 calc values here?
-            # BCR uses its own registers for defined in the pro2 calculator
             model.vars.rxbrint.value = 0
             model.vars.rxbrnum.value = 1
             model.vars.rxbrden.value = 2
@@ -552,16 +464,11 @@ class CALC_Demodulator_ocelot(ICalculator):
             denlist = range(2, 31)
             error_limit = 0.5
 
-        # not using target_osr, because in some cases (e.g. BCR with fractional OSR)
-        # the OSR w.r.t desired baudrate and acutal decimators varies from the target
-        # allowing 0.01% variation from targetmin_osr and targetmax_osr for range check
-        # because this osr calculation uses src2_actual, which has some small quantization noise
         osr = float(adc_freq_actual * src2_actual) / float(dec0_actual * dec1_actual * 8 * dec2_actual * baudrate)
         osr_limit_min = targetmin_osr * (1 - 0.0001)
         osr_limit_max = targetmax_osr * (1 + 0.0001)
 
         if (osr >= osr_limit_min) and (osr <= osr_limit_max):
-            #search for best fraction
             rxbrint = int(floor(osr/2))
             frac = (osr/2) - float(rxbrint)
             numlist = range(0,31)
@@ -573,9 +480,6 @@ class CALC_Demodulator_ocelot(ICalculator):
                         min_error = frac_error
                         best_den = den
                         best_num = num
-            # calculate error in percent of baudrate, and require < 0.5% error
-            # matlab simulation sweeping osr with 0.01% step size, showed the max osr relative error = 0.4%
-            # using num=0:31, den=2:31
             error_percent = 100 * abs( 2 * ( rxbrint + float(best_num) / float(best_den) ) - osr ) / osr
             if error_percent < error_limit:
                 rxbrnum = best_num
@@ -588,38 +492,20 @@ class CALC_Demodulator_ocelot(ICalculator):
                     raise CalculationException('ERROR: num > den in calc_rxbr()')
 
             else:
-                #print("adc_freq = %f" % adc_freq_actual)
-                #print("baudrate = %f" % baudrate)
-                #print("target_osr = %f" % target_osr)
-                #print("adjust_osr = %f" % osr)
-                #print("rxbrint = %d" % rxbrint)
-                #print("best_num = %d" % best_num)
-                #print("best_den = %d" % best_den)
-                #print(model.vars.demod_select.value)
                 raise CalculationException('ERROR: baudrate error > 0.5% in calc_rxbr()')
         elif bcr_demod_en:
             rxbrint = 3
             rxbrnum = 1
             rxbrden = 2
         else:
-            #print("adc_freq = %f" % adc_freq_actual)
-            #print("baudrate = %f" % baudrate)
-            #print("target_osr = %f" % target_osr)
-            #print("adjust_osr = %f" % osr)
-            #print("targetmin_osr = %f" % targetmin_osr)
-            #print("targetmax_osr = %f" % targetmax_osr)
-            #print(str(model.vars.demod_select.value).split(".")[-1])
             raise CalculationException('ERROR: OSR out of range in calc_rxbr()')
 
-        #Load local variables back into model variables
         model.vars.rxbrint.value = rxbrint
         model.vars.rxbrnum.value = rxbrnum
         model.vars.rxbrden.value = rxbrden
 
     def calc_rxbr_reg(self,model):
-        #This function writes the rxbr registers
 
-        #Load model variables into local variables
         rxbrint =  model.vars.rxbrint.value
         rxbrnum = model.vars.rxbrnum.value
         rxbrden =  model.vars.rxbrden.value
@@ -638,55 +524,40 @@ class CALC_Demodulator_ocelot(ICalculator):
             rxbrden = 2
             rxbrnum = 1
 
-        #Write registers
         self._reg_sat_write(model.vars.MODEM_RXBR_RXBRINT, rxbrint)
         self._reg_sat_write(model.vars.MODEM_RXBR_RXBRNUM, rxbrnum)
         self._reg_sat_write(model.vars.MODEM_RXBR_RXBRDEN, rxbrden)
 
 
     def calc_rxbr_actual(self,model):
-        #This function shows the actual rxbr values contained in the registers
 
-        #Load model variables into local variables
         rxbrint_actual = model.vars.MODEM_RXBR_RXBRINT.value
         rxbrnum_actual = model.vars.MODEM_RXBR_RXBRNUM.value
         rxbrden_actual = model.vars.MODEM_RXBR_RXBRDEN.value
 
-        #Calculate the rxbr fraction
         rxbrfrac_actual = float(rxbrint_actual + float(rxbrnum_actual) / rxbrden_actual)
 
-        #Load local variables back into model variables
         model.vars.rxbrint_actual.value = rxbrint_actual
         model.vars.rxbrnum_actual.value = rxbrnum_actual
         model.vars.rxbrden_actual.value = rxbrden_actual
         model.vars.rxbrfrac_actual.value = rxbrfrac_actual
 
-    # FIXME: why do we need a special symbol encoding for mbus? we should combine this with the defaul symbol encoding
     def calc_mbus_symbol_encoding(self,model):
-        #This function calculates the default value for mbus_symbol_encoding
 
-        #Set defaults
         mbus_symbol_encoding = model.vars.mbus_symbol_encoding.var_enum.NRZ
 
-        # Load local variables back into model variables
         model.vars.mbus_symbol_encoding.value = mbus_symbol_encoding
         model.vars.symbol_encoding.value = model.vars.symbol_encoding.var_enum.NRZ  # mbus_symbol_encoding
 
     def calc_bitrate_gross(self, model):
-        #This function calculates the gross bitrate (bitrate including redundant coding bits)
-        #Note that this gross bitrate excludes DSSS, because in RX the DSSS chips never make it
-        #through the demod path (they are only used for correlation)
 
-        #Read from model variables
         bitrate = model.vars.bitrate.value
         encoding = model.vars.symbol_encoding.value
         mbus_encoding = model.vars.mbus_symbol_encoding.value
         fec_enabled = model.vars.fec_enabled.value
 
-        #Start by assuming the gross bitrate is equal to the net bitrate
         bitrate_gross = bitrate
 
-        #Calculate the encoded bitrate based on the encoding parameters
         if (encoding == model.vars.symbol_encoding.var_enum.Manchester or encoding == model.vars.symbol_encoding.var_enum.Inv_Manchester):
             bitrate_gross *= 2
         if (mbus_encoding == model.vars.mbus_symbol_encoding.var_enum.MBUS_3OF6):
@@ -694,19 +565,15 @@ class CALC_Demodulator_ocelot(ICalculator):
         if fec_enabled:
             bitrate_gross *= 2
 
-        #Write the model variable
         model.vars.bitrate_gross.value =  int(round(bitrate_gross))
 
     def calc_baudrate(self,model):
-        #This function calculates baudrate based on the input bitrate and modulation/encoding settings
 
-        #Load model variables into local variables
         mod_type = model.vars.modulation_type.value
         bitrate_gross = model.vars.bitrate_gross.value
         encoding = model.vars.symbol_encoding.value
         spreading_factor = model.vars.dsss_spreading_factor.value
 
-        #Based on modulation type calculate baudrate from bitrate
         if(mod_type == model.vars.modulation_type.var_enum.OQPSK) or \
                 (mod_type == model.vars.modulation_type.var_enum.OOK) or \
                 (mod_type == model.vars.modulation_type.var_enum.ASK) or \
@@ -720,17 +587,13 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             raise CalculationException('ERROR: modulation type not supported in calc_baudrate()')
 
-        #Account for the DSSS spreading factor
         if (encoding == model.vars.symbol_encoding.var_enum.DSSS):
             baudrate *= spreading_factor
 
-        #Load local variables back into model variables
         model.vars.baudrate.value = int(round(baudrate))
 
     def calc_baudrate_actual(self,model,disable_subfrac_divider=False):
-        #This function calculates the actual baudrate based on register settings
 
-        #Load model variables into local variables
         adc_freq = model.vars.adc_freq_actual.value
         dec0_actual = model.vars.dec0_actual.value
         dec1_actual = model.vars.dec1_actual.value
@@ -744,26 +607,20 @@ class CALC_Demodulator_ocelot(ICalculator):
         agc_subperiod_actual = model.vars.AGC_CTRL7_SUBPERIOD.value
 
         if bcr_demod_en and (subfrac_actual > 0) and (disable_subfrac_divider == False):
-            # The BCR demod uses the AGC subperiod settings for baudrate division
             frac = subfrac_actual * pow(2, dec)
         else:
-            # For other demods use the standard RX baudrate divider settings
             frac = rxbrfrac_actual
 
-        #Calculate actual baudrate once the ADC, decimator, SRC, and rxbr settings are known
         if (bcr_demod_en_forced and agc_subperiod_actual == 1):
             n_update = pow(2, dec)
             baudrate_actual = (adc_freq * src2ratio_actual) / (dec0_actual * dec1_actual * n_update * 8 * frac)
         else:
             baudrate_actual = (adc_freq * src2ratio_actual) / (dec0_actual * dec1_actual * dec2_actual * 8 * 2 * frac)
 
-        #Load local variables back into model variables
         model.vars.rx_baud_rate_actual.value = baudrate_actual
 
     def calc_bwsel(self,model, softmodem_narrowing=False):
-        #This function calculates the bwsel ratio that sets the channel bandwidth
 
-        #Load model variables into local variables
         adc_freq = model.vars.adc_freq_actual.value
         dec0_actual = model.vars.dec0_actual.value
         dec1_actual = model.vars.dec1_actual.value
@@ -772,34 +629,27 @@ class CALC_Demodulator_ocelot(ICalculator):
         lock_bandwidth = model.vars.lock_bandwidth_hz.value  # maybe this cab be reduced further based on residual freq offset
         min_bwsel = model.vars.min_bwsel.value
 
-        #Calculate the required BWSEL from the adc rate, decimators, and required bandwidth
         bwsel = float(bandwidth * 8 * dec0_actual * dec1_actual) / adc_freq
         lock_bwsel = float(lock_bandwidth * 8 * dec0_actual * dec1_actual) / adc_freq
-        # print(f"BWSEL = {bwsel}, LOCK_BWSEL = {lock_bwsel}")
         if (lock_bwsel < min_bwsel) and ((afc_run_mode == model.vars.afc_run_mode.var_enum.ONE_SHOT) or softmodem_narrowing):
             lock_bwsel = min_bwsel
 
-        #Load local variables back into model variables
         model.vars.bwsel.value = bwsel
         model.vars.lock_bwsel.value = lock_bwsel
 
 
     def calc_chfilt_reg(self,model):
-        #This function calculates the channel filter registers
 
-        #Load model variables into local variables
         bwsel = model.vars.bwsel.value
 
         coeffs = self.return_coeffs(bwsel)
 
         bit_widths = [10,10,10,11,11,11,12,12,12,14,14,14,16,16,16]
 
-        # replace negative numbers with 2s complement
         for i in range(15):
             if coeffs[i] < 0:
                 coeffs[i] = coeffs[i] + 2**bit_widths[i]
 
-        # Write registers
         self._reg_write(model.vars.MODEM_CHFCOE00_SET0COEFF0,  coeffs[0])
         self._reg_write(model.vars.MODEM_CHFCOE00_SET0COEFF1,  coeffs[1])
         self._reg_write(model.vars.MODEM_CHFCOE00_SET0COEFF2,  coeffs[2])
@@ -816,17 +666,14 @@ class CALC_Demodulator_ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_CHFCOE06_SET0COEFF13, coeffs[13])
         self._reg_write(model.vars.MODEM_CHFCOE06_SET0COEFF14, coeffs[14])
 
-        # Load model variables into local variables
         bwsel = model.vars.lock_bwsel.value
         coeffs = self.return_coeffs(bwsel)
 
 
-        # replace negative numbers with 2s complement
         for i in range(15):
             if coeffs[i] < 0:
                 coeffs[i] = coeffs[i] + 2**bit_widths[i]
 
-        # TODO: calculate the second set separately
         self._reg_write(model.vars.MODEM_CHFCOE10_SET1COEFF0,  coeffs[0])
         self._reg_write(model.vars.MODEM_CHFCOE10_SET1COEFF1,  coeffs[1])
         self._reg_write(model.vars.MODEM_CHFCOE10_SET1COEFF2,  coeffs[2])
@@ -844,7 +691,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_CHFCOE16_SET1COEFF14, coeffs[14])
 
     def return_coeffs(self, bwsel):
-        # this table is generated with srw_model/models/channel_filters/gen_channel_filter_coeffs.m
         if bwsel < 0.075:
             coeffs = [-12, -8, 6, 49, 138, 288, 513, 816, 1189, 1610, 2043, 2447, 2777, 2993, 3068]
         elif bwsel < 0.085:
@@ -954,8 +800,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             coeffs = [-23, -267, -394, 199, 306, -588, 38, 944, -961, -668, 2365, -1262, -3694, 9834, 21113]
 
-        # Confirm Sum of the Magnitudes is in spec to not overflow the
-        # filter accumulator
         try:
             assert sum([abs(i) for i in coeffs]) < 2**16
         except AssertionError:
@@ -964,38 +808,28 @@ class CALC_Demodulator_ocelot(ICalculator):
         return coeffs
 
     def calc_bw_carson(self,model):
-        #This function calculates the Carson bandwidth (minimum bandwidth)
 
-        #Load model variables into local variables
         baudrate = model.vars.baudrate.value
         deviation = model.vars.deviation.value
         mod_type = model.vars.modulation_type.value
 
-        #Calculate the Carson bandwidth
         if (mod_type == model.vars.modulation_type.var_enum.FSK4):
-            #Assumes deviation = inner symbol deviation
             bw_carson = baudrate + 6*deviation
         else:
             bw_carson = baudrate + 2*deviation
 
-        #Load local variables back into model variables
         model.vars.bandwidth_carson_hz.value = int(bw_carson)
 
     def calc_rx_tx_ppm(self,model):
-        #This function calculates the default RX and TX HFXO tolerance in PPM
 
-        #Set defaults
         rx_ppm = 0
         tx_ppm = 0
 
-        #Load local variables back into model variables
         model.vars.rx_xtal_error_ppm.value = rx_ppm
         model.vars.tx_xtal_error_ppm.value = tx_ppm
 
 
     def get_alpha(self, model, modulation_index, shaping_filter, shaping_filter_param):
-        # Bandwidth adjustment based on mi and bt
-        # the thresholds were derived based simulating bandwidth of modulated signal with 98% of the energy
         mi = modulation_index
         sf = shaping_filter
 
@@ -1036,7 +870,6 @@ class CALC_Demodulator_ocelot(ICalculator):
                 else:
                     alpha = -0.1
         else:
-            # for non Gaussian shaping keeping the original alpha calculation
             if (mi < 1.0):
                 alpha = 0.2
             elif (mi == 1.0):
@@ -1047,18 +880,12 @@ class CALC_Demodulator_ocelot(ICalculator):
         return alpha
 
     def calc_target_bandwidth(self, model):
-        #This function calculates the target bandwidth in case the user didn't enter one
-        #This is the acquisition bandwidth
 
-        #Load model variables into local variables
         mod_type = model.vars.modulation_type.value
         bw_carson = model.vars.bandwidth_carson_hz.value
         baudrate = model.vars.baudrate.value
         freq_offset_hz = model.vars.freq_offset_hz.value
 
-        #Calculate bw_demod and bw_acq
-        #bw_demod is the target demod bandwidth before adding frequency shift
-        #bw_acq combines bw_demod and frequency shift
         if (mod_type == model.vars.modulation_type.var_enum.FSK2) or \
                 (mod_type == model.vars.modulation_type.var_enum.MSK):
             modulation_index = model.vars.modulation_index.value
@@ -1071,7 +898,6 @@ class CALC_Demodulator_ocelot(ICalculator):
             bw_acq = bw_carson + 2.0 * freq_offset_hz
 
         else:
-            #Default values for other modulation types
             if (mod_type == model.vars.modulation_type.var_enum.OOK) or \
                     (mod_type == model.vars.modulation_type.var_enum.ASK):
                 bw_modulation = baudrate * 5.0
@@ -1084,14 +910,12 @@ class CALC_Demodulator_ocelot(ICalculator):
 
             bw_acq = bw_modulation + 2.0 * freq_offset_hz
 
-        #Set max limit on bandwidth_hz
         bw_acq = min(bw_acq, 2.5e6)
 
         if model.vars.bandwidth_hz.value_forced:
             if model.vars.bandwidth_hz.value > 1.2 * bw_acq:
                 LogMgr.Warning("WARNING: Programmed acquisition channel bandwidth is much higher than calculated")
 
-        #Load local variables back into model variables
         model.vars.bandwidth_hz.value = int(bw_acq)
 
     def get_target_2fsk_bandwidth(self, bw_carson, freq_offset_hz, alpha):
@@ -1099,7 +923,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         return bw_acq
 
     def calc_lock_bandwidth(self, model, softmodem_narrowing=False):
-        #Load model variables into local variables
         bw_acq = model.vars.bandwidth_hz.value
         bw_demod = model.vars.demod_bandwidth_hz.value
         afc_run_mode = model.vars.afc_run_mode.value
@@ -1107,10 +930,8 @@ class CALC_Demodulator_ocelot(ICalculator):
         antdivmode = model.vars.antdivmode.value
 
         if (model.vars.demod_bandwidth_hz._value_forced != None):
-            # Prioritize forced value
             lock_bandwidth_hz = bw_demod
         elif (afc_run_mode == model.vars.afc_run_mode.var_enum.ONE_SHOT) or softmodem_narrowing:
-            # for calculated bw_demod, upper limit: lock_bandwidth_hz <= bandwidth_hz
             lock_bandwidth_hz = min(bw_demod, bw_acq)
         elif (afc_run_mode == model.vars.afc_run_mode.var_enum.INTERNAL) and rtschmode == 1:
             if antdivmode != model.vars.antdivmode.var_enum.DISABLE:
@@ -1118,31 +939,24 @@ class CALC_Demodulator_ocelot(ICalculator):
             else:
                 lock_bandwidth_hz = bw_acq
         else:
-            # for calculated bw_demod, if AFC is disabled, set lock_bandwidth_hz = bandwidth_hz
             lock_bandwidth_hz = bw_acq
 
         model.vars.lock_bandwidth_hz.value = int(lock_bandwidth_hz)
 
 
     def calc_bandwidth_actual(self,model):
-        #This function calculates the actual channel bandwidth based on adc rate, decimator, and bwsel settings
 
-        #Load model variables into local variables
         adc_freq_actual = model.vars.adc_freq_actual.value
         dec0_actual = model.vars.dec0_actual.value
         dec1_actual = model.vars.dec1_actual.value
         bwsel = model.vars.bwsel.value
 
-        #Calculate the actual channel bandwidth
         bandwidth_actual = int(adc_freq_actual * bwsel / dec0_actual / dec1_actual / 8)
 
-        #Load local variables back into model variables
         model.vars.bandwidth_actual.value = bandwidth_actual
 
     def calc_datafilter(self,model):
-        #This function calculates the number of datafilter taps
 
-        #Load model variables into local variables
         osr = model.vars.oversampling_rate_actual.value
         demod_sel = model.vars.demod_select.value
         modformat = model.vars.modulation_type.value
@@ -1153,60 +967,44 @@ class CALC_Demodulator_ocelot(ICalculator):
 
         if demod_sel==model.vars.demod_select.var_enum.COHERENT and \
                 modformat == model.vars.modulation_type.var_enum.OQPSK:
-            # : For Cohererent demod, set data filter taps to 9
-            # : TODO for complex correlation enabled, set datafilter taps to 6
             if cplx_corr_enabled:
                 datafilter_taps = 6
             else:
                 datafilter_taps = 9
-        # no data filter in path when TRecS is enabled
         elif demod_sel==model.vars.demod_select.var_enum.BCR or \
                 modformat == model.vars.modulation_type.var_enum.OQPSK or \
                 (trecs_enabled and not remoden) or remoddwn > 1:
             datafilter_taps = 2 # 2 here translates to datafilter_reg = 0 meaning disabled datafilter
-        #Calculate datafitler based on OSR
         elif (osr > 1) and (osr < 10):
             datafilter_taps = int(round(osr))
         else:
             raise CalculationException('ERROR: OSR out of range in calc_datafilter()')
 
-        #Load local variables back into model variables
         model.vars.datafilter_taps.value = datafilter_taps
 
     def calc_datafilter_reg(self,model):
-        #This function writes the datafilter register
 
-        #Load model variables into local variables
         datafilter_taps = model.vars.datafilter_taps.value
 
-        #The datafilter register setting is 2 less than the number of taps
         datafilter_reg = datafilter_taps - 2
 
         if datafilter_reg < 0:
             datafilter_reg = 0
 
-        # Write register
         self._reg_write(model.vars.MODEM_CTRL2_DATAFILTER, datafilter_reg)
 
     def calc_datafilter_actual(self,model):
-        #This function calculates the actual datafilter taps from the register value
 
-        #Load model variables into local variables
         datafilter_reg = model.vars.MODEM_CTRL2_DATAFILTER.value
 
-        #The number of taps is the register value plus 2
         datafilter_taps_actual = datafilter_reg
 
-        #Load local variables back into model variables
         model.vars.datafilter_taps_actual = datafilter_taps_actual
 
     def calc_digmix_res_actual(self,model):
-        #This function calculates the digital mixer register
 
-        #Load model variables into local variables
         adc_freq_actual = model.vars.adc_freq_actual.value
         dec0_actual = model.vars.dec0_actual.value
-        # digital mixer frequency resolution, Hz/mixer ticks
         digmix_res = adc_freq_actual/((2**20) * 8.0 * dec0_actual)
         model.vars.digmix_res_actual.value = digmix_res
 
@@ -1226,21 +1024,15 @@ class CALC_Demodulator_ocelot(ICalculator):
             model.vars.digmixfreq.value = int(round(fif / digmix_res)) * -1
 
     def calc_digmixfreq_reg(self,model):
-        #This function calculates the digital mixer register
         digmixfreq_reg = model.vars.digmixfreq.value
 
-        # Write register
         self._reg_write(model.vars.MODEM_DIGMIXCTRL_DIGMIXFREQ, digmixfreq_reg, allow_neg=True,
                                        neg_twos_comp=True)
 
     def calc_digmixfreq_actual(self,model):
-        #This function calculates the actual digital mixer frequency based on the register
 
-        #Load model variables into local variables
         digmixfreq_reg = model.vars.MODEM_DIGMIXCTRL_DIGMIXFREQ.value
 
-        #Calculate the actual mixer frequency
-        # Calculate the actual mixer frequency
         if model.vars.lo_injection_side.value == model.vars.lo_injection_side.var_enum.HIGH_SIDE:
             digmixfreq_actual = int(digmixfreq_reg * model.vars.digmix_res_actual.value)
         else:
@@ -1249,13 +1041,10 @@ class CALC_Demodulator_ocelot(ICalculator):
             digmixfreq_pos = (2 ** digmixfreq_regsize) - digmixfreq_reg
             digmixfreq_actual = -1 * int(digmixfreq_pos * model.vars.digmix_res_actual.value)
 
-        #Load local variables back into model variables
         model.vars.digmixfreq_actual.value = digmixfreq_actual
 
     def calc_devoffcomp_reg(self,model):
-        #This function calculates the register value of devoffcomp
 
-        #Load model variables into local variables
         mod_type = model.vars.modulation_type.value
 
         if(mod_type==model.vars.modulation_type.var_enum.FSK4):
@@ -1263,14 +1052,11 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             devoffcomp=0
 
-        #Write register
         self._reg_write(model.vars.MODEM_CTRL4_DEVOFFCOMP, devoffcomp)
 
 
     def calc_demod_rate_actual(self,model):
-        #This function calculates the actual sample rate at the demod
 
-        # Load model variables into local variables
         adc_freq_actual = model.vars.adc_freq_actual.value
         dec0_actual = model.vars.dec0_actual.value
         dec1_actual = model.vars.dec1_actual.value
@@ -1279,26 +1065,20 @@ class CALC_Demodulator_ocelot(ICalculator):
 
         demod_rate_actual = adc_freq_actual * src2_actual / (8 * dec0_actual * dec1_actual * dec2_actual)
 
-        #Load local variables back into model variables
         model.vars.demod_rate_actual.value = demod_rate_actual
 
     def calc_rx_deviation_scaled(self,model):
-        #This function calculates the scaled RX deviation
 
-        #Load model variables into local variables
         deviation = model.vars.deviation.value
         freq_gain_actual = model.vars.freq_gain_actual.value
         demod_rate_actual = model.vars.demod_rate_actual.value
 
         rx_deviation_scaled = float(256*deviation*freq_gain_actual/demod_rate_actual)
 
-        #Load local variables back into model variables
         model.vars.rx_deviation_scaled.value = rx_deviation_scaled
 
     def calc_devweightdis_reg(self,model):
-        #This function calculates the register value of devweightdis
 
-        #Load model variables into local variables
         mod_type = model.vars.modulation_type.value
         rx_deviation_scaled = model.vars.rx_deviation_scaled.value
 
@@ -1311,13 +1091,10 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             devweightdis = 0
 
-        #Write register
         self._reg_write(model.vars.MODEM_CTRL2_DEVWEIGHTDIS, devweightdis)
 
     def calc_freq_gain_target(self,model):
-        #This function calculates the target frequency gain value
 
-        #Load model variables into local variables
         mod_type = model.vars.modulation_type.value
         demod_rate_actual = model.vars.demod_rate_actual.value
         deviation = model.vars.deviation.value
@@ -1338,13 +1115,10 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             freq_gain_target = 0.0
 
-        #Load local variables back into model variables
         model.vars.freq_gain.value = freq_gain_target
 
     def calc_freq_gain_reg(self,model):
-        #This function calculates the frequency gain registers
 
-        #Load model variables into local variables
         freq_gain_target = model.vars.freq_gain.value
 
         best_error = 1e9
@@ -1360,29 +1134,21 @@ class CALC_Demodulator_ocelot(ICalculator):
                     bestM = M
                     bestE = E
 
-        #Write registers
         self._reg_write(model.vars.MODEM_MODINDEX_FREQGAINM, bestM)
         self._reg_write(model.vars.MODEM_MODINDEX_FREQGAINE, bestE)
 
     def calc_freq_gain_actual(self,model):
-        #This function calculates the actual frequency gain from the register values
 
-        #Load model variables into local variables
         M_actual = model.vars.MODEM_MODINDEX_FREQGAINM.value
         E_actual = model.vars.MODEM_MODINDEX_FREQGAINE.value
 
         freq_gain_actual = M_actual * float(2**(2-E_actual))
 
-        #Load local variables back into model variables
         model.vars.freq_gain_actual.value = freq_gain_actual
 
-###Since we are not inheriting the CALC_Demodulator_Ocelot class from prior parts, the functions below are copied in order to maintain functionality###
-#TODO: Go through these and decide if they still apply for Ocelot
 
     def calc_interpolation_gain_actual(self, model):
-        #This function calculates the actual interpolation gain
 
-        #Load model variables into local variables
         txbrnum = model.vars.MODEM_TXBR_TXBRNUM.value
         modformat = model.vars.modulation_type.value
 
@@ -1408,17 +1174,13 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             interpolation_gain = txbrnum / 256.0
 
-        # calculate phase interpolation gain for OQPSK cases
         if modformat == model.vars.modulation_type.var_enum.OQPSK:
             interpolation_gain = 2 ** (ceil(log(interpolation_gain, 2)))
 
-        #Load local variables back into model variables
         model.vars.interpolation_gain_actual.value = float(interpolation_gain)
 
     def calc_mod_type_actual(self, model):
-        #This function calculates the actual modulation type based on the register value
 
-        #Load model variables into local variables
         mod = model.vars.MODEM_CTRL0_MODFORMAT.value
 
         if mod == 0:
@@ -1436,13 +1198,10 @@ class CALC_Demodulator_ocelot(ICalculator):
         elif mod == 6:
             modformat = 'OOKASK'
 
-        #Load local variables back into model variables
         model.vars.mod_format_actual.value = modformat
 
     def calc_mod_type_reg(self, model):
-        #This function writes the modulation type register
 
-        #Load model variables into local variables
         modformat = model.vars.modulation_type.value
 
         if modformat == model.vars.modulation_type.var_enum.FSK2 or \
@@ -1462,13 +1221,10 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             raise CalculationException('ERROR: modulation method in input file not recognized')
 
-        #Write register
         self._reg_write(model.vars.MODEM_CTRL0_MODFORMAT, mod)
 
     def calc_resyncper_brcal_val(self, model):
-        #This function calculates the resynchronization and baud rate calibration values
 
-        #Load model variables into local variables
         mod_type = model.vars.modulation_type.value
         osr = model.vars.oversampling_rate_actual.value
         symbols_in_timing_window = model.vars.symbols_in_timing_window.value
@@ -1480,72 +1236,53 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             timing_wind_size = syncword_length
 
-        #Estimate the baudrate tol with resyncper=2
         estimated_baudrate_tol_ppm = int(1.0/(2*timing_wind_size*osr)*1e6/2) #Divide by 2 is to be conservative
 
-        #Use a resynchronization period of 2 if we don't need much baudrate tolerance, otherwise use 1
         if estimated_baudrate_tol_ppm >= baudrate_tol_ppm:
             resyncper = 2
         else:
             resyncper = 1
 
-        #Baudrate calibration does not work well with the Legacy demod, so disable
         brcalavg = 0
         brcalen = 0
 
-        #Load local variables back into model variables
         model.vars.brcalavg.value = brcalavg
         model.vars.brcalen.value = brcalen
         model.vars.timing_resync_period.value = resyncper
 
     def calc_brcalmode_reg(self, model):
-        #This function writes the brcal model register
 
-        #Write register
         self._reg_write(model.vars.MODEM_CTRL5_BRCALMODE, 0)
 
     def calc_brcal_reg(self, model):
-        #This function writes the brcal average and enable registers
 
-        #Load model variables into local variables
         brcalavg = model.vars.brcalavg.value
         brcalen = model.vars.brcalen.value
 
-        #Write registers
         self._reg_write(model.vars.MODEM_CTRL5_BRCALAVG, brcalavg)
         self._reg_write(model.vars.MODEM_CTRL5_BRCALEN, brcalen)
 
     def calc_resyncbaudtrans_reg(self, model):
-        #This function writes the resyncbaudtrans register
         demod_select = model.vars.demod_select.value
 
-        # : for coherent demod, disable otherwise the measured baudrate tolerance is effectively 0
         if demod_select == model.vars.demod_select.var_enum.COHERENT:
             self._reg_write(model.vars.MODEM_CTRL5_RESYNCBAUDTRANS, 0)
         else:
-            #Based on Series 1 findings, always set RESYNCBAUDTRANS for all other demods
             self._reg_write(model.vars.MODEM_CTRL5_RESYNCBAUDTRANS, 1)
 
     def calc_rsyncper_reg(self, model):
-        #This function writes the resyncper register
 
-        #Load model variables into local variables
         timing_resync_period = model.vars.timing_resync_period.value
 
-        #Write register
         self._reg_write(model.vars.MODEM_CTRL1_RESYNCPER, timing_resync_period)
 
     def calc_resyncper_actual(self, model):
-        #This function calculates the actual resynchonization period based on the register value
 
-        #Load model variables into local variables
         resyncper_actual = float(model.vars.MODEM_CTRL1_RESYNCPER.value)
 
-        #Load local variables back into model variables
         model.vars.resyncper_actual.value = resyncper_actual
 
     def calc_phasedemod_reg(self, model):
-        #This function writes the phase demod register
 
         length = model.vars.dsss_len.value
         modulation = model.vars.modulation_type.value
@@ -1569,24 +1306,17 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             phasedemod = 0  # BDD
 
-        #Load local variables back into model variables
         self._reg_write(model.vars.MODEM_CTRL1_PHASEDEMOD, phasedemod)
 
     def calc_dsa_enable(self,model):
-        #This function sets a value for dsa_enable
 
         dsa_enable = False
 
-        #Write the model variable
         model.vars.dsa_enable.value = dsa_enable
 
-    # limit accumulated baudrate offset over timing window to 30000 ppm or 3%
-    # used in calc_resynper_brcal_val and calc_baudrate_tol_ppm_actual
-    # TODO: might need to tweak this number based on PHY performance
     max_accumulated_tolerance_ppm = 30000.0
 
     def calc_intosr_reg(self, model):
-        # This function sets INTOSR register field
         osr = model.vars.oversampling_rate_actual.value
 
         if abs(round(osr) - osr) < 0.001:
@@ -1597,18 +1327,13 @@ class CALC_Demodulator_ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_SRCCHF_INTOSR, intosr)
 
     def calc_isicomp_reg(self, model):
-        # This function calculates the ISICOMP register field
 
-        # Read in global variables
         modulation = model.vars.modulation_type.value
         shaping_filter = model.vars.shaping_filter.value
 
-        #Calculate the ISICOMP value based on filter type and BT
         if modulation == model.vars.modulation_type.var_enum.FSK4:
 
             if shaping_filter == model.vars.shaping_filter.var_enum.Gaussian:
-                # Currently we only consider Gaussian shaping, support for other filter types with 4FSK and ISICOMP is TBD
-                # Read in shaping filter param here as some PHYs do not have shaping filter defined if filter is NONE
                 shaping_filter_param = model.vars.shaping_filter_param.value
 
                 if shaping_filter_param >= 0.75:
@@ -1616,20 +1341,15 @@ class CALC_Demodulator_ocelot(ICalculator):
                 elif shaping_filter_param >= 0.6:
                     isicomp = 8
                 else:
-                    #This is the default BT=0.5 case
                     isicomp = 10
             else:
-                #Not gaussian filtering
                 isicomp = 8
         else:
-            #Do not use ISI compensation for other modulation types
             isicomp = 0
 
-        #Write the register
         self._reg_write(model.vars.MODEM_CTRL4_ISICOMP, isicomp)
 
     def calc_offsetphasemasking_reg(self, model):
-        # This function calculates OFFSETPHASEMASKING
 
         modulation = model.vars.modulation_type.value
 
@@ -1687,7 +1407,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         model.vars.syncacqwin_actual.value = 4 * (model.vars.MODEM_REALTIMCFE_SYNCACQWIN.value + 1)
 
     def calc_phscale_reg(self, model):
-        #Load model variables into local variables
         mi = model.vars.modulation_index.value
         remoden = model.vars.MODEM_PHDMODCTRL_REMODEN.value
         demod_sel = model.vars.demod_select.value
@@ -1695,11 +1414,9 @@ class CALC_Demodulator_ocelot(ICalculator):
         phscale_derate_factor = model.vars.phscale_derate_factor.value
 
         if remoden:
-            # if remodulation path is enabled freqgain block is handling the scaling
             phscale_reg = 0
         elif mi > 0.0:
             if demod_sel == model.vars.demod_select.var_enum.BCR:
-                # phscale_reg = int(floor(log(8 * 4 * mi / osr, 2)))
                 bcr_phscale_list = [0,1,2,3]
                 bcrksi3_list = []
                 diff_from_opt_bcrksi3_list = []
@@ -1710,26 +1427,21 @@ class CALC_Demodulator_ocelot(ICalculator):
                     bcrksi3_list.append(ksi3wb_val)
                     diff_from_opt_bcrksi3_list.append(40 - ksi3wb_val)
 
-                # : Determine lowest phscale value with bcrksi3 < 64
                 phscale_reg = -1
                 for diff_index in range(len(diff_from_opt_bcrksi3_list)):
                     if diff_from_opt_bcrksi3_list[diff_index] >= 0:
                         phscale_reg = bcr_phscale_list[diff_index]
                         break
 
-                # : If fail, calculate following est osr disable case
                 if phscale_reg == -1:
                     phscale_reg = int(floor(log(8 * 4 * mi / osr, 2)))
             else:
-                # this scaling will bring the nominal soft decision as close to 64 as possible with a power of 2 scaling
                 phscale_reg = int(round(log(2 * mi, 2)))
         else:
             phscale_reg = 0
 
-        #Derate phscale per phscale_derate_factor (used to accomodate large freq offset tol)
         phscale_reg += int(round(log2(phscale_derate_factor)))
 
-        # limit phscale_reg from 0 to 3
         phscale_reg = max(min(phscale_reg, 3), 0)
 
         self._reg_write(model.vars.MODEM_TRECPMDET_PHSCALE, phscale_reg)
@@ -1745,11 +1457,9 @@ class CALC_Demodulator_ocelot(ICalculator):
         freq_dev_min = model.vars.freq_dev_min.value
         baudrate = model.vars.baudrate.value
 
-        # Calculate minimum and maximum possible modulation indices
         mi_min = 2.0 * freq_dev_min / baudrate
         mi_max = 2.0 * freq_dev_max / baudrate
 
-        # Determine which modulation index to use for the purposes of KSI calculation
         mi_to_use = mi_min + (mi_max - mi_min) * 0.5
         if (modtype == model.vars.modulation_type.var_enum.FSK4 and \
                 demod_sel == model.vars.demod_select.var_enum.BCR):
@@ -1758,7 +1468,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         model.vars.modulation_index_for_ksi.value = mi_to_use
 
     def return_ksi1_calc(self, model, phscale):
-        # Load model variables into local variables
         demod_sel = model.vars.demod_select.value
         modtype = model.vars.modulation_type.value
         trecs_enabled = model.vars.trecs_enabled.value
@@ -1767,7 +1476,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         osr = model.vars.oversampling_rate_actual.value
         mi_to_use = model.vars.modulation_index_for_ksi.value
 
-        # when remod is enabled scaling is controlled by freqgain and phscale is currently set to 1
         if remoden:
             gain = freq_gain_actual / phscale / osr
         elif demod_sel == model.vars.demod_select.var_enum.BCR:
@@ -1775,9 +1483,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             gain = 1 / phscale
 
-        # calculate ksi values for Viterbi demod only
-        # if the gain is set correctly this should give us nominal soft decisions of 64 for regular case
-        # in case of remod we actually use the legacy demod's gain which sets the deviation + freq offset to 128
         if ((trecs_enabled or demod_sel == model.vars.demod_select.var_enum.BCR) and
                 (modtype == model.vars.modulation_type.var_enum.FSK2 or
                  modtype == model.vars.modulation_type.var_enum.FSK4 or
@@ -1793,21 +1498,15 @@ class CALC_Demodulator_ocelot(ICalculator):
         return ksi1
 
     def calc_ksi1(self, model):
-        #This function writes the ksi1 model variable that is used to program both
-        #hardmodem and softmodem ksi1 regs
 
-        # Read in model vars
         phscale_actual = model.vars.phscale_actual.value
 
-        # Call the calculation routine for ksi1 based on actual selected phscale
         model.vars.ksi1.value = self.return_ksi1_calc(model, phscale_actual)
 
     def calc_ksi1_reg(self, model):
 
-        #Read in model vars
         ksi1 = model.vars.ksi1.value
 
-        #Write the reg
         self._reg_sat_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI1, ksi1)
 
     def calc_syncbits_actual(self, model):
@@ -1836,64 +1535,50 @@ class CALC_Demodulator_ocelot(ICalculator):
         oversampling_rate = model.vars.oversampling_rate_actual.value
         baudrate_actual = model.vars.rx_baud_rate_actual.value
 
-        # : DEC8
         dec8_filter_taps = del_dec8 = 22
         dec8_filter_rate = adc_freq_actual / 8
         dec8_grp_delay = dec8_filter_taps / 2
         dec8_grp_delay_us = dec8_grp_delay / adc_freq_actual * 1e6
 
-        # : DEC0
         dec0_filter_taps = del_dec0 = 27.0 if dec0 == 3 or dec0 == 4 else 40
         dec0_filter_rate = dec8_filter_rate / dec0
         dec0_grp_delay = dec0_filter_taps / 2
         dec0_grp_delay_us = dec0_grp_delay / dec8_filter_rate * 1e6
 
-        # : IRCAL
         dc_ircal_digmix_grp_delay = del_dc_ircal_digmix = 2
         dc_ircal_digmix_rate = dec0_filter_rate
         dc_ircal_digmix_grp_delay_us = dc_ircal_digmix_grp_delay / dc_ircal_digmix_rate * 1e6
 
-        # : DEC1
         dec1_filter_taps = del_dec1 = (dec1 - 1) * 4.0 + 1
         dec1_filter_rate = dc_ircal_digmix_rate / dec1
         dec1_delay = dec1_filter_taps / 2
         dec1_grp_delay_us = dec1_delay / dc_ircal_digmix_rate * 1e6
 
-        # : channel filter
         chf_filter_taps = del_chflt = 29.0 - chflatency * 6.0
-        # print(f"Channel Filter number of taps = {chf_filter_taps}")
         chf_filter_rate = dec1_filter_rate
-        # : channel filter is odd (taps+1)/2.
-        # : -1 term comes from CHF input goes directly into the combinational logic and does not pass into the delay line before multiplier.
         chf_grp_delay = (chf_filter_taps + 1) / 2 - 1 # : channel filter is odd (taps+1)/2.
         chf_grp_delay_us = chf_grp_delay / chf_filter_rate * 1e6
 
-        # : src delay
         src2_grp_delay = del_src2 = 2
         src2_rate = chf_filter_rate * src2_actual
         src2_delay_us = src2_grp_delay / chf_filter_rate * 1e6
 
-        # Digital gain and CORDIC do not introduce any delays
         del_digigain = 0
         del_cordic = 0
 
-        # Differentiation delay of 1, frequency gain has no delay
         diff_grp_delay = del_diff = 1
         diff_rate = src2_rate
         diff_delay_us = diff_grp_delay / diff_rate * 1e6
 
-        # : DEC2
         dec2_grp_delay = del_dec2 = dec2
         dec2_rate = src2_rate / dec2
         dec2_delay_us = dec2_grp_delay / src2_rate * 1e6
 
-        # : data filter delay
         del_data = datafilter_taps
         datafilter_grp_delay = datafilter_taps / 2
         datafilter_rate = dec2_rate
         datafilter_delay_us = datafilter_grp_delay / datafilter_rate * 1e6
 
-        # : Phase Remod Down sampling delay
         if remoddwn > 1:
             del_remod = remoddwn
             remod_rate = dec2_rate / remoddwn
@@ -1902,28 +1587,22 @@ class CALC_Demodulator_ocelot(ICalculator):
             del_remod = 0
             remod_delay_us = 0
 
-        # : calculate delay in samples from adc to src
         del_adc_to_src = (((del_dec8 / 8 + del_dec0) / dec0 + del_dc_ircal_digmix + del_dec1) / dec1 + \
                            del_chflt + del_src2) / src2_actual
 
-        # : calculate delay in samples from adc to diff
         del_adc_to_diff = del_adc_to_src + del_digigain + del_cordic + del_diff
 
         grpdel_mixer_to_diff = ((del_dec1 + 1) / 2 / dec1 + (del_chflt + 1) / 2 + del_src2) / src2_actual + del_digigain + del_cordic + del_diff
 
-        # : Calculate group delay to src in us
         grp_delay_to_src_us = dec8_grp_delay_us + dec0_grp_delay_us + dc_ircal_digmix_grp_delay_us + \
                               dec1_grp_delay_us + chf_grp_delay_us + src2_delay_us
 
-        # : delay within demod
         if trecs_enabled and not harddecision_enabled:
-            # : MCUW_RADIO_CFG-2395: depth of viterbi decoder in demod is 4 symbols
             demod_delay_symbols = 4
         else:
             demod_delay_symbols = 0
         demod_delay_us = demod_delay_symbols / baudrate_actual * 1e6
 
-        # : Calculate group delay for each demod
         if trecs_enabled:
             if remoden == 1 and remoddwn == 0:  # demod at DEC2 output
                 grp_delay_us = grp_delay_to_src_us + diff_delay_us + dec2_delay_us + demod_delay_us
@@ -1956,9 +1635,7 @@ class CALC_Demodulator_ocelot(ICalculator):
         model.vars.delay_adc_to_demod_symbols.value = int(ceil(delay_adc_to_demod_symbols))
 
     def calc_src2_denominator(self, model):
-        #Needed by RAIL
 
-        # Load model variables into local variables
         osr = model.vars.oversampling_rate_actual.value
         datarate = model.vars.baudrate.value
         dec0 = model.vars.dec0_actual.value
@@ -1971,34 +1648,25 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             src2_calcDenominator = datarate * dec0 * dec1 * dec2 * 8 * osr
 
-        # Load local variables back into model variables
         model.vars.src2_calcDenominator.value = int(src2_calcDenominator)
 
     def calc_dccomp_misc_reg(self, model):
 
-        # always enable both DC offset estimation and compensation blocks
         self._reg_write(model.vars.MODEM_DCCOMP_DCCOMPEN, 1)
         self._reg_write(model.vars.MODEM_DCCOMP_DCESTIEN, 1)
 
-        # don't reset at every packet
         self._reg_write(model.vars.MODEM_DCCOMP_DCRSTEN, 0)
 
-        # always enable gear shifting option
         self._reg_write(model.vars.MODEM_DCCOMP_DCGAINGEAREN, 1)
 
-        # when AGC gain change happens set the gear to fastest
         self._reg_write(model.vars.MODEM_DCCOMP_DCGAINGEAR, 7)
 
-        # final gear setting after settling
         self._reg_write(model.vars.MODEM_DCCOMP_DCCOMPGEAR, 3)
 
-        # limit max DC to 1V
         self._reg_write(model.vars.MODEM_DCCOMP_DCLIMIT, 0)
 
-        # don't freeze state of DC comp filters
         self._reg_write(model.vars.MODEM_DCCOMP_DCCOMPFREEZE, 0)
 
-        # time between gear shifts - set to fixed value for now
         self._reg_write(model.vars.MODEM_DCCOMP_DCGAINGEARSMPS, 40)
 
 
@@ -2014,11 +1682,9 @@ class CALC_Demodulator_ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_CGCLKSTOP_FORCEOFF, clock_gate_off_reg)
 
     def calc_maximize_bwsel_range_value(self, model):
-        # Set default as false
         model.vars.maximize_bwsel_range.value = False
 
     def get_limits(self, demod_select, withremod, relaxsrc2, model):
-        #Load model variables into local variables
         freq_tol = model.vars.freq_offset_hz.value
         bandwidth = model.vars.bandwidth_hz.value
         carson_bandwidth = model.vars.bandwidth_carson_hz.value
@@ -2031,10 +1697,7 @@ class CALC_Demodulator_ocelot(ICalculator):
         osr_list = None
         max_bwsel_range = model.vars.maximize_bwsel_range.value
 
-        # Define constraints for osr, src2, dec2
         if demod_select == model.vars.demod_select.var_enum.BCR:
-            # FIXME:  osr_list and resulting target osr are really chfilt_osr, pro2 calculator defines target_osr
-            #       This doesn't cause an error but is confusing.
             osr_est = int(ceil(2 * float(bandwidth) / baudrate))
 
             min_osr = 8
@@ -2053,9 +1716,6 @@ class CALC_Demodulator_ocelot(ICalculator):
             min_dec2 = 1
             max_dec2 = 1
 
-            # High freqtol, low lock_bw case.
-            # Calculations will use the maximum bwsel range available in self.return_coeffs() in exchange for degraded blocking performance
-            # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-2296
             if max_bwsel_range:
                 LogMgr.Info("AFC BW >> demod BW. Expect reduced blocker performance")
                 min_bwsel = 0.07
@@ -2069,8 +1729,6 @@ class CALC_Demodulator_ocelot(ICalculator):
             if (modtype == model.vars.modulation_type.var_enum.FSK2 or \
                   modtype == model.vars.modulation_type.var_enum.FSK4 or \
                   modtype == model.vars.modulation_type.var_enum.MSK) and (mi<1):
-                # >=7 is better for sensitivity and frequency offset
-                # cost (sens degrade) increases with decreasing osr 6,5,4
                 osr_list = [7, 8, 9, 6, 5, 4]
                 min_osr = 4
             else:
@@ -2121,7 +1779,6 @@ class CALC_Demodulator_ocelot(ICalculator):
                 max_osr = 7
                 osr_list = [4, 5, 6, 7]
             else:
-                # Standard TRECs, no DEC2 or remod path
                 min_dec2 = 1
                 max_dec2 = 1
                 min_osr = 4
@@ -2141,7 +1798,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             raise CalculationException('ERROR: invalid demod_select in return_osr_dec0_dec1()')
 
-        # save to use in other functions
         model.vars.min_bwsel.value = min_bwsel  # min value for normalized channel filter bandwidth
         model.vars.max_bwsel.value = max_bwsel  # max value for normalized channel filter bandwidth
         model.vars.min_src2.value = min_src2  # min value for SRC2
@@ -2157,7 +1813,6 @@ class CALC_Demodulator_ocelot(ICalculator):
 
     def return_osr_dec0_dec1(self, model, demod_select, withremod=False, relaxsrc2=False, quitatfirstvalid=True):
 
-        # Load model variables into local variables
         bandwidth = model.vars.bandwidth_hz.value  # from calc_target_bandwidth
         adc_freq = model.vars.adc_freq_actual.value
         baudrate = model.vars.baudrate.value  # We don't know the actual bandrate yet
@@ -2168,49 +1823,35 @@ class CALC_Demodulator_ocelot(ICalculator):
         bw_var = model.vars.bandwidth_tol.value
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
 
-        # set limits based on selected demod
         [min_bwsel, max_bwsel, min_chfilt_osr, max_chfilt_osr, min_src2, max_src2, min_dec2, \
             max_dec2, min_osr, max_osr, target_bwsel, osr_list] = self.get_limits(demod_select, withremod, relaxsrc2, model)
 
-        # initialize output
         best_bwsel_error = 1e9
         best_osr = 0
         best_dec0 = 0
         best_dec1 = 0
 
-        # Setup for osr loop
-        # osr_list is a prioritized list, where first value with valid config will be returned
         if (model.vars.target_osr._value_forced != None):
             osr_forced = model.vars.target_osr._value_forced
             osr_list = [osr_forced]
 
-        # Setup for dec0 loop
-        # dec0_list is a prioritized list, where ties in best bwsel go to earlier value in list
         dec0_list = self.return_dec0_list(if_frequency_hz,adc_freq)
 
-        # Search values of osr, dec0, dec1 to find solution
-        # Exit on first osr with valid dec0 and dec1
         for osr in osr_list:
             for dec0 in dec0_list:
 
-                # define integer range for dec1
                 min_dec1 = int(max(1, ceil(float(adc_freq) * min_bwsel / (8 * dec0 * bandwidth*(1+bw_var)))))
                 max_dec1 = int(min(11500, floor(float(adc_freq) * max_bwsel / (8 * dec0 * bandwidth*(1-bw_var)))))
                 if min_dec1 <= max_dec1:
-                    # Order list from highest to lowest, bwsel from highest to lowest
                     dec1_list = range(max_dec1,min_dec1-1,-1)
                 else:
-                    # No solution
                     continue
 
                 for dec1 in dec1_list:
 
-                    # check configuration does trigger IPMCUSRW-876 channel filter issue when input sample rate
-                    # is too fast relative to the processing clock cycles needed
                     if not self._channel_filter_clocks_valid(model, dec0, dec1):
                         continue
 
-                    # calculated dec2 range
                     if demod_select == model.vars.demod_select.var_enum.BCR:
                         calc_min_dec2 = 1
                         calc_max_dec2 = 1
@@ -2222,35 +1863,28 @@ class CALC_Demodulator_ocelot(ICalculator):
                                 continue
                         else:
                             if (chfilt_osr_actual < min_chfilt_osr) or (chfilt_osr_actual > max_chfilt_osr):
-                                # not a solution, next value of dec1 loop
                                 continue
 
                     elif demod_select == model.vars.demod_select.var_enum.TRECS_SLICER or \
                          demod_select == model.vars.demod_select.var_enum.TRECS_VITERBI:
-                        # forcing integer osr condition, which applies to TRECS
-                        # check for TRECS minimum clk cycle requirements
                         calc_min_dec2 = ceil(min_src2 * float(adc_freq) / (osr * dec0 * dec1 * 8 * baudrate))
                         calc_max_dec2 = floor(max_src2 * float(adc_freq) / (osr * dec0 * dec1 * 8 * baudrate))
 
                         trecs_src_interp_okay = self._check_trecs_required_clk_cycles(adc_freq, baudrate, osr, dec0,
                                                                                      dec1, xtal_frequency_hz, relaxsrc2, model)
                         if not trecs_src_interp_okay:
-                            # not a solution due to trecs clocking constraints, continue
                             continue
                     else:
-                        # forcing integer osr condition, which applies to LEGACY, COHERENT
                         calc_min_dec2 = ceil(min_src2 * float(adc_freq) / (osr * dec0 * dec1 * 8 * baudrate))
                         calc_max_dec2 = floor(max_src2 * float(adc_freq) / (osr * dec0 * dec1 * 8 * baudrate))
 
                     if (calc_min_dec2 <= calc_max_dec2) and (calc_min_dec2 <= max_dec2) and \
                             (calc_max_dec2 >= min_dec2):
 
-                        # calculation of dec1 has constrained bwsel to range bwsel_min to bwsel_max
                         bwsel = bandwidth * (8 * dec0 * dec1) / float(adc_freq)
 
                         bwsel_error = abs(bwsel - target_bwsel)
 
-                        # Select largest bwsel as best result
                         if (bwsel_error < best_bwsel_error):
                             best_bwsel_error = bwsel_error
                             best_osr = osr
@@ -2260,17 +1894,12 @@ class CALC_Demodulator_ocelot(ICalculator):
 
             if best_osr > 0 and quitatfirstvalid:
 
-                # break out of the osr loop on first successful configuration
                 break
 
         return best_osr, best_dec0, best_dec1, min_osr, max_osr
 
 
     def return_dec0_list(self,if_frequency_hz,adc_freq):
-        # The purpose of this function is determine the prioritized dec0 list from decimation options 3,4,8
-        # Rules:
-        # 1) DEC0=8 was only designed for adc_freq <= 40MHz
-        # 2) DEC0 anti-aliasing rejection >60dB for DEC0=8 and 4
 
         first_null_d8 = float(adc_freq) / (8 * 8)
         ratio_d8 = float(if_frequency_hz) / first_null_d8
@@ -2279,10 +1908,8 @@ class CALC_Demodulator_ocelot(ICalculator):
         ratio_d4 = float(if_frequency_hz) / first_null_d4
 
         if (ratio_d8 < 0.248) and (adc_freq <= 40e6):
-            # 0.248 = (.125-.094)/.125 corresponds to >60dB attenuation on d0=8 response
             dec0_priority_list = [8,4,3]
         elif ratio_d4 < 0.27:
-            # 0.27 = (.25-0.1825)/.25 corresponds to >60dB attenuation on d0=4 response
             dec0_priority_list = [4,3]
         else:
             dec0_priority_list = [3,4]
@@ -2294,7 +1921,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         dec2_actual = model.vars.dec2_actual.value
         trecs_enabled = model.vars.trecs_enabled.value
 
-        # Current assumption is that we are going to use the REMOD path only for Viterbi/TRecS
         if trecs_enabled and (osr > 7 or dec2_actual > 1):
             reg = 1
         else:
@@ -2304,13 +1930,8 @@ class CALC_Demodulator_ocelot(ICalculator):
 
     def calc_remoddwn_reg(self, model):
         osr = model.vars.oversampling_rate_actual.value
-        #trecs_enabled = model.vars.trecs_enabled.value
 
-        # if trecs_enabled and osr > 7:
-        #     remoddwn = int(osr/4) - 1   # we know osr is a multiple of 4 if we're here
-        # else:
 
-        # We prefer to not use the slice and remod path so this shoudl always be 0
         remoddwn = 0
 
         self._reg_write(model.vars.MODEM_PHDMODCTRL_REMODDWN, remoddwn)
@@ -2327,9 +1948,7 @@ class CALC_Demodulator_ocelot(ICalculator):
         self._reg_write(model.vars.MODEM_PHDMODCTRL_REMODOSR, remodosr)
 
     def calc_target_demod_bandwidth(self, model):
-        # Calculate target demod bandwidth
 
-        #Load model variables into local variables
         mod_type = model.vars.modulation_type.value
         bw_carson = model.vars.bandwidth_carson_hz.value
         harddecision = model.vars.MODEM_VITERBIDEMOD_HARDDECISION.value
@@ -2347,7 +1966,6 @@ class CALC_Demodulator_ocelot(ICalculator):
             bw_demod = bw_carson
 
         else:
-            #Default values for other modulation types
             if (mod_type == model.vars.modulation_type.var_enum.OOK) or \
                     (mod_type == model.vars.modulation_type.var_enum.ASK):
                 bw_demod = baudrate * 5.0
@@ -2358,26 +1976,20 @@ class CALC_Demodulator_ocelot(ICalculator):
             else:
                 bw_demod = baudrate * 1.0
 
-        #Load local variables back into model variables
         model.vars.demod_bandwidth_hz.value = int(bw_demod)
 
     def calc_lock_bandwidth_actual(self, model):
-        # This function calculates the actual channel bandwidth based on adc rate, decimator, and bwsel settings
 
-        # Load model variables into local variables
         adc_freq_actual = model.vars.adc_freq_actual.value
         dec0_actual = model.vars.dec0_actual.value
         dec1_actual = model.vars.dec1_actual.value
         lock_bwsel = model.vars.lock_bwsel.value
         min_bwsel = model.vars.min_bwsel.value
 
-        # Lower limit - calc filter coeffs limits lock_bwsel to min_bwsel
         lock_bwsel_actual = max(lock_bwsel,min_bwsel)
 
-        # Calculate the actual channel bandwidth
         lock_bandwidth_actual = int(adc_freq_actual * lock_bwsel_actual / dec0_actual / dec1_actual / 8)
 
-        # Load local variables back into model variables
         model.vars.lock_bandwidth_actual.value = lock_bandwidth_actual
 
     def get_data_filter(self, datafilter):
@@ -2426,7 +2038,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         return df
 
     def gen_frequency_signal(self, x, sf, cf, sfosr, model):
-        # get parameters
         deviation = model.vars.deviation.value
         baudrate = model.vars.baudrate.value
         demodosr = round(model.vars.oversampling_rate_actual.value)
@@ -2443,23 +2054,16 @@ class CALC_Demodulator_ocelot(ICalculator):
             rawndec = model.vars.MODEM_BCRDEMODOOK_RAWNDEC.value #Moved inside BCR statement to allow inheritance
             dec2 = 2 ** rawndec
 
-        # scale shaping filter to desired amplitude OSR = 8
         sf = sf / np.sum(sf) * sfosr
 
-        # pulse shape OSR = 8
         y = sp.lfilter(sf, 1, x)
 
-        # apply deviation OSR = 8
         z = y * deviation
 
-        # integrate to get phase after scaling by sampling rate at TX OSR = 8
         t = np.cumsum(z / (baudrate * sfosr))
 
-        # modulate at baseband OSR = 8
         u = np.exp(1j * 2 * pi * t)
 
-        # resample at channel filter rate (e.g. sfosr -> osr) OSR = chflt_osr * src2
-        # FIXME: handle other remod paths here if we end up using them
         if remodpath:
             osr = demodosr * dec2
         else:
@@ -2467,23 +2071,15 @@ class CALC_Demodulator_ocelot(ICalculator):
 
         u2 = resample_poly_cached(u,osr*src2, sfosr*16384)
 
-        # channel filter OSR = chflt_osr * src2
         v = sp.lfilter(cf, 1, u2)
 
-        # src2 - resample to target OSR rate OSR = target_osr * dec2
         v2 = resample_poly_cached(v, 16384, src2)
 
-        # CORDIC OSR = target_osr * dec2
         a = np.unwrap(np.angle(v2))
 
-        # downsample by dec2 to get to target_osr if remod enabled
         if remodpath: #and remodoutsel == 1:
-            # differentiate phase to frequency OSR = target_osr * dec2
             f1 = a[1:] - a[0:-1]
-            #f = sp.resample_poly(f1, 1, dec2)
 
-            # when downsampling pick the best phase that results in max eye opening as we are going to feed the samples
-            # from here to the datafilter. Low value samples will bring the average soft decision to a lower value.
             best_min = 0
             for phase in range(dec2):
                 f2 = resample_poly_cached(f1[round(len(f1)/4)+phase:], 1, dec2)
@@ -2492,10 +2088,8 @@ class CALC_Demodulator_ocelot(ICalculator):
                     best_min = min_val
                     f = f2
         else:
-            # differentiate phase to frequency OSR = target_osr * dec2
             f = a[osr:] - a[0:-osr]
 
-        # optional decimation and filtering for remod paths
         if demod_select == model.vars.demod_select.var_enum.BCR:
             rawgain = model.vars.MODEM_BCRDEMODOOK_RAWGAIN.value #Moved inside BCR statement to allow inheritance
             rawfltsel = model.vars.MODEM_BCRDEMODCTRL_RAWFLTSEL.value
@@ -2509,7 +2103,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         else:
             g = f
 
-        # return frequency signal
         return g
 
     def _get_ksi_cache_gen_signal_inputs(self, model):
@@ -2531,17 +2124,14 @@ class CALC_Demodulator_ocelot(ICalculator):
         is_bcr = demod_select == model.vars.demod_select.var_enum.BCR
 
         return (
-            # Direct gen_frequency_signal() numeric inputs.
             ("deviation", model.vars.deviation.value),
             ("baudrate", model.vars.baudrate.value),
             ("src2_ratio", self._get_ksi_cache_src2_key(model)),
-            # Remod/data-filter control bits used in gen_frequency_signal().
             ("datafilter", model.vars.MODEM_CTRL2_DATAFILTER.value),
             ("remoden", model.vars.MODEM_PHDMODCTRL_REMODEN.value),
             ("remodoutsel", model.vars.MODEM_PHDMODCTRL_REMODOUTSEL.value),
             ("demod_select", str(demod_select)),
             ("dec2_actual", model.vars.dec2_actual.value),
-            # BCR-only path controls (ignored for non-BCR demod modes).
             ("bcr_rawndec", model.vars.MODEM_BCRDEMODOOK_RAWNDEC.value if is_bcr else None),
             ("bcr_rawgain", model.vars.MODEM_BCRDEMODOOK_RAWGAIN.value if is_bcr else None),
             ("bcr_rawfltsel", model.vars.MODEM_BCRDEMODCTRL_RAWFLTSEL.value if is_bcr else None),
@@ -2567,40 +2157,32 @@ class CALC_Demodulator_ocelot(ICalculator):
 
     def _build_ksi_cache_key(self, model, ksi1, lock_bwsel, bwsel, osr, sf):
         cache_inputs = (
-            # Stable labels for readability + deterministic key structure.
             ("ksi1", ksi1),
             ("lock_bwsel", lock_bwsel),
             ("bwsel", bwsel),
             ("osr", osr),
             ("sf", sf),
-            # Prevent cross-part collisions in shared Ocelot-family cache.
             ("impl", self._get_ksi_cache_impl_discriminator()),
             ("gen_signal", self._get_ksi_cache_gen_signal_inputs(model)),
         )
         cache_inputs += tuple(self._get_ksi_cache_additional_inputs(model))
-        # Version tag allows future key-shape changes without colliding old entries.
-        # freeze_for_cache converts nested/numpy-heavy inputs into a stable hashable key.
         return ("ocelot_ksi2_ksi3_v2", freeze_for_cache(cache_inputs))
 
     def return_ksi2_ksi3_calc(self, model, ksi1):
-        # get parameters
         lock_bwsel = model.vars.lock_bwsel.value # use the lock bw
         bwsel = model.vars.bwsel.value  # use the lock bw
         osr = int(round(model.vars.oversampling_rate_actual.value))
 
         _ksi_key = None  # result cache key; set inside else block when inputs are available
 
-        # calculate only if needed - ksi1 would be already calculated if that is the case
         if (ksi1 == 0):
             best_ksi2 = 0
             best_ksi3 = 0
             best_ksi3wb = 0
         else:
-            # get shaping filter and it oversampling rate with respect to baudrate
             sf = CALC_Shaping_ocelot().get_shaping_filter(model)/1.0
             sfosr = 8 # shaping filter coeffs are sampled at 8x
 
-            # Check result cache before expensive DSP computation (kaiser/firwin/resample_poly)
             if _ADVANCED_CACHE_EN:
                 try:
                     _ksi_key = self._build_ksi_cache_key(model, ksi1, lock_bwsel, bwsel, osr, sf)
@@ -2608,51 +2190,34 @@ class CALC_Demodulator_ocelot(ICalculator):
                     if _cached is not None:
                         return _cached
                 except Exception:
-                    # Never block calculation on cache-key construction edge cases.
-                    # Fallback is compute-without-cache for this invocation.
                     _ksi_key = None
 
-            # get channel filter and expend the symmetric part
             cfh = np.asarray(self.return_coeffs(lock_bwsel))
             cf = np.block([cfh, cfh[-2::-1]])/1.0
             cfh = np.asarray(self.return_coeffs(bwsel))
             cfwb = np.block([cfh, cfh[-2::-1]])/1.0
 
-            # base sequences for +1 and -1
             a = np.array([ 1.0, 0, 0, 0, 0, 0, 0, 0])
             b = np.array([-1.0, 0, 0, 0, 0, 0, 0, 0])
 
-            # generate frequency signal for periodic 1 1 1 0 0 0 sequence for ksi1
             x1 = np.matlib.repmat(np.append(np.matlib.repmat(a, 1, 3),np.matlib.repmat(b, 1, 3)), 1, 4)
             f1 = self.gen_frequency_signal( x1[0], sf, cf, sfosr, model)
 
-            # generate frequency signal for periodic 1 1 0 0 1 1 sequence for ksi2
             x2 = np.matlib.repmat(np.append(np.matlib.repmat(a, 1, 2), np.matlib.repmat(b, 1, 2)), 1, 6)
             f2 = self.gen_frequency_signal( x2[0], sf, cf, sfosr, model)
 
-            # generate frequency signal for periodic 1 0 1 0 1 0 sequence for ksi3
             x3 = np.matlib.repmat(np.append(np.matlib.repmat(a, 1, 1), np.matlib.repmat(b, 1, 1)), 1, 12)
             f3 = self.gen_frequency_signal( x3[0], sf, cf, sfosr, model)
 
-            # generate frequency signal for periodic 1 0 1 0 1 0 sequence for ksi3 but with aqcusition channel filter
             f3wb = self.gen_frequency_signal( x3[0], sf, cfwb, sfosr, model)
 
-            # find scaling needed to get f1 to the desired ksi1 value and apply it to f2 and f3
             ind = osr - 1
             scaler = ksi1 / np.max(np.abs(f1[ind + 8 * osr - 1: - 2 * osr: osr]))
             f2 = scaler * f2
             f3 = scaler * f3
             f3wb = scaler * f3wb
 
-            # from matplotlib import pyplot as plt
-            # plt.plot(f1*scaler,'x-')
-            # plt.show()
-            # plt.plot(f2,'x-')
-            # plt.plot(f3,'x-')
-            # plt.plot(f3wb,'x-')
 
-            # search for best phase to sample to get ksi3 value.
-            # best phase is the phase that gives largest eye opening
             best_ksi3 = 0
             for ph in range(osr):
                 ksi3 = np.max(np.round(np.abs(f3[ - 6 * osr + ph: - 2 * osr: osr])))
@@ -2665,11 +2230,6 @@ class CALC_Demodulator_ocelot(ICalculator):
                 if ksi3wb > best_ksi3wb:
                     best_ksi3wb = ksi3wb
 
-            # ksi2 is tricky depending if we sampled perfectly (symmetric around a
-            # pulse we should see the same value for 1 1 0 and 0 1 1 sequence but
-            # most of the time we cannot sample perfectly since can go as low as 4x
-            # oversampling for Viterbi PHYs. In this case we have 2 ksi values which we
-            # average to get the ksi2 value
             best_cost = 1e9
             for ph in range(osr):
                 x = np.round(np.abs(f2[- 6 * osr + ph: - 2 * osr: osr]))
@@ -2678,9 +2238,6 @@ class CALC_Demodulator_ocelot(ICalculator):
                     best_cost = cost
                     best_ksi2 = np.round(np.mean(x))
 
-        # ensure that ksi1 >= ksi2 >= ksi3
-        # this code should only be needed in the extreme case when ksi1 = ksi2 = ksi3 and
-        # small variation can cause one to be larger than the other
         best_ksi2 = ksi1 if best_ksi2 > ksi1 else best_ksi2
         best_ksi3 = best_ksi2 if best_ksi3 > best_ksi2 else best_ksi3
         best_ksi3wb = best_ksi2 if best_ksi3wb > best_ksi2 else best_ksi3wb
@@ -2695,28 +2252,21 @@ class CALC_Demodulator_ocelot(ICalculator):
         return model.vars.MODEM_SRCCHF_SRCRATIO2.value
 
     def calc_ksi2_ksi3(self, model):
-        # This function writes the ksi2,3 model variables that are used to program both
-        # hardmodem and softmodem ksi regs
 
-        #Read in model vars
         ksi1 = model.vars.ksi1.value
 
-        # Call the calculation routine for ksi2 and ksi3
         ksi2, ksi3, ksi3wb = self.return_ksi2_ksi3_calc(model, ksi1)
 
-        #Write the model vars
         model.vars.ksi2.value = int(ksi2)
         model.vars.ksi3.value = int(ksi3)
         model.vars.ksi3wb.value = int(ksi3wb)
 
     def calc_ksi2_ksi3_reg(self, model):
 
-        #Read in model vars
         ksi2 = model.vars.ksi2.value
         ksi3 = model.vars.ksi3.value
         ksi3wb = model.vars.ksi3wb.value
 
-        #Write the reg fields
         self._reg_sat_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI2, int(ksi2))
         self._reg_sat_write(model.vars.MODEM_VITERBIDEMOD_VITERBIKSI3, int(ksi3))
         self._reg_sat_write(model.vars.MODEM_VTCORRCFG1_VITERBIKSI3WB, int(ksi3wb))
@@ -2742,35 +2292,22 @@ class CALC_Demodulator_ocelot(ICalculator):
         cplxcorr_enabled = model.vars.MODEM_CTRL6_CPLXCORREN.value
         dsss_len = model.vars.dsss_len_actual.value
 
-        # : For coherent demod, set prefilter length to 4 symbols
         if demod_select == model.vars.demod_select.var_enum.COHERENT:
             prefilter_len_actual = dsss_len * 4
-            # If complex correlation is enabled, max length is 64 (prefilter_len_reg = 1)
             if cplxcorr_enabled == 1:
                 if prefilter_len_actual > 64:
                     prefilter_len_actual = 64
         else: # : default value for all other demods
             prefilter_len_actual = 64
-        # : convert actual length to register values
         prefilter_len_reg = int(round(prefilter_len_actual / 32.0 - 1.0))
 
         self._reg_write(model.vars.MODEM_LONGRANGE1_PREFILTLEN, prefilter_len_reg)
 
     def calc_demod_misc(self, model):
-        #Now that we always use the digital mixer, the CFOSR reg field is never used
         self._reg_do_not_care(model.vars.MODEM_CF_CFOSR)
 
     def _check_trecs_required_clk_cycles(self, adc_freq, baudrate, osr, dec0, dec1, xtal_frequency_hz, relaxsrc2, model):
-        # Returns True if the filter chain configuration meets the requirement for trecs
-        # minimum clock cycles between samples. Returns False if the configuration is invalid
-        #
-        # IPMCUSRW-668 - TRECS requires minimum of 4 clk between samples. SRC interpolation on ocelot
-        # has a fixed 3 clk separation and cannot be used with TRECS. Limiting max_src2_ratio is sufficient
-        # for ocelot, but this function is used by inherited classes which are able to adjust the
-        # interpolated sample clk delay
 
-        # calculate the src_ratio as this function is called in the process of evaluating
-        # osr, dec0, dec1, so the src_ratio_actual cannot be calculated
         dec1_freq = adc_freq / (8 * dec0 * dec1)
         src_freq = baudrate * osr
         src_ratio = src_freq / dec1_freq
@@ -2779,11 +2316,7 @@ class CALC_Demodulator_ocelot(ICalculator):
         is_vcodiv = model.vars.adc_clock_mode.value == model.vars.adc_clock_mode.var_enum.VCODIV
 
         if src_ratio > 1:
-            # ocelot has fixed clk delay of 3
 
-            # IPMCUSRW-668 when it occurs causes slightly slower waterfall curves, and minor < 1% PER bumps
-            # if a PHY suffers from IPMCUSRW-876 (channel filter clocks), it is preferable to solve the channel
-            # filter issue by allowing the PHY workaround of a lower f_dec1 and interpolation on SRC2
             bandwidth_threshold = 38e6 / 4 * 0.2  # minimum hfxo / chf_clks_per_sample * min_bwsel
             return relaxsrc2 and is_vcodiv and bandwidth_hz > bandwidth_threshold
         else:
@@ -2812,7 +2345,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         rxrestartmathreshold = 6
         rxrestartuponmarssi = 0
 
-        #The following need to be set the same regardless of antdiv enable
         self._reg_write(model.vars.MODEM_RXRESTART_FLTRSTEN, fltrsten)
         self._reg_write(model.vars.MODEM_RXRESTART_ANTSWRSTFLTTDIS, antswrstfltdis)
 
@@ -2833,22 +2365,17 @@ class CALC_Demodulator_ocelot(ICalculator):
             self._reg_write(model.vars.MODEM_RXRESTART_RXRESTARTUPONMARSSI, rxrestartuponmarssi)
 
     def calc_preamble_detection_length(self, model):
-        #This method calculates a defualt value for preamble_detection_length
 
         preamble_length = model.vars.preamble_length.value
         directmode_rx = model.vars.directmode_rx.value
 
         if directmode_rx != model.vars.directmode_rx.var_enum.DISABLED:
-            # No preamble is expected in direct mode, so any DSA configuration should bypass preamble search
             model.vars.preamble_detection_length.value = 0
         else:
-            # Set the preamble detection length to the preamble length (TX) by default
             model.vars.preamble_detection_length.value = preamble_length
 
     def calc_detdis_reg(self, model):
-        #This method calculates the MODEM_CTRL0_DETDIS field
 
-        #For Ocelot always set to 0
         self._reg_write(model.vars.MODEM_CTRL0_DETDIS, 0)
 
     def calc_dec1gain_actual(self, model):
@@ -2870,9 +2397,7 @@ class CALC_Demodulator_ocelot(ICalculator):
         model.vars.dec1gain_actual.value = val
 
     def calc_rssi_dig_adjust_db(self, model):
-        #These variables are passed to RAIL so that RSSI corrections can be made to more accurately measure power
 
-        #Read in model vars
         dec0gain = model.vars.MODEM_DIGIGAINCTRL_DEC0GAIN.value
         dec1_actual = model.vars.dec1_actual.value
         dec1gain_actual = model.vars.dec1gain_actual.value
@@ -2882,7 +2407,6 @@ class CALC_Demodulator_ocelot(ICalculator):
         digigainhalf = model.vars.MODEM_DIGIGAINCTRL_DIGIGAINHALF.value
         log2x4_actual = model.vars.log2x4_actual.value
 
-        #Calculate gains
 
         dec0_gain_db = 6.0*dec0gain
 
@@ -2895,22 +2419,14 @@ class CALC_Demodulator_ocelot(ICalculator):
             digigain_db = 0.0
         digigain_db += 6*digigaindouble-6*digigainhalf
 
-        # For consistency / simplicity, let's treat the rssi_adjust_db  output from the calculator like RAIL handles
-        # EFR32_FEATURE_SW_CORRECTED_RSSI_OFFSET in that the value is thought to be added to the RSSI
-        # So to compensate for the digital gain, the value should be the negative of the excess gain
-        # Note that RSSISHIFT is actually subtracted from the RSSI, but EFR32_FEATURE_SW_CORRECTED_RSSI_OFFSET is
-        # subtracted from the default RSSISHIFT so that the proper sign is maintained
         rssi_dig_adjust_db = -(dec1_gain_db + digigain_db)
 
-        #Write the vars
         model.vars.rssi_dig_adjust_db.value = rssi_dig_adjust_db
 
     def calc_rssi_rf_adjust_db(self, model):
 
-        #Read in model vars
         rf_band = model.vars.rf_band.value
 
-        #Calculate rf adjustment based on band
         if rf_band == model.vars.rf_band.var_enum.BAND_169:
             rssi_rf_adjust_db = -15.5
         elif rf_band == model.vars.rf_band.var_enum.BAND_315:
@@ -2926,27 +2442,19 @@ class CALC_Demodulator_ocelot(ICalculator):
             LogMgr.Warning("Warning: No RSSI adjustment available for this band")
             rssi_rf_adjust_db = 0.0
 
-        #Write the model var
         model.vars.rssi_rf_adjust_db.value = rssi_rf_adjust_db
 
     def calc_rssi_adjust_db(self, model):
 
-        #Read in model vars
         rssi_dig_adjust_db = model.vars.rssi_dig_adjust_db.value
         rssi_rf_adjust_db = model.vars.rssi_rf_adjust_db.value
 
-        #Add digital and RF adjustments
         rssi_adjust_db = rssi_dig_adjust_db + rssi_rf_adjust_db
 
-        #Write the model var
         model.vars.rssi_adjust_db.value = rssi_adjust_db
 
     def _channel_filter_clocks_valid(self, model, dec0, dec1):
-        # returns if the requested configuration is safe to not trigger ipmcusrw-876
-        # to avoid the channel filter sampling issue, clks_per_sample >= 4
-        # helper function for return_osr_dec0_dec1
 
-        # no margin on the first check. hfxomult clocking at exactly 4 clks/sample will not trigger this issue
         safe_clks_per_sample = self.chf_required_clks_per_sample
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
         adc_freq = model.vars.adc_freq_actual.value
@@ -2957,15 +2465,10 @@ class CALC_Demodulator_ocelot(ICalculator):
         clks_per_sample = xtal_frequency_hz / f_dec1
         base_config_valid = clks_per_sample >= safe_clks_per_sample
 
-        # for lodiv based clocking, sample rate varies with RF. VCODIV PHYs are only used in the 2.4G band
-        # maximum ppm change can be determined by the min, max of the FCC band of 2400-2483.5 MHz
-        # for current 2.4G LODIV products, if its LODIV and subG the channel plan doesn't span
-        # wide enough where this is a problem
         in_2p4G_band = base_frequency_hz >= 2400e6 and base_frequency_hz <= 2500e6
         if adc_clock_mode_actual == model.vars.adc_clock_mode.var_enum.VCODIV and in_2p4G_band:
             max_rf_frequency = 2480e6
             max_ppm = (max_rf_frequency - base_frequency_hz) / base_frequency_hz
-            # (1-max_ppm because adc_freq is in the denominator
             clks_per_sample_highest_channel = clks_per_sample * (1 - max_ppm)
             highest_channel_valid = clks_per_sample_highest_channel >= self.chf_required_clks_per_sample
             valid = base_config_valid and highest_channel_valid
@@ -2974,28 +2477,21 @@ class CALC_Demodulator_ocelot(ICalculator):
         return valid
 
     def calc_phscale_derate_factor(self, model):
-        #This function calculates the derating factor for PHSCALE for TRECS PHYs with large freq offset tol
 
-        #Always set to 1 on Ocelot for now
         phscale_derate_factor = 1
 
-        #Write the model var
         model.vars.phscale_derate_factor.value = phscale_derate_factor
 
     def calc_log2x4_actual(self, model):
-        # Read in model vars
         dec1_actual = model.vars.dec1_actual.value
 
         log2x4_actual = floor(4*log2(dec1_actual))
 
-        # Write the model var
         model.vars.log2x4_actual.value = log2x4_actual
 
     def calc_directmode_regs(self, model):
-        # Populate directmode default variables
         model.vars.directmode_rx.value = model.vars.directmode_rx.var_enum.DISABLED
 
-        ### select asynchronous direct mode
         directmode_rx = model.vars.directmode_rx.value
 
         if directmode_rx == model.vars.directmode_rx.var_enum.ASYNC:

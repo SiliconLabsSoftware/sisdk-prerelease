@@ -2,6 +2,9 @@ id: zw_end_device
 label: Z-Wave End Device
 category: Z-Wave
 description: Z-Wave End Device Component
+documentation:
+  docset: z-wave
+  document: z-wave-development-basics/#z-wave-plus-device-type-and-role-type-specifications
 package: zwave
 quality: production
 metadata:

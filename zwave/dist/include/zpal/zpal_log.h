@@ -14,6 +14,14 @@
 #ifndef ZPAL_LOG_H_
 #define ZPAL_LOG_H_
 
+/**
+ * @addtogroup zpal
+ * @{
+ * @addtogroup zpal-log
+ * @brief Defines a platform abstraction layer for Z-Wave logging.
+ * @{
+ */
+
 typedef enum zpal_log_level_t_ {
   ZPAL_LOG_LEVEL_DEBUG,
   ZPAL_LOG_LEVEL_INFO,
@@ -128,4 +136,10 @@ void zpal_log(
 #if defined(__clang__)
 #pragma clang diagnostic pop // "-Wgnu-zero-variadic-macro-arguments"
 #endif // defined(__clang__)
+
+/**
+ * @}
+ * @}
+ */
+
 #endif /* ZPAL_LOG_H */

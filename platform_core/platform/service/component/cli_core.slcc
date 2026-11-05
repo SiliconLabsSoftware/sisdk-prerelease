@@ -34,6 +34,7 @@ source:
 provides:
 - name: cli_core
 requires:
+- name: log_none
 - name: component_catalog
 - name: sl_string
 - name: status

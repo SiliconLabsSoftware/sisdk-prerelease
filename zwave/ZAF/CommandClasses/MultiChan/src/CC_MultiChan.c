@@ -188,6 +188,15 @@ static void CmdClassMultiChannelEncapsulateCmd(
   cc_handler_output_t * output)
 {
   ZW_MULTI_CHANNEL_CMD_ENCAP_V2_FRAME *pCmd = (ZW_MULTI_CHANNEL_CMD_ENCAP_V2_FRAME *) input->frame;
+
+  if (input->length <= CC_MULTICHAN_ENCAP_HEADER_SIZE) {
+    return;
+  }
+  const uint8_t encapsulated_length = input->length - CC_MULTICHAN_ENCAP_HEADER_SIZE;
+  if (encapsulated_length > sizeof(ZW_APPLICATION_TX_BUFFER)) {
+    return;
+  }
+
   uint8_t number_of_endpoints = zaf_config_get_number_of_endpoints();
 
 #pragma GCC diagnostic push
@@ -247,14 +256,15 @@ static void CmdClassMultiChannelEncapsulateCmd(
      * command, a copy of the encapsulated frame must be used for each iteration
      * of the loop.
      */
-    ZW_APPLICATION_TX_BUFFER encapsulatedFrame = *(ZW_APPLICATION_TX_BUFFER*)&pCmd->encapFrame;
+    ZW_APPLICATION_TX_BUFFER encapsulatedFrame = { 0 };
+    memcpy(&encapsulatedFrame, &pCmd->encapFrame, encapsulated_length);
 
     if (true == ZAF_CC_MultiChannel_IsCCSupported(input->rx_options, &encapsulatedFrame)) {
       /* Command class supported */
       cc_handler_input_t input_encap = {
         .rx_options = input->rx_options,
         .frame = &encapsulatedFrame,
-        .length = input->length - CC_MULTICHAN_ENCAP_HEADER_SIZE
+        .length = encapsulated_length
       };
 
       // No encapsulation, use original output frame.

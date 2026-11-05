@@ -31,5 +31,3 @@ requires:
 - name: hal_gpio
 - name: hal_prs
 - name: hal_ldma
-- name: slist
-- name: status

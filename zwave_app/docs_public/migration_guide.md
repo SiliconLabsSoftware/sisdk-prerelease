@@ -30,6 +30,10 @@ PAL helpers were moved to the Z-Wave stack API in `ZW_product_infos.h`:
 
 Update includes: replace `zpal_misc.h` usage for these APIs with `ZW_product_infos.h`. Silicon Labs applications link the strong implementations from `ZW_version.c` via the `zw_versions` component. The deprecated APIs remain available until their removal through `zw_legacy_api`.
 
+### Stay-awake handling
+
+`zaf_stay_awake()` and its callback accessors are deprecated. The stack now manages linger periods automatically through `zw_linger`. Applications that used the callback accessors should migrate to `ZW_LingerSetCallback()`; its callback runs when the linger period expires. The legacy symbols remain available through `zw_legacy_api` until removal.
+
 # 8.1.0 {#migrate-section-8-1-0}
 
 ## Sleeptimer peripheral configuration 

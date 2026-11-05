@@ -436,7 +436,7 @@ template_contribution:
         - type: uint8
           help: "lfn_limit: Number of locally supported LFN"
   - name: "cli_command"
-    condition: [wisun_stack_ffn]
+    condition: [wisun_stack_ffn, wisun_ffn_power_saving]
     value:
       group: "wisun"
       name: "set_ffn_power_saving"
@@ -625,16 +625,6 @@ template_contribution:
       help: "reset Wi-SUN parameters"
       shortcuts:
         - name: "rstpar"
-  - name: "cli_command"
-    condition: [wisun_lxpm]
-    value:
-      group: "wisun"
-      name: "set_lxpm_prefix"
-      handler: "app_set_lxpm_prefix"
-      help: "Set Local Cross-PAN Multicast prefix"
-      argument:
-        - type: string
-          help: "LXPM prefix"
 
 # -------------------------------
   - name: "cli_group"

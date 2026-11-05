@@ -28,7 +28,6 @@ class CALC_Firmware(ICalculator):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Output fields
         self._addModelRegister(model, 'MODEM.RAMPLEV.RAMPLEV0'          , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'MODEM.RAMPLEV.RAMPLEV1'          , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'MODEM.RAMPLEV.RAMPLEV2'          , int, ModelVariableFormat.HEX )
@@ -44,8 +43,6 @@ class CALC_Firmware(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
         if model.part_family.lower() in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
-            # skip this for Panther as the preference was to manually re-write the reset values         
-            # MCUW_RADIO_CFG-734 Panther: PHY/MAC Design requests more registers added (all MODEM, AGC, etc.) with re-writes of reset values
             model.vars.MODEM_RAMPLEV_RAMPLEV0.value = None
             model.vars.MODEM_RAMPLEV_RAMPLEV1.value = None
             model.vars.MODEM_RAMPLEV_RAMPLEV2.value = None

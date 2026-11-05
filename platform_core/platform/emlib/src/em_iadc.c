@@ -32,7 +32,7 @@
 
 #if defined(IADC_COUNT) && (IADC_COUNT > 0)
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_cmu.h"
 #include "sl_common.h"
 #include <stddef.h>
@@ -233,7 +233,7 @@ void IADC_init(IADC_TypeDef *iadc,
   const float osrHiAcc[6] = { 16.0, 32.0, 64.0, 92.0, 128.0, 256.0 };
 #endif
 
-  EFM_ASSERT(IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(IADC_REF_VALID(iadc));
 
   // Calculate min allowed SRC_CLK prescaler setting
   srcClkPrescale = IADC_calcSrcClkPrescale(iadc, IADC_CLK_MAX_FREQ, 0);
@@ -494,7 +494,7 @@ void IADC_init(IADC_TypeDef *iadc,
 #endif
       default:
         // Mode not supported.
-        EFM_ASSERT(false);
+        SL_LOG_DEBUG_ASSERT(false);
         break;
     }
     iadc->CFG[config].SCHED = ((adcClkPrescale << _IADC_SCHED_PRESCALE_SHIFT)
@@ -532,10 +532,10 @@ void IADC_initScan(IADC_TypeDef *iadc,
 {
   uint32_t i;
   uint32_t tmp;
-  EFM_ASSERT(IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(IADC_REF_VALID(iadc));
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
   // Errata IADC_E305. Makes sure that DVL is equal or less than 7 entries.
-  EFM_ASSERT(init->dataValidLevel <= iadcFifoCfgDvl7);
+  SL_LOG_DEBUG_ASSERT(init->dataValidLevel <= iadcFifoCfgDvl7);
 #endif
 
   IADC_disable(iadc);
@@ -609,10 +609,10 @@ void IADC_initSingle(IADC_TypeDef *iadc,
                      const IADC_InitSingle_t *init,
                      const IADC_SingleInput_t *input)
 {
-  EFM_ASSERT(IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(IADC_REF_VALID(iadc));
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
   // Errata IADC_E305. Makes sure that DVL is equal or less than 7 entries.
-  EFM_ASSERT(init->dataValidLevel <= iadcFifoCfgDvl7);
+  SL_LOG_DEBUG_ASSERT(init->dataValidLevel <= iadcFifoCfgDvl7);
 #endif
   IADC_disable(iadc);
 
@@ -665,7 +665,7 @@ void IADC_updateSingleInput(IADC_TypeDef *iadc,
 {
   bool enabled;
 
-  EFM_ASSERT(IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(IADC_REF_VALID(iadc));
 
   enabled = (iadc->EN & IADC_EN_EN) != 0UL;
 
@@ -705,9 +705,9 @@ void IADC_setScanMask(IADC_TypeDef *iadc, uint32_t mask)
 {
   bool enabled;
 
-  EFM_ASSERT(IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(IADC_REF_VALID(iadc));
 
-  EFM_ASSERT(mask <= ((1UL << IADC_SCANENTRIES(iadc)) - 1UL));
+  SL_LOG_DEBUG_ASSERT(mask <= ((1UL << IADC_SCANENTRIES(iadc)) - 1UL));
 
   enabled = (iadc->EN & IADC_EN_EN) != 0UL;
 
@@ -749,7 +749,7 @@ void IADC_updateScanEntry(IADC_TypeDef *iadc,
 {
   bool enabled;
 
-  EFM_ASSERT(IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(IADC_REF_VALID(iadc));
 
   enabled = (iadc->EN & IADC_EN_EN) != 0UL;
 
@@ -790,7 +790,7 @@ void IADC_updateScanEntry(IADC_TypeDef *iadc,
 void IADC_reset(IADC_TypeDef *iadc)
 {
   uint32_t i;
-  EFM_ASSERT(IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(IADC_REF_VALID(iadc));
 
   // Write all WSYNC registers to reset value while enabled
   IADC_enable(iadc);
@@ -876,7 +876,8 @@ void IADC_reset(IADC_TypeDef *iadc)
  ******************************************************************************/
 uint8_t IADC_calcTimebase(IADC_TypeDef *iadc, uint32_t srcClkFreq)
 {
-  EFM_ASSERT(IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(IADC_REF_VALID(iadc));
+  (void)iadc;
 
   if (srcClkFreq == 0UL) {
     // CLK_SRC_ADC is derived from CLK_CMU_ADC, and must be no faster than 40 MHz. Therefore we set
@@ -935,8 +936,8 @@ uint8_t IADC_calcSrcClkPrescale(IADC_TypeDef *iadc,
 {
   uint32_t ret;
 
-  EFM_ASSERT(IADC_REF_VALID(iadc));
-  EFM_ASSERT(srcClkFreq);
+  SL_LOG_DEBUG_ASSERT(IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(srcClkFreq);
 
   // Make sure wanted CLK_SRC_ADC clock is below max allowed frequency
   srcClkFreq = SL_MIN(srcClkFreq, IADC_CLK_MAX_FREQ);
@@ -993,8 +994,8 @@ uint32_t IADC_calcAdcClkPrescale(IADC_TypeDef *iadc,
   uint32_t ret;
   uint32_t resFreq;
 
-  EFM_ASSERT(IADC_REF_VALID(iadc));
-  EFM_ASSERT(adcClkFreq);
+  SL_LOG_DEBUG_ASSERT(IADC_REF_VALID(iadc));
+  SL_LOG_DEBUG_ASSERT(adcClkFreq);
 
   // Make sure wanted analog clock is below max allowed frequency for the given
   // mode.
@@ -1166,7 +1167,7 @@ uint32_t IADC_getReferenceVoltage(IADC_CfgReference_t reference)
       break;
 #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 

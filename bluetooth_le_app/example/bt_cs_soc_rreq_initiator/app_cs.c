@@ -278,9 +278,10 @@ sl_status_t app_cs_create_new_initiator_instance(uint8_t conn_handle,
 /******************************************************************************
  * Check if the remote device supports the required capabilities
  *****************************************************************************/
-void app_cs_check_supported_capabilities(const sl_bt_msg_t *evt)
+sl_status_t app_cs_check_supported_capabilities(const sl_bt_msg_t *evt)
 {
   sl_status_t sc;
+  sl_status_t status = SL_STATUS_OK;
   app_cs_capabilities_t local_caps = { 0 };
   const sl_bt_evt_cs_read_remote_supported_capabilities_complete_t *remote_evt =
     &evt->data.evt_cs_read_remote_supported_capabilities_complete;
@@ -331,35 +332,39 @@ void app_cs_check_supported_capabilities(const sl_bt_msg_t *evt)
       && ((local_caps.subfeatures >> CS_CHANNEL_SELECTION_ALGORITHM_3C_SUBFEATURE_BITMASK & 0x01) == 0
           || (remote_evt->subfeatures
               >> CS_CHANNEL_SELECTION_ALGORITHM_3C_SUBFEATURE_BITMASK & 0x01) == 0)) {
-    app_assert(false,
-               APP_PREFIX "Requested CS channel selection algorithm "
-                          " #3c is not supported by the local/remote device" APP_LOG_NL);
+    cs_on_error(conn_handle,
+                CS_APP_ERROR_CHANNEL_SELECTION_NOT_SUPPORTED,
+                SL_STATUS_NOT_SUPPORTED);
+    status = SL_STATUS_NOT_SUPPORTED;
   }
   // local device doesn't support initiator role
   // or remote device doesn't support reflector role
   if ((local_caps.roles >> CS_ROLE_INITIATOR_SUBFEATURE_BITMASK & 0x01) == 0
       || (remote_evt->roles
           >> CS_ROLE_REFLECTOR_SUBFEATURE_BITMASK & 0x01) == 0) {
-    app_assert(false,
-               APP_PREFIX "Requested CS role is not supported by the "
-                          "local/remote device" APP_LOG_NL);
+    cs_on_error(conn_handle,
+                CS_APP_ERROR_CS_ROLE_NOT_SUPPORTED,
+                SL_STATUS_NOT_SUPPORTED);
+    status = SL_STATUS_NOT_SUPPORTED;
   }
   // [RTT AA only] is set but local/remote device doesn't support it
   if ((cs_config.rtt_type == sl_bt_cs_rtt_type_aa_only)
       && (local_caps.rtt_aa_only == 0
           || remote_evt->rtt_aa_only == 0)) {
-    app_assert(false,
-               APP_PREFIX "RTT AA only is not supported by the local/ "
-                          "remote device" APP_LOG_NL);
+    cs_on_error(conn_handle,
+                CS_APP_ERROR_RTT_AA_ONLY_NOT_SUPPORTED,
+                SL_STATUS_NOT_SUPPORTED);
+    status = SL_STATUS_NOT_SUPPORTED;
   }
   // [RTT Sounding] is set but local/remote device doesn't support it
   if ((cs_config.rtt_type == sl_bt_cs_rtt_type_fractional_32_bit_sounding
        || cs_config.rtt_type == sl_bt_cs_rtt_type_fractional_96_bit_sounding)
       && (local_caps.rtt_sounding == 0
           || remote_evt->rtt_sounding == 0)) {
-    app_assert(false,
-               APP_PREFIX "RTT sounding is not supported by the local/remote "
-                          "device" APP_LOG_NL);
+    cs_on_error(conn_handle,
+                CS_APP_ERROR_RTT_SOUNDING_NOT_SUPPORTED,
+                SL_STATUS_NOT_SUPPORTED);
+    status = SL_STATUS_NOT_SUPPORTED;
   }
   // [RTT Random] is set but local/remote device doesn't support it
   if ((cs_config.rtt_type == sl_bt_cs_rtt_type_fractional_32_bit_random
@@ -368,9 +373,13 @@ void app_cs_check_supported_capabilities(const sl_bt_msg_t *evt)
        || cs_config.rtt_type == sl_bt_cs_rtt_type_fractional_128_bit_random)
       && (local_caps.rtt_random_payload == 0
           || remote_evt->rtt_random_payload == 0)) {
-    app_assert(false,
-               APP_PREFIX "RTT random is not supported by the local/ "
-                          "remote device" APP_LOG_NL);
+    cs_on_error(conn_handle,
+                CS_APP_ERROR_RTT_RANDOM_NOT_SUPPORTED,
+                SL_STATUS_NOT_SUPPORTED);
+    status = SL_STATUS_NOT_SUPPORTED;
+  }
+  if (status != SL_STATUS_OK) {
+    return status;
   }
   // Select antennas, limited by the minimum supported antenna paths
   uint8_t max_antenna_paths =
@@ -384,6 +393,7 @@ void app_cs_check_supported_capabilities(const sl_bt_msg_t *evt)
                                    max_antenna_paths,
                                    &procedure_parameters,
                                    &negotiated_num_antenna_paths);
+  return SL_STATUS_OK;
 }
 
 /******************************************************************************
@@ -585,6 +595,7 @@ static void app_on_cs_manager_event(uint8_t conn_handle,
         cs_on_error(conn_handle, CS_APP_ERROR_ALGO_CREATE_FAILED, sc);
         break;
       }
+      log_info(APP_INSTANCE_PREFIX "Algo instance created" NL, conn_handle);
       // Start procedure
       sc = cs_manager_start(conn_handle, config_id, &procedure_parameters);
       if (sc != SL_STATUS_OK) {

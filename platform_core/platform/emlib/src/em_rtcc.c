@@ -31,6 +31,7 @@
 #include "em_rtcc.h"
 #if defined(RTCC_COUNT) && (RTCC_COUNT == 1)
 #include "em_bus.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup rtcc RTCC - Real Timer Counter/Calendar
@@ -73,10 +74,10 @@
  ******************************************************************************/
 void RTCC_ChannelInit(int ch, RTCC_CCChConf_TypeDef const *confPtr)
 {
-  EFM_ASSERT(RTCC_CH_VALID(ch));
+  SL_LOG_DEBUG_ASSERT(RTCC_CH_VALID(ch));
 
 #if defined(_SILICON_LABS_32B_SERIES_1)
-  EFM_ASSERT((uint32_t)confPtr->compMask
+  SL_LOG_DEBUG_ASSERT((uint32_t)confPtr->compMask
              < (_RTCC_CC_CTRL_COMPMASK_MASK >> _RTCC_CC_CTRL_COMPMASK_SHIFT)
              + 1U);
 

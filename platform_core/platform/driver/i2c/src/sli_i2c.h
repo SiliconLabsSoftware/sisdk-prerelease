@@ -38,6 +38,18 @@ extern "C" {
 #endif
 
 /*******************************************************************************
+ *******************************   DEFINES   ***********************************
+ ******************************************************************************/
+
+/// True when I2C hardware has been torn down by sl_i2c_suspend().
+#define SLI_I2C_POWER_IS_SUSPENDED(i2c_handle) \
+  ((i2c_handle)->power_state == SL_I2C_POWER_STATE_SUSPENDED)
+
+/// True when a transfer is marked active (power state ACTIVE).
+#define SLI_I2C_POWER_IS_ACTIVE(i2c_handle) \
+  ((i2c_handle)->power_state == SL_I2C_POWER_STATE_ACTIVE)
+
+/*******************************************************************************
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
 

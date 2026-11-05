@@ -115,6 +115,13 @@ static sl_status_t i2c_get_dma_trigger_signals(sl_i2c_handle_t *i2c_handle,
                                                uint32_t *dma_tx_trigger_source,
                                                uint32_t *dma_rx_trigger_source);
 static void stop_active_dma_transfers(sl_i2c_handle_t *i2c_handle);
+static void i2c_enable_clocks(const sl_i2c_handle_t *i2c_handle);
+static void i2c_recover_bus(const sl_i2c_handle_t *i2c_handle);
+static void i2c_configure_gpio(const sl_i2c_handle_t *i2c_handle);
+static void i2c_restore_follower_address(sl_i2c_handle_t *i2c_handle);
+static sl_status_t i2c_get_irq(I2C_TypeDef *i2c_base_addr, IRQn_Type *i2c_irq);
+static sl_status_t i2c_deinit_hw(sl_i2c_handle_t *i2c_handle);
+static sl_status_t i2c_init_hw(sl_i2c_handle_t *i2c_handle);
 static sl_status_t i2c_setup_leader_non_blocking_dma_transfer(sl_i2c_handle_t *i2c_handle,
                                                               const uint8_t *tx_buffer,
                                                               uint32_t tx_len,
@@ -139,7 +146,6 @@ sl_status_t sl_i2c_init(sl_i2c_handle_t *i2c_handle,
 {
   CORE_DECLARE_IRQ_STATE;
   I2C_TypeDef *i2c_base_addr;
-  sl_bus_clock_t i2c_bus_clk;
   int8_t i2c_instance_num;
 
   // Parameter validation
@@ -169,39 +175,25 @@ sl_status_t sl_i2c_init(sl_i2c_handle_t *i2c_handle,
     return SL_STATUS_ALREADY_INITIALIZED;
   }
 
-  // Enable clocks
-  i2c_bus_clk = sl_device_peripheral_get_bus_clock(init_params->i2c_peripheral);
-  sl_clock_manager_enable_bus_clock(i2c_bus_clk);
-  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
-
-  // GPIO Configuration
-  sl_hal_gpio_set_pin_mode(&(init_params->scl_gpio), SL_GPIO_MODE_WIRED_AND_PULLUP, 1);
-  sl_hal_gpio_set_pin_mode(&(init_params->sda_gpio), SL_GPIO_MODE_WIRED_AND_PULLUP, 1);
-
-  // Generate 9 clock pulses to recover the follower device from an unknown state.
-  // Refer to the 'Bus Lock-Up' section in the I2C part of the reference manual.
-  if (init_params->operating_mode == SL_I2C_LEADER_MODE) {
-    for (int clk_pulses = 0; clk_pulses < I2C_RECOVER_NUM_CLOCKS; clk_pulses++) {
-      sl_hal_gpio_clear_pin(&(init_params->scl_gpio));
-      sl_udelay_wait(I2C_SCL_HOLD_TIME_US);
-      sl_hal_gpio_set_pin(&(init_params->scl_gpio));
-      sl_udelay_wait(I2C_SCL_HOLD_TIME_US);
-    }
-  }
-
-  // GPIO Routing
-  GPIO->I2CROUTE[i2c_instance_num].ROUTEEN = GPIO_I2C_ROUTEEN_SDAPEN | GPIO_I2C_ROUTEEN_SCLPEN;
-  GPIO->I2CROUTE[i2c_instance_num].SCLROUTE = (uint32_t)((init_params->scl_gpio.pin << _GPIO_I2C_SCLROUTE_PIN_SHIFT)
-                                                         | (init_params->scl_gpio.port << _GPIO_I2C_SCLROUTE_PORT_SHIFT));
-  GPIO->I2CROUTE[i2c_instance_num].SDAROUTE = (uint32_t)((init_params->sda_gpio.pin << _GPIO_I2C_SDAROUTE_PIN_SHIFT)
-                                                         | (init_params->sda_gpio.port << _GPIO_I2C_SDAROUTE_PORT_SHIFT));
-
-  // Fill I2C handle structure with initialization parameters
+  // Fill software state
   i2c_handle->i2c_peripheral = init_params->i2c_peripheral;
   i2c_handle->operating_mode = init_params->operating_mode;
   i2c_handle->frequency_mode = init_params->frequency_mode;
   i2c_handle->scl_gpio = init_params->scl_gpio;
   i2c_handle->sda_gpio = init_params->sda_gpio;
+  i2c_handle->follower_address = 0;
+  i2c_handle->is_10bit_addr = false;
+  i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
+  i2c_handle->event = SL_I2C_EVENT_IDLE;
+
+  i2c_enable_clocks(i2c_handle);
+
+  // Leader bus recovery before routes are enabled so SCL is driven as GPIO.
+  if (init_params->operating_mode == SL_I2C_LEADER_MODE) {
+    i2c_recover_bus(i2c_handle);
+  }
+
+  i2c_configure_gpio(i2c_handle);
 
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LDMAXBAR0);
 
@@ -228,9 +220,9 @@ sl_status_t sl_i2c_init(sl_i2c_handle_t *i2c_handle,
 sl_status_t sl_i2c_deinit(sl_i2c_handle_t *i2c_handle)
 {
   CORE_DECLARE_IRQ_STATE;
-  sl_bus_clock_t i2c_bus_clk;
   I2C_TypeDef *i2c_base_addr;
   int8_t i2c_instance_num;
+  sl_status_t status;
 
   // Validate handle
   if (i2c_handle == NULL) {
@@ -243,36 +235,22 @@ sl_status_t sl_i2c_deinit(sl_i2c_handle_t *i2c_handle)
   i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
   i2c_instance_num = I2C_NUM(i2c_base_addr);
 
+  // Hardware is already down when suspended; skip teardown in that case.
+  if (!SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    status = i2c_deinit_hw(i2c_handle);
+    if (status != SL_STATUS_OK) {
+      CORE_EXIT_ATOMIC();
+      return status;
+    }
+  }
+
   // De-Allocate DMA channels
   sl_dma_manager_free_channel(NULL, i2c_handle->dma_channel.dma_tx_channel);
   sl_dma_manager_free_channel(NULL, i2c_handle->dma_channel.dma_rx_channel);
 
-  // Clear follower address if in follower mode
-  if (i2c_handle->operating_mode == SL_I2C_FOLLOWER_MODE) {
-    sl_hal_i2c_set_follower_address(i2c_base_addr, 0x00, false);
-  }
-
-  // Flush buffers and reset I2C peripheral
-  sl_hal_i2c_flush_buffers(i2c_base_addr);
-  sl_hal_i2c_reset(i2c_base_addr);
-
-  // Disable i2c peripheral
-  sl_hal_i2c_disable(i2c_base_addr);
-
-  // Reset GPIO configuration
-  GPIO->I2CROUTE[i2c_instance_num].ROUTEEN = _GPIO_I2C_ROUTEEN_RESETVALUE;
-  GPIO->I2CROUTE[i2c_instance_num].SCLROUTE = _GPIO_I2C_SCLROUTE_RESETVALUE;
-  GPIO->I2CROUTE[i2c_instance_num].SDAROUTE = _GPIO_I2C_SDAROUTE_RESETVALUE;
-
-  sl_hal_gpio_set_pin_mode(&(i2c_handle->scl_gpio), SL_GPIO_MODE_DISABLED, 0);
-  sl_hal_gpio_set_pin_mode(&(i2c_handle->sda_gpio), SL_GPIO_MODE_DISABLED, 0);
-
-  // Disable the clock for the I2C peripheral
-  i2c_bus_clk = sl_device_peripheral_get_bus_clock(i2c_handle->i2c_peripheral);
-  sl_clock_manager_disable_bus_clock(i2c_bus_clk);
-
   // Clear the initialization flag
   i2c_handle_contexts[i2c_instance_num] = NULL;
+  i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
 
   CORE_EXIT_ATOMIC();
   return SL_STATUS_OK;
@@ -299,6 +277,11 @@ sl_status_t sl_i2c_set_frequency(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
   I2C_TypeDef *i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
   i2c_clk_branch = sl_device_peripheral_get_clock_branch(i2c_handle->i2c_peripheral);
   sl_clock_manager_get_clock_branch_frequency(i2c_clk_branch, &freq);
@@ -307,6 +290,7 @@ sl_status_t sl_i2c_set_frequency(sl_i2c_handle_t *i2c_handle,
   clhr     = i2c_clhr_table[frequency_mode];
 
   sl_hal_i2c_set_clock_frequency(i2c_base_addr, freq, max_freq, clhr);
+  i2c_handle->frequency_mode = frequency_mode;
 
   CORE_EXIT_ATOMIC();
   return SL_STATUS_OK;
@@ -327,6 +311,11 @@ sl_status_t sl_i2c_get_frequency(sl_i2c_handle_t *i2c_handle,
   }
 
   CORE_ENTER_ATOMIC();
+
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
 
   I2C_TypeDef *i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
   i2c_clk_branch = sl_device_peripheral_get_clock_branch(i2c_handle->i2c_peripheral);
@@ -380,10 +369,16 @@ sl_status_t sl_i2c_set_follower_address(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
   I2C_TypeDef *i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
 
   // Set the follower address in the I2C peripheral
   i2c_handle->follower_address = address;
+  i2c_handle->is_10bit_addr = is_10bit_addr;
   sl_hal_i2c_set_follower_address(i2c_base_addr, (address << 1), is_10bit_addr);
   sl_hal_i2c_set_follower_mask_address(i2c_base_addr, 0xFE); // 0xFE means exact address match
 
@@ -405,6 +400,11 @@ sl_status_t sl_i2c_configure_dma(sl_i2c_handle_t *i2c_handle,
   }
 
   CORE_ENTER_ATOMIC();
+
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
 
   const uint8_t old_tx = i2c_handle->dma_channel.dma_tx_channel;
   const uint8_t old_rx = i2c_handle->dma_channel.dma_rx_channel;
@@ -475,7 +475,18 @@ sl_status_t sl_i2c_leader_send_blocking(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (SLI_I2C_POWER_IS_ACTIVE(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
   // Initialize transaction parameters
+  i2c_handle->power_state = SL_I2C_POWER_STATE_ACTIVE;
   i2c_handle->follower_address = address;
   i2c_handle->tx_offset = 0;
   i2c_handle->transfer_direction = SL_I2C_WRITE;
@@ -485,6 +496,7 @@ sl_status_t sl_i2c_leader_send_blocking(sl_i2c_handle_t *i2c_handle,
 
   status = i2c_leader_mode_blocking_state_machine(i2c_handle, tx_buffer, tx_len, NULL, 0, timeout);
 
+  i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
   CORE_EXIT_ATOMIC();
   return status;
 }
@@ -520,7 +532,18 @@ sl_status_t sl_i2c_leader_receive_blocking(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (SLI_I2C_POWER_IS_ACTIVE(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
   // Initialize transaction parameters
+  i2c_handle->power_state = SL_I2C_POWER_STATE_ACTIVE;
   i2c_handle->follower_address = address;
   i2c_handle->rx_offset = 0;
   i2c_handle->transfer_direction = SL_I2C_READ;
@@ -530,6 +553,7 @@ sl_status_t sl_i2c_leader_receive_blocking(sl_i2c_handle_t *i2c_handle,
 
   status = i2c_leader_mode_blocking_state_machine(i2c_handle, NULL, 0, rx_buffer, rx_len, timeout);
 
+  i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
   CORE_EXIT_ATOMIC();
   return status;
 }
@@ -567,7 +591,18 @@ sl_status_t sl_i2c_leader_transfer_blocking(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (SLI_I2C_POWER_IS_ACTIVE(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
   // Initialize transaction parameters
+  i2c_handle->power_state = SL_I2C_POWER_STATE_ACTIVE;
   i2c_handle->follower_address = address;
   i2c_handle->tx_offset = 0;
   i2c_handle->rx_offset = 0;
@@ -578,6 +613,7 @@ sl_status_t sl_i2c_leader_transfer_blocking(sl_i2c_handle_t *i2c_handle,
 
   status = i2c_leader_mode_blocking_state_machine(i2c_handle, tx_buffer, tx_len, rx_buffer, rx_len, timeout);
 
+  i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
   CORE_EXIT_ATOMIC();
 
   return status;
@@ -610,13 +646,27 @@ sl_status_t sl_i2c_leader_send_non_blocking(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (SLI_I2C_POWER_IS_ACTIVE(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
   // Initialize transaction parameters
+  i2c_handle->power_state = SL_I2C_POWER_STATE_ACTIVE;
   i2c_handle->follower_address = address;
   i2c_handle->transfer_direction = SL_I2C_WRITE;
   i2c_handle->event = SL_I2C_EVENT_IDLE;
   i2c_handle->user_data = user_data;
 
   status = i2c_setup_leader_non_blocking_dma_transfer(i2c_handle, tx_buffer, tx_len, NULL, 0);
+  if (status != SL_STATUS_OK) {
+    i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
+  }
 
   CORE_EXIT_ATOMIC();
 
@@ -650,13 +700,27 @@ sl_status_t sl_i2c_leader_receive_non_blocking(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (SLI_I2C_POWER_IS_ACTIVE(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
   // Initialize transaction parameters
+  i2c_handle->power_state = SL_I2C_POWER_STATE_ACTIVE;
   i2c_handle->follower_address = address;
   i2c_handle->transfer_direction = SL_I2C_READ;
   i2c_handle->event = SL_I2C_EVENT_IDLE;
   i2c_handle->user_data = user_data;
 
   status = i2c_setup_leader_non_blocking_dma_transfer(i2c_handle, NULL, 0, rx_buffer, rx_len);
+  if (status != SL_STATUS_OK) {
+    i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
+  }
 
   CORE_EXIT_ATOMIC();
 
@@ -692,13 +756,27 @@ sl_status_t sl_i2c_leader_transfer_non_blocking(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (SLI_I2C_POWER_IS_ACTIVE(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
   // Initialize i2c instance structure
+  i2c_handle->power_state = SL_I2C_POWER_STATE_ACTIVE;
   i2c_handle->follower_address = address;
   i2c_handle->transfer_direction = SL_I2C_WRITE_READ;
   i2c_handle->event = SL_I2C_EVENT_IDLE;
   i2c_handle->user_data = user_data;
 
   status = i2c_setup_leader_non_blocking_dma_transfer(i2c_handle, tx_buffer, tx_len, rx_buffer, rx_len);
+  if (status != SL_STATUS_OK) {
+    i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
+  }
 
   CORE_EXIT_ATOMIC();
 
@@ -731,7 +809,18 @@ sl_status_t sl_i2c_follower_send_blocking(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (SLI_I2C_POWER_IS_ACTIVE(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
   // Initialize transaction parameters
+  i2c_handle->power_state = SL_I2C_POWER_STATE_ACTIVE;
   i2c_handle->tx_offset = 0;
   i2c_handle->transfer_direction = SL_I2C_WRITE;
 
@@ -740,6 +829,7 @@ sl_status_t sl_i2c_follower_send_blocking(sl_i2c_handle_t *i2c_handle,
 
   status = i2c_follower_mode_blocking_state_machine(i2c_handle, tx_buffer, tx_len, NULL, 0, timeout);
 
+  i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
   CORE_EXIT_ATOMIC();
 
   return status;
@@ -771,7 +861,18 @@ sl_status_t sl_i2c_follower_receive_blocking(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (SLI_I2C_POWER_IS_ACTIVE(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
   // Initialize transaction parameters
+  i2c_handle->power_state = SL_I2C_POWER_STATE_ACTIVE;
   i2c_handle->rx_offset = 0;
   i2c_handle->transfer_direction = SL_I2C_READ;
 
@@ -780,6 +881,7 @@ sl_status_t sl_i2c_follower_receive_blocking(sl_i2c_handle_t *i2c_handle,
 
   status = i2c_follower_mode_blocking_state_machine(i2c_handle, NULL, 0, rx_buffer, rx_len, timeout);
 
+  i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
   CORE_EXIT_ATOMIC();
 
   return status;
@@ -811,12 +913,26 @@ sl_status_t sl_i2c_follower_send_non_blocking(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (SLI_I2C_POWER_IS_ACTIVE(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
   // Initialize the I2C instance structure
+  i2c_handle->power_state = SL_I2C_POWER_STATE_ACTIVE;
   i2c_handle->transfer_direction = SL_I2C_WRITE;
   i2c_handle->event = SL_I2C_EVENT_IDLE;
   i2c_handle->user_data = user_data;
 
   status = i2c_setup_follower_non_blocking_dma_transfer(i2c_handle, tx_buffer, tx_len, NULL, 0);
+  if (status != SL_STATUS_OK) {
+    i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
+  }
 
   CORE_EXIT_ATOMIC();
   return status;
@@ -848,11 +964,25 @@ sl_status_t sl_i2c_follower_receive_non_blocking(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (SLI_I2C_POWER_IS_ACTIVE(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
   // Initialize the I2C instance structure
+  i2c_handle->power_state = SL_I2C_POWER_STATE_ACTIVE;
   i2c_handle->transfer_direction = SL_I2C_READ;
   i2c_handle->user_data = user_data;
 
   status = i2c_setup_follower_non_blocking_dma_transfer(i2c_handle, NULL, 0, rx_buffer, rx_len);
+  if (status != SL_STATUS_OK) {
+    i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
+  }
 
   CORE_EXIT_ATOMIC();
   return status;
@@ -927,12 +1057,8 @@ sl_status_t sli_i2c_init_core(sl_i2c_handle_t *i2c_handle)
     return SL_STATUS_FAIL;
   }
 
-  // Reset the I2C instance
+  // Reset leaves the peripheral disabled with IEN and IF already clear.
   sl_hal_i2c_reset(i2c_base_addr);
-
-  // Clear and disable all I2C interrupts to ensure clean state
-  sl_hal_i2c_clear_interrupts(i2c_base_addr, _I2C_IF_MASK);
-  sl_hal_i2c_disable_interrupts(i2c_base_addr, _I2C_IEN_MASK);
 
   // Initialize the I2C module with the appropriate operating mode (leader or follower)
   sl_hal_i2c_init(i2c_base_addr, i2c_handle->operating_mode);
@@ -963,26 +1089,26 @@ void sli_i2c_leader_dispatch_interrupt(sl_i2c_handle_t *i2c_handle)
 
   if (pending_irq & I2C_IF_ACK) {
     sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_ACK);
-    switch (i2c_handle->state) {
+    switch (i2c_handle->transaction_state) {
       case SL_I2C_STATE_ADDR_WAIT_FOR_ACK_OR_NACK:
         if (i2c_handle->follower_address < 0x7F) {
           i2c_handle->event = SL_I2C_EVENT_IN_PROGRESS;
           if (i2c_handle->transfer_direction != SL_I2C_READ) {
-            i2c_handle->state = SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK;
+            i2c_handle->transaction_state = SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK;
           }
         } else {
-          i2c_handle->state = SL_I2C_STATE_ADDR_2ND_BYTE_10BIT_WAIT_FOR_ACK_OR_NACK;
+          i2c_handle->transaction_state = SL_I2C_STATE_ADDR_2ND_BYTE_10BIT_WAIT_FOR_ACK_OR_NACK;
         }
         break;
 
       case SL_I2C_STATE_ADDR_2ND_BYTE_10BIT_WAIT_FOR_ACK_OR_NACK:
         if (i2c_handle->transfer_direction != SL_I2C_READ) {
           i2c_handle->event = SL_I2C_EVENT_IN_PROGRESS;
-          i2c_handle->state = SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK;
+          i2c_handle->transaction_state = SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK;
         } else {
           sl_hal_i2c_start_cmd(i2c_base_addr);
           sl_hal_i2c_tx(i2c_base_addr, i2c_handle->addr_buffer[0] | 1);
-          i2c_handle->state = SL_I2C_STATE_REPEATED_ADDR_WAIT_FOR_ACK_OR_NACK;
+          i2c_handle->transaction_state = SL_I2C_STATE_REPEATED_ADDR_WAIT_FOR_ACK_OR_NACK;
         }
         break;
 
@@ -997,7 +1123,7 @@ void sli_i2c_leader_dispatch_interrupt(sl_i2c_handle_t *i2c_handle)
     sl_hal_i2c_tx(i2c_base_addr, i2c_handle->addr_buffer[0] | 1);
   } else if (pending_irq & I2C_IF_NACK) {
     sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_NACK);
-    switch (i2c_handle->state) {
+    switch (i2c_handle->transaction_state) {
       case SL_I2C_STATE_ADDR_WAIT_FOR_ACK_OR_NACK:
       case SL_I2C_STATE_ADDR_2ND_BYTE_10BIT_WAIT_FOR_ACK_OR_NACK:
       case SL_I2C_STATE_REPEATED_ADDR_WAIT_FOR_ACK_OR_NACK:
@@ -1007,7 +1133,7 @@ void sli_i2c_leader_dispatch_interrupt(sl_i2c_handle_t *i2c_handle)
         i2c_handle->event = SL_I2C_EVENT_DATA_NACK;
         break;
     }
-    i2c_handle->state = SL_I2C_STATE_WAIT_FOR_STOP;
+    i2c_handle->transaction_state = SL_I2C_STATE_WAIT_FOR_STOP;
     sl_hal_i2c_stop_cmd(i2c_base_addr);
   } else if (pending_irq & I2C_IF_MSTOP) {
     sl_hal_i2c_clear_interrupts(i2c_base_addr, _I2C_IEN_MASK);
@@ -1043,7 +1169,7 @@ void sli_i2c_follower_dispatch_interrupt(sl_i2c_handle_t *i2c_handle)
     sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_ADDR | I2C_IF_RXDATAV | I2C_IF_SSTOP);
     sl_hal_i2c_enable_interrupts(i2c_base_addr, (I2C_IEN_NACK | I2C_IEN_SSTOP));
 
-    switch (i2c_handle->state) {
+    switch (i2c_handle->transaction_state) {
       case SL_I2C_STATE_ADDRESS_MATCH:
         if (i2c_handle->follower_address < 0x7F) {
           i2c_handle->event = SL_I2C_EVENT_IN_PROGRESS;
@@ -1052,7 +1178,7 @@ void sli_i2c_follower_dispatch_interrupt(sl_i2c_handle_t *i2c_handle)
           }
         } else {
           sl_hal_i2c_enable_interrupts(i2c_base_addr, I2C_IEN_RXDATAV);
-          i2c_handle->state = SL_I2C_STATE_10BIT_ADDRESS_MATCH;
+          i2c_handle->transaction_state = SL_I2C_STATE_10BIT_ADDRESS_MATCH;
         }
         break;
 
@@ -1065,14 +1191,14 @@ void sli_i2c_follower_dispatch_interrupt(sl_i2c_handle_t *i2c_handle)
     sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_RXDATAV);
     sl_hal_i2c_disable_interrupts(i2c_base_addr, I2C_IEN_RXDATAV);
 
-    if (i2c_handle->state == SL_I2C_STATE_10BIT_ADDRESS_MATCH) {
+    if (i2c_handle->transaction_state == SL_I2C_STATE_10BIT_ADDRESS_MATCH) {
       if (((i2c_handle->follower_address << 1) & 0xFF) == i2c_handle->addr_buffer[1]) {
         sl_hal_i2c_send_ack(i2c_base_addr);
         if (i2c_handle->transfer_direction == SL_I2C_READ) {
           i2c_base_addr->CTRL_SET = I2C_CTRL_AUTOACK;
           i2c_handle->event = SL_I2C_EVENT_IN_PROGRESS;
         } else {
-          i2c_handle->state = SL_I2C_STATE_REP_ADDR_MATCH;
+          i2c_handle->transaction_state = SL_I2C_STATE_REP_ADDR_MATCH;
         }
       } else {
         sl_hal_i2c_send_nack(i2c_base_addr);
@@ -1138,7 +1264,18 @@ sl_status_t sli_i2c_leader_write_no_stop_blocking(sl_i2c_handle_t *i2c_handle,
 
   CORE_ENTER_ATOMIC();
 
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  if (SLI_I2C_POWER_IS_ACTIVE(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
   // Initialize transaction parameters
+  i2c_handle->power_state = SL_I2C_POWER_STATE_ACTIVE;
   i2c_handle->follower_address = address;
   i2c_handle->tx_offset = 0;
   i2c_handle->rx_offset = 0;
@@ -1149,9 +1286,109 @@ sl_status_t sli_i2c_leader_write_no_stop_blocking(sl_i2c_handle_t *i2c_handle,
 
   status = i2c_leader_mode_write_no_stop_blocking_state_machine(i2c_handle, tx_buffer1, tx_len1, tx_buffer2, tx_len2, timeout);
 
+  i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
   CORE_EXIT_ATOMIC();
 
   return status;
+}
+
+/***************************************************************************//**
+ * Suspends the I2C peripheral hardware.
+ ******************************************************************************/
+sl_status_t sl_i2c_suspend(sl_i2c_handle_t *i2c_handle)
+{
+  CORE_DECLARE_IRQ_STATE;
+  I2C_TypeDef *i2c_base_addr;
+  int8_t i2c_instance_num;
+  sl_status_t status;
+
+  if (i2c_handle == NULL || i2c_handle->i2c_peripheral == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
+  if (!SL_HAL_I2C_REF_VALID(i2c_base_addr)) {
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+
+  i2c_instance_num = I2C_NUM(i2c_base_addr);
+
+  CORE_ENTER_ATOMIC();
+
+  if (i2c_handle_contexts[i2c_instance_num] != i2c_handle) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+
+  if (SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_OK;
+  }
+
+  // Non-blocking transfers can be active after the API returns; blocking ones
+  // cannot race suspend on the same core (they hold CORE_ENTER_ATOMIC).
+  if (SLI_I2C_POWER_IS_ACTIVE(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_BUSY;
+  }
+
+  status = i2c_deinit_hw(i2c_handle);
+  if (status != SL_STATUS_OK) {
+    CORE_EXIT_ATOMIC();
+    return status;
+  }
+
+  i2c_handle->power_state = SL_I2C_POWER_STATE_SUSPENDED;
+
+  CORE_EXIT_ATOMIC();
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Resumes the I2C peripheral hardware after sl_i2c_suspend().
+ ******************************************************************************/
+sl_status_t sl_i2c_resume(sl_i2c_handle_t *i2c_handle)
+{
+  CORE_DECLARE_IRQ_STATE;
+  I2C_TypeDef *i2c_base_addr;
+  int8_t i2c_instance_num;
+  sl_status_t status;
+
+  if (i2c_handle == NULL || i2c_handle->i2c_peripheral == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
+  if (!SL_HAL_I2C_REF_VALID(i2c_base_addr)) {
+    return SL_STATUS_NOT_SUPPORTED;
+  }
+
+  i2c_instance_num = I2C_NUM(i2c_base_addr);
+
+  CORE_ENTER_ATOMIC();
+
+  if (i2c_handle_contexts[i2c_instance_num] != i2c_handle) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_NOT_INITIALIZED;
+  }
+
+  if (!SLI_I2C_POWER_IS_SUSPENDED(i2c_handle)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_OK;
+  }
+
+  status = i2c_init_hw(i2c_handle);
+  if (status != SL_STATUS_OK) {
+    // Clocks/GPIO may already be up; restore torn-down HW so handle stays suspended.
+    (void)i2c_deinit_hw(i2c_handle);
+    CORE_EXIT_ATOMIC();
+    return status;
+  }
+
+  i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
+
+  CORE_EXIT_ATOMIC();
+  return SL_STATUS_OK;
 }
 
 /*******************************************************************************
@@ -1167,6 +1404,159 @@ sl_status_t sli_i2c_leader_write_no_stop_blocking(sl_i2c_handle_t *i2c_handle,
 static uint32_t get_current_time_ms(void)
 {
   return sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
+}
+
+/***************************************************************************//**
+ * Enables the I2C and GPIO bus clocks for the instance.
+ ******************************************************************************/
+static void i2c_enable_clocks(const sl_i2c_handle_t *i2c_handle)
+{
+  sl_bus_clock_t i2c_bus_clk = sl_device_peripheral_get_bus_clock(i2c_handle->i2c_peripheral);
+
+  sl_clock_manager_enable_bus_clock(i2c_bus_clk);
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
+}
+
+/***************************************************************************//**
+ * Recovers a stuck follower by clocking SCL before I2C routes are enabled.
+ *
+ * @note Refer to the 'Bus Lock-Up' section in the I2C part of the reference
+ *       manual. Pin modes only (no routes) so SCL is driven as GPIO.
+ ******************************************************************************/
+static void i2c_recover_bus(const sl_i2c_handle_t *i2c_handle)
+{
+  sl_hal_gpio_set_pin_mode(&(i2c_handle->scl_gpio), SL_GPIO_MODE_WIRED_AND_PULLUP, 1);
+  sl_hal_gpio_set_pin_mode(&(i2c_handle->sda_gpio), SL_GPIO_MODE_WIRED_AND_PULLUP, 1);
+  for (int clk_pulses = 0; clk_pulses < I2C_RECOVER_NUM_CLOCKS; clk_pulses++) {
+    sl_hal_gpio_clear_pin(&(i2c_handle->scl_gpio));
+    sl_udelay_wait(I2C_SCL_HOLD_TIME_US);
+    sl_hal_gpio_set_pin(&(i2c_handle->scl_gpio));
+    sl_udelay_wait(I2C_SCL_HOLD_TIME_US);
+  }
+}
+
+/***************************************************************************//**
+ * Configures SCL/SDA pin modes and I2C GPIO routes from the handle.
+ ******************************************************************************/
+static void i2c_configure_gpio(const sl_i2c_handle_t *i2c_handle)
+{
+  I2C_TypeDef *i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
+  int8_t i2c_instance_num = I2C_NUM(i2c_base_addr);
+
+  sl_hal_gpio_set_pin_mode(&(i2c_handle->scl_gpio), SL_GPIO_MODE_WIRED_AND_PULLUP, 1);
+  sl_hal_gpio_set_pin_mode(&(i2c_handle->sda_gpio), SL_GPIO_MODE_WIRED_AND_PULLUP, 1);
+
+  GPIO->I2CROUTE[i2c_instance_num].ROUTEEN = GPIO_I2C_ROUTEEN_SDAPEN | GPIO_I2C_ROUTEEN_SCLPEN;
+  GPIO->I2CROUTE[i2c_instance_num].SCLROUTE = (uint32_t)((i2c_handle->scl_gpio.pin << _GPIO_I2C_SCLROUTE_PIN_SHIFT)
+                                                         | (i2c_handle->scl_gpio.port << _GPIO_I2C_SCLROUTE_PORT_SHIFT));
+  GPIO->I2CROUTE[i2c_instance_num].SDAROUTE = (uint32_t)((i2c_handle->sda_gpio.pin << _GPIO_I2C_SDAROUTE_PIN_SHIFT)
+                                                         | (i2c_handle->sda_gpio.port << _GPIO_I2C_SDAROUTE_PORT_SHIFT));
+}
+
+/***************************************************************************//**
+ * Restores follower own-address from handle software state after resume.
+ ******************************************************************************/
+static void i2c_restore_follower_address(sl_i2c_handle_t *i2c_handle)
+{
+  I2C_TypeDef *i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
+
+  // is_10bit_addr covers a valid 10-bit own-address of 0.
+  if ((i2c_handle->operating_mode == SL_I2C_FOLLOWER_MODE)
+      && ((i2c_handle->follower_address != 0) || i2c_handle->is_10bit_addr)) {
+    sl_hal_i2c_set_follower_address(i2c_base_addr,
+                                    (uint16_t)(i2c_handle->follower_address << 1),
+                                    i2c_handle->is_10bit_addr);
+    sl_hal_i2c_set_follower_mask_address(i2c_base_addr, 0xFE);
+  }
+}
+
+/***************************************************************************//**
+ * Resolves the NVIC IRQ for an I2C instance.
+ ******************************************************************************/
+static sl_status_t i2c_get_irq(I2C_TypeDef *i2c_base_addr, IRQn_Type *i2c_irq)
+{
+  switch (I2C_NUM(i2c_base_addr)) {
+#if defined(I2C0)
+    case 0:
+      *i2c_irq = I2C0_IRQn;
+      break;
+#endif
+#if defined(I2C1)
+    case 1:
+      *i2c_irq = I2C1_IRQn;
+      break;
+#endif
+#if defined(I2C2)
+    case 2:
+      *i2c_irq = I2C2_IRQn;
+      break;
+#endif
+#if defined(I2C3)
+    case 3:
+      *i2c_irq = I2C3_IRQn;
+      break;
+#endif
+    default:
+      return SL_STATUS_INVALID_CONFIGURATION;
+  }
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Tears down I2C clocks, peripheral, pins, and IRQ. Leaves SW handle intact.
+ *
+ * @note sl_hal_i2c_reset() already aborts, clears SADDR/config, and disables
+ *       the peripheral and IEN/IF.
+ ******************************************************************************/
+static sl_status_t i2c_deinit_hw(sl_i2c_handle_t *i2c_handle)
+{
+  I2C_TypeDef *i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
+  int8_t i2c_instance_num = I2C_NUM(i2c_base_addr);
+  IRQn_Type i2c_irq = (IRQn_Type)0;
+  sl_bus_clock_t i2c_bus_clk;
+  sl_status_t status;
+
+  status = i2c_get_irq(i2c_base_addr, &i2c_irq);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  sl_interrupt_manager_disable_irq(i2c_irq);
+  stop_active_dma_transfers(i2c_handle);
+  sl_hal_i2c_reset(i2c_base_addr);
+
+  GPIO->I2CROUTE[i2c_instance_num].ROUTEEN = _GPIO_I2C_ROUTEEN_RESETVALUE;
+  GPIO->I2CROUTE[i2c_instance_num].SCLROUTE = _GPIO_I2C_SCLROUTE_RESETVALUE;
+  GPIO->I2CROUTE[i2c_instance_num].SDAROUTE = _GPIO_I2C_SDAROUTE_RESETVALUE;
+
+  sl_hal_gpio_set_pin_mode(&(i2c_handle->scl_gpio), SL_GPIO_MODE_DISABLED, 0);
+  sl_hal_gpio_set_pin_mode(&(i2c_handle->sda_gpio), SL_GPIO_MODE_DISABLED, 0);
+
+  i2c_bus_clk = sl_device_peripheral_get_bus_clock(i2c_handle->i2c_peripheral);
+  sl_clock_manager_disable_bus_clock(i2c_bus_clk);
+
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * Restores I2C clocks, pins, and peripheral from handle software state.
+ ******************************************************************************/
+static sl_status_t i2c_init_hw(sl_i2c_handle_t *i2c_handle)
+{
+  sl_status_t status;
+
+  i2c_enable_clocks(i2c_handle);
+  i2c_configure_gpio(i2c_handle);
+
+  status = sli_i2c_init_core(i2c_handle);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  i2c_restore_follower_address(i2c_handle);
+
+  return SL_STATUS_OK;
 }
 
 /***************************************************************************//**
@@ -1186,23 +1576,11 @@ static sl_status_t i2c_setup_blocking_transfer_interrupts(sl_i2c_handle_t *i2c_h
 {
   I2C_TypeDef *i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
   IRQn_Type i2c_irq = (IRQn_Type)0;
+  sl_status_t status;
 
-  // Disable I2C IQR Handler
-  switch (I2C_NUM(i2c_base_addr)) {
-#if defined(I2C0)
-    case 0: i2c_irq = I2C0_IRQn; break;
-#endif
-#if defined(I2C1)
-    case 1: i2c_irq = I2C1_IRQn; break;
-#endif
-#if defined(I2C2)
-    case 2: i2c_irq = I2C2_IRQn; break;
-#endif
-#if defined(I2C3)
-    case 3: i2c_irq = I2C3_IRQn; break;
-#endif
-    default:
-      return SL_STATUS_INVALID_CONFIGURATION;
+  status = i2c_get_irq(i2c_base_addr, &i2c_irq);
+  if (status != SL_STATUS_OK) {
+    return status;
   }
 
   sl_interrupt_manager_disable_irq(i2c_irq);
@@ -1272,7 +1650,7 @@ static sl_status_t i2c_leader_mode_blocking_state_machine(sl_i2c_handle_t *i2c_h
   uint32_t pending_irq;
   I2C_TypeDef *i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
 
-  i2c_handle->state = SL_I2C_STATE_SEND_START_AND_ADDR;
+  i2c_handle->transaction_state = SL_I2C_STATE_SEND_START_AND_ADDR;
 
   bool is_10bit_addr = (i2c_handle->follower_address > 0x7F);
   uint16_t actual_follower_addr = (i2c_handle->follower_address << 1);
@@ -1302,7 +1680,7 @@ static sl_status_t i2c_leader_mode_blocking_state_machine(sl_i2c_handle_t *i2c_h
     if (pending_irq & SL_HAL_I2C_IF_ERRORS) {
       sl_hal_i2c_clear_interrupts(i2c_base_addr, _I2C_IF_MASK);
       i2c_base_addr->CMD = I2C_CMD_ABORT;
-      i2c_handle->state = SL_I2C_STATE_ERROR;
+      i2c_handle->transaction_state = SL_I2C_STATE_ERROR;
 
       if (pending_irq & I2C_IF_ARBLOST) {
         i2c_handle->event = SL_I2C_EVENT_ARBITRATION_LOST;
@@ -1313,18 +1691,18 @@ static sl_status_t i2c_leader_mode_blocking_state_machine(sl_i2c_handle_t *i2c_h
       }
     }
 
-    switch (i2c_handle->state) {
+    switch (i2c_handle->transaction_state) {
       case SL_I2C_STATE_SEND_START_AND_ADDR:
         sl_hal_i2c_start_cmd(i2c_base_addr);
         sl_hal_i2c_tx(i2c_base_addr, first_addr_byte);
-        i2c_handle->state = SL_I2C_STATE_ADDR_WAIT_FOR_ACK_OR_NACK;
+        i2c_handle->transaction_state = SL_I2C_STATE_ADDR_WAIT_FOR_ACK_OR_NACK;
         i2c_handle->event = SL_I2C_EVENT_IN_PROGRESS;
         break;
 
       case SL_I2C_STATE_SEND_REPEATED_START_AND_ADDR:
         sl_hal_i2c_start_cmd(i2c_base_addr);
         sl_hal_i2c_tx(i2c_base_addr, (first_addr_byte | 1));
-        i2c_handle->state = SL_I2C_STATE_REPEATED_ADDR_WAIT_FOR_ACK_OR_NACK;
+        i2c_handle->transaction_state = SL_I2C_STATE_REPEATED_ADDR_WAIT_FOR_ACK_OR_NACK;
         break;
 
       case SL_I2C_STATE_ADDR_WAIT_FOR_ACK_OR_NACK:
@@ -1332,19 +1710,19 @@ static sl_status_t i2c_leader_mode_blocking_state_machine(sl_i2c_handle_t *i2c_h
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_ACK);
           if (is_10bit_addr) {
             sl_hal_i2c_tx(i2c_base_addr, second_addr_byte);
-            i2c_handle->state = SL_I2C_STATE_ADDR_2ND_BYTE_10BIT_WAIT_FOR_ACK_OR_NACK;
+            i2c_handle->transaction_state = SL_I2C_STATE_ADDR_2ND_BYTE_10BIT_WAIT_FOR_ACK_OR_NACK;
           } else {
             if (i2c_handle->transfer_direction == SL_I2C_READ) {
-              i2c_handle->state = SL_I2C_STATE_RECEIVE_DATA;
+              i2c_handle->transaction_state = SL_I2C_STATE_RECEIVE_DATA;
             } else {  // WRITE or WRITE-READ
-              i2c_handle->state = SL_I2C_STATE_SEND_DATA;
+              i2c_handle->transaction_state = SL_I2C_STATE_SEND_DATA;
             }
           }
         } else if (pending_irq & I2C_IF_NACK) {
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_NACK);
           sl_hal_i2c_stop_cmd(i2c_base_addr);
           i2c_handle->event = SL_I2C_EVENT_ADDR_NACK;
-          i2c_handle->state = SL_I2C_STATE_SEND_STOP;
+          i2c_handle->transaction_state = SL_I2C_STATE_SEND_STOP;
         }
         break;
 
@@ -1354,40 +1732,40 @@ static sl_status_t i2c_leader_mode_blocking_state_machine(sl_i2c_handle_t *i2c_h
           if (i2c_handle->transfer_direction == SL_I2C_READ) {
             sl_hal_i2c_start_cmd(i2c_base_addr);
             sl_hal_i2c_tx(i2c_base_addr, (first_addr_byte | 1));
-            i2c_handle->state = SL_I2C_STATE_REPEATED_ADDR_WAIT_FOR_ACK_OR_NACK;
+            i2c_handle->transaction_state = SL_I2C_STATE_REPEATED_ADDR_WAIT_FOR_ACK_OR_NACK;
           } else {
-            i2c_handle->state = SL_I2C_STATE_SEND_DATA;
+            i2c_handle->transaction_state = SL_I2C_STATE_SEND_DATA;
           }
         } else if (pending_irq & I2C_IF_NACK) {
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_NACK);
           sl_hal_i2c_stop_cmd(i2c_base_addr);
           i2c_handle->event = SL_I2C_EVENT_ADDR_NACK;
-          i2c_handle->state = SL_I2C_STATE_SEND_STOP;
+          i2c_handle->transaction_state = SL_I2C_STATE_SEND_STOP;
         }
         break;
 
       case SL_I2C_STATE_REPEATED_ADDR_WAIT_FOR_ACK_OR_NACK:
         if (pending_irq & I2C_IF_ACK) {
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_ACK);
-          i2c_handle->state = SL_I2C_STATE_RECEIVE_DATA;
+          i2c_handle->transaction_state = SL_I2C_STATE_RECEIVE_DATA;
         } else if (pending_irq & I2C_IF_NACK) {
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_NACK);
           sl_hal_i2c_stop_cmd(i2c_base_addr);
           i2c_handle->event = SL_I2C_EVENT_ADDR_NACK;
-          i2c_handle->state = SL_I2C_STATE_SEND_STOP;
+          i2c_handle->transaction_state = SL_I2C_STATE_SEND_STOP;
         }
         break;
 
       case SL_I2C_STATE_SEND_DATA:
         if (i2c_handle->tx_offset < tx_len) {
           sl_hal_i2c_tx(i2c_base_addr, tx_buffer[i2c_handle->tx_offset++]);
-          i2c_handle->state = SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK;
+          i2c_handle->transaction_state = SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK;
         } else {
           if (i2c_handle->transfer_direction == SL_I2C_WRITE_READ) {
-            i2c_handle->state = SL_I2C_STATE_SEND_REPEATED_START_AND_ADDR;
+            i2c_handle->transaction_state = SL_I2C_STATE_SEND_REPEATED_START_AND_ADDR;
           } else {
             sl_hal_i2c_stop_cmd(i2c_base_addr);
-            i2c_handle->state = SL_I2C_STATE_SEND_STOP;
+            i2c_handle->transaction_state = SL_I2C_STATE_SEND_STOP;
           }
         }
         break;
@@ -1395,12 +1773,12 @@ static sl_status_t i2c_leader_mode_blocking_state_machine(sl_i2c_handle_t *i2c_h
       case SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK:
         if (pending_irq & I2C_IF_ACK) {
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_ACK);
-          i2c_handle->state = SL_I2C_STATE_SEND_DATA;
+          i2c_handle->transaction_state = SL_I2C_STATE_SEND_DATA;
         } else if (pending_irq & I2C_IF_NACK) {
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_NACK);
 
           sl_hal_i2c_stop_cmd(i2c_base_addr);
-          i2c_handle->state = SL_I2C_STATE_SEND_STOP;
+          i2c_handle->transaction_state = SL_I2C_STATE_SEND_STOP;
           i2c_handle->event = SL_I2C_EVENT_DATA_NACK;
         }
         break;
@@ -1416,7 +1794,7 @@ static sl_status_t i2c_leader_mode_blocking_state_machine(sl_i2c_handle_t *i2c_h
           if (i2c_handle->rx_offset == rx_len) {
             sl_hal_i2c_send_nack(i2c_base_addr);
             sl_hal_i2c_stop_cmd(i2c_base_addr);
-            i2c_handle->state = SL_I2C_STATE_SEND_STOP;
+            i2c_handle->transaction_state = SL_I2C_STATE_SEND_STOP;
           } else {
             sl_hal_i2c_send_ack(i2c_base_addr);
           }
@@ -1439,7 +1817,7 @@ static sl_status_t i2c_leader_mode_blocking_state_machine(sl_i2c_handle_t *i2c_h
 
       default:
         i2c_handle->event = SL_I2C_EVENT_SW_FAULT;
-        i2c_handle->state = SL_I2C_STATE_ERROR;
+        i2c_handle->transaction_state = SL_I2C_STATE_ERROR;
         return SL_STATUS_FAIL;
     }
   }
@@ -1480,7 +1858,7 @@ static sl_status_t i2c_leader_mode_write_no_stop_blocking_state_machine(sl_i2c_h
   uint32_t pending_irq;
   I2C_TypeDef *i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
 
-  i2c_handle->state = SL_I2C_STATE_SEND_START_AND_ADDR;
+  i2c_handle->transaction_state = SL_I2C_STATE_SEND_START_AND_ADDR;
 
   uint16_t actual_follower_addr = (i2c_handle->follower_address << 1);
   uint8_t first_addr_byte;
@@ -1506,7 +1884,7 @@ static sl_status_t i2c_leader_mode_write_no_stop_blocking_state_machine(sl_i2c_h
     if (pending_irq & SL_HAL_I2C_IF_ERRORS) {
       sl_hal_i2c_clear_interrupts(i2c_base_addr, _I2C_IF_MASK);
       i2c_base_addr->CMD = I2C_CMD_ABORT;
-      i2c_handle->state = SL_I2C_STATE_ERROR;
+      i2c_handle->transaction_state = SL_I2C_STATE_ERROR;
 
       if (pending_irq & I2C_IF_ARBLOST) {
         i2c_handle->event = SL_I2C_EVENT_ARBITRATION_LOST;
@@ -1517,30 +1895,30 @@ static sl_status_t i2c_leader_mode_write_no_stop_blocking_state_machine(sl_i2c_h
       }
     }
 
-    switch (i2c_handle->state) {
+    switch (i2c_handle->transaction_state) {
       case SL_I2C_STATE_SEND_START_AND_ADDR:
         sl_hal_i2c_start_cmd(i2c_base_addr);
         sl_hal_i2c_tx(i2c_base_addr, first_addr_byte);
-        i2c_handle->state = SL_I2C_STATE_ADDR_WAIT_FOR_ACK_OR_NACK;
+        i2c_handle->transaction_state = SL_I2C_STATE_ADDR_WAIT_FOR_ACK_OR_NACK;
         i2c_handle->event = SL_I2C_EVENT_IN_PROGRESS;
         break;
 
       case SL_I2C_STATE_ADDR_WAIT_FOR_ACK_OR_NACK:
         if (pending_irq & I2C_IF_ACK) {
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_ACK);
-          i2c_handle->state = SL_I2C_STATE_SEND_DATA;
+          i2c_handle->transaction_state = SL_I2C_STATE_SEND_DATA;
         } else if (pending_irq & I2C_IF_NACK) {
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_NACK);
           sl_hal_i2c_stop_cmd(i2c_base_addr);
           i2c_handle->event = SL_I2C_EVENT_ADDR_NACK;
-          i2c_handle->state = SL_I2C_STATE_SEND_STOP;
+          i2c_handle->transaction_state = SL_I2C_STATE_SEND_STOP;
         }
         break;
 
       case SL_I2C_STATE_SEND_DATA:
         if (i2c_handle->tx_offset < current_tx_len) {
           sl_hal_i2c_tx(i2c_base_addr, current_tx_buffer[i2c_handle->tx_offset++]);
-          i2c_handle->state = SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK;
+          i2c_handle->transaction_state = SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK;
         } else {
           // Current buffer complete
           if (!is_second_buffer) {
@@ -1553,7 +1931,7 @@ static sl_status_t i2c_leader_mode_write_no_stop_blocking_state_machine(sl_i2c_h
           } else {
             // Second buffer complete - send STOP
             sl_hal_i2c_stop_cmd(i2c_base_addr);
-            i2c_handle->state = SL_I2C_STATE_SEND_STOP;
+            i2c_handle->transaction_state = SL_I2C_STATE_SEND_STOP;
           }
         }
         break;
@@ -1561,12 +1939,12 @@ static sl_status_t i2c_leader_mode_write_no_stop_blocking_state_machine(sl_i2c_h
       case SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK:
         if (pending_irq & I2C_IF_ACK) {
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_ACK);
-          i2c_handle->state = SL_I2C_STATE_SEND_DATA;
+          i2c_handle->transaction_state = SL_I2C_STATE_SEND_DATA;
         } else if (pending_irq & I2C_IF_NACK) {
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_NACK);
 
           sl_hal_i2c_stop_cmd(i2c_base_addr);
-          i2c_handle->state = SL_I2C_STATE_SEND_STOP;
+          i2c_handle->transaction_state = SL_I2C_STATE_SEND_STOP;
           i2c_handle->event = SL_I2C_EVENT_DATA_NACK;
         }
         break;
@@ -1587,7 +1965,7 @@ static sl_status_t i2c_leader_mode_write_no_stop_blocking_state_machine(sl_i2c_h
 
       default:
         i2c_handle->event = SL_I2C_EVENT_SW_FAULT;
-        i2c_handle->state = SL_I2C_STATE_ERROR;
+        i2c_handle->transaction_state = SL_I2C_STATE_ERROR;
         return SL_STATUS_FAIL;
     }
   }
@@ -1637,7 +2015,7 @@ static sl_status_t i2c_follower_mode_blocking_state_machine(sl_i2c_handle_t *i2c
   I2C_TypeDef *i2c_base_addr = sl_device_peripheral_i2c_get_base_addr(i2c_handle->i2c_peripheral);
   bool is_10bit_addr = (i2c_handle->follower_address > 0x7F);
 
-  i2c_handle->state = SL_I2C_STATE_IDLE;
+  i2c_handle->transaction_state = SL_I2C_STATE_IDLE;
 
   if (is_10bit_addr) {
     second_addr_byte = ((i2c_handle->follower_address << 1) & 0xFF);
@@ -1657,7 +2035,7 @@ static sl_status_t i2c_follower_mode_blocking_state_machine(sl_i2c_handle_t *i2c
     if (pending_irq & SL_HAL_I2C_IF_ERRORS) {
       sl_hal_i2c_clear_interrupts(i2c_base_addr, _I2C_IF_MASK);
       i2c_base_addr->CMD = I2C_CMD_ABORT;
-      i2c_handle->state = SL_I2C_STATE_ERROR;
+      i2c_handle->transaction_state = SL_I2C_STATE_ERROR;
 
       if (pending_irq & I2C_IF_ARBLOST) {
         i2c_handle->event = SL_I2C_EVENT_ARBITRATION_LOST;
@@ -1668,7 +2046,7 @@ static sl_status_t i2c_follower_mode_blocking_state_machine(sl_i2c_handle_t *i2c
       }
     }
 
-    switch (i2c_handle->state) {
+    switch (i2c_handle->transaction_state) {
       case SL_I2C_STATE_IDLE:
         if (pending_irq & I2C_IF_ADDR) {
           rx_data = sl_hal_i2c_rx(i2c_base_addr);
@@ -1676,12 +2054,12 @@ static sl_status_t i2c_follower_mode_blocking_state_machine(sl_i2c_handle_t *i2c
           sl_hal_i2c_send_ack(i2c_base_addr);
 
           if (is_10bit_addr) {
-            i2c_handle->state = SL_I2C_STATE_10BIT_ADDRESS_MATCH;
+            i2c_handle->transaction_state = SL_I2C_STATE_10BIT_ADDRESS_MATCH;
           } else {
             if (rx_data & 0x01) {
-              i2c_handle->state = SL_I2C_STATE_SEND_DATA;
+              i2c_handle->transaction_state = SL_I2C_STATE_SEND_DATA;
             } else {
-              i2c_handle->state = SL_I2C_STATE_RECEIVE_DATA;
+              i2c_handle->transaction_state = SL_I2C_STATE_RECEIVE_DATA;
             }
           }
           i2c_handle->event = SL_I2C_EVENT_IN_PROGRESS;
@@ -1696,9 +2074,9 @@ static sl_status_t i2c_follower_mode_blocking_state_machine(sl_i2c_handle_t *i2c
           if (second_addr_byte == rx_data) {
             sl_hal_i2c_send_ack(i2c_base_addr);
             if (i2c_handle->transfer_direction == SL_I2C_READ) {
-              i2c_handle->state = SL_I2C_STATE_RECEIVE_DATA;
+              i2c_handle->transaction_state = SL_I2C_STATE_RECEIVE_DATA;
             } else {  // SL_I2C_WRITE
-              i2c_handle->state = SL_I2C_STATE_REP_ADDR_MATCH;
+              i2c_handle->transaction_state = SL_I2C_STATE_REP_ADDR_MATCH;
             }
           }
         }
@@ -1710,11 +2088,11 @@ static sl_status_t i2c_follower_mode_blocking_state_machine(sl_i2c_handle_t *i2c
           sl_hal_i2c_clear_interrupts(i2c_base_addr, (I2C_IF_ADDR | I2C_IF_RXDATAV));
           sl_hal_i2c_send_ack(i2c_base_addr);
           if (rx_data & 0x01) {
-            i2c_handle->state = SL_I2C_STATE_SEND_DATA;
+            i2c_handle->transaction_state = SL_I2C_STATE_SEND_DATA;
           } else {
             sl_hal_i2c_send_nack(i2c_base_addr);
             i2c_handle->event = SL_I2C_EVENT_ADDR_NACK;
-            i2c_handle->state = SL_I2C_STATE_WAIT_FOR_STOP;
+            i2c_handle->transaction_state = SL_I2C_STATE_WAIT_FOR_STOP;
           }
         }
         break;
@@ -1725,16 +2103,16 @@ static sl_status_t i2c_follower_mode_blocking_state_machine(sl_i2c_handle_t *i2c
         } else {
           sl_hal_i2c_tx(i2c_base_addr, 0xFF);
         }
-        i2c_handle->state = SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK;
+        i2c_handle->transaction_state = SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK;
         break;
 
       case SL_I2C_STATE_DATA_WAIT_FOR_ACK_OR_NACK:
         if (pending_irq & I2C_IF_ACK) {
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_ACK);
-          i2c_handle->state = SL_I2C_STATE_SEND_DATA;
+          i2c_handle->transaction_state = SL_I2C_STATE_SEND_DATA;
         } else if (pending_irq & I2C_IF_NACK) {
           sl_hal_i2c_clear_interrupts(i2c_base_addr, I2C_IF_NACK);
-          i2c_handle->state = SL_I2C_STATE_WAIT_FOR_STOP;
+          i2c_handle->transaction_state = SL_I2C_STATE_WAIT_FOR_STOP;
         }
         break;
 
@@ -1749,10 +2127,10 @@ static sl_status_t i2c_follower_mode_blocking_state_machine(sl_i2c_handle_t *i2c
           } else {
             sl_hal_i2c_send_nack(i2c_base_addr);
             i2c_handle->event = SL_I2C_EVENT_BUFFER_FULL;
-            i2c_handle->state = SL_I2C_STATE_WAIT_FOR_STOP;
+            i2c_handle->transaction_state = SL_I2C_STATE_WAIT_FOR_STOP;
           }
         } else if (pending_irq & I2C_IF_SSTOP) {
-          i2c_handle->state = SL_I2C_STATE_WAIT_FOR_STOP;
+          i2c_handle->transaction_state = SL_I2C_STATE_WAIT_FOR_STOP;
         }
         break;
 
@@ -1772,7 +2150,7 @@ static sl_status_t i2c_follower_mode_blocking_state_machine(sl_i2c_handle_t *i2c
 
       default:
         i2c_handle->event = SL_I2C_EVENT_SW_FAULT;
-        i2c_handle->state = SL_I2C_STATE_ERROR;
+        i2c_handle->transaction_state = SL_I2C_STATE_ERROR;
         return SL_STATUS_FAIL;
     }
   }
@@ -1862,6 +2240,11 @@ static void stop_active_dma_transfers(sl_i2c_handle_t *i2c_handle)
   if (sl_hal_ldma_channel_is_enabled(ldma, rx_ch)) {
     sl_hal_ldma_stop_transfer(ldma, rx_ch);
   }
+
+  // Transfer hardware is idle; clear ACTIVE unless already suspended for EM2.
+  if (i2c_handle->power_state == SL_I2C_POWER_STATE_ACTIVE) {
+    i2c_handle->power_state = SL_I2C_POWER_STATE_IDLE;
+  }
 }
 
 /***************************************************************************//**
@@ -1937,7 +2320,7 @@ static sl_status_t i2c_setup_leader_non_blocking_dma_transfer(sl_i2c_handle_t *i
   sl_hal_i2c_flush_buffers(i2c_base_addr);
   sl_hal_i2c_clear_interrupts(i2c_base_addr, _I2C_IF_MASK);
   sl_hal_i2c_enable_interrupts(i2c_base_addr, (I2C_IEN_ACK | I2C_IEN_NACK | I2C_IEN_MSTOP | SL_HAL_I2C_IEN_ERRORS));
-  i2c_handle->state = SL_I2C_STATE_ADDR_WAIT_FOR_ACK_OR_NACK;
+  i2c_handle->transaction_state = SL_I2C_STATE_ADDR_WAIT_FOR_ACK_OR_NACK;
   i2c_handle->event = SL_I2C_EVENT_IDLE;
 
   sl_hal_ldma_disable_interrupts(ldma, (1 << dma_channel->dma_tx_channel));
@@ -2026,7 +2409,7 @@ static sl_status_t i2c_setup_follower_non_blocking_dma_transfer(sl_i2c_handle_t 
   sl_hal_i2c_flush_buffers(i2c_base_addr);
   sl_hal_i2c_clear_interrupts(i2c_base_addr, _I2C_IF_MASK);
   sl_hal_i2c_enable_interrupts(i2c_base_addr, (I2C_IEN_ADDR | SL_HAL_I2C_IEN_ERRORS));
-  i2c_handle->state = SL_I2C_STATE_ADDRESS_MATCH;
+  i2c_handle->transaction_state = SL_I2C_STATE_ADDRESS_MATCH;
   i2c_handle->event = SL_I2C_EVENT_IDLE;
 
   sl_hal_ldma_disable_interrupts(ldma, (1 << dma_channel->dma_tx_channel));
@@ -2078,8 +2461,8 @@ static void i2c_common_irq_handler(uint8_t i2c_instance)
     if (i2c_handle->transfer_complete_callback) {
       i2c_handle->transfer_complete_callback(i2c_handle, i2c_handle->user_data);
     }
-  } else if (i2c_handle->event != SL_I2C_EVENT_IN_PROGRESS && i2c_handle->state == SL_I2C_STATE_WAIT_FOR_STOP) {
-    i2c_handle->state = SL_I2C_STATE_DONE;
+  } else if (i2c_handle->event != SL_I2C_EVENT_IN_PROGRESS && i2c_handle->transaction_state == SL_I2C_STATE_WAIT_FOR_STOP) {
+    i2c_handle->transaction_state = SL_I2C_STATE_DONE;
     if (i2c_handle->event_callback) {
       i2c_handle->event_callback(i2c_handle, i2c_handle->event, i2c_handle->user_data);
     }

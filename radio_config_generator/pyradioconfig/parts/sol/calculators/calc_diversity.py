@@ -8,8 +8,6 @@ class Calc_Diversity_Sol(CALC_Diversity_Ocelot):
 
     def buildVariables(self, model):
         super().buildVariables(model)
-        # Internal variables
-        # Must exposing the forced selection of a antenna 0 only as DISABLE enum
         var = self._addModelVariable(model, 'softmodem_antdivmode', Enum, ModelVariableFormat.DECIMAL, 'Antenna diversity mode for soft modem')
         member_data = [
             ['DISABLE', 0, 'Antenna 0 used'],

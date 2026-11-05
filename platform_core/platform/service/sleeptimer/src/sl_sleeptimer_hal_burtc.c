@@ -69,6 +69,7 @@
 #include "sl_clock_manager.h"
 #include "sl_device_peripheral.h"
 #include "sl_interrupt_manager.h"
+#include "sl_log_helper.h"
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
@@ -345,7 +346,7 @@ uint16_t sleeptimer_hal_get_clock_accuracy(void)
 uint32_t sleeptimer_hal_get_capture(void)
 {
   // Invalid for BURTC peripheral
-  EFM_ASSERT(0);
+  SL_LOG_DEBUG_ASSERT(0);
   return 0;
 }
 
@@ -356,7 +357,7 @@ uint32_t sleeptimer_hal_get_capture(void)
 void sleeptimer_hal_reset_prs_signal(void)
 {
   // Invalid for BURTC peripheral
-  EFM_ASSERT(0);
+  SL_LOG_DEBUG_ASSERT(0);
 }
 
 /***************************************************************************//**

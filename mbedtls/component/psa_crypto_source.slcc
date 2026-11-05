@@ -109,6 +109,7 @@ include:
   - path: psa_util_internal.h
   - path: rsa_alt_helpers.h
   - path: rsa_internal.h
+  - path: rsa_invasive.h
 - path: drivers/builtin/include
   file_list:
   - path: mbedtls/private_access.h

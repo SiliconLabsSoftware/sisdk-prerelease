@@ -8,6 +8,9 @@ description: >
   of the application.
   The default size is set to 2 since this is the minimum for our sample
   applications. The user must configure it for optimal memory usage.
+documentation:
+  docset: z-wave
+  document: zwave-api/zaf-transport-tx
 package: zwave
 quality: production
 metadata:

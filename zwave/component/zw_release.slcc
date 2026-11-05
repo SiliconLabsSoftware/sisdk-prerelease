@@ -7,6 +7,9 @@ description: >
   Debug information is emitted at compile time (-g) and removed by the linker
   or post-build strip, so the shipped binary stays small while .unstripped.out
   or RelWithDebInfo artifacts can retain symbols and sources.
+documentation:
+  docset: z-wave
+  document: z-wave-getting-started-for-end-devices/08-debug-a-z-wave-application
 package: zwave
 quality: production
 metadata:

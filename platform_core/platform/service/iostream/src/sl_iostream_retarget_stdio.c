@@ -36,7 +36,7 @@
 #include <sys/stat.h>
 #include <stddef.h>
 #include "em_device.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 __attribute__((used)) int _close(int file);
 __attribute__((used)) void _exit(int status);
@@ -192,9 +192,10 @@ int _write(int file, const char *ptr, int len)
     case SL_STATUS_INVALID_STATE:
       break;  // Ignore error if the state doesn't allow to write.
     default:
-      EFM_ASSERT(status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
       break;
   }
+  (void)status;
 
   return len;
 }
@@ -229,6 +230,7 @@ int _write(int file, const char *ptr, int len)
 #include <yfuns.h>
 #include <stdint.h>
 #include "sl_common.h"
+#include "sl_log_helper.h"
 
 _STD_BEGIN
 
@@ -250,9 +252,10 @@ static int TxBuf(uint8_t *buffer, int nbytes)
     case SL_STATUS_INVALID_STATE:
       break;
     default:
-      EFM_ASSERT(status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
       break;
   }
+  (void)status;
 
   return nbytes;
 }
@@ -333,6 +336,8 @@ _STD_END
 
 #if defined(__CROSSWORKS_ARM)
 
+#include "sl_log_helper.h"
+
 /**************************************************************************//**
  * Write a character.
  *
@@ -345,7 +350,8 @@ int __putchar(int ch)
   sl_status_t status;
 
   status = sl_iostream_putchar(SL_IOSTREAM_STDOUT, ch);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   return(1);
 }
@@ -365,8 +371,9 @@ int __getchar(void)
   if (status == SL_STATUS_OK) {
     rtn_val = 1;
   } else {
-    EFM_ASSERT(status == SL_STATUS_EMPTY);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_EMPTY);
   }
+  (void)status;
 
   return(rtn_val);
 }
@@ -385,6 +392,7 @@ int __getchar(void)
 /******************************************************************************/
 
 #include <stdio.h>
+#include "sl_log_helper.h"
 
 // #pragma import(__use_no_semihosting_swi)
 
@@ -409,7 +417,8 @@ int fputc(int ch, FILE *f)
   sl_status_t status;
 
   status = sl_iostream_putchar(SL_IOSTREAM_STDOUT, ch);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   return(1);
 }
@@ -431,8 +440,9 @@ int fgetc(FILE *f)
   if (status == SL_STATUS_OK) {
     rtn_val = 1;
   } else {
-    EFM_ASSERT(status == SL_STATUS_EMPTY);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_EMPTY);
   }
+  (void)status;
 
   return((int)c);
 }
@@ -460,7 +470,8 @@ void _ttywrch(int ch)
   sl_status_t status;
 
   status = sl_iostream_putchar(SL_IOSTREAM_STDOUT, ch);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 }
 
 /**************************************************************************//**

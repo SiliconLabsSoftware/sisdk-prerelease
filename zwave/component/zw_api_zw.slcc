@@ -2,6 +2,10 @@ id: zw_api_zw
 label: Z-Wave API ZW
 category: Z-Wave|API
 description: API for ZW
+documentation:
+  docset: z-wave
+  document: zwave-api/zw-set-learn-mode
+
 package: zwave
 quality: production
 metadata:

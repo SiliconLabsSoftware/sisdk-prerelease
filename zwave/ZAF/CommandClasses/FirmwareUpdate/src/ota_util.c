@@ -700,16 +700,19 @@ handleCmdClassFirmwareUpdateMdReport(uint16_t crc16Result,
   }
 
   /* Right report number, continue */
-  if ((firmware_update_packetsize != fw_actualFrameSize)
-      && !(properties & FIRMWARE_UPDATE_MD_REPORT_PROPERTIES1_LAST_BIT_MASK)) {
+  // Every report except the last must be exactly the fragment size. The last one may be shorter.
+  // Each report must also fit in mdReportsStorage at its cache offset.
+  const bool is_last_report = (0 != (properties & FIRMWARE_UPDATE_MD_REPORT_PROPERTIES1_LAST_BIT_MASK));
+  const uint32_t cacheOffset = useMultiFrames() ? ((uint32_t)myOta.reportsReceived * firmware_update_packetsize) : 0;
+  if ((fw_actualFrameSize > firmware_update_packetsize)
+      || ((firmware_update_packetsize != fw_actualFrameSize) && !is_last_report)
+      || (cacheOffset + fw_actualFrameSize > sizeof(mdReportsStorage))) {
     ZPAL_LOG_ERROR(ZPAL_LOG_CC_FIRMWARE_UPDATE, "ERROR: Wrong fragment size. expected: %% 0x%x - got: 0x%x\r\n", firmware_update_packetsize, fw_actualFrameSize);
-    // (firmware_update_packetsize != fw_actualFrameSize) and not last packet - do not match.
     // Set Status value and let the timer handle retries
     myOta.statusReport = FIRMWARE_UPDATE_MD_STATUS_REPORT_UNABLE_TO_RECEIVE_V5;
     if (useMultiFrames()) {
       zaf_transport_resume();
     }
-    // All non-last fragments must have the same length. (This could also indicate a controller issue)
     return;  // Stop processing the received report and a timeout will be triggered for a new Md Get CMD.
   }
 
@@ -736,15 +739,20 @@ handleCmdClassFirmwareUpdateMdReport(uint16_t crc16Result,
     // If mdReportsStorage size is > 1, then we expect multiple frames after single MD Get.
     // If so, write all incoming frames into mdReportsStorage,
     // and write entire content of it into NVM when all of them have been received
-    startAddress = myOta.reportsReceived * firmware_update_packetsize;
-    memcpy(&mdReportsStorage[startAddress], pData, fw_actualFrameSize);
+    memcpy(&mdReportsStorage[cacheOffset], pData, fw_actualFrameSize);
   } else {
     // Otherwise, write data directly to flash
     // Using mdReportsStorage to ensure 32-bit alignment
     startAddress = ((uint32_t)(firmwareUpdateReportNumber - 1) * firmware_update_packetsize);
     memcpy(mdReportsStorage, pData, fw_actualFrameSize);
     zpal_status = zpal_bootloader_write_data(startAddress, mdReportsStorage, fw_actualFrameSize);
-    assert(zpal_status == ZPAL_STATUS_OK);
+    if (ZPAL_STATUS_OK != zpal_status) {
+      ZPAL_LOG_ERROR(ZPAL_LOG_CC_FIRMWARE_UPDATE, "Failed to write OTA fragment at offset %lu\n",
+                     (unsigned long)startAddress);
+      myOta.statusReport = FIRMWARE_UPDATE_MD_STATUS_REPORT_UNABLE_TO_RECEIVE_V5;
+      handleEvent(FW_EVENT_REPORT_RECEIVED_LAST_INVALID);
+      return;
+    }
   }
 
   /**
@@ -792,7 +800,13 @@ handleCmdClassFirmwareUpdateMdReport(uint16_t crc16Result,
       // Find the starting address for writing to flash
       startAddress = ((uint32_t)(firmwareUpdateReportNumber - myOta.reportsReceived) * firmware_update_packetsize);
       zpal_status = zpal_bootloader_write_data(startAddress, mdReportsStorage, len);
-      assert(zpal_status == ZPAL_STATUS_OK);
+      if (ZPAL_STATUS_OK != zpal_status) {
+        ZPAL_LOG_ERROR(ZPAL_LOG_CC_FIRMWARE_UPDATE, "Failed to write OTA fragments at offset %lu\n",
+                       (unsigned long)startAddress);
+        myOta.statusReport = FIRMWARE_UPDATE_MD_STATUS_REPORT_UNABLE_TO_RECEIVE_V5;
+        handleEvent(FW_EVENT_REPORT_RECEIVED_LAST_INVALID);
+        return;
+      }
     }
     // Delay verification of the firmware image
     // so we can transmit the ack or routed ack first
@@ -814,7 +828,14 @@ handleCmdClassFirmwareUpdateMdReport(uint16_t crc16Result,
         // Find the starting address for writing to flash
         startAddress = ((uint32_t)(firmwareUpdateReportNumber - myOta.reportsReceived) * firmware_update_packetsize);
         zpal_status = zpal_bootloader_write_data(startAddress, mdReportsStorage, len);
-        assert(zpal_status == ZPAL_STATUS_OK);
+        if (ZPAL_STATUS_OK != zpal_status) {
+          ZPAL_LOG_ERROR(ZPAL_LOG_CC_FIRMWARE_UPDATE, "Failed to write OTA fragments at offset %lu\n",
+                         (unsigned long)startAddress);
+          myOta.statusReport = FIRMWARE_UPDATE_MD_STATUS_REPORT_UNABLE_TO_RECEIVE_V5;
+          zaf_transport_resume();
+          handleEvent(FW_EVENT_REPORT_RECEIVED_LAST_INVALID);
+          return;
+        }
         zaf_transport_resume();
       } else {
         // MultiFrames were not used, therefore all fragments are already written to flash.
@@ -958,7 +979,18 @@ void handleCmdClassFirmwareUpdateMdReqGet(
 
   // Keep awake for a long time, but not forever.
   zpal_radio_update_stay_awake(&myOta.stay_awake_id, OTA_AWAKE_PERIOD_LONG_TERM);
-  zpal_bootloader_erase_storage_slot();
+  if (ZPAL_STATUS_OK != zpal_bootloader_erase_storage_slot()) {
+    ZPAL_LOG_ERROR(ZPAL_LOG_CC_FIRMWARE_UPDATE, "Failed to erase OTA storage slot\n");
+    *pStatus = FIRMWARE_UPDATE_MD_REQUEST_REPORT_NOT_UPGRADABLE_V5;
+    myOta.requestReport = *pStatus;
+    myOta.finishStatus = OTA_STATUS_ABORT;
+    if (NULL != myOta.pOtaFinish) {
+      myOta.pOtaFinish(myOta.finishStatus);
+    }
+    zpal_radio_update_stay_awake(&myOta.stay_awake_id, OTA_AWAKE_PERIOD_GRACEFUL_OFF);
+    handleEvent(FW_EVENT_REQ_GET_RECEIVED_INVALID);
+    return;
+  }
   initOTAState();
   memcpy( (uint8_t*) &myOta.rxOpt, (uint8_t*)rxOpt, sizeof(RECEIVE_OPTIONS_TYPE_EX));
 

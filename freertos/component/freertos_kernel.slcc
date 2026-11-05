@@ -11,12 +11,11 @@ metadata:
     id: freertos
     license: MSLA
     upstream:
-      name: FreeRTOS kernel
+      name: FreeRTOS-Kernel
       version: 11.1.0
       supplier: AWS open source
       url: https://github.com/FreeRTOS/FreeRTOS-Kernel
-      package_url: https://github.com/FreeRTOS/FreeRTOS-Kernel/releases/tag/V11.1.0
-      comment: FreeRTOS kernel, Version 11.1.0
+      comment: FreeRTOS-Kernel, Version 11.1.0
 config_file:
 - path: config/series2/FreeRTOSConfig.h
   file_id: freertos_config
@@ -78,6 +77,7 @@ provides:
   condition:
   - device_cortexm
 requires:
+- name: log_none
 - name: freertos_heap
 - name: component_catalog
   condition:

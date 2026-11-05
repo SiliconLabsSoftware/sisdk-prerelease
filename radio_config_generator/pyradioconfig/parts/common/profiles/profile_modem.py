@@ -8,10 +8,6 @@ def buildModemAdvancedInputs(model, profile):
     IProfile.make_linked_io(profile, model.vars.timing_sample_threshold           , 'Advanced', readable_name="Timing Samples Threshold",                     value_limit_min=0,      value_limit_max=100)
     IProfile.make_linked_io(profile, model.vars.freq_offset_hz                    , 'Advanced', readable_name="Frequency Offset Compensation (AFC) Limit",                          value_limit_min=0,      value_limit_max=500000, units_multiplier=UnitsMultiplier.KILO)
 
-    # The origin of the value used for the channel bandwidth upper limit isn't obvious.  The decimators can be set to
-    # get a bandwidth of up to 3.4 MHz (DEC0 = 3 and DEC1 = 1). The ADC bandwidth, however, is limited to about 2.5 MHz.
-    # We should set the limt to to the ADC limit, since the overall bandwidth is limited by the ADC bandwidth, not the
-    # limit by the decimators.   See https://jira.silabs.com/browse/MCUW_RADIO_CFG-554 for additional discussion on this.
     bandwidth_limit_decimators = 3400000
     bandwidth_limit_adc        = 2530000
     IProfile.make_linked_io(profile, model.vars.bandwidth_hz                      , 'Advanced', readable_name="Acquisition Channel Bandwidth",                 value_limit_min=100,    value_limit_max=bandwidth_limit_adc, units_multiplier=UnitsMultiplier.KILO)
@@ -54,7 +50,6 @@ def buildModemAdvancedInputs(model, profile):
     IProfile.make_hidden_input(profile, model.vars.in_2fsk_opt_scope, 'Advanced', readable_name="Include in 2FSK optimization scope")
 
     if model.part_family.lower() not in ["dumbo","unit_test_part"]:
-        # Expose diversity registers as advanced inputs
         IProfile.make_linked_io(profile, model.vars.antdivmode, 'Advanced', readable_name="Antenna diversity mode")
         IProfile.make_linked_io(profile, model.vars.antdivrepeatdis, 'Advanced', readable_name="Diversity Select-Best repeat")
 
@@ -64,6 +59,7 @@ def buildModemAdvancedInputs(model, profile):
     IProfile.make_linked_io(profile, model.vars.var_length_loc, 'Advanced', readable_name="Byte position of dynamic length byte",                               value_limit_min=0,     value_limit_max=4096)
 
     IProfile.make_linked_io(profile, model.vars.firstframe_bitsperword, 'Advanced', readable_name="Length of the First Word",                               value_limit_min=1,     value_limit_max=8)
+
 
 def buildModemInfoOutputs(model, profile):
     profile.outputs.append(ModelOutput(model.vars.preamble_string,  '', ModelOutputType.INFO, readable_name="Preamble Binary Pattern"))
@@ -98,3 +94,5 @@ def buildRailOutputs(model, profile):
     profile.outputs.append(ModelOutput(model.vars.tx_eof_delay_ns, '', ModelOutputType.RAIL_CONFIG, readable_name='Time from TX EOF timestamp to end of frame on-air'))
     if model.part_family.lower() not in ["dumbo", "jumbo", "nerio", "nixi", "unit_test_part"]:
         profile.outputs.append(ModelOutput(model.vars.rssi_adjust_db, '', ModelOutputType.RAIL_CONFIG, readable_name='RSSI compensation value calculated from decimation and digital gains'))
+
+    IProfile.make_hidden_input(profile, model.vars.phy_mode_id, "RAIL", readable_name="Stack info PHY mode ID", value_limit_min=10, value_limit_max=255)

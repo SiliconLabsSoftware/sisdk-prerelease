@@ -5,7 +5,6 @@ from enum import Enum
 from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import CalculationException
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
 import numpy as np
-#This file contains calculations related to the configuring the frequency synthesizer
 
 class CALC_Synth_ocelot(CALC_Synth_lynx):
 
@@ -23,10 +22,8 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Build variables from Lynx
         super().buildVariables(model)
 
-        # New variables
         self._addModelVariable(model, 'synth_rx_mode', Enum, ModelVariableFormat.DECIMAL)
         model.vars.synth_rx_mode.var_enum = CreateModelVariableEnum(
             enum_name='SynthRxModeEnum',
@@ -87,18 +84,15 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
                 ['BLE', 3, 'BLE Mode'],
             ])
 
-        #Deprecated variable (needs to stay around as we have a deprecated Profile Input)
         self._addModelVariable(model, 'max_tx_power_dbm', int, ModelVariableFormat.DECIMAL,
                                desc='Maximum transmit power expected from this device (DEPRECATED)')
 
-        # https://jira.silabs.com/browse/MCUW_RADIO_CFG-2273
         self._addModelVariable(model, 'synth_tuning_rx_step_size', float, ModelVariableFormat.FLOAT,
                                desc="Syntheziser RX Tuning Step [Hz]")
         self._addModelVariable(model, 'synth_tuning_tx_step_size', float, ModelVariableFormat.FLOAT,
                                desc="Syntheziser TX Tuning Step [Hz]")
 
     def calc_rf_band(self, model):
-       ### revised to include BAND_315
         rf_freq = model.vars.base_frequency_hz.value
 
         if ( rf_freq > 2.0e9 ):
@@ -121,20 +115,17 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
 
     def calc_synth_settling_mode(self, model):
 
-        #Read in model vars
         rf_band = model.vars.rf_band.value
 
         if rf_band == model.vars.rf_band.var_enum.BAND_2400:
             synth_settling_mode = model.vars.synth_settling_mode.var_enum.BLE
         else:
-            #Set synth settling mode to Normal for now
             synth_settling_mode = model.vars.synth_settling_mode.var_enum.NORMAL
 
         model.vars.synth_settling_mode.value = synth_settling_mode
 
     def calc_rx_mode(self, model):
 
-        # Revised for unified PHYs from Ranga per https://jira.silabs.com/browse/MCUW_RADIO_CFG-1477
 
         synth_settling_mode = model.vars.synth_settling_mode.value
 
@@ -154,10 +145,7 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         baudrate = model.vars.baudrate.value
         modulation_type = model.vars.modulation_type.value
 
-        # Revised TX settings from Ranga per https://jira.silabs.com/browse/MCUW_RADIO_CFG-1379
-        # Revised for unified PHYs per https://jira.silabs.com/browse/MCUW_RADIO_CFG-1476
 
-        # Fixed settings for OOK, DBPSK, BPSK
         if modulation_type == model.vars.modulation_type.var_enum.DBPSK:
             model.vars.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE8       # Sub-GHz, 3 MHz, QNC
         elif modulation_type == model.vars.modulation_type.var_enum.BPSK:
@@ -166,7 +154,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
                 modulation_type == model.vars.modulation_type.var_enum.ASK:
             model.vars.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE4       # Sub-GHz, 500 kHz, QNC
         else:
-            # Settings based on band and baudrate
             if band == model.vars.rf_band.var_enum.BAND_2400:
                 if baudrate > 1.5e6:
                     model.vars.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE10  # 2.4 GHz, 1.5 MHz, BLE 2Mbps
@@ -194,7 +181,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         rx_mode = model.vars.synth_rx_mode.value
         ind = rx_mode.value
 
-        # Revised for unified PHYs from Ranga per https://jira.silabs.com/browse/MCUW_RADIO_CFG-1477
 
         rx_mode_settings = {
             'SYNTH.LPFCTRL2RX.CASELRX':         [1,1,0,1],
@@ -270,8 +256,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         tx_mode = model.vars.synth_tx_mode.value
         ind = tx_mode.value
 
-        # Revised TX settings from Ranga per https://jira.silabs.com/browse/MCUW_RADIO_CFG-1379
-        # Revised for unified PHYs per https://jira.silabs.com/browse/MCUW_RADIO_CFG-1476
 
         tx_mode_settings = {
             'SYNTH.LPFCTRL2TX.CASELTX':         [1,1,0,0,1,1,1,1,1,1],
@@ -339,50 +323,35 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         self._reg_write(model.vars.RAC_SYTRIM0_SYCHPSRCENTX,            tx_mode_settings['RAC.SYTRIM0.SYCHPSRCENTX'][ind])
 
     def calc_sytrim0_sychpcurrtx_reg(self, model):
-        # This function calculates the SYTRIM0_SYCHPCURRTX field
 
-        #For now, always use value 5
         sychpcurrtx = 5
 
-        # Write the register
         self._reg_write(model.vars.RAC_SYTRIM0_SYCHPCURRTX, sychpcurrtx)
 
     def calc_sytrim_misc(self, model):
-        # Set statically, these were previously PTE set and forget but were moved to calculator
-        # given calculator ownership of adjacent fields
         self._reg_write(model.vars.RAC_SYTRIM0_SYTRIMCHPREGAMPBIAS, 0)
         self._reg_write(model.vars.RAC_SYTRIM0_SYTRIMCHPREGAMPBW, 3)
         self._reg_write(model.vars.RAC_SYTRIM1_SYTRIMMMDREGAMPBIAS, 1)
         self._reg_write(model.vars.RAC_SYTRIM1_SYTRIMMMDREGAMPBW, 3)
 
     def calc_adc_clock_config(self, model):
-        #This function calculates both the ADC mode (e.g. fullrate, halfrate, etc) as well as the ADC clock divider path
 
-        #Load model values into local variables
         bandwidth_hz = model.vars.bandwidth_hz.value
 
         if(bandwidth_hz < 100e3):
-            #1/8 rate mode, noise density is lowest in 50-100kHz range
-            #Use the HFXO for the ADC clock
             adc_rate_mode = model.vars.adc_rate_mode.var_enum.EIGHTHRATE
             adc_clock_mode = model.vars.adc_clock_mode.var_enum.HFXOMULT
         elif(bandwidth_hz < 1.25e6):
-            #1/2 rate mode
-            #Use the HFXO along with DPLL for the ADC clock
             adc_rate_mode = model.vars.adc_rate_mode.var_enum.HALFRATE
             adc_clock_mode = model.vars.adc_clock_mode.var_enum.HFXOMULT
         else:
-            #Full rate mode
-            #Use the divided down VCO for the ADC clock
             adc_rate_mode = model.vars.adc_rate_mode.var_enum.FULLRATE
             adc_clock_mode = model.vars.adc_clock_mode.var_enum.HFXOMULT
 
-        #Load local variables back into model variables
         model.vars.adc_clock_mode.value = adc_clock_mode
         model.vars.adc_rate_mode.value = adc_rate_mode
 
     def calc_adc_clockmode_reg(self,model):
-        #This function handles writes to the registers impacting ADC clock mode
         adc_clock_mode = model.vars.adc_clock_mode.value
 
         if( model.vars.adc_clock_mode.var_enum.HFXOMULT == adc_clock_mode ):
@@ -391,7 +360,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
             self._reg_write(model.vars.RAC_IFADCTRIM0_IFADCCLKSEL, 0)
 
     def calc_adc_clockmode_actual(self, model):
-        #This function calculates the actual value of the adc clock mode based on the register value used
         ifadc_clk_sel = model.vars.RAC_IFADCTRIM0_IFADCCLKSEL.value
 
         if( 1 == ifadc_clk_sel ):
@@ -400,7 +368,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
             model.vars.adc_clock_mode_actual.value = model.vars.adc_clock_mode.var_enum.VCODIV
 
     def calc_adc_rate_mode_reg(self,model):
-        #This function handles writes to the registers impacting ADC clock mode and HFXO multiplier
         adc_rate_mode = model.vars.adc_rate_mode.value
         adc_clock_mode = model.vars.adc_clock_mode.value
 
@@ -411,15 +378,11 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
             self._reg_write(model.vars.RAC_IFADCPLLDCO_IFADCPLLDCOFULLRATE, 0)
             self._reg_write(model.vars.RAC_IFADCPLLEN_IFADCPLLENXOBYP, 0)
         else:
-            # Eigthrate
             self._reg_write(model.vars.RAC_IFADCPLLEN_IFADCPLLENXOBYP, 1)
             self._reg_write(model.vars.RAC_IFADCPLLDCO_IFADCPLLDCOFULLRATE, 0)
 
-    # FIXME: do we have VCO based on clock option in Sol? if not remove that path
     def calc_adc_target_freq(self, model):
-        #This function calculates the target sample frequency based on the ADC clock configuration
 
-        #Load model variables into local variables
         adc_rate_mode = model.vars.adc_rate_mode.value #Use the target rate mode for now because we haven't yet chosen the exact VCODIV value
         adc_clock_mode = model.vars.adc_clock_mode.value
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
@@ -432,53 +395,37 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
             else:
                 fadc_target = xtal_frequency_hz
         else:
-            #Clock mode is VCODIV
             if(adc_rate_mode==model.vars.adc_rate_mode.var_enum.HALFRATE):
                 fadc_target = 152.5e6
             else:
                 fadc_target = 305e6   #Target full rate
 
-        #Load local variables back into model variables
         model.vars.adc_target_freq.value = int(fadc_target)
 
     def calc_lo_adc_dividers(self,model):
-        #This function calculates A,B,C, ADC dividers
 
-        #Load model variables into local variables
         adc_clock_mode = model.vars.adc_clock_mode_actual.value
         flo = model.vars.lo_target_freq.value #We don't know the LO frequency yet, this is based on the center freq and target IF
         fadc_target = model.vars.adc_target_freq.value #We don't know the ADC frequency yet
 
-        #Define VCO pull range constants
-        #fvcomin = 4450e6
-        #fvcomax = 5950e6
 
-        #These array variables store all valid divider sets
-        # lodiv_codes[div-1] is the combined divider code for divider A, B, C
-        #    div_m_1  [0,1,2,3,4,5,6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
         lodiv_codes = [1,2,3,4,5,6,7,20,27,21, 0,22, 0,23,29,36, 0,30, 0,37,31, 0, 0,38]
         fosc = []
         lodiv = []
-        #Loop through all C,B,A divider possibilities
         for div_m_1 in range(24):
             fvco = flo * (2 * (div_m_1 + 1))
             if (lodiv_codes[div_m_1] > 0) and (fvco < self.fvcomax) and (fvco > self.fvcomin):
-                #If this is a valid value for the VCO, add to the list of valid divider combinations
                 lodiv.append(div_m_1+1)
                 fosc.append(fvco)
 
-        #Now go through all of the possible solutions and pick the best one
         if (len(fosc) == 0):
             raise CalculationException('ERROR: no valid solution for VCO frequency in calc_lo_adc_dividers()')
 
         else:
-            # If the ADC is based directly on the HFXO, then don't worry about the ADC divider and pick the first valid LO divider set
             if(adc_clock_mode==model.vars.adc_clock_mode.var_enum.HFXOMULT):
                 adcdivfinal = 0 #This is a don't care, but make it 1 so that any calculations using the value don't divide by zero
                 lodivfinal = lodiv[0]
             else:
-                # Find target freq for ADC from potential candidates
-                # Start with some initial values
                 fadcerr = 1e20
                 adcdivfinal = 1
                 lodivfinal = 1
@@ -489,22 +436,17 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
                     error = abs(fadc - fadc_target)
 
                     if (error < fadcerr):
-                        #If the current divider set yields the lowest ADC error, then make that the final for now
                         fadcerr = error
                         adcdivfinal = adcdiv
                         lodivfinal = lodiv[index]
 
-        #Calculate the A,B,C dividers from lodiv_reg and its 3 fields
         lodiv_reg  = lodiv_codes[lodivfinal-1]
 
-        #Load local variables back into model variables
         model.vars.adc_vco_div.value = adcdivfinal
         model.vars.lodiv.value = lodivfinal
 
-        #Write register
         self._reg_write(model.vars.SYNTH_DIVCTRL_LODIVFREQCTRL, lodiv_reg)
 
-        # calculate proper variable flag to determine sub-GHz
         model.vars.subgig_band.value = bool(model.vars.lodiv_actual.value > 1)
 
     def calc_lodividers_actual(self, model):
@@ -526,8 +468,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         model.vars.lodiv_actual.value = a_divider * b_divider * c_divider
 
     def calc_adc_vco_div_reg(self,model):
-        #This function writes the registers associated with the VCO Divider going to ADC
-        #Only care about this register when in VCO mode in XO mode exceptions are ignored
         adc_vco_div = model.vars.adc_vco_div.value
         adc_clock_mode = model.vars.adc_clock_mode_actual.value
 
@@ -541,19 +481,15 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
             if adc_clock_mode == model.vars.adc_clock_mode.var_enum.VCODIV:
                 raise CalculationException('WARNING: ADC_VCO_DIV is greater than 8 in calc_adc_vco_div_reg()')
 
-        # 16 codes [0:15]. Code 0 = div8 and code 15 = div23
         self._reg_write(model.vars.RAC_SYDIVCTRL_SYLODIVRADCDIV, adc_vco_div-8)
 
     def calc_adc_vco_div_actual(self,model):
-        #This function calculates the actual ADC divider based on the register value
         sy_lo_divr_adc_div = model.vars.RAC_SYDIVCTRL_SYLODIVRADCDIV.value
 
         model.vars.adc_vco_div_actual.value = sy_lo_divr_adc_div + 8
 
     def calc_adc_freq_actual(self,model):
-        #This function calculates the actual ADC sample frequency and error based on the registers
 
-        #Load model variables into local variables
         adc_clock_mode_actual = model.vars.adc_clock_mode_actual.value
         adc_vco_div_actual = model.vars.adc_vco_div_actual.value
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value
@@ -563,7 +499,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         ifadcpll_en_xo_bypass = model.vars.RAC_IFADCPLLEN_IFADCPLLENXOBYP.value
 
         if adc_clock_mode_actual == model.vars.adc_clock_mode.var_enum.HFXOMULT:
-            #the ordering of the if statements is important - keep ifadcpll_en_xo_bypass on top
             if 1 == ifadcpll_en_xo_bypass:
                 adc_freq_actual = xtal_frequency_hz
             elif 1 == ifadcpll_dco_fullrate:
@@ -573,20 +508,14 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         else:
             adc_freq_actual = int(fsynth / adc_vco_div_actual)
 
-        # Compute the final ADC frequency percent error
         ferror = 100 * (fadc_target - adc_freq_actual) / float(fadc_target)
 
-        #Load local variables back into model variables
         model.vars.adc_freq_actual.value = adc_freq_actual
         model.vars.adc_freq_error.value = ferror
 
     def calc_if_frequency_target(self,model):
-        #This function calculates the target IF frequency
 
-        #The lower bound for signal content is determined by the lowest usable frequency range of the ADC (DC filtering produces noise near DC, varies based on sample rate)
-        #This upper bound for signal content is determined by the highest usable frequency range of the ADC (noise shaping, varies based on sample rate)
 
-        #Load model variables into local variables
         bandwidth_hz = model.vars.bandwidth_hz.value
         adc_rate_mode = model.vars.adc_rate_mode.value #We can't use the actual rate mode, because the IF goes into calculating the actual VCO, which goes into final ADC divider
 
@@ -606,30 +535,23 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         if ( (if_frequency_hz + bandwidth_hz / 2) > bandwidth_adc_hz):
             LogMgr.Warning("WARNING: IF + BW/2 > ADC Bandwidth")
 
-        #Load local variables back into model variables
         model.vars.if_frequency_hz.value = int(if_frequency_hz)
 
     def calc_iffreq_reg(self, model):
-        #This calculation writes the IF frequency to the register
 
-        #Load model variables into local variables
         if_frequency_hz = model.vars.if_frequency_hz.value
         synth_res_actual = model.vars.synth_res_actual.value
 
         iffreq_reg = int(if_frequency_hz / synth_res_actual)
 
-        #Load local variables back into model variables
         self._reg_write(model.vars.SYNTH_IFFREQ_IFFREQ, iffreq_reg)
 
 
     def calc_lodiv_value(self, model):
-        #This calculation is now in the calc_demodulator file as it also computes the ADC divider
         pass
 
     def calc_lo_target_freq(self,model):
-        #This function calculates the target LO frequency baed on RF, IF, and injection side
 
-        #Load model variables into local variables
         lo_injection_side = model.vars.lo_injection_side.value
         rf_freq = model.vars.base_frequency_hz.value
         if_freq = model.vars.if_frequency_hz.value #We don't yet know the actual synth frequency to get the true IF
@@ -639,34 +561,28 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         else:
             lo_freq = rf_freq - if_freq
 
-        #Load local variables back into model variables
         model.vars.lo_target_freq.value = lo_freq
 
 
     def calc_chsp_freq_reg(self, model):
-        #This function was ported due to a variable name mismatch
 
         ch_spacing = model.vars.channel_spacing_hz.value * 1.0
         f0 = model.vars.base_frequency_hz.value * 1.0
         res = model.vars.synth_res_actual.value
 
-        #channel spacing in terms of res
         chsp = py2round(ch_spacing / res)
 
         self._reg_write(model.vars.SYNTH_CHSP_CHSP, int(chsp))
 
-        # frequency in terms of res
         freq = math.floor(f0 / res)
 
         self._reg_write(model.vars.SYNTH_FREQ_FREQ, long(freq))
 
     def calc_synth_res_actual(self, model):
-        #This function was ported due to a variable name mismatch
 
         xtal_frequency_hz = model.vars.xtal_frequency_hz.value * 1.0
         lodiv = model.vars.lodiv_actual.value
 
-        # Calculate frequency resolution
         res = xtal_frequency_hz / lodiv / pow(2, 19)
 
         model.vars.synth_res_actual.value = res
@@ -676,7 +592,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         res = model.vars.synth_res_actual.value
         lsbforce_rx = model.vars.SYNTH_DSMCTRLRX_LSBFORCERX.value
 
-        # Correct reported frequency resolution based on LSBFORCERX register
         if lsbforce_rx == 1:
             frequency_res_log = res * 2
         else:
@@ -688,7 +603,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         res = model.vars.synth_res_actual.value
         lsbforce_tx = model.vars.SYNTH_DSMCTRLTX_LSBFORCETX.value
 
-        # Correct reported frequency resolution based on LSBFORCETX register
         if lsbforce_tx == 1:
             frequency_res_log = res * 2
         else:
@@ -697,8 +611,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         model.vars.synth_tuning_tx_step_size.value = frequency_res_log
 
     def calc_check_synth_limits(self,model):
-        #Overriding limit check from Common
-        #TODO: add in limits if we want to check on Ocelot
         pass
 
     def calc_rx_synth_freq_actual(self, model):
@@ -726,50 +638,26 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
 
         model.vars.rx_synth_freq_actual.value = long(round(rx_synth_freq))
 
-    #FIXME: do we want to create another file called calc_rac.py and place this function there?
     def calc_pga_lna_bw_reg(self, model):
 
-        # Notes
-        # Panther used max if_bandwidth_hz = 2.5MHz for BW3dB = 5MHz
-        # This gave 1dB droop for mixer pole response and 1dB droop for pga pole response (2dB total).
-        # For Ocelot, the initial approach is to scale this to 4 ranges for the 4 filter options
-        # 0:  BW3dB = 5 MHz -> max IF BW = 2.5 MHz
-        # 1:  BW3dB = 2.5 MHz -> max IF BW = 1.25 MHz
-        # 2:  BW3dB = 1.25 MHz -> max IF BW = 0.625 MHz
-        # 3:  BW3dB = 0.625 MHz -> max IF BW = 0.3125 MHz
 
         if_frequency_hz = model.vars.if_frequency_hz.value
         bandwidth_hz = model.vars.bandwidth_hz.value
         if_bandwidth_hz = if_frequency_hz + bandwidth_hz / 2.0
 
-        # Initial Ocelot approach:  same BW3dB for both poles, H(f) > -2dB at IF bandwidth edge
-        # Adjusted thresholds by -15% for -2dB frequency based on Ocelot Silicon measurements
         if if_bandwidth_hz < 0.260e6:
-            # eighth-rate modes
-            # LNABWADJ = 15 for BW3dB = 0.625 MHz
-            # PGABWMODE = 2 for BW3dB = 0.625 MHz
             mixer_bw_sel = 15
             pga_bw_sel = 2
         elif if_bandwidth_hz < 0.85*0.625e6:
-            # half-rate modes
-            # LNABWADJ = 7 for BW3dB = 1.25 MHz
-            # PGABWMODE = 3 for BW3dB = 1.25 MHz
             mixer_bw_sel = 7
             pga_bw_sel = 3
         elif if_bandwidth_hz < 0.85*1.25e6:
-            # half-rate modes
-            # LNABWADJ = 3 for BW3dB = 2.5 MHz
-            # PGABWMODE = 1 for BW3dB = 2.5 MHz
             mixer_bw_sel = 3
             pga_bw_sel = 1
         else:
-            # full-rate modes
-            # LNABWADJ = 0 for BW3dB = 2.5 MHz
-            # PGABWMODE = 0 for BW3dB = 2.5 MHz
             mixer_bw_sel = 0
             pga_bw_sel = 0
 
-        #For now, set mixer_bw_sel_boost to the same value as mixer_bw_sel (MCUW_RADIO_CFG-1174)
         mixer_bw_sel_boost = mixer_bw_sel
 
         self._reg_write(model.vars.RAC_PGACTRL_PGABWMODE, pga_bw_sel)
@@ -780,18 +668,14 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
 
         rf_band = model.vars.rf_band.value
 
-        # Calculating the boostlna value
         if rf_band == model.vars.rf_band.var_enum.BAND_2400:
             boostlna = 1
         else:
-            # https://jira.silabs.com/browse/MCUW_RADIO_CFG-1612 always set to 0 for SubG
             boostlna = 0
 
-        #Write the register
         self._reg_write(model.vars.AGC_LNABOOST_BOOSTLNA, boostlna)
 
     def calc_lodiv_actual(self, model):
-        # Don't want to calculate this for Ocelot
         pass
 
     def calc_ifadcplldcofilter_reg(self, model):
@@ -863,9 +747,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         model.vars.ppnd_2.value = 0
         model.vars.ppnd_3.value = 0
         if (lodiv >= 5):
-            # only allow DCDC retiming for low frequency band
-            # calculate 4 freqs equaly spaced over synth range
-            # divide by 2 is to convert vco range to synth range
             fvcorange = self.fvcomax - self.fvcomin
             fvcostep = fvcorange / 4.0
             fsynth_list = np.arange(self.fvcomin+fvcostep/2,self.fvcomax-fvcostep/4,fvcostep)/2
@@ -898,15 +779,11 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
 
     def calc_synth_misc(self, model):
 
-        #Setting these regs to static values
         self._reg_write(model.vars.RAC_SYNTHENCTRL_MMDPOWERBALANCEDISABLE, 0)
 
-        # Setting these values to POR
         self._reg_write_default(model.vars.SYNTH_LPFCTRL2TX_VCMLVLTX)
         self._reg_write_default(model.vars.RAC_SYNTHREGCTRL_MMDLDOVREFTRIM)
 
-        # Fairly confident that these CAL values are not actually used, but Design can not confirm these are unused.
-        # So if the value isn't forced then these are a do not care.
         if model.vars.SYNTH_LPFCTRL1CAL_OP1BWCAL.value_forced is None:
             self._reg_do_not_care(model.vars.SYNTH_LPFCTRL1CAL_OP1BWCAL)
         if model.vars.SYNTH_LPFCTRL1CAL_OP1COMPCAL.value_forced is None:
@@ -919,7 +796,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
             self._reg_do_not_care(model.vars.SYNTH_LPFCTRL1CAL_RFBVALCAL)
 
     def calc_hfxo_retiming_table(self, model):
-        # Initialize Table
         model.vars.lut_table_index.value = [0]
         model.vars.lut_freq.value = []
         model.vars.lut_freq_upper.value = []
@@ -929,28 +805,22 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         model.vars.lut_limith.value = []
         model.vars.lut_dpll_freq_hz.value = []
 
-        #setting for 1x HFXO frequency
         self.retime_print("calculating 1x HFXO freq")
         self.retime_main(model, model.vars.xtal_frequency_hz.value, 0, 0)
 
     def calc_txramp_txmodephaseflip_reg(self, model):
-        #This function writes the TXMODEPHASEFLIP reg field
 
-        #Read in model variables
         modulation_type = model.vars.modulation_type.value
 
-        #Only set to 1 for DBPSK and BPSK
         if modulation_type == model.vars.modulation_type.var_enum.DBPSK or \
                 modulation_type == model.vars.modulation_type.var_enum.BPSK:
             txmodephaseflip = 1
         else:
             txmodephaseflip = 0
 
-        #Write the register
         self._reg_write(model.vars.RAC_TXRAMP_TXMODEPHASEFLIP, txmodephaseflip)
 
     def calc_lo_side_regs(self, model):
-        # Separate implentation between Panther and Ocelot to differentiate SubG and 2.4G implementation of low-side
 
         model.vars.lo_injection_side.value = model.vars.lo_injection_side.var_enum.HIGH_SIDE # default to high-side
 
@@ -966,7 +836,6 @@ class CALC_Synth_ocelot(CALC_Synth_lynx):
         else:
             loside = 0
 
-        #Write the registers
         self._reg_write(model.vars.SYNTH_IFFREQ_LOSIDE, loside)
         self._reg_write(model.vars.MODEM_MIXCTRL_DIGIQSWAPEN, digiqswapen)
         self._reg_write(model.vars.MODEM_DIGMIXCTRL_MIXERCONJ, mixerconj)

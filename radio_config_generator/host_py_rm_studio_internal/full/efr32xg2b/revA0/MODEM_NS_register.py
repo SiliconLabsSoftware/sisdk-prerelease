@@ -1,5 +1,4 @@
 
-# -*- coding: utf-8 -*-
 
 from . static import Base_RM_Register
 from . MODEM_NS_field import *
@@ -2419,24 +2418,46 @@ class RM_Register_MODEM_NS_SPARE(Base_RM_Register):
         self.__dict__['zz_frozen'] = True
 
 
-class RM_Register_MODEM_NS_IRCALCOEFWR(Base_RM_Register):
+class RM_Register_MODEM_NS_IRCALCOEFWR0(Base_RM_Register):
     def __init__(self, rmio, label):
         self.__dict__['zz_frozen'] = False
-        super(RM_Register_MODEM_NS_IRCALCOEFWR, self).__init__(rmio, label,
-            0xb8014000, 0x28C,
-            'IRCALCOEFWR', 'MODEM_NS.IRCALCOEFWR', 'read-write',
+        super(RM_Register_MODEM_NS_IRCALCOEFWR0, self).__init__(rmio, label,
+            0xb8014000, 0x288,
+            'IRCALCOEFWR0', 'MODEM_NS.IRCALCOEFWR0', 'read-write',
             u"",
             0x00000000, 0xFFFFFFFF,
             0x00001000, 0x00002000,
             0x00003000)
 
-        self.CRVWD = RM_Field_MODEM_NS_IRCALCOEFWR_CRVWD(self)
+        self.CRVWD = RM_Field_MODEM_NS_IRCALCOEFWR0_CRVWD(self)
         self.zz_fdict['CRVWD'] = self.CRVWD
-        self.CRVWEN = RM_Field_MODEM_NS_IRCALCOEFWR_CRVWEN(self)
+        self.CRVWEN = RM_Field_MODEM_NS_IRCALCOEFWR0_CRVWEN(self)
         self.zz_fdict['CRVWEN'] = self.CRVWEN
-        self.CIVWD = RM_Field_MODEM_NS_IRCALCOEFWR_CIVWD(self)
+        self.CIVWD = RM_Field_MODEM_NS_IRCALCOEFWR0_CIVWD(self)
         self.zz_fdict['CIVWD'] = self.CIVWD
-        self.CIVWEN = RM_Field_MODEM_NS_IRCALCOEFWR_CIVWEN(self)
+        self.CIVWEN = RM_Field_MODEM_NS_IRCALCOEFWR0_CIVWEN(self)
+        self.zz_fdict['CIVWEN'] = self.CIVWEN
+        self.__dict__['zz_frozen'] = True
+
+
+class RM_Register_MODEM_NS_IRCALCOEFWR1(Base_RM_Register):
+    def __init__(self, rmio, label):
+        self.__dict__['zz_frozen'] = False
+        super(RM_Register_MODEM_NS_IRCALCOEFWR1, self).__init__(rmio, label,
+            0xb8014000, 0x28C,
+            'IRCALCOEFWR1', 'MODEM_NS.IRCALCOEFWR1', 'read-write',
+            u"",
+            0x00000000, 0xFFFFFFFF,
+            0x00001000, 0x00002000,
+            0x00003000)
+
+        self.CRVWD = RM_Field_MODEM_NS_IRCALCOEFWR1_CRVWD(self)
+        self.zz_fdict['CRVWD'] = self.CRVWD
+        self.CRVWEN = RM_Field_MODEM_NS_IRCALCOEFWR1_CRVWEN(self)
+        self.zz_fdict['CRVWEN'] = self.CRVWEN
+        self.CIVWD = RM_Field_MODEM_NS_IRCALCOEFWR1_CIVWD(self)
+        self.zz_fdict['CIVWD'] = self.CIVWD
+        self.CIVWEN = RM_Field_MODEM_NS_IRCALCOEFWR1_CIVWEN(self)
         self.zz_fdict['CIVWEN'] = self.CIVWEN
         self.__dict__['zz_frozen'] = True
 

@@ -6,6 +6,10 @@ description: >
   The Wake On Critical Message Command Class allows a device to be configured to send encapsulated critical messages.
   Based on the configured severity level, those message will be able to wake up a sleeping host.
   The Wake On Critical Message Command Class will be advertised in the non-secure NIF.
+documentation:
+  docset: z-wave
+  document: zwave-api/wake-on-critical-message
+
 package: zwave
 quality: production
 metadata:

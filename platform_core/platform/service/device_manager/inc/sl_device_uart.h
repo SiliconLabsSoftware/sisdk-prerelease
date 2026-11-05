@@ -34,7 +34,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "sl_enum.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -136,7 +136,7 @@ static inline uint8_t sl_uart_data_bits_to_count(sl_uart_data_bits_t data_bits)
 {
   if (data_bits < SL_UART_DATA_BITS_4
       || data_bits > SL_UART_DATA_BITS_16) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return 8;
   }
 
@@ -162,7 +162,7 @@ static inline uint8_t sl_uart_stop_bits_to_count(sl_uart_stop_bits_t stop_bits)
     case SL_UART_STOP_BITS_2:
       return 2;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return 1;
   }
 }
@@ -183,7 +183,7 @@ static inline uint8_t sl_uart_parity_to_count(sl_uart_parity_t parity)
     case SL_UART_PARITY_EVEN:
       return 1;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return 0;
   }
 }
@@ -224,7 +224,7 @@ static inline uint8_t sl_uart_oversampling_to_count(sl_uart_oversampling_t overs
     case SL_UART_OVERSAMPLING_16:
       return SL_UART_OVERSAMPLING_16;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_UART_OVERSAMPLING_16;
   }
 }

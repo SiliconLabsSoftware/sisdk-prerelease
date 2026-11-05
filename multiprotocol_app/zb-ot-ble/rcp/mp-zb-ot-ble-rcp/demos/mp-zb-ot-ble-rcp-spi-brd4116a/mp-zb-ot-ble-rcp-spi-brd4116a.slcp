@@ -421,6 +421,9 @@ autoselected_components:
   id: hal_common
 - package: platform_core
   vendor: silabs
+  id: hal_emu
+- package: platform_core
+  vendor: silabs
   id: hal_eusart
 - package: platform_core
   vendor: silabs
@@ -470,9 +473,6 @@ autoselected_components:
 - package: platform_core
   vendor: silabs
   id: mbedtls_aes
-- package: platform_core
-  vendor: silabs
-  id: mbedtls_asn1
 - package: platform_core
   vendor: silabs
   id: mbedtls_asn1_parse
@@ -529,9 +529,6 @@ autoselected_components:
   id: mbedtls_mpi
 - package: platform_core
   vendor: silabs
-  id: mbedtls_oid
-- package: platform_core
-  vendor: silabs
   id: mbedtls_pem_parse
 - package: platform_core
   vendor: silabs
@@ -560,6 +557,9 @@ autoselected_components:
 - package: platform_core
   vendor: silabs
   id: mbedtls_ssl_dtls_hello_verify
+- package: platform_core
+  vendor: silabs
+  id: mbedtls_ssl_handshake_sha256
 - package: platform_core
   vendor: silabs
   id: mbedtls_ssl_proto_dtls
@@ -957,50 +957,53 @@ sdk_extension:
   id: segger
   version: 1.2.0
 - vendor: silabs
+  id: delta_dfu
+  version: 1.1.1-rc.2
+- vendor: silabs
   id: mbedtls
   version: 4.1.0
+- vendor: silabs
+  id: cpc_extra
+  version: 1.1.0
 - vendor: silabs
   id: micriumos
   version: 6.2.0
 - vendor: silabs
-  id: bluetooth_le_host
-  version: 11.2.0-alpha.119
-- vendor: silabs
   id: openthread_forks
   version: 3.2.0
-- vendor: silabs
-  id: bluetooth_apploader
-  version: 11.2.0-alpha.119
 - vendor: silabs
   id: bluetooth_le
   version: 11.2.0
 - vendor: silabs
-  id: bluetooth_common
-  version: 1.2.0-alpha.119
+  id: bluetooth_le_host
+  version: 11.2.0-alpha.144
 - vendor: silabs
-  id: unity_test_framework
-  version: 1.2.0
+  id: realtime_locationing
+  version: 12.0.0-alpha.20
+- vendor: silabs
+  id: bgapi_protocol
+  version: 11.2.0-alpha.144
 - vendor: silabs
   id: security_libcryptosoc
   version: 1.2.0
 - vendor: silabs
-  id: bluetooth_le_controller
-  version: 11.2.0-alpha.119
-- vendor: silabs
-  id: common_15_4
+  id: unity_test_framework
   version: 1.2.0
 - vendor: silabs
   id: platform_core
   version: 1.2.0
 - vendor: silabs
+  id: common_15_4
+  version: 1.2.0
+- vendor: silabs
   id: zigbee
   version: 9.2.0
 - vendor: silabs
-  id: usb
-  version: 1.8.0
-- vendor: silabs
   id: security_tfm
   version: 1.2.0
+- vendor: silabs
+  id: usb
+  version: 1.8.0
 - vendor: silabs
   id: boards
   version: 1.2.0
@@ -1011,26 +1014,23 @@ sdk_extension:
   id: bootloader
   version: 3.4.0
 - vendor: silabs
-  id: realtime_locationing
-  version: 12.0.0-alpha.13
+  id: bluetooth_common
+  version: 1.2.0-alpha.144
 - vendor: silabs
   id: cpc
   version: 4.10.0
 - vendor: silabs
-  id: printf
+  id: freertos
   version: 1.2.0
 - vendor: silabs
-  id: freertos
+  id: printf
   version: 1.2.0
 - vendor: silabs
   id: security_sxsymcrypt
   version: 1.2.0
 - vendor: silabs
-  id: delta_dfu
-  version: 1.1.0
-- vendor: silabs
-  id: bgapi_protocol
-  version: 11.2.0-alpha.119
+  id: bluetooth_le_controller
+  version: 11.2.0-alpha.144
 - vendor: silabs
   id: coremark
   version: 1.1.0
@@ -1046,6 +1046,9 @@ sdk_extension:
 - vendor: silabs
   id: multiprotocol
   version: 1.2.0
+- vendor: silabs
+  id: bluetooth_apploader
+  version: 11.2.0-alpha.144
 - vendor: silabs
   id: cmsis
   version: 1.2.0

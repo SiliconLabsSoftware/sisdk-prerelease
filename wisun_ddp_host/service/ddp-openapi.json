@@ -156,6 +156,16 @@
           }
         }
       },
+      "PkiPath": {
+        "type": "object",
+        "properties": {
+          "pki_path": {
+            "type": "string",
+            "description": "Absolute path to the directory used to store PKI files. If omitted, the server working directory is used.",
+            "example": "/home/user/pki"
+          }
+        }
+      },
       "PkiInformation": {
         "type": "object",
         "required": ["root"],
@@ -262,6 +272,18 @@
       "get": {
         "description": "Returns CAs of the current PKI if any",
         "operationId": "getPki",
+        "parameters": [
+          {
+            "name": "pki_path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Absolute path to the directory used to store PKI files. If omitted, the server working directory is used.",
+              "example": "/home/user/pki"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Request was successfully processed",
@@ -286,7 +308,7 @@
     },
     "/pki/ca/create": {
       "post": {
-        "description": "Generates a new set of CAs to the current directory",
+        "description": "Generates a new set of CAs to the PKI directory",
         "operationId": "createPki",
         "requestBody": {
           "content": {
@@ -301,6 +323,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/PkiChainLength"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PkiPath"
                   }
                 ],
                 "unevaluatedProperties": false
@@ -335,7 +360,7 @@
     },
     "/pki/ca/import": {
       "post": {
-        "description": "Takes a copy of existing CAs and stores them to the current directory",
+        "description": "Takes a copy of existing CAs and stores them to the PKI directory",
         "operationId": "importPki",
         "requestBody": {
           "content": {
@@ -344,6 +369,9 @@
                 "allOf": [
                   {
                     "$ref": "#/components/schemas/PkiInformation"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PkiPath"
                   }
                 ],
                 "unevaluatedProperties": false
@@ -379,6 +407,16 @@
               "maxLength": 16,
               "description": "MAC address of the device",
               "example": "0cae5ffffe6d50c9"
+            }
+          },
+          {
+            "name": "pki_path",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Absolute path to the directory used to store PKI files. If omitted, the server working directory is used.",
+              "example": "/home/user/pki"
             }
           }
         ],
@@ -424,6 +462,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/OemHwType"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PkiPath"
                   }
                 ],
                 "unevaluatedProperties": false
@@ -488,6 +529,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/OemHwType"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PkiPath"
                   }
                 ],
                 "unevaluatedProperties": false

@@ -35,7 +35,7 @@
 #if defined(GPIO_COUNT) && (GPIO_COUNT > 0)
 
 #include <stdbool.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_bus.h"
 #include "sl_common.h"
 #include "sl_enum.h"
@@ -805,7 +805,7 @@ void GPIO_DriveStrengthSet(GPIO_Port_TypeDef port, GPIO_DriveStrength_TypeDef st
  *****************************************************************************/
 __STATIC_INLINE void GPIO_EM4DisablePinWakeup(uint32_t pinmask)
 {
-  EFM_ASSERT((pinmask & ~_GPIO_EM4WUEN_MASK) == 0UL);
+  SL_LOG_DEBUG_ASSERT((pinmask & ~_GPIO_EM4WUEN_MASK) == 0UL);
 #if defined(GPIO_HAS_SET_CLEAR)
   GPIO->EM4WUEN_CLR = pinmask;
 #else
@@ -1060,7 +1060,7 @@ __STATIC_INLINE void GPIO_Lock(void)
 __STATIC_INLINE unsigned int GPIO_PinInGet(GPIO_Port_TypeDef port,
                                            unsigned int pin)
 {
-  EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
   return BUS_RegBitRead(&GPIO->P[port].DIN, pin);
 }
 
@@ -1107,7 +1107,7 @@ void GPIO_PinModeSet(GPIO_Port_TypeDef port,
  ******************************************************************************/
 __STATIC_INLINE void GPIO_PinOutClear(GPIO_Port_TypeDef port, unsigned int pin)
 {
-  EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
 #if defined(_GPIO_P_DOUTCLR_MASK)
   GPIO->P[port].DOUTCLR = 1UL << pin;
 #elif defined(GPIO_HAS_SET_CLEAR)
@@ -1133,7 +1133,7 @@ __STATIC_INLINE void GPIO_PinOutClear(GPIO_Port_TypeDef port, unsigned int pin)
 __STATIC_INLINE unsigned int GPIO_PinOutGet(GPIO_Port_TypeDef port,
                                             unsigned int pin)
 {
-  EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
   return BUS_RegBitRead(&GPIO->P[port].DOUT, pin);
 }
 
@@ -1154,7 +1154,7 @@ __STATIC_INLINE unsigned int GPIO_PinOutGet(GPIO_Port_TypeDef port,
  ******************************************************************************/
 __STATIC_INLINE void GPIO_PinOutSet(GPIO_Port_TypeDef port, unsigned int pin)
 {
-  EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
 #if defined(_GPIO_P_DOUTSET_MASK)
   GPIO->P[port].DOUTSET = 1UL << pin;
 #elif defined(GPIO_HAS_SET_CLEAR)
@@ -1181,7 +1181,7 @@ __STATIC_INLINE void GPIO_PinOutSet(GPIO_Port_TypeDef port, unsigned int pin)
  ******************************************************************************/
 __STATIC_INLINE void GPIO_PinOutToggle(GPIO_Port_TypeDef port, unsigned int pin)
 {
-  EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
 
 #if defined (_GPIO_P_DOUTTGL_MASK)
   GPIO->P[port].DOUTTGL = 1UL << pin;
@@ -1204,7 +1204,7 @@ __STATIC_INLINE void GPIO_PinOutToggle(GPIO_Port_TypeDef port, unsigned int pin)
  ******************************************************************************/
 __STATIC_INLINE uint32_t GPIO_PortInGet(GPIO_Port_TypeDef port)
 {
-  EFM_ASSERT(GPIO_PORT_VALID(port));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_VALID(port));
 
   return GPIO->P[port].DIN;
 }
@@ -1226,7 +1226,7 @@ __STATIC_INLINE uint32_t GPIO_PortInGet(GPIO_Port_TypeDef port)
  ******************************************************************************/
 __STATIC_INLINE void GPIO_PortOutClear(GPIO_Port_TypeDef port, uint32_t pins)
 {
-  EFM_ASSERT(GPIO_PORT_VALID(port));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_VALID(port));
 #if defined(_GPIO_P_DOUTCLR_MASK)
   GPIO->P[port].DOUTCLR = pins;
 #elif defined(GPIO_HAS_SET_CLEAR)
@@ -1248,7 +1248,7 @@ __STATIC_INLINE void GPIO_PortOutClear(GPIO_Port_TypeDef port, uint32_t pins)
  ******************************************************************************/
 __STATIC_INLINE uint32_t GPIO_PortOutGet(GPIO_Port_TypeDef port)
 {
-  EFM_ASSERT(GPIO_PORT_VALID(port));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_VALID(port));
 
   return GPIO->P[port].DOUT;
 }
@@ -1270,7 +1270,7 @@ __STATIC_INLINE uint32_t GPIO_PortOutGet(GPIO_Port_TypeDef port)
  ******************************************************************************/
 __STATIC_INLINE void GPIO_PortOutSet(GPIO_Port_TypeDef port, uint32_t pins)
 {
-  EFM_ASSERT(GPIO_PORT_VALID(port));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_VALID(port));
 #if defined(_GPIO_P_DOUTSET_MASK)
   GPIO->P[port].DOUTSET = pins;
 #elif defined(GPIO_HAS_SET_CLEAR)
@@ -1302,7 +1302,7 @@ __STATIC_INLINE void GPIO_PortOutSetVal(GPIO_Port_TypeDef port,
                                         uint32_t val,
                                         uint32_t mask)
 {
-  EFM_ASSERT(GPIO_PORT_VALID(port));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_VALID(port));
 
   GPIO->P[port].DOUT = (GPIO->P[port].DOUT & ~mask) | (val & mask);
 }
@@ -1324,7 +1324,7 @@ __STATIC_INLINE void GPIO_PortOutSetVal(GPIO_Port_TypeDef port,
  ******************************************************************************/
 __STATIC_INLINE void GPIO_PortOutToggle(GPIO_Port_TypeDef port, uint32_t pins)
 {
-  EFM_ASSERT(GPIO_PORT_VALID(port));
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_VALID(port));
 #if defined (GPIO_HAS_SET_CLEAR)
   GPIO->P_TGL[port].DOUT = pins;
 #else
@@ -1350,10 +1350,10 @@ __STATIC_INLINE void GPIO_SlewrateSet(GPIO_Port_TypeDef port,
                                       uint32_t slewrate,
                                       uint32_t slewrateAlt)
 {
-  EFM_ASSERT(GPIO_PORT_VALID(port));
-  EFM_ASSERT(slewrate <= (_GPIO_P_CTRL_SLEWRATE_MASK
+  SL_LOG_DEBUG_ASSERT(GPIO_PORT_VALID(port));
+  SL_LOG_DEBUG_ASSERT(slewrate <= (_GPIO_P_CTRL_SLEWRATE_MASK
                           >> _GPIO_P_CTRL_SLEWRATE_SHIFT));
-  EFM_ASSERT(slewrateAlt <= (_GPIO_P_CTRL_SLEWRATEALT_MASK
+  SL_LOG_DEBUG_ASSERT(slewrateAlt <= (_GPIO_P_CTRL_SLEWRATEALT_MASK
                              >> _GPIO_P_CTRL_SLEWRATEALT_SHIFT));
 
   GPIO->P[port].CTRL = (GPIO->P[port].CTRL

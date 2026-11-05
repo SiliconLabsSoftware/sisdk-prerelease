@@ -35,7 +35,7 @@
 #include "sl_power_manager_execution_modes.h"
 #include "sli_power_manager_execution_modes_private.h"
 #include "sli_clock_manager.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_core.h"
 #include "sl_status.h"
 
@@ -73,9 +73,9 @@ void sli_power_manager_update_execution_mode_requirement(bool add)
 
   CORE_ENTER_CRITICAL();
   // Cannot increment above 255 (wraparound not allowed)
-  EFM_ASSERT(!((performance_mode_requirement == UINT8_MAX) && (add == true)));
+  SL_LOG_DEBUG_ASSERT(!((performance_mode_requirement == UINT8_MAX) && (add == true)));
   // Cannot decrement below 0 (wraparound not allowed)
-  EFM_ASSERT(!((performance_mode_requirement == 0) && (add == false)));
+  SL_LOG_DEBUG_ASSERT(!((performance_mode_requirement == 0) && (add == false)));
 
   // Increment (add) or decrement (remove) energy mode counter.
   performance_mode_requirement += (add) ? 1 : -1;
@@ -140,7 +140,8 @@ void sli_clock_manager_notify_hfxo_ready(void)
   CORE_ENTER_CRITICAL();
   if ((performance_mode_requirement >= 1) && (current_sysclk_source_clock != SL_OSCILLATOR_SOCPLL0)) {
     sl_status_t status = slx_clock_manager_set_sysclk_source(SL_OSCILLATOR_SOCPLL0);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
   }
   // Remove HFXO FORCEEN.
   HFXO0->CTRL_CLR = HFXO_CTRL_FORCEEN;

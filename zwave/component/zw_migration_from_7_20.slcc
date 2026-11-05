@@ -13,6 +13,11 @@ description: >
   This component can be uninstalled if the user is already on a later GSDK version.
 
   NOTE: Only Serial API is affected.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/md-content-how-to-implement-a-new-migration-code-block
+  - page: zwave-api/migration-guide
 
 package: zwave
 quality: production

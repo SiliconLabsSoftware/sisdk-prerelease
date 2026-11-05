@@ -1,17 +1,16 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
+from pycalcmodel.core.common import IPCategory
+
 
 
 class PhysStudioIEEE802154Bobcat(IPhy):
 
+    ip_category = IPCategory.LPW
+    default_xtal_frequency_hz = 39000000
 
     def _part_specific_phy_overrides(self, phy, model):
         pass
 
-    def _set_xtal_frequency(self, phy, xtal_freq=None):
-        if xtal_freq is None:
-            phy.profile_inputs.xtal_frequency_hz.value = 39000000
-        else:
-            phy.profile_inputs.xtal_frequency_hz.value = xtal_freq
 
     def PHY_IEEE802154_2p4GHz_prod(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.IEEE802154OQPSK,

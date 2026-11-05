@@ -21,11 +21,9 @@ class ProtectedFieldsPanther(ProtectedFieldsBase):
     PTE_PROTECTED_FIELD_DICT = {
     }
 
-    # : List of fields found in PTE, but allow radio configurator to override the value
     PTE_PROTECTED_FIELD_EXCEPTIONS = [
     ]
 
-    # : List of fields protected by RAIL
     RAIL_PROTECTED_FIELDS = [
         'AGC_CTRL0_RSSISHIFT',
         'AGC_CTRL1_CCATHRSH',
@@ -65,6 +63,5 @@ class ProtectedFieldsPanther(ProtectedFieldsBase):
         'SYNTH_VCOGAIN_VCOKVFINE',
     ]
 
-    # : List of fields that are found in PTE list, but does not need to be protected by RAIL
     RAIL_PROTECTED_FIELD_EXCEPTIONS = [
     ]

@@ -46,6 +46,7 @@
 #include "sl_dma_manager_round_robin_config.h"
 #endif
 #include "sl_device_peripheral.h"
+#include "sl_log_helper.h"
 #if SLI_DMA_MANAGER_MEMORY_MANAGER_EN
 #include "sl_memory_manager.h"
 #include "sl_clock_manager.h"
@@ -117,7 +118,7 @@ static sl_status_t check_dma_handle_availability(const sl_dma_handle_t *dma_hand
     }
 
     // Assert if another DMA Manager handle has the same DMA peripheral
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return SL_STATUS_INVALID_CONFIGURATION;
   }
 
@@ -302,7 +303,7 @@ sl_status_t sli_dma_manager_init_advanced(sl_dma_handle_t *dma_handle,
   sli_dma_manager_hal_init(dma_peripheral);
 
 #if defined(SL_CATALOG_DMA_MANAGER_ROUND_ROBIN_PRESENT)
-  EFM_ASSERT(SL_DMA_MANAGER_ROUND_ROBIN_CHANNEL_COUNT <= dma_peripheral->nbr_channel);
+  SL_LOG_DEBUG_ASSERT(SL_DMA_MANAGER_ROUND_ROBIN_CHANNEL_COUNT <= dma_peripheral->nbr_channel);
   dma_handle->round_robin_channel_number = SL_DMA_MANAGER_ROUND_ROBIN_CHANNEL_COUNT;
   sli_dma_manager_hal_configure_round_robin_channel_nbr(dma_peripheral, SL_DMA_MANAGER_ROUND_ROBIN_CHANNEL_COUNT);
 #endif
@@ -371,7 +372,7 @@ sl_status_t sl_dma_manager_allocate_channel(sl_dma_handle_t *dma_handle,
 #if !defined(SL_CATALOG_DMA_MANAGER_ROUND_ROBIN_PRESENT)
   CORE_DECLARE_IRQ_STATE;
 
-  EFM_ASSERT(channel_nbr != NULL);
+  SL_LOG_DEBUG_ASSERT(channel_nbr != NULL);
 
   // Fall back on the default DMA instance if no handle is provided
   if (dma_handle == NULL) {
@@ -421,15 +422,15 @@ sl_status_t sl_dma_manager_allocate_channel_with_properties(sl_dma_handle_t *dma
 {
   CORE_DECLARE_IRQ_STATE;
 
-  EFM_ASSERT(channel_nbr != NULL);
+  SL_LOG_DEBUG_ASSERT(channel_nbr != NULL);
 
   // Cannot have both High Priority and Round Robin properties
-  EFM_ASSERT(!((channel_properties & (SL_DMA_CHANNEL_HIGH_PRIORITY | SL_DMA_CHANNEL_USES_ROUND_ROBIN))
+  SL_LOG_DEBUG_ASSERT(!((channel_properties & (SL_DMA_CHANNEL_HIGH_PRIORITY | SL_DMA_CHANNEL_USES_ROUND_ROBIN))
                == (SL_DMA_CHANNEL_HIGH_PRIORITY | SL_DMA_CHANNEL_USES_ROUND_ROBIN)));
 
 #if !defined(SL_CATALOG_DMA_MANAGER_ROUND_ROBIN_PRESENT)
   // Assert if Round Robin channels are not enabled but requested
-  EFM_ASSERT((channel_properties & SL_DMA_CHANNEL_USES_ROUND_ROBIN) == 0);
+  SL_LOG_DEBUG_ASSERT((channel_properties & SL_DMA_CHANNEL_USES_ROUND_ROBIN) == 0);
 #endif
 
   // Fall back on the default DMA instance if no handle is provided
@@ -441,7 +442,7 @@ sl_status_t sl_dma_manager_allocate_channel_with_properties(sl_dma_handle_t *dma
 
   // The DMA Manager only supports up to 32 channels due to the use of a 32-bit bitmap.
   // Add check here, before doing a bitshift operations on a 32-bit variable.
-  EFM_ASSERT((dma_handle->dma_peripheral->nbr_channel <= 32));
+  SL_LOG_DEBUG_ASSERT((dma_handle->dma_peripheral->nbr_channel <= 32));
 
   // Retrieve the first available dma channel from the DMA bitmask.
   // This will give us the available channel with the highest priority.
@@ -497,7 +498,7 @@ sl_status_t sl_dma_manager_allocate_channel_with_properties(sl_dma_handle_t *dma
 
   // It should be guaranteed by the previous checks that dma_channel_tmp is less than 32.
   // Add a check here to be sure.
-  EFM_ASSERT((dma_channel_tmp < 32));
+  SL_LOG_DEBUG_ASSERT((dma_channel_tmp < 32));
 
   // Mark the channel as allocated
   // This shift operation is safe because dma_channel_tmp is guaranteed to be less than 32
@@ -583,7 +584,7 @@ sl_status_t sl_dma_manager_allocate_sync(sl_dma_handle_t *dma_handle,
 {
   CORE_DECLARE_IRQ_STATE;
 
-  EFM_ASSERT(sync_nbr != NULL);
+  SL_LOG_DEBUG_ASSERT(sync_nbr != NULL);
 
   // Fall back on the default DMA instance if no handle is provided
   if (dma_handle == NULL) {
@@ -745,7 +746,7 @@ void sli_dma_manager_interrupt_handler(uint32_t peripheral_base_addr, uint8_t ch
   }
 
   // Validate that the DMA channel number is valid
-  EFM_ASSERT(channel_nbr < dma_handle->dma_peripheral->nbr_channel);
+  SL_LOG_DEBUG_ASSERT(channel_nbr < dma_handle->dma_peripheral->nbr_channel);
 
   // Set the current IRQ context so that the callback can retrieve
   // the channel number and user data via

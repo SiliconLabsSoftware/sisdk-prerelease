@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
-
+#include <inttypes.h>
 
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
@@ -68,6 +68,10 @@ NO_INIT(uint32_t halWatchdogLwmCaptureSignature);
 
 // LWM capture PC live in noinit RAM segment that is not modified during startup.
 NO_INIT(uint32_t halWatchdogLwmCapturePc);
+
+NO_INIT(uint32_t halWatchdogLwmSwCaptureSignature);
+NO_INIT(uint32_t halWatchdogLwmSwUidCount);
+NO_INIT(uint32_t halWatchdogLwmSwUids[HAL_WATCHDOG_LWM_SW_UID_MAX]);
 
 //------------------------------------------------------------------------------
 // Preprocessor definitions
@@ -180,6 +184,47 @@ static void logWatchdogExpired(const HalCrashInfoType *crash)
   }
 
   otLogCritPlat("Reset cause: WDG expired PC=%08lx", crash->PC);
+
+  if ((halWatchdogLwmSwCaptureSignature == HAL_WATCHDOG_LWM_SW_CAPTURE_SIGNATURE)
+      && (halWatchdogLwmSwUidCount > 0U))
+  {
+    char     line[160];
+    uint32_t offset = 0U;
+    uint32_t count  = halWatchdogLwmSwUidCount;
+    int      n;
+
+    if (count > HAL_WATCHDOG_LWM_SW_UID_MAX)
+    {
+      count = HAL_WATCHDOG_LWM_SW_UID_MAX;
+    }
+
+    n = snprintf(line, sizeof(line), "WDG SW unfed:");
+    if (n > 0)
+    {
+      offset = (uint32_t)n;
+    }
+
+    for (uint32_t i = 0; i < count; i++)
+    {
+      if(offset < sizeof(line)){
+      n = snprintf(line + offset,
+                   sizeof(line) - offset,
+                   " uid=0x%08" PRIx32,
+                   halWatchdogLwmSwUids[i]);
+      }
+      else{
+        n = 0;
+      }
+      if (n <= 0)
+      {
+        break;
+      }
+      offset += (uint32_t)n;
+    }
+
+    otLogCritPlat("%s", line);
+  }
+
   halWatchdogLwmCaptureClear();
 }
 
@@ -277,6 +322,31 @@ void halWatchdogLwmCaptureMark(uint32_t pc)
   halWatchdogLwmCaptureSignature = HAL_WATCHDOG_LWM_CAPTURE_SIGNATURE;
 }
 
+void halWatchdogLwmCaptureSetSwUids(const uint32_t *uids, uint32_t count)
+{
+  uint32_t n = count;
+
+  if ((uids == NULL) || (n == 0U))
+  {
+    halWatchdogLwmSwCaptureSignature = 0U;
+    halWatchdogLwmSwUidCount         = 0U;
+    return;
+  }
+
+  if (n > HAL_WATCHDOG_LWM_SW_UID_MAX)
+  {
+    n = HAL_WATCHDOG_LWM_SW_UID_MAX;
+  }
+
+  for (uint32_t i = 0; i < n; i++)
+  {
+    halWatchdogLwmSwUids[i] = uids[i];
+  }
+
+  halWatchdogLwmSwUidCount         = n;
+  halWatchdogLwmSwCaptureSignature = HAL_WATCHDOG_LWM_SW_CAPTURE_SIGNATURE;
+}
+
 bool halWatchdogLwmCaptureIsValid(void)
 {
   return (halWatchdogLwmCaptureSignature == HAL_WATCHDOG_LWM_CAPTURE_SIGNATURE)
@@ -286,8 +356,10 @@ bool halWatchdogLwmCaptureIsValid(void)
 
 void halWatchdogLwmCaptureClear(void)
 {
-  halWatchdogLwmCaptureSignature = 0U;
-  halWatchdogLwmCapturePc        = 0U;
+  halWatchdogLwmCaptureSignature   = 0U;
+  halWatchdogLwmCapturePc          = 0U;
+  halWatchdogLwmSwCaptureSignature = 0U;
+  halWatchdogLwmSwUidCount         = 0U;
 }
 
 //------------------------------------------------------------------------------

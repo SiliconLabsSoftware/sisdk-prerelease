@@ -141,4 +141,7 @@ metadata:
   sbom:
     id: btmesh_stack
     license: MSLA
+documentation:
+  docset: btmesh
+  document: bluetooth-mesh-api
 root_path: bluetooth_mesh_stack

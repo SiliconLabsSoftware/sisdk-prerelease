@@ -33,8 +33,6 @@ class LogMgr(object):
         :return:
         """
         assert isinstance(log_type, LogType)
-        # assert isinstance(log_type, basestring)
-        # print(message)
         logmsg = LogMsg(log_type, message)
         LogMgr._log_queue.append(logmsg)
 
@@ -72,8 +70,6 @@ class LogMgr(object):
     @staticmethod
     def _print(color, message):
         if LogMgr._is_pycharm_hosted:
-            # Use color inside PyCharm, else don't send color codes to console,
-            # which breaks tools that don't understand unicode color charachers
             print('{}{}{}'.format(color, message, ConsoleColor.ENDC))
         else:
             print(message)

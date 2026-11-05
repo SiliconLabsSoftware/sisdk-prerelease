@@ -3,13 +3,6 @@ from pycalcmodel.core.variable import ModelVariableFormat
 
 class CALC_Misc_ocelot(CALC_Misc_lynx):
 
-    # def calc_misc(self, model):
-    #     """
-    #     These aren't really calculating right now.  Just using defaults or forced values.
-    #
-    #     Args:
-    #         model (ModelRoot) : Data model to read and write variables from
-    #     """
     def calc_misc_Panther(self, model):
         pass
 
@@ -35,7 +28,6 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
         self._reg_write(model.vars.MODEM_CF_ADCBITORDERI, 0)
         self._reg_write(model.vars.MODEM_CF_ADCBITORDERQ, 0)
 
-        # Digital Gain Control
         self._reg_write(model.vars.MODEM_DIGIGAINCTRL_DEC0GAIN, 0)
         self._reg_write(model.vars.MODEM_DIGIGAINCTRL_DIGIGAINDOUBLE, 0)
         self._reg_write(model.vars.MODEM_DIGIGAINCTRL_DIGIGAINEN, 0)
@@ -44,8 +36,6 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
 
         self._reg_write(model.vars.MODEM_CHFCTRL_FWSELCOEFF, 0)
         self._reg_write(model.vars.MODEM_CHFCTRL_FWSWCOEFFEN, 0)
-        ## New registers
-        # FIXME: how to calculate these?
 
         self._reg_write(model.vars.MODEM_CHFLATENCYCTRL_CHFLATENCY, 0)
         self._reg_write(model.vars.MODEM_DIGMIXCTRL_DIGMIXMODE, 1)
@@ -60,11 +50,9 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
         self._reg_write(model.vars.SEQ_MISC_DIG_RAMP_EN, 0)
 
     def buildVariables(self, model):
-        # : Build variables using base
         super().buildVariables(model)
 
         """ Coherent Demod Calculations """
-        # : Noise floor of channel power accumulator used for coherent demod.
         self._addModelVariable(model, 'chpwraccu_noise', float, ModelVariableFormat.DECIMAL)
 
     def calc_misc(self, model):
@@ -77,8 +65,6 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
 
         part_family = model.part_family.lower()
 
-        # Legacy Demod Registers
-        # FIXME: calculate these
 
         self._reg_write(model.vars.MODEM_CTRL2_BRDIVA, 0)
         self._reg_write(model.vars.MODEM_CTRL2_BRDIVB, 0)
@@ -122,8 +108,6 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
         self._reg_write(model.vars.MODEM_TIMING_TIMSEQSYNC, 0)
         self._reg_write(model.vars.MODEM_TIMING_TSAGCDEL, 0)
 
-        # Long Range registers
-        # FIXME: calculate these
         self._reg_write(model.vars.MODEM_LONGRANGE1_LOGICBASEDLRDEMODGATE, 0)
         self._reg_write(model.vars.MODEM_LONGRANGE1_LOGICBASEDPUGATE, 0)
         self._reg_write(model.vars.MODEM_LONGRANGE1_LRSPIKETHADD, 0)
@@ -132,15 +116,12 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
         self._reg_write(model.vars.MODEM_LRFRC_FRCACKTIMETHD, 0)
         self._reg_write(model.vars.MODEM_LRFRC_LRCORRMODE, 1)
 
-        # FIXME: figure out how these AGC registers need to be calculated
         self._reg_write(model.vars.AGC_RSSISTEPTHR_DEMODRESTARTPER, 0)
         self._reg_write(model.vars.AGC_RSSISTEPTHR_DEMODRESTARTTHR, 0)
         self._reg_write(model.vars.AGC_RSSISTEPTHR_NEGSTEPTHR, 0)
         self._reg_write(model.vars.AGC_RSSISTEPTHR_POSSTEPTHR, 0)
         self._reg_write(model.vars.AGC_RSSISTEPTHR_STEPPER, 0)
 
-        # Coherent Demod Registers
-        #FIXME: Check with Yan/Per on how to calculate these
         self._reg_write(model.vars.MODEM_COH2_DSAPEAKCHPWRTH, 0)
         self._reg_write(model.vars.MODEM_COH3_COHDSADETDIS, 0)
         self._reg_write(model.vars.MODEM_COH3_DSAPEAKCHPWREN, 0)
@@ -148,11 +129,9 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
         self._reg_write(model.vars.MODEM_COH3_ONEPEAKQUALEN, 0)
         self._reg_write(model.vars.MODEM_COH3_PEAKCHKTIMOUT, 0)
 
-        # Clock-gating register
         self._reg_write(model.vars.MODEM_AUTOCG_AUTOCGEN, 0) #We calculate MODEM_CGCLKSTOP_FORCEOFF in calculator instead
         self._reg_write(model.vars.FRC_AUTOCG_AUTOCGEN, 7)
 
-        # Modem Registers with fixed value
         self._reg_write(model.vars.MODEM_CTRL0_DEMODRAWDATASEL, 0)
         self._reg_write(model.vars.MODEM_CTRL2_DMASEL, 0)
         self._reg_write(model.vars.MODEM_CTRL3_PRSDINEN, 0)
@@ -171,7 +150,6 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
         self._reg_write(model.vars.MODEM_CTRL0_FRAMEDETDEL, 0)
         self._reg_write(model.vars.MODEM_CTRL1_SYNC1INV, 0)
 
-        # FRC Registers with fixed value
         self._reg_write(model.vars.FRC_BOICTRL_BOIBITPOS, 0)
         self._reg_write(model.vars.FRC_BOICTRL_BOIEN, 0)
         self._reg_write(model.vars.FRC_BOICTRL_BOIFIELDLOC, 0)
@@ -192,15 +170,12 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
         self._reg_write(model.vars.FRC_WCNTCMP3_SUPPLENFIELDLOC, 0)
         self._reg_write(model.vars.FRC_WCNTCMP4_SUPPLENGTH, 0)
 
-        # Added new reg-fields related to 15.4 subG OQPSK phys
         self._reg_write(model.vars.MODEM_COH3_COHDSACMPLX, 0)
         self._reg_write(model.vars.MODEM_SYNCPROPERTIES_STATICSYNCTHRESH, 0)
 
-        # Added new reg-fields related to Internal Long Range
         self._reg_write(model.vars.MODEM_PRE_PREWNDERRORS, 0)
         self._reg_write(model.vars.MODEM_CTRL3_TIMINGBASESGAIN, 0)
 
-        #AGC default settings
         self._reg_write(model.vars.AGC_CTRL0_CFLOOPNFADJ, 0)
         self._reg_write(model.vars.AGC_DUALRFPKDTHD1_RFPKDHITHD0, 1)
         self._reg_write(model.vars.AGC_DUALRFPKDTHD1_RFPKDHITHD1, 40)
@@ -208,12 +183,10 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
         self._reg_write(model.vars.AGC_DUALRFPKDTHD0_RFPKDLOWTHD1, 10)
         self._reg_write(model.vars.AGC_CTRL6_ENDUALRFPKD, 1)
 
-        # reg-fields to modify sync detection reset behavior PGOCELOT-5282
         self._reg_write(model.vars.MODEM_FRMSCHTIME_PMRSTSYCNEN, 0)
         self._reg_write(model.vars.MODEM_FRMSCHTIME_DSARSTSYCNEN, 0)
 
     def calc_clkmult_misc(self, model):
-        # RAC settings
         self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVN)
         self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENDRVP)
         self._reg_write_default(model.vars.RAC_CLKMULTEN0_CLKMULTENREG3)
@@ -222,15 +195,9 @@ class CALC_Misc_ocelot(CALC_Misc_lynx):
         self._reg_write_default(model.vars.RAC_CLKMULTEN1_CLKMULTDRVAMPSEL)
 
     def calc_aox_misc(self, model):
-        # AoX Registers
-        # Always force these to zero so all AoX features are disabled.
         self._reg_write(model.vars.MODEM_ANTSWCTRL_ANTSWENABLE, 0)
         self._reg_write(model.vars.MODEM_ANTSWCTRL_CFGANTPATTEN, 0)
 
-        # Configuration registers for AoX. These registers do not matter as long as the
-        # enables (ANTSWENABLE, CFGANTPATTEN) are set to 0.
-        # These do not need to be written by calculator as RAIL will override them
-        # for AoX. Left in for ocelot to avoid regression risk post validation.
         self._reg_write(model.vars.MODEM_ETSCTRL_CAPTRIG, 0)
         self._reg_write(model.vars.MODEM_ETSCTRL_ETSLOC, 0)
         self._reg_write(model.vars.MODEM_ANTSWCTRL1_TIMEPERIOD, 436906)

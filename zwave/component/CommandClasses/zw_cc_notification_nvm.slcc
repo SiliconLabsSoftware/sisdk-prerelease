@@ -11,6 +11,13 @@ description: >
 
   It can be used if the state of the Command Class should persist across resets by
   storing the state into the NVM.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/cc-notification-config
+  - page: zwave-api/cc-notification-storage
+  - page: zwave-api/notification
+
 package: zwave
 quality: production
 metadata:

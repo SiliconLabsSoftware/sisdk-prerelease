@@ -33,7 +33,7 @@
 
 #include "em_device.h"
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_clock_manager.h"
 #include "sl_core.h"
 #include "sl_interrupt_manager.h"
@@ -122,11 +122,23 @@ static sl_status_t uart_deinit(sl_uart_handle_t *uart_handle)
 *******************************************************************************/
 
 /***************************************************************************//**
+ * Gets the size of the UART handle structure.
+ *
+ * @note Keep implementation in this compilation unit to ensure ABI
+ *       compatibility with applications that want to allocate the UART handle
+ *       manually when the driver is compiled as a library.
+ ******************************************************************************/
+size_t sl_uart_handle_get_size(void)
+{
+  return sizeof(sl_uart_handle_t);
+}
+
+/***************************************************************************//**
  * Allocates a UART handle.
  ******************************************************************************/
 sl_status_t sl_uart_handle_alloc(sl_uart_handle_t **uart_handle)
 {
-  EFM_ASSERT(uart_handle != NULL);
+  SL_LOG_DEBUG_ASSERT(uart_handle != NULL);
 
   *uart_handle = calloc(1, sl_uart_handle_get_size());
   if (*uart_handle == NULL) {
@@ -141,8 +153,8 @@ sl_status_t sl_uart_handle_alloc(sl_uart_handle_t **uart_handle)
  ******************************************************************************/
 sl_status_t sl_uart_handle_free(sl_uart_handle_t *uart_handle)
 {
-  EFM_ASSERT(uart_handle != NULL);
-  EFM_ASSERT(uart_handle->uart == NULL);
+  SL_LOG_DEBUG_ASSERT(uart_handle != NULL);
+  SL_LOG_DEBUG_ASSERT(uart_handle->uart == NULL);
 
   free(uart_handle);
 
@@ -159,8 +171,8 @@ sl_status_t sl_uart_init(sl_uart_handle_t *uart_handle,
 {
   sl_status_t status;
 
-  EFM_ASSERT(uart_handle != NULL);
-  EFM_ASSERT(pin_config != NULL);
+  SL_LOG_DEBUG_ASSERT(uart_handle != NULL);
+  SL_LOG_DEBUG_ASSERT(pin_config != NULL);
 
   status = sli_uart_init_core(uart_handle, uart, pin_config);
   if (status != SL_STATUS_OK) {
@@ -178,7 +190,7 @@ sl_status_t sl_uart_init(sl_uart_handle_t *uart_handle,
   }
   #else
   (void)async_config;
-  EFM_ASSERT(async_config == NULL);
+  SL_LOG_DEBUG_ASSERT(async_config == NULL);
   #endif
 
   #if !defined(__ZEPHYR__)
@@ -186,7 +198,8 @@ sl_status_t sl_uart_init(sl_uart_handle_t *uart_handle,
   if (status != SL_STATUS_OK) {
     if (SLI_UART_HANDLE_IS_ASYNC(uart_handle)) {
       sl_status_t _status = sli_uart_async_deinit(uart_handle);
-      EFM_ASSERT(_status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(_status == SL_STATUS_OK);
+      (void)_status;
     }
 
     sli_uart_deinit_core(uart_handle);
@@ -203,7 +216,7 @@ sl_status_t sl_uart_init(sl_uart_handle_t *uart_handle,
  ******************************************************************************/
 sl_status_t sl_uart_deinit(sl_uart_handle_t *uart_handle)
 {
-  EFM_ASSERT(uart_handle != NULL);
+  SL_LOG_DEBUG_ASSERT(uart_handle != NULL);
   sl_status_t status;
 
   if (uart_handle->uart == NULL) {
@@ -289,7 +302,8 @@ sl_status_t sl_uart_resume(sl_uart_handle_t *uart_handle)
 
     // Restoring the configuration should always succeed, since it was successfully applied before suspension.
     status = sl_uart_configure_line(uart_handle, &config);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
 
     sli_uart_enable_irq(uart_handle, uart_handle->enabled_irq);
   }
@@ -298,7 +312,8 @@ sl_status_t sl_uart_resume(sl_uart_handle_t *uart_handle)
     status = sli_uart_async_resume(uart_handle);
     if (status != SL_STATUS_OK) {
       _status = uart_deinit(uart_handle);
-      EFM_ASSERT(_status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(_status == SL_STATUS_OK);
+      (void)_status;
       return status;
     }
   }
@@ -319,6 +334,12 @@ sl_status_t sl_uart_configure_line(sl_uart_handle_t *uart_handle, const sl_uart_
 
   if (!SLI_UART_CONFIG_IS_VALID(config)) {
     // CPC-3222: Add support for auto baud rate detection and software flow control.
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if ((config->flow_control == SL_UART_FLOW_CONTROL_CTS_RTS)
+      && (!SL_HAL_GPIO_PORT_PIN_IS_VALID(uart_handle->pin_config.cts.port, uart_handle->pin_config.cts.pin)
+          || !SL_HAL_GPIO_PORT_PIN_IS_VALID(uart_handle->pin_config.rts.port, uart_handle->pin_config.rts.pin))) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -378,8 +399,8 @@ sl_status_t sl_uart_configure_line(sl_uart_handle_t *uart_handle, const sl_uart_
 sl_status_t sl_uart_read_byte(sl_uart_handle_t *uart_handle, uint8_t * byte)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
-  EFM_ASSERT(byte != NULL);
+  SL_LOG_DEBUG_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
+  SL_LOG_DEBUG_ASSERT(byte != NULL);
 
   if (SLI_UART_HANDLE_IS_SUSPENDED(uart_handle)) {
     return SL_STATUS_INVALID_STATE;
@@ -394,7 +415,7 @@ sl_status_t sl_uart_read_byte(sl_uart_handle_t *uart_handle, uint8_t * byte)
 sl_status_t sl_uart_write_byte(sl_uart_handle_t *uart_handle, uint8_t byte)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
+  SL_LOG_DEBUG_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
 
   if (SLI_UART_HANDLE_IS_SUSPENDED(uart_handle)) {
     return SL_STATUS_INVALID_STATE;
@@ -415,11 +436,11 @@ sl_status_t sl_uart_write_byte(sl_uart_handle_t *uart_handle, uint8_t byte)
 sl_status_t sl_uart_read(sl_uart_handle_t *uart_handle, void *data, size_t size, size_t *read_size)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
+  SL_LOG_DEBUG_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
 
-  EFM_ASSERT(data != NULL);
-  EFM_ASSERT(size > 0);
-  EFM_ASSERT(read_size != NULL);
+  SL_LOG_DEBUG_ASSERT(data != NULL);
+  SL_LOG_DEBUG_ASSERT(size > 0);
+  SL_LOG_DEBUG_ASSERT(read_size != NULL);
 
   if (SLI_UART_HANDLE_IS_SUSPENDED(uart_handle)) {
     return SL_STATUS_INVALID_STATE;
@@ -437,10 +458,10 @@ sl_status_t sl_uart_write(sl_uart_handle_t *uart_handle,
                           size_t *write_size)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
+  SL_LOG_DEBUG_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
 
-  EFM_ASSERT(size == 0 || data != NULL);
-  EFM_ASSERT(write_size != NULL);
+  SL_LOG_DEBUG_ASSERT(size == 0 || data != NULL);
+  SL_LOG_DEBUG_ASSERT(write_size != NULL);
 
   if (SLI_UART_HANDLE_IS_SUSPENDED(uart_handle)) {
     return SL_STATUS_INVALID_STATE;
@@ -455,8 +476,8 @@ sl_status_t sl_uart_write(sl_uart_handle_t *uart_handle,
 sl_status_t sl_uart_get_line_configuration(sl_uart_handle_t *uart_handle, sl_uart_config_t * config)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
-  EFM_ASSERT(config != NULL);
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
+  SL_LOG_DEBUG_ASSERT(config != NULL);
+  SL_LOG_DEBUG_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
 
   *config = uart_handle->config;
 
@@ -472,8 +493,8 @@ void sl_uart_set_rx_err_callback(sl_uart_handle_t *uart_handle,
 {
   CORE_DECLARE_IRQ_STATE;
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
-  EFM_ASSERT(rx_err_cb != NULL);
-  EFM_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
+  SL_LOG_DEBUG_ASSERT(rx_err_cb != NULL);
+  SL_LOG_DEBUG_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
 
   const sli_uart_ops_t *ops = uart_handle->ops;
 
@@ -496,7 +517,7 @@ void sl_uart_set_rx_ready_callback(sl_uart_handle_t *uart_handle,
   CORE_DECLARE_IRQ_STATE;
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
 
-  EFM_ASSERT(rx_ready_cb != NULL);
+  SL_LOG_DEBUG_ASSERT(rx_ready_cb != NULL);
 
   CORE_ENTER_ATOMIC();
   uart_handle->rx_ready_cb = rx_ready_cb;
@@ -514,7 +535,7 @@ void sl_uart_set_tx_ready_callback(sl_uart_handle_t *uart_handle,
   CORE_DECLARE_IRQ_STATE;
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
 
-  EFM_ASSERT(tx_ready_cb != NULL);
+  SL_LOG_DEBUG_ASSERT(tx_ready_cb != NULL);
 
   CORE_ENTER_ATOMIC();
   uart_handle->tx_ready_cb = tx_ready_cb;
@@ -532,7 +553,7 @@ void sl_uart_set_tx_complete_callback(sl_uart_handle_t *uart_handle,
   CORE_DECLARE_IRQ_STATE;
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
 
-  EFM_ASSERT(tx_complete_cb != NULL);
+  SL_LOG_DEBUG_ASSERT(tx_complete_cb != NULL);
 
   CORE_ENTER_ATOMIC();
   uart_handle->tx_complete_cb = tx_complete_cb;
@@ -546,12 +567,16 @@ void sl_uart_set_tx_complete_callback(sl_uart_handle_t *uart_handle,
 void sl_uart_enable_rx_ready_interrupt(sl_uart_handle_t *uart_handle)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
-  EFM_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
+  SL_LOG_DEBUG_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
+  SL_LOG_DEBUG_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
 
-  EFM_ASSERT(uart_handle->rx_ready_cb != NULL);
+  SL_LOG_DEBUG_ASSERT(uart_handle->rx_ready_cb != NULL);
 
   const sli_uart_ops_t *ops = uart_handle->ops;
+
+  // Clear any latent RX ready interrupt. Since the interrupt is level-based, if the FIFO is not
+  // empty, the interrupt will be set again by the hardware.
+  ops->clear_irq(uart_handle->uart, ops->irq_rx_ready_flag);
 
   sli_uart_enable_irq(uart_handle, ops->irq_rx_ready_flag);
 }
@@ -562,12 +587,16 @@ void sl_uart_enable_rx_ready_interrupt(sl_uart_handle_t *uart_handle)
 void sl_uart_enable_tx_ready_interrupt(sl_uart_handle_t *uart_handle)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
-  EFM_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
+  SL_LOG_DEBUG_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
+  SL_LOG_DEBUG_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
 
-  EFM_ASSERT(uart_handle->tx_ready_cb != NULL);
+  SL_LOG_DEBUG_ASSERT(uart_handle->tx_ready_cb != NULL);
 
   const sli_uart_ops_t *ops = uart_handle->ops;
+
+  // Clear any latent TX ready interrupt. Since the interrupt is level-based, if the FIFO is not
+  // empty, the interrupt will be set again by the hardware.
+  ops->clear_irq(uart_handle->uart, ops->irq_tx_ready_flag);
 
   sli_uart_enable_irq(uart_handle, ops->irq_tx_ready_flag);
 }
@@ -577,15 +606,29 @@ void sl_uart_enable_tx_ready_interrupt(sl_uart_handle_t *uart_handle)
  ******************************************************************************/
 void sl_uart_enable_tx_complete_interrupt(sl_uart_handle_t *uart_handle)
 {
+  CORE_DECLARE_IRQ_STATE;
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
-  EFM_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
-  EFM_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
+  SL_LOG_DEBUG_ASSERT(SLI_UART_CONFIG_IS_VALID(&uart_handle->config));
+  SL_LOG_DEBUG_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
 
-  EFM_ASSERT(uart_handle->tx_complete_cb != NULL);
+  SL_LOG_DEBUG_ASSERT(uart_handle->tx_complete_cb != NULL);
 
   const sli_uart_ops_t *ops = uart_handle->ops;
+  uint32_t txc = ops->irq_tx_complete_flag;
 
-  sli_uart_enable_irq(uart_handle, ops->irq_tx_complete_flag);
+  CORE_ENTER_ATOMIC();
+
+  sli_uart_enable_irq(uart_handle, txc);
+
+  if (SLI_UART_HANDLE_IS_ASYNC(uart_handle) && sl_uart_async_is_tx_active(uart_handle)) {
+    // During an in-flight async DMA TX, hardware TXC must stay disabled until the DMA callback
+    // re-arms it. Only record the caller's intent in enabled_irq but keep the peripheral's HW
+    // interrupt disabled to avoid completing before the DMA callback. sli_uart_async_tx_handler
+    // will re-enable the interrupt once the transfer completes.
+    ops->set_enable_irq(uart_handle->uart, false, txc);
+  }
+
+  CORE_EXIT_ATOMIC();
 }
 
 /***************************************************************************//**
@@ -595,7 +638,7 @@ void sl_uart_disable_rx_ready_interrupt(sl_uart_handle_t *uart_handle)
 {
   CORE_DECLARE_IRQ_STATE;
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
-  EFM_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
+  SL_LOG_DEBUG_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
 
   const sli_uart_ops_t *ops = uart_handle->ops;
   uint32_t rx_rdy = ops->irq_rx_ready_flag;
@@ -619,7 +662,7 @@ void sl_uart_disable_rx_ready_interrupt(sl_uart_handle_t *uart_handle)
 void sl_uart_disable_tx_ready_interrupt(sl_uart_handle_t *uart_handle)
 {
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
-  EFM_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
+  SL_LOG_DEBUG_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
 
   const sli_uart_ops_t *ops = uart_handle->ops;
 
@@ -633,20 +676,23 @@ void sl_uart_disable_tx_complete_interrupt(sl_uart_handle_t *uart_handle)
 {
   CORE_DECLARE_IRQ_STATE;
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
-  EFM_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
+  SL_LOG_DEBUG_ASSERT(!SLI_UART_HANDLE_IS_SUSPENDED(uart_handle));
 
   const sli_uart_ops_t *ops = uart_handle->ops;
   uint32_t tx_comp = ops->irq_tx_complete_flag;
 
   CORE_ENTER_ATOMIC();
 
-  sli_uart_disable_irq(uart_handle, tx_comp);
+  uart_handle->enabled_irq &= ~tx_comp;
 
-  // On an async handle, TXC stays armed in hardware for the lifetime of the handle, since it is
-  // what completes a DMA TX transfer and no async API re-arms it. Only clear the hardware bit on
-  // a sync handle; the caller stops receiving tx_complete_cb either way, as its delivery is gated
-  // on enabled_irq.
-  ops->set_enable_irq(uart_handle->uart, SLI_UART_HANDLE_IS_ASYNC(uart_handle), tx_comp);
+  // On an async handle, the driver owns hardware TXC across the DMA window (disabled until DMA
+  // completes, then re-armed for the final TXC). Only clear enabled_irq so tx_complete_cb stops
+  // firing; leave the peripheral bit alone. Force-enabling here would re-open the TXC-before-DMA
+  // race, and clearing IEN while waiting for TXC would stall async completion. On a sync handle,
+  // clear the hardware bit as well.
+  if (!SLI_UART_HANDLE_IS_ASYNC(uart_handle)) {
+    ops->set_enable_irq(uart_handle->uart, false, tx_comp);
+  }
 
   CORE_EXIT_ATOMIC();
 }
@@ -658,9 +704,9 @@ sl_status_t sli_uart_init_core(sl_uart_handle_t *uart_handle, sl_peripheral_t ua
 {
   const sli_uart_ops_t *ops;
 
-  EFM_ASSERT(uart_handle != NULL);
-  EFM_ASSERT(uart != NULL);
-  EFM_ASSERT(pin_config != NULL);
+  SL_LOG_DEBUG_ASSERT(uart_handle != NULL);
+  SL_LOG_DEBUG_ASSERT(uart != NULL);
+  SL_LOG_DEBUG_ASSERT(pin_config != NULL);
 
   switch (sl_device_peripheral_get_serial_ip_type(uart)) {
     #if defined(SL_CATALOG_UART_EUSART_PRESENT)
@@ -680,6 +726,7 @@ sl_status_t sli_uart_init_core(sl_uart_handle_t *uart_handle, sl_peripheral_t ua
       break;
     #endif
     default:
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_STATUS_NOT_SUPPORTED;
   }
 
@@ -694,7 +741,7 @@ sl_status_t sli_uart_init_core(sl_uart_handle_t *uart_handle, sl_peripheral_t ua
 
 void sli_uart_deinit_core(sl_uart_handle_t *uart_handle)
 {
-  EFM_ASSERT(uart_handle != NULL);
+  SL_LOG_DEBUG_ASSERT(uart_handle != NULL);
 
   memset(uart_handle, 0, sizeof(*uart_handle));
 }
@@ -772,8 +819,8 @@ SL_WEAK sl_status_t sli_uart_deinit_clocks(sl_uart_handle_t *uart_handle)
 
 void sli_uart_reset(sl_uart_handle_t *uart_handle)
 {
-  EFM_ASSERT(uart_handle != NULL);
-  EFM_ASSERT(uart_handle->uart != NULL);
+  SL_LOG_DEBUG_ASSERT(uart_handle != NULL);
+  SL_LOG_DEBUG_ASSERT(uart_handle->uart != NULL);
 
   uart_handle->ops->reset(uart_handle->uart);
 }
@@ -817,6 +864,7 @@ SL_WEAK void sli_uart_deinit_irq(sl_peripheral_t uart)
  ******************************************************************************/
 void sli_uart_rx_irq_handler(sl_uart_handle_t *uart_handle)
 {
+  CORE_DECLARE_IRQ_STATE;
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
 
   const sli_uart_ops_t *ops = uart_handle->ops;
@@ -828,6 +876,8 @@ void sli_uart_rx_irq_handler(sl_uart_handle_t *uart_handle)
   uint32_t rx_err = ops->irq_rx_err_flag;
   uint32_t rx_irq_mask = rx_rdy | rx_err;
   uint32_t errors = irq & rx_err;
+
+  CORE_ENTER_ATOMIC();
 
   // Clear the interrupt before handling, as it may be set once more by the handler.
   ops->clear_irq(uart, irq & rx_irq_mask);
@@ -853,6 +903,8 @@ void sli_uart_rx_irq_handler(sl_uart_handle_t *uart_handle)
     // the hardware.
     ops->clear_irq(uart, rx_rdy);
   }
+
+  CORE_EXIT_ATOMIC();
 }
 
 /***************************************************************************//**
@@ -860,6 +912,7 @@ void sli_uart_rx_irq_handler(sl_uart_handle_t *uart_handle)
  ******************************************************************************/
 void sli_uart_tx_irq_handler(sl_uart_handle_t *uart_handle)
 {
+  CORE_DECLARE_IRQ_STATE;
   SLI_UART_ASSERT_VALID_HANDLE(uart_handle);
 
   const sli_uart_ops_t *ops = uart_handle->ops;
@@ -870,6 +923,8 @@ void sli_uart_tx_irq_handler(sl_uart_handle_t *uart_handle)
   uint32_t tx_comp = ops->irq_tx_complete_flag;
   uint32_t tx_rdy = ops->irq_tx_ready_flag;
   uint32_t tx_irq_mask = tx_comp | tx_rdy;
+
+  CORE_ENTER_ATOMIC();
 
   // Clear the interrupt before handling, as it may be set once more by the handler.
   ops->clear_irq(uart, irq_status & tx_irq_mask);
@@ -895,4 +950,6 @@ void sli_uart_tx_irq_handler(sl_uart_handle_t *uart_handle)
     // the hardware.
     ops->clear_irq(uart, tx_rdy);
   }
+
+  CORE_EXIT_ATOMIC();
 }

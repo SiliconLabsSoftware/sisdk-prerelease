@@ -28,7 +28,7 @@
  *
  ******************************************************************************/
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_memory_manager.h"
 #include "sl_slist.h"
 #include "sl_uart.h"
@@ -46,7 +46,7 @@
  ******************************************************************************/
 static void uart_transfer_pool_free(sl_slist_node_t **pool)
 {
-  EFM_ASSERT(pool != NULL);
+  SL_LOG_DEBUG_ASSERT(pool != NULL);
 
   sl_slist_node_t *node;
 
@@ -66,7 +66,7 @@ static sl_status_t uart_transfer_pool_alloc(size_t transfer_count,
 {
   sl_status_t status;
 
-  EFM_ASSERT(pool != NULL);
+  SL_LOG_DEBUG_ASSERT(pool != NULL);
 
   sl_slist_init(pool);
 
@@ -96,8 +96,8 @@ sl_status_t sli_uart_transfer_pool_init(sl_uart_handle_t *uart_handle)
 {
   sl_status_t status;
 
-  EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
-  EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
+  SL_LOG_DEBUG_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
+  SL_LOG_DEBUG_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
 
   status = uart_transfer_pool_alloc(uart_handle->async_config.async_tx_transfer_count,
                                     sizeof(sli_uart_async_tx_transfer_t),
@@ -119,12 +119,12 @@ sl_status_t sli_uart_transfer_pool_init(sl_uart_handle_t *uart_handle)
 
 void sli_uart_transfer_pool_deinit(sl_uart_handle_t *uart_handle)
 {
-  EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
-  EFM_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
+  SL_LOG_DEBUG_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
+  SL_LOG_DEBUG_ASSERT(SLI_UART_HANDLE_IS_ASYNC(uart_handle));
 
-  EFM_ASSERT(sl_slist_is_empty(uart_handle->async_tx_transfer_submitted_list_head));
-  EFM_ASSERT(sl_slist_is_empty(uart_handle->async_rx_transfer_active_list_head));
-  EFM_ASSERT(sl_slist_is_empty(uart_handle->async_rx_transfer_pending_list_head));
+  SL_LOG_DEBUG_ASSERT(sl_slist_is_empty(uart_handle->async_tx_transfer_submitted_list_head));
+  SL_LOG_DEBUG_ASSERT(sl_slist_is_empty(uart_handle->async_rx_transfer_active_list_head));
+  SL_LOG_DEBUG_ASSERT(sl_slist_is_empty(uart_handle->async_rx_transfer_pending_list_head));
 
   uart_transfer_pool_free(&uart_handle->async_tx_free_list_head);
   uart_transfer_pool_free(&uart_handle->async_rx_free_list_head);

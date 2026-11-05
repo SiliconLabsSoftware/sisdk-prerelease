@@ -21,10 +21,14 @@ Output is printed on the kit **VCOM** port, including **clock-cycle counts** per
 - **SPACE** — cycle the current menu option
 - **ENTER (CR)** — confirm and proceed
 **Secure Vault High** — configure in order:
-1. **Key storage:** plaintext, wrapped, or volatile SE slot
+1. **Key storage:** plaintext, wrapped, or volatile SE slot (volatile only where supported)
 2. **Curve family:** ECC Weierstrass Prime or ECC Montgomery
 3. **Specific curve** (see table below)
 **Secure Vault Mid** — select curve family and curve only; keys are **plaintext in RAM**.
+
+> **Note:** SE volatile key support may not be supported on all platforms. On platforms
+> without volatile SE key storage, the volatile key-storage menu option is omitted.
+> Plaintext and wrapped key paths still work where available.
 
 ### Supported curves
 
@@ -71,7 +75,7 @@ On **volatile** keys (Vault High), volatile slots are deleted after a successful
 3. Create the **Platform Security - SoC SE Manager Key Agreement (ECDH)** project in Simplicity Studio ([Examples](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-getting-started/start-a-project#examples)).
 4. Build and flash the project ([Simple Build](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/building#simple-build), [Flash Programmer](https://docs.silabs.com/simplicity-studio-5-users-guide/latest/ss-5-users-guide-building-and-flashing/flashing#flash-programmer)).
 5. Reset the board and follow the console prompts:
-   - **Vault High:** choose key type (plaintext / wrapped / volatile), then curve family and curve.
+   - **Vault High:** choose key type (plaintext / wrapped / volatile where supported), then curve family and curve.
    - **Vault Mid:** choose Weierstrass (P192/P256) or Montgomery (X25519).
 6. Watch the log for client and server key generation, public-key export, shared-secret computation, and **Compare shared secret… OK**.
 7. The startup menu reappears so you can run again with different settings.
@@ -83,6 +87,7 @@ On **volatile** keys (Vault High), volatile slots are deleted after a successful
 | No serial output | VCOM 115200 8-N-1, line terminator **None**; `SL_BOARD_ENABLE_VCOM=1` |
 | SE manager init failed | Latest SE firmware; Secure Vault + SE mailbox |
 | Wrapped / volatile options missing | Expected on **Secure Vault Mid** — use Vault High for full key-storage paths |
+| Volatile key option missing | Expected on platforms that do not support SE volatile key storage |
 | X25519 failures on Mid HSE | SE firmware version (see Prerequisites) |
 | Compare shared secret **Failed** | Rebuild and rerun; matching curve and key type on both peers |
 | Volatile key cleanup errors | Prior run may have left a slot occupied — reset and retry |

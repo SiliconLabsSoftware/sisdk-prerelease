@@ -93,7 +93,6 @@ def build_modem_regs_rainier(model, profile):
     profile.outputs.append(ModelOutput(model.vars.MODEM_DIGMIXCTRL_FWHOPPING, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.DIGMIXCTRL.FWHOPPING'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_PHDMODCTRL_FASTHOPPINGEN, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.PHDMODCTRL.FASTHOPPINGEN'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_PHDMODCTRL_CHPWRQUAL, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.PHDMODCTRL.CHPWRQUAL'))
-    # profile.outputs.append(ModelOutput(model.vars., '', ModelOutputType.SVD_REG_FIELD, readable_name=''))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CTRL3_ANTDIVMODE, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CTRL3.ANTDIVMODE'))
 
     profile.outputs.append(ModelOutput(model.vars.MODEM_DIGMIXCTRL_BLEORZB, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.DIGMIXCTRL.BLEORZB'))
@@ -208,8 +207,6 @@ def build_modem_regs_rainier(model, profile):
     profile.outputs.append(ModelOutput(model.vars.AGC_PGAGAIN4_PGAGAINDB10, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.PGAGAIN4.PGAGAINDB10'))
     profile.outputs.append(ModelOutput(model.vars.AGC_PGAGAIN4_PGAGAINDB11, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.PGAGAIN4.PGAGAINDB11'))
 
-    #profile.outputs.append(ModelOutput(model.vars.AGC_PNRFATT0_LNAMIXRFATT1, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.PNRFATT0.LNAMIXRFATT1'))
-    #profile.outputs.append(ModelOutput(model.vars.AGC_PNRFATT0_LNAMIXRFATT2, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.PNRFATT0.LNAMIXRFATT2'))
     profile.outputs.append(ModelOutput(model.vars.AGC_PNRFATT1_LNAMIXRFATT3, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.PNRFATT1.LNAMIXRFATT3'))
     profile.outputs.append(ModelOutput(model.vars.AGC_PNRFATT1_LNAMIXRFATT4, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.PNRFATT1.LNAMIXRFATT4'))
     profile.outputs.append(ModelOutput(model.vars.AGC_PNRFATT2_LNAMIXRFATT5, '', ModelOutputType.SVD_REG_FIELD, readable_name='AGC.PNRFATT2.LNAMIXRFATT5'))
@@ -258,9 +255,7 @@ def build_modem_regs_rainier(model, profile):
 
     profile.outputs.append(ModelOutput(model.vars.MODEM_SPARE_SPARE, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.SPARE.SPARE'))
 
-## Synth_IF Series 3 Reigsters
 def build_synth_regs_s3(model, profile):
-    ## LPF
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DLFCTRL_LOCKLPFBWGEAR0, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DLFCTRL.LOCKLPFBWGEAR0'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DLFCTRL_LOCKLPFBWGEAR1, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DLFCTRL.LOCKLPFBWGEAR1'))
 
@@ -285,7 +280,6 @@ def build_synth_regs_s3(model, profile):
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DLFCTRL_LOCKLPFBWGEARSLOT, '',      ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DLFCTRL.LOCKLPFBWGEARSLOT'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DLFCTRL_LPFBWLOADDEL, '',           ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DLFCTRL.LPFBWLOADDEL'))
 
-    ## DSM
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DSMCTRLRX_DEMMODERX, '',             ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DSMCTRLRX.DEMMODERX'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DSMCTRLRX_REQORDERRX, '',            ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DSMCTRLRX.REQORDERRX'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DSMCTRLRX_QNCMODERX, '',             ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DSMCTRLRX.QNCMODERX'))
@@ -297,13 +291,10 @@ def build_synth_regs_s3(model, profile):
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DSMCTRLTX_QNCMODETX, '',             ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DSMCTRLTX.QNCMODETX'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_QNCCTRL_QNCOFFSET, '',               ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.QNCCTRL.QNCOFFSET'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_QNCCTRL_ENABLEDQNCTIME, '',          ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.QNCCTRL.ENABLEDQNCTIME'))
-    ## DENOMINIT
     profile.outputs.append(ModelOutput(model.vars.SYNTH_MMDDENOMINIT_DENOMINIT0, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.MMDDENOMINIT.DENOMINIT0'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_MMDDENOMINIT_DENOMINIT1, '',         ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.MMDDENOMINIT.DENOMINIT1'))
-    ## HOPPING
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DLFCTRL_LPFBWDURINGHOP, '',          ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DLFCTRL.LPFBWDURINGHOP'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_DLFCTRL_LPFBWAFTERHOP, '',           ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.DLFCTRL.LPFBWAFTERHOP'))
-    ## LMS
     profile.outputs.append(ModelOutput(model.vars.SYNTH_GLMS_GLMSENABLEDELAY, '',             ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.GLMS.GLMSENABLEDELAY'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_GLMS_GLMSGEAR0, '',                   ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.GLMS.GLMSGEAR0'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_GLMS_GLMSGEAR1, '',                   ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.GLMS.GLMSGEAR1'))
@@ -320,7 +311,6 @@ def build_synth_regs_s3(model, profile):
     profile.outputs.append(ModelOutput(model.vars.SYNTH_PLMS_PLMSGEARSLOT, '',                ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.PLMS.PLMSGEARSLOT'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_LMSOVERRIDE_GLMSOVERRIDEEN, '',       ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.LMSOVERRIDE.GLMSOVERRIDEEN'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_LMSOVERRIDE_PLMSOVERRIDEEN, '',       ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.LMSOVERRIDE.PLMSOVERRIDEEN'))
-    ## FCAL
     profile.outputs.append(ModelOutput(model.vars.SYNTH_COMPANION_COMPANION0, '',             ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.COMPANION.COMPANION0'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_COMPANION_COMPANION1, '',             ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.COMPANION.COMPANION1'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_COMPANION_COMPANION2, '',             ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.COMPANION.COMPANION2'))
@@ -352,20 +342,12 @@ def build_synth_regs_s3(model, profile):
     profile.outputs.append(ModelOutput(model.vars.SYNTH_FCALSTEPWAIT_STEPWAIT9, '',           ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.FCALSTEPWAIT.STEPWAIT9'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_FCALSTEPWAIT_STEPWAIT10, '',          ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.FCALSTEPWAIT.STEPWAIT10'))
     profile.outputs.append(ModelOutput(model.vars.SYNTH_FCALCTRL_FCALMODE, '',                ModelOutputType.SVD_REG_FIELD, readable_name='SYNTH.FCALCTRL.FCALMODE'))
-    # RFSYNTH CTRL
     profile.outputs.append(ModelOutput(model.vars.RAC_SYLOCTRL0_SYLODIVDSMDACCLKDIVRATIO, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYLOCTRL0.SYLODIVDSMDACCLKDIVRATIO'))
     profile.outputs.append(ModelOutput(model.vars.RAC_SYLOCTRLTX0_SYLODIVDSMDACCLKDIVRATIOTX, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYLOCTRLTX0.SYLODIVDSMDACCLKDIVRATIOTX'))
-    # Select LODIV path (normal vs HADM)
     profile.outputs.append(ModelOutput(model.vars.RAC_LNAMIXEN1_LNAMIXMXRLOSEL, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.LNAMIXEN1.LNAMIXMXRLOSEL'))
 
-  # fp select depend on TX power, move to rail code
-  #  profile.outputs.append(ModelOutput(model.vars.RAC_SYCTRL1_SYLODIVSELFP4G82G4, '',          ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYCTRL1.SYLODIVSELFP4G82G4'))
-  #  profile.outputs.append(ModelOutput(model.vars.RAC_SYCTRL1_SYLODIVSELFP4G82G4TX, '',       ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYCTRL1.SYLODIVSELFP4G82G4TX'))
-  #  profile.outputs.append(ModelOutput(model.vars.RAC_SYMMDCTRL_SYMMDSEL56STG, '',            ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYMMDCTRL.SYMMDSEL56STG'))
-  #  profile.outputs.append(ModelOutput(model.vars.RAC_SYMMDCTRL_SYMMDSEL56STGTX, '',          ModelOutputType.SVD_REG_FIELD, readable_name='RAC.SYMMDCTRL.SYMMDSEL56STGTX'))
 
 
-    # DTIMLOSS feature for fast switch PHY optimization. See https://jira.silabs.com/browse/MCUW_RADIO_CFG-2525
     profile.outputs.append(ModelOutput(model.vars.MODEM_TRECSCFG_DTIMLOSSEN, '', ModelOutputType.SVD_REG_FIELD,
                                        readable_name='MODEM.TRECSCFG.DTIMLOSSEN'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_TRECSCFG_DTIMLOSSTHD, '', ModelOutputType.SVD_REG_FIELD,

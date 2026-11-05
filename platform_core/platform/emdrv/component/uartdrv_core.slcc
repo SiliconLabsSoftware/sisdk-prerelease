@@ -13,7 +13,7 @@ description: >
   This component includes only the UART driver core. To configure and create
   instances of this driver, one or more of the UARTDRV EUART/LEUART/USART components  should be included in the project.
 category: Platform|Driver|UART
-quality: production
+quality: deprecated
 metadata:
   sbom:
     license: Zlib
@@ -21,6 +21,7 @@ root_path: platform_core/platform/emdrv/uartdrv
 provides:
 - name: uartdrv_core
 requires:
+- name: log_none
 - name: device
 - name: emlib_usart
   condition:
@@ -42,6 +43,7 @@ requires:
   condition: [uartdrv_instance]
 - name: device_peripheral
 - name: code_classification
+- name: sl_common
 include:
 - path: inc
   file_list:

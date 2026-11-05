@@ -3,6 +3,9 @@ label: Z-Wave Debug
 category: Z-Wave
 description: >
   This component, which offers zw_debug, is a crucial tool for debugging and development.  If this component is installed, the firmware will be compiled with increased flash memory usage,  providing invaluable insights into application behavior and aiding in efficient troubleshooting and optimization.
+documentation:
+  docset: z-wave
+  document: z-wave-getting-started-for-end-devices/08-debug-a-z-wave-application
 package: zwave
 quality: production
 metadata:

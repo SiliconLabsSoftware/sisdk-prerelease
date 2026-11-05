@@ -31,7 +31,7 @@
 #include "em_letimer.h"
 #if defined(LETIMER_COUNT) && (LETIMER_COUNT > 0)
 #include "em_cmu.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup letimer LETIMER - Low Energy Timer
@@ -125,7 +125,7 @@ uint32_t LETIMER_CompareGet(LETIMER_TypeDef *letimer, unsigned int comp)
 {
   uint32_t ret;
 
-  EFM_ASSERT(LETIMER_REF_VALID(letimer) && LETIMER_COMP_REG_VALID(comp));
+  SL_LOG_DEBUG_ASSERT(LETIMER_REF_VALID(letimer) && LETIMER_COMP_REG_VALID(comp));
 
   /* Initialize the selected compare value. */
   switch (comp) {
@@ -214,7 +214,7 @@ void LETIMER_CompareSet(LETIMER_TypeDef *letimer,
                         unsigned int comp,
                         uint32_t value)
 {
-  EFM_ASSERT(LETIMER_REF_VALID(letimer)
+  SL_LOG_DEBUG_ASSERT(LETIMER_REF_VALID(letimer)
              && LETIMER_COMP_REG_VALID(comp)
              && ((value & ~(_LETIMER_COMP0_COMP0_MASK
                             >> _LETIMER_COMP0_COMP0_SHIFT))
@@ -262,7 +262,7 @@ void LETIMER_CompareSet(LETIMER_TypeDef *letimer,
  ******************************************************************************/
 void LETIMER_Enable(LETIMER_TypeDef *letimer, bool enable)
 {
-  EFM_ASSERT(LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(LETIMER_REF_VALID(letimer));
 
 #if defined(LETIMER_SYNCBUSY_CMD)
   regSync(letimer, LETIMER_SYNCBUSY_CMD);
@@ -355,7 +355,7 @@ void LETIMER_Init(LETIMER_TypeDef *letimer, const LETIMER_Init_TypeDef *init)
 {
   uint32_t tmp = 0;
 
-  EFM_ASSERT(LETIMER_REF_VALID(letimer));
+  SL_LOG_DEBUG_ASSERT(LETIMER_REF_VALID(letimer));
 
 #if defined (LETIMER_EN_EN)
   letimer->EN_SET = LETIMER_EN_EN;
@@ -451,7 +451,7 @@ uint32_t LETIMER_RepeatGet(LETIMER_TypeDef *letimer, unsigned int rep)
 {
   uint32_t ret;
 
-  EFM_ASSERT(LETIMER_REF_VALID(letimer) && LETIMER_REP_REG_VALID(rep));
+  SL_LOG_DEBUG_ASSERT(LETIMER_REF_VALID(letimer) && LETIMER_REP_REG_VALID(rep));
 
   /* Initialize the selected compare value. */
   switch (rep) {
@@ -503,7 +503,7 @@ void LETIMER_RepeatSet(LETIMER_TypeDef *letimer,
                        unsigned int rep,
                        uint32_t value)
 {
-  EFM_ASSERT(LETIMER_REF_VALID(letimer)
+  SL_LOG_DEBUG_ASSERT(LETIMER_REF_VALID(letimer)
              && LETIMER_REP_REG_VALID(rep)
              && ((value & ~(_LETIMER_REP0_REP0_MASK
                             >> _LETIMER_REP0_REP0_SHIFT))

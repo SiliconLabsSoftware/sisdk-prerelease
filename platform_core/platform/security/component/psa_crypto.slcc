@@ -38,6 +38,8 @@ requires:
   condition: [device_series_3]
 - name: psa_driver_dispatch
   condition: [device_si91x]
+- name: psa_driver_dispatch
+  condition: [device_host]
 - name: sl_si91x_psa_crypto
   condition: [device_si91x]
 - name: mbedtls_iar_workarounds

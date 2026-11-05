@@ -25,10 +25,10 @@ class CalcSynthCurl(CalcSynthLion):
         super().calc_clkmulten_reg(model)
         adc_clock_mode_actual = model.vars.adc_clock_mode_actual.value
 
-        # regulators set to max voltage, current for hot temp performance EFRPTE-6618
-        # Bypass Lion regvals due to MCUW_RADIO_CFG-3308
         if adc_clock_mode_actual == model.vars.adc_clock_mode.var_enum.HFXOMULT:
             self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTREG1ADJV, 3)
-            # self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJV, 3)
+            self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJV, 3)
             self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJI, 3)
             self._reg_write(model.vars.RAC_CLKMULTEN0_CLKMULTREG3ADJV, 3)
+        else:
+            self._reg_do_not_care(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJV)

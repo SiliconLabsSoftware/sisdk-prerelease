@@ -272,11 +272,11 @@ static psa_status_t set_key_buffer_length(
       }
       *key_buffer_length =  data_size;
       break;
-    #if defined(_SILICON_LABS_32B_SERIES_3)
+    #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
     case SL_PSA_KEY_LOCATION_KSU_0:
       *key_buffer_length = sizeof(uint8_t);
       break;
-    #endif // _SILICON_LABS_32B_SERIES_3
+    #endif // SLI_PSA_DRIVER_FEATURE_KSU
       #if defined(SLI_PSA_DRIVER_FEATURE_WRAPPED_KEYS)
     case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
       #if defined(SLI_SE_KEY_PADDING_REQUIRED)
@@ -1011,6 +1011,11 @@ psa_status_t sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
             builtin_key_desc = (sl_se_key_descriptor_t) SL_SE_SYSTEM_ATTESTATION_KEY;
             break;
             #endif // SLI_PSA_DRIVER_FEATURE_ATTESTATION
+            #if defined(SLI_PSA_DRIVER_FEATURE_TLS_IDENTITY)
+          case SL_SE_KEY_SLOT_TLS_IDENTITY:
+            builtin_key_desc = (sl_se_key_descriptor_t) SL_SE_TLS_IDENTITY_KEY;
+            break;
+            #endif // SLI_PSA_DRIVER_FEATURE_TLS_IDENTITY
           default:
             return PSA_ERROR_DOES_NOT_EXIST;
         }
@@ -2477,10 +2482,18 @@ psa_status_t sli_se_transparent_export_public_key(
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
-  // RSA key pairs are stored as DER; mbedtls_psa_rsa_export_public_key extracts
-  // the public key. The SE driver only accelerates ECC export-public.
+  // Preserve software fallback when SE RSA is unavailable.
   if (PSA_KEY_TYPE_IS_RSA(psa_get_key_type(attributes))) {
+  #if defined(SLI_PSA_DRIVER_FEATURE_RSA_SIGN) && defined(SLI_SE_SUPPORTS_RSA)
+    return sli_se_driver_export_rsa_public_key(attributes,
+                                               key_buffer,
+                                               key_buffer_size,
+                                               data,
+                                               data_size,
+                                               data_length);
+  #else
     return PSA_ERROR_NOT_SUPPORTED;
+  #endif
   }
 
   return sli_se_driver_export_public_key(attributes,
@@ -2500,8 +2513,7 @@ psa_status_t sli_se_transparent_import_key(const psa_key_attributes_t *attribute
                                            size_t *bits)
 {
   #if defined(SLI_PSA_DRIVER_FEATURE_ECC)
-
-  // Our driver only handles ECC keys (since they are better done accelerated).
+  // Validate and store ECC keys in their PSA export format.
   if (PSA_KEY_TYPE_IS_ECC(psa_get_key_type(attributes))) {
     psa_status_t status = sli_se_driver_validate_ecc_key(attributes,
                                                          data,
@@ -2521,9 +2533,32 @@ psa_status_t sli_se_transparent_import_key(const psa_key_attributes_t *attribute
 
     return PSA_SUCCESS;
   }
+  #endif // SLI_PSA_DRIVER_FEATURE_ECC
 
-  #else // SLI_PSA_DRIVER_FEATURE_ECC
+  #if defined(SLI_PSA_DRIVER_FEATURE_RSA_SIGN) && defined(SLI_SE_SUPPORTS_RSA)
+  // Validate and store RSA keys in PKCS#1 DER format for SE operations.
+  if (PSA_KEY_TYPE_IS_RSA(psa_get_key_type(attributes))) {
+    psa_status_t status = sli_se_driver_validate_rsa_key(attributes,
+                                                         data,
+                                                         data_length,
+                                                         bits);
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
 
+    if (key_buffer_size < data_length) {
+      return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    memcpy(key_buffer, data, data_length);
+    *key_buffer_length = data_length;
+
+    return PSA_SUCCESS;
+  }
+  #endif // SLI_PSA_DRIVER_FEATURE_RSA_SIGN && SLI_SE_SUPPORTS_RSA
+
+  #if !defined(SLI_PSA_DRIVER_FEATURE_ECC)                                 \
+  && !(defined(SLI_PSA_DRIVER_FEATURE_RSA_SIGN) && defined(SLI_SE_SUPPORTS_RSA))
   (void)attributes;
   (void)data;
   (void)data_length;
@@ -2531,8 +2566,7 @@ psa_status_t sli_se_transparent_import_key(const psa_key_attributes_t *attribute
   (void)key_buffer_size;
   (void)key_buffer_length;
   (void)bits;
-
-  #endif // SLI_PSA_DRIVER_FEATURE_ECC
+  #endif
 
   return PSA_ERROR_NOT_SUPPORTED;
 }

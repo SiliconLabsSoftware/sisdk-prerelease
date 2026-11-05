@@ -41,6 +41,7 @@
 #include "sl_sleeptimer.h"
 #include "sl_memory_manager.h"
 #include "sl_core.h"
+#include "sl_log_helper.h"
 
 #include "ecode.h"
 
@@ -117,7 +118,8 @@ static sl_status_t generate_encryption_key(psa_key_id_t * key_id)
   psa_set_key_bits(&key_attr, 128);
   psa_set_key_lifetime(&key_attr, PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_LIFETIME_PERSISTENT, PSA_KEY_LOCATION_LOCAL_STORAGE));
   status = psa_generate_key(&key_attr, key_id);
-  EFM_ASSERT(status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(status == PSA_SUCCESS);
+  (void)status;
 
   psa_reset_key_attributes(&key_attr);
 
@@ -147,7 +149,8 @@ static psa_status_t cipher_operation(psa_cipher_operation_t * operation,
     psa_status = psa_cipher_update(operation, input + bytes_written,
                                    bytes_to_write, output + *output_len,
                                    output_size - *output_len, &len);
-    EFM_ASSERT(psa_status == PSA_SUCCESS);
+    SL_LOG_DEBUG_ASSERT(psa_status == PSA_SUCCESS);
+    (void)psa_status;
 
     bytes_written += bytes_to_write;
     *output_len += len;
@@ -155,7 +158,7 @@ static psa_status_t cipher_operation(psa_cipher_operation_t * operation,
 
   psa_status = psa_cipher_finish(operation, output + *output_len,
                                  output_size - *output_len, &len);
-  EFM_ASSERT(psa_status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(psa_status == PSA_SUCCESS);
   *output_len += len;
 
   return(psa_status);
@@ -180,20 +183,24 @@ static psa_status_t cipher_encrypt(uint8_t * iv,
     // Key has been destroyed. Generate a new one
     psa_key_id_t key_id;
     sl_status_t status = generate_encryption_key(&key_id);
-    EFM_ASSERT(status == SL_STATUS_OK);
-    EFM_ASSERT(key_id == CLI_SECURITY_PSA_CRYPTO_KEY_ID);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
+    SL_LOG_DEBUG_ASSERT(key_id == CLI_SECURITY_PSA_CRYPTO_KEY_ID);
+    (void)key_id;
   }
 
   mbedtls_platform_zeroize(&operation, sizeof(operation) );
   psa_status = psa_cipher_encrypt_setup(&operation, CLI_SECURITY_PSA_CRYPTO_KEY_ID, psa_algo);
-  EFM_ASSERT(psa_status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(psa_status == PSA_SUCCESS);
+  (void)psa_status;
 
   psa_status = psa_cipher_generate_iv(&operation, iv, iv_size, &iv_len);
-  EFM_ASSERT(psa_status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(psa_status == PSA_SUCCESS);
+  (void)psa_status;
 
   psa_status = cipher_operation(&operation, input, input_size, BLOCK_SIZE,
                                 output, output_size, output_len);
-  EFM_ASSERT(psa_status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(psa_status == PSA_SUCCESS);
 
   psa_cipher_abort(&operation);
   return(psa_status);
@@ -215,14 +222,16 @@ static psa_status_t cipher_decrypt(const uint8_t * iv,
 
   mbedtls_platform_zeroize(&operation, sizeof(operation) );
   psa_status = psa_cipher_decrypt_setup(&operation, CLI_SECURITY_PSA_CRYPTO_KEY_ID, psa_algo);
-  EFM_ASSERT(psa_status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(psa_status == PSA_SUCCESS);
+  (void)psa_status;
 
   psa_status = psa_cipher_set_iv(&operation, iv, iv_size);
-  EFM_ASSERT(psa_status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(psa_status == PSA_SUCCESS);
+  (void)psa_status;
 
   psa_status = cipher_operation(&operation, input, input_size, BLOCK_SIZE,
                                 output, output_size, output_len);
-  EFM_ASSERT(psa_status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(psa_status == PSA_SUCCESS);
 
   psa_cipher_abort(&operation);
   return(psa_status);
@@ -246,10 +255,12 @@ static bool is_valid_password(char *password)
   operation = psa_hash_operation_init();
 
   psa_status = psa_hash_setup(&operation, PSA_ALG_SHA_256);
-  EFM_ASSERT(psa_status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(psa_status == PSA_SUCCESS);
+  (void)psa_status;
 
   psa_status = psa_hash_update(&operation, (uint8_t *)password, length);
-  EFM_ASSERT(psa_status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(psa_status == PSA_SUCCESS);
+  (void)psa_status;
 
   psa_status = psa_hash_verify(&operation, decrypted_hash, sizeof(decrypted_hash));
 
@@ -346,7 +357,7 @@ static sl_status_t read_until_line_feed(sl_cli_handle_t handle,
             CORE_ATOMIC_SECTION(session->state = ASK_PASSWORD; );
             break;
           default:
-            EFM_ASSERT(false);
+            SL_LOG_DEBUG_ASSERT(false);
         }
         return SL_STATUS_WOULD_OVERFLOW;
       } else if (isgraph((unsigned char)c)) {  // Only allow printable char and no space
@@ -360,7 +371,7 @@ static sl_status_t read_until_line_feed(sl_cli_handle_t handle,
         }
       }
     } else {
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
     }
   } while (read);
 
@@ -385,7 +396,8 @@ static void on_lock_timeout(sl_sleeptimer_timer_handle_t *handle,
   nvm3_writeCounter(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_RETRY_COUNTER, retry_count);
   // Don't need to notify, by default we will wake up.
 
-  EFM_ASSERT(ecode == ECODE_NVM3_OK);
+  SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+  (void)ecode;
 }
 
 /***************************************************************************//**
@@ -400,16 +412,20 @@ static void configure_session_lock_timer(sl_cli_handle_t handle,
   CORE_ATOMIC_SECTION(session->locked = true; );
   security_warning = true;
   ecode = nvm3_writeData(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_WARN_FLAG, &security_warning, sizeof(security_warning));
-  EFM_ASSERT(ecode == ECODE_NVM3_OK);
+  SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+  (void)ecode;
 
   write_string_lf(handle, SL_CLI_SIMPLE_PASSWORD_LOCK_OUT_MESSAGE);
 
-  EFM_ASSERT(sl_sleeptimer_start_timer_ms(&session->timer, timeout, on_lock_timeout, session, 0, 0) == SL_STATUS_OK);
+  sl_status_t status = sl_sleeptimer_start_timer_ms(&session->timer, timeout, on_lock_timeout, session, 0, 0);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   lock_timer_running = true;
 
   ecode = nvm3_writeData(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_LOCK_TIMER, &lock_timer_running, sizeof(lock_timer_running));
-  EFM_ASSERT(ecode == ECODE_NVM3_OK);
+  SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+  (void)ecode;
 }
 
 /***************************************************************************//**
@@ -432,7 +448,8 @@ sl_status_t sl_cli_reset_security_warning_flag(void)
   bool warning = false;
   CORE_ATOMIC_SECTION(security_warning = false; );
   ecode = nvm3_writeData(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_WARN_FLAG, &warning, sizeof(security_warning));
-  EFM_ASSERT(ecode == ECODE_NVM3_OK);
+  SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+  (void)ecode;
 
   return SL_STATUS_OK;
 }
@@ -455,18 +472,23 @@ sl_status_t sl_cli_set_simple_password(char *new_password)
   operation = psa_hash_operation_init();
 
   status = psa_hash_setup(&operation, PSA_ALG_SHA_256);
-  EFM_ASSERT(status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(status == PSA_SUCCESS);
+  (void)status;
 
   status = psa_hash_update(&operation, (uint8_t *)new_password, strlen(new_password));
-  EFM_ASSERT(status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(status == PSA_SUCCESS);
+  (void)status;
 
   status = psa_hash_finish(&operation, hash, sizeof(hash), &hash_len);
-  EFM_ASSERT(status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(status == PSA_SUCCESS);
+  (void)status;
 
   psa_hash_abort(&operation);
 
-  EFM_ASSERT(status == PSA_SUCCESS);
-  EFM_ASSERT(hash_len == sizeof(encrypted_password_hash));
+  SL_LOG_DEBUG_ASSERT(status == PSA_SUCCESS);
+  (void)status;
+  SL_LOG_DEBUG_ASSERT(hash_len == sizeof(encrypted_password_hash));
+  (void)hash_len;
 
   cipher_encrypt(iv, sizeof(iv),
                  hash, sizeof(hash),
@@ -474,10 +496,12 @@ sl_status_t sl_cli_set_simple_password(char *new_password)
   mbedtls_platform_zeroize(hash, sizeof(hash));
 
   ecode = nvm3_writeData(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_ENCRYPTED_PASSWORD_HASH, encrypted_password_hash, sizeof(encrypted_password_hash));
-  EFM_ASSERT(ecode == ECODE_NVM3_OK);
+  SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+  (void)ecode;
 
   ecode = nvm3_writeData(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_IV, iv, sizeof(iv));
-  EFM_ASSERT(ecode == ECODE_NVM3_OK);
+  SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+  (void)ecode;
 
   CORE_ATOMIC_SECTION(module_state = CONFIGURED; );
 
@@ -496,29 +520,35 @@ sl_status_t sl_cli_simple_password_init(void)
   sl_status_t status;
   psa_status_t psa_status = psa_crypto_init();
 
-  EFM_ASSERT(psa_status == PSA_SUCCESS);
+  SL_LOG_DEBUG_ASSERT(psa_status == PSA_SUCCESS);
+  (void)psa_status;
 
   if (psa_is_key_present_in_storage(CLI_SECURITY_PSA_CRYPTO_KEY_ID)) {
     uint32_t obj_type;
     size_t obj_len;
     ecode = nvm3_getObjectInfo(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_ENCRYPTED_PASSWORD_HASH, &obj_type, &obj_len);
-    EFM_ASSERT(obj_len <= SL_CLI_SIMPLE_PASSWORD_LENGTH_MAX);
+    SL_LOG_DEBUG_ASSERT(obj_len <= SL_CLI_SIMPLE_PASSWORD_LENGTH_MAX);
     if (ecode == ECODE_NVM3_OK) {
       uint32_t count;
       ecode = nvm3_readData(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_ENCRYPTED_PASSWORD_HASH, encrypted_password_hash, obj_len);
-      EFM_ASSERT(ecode == ECODE_NVM3_OK);
+      SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+      (void)ecode;
 
       ecode = nvm3_readData(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_IV, iv, sizeof(iv));
-      EFM_ASSERT(ecode == ECODE_NVM3_OK);
+      SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+      (void)ecode;
 
       ecode = nvm3_readData(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_WARN_FLAG, &security_warning, sizeof(security_warning));
-      EFM_ASSERT(ecode == ECODE_NVM3_OK);
+      SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+      (void)ecode;
 
       ecode = nvm3_readData(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_LOCK_TIMER, &lock_timer_running, sizeof(lock_timer_running));
-      EFM_ASSERT(ecode == ECODE_NVM3_OK);
+      SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+      (void)ecode;
 
       ecode = nvm3_readCounter(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_RETRY_COUNTER, &count);
-      EFM_ASSERT(ecode == ECODE_NVM3_OK);
+      SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+      (void)ecode;
 
       retry_count = (uint8_t)count;
 
@@ -531,20 +561,25 @@ sl_status_t sl_cli_simple_password_init(void)
   }
 
   status = generate_encryption_key(&key_id);
-  EFM_ASSERT(status == SL_STATUS_OK);
-  EFM_ASSERT(key_id == CLI_SECURITY_PSA_CRYPTO_KEY_ID);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
+  SL_LOG_DEBUG_ASSERT(key_id == CLI_SECURITY_PSA_CRYPTO_KEY_ID);
+  (void)key_id;
   CORE_ATOMIC_SECTION(module_state = CONFIGURE; );
 
   // Set warning flag to false at first startup
   ecode = nvm3_writeData(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_WARN_FLAG, &security_warning, sizeof(security_warning));
-  EFM_ASSERT(ecode == ECODE_NVM3_OK);
+  SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+  (void)ecode;
 
   // Set warning flag to false at first startup
   ecode = nvm3_writeData(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_LOCK_TIMER, &lock_timer_running, sizeof(lock_timer_running));
-  EFM_ASSERT(ecode == ECODE_NVM3_OK);
+  SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+  (void)ecode;
 
   nvm3_writeCounter(nvm3_defaultHandle, CLI_SECURITY_NVM3_KEY_ID_RETRY_COUNTER, retry_count);
-  EFM_ASSERT(ecode == ECODE_NVM3_OK);
+  SL_LOG_DEBUG_ASSERT(ecode == ECODE_NVM3_OK);
+  (void)ecode;
 
   CORE_ATOMIC_SECTION(module_state = CONFIGURE; );
 
@@ -562,7 +597,7 @@ sl_status_t sli_cli_session_init(sl_cli_handle_t handle)
   state_t state;
 
   session = sl_malloc(sizeof(cli_instance_data_session_t));
-  EFM_ASSERT(session != NULL);
+  SL_LOG_DEBUG_ASSERT(session != NULL);
 
   sl_iostream_putchar(handle->iostream_handle, '\n');
   write_string_lf(handle, SL_CLI_SIMPLE_PASSWORD_WELCOME_MESSAGE);
@@ -583,7 +618,7 @@ sl_status_t sli_cli_session_init(sl_cli_handle_t handle)
       break;
 
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
   }
   session->wrong_password_cnt = retry_count;
   handle->session_data = session;
@@ -684,7 +719,7 @@ sl_status_t sli_cli_session_handler(sl_cli_handle_t handle)
         break;
 
       default:
-        EFM_ASSERT(false);
+        SL_LOG_DEBUG_ASSERT(false);
         break;
     }
 
@@ -740,7 +775,7 @@ sl_status_t sli_cli_session_handler(sl_cli_handle_t handle)
               loop = false;
               return SL_STATUS_PERMISSION;
             default:
-              EFM_ASSERT(false);
+              SL_LOG_DEBUG_ASSERT(false);
           }
 
           CORE_ATOMIC_SECTION(session->state = ASK_PASSWORD; \
@@ -795,7 +830,7 @@ sl_status_t sli_cli_session_handler(sl_cli_handle_t handle)
         break;
 
       default:
-        EFM_ASSERT(false);
+        SL_LOG_DEBUG_ASSERT(false);
         break;
     }
 
@@ -871,7 +906,7 @@ void cli_set_password_cmd(sl_cli_command_arg_t * arguments)
       write_string_lf(arguments->handle, SL_CLI_SIMPLE_PASSWORD_PASSWORD_TOO_SHORT);
       break;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
   }
 }
 
@@ -882,7 +917,9 @@ void cli_reset_security_warning_flag_cmd(sl_cli_command_arg_t * arguments)
 {
   (void)arguments;
 
-  EFM_ASSERT(sl_cli_reset_security_warning_flag() == SL_STATUS_OK);
+  sl_status_t status = sl_cli_reset_security_warning_flag();
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 }
 
 /***************************************************************************//**
@@ -891,5 +928,7 @@ void cli_reset_security_warning_flag_cmd(sl_cli_command_arg_t * arguments)
 void cli_destroy_key_cmd(sl_cli_command_arg_t * arguments)
 {
   (void)arguments;
-  EFM_ASSERT(sl_cli_simple_password_destroy_key() == SL_STATUS_OK);
+  sl_status_t status = sl_cli_simple_password_destroy_key();
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 }

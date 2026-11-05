@@ -170,7 +170,7 @@ static bool tpiu_context_saved = false;
 #endif
 
 /// Stack state for RESUME macro (no function call, no stack use)
-sli_power_manager_saved_stack_t sli_power_manager_saved_stack SL_ATTRIBUTE_SECTION(".noinit");
+sli_power_manager_saved_stack_t sli_power_manager_saved_stack = {0};
 
 /*******************************************************************************
  ***************************  LOCAL FUNCTIONS   ********************************

@@ -904,7 +904,6 @@ struct RAIL_ChannelConfigEntryAttr {
 #endif //RAIL_SUPPORTS_SUBGHZ_BAND
 
 #if RAIL_SUPPORTS_OFDM_PA
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 5) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 10))
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_OFDM_PA_POWERSETTING_TABLE mode on EFR32xG25.
@@ -928,7 +927,6 @@ struct RAIL_ChannelConfigEntryAttr {
  *   temporarily a synonym of SLI_RAIL_OFDM_PA_MIN.
  */
 #define RAIL_OFDM_PA_MIN      0U
-#endif
 
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref

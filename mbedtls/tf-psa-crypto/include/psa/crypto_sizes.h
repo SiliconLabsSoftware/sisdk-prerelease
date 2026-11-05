@@ -203,7 +203,9 @@
  *
  * Note that an implementation may set different size limits for different
  * operations, and does not need to accept all key sizes up to the limit. */
+#if !defined(PSA_VENDOR_RSA_MAX_KEY_BITS)
 #define PSA_VENDOR_RSA_MAX_KEY_BITS 4096u
+#endif
 
 /* The minimum size of an RSA key on this implementation, in bits.
  * This is a vendor-specific macro.

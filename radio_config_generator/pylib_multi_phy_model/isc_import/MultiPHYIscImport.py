@@ -9,13 +9,11 @@ class MultiPHYIscImport(object):
     Runs Multi-PHYISC files through calculator and rail_scripts to generate a C/H, XML, and CFG file
     """
 
-    # ------------------------------------------------------------------------
     def __init__(self):
         pass
 
     def run(self, isc_filename, output_directory):
         xml_string = self.parse_file(isc_filename)
-        # print xml_string
 
         mphy_config = MultiPHYConfig()
         multi_phy_model = mphy_config.load_xml_string(xml_string)
@@ -28,7 +26,6 @@ class MultiPHYIscImport(object):
         ModelDiff.process_diffs(multi_phy_model)
         RAILScriptsWrapper.run_rail_scripts(multi_phy_model)
 
-        # Renaming the files for uniqueness
         file_name = os.path.splitext(os.path.basename(isc_filename))[0]
         for file in multi_phy_model.output_files.file:
             if file.name.endswith('.h'):
@@ -36,7 +33,6 @@ class MultiPHYIscImport(object):
             elif file.name.endswith('.c'):
                 file.name = 'rail_config_{}.c'.format(file_name)
 
-            # check if output for each file is not a null string
             if len(file.source_code) == 0:
                 raise Exception('Error RAIL source file {}.'.format(file.name))
 
@@ -52,20 +48,16 @@ class MultiPHYIscImport(object):
 
         str_list = []
 
-        # Loop through file line by line until start 'setupId:multiPhyRadioConfigurator' is found
         with open(file_path, "r") as f:
             for line in f:
                 line_strip = line.strip()
                 if len(line_strip) > 0:
                     if line_strip == '{setupId:multiPhyRadioConfigurator':
-                        # found start of input section
                         found_start = True
                     elif line_strip == '}' and found_start:
-                        # found end of input section
                         found_end = True
                         break
                     else:
-                        # We found start and are in input section
                         if found_start and not found_end:
                             str_list.append(line)
 
@@ -74,5 +66,4 @@ class MultiPHYIscImport(object):
 
         xml_str = ''.join(str_list)
 
-        # Return XML string
         return xml_str

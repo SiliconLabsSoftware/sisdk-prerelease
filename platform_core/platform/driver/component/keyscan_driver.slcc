@@ -10,13 +10,17 @@ metadata:
 provides:
 - name: keyscan_driver
 requires:
+- name: log_none
 - name: hal_generic_common
 - name: clock_manager_runtime
 - name: hal_keyscan
 - name: device_manager
 - name: status
 - name: gpio
+- name: gpio_peripheral_pin_latching
+  condition: [device_has_no_deepsleep_retention]
 - name: slist
+- name: component_catalog
 include:
 - path: inc
   file_list:

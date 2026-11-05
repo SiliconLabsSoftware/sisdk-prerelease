@@ -153,6 +153,7 @@ void sli_power_manager_pre_sleep(void);
  *
  * @return Returns current energy mode
  ******************************************************************************/
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 sl_power_manager_em_t sli_power_manager_get_current_em(void);
 
 /***************************************************************************//**

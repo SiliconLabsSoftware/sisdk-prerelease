@@ -19,22 +19,14 @@ __all__ = [ 'ModelInput', 'ModelInputContainer', 'ModelInputType',
 
 @unique
 class ModelInputType(Enum):
-    #: This is a required variable that has to be set before a calculation can be run.
     REQUIRED = 0
-    #: This is an optional value. If not specified, a default is used. Depending on a key required input,
-    #:   this input may even be ignored.
     OPTIONAL = 1
-    #: A purely informational input, useful in description or logging output.
     INFO = 2
-    #: An optional input automatically calculated and shown in GUI, use checkbox to explicitly set,
-    #:   show "auto" in the absence of a calculated value.
     LINKED_IO = 3
     METADATA = 4
 
 class ModelInputDefaultVisibilityType(Enum):
-    #: This profile input is visible by default, in a GUI
     VISIBLE = 0
-    #: This profile input is hidden by default, in a GUI
     HIDDEN = 1
 
 
@@ -52,32 +44,19 @@ class ModelInput(object):
         self.category = category
         self.input_type = input_type
         self.default = default
-        #if var_value is None:
-        #    if self.default is None:
-        #        # ensure var_value is always present so it can be assigned
-        #        self.var_value = None # get_dummy_var_value(self._var)
-        #    else:
-        #        self.var_value = self.default
-        #else:
-        #    self.var_value = var_value
         self.var_value = var_value
-        #: The minimum limit of the value (inclusive)
         self.value_limit_min = value_limit_min
-        #: The maximum limit of the value (inclusive)
         self.value_limit_max = value_limit_max
         self.fractional_digits = fractional_digits
 
-        # backward compatibility
         if deprecated is None:
             deprecated = False
         self.deprecated = deprecated
 
-        # backward compatibility
         if default_visibility is None:
            default_visibility = ModelInputDefaultVisibilityType.VISIBLE
         self.default_visibility = default_visibility
 
-        #: The units multiplier string for the variable
         self._units_multiplier = None
         if units_multiplier is not None:
             self.units_multiplier = units_multiplier
@@ -154,11 +133,9 @@ class ModelInput(object):
         self._value_limit_max = value
 
     def validate_limits(self, value):
-        # test optional max limit
         if self._value_limit_max is not None:
             if value > self._value_limit_max:
                 return False
-        # test optional min limit
         if self._value_limit_min is not None:
             if value < self._value_limit_min:
                 return False
@@ -294,11 +271,9 @@ class ModelInputContainer(object):
         return inputs
 
     def remove_input(self, var_name):
-        # Remove attribute
         if hasattr(self, var_name):
             delattr(self, var_name)
 
-        #Remove from dictionary
         if var_name in self.ZZ_INPUT_KEYS:
             force = self.ZZ_INPUT_KEYS.pop(var_name)
             force = None # Tag for garbage collector

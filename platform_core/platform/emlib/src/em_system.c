@@ -29,7 +29,7 @@
  ******************************************************************************/
 
 #include "em_system.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include <stddef.h>
 #if defined(SYSCFG_PRESENT)
 #include "em_syscfg.h"
@@ -81,7 +81,7 @@ void SYSTEM_ChipRevisionGet(SYSTEM_ChipRevision_TypeDef *rev)
 #else
   uint8_t tmp;
 
-  EFM_ASSERT(rev);
+  SL_LOG_DEBUG_ASSERT(rev);
 
   /* CHIP FAMILY bit [5:2] */
   tmp  = (uint8_t)(((ROMTABLE->PID1 & _ROMTABLE_PID1_FAMILYMSB_MASK)

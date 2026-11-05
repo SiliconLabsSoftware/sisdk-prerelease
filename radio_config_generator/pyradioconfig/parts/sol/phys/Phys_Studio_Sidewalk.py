@@ -2,5 +2,4 @@ from pyradioconfig.parts.ocelot.phys.Phys_Studio_Sidewalk import PhysStudioSidew
 
 
 class PhysStudioSidewalkSol(PhysStudioSidewalkOcelot):
-    #Inherit all from Ocelot
     pass

@@ -15,6 +15,7 @@ provides:
 - name: iostream_debug_support
   allow_multiple: true
 requires:
+- name: log_none
 - name: iostream
 - name: debug_swo
 - name: atomic

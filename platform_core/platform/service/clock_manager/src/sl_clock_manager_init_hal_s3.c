@@ -46,11 +46,12 @@
 #include "sl_clock_manager.h"
 #include "sl_hal_syscfg.h"
 #include "sl_hal_system.h"
+#include "sl_hal_emu.h"
 #include "sl_hal_bus.h"
 #include "sl_gpio.h"
 #include "sl_status.h"
 #include "sl_common.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_core.h"
 #if defined(SL_COMMON_TOKEN_MANAGER_ENABLE_STATIC_TOKENS) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
 #include "sl_token_manager_api.h"
@@ -322,6 +323,7 @@ extern sl_oscillator_t initial_qspi_reference_clock;
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
 uint32_t SLI_CLOCK_MANAGER_HFXO_MODE = SL_CLOCK_MANAGER_HFXO_MODE;
 uint32_t SLI_CLOCK_MANAGER_HFXO_FREQ = SL_CLOCK_MANAGER_HFXO_FREQ;
+uint32_t SLI_CLOCK_MANAGER_HFXO_ENXIDCBIASANA = SL_CLOCK_MANAGER_HFXO_ENXIDCBIASANA;
 uint32_t SLI_CLOCK_MANAGER_HFXO_CTUNE_FIXED_STEADY = SLI_CLOCK_MANAGER_HFXO_CTUNE_FIXED_STEADY_DEFAULT;
 
 uint32_t SLI_CLOCK_MANAGER_HFRCO_BAND     = SL_CLOCK_MANAGER_HFRCO_BAND;
@@ -471,7 +473,7 @@ static void get_hfxo_ctune(uint8_t *ctune_xi_steady, uint8_t *ctune_xo_steady)
       }
       *ctune_xo_steady =  (uint8_t)ctune;
     } else {
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
     }
 #endif  // (SL_CLOCK_MANAGER_HFXO_SEPARATE_CTUNEXIANA_CTUNEXOANA_EN == 1)
   }
@@ -506,7 +508,8 @@ static void init_hfxo_startup_time_measurement(void)
 
   // Start the initial one-shot measurement through the runtime HAL.
   sl_status_t status = sli_clock_manager_hal_start_hfxo_startup_time_measurement();
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 }
 #endif
 
@@ -525,7 +528,8 @@ FUNCTION_SCOPE void init_hfxo(void)
 
   // Enable HFXO bus clock.
   status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_HFXO0);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
 #if defined(SL_CLOCK_MANAGER_HFXO_SLEEPY_CRYSTAL_SUPPORT) && (SL_CLOCK_MANAGER_HFXO_SLEEPY_CRYSTAL_SUPPORT == 1)
   // Configure Sleepy Crystal settings
@@ -570,11 +574,7 @@ FUNCTION_SCOPE void init_hfxo(void)
   ctune_xi_steady = 0;
   ctune_xo_steady = 0;
 
-#if defined(SL_CLOCK_MANAGER_HFXO_ENXIDCBIASANA)
-  enXiDcBiasAna = SL_CLOCK_MANAGER_HFXO_ENXIDCBIASANA;
-#else
-  enXiDcBiasAna = _HFXO_CFG_ENXIDCBIASANA_DEFAULT;
-#endif
+  enXiDcBiasAna = SLI_CLOCK_MANAGER_HFXO_ENXIDCBIASANA;
 
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
   // If the Core Bias Optimization is being skipped, it means it was already done and
@@ -584,12 +584,12 @@ FUNCTION_SCOPE void init_hfxo(void)
   }
 #endif
 
-  EFM_ASSERT(SLI_CLOCK_MANAGER_HFXO_MODE <= (_HFXO_CFG_MODE_MASK >> _HFXO_CFG_MODE_SHIFT));
+  SL_LOG_DEBUG_ASSERT(SLI_CLOCK_MANAGER_HFXO_MODE <= (_HFXO_CFG_MODE_MASK >> _HFXO_CFG_MODE_SHIFT));
 
   // If HFXO is already selected as SYSCLK Clock Manager has already been initialized.
   // Startup time cannot occur if it's the case
   if ((CMU->SYSCLKCTRL & _CMU_SYSCLKCTRL_CLKSEL_MASK) == CMU_SYSCLKCTRL_CLKSEL_HFXO) {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
   }
 
   // Unlock register interface.
@@ -703,13 +703,13 @@ FUNCTION_SCOPE void init_lfxo(void)
   gain = 0;
 #endif
 
-  EFM_ASSERT(SL_CLOCK_MANAGER_LFXO_TIMEOUT
+  SL_LOG_DEBUG_ASSERT(SL_CLOCK_MANAGER_LFXO_TIMEOUT
              <= _LFXO_CFG_TIMEOUT_MASK);
-  EFM_ASSERT(SL_CLOCK_MANAGER_LFXO_MODE
+  SL_LOG_DEBUG_ASSERT(SL_CLOCK_MANAGER_LFXO_MODE
              <= _LFXO_CFG_MODE_MASK);
-  EFM_ASSERT(gain
+  SL_LOG_DEBUG_ASSERT(gain
              <= (_LFXO_CAL_GAIN_MASK >> _LFXO_CAL_GAIN_SHIFT));
-  EFM_ASSERT(SL_CLOCK_MANAGER_LFXO_CTUNE
+  SL_LOG_DEBUG_ASSERT(SL_CLOCK_MANAGER_LFXO_CTUNE
              <= (_LFXO_CAL_CAPTUNE_MASK >> _LFXO_CAL_CAPTUNE_SHIFT));
 
 #if defined(SL_COMMON_TOKEN_MANAGER_ENABLE_STATIC_TOKENS) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
@@ -738,6 +738,15 @@ FUNCTION_SCOPE void init_lfxo(void)
   // Enable Bus Clock for LFXO.
   sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LFXO);
 
+  clock_manager_lfxo_precision = SL_CLOCK_MANAGER_LFXO_PRECISION;
+
+  // Keep LFXO running through EM4.
+  if (sl_hal_emu_is_reset_cause_em4()
+      && ((LFXO->STATUS & (LFXO_STATUS_RDY | LFXO_STATUS_ENS)) == (LFXO_STATUS_RDY | LFXO_STATUS_ENS))) {
+    SLI_CLOCK_MANAGER_LOG_INFO("LFXO kept running through EM4");
+    return;
+  }
+
   // Unlock register interface.
   LFXO->LOCK = LFXO_LOCK_LOCKKEY_UNLOCK;
 
@@ -764,8 +773,6 @@ FUNCTION_SCOPE void init_lfxo(void)
   // Re-enable on-demand.
   LFXO->CTRL_CLR = LFXO_CTRL_DISONDEMAND;
 
-  clock_manager_lfxo_precision = SL_CLOCK_MANAGER_LFXO_PRECISION;
-
   SLI_CLOCK_MANAGER_LOG_INFO("LFXO configured, ctune=%u", (uint32_t)ctune);
 }
 #endif
@@ -784,10 +791,12 @@ FUNCTION_SCOPE void init_clkin0(void)
   sl_gpio_t clkin0_gpio = { SL_CLOCK_MANAGER_CLKIN0_PORT, SL_CLOCK_MANAGER_CLKIN0_PIN };
 
   status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   status = sl_gpio_set_pin_mode(&clkin0_gpio, SL_GPIO_MODE_INPUT, false);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   GPIO->CMUROUTE.CLKIN0ROUTE = (clkin0_gpio.port << _GPIO_CMU_CLKIN0ROUTE_PORT_SHIFT)
                                | (clkin0_gpio.pin << _GPIO_CMU_CLKIN0ROUTE_PIN_SHIFT);
@@ -805,8 +814,8 @@ FUNCTION_SCOPE void init_dpll(uint8_t hfrcodpll_num)
   DPLL_TypeDef *dpll = DPLL(hfrcodpll_num);
   sl_bus_clock_t dpll_bus_clock = DPLL_BUS_CLOCK(hfrcodpll_num);
 
-  EFM_ASSERT(hfrco != NULL);
-  EFM_ASSERT(dpll != NULL);
+  SL_LOG_DEBUG_ASSERT(hfrco != NULL);
+  SL_LOG_DEBUG_ASSERT(dpll != NULL);
 
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
   if (CLOCK_MANAGER_HFRCO_DPLL_EN(hfrcodpll_num))
@@ -818,7 +827,8 @@ FUNCTION_SCOPE void init_dpll(uint8_t hfrcodpll_num)
 
     // Enable DPLL module's clock.
     status = sl_clock_manager_enable_bus_clock(dpll_bus_clock);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
 
     // Disable DPLL before configuring.
     dpll->EN_CLR = DPLL_EN_EN;
@@ -826,8 +836,8 @@ FUNCTION_SCOPE void init_dpll(uint8_t hfrcodpll_num)
       // Wait for DPLL to be disabled before configuring.
     }
 
-    EFM_ASSERT(CLOCK_MANAGER_DPLL_N(hfrcodpll_num) <= (_DPLL_CFG1_N_MASK >> _DPLL_CFG1_N_SHIFT));
-    EFM_ASSERT(CLOCK_MANAGER_DPLL_M(hfrcodpll_num) <= (_DPLL_CFG1_M_MASK >> _DPLL_CFG1_M_SHIFT));
+    SL_LOG_DEBUG_ASSERT(CLOCK_MANAGER_DPLL_N(hfrcodpll_num) <= (_DPLL_CFG1_N_MASK >> _DPLL_CFG1_N_SHIFT));
+    SL_LOG_DEBUG_ASSERT(CLOCK_MANAGER_DPLL_M(hfrcodpll_num) <= (_DPLL_CFG1_M_MASK >> _DPLL_CFG1_M_SHIFT));
 
 #if !defined(SL_CATALOG_CLOCK_MANAGER_PTE_PRESENT) && !defined(SLI_SE_FIRMWARE_UNAVAILABLE)
     CORE_ATOMIC_SECTION(
@@ -835,7 +845,7 @@ FUNCTION_SCOPE void init_dpll(uint8_t hfrcodpll_num)
       // we need to enter atomic mode to prevent the SE Command from being interrupted.
       hfrco_cal_val = sl_hal_system_get_hfrcodpll_band_calibration(CLOCK_MANAGER_DPLL_FREQ(hfrcodpll_num));
       )
-    EFM_ASSERT((hfrco_cal_val != 0UL) && (hfrco_cal_val != UINT32_MAX));
+    SL_LOG_DEBUG_ASSERT((hfrco_cal_val != 0UL) && (hfrco_cal_val != UINT32_MAX));
 
     while (hfrco->STATUS & (HFRCO_STATUS_SYNCBUSY | HFRCO_STATUS_FREQBSY)) {
       // Updates to the CAL register are deferred if FREQBSY is high, so wait
@@ -910,7 +920,8 @@ FUNCTION_SCOPE void init_hfrco_dpll(uint8_t hfrcodpll_num)
   HFRCO_TypeDef *hfrco = HFRCO(hfrcodpll_num);
   sl_bus_clock_t hfrco_bus_clock = HFRCO_BUS_CLOCK(hfrcodpll_num);
 
-  EFM_ASSERT(hfrco != NULL);
+  SL_LOG_DEBUG_ASSERT(hfrco != NULL);
+  (void)hfrco;
 
 #if defined(SLI_CLOCK_MANAGER_INIT_DPLL0) || defined(SLI_CLOCK_MANAGER_INIT_DPLL1)
   if (CLOCK_MANAGER_HFRCO_DPLL_EN(hfrcodpll_num)) {
@@ -918,7 +929,8 @@ FUNCTION_SCOPE void init_hfrco_dpll(uint8_t hfrcodpll_num)
 
     // Enable HFRCO module's clock.
     status = sl_clock_manager_enable_bus_clock(hfrco_bus_clock);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
 
     // Initialize DPLL.
     init_dpll(hfrcodpll_num);
@@ -938,7 +950,7 @@ FUNCTION_SCOPE void init_hfrco_dpll(uint8_t hfrcodpll_num)
     const DPLL_TypeDef *dpll = DPLL(hfrcodpll_num);
     sl_bus_clock_t dpll_bus_clock = DPLL_BUS_CLOCK(hfrcodpll_num);
 
-    EFM_ASSERT(dpll != NULL);
+    SL_LOG_DEBUG_ASSERT(dpll != NULL);
 
     // Retrieve HFRCO calibration from DEVINFO data.
     switch (CLOCK_MANAGER_HFRCO_BAND(hfrcodpll_num)) {
@@ -964,18 +976,22 @@ FUNCTION_SCOPE void init_hfrco_dpll(uint8_t hfrcodpll_num)
 #endif
         break;
     }
-    EFM_ASSERT((freq_cal != 0UL) && (freq_cal != UINT32_MAX));
+    SL_LOG_DEBUG_ASSERT((freq_cal != 0UL) && (freq_cal != UINT32_MAX));
 
     // Enable HFRCO module's clock.
     status = sl_clock_manager_enable_bus_clock(hfrco_bus_clock);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
 
     // Make sure DPLL is disabled before configuring.
     status = sl_clock_manager_enable_bus_clock(dpll_bus_clock);
-    EFM_ASSERT(status == SL_STATUS_OK);
-    EFM_ASSERT(dpll->EN == 0);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
+    SL_LOG_DEBUG_ASSERT(dpll->EN == 0);
+    (void)dpll;
     status = sl_clock_manager_disable_bus_clock(dpll_bus_clock);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
 
     while (hfrco->STATUS & (HFRCO_STATUS_SYNCBUSY | HFRCO_STATUS_FREQBSY)) {
       // Updates to the CAL register are deferred if FREQBSY is high, so wait
@@ -1006,7 +1022,7 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
   sl_status_t status;
 
   SOCPLL_TypeDef *socpll = SOCPLL(socpll_num);
-  EFM_ASSERT(socpll != NULL);
+  SL_LOG_DEBUG_ASSERT(socpll != NULL);
   sl_bus_clock_t socpll_bus_clock = SOCPLL_BUS_CLOCK(socpll_num);
 
 #if defined(SLI_CLOCK_MANAGER_RUNTIME_CONFIGURATION)
@@ -1019,7 +1035,8 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
 
   // Enable Bus Clock for SOCPLL.
   status = sl_clock_manager_enable_bus_clock(socpll_bus_clock);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   // Unlock register interface.
   socpll->LOCK = SOCPLL_LOCK_LOCKKEY_UNLOCK;
@@ -1033,7 +1050,7 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
 
   // Verify invalid configurations.
   // If Integer-N mode is selected, DIVN cannot be 0.
-  EFM_ASSERT(CLOCK_MANAGER_SOCPLL_FRACTIONAL_EN(socpll_num) != 0
+  SL_LOG_DEBUG_ASSERT(CLOCK_MANAGER_SOCPLL_FRACTIONAL_EN(socpll_num) != 0
              || CLOCK_MANAGER_SOCPLL_DIVN(socpll_num) != 0);
   if ((CLOCK_MANAGER_SOCPLL_FRACTIONAL_EN(socpll_num) == 0)
       && (CLOCK_MANAGER_SOCPLL_DIVN(socpll_num) == 0)) {
@@ -1042,7 +1059,7 @@ FUNCTION_SCOPE void init_socpll(uint8_t socpll_num)
   }
   // If Integer-N mode is selected, DIVF must be 0.
   uint32_t divf = CLOCK_MANAGER_SOCPLL_FRACTIONAL_EN(socpll_num) ? CLOCK_MANAGER_SOCPLL_DIVF(socpll_num) : 0;
-  EFM_ASSERT(divf <= 1023U);
+  SL_LOG_DEBUG_ASSERT(divf <= 1023U);
 
   SLI_CLOCK_MANAGER_LOG_DEBUG("SOCPLL configuration, divn=%u divf=%u refclk=%u",
                               (uint32_t)CLOCK_MANAGER_SOCPLL_DIVN(socpll_num),
@@ -1144,13 +1161,14 @@ FUNCTION_SCOPE void init_perpll(uint8_t perpll_num)
 {
   sl_status_t status;
   PERPLL_TypeDef *perpll = PERPLL(perpll_num);
-  EFM_ASSERT(perpll != NULL);
+  SL_LOG_DEBUG_ASSERT(perpll != NULL);
   sl_bus_clock_t perpll_bus_clock = PERPLL_BUS_CLOCK(perpll_num);
   uint32_t perpll_freq = 0;
 
   // Enable PERPLL Bus Clock.
   status = sl_clock_manager_enable_bus_clock(perpll_bus_clock);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   // Unlock register interface.
   perpll->LOCKKEY = PERPLL_LOCKKEY_LOCKKEY_UNLOCK;
@@ -1186,10 +1204,10 @@ FUNCTION_SCOPE void init_perpll(uint8_t perpll_num)
 
     if (CLOCK_MANAGER_PERPLL_FRACTIONAL_EN(perpll_num) == 0) {
       // If Integer-N mode is selected, DIVN cannot be 0.
-      EFM_ASSERT(CLOCK_MANAGER_PERPLL_DIVN(perpll_num) != 0);
+      SL_LOG_DEBUG_ASSERT(CLOCK_MANAGER_PERPLL_DIVN(perpll_num) != 0);
     } else {
       // If Fractional-N mode is selected, DIVF cannot be 0.
-      EFM_ASSERT(CLOCK_MANAGER_PERPLL_DIVF(perpll_num) != 0);
+      SL_LOG_DEBUG_ASSERT(CLOCK_MANAGER_PERPLL_DIVF(perpll_num) != 0);
     }
 
     perpll->CTRL = (perpll->CTRL & ~(_PERPLL_CTRL_ENFRACN_MASK | _PERPLL_CTRL_PERPLLDIVN_MASK | _PERPLL_CTRL_PERPLLDIVF_MASK))
@@ -1251,13 +1269,14 @@ FUNCTION_SCOPE void init_hfrcoem23(void)
     // we need to enter atomic mode to prevent the SE Command from being interrupted.
     frequency_calibration = sl_hal_system_get_hfrcoem23_calibration(SL_CLOCK_MANAGER_HFRCOEM23_BAND);
     )
-  EFM_ASSERT((frequency_calibration != 0UL) && (frequency_calibration != UINT_MAX));
+  SL_LOG_DEBUG_ASSERT((frequency_calibration != 0UL) && (frequency_calibration != UINT_MAX));
 #else
   frequency_calibration = _HFRCO_CAL_RESETVALUE;
 #endif
 
   status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_HFRCOEM23);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   // Set divider for 1MHz and 2Mhz bands.
   frequency_calibration &= ~_HFRCO_CAL_CLKDIV_MASK;
@@ -1292,7 +1311,15 @@ FUNCTION_SCOPE void init_lfrco(void)
   sl_status_t status;
 
   status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LFRCO);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
+
+  // Keep LFRCO running through EM4.
+  if (sl_hal_emu_is_reset_cause_em4()
+      && ((LFRCO->STATUS & (LFRCO_STATUS_RDY | LFRCO_STATUS_ENS)) == (LFRCO_STATUS_RDY | LFRCO_STATUS_ENS))) {
+    SLI_CLOCK_MANAGER_LOG_INFO("LFRCO kept running through EM4");
+    return;
+  }
 
   // Disable LFRCO before accessing the CFG register.
   LFRCO->CTRL_SET = LFRCO_CTRL_DISONDEMAND;
@@ -1302,7 +1329,7 @@ FUNCTION_SCOPE void init_lfrco(void)
   }
 
 #if defined(SL_CLOCK_MANAGER_LFRCO_PRECISION) && (SL_CLOCK_MANAGER_LFRCO_PRECISION == 1)
-  EFM_ASSERT(SL_CLOCK_MANAGER_HFXO_EN == 1);
+  SL_LOG_DEBUG_ASSERT(SL_CLOCK_MANAGER_HFXO_EN == 1);
 
   uint32_t ref = 0;
   uint32_t nom_cal = 0;
@@ -1378,7 +1405,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
                              (CMU->SYSCLKCTRL & _CMU_SYSCLKCTRL_CLKSEL_MASK) >> _CMU_SYSCLKCTRL_CLKSEL_SHIFT);
 
 #elif !defined(SL_CLOCK_MANAGER_SYSCLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 
   SystemCoreClockUpdate();
@@ -1408,7 +1435,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
   }
 #endif
 #elif !(defined(SL_CLOCK_MANAGER_TRACECLK_SOURCE) || defined(SL_CLOCK_MANAGER_TRACECLK_DIVIDER))
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1421,7 +1448,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM01GRPACLK, SL_CLOCK_MANAGER_EM01GRPACLK_SOURCE);
 #endif
 #elif !defined(SL_CLOCK_MANAGER_EM01GRPACLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1434,7 +1461,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM01GRPCCLK, SL_CLOCK_MANAGER_EM01GRPCCLK_SOURCE);
 #endif
 #elif !defined(SL_CLOCK_MANAGER_EM01GRPCCLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1447,7 +1474,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM01GRPDCLK, SL_CLOCK_MANAGER_EM01GRPDCLK_SOURCE);
 #endif
 #elif !defined(SL_CLOCK_MANAGER_EM01GRPDCLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1460,7 +1487,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM23GRPACLK, SL_CLOCK_MANAGER_EM23GRPACLK_SOURCE);
 #endif
 #elif !defined(SL_CLOCK_MANAGER_EM23GRPACLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1473,7 +1500,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EM4GRPACLK, SL_CLOCK_MANAGER_EM4GRPACLK_SOURCE);
 #endif
 #elif !defined(SL_CLOCK_MANAGER_EM4GRPACLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1482,7 +1509,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #if defined(SLI_CLOCK_MANAGER_INIT_ADCCLK)
   CLOCK_MANAGER_CLOCK_SELECT_SET(ADCCLK, SL_CLOCK_MANAGER_ADCCLK_SOURCE);
 #elif !defined(SL_CLOCK_MANAGER_ADCCLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1493,7 +1520,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
   CMU->PIXELRZCLKCTRL = (CMU->PIXELRZCLKCTRL & ~_CMU_PIXELRZCLKCTRL_PRESC_MASK)
                         | SL_CLOCK_MANAGER_PIXELRZCLK_DIVIDER;
 #elif !defined(SL_CLOCK_MANAGER_PIXELRZCLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1506,7 +1533,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
   CLOCK_MANAGER_CLOCK_SELECT_SET(SYSRTC0CLK, SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE);
 #endif
 #elif !defined(SL_CLOCK_MANAGER_SYSRTCCLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1519,7 +1546,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
   CLOCK_MANAGER_CLOCK_SELECT_SET(WDOG0CLK, SL_CLOCK_MANAGER_WDOG0CLK_SOURCE);
 #endif
 #elif !defined(SL_CLOCK_MANAGER_WDOG0CLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 
 #if defined(_CMU_WDOG1CLKCTRL_MASK)
@@ -1531,7 +1558,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
   CLOCK_MANAGER_CLOCK_SELECT_SET(WDOG1CLK, SL_CLOCK_MANAGER_WDOG1CLK_SOURCE);
 #endif
 #elif !defined(SL_CLOCK_MANAGER_WDOG1CLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 #endif
@@ -1541,7 +1568,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #if defined(SLI_CLOCK_MANAGER_INIT_PCNT0CLK)
   CLOCK_MANAGER_CLOCK_SELECT_SET(PCNT0CLK, SL_CLOCK_MANAGER_PCNT0CLK_SOURCE);
 #elif !defined(SL_CLOCK_MANAGER_PCNT0CLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1555,7 +1582,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EUSART0CLK, SL_CLOCK_MANAGER_EUSART0CLK_SOURCE);
 #endif
 #elif !defined(SL_CLOCK_MANAGER_EUSART0CLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1564,7 +1591,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #if defined(SLI_CLOCK_MANAGER_INIT_EUSART1CLK)
   CLOCK_MANAGER_CLOCK_SELECT_SET(EUSART1CLK, SL_CLOCK_MANAGER_EUSART1CLK_SOURCE);
 #elif !defined(SL_CLOCK_MANAGER_EUSART1CLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1573,7 +1600,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #if defined(SLI_CLOCK_MANAGER_INIT_I2C0CLK)
   CLOCK_MANAGER_CLOCK_SELECT_SET(I2C0CLK, SL_CLOCK_MANAGER_I2C0CLK_SOURCE);
 #elif !defined(SL_CLOCK_MANAGER_I2C0CLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1586,10 +1613,10 @@ FUNCTION_SCOPE void init_clock_branches(void)
   sl_hal_syscfg_clear_systicextclken_cfgsystic();
   SysTick->CTRL = (SysTick->CTRL | SysTick_CTRL_CLKSOURCE_Msk);
 #else
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #elif !defined(SL_CLOCK_MANAGER_SYSTICKCLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 
   // Initialize VDAC0CLK clock branch.
@@ -1597,7 +1624,7 @@ FUNCTION_SCOPE void init_clock_branches(void)
 #if defined(SLI_CLOCK_MANAGER_INIT_VDAC0CLK)
   CLOCK_MANAGER_CLOCK_SELECT_SET(VDAC0CLK, SL_CLOCK_MANAGER_VDAC0CLK_SOURCE);
 #elif !defined(SL_CLOCK_MANAGER_VDAC0CLK_SOURCE)
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 #endif
 #endif
 
@@ -1628,17 +1655,19 @@ FUNCTION_SCOPE void init_clock_branches(void)
  ******************************************************************************/
 static void init_se(sl_se_command_context_t *context, uint32_t  *se_fw_version)
 {
-  EFM_ASSERT((context != NULL) && (se_fw_version != NULL));
+  SL_LOG_DEBUG_ASSERT((context != NULL) && (se_fw_version != NULL));
 
   sl_status_t status;
 
   // Initialize command context.
   status = sl_se_init_command_context(context);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   // Fetch Device SE FW version.
   status = sl_se_get_se_version(context, se_fw_version);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 }
 #endif
 
@@ -1654,9 +1683,9 @@ static void init_se(sl_se_command_context_t *context, uint32_t  *se_fw_version)
  ******************************************************************************/
 QSPI_FUNCTION_SCOPE void qspi_frequency_scale(uint32_t *qspi_frequency)
 {
-  EFM_ASSERT(qspi_frequency != NULL);
+  SL_LOG_DEBUG_ASSERT(qspi_frequency != NULL);
   // Zero sentinel means configure_flpll() was reached with an unsupported PART_NUMBER.
-  EFM_ASSERT(*qspi_frequency != 0);
+  SL_LOG_DEBUG_ASSERT(*qspi_frequency != 0);
 
   uint32_t scaled_qspi_frequency;
   // Lower and upper limits of 2.4GHz radio band.
@@ -1681,11 +1710,11 @@ QSPI_FUNCTION_SCOPE void qspi_frequency_scale(uint32_t *qspi_frequency)
 
   // Calculate acceptable QSPI clock frequency.
   // Ensure boundaries are in the correct range.
-  EFM_ASSERT(min_boundary < max_boundary);
+  SL_LOG_DEBUG_ASSERT(min_boundary < max_boundary);
   scaled_qspi_frequency = (max_boundary + min_boundary) / 2;
 
   // Ensure scaled frequency is less than original frequency.
-  EFM_ASSERT(scaled_qspi_frequency <= *qspi_frequency);
+  SL_LOG_DEBUG_ASSERT(scaled_qspi_frequency <= *qspi_frequency);
 
   SLI_CLOCK_MANAGER_LOG_DEBUG("QSPI frequency scaled, original=%u scaled=%u",
                               *qspi_frequency, scaled_qspi_frequency);
@@ -1713,10 +1742,10 @@ static void configure_flpll(sli_se_qspi_flpll_config_t *flpll_config)
 
 #if defined(SL_CLOCK_MANAGER_EXT_FLASH_MAX_FREQ)
   // Ensure that the max external flash specified is not 0.
-  EFM_ASSERT(SL_CLOCK_MANAGER_EXT_FLASH_MAX_FREQ > 0);
+  SL_LOG_DEBUG_ASSERT(SL_CLOCK_MANAGER_EXT_FLASH_MAX_FREQ > 0);
 #if defined(SL_CLOCK_MANAGER_QSPICLK_ADVANCED_CONFIG_EN) && (SL_CLOCK_MANAGER_QSPICLK_ADVANCED_CONFIG_EN == 1)
   // Ensure the custom QSPI frequency is less than the external flash max frequency.
-  EFM_ASSERT((SL_CLOCK_MANAGER_QSPICLK_CUSTOM_FREQ < SL_CLOCK_MANAGER_EXT_FLASH_MAX_FREQ) && (SL_CLOCK_MANAGER_QSPICLK_CUSTOM_FREQ != 0));
+  SL_LOG_DEBUG_ASSERT((SL_CLOCK_MANAGER_QSPICLK_CUSTOM_FREQ < SL_CLOCK_MANAGER_EXT_FLASH_MAX_FREQ) && (SL_CLOCK_MANAGER_QSPICLK_CUSTOM_FREQ != 0));
   qspi_frequency = SL_CLOCK_MANAGER_QSPICLK_CUSTOM_FREQ;
 #else
   qspi_frequency = SL_CLOCK_MANAGER_EXT_FLASH_MAX_FREQ;
@@ -1732,12 +1761,12 @@ static void configure_flpll(sli_se_qspi_flpll_config_t *flpll_config)
     // Max temp grade is 85C corresponding to max flash of 133 MHz.
     qspi_frequency = 133000000;
   } else {
-    EFM_ASSERT(false);
+    SL_LOG_DEBUG_ASSERT(false);
     return;
   }
 #if defined(SL_CLOCK_MANAGER_QSPICLK_ADVANCED_CONFIG_EN) && (SL_CLOCK_MANAGER_QSPICLK_ADVANCED_CONFIG_EN == 1)
   // Ensure the custom QSPI frequency is less than the co-packaged flash max frequency.
-  EFM_ASSERT((SL_CLOCK_MANAGER_QSPICLK_CUSTOM_FREQ < qspi_frequency) && (SL_CLOCK_MANAGER_QSPICLK_CUSTOM_FREQ != 0));
+  SL_LOG_DEBUG_ASSERT((SL_CLOCK_MANAGER_QSPICLK_CUSTOM_FREQ < qspi_frequency) && (SL_CLOCK_MANAGER_QSPICLK_CUSTOM_FREQ != 0));
   qspi_frequency = SL_CLOCK_MANAGER_QSPICLK_CUSTOM_FREQ;
 #endif
 #else
@@ -1820,7 +1849,8 @@ sl_status_t sli_clock_manager_hal_init(void)
 
 #if defined(SLI_CLOCK_MANAGER_INIT_SYSRTC0CLK)
   sl_status_t status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_SYSRTC0);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 #endif
 
 #if defined(SL_CATALOG_CLOCK_MANAGER_INIT_HAL_INTERNAL_PRESENT)

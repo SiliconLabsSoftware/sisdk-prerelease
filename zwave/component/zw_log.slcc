@@ -15,6 +15,11 @@ description: >
 
   Most pre-defined log messages belonging to software components are disabled by
   default to conserve flash space.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/zpal-log
+  - page: zwave-api/print-app-info
 package: zwave
 quality: production
 metadata:

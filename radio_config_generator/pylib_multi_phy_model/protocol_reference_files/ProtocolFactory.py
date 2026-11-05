@@ -22,7 +22,6 @@ class ProtocolFactory(object):
 
                 if protocol_name == file_name:
                     if file_extention.lower() == ".xml":
-                        # Load model from XML
                         mphy_config_import = MultiPHYConfig()
                         multi_phy_model = mphy_config_import.load_xml(os.path.join(part_path, file))
                         break
@@ -50,7 +49,6 @@ class ProtocolFactory(object):
     @staticmethod
     def _get_multi_phy_model_from_src(part_family, file_name):
         multi_phy_model = None
-        # Load from python code
         part_family = part_family.lower()
         protocol_module = importlib.import_module('pylib_multi_phy_model.protocol_reference_files.parts.{0}.{1}'.format(part_family, file_name))
         for cls in dir(protocol_module):
@@ -72,12 +70,10 @@ class ProtocolFactory(object):
         if multi_phy_model is None:
             raise Exception('Unable to find {} protocol: {} multi-phy reference file'.format(part_family, protocol_name))
 
-        # Handle overrides
         if override_channel_config_name is not None and len(override_channel_config_name) > 0:
             if overrides is None:
                 overrides = dict()
 
-            # Find channel under test
             channel_config_entry_found = False
             for base_channel_configuration in multi_phy_model.base_channel_configurations.base_channel_configuration:
                 for channel_config_entry in base_channel_configuration.channel_config_entries.channel_config_entry:

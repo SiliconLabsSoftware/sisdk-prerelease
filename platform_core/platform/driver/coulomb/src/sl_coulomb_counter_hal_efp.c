@@ -33,7 +33,7 @@
 #include "sl_coulomb_counter_config.h"
 #include "sli_coulomb_counter_hal.h"
 #include "sl_efp_instances.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 #define EFP_INSTANCE_IMPL(_inst) sl_efp_efp ## _inst
@@ -425,7 +425,7 @@ static uint8_t hal_efp_cal_get_ccl_sel(sli_coulomb_counter_output_t *output)
   } else if (output == &output_voc) {
     return 0x3;
   } else {
-    EFM_ASSERT(0);
+    SL_LOG_DEBUG_ASSERT(0);
     return 0;
   }
 }
@@ -438,8 +438,8 @@ float sli_coulomb_counter_hal_cal_get_load_current(int8_t ccl_level)
 {
   float cal_current_ua;
 
-  EFM_ASSERT(ccl_level >= 0);
-  EFM_ASSERT(ccl_level <= 7);
+  SL_LOG_DEBUG_ASSERT(ccl_level >= 0);
+  SL_LOG_DEBUG_ASSERT(ccl_level <= 7);
 
   if (ccl_level > 3) {
     /*
@@ -761,7 +761,7 @@ int sli_coulomb_counter_calibrate_compute_nreq(int16_t ccc)
     nreq = 7;
   }
 
-  EFM_ASSERT(nreq >= 0);
+  SL_LOG_DEBUG_ASSERT(nreq >= 0);
 
   return nreq;
 }

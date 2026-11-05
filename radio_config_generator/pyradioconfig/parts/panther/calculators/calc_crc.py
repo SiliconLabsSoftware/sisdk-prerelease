@@ -19,8 +19,6 @@ class CALC_CRC(CALC_CRC_common):
     Init internal variables
     """
 
-    # For Panther many of these methods need overrides as the peripheral is renamed RFCRC (vs CRC on Series 1)
-    # The two calculations methods which no not include specific register names are not overriden here to prevent redundancy.
 
 
     def __init__(self):
@@ -36,9 +34,7 @@ class CALC_CRC(CALC_CRC_common):
         """
 
         """
-        #Inputs
         """
-        # CRC POLY
         var = self._addModelVariable(model, 'crc_poly', Enum, ModelVariableFormat.DECIMAL,
                                      'List of supported CRC Polynomials')
         member_data = [
@@ -58,10 +54,8 @@ class CALC_CRC(CALC_CRC_common):
             'List of supported CRC Polynomials',
             member_data)
 
-        # CRC INIT
         self._addModelVariable(model, 'crc_seed', long, ModelVariableFormat.HEX, 'CRC Initialization Value')
 
-        # CRC_BYTE_ENDIAN
         var = self._addModelVariable(model, 'crc_byte_endian', Enum, ModelVariableFormat.DECIMAL, 'CRC Byte Endianness')
         member_data = [
             ['LSB_FIRST', 0, 'Least significant byte of the CRC is transmitted first.'],
@@ -72,7 +66,6 @@ class CALC_CRC(CALC_CRC_common):
             'Define how the CRC bytes are transmitted over the air',
             member_data)
 
-        # CRC_BIT_ENDIAN
         var = self._addModelVariable(model, 'crc_bit_endian', Enum, ModelVariableFormat.DECIMAL, 'CRC Bit Endianness')
         member_data = [
             ['LSB_FIRST', 0, 'Over the air CRC bit order is sent least significant bit first.'],
@@ -83,11 +76,9 @@ class CALC_CRC(CALC_CRC_common):
             'Define how the CRC bits are transmitted over the air',
             member_data)
 
-        # CRC_PAD_INPUT
         self._addModelVariable(model, 'crc_pad_input', bool, ModelVariableFormat.ASCII,
                                'Set to true to enable zero padding of the CRC input data.')
 
-        # CRC_INPUT_BIT_ORDER
         var = self._addModelVariable(model, 'crc_input_order', Enum, ModelVariableFormat.DECIMAL,
                                      'Define the order data bits are fed into the CRC generator')
         member_data = [
@@ -99,15 +90,12 @@ class CALC_CRC(CALC_CRC_common):
             'Define the order data bits are fed into the CRC generator',
             member_data)
 
-        # CRC_INVERT
         self._addModelVariable(model, 'crc_invert', bool, ModelVariableFormat.ASCII,
                                'Set to true if the CRC result is inverted')
 
 
-        # The CRC periperal is now named RFCRC
 
         """
-        #Outputs
         """
         self._build_crc_regs(model)
 
@@ -140,7 +128,6 @@ class CALC_CRC(CALC_CRC_common):
         self._reg_write(model.vars.RFCRC_INIT_INIT, long(0))
         self._reg_write(model.vars.RFCRC_POLY_POLY, long(0))
 
-        # Always set BITSPERWORD to 7 because we work with bytes
         self._reg_write(model.vars.RFCRC_CTRL_BITSPERWORD, 7)
 
 
@@ -152,8 +139,6 @@ class CALC_CRC(CALC_CRC_common):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # This is a dictionary lookup of each of the supported CRC Polynomials
-        # Each dictionary entry is a tuple which contains the poly and the CRC size
         CRC_POLY_LOOKUP = {
             model.vars.crc_poly.var_enum.NONE.value: (long(0), 0),
             model.vars.crc_poly.var_enum.CRC_8.value: (long(0x107), 1),
@@ -169,35 +154,24 @@ class CALC_CRC(CALC_CRC_common):
 
         self._calc_init(model)
 
-        # These variables are read from the table and put into model variables here.
-        # The table is never referenced again after this.  This allows us to use
-        # any arbitrary polynomial or size by just forcing these variables.
-        # We could expose these two variables as advanced input variables if we
-        # wanted to for either lab use or for customer use.
-        #
         model.vars.crc_polynomial.value = CRC_POLY_LOOKUP[model.vars.crc_poly.value.value][0]
         model.vars.crc_size.value = CRC_POLY_LOOKUP[model.vars.crc_poly.value.value][1]
 
         if model.vars.crc_poly.value.value != model.vars.crc_poly.var_enum.NONE.value:
-            # Handle POLY and Init configuration
             poly_reg, seed_reg = self._calc_crc_poly_reg(model.vars.crc_polynomial.value, model.vars.crc_seed.value)
             self._reg_write(model.vars.RFCRC_POLY_POLY, poly_reg)
             self._reg_write(model.vars.RFCRC_INIT_INIT, seed_reg)
 
-            # Subtract 1 from the CRC size to get the proper value
             self._reg_write(model.vars.RFCRC_CTRL_CRCWIDTH, model.vars.crc_size.value - 1)
 
-            # Handle Endianness
             if model.vars.crc_byte_endian.value == model.vars.crc_byte_endian.var_enum.LSB_FIRST:
                 self._reg_write(model.vars.RFCRC_CTRL_BYTEREVERSE, 1)
             if model.vars.frame_bitendian.value.value == model.vars.crc_bit_endian.value.value:
                 self._reg_write(model.vars.RFCRC_CTRL_BITREVERSE, 1)
 
-            # Handle Input Bit Order
             if model.vars.crc_input_order.value == model.vars.crc_input_order.var_enum.MSB_FIRST:
                 self._reg_write(model.vars.RFCRC_CTRL_INPUTBITORDER, 1)
 
-            # Handle pad crc input
             if model.vars.crc_pad_input.value is True:
                 self._reg_write(model.vars.RFCRC_CTRL_PADCRCINPUT, 1)
 

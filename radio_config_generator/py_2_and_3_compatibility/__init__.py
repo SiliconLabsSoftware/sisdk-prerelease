@@ -2,13 +2,11 @@ import math
 import sys
 
 if sys.version_info[0] < 3:
-    # Assume Python 2
     class FileExistsError(Exception):
         pass
 
     pass
 else:
-    # hack for backward compatibility
     long = int
     xrange = range
     basestring = str
@@ -18,10 +16,6 @@ else:
     reload = imp.reload
     unicode = str
 
-# try:
-#     import __builtin__
-# except ModuleNotFoundError:
-#     import builtins as __builtin__
 
 def py2round(x):
     if x >= 0.0:

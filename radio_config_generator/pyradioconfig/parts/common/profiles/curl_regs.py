@@ -83,3 +83,5 @@ def build_modem_regs_curl(model,profile):
     profile.outputs.append(ModelOutput(model.vars.MODEM_CHFCSDCOE01SNADM_NADMCSDCOEFF9S,  '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CHFCSDCOE01SNADM.NADMCSDCOEFF9S'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CHFCSDCOE01SNADM_NADMCSDCOEFF10S, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CHFCSDCOE01SNADM.NADMCSDCOEFF10S'))
     profile.outputs.append(ModelOutput(model.vars.MODEM_CHFCSDCOE01SNADM_NADMCSDCOEFF11S, '', ModelOutputType.SVD_REG_FIELD, readable_name='MODEM.CHFCSDCOE01SNADM.NADMCSDCOEFF11S'))
+
+    profile.outputs.append(ModelOutput(model.vars.RAC_CLKMULTEN0_CLKMULTREG2ADJV, '', ModelOutputType.SVD_REG_FIELD, readable_name='RAC.CLKMULTEN0.CLKMULTREG2ADJV'))

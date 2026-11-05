@@ -38,7 +38,6 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
-#include "sl_assert.h"
 #include "sl_status.h"
 #include "sl_enum.h"
 #include "sl_device_i2c.h"

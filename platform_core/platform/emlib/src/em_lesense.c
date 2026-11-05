@@ -31,7 +31,7 @@
 #include "em_lesense.h"
 
 #if defined(LESENSE_COUNT) && (LESENSE_COUNT > 0)
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_bus.h"
 #include "em_cmu.h"
 
@@ -117,9 +117,9 @@
 void LESENSE_Init(const LESENSE_Init_TypeDef * init, bool reqReset)
 {
   /* Sanity check of initialization values. */
-  EFM_ASSERT((uint32_t)init->timeCtrl.startDelay < 4U);
+  SL_LOG_DEBUG_ASSERT((uint32_t)init->timeCtrl.startDelay < 4U);
 #if defined(_LESENSE_PERCTRL_DACPRESC_MASK)
-  EFM_ASSERT((uint32_t)init->perCtrl.dacPresc < 32U);
+  SL_LOG_DEBUG_ASSERT((uint32_t)init->perCtrl.dacPresc < 32U);
 #endif
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
@@ -172,7 +172,7 @@ void LESENSE_Init(const LESENSE_Init_TypeDef * init, bool reqReset)
     | ((uint32_t)init->coreCtrl.bufOverWr    << _LESENSE_CTRL_BUFOW_SHIFT)
     | ((uint32_t)init->coreCtrl.debugRun     << _LESENSE_CTRL_DEBUGRUN_SHIFT);
 #else
-  EFM_ASSERT(init->coreCtrl.fifoTrigLevel < 16);
+  SL_LOG_DEBUG_ASSERT(init->coreCtrl.fifoTrigLevel < 16);
   LESENSE->CFG = (uint32_t)init->coreCtrl.scanConfSel
                  | (uint32_t)init->coreCtrl.wakeupOnDMA
                  | ((uint32_t)init->coreCtrl.fifoTrigLevel << _LESENSE_CFG_RESFIDL_SHIFT)
@@ -333,10 +333,10 @@ uint32_t LESENSE_ScanFreqSet(uint32_t refFreq, uint32_t scanFreq)
   /* The maximum value of pcPresc is 128. AS a result, using the reference frequency less than
    * 33554431 Hz (33.554431 MHz), the frequency calculation in the while loop
    * below will not overflow. */
-  EFM_ASSERT(refFreq < ((uint32_t)UINT32_MAX / 128UL));
+  SL_LOG_DEBUG_ASSERT(refFreq < ((uint32_t)UINT32_MAX / 128UL));
 
   /* A sanity check of scan frequency value. */
-  EFM_ASSERT((scanFreq > 0U) && (scanFreq <= refFreq));
+  SL_LOG_DEBUG_ASSERT((scanFreq > 0U) && (scanFreq <= refFreq));
 
   /* Calculate the minimum necessary prescaler value to provide the
    * biggest possible resolution for setting the scan frequency.
@@ -349,7 +349,7 @@ uint32_t LESENSE_ScanFreqSet(uint32_t refFreq, uint32_t scanFreq)
 
   /* Calculate the pcTop value. */
   pcTop = ((uint32_t)refFreq / ((uint32_t)scanFreq * clkDiv)) - 1UL;
-  EFM_ASSERT(pcTop <= (_LESENSE_TIMCTRL_PCTOP_MASK >> _LESENSE_TIMCTRL_PCTOP_SHIFT));
+  SL_LOG_DEBUG_ASSERT(pcTop <= (_LESENSE_TIMCTRL_PCTOP_MASK >> _LESENSE_TIMCTRL_PCTOP_SHIFT));
 
   /* Clear current PCPRESC and PCTOP settings. Be aware of the effect of
    * non-atomic Read-Modify-Write on LESENSE->TIMCRTL. */
@@ -482,7 +482,7 @@ void LESENSE_StartDelaySet(uint8_t startDelay)
 #endif
 
   /* Sanity check of the startDelay. */
-  EFM_ASSERT(startDelay < 4U);
+  SL_LOG_DEBUG_ASSERT(startDelay < 4U);
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   if (LESENSE->EN != 0U) {
@@ -565,7 +565,7 @@ void LESENSE_ClkDivSet(LESENSE_ChClk_TypeDef clk,
   switch (clk) {
     case lesenseClkHF:
       /* A sanity check of the clock divisor for the HF clock. */
-      EFM_ASSERT((uint32_t)clkDiv <= lesenseClkDiv_8);
+      SL_LOG_DEBUG_ASSERT((uint32_t)clkDiv <= lesenseClkDiv_8);
 
       /* Clear the current AUXPRESC settings. */
       tmp = LESENSE->TIMCTRL & ~(_LESENSE_TIMCTRL_AUXPRESC_MASK);
@@ -589,7 +589,7 @@ void LESENSE_ClkDivSet(LESENSE_ChClk_TypeDef clk,
       break;
 
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 
@@ -678,32 +678,32 @@ void LESENSE_ChannelConfig(const LESENSE_ChDesc_TypeDef * confCh,
 #endif
 
   /* A sanity check of configuration parameters. */
-  EFM_ASSERT(chIdx < LESENSE_NUM_CHANNELS);
-  EFM_ASSERT(confCh->exTime      <= (_LESENSE_CH_TIMING_EXTIME_MASK >> _LESENSE_CH_TIMING_EXTIME_SHIFT));
-  EFM_ASSERT(confCh->measDelay   <= (_LESENSE_CH_TIMING_MEASUREDLY_MASK >> _LESENSE_CH_TIMING_MEASUREDLY_SHIFT));
+  SL_LOG_DEBUG_ASSERT(chIdx < LESENSE_NUM_CHANNELS);
+  SL_LOG_DEBUG_ASSERT(confCh->exTime      <= (_LESENSE_CH_TIMING_EXTIME_MASK >> _LESENSE_CH_TIMING_EXTIME_SHIFT));
+  SL_LOG_DEBUG_ASSERT(confCh->measDelay   <= (_LESENSE_CH_TIMING_MEASUREDLY_MASK >> _LESENSE_CH_TIMING_MEASUREDLY_SHIFT));
 #if defined(_LESENSE_CH_INTERACT_OFFSET_MASK)
-  EFM_ASSERT(confCh->offset      <= (_LESENSE_CH_INTERACT_OFFSET_MASK >> _LESENSE_CH_INTERACT_OFFSET_SHIFT));
+  SL_LOG_DEBUG_ASSERT(confCh->offset      <= (_LESENSE_CH_INTERACT_OFFSET_MASK >> _LESENSE_CH_INTERACT_OFFSET_SHIFT));
 #endif
 #if defined(_SILICON_LABS_32B_SERIES_0)
   // Sample delay on other devices are 8 bits which fits perfectly in uint8_t.
-  EFM_ASSERT(confCh->sampleDelay <= (_LESENSE_CH_TIMING_SAMPLEDLY_MASK >> _LESENSE_CH_TIMING_SAMPLEDLY_SHIFT));
+  SL_LOG_DEBUG_ASSERT(confCh->sampleDelay <= (_LESENSE_CH_TIMING_SAMPLEDLY_MASK >> _LESENSE_CH_TIMING_SAMPLEDLY_SHIFT));
 #endif
 
   /* Not a complete assert, as the maximum value of acmpThres depends on other
    * configuration parameters. Check the parameter description of acmpThres
    * for more details. */
-  EFM_ASSERT(confCh->acmpThres < 4096U);
+  SL_LOG_DEBUG_ASSERT(confCh->acmpThres < 4096U);
   if (confCh->chPinExMode == lesenseChPinExDACOut) {
-    EFM_ASSERT((0x1 << chIdx) & DACOUT_SUPPORT);
+    SL_LOG_DEBUG_ASSERT((0x1 << chIdx) & DACOUT_SUPPORT);
   }
 
 #if defined(_LESENSE_IDLECONF_CH0_DACCH0)
-  EFM_ASSERT(!(confCh->chPinIdleMode == lesenseChPinIdleDACCh1
+  SL_LOG_DEBUG_ASSERT(!(confCh->chPinIdleMode == lesenseChPinIdleDACCh1
                && ((chIdx != 12U)
                    && (chIdx != 13U)
                    && (chIdx != 14U)
                    && (chIdx != 15U))));
-  EFM_ASSERT(!(confCh->chPinIdleMode == lesenseChPinIdleDACCh0
+  SL_LOG_DEBUG_ASSERT(!(confCh->chPinIdleMode == lesenseChPinIdleDACCh0
                && ((chIdx != 0U)
                    && (chIdx != 1U)
                    && (chIdx != 2U)
@@ -857,7 +857,7 @@ void LESENSE_AltExConfig(const LESENSE_ConfAltEx_TypeDef * confAltEx)
       break;
     default:
       /* An illegal value. */
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 #else
@@ -979,11 +979,11 @@ void LESENSE_ChannelTimingSet(uint8_t chIdx,
 #endif
 
   /* A sanity check of parameters. */
-  EFM_ASSERT(exTime      <= (_LESENSE_CH_TIMING_EXTIME_MASK >> _LESENSE_CH_TIMING_EXTIME_SHIFT));
-  EFM_ASSERT(measDelay   <= (_LESENSE_CH_TIMING_MEASUREDLY_MASK >> _LESENSE_CH_TIMING_MEASUREDLY_SHIFT));
+  SL_LOG_DEBUG_ASSERT(exTime      <= (_LESENSE_CH_TIMING_EXTIME_MASK >> _LESENSE_CH_TIMING_EXTIME_SHIFT));
+  SL_LOG_DEBUG_ASSERT(measDelay   <= (_LESENSE_CH_TIMING_MEASUREDLY_MASK >> _LESENSE_CH_TIMING_MEASUREDLY_SHIFT));
 #if defined(_SILICON_LABS_32B_SERIES_0)
   // A sample delay on other devices is 8 bits which fits perfectly in uint8_t.
-  EFM_ASSERT(sampleDelay <= (_LESENSE_CH_TIMING_SAMPLEDLY_MASK >> _LESENSE_CH_TIMING_SAMPLEDLY_SHIFT));
+  SL_LOG_DEBUG_ASSERT(sampleDelay <= (_LESENSE_CH_TIMING_SAMPLEDLY_MASK >> _LESENSE_CH_TIMING_SAMPLEDLY_SHIFT));
 #endif
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
@@ -1059,9 +1059,9 @@ void LESENSE_ChannelThresSet(uint8_t chIdx,
 #endif
 
   /* A sanity check for acmpThres only, cntThres is a 16 bit value. */
-  EFM_ASSERT(acmpThres < 4096U);
+  SL_LOG_DEBUG_ASSERT(acmpThres < 4096U);
   /* A sanity check for the LESENSE channel ID. */
-  EFM_ASSERT(chIdx < LESENSE_NUM_CHANNELS);
+  SL_LOG_DEBUG_ASSERT(chIdx < LESENSE_NUM_CHANNELS);
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   if (LESENSE->EN != 0U) {
@@ -1390,13 +1390,13 @@ void LESENSE_DecoderStateConfig(const LESENSE_DecStDesc_TypeDef * confDecSt,
 {
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Sanity check of configuration parameters */
-  EFM_ASSERT(decSt < LESENSE_NUM_DECODER_STATES);
-  EFM_ASSERT((uint32_t)confDecSt->confA.compMask < 16U);
-  EFM_ASSERT((uint32_t)confDecSt->confA.compVal < 16U);
-  EFM_ASSERT((uint32_t)confDecSt->confA.nextState < LESENSE_NUM_DECODER_STATES);
-  EFM_ASSERT((uint32_t)confDecSt->confB.compMask < 16U);
-  EFM_ASSERT((uint32_t)confDecSt->confB.compVal < 16U);
-  EFM_ASSERT((uint32_t)confDecSt->confB.nextState < LESENSE_NUM_DECODER_STATES);
+  SL_LOG_DEBUG_ASSERT(decSt < LESENSE_NUM_DECODER_STATES);
+  SL_LOG_DEBUG_ASSERT((uint32_t)confDecSt->confA.compMask < 16U);
+  SL_LOG_DEBUG_ASSERT((uint32_t)confDecSt->confA.compVal < 16U);
+  SL_LOG_DEBUG_ASSERT((uint32_t)confDecSt->confA.nextState < LESENSE_NUM_DECODER_STATES);
+  SL_LOG_DEBUG_ASSERT((uint32_t)confDecSt->confB.compMask < 16U);
+  SL_LOG_DEBUG_ASSERT((uint32_t)confDecSt->confB.compVal < 16U);
+  SL_LOG_DEBUG_ASSERT((uint32_t)confDecSt->confB.nextState < LESENSE_NUM_DECODER_STATES);
 
   /* Configure the state descriptor A (LESENSE_STi_TCONFA) for the decoder state i.
    * Setting sensor compare value, sensor mask, next state index,
@@ -1423,11 +1423,11 @@ void LESENSE_DecoderStateConfig(const LESENSE_DecStDesc_TypeDef * confDecSt,
   bool enabled = false;
 
   /* Sanity check of configuration parameters */
-  EFM_ASSERT(decSt < LESENSE_NUM_ARCS);
-  EFM_ASSERT((uint32_t)confDecSt->compMask < 16U);
-  EFM_ASSERT((uint32_t)confDecSt->compVal < 16U);
-  EFM_ASSERT((uint32_t)confDecSt->curState < LESENSE_NUM_DECODER_STATES);
-  EFM_ASSERT((uint32_t)confDecSt->nextState < LESENSE_NUM_DECODER_STATES);
+  SL_LOG_DEBUG_ASSERT(decSt < LESENSE_NUM_ARCS);
+  SL_LOG_DEBUG_ASSERT((uint32_t)confDecSt->compMask < 16U);
+  SL_LOG_DEBUG_ASSERT((uint32_t)confDecSt->compVal < 16U);
+  SL_LOG_DEBUG_ASSERT((uint32_t)confDecSt->curState < LESENSE_NUM_DECODER_STATES);
+  SL_LOG_DEBUG_ASSERT((uint32_t)confDecSt->nextState < LESENSE_NUM_DECODER_STATES);
 
   if (LESENSE->EN != 0U) {
     enabled = true;
@@ -1475,7 +1475,7 @@ void LESENSE_DecoderStateConfig(const LESENSE_DecStDesc_TypeDef * confDecSt,
  ******************************************************************************/
 void LESENSE_DecoderStateSet(uint32_t decSt)
 {
-  EFM_ASSERT(decSt <= _LESENSE_DECSTATE_DECSTATE_MASK);
+  SL_LOG_DEBUG_ASSERT(decSt <= _LESENSE_DECSTATE_DECSTATE_MASK);
 
   LESENSE->DECSTATE = decSt & _LESENSE_DECSTATE_DECSTATE_MASK;
 }

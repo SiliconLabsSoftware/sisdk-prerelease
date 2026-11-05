@@ -314,6 +314,48 @@ typedef void * SPIDRV_Handle_t;
     spidrvCsControlAuto,      /* CS controlled by the driver      */ \
     spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
   }
+#elif defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+#define SPIDRV_MASTER_EUSART0                                        \
+  {                                                                  \
+    EUSART0,                  /* EUSART port                      */ \
+    SL_GPIO_PORT_B,           /* EUSART Tx port location number   */ \
+    SL_GPIO_PORT_B,           /* EUSART Rx port location number   */ \
+    SL_GPIO_PORT_D,           /* EUSART Clk port location number  */ \
+    SL_GPIO_PORT_A,           /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    1,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvMaster,             /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+
+#define SPIDRV_SLAVE_EUSART0                                         \
+  {                                                                  \
+    EUSART0,                  /* EUSART port                      */ \
+    SL_GPIO_PORT_B,           /* EUSART Tx port location number   */ \
+    SL_GPIO_PORT_B,           /* EUSART Rx port location number   */ \
+    SL_GPIO_PORT_D,           /* EUSART Clk port location number  */ \
+    SL_GPIO_PORT_A,           /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    1,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvSlave,              /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
 #else /* Series 3 and above */
 #define SPIDRV_MASTER_EUSART0                                        \
   {                                                                  \
@@ -389,6 +431,48 @@ typedef void * SPIDRV_Handle_t;
     SL_GPIO_PORT_C,           /* EUSART Rx port location number   */ \
     SL_GPIO_PORT_C,           /* EUSART Clk port location number  */ \
     SL_GPIO_PORT_C,           /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvSlave,              /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+#elif defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) 
+#define SPIDRV_MASTER_EUSART1                                        \
+  {                                                                  \
+    EUSART1,                  /* EUSART port                      */ \
+    SL_GPIO_PORT_G,           /* EUSART Tx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Rx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Clk port location number  */ \
+    SL_GPIO_PORT_G,           /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvMaster,             /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+
+#define SPIDRV_SLAVE_EUSART1                                         \
+  {                                                                  \
+    EUSART1,                  /* EUSART port                      */ \
+    SL_GPIO_PORT_G,           /* EUSART Tx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Rx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Clk port location number  */ \
+    SL_GPIO_PORT_G,           /* EUSART Cs port location number   */ \
     0,                        /* EUSART Tx port location number   */ \
     1,                        /* EUSART Rx port location number   */ \
     2,                        /* EUSART Clk pin location number   */ \
@@ -490,6 +574,48 @@ typedef void * SPIDRV_Handle_t;
     spidrvCsControlAuto,      /* CS controlled by the driver      */ \
     spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
   }
+#elif defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) 
+#define SPIDRV_MASTER_EUSART2                                        \
+  {                                                                  \
+    EUSART2,                  /* EUSART port                      */ \
+    SL_GPIO_PORT_G,           /* EUSART Tx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Rx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Clk port location number  */ \
+    SL_GPIO_PORT_G,           /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvMaster,             /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+
+#define SPIDRV_SLAVE_EUSART2                                         \
+  {                                                                  \
+    EUSART2,                  /* EUSART port                      */ \
+    SL_GPIO_PORT_G,           /* EUSART Tx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Rx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Clk port location number  */ \
+    SL_GPIO_PORT_G,           /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvSlave,              /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
 #else /* Series 3 and above */
 #define SPIDRV_MASTER_EUSART2                                        \
   {                                                                  \
@@ -578,6 +704,48 @@ typedef void * SPIDRV_Handle_t;
     spidrvCsControlAuto,      /* CS controlled by the driver      */ \
     spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
   }
+#elif defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) 
+#define SPIDRV_MASTER_EUSART3                                        \
+  {                                                                  \
+    EUSART3,                  /* EUSART port                      */ \
+    SL_GPIO_PORT_G,           /* EUSART Tx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Rx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Clk port location number  */ \
+    SL_GPIO_PORT_G,           /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvMaster,             /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+
+#define SPIDRV_SLAVE_EUSART3                                         \
+  {                                                                  \
+    EUSART3,                  /* EUSART port                      */ \
+    SL_GPIO_PORT_G,           /* EUSART Tx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Rx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Clk port location number  */ \
+    SL_GPIO_PORT_G,           /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvSlave,              /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
 #else /* Series 3 and above */
 #define SPIDRV_MASTER_EUSART3                                        \
   {                                                                  \
@@ -653,6 +821,48 @@ typedef void * SPIDRV_Handle_t;
     SL_GPIO_PORT_C,           /* EUSART Rx port location number   */ \
     SL_GPIO_PORT_C,           /* EUSART Clk port location number  */ \
     SL_GPIO_PORT_C,           /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvSlave,              /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+#elif defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) 
+#define SPIDRV_MASTER_EUSART4                                        \
+  {                                                                  \
+    EUSART4,                  /* EUSART port                      */ \
+    SL_GPIO_PORT_G,           /* EUSART Tx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Rx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Clk port location number  */ \
+    SL_GPIO_PORT_G,           /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvMaster,             /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+
+#define SPIDRV_SLAVE_EUSART4                                         \
+  {                                                                  \
+    EUSART4,                  /* EUSART port                      */ \
+    SL_GPIO_PORT_G,           /* EUSART Tx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Rx port location number   */ \
+    SL_GPIO_PORT_G,           /* EUSART Clk port location number  */ \
+    SL_GPIO_PORT_G,           /* EUSART Cs port location number   */ \
     0,                        /* EUSART Tx port location number   */ \
     1,                        /* EUSART Rx port location number   */ \
     2,                        /* EUSART Clk pin location number   */ \

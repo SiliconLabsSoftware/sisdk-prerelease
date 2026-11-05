@@ -7,7 +7,6 @@ class CALC_DSA_lynx(CALC_DSA_panther):
         dsa_enabled = model.vars.MODEM_DSACTRL_DSAMODE.value
 
         if dsa_enabled == 0:
-            #DSA is not enabled, so we don't care about DSATHD2 values
             self._reg_do_not_care(model.vars.MODEM_DSATHD2_POWABSTHDLOG)
             self._reg_do_not_care(model.vars.MODEM_DSATHD2_JUMPDETEN)
             self._reg_do_not_care(model.vars.MODEM_DSATHD2_FDADJTHD)

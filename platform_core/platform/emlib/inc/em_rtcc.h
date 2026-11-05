@@ -35,7 +35,7 @@
 #if defined(RTCC_COUNT) && (RTCC_COUNT == 1)
 
 #include <stdbool.h>
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -400,7 +400,7 @@ typedef struct {
  ******************************************************************************/
 __STATIC_INLINE uint32_t RTCC_ChannelCompareValueGet(int ch)
 {
-  EFM_ASSERT(RTCC_CH_VALID(ch) );
+  SL_LOG_DEBUG_ASSERT(RTCC_CH_VALID(ch) );
 #if defined (_RTCC_CC_CCV_MASK)
   return RTCC->CC[ch].CCV;
 #elif defined (_RTCC_CC_OCVALUE_MASK)
@@ -420,7 +420,7 @@ __STATIC_INLINE uint32_t RTCC_ChannelCompareValueGet(int ch)
  ******************************************************************************/
 __STATIC_INLINE void RTCC_ChannelCompareValueSet(int ch, uint32_t value)
 {
-  EFM_ASSERT(RTCC_CH_VALID(ch) );
+  SL_LOG_DEBUG_ASSERT(RTCC_CH_VALID(ch) );
 #if defined (_RTCC_CC_CCV_MASK)
   RTCC->CC[ch].CCV = value;
 #elif defined (_RTCC_CC_OCVALUE_MASK)
@@ -440,7 +440,7 @@ __STATIC_INLINE void RTCC_ChannelCompareValueSet(int ch, uint32_t value)
  ******************************************************************************/
 __STATIC_INLINE uint32_t RTCC_ChannelCaptureValueGet(int ch)
 {
-  EFM_ASSERT(RTCC_CH_VALID(ch) );
+  SL_LOG_DEBUG_ASSERT(RTCC_CH_VALID(ch) );
 #if defined (_RTCC_CC_CCV_MASK)
   return RTCC->CC[ch].CCV;
 #elif defined (_RTCC_CC_ICVALUE_MASK)
@@ -495,7 +495,7 @@ __STATIC_INLINE void RTCC_ChannelCCVSet(int ch, uint32_t value)
  ******************************************************************************/
 __STATIC_INLINE uint32_t RTCC_ChannelDateGet(int ch)
 {
-  EFM_ASSERT(RTCC_CH_VALID(ch) );
+  SL_LOG_DEBUG_ASSERT(RTCC_CH_VALID(ch) );
   return RTCC->CC[ch].DATE;
 }
 
@@ -511,7 +511,7 @@ __STATIC_INLINE uint32_t RTCC_ChannelDateGet(int ch)
  ******************************************************************************/
 __STATIC_INLINE void RTCC_ChannelDateSet(int ch, uint32_t date)
 {
-  EFM_ASSERT(RTCC_CH_VALID(ch) );
+  SL_LOG_DEBUG_ASSERT(RTCC_CH_VALID(ch) );
   RTCC->CC[ch].DATE = date;
 }
 
@@ -527,7 +527,7 @@ __STATIC_INLINE void RTCC_ChannelDateSet(int ch, uint32_t date)
  ******************************************************************************/
 __STATIC_INLINE uint32_t RTCC_ChannelTimeGet(int ch)
 {
-  EFM_ASSERT(RTCC_CH_VALID(ch) );
+  SL_LOG_DEBUG_ASSERT(RTCC_CH_VALID(ch) );
   return RTCC->CC[ch].TIME;
 }
 
@@ -543,7 +543,7 @@ __STATIC_INLINE uint32_t RTCC_ChannelTimeGet(int ch)
  ******************************************************************************/
 __STATIC_INLINE void RTCC_ChannelTimeSet(int ch, uint32_t time)
 {
-  EFM_ASSERT(RTCC_CH_VALID(ch) );
+  SL_LOG_DEBUG_ASSERT(RTCC_CH_VALID(ch) );
   RTCC->CC[ch].TIME = time;
 }
 #endif /* defined (_RTCC_CC_DATE_MASK) */

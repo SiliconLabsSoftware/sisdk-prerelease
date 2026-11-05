@@ -32,7 +32,6 @@ class dict2xml(object):
             tagName     = father.tagName
             tag = self.doc.createElement(tagName)
             idx = 0
-#             grandFather.removeChild(father)
             for l in structure:
                 tag = self.doc.createElement(tagName + '_{:02}'.format(idx))
                 self.build(tag, l)

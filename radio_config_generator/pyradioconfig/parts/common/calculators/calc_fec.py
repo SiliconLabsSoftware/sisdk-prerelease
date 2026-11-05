@@ -33,10 +33,8 @@ class CALC_FEC(ICalculator):
         """
 
         """
-        #Inputs
         """
 
-        #Call the function to build the fec_en variable
         self._build_fec_var(model)
 
         var = self._addModelVariable(model, 'fec_tx_enable', Enum, ModelVariableFormat.DECIMAL, 'FEC enable')
@@ -61,11 +59,9 @@ class CALC_FEC(ICalculator):
             member_data)
 
         """
-        #Outputs
         """
         self._build_frc_reg_var(model)
 
-        # Output software variables for RAIL to consume
         self._addModelVariable(model, 'frc_conv_decoder_buffer_size', int, ModelVariableFormat.DECIMAL, units='bytes', desc='Size (in bytes) of the buffer necessary for the Convolutional Decoder')
         self._addModelVariable(model, 'fec_enabled', int, ModelVariableFormat.DECIMAL, 'FEC enabled flag')
 
@@ -96,7 +92,6 @@ class CALC_FEC(ICalculator):
         self._addModelRegister(model, 'FRC.PUNCTCTRL.PUNCT1', int, ModelVariableFormat.HEX)
 
     def _build_fec_var(self, model):
-        # This function adds the fec_en enumerated variable. It is a separate method to allow overwriting in future parts.
 
         var = self._addModelVariable(model, 'fec_en', Enum, ModelVariableFormat.DECIMAL,
                                      'List of supported FEC Configurations')
@@ -114,7 +109,6 @@ class CALC_FEC(ICalculator):
             member_data)
 
     def _calc_init(self, model):
-        # Need to override this method in order to instead set CONVMODE elsewhere
 
         self._reg_write(model.vars.FRC_FECCTRL_CONVTRACEBACKDISABLE, 0)
         self._reg_write(model.vars.FRC_FECCTRL_INTERLEAVEFIRSTINDEX, 0)
@@ -157,68 +151,52 @@ class CALC_FEC(ICalculator):
 
         model.vars.fec_en.value = model.vars.fec_en.var_enum.NONE #Calculate a default value for Profiles where this is an advanced input
 
-        #Always initialize FEC regs to these values
         self._calc_init(model)
 
-        # IF FEC is enabled then write the 802.15.4g base values
         if model.vars.fec_en.value != model.vars.fec_en.var_enum.NONE:
             self._FEC_154G_Base(model)
 
             if model.vars.fec_en.value == model.vars.fec_en.var_enum.FEC_154G:
-                # Settings are only a minor departure from _FEC_154G_Base since the legacy fec_en modes were incorrect
                 self._reg_write(model.vars.FRC_CONVGENERATOR_GENERATOR0, 0x0D)
                 self._reg_write(model.vars.FRC_CONVGENERATOR_GENERATOR1, 0x0E)
 
             elif (model.vars.fec_en.value == model.vars.fec_en.var_enum.FEC_154G_K7):
-                # Settings are only a minor departure from _FEC_154G_Base since the legacy fec_en modes were incorrect
                 self._reg_write(model.vars.FRC_CONVGENERATOR_GENERATOR0, 0x6D)
                 self._reg_write(model.vars.FRC_CONVGENERATOR_GENERATOR1, 0x4F)
 
         model.vars.fec_enabled.value = int(model.vars.FRC_FECCTRL_CONVMODE.value != 0)
 
     def calc_feccrl_interleavemode_reg(self, model):
-        # This function calculates the FRC_FECCTRL_INTERLEAVEMODE reg field
 
-        # Read in model variables
         fec_en = model.vars.fec_en.value
         fec_enabled = model.vars.fec_enabled.value
 
-        # For dynamic FEC case, RAIL will handle reading in this interleavemode and enabling RX buffering
-        # (changing to interleavemode=2) as needed
         if fec_enabled:
             if (fec_en == model.vars.fec_en.var_enum.FEC_154G_NRNSC_INTERLEAVING) or \
                     (fec_en == model.vars.fec_en.var_enum.FEC_154G_RSC_INTERLEAVING) or \
                     (fec_en == model.vars.fec_en.var_enum.FEC_154G) or \
                     (fec_en == model.vars.fec_en.var_enum.FEC_154G_K7):
-                # We need to turn on interleaving to TX properly
                 interleavemode = 1
             else:
                 interleavemode = 0
         else:
             interleavemode = 0
 
-        # Load value into register
         self._reg_write(model.vars.FRC_FECCTRL_INTERLEAVEMODE, interleavemode)
 
     def calc_fecctrl_convinv_reg(self, model):
-        # This function calculates the FRC_FECCTRL_CONVINV reg field
 
-        # Read in model variables
         fec_en = model.vars.fec_en.value
 
-        # Calculate the output bits to invert based on the fec_en mode
         if fec_en == model.vars.fec_en.var_enum.FEC_154G_NRNSC_INTERLEAVING:
             convinv = 3  # Invert both bits
         else:
             convinv = 0
 
-        # Write the register
         self._reg_write(model.vars.FRC_FECCTRL_CONVINV, convinv)
 
     def calc_convgenerator_recursive_reg(self, model):
-        # This function calculates the FRC_CONVGENERATOR_RECURSIVE reg field
 
-        # Read in model variables
         fec_en = model.vars.fec_en.value
 
         if (fec_en == model.vars.fec_en.var_enum.FEC_154G_RSC_INTERLEAVING) or (
@@ -227,13 +205,10 @@ class CALC_FEC(ICalculator):
         else:
             recursive = 0
 
-        # Load value into register
         self._reg_write(model.vars.FRC_CONVGENERATOR_RECURSIVE, recursive)
 
     def calc_fecctrl_interleavewidth_reg(self, model):
-        #This function calculates the FRC_FECCTRL_INTERLEAVEWIDTH reg field
 
-        #Read in model variables
         modulation_type = model.vars.modulation_type.value
         fec_en = model.vars.fec_en.value
 
@@ -247,13 +222,10 @@ class CALC_FEC(ICalculator):
         else:
             interleavewidth = 0
 
-        #Load value into register
         self._reg_write(model.vars.FRC_FECCTRL_INTERLEAVEWIDTH, interleavewidth)
 
     def calc_convdecodemode_reg(self, model):
-        # This function calculates the CONVDECODEMODE (hard vs soft decision symbols)
 
-        # Assign inputs to variables
         fec_enabled = model.vars.fec_enabled.value
         dsss_bits_per_symbol = model.vars.dsss_bits_per_symbol.value
 
@@ -262,42 +234,31 @@ class CALC_FEC(ICalculator):
         else:
             convdecodemode = 0  # soft decision
 
-        # Write the register
         self._reg_write(model.vars.FRC_FECCTRL_CONVDECODEMODE, convdecodemode)
 
     def calc_fecctrl_convmode_reg(self, model):
-        #This function calculates the CONVMODE field
 
-        #Read in model variables
         fec_tx_enable = (model.vars.fec_tx_enable.value == model.vars.fec_tx_enable.var_enum.ENABLED)
 
-        #Calculate the register
         if fec_tx_enable:
             convmode = 1
         else:
             convmode = 0
 
-        #Set the register
         self._reg_write(model.vars.FRC_FECCTRL_CONVMODE, convmode)
 
     def calc_fec_tx_enable(self, model):
-        # This function enables or disables FEC in TX
-        # It is used so that we can configure FEC type with fec_en but still disable on TX if desired
 
-        # Read in model variables
         fec_en = model.vars.fec_en.value
 
-        # By default enable FEC TX whenever a customer selects a fec_en setting that is not NONE
         if fec_en != model.vars.fec_en.var_enum.NONE:
             fec_tx_enable = model.vars.fec_tx_enable.var_enum.ENABLED
         else:
             fec_tx_enable = model.vars.fec_tx_enable.var_enum.DISABLED
 
-        # Write the variable
         model.vars.fec_tx_enable.value = fec_tx_enable
 
     def calc_postamble_regs(self, model):
-        # This function calculate  registers to configure the postamble of PHYs with FEC enabled
 
         fec_en = model.vars.fec_en.value
 
@@ -307,7 +268,6 @@ class CALC_FEC(ICalculator):
         else:
             trailtxdata = 0x0B
 
-        #Always set these to 0 for now
         trailtxdatacnt = 0
         trailtxdataforce = 0
 
@@ -323,12 +283,8 @@ class CALC_FEC(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # This whole calculation only applies if convolutional Encoder/Decoder is enabled
         if model.vars.FRC_FECCTRL_CONVMODE != 0:
 
-            # From Reference Manual, section 5.8.16.4 Convolutional decoder,
-            # 'Convolutional decoding RAM buffer size' table
-            # Constraint length : RAM size (bytes)
             convDecodRamBufSize = {0:0,
                                    1:0,
                                    2:16,
@@ -338,20 +294,14 @@ class CALC_FEC(ICalculator):
                                    6:384,
                                    7:768}
 
-            # Get the value set in FRC_CONVGENERATOR_GENERATOR0/1
             generator0 = model.vars.FRC_CONVGENERATOR_GENERATOR0.value
             generator1 = model.vars.FRC_CONVGENERATOR_GENERATOR1.value
 
-            # Make sure the values are >= 1
             generator0 = 1 if generator0 < 1 else generator0
             generator1 = 1 if generator1 < 1 else generator1
 
-            # Get the MSB set in the generator0/generator1 variables
-            # We use ceil to round up any fractional value
             generator0_constraintLength = int(math.ceil(math.log(generator0, 2)))
             generator1_constraintLength = int(math.ceil(math.log(generator1, 2)))
 
-            # Get the larger of the two MSBs obtained in the previous step and use that
-            # as the key to lookup the required buffer size in convDecodRamBufSize dict
             constraintLength = max(generator0_constraintLength, generator1_constraintLength)
             model.vars.frc_conv_decoder_buffer_size.value = convDecodRamBufSize[constraintLength]

@@ -34,7 +34,7 @@
 #include "sli_hfxo_manager_internal.h"
 #include "sli_hfxo_manager_log.h"
 #include "sl_sleeptimer.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_status.h"
 #include <stdbool.h>
 
@@ -146,7 +146,7 @@ sl_status_t sl_hfxo_manager_update_sleepy_xtal_settings(const sl_hfxo_manager_sl
  ******************************************************************************/
 __WEAK void sl_hfxo_manager_notify_consecutive_failed_startups(void)
 {
-  EFM_ASSERT(false);
+  SL_LOG_DEBUG_ASSERT(false);
 }
 
 /*******************************************************************************
@@ -208,7 +208,7 @@ void sli_hfxo_manager_end_startup_measurement(void)
 
   // Skip measurement if value is out of bound
   default_startup_ticks = (((HFXO_STARTUP_TIME_DEFAULT_VALUE_US * sl_sleeptimer_get_timer_frequency()) + (1000000 - 1)) / 1000000);
-  EFM_ASSERT(hfxo_last_startup_time <= default_startup_ticks);
+  SL_LOG_DEBUG_ASSERT(hfxo_last_startup_time <= default_startup_ticks);
   if (hfxo_last_startup_time > default_startup_ticks) {
     hfxo_measurement_on = false;
     return;

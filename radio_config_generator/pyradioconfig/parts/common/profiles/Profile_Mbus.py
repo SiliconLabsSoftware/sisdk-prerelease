@@ -7,11 +7,15 @@ from pyradioconfig.parts.common.profiles.profile_modem import *
 
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfile
 from pyradioconfig.parts.common.utils.units_multiplier import UnitsMultiplier
+from pycalcmodel.core.common import IPCategory
 
 from pyradioconfig.parts.common.profiles.profile_mbus_modes import *
 
 
 class Profile_Mbus(IProfile):
+
+    ip_category = IPCategory.LPW
+
     """
     Init internal variables
     """
@@ -32,7 +36,6 @@ class Profile_Mbus(IProfile):
 
         family = self._family
 
-        # Build profile
         profile = self._makeProfile(model)
 
         IProfile.make_required_input(profile, model.vars.mbus_mode, category="general", readable_name="Mbus Mode")
@@ -50,14 +53,12 @@ class Profile_Mbus(IProfile):
                                      readable_name="Channel Spacing", value_limit_min=0, value_limit_max=10000000,
                                      units_multiplier=UnitsMultiplier.KILO)
 
-        # Hidden test inputs
         IProfile.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
                                    readable_name="Fixed Payload Size", value_limit_min=0, value_limit_max=4095)
         IProfile.make_hidden_input(profile, model.vars.payload_crc_en, category='frame_payload',
                                    readable_name="Insert/Check CRC after payload")
 
         IProfile.make_hidden_input(profile, model.vars.crc_poly, category='crc', readable_name="CRC Polynomial")
-        # IProfile.make_hidden_input(profile, model.vars.crc_seed,        category='crc', readable_name="CRC Seed")
         IProfile.make_hidden_input(profile, model.vars.crc_byte_endian, category='crc', readable_name="CRC Byte Endian")
         IProfile.make_hidden_input(profile, model.vars.crc_bit_endian, category='crc',
                                    readable_name="CRC Output Bit Endian")
@@ -69,22 +70,16 @@ class Profile_Mbus(IProfile):
         IProfile.make_optional_input(profile, model.vars.test_ber, category="testing",
                                      readable_name="Reconfigure for BER testing", default=False)
 
-        # TODO:  Change this to MSB_FIRst in the lab phys, then remove this input and move it to the forced section below
         IProfile.make_hidden_input(profile, model.vars.frame_bitendian, category='frame_general',
                                    readable_name="Frame Bit Endian")
 
-        # Informational output
         buildModemInfoOutputs(model, profile)
 
-        # RAIL Outputs
         buildRailOutputs(model, profile)
 
-        # Profile does not include advanced inputs, but we do need an output for IR cal power level for rail_scripts to consume
-        # So add that here. It will default to 0 (which triggers to change to IR cal).
         profile.outputs.append(ModelOutput(model.vars.ircal_power_level, '', ModelOutputType.RAIL_CONFIG,
                                            readable_name='IR cal power level (amplitude)'))
 
-        # Output fields
         buildFrameOutputs(model, profile)
         buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
@@ -111,30 +106,25 @@ class Profile_Mbus(IProfile):
     def mbus_profile_frame_format_common(self, model):
         family = self._family
 
-        # Whitening
         model.vars.header_white_en.value_forced = False
         model.vars.payload_white_en.value_forced = False
         model.vars.white_poly.value_forced = model.vars.white_poly.var_enum.NONE
         model.vars.white_seed.value_forced = 0
         model.vars.white_output_bit.value_forced = 0
 
-        # General frame format
         model.vars.frame_bitendian.value_forced = model.vars.frame_bitendian.var_enum.MSB_FIRST
 
-        # -- Payload --
         if family != 'dumbo':
             model.vars.payload_addtrailtxdata_en.value_forced = False
         if family == 'nerio' or family == 'nixi':  # TODO Is this correct?  Do we include this in Nixi?
             model.vars.payload_excludesubframewcnt_en.value_forced = False
 
-        # -- Header --
 
         if family != 'dumbo':
             model.vars.header_addtrailtxdata_en.value_forced = False
         if family == 'nerio' or family == 'nixi':  # TODO Is this correct?  Do we include this in Nixi?
             model.vars.header_excludesubframewcnt_en.value_forced = False
 
-        # Frame type length variables
         model.vars.frame_type_loc.value_forced = 0
         model.vars.frame_type_bits.value_forced = 3
         model.vars.frame_type_lsbit.value_forced = 0
@@ -155,10 +145,8 @@ class Profile_Mbus(IProfile):
         model.vars.frame_type_6_valid.value_forced = False
         model.vars.frame_type_7_valid.value_forced = False
 
-        # FEC
         model.vars.fec_en.value_forced = model.vars.fec_en.var_enum.NONE
 
-        # CRC
         model.vars.crc_poly.value_forced = model.vars.crc_poly.var_enum.DNP_16
         model.vars.crc_seed.value_forced = default = long(0)
         model.vars.crc_byte_endian.value_forced = model.vars.crc_byte_endian.var_enum.MSB_FIRST
@@ -187,8 +175,6 @@ class Profile_Mbus(IProfile):
             model.vars.payload_crc_en.value_forced = False
 
         elif model.profile.inputs.mbus_frame_format.var_value == model.vars.mbus_frame_format.var_enum.FrameA:
-            # -- Header --
-            # Block 1 for frameA
             model.vars.header_en.value_forced = True
             model.vars.header_size.value_forced = 1  # This controls DFL location AND header size. We set it up for DFL loc
             model.vars.FRC_FCD0_WORDS.value_forced = 9  # and override the size to be 10B for TX
@@ -196,12 +182,9 @@ class Profile_Mbus(IProfile):
             model.vars.header_calc_crc.value_forced = True
             model.vars.header_include_crc.value_forced = True
 
-            # all subsequent blocks are handled as repating 16B subframes
             model.vars.FRC_FCD1_WORDS.value_forced = 15
             model.vars.FRC_FCD3_WORDS.value_forced = 15
-            # FCDMODE2 is the default, which is good for us
 
-            # -- Variable Length --
             model.vars.frame_length_type.value_forced = model.vars.frame_length_type.var_enum.VARIABLE_LENGTH
             model.vars.var_length_numbits.value_forced = 8
             model.vars.var_length_bitendian.value_forced = model.vars.var_length_bitendian.var_enum.MSB_FIRST
@@ -215,17 +198,13 @@ class Profile_Mbus(IProfile):
             model.vars.payload_crc_en.value_forced = True
 
         elif model.profile.inputs.mbus_frame_format.var_value == model.vars.mbus_frame_format.var_enum.FrameB:
-            # -- Header --
-            # Block 1 and 2 for frameB
             model.vars.header_en.value_forced = True
             model.vars.header_size.value_forced = 1  # This controls DFL location AND header size. We set it up for DFL loc
             model.vars.FRC_FCD0_WORDS.value_forced = 125  # and override the size to be 125B for TX
             model.vars.FRC_FCD2_WORDS.value_forced = 125  # and for RX
             model.vars.header_calc_crc.value_forced = True
             model.vars.header_include_crc.value_forced = True
-            # Block 3 is the remaining data, which is the payload from the configurator's perspective
 
-            # -- Variable Length --
             model.vars.frame_length_type.value_forced = model.vars.frame_length_type.var_enum.VARIABLE_LENGTH
             model.vars.var_length_numbits.value_forced = 8
             model.vars.var_length_bitendian.value_forced = model.vars.var_length_bitendian.var_enum.MSB_FIRST
@@ -242,7 +221,6 @@ class Profile_Mbus(IProfile):
             raise Exception("Unexpected value found for mbus_frame_format")
 
     def mbus_profile_radio_common(self, model):
-        # Set some variables common to all modes
         model.vars.fsk_symbol_map.value_forced = model.vars.fsk_symbol_map.var_enum.MAP0
 
         model.vars.dsss_chipping_code.value_forced = long(0)
@@ -286,10 +264,6 @@ class Profile_Mbus(IProfile):
             profile_MBus_modes.profile_wMbus_ModeS_32p768k(model, self._family)
 
     def mbus_profile_postamble_calc(self, model):
-        # We should be able to create an input variable in the base profile that selects the type of
-        # postamble that will be sent.  That variable would be read by a calculation in the calculator (calc_fec right now).
-        # Then this code would just force that base profile input variable instead of forcing registers.
-        # The profile really should only be forcing base profile input variables, so this code should be cleaned up
         if model.profile.inputs.mbus_symbol_encoding.var_value == model.vars.mbus_symbol_encoding.var_enum.Manchester:
             model.vars.FRC_TRAILTXDATACTRL_TRAILTXDATA.value_forced = 0xff
             model.vars.FRC_TRAILTXDATACTRL_TRAILTXDATACNT.value_forced = 0  # shortest allowed postamble is 2 chip

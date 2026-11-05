@@ -1,0 +1,141 @@
+id: memory_manager_systemview_retarget
+package: platform_core
+label: Memory Manager SystemView Retarget
+description: >
+  Link-time function wrapping for Memory Manager APIs (dynamic allocation,
+  dynamic reservation, memory pool, and no-retention reservation), Bluetooth,
+  Matter, and the Memory Manager C++ new operators.
+  Emits SEGGER SystemView RTT ownership events at each wrapped call site with
+  block pointer and caller return address, enabling call-site annotation in
+  SystemView traces without modifying the core Memory Manager source.
+category: Services|Memory Manager
+quality: experimental
+metadata:
+  sbom:
+    license: Zlib
+source:
+- path: src/sli_memory_manager_retarget_sysview.c
+template_contribution:
+- name: component_catalog
+  value: memory_manager_systemview_retarget
+provides:
+- name: memory_manager_systemview_retarget
+- name: toolchain_lto_disable
+  allow_multiple: true
+- name: toolchain_llvm_lto_disable
+  condition: [toolchain_llvm]
+requires:
+- name: component_catalog
+- name: memory_manager
+- name: segger_systemview
+toolchain_settings:
+  # The generic disable feature also suppresses toolchain_gcc_lto's enabled setting.
+- option: link_time_optimization
+  value: disabled
+- option: gcc_linker_option
+  value: >-
+    -Wl,--wrap=sl_malloc
+    -Wl,--wrap=sl_free
+    -Wl,--wrap=sl_calloc
+    -Wl,--wrap=sl_realloc
+    -Wl,--wrap=sl_memory_alloc
+    -Wl,--wrap=sl_memory_alloc_advanced
+    -Wl,--wrap=sl_memory_free
+    -Wl,--wrap=sl_memory_calloc
+    -Wl,--wrap=sl_memory_realloc
+    -Wl,--wrap=sl_memory_heap_alloc
+    -Wl,--wrap=sl_memory_heap_alloc_advanced
+    -Wl,--wrap=sl_memory_heap_free
+    -Wl,--wrap=sl_memory_heap_calloc
+    -Wl,--wrap=sl_memory_heap_realloc
+    -Wl,--wrap=sl_memory_reserve_block
+    -Wl,--wrap=sl_memory_release_block
+    -Wl,--wrap=sl_memory_reservation_handle_alloc
+    -Wl,--wrap=sl_memory_reservation_handle_free
+    -Wl,--wrap=sl_memory_reservation_add_retention
+    -Wl,--wrap=sl_memory_reservation_remove_retention
+    -Wl,--wrap=sl_memory_create_pool
+    -Wl,--wrap=sl_memory_create_pool_advanced
+    -Wl,--wrap=sl_memory_delete_pool
+    -Wl,--wrap=sl_memory_delete_pool_no_unreserve
+    -Wl,--wrap=sl_memory_pool_alloc
+    -Wl,--wrap=sl_memory_pool_free
+    -Wl,--wrap=sl_memory_pool_handle_alloc
+    -Wl,--wrap=sl_memory_pool_handle_free
+    -Wl,--wrap=sl_memory_reserve_no_retention
+    -Wl,--wrap=sl_memory_heap_reserve_no_retention
+    -Wl,--wrap=sl_memory_heap_reserve_block
+    -Wl,--wrap=sl_memory_heap_reservation_handle_alloc
+    -Wl,--wrap=sl_memory_heap_create_pool
+    -Wl,--wrap=sl_memory_heap_create_pool_advanced
+    -Wl,--wrap=sl_memory_heap_pool_handle_alloc
+    -Wl,--wrap=bg_malloc
+  # Matter chip::Platform::MemoryAlloc/MemoryCalloc, then the overloaded global
+  # operator new variants (scalar/array, nothrow, aligned).
+- option: gcc_linker_option
+  condition: [memory_manager_cpp]
+  value: >-
+    -Wl,--wrap=_ZN4chip8Platform11MemoryAllocEj
+    -Wl,--wrap=_ZN4chip8Platform12MemoryCallocEjj
+    -Wl,--wrap=_Znwj
+    -Wl,--wrap=_Znaj
+    -Wl,--wrap=_ZnwjRKSt9nothrow_t
+    -Wl,--wrap=_ZnajRKSt9nothrow_t
+    -Wl,--wrap=_ZnwjSt11align_val_t
+    -Wl,--wrap=_ZnajSt11align_val_t
+    -Wl,--wrap=_ZnwjSt11align_val_tRKSt9nothrow_t
+    -Wl,--wrap=_ZnajSt11align_val_tRKSt9nothrow_t
+- option: llvm_linker_option
+  value: >-
+    -Wl,--wrap=sl_malloc
+    -Wl,--wrap=sl_free
+    -Wl,--wrap=sl_calloc
+    -Wl,--wrap=sl_realloc
+    -Wl,--wrap=sl_memory_alloc
+    -Wl,--wrap=sl_memory_alloc_advanced
+    -Wl,--wrap=sl_memory_free
+    -Wl,--wrap=sl_memory_calloc
+    -Wl,--wrap=sl_memory_realloc
+    -Wl,--wrap=sl_memory_heap_alloc
+    -Wl,--wrap=sl_memory_heap_alloc_advanced
+    -Wl,--wrap=sl_memory_heap_free
+    -Wl,--wrap=sl_memory_heap_calloc
+    -Wl,--wrap=sl_memory_heap_realloc
+    -Wl,--wrap=sl_memory_reserve_block
+    -Wl,--wrap=sl_memory_release_block
+    -Wl,--wrap=sl_memory_reservation_handle_alloc
+    -Wl,--wrap=sl_memory_reservation_handle_free
+    -Wl,--wrap=sl_memory_reservation_add_retention
+    -Wl,--wrap=sl_memory_reservation_remove_retention
+    -Wl,--wrap=sl_memory_create_pool
+    -Wl,--wrap=sl_memory_create_pool_advanced
+    -Wl,--wrap=sl_memory_delete_pool
+    -Wl,--wrap=sl_memory_delete_pool_no_unreserve
+    -Wl,--wrap=sl_memory_pool_alloc
+    -Wl,--wrap=sl_memory_pool_free
+    -Wl,--wrap=sl_memory_pool_handle_alloc
+    -Wl,--wrap=sl_memory_pool_handle_free
+    -Wl,--wrap=sl_memory_reserve_no_retention
+    -Wl,--wrap=sl_memory_heap_reserve_no_retention
+    -Wl,--wrap=sl_memory_heap_reserve_block
+    -Wl,--wrap=sl_memory_heap_reservation_handle_alloc
+    -Wl,--wrap=sl_memory_heap_create_pool
+    -Wl,--wrap=sl_memory_heap_create_pool_advanced
+    -Wl,--wrap=sl_memory_heap_pool_handle_alloc
+    -Wl,--wrap=bg_malloc
+  # Matter chip::Platform::MemoryAlloc/MemoryCalloc, then the overloaded global
+  # operator new variants (scalar/array, nothrow, aligned).
+- option: llvm_linker_option
+  condition: [memory_manager_cpp]
+  value: >-
+    -Wl,--wrap=_ZN4chip8Platform11MemoryAllocEj
+    -Wl,--wrap=_ZN4chip8Platform12MemoryCallocEjj
+    -Wl,--wrap=_Znwj
+    -Wl,--wrap=_Znaj
+    -Wl,--wrap=_ZnwjRKSt9nothrow_t
+    -Wl,--wrap=_ZnajRKSt9nothrow_t
+    -Wl,--wrap=_ZnwjSt11align_val_t
+    -Wl,--wrap=_ZnajSt11align_val_t
+    -Wl,--wrap=_ZnwjSt11align_val_tRKSt9nothrow_t
+    -Wl,--wrap=_ZnajSt11align_val_tRKSt9nothrow_t
+root_path: platform_core/platform/service/memory_manager

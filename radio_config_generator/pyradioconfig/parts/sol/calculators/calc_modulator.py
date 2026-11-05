@@ -44,12 +44,10 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         else:
             modulator_select =  model.vars.modulator_select.var_enum.PH_MOD
 
-        #Write the model var
         model.vars.modulator_select.value = modulator_select
 
     def calc_txmodsel_reg(self, model):
 
-        #Read in model vars
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         modulator_select = model.vars.modulator_select.value
 
@@ -61,18 +59,14 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         else:
             txmodsel = 0
 
-        #Write the register
         self._reg_write(model.vars.RAC_SOFTMCTRL_TXMODSEL, txmodsel)
 
     def calc_softmodem_tx_interpolation(self, model):
-        #This method calculates the interpolation rates for softmodem PHYs
 
-        #Read in model vars
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         ofdm_option = model.vars.ofdm_option.value
         modulator_select = model.vars.modulator_select.value
 
-        #Only need to set interpolation values for OFDM MOD
         if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD:
             if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
                 softmodem_tx_interpolation1 = 7 #Static for now
@@ -91,19 +85,15 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
             softmodem_tx_interpolation1 = 0
             softmodem_tx_interpolation2 = 0
 
-        #Write the model vars
         model.vars.softmodem_tx_interpolation1.value = softmodem_tx_interpolation1
         model.vars.softmodem_tx_interpolation2.value = softmodem_tx_interpolation2
 
 
     def calc_int1cfg_reg(self, model):
-        #This method calculates the int1cfg register fields
 
-        #Read in model vars
         modulator_select = model.vars.modulator_select.value
         softmodem_tx_interpolation1 = model.vars.softmodem_tx_interpolation1.value
 
-        # Set only when OFDM modulator is used
         if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD:
             ratio = softmodem_tx_interpolation1-1
             gainshift = 12 #Static for now
@@ -111,18 +101,14 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
             ratio=0
             gainshift=0
 
-        #Write the registers
         self._reg_write(model.vars.TXFRONT_INT1CFG_RATIO,ratio)
         self._reg_write(model.vars.TXFRONT_INT1CFG_GAINSHIFT, gainshift)
 
     def calc_int2cfg_reg(self, model):
-        #This method calculates the int2cfg register fields
 
-        #Read in model vars
         modulator_select = model.vars.modulator_select.value
         softmodem_tx_interpolation2 = model.vars.softmodem_tx_interpolation2.value
 
-        # Set only when OFDM modulator is used
         if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD:
             ratio = softmodem_tx_interpolation2-1
             gainshift = ceil(log2(softmodem_tx_interpolation2**2))
@@ -130,17 +116,14 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
             ratio = 0
             gainshift = 0
 
-        #Write the registers
         self._reg_write(model.vars.TXFRONT_INT2CFG_RATIO, ratio)
         self._reg_write(model.vars.TXFRONT_INT2CFG_GAINSHIFT, gainshift)
 
     def calc_softmodem_txircal(self, model):
 
-        #Read in model vars
         divn = model.vars.fpll_divn.value
         divx = model.vars.fpll_divx.value
 
-        #divn: [kt, int2_ratio, int2_gainshift]
         txircal_dict = {
             80:[5,5,5],
             81:[9,9,7],
@@ -177,9 +160,7 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         model.vars.softmodem_txircal_freq.value = int(softmodem_txircal_freq)
 
     def calc_srccfg_ratio_reg(self, model):
-        #This method calulates the softmodem SRCCFG RATIO value
 
-        #Read in model vars
         modulator_select = model.vars.modulator_select.value
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         dac_freq_actual = model.vars.dac_freq_actual.value
@@ -187,7 +168,6 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         softmodem_tx_interpolation1 = model.vars.softmodem_tx_interpolation1.value
         softmodem_tx_interpolation2 = model.vars.softmodem_tx_interpolation2.value
 
-        # Set only when OFDM modulator is used
         if modulator_select == model.vars.modulator_select.var_enum.IQ_MOD:
             if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
                 ratio = (2**18) * (2.0*baudrate*softmodem_tx_interpolation1*softmodem_tx_interpolation2)/dac_freq_actual #2^18 * (2*OFDM_RATE*INT1*INT2)/DAC_FREQ
@@ -196,12 +176,10 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         else:
             ratio = 0
 
-        #Write the reg
         self._reg_write(model.vars.TXFRONT_SRCCFG_RATIO, int(round(ratio)))
 
     def calc_tx_baud_rate_actual(self, model):
 
-        #Read in model vars
         modulator_select = model.vars.modulator_select.value
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         softmodem_tx_interpolation1_actual = model.vars.TXFRONT_INT1CFG_RATIO.value + 1
@@ -217,17 +195,14 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
             super().calc_tx_baud_rate_actual(model)
 
     def calc_txmix_regs(self, model):
-        #This method calculates the RAC_TXMIX fields
 
         modulator_select = model.vars.modulator_select.value
         base_frequency_hz = model.vars.base_frequency_hz.value
         conc_ofdm = (model.vars.conc_ofdm_option.value != model.vars.conc_ofdm_option.var_enum.NONE)
 
-        #Choose regsiter settings based on RF band
         if (modulator_select == model.vars.modulator_select.var_enum.IQ_MOD) or conc_ofdm:
 
             if base_frequency_hz < 450e6:
-                #430M Band
                 txselmixctune = 43
                 txselmixgmslicei = 9
                 txselmixgmsliceq = 9
@@ -236,7 +211,6 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
                 txmixcappulldown = 1
 
             elif base_frequency_hz < 520e6:
-                # 470M Band
                 txselmixctune = 31
                 txselmixgmslicei = 8
                 txselmixgmsliceq = 8
@@ -245,7 +219,6 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
                 txmixcappulldown = 1
 
             elif base_frequency_hz < 625e6:
-                # 570M Band
                 txselmixctune = 13
                 txselmixgmslicei = 6
                 txselmixgmsliceq = 6
@@ -254,7 +227,6 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
                 txmixcappulldown = 1
 
             elif base_frequency_hz < 730e6:
-                # 680M Band
                 txselmixctune = 3
                 txselmixgmslicei = 6
                 txselmixgmsliceq = 6
@@ -263,7 +235,6 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
                 txmixcappulldown = 1
 
             elif base_frequency_hz < 825e6:
-                # 780M Band
                 txselmixctune = 24
                 txselmixgmslicei = 7
                 txselmixgmsliceq = 7
@@ -272,7 +243,6 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
                 txmixcappulldown = 0
 
             elif base_frequency_hz < 895e6:
-                # 870M Band
                 txselmixctune = 14
                 txselmixgmslicei = 6
                 txselmixgmsliceq = 6
@@ -281,7 +251,6 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
                 txmixcappulldown = 0
 
             elif base_frequency_hz < 940e6:
-                # 920M Band (settings from Eric Vapillon)
                 txselmixctune = 9
                 txselmixgmslicei = 6
                 txselmixgmsliceq = 6
@@ -290,7 +259,6 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
                 txmixcappulldown = 0
 
             else:
-                # 960M Band
                 txselmixctune = 5
                 txselmixgmslicei = 6
                 txselmixgmsliceq = 6
@@ -299,7 +267,6 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
                 txmixcappulldown = 0
 
         else:
-            #Use POR values
             txselmixctune = 0
             txselmixgmslicei = 4
             txselmixgmsliceq = 4
@@ -307,7 +274,6 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
             txselmixband = 0
             txmixcappulldown = 0
 
-        #Write the register fields
         self._reg_write(model.vars.RAC_TXMIX_TXSELMIXCTUNE, txselmixctune)
         self._reg_write(model.vars.RAC_TXMIX_TXSELMIXGMSLICEI, txselmixgmslicei)
         self._reg_write(model.vars.RAC_TXMIX_TXSELMIXGMSLICEQ, txselmixgmsliceq)
@@ -316,7 +282,6 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         self._reg_write(model.vars.RAC_TXMIX_TXMIXCAPPULLDOWN, txmixcappulldown)
 
     def calc_txtrim_regs(self, model):
-        # This method calculates the RAC_PATRIM6 fields
 
         modulator_select = model.vars.modulator_select.value
         conc_ofdm = (model.vars.conc_ofdm_option.value != model.vars.conc_ofdm_option.var_enum.NONE)
@@ -325,11 +290,9 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
             txtrimfilgain = 2
             txtrimfilres = 0
         else:
-            # Use POR values
             txtrimfilgain = 1
             txtrimfilres = 0
 
-        # Write the register fields
         self._reg_write(model.vars.RAC_PATRIM6_TXTRIMFILGAIN, txtrimfilgain)
         self._reg_write(model.vars.RAC_PATRIM6_TXTRIMFILRES, txtrimfilres)
 
@@ -348,50 +311,38 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
             else:
                 ofdm_min_bitrate = 12500
 
-            # Symbol rate is constant for OFDM: 1/120us
             ofdm_tsym = 120e-6
             ofdm_symbol_rate = 1/ofdm_tsym
 
-            # baud per symbol is not used in OFDM
             baud_per_symbol = 1
 
-            # MCS3 is the first one without frequency repetition then it is more convenient to use it
-            # as reference for bit_per_symbol. Besides, using MCS0 as reference implies a bit_per_symbol equal to 1.5,
-            # and this value cannot be forwarded to RAIL.
-            # bits_per_symbol is merely MCS3 bit rate for a given option over the symbol rate
             mcs3_bit_rate = ofdm_min_bitrate * 4
             bits_per_symbol = int(mcs3_bit_rate / ofdm_symbol_rate)
 
-            # Update model variables
             model.vars.ofdm_symbol_rate.value = ofdm_symbol_rate
             model.vars.baud_per_symbol_actual.value = baud_per_symbol
             model.vars.bits_per_symbol_actual.value = bits_per_symbol
         else:
-            # Call Ocelot version
             super().calc_symbol_rates_actual(model)
 
     def calc_txbases_reg(self, model):
 
-        # Read in model variables
         preamble_length = model.vars.preamble_length.value  # This is the TX preamble length
         preamble_pattern_len_actual = model.vars.preamble_pattern_len_actual.value
         softmodem_active = (model.vars.softmodem_modulation_type.value != model.vars.softmodem_modulation_type.var_enum.NONE)
 
         if softmodem_active:
-            #If the softmodem is active, the preamble bits will come from the softmodem so set TXBASES=0
             txbases = 0
         else:
             txbases = preamble_length / preamble_pattern_len_actual
             if (txbases) > 0xffff:
                 LogMgr.Error("Calculated TX preamble sequences (TXBASE) value of %s exceeds limit of 65535! Adjust preamble inputs." % txbases)
 
-        # Write the register
         self._reg_write(model.vars.MODEM_PRE_TXBASES, int(txbases))
 
     def calc_hardmodem_txbr_compensation(self, model):
         """ Generate a table of compensated values covering 100ppm variation """
 
-        # Get model variables
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         modulator_select = model.vars.modulator_select.value
         modformat = model.vars.modulation_type.value
@@ -400,7 +351,6 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         synth_res = model.vars.synth_res_actual.value
         shaping_filter_gain = model.vars.shaping_filter_gain_actual.value
 
-        # Initialize variables
         hardmodem_txbr_compensation = []
         min_ppm = -50
         max_ppm = 50
@@ -408,22 +358,16 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
         txbr_num_err_tol = 0.00001
         txbr_max_den = 255
 
-        # This compensation is needed for all modulations that use the FSK PA, that is, all but OFDM.
         if modulator_select != model.vars.modulator_select.var_enum.IQ_MOD:
             xtal_frequency_hz = model.vars.xtal_frequency_hz.value
             baudrate = model.vars.baudrate.value
 
-            # SUN OQPSK needs a precision of 5ppm but other modulations are fine with 10ppm
             if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OQPSK:
                 ppm_precision = 5
 
-            # Case '0' is not counted so actual length is length+1
             length = int(((abs(min_ppm) + max_ppm) / ppm_precision))
             ctr = 0
 
-            # Compute a set of ratios with ppm correction
-            # ratio = xtal / (8*baudrate)
-            # then ratio_corrected = (xtal - (xtal*ppm)/1e6)/(8*baudrate)
             for ppm in range(min_ppm, max_ppm + ppm_precision, ppm_precision):
                 freq_corrected = (xtal_frequency_hz * ppm)/1e6
                 ratio_corrected = (xtal_frequency_hz + freq_corrected)/(8 * baudrate)
@@ -434,53 +378,41 @@ class Calc_Modulator_Sol(CALC_Modulator_Ocelot):
                 new_modindex = self._get_modindex(model, modem_frequency_hz, modformat, freq_dev_hz, synth_res, shaping_filter_gain, new_interpolation_gain)
                 modindexM, modindexE = self._get_modindex_field(new_modindex)
 
-                # Store the necessary information as 16b triplets into hardmodem_txbr_compensation array
-                # 1) ModindexE and modindexM (5b + 5b) and length (6b) indicating the remaining elements in this array
-                # 2) den (8b) + ppm (8b)
-                # 3) num (16b)
                 half_word1 = ((length - ctr) << 10) | (modindexE << 5) | modindexM
                 half_word2 = (ppm << 8) | den
                 half_word3 = int(round(num))
 
                 hardmodem_txbr_compensation.append(str(hex(half_word1)))
-                # Store last half word as int16 in hex and keep sign
                 hardmodem_txbr_compensation.append("0x{:04x}".format((int(half_word2) & 0xFFFF), '04x'))
                 hardmodem_txbr_compensation.append(str(hex(half_word3)))
                 ctr += 1
 
-        # Update model variable
         model.vars.hardmodem_txbr_compensation.value = hardmodem_txbr_compensation
 
     def calc_tx_delay(self, model):
         if model.vars.modulator_select.value == model.vars.modulator_select.var_enum.IQ_MOD:  # : IQ modulator for OFDM
             """ calculate tx delay in ns """
-            # : Get Model Variables
             tx_baud_rate_actual = model.vars.tx_baud_rate_actual.value
             softmodem_interp1_ratio = model.vars.softmodem_tx_interpolation1.value
             softmodem_interp2_ratio = model.vars.softmodem_tx_interpolation2.value
 
-            # : Sol design book pp. 2769 - IQ_MOD
-            # : soft modem delay
             softmodem_filter_taps = 32 # : coproc filter has 32 taps
             softmodem_filter_rate = 2*tx_baud_rate_actual # : softmodem operates at 2xFs
             softmodem_delay = softmodem_filter_taps/2
             softmodem_grp_delay_us = softmodem_delay / softmodem_filter_rate * 1e6
 
-            # : interp1 delay
             interp1_ratio = softmodem_interp1_ratio
             interp1_rate = interp1_ratio * softmodem_filter_rate
             interp1_taps = 5 *interp1_ratio  # : FIR Polyphase filter with 5 taps
             interp1_delay = interp1_taps/2  #Even symmetrical filter
             interp1_grp_delay_us = interp1_delay / interp1_rate * 1e6
 
-            # : interp2 delay
             interp2_ratio = softmodem_interp2_ratio
             interp2_rate = interp2_ratio * interp1_rate
             interp2_taps = 3 * interp2_ratio # : 3 additional taps for each interpolation since 3rd order CIC
             interp2_delay = interp2_taps/2
             interp2_grp_delay_us = interp2_delay / interp2_rate * 1e6
 
-            # : calculate total delay
             model.vars.softm_tx_grp_delay_us.value = softmodem_grp_delay_us
             model.vars.interp1_tx_grp_delay_us.value = interp1_grp_delay_us
             model.vars.interp2_tx_grp_delay_us.value = interp2_grp_delay_us

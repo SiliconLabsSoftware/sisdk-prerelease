@@ -1,0 +1,48 @@
+project_name: uart_echo_freertos
+package: platform_app
+quality: production
+label: Platform - UART IRQ Echo FreeRTOS
+description: >
+  Demonstrates interrupt-driven UART echo using FreeRTOS with optional RTS/CTS
+  hardware flow control. UART callbacks notify an echo task when data is ready
+  and when transmission completes. The task drains the RX FIFO, transmits the
+  received data, and re-enables RX notification after transmission completes.
+  This is suitable for RTOS applications that process UART events in a task 
+  instead of performing all work in interrupt context.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+source:
+  - path: app.c
+  - path: app_uart_echo.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: app_uart_echo.h
+component:
+  - id: sl_main
+  - id: device_init
+  - id: clock_manager
+  - id: freertos
+  - id: uart_eusart
+    instance: [vcom]
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+define:
+  - name: UART_TEST_HANDLE
+    value: sl_uart_eusart_vcom_handle
+  - name: DEBUG_EFM
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - hwfilter:device:device_has_euart
+  - hwfilter:board:hardware_board_has_vcom

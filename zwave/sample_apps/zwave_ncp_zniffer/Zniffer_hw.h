@@ -8,6 +8,13 @@
 #define ZNIFFER_HW_H_
 
 /**
+ * @addtogroup Apps
+ * @{
+ * @addtogroup Zniffer
+ * @{
+ */
+
+/**
  * Initialize hardware modules specific to Serial API application.
  */
 void Zniffer_hw_init(void);
@@ -16,5 +23,10 @@ void Zniffer_hw_init(void);
  * Get zpal-uart config extension.
  */
 const void* Zniffer_get_uart_config_ext(void);
+
+/**
+ * @}
+ * @}
+ */
 
 #endif /* ZNIFFER_HW_H_ */

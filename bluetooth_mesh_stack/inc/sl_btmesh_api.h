@@ -16330,7 +16330,75 @@ typedef enum
                                                                              in
                                                                              the
                                                                              current
-                                                                             phase. */
+                                                                             phase.
+                                                                             After
+                                                                             a
+                                                                             successful
+                                                                             firmware
+                                                                             apply,
+                                                                             the
+                                                                             Target
+                                                                             Node
+                                                                             typically
+                                                                             reboots
+                                                                             and
+                                                                             no
+                                                                             longer
+                                                                             has
+                                                                             an
+                                                                             active
+                                                                             DFU
+                                                                             session.
+                                                                             A
+                                                                             subsequent
+                                                                             Firmware
+                                                                             Update
+                                                                             Apply
+                                                                             request
+                                                                             is
+                                                                             therefore
+                                                                             answered
+                                                                             with
+                                                                             this
+                                                                             status
+                                                                             while
+                                                                             the
+                                                                             server
+                                                                             is
+                                                                             Idle.
+                                                                             That
+                                                                             response
+                                                                             is
+                                                                             expected
+                                                                             and
+                                                                             does
+                                                                             not
+                                                                             by
+                                                                             itself
+                                                                             indicate
+                                                                             that
+                                                                             the
+                                                                             apply
+                                                                             failed;
+                                                                             the
+                                                                             distributor
+                                                                             or
+                                                                             standalone
+                                                                             updater
+                                                                             determines
+                                                                             success
+                                                                             from
+                                                                             the
+                                                                             procedure
+                                                                             result
+                                                                             (for
+                                                                             example
+                                                                             Apply
+                                                                             Success
+                                                                             after
+                                                                             a
+                                                                             firmware-version
+                                                                             check). */
   sl_btmesh_fw_update_server_update_status_internal_error        = 0x3, /**<
                                                                              (0x3)
                                                                              An
@@ -17807,7 +17875,48 @@ typedef enum
                                                                             Firmware
                                                                             was
                                                                             applied
-                                                                            successfully. */
+                                                                            successfully.
+                                                                            This
+                                                                            is
+                                                                            the
+                                                                            procedure
+                                                                            result
+                                                                            determined
+                                                                            by
+                                                                            the
+                                                                            distributor
+                                                                            or
+                                                                            standalone
+                                                                            updater.
+                                                                            The
+                                                                            last
+                                                                            received
+                                                                            Update
+                                                                            Status
+                                                                            or
+                                                                            BLOB
+                                                                            Transfer
+                                                                            Status
+                                                                            may
+                                                                            still
+                                                                            report
+                                                                            Wrong
+                                                                            Phase
+                                                                            or
+                                                                            an
+                                                                            earlier
+                                                                            transfer
+                                                                            state;
+                                                                            those
+                                                                            fields
+                                                                            are
+                                                                            diagnostic
+                                                                            and
+                                                                            do
+                                                                            not
+                                                                            override
+                                                                            this
+                                                                            result. */
   sl_btmesh_fw_dist_server_dist_node_phase_apply_failed         = 0x9, /**<
                                                                             (0x9)
                                                                             Firmware
@@ -18617,18 +18726,32 @@ sl_status_t sl_btmesh_fw_dist_server_set_upload_oob_progress(uint16_t elem_index
 
 /***************************************************************************//**
  *
- * Retrieve information about the ongoing update on a node
+ * Retrieve information about the ongoing update on a node. The retrieved_phase
+ * value is the procedure result determined by the Distribution Server. The
+ * update_server_status and mbt_server_status values are the most recently
+ * received protocol statuses from the Target Node and are primarily diagnostic.
+ * After a successful apply they may still report Wrong Phase (or an earlier
+ * BLOB Transfer status) even when retrieved_phase is Apply Success, because the
+ * distributor continues sending Apply messages until it detects reboot and then
+ * verifies the installed firmware version.
  *
  * @param[in] elem_index Server model element index
  * @param[in] entry_index Node entry index
  * @param[out] address Address of the Update Server
  * @param[out] retrieved_phase Enum @ref
- *   sl_btmesh_fw_dist_server_dist_node_phase_t. Phase of the Update Server
+ *   sl_btmesh_fw_dist_server_dist_node_phase_t. Phase of the Update Server as
+ *   determined by the distribution procedure. This is the procedure result (for
+ *   example Apply Success).
  * @param[out] update_server_status Enum @ref
  *   sl_btmesh_fw_update_server_update_status_t. Last Update Status message
- *   received from the Update Server
+ *   received from the Update Server. This is a diagnostic snapshot of the most
+ *   recent protocol response and is not the procedure result. After a
+ *   successful apply it is commonly Wrong Phase while the node is Idle; that
+ *   does not contradict Apply Success.
  * @param[out] mbt_server_status Enum @ref sl_btmesh_mbt_server_status_t. Last
- *   Transfer Status message received from the BLOB Transfer Server
+ *   Transfer Status message received from the BLOB Transfer Server. This is
+ *   primarily diagnostic and may reflect an earlier transfer state even when
+ *   the DFU procedure has completed successfully.
  * @param[out] transfer_progress 0-100, percentage of BLOB Transfer octets
  *   delivered and confirmed
  * @param[out] fw_index Index of the firmware being updated
@@ -18647,18 +18770,32 @@ sl_status_t sl_btmesh_fw_dist_server_get_node_status_by_index(uint16_t elem_inde
 
 /***************************************************************************//**
  *
- * Retrieve information about the ongoing update by a node address
+ * Retrieve information about the ongoing update by a node address. The
+ * retrieved_phase value is the procedure result determined by the Distribution
+ * Server. The update_server_status and mbt_server_status values are the most
+ * recently received protocol statuses from the Target Node and are primarily
+ * diagnostic. After a successful apply they may still report Wrong Phase (or an
+ * earlier BLOB Transfer status) even when retrieved_phase is Apply Success,
+ * because the distributor continues sending Apply messages until it detects
+ * reboot and then verifies the installed firmware version.
  *
  * @param[in] elem_index Server model element index
  * @param[in] node_address Node mesh address
  * @param[out] address Address of the Update Server
  * @param[out] retrieved_phase Enum @ref
- *   sl_btmesh_fw_dist_server_dist_node_phase_t. Phase of the Update Server
+ *   sl_btmesh_fw_dist_server_dist_node_phase_t. Phase of the Update Server as
+ *   determined by the distribution procedure. This is the procedure result (for
+ *   example Apply Success).
  * @param[out] update_server_status Enum @ref
  *   sl_btmesh_fw_update_server_update_status_t. Last Update Status message
- *   received from the Update Server
+ *   received from the Update Server. This is a diagnostic snapshot of the most
+ *   recent protocol response and is not the procedure result. After a
+ *   successful apply it is commonly Wrong Phase while the node is Idle; that
+ *   does not contradict Apply Success.
  * @param[out] mbt_server_status Enum @ref sl_btmesh_mbt_server_status_t. Last
- *   Transfer Status message received from the BLOB Transfer Server
+ *   Transfer Status message received from the BLOB Transfer Server. This is
+ *   primarily diagnostic and may reflect an earlier transfer state even when
+ *   the DFU procedure has completed successfully.
  * @param[out] transfer_progress 0-100, percentage of BLOB Transfer octets
  *   delivered and confirmed
  * @param[out] fw_index Index of the firmware being updated
@@ -19020,6 +19157,12 @@ typedef struct sl_btmesh_evt_fw_dist_client_receivers_status_s sl_btmesh_evt_fw_
  * @addtogroup sl_btmesh_evt_fw_dist_client_receivers_list sl_btmesh_evt_fw_dist_client_receivers_list
  * @{
  * @brief Firmware Distribution Node List item
+ *
+ * The phase value is the procedure result determined by the Distribution
+ * Server. The update_status and transfer_status values are the most recently
+ * received protocol statuses from the Target Node and are primarily diagnostic.
+ * After a successful apply they may still report Wrong Phase (or an earlier
+ * BLOB Transfer status) even when phase is Apply Success.
  */
 
 /** @brief Identifier of the receivers_list event */
@@ -19037,11 +19180,20 @@ PACKSTRUCT( struct sl_btmesh_evt_fw_dist_client_receivers_list_s
   uint16_t address;         /**< Address of the Update Server */
   uint8_t  phase;           /**< Enum @ref
                                  sl_btmesh_fw_dist_server_dist_node_phase_t.
-                                 Phase of the Update Server */
+                                 Phase of the Update Server as determined by the
+                                 distribution procedure. This is the procedure
+                                 result (for example Apply Success). */
   uint8_t  update_status;   /**< Last Update Status message received from the
-                                 Update Server */
+                                 Update Server. This is a diagnostic snapshot of
+                                 the most recent protocol response and is not
+                                 the procedure result. After a successful apply
+                                 it is commonly Wrong Phase while the node is
+                                 Idle; that does not contradict Apply Success. */
   uint8_t  transfer_status; /**< Last Transfer Status message received from the
-                                 BLOB Transfer Server */
+                                 BLOB Transfer Server. This is primarily
+                                 diagnostic and may reflect an earlier transfer
+                                 state even when the DFU procedure has completed
+                                 successfully. */
   uint8_t  progress;        /**< 0-100, percentage of BLOB Transfer octets
                                  delivered and confirmed */
   uint8_t  fw_index;        /**< Index of the firmware being updated */
@@ -20784,18 +20936,32 @@ sl_status_t sl_btmesh_fw_standalone_updater_get_state(uint16_t elem_index,
 
 /***************************************************************************//**
  *
- * Retrieve information about the ongoing update on a node
+ * Retrieve information about the ongoing update on a node. The retrieved_phase
+ * value is the procedure result determined by the Standalone Updater. The
+ * update_server_status and mbt_server_status values are the most recently
+ * received protocol statuses from the Target Node and are primarily diagnostic.
+ * After a successful apply they may still report Wrong Phase (or an earlier
+ * BLOB Transfer status) even when retrieved_phase is Apply Success, because the
+ * updater continues sending Apply messages until it detects reboot and then
+ * verifies the installed firmware version.
  *
  * @param[in] elem_index Element index
  * @param[in] entry_index Node entry index
  * @param[out] address Address of the Update Server
  * @param[out] retrieved_phase Enum @ref
- *   sl_btmesh_fw_dist_server_dist_node_phase_t. Phase of the Update Server
+ *   sl_btmesh_fw_dist_server_dist_node_phase_t. Phase of the Update Server as
+ *   determined by the distribution procedure. This is the procedure result (for
+ *   example Apply Success).
  * @param[out] update_server_status Enum @ref
  *   sl_btmesh_fw_update_server_update_status_t. Last Update Status message
- *   received from the Update Server
+ *   received from the Update Server. This is a diagnostic snapshot of the most
+ *   recent protocol response and is not the procedure result. After a
+ *   successful apply it is commonly Wrong Phase while the node is Idle; that
+ *   does not contradict Apply Success.
  * @param[out] mbt_server_status Enum @ref sl_btmesh_mbt_server_status_t. Last
- *   Transfer Status message received from the BLOB Transfer Server
+ *   Transfer Status message received from the BLOB Transfer Server. This is
+ *   primarily diagnostic and may reflect an earlier transfer state even when
+ *   the DFU procedure has completed successfully.
  * @param[out] transfer_progress 0-100, percentage of BLOB Transfer octets
  *   delivered and confirmed
  * @param[out] fw_index Index of the firmware being updated
@@ -20814,18 +20980,32 @@ sl_status_t sl_btmesh_fw_standalone_updater_get_node_status_by_index(uint16_t el
 
 /***************************************************************************//**
  *
- * Retrieve information about the ongoing update by a node address
+ * Retrieve information about the ongoing update by a node address. The
+ * retrieved_phase value is the procedure result determined by the Standalone
+ * Updater. The update_server_status and mbt_server_status values are the most
+ * recently received protocol statuses from the Target Node and are primarily
+ * diagnostic. After a successful apply they may still report Wrong Phase (or an
+ * earlier BLOB Transfer status) even when retrieved_phase is Apply Success,
+ * because the updater continues sending Apply messages until it detects reboot
+ * and then verifies the installed firmware version.
  *
  * @param[in] elem_index Element index
  * @param[in] node_address Node mesh address
  * @param[out] address Address of the Update Server
  * @param[out] retrieved_phase Enum @ref
- *   sl_btmesh_fw_dist_server_dist_node_phase_t. Phase of the Update Server
+ *   sl_btmesh_fw_dist_server_dist_node_phase_t. Phase of the Update Server as
+ *   determined by the distribution procedure. This is the procedure result (for
+ *   example Apply Success).
  * @param[out] update_server_status Enum @ref
  *   sl_btmesh_fw_update_server_update_status_t. Last Update Status message
- *   received from the Update Server
+ *   received from the Update Server. This is a diagnostic snapshot of the most
+ *   recent protocol response and is not the procedure result. After a
+ *   successful apply it is commonly Wrong Phase while the node is Idle; that
+ *   does not contradict Apply Success.
  * @param[out] mbt_server_status Enum @ref sl_btmesh_mbt_server_status_t. Last
- *   Transfer Status message received from the BLOB Transfer Server
+ *   Transfer Status message received from the BLOB Transfer Server. This is
+ *   primarily diagnostic and may reflect an earlier transfer state even when
+ *   the DFU procedure has completed successfully.
  * @param[out] transfer_progress 0-100, percentage of BLOB Transfer octets
  *   delivered and confirmed
  * @param[out] fw_index Index of the firmware being updated

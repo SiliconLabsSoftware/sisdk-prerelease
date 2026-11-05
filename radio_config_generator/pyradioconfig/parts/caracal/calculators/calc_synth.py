@@ -8,11 +8,6 @@ class Calc_Synth_Caracal(Calc_Synth_Bobcat):
         rx_mode = model.vars.synth_rx_mode.value
         ind = rx_mode.value
 
-        # Synth settings https://jira.silabs.com/browse/MCUW_RADIO_CFG-1529
-        # Settings copied over from Lynx Assert
-        # {workspace}\shared_files\lynx\radio_validation\ASSERTS
-        # BLK_SYNTH_RX_LP_BW_200KHZ.csv (BLE_LR mode)
-        # BLK_SYNTH_RX_LP_BW_250KHZ.csv (NORMAL mode)
 
         rx_mode_settings = {
             'SYNTH.LPFCTRL2RX.CASELRX':         [1,   1,   1],
@@ -59,8 +54,6 @@ class Calc_Synth_Caracal(Calc_Synth_Bobcat):
         self._reg_write(model.vars.SYNTH_LPFCTRL2RX_LPFSWENRX,        rx_mode_settings['SYNTH.LPFCTRL2RX.LPFSWENRX'][ind])
         self._reg_write(model.vars.SYNTH_LPFCTRL2RX_LPFINCAPRX,       rx_mode_settings['SYNTH.LPFCTRL2RX.LPFINCAPRX'][ind])
 
-        # : Following registers are PTE Set & Forget but needs to be set by RC since they are different from reset value
-        # : See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1610
         self._reg_write(model.vars.SYNTH_DSMCTRLRX_MASHORDERRX,       rx_mode_settings['SYNTH.DSMCTRLRX.MASHORDERRX'][ind])
         self._reg_write(model.vars.SYNTH_DSMCTRLRX_LSBFORCERX,        rx_mode_settings['SYNTH.DSMCTRLRX.LSBFORCERX'][ind])
         self._reg_write(model.vars.SYNTH_DSMCTRLRX_DSMMODERX,         rx_mode_settings['SYNTH.DSMCTRLRX.DSMMODERX'][ind])
@@ -73,7 +66,5 @@ class Calc_Synth_Caracal(Calc_Synth_Bobcat):
         self._reg_write(model.vars.RAC_SYTRIM0_SYCHPREPLICACURRADJ,   rx_mode_settings['RAC.SYTRIM0.SYCHPREPLICACURRADJ'][ind])
         self._reg_write(model.vars.RAC_SYTRIM0_SYCHPSRCENRX,          rx_mode_settings['RAC.SYTRIM0.SYCHPSRCENRX'][ind])
 
-        # : Following registers are added due to BW 1.5 MHz fast mode setting
-        # : See https://jira.silabs.com/browse/MCUW_RADIO_CFG-1862
         self._reg_write(model.vars.SYNTH_DSMCTRLRX_DEMMODERX,         rx_mode_settings['SYNTH.DSMCTRLRX.DEMMODERX'][ind])
         self._reg_write(model.vars.RAC_SYTRIM0_SYCHPLEVPSRCRX,        rx_mode_settings['RAC.SYTRIM0.SYCHPLEVPSRCRX'][ind])

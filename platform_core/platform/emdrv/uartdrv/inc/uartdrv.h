@@ -64,13 +64,36 @@
 #include "sl_device_dma.h"
 #include "sl_enum.h"
 #include "sl_sleeptimer.h"
+#include "sl_common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup uartdrv
+ * @addtogroup uartdrv UARTDRV - UART Driver (deprecated)
+ * @details
+ *
+ * \warning This API is deprecated. For new designs, use the UART Driver
+ *          (@ref uart).
+ *
+ * The UART driver supports the UART capabilities of the USART, UART, and
+ * LEUART/EUSART peripherals. The driver is fully reentrant and supports
+ * multiple driver instances. Both blocking and non-blocking transfer functions
+ * are available. The non-blocking transfer functions use DMA to transfer data
+ * and report transfer completion with callback functions.
+ *
+ * These responsibilities are now provided by the newer @ref uart driver, which
+ * covers polling, interrupt-driven, and asynchronous (DMA) transfer modes.
+ *
+ * \note To keep a project building cleanly with `-Werror` while migration
+ *       is still in progress, the deprecation warnings emitted for the
+ *       UARTDRV API can be suppressed by defining
+ *       @c SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_2026_12 at the project or
+ *       translation-unit level. This affects only warnings introduced by
+ *       this deprecation cycle, and is intended as a temporary measure;
+ *       the UARTDRV API will be removed in a future major release.
+ *
  * @{
  ******************************************************************************/
 
@@ -399,39 +422,51 @@ typedef struct UARTDRV_HandleData{
 typedef UARTDRV_HandleData_t * UARTDRV_Handle_t;
 
 #if (defined(UART_COUNT) && (UART_COUNT > 0)) || (defined(USART_COUNT) && (USART_COUNT > 0)) || defined(DOXYGEN)
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_InitUart(UARTDRV_Handle_t handle,
                          const UARTDRV_InitUart_t * initData);
 #endif
 
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_InitLeuart(UARTDRV_Handle_t handle,
                            const UARTDRV_InitLeuart_t * initData);
 #endif
 
 #if (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
                           const UARTDRV_InitEuart_t * initData);
 #endif
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_DeInit(UARTDRV_Handle_t handle);
 
+SL_DEPRECATED_API_SDK_2026_12
 UARTDRV_Status_t UARTDRV_GetPeripheralStatus(UARTDRV_Handle_t handle);
 
+SL_DEPRECATED_API_SDK_2026_12
 UARTDRV_Status_t UARTDRV_GetReceiveStatus(UARTDRV_Handle_t handle,
                                           uint8_t **buffer,
                                           UARTDRV_Count_t *bytesReceived,
                                           UARTDRV_Count_t *bytesRemaining);
 
+SL_DEPRECATED_API_SDK_2026_12
 UARTDRV_Status_t UARTDRV_GetTransmitStatus(UARTDRV_Handle_t handle,
                                            uint8_t **buffer,
                                            UARTDRV_Count_t *bytesSent,
                                            UARTDRV_Count_t *bytesRemaining);
 
+SL_DEPRECATED_API_SDK_2026_12
 uint8_t UARTDRV_GetReceiveDepth(UARTDRV_Handle_t handle);
+SL_DEPRECATED_API_SDK_2026_12
 uint16_t UARTDRV_GetReceiveDepthExt(UARTDRV_Handle_t handle);
 
+SL_DEPRECATED_API_SDK_2026_12
 uint8_t UARTDRV_GetTransmitDepth(UARTDRV_Handle_t handle);
+SL_DEPRECATED_API_SDK_2026_12
 uint16_t UARTDRV_GetTransmitDepthExt(UARTDRV_Handle_t handle);
 
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_Transmit(UARTDRV_Handle_t handle,
                          uint8_t *data,
                          UARTDRV_Count_t count,
@@ -442,6 +477,7 @@ Ecode_t UARTDRV_Transmit(UARTDRV_Handle_t handle,
                          #endif
                          );
 
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_Receive(UARTDRV_Handle_t handle,
                         uint8_t *data,
                         UARTDRV_Count_t count,
@@ -452,40 +488,53 @@ Ecode_t UARTDRV_Receive(UARTDRV_Handle_t handle,
                         #endif
                         );
 
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_TransmitB(UARTDRV_Handle_t handle,
                           uint8_t *data,
                           UARTDRV_Count_t count);
 
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_ReceiveB(UARTDRV_Handle_t handle,
                          uint8_t *data,
                          UARTDRV_Count_t count);
 
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_ForceTransmit(UARTDRV_Handle_t handle,
                               uint8_t *data,
                               UARTDRV_Count_t count);
 
+SL_DEPRECATED_API_SDK_2026_12
 UARTDRV_Count_t UARTDRV_ForceReceive(UARTDRV_Handle_t handle,
                                      uint8_t *data,
                                      UARTDRV_Count_t maxLength);
 
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_Abort(UARTDRV_Handle_t handle, UARTDRV_AbortType_t type);
 
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_PauseTransmit(UARTDRV_Handle_t handle);
 
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_ResumeTransmit(UARTDRV_Handle_t handle);
 
+SL_DEPRECATED_API_SDK_2026_12
 UARTDRV_FlowControlState_t UARTDRV_FlowControlGetSelfStatus(UARTDRV_Handle_t handle);
 
+SL_DEPRECATED_API_SDK_2026_12
 UARTDRV_FlowControlState_t UARTDRV_FlowControlGetPeerStatus(UARTDRV_Handle_t handle);
 
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_FlowControlSet(UARTDRV_Handle_t handle, UARTDRV_FlowControlState_t state);
 
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_FlowControlSetPeerStatus(UARTDRV_Handle_t handle, UARTDRV_FlowControlState_t state);
 
+SL_DEPRECATED_API_SDK_2026_12
 Ecode_t UARTDRV_FlowControlIgnoreRestrain(UARTDRV_Handle_t handle);
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_UARTDRV, SL_CODE_CLASS_TIME_CRITICAL)
+SL_DEPRECATED_API_SDK_2026_12
 sl_power_manager_on_isr_exit_t sl_uartdrv_sleep_on_isr_exit(void);
 #endif
 

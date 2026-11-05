@@ -31,9 +31,7 @@ class CALC_AGC(ICalculator):
             model (ModelRoot) : Builds the variables specific to this calculator
         """
 
-        # Input variables
 
-        # Internal variables
         self._addModelActual(model,   'agcperiod'             ,float, ModelVariableFormat.DECIMAL)
         self._addModelActual(model,   'rssi_period_sym'            ,int,  ModelVariableFormat.DECIMAL)
         self._addModelVariable(model, 'agc_settling_delay'    ,  int, ModelVariableFormat.DECIMAL, desc='Delay between two AGC gain adjustments in AGC clock cycles')
@@ -57,7 +55,6 @@ class CALC_AGC(ICalculator):
         self._build_agc_regs(model)
 
     def _build_agc_regs(self, model):
-        # Output variables
         self._addModelRegister(model, 'AGC.CTRL0.ADCRESETDURATION'     , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'AGC.CTRL0.PWRTARGET'            , int, ModelVariableFormat.HEX )
         self._addModelRegister(model, 'AGC.CTRL0.MODE'                 , int, ModelVariableFormat.HEX )
@@ -109,11 +106,8 @@ class CALC_AGC(ICalculator):
 
         if model.part_family.lower() in ["jumbo", "nerio", "nixi"]:
 
-            # MCUW_RADIO_CFG-673
-            # following register only for Jumbo, Nerio and Nixi
             self._addModelRegister(model, 'AGC.RFPEAKDET.RFPKDSWITCHDEL', int, ModelVariableFormat.HEX)
 
-            # MCUW_RADIO_CFG-656 : AGC_RFPEAKDET fields are not overridable
             self._addModelRegister(model, 'AGC.RFPEAKDET.RFPKDTHRESH2', int, ModelVariableFormat.HEX)
             self._addModelRegister(model, 'AGC.RFPEAKDET.RFPKDTHRESH1', int, ModelVariableFormat.HEX)
 
@@ -141,7 +135,6 @@ class CALC_AGC(ICalculator):
             self._reg_write(model.vars.AGC_MININDEX_INDEXMINSLICES,     18)
             self._reg_write(model.vars.AGC_MININDEX_INDEXMINATTEN,       0)
 
-            # MCUW_RADIO_CFG-1
             self._reg_write(model.vars.AGC_MANGAIN_MANGAINLNAATTEN,      0)
             self._reg_write(model.vars.AGC_MANGAIN_MANGAINLNASLICES,     0)
             self._reg_write(model.vars.AGC_MANGAIN_MANGAINLNASLICESREG,  0)
@@ -199,7 +192,6 @@ class CALC_AGC(ICalculator):
         """
         mod_format = model.vars.modulation_type.value
 
-        # in OOK mode use max step size of 5
         if mod_format == model.vars.modulation_type.var_enum.OOK:
             step = 0
         else:
@@ -218,9 +210,6 @@ class CALC_AGC(ICalculator):
         bw = model.vars.bandwidth_actual.value
         baudrate = model.vars.baudrate.value
 
-        # in OOK mode use max step size of 5 unless we are in a relatively
-        # narrowband OOK case. In narrowband case for dumbo only disable
-        # slow loop as it is causing an error floor.
         if mod_format == model.vars.modulation_type.var_enum.OOK:
             if bw < 5*baudrate:
                 step = 0
@@ -242,7 +231,6 @@ class CALC_AGC(ICalculator):
 
         mod_format = model.vars.modulation_type.value
 
-        # in OOK mode use LOCKPREDET lock gain once preamble is detected
         if mod_format == model.vars.modulation_type.var_enum.OOK:
             mode = 1
         else:
@@ -259,7 +247,6 @@ class CALC_AGC(ICalculator):
 
         mod_format = model.vars.modulation_type.value
 
-        # in OOK mode use FAST AGC
         if mod_format == model.vars.modulation_type.var_enum.OOK:
             agc_speed = model.vars.agc_speed.var_enum.FAST
         else:
@@ -289,7 +276,6 @@ class CALC_AGC(ICalculator):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # level in dBm (can be negative)
         level = model.vars.agc_power_target.value
 
         self._reg_write(model.vars.AGC_CTRL0_PWRTARGET, level, allow_neg=True)
@@ -314,8 +300,6 @@ class CALC_AGC(ICalculator):
         if period > 15:
             period = 15
 
-        # Minimum RSSIPERIOD field value is 1 corresponding to a period of 2
-        # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-851
         if period < 1:
             period = 1
 
@@ -497,7 +481,6 @@ class CALC_AGC(ICalculator):
         agc_clock_cycle = model.vars.agc_clock_cycle.value
         fast_loop_delay = model.vars.fast_loop_delay.value
 
-        # TODO: add missing -1 to equation once verified
         delay = int(math.ceil(fast_loop_delay / agc_clock_cycle))
 
         if delay < 0:
@@ -517,7 +500,6 @@ class CALC_AGC(ICalculator):
         agc_clock_cycle = model.vars.agc_clock_cycle.value
         lna_slices_delay = model.vars.lna_slices_delay.value
 
-        # TODO: add missing -1 to equation once verified
         delay = int(math.ceil(lna_slices_delay / agc_clock_cycle))
 
         if delay < 0:
@@ -537,7 +519,6 @@ class CALC_AGC(ICalculator):
         agc_clock_cycle = model.vars.agc_clock_cycle.value
         if_pga_delay = model.vars.if_pga_delay.value
 
-        # TODO: add missing -1 to equation once verified
         delay = int(math.ceil(if_pga_delay / agc_clock_cycle))
 
         if delay < 0:
@@ -549,7 +530,6 @@ class CALC_AGC(ICalculator):
 
     def calc_rssi_period_actual(self, model):
 
-        #Read in the RSSI period register and take 2 to that power to compute the symbols in the period
         rssi_period_reg = model.vars.AGC_CTRL1_RSSIPERIOD.value
         rssi_period_sym_actual = 2**rssi_period_reg
 

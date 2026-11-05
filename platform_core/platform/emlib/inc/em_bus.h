@@ -31,7 +31,7 @@
 #ifndef EM_BUS_H
 #define EM_BUS_H
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_core.h"
 #include "em_device.h"
 
@@ -142,7 +142,7 @@ __STATIC_INLINE void BUS_RegBitWrite(volatile uint32_t *addr,
                                      unsigned int bit,
                                      unsigned int val)
 {
-  EFM_ASSERT(bit < 32U);
+  SL_LOG_DEBUG_ASSERT(bit < 32U);
 #if defined(PER_REG_BLOCK_SET_OFFSET) && defined(PER_REG_BLOCK_CLR_OFFSET)
   uint32_t aliasAddr;
   if (val != 0U) {
@@ -309,7 +309,7 @@ __STATIC_INLINE void BUS_RegMaskedWrite(volatile uint32_t *addr,
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_CRITICAL();
-  EFM_ASSERT(addr != 0);
+  SL_LOG_DEBUG_ASSERT(addr != 0);
   *addr = (*addr & ~mask) | (val & mask);
 
   CORE_EXIT_CRITICAL();

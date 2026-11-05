@@ -974,7 +974,7 @@ psa_status_t psa_crypto_local_output_free(psa_crypto_local_output_t *local_outpu
  * On success, the key slot is locked. It is the caller's responsibility
  * to unlock it when done via psa_unregister_read().
  */
- psa_status_t psa_get_and_lock_key_slot_with_policy(
+psa_status_t psa_get_and_lock_key_slot_with_policy(
     mbedtls_svc_key_id_t key,
     psa_key_slot_t **p_slot,
     psa_key_usage_t usage,

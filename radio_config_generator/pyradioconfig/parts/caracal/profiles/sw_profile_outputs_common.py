@@ -2,5 +2,4 @@ from pyradioconfig.parts.bobcat.profiles.sw_profile_outputs_common import sw_pro
 
 
 class sw_profile_outputs_common_caracal(sw_profile_outputs_common_bobcat):
-    # Inherit all profile outputs for now
     pass

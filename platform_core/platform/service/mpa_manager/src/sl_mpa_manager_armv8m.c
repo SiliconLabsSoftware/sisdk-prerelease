@@ -38,6 +38,7 @@
 
 #include <stdbool.h>
 
+#include "sl_log_helper.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -347,7 +348,7 @@ static mpu_attribute_t map_region_attribute_to_mpu_attribute(sl_mpa_manager_attr
 
     case SL_MPA_MANAGER_ATTRIBUTE_MAX:
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       break;
   }
 

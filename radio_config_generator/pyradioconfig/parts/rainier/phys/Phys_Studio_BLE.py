@@ -1,13 +1,13 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
+from pycalcmodel.core.common import IPCategory
+
 
 
 class PhysStudioBLERainier(IPhy):
 
-    def _set_xtal_frequency(self, phy, xtal_freq=None):
-        if xtal_freq is None:
-            phy.profile_inputs.xtal_frequency_hz.value = 38400000
-        else:
-            phy.profile_inputs.xtal_frequency_hz.value = xtal_freq
+    ip_category = IPCategory.LPW
+
+    default_xtal_frequency_hz = 38400000
 
     def PHY_Bluetooth_LE_1M_prod(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.BLE, readable_name='Production BLE 1Mbps PHY', phy_name=phy_name)

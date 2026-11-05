@@ -19,6 +19,13 @@ extern "C" {
 #endif
 
 /**
+ * @addtogroup ZWaveAPI Z-Wave API
+ * @{
+ * @addtogroup ProductInfos Product Identity and Version
+ * @{
+ */
+
+/**
  * @brief Product identity fields derived from application metadata.
  */
 typedef struct {
@@ -42,6 +49,11 @@ void zw_product_infos_get_product_id(zw_version_product_id_t *product_id);
  * @brief Raw application version word (vendor layout; typically major/minor/patch packed).
  */
 uint32_t zw_product_infos_get_app_version(void);
+
+/**
+ * @}
+ * @}
+ */
 
 #ifdef __cplusplus
 }

@@ -31,6 +31,7 @@
 #include "em_vdac.h"
 #if defined(VDAC_COUNT) && (VDAC_COUNT > 0)
 #include "em_cmu.h"
+#include "sl_log_helper.h"
 
 /***************************************************************************//**
  * @addtogroup vdac VDAC - Voltage DAC
@@ -113,8 +114,8 @@ static void VDAC_DisableModule(VDAC_TypeDef* vdac)
  ******************************************************************************/
 void VDAC_Enable(VDAC_TypeDef *vdac, unsigned int ch, bool enable)
 {
-  EFM_ASSERT(VDAC_REF_VALID(vdac));
-  EFM_ASSERT(VDAC_CH_VALID(ch));
+  SL_LOG_DEBUG_ASSERT(VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(VDAC_CH_VALID(ch));
 
 #if defined(_VDAC_STATUS_SYNCBUSY_MASK)
   while (vdac->STATUS & VDAC_STATUS_SYNCBUSY) {
@@ -181,7 +182,7 @@ void VDAC_Enable(VDAC_TypeDef *vdac, unsigned int ch, bool enable)
  ******************************************************************************/
 void VDAC_Init(VDAC_TypeDef *vdac, const VDAC_Init_TypeDef *init)
 {
-  EFM_ASSERT(VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(VDAC_REF_VALID(vdac));
   uint32_t config = 0;
 
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
@@ -318,8 +319,8 @@ void VDAC_InitChannel(VDAC_TypeDef *vdac,
 {
   uint32_t channelConfig, vdacStatus;
 
-  EFM_ASSERT(VDAC_REF_VALID(vdac));
-  EFM_ASSERT(VDAC_CH_VALID(ch));
+  SL_LOG_DEBUG_ASSERT(VDAC_REF_VALID(vdac));
+  SL_LOG_DEBUG_ASSERT(VDAC_CH_VALID(ch));
 
   vdacStatus = vdac->STATUS;
 
@@ -435,7 +436,7 @@ void VDAC_ChannelOutputSet(VDAC_TypeDef *vdac,
       VDAC_Channel1OutputSet(vdac, value);
       break;
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 }
@@ -555,7 +556,7 @@ uint32_t VDAC_PrescaleCalc(VDAC_TypeDef *vdac, uint32_t vdacFreq)
   }
 #endif
   else {
-    EFM_ASSERT(0);
+    SL_LOG_DEBUG_ASSERT(0);
   }
 
   /* Iterate to determine the best prescaler value. Start with the lowest */

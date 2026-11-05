@@ -5,12 +5,9 @@ class Calc_Frame_Sol(CALC_Frame_ocelot):
     def _configure_variable_length(self, model):
         demod_select = model.vars.demod_select.value
 
-        # Call old calculation first
         super(Calc_Frame_Sol, self)._configure_variable_length(model)
 
         if demod_select == model.vars.demod_select.var_enum.SOFT_DEMOD:
-            # Set FRC_DFLCTRL_DFLMODE to DISABLE mode for Soft Modem modulations
-            # Preserving all other settings as they are still used by packet generator
             self._reg_write(model.vars.FRC_DFLCTRL_DFLMODE, 0)
 
     def _fixed_length_no_header(self, model):
@@ -20,10 +17,8 @@ class Calc_Frame_Sol(CALC_Frame_ocelot):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # call function as defined in super class
         super()._fixed_length_no_header(model)
 
-        # for soft modem FSK overwrite FCD0 settings
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_FSK:
             fcdDict = {
@@ -45,7 +40,6 @@ class Calc_Frame_Sol(CALC_Frame_ocelot):
         Args:
             model (ModelRoot) : Data model to read and write variables from
         """
-        # handle special case for soft modem FSK otherwise call super class method
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_FSK:
             self._calc_frame_length_defaults(model)
@@ -56,7 +50,6 @@ class Calc_Frame_Sol(CALC_Frame_ocelot):
         return
 
     def calc_softmodem_frame_dont_cares(self, model):
-        # This method sets all of the FCDx fields to do not care for softmodem PHYs
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         dual_fefilt = model.vars.dual_fefilt.value
 

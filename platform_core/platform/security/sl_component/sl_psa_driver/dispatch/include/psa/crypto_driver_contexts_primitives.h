@@ -167,6 +167,9 @@ typedef union {
 #if defined(SLI_SHA_DEVICE_SI91X)
     sli_si91x_crypto_sha_operation_t sli_si91x_crypto_sha_ctx;
 #endif /* SLI_SHA_DEVICE_SI91X */
+#if defined(SLI_SHA3_DEVICE_SI91X)
+    sli_si91x_crypto_sha3_operation_t sli_si91x_crypto_sha3_ctx;
+#endif /* SLI_SHA3_DEVICE_SI91X */
 #endif
 } psa_driver_hash_context_t;
 

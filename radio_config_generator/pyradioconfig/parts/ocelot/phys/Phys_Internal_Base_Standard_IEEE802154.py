@@ -6,21 +6,11 @@ from py_2_and_3_compatibility import *
 
 
 class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lynx):
-    # For now, inherit all from Lynx
 
-    # Manual copy/paste of sub-GHz 802.15.4 PHYs from Jumbo
-    # These do not inherit from Lynx, as Lynx excludes sub-GHz
-    #
-    # Useful to copy here as many register overrides do not exist on Series 2
 
-    def _set_xtal_frequency(self, phy, xtal_freq=None):
-        if xtal_freq is None:
-            phy.profile_inputs.xtal_frequency_hz.value = 38400000
-        else:
-            phy.profile_inputs.xtal_frequency_hz.value = xtal_freq
+    default_xtal_frequency_hz = 38400000
 
     def IEEE802154_Base(self, phy, model):
-        # Inputs
         phy.profile_inputs.diff_encoding_mode.value = model.vars.diff_encoding_mode.var_enum.DISABLED
         phy.profile_inputs.fsk_symbol_map.value = model.vars.fsk_symbol_map.var_enum.MAP0
         phy.profile_inputs.preamble_pattern.value = 0
@@ -34,7 +24,6 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
         self._set_xtal_frequency(phy)
 
-        # Add 15.4 Packet Configuration
         PHY_COMMON_FRAME_154(phy, model)
 
         self._part_specific_phy_overrides(phy, model)
@@ -72,7 +61,6 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         return phy
 
     def IEEE802154_915MHz_OQPSK(self, phy, model):
-        #phy.profile_inputs.agc_power_target.value = -15 # : TODO remove
         phy.profile_inputs.bandwidth_hz.value = 1262400
         phy.profile_inputs.base_frequency_hz.value = long(906000000)
         phy.profile_inputs.baudrate_tol_ppm.value = 8000
@@ -88,7 +76,6 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.preamble_length.value = 32
         phy.profile_inputs.preamble_pattern.value = 0
         phy.profile_inputs.preamble_pattern_len.value = 4
-        #phy.profile_inputs.rssi_period.value = 7 # : TODO remove
         phy.profile_inputs.rx_xtal_error_ppm.value = 25
         phy.profile_inputs.shaping_filter.value = model.vars.shaping_filter.var_enum.Custom_OQPSK
         phy.profile_inputs.shaping_filter_param.value = 0.0
@@ -96,12 +83,9 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.syncword_0.value = long(0xe5)
         phy.profile_inputs.syncword_1.value = long(0x0)
         phy.profile_inputs.syncword_length.value = 8
-        #phy.profile_inputs.timing_detection_threshold.value = 35 # : TODO remove
-        #phy.profile_inputs.timing_sample_threshold.value = 0 # : TODO remove
         phy.profile_inputs.tx_xtal_error_ppm.value = 25
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy, xtal_freq_hz=39000000)
 
-        # Add 15.4 Packet Configuration
         PHY_COMMON_FRAME_154(phy, model)
 
 
@@ -121,46 +105,8 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.deviation.value = 250000
         phy.profile_inputs.demod_select.value = model.vars.demod_select.var_enum.COHERENT
         phy.profile_inputs.timing_detection_threshold.value = 35
-        #phy.profile_outputs.AGC_AGCPERIOD0_MAXHICNTTHD.override = 13
-        #phy.profile_outputs.AGC_AGCPERIOD0_PERIODHI.override = 14
-        #phy.profile_outputs.AGC_AGCPERIOD1_PERIODLOW.override = 42
-        #phy.profile_outputs.AGC_AGCPERIOD0_SETTLETIMERF.override = 14
-        # phy.profile_outputs.AGC_CTRL0_DISPNGAINUP.override = 0
-        # phy.profile_outputs.AGC_CTRL0_MODE.override = 2
         phy.profile_outputs.AGC_CTRL0_PWRTARGET.override = 20
         phy.profile_outputs.AGC_CTRL1_RSSIPERIOD.override = 3
-        # phy.profile_outputs.AGC_CTRL2_REHICNTTHD.override = 7
-        # phy.profile_outputs.AGC_CTRL2_SAFEMODE.override = 0
-        # phy.profile_outputs.AGC_CTRL2_SAFEMODETHD.override = 3
-        # phy.profile_outputs.AGC_CTRL3_IFPKDDEB.override = 1
-        # phy.profile_outputs.AGC_CTRL3_IFPKDDEBPRD.override = 40
-        # phy.profile_outputs.AGC_CTRL3_IFPKDDEBRST.override = 10
-        # phy.profile_outputs.AGC_CTRL3_IFPKDDEBTHD.override = 1
-        # phy.profile_outputs.AGC_CTRL3_RFPKDDEB.override = 0
-        # phy.profile_outputs.AGC_CTRL3_RFPKDDEBTHD.override = 1
-        # phy.profile_outputs.AGC_CTRL4_PERIODRFPKD.override = 4000
-        # phy.profile_outputs.AGC_CTRL4_RFPKDPRDGEAR.override = 4
-        # phy.profile_outputs.AGC_CTRL4_RFPKDSEL.override = 1
-        # phy.profile_outputs.AGC_CTRL4_RFPKDSYNCSEL.override = 1
-        # phy.profile_outputs.AGC_CTRL5_PNUPDISTHD.override = 32
-        # phy.profile_outputs.AGC_CTRL5_PNUPRELTHD.override = 4
-        # phy.profile_outputs.AGC_CTRL6_SEQRFPKDEN.override = 0
-        # phy.profile_outputs.AGC_GAINRANGE_BOOSTLNA.override = 1
-        # phy.profile_outputs.AGC_GAINRANGE_HIPWRTHD.override = 3
-        # phy.profile_outputs.AGC_GAINRANGE_LATCHEDHISTEP.override = 0
-        # phy.profile_outputs.AGC_GAINRANGE_PNGAINSTEP.override = 4
-        # phy.profile_outputs.AGC_GAINSTEPLIM0_CFLOOPDEL.override = 50
-        # phy.profile_outputs.AGC_GAINSTEPLIM0_HYST.override = 3
-        # phy.profile_outputs.AGC_HICNTREGION0_HICNTREGION0.override = 8
-        # phy.profile_outputs.AGC_HICNTREGION0_HICNTREGION1.override = 10
-        # phy.profile_outputs.AGC_HICNTREGION0_HICNTREGION2.override = 12
-        # phy.profile_outputs.AGC_HICNTREGION0_HICNTREGION3.override = 12
-        # phy.profile_outputs.AGC_HICNTREGION1_HICNTREGION4.override = 13
-        # phy.profile_outputs.AGC_MANGAIN_MANGAINIFPGA.override = 7
-        # phy.profile_outputs.AGC_MANGAIN_MANGAINLNA.override = 1
-        # phy.profile_outputs.AGC_MANGAIN_MANGAINPN.override = 1
-        # phy.profile_outputs.AGC_STEPDWN_STEPDWN2.override = 3
-        # phy.profile_outputs.AGC_STEPDWN_STEPDWN4.override = 3
         phy.profile_outputs.MODEM_AFCADJLIM_AFCADJLIM.override = 658
         phy.profile_outputs.MODEM_COH0_COHCHPWRTH1.override = 19
         phy.profile_outputs.MODEM_COH0_COHCHPWRTH2.override = 79
@@ -225,18 +171,11 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_outputs.MODEM_MODINDEX_FREQGAINE.override = 7
         phy.profile_outputs.MODEM_MODINDEX_FREQGAINM.override = 1
         phy.profile_outputs.MODEM_PRE_PREERRORS.override = 15
-        #phy.profile_outputs.MODEM_REALTIMCFE_MINCOSTTHD.override = 800
-        #phy.profile_outputs.MODEM_REALTIMCFE_RTCFEEN.override = 1
-        #phy.profile_outputs.MODEM_REALTIMCFE_RTSCHWIN.override = 10
-        #phy.profile_outputs.MODEM_REALTIMCFE_VTAFCFRAME.override = 1
         phy.profile_outputs.MODEM_TIMING_ADDTIMSEQ.override = 6
         phy.profile_outputs.MODEM_TIMING_OFFSUBDEN.override = 5
         phy.profile_outputs.MODEM_TIMING_OFFSUBNUM.override = 7
         phy.profile_outputs.MODEM_TIMING_TIMINGBASES.override = 3
         phy.profile_outputs.MODEM_TIMING_TIMTHRESH.override = 25
-        #phy.profile_outputs.MODEM_TRECPMDET_PMACQUINGWIN.override = 1
-        #phy.profile_outputs.MODEM_TRECPMDET_PMMINCOSTTHD.override = 120
-        #phy.profile_outputs.MODEM_TRECPMDET_PMTIMEOUTSEL.override = 2
         phy.profile_outputs.MODEM_CTRL1_RESYNCPER.override = 1
         phy.profile_outputs.MODEM_LONGRANGE1_PREFILTLEN.override = 1
         phy.profile_outputs.MODEM_PREFILTCOEFF_PREFILTCOEFF.override = 2736235287
@@ -264,8 +203,6 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
 
         return phy
 
-    # Owner: Young-Joon Choi
-    # Jira Link: https://jira.silabs.com/browse/PGOCELOTVALTEST-161
     def PHY_IEEE802154_868MHz_OQPSK_coh(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='IEEE 802.15.4 868MHz OQPSK Coherent Demod',
                             phy_name=phy_name)
@@ -282,12 +219,10 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_outputs.MODEM_COH3_COHDSACMPLX.override = 1
 
         """ Channel Power Accumulator Setting """
-        # : Average and delay
         phy.profile_outputs.MODEM_LONGRANGE1_AVGWIN.override = 1
         phy.profile_outputs.MODEM_LONGRANGE1_CHPWRACCUDEL.override = 0
 
         """ BBSS """
-        # : BBSS Channel Power Thresholds
         phy.profile_outputs.MODEM_LONGRANGE2_LRCHPWRTH1.override = 12
         phy.profile_outputs.MODEM_LONGRANGE2_LRCHPWRTH2.override = 18
         phy.profile_outputs.MODEM_LONGRANGE2_LRCHPWRTH3.override = 28
@@ -300,7 +235,6 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_outputs.MODEM_LONGRANGE4_LRCHPWRTH10.override = 70
         phy.profile_outputs.MODEM_LONGRANGE6_LRCHPWRTH11.override = 78
 
-        # : BBSS lookup table
         phy.profile_outputs.MODEM_LONGRANGE4_LRCHPWRSH1.override = 2
         phy.profile_outputs.MODEM_LONGRANGE4_LRCHPWRSH2.override = 3
         phy.profile_outputs.MODEM_LONGRANGE4_LRCHPWRSH3.override = 4
@@ -315,42 +249,28 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_outputs.MODEM_LONGRANGE6_LRCHPWRSH12.override = 12
 
         """ Datafilter """
-        # : Per's recommended DATAFILTER value is 7; however, with cplxcorren =1, DATAFILTER = 4 gives improved sens.
         phy.profile_outputs.MODEM_CTRL2_DATAFILTER.override = 4
 
         """ DSA Prefilter """
         phy.profile_outputs.MODEM_PREFILTCOEFF_PREFILTCOEFF.override = 2736235287
 
         """ Coherent DSA Settings """
-        # : Enable coherent demodulator DSA
         phy.profile_outputs.MODEM_COH3_COHDSAEN.override = 1
         phy.profile_outputs.MODEM_COH3_CDSS.override = 4
 
-        # : This threshold determines whether to use fixed or dynamic threshold based on channel power.
-        # : > 128, FIXED DSA THRESHOLD ALWAYS
-        # : = 0  , DYNAMIC DSA THRESHOLD ALWAYS
-        # : 0 < x < 128, hybrid - for low channel power, use fixed threshold. For high channel power, use dynamic.
         phy.profile_outputs.MODEM_LONGRANGE6_LRCHPWRSPIKETH.override = 35
 
-        # : For FIXED DSA mode, this is the correlation threshold
         phy.profile_outputs.MODEM_LONGRANGE6_LRSPIKETHD.override = 120  # : below 130, floor issues
 
-        # : For dynamic DSA threshold, this is the baseline threshold. Threshold will increase in addition to this
-        # : baseline value dependent on the channel power.
         phy.profile_outputs.MODEM_COH2_FIXEDCDTHFORIIR.override = 120  # Above 120, blocking degradation
-        # : Coefficients for IIR, 0 -> 2^-3, 1 -> 2^-4, 2 -> 2^-5 , 3 -> 2^-6, Higher the value slower averaging.
         phy.profile_outputs.MODEM_COH3_DYNIIRCOEFOPTION.override = 3
 
         phy.profile_outputs.MODEM_COH3_PEAKCHKTIMOUT.override = 18
 
         """ Timing Detection Settings """
-        # : Offset between DSA and timing windows
-        # : Calculate as OSR*no_of_chips_per_sym*m
         phy.profile_outputs.MODEM_COH3_COHDSAADDWNDSIZE.override = 864  #-160 ( 864 = 2^10 - 160 )
 
         """ AFC """
-        # : Controls number of bauds to rewind after fixed window timing detection.
-        # : baudrate offset range is dependent on this value. Setting to 32 narrows baudrate offset range
         phy.profile_outputs.MODEM_CTRL6_TDREW.override = 64
 
         """ Dynamic Preamble / Sync """
@@ -404,16 +324,16 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_outputs.AGC_CTRL7_SUBNUM.override = 2
         phy.profile_outputs.AGC_CTRL7_SUBPERIOD.override = 1
         phy.profile_outputs.AGC_GAINSTEPLIM0_CFLOOPSTEPMAX.override = 4
-        # Not present in Series 2
-        # phy.profile_outputs.AGC_LOOPDEL_LNASLICESDEL.override = 4
         phy.profile_outputs.MODEM_CTRL2_DATAFILTER.override = 0
         phy.profile_outputs.MODEM_TIMING_FASTRESYNC.override = 1
         phy.profile_outputs.MODEM_CTRL4_PREDISTDEB.override = 1
         phy.profile_outputs.MODEM_CTRL4_PREDISTGAIN.override = 3
 
-        phy.profile_outputs.SEQ_MISC_DIG_RAMP_EN.override = 1
-
+        self.add_seq_reg_overrides(phy)
         return phy
+
+    def add_seq_reg_overrides(self, phy):
+        phy.profile_outputs.SEQ_MISC_DIG_RAMP_EN.override = 1
 
     def PHY_IEEE802154_915MHz_BPSK_40kbps(self, model, phy_name=None):
         phy = self.PHY_IEEE802154_868MHz_BPSK(model, 'PHY_IEEE802154_915MHz_BPSK_40kbps')
@@ -437,15 +357,12 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.syncword_length.value = 8
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy, xtal_freq_hz=39000000)
 
-        # Add 15.4 Packet Configuration
         PHY_COMMON_FRAME_154(phy, model)
 
         self._part_specific_phy_overrides(phy, model)
 
-        # Mandatory to use model.vars.demod_select to force the coherent demodulator, otherwise LEGACY
-        # Cannot use profile_inputs because hidden inputs
         model.vars.demod_select.value_forced = model.vars.demod_select.var_enum.COHERENT
 
         phy.profile_inputs.base_frequency_hz.value = long(868_300_000)
@@ -467,23 +384,17 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.tx_xtal_error_ppm.value = 20
         phy.profile_inputs.preamble_pattern_len.value = 1
 
-        # Mandatory to enable static threshold to avoid false detection after the sync word
         model.vars.MODEM_SYNCPROPERTIES_STATICSYNCTHRESHEN.value_forced = 1  # Add static sync threadhold
         model.vars.MODEM_SYNCPROPERTIES_STATICSYNCTHRESH.value_forced = 40  # Static sync threshold = STATICSYNCTHRESH *2^TIMTHRESHGAIN
 
         """ Channel Power Accumulator Setting """
-        # : Average and delay
-        # model.vars.MODEM_LONGRANGE1_PREFILTEN.value_forced = 1 # DSA prefilter length
-        # model.vars.MODEM_LONGRANGE1_LRSPIKETHADD.value_forced = 0  # DSA
         model.vars.MODEM_LONGRANGE1_AVGWIN.value_forced = 4  # Average window for channel power estimation
         model.vars.MODEM_LONGRANGE1_CHPWRACCUDEL.value_forced = 0  # Use accumulated channel power value, 0 -> DEL0 (no delay) floor(timing_window_actual*2/(2^(AVGWIN+2+PWRPERIOD)))
         model.vars.MODEM_LONGRANGE1_HYSVAL.value_forced = 3  # Hysteresis Value for BBSS
 
         """ BBSS """
-        # : BBSS Channel Power Thresholds
         starting_LRCHPWRTH = 16  # BEST VALUE
         shifting_LRCHPWRTH = 8
-        # Threshold for LRCHPWRSH
         model.vars.MODEM_LONGRANGE2_LRCHPWRTH1.value_forced = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 2)  # 32 -> -105 dBm
         model.vars.MODEM_LONGRANGE2_LRCHPWRTH2.value_forced = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 3)  # 40 -> -97 dBm
         model.vars.MODEM_LONGRANGE2_LRCHPWRTH3.value_forced = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 4)  # 48 -> -89 dBm
@@ -496,7 +407,6 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         model.vars.MODEM_LONGRANGE4_LRCHPWRTH10.value_forced = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 11) + 4 # 104 -> -33 dBm
         model.vars.MODEM_LONGRANGE6_LRCHPWRTH11.value_forced = starting_LRCHPWRTH + (shifting_LRCHPWRTH * 12)  # 112-> -27 dBm
 
-        # : BBSS lookup table
         starting_LRCHPWRSH = 3  # BEST VALUE, add one to increase sensibility
         model.vars.MODEM_LONGRANGE4_LRCHPWRSH1.value_forced = starting_LRCHPWRSH + 2  # Take this value if LRCHPWRTH1 > CHPWR
         model.vars.MODEM_LONGRANGE4_LRCHPWRSH2.value_forced = starting_LRCHPWRSH + 3  # Take this value if LRCHPWRTH2 > CHPWR > LRCHPWRTH1
@@ -511,12 +421,9 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         model.vars.MODEM_LONGRANGE5_LRCHPWRSH11.value_forced = starting_LRCHPWRSH + 12  # Take this value if LRCHPWRTH11 > CHPWR > LRCHPWRTH10
         model.vars.MODEM_LONGRANGE6_LRCHPWRSH12.value_forced = starting_LRCHPWRSH + 12  # : removes floor issue at high power max 15
 
-        # : This threshold determines whether to use fixed or dynamic threshold based on channel power.
         model.vars.MODEM_LONGRANGE6_LRCHPWRSPIKETH.value_forced = 70  # DSA setting
-        # : For FIXED DSA mode, this is the correlation threshold
         model.vars.MODEM_LONGRANGE6_LRSPIKETHD.value_forced = 40  # Below 130, floor issues DSA setting
 
-        # base_value = -138dBm
         model.vars.MODEM_COH0_COHCHPWRTH0.value_forced = 25  # Channel power boundary between SYNCTHRESH 0 and 1
         model.vars.MODEM_COH0_COHCHPWRTH1.value_forced = 64  # Channel power boundary between SYNCTHRESH 1 and 2
         model.vars.MODEM_COH0_COHCHPWRTH2.value_forced = 127  # Channel power boundary between SYNCTHRESH 2 and 3
@@ -537,8 +444,6 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         model.vars.MODEM_COH2_SYNCTHRESHDELTA1.value_forced = 1  # COHCHPWRTH0 < x < COHCHPWRTH1
         model.vars.MODEM_COH2_SYNCTHRESHDELTA2.value_forced = 1  # COHCHPWRTH1 < x < COHCHPWRTH2
         model.vars.MODEM_COH2_SYNCTHRESHDELTA3.value_forced = 1  # > COHCHPWRTH2
-        # : For dynamic DSA threshold, this is the baseline threshold. Threshold will increase in addition to this
-        # : baseline value dependent on the channel power.
         model.vars.MODEM_COH2_FIXEDCDTHFORIIR.value_forced = 70  # Above 120, blocking degradation Coherent DSA Settings
 
         model.vars.MODEM_COH3_COHDSAEN.value_forced = 0  # Coherent DSA Settings
@@ -554,7 +459,6 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         model.vars.MODEM_CTRL1_FREQOFFESTLIM.value_forced = 0  # Limit for frequency offset compensation
         model.vars.MODEM_CTRL1_FREQOFFESTPER.value_forced = 0  # Frequency offset estimation/compensation update period is 2^FREQOFFESTPER windows
         model.vars.MODEM_CTRL1_COMPMODE.value_forced = 1  # Enable compensation
-        # Defines the timing resynchronization period. The timing update interval is RESYNCPER times the length of the timing sequence defined by TIMINGBASES
         model.vars.MODEM_CTRL1_RESYNCPER.value_forced = 2  # Defines the timing resynchronization period
 
         model.vars.MODEM_CTRL2_DATAFILTER.value_forced = 4  # Coherent detection is enabled
@@ -569,7 +473,6 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
 
         model.vars.MODEM_CTRL5_DSSSCTD.value_forced = 1  # After preamble detection, only detected symbol is used to qualify a valid preamble 4/bits-per-symbol
         model.vars.MODEM_CTRL5_POEPER.value_forced = 4  # Controls the POE period in number of DSSS symbols
-        # Calibration baud rate during the preamble (earn many of tolerance)
         model.vars.MODEM_CTRL5_BRCALEN.value_forced = 0  # Loop BR enable
         model.vars.MODEM_CTRL5_BRCALMODE.value_forced = 0  # slopes et zeros (robustness)
         model.vars.MODEM_CTRL5_BRCALAVG.value_forced = 0  # Moderate average
@@ -583,15 +486,12 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         model.vars.MODEM_CTRL6_ARW.value_forced = 1  # If the difference between the end of next window and the current write address is less than half the RAM size
         model.vars.MODEM_CTRL6_TDREW.value_forced = 60  # Controls number of bauds to rewind after Fixed Window Timing Detection = timingbases*dsss_len*2/3
         model.vars.MODEM_CTRL6_CPLXCORREN.value_forced = 0  # Set if freq_limit > baudrate/8
-        # Timing threshold = TIMTHRESH * 2^TIMTHRESHGAIN && sync threshold = STATICSYNCTHRESH * 2^TIMTHRESHGAIN
         model.vars.MODEM_CTRL6_PSTIMABORT0.value_forced = 1  # Timing is aborted during preamble search if maximum correlation is much higher than preamble correlation used for timing detection
         model.vars.MODEM_CTRL6_PSTIMABORT1.value_forced = 1  # Timing is aborted during preamble search if maximum correlation is not equal to current preamble correlation
         model.vars.MODEM_CTRL6_PSTIMABORT2.value_forced = 1  # Timing is aborted during preamble search if current preamble correlation is much higher than preamble correlation used for timing detection
-        # Disable RX baudrate calculation used by AGC. Instead, assume OSR = 2 * RXBRFRAC
         model.vars.MODEM_CTRL6_RXBRCALCDIS.value_forced = 1  # DO NOT TOUCH
         model.vars.MODEM_CTRL6_PREBASES.value_forced = 8  # The window size can be set differently during Preamble Search than during Timing Search
 
-        # Remove the slope between -40 to -26 dBm
         model.vars.AGC_CTRL1_PWRPERIOD.value_forced = 4  # This value controls the AGC power measure period. The period is 2^AGCPERIOD subperiods
         model.vars.AGC_CTRL0_PWRTARGET.value_forced = 188  # This value controls the AGC power measure period. The period is 2^AGCPERIOD subperiods
         model.vars.AGC_CTRL1_RSSIPERIOD.value_forced = 3  # The period is defined as 2^RSSIPERIOD subperiods
@@ -617,32 +517,23 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         model.vars.MODEM_INTAFC_FOEPREAVG2.value_forced = 4  # Frequency Offset Estimate Pre-Averaging for third estimate
         model.vars.MODEM_INTAFC_FOEPREAVG3.value_forced = 4  # Frequency Offset Estimate Pre-Averaging for fourth estimate
 
-        # This is the maximum limit for AFC adjustment in RX and TX. The limit in Hz is AFCADJLIM * Synthesizer resolution.
-        # If the register is set to 0, the limit is disabled.
         model.vars.MODEM_AFCADJLIM_AFCADJLIM.value_forced = 0  # Set to freq_limit*baudrate/2^13 with freq_limit=freq_offset_hz
 
-        # : Controls additional offset averaging state for timing search and AFC.
-        # : Additional windows averages over OFFSUBNUM/OFFSUBDEN samples to avoid DC balance issue
-        # : MUST BE SET MANUALLY! NO CALCULATOR SUPPORT AVAILABLE FOR COH PHY
-        # AFC update period = 2^AFCAVGPER × (OFFSUBNUM/OFFSUBDEN)
         model.vars.MODEM_TIMING_OFFSUBNUM.value_forced = 8
         model.vars.MODEM_TIMING_OFFSUBDEN.value_forced = 8
 
-        # this is the number of times the first aligned window is processed during Preamble Search. Number of FOC updates is ADDTIMSEQ/2
         model.vars.MODEM_TIMING_ADDTIMSEQ.value_forced = 8  # Number of additional timing sequences to detect a valid preamble. Number of FOC updates is ADDTIMSEQ/2
         model.vars.MODEM_TIMING_FASTRESYNC.value_forced = 1  # Allow fast timing resynchronization (RESYNCPER = 1) in first part of frame
         model.vars.MODEM_TIMING_TIMINGBASES.value_forced = 9  # Defines the timing sequence used for Timing Search
         model.vars.MODEM_TIMING_TIMTHRESH.value_forced = 105  # Timing threshold = TIMTHRESH * 2^TIMTHRESHGAIN
         model.vars.MODEM_CTRL6_TIMTHRESHGAIN.value_forced = 0  # Timing threshold = TIMTHRESH * 2^TIMTHRESHGAIN
 
-        # Tx override with digital ramping to be compliant on ACPR
         model.vars.MODEM_CTRL4_PREDISTDEB.value_forced = 1
         model.vars.MODEM_CTRL4_PREDISTGAIN.value_forced = 3
-        model.vars.SEQ_MISC_DIG_RAMP_EN.value_forced = 1
+        self.add_seq_reg_overrides(phy)
 
         return phy
 
-    # Jira Link: https://jira.silabs.com/browse/MCUW_RADIO_CFG-2755
     def PHY_IEEE802154_915MHz_BPSK_40kbps_coh(self, model, phy_name=None):
         phy = self.PHY_IEEE802154_868MHz_BPSK_20kbps_coh(model, phy_name=phy_name)
 
@@ -708,10 +599,7 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.syncword_1.value =  long(0x9af0)
         phy.profile_inputs.syncword_length.value = 16
         phy.profile_inputs.tx_xtal_error_ppm.value = 25
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
-        # FIXME:  temporary force bandwidth to (0.76+1)*500000*0.75 + 2*(25+25)*868
-        #phy.profile_inputs.bandwidth_hz.value = 650000
-        # FIXME:  temporary force KSI until calculated in py
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI1.override = 97
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI2.override = 65 #72 for forced bw=650000
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI3.override = 49 #50 for forced bw=650000
@@ -720,7 +608,6 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
 
     def IEEE802154_2p4GHz_cohdsa_base(self, phy, model):
         PHY_COMMON_FRAME_154(phy, model)
-        # Override min length for 802.15.4E Seq# Suppression
         phy.profile_inputs.var_length_minlength.value = 4
         Phy_Internal_Base.AGC_FAST_LOOP_base(phy, model)
         phy.profile_inputs.demod_select.value = model.vars.demod_select.var_enum.COHERENT
@@ -757,18 +644,15 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.timing_detection_threshold.value = 65
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        # phy.profile_inputs.xtal_frequency_hz.value = 38400000
         self._set_xtal_frequency(phy)
         phy.profile_inputs.target_osr.value = 5  # Calc SRC
 
-        # Additional overrides introduced when Series 2 AGC calculations added. These prevent the PHY from changing versus what was used during Validation.
 
         phy.profile_outputs.AGC_LNABOOST_LNABWADJ.override = 0
         phy.profile_outputs.AGC_CTRL0_PWRTARGET.override = 20
         phy.profile_outputs.AGC_CTRL1_PWRPERIOD.override = 4
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
         phy.profile_outputs.MODEM_AFC_AFCRXCLR.override = 1
-        #phy.profile_outputs.MODEM_AFC_AFCSCALEM.override = 3
         phy.profile_outputs.MODEM_AFCADJLIM_AFCADJLIM.override = 2750
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 0x1E00  # 9,10,11,12
         phy.profile_outputs.MODEM_COH0_COHCHPWRTH0.override = 33
@@ -809,7 +693,6 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_outputs.MODEM_CTRL6_TIMTHRESHGAIN.override = 2
         phy.profile_outputs.MODEM_DIGIGAINCTRL_DIGIGAINEN.override = 1
         phy.profile_outputs.MODEM_DIGIGAINCTRL_DIGIGAINSEL.override = 20
-        # phy.profile_outputs.MODEM_DIGMIXCTRL_DIGMIXFREQ.override = 150020 # Calc SRC
         phy.profile_outputs.MODEM_DSACTRL_ARRTHD.override = 4  # Was missed
         phy.profile_outputs.MODEM_INTAFC_FOEPREAVG0.override = 1
         phy.profile_outputs.MODEM_INTAFC_FOEPREAVG1.override = 3
@@ -844,13 +727,10 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_outputs.MODEM_LONGRANGE6_LRCHPWRSPIKETH.override = 40
         phy.profile_outputs.MODEM_LONGRANGE6_LRSPIKETHD.override = 105
 
-        # phy.profile_outputs.MODEM_SRCCHF_SRCRATIO2.override = 15689 # Calc SRC
         phy.profile_outputs.MODEM_TIMING_TIMTHRESH.override = 35
 
-        #phy.profile_outputs.RAC_PGACTRL_LNAMIXRFPKDTHRESHSEL.override = 2
         phy.profile_outputs.RAC_PGACTRL_PGATHRPKDHISEL.override = 5
         phy.profile_outputs.RAC_PGACTRL_PGATHRPKDLOSEL.override = 1
-        #phy.profile_outputs.RAC_SYNTHCTRL_MMDPOWERBALANCEDISABLE.override = 1
         phy.profile_outputs.RAC_SYNTHREGCTRL_MMDLDOVREFTRIM.override = 3
         phy.profile_outputs.RAC_PGACTRL_PGAENLATCHI.override = 1
         phy.profile_outputs.RAC_PGACTRL_PGAENLATCHQ.override = 1
@@ -859,8 +739,6 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_outputs.SYNTH_LPFCTRL1CAL_RFBVALCAL.override = 0
         phy.profile_outputs.SYNTH_LPFCTRL1CAL_RPVALCAL.override = 0
         phy.profile_outputs.SYNTH_LPFCTRL1CAL_RZVALCAL.override = 9
-        # Derived empirically
-        # https://confluence.silabs.com/display/RAIL/Panther+Weaksymbols+WifiBlocker+Characterization
         phy.profile_outputs.MODEM_CTRL2_SQITHRESH.override = 56
 
     def PHY_IEEE802154_2p4GHz_cohdsa(self, model, phy_name=None):
@@ -916,9 +794,7 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.baudrate_tol_ppm.value = 0
 
         PHY_COMMON_FRAME_154(phy, model)
-        # Override min length for 802.15.4E Seq# Suppression
         phy.profile_inputs.var_length_minlength.value = 4
-        # Phy_Internal_Base.AGC_FAST_LOOP_base(phy, model)
 
         """ Modulation """
         phy.profile_inputs.demod_select.value = model.vars.demod_select.var_enum.COHERENT
@@ -955,7 +831,7 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.syncword_length.value = 8
 
         """ XO Configuration """
-        phy.profile_inputs.xtal_frequency_hz.value = 39000000
+        self._set_xtal_frequency(phy, xtal_freq_hz=39000000)
         phy.profile_inputs.rx_xtal_error_ppm.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
 
@@ -1014,19 +890,13 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         """ For Ocelot, need to force adc clock mode to be same as bobcat """
         phy.profile_inputs.adc_clock_mode.value = model.vars.adc_clock_mode.var_enum.VCODIV
 
-        # Derived empirically to improve wifi blocking performance
-        # https://confluence.silabs.com/display/RAIL/Panther+Weaksymbols+WifiBlocker+Characterization
         phy.profile_outputs.MODEM_CTRL2_SQITHRESH.override = 56
 
-    # Owner : Young-Joon Choi
-    # Internal IEEE802154 PHY to check Bobcat PHY in Ocelot Silicon
     def PHY_Internal_IEEE802154_915MHz_cohdsa(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='802154 915 MHz cohdsa', phy_name=phy_name)
         self.IEEE802154_Internal_915MHz_cohdsa_base(phy, model)
         return phy
 
-    # Owner : Young-Joon Choi
-    # Internal IEEE802154 PHY to check Bobcat PHY Antenna Diversity in Ocelot Silicon
     def PHY_Internal_IEEE802154_915MHz_cohdsa_antdiv(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='802154 915 MHz cohdsa AntDiv', phy_name=phy_name)
         self.IEEE802154_Internal_915MHz_cohdsa_base(phy, model)

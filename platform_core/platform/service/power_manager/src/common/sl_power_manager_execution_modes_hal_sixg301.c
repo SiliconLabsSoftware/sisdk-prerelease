@@ -34,7 +34,7 @@
 #include "sl_power_manager.h"
 #include "sli_power_manager_execution_modes_private.h"
 #include "sli_clock_manager.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 
 /*******************************************************************************
  *******************************  DEFINES   ************************************
@@ -67,7 +67,8 @@ void sli_power_manager_hal_apply_performance_mode(void)
     HFXO0->CTRL_SET = HFXO_CTRL_FORCEEN;
   } else {
     sl_status_t status = slx_clock_manager_set_sysclk_source(EXECUTION_MODE_PERFORMANCE_CLOCK_SOURCE);
-    EFM_ASSERT(status == SL_STATUS_OK);
+    SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+    (void)status;
   }
 }
 
@@ -77,6 +78,7 @@ void sli_power_manager_hal_apply_performance_mode(void)
 void sli_power_manager_hal_apply_standard_mode(void)
 {
   sl_status_t status = slx_clock_manager_set_sysclk_source(EXECUTION_MODE_STANDARD_CLOCK_SOURCE);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 }
 #endif // SL_POWER_MANAGER_EXECUTION_MODES_FEATURE_EN

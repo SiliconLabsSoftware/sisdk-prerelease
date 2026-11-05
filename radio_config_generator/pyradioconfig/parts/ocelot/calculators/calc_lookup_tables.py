@@ -32,7 +32,6 @@ class CALC_LUT_ocelot(CALC_LUT):
             'coding_array': coding_array,
             'width': width
         })
-        # Create frame coding calculator using the interface
         calculator = FrameCodingLookupTable(
             input_parameters=input_parameters
         )

@@ -4,18 +4,14 @@ class Calc_AGC_Bobcat(CALC_AGC_ocelot):
 
     def calc_pnupdisthd_reg(self, model):
 
-        # MCUW_RADIO_CFG-1856: Set PNUPDISTHD to 0 When Using RFPKD to Prevent AGC chattering at after PN exhaustion
-        # only acceptable to set to 0 when dual RFPKD THD can release the disgainup
         self._reg_write(model.vars.AGC_CTRL5_PNUPDISTHD, 0)
 
     def calc_lnamixrfatt_reg(self, model):
 
-        #Values from Sanjeev Suresh
 
         lnamixrfatt = [0, 1, 2, 4, 6, 8, 11, 15, 18, 24, 31, 33, 47, 63, 110, 127]
         pnindexmax = 16 # Set to 16 to allow for max pn attenuator to handle wifi blockers
 
-        #Write registers
         self._reg_write(model.vars.AGC_PNRFATT0_LNAMIXRFATT1, lnamixrfatt[0])
         self._reg_write(model.vars.AGC_PNRFATT0_LNAMIXRFATT2, lnamixrfatt[1])
         self._reg_write(model.vars.AGC_PNRFATT0_LNAMIXRFATT3, lnamixrfatt[2])
@@ -87,7 +83,6 @@ class Calc_AGC_Bobcat(CALC_AGC_ocelot):
 
         debouncecntthd = 40 # : Recommended value by He Gou
 
-        # : If antenna diversity mode is 0 (disabled) or 1 (antenna 1 fixed), then debouncecntthd is not used
         if antdivmode == 0 or \
                 antdivmode == 1:
             self._reg_do_not_care(model.vars.AGC_ANTDIV_DEBOUNCECNTTHD)

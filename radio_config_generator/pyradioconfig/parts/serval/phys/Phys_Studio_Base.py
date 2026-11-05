@@ -1,8 +1,11 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from pyradioconfig.parts.margay.phys.Phys_Studio_Base import PHYS_Studio_Base_Margay
+from pycalcmodel.core.common import IPCategory
 
 
 class PHYS_Studio_Base_Serval(IPhy):
+
+    ip_category = IPCategory.LPW
 
     def PHY_Datasheet_169M_2GFSK_2p4Kbps_1p2K_ETSI(self, model):
         phy = PHYS_Studio_Base_Margay().PHY_Datasheet_169M_2GFSK_2p4Kbps_1p2K_ETSI(model)

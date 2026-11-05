@@ -28,13 +28,15 @@ requires:
 - name: sleeptimer
 - name: hal_prs
 - name: clock_manager_runtime
+- name: wisun_ffn_power_saving_implementation
 
 recommends:
 - id: rail_lib_singleprotocol
+  vendor: silabs
+- id: wisun_ffn_power_saving_stubs
 
   vendor: silabs
 define:
-- name: "HAVE_LFN_PARENT"
 - name: "HAVE_ROUTER"
 - name: "HAVE_MODE_SWITCH"
 - name: "MBED_CONF_NANOSTACK_CONFIGURATION"

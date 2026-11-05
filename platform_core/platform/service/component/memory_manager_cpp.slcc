@@ -18,6 +18,7 @@ source:
 provides:
 - name: memory_manager_cpp
 requires:
+- name: log_none
 - name: memory_manager
 - name: cpp_support
 toolchain_settings:

@@ -5,6 +5,12 @@ description: >
   Source files mandatory for end devices.
   This component contains source files from all command clases that cannot be removed from the app,
   regardless if specific command Class component has been installed or not.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/device-reset-locally
+  - page: zwave-api/indicator
+
 package: zwave
 quality: production
 metadata:

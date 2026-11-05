@@ -65,7 +65,7 @@ static inline sl_hal_eusart_hw_flow_control_t uart_hwfc_to_eusart_hal_hwfc(sl_ua
     case SL_UART_FLOW_CONTROL_SOFT:
       return SL_HAL_EUSART_HW_FLOW_CONTROL_NONE;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_EUSART_HW_FLOW_CONTROL_NONE;
   }
 }
@@ -83,7 +83,7 @@ static inline sl_hal_eusart_parity_t uart_parity_to_eusart_hal_parity(sl_uart_pa
     case SL_UART_PARITY_EVEN:
       return SL_HAL_EUSART_EVEN_PARITY;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_EUSART_NO_PARITY;
   }
 }
@@ -103,7 +103,7 @@ static inline sl_hal_eusart_stop_bits_t uart_stop_bits_to_eusart_hal_stop_bits(s
     case SL_UART_STOP_BITS_2:
       return SL_HAL_EUSART_STOP_BITS_2;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_EUSART_STOP_BITS_1;
   }
 }
@@ -122,7 +122,7 @@ static inline sl_hal_eusart_ovs_t uart_oversampling_to_eusart_hal_oversampling(s
     case SL_UART_OVERSAMPLING_16:
       return SL_HAL_EUSART_OVS_16;
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_EUSART_OVS_16;
   }
 }
@@ -164,7 +164,7 @@ static inline sl_hal_eusart_data_bits_t uart_data_bits_to_eusart_hal_data_bits(s
     case SL_UART_DATA_BITS_16:
     #endif
     default:
-      EFM_ASSERT(false);
+      SL_LOG_DEBUG_ASSERT(false);
       return SL_HAL_EUSART_DATA_BITS_8;
   }
 }
@@ -189,7 +189,8 @@ static inline bool eusart_uart_is_lf_mode(EUSART_TypeDef *eusart,
   }
 
   sl_status_t status = sl_clock_manager_get_oscillator_frequency(SL_OSCILLATOR_LFRCO, &lf_freq);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
 #if defined(EUSART_PRESENT)
   lf_periph = (eusart == EUSART0);
@@ -217,7 +218,7 @@ static void eusart_uart_init_transport_pins(sl_peripheral_t uart, const sl_uart_
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(uart);
   GPIO_EUSARTROUTE_TypeDef *route = eusart_uart_get_gpio_route(eusart);
-  EFM_ASSERT(route != NULL);
+  SL_LOG_DEBUG_ASSERT(route != NULL);
 
   route->TXROUTE = (pin_config->tx.port << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
                    | (pin_config->tx.pin << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
@@ -589,7 +590,8 @@ static sl_power_manager_em_t eusart_uart_get_em_requirement(sl_peripheral_t uart
   uint32_t freq;
 
   status = sl_clock_manager_get_clock_branch_frequency(clock_branch, &freq);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   bool lf = eusart_uart_is_lf_mode(eusart, config, freq);
 

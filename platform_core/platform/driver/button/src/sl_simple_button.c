@@ -31,6 +31,7 @@
 #include "sl_simple_button.h"
 #include "sl_simple_button_config.h"
 #include "sl_clock_manager.h"
+#include "sl_log_helper.h"
 
 #if (SL_SIMPLE_BUTTON_DEBOUNCE_BITS < 1U)
 #undef SL_SIMPLE_BUTTON_DEBOUNCE_BITS
@@ -108,7 +109,8 @@ sl_status_t sl_simple_button_init(const sl_button_t *handle)
                                                     SL_GPIO_INTERRUPT_RISING_FALLING_EDGE,
                                                     (sl_gpio_irq_callback_t)sli_simple_button_on_change,
                                                     button);
-      EFM_ASSERT(status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+      (void)status;
     } else {
       // If the pin is EM4WU-compatible, setup the pin as an EM4WU pin
       // Since EM4WU interrupts are level-sensitive and not edge-sensitive, also register a regular edge-sensitive interrupt to capture the other edge
@@ -123,7 +125,8 @@ sl_status_t sl_simple_button_init(const sl_button_t *handle)
                                                     flags,
                                                     (sl_gpio_irq_callback_t)sli_simple_button_on_change,
                                                     button);
-      EFM_ASSERT(status == SL_STATUS_OK);
+      SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+      (void)status;
     }
   }
 

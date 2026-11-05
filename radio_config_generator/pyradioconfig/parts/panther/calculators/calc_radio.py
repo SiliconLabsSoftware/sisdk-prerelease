@@ -7,7 +7,6 @@ Calculator functions must start with "calc_", if they are to be consumed by the 
 """
 
 from collections import OrderedDict
-# import math
 from enum import Enum
 from pyradioconfig.calculator_model_framework.interfaces.icalculator import ICalculator
 from pycalcmodel.core.variable import ModelVariableFormat, CreateModelVariableEnum
@@ -35,14 +34,10 @@ class CALC_Radio_panther(CALC_Radio):
         bw_analog = model.vars.iffilt_bandwidth_actual.value
         bw_digital = model.vars.bandwidth_hz.value  # Can not use actual bandwidth here, because it depends on fxo_or_fdec8
 
-        # loop over all possible center frequencies the analog filter
-        # can be centered around given analog filter bandwidths
         for ratio_reg, ratio in self.iffilt_ratio.items():
 
             f_if = bw_analog * ratio
 
-            # pick first setting that ensures the lower edge of the band
-            # is beyond 107 KHz lower threshold
             if f_if - bw_digital / 2.0 > 107e3:
                 break
 
@@ -68,17 +63,14 @@ class CALC_Radio_panther(CALC_Radio):
             model (ModelRoot) : Data model to read and write variables from
         """
 
-        # Always set to narrowest bandwidth
         model.vars.pll_bandwidth_rx.value = model.vars.pll_bandwidth_rx.var_enum.BW_250KHz
 
     def calc_reg_vcodetamplitude(self, model):
 
         lodiv = model.vars.lodiv_actual.value
 
-        # https://jira.silabs.com/browse/LABATEPDB-154 set to 10 for subgig
         subgig_band = model.vars.subgig_band.value
 
-        # Leave this at Panther default if left to be calculated
         reg = 4
 
         self._reg_write(model.vars.RAC_VCOCTRL_VCODETAMPLITUDE, reg)
@@ -476,13 +468,9 @@ class CALC_Radio_panther(CALC_Radio):
 
 
     def calc_iffilt_bw_actual(self, model):
-        # The Panther calculations use the analog IF filter bandwidth calculation, even though it doesn't actually
-        # exist any more on the part. It is too late to change this, so just calculate the filter bandwidth
-        # as if the filter existed.
 
         bw_dig = model.vars.bandwidth_hz.value  # Can not use actual bandwidth here, because it depends on fxo or fdec8
 
-        # find smallest bandwidth setting that is larger than bw_dig
         for bw_reg, bw_ana in self.iffilt_bw.items():
             if bw_ana > bw_dig:
                 break
@@ -490,9 +478,6 @@ class CALC_Radio_panther(CALC_Radio):
         model.vars.iffilt_bandwidth_actual.value = self.iffilt_bw[bw_reg]
 
     def calc_iffilt_ratio_actual(self, model):
-        # The Panther calculations use the analog IF filter ratio calculation, even though it doesn't actually
-        # exist any more on the part. It is too late to change this, so just calculate the filter ratio
-        # as if the filter existed.
 
         bw_analog = model.vars.iffilt_bandwidth_actual.value
         f_if = float(model.vars.if_frequency_hz.value)
@@ -501,7 +486,6 @@ class CALC_Radio_panther(CALC_Radio):
 
         best_error = 99
 
-        # loop over all ratios and find best closest to target ratio
         for ratio_reg, ratio in self.iffilt_ratio.items():
 
             error = abs(ratio - ratio_target)
@@ -512,49 +496,37 @@ class CALC_Radio_panther(CALC_Radio):
         model.vars.iffilt_ratio_actual.value = self.iffilt_ratio[best_ratio_reg]
 
     def calc_iffilt_ratio_reg(self, model):
-        # Removed because these registers no longer appear in the Profile Outputs
         pass
 
     def calc_iffilt_bw_reg(self, model):
-        # Removed because these registers no longer appear in the Profile Outputs
         pass
 
     def calc_realmode_reg(self, model):
-        # Removed because these registers no longer appear in the Profile Outputs
         pass
 
     def calc_reg_iffiltctrl(self, model):
-        # Removed because these registers no longer appear in the Profile Outputs
         pass
 
     def calc_bandsel_reg(self, model):
-        # Removed because these registers no longer appear in the Profile Outputs
         pass
 
     def calc_reg_ifpgactrl(self, model):
-        # Removed because these registers no longer appear in the Profile Outputs
         pass
 
     def calc_reg_lnamixctrl1(self, model):
-        # Removed because these registers no longer appear in the Profile Outputs
         pass
 
     def calc_reg_lpfbwtx_lpfbwrx(self, model):
-        # Removed because these registers no longer appear in the Profile Outputs
         pass
 
     def calc_demen(self, model):
-        # Removed because these registers no longer appear in the Profile Outputs
         pass
 
     def calc_analog_misc(self, model):
-        # Removed because these registers no longer appear in the Profile Outputs
         pass
 
     def calc_reg_vcoctrl(self, model):
-        # Removed because these registers no longer appear in the Profile Outputs
         pass
 
     def calc_reg_ifadcctrl(self, model):
-        # Removed because these registers no longer appear in the Profile Outputs
         pass

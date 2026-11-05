@@ -9,9 +9,12 @@ from pyradioconfig.parts.ocelot.profiles.sw_profile_outputs_common import sw_pro
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
     buildWhiteOutputs
+from pycalcmodel.core.common import IPCategory
 
 
 class ProfileIEEE802154BPSKOcelot(IProfile):
+
+    ip_category = IPCategory.LPW
 
     def __init__(self):
         super().__init__()
@@ -26,7 +29,6 @@ class ProfileIEEE802154BPSKOcelot(IProfile):
         self._frame_profile_inputs_common = frame_profile_inputs_common_ocelot()
 
     def buildProfileModel(self, model: ModelRoot):
-        # Build profile object and append it to the model
         profile = self._makeProfile(model)
 
         self.build_inputs(model, profile)
@@ -34,7 +36,6 @@ class ProfileIEEE802154BPSKOcelot(IProfile):
         self.build_outputs(model, profile)
 
     def build_inputs(self, model: ModelRoot, profile: ModelProfile):
-        # Build inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
@@ -66,7 +67,6 @@ class ProfileIEEE802154BPSKOcelot(IProfile):
                                  readable_name="Channel Config Base Channel Frequency", value_limit_min=100000000,
                                  value_limit_max=2500000000, units_multiplier=UnitsMultiplier.MEGA)
 
-        # Hidden input needed for rail_test generation
         self.make_metadata_input(profile, model.vars.chcfg_channel_spacing_hz, "metadata",
                                  readable_name="Channel Config Channel Spacing", value_limit_min=0,
                                  value_limit_max=10000000,
@@ -85,7 +85,6 @@ class ProfileIEEE802154BPSKOcelot(IProfile):
                                  value_limit_min=[-1], value_limit_max=[999])
 
     def build_hidden_profile_inputs(self, model: ModelRoot, profile: ModelProfile):
-        # Hidden inputs to allow for fixed frame length testing
         self.make_hidden_input(profile, model.vars.frame_length_type, 'frame_general',
                                readable_name="Frame Length Algorithm")
         self.make_hidden_input(profile, model.vars.fixed_length_size, category='frame_fixed_length',
@@ -93,13 +92,11 @@ class ProfileIEEE802154BPSKOcelot(IProfile):
         self.make_hidden_input(profile, model.vars.frame_bitendian, category='frame_general',
                                readable_name="Frame Bit Endian")
 
-        # Hidden input for changing syncword
         self.make_hidden_input(profile, model.vars.syncword_0, "syncword", readable_name="Sync Word 0",
                                value_limit_min=int(0), value_limit_max=int(0xffffffff))
         self.make_hidden_input(profile, model.vars.syncword_1, "syncword", readable_name="Sync Word 1",
                                value_limit_min=int(0), value_limit_max=int(0xffffffff))
 
-        # Hidden input for CRC
         self.make_hidden_input(profile, model.vars.payload_crc_en, category='frame_payload',
                                readable_name="Insert/Check CRC after payload")
         self.make_hidden_input(profile, model.vars.crc_poly, category='crc',
@@ -117,12 +114,10 @@ class ProfileIEEE802154BPSKOcelot(IProfile):
         self.make_hidden_input(profile, model.vars.crc_invert, category='crc',
                                readable_name="CRC Invert")
 
-        # Hidden input for BER testing
         self.make_hidden_input(profile, model.vars.test_ber, category="testing",
                                readable_name="Reconfigure for BER testing")
 
     def build_outputs(self, model: ModelRoot, profile: ModelProfile):
-        # Build outputs
         buildFrameOutputs(model, profile)
         buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
@@ -136,14 +131,11 @@ class ProfileIEEE802154BPSKOcelot(IProfile):
         build_modem_regs_ocelot(model, profile)
 
     def build_variable_profile_outputs(self, model: ModelRoot, profile: ModelProfile):
-        # RAIL Outputs
         self._sw_profile_outputs_common.build_rail_outputs(model, profile)
 
-        # IRCal outputs
         self._sw_profile_outputs_common.build_ircal_outputs(model, profile)
 
     def build_info_profile_outputs(self, model: ModelRoot, profile: ModelProfile):
-        # Informational output
         self._sw_profile_outputs_common.build_info_outputs(model, profile)
         profile.outputs.append(ModelOutput(model.vars.base_frequency_hz, '', ModelOutputType.INFO,
                                            readable_name="Base Channel Frequency"))
@@ -204,23 +196,4 @@ class ProfileIEEE802154BPSKOcelot(IProfile):
 
 
     def _copy_model_variables_from_phy(self, model: ModelRoot, phy_name: str):
-
-        non_prod_phy_model = CalcManager(part_family=model.part_family, part_rev=model.part_revision,
-                                         target=model.target).calc_config(phy_name, None)
-
-        for non_prod_profile_input in non_prod_phy_model.profile.inputs:
-            model_var = getattr(model.vars, non_prod_profile_input.var_name)
-            model_var.value_forced = non_prod_profile_input.var_value
-
-        for non_prod_profile_output in non_prod_phy_model.profile.outputs:
-            model_var = getattr(model.vars, non_prod_profile_output.var_name)
-            if non_prod_profile_output.override is not None:
-                model_var.value_forced = non_prod_profile_output.override
-
-        for non_prod_model_var in non_prod_phy_model.vars:
-            if non_prod_model_var.value_forced is not None:
-                model_var = getattr(model.vars, non_prod_model_var.name)
-                model_var.value_forced = non_prod_model_var.value
-
-        if model.phy is not None:
-            model.phy.phy_points_to = phy_name
+        CalcManager._copy_model_variables_from_phy(model, phy_name)

@@ -6,6 +6,10 @@ description: >
   Applications. It can handle invalid states, such as maximum node inclusion reached, as well as
   different process flows such as learn mode or reset. It initializes some subsystems at system
   start, such as the EventQueue.
+documentation:
+  docset: z-wave
+  document: zwave-api/event-distributor
+
 package: zwave
 quality: production
 metadata:

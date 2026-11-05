@@ -6,11 +6,9 @@ class Calc_AGC_Sol(CALC_AGC_ocelot):
 
     def calc_settlingindctrl_reg(self, model):
 
-        # For now, always disable
         settlingindctrl_en = 0
         delayperiod = 0
 
-        # Write the registers
         self._reg_write(model.vars.AGC_SETTLINGINDCTRL_EN, settlingindctrl_en)
         self._reg_write(model.vars.AGC_SETTLINGINDCTRL_POSTHD, 1)
         self._reg_write(model.vars.AGC_SETTLINGINDCTRL_NEGTHD, 1)
@@ -19,10 +17,8 @@ class Calc_AGC_Sol(CALC_AGC_ocelot):
 
     def calc_lnamixrfatt_reg(self, model):
 
-        # Load in model variables
         rf_band = model.vars.rf_band.value
 
-        # Calculate the LNAMIXRFATT values based on band
         if rf_band == model.vars.rf_band.var_enum.BAND_915:
             lnamixrfatt = [0, 25, 58, 101, 150, 218, 448, 698, 982, 1456, 1970, 2538, 3322, 4350, 5842, 7514,
                            9882, 12664, 16383, 14042, 14800, 16383, 16383]
@@ -53,7 +49,6 @@ class Calc_AGC_Sol(CALC_AGC_ocelot):
                            5630, 7160, 9180, 11700, 14800, 16383, 16383]
             pnindexmax = 17
 
-        # Write registers
         self._reg_write(model.vars.AGC_PNRFATT0_LNAMIXRFATT1, lnamixrfatt[0])
         self._reg_write(model.vars.AGC_PNRFATT0_LNAMIXRFATT2, lnamixrfatt[1])
         self._reg_write(model.vars.AGC_PNRFATT1_LNAMIXRFATT3, lnamixrfatt[2])
@@ -80,9 +75,7 @@ class Calc_AGC_Sol(CALC_AGC_ocelot):
         self._reg_write(model.vars.AGC_GAINSTEPLIM1_PNINDEXMAX, pnindexmax)
 
     def calc_rssifilten_reg(self, model):
-        # This method calculates the FEFILT1 RSSIFILTEN reg depending on demod
 
-        # Read in model vars
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
 
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
@@ -90,12 +83,10 @@ class Calc_AGC_Sol(CALC_AGC_ocelot):
         else:
             rssifilten = 0
 
-        # Write the reg
         self._reg_write(model.vars.FEFILT1_RSSIFILT_RSSIFILTEN, rssifilten)
 
     def calc_fefilt1_rssifilt(self, model):
 
-        # Read in model vars
         fefilt1_rssifilten = model.vars.FEFILT1_RSSIFILT_RSSIFILTEN.value
 
         if fefilt1_rssifilten == 1:
@@ -109,7 +100,6 @@ class Calc_AGC_Sol(CALC_AGC_ocelot):
             rssifiltdec = 0
             do_not_care = True
 
-        # Write the regs
         self._reg_write(model.vars.FEFILT1_RSSIFILT_RSSIFILTCOEF0, rssifilt_coeffs[0], do_not_care=do_not_care)
         self._reg_write(model.vars.FEFILT1_RSSIFILT_RSSIFILTCOEF1, rssifilt_coeffs[1], do_not_care=do_not_care)
         self._reg_write(model.vars.FEFILT1_RSSIFILT_RSSIFILTCOEF2, rssifilt_coeffs[2], do_not_care=do_not_care)
@@ -122,11 +112,9 @@ class Calc_AGC_Sol(CALC_AGC_ocelot):
         self._reg_write(model.vars.FEFILT1_RSSIFILT_RSSIFILTDEC, rssifiltdec, do_not_care=do_not_care)
 
     def calc_agc_colldetctrl_regs(self, model):
-        # Jira: https://jira.silabs.com/browse/MCUW_RADIO_CFG-2456
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         legacy_modulation_type = model.vars.modulation_type.value
 
-        # SOFT_DEMOD is used, also applied in concurrent mode
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:
             ofdm_option = model.vars.ofdm_option.value
 
@@ -167,7 +155,6 @@ class Calc_AGC_Sol(CALC_AGC_ocelot):
         self._reg_write(model.vars.AGC_COLLDETCTRL_INPUTSEL, inputsel)
 
     def calc_agc_colldetthd_regs(self, model):
-        # Jira: https://jira.silabs.com/browse/MCUW_RADIO_CFG-2456
         self._reg_write(model.vars.AGC_COLLDETTHD_MATHRESHOLD, 6)  # Control RSSI detection threshold
         self._reg_write(model.vars.AGC_COLLDETTHD_OVRTHRESHOLD, 255)
 
@@ -182,15 +169,12 @@ class Calc_AGC_Sol(CALC_AGC_ocelot):
         Args:
             model (ModelRoot) : Data model to read and write variables from
         """
-        # Read in model variables
         softmodem_antdivmode = model.vars.softmodem_antdivmode.value
 
         softmodem_antdivmode_en = softmodem_antdivmode != model.vars.softmodem_antdivmode.var_enum.DISABLE\
             and softmodem_antdivmode != model.vars.softmodem_antdivmode.var_enum.ANTENNA1
 
         if softmodem_antdivmode_en:
-            # In OFDM antenna diversity, we do not need the measurement of the power after channel filtering.
-            # The delay before the measurement (CFLOOPDEL) is cut to the minimum to avoid delay in the SFM.
             cfloopdel = 1
         else:
             agc_delay = model.vars.agc_settling_delay.value
@@ -205,13 +189,8 @@ class Calc_AGC_Sol(CALC_AGC_ocelot):
             and antdivmode != model.vars.antdivmode.var_enum.ANTENNA1
 
         if hardmodem_antdivmode_en:
-            # In FSK or concurrent antenna diversity:
-            # always enable gain restore mode - clear stored gain from last packet when RX is turned off.
             gainmode = 1
         else:
-            # In OFDM antenna diversity, not concurrent:
-            # Never use single_packet mode. Gain recover is performed in FW.
-            # See https://jira.silabs.com/browse/MCUW_RADIO_CFG-2232
             gainmode = 0
 
         self._reg_write(model.vars.AGC_ANTDIV_GAINMODE, gainmode)

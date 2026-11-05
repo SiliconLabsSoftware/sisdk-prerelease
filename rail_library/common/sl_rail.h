@@ -568,6 +568,54 @@ sl_rail_status_t sl_rail_config_antenna(sl_rail_handle_t rail_handle,
 sl_rail_status_t sl_rail_get_rf_path(sl_rail_handle_t rail_handle,
                                      sl_rail_antenna_sel_t *p_rf_path);
 
+/**
+ * Configure an external RF switch used for antenna switching: the antenna-to-pin
+ * mapping and optional VDD power-gating.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @param[in] p_rf_switch_config A pointer to the RF switch configuration.
+ * @return Status code indicating success of the function call.
+ *
+ * @note The antenna-switch control GPIO(s) are configured through \ref
+ *   sl_rail_ble_config_aox_antenna(); this API layers the antenna-to-pin
+ *   mapping (\ref sl_rail_rf_switch_config_t::antenna_gpio_pattern) and the
+ *   optional VDD power-gating on top. Once called, the switch is applied for
+ *   any radio activity, not only Channel Sounding: VDD is routed first and
+ *   follows PA/LNA or TX/RX, and the control pins follow the same signal for the
+ *   default antenna, resting low while the radio is inactive. When CS is also
+ *   used, configure the switch before calling sl_rail_ble_enable_cs()
+ *   (documented in sl_rail_ble.h).
+ *
+ * @note While configured, the switch reserves asynchronous PRS channels: two
+ *   for the radio-activity signal when VDD power-gating is enabled or when a
+ *   control pin is high for the default antenna, plus one per control pin that
+ *   is high for the default antenna. A channel that drives the VDD pin or a
+ *   control pin must be able to reach that pin's GPIO port. Returns
+ *   \ref SL_RAIL_STATUS_INVALID_STATE, leaving the switch unconfigured, if they
+ *   are unavailable.
+ *
+ * @note The control pins are taken from the modem, including the AoX antenna
+ *   routes and any antenna-diversity route (\ref sl_rail_config_antenna()) that
+ *   targets the same GPIO, for as long as the switch is configured.
+ *
+ * @warning Returns \ref SL_RAIL_STATUS_INVALID_CALL on platforms that do not
+ *   support this feature. Compile-time support is indicated by \ref
+ *   SL_RAIL_SUPPORTS_RF_SWITCH in \ref sl_rail_features.h (include that header
+ *   separately when needed). This API is not supported if GPIO is configured as
+ *   a secure peripheral and will return \ref SL_RAIL_STATUS_INVALID_CALL.
+ */
+sl_rail_status_t sl_rail_config_rf_switch(sl_rail_handle_t rail_handle,
+                                          const sl_rail_rf_switch_config_t *p_rf_switch_config);
+
+/**
+ * Check whether the external RF switch configuration can be changed.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @return True if the RF switch can be reconfigured, false otherwise (including
+ *   when the platform does not support RF switch configuration).
+ */
+bool sl_rail_rf_switch_can_reconfigure(sl_rail_handle_t rail_handle);
+
 /** @} */ // end of group Antenna_Control
 
 /******************************************************************************
@@ -3795,6 +3843,8 @@ sl_rail_status_t sl_rail_get_rx_packet_details(sl_rail_handle_t rail_handle,
  *   for this packet started on air.
  * @return \ref SL_RAIL_STATUS_NO_ERROR if the packet time was successfully
  *   calculated, or an appropriate error code otherwise.
+ * @note For SUN OFDM, SUN OQPSK, and PROP OQPSK, total_packet_bytes is ignored
+ *   and the adjustment always uses packet_duration_us.
  */
 sl_rail_status_t sl_rail_get_rx_time_preamble_start(sl_rail_handle_t rail_handle,
                                                     sl_rail_rx_packet_details_t *p_packet_details);
@@ -3816,6 +3866,8 @@ sl_rail_status_t sl_rail_get_rx_time_preamble_start(sl_rail_handle_t rail_handle
  *   word for this packet finished on air.
  * @return \ref SL_RAIL_STATUS_NO_ERROR if the packet time was successfully
  *   calculated, or an appropriate error code otherwise.
+ * @note For SUN OFDM, SUN OQPSK, and PROP OQPSK, total_packet_bytes is ignored
+ *   and the adjustment always uses packet_duration_us.
  */
 sl_rail_status_t sl_rail_get_rx_time_sync_word_end(sl_rail_handle_t rail_handle,
                                                    sl_rail_rx_packet_details_t *p_packet_details);
@@ -5522,14 +5574,11 @@ sl_rail_status_t sl_rail_get_scheduler_status(sl_rail_handle_t rail_handle,
  * @param[in] task_type Type of task whose priority should be updated
  * @return Status code indicating success of the function call.
  *
- * While the application can use this function however it likes, a major use
- * case is being able to increase an infinite receive priority while receiving
- * a packet. In other words, a given \ref sl_rail_handle_t can maintain a very low
- * priority background receive, but upon getting a
- * \ref SL_RAIL_EVENT_RX_SYNC_0_DETECT_SHIFT or
- * \ref SL_RAIL_EVENT_RX_SYNC_1_DETECT_SHIFT event, the app can call this function
- * to increase the background RX priority to lower the risk another protocol
- * might preempt during packet reception.
+ * \ref SL_RAIL_TASK_TYPE_START_RX / \ref SL_RAIL_TASK_TYPE_OTHER update
+ * scheduler priority (e.g. raise infinite RX after sync detect).
+ * \ref SL_RAIL_TASK_TYPE_RX / \ref SL_RAIL_TASK_TYPE_TX /
+ * \ref SL_RAIL_TASK_TYPE_ACK set PITA arbitration priority only (PITA
+ * platforms; live-applied when that LPW request is already asserted).
  */
 sl_rail_status_t sl_rail_set_task_priority(sl_rail_handle_t rail_handle,
                                            uint8_t priority,

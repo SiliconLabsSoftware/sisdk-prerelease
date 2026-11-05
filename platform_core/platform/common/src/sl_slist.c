@@ -28,7 +28,7 @@
  *
  ******************************************************************************/
 
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_slist.h"
 #include <stdbool.h>
 #include <stdlib.h>
@@ -52,7 +52,7 @@ void sl_slist_init(sl_slist_node_t **head)
 void sl_slist_push(sl_slist_node_t **head,
                    sl_slist_node_t *item)
 {
-  EFM_ASSERT((item != NULL) && (head != NULL));
+  SL_LOG_DEBUG_ASSERT((item != NULL) && (head != NULL));
 
   item->node = *head;
   *head = item;
@@ -66,7 +66,7 @@ void sl_slist_push_back(sl_slist_node_t **head,
 {
   sl_slist_node_t **node_ptr = head;
 
-  EFM_ASSERT((item != NULL) && (head != NULL));
+  SL_LOG_DEBUG_ASSERT((item != NULL) && (head != NULL));
 
   while (*node_ptr != NULL) {
     node_ptr = &((*node_ptr)->node);
@@ -83,7 +83,7 @@ sl_slist_node_t *sl_slist_pop(sl_slist_node_t **head)
 {
   sl_slist_node_t *item;
 
-  EFM_ASSERT(head != NULL);
+  SL_LOG_DEBUG_ASSERT(head != NULL);
 
   item = *head;
   if (item == NULL) {
@@ -103,7 +103,7 @@ sl_slist_node_t *sl_slist_pop(sl_slist_node_t **head)
 void sl_slist_insert(sl_slist_node_t *item,
                      sl_slist_node_t *pos)
 {
-  EFM_ASSERT((item != NULL) && (pos != NULL));
+  SL_LOG_DEBUG_ASSERT((item != NULL) && (pos != NULL));
 
   item->node = pos->node;
   pos->node = item;
@@ -117,7 +117,7 @@ void sl_slist_join(sl_slist_node_t **head_list_1,
 {
   sl_slist_node_t **node_ptr = head_list_1;
 
-  EFM_ASSERT((head_list_2 != NULL)
+  SL_LOG_DEBUG_ASSERT((head_list_2 != NULL)
              && (head_list_1 != NULL));
 
   while (*node_ptr != NULL) {
@@ -134,7 +134,7 @@ void sl_slist_join(sl_slist_node_t **head_list_1,
 void sl_slist_remove(sl_slist_node_t **head,
                      sl_slist_node_t *item)
 {
-  EFM_ASSERT((item != NULL) && (head != NULL));
+  SL_LOG_DEBUG_ASSERT((item != NULL) && (head != NULL));
 
   for (sl_slist_node_t **node_ptr = head; *node_ptr != NULL; node_ptr = &((*node_ptr)->node)) {
     if (*node_ptr == item) {
@@ -155,7 +155,7 @@ void sl_slist_sort(sl_slist_node_t **head,
   bool  swapped;
   sl_slist_node_t **pp_item_l;
 
-  EFM_ASSERT((head != NULL) && (cmp_fnct != NULL));
+  SL_LOG_DEBUG_ASSERT((head != NULL) && (cmp_fnct != NULL));
 
   do {
     swapped = false;

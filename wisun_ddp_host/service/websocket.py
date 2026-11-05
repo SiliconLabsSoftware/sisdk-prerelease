@@ -5,6 +5,7 @@ WebSocket Service Module
 Contains WebSocket functionality for real-time communication.
 """
 
+import sys
 import time
 from flask_socketio import SocketIO, emit
 
@@ -17,17 +18,27 @@ class WebSocketService:
         self.common_executor = common_executor
         self.shutdown_flag_ref = shutdown_flag_ref
 
-        # Initialize SocketIO with WebSocket-only transport
+        # Windows (Waitress) has no native WebSocket support,
+        # offer polling as the only transport.
+        if sys.platform == "win32":
+            async_mode = 'threading'
+            transports = ['polling']
+            allow_upgrades = False
+        else:
+            async_mode = 'eventlet'
+            transports = ['websocket', 'polling']
+            allow_upgrades = True
+
         self.socketio = SocketIO(
             self.app,
             cors_allowed_origins="*",
-            transport=['websocket', 'polling'],  # Allow both transports for better compatibility
+            async_mode=async_mode,
+            transports=transports,
             engineio_logger=True,  # Enable logging to debug connection issues
             socketio_logger=True,
-            async_mode='eventlet',  # Use eventlet for better production performance
             ping_interval=120,  # Send ping every 2 minutes (instead of 25 seconds)
             ping_timeout=60,    # Wait 1 minute for pong response (instead of 20 seconds)
-            allow_upgrades=True
+            allow_upgrades=allow_upgrades
         )
 
         self._setup_websocket_handlers()

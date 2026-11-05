@@ -4,14 +4,14 @@ from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from pyradioconfig.parts.panther.calculators.calc_global import CALC_Global_panther
 
 from py_2_and_3_compatibility import *
+from pycalcmodel.core.common import IPCategory
 
 
 class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
 
-    #FIXME: there seem to be lots of extra overrides in these PHYs. Wentao needs to go over these and remove them.
+    ip_category = IPCategory.LPW
 
-    ################################################################################################
-    # "base" definitions - allows usage in multiple PHYs
+
 
     def Bluetooth_LE_Viterbi_BLEIQDSA_base(self, phy, model):
 
@@ -42,15 +42,13 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_inputs.target_osr.value = 4
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.src1_range_available_minimum.value = 133
 
-		# Additional overrides introduced when Series 2 AGC calculations added. These prevent the PHY from changing versus what was used during Validation.
         phy.profile_outputs.AGC_GAINRANGE_BOOSTLNA.override = 1
         phy.profile_outputs.AGC_GAINRANGE_LNABWADJ.override = 1
 
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
-        # phy.profile_outputs.FRC_RXCTRL_RXFRAMEENDAHEADBYTES.override = 4
         phy.profile_outputs.MODEM_BLEIQDSA_BLEIQDSADIFFTH1.override = 1000
         phy.profile_outputs.MODEM_BLEIQDSA_BLEIQDSAEN.override = 1
         phy.profile_outputs.MODEM_BLEIQDSA_BLEIQDSAIIRCOEFPWR.override = 7
@@ -61,8 +59,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_outputs.MODEM_BLEIQDSAEXT1_CHPWRFIRAVGVAL.override = 3
         phy.profile_outputs.MODEM_BLEIQDSAEXT1_CORRIIRAVGMULFACT.override = 2
         phy.profile_outputs.MODEM_BLEIQDSAEXT1_FREQSCALEIQDSA.override = 2
-        # phy.profile_outputs.MODEM_CF_CFOSR.override = 1 # Calc SRC
-        # phy.profile_outputs.MODEM_CF_DEC0.override = 2 # Calc SRC
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 65535
         phy.profile_outputs.MODEM_CTRL0_FRAMEDETDEL.override = 2
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 3
@@ -120,7 +116,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_outputs.MODEM_LONGRANGE5_LRCHPWRSH9.override = 9
         phy.profile_outputs.MODEM_LONGRANGE6_LRCHPWRSH12.override = 11
         phy.profile_outputs.MODEM_LONGRANGE6_LRCHPWRTH11.override = 76
-        #phy.profile_outputs.MODEM_MODINDEX_MODINDEXM.override = 27
         phy.profile_outputs.MODEM_PRE_PREERRORS.override = 1
         phy.profile_outputs.MODEM_RXBR_RXBRDEN.override = 4
 
@@ -182,16 +177,14 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_inputs.shaping_filter_param.value = 0.5
         phy.profile_inputs.target_osr.value = 4
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
 
         self.BLE_2M_TX_Shaping_Coeffs(phy, model)
 
-        # Additional overrides introduced when Series 2 AGC calculations added. These prevent the PHY from changing versus what was used during Validation.
         phy.profile_outputs.AGC_GAINRANGE_BOOSTLNA.override = 1
         phy.profile_outputs.AGC_GAINRANGE_LNABWADJ.override = 1
         phy.profile_outputs.AGC_AGCPERIOD_PERIODHI.override = 10 # different in 1mbps vs 2mbps
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
-        # phy.profile_outputs.FRC_RXCTRL_RXFRAMEENDAHEADBYTES.override = 4
         phy.profile_outputs.MODEM_BLEIQDSA_BLEIQDSADIFFTH1.override = 1050
         phy.profile_outputs.MODEM_BLEIQDSA_BLEIQDSAEN.override = 1
         phy.profile_outputs.MODEM_BLEIQDSA_BLEIQDSAIIRCOEFPWR.override = 7
@@ -201,8 +194,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_outputs.MODEM_BLEIQDSAEXT1_CHPWRFIRAVGEN.override = 1
         phy.profile_outputs.MODEM_BLEIQDSAEXT1_CHPWRFIRAVGVAL.override = 3
         phy.profile_outputs.MODEM_BLEIQDSAEXT1_CORRIIRAVGMULFACT.override = 2
-        # phy.profile_outputs.MODEM_CF_CFOSR.override = 1 # Calc SRC
-        # phy.profile_outputs.MODEM_CF_DEC0.override = 2 # Calc SRC
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 65535
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 3
         phy.profile_outputs.MODEM_CTRL1_RESYNCPER.override = 0
@@ -239,8 +230,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_outputs.MODEM_TIMING_OFFSUBDEN.override = 0 # Was missed
         phy.profile_outputs.MODEM_TIMING_OFFSUBNUM.override = 0 # Was missed
         phy.profile_outputs.MODEM_TIMING_TIMTHRESH.override = 8
-        #phy.profile_outputs.MODEM_TXBR_TXBRDEN.override = 105
-        #phy.profile_outputs.MODEM_TXBR_TXBRNUM.override = 252
         phy.profile_outputs.MODEM_VITERBIDEMOD_VTDEMODEN.override = 1
         phy.profile_outputs.MODEM_VITERBIDEMOD_DISDEMODOF.override = 1
         phy.profile_outputs.MODEM_VTBLETIMING_TIMINGDELAY.override = 140 # Per Divyansh email
@@ -293,14 +282,12 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_inputs.timing_detection_threshold.value = 140
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
 
-        # Additional overrides introduced when Series 2 AGC calculations added. These prevent the PHY from changing versus what was used during Validation.
         phy.profile_outputs.AGC_GAINRANGE_BOOSTLNA.override = 1
         phy.profile_outputs.AGC_GAINRANGE_LNABWADJ.override = 1
 
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
-        # phy.profile_outputs.FRC_RXCTRL_RXFRAMEENDAHEADBYTES.override = 4
 
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 65535
         phy.profile_outputs.MODEM_RXBR_RXBRDEN.override = 4
@@ -315,7 +302,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_outputs.MODEM_MIXCTRL_DIGIQSWAPEN.override = 1
         phy.profile_outputs.MODEM_MODINDEX_FREQGAINE.override = 2
         phy.profile_outputs.MODEM_MODINDEX_FREQGAINM.override = 4
-        #### phase DSA settings
         phy.profile_outputs.MODEM_BLEIQDSA_BLEIQDSAEN.override = 0
         phy.profile_outputs.MODEM_DSACTRL_ARRTHD.override = 4
         phy.profile_outputs.MODEM_DSACTRL_ARRTOLERTHD0.override = 1
@@ -347,7 +333,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_outputs.MODEM_DSATHD4_ARRTOLERTHD1LO.override = 3
         phy.profile_outputs.MODEM_DSATHD4_POWABSTHDLO.override = 1000
         phy.profile_outputs.MODEM_DSATHD4_SWTHD.override = 1
-        #### Viterbi Demod settings
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI1.override = 62
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI2.override = 42
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI3.override = 30
@@ -405,26 +390,22 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_inputs.timing_detection_threshold.value = 140
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.src1_range_available_minimum.value = 133
 
 
         self.BLE_2M_TX_Shaping_Coeffs(phy, model)
 
-		# Additional overrides introduced when Series 2 AGC calculations added. These prevent the PHY from changing versus what was used during Validation.
         phy.profile_outputs.AGC_GAINRANGE_BOOSTLNA.override = 1
         phy.profile_outputs.AGC_GAINRANGE_LNABWADJ.override = 1
 
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
-        # phy.profile_outputs.FRC_RXCTRL_RXFRAMEENDAHEADBYTES.override = 4
 
         phy.profile_outputs.MODEM_CGCLKSTOP_FORCEOFF.override = 65535
         phy.profile_outputs.MODEM_RXBR_RXBRDEN.override = 4
         phy.profile_outputs.MODEM_SRCCHF_BWSEL.override = 1
         phy.profile_outputs.MODEM_TIMING_OFFSUBDEN.override = 0
         phy.profile_outputs.MODEM_TIMING_OFFSUBNUM.override = 0
-        #phy.profile_outputs.MODEM_TXBR_TXBRDEN.override = 5
-        #phy.profile_outputs.MODEM_TXBR_TXBRNUM.override = 24
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 3
         phy.profile_outputs.MODEM_CTRL2_DATAFILTER.override = 6
         phy.profile_outputs.MODEM_DIGMIXCTRL_DIGMIXMODE.override = 1
@@ -445,7 +426,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_outputs.MODEM_CF_CFOSR.override = 1
         phy.profile_outputs.MODEM_CF_DEC0.override = 2
 
-        #### phase DSA settings
         phy.profile_outputs.MODEM_BLEIQDSA_BLEIQDSAEN.override = 0
         phy.profile_outputs.MODEM_DSACTRL_ARRTHD.override = 5
         phy.profile_outputs.MODEM_DSACTRL_ARRTOLERTHD0.override = 1
@@ -477,7 +457,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_outputs.MODEM_DSATHD4_ARRTOLERTHD1LO.override = 3
         phy.profile_outputs.MODEM_DSATHD4_POWABSTHDLO.override = 1500
         phy.profile_outputs.MODEM_DSATHD4_SWTHD.override = 1
-        #### Viterbi Demod settings
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI1.override = 64
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI2.override = 48
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI3.override = 32
@@ -536,14 +515,12 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_inputs.timing_detection_threshold.value = 140
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
 
-		# Additional overrides introduced when Series 2 AGC calculations added. These prevent the PHY from changing versus what was used during Validation.
         phy.profile_outputs.AGC_GAINRANGE_BOOSTLNA.override = 1
         phy.profile_outputs.AGC_GAINRANGE_LNABWADJ.override = 1
 
         phy.profile_outputs.FRC_AUTOCG_AUTOCGEN.override = 7
-        # phy.profile_outputs.FRC_RXCTRL_RXFRAMEENDAHEADBYTES.override = 4
         phy.profile_outputs.MODEM_CTRL0_FRAMEDETDEL.override = 2
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 3
         phy.profile_outputs.MODEM_CTRL2_SQITHRESH.override = 200
@@ -596,26 +573,19 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_inputs.timing_detection_threshold.value = 140
         phy.profile_inputs.timing_sample_threshold.value = 0
         phy.profile_inputs.tx_xtal_error_ppm.value = 0
-        phy.profile_inputs.xtal_frequency_hz.value = 38400000
+        self._set_xtal_frequency(phy, xtal_freq_hz=38400000) 
         phy.profile_inputs.src1_range_available_minimum.value = 128
-        # Explicitly disallow DEC0 dec-by-3 or dec-by-8 per Yan's findings
         phy.profile_inputs.input_decimation_filter_allow_dec3.value = 0
         phy.profile_inputs.input_decimation_filter_allow_dec8.value = 0
         phy.profile_outputs.MODEM_VTTRACK_TIMEACQUTHD.override = 32
 
         self.BLE_TX_Shaping_Coeffs(phy, model)
 
-		# Additional overrides introduced when Series 2 AGC calculations added. These prevent the PHY from changing versus what was used during Validation.
         phy.profile_outputs.AGC_GAINRANGE_BOOSTLNA.override = 1
         phy.profile_outputs.AGC_GAINRANGE_LNABWADJ.override = 1
 
         phy.profile_outputs.FRC_CTRL_RXFCDMODE.override = 0             # Override the RXFCDMODE to FCDMODE0 (FCD2 is reloaded when SCNT reaches 0)
-        # phy.profile_outputs.FRC_RXCTRL_RXFRAMEENDAHEADBYTES.override = 4
 
-        # NOTE: Currently the 'header_include_crc' variable is not part of the profile,
-        # but if it ever gets added, we should set it to False
-        # phy.profile_inputs.header_include_crc.value = False
-        # For now, we need to directly override the associated profile output
         phy.profile_outputs.FRC_FCD0_INCLUDECRC.override = 0
 
         phy.profile_outputs.FRC_FCD0_WORDS.override = 3                 # SYNCWORD size (4 bytes) - 1 = 3
@@ -709,8 +679,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         phy.profile_outputs.MODEM_LONGRANGE6_LRCHPWRSH12.override = 10
         phy.profile_outputs.MODEM_LONGRANGE6_LRCHPWRTH11.override = 72
 
-    ################################################################################################
-    # "PHY" definitions - official PHY created here, simulation PHYs in Phys_sim_tests.py
 
     def PHY_Bluetooth_LE_Viterbi_BLEIQDSA(self, model, phy_name=None):
         phy = self._makePhy(model, model.profiles.Base, readable_name='Official BLE 1Mbps PHY for Panther', phy_name=phy_name)
@@ -797,14 +765,12 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         return phy
 
     def PHY_Bluetooth_1M_AOX(self, model, phy_name=None):
-        # PHY_Bluetooth_LE
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE 1Mbps AOX PHY for Panther', phy_name=phy_name)
 
         self.Bluetooth_LE_base(phy, model)
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.AOX_1M
 
     def PHY_Bluetooth_1M(self, model, phy_name=None):
-        # PHY_Bluetooth_LE_Viterbi phase DSA
 
         phy = self._makePhy(model, model.profiles.Base, readable_name='BLE 1Mbps PHY for Panther', phy_name=phy_name)
 
@@ -814,7 +780,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
         return phy
 
     def PHY_Bluetooth_LR_125k(self, model, phy_name=None):
-        # PHY_Bluetooth_LongRange_dsa_125kbps
         phy = self._makePhy(model, model.profiles.Base, readable_name='Production BLE LongRange 125kbps PHY for Panther', phy_name=phy_name)
 
         self.Bluetooth_LongRange_base(phy, model)
@@ -822,7 +787,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
 
 
     def PHY_Bluetooth_LR_500k(self, model, phy_name=None):
-        # PHY_Bluetooth_LongRange_dsa_500kbps
         phy = self._makePhy(model, model.profiles.Base, readable_name='Production BLE LongRange 500kbps PHY for Panther', phy_name=phy_name)
 
         self.Bluetooth_LongRange_500kbps_base(phy, model)
@@ -877,8 +841,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
 
         phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 3
 
-        #New coeffs that are required to pass mod char with PantherZ
-        #Also applied for Panther so that Panther/PantherZ PHYs are identical
         phy.profile_outputs.MODEM_SHAPING0_COEFF0.override = 0
         phy.profile_outputs.MODEM_SHAPING0_COEFF1.override = 2
         phy.profile_outputs.MODEM_SHAPING0_COEFF2.override = 5
@@ -923,7 +885,6 @@ class PhysRAILBaseStandardBluetoothLEPanther(IPhy):
     @staticmethod
     def BLE_2M_TX_Shaping_Coeffs(phy, model):
 
-        # from Bluetooth_LE_2M_Viterbi_BLEIQDSA_base
         phy.profile_outputs.MODEM_SHAPING0_COEFF0.override =  1
         phy.profile_outputs.MODEM_SHAPING0_COEFF1.override =  2
         phy.profile_outputs.MODEM_SHAPING0_COEFF2.override =  7

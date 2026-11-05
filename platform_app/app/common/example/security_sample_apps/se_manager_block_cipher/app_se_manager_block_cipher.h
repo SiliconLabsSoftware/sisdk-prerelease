@@ -37,8 +37,10 @@
 /// Overhead of wrapped key buffer
 #define WRAPPED_KEY_OVERHEAD    (12 + 16)
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /// Internal SE key slot used for symmetric key
 #define BLOCK_CIPHER_KEY_SLOT   (SL_SE_KEY_SLOT_VOLATILE_0)
+#endif
 
 /// AES data block size
 #define AES_BLOCK_SIZE          (16)
@@ -192,6 +194,7 @@ sl_status_t create_plain_symmetric_key(sl_se_key_type_t key_type);
  ******************************************************************************/
 sl_status_t create_wrap_symmetric_key(sl_se_key_type_t key_type);
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /***************************************************************************//**
  * Delete a non-exportable symmetric key in a volatile SE key slot.
  *
@@ -207,6 +210,7 @@ sl_status_t delete_volatile_symmetric_key(sl_se_key_type_t key_type);
  * @returns Returns status code, @ref sl_status.h.
  ******************************************************************************/
 sl_status_t create_volatile_symmetric_key(sl_se_key_type_t key_type);
+#endif
 #endif
 
 /***************************************************************************//**

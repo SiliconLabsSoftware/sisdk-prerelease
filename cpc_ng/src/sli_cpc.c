@@ -823,19 +823,26 @@ void sli_cpc_ep_detach(sl_cpc_ep_t *ep)
   RELEASE_EP_LIST(bus);
 }
 
-void sl_cpc_ep_deinit(sl_cpc_ep_t *ep)
+sl_status_t sl_cpc_ep_deinit(sl_cpc_ep_t *ep)
 {
   SLI_CPC_ASSERT(ep);
-  SLI_CPC_ASSERT(!(ep->flags & SLI_CPC_EP_FLAG_OPENED));
+
+  // Still-open or not-yet-idle endpoints must reach CLOSED first.
+  if (ep->event_cb == NULL // A NULL callback marks an already-deinitialized endpoint.
+      || (ep->flags & SLI_CPC_EP_FLAG_OPENED) != 0 || ep->state != SLI_CPC_STATE_CLOSED) {
+    return SL_STATUS_INVALID_STATE;
+  }
 
   sli_cpc_ep_detach(ep);
-
   SLI_CPC_ASSERT(ep->ref_cnt == 0);
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   osMutexDelete(ep->kernel.lock);
   ep->kernel.lock = 0;
 #endif
+  ep->event_cb = NULL;
+
+  return SL_STATUS_OK;
 }
 
 /***************************************************************************/ /**
@@ -2671,8 +2678,6 @@ static void clean_tx_queues(sl_cpc_ep_t *ep)
 
   LOCK_TRANSMIT_QUEUE(bus);
 
-  // Enter atomic region for the following reasons:
-  // - Re-transmit timer callback is an ISR and will access the expired_retransmit_list.
   SLI_CPC_FRAME_LIST_FOR_EACH_SAFE(&bus->transmit_queue, frame, tmp_frame)
   {
     if (frame->ep == ep) {
@@ -2682,7 +2687,8 @@ static void clean_tx_queues(sl_cpc_ep_t *ep)
 
   sli_cpc_timer_stop(&ep->re_transmit_timer);
 
-  // Cleanup expired re-transmit queues
+  // The re-transmit timer callback runs in ISR context and pushes to
+  // expired_retransmit_list.
   MCU_ENTER_ATOMIC();
   SLI_CPC_FRAME_LIST_FOR_EACH_SAFE(&bus->expired_retransmit_list, frame, tmp_frame)
   {
@@ -2702,7 +2708,6 @@ static void clean_tx_queues(sl_cpc_ep_t *ep)
   }
 
   ep->packet_re_transmit_count = 0u;
-  MCU_EXIT_ATOMIC();
 
   // Clean holding frame list
   while (!sli_cpc_ep_frame_list_empty(&ep->holding_list)) {

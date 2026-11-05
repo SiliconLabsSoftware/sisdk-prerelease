@@ -51,11 +51,9 @@ class ProtectedFieldsBobcat(ProtectedFieldsBase):
         'RAC_TX_TX0DBMENBLEEDPREDRVREG': 'cal',
     }
 
-    # : List of fields found in PTE, but allow radio configurator to override the value
     PTE_PROTECTED_FIELD_EXCEPTIONS = [
     ]
 
-    # : List of fields protected by RAIL
     RAIL_PROTECTED_FIELDS = [
         'AGC_CTRL0_RSSISHIFT',
         'AGC_CTRL1_CCATHRSH',
@@ -100,7 +98,6 @@ class ProtectedFieldsBobcat(ProtectedFieldsBase):
         'RAC_SYTRIM1_SYLODIVTLO20DBM2G4DELAY',
     ]
 
-    # : List of fields that are found in PTE list, but does not need to be protected by RAIL
     RAIL_PROTECTED_FIELD_EXCEPTIONS = [
         'RAC_PACTRL_TXPASELPREDRVREGVDDPA',
         'SYNTH_DSMCTRLRX_REQORDERRX',

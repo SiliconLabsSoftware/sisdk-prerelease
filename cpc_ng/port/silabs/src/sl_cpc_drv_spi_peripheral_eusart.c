@@ -116,7 +116,7 @@ static uint32_t prs_signal_exti(uint8_t exti_no)
   }
 }
 
-static sl_status_t init_caps(sl_cpc_drv_spi_peripheral_t *drv)
+static sl_status_t init_caps(struct sl_cpc_drv_spi_peripheral *drv)
 {
   // The max bitrate of the EUSART in secondary mode is 10MHz no matter what.
   sli_cpc_u32_to_le(10000000UL, drv->local_caps.max_speed_le);
@@ -127,7 +127,7 @@ static sl_status_t init_caps(sl_cpc_drv_spi_peripheral_t *drv)
 /***************************************************************************/ /**
  * Initialize peripheral clocks.
  ******************************************************************************/
-static void init_clocks(const sl_cpc_drv_spi_peripheral_t *drv)
+static void init_clocks(const struct sl_cpc_drv_spi_peripheral *drv)
 {
   sl_status_t status;
 
@@ -150,7 +150,7 @@ static void init_clocks(const sl_cpc_drv_spi_peripheral_t *drv)
  * Also configures the CS EXTI route used as the CS PRS producer, and fills the
  * shared driver fields needed by the common SPI init (PRS producers, RXBLOCKEN).
  ******************************************************************************/
-static sl_status_t init_hw(sl_cpc_drv_spi_peripheral_t *drv, const sl_cpc_drv_spi_peripheral_eusart_config_t *cfg)
+static sl_status_t init_hw(struct sl_cpc_drv_spi_peripheral *drv, const sl_cpc_drv_spi_peripheral_eusart_config_t *cfg)
 {
   EUSART_TypeDef *eusart = sl_device_peripheral_eusart_get_base_addr(cfg->peripheral);
   uint8_t peripheral_no = EUSART_NUM(eusart);

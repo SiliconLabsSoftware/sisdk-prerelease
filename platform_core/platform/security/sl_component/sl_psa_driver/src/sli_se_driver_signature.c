@@ -48,6 +48,7 @@
 // PSA transparent RSA keys are PKCS#1 DER. The SE wants raw N||D / N||E, so
 // parse DER with the public ASN.1 API (Mbed TLS 4 removed mbedtls_rsa_export*).
 #include "mbedtls/asn1.h"
+#include "mbedtls/asn1write.h"
 #endif
 
 #include <string.h>
@@ -283,6 +284,9 @@ static psa_status_t rsa_der_get_positive_integer(unsigned char **p,
   if (mbedtls_asn1_get_integer(p, end, &head, &length) != 0) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
+  if ((head == NULL) || (length == 0U)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
 
   *value = head;
   *value_len = length;
@@ -368,9 +372,24 @@ static psa_status_t rsa_der_extract_components(psa_key_type_t key_type,
       return status;
     }
     if (need_private_exponent) {
+      const uint8_t *ignored = NULL;
+      size_t ignored_len = 0;
+      unsigned int i;
+
       status = rsa_der_get_positive_integer(&p, end, d, d_len);
       if (status != PSA_SUCCESS) {
         return status;
+      }
+
+      // Validate the remaining PKCS#1 private-key fields and no trailing data.
+      for (i = 0; i < 5U; i++) {
+        status = rsa_der_get_positive_integer(&p, end, &ignored, &ignored_len);
+        if (status != PSA_SUCCESS) {
+          return status;
+        }
+      }
+      if (p != end) {
+        return PSA_ERROR_INVALID_ARGUMENT;
       }
     }
   } else if (PSA_KEY_TYPE_IS_RSA(key_type)
@@ -386,10 +405,288 @@ static psa_status_t rsa_der_extract_components(psa_key_type_t key_type,
     if (status != PSA_SUCCESS) {
       return status;
     }
+    // RSAPublicKey must contain only N and E.
+    if (p != end) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
   } else {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
+  return PSA_SUCCESS;
+}
+
+/**
+ * @brief Validate RSA component lengths against SE driver limits.
+ */
+static psa_status_t rsa_validate_component_sizes(size_t n_len,
+                                                 size_t e_len,
+                                                 size_t d_len,
+                                                 bool for_private_key)
+{
+  // Unsupported size (vendor max or SE buffer): NOT_SUPPORTED so LOCAL_STORAGE
+  // fallback can continue, matching ECC unsupported-size policy.
+  if ((PSA_BYTES_TO_BITS(n_len) > PSA_VENDOR_RSA_MAX_KEY_BITS)
+      || (n_len > SLI_SE_DRIVER_RSA_MAX_MODULUS_BYTES)) {
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  if ((n_len == 0U) || (e_len == 0U) || (e_len > n_len)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+  if (for_private_key && ((d_len == 0U) || (d_len > n_len))) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  return PSA_SUCCESS;
+}
+
+/** @brief Compare two normalized big-endian integers. */
+static bool rsa_be_less_than(const uint8_t *a,
+                             size_t a_len,
+                             const uint8_t *b,
+                             size_t b_len)
+{
+  if (a_len != b_len) {
+    return a_len < b_len;
+  }
+
+  return memcmp(a, b, a_len) < 0;
+}
+
+/**
+ * @brief Validate basic RSA public-key parameters.
+ *
+ * Checks the modulus and public exponent without MPI/BIGNUM.
+ */
+static psa_status_t rsa_validate_pubkey_sanity(const uint8_t *n,
+                                               size_t n_len,
+                                               const uint8_t *e,
+                                               size_t e_len)
+{
+  if ((n == NULL) || (e == NULL) || (n_len == 0U) || (e_len == 0U)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+  // Match soft psa_check_rsa_key_byte_aligned(): bitlen(N) must be a multiple of 8.
+  if ((n[0] & 0x80U) == 0U) {
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+  if ((n[n_len - 1U] & 0x01U) == 0U) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+  if ((e[e_len - 1U] & 0x01U) == 0U) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+  if ((e_len == 1U) && (e[0] < 0x03U)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (!rsa_be_less_than(e, e_len, n, n_len)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  return PSA_SUCCESS;
+}
+
+/**
+ * @brief Validate basic RSA private-exponent constraints.
+ */
+static psa_status_t rsa_validate_privexp_sanity(const uint8_t *n,
+                                                size_t n_len,
+                                                const uint8_t *d,
+                                                size_t d_len)
+{
+  if ((n == NULL) || (d == NULL) || (n_len == 0U) || (d_len == 0U)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if ((d[d_len - 1U] & 0x01U) == 0U) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (!rsa_be_less_than(d, d_len, n, n_len)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  return PSA_SUCCESS;
+}
+
+psa_status_t sli_se_driver_validate_rsa_key(const psa_key_attributes_t *attributes,
+                                            const uint8_t *data,
+                                            size_t data_length,
+                                            size_t *bits)
+{
+  const uint8_t *n = NULL;
+  const uint8_t *e = NULL;
+  const uint8_t *d = NULL;
+  size_t n_len = 0;
+  size_t e_len = 0;
+  size_t d_len = 0;
+  psa_key_type_t key_type;
+  bool need_private_exponent;
+  psa_status_t status;
+
+  if ((attributes == NULL) || (data == NULL) || (data_length == 0U)
+      || (bits == NULL)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  key_type = psa_get_key_type(attributes);
+  if (!PSA_KEY_TYPE_IS_RSA(key_type)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  need_private_exponent = PSA_KEY_TYPE_IS_KEY_PAIR(key_type);
+  status = rsa_der_extract_components(key_type,
+                                      data,
+                                      data_length,
+                                      need_private_exponent,
+                                      &n, &n_len,
+                                      &e, &e_len,
+                                      &d, &d_len);
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  status = rsa_validate_component_sizes(n_len, e_len, d_len, need_private_exponent);
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  status = rsa_validate_pubkey_sanity(n, n_len, e, e_len);
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  if (need_private_exponent) {
+    status = rsa_validate_privexp_sanity(n, n_len, d, d_len);
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
+  }
+
+  {
+    const size_t key_bits = PSA_BYTES_TO_BITS(n_len);
+
+    // When the caller specifies a bit size, require it to match the modulus.
+    if ((psa_get_key_bits(attributes) != 0U)
+        && (psa_get_key_bits(attributes) != key_bits)) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    // Reject RSA key sizes unsupported by the SE.
+    {
+      sl_se_key_type_t se_type;
+      status = rsa_se_key_type_for_bits(key_bits, &se_type);
+      if (status != PSA_SUCCESS) {
+        return status;
+      }
+      (void)se_type;
+    }
+
+    *bits = key_bits;
+  }
+
+  return PSA_SUCCESS;
+}
+
+psa_status_t sli_se_driver_export_rsa_public_key(
+  const psa_key_attributes_t *attributes,
+  const uint8_t *key_buffer,
+  size_t key_buffer_size,
+  uint8_t *data,
+  size_t data_size,
+  size_t *data_length)
+{
+  const uint8_t *n = NULL;
+  const uint8_t *e = NULL;
+  const uint8_t *d = NULL;
+  size_t n_len = 0;
+  size_t e_len = 0;
+  size_t d_len = 0;
+  psa_key_type_t key_type;
+  psa_status_t status;
+  unsigned char *p;
+  unsigned char *start;
+  size_t len = 0;
+  int ret;
+
+  if ((attributes == NULL) || (key_buffer == NULL) || (key_buffer_size == 0U)
+      || (data == NULL) || (data_length == NULL)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  key_type = psa_get_key_type(attributes);
+  if (!PSA_KEY_TYPE_IS_RSA(key_type) || !PSA_KEY_TYPE_IS_KEY_PAIR(key_type)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Require a complete PKCS#1 RSAPrivateKey; encode N and E as RSAPublicKey.
+  status = rsa_der_extract_components(key_type,
+                                      key_buffer,
+                                      key_buffer_size,
+                                      true,
+                                      &n, &n_len,
+                                      &e, &e_len,
+                                      &d, &d_len);
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  status = rsa_validate_component_sizes(n_len, e_len, d_len, true);
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  status = rsa_validate_pubkey_sanity(n, n_len, e, e_len);
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  // RFC 3279 RSAPublicKey ::= SEQUENCE { modulus INTEGER, publicExponent INTEGER }
+  // ASN.1 writers fill the buffer from the end (E, then N, then SEQUENCE).
+  p = data + data_size;
+  start = data;
+
+  ret = mbedtls_asn1_write_integer(&p, start, e, e_len);
+  if (ret < 0) {
+    return (ret == MBEDTLS_ERR_ASN1_BUF_TOO_SMALL)
+           ? PSA_ERROR_BUFFER_TOO_SMALL
+           : PSA_ERROR_INVALID_ARGUMENT;
+  }
+  len += (size_t)ret;
+
+  ret = mbedtls_asn1_write_integer(&p, start, n, n_len);
+  if (ret < 0) {
+    return (ret == MBEDTLS_ERR_ASN1_BUF_TOO_SMALL)
+           ? PSA_ERROR_BUFFER_TOO_SMALL
+           : PSA_ERROR_INVALID_ARGUMENT;
+  }
+  len += (size_t)ret;
+
+  ret = mbedtls_asn1_write_len(&p, start, len);
+  if (ret < 0) {
+    return (ret == MBEDTLS_ERR_ASN1_BUF_TOO_SMALL)
+           ? PSA_ERROR_BUFFER_TOO_SMALL
+           : PSA_ERROR_INVALID_ARGUMENT;
+  }
+  len += (size_t)ret;
+
+  ret = mbedtls_asn1_write_tag(&p, start,
+                               MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+  if (ret < 0) {
+    return (ret == MBEDTLS_ERR_ASN1_BUF_TOO_SMALL)
+           ? PSA_ERROR_BUFFER_TOO_SMALL
+           : PSA_ERROR_INVALID_ARGUMENT;
+  }
+  len += (size_t)ret;
+
+  memmove(data, p, len);
+  if (len < data_size) {
+    memset(data + len, 0, data_size - len);
+  }
+
+  *data_length = len;
   return PSA_SUCCESS;
 }
 
@@ -435,16 +732,21 @@ static psa_status_t build_rsa_se_key_desc(
     return status;
   }
 
-  if (PSA_BYTES_TO_BITS(n_len) > PSA_VENDOR_RSA_MAX_KEY_BITS) {
-    return PSA_ERROR_NOT_SUPPORTED;
+  status = rsa_validate_component_sizes(n_len, e_len, d_len, for_private_key);
+  if (status != PSA_SUCCESS) {
+    return status;
   }
 
-  if ((n_len == 0U) || (n_len > SLI_SE_DRIVER_RSA_MAX_MODULUS_BYTES)
-      || (e_len == 0U) || (e_len > n_len)) {
-    return PSA_ERROR_INVALID_ARGUMENT;
+  status = rsa_validate_pubkey_sanity(n, n_len, e, e_len);
+  if (status != PSA_SUCCESS) {
+    return status;
   }
-  if (for_private_key && ((d_len == 0U) || (d_len > n_len))) {
-    return PSA_ERROR_INVALID_ARGUMENT;
+
+  if (for_private_key) {
+    status = rsa_validate_privexp_sanity(n, n_len, d, d_len);
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
   }
 
   const size_t key_size = n_len;

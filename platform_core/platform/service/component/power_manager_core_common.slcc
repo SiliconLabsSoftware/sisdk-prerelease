@@ -33,6 +33,7 @@ source:
 provides:
 - name: power_manager_core_common
 requires:
+- name: log_none
 - name: sl_core
 - name: sl_assert
 - name: status

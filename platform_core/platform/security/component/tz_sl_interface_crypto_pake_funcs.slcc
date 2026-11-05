@@ -13,31 +13,49 @@ requires:
 template_contribution:
 
 - name: tfm_interface_func
-  value: tfm_crypto_pake_setup
+  value:
+    function: tfm_crypto_pake_setup
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_pake_set_user
+  value:
+    function: tfm_crypto_pake_set_user
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_pake_set_peer
+  value:
+    function: tfm_crypto_pake_set_peer
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_pake_set_role
+  value:
+    function: tfm_crypto_pake_set_role
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_pake_output
+  value:
+    function: tfm_crypto_pake_output
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_pake_input
+  value:
+    function: tfm_crypto_pake_input
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_pake_get_shared_key
+  value:
+    function: tfm_crypto_pake_get_shared_key
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_pake_derive_secret
+  value:
+    function: tfm_crypto_pake_derive_secret
+    key_checks: []
 
 - name: tfm_interface_func
-  value: tfm_crypto_pake_abort
+  value:
+    function: tfm_crypto_pake_abort
+    key_checks: []
 
 documentation:
   url: https://www.silabs.com/documents/public/application-notes/an1374-trustzone.pdf

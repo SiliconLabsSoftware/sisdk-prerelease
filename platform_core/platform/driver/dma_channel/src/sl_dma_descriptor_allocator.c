@@ -29,7 +29,7 @@
  ******************************************************************************/
 
 #include "sl_dma_descriptor_allocator.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "sl_memory_manager.h"
 #include "sl_dma_channel_device.h"
 
@@ -68,7 +68,7 @@ sl_status_t sl_dma_descriptor_allocator_allocate(sl_peripheral_t dma_peripheral,
                                                  bool is_extended,
                                                  void **descriptor)
 {
-  EFM_ASSERT(descriptor != NULL);
+  SL_LOG_DEBUG_ASSERT(descriptor != NULL);
   (void)dma_peripheral;
   (void)channel_nbr;
   (void)is_extended;

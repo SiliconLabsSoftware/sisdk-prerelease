@@ -18,6 +18,7 @@
 #define BTL_SMP_SWITCH_FLASH_API_H
 
 #include "btl_smp_switch_record.h"
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -73,6 +74,23 @@ bool btl_smp_switch_write_record(bool use_page_1,
  * @return False if SMP is not supported, or the storage vtable does not expose page bases.
  ******************************************************************************/
 bool get_smp_page_bases_from_storage(uint32_t *page1Base, uint32_t *page2Base);
+
+/***************************************************************************//**
+ * Compute SMP record CRC32 using the same GPCRC flow as the SMP flash API.
+ *
+ * This helper is intended for SMP metadata validation in applications/tests
+ * that include this header, so they can avoid re-implementing CRC logic.
+ *
+ * @param[in] buffer      Input bytes. Must not be NULL when @p length > 0.
+ * @param[in] length      Number of input bytes.
+ * @param[in] prevResult  Initial/previous CRC value (use 0xFFFFFFFF for start).
+ *
+ * @return CRC32 value for the provided stream. If @p buffer is NULL or
+ *         @p length is 0, @p prevResult is returned unchanged.
+ ******************************************************************************/
+uint32_t btl_smp_switch_record_crc32(const uint8_t *buffer,
+                                     size_t length,
+                                     uint32_t prevResult);
 
 /***************************************************************************//**
  * Request that the next boot runs the given application.

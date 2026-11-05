@@ -5,8 +5,10 @@ description: >-
   This component provides support for reading and writing standard PEM formatted
   keys and certificates in Mbed TLS. Password-encrypted PEM is not included,
   add mbedtls_pem_rfc1421 for that.
+  This component is DEPRECATED and is replaced by new set of components
+  including mbedtls_pem_parse, mbedtls_pem_write.
 category: Platform|Security|Mbed TLS|Upper Layer
-quality: production
+quality: deprecated
 provides:
 - name: mbedtls_pem
 requires:

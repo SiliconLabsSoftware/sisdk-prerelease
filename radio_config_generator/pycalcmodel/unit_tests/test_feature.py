@@ -7,7 +7,6 @@ Tests cover ModelFeature creation, properties, and ModelFeatureContainer functio
 import unittest
 import sys
 
-# Add the Package directory to the path for imports
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
@@ -94,7 +93,6 @@ class TestModelFeature(unittest.TestCase):
         """Test registering parser update function."""
         feature = ModelFeature(name="test_feature")
         
-        # Mock parser update function
         update_calls = []
         def mock_parser_update(name, value):
             update_calls.append((name, value))
@@ -102,7 +100,6 @@ class TestModelFeature(unittest.TestCase):
         feature.register_parser(mock_parser_update)
         assert feature.zz_parser_update is not None
         
-        # Test that parser update is called when value changes
         feature.value = True
         assert len(update_calls) == 1
         assert update_calls[0] == ("test_feature", True)
@@ -169,7 +166,6 @@ class TestModelFeatureContainer(unittest.TestCase):
         parser = ModelParser()
         container = ModelFeatureContainer(parser)
         
-        # Should be able to iterate even when empty
         features = list(container)
         assert features == []
     
@@ -178,7 +174,6 @@ class TestModelFeatureContainer(unittest.TestCase):
         parser = ModelParser()
         container = ModelFeatureContainer(parser)
         
-        # Test with empty container
         assert "nonexistent" not in container
     
     def test_invalid_parser_type(self):
@@ -202,8 +197,6 @@ class TestModelFeatureXMLSerialization(unittest.TestCase):
         
         xml_obj = feature.to_type_xml()
         assert xml_obj is not None
-        # The actual XML object properties would depend on the model_type module
-        # We can test that the method runs without error
     
     def test_to_instance_xml(self):
         """Test to_instance_xml method."""
@@ -215,8 +208,6 @@ class TestModelFeatureXMLSerialization(unittest.TestCase):
         
         xml_obj = feature.to_instance_xml()
         assert xml_obj is not None
-        # The actual XML object properties would depend on the model_inst module
-        # We can test that the method runs without error
 
 
 class TestModelFeatureEdgeCases(unittest.TestCase):
@@ -272,7 +263,6 @@ class TestModelFeatureEdgeCases(unittest.TestCase):
         
         feature.register_parser(mock_parser_update)
         
-        # Multiple value changes should trigger multiple updates
         for i in range(5):
             feature.value = i % 2 == 0  # Alternate between True and False
         

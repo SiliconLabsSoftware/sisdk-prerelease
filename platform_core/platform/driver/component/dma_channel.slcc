@@ -20,6 +20,7 @@ include:
 source:
 - path: src/sl_dma_channel.c
 requires:
+- name: log_none
 - name: hal_ldma
 - name: device_dma
 - name: device_peripheral

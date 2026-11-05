@@ -6,6 +6,12 @@ description: >
   One example is the default dimming rate of a light dimmer. Configuration parameters MUST
   be specified in the product documentation. Configuration parameters accessed via this command
   class MUST NOT replace similar commands provided by other existing Command Classes.
+documentation:
+  docset: z-wave
+  document:
+  - page: zwave-api/configuration
+  - page: z-wave-device-configuration-basics
+
 package: zwave
 quality: production
 metadata:

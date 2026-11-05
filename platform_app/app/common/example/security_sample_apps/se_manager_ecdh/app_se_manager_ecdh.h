@@ -71,9 +71,11 @@
 /// Shared secret size = private key size x 2
 #define SHARED_SECRET_SIZE      (ECC_PRIVKEY_SIZE * 2)
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /// Internal SE key slots used for asymmetric keys
 #define CLIENT_KEY_SLOT         (SL_SE_KEY_SLOT_VOLATILE_0)
 #define SERVER_KEY_SLOT         (SL_SE_KEY_SLOT_VOLATILE_1)
+#endif
 
 // -----------------------------------------------------------------------------
 //                                Global Variables
@@ -165,6 +167,7 @@ sl_status_t create_wrap_asymmetric_key(sl_se_key_type_t key_type, bool client);
 sl_status_t export_asymmetric_pubkey_from_wrap(sl_se_key_type_t key_type,
                                                bool client);
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /***************************************************************************//**
  * Generate a non-exportable asymmetric key into a volatile SE key slot.
  *
@@ -197,6 +200,7 @@ sl_status_t export_asymmetric_pubkey_from_volatile(sl_se_key_type_t key_type,
  ******************************************************************************/
 sl_status_t delete_volatile_asymmetric_key(sl_se_key_type_t key_type,
                                            bool client);
+#endif
 
 /***************************************************************************//**
  * Compute ECDH shared secret from wrapped key.
@@ -207,6 +211,7 @@ sl_status_t delete_volatile_asymmetric_key(sl_se_key_type_t key_type,
  ******************************************************************************/
 sl_status_t compute_wrap_shared_secret(sl_se_key_type_t key_type, bool client);
 
+#if defined(SLI_SE_SUPPORTS_VOLATILE_KEY_STORAGE)
 /***************************************************************************//**
  * Compute ECDH shared secret from volatile key.
  *
@@ -216,6 +221,7 @@ sl_status_t compute_wrap_shared_secret(sl_se_key_type_t key_type, bool client);
  ******************************************************************************/
 sl_status_t compute_volatile_shared_secret(sl_se_key_type_t key_type,
                                            bool client);
+#endif
 #endif
 
 #endif  // APP_SE_MANAGER_ECDH_H

@@ -75,6 +75,16 @@
 #endif
 
 // -------------------------------------
+// TLS identity
+
+// Mirrors SLI_SE_SUPPORTS_TLS_IDENTITY_KEY in sli_se_manager_features.h, stated
+// in terms of the macros available here so that this header does not have to
+// depend on SE Manager. Both resolve to Wi-Fi parts with Secure Vault.
+#if defined(SLI_MBEDTLS_DEVICE_HSE_VAULT_HIGH) && defined(_SI_WIFI_FAMILY)
+  #define SLI_PSA_DRIVER_FEATURE_TLS_IDENTITY
+#endif
+
+// -------------------------------------
 // AEAD
 
 #if defined(PSA_WANT_ALG_CCM) && defined(MBEDTLS_PSA_ACCEL_ALG_CCM)

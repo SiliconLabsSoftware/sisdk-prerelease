@@ -1,10 +1,9 @@
-from pyradioconfig.calculator_model_framework.interfaces.iprofile import ModelOutput, ModelOutputType
+from pyradioconfig.calculator_model_framework.interfaces.iprofile import ModelOutput, ModelOutputType, IProfile
 from pyradioconfig.parts.ocelot.profiles.sw_profile_outputs_common import sw_profile_outputs_common_ocelot
 
 class sw_profile_outputs_common_sol(sw_profile_outputs_common_ocelot):
 
     def build_ircal_outputs(self, model, profile):
-        # Output Software Variables
         profile.outputs.append(ModelOutput(model.vars.ircal_auxndiv, '', ModelOutputType.SW_VAR,
                                            readable_name='IRCAL auxndiv'))
         profile.outputs.append(ModelOutput(model.vars.ircal_auxlodiv, '', ModelOutputType.SW_VAR,
@@ -38,7 +37,6 @@ class sw_profile_outputs_common_sol(sw_profile_outputs_common_ocelot):
         profile.outputs.append(ModelOutput(model.vars.ircal_muishf, '', ModelOutputType.SW_VAR,
                                            readable_name='IRCAL MUISHF'))
 
-        # All but one (agcrssiperiod) of these were created for backwards compatibility with RAIL 1.x - remove in RAIL 2.x
         profile.outputs.append(ModelOutput(model.vars.ircal_agcrssiperiod, '', ModelOutputType.SW_VAR,
                                            readable_name='IRCAL agcrssiperiod'))
         profile.outputs.append(ModelOutput(model.vars.ircal_useswrssiaveraging2, '', ModelOutputType.SW_VAR,
@@ -140,3 +138,4 @@ class sw_profile_outputs_common_sol(sw_profile_outputs_common_ocelot):
 
         profile.outputs.append(ModelOutput(model.vars.softmodem_antdivmode, '', ModelOutputType.RAIL_CONFIG,
                                            readable_name='Antenna diversity mode'))
+        IProfile.make_hidden_input(profile, model.vars.phy_mode_id, "RAIL", readable_name="Stack info PHY mode ID", value_limit_min=0, value_limit_max=255)

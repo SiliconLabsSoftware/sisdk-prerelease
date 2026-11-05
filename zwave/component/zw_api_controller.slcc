@@ -2,6 +2,10 @@ id: zw_api_controller
 label: Z-Wave API Controller
 category: Z-Wave|API
 description: API for Controller
+documentation:
+  docset: z-wave
+  document: zwave-api/controller-api
+
 package: zwave
 quality: production
 metadata:

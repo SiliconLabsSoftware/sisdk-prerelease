@@ -4,7 +4,6 @@ from pyradioconfig.parts.lion.calculators.calc_misc import CalcMiscLion
 class CalcMiscCurl(CalcMiscLion):
 
     def calc_misc_Leopard(self, model):
-        # Remove RAC_CLKMULTEN registers from default calculation
         self._reg_write(model.vars.FRC_DFLCTRL_DFLBOIOFFSET, 0)
         self._reg_write(model.vars.FRC_CTRL_WAITEOFEN, 0)
         self._reg_write(model.vars.FRC_TRAILTXDATACTRL_TRAILTXREPLEN, 0)
@@ -164,7 +163,6 @@ class CalcMiscCurl(CalcMiscLion):
         self._reg_write(model.vars.MODEM_BLEIQDSAEXT1_IIRRST, 0)
 
     def calc_misc(self, model):
-        # Copied from nixi, remove unused registers
 
         self._reg_write(model.vars.MODEM_CTRL0_FRAMEDETDEL, 0)
         self._reg_write(model.vars.MODEM_CTRL1_SYNCERRORS, 0)

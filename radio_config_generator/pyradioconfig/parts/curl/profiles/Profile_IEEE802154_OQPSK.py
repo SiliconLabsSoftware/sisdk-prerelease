@@ -1,6 +1,7 @@
 from pyradioconfig.parts.common.profiles.curl_regs import build_modem_regs_curl
 from pyradioconfig.parts.lion.profiles.Profile_IEEE802154_OQPSK import ProfileIEEE802154OQPSKLion
 from pyradioconfig.parts.curl.ip_collector.ip_collector_curl import IPCollector_Curl
+from pyradioconfig.parts.curl.profiles.Profile_Base import ProfileBaseCurl
 
 
 class ProfileIEEE802154OQPSKCurl(ProfileIEEE802154OQPSKLion):
@@ -18,4 +19,8 @@ class ProfileIEEE802154OQPSKCurl(ProfileIEEE802154OQPSKLion):
 
     def build_register_profile_outputs(self, model, profile):
         build_modem_regs_curl(model, profile)
-        IPCollector_Curl(model.part_family, model.part_revision).build_all_peripheral_regs(model, profile)
+        IPCollector_Curl(model.part_family, model.part_revision, self.ip_category).build_all_peripheral_regs(model, profile)
+
+    def buildRailOutputs(self, model, profile):
+        ProfileIEEE802154OQPSKLion().buildRailOutputs(model, profile)
+        ProfileBaseCurl().buildHadmOutputs(model, profile)

@@ -6,6 +6,10 @@ description: >
   Command Classes. It can collect all endpoints and is used during the ZAF initialization phase.
   It also collects the secure and not secure command classes. It is possible to get the list
   through the get function.
+documentation:
+  docset: z-wave
+  document: zwave-api/cc-list
+
 package: zwave
 quality: production
 metadata:

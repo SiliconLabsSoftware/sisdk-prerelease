@@ -5,6 +5,7 @@ from pyradioconfig.parts.common.profiles.profile_common import buildCrcInputs, b
 from pyradioconfig.parts.common.profiles.profile_modem import buildModemAdvancedInputs, buildModemInfoOutputs, \
     buildRailOutputs
 from pyradioconfig.calculator_model_framework.interfaces.iprofile import IProfile
+from pycalcmodel.core.output import ModelOutput, ModelOutputType
 from pyradioconfig.parts.common.profiles.curl_regs import build_modem_regs_curl
 from pyradioconfig.parts.curl.ip_collector.ip_collector_curl import IPCollector_Curl
 
@@ -24,29 +25,22 @@ class ProfileBaseCurl(ProfileBaseLion):
 
         family = self._family
 
-        # Build profile
         profile = self._makeProfile(model)
 
-        # Add inputs
         self.build_required_profile_inputs(model, profile)
         self.build_optional_profile_inputs(model, profile)
         self.build_advanced_profile_inputs(model, profile)
         self.build_hidden_profile_inputs(model, profile)
         self.build_deprecated_profile_inputs(model, profile)
 
-        # Frame configuration Inputs
         self.build_frame_configuration_inputs(model, profile)
 
-        # Modem Advanced Inputs
         buildModemAdvancedInputs(model, profile)
 
-        # Informational Output
         buildModemInfoOutputs(model, profile)
 
-        # RAIL Outputs
-        buildRailOutputs(model, profile)
+        self.buildRailOutputs(model, profile)
 
-        # Output fields
         buildFrameOutputs(model, profile)
         buildCrcOutputs(model, profile)
         buildWhiteOutputs(model, profile)
@@ -158,6 +152,15 @@ class ProfileBaseCurl(ProfileBaseLion):
         buildWhiteInputs(model, profile)
         buildFecInputs(model, profile)
 
+    def buildHadmOutputs(self, model, profile):
+        profile.outputs.append(ModelOutput(model.vars.cs_rtt_dig_delay_ns, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='Time needed for RTT digital delay compensation'))
+        profile.outputs.append(ModelOutput(model.vars.cs_rtt_rbs_bias_ns, '', ModelOutputType.RAIL_CONFIG,
+                                           readable_name='RTT digital bias for fractional time'))
     def buildRegisterOutputs(self, model, profile):
         build_modem_regs_curl(model, profile)
-        IPCollector_Curl(model.part_family, model.part_revision).build_all_peripheral_regs(model, profile)
+        IPCollector_Curl(model.part_family, model.part_revision, self.ip_category).build_all_peripheral_regs(model, profile)
+
+    def buildRailOutputs(self, model, profile):
+        buildRailOutputs(model, profile)
+        self.buildHadmOutputs(model, profile)

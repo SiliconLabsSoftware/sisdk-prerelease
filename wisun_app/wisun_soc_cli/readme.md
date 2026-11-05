@@ -170,6 +170,11 @@ The settings part of the *statistics* section are counters maintained by the Wi-
 | statistics.network | R | 6LoWPAN/IP stack statistics |
 | statistics.regulation | R | Regional regulation statistics and errors |
 | statistics.heap | R | Memory consumption statistics |
+| statistics.ffn_power_saving | R | Local FFN power-saving ratios and interval durations |
+
+Reading FFN power saving metrics requires local FFN power-saving support. The stack returns `SL_STATUS_NOT_READY` until positive `ACTIVE` time has been measured since the last reset, and `SL_STATUS_NOT_AVAILABLE` for peer-only or feature-disabled providers.
+
+The FFN power-saving metrics accumulate only while power saving is `ACTIVE`. They are kept when power saving leaves `ACTIVE` (for example on a schedule change, FHSS timing invalidation or disable), so the latest values can still be read afterwards, and later `ACTIVE` time accumulates on top of them. They are cleared by `wisun reset_statistics`, or automatically when power saving becomes `ACTIVE` again with a different listen/sleep schedule than the one they were measured with. `nominal_sleep_ratio` is the target of that measured schedule.
 
 ### *info* Section Settings
 

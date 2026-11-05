@@ -32,7 +32,7 @@
 #if defined(PCNT_COUNT) && (PCNT_COUNT > 0)
 
 #include "em_cmu.h"
-#include "sl_assert.h"
+#include "sl_log_helper.h"
 #include "em_bus.h"
 
 /***************************************************************************//**
@@ -118,7 +118,7 @@ __STATIC_INLINE unsigned int PCNT_Map(PCNT_TypeDef *pcnt)
  ******************************************************************************/
 void PCNT_CounterReset(PCNT_TypeDef *pcnt)
 {
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(PCNT_REF_VALID(pcnt));
 
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Enable reset of the CNT and TOP register. */
@@ -161,7 +161,7 @@ void PCNT_Enable(PCNT_TypeDef *pcnt, PCNT_Mode_TypeDef mode)
 {
   uint32_t tmp;
 
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(PCNT_REF_VALID(pcnt));
 
   /* Set as specified. */
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
@@ -220,7 +220,7 @@ void PCNT_Enable(PCNT_TypeDef *pcnt, PCNT_Mode_TypeDef mode)
  ******************************************************************************/
 bool PCNT_IsEnabled(PCNT_TypeDef *pcnt)
 {
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(PCNT_REF_VALID(pcnt));
 
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   return ((pcnt->CTRL & _PCNT_CTRL_MODE_MASK) != PCNT_CTRL_MODE_DISABLE);
@@ -259,26 +259,26 @@ void PCNT_CounterTopSet(PCNT_TypeDef *pcnt, uint32_t count, uint32_t top)
   uint32_t ctrl;
 #endif
 
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(PCNT_REF_VALID(pcnt));
 
 #ifdef PCNT0
   if (PCNT0 == pcnt) {
-    EFM_ASSERT((1 << PCNT0_CNT_SIZE) > count);
-    EFM_ASSERT((1 << PCNT0_CNT_SIZE) > top);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT0_CNT_SIZE) > count);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT0_CNT_SIZE) > top);
   }
 #endif
 
 #ifdef PCNT1
   if (PCNT1 == pcnt) {
-    EFM_ASSERT((1 << PCNT1_CNT_SIZE) > count);
-    EFM_ASSERT((1 << PCNT1_CNT_SIZE) > top);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT1_CNT_SIZE) > count);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT1_CNT_SIZE) > top);
   }
 #endif
 
 #ifdef PCNT2
   if (PCNT2 == pcnt) {
-    EFM_ASSERT((1 << PCNT2_CNT_SIZE) > count);
-    EFM_ASSERT((1 << PCNT2_CNT_SIZE) > top);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT2_CNT_SIZE) > count);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT2_CNT_SIZE) > top);
   }
 #endif
 
@@ -368,7 +368,7 @@ void PCNT_PRSInputEnable(PCNT_TypeDef *pcnt,
                          PCNT_PRSInput_TypeDef prsInput,
                          bool enable)
 {
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(PCNT_REF_VALID(pcnt));
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   bool module_enable = PCNT_IsEnabled(pcnt);
@@ -407,7 +407,7 @@ void PCNT_PRSInputEnable(PCNT_TypeDef *pcnt,
 
     /* An invalid parameter, asserted. */
     default:
-      EFM_ASSERT(0);
+      SL_LOG_DEBUG_ASSERT(0);
       break;
   }
 
@@ -450,7 +450,7 @@ void PCNT_PRSInputEnable(PCNT_TypeDef *pcnt,
  ******************************************************************************/
 void PCNT_FreezeEnable(PCNT_TypeDef *pcnt, bool enable)
 {
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(PCNT_REF_VALID(pcnt));
 
   if (enable) {
     /* Wait for any ongoing LF synchronization to complete to
@@ -516,26 +516,26 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
 
   (void)&tmp;
 
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(PCNT_REF_VALID(pcnt));
 
 #ifdef PCNT0
   if (PCNT0 == pcnt) {
-    EFM_ASSERT((1 << PCNT0_CNT_SIZE) > init->counter);
-    EFM_ASSERT((1 << PCNT0_CNT_SIZE) > init->top);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT0_CNT_SIZE) > init->counter);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT0_CNT_SIZE) > init->top);
   }
 #endif
 
 #ifdef PCNT1
   if (PCNT1 == pcnt) {
-    EFM_ASSERT((1 << PCNT1_CNT_SIZE) > init->counter);
-    EFM_ASSERT((1 << PCNT1_CNT_SIZE) > init->top);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT1_CNT_SIZE) > init->counter);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT1_CNT_SIZE) > init->top);
   }
 #endif
 
 #ifdef PCNT2
   if (PCNT2 == pcnt) {
-    EFM_ASSERT((1 << PCNT2_CNT_SIZE) > init->counter);
-    EFM_ASSERT((1 << PCNT2_CNT_SIZE) > init->top);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT2_CNT_SIZE) > init->counter);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT2_CNT_SIZE) > init->top);
   }
 #endif
 
@@ -614,7 +614,7 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
 
       default:
         /* An invalid parameter, asserted. */
-        EFM_ASSERT(0);
+        SL_LOG_DEBUG_ASSERT(0);
         break;
     }
     tmp |= auxCntEventField << _PCNT_CTRL_AUXCNTEV_SHIFT;
@@ -744,8 +744,8 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
   pcnt->CTRL = tmp;
 
   /* Set PRS inputs */
-  EFM_ASSERT(init->s0PRS < PRS_ASYNC_CH_NUM);
-  EFM_ASSERT(init->s1PRS < PRS_ASYNC_CH_NUM);
+  SL_LOG_DEBUG_ASSERT(init->s0PRS < PRS_ASYNC_CH_NUM);
+  SL_LOG_DEBUG_ASSERT(init->s1PRS < PRS_ASYNC_CH_NUM);
   PRS->CONSUMER_PCNT0_S0IN = init->s0PRS;
   PRS->CONSUMER_PCNT0_S1IN = init->s1PRS;
 
@@ -805,7 +805,7 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
 void PCNT_Reset(PCNT_TypeDef *pcnt)
 {
   unsigned int inst = 0;
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(PCNT_REF_VALID(pcnt));
 
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* A map pointer to the instance and clock information. */
@@ -881,7 +881,7 @@ void PCNT_FilterConfiguration(PCNT_TypeDef *pcnt, const PCNT_Filter_TypeDef *con
   bool module_enable = false;
 #endif
 
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(PCNT_REF_VALID(pcnt));
 
 #if defined(PCNT_OVSCFG_FILTLEN_DEFAULT)
   /* Construct the new filter setting value. */
@@ -966,7 +966,7 @@ void PCNT_TCCConfiguration(PCNT_TypeDef *pcnt, const PCNT_TCC_TypeDef *config)
                   | _PCNT_CTRL_TCCPRSPOL_MASK
                   | _PCNT_CTRL_TCCPRSSEL_MASK;
 
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(PCNT_REF_VALID(pcnt));
 
   /* Construct the TCC part of the configuration register. */
   ctrl |= (config->mode          << _PCNT_CTRL_TCCMODE_SHIFT)   & _PCNT_CTRL_TCCMODE_MASK;
@@ -1000,7 +1000,7 @@ void PCNT_TCCConfiguration(PCNT_TypeDef *pcnt, const PCNT_TCC_TypeDef *config)
  ******************************************************************************/
 void PCNT_TopBufferSet(PCNT_TypeDef *pcnt, uint32_t val)
 {
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(PCNT_REF_VALID(pcnt));
 
   /* LF register about to be modified require sync. busy check */
   PCNT_Sync(pcnt, PCNT_SYNCBUSY_TOPB);
@@ -1025,23 +1025,23 @@ void PCNT_TopBufferSet(PCNT_TypeDef *pcnt, uint32_t val)
  ******************************************************************************/
 void PCNT_TopSet(PCNT_TypeDef *pcnt, uint32_t val)
 {
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+  SL_LOG_DEBUG_ASSERT(PCNT_REF_VALID(pcnt));
 
 #ifdef PCNT0
   if (PCNT0 == pcnt) {
-    EFM_ASSERT((1 << PCNT0_CNT_SIZE) > val);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT0_CNT_SIZE) > val);
   }
 #endif
 
 #ifdef PCNT1
   if (PCNT1 == pcnt) {
-    EFM_ASSERT((1 << PCNT1_CNT_SIZE) > val);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT1_CNT_SIZE) > val);
   }
 #endif
 
 #ifdef PCNT2
   if (PCNT2 == pcnt) {
-    EFM_ASSERT((1 << PCNT2_CNT_SIZE) > val);
+    SL_LOG_DEBUG_ASSERT((1 << PCNT2_CNT_SIZE) > val);
   }
 #endif
 

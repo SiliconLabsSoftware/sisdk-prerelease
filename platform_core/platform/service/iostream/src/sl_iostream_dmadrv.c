@@ -41,7 +41,7 @@
 #include "sl_hal_ldma.h"
 #include "sl_status.h"
 #include "sli_iostream_dmadrv.h"
-
+#include "sl_log_helper.h"
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
@@ -307,10 +307,12 @@ sl_status_t sli_iostream_dmadrv_init(void)
   }
 
   status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LDMA0);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_LDMAXBAR0);
-  EFM_ASSERT(status == SL_STATUS_OK);
+  SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+  (void)status;
 
   sl_dma_manager_get_default_handle(&dmadrv_dma_manager_handle);
 

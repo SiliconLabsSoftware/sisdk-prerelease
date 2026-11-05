@@ -2,6 +2,9 @@ id: zw_sbom
 label: Z-Wave SBOM
 category: Z-Wave
 description: Z-Wave SBOM metadata
+documentation:
+  docset: ssv6ug
+  document: ssv6-sbom-generation
 package: zwave
 quality: production
 ui_hints:

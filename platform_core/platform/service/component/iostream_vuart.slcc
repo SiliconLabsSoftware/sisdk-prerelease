@@ -16,6 +16,7 @@ provides:
 - name: iostream_console_support
   allow_multiple: true
 requires:
+- name: log_none
 - name: iostream
 - name: segger_rtt
 - name: debug_swo

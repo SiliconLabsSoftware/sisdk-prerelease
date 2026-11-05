@@ -1,8 +1,11 @@
 from pyradioconfig.calculator_model_framework.interfaces.iphy import IPhy
 from pyradioconfig.parts.margay.phys.Phys_Studio_MBus import PHYS_Mbus_Studio_Margay
+from pycalcmodel.core.common import IPCategory
 
 
 class PHYS_Mbus_Studio_Serval(IPhy):
+
+    ip_category = IPCategory.LPW
 
     def PHY_wMbus_ModeNabef_4p8K_frameA(self, model):
         phy = PHYS_Mbus_Studio_Margay().PHY_wMbus_ModeNabef_4p8K_frameA(model)

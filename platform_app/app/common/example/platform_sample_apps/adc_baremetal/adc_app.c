@@ -81,6 +81,14 @@
 #define GPIO_ADC1_PORT         SL_GPIO_PORT_D
 #define GPIO_ADC1_PIN          2
 
+#elif defined(EFR32MG2B_BRD2612A)
+#define ADC0_IN_GPIO_PORT     SL_HAL_ADC_PORT_POS_PORTD
+#define ADC0_IN_GPIO_PIN      2
+#define GPIO_ADC0_PORT        SL_GPIO_PORT_D
+#define GPIO_ADC0_PIN         2
+#define GPIO_OUT_PORT         SL_GPIO_PORT_A
+#define GPIO_OUT_PIN          4
+
 #elif defined(SLDK4360A_SIWG353) || defined(SLDK6360A_SIWG353)
 // ADC input on PA2 (port A), loopback output on PA3 (port A).
 #define ADC0_IN_GPIO_PORT     SL_HAL_ADC_PORT_POS_PORTA

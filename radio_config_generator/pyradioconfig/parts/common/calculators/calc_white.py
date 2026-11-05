@@ -30,9 +30,7 @@ class CALC_Whitening(ICalculator):
         """
 
         """
-        #Inputs
         """
-        #WHITE_POLY
         var = self._addModelVariable(model, 'white_poly', Enum, ModelVariableFormat.DECIMAL, 'List of supported Whitening Polynomials')
         member_data = [
             ['NONE' , 0, 'No Whitening'],
@@ -48,14 +46,11 @@ class CALC_Whitening(ICalculator):
             'List of supported Whitening Polynomials',
             member_data)
 
-        #white_seed
         self._addModelVariable(model, 'white_seed', int, ModelVariableFormat.HEX, 'Whitening Initialization Value')
 
-        #WHITE_OUTPUT_BIT
         self._addModelVariable(model, 'white_output_bit', int, ModelVariableFormat.HEX, 'Whitening Output Bit')
 
         """
-        #Outputs
         """
         self._build_white_regs(model)
 
@@ -100,9 +95,7 @@ class CALC_Whitening(ICalculator):
 
         elif model.vars.white_poly.value.value != model.vars.white_poly.var_enum.NONE.value:
             white_params = WHITE_POLY_LOOKUP[model.vars.white_poly.value.value]
-            #Handle POLY configuration
             self._reg_write(model.vars.FRC_WHITEPOLY_POLY, white_params[0])
-            # Subtract 1 from the CRC size to get the proper value
             self._reg_write(model.vars.FRC_WHITECTRL_XORFEEDBACK, white_params[1])
             self._reg_write(model.vars.FRC_WHITECTRL_FEEDBACKSEL, white_params[2])
 
@@ -110,12 +103,9 @@ class CALC_Whitening(ICalculator):
             self._reg_write(model.vars.FRC_WHITECTRL_SHROUTPUTSEL, model.vars.white_output_bit.value)
             
         else:
-            # Defaults if whitening is disabled
             self._reg_write(model.vars.FRC_WHITECTRL_XORFEEDBACK, 0)
             self._reg_write(model.vars.FRC_WHITECTRL_FEEDBACKSEL, 0)
             self._reg_write(model.vars.FRC_WHITEINIT_WHITEINIT, 0)
             
-            # If whitening is disabled, set the following values to whatever they were set to in
-            # the block coding code in case it is enabled.
             self._reg_write(model.vars.FRC_WHITECTRL_SHROUTPUTSEL, model.vars.frame_coding_fshroutputsel_val.value)
             self._reg_write(model.vars.FRC_WHITEPOLY_POLY, model.vars.frame_coding_poly_val.value)

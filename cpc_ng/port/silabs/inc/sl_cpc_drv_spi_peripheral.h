@@ -40,7 +40,6 @@
 #include "sl_device_gpio.h"
 #include "sl_device_peripheral.h"
 #include "sl_dma_manager.h"
-#include "sl_enum.h"
 #include "sl_hal_ldma.h"
 #include "sl_hal_prs_enums.h"
 
@@ -49,7 +48,7 @@
 
 #define SL_CPC_DRV_SPI_PERIPHERAL_LDMA_DESCRIPTORS 2
 
-SL_ENUM(sl_cpc_drv_spi_peripheral_irq_state_t){
+enum sl_cpc_drv_spi_peripheral_irq_state {
   SL_CPC_DRV_SPI_PERIPHERAL_IRQ_STATE_HEADER = 0,
   SL_CPC_DRV_SPI_PERIPHERAL_IRQ_STATE_PAYLOAD,
 };
@@ -154,7 +153,7 @@ struct sl_cpc_drv_spi_peripheral_rx {
   sli_cpc_drv_spi_header_t current_header;
 
   bool need_frame;
-  sl_cpc_drv_spi_peripheral_irq_state_t irq_state;
+  enum sl_cpc_drv_spi_peripheral_irq_state irq_state;
 
   struct sl_cpc_drv_spi_peripheral_rx_ldma_desc desc;
 #if defined(SL_CATALOG_CPC_DRIVER_HW_CRC_PRESENT)
@@ -187,7 +186,7 @@ struct sl_cpc_drv_spi_peripheral_tx {
   struct sl_cpc_drv_spi_peripheral_tx_ldma desc;
 };
 
-typedef struct sl_cpc_drv_spi_peripheral {
+struct sl_cpc_drv_spi_peripheral {
   sl_peripheral_t peripheral;
   sl_dma_handle_t *dma_handle;
   sl_cpc_bus_t bus;
@@ -201,6 +200,6 @@ typedef struct sl_cpc_drv_spi_peripheral {
 
   struct sl_cpc_drv_spi_peripheral_rx rx;
   struct sl_cpc_drv_spi_peripheral_tx tx;
-} sl_cpc_drv_spi_peripheral_t;
+};
 
 #endif /* SL_CPC_DRV_SPI_PERIPHERAL_H */

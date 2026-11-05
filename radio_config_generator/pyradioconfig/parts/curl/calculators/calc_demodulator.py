@@ -4,16 +4,6 @@ import math
 from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import CalculationException
 
 class CalcDemodulatorCurl(CalcDemodulatorLion):
-    # This table is generated with srw_model/models/channel_filters/gen_channel_filter_coeffs.m
-    # Key: bwsel (actual) - Value: Corresponding channel filter coeff
-    # if bwsel < 0.155:
-    #     coeffs = coeff_list_1
-    # elif bwsel < 0.165:
-    #     coeffs = coeff_list_2
-    # is equivalent to
-    # bwsel_actual = round(bwsel, 2)
-    # channel_filter_lut = { 0.15: coeff_list_1, 0.16: coeff_list_2}
-    # coeffs = channel_filter_lut[bwsel_actual]
     channel_filter_lut = {
         0.15: [-16, -51, -86, -101, -82, -17, 97, 248, 414, 565, 671, 709],
         0.16: [-6, -38, -84, -115, -111, -54, 60, 223, 409, 582, 704, 749],
@@ -85,29 +75,18 @@ class CalcDemodulatorCurl(CalcDemodulatorLion):
         model.vars.dec0_actual.value = dec0
 
     def calc_chfilt_reg(self,model):
-        # This function calculates the channel filter registers
         csdcoeffs = [0 for i in range(12)]
         csdcoeffs_sign = [0 for i in range(12)]
         bit_widths = [7, 8, 8, 9, 9, 9, 9, 10, 10, 11, 12, 12]
 
-        #chfgainreduction_reg = model.vars.FEFILT_CHFCTRL_CHFGAINREDUCTION.value
 
-        #if (chfgainreduction_reg == 1):
-        #    coeffs = [13, 31, 29, -1, -52, -94, -89, -12, 136, 313, 458, 514]
-        #else:
         coeffs = self.return_coeffs(model)
 
-        #csdcoeffs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        #csdcoeffs_sign = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-        # csdcoeffs_bit_widths = [6,8,8,8,8,9,9,9,10,10,11,12] CSD coefficients bit width is smaller due to it's unsigned
-        #bit_widths = [7, 8, 8, 9, 9, 9, 9, 10, 10, 11, 12, 12]
 
-        # replace negative numbers with 2s complement
         for i in range(12):
             csdcoeffs[i], csdcoeffs_sign[i] = self.return_csd(coeffs[i], bit_widths[i])
 
-        # Write registers
         self._reg_write(model.vars.MODEM_CHFCSDCOE00_SET0CSDCOEFF0,  csdcoeffs[0])
         self._reg_write(model.vars.MODEM_CHFCSDCOE00_SET0CSDCOEFF1,  csdcoeffs[1])
         self._reg_write(model.vars.MODEM_CHFCSDCOE00_SET0CSDCOEFF2,  csdcoeffs[2])
@@ -137,13 +116,10 @@ class CalcDemodulatorCurl(CalcDemodulatorLion):
 
         coeffs = self.return_coeffs(model)
 
-        # print(f"CHF Set 1 coefficient values for BW, BWSEL = : {model.vars.bandwidth_hz.value, bwsel}")
 
-        # replace negative numbers with 2s complement
         for i in range(12):
             csdcoeffs[i], csdcoeffs_sign[i] = self.return_csd(coeffs[i], bit_widths[i])
 
-        # TODO: calculate the second set separately
         self._reg_write(model.vars.MODEM_CHFCSDCOE10_SET1CSDCOEFF0,  csdcoeffs[0])
         self._reg_write(model.vars.MODEM_CHFCSDCOE10_SET1CSDCOEFF1,  csdcoeffs[1])
         self._reg_write(model.vars.MODEM_CHFCSDCOE10_SET1CSDCOEFF2,  csdcoeffs[2])
@@ -174,7 +150,6 @@ class CalcDemodulatorCurl(CalcDemodulatorLion):
         bwsel_actual = model.vars.bwsel_actual.value
 
         coeffs = self.channel_filter_lut[bwsel_actual]
-        # Confirm Sum of the Magnitudes is in spec to not overflow the filter accumulator
         try:
             assert sum([abs(i) for i in coeffs]) < 2**16
         except AssertionError:
@@ -199,20 +174,13 @@ class CalcDemodulatorCurl(CalcDemodulatorLion):
                     csdcoeffsign = csdcoeffsign + 2 ** (pointer // 2)
                 coeff = csdcoeff // 2 ** (pointer + 1)
                 pointer += 1
-        # mask values per csdcoeff and csdcoeffsign bitwidths
         csdcoeff = csdcoeff & (2 ** bitwidth - 1)
         csdcoeffsign = csdcoeffsign & (2 ** sign_bitwidth - 1)
 
         if signinv:
             csdcoeffsign = csdcoeffsign ^ (2 ** sign_bitwidth - 1)
-        # print(f"coeff, bitwidth, csdcoeff ,csdcoeffsign : {coeff1,bitwidth,csdcoeff,csdcoeffsign}")
-        # print(f"{coeff1}")
         return csdcoeff, csdcoeffsign
 
-    # kulee: For now, NADM uses maximum possible bandwidth, corresponding to
-    # all pass filter. Only the center tap is used, 2047 in 12.11 format is
-    # 2047/2^11 ~ 1.0 and 2047 in CSD format is {2049,1}. For non-HADM PHYs,
-    # the second CHF is turned off it doesn't matter what we do here.
     def calc_hadm_nadm_second_csd_chf(self, model):
         self._reg_write(model.vars.MODEM_CHFCSDCOE00NADM_NADMCSDCOEFF0, 0)
         self._reg_write(model.vars.MODEM_CHFCSDCOE00NADM_NADMCSDCOEFF1, 0)
@@ -257,16 +225,8 @@ class CalcDemodulatorCurl(CalcDemodulatorLion):
         hadm_enable = model.vars.hadm_enable.value == model.vars.hadm_enable.var_enum.ENABLED
 
         if hadm_enable:
-            # For HADM, belows bwsel values has been tested and validated, so the calculator must select one among them.
-            # bwsel is such that bandwidth_hz = bwsel * xtal_frequency_hz / (dec0 * dec1)
-            # ------------------------------------
-            # XTAL = 40MHz:          bwsel = 0.275
-            # XTAL = 39MHz:          bwsel = 0.226
-            # XTAL = 38.4MHz:        bwsel = 0.229
-            # XTAL = 38MHz:          bwsel = 0.232
             model.vars.ch_filt_bw_available.value = [0.275, 0.226, 0.229, 0.232]
         else:
-            # For non HADM PHYs, use same bwsel list as for the fixed coeff channel filter, like older part.
             super().calc_ch_filt_bw_available(model)
 
     def calc_bwsel_actual(self, model):
@@ -278,7 +238,6 @@ class CalcDemodulatorCurl(CalcDemodulatorLion):
         model.vars.bwsel_actual.value = bwsel_actual
 
     def calc_bwsel_reg(self, model):
-        # The field has no effect: fixed channel bandwidth channel filter replaced by a programmable one
         self._reg_do_not_care(model.vars.MODEM_SRCCHF_BWSEL)
 
     def calc_init_advanced(self, model):
@@ -293,5 +252,4 @@ class CalcDemodulatorCurl(CalcDemodulatorLion):
             super().calc_init_advanced(model)
 
     def calc_adc_clock_config(self, model):
-        # These are explicitly set for parts>=Curl
         pass

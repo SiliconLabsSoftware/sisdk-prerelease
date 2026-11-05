@@ -81,7 +81,6 @@ class Base_RM_Field(IRegMapField):
         return self.zz_reg.zz_rmio.readRegisterField(self.zz_reg, self)
 
     def _setio(self, value):
-        # unused due to the __setattr__ logic above
         pass
 
     io = property(_getio, _setio)
@@ -89,7 +88,6 @@ class Base_RM_Field(IRegMapField):
     def set(self, mask=None):
         if mask is None:
             mask = (0xFFFFFFFF >> (32 - self.bitWidth))
-        # TODO add new methods to replicate behavior in the logger
         self._c_log_write(mask)
         self._py_log_write(mask)
         if self.zz_reg.zz_rmio.accessed_flag_active:
@@ -100,7 +98,6 @@ class Base_RM_Field(IRegMapField):
     def clr(self, mask=None):
         if mask is None:
             mask = (0xFFFFFFFF >> (32 - self.bitWidth))
-        # TODO add new methods to replicate behavior in the logger
         self._c_log_write(mask)
         self._py_log_write(mask)
         if self.zz_reg.zz_rmio.accessed_flag_active:
@@ -111,7 +108,6 @@ class Base_RM_Field(IRegMapField):
     def tgl(self, mask=None):
         if mask is None:
             mask = (0xFFFFFFFF >> (32 - self.bitWidth))
-        # TODO add new methods to replicate behavior in the logger
         self._c_log_write(mask)
         self._py_log_write(mask)
         if self.zz_reg.zz_rmio.accessed_flag_active:

@@ -4,7 +4,6 @@ class Calc_Frame_Coding_Sol(CALC_Frame_Coding_Ocelot):
 
     def calc_blockwhitemode(self, model):
 
-        # In soft modem FSK/OFDM cases set whitening mode to 0 else call super class method
         softmodem_modulation_type = model.vars.softmodem_modulation_type.value
         if softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_FSK or \
             softmodem_modulation_type == model.vars.softmodem_modulation_type.var_enum.SUN_OFDM:

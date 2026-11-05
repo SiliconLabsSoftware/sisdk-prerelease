@@ -36,6 +36,7 @@
 #include "sl_device_clock.h"
 #include "sl_device_peripheral.h"
 #include "sl_status.h"
+#include "sli_power_manager_periph_bitmap.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,10 +46,8 @@ extern "C" {
  *****************************   DEFINES   **************************************
  ******************************************************************************/
 
-#define SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS  (4u)
-
 // Maximum number of ppu_bits
-#define SLI_POWER_MANAGER_MAX_PPU_BITS  (SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS * 32u)
+#define SLI_POWER_MANAGER_MAX_PPU_BITS  (SLI_PM_PPU_REG_COUNT * 32u)
 
 // Invalid index marker for mapping table
 #define SLI_POWER_MANAGER_INVALID_PERIPH_INDEX  (0xFFu)
@@ -92,22 +91,22 @@ typedef struct sli_power_manager_periph_state_mgmt {
  ******************************************************************************/
 
 // Compile-time bitmaps from retention config.
-extern const uint32_t sli_pm_retained_default_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS];
-extern const uint32_t sli_pm_restore_on_wakeup_default_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS];
+extern const uint32_t sli_pm_retained_default_mask[SLI_PM_PPU_REG_COUNT];
+extern const uint32_t sli_pm_restore_on_wakeup_default_mask[SLI_PM_PPU_REG_COUNT];
 
 // Mutable copy of the compile-time retained set. Updated by
 // sl_power_manager_enable_peripheral_retention() and
 // sl_power_manager_disable_peripheral_retention().
 // Mutable retained peripherals mask modified by sl_power_manager_enable_peripheral_retention().
-extern uint32_t sli_pm_retained_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS];
+extern uint32_t sli_pm_retained_mask[SLI_PM_PPU_REG_COUNT];
 
 // Mutable retained peripherals restore-on-wakeup mask modified by sl_power_manager_set_peripheral_retention_strategy().
-extern uint32_t sli_pm_restore_on_wakeup_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS];
+extern uint32_t sli_pm_restore_on_wakeup_mask[SLI_PM_PPU_REG_COUNT];
 
 // Power domain to peripheral PPU bitmask mapping entry.
 typedef struct {
   uint32_t domain_mask;                                        // EMU_PWRSTATUS DIGDOMOFF bitmask for this domain.
-  uint32_t periph_mask[SLI_POWER_MANAGER_PERIPH_BITMAP_WORDS]; // PPU bitmask of peripherals in this domain.
+  uint32_t periph_mask[SLI_PM_PPU_REG_COUNT]; // PPU bitmask of peripherals in this domain.
 } sli_pm_power_domain_entry_t;
 
 // Device-specific power domain map (keyed by EMU DIGDOMOFF bitmask values).

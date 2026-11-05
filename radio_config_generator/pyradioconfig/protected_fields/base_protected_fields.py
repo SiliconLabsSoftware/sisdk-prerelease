@@ -17,23 +17,17 @@ class ProtectedFieldsBase():
 
     """
 
-    # From https://confluence.silabs.com/pages/viewpage.action?spaceKey=PGSOL&title=Test+Plan+-+Feature+Write
-    # Omitting CMU, ULFRCO/LFRCO/HFRCO, EMU, DCDC, USB, ACMP, IADC, VDAC, cal fields
     PTE_PROTECTED_FIELD_DICT = {}
 
-    # : List of fields found in PTE, but allow radio configurator to override the value
     PTE_PROTECTED_FIELD_EXCEPTIONS = []
 
-    # : List of registers that Radio Configurator should not write to based on RAIL request
     RAIL_PROTECTED_REGS = [
         'SYNTH_CHCTRL',
         'FRC_BLOCKRAMADDR'
     ]
 
-    # : List of fields protected by RAIL
     RAIL_PROTECTED_FIELDS = []
 
-    # : List of fields that are found in PTE list, but does not need to be protected by RAIL
     RAIL_PROTECTED_FIELD_EXCEPTIONS = []
 
     def get_rail_protected_field_dict(self):
@@ -67,7 +61,6 @@ class ProtectedFieldsBase():
         """
         rail_protected_list = []
 
-        # : Create list containing all PTE cals + RAIL protected fields
         for reg_field_name_list in [self.get_pte_cal_field_list(), self.RAIL_PROTECTED_FIELDS]:
             for reg_field_name in reg_field_name_list:
                 if reg_field_name not in self.RAIL_PROTECTED_FIELD_EXCEPTIONS:

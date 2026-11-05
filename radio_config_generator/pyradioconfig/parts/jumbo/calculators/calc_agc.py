@@ -38,7 +38,6 @@ class CALC_AGC_jumbo(CALC_AGC):
         fxo = model.vars.xtal_frequency.value
         fast_loop_delay = model.vars.fast_loop_delay.value
 
-        # TODO: add missing -1 to equation once verified
         delay = int(math.ceil(fast_loop_delay * fxo))
 
         if delay < 0:
@@ -57,7 +56,6 @@ class CALC_AGC_jumbo(CALC_AGC):
         fxo = model.vars.xtal_frequency.value
         lna_slices_delay = model.vars.lna_slices_delay.value
 
-        # TODO: add missing -1 to equation once verified
         delay = int(math.ceil(lna_slices_delay * fxo))
 
         if delay < 0:
@@ -76,7 +74,6 @@ class CALC_AGC_jumbo(CALC_AGC):
         fxo = model.vars.xtal_frequency.value
         if_pga_delay = model.vars.if_pga_delay.value
 
-        # TODO: add missing -1 to equation once verified
         delay = int(math.ceil(if_pga_delay * fxo))
 
         if delay < 0:
@@ -100,10 +97,8 @@ class CALC_AGC_jumbo(CALC_AGC):
         rfpkd_en = model.vars.RAC_SGLNAMIXCTRL1_ENRFPKD.value
         rfpkd_switch_del = model.vars.AGC_RFPEAKDET_RFPKDSWITCHDEL.value
 
-        # per guideline in internal document
         wait = fxo / (4 * (f_if - freq_dev_hz))
 
-        #MCUW_RADIO_CFG-673
         if rfpkd_en == 1:
             if rfpkd_switch_del == 0:
                 wait = 120 + wait
@@ -163,7 +158,6 @@ class CALC_AGC_jumbo(CALC_AGC):
         self._reg_write(model.vars.AGC_MANGAIN_MANGAININDEX, 		0)
         self._reg_write(model.vars.AGC_MANGAIN_MANGAININDEXEN,	0)
 
-        #MCUW_RADIO_CFG-673
         self._reg_write(model.vars.AGC_RFPEAKDET_RFPKDSWITCHDEL, 0)
 
         etsi = model.vars.etsi_cat1_compatible.value
@@ -252,9 +246,6 @@ class CALC_AGC_jumbo(CALC_AGC):
         numindexatten = model.vars.AGC_GAININDEX_NUMINDEXATTEN.value
         numindexpga = model.vars.AGC_GAININDEX_NUMINDEXPGA.value
 
-        # not following convention of reading in input variables at top of function because
-        # this function combined with calc_agc_index_min_pga_reg() prevent each other from
-        # running in that case.
         if scheme == model.vars.agc_scheme.var_enum.SCHEME_1:
             indexminslices = model.vars.AGC_MININDEX_INDEXMINSLICES.value
             indexmindegen = numindexslices + indexminslices
@@ -277,9 +268,6 @@ class CALC_AGC_jumbo(CALC_AGC):
         numindexatten = model.vars.AGC_GAININDEX_NUMINDEXATTEN.value
         numindexdegen = model.vars.AGC_GAININDEX_NUMINDEXDEGEN.value
 
-        # not following convention of reading in input variables at top of function because
-        # this function combined with calc_agc_index_min_degen_reg() prevent each other from
-        # running in that case.
         if scheme == model.vars.agc_scheme.var_enum.SCHEME_4:
             indexminslices = model.vars.AGC_MININDEX_INDEXMINSLICES.value
             indexminpga = numindexslices + indexminslices
@@ -327,7 +315,6 @@ class CALC_AGC_jumbo(CALC_AGC):
         mod_format = model.vars.modulation_type.value
         etsi = model.vars.etsi_cat1_compatible.value
 
-        # in OOK mode use max step size of 5
         if etsi == model.vars.etsi_cat1_compatible.var_enum.Band_169:
             step = 1
         else:
@@ -358,7 +345,6 @@ class CALC_AGC_jumbo(CALC_AGC):
         mod_format = model.vars.modulation_type.value
 
         if mod_format == model.vars.modulation_type.var_enum.OOK:
-            # in OOK mode disable the channel filter loop
             step = 0
         elif mod_format == model.vars.modulation_type.var_enum.FSK4:
             step = 1
@@ -376,7 +362,6 @@ class CALC_AGC_jumbo(CALC_AGC):
 
         mod_format = model.vars.modulation_type.value
 
-        # in OOK mode, lock once the syncword is detected (CFLOOP is disabled)
         if mod_format == model.vars.modulation_type.var_enum.OOK:
             mode = 2
         else:
