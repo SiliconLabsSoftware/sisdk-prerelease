@@ -49,13 +49,16 @@
 extern "C" {
 #endif
 
-// Internal state flags (needed for event processing)
+// Internal radio state bits (sMiscRadioState). FLAG_* and EVENT_* share the
+// same word, so keep bits unique.
+#define FLAG_RADIO_INIT_DONE 0x00000001
+#define FLAG_ONGOING_TX_DATA 0x00000002
+#define FLAG_ONGOING_TX_ACK 0x00000004
 #define FLAG_WAITING_FOR_ACK 0x00000008
+#define FLAG_CURRENT_TX_USE_CSMA 0x00000010
 #define FLAG_SCHEDULED_RX_PENDING 0x00000020
 #define FLAG_SCHEDULED_TX_PENDING 0x00000040
-
-// Radio event type definitions
-// These represent different types of events that can occur during radio operations
+#define FLAG_SLEEP_PENDING 0x00000080
 #define EVENT_TX_SUCCESS 0x00000100
 #define EVENT_TX_CCA_FAILED 0x00000200
 #define EVENT_TX_NO_ACK 0x00000400
@@ -65,6 +68,7 @@ extern "C" {
 #define EVENT_SECURED_ACK_SENT 0x00004000
 #define EVENT_SCHEDULED_RX_STARTED 0x00008000
 #define EVENT_SCHEDULED_TX_STARTED 0x00010000
+#define FLAG_SCHEDULED_RX_DEFERRED 0x00020000
 
 #define TX_WAITING_FOR_ACK 0x00
 #define TX_NO_ACK 0x01

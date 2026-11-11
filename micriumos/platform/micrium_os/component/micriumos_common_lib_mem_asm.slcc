@@ -18,4 +18,6 @@ requires:
   condition: [armv7m]
 - name: lib_mem_port_armv8m
   condition: [armv8m.main]
+documentation:
+  url: https://docs.silabs.com/micrium/latest/micrium-common-api/
 root_path: micriumos/platform/micrium_os/ports

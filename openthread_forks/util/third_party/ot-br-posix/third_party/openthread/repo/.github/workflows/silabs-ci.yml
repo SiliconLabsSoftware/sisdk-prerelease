@@ -1,0 +1,321 @@
+name: OpenThread CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - silabs
+      - sisdk-*
+      - sisdk-release/**
+      - release/**
+
+env:
+  SONAR_HOST_URL: https://sonarqube.silabs.net
+  FUZZ_CORPUS_STREAM: sisdk-2026.12
+  # Shared by the unit-test build and the scan build. Word-split on spaces.
+  # Multi-PAN RCP is not included. ot_option() turns it on for every app, but
+  # the multiple-instance flags are only applied to the radio config, so the
+  # NCP FTD and MTD apps fail to compile.
+  OT_SONAR_FEATURES: >-
+    -DOT_THREAD_VERSION=1.4
+    -DOT_BACKBONE_ROUTER=ON
+    -DOT_BORDER_ROUTING=ON
+    -DOT_NAT64_BORDER_ROUTING=ON
+    -DOT_NAT64_TRANSLATOR=ON
+    -DOT_CSL_RECEIVER=ON
+    -DOT_MLR=ON
+    -DOT_TREL=ON
+    -DOT_TCP=ON
+    -DOT_LINK_METRICS_INITIATOR=ON
+    -DOT_LINK_METRICS_SUBJECT=ON
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write
+  id-token: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  formatting:
+    name: Formatting Check
+    runs-on: silabs-internal
+    container:
+      image: 'artifactory-local.silabs.net/nwk-15-4-docker-development/ot-pretty:latest'
+      options: --user root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Tell git this checkout is safe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Run formatting check
+        run: |
+          set -euo pipefail
+          script/make-pretty check clang-format
+
+  run_unit_tests:
+    name: OpenThread Stack Unit Tests
+    runs-on: silabs-internal
+    container:
+      image: 'artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/slt_build_env:latest'
+      options: --user root
+      env:
+        LANG: C.utf8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Tell git this checkout is safe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Unit tests (Thread 1.4)
+        run: |
+          set -euo pipefail
+          # Same feature flags as the scan. Keep the object files so the
+          # coverage report matches the code SonarQube analyzes.
+          read -r -a FEATURES <<< "${OT_SONAR_FEATURES}"
+          build_dir="${GITHUB_WORKSPACE}/build/1.4"
+          OT_CLEAN_INTERMEDIATES= \
+            OT_CMAKE_BUILD_DIR="$build_dir" \
+            script/cmake-build simulation "${FEATURES[@]}"
+          ( cd "$build_dir" && ctest --output-on-failure )
+      - name: Unit tests (Thread 1.3)
+        run: |
+          set -euo pipefail
+          build_dir="${GITHUB_WORKSPACE}/build/1.3"
+          OT_CMAKE_BUILD_DIR="$build_dir" \
+            script/cmake-build simulation -DOT_THREAD_VERSION=1.3
+          ( cd "$build_dir" && ctest --output-on-failure )
+      - name: Unit tests (Thread 1.2)
+        run: |
+          set -euo pipefail
+          build_dir="${GITHUB_WORKSPACE}/build/1.2"
+          OT_CMAKE_BUILD_DIR="$build_dir" \
+            script/cmake-build simulation -DOT_THREAD_VERSION=1.2
+          ( cd "$build_dir" && ctest --output-on-failure )
+      - name: Unit tests (Thread 1.1)
+        run: |
+          set -euo pipefail
+          build_dir="${GITHUB_WORKSPACE}/build/1.1"
+          OT_CMAKE_BUILD_DIR="$build_dir" \
+            script/cmake-build simulation -DOT_THREAD_VERSION=1.1
+          ( cd "$build_dir" && ctest --output-on-failure )
+      - name: Generate SonarQube coverage report
+        run: |
+          set -euo pipefail
+          python3 -m pip install 'gcovr>=5.2' --break-system-packages
+          # FTD and MTD compile the same file with different #if regions,
+          # so one function can start on two lines. Merge those copies.
+          gcovr --root "$GITHUB_WORKSPACE" \
+            --sonarqube "$GITHUB_WORKSPACE/build/stack-sonarqube-coverage.xml" \
+            --filter '^(src|include|examples)/' \
+            --exclude 'third_party/' \
+            --exclude 'tests/' \
+            --gcov-ignore-errors source_not_found \
+            --gcov-ignore-errors no_working_dir_found \
+            --merge-mode-functions=merge-use-line-min \
+            "${GITHUB_WORKSPACE}/build/1.4"
+      - name: Upload unit test coverage for SonarQube
+        uses: actions/upload-artifact@v4
+        with:
+          name: openthread-sonarqube-coverage
+          path: ${{ github.workspace }}/build/stack-sonarqube-coverage.xml
+          retention-days: 1
+          if-no-files-found: error
+
+  fuzz_validate:
+    name: Fuzz Validate
+    runs-on: silabs-internal
+    timeout-minutes: 90
+    container:
+      image: 'artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/slt_build_env:latest'
+      options: --user root
+      env:
+        LANG: C.utf8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Tell git this checkout is safe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install host Clang/LLVM
+        uses: ./.github/actions/install-libfuzzer
+      - name: Get Artifactory token from Vault
+        id: vault-prod-token
+        uses: hashicorp/vault-action@v3.0.0
+        with:
+          url: https://vault.silabs.net
+          caCertificate: ${{ secrets.SILABS_VAULT_PROD_CA }}
+          method: "jwt"
+          path: "github"
+          role: "siliconlabsinternal-openthread"
+          outputToken: true
+          secrets: |
+            dynamic/data/app/artifactory/tokens/svc_nwk-15-4 token | artifactory_token
+      - name: Resolve corpus stream
+        id: corpus-stream
+        shell: bash
+        run: |
+          set -euo pipefail
+          # OpenThread's default branch is silabs. Release lines are
+          # sisdk-YYYY.M, including patch branches such as sisdk-YYYY.M.P.
+          # A pull request follows its base branch. Pushes and
+          # workflow_dispatch follow the ref. silabs stays on the current stream.
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            REF="${GITHUB_BASE_REF}"
+          else
+            REF="${GITHUB_REF_NAME}"
+          fi
+          STREAM="${FUZZ_CORPUS_STREAM}"
+          if [[ "$REF" =~ ^(sisdk-[0-9]{4}\.[0-9]{1,2}) ]]; then
+            STREAM="${BASH_REMATCH[1]}"
+          fi
+          echo "stream=${STREAM}" >> "$GITHUB_OUTPUT"
+          echo "Using fuzz corpus stream: ${STREAM} (ref ${REF})"
+      - name: Download latest fuzz corpus snapshot
+        id: download-latest
+        continue-on-error: true
+        uses: SiliconLabsInternal/action-jfrog-artifact/download@v1
+        with:
+          jfrog-url: 'https://artifactory.silabs.net/artifactory'
+          username: ${{ vars.SVC_NWK154_USERNAME }}
+          password: ${{ steps.vault-prod-token.outputs.artifactory_token }}
+          repository: 'nwk-15-4-generic'
+          artifact-path: fuzz-testing/corpora/${{ steps.corpus-stream.outputs.stream }}/snapshots/latest/thread-fuzz-corpora.tar.gz
+          target-path: corpus-download/latest/
+      - name: Download stable fuzz corpus
+        if: steps.download-latest.outcome != 'success'
+        uses: SiliconLabsInternal/action-jfrog-artifact/download@v1
+        with:
+          jfrog-url: 'https://artifactory.silabs.net/artifactory'
+          username: ${{ vars.SVC_NWK154_USERNAME }}
+          password: ${{ steps.vault-prod-token.outputs.artifactory_token }}
+          repository: 'nwk-15-4-generic'
+          artifact-path: fuzz-testing/corpora/${{ steps.corpus-stream.outputs.stream }}/thread-fuzz-corpora.tar.gz
+          target-path: corpus-download/stable/
+      - name: Locate corpus archive
+        id: corpus-archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Prefer the snapshot published by OpenThread Fuzz. Fall back to the
+          # stable corpus until that snapshot exists. A fuzzer with no inputs
+          # in this archive is skipped by the validate command.
+          ARCHIVE="$(find "${GITHUB_WORKSPACE}/corpus-download/latest" -type f -name 'thread-fuzz-corpora.tar.gz' -print -quit 2>/dev/null || true)"
+          if [ -n "${ARCHIVE}" ]; then
+            echo "Using latest fuzz corpus snapshot: ${ARCHIVE}"
+          else
+            ARCHIVE="$(find "${GITHUB_WORKSPACE}/corpus-download/stable" -type f -name 'thread-fuzz-corpora.tar.gz' -print -quit 2>/dev/null || true)"
+            echo "Using stable fuzz corpus: ${ARCHIVE}"
+          fi
+          if [ -z "${ARCHIVE}" ]; then
+            echo "ERROR: thread-fuzz-corpora.tar.gz not found after download"
+            find "${GITHUB_WORKSPACE}/corpus-download" -print || true
+            exit 1
+          fi
+          echo "path=${ARCHIVE}" >> "$GITHUB_OUTPUT"
+      - name: Build fuzzers
+        uses: ./.github/actions/fuzz
+        with:
+          command: build
+      - name: Import corpus
+        uses: ./.github/actions/fuzz
+        with:
+          command: import
+          archive: ${{ steps.corpus-archive.outputs.path }}
+      - name: Replay corpus
+        uses: ./.github/actions/fuzz
+        with:
+          command: validate
+
+  sonarqube:
+    needs: run_unit_tests
+    runs-on: silabs-internal
+    container:
+      image: 'artifactory.silabs.net/gsdk-docker-production/gsdk_nomad_containers/slt_build_env:latest'
+      options: --user root
+      env:
+        LANG: C.utf8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Tell git this checkout is safe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Build simulation and POSIX
+        run: |
+          set -euo pipefail
+          # The POSIX preset passes -DOT_TCP=OFF; the last -D on the cmake
+          # command line wins, and -DOT_TCP=ON is last. Each build directory
+          # is a SonarQube variant and already contains compile_commands.json.
+          read -r -a FEATURES <<< "${OT_SONAR_FEATURES}"
+          # The POSIX radio does not implement CSL reception, so keep that
+          # option on the simulation variant only.
+          POSIX_FEATURES=()
+          for feature in "${FEATURES[@]}"; do
+            [[ "${feature}" == "-DOT_CSL_RECEIVER=ON" ]] && continue
+            POSIX_FEATURES+=("${feature}")
+          done
+          build_platform() {
+            local platform="$1"
+            shift
+            OT_CLEAN_INTERMEDIATES= \
+              OT_CMAKE_BUILD_DIR="${GITHUB_WORKSPACE}/build/${platform}" \
+              script/cmake-build "${platform}" "$@"
+          }
+          build_platform simulation "${FEATURES[@]}"
+          build_platform posix "${POSIX_FEATURES[@]}"
+      - name: Download unit test coverage for SonarQube
+        uses: actions/download-artifact@v4
+        with:
+          name: openthread-sonarqube-coverage
+          path: ${{ github.workspace }}/build
+      - name: Set up SonarQube branch options
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          REF_NAME: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            echo "SONARQUBE_BRANCH_OPTIONS=-Dsonar.pullrequest.key=$PULL_REQUEST_NUMBER -Dsonar.pullrequest.branch=$HEAD_REF -Dsonar.pullrequest.base=$BASE_REF" >> "$GITHUB_ENV"
+          else
+            echo "SONARQUBE_BRANCH_OPTIONS=-Dsonar.branch.name=$REF_NAME" >> "$GITHUB_ENV"
+          fi
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        with:
+          args: >
+            -Dsonar.projectKey=openthread
+            -Dsonar.projectBaseDir=.
+            -Dsonar.sources=src,examples,include
+            -Dsonar.exclusions=**/third_party/**
+            -Dsonar.cfamily.variants.names=simulation,posix
+            -Dsonar.cfamily.variants.dir=build
+            -Dsonar.coverageReportPaths=build/stack-sonarqube-coverage.xml
+            ${{ env.SONARQUBE_BRANCH_OPTIONS }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_STACK }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}

@@ -73,7 +73,7 @@ The list of available commands is output on the console with the associated help
 | wisun clear_credential_cache | Clear the wisun credential cache | > wisun clear_credential_cache |
 | wisun reset_statistics | Reset the statistics | > wisun reset_statistics |
 | wisun set_trace_level \<string> | Set [trace level](https://docs.silabs.com/wisun/latest/wisun-stack-api/sl-wisun-types#sl-wisun-trace-level-t) for a [trace group](https://docs.silabs.com/wisun/latest/wisun-stack-api/sl-wisun-types#sl-wisun-trace-group-t) | > wisun set_trace_level all,debug<br>[Set 64 trace groups]<br>> wisun set_trace_level 1,none;4,info<br>[Set 2 trace groups]|
-| wisun set_lfn_support \<lfn_limit> | configure LFN support: <br> - [uint8] lfn_limit: Number of LFN children | > wisun set_lfn_support 3 |
+| wisun set_lfn_support \<lfn_limit> \<lfn_pan_support> | configure LFN support: <br> - [uint8] lfn_limit: Number of LFN children <br> - [uint8] lfn_pan_support: 0=disabled, 1=enabled | > wisun set_lfn_support 3 1 |
 | wisun mode_switch \<mode> \<phy_mode_id> \<neighbor_mac_address> |  configure mode switch: <br> - [uint8] mode: 0=disabled, 1=enabled, 2=default <br> - [uint8] PhyModeID <br> - [string] neighbor MAC address (optional)   | > wisun mode_switch 1 84 <br> > wisun mode_switch 1 84 01:02:03:04:05:06:07:08 |
 | wisun trigger \<frame type> | Trigger a transmission of a periodic frame <br> - [string] pas: PAN Advertisement Solicit, pa: PAN Advertisement, pcs: PAN Configuration Solicit, pc: PAN Configuration, dis: DODAG Information Solicitation, dio: DODAG Information Object | > wisun trigger pas |
 | wisun getsockname \<socket> | Get local IP address of the socket | > wisun getsockname 3 |
@@ -142,7 +142,7 @@ Next time you issue the `wisun start_fan11` command in the case of a FAN-1.1 PHY
 | wisun.regulation_alert_threshold     | R/W | integer     | - threshold value (0-100) <br> - disable (-1) | Transmission power alert threshold in percent (-1 to disable) |  |
 | wisun.trace_filter.000-031           | R/W | hexadecimal | (Refer to sl_wisun_types.h / `sl_wisun_trace_group_t` for a list of all 37 trace groups)| RTT Trace filter enable bitfield for first 32 groups |  |
 | wisun.trace_filter.032-063           | R/W | hexadecimal | (Refer to sl_wisun_types.h / `sl_wisun_trace_group_t` for a list of all 37 trace groups)| RTT Trace filter enable bitfield for last  32 groups |  |
-| wisun.lfn_profile | R/W | integer | - Test (0) <br> - Balanced (1) <br> - Eco (2) | Wi-SUN LFN profile | FAN1.1 |
+| wisun.lfn_profile | R/W | integer | - Test (0) <br> - Balanced (1) <br> - Eco (2) <br> - Automatic (3) | Wi-SUN LFN profile | FAN1.1 |
 | wisun.lfn_broadcast_interval_ms | R/W | integer | When set with lfn_broadcast_sync_period, overrides lfn_profile | FAN1.1 |
 | wisun.lfn_broadcast_sync_period | R/W | integer | When set with lfn_broadcast_interval_ms, overrides lfn_profile | FAN1.1 |
 | wisun.rx_phy_mode_ids | R/W | integer | list of phy_mode_ids | List of PhyModeId to advertise in POM-IE | FAN1.1 |

@@ -494,6 +494,14 @@ void getRssiDetectThreshold(sl_cli_command_arg_t *args)
                 rssiDetectThresholdDbm == SL_RAIL_RSSI_INVALID_DBM ? "Disabled" : "Enabled");
 }
 
+void getRssiDetectBelowThreshold(sl_cli_command_arg_t *args)
+{
+  int8_t rssiDetectThresholdDbm = sl_rail_get_rssi_detect_below_threshold(railHandle);
+  responsePrint(sl_cli_get_command_string(args, 0), "rssiDetectThresholdDbm:%d,status:%s",
+                rssiDetectThresholdDbm,
+                rssiDetectThresholdDbm == SL_RAIL_RSSI_INVALID_DBM ? "Disabled" : "Enabled");
+}
+
 void setRssiDetectThreshold(sl_cli_command_arg_t *args)
 {
   int8_t rssiDetectThresholdDbm = sl_cli_get_argument_int8(args, 0);
@@ -505,6 +513,21 @@ void setRssiDetectThreshold(sl_cli_command_arg_t *args)
       responsePrintError(sl_cli_get_command_string(args, 0), 0x0B, "Error setting the rssiDetectThreshold.");
     } else {
       getRssiDetectThreshold(args);
+    }
+  }
+}
+
+void setRssiDetectBelowThreshold(sl_cli_command_arg_t *args)
+{
+  int8_t rssiDetectThresholdDbm = sl_cli_get_argument_int8(args, 0);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  if (!sl_rail_supports_rssi_detect_threshold(railHandle)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x0A, "RSSI threshold detection is not supported on this chip.");
+  } else {
+    if (SL_RAIL_STATUS_NO_ERROR != sl_rail_set_rssi_detect_below_threshold(railHandle, rssiDetectThresholdDbm)) {
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x0B, "Error setting the rssiDetectThreshold.");
+    } else {
+      getRssiDetectBelowThreshold(args);
     }
   }
 }

@@ -396,9 +396,9 @@ static void HandleNotifierStateChanged(otChangedFlags aFlags, void *aContext)
 
 static Instance *TestInitInstanceTcat(void)
 {
-    Instance *instance = testInitInstance();
-
     sAlarmOn = false; // discard any pending alarm of a previous test's instance
+
+    Instance *instance = testInitInstance();
 
     otBleSecureSetCertificate(instance, reinterpret_cast<const uint8_t *>(OT_TCAT_X509_CERT), sizeof(OT_TCAT_X509_CERT),
                               reinterpret_cast<const uint8_t *>(OT_TCAT_PRIV_KEY), sizeof(OT_TCAT_PRIV_KEY));

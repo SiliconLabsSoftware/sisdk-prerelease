@@ -139,8 +139,8 @@ typedef DCH_PACKED_STRUCT __COS_ConfigOption {
  *********************   LOCAL FUNCTION PROTOTYPES   ***************************
  ******************************************************************************/
 
-#if defined (SLI_COS_UARTDRV_VCOM_PRESENT)
 static uint32_t sli_cos_vcom_config(uint32_t baudrate, uint8_t flow_control);
+#if defined (SLI_COS_UARTDRV_VCOM_PRESENT)
 static void sli_cos_vcom_write(void);
 #endif // SLI_COS_UARTDRV_VCOM_PRESENT
 

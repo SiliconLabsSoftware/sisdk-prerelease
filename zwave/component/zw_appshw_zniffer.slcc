@@ -26,10 +26,18 @@ include:
   - path: "Zniffer_hw.h"
 provides:
 - name: zw_appshw_zniffer
+template_contribution:
+- name: component_catalog
+  value: zw_appshw_zniffer
 requires:
 - name: zw_appshw
+- name: dma_manager
+- name: dma_manager_init
+- name: dma_manager_hal_ldma
+
 define:
   # BRD4204A routes VCOM USART0 to PD02/PD03 (other Z-Wave boards use PA08/PA09).
 - name: ZW_BOARD_BRD4204A
   condition: [brd4204a]
+
 root_path: zwave

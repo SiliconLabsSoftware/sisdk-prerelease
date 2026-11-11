@@ -1259,6 +1259,10 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_events_t, uint64_t) {
    * Shift position of \ref SL_RAIL_EVENT_RX_BLOCKED bit.
    */
   SL_RAIL_EVENT_RX_BLOCKED_SHIFT = 54,
+  /**
+   * Shift position of \ref SL_RAIL_EVENT_DETECT_RSSI_BELOW_THRESHOLD bit.
+   */
+  SL_RAIL_EVENT_DETECT_RSSI_BELOW_THRESHOLD_SHIFT = 55,
 };
 
 // sl_rail_events_t bitmasks
@@ -1976,6 +1980,12 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_events_t, uint64_t) {
  * \ref sl_rail_set_rssi_detect_threshold().
  */
 #define SL_RAIL_EVENT_DETECT_RSSI_THRESHOLD (1ULL << SL_RAIL_EVENT_DETECT_RSSI_THRESHOLD_SHIFT)
+
+/**
+ * Occurs when the sampled RSSI is below the threshold set by
+ * \ref sl_rail_set_rssi_detect_below_threshold().
+ */
+#define SL_RAIL_EVENT_DETECT_RSSI_BELOW_THRESHOLD (1ULL << SL_RAIL_EVENT_DETECT_RSSI_BELOW_THRESHOLD_SHIFT)
 
 /**
  * Occurs when the thermistor has finished its measurement in response to

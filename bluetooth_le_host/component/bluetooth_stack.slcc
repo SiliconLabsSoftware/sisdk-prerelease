@@ -20,9 +20,11 @@ include:
   - path: "sl_bt_stack_init.h"
   - path: "sl_bt_types.h"
   - path: "sli_bt_hci_event_table.h"
+  - path: "sli_bt_core_contexts.h"
 source:
 - path: "src/sl_bt_stack_init.c"
 - path: "src/sli_bt_hci_event_table.c"
+- path: "src/sli_bt_core_contexts.c"
 template_file:
 - path: "src/sl_bluetooth.c.jinja"
 - path: "src/sl_bluetooth.h.jinja"

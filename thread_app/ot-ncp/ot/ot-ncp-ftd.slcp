@@ -27,6 +27,8 @@ component:
   - id: ot_rtt_log
   - id: clock_manager
   - id: ot_reset_utils
+  # Move AES tables to flash
+  - id: mbedtls_aes_rom_tables
   # Platform - Enable LTO for gcc and llvm by installing the following component
   - id: toolchain_gcc_lto
     condition: [toolchain_gcc]
@@ -129,6 +131,22 @@ filter:
     value: ["NCP"]
   - name: "Project Difficulty"
     value: ["Advanced"]
+
+template_contribution:
+  - name: default_stack_size_override
+    value: 6144
+    condition: [toolchain_lto]
+    unless: [freertos]
+  - name: default_stack_size_override
+    value: 4608
+    condition: [freertos]
+    unless: [toolchain_lto]
+  - name: default_stack_size_override
+    value: 5120
+    condition: [toolchain_lto, freertos]
+  - name: default_stack_size_override
+    value: 5120
+    unless: [toolchain_lto, freertos]
 
 ui_hints:
   highlight:

@@ -5,8 +5,6 @@
  * interface. This file contains the context structures for 'primitive'
  * operations, i.e. those operations which do not rely on other contexts.
  *
- * \warning This file will be auto-generated in the future.
- *
  * \note This file may not be included directly. Applications must
  * include psa/crypto.h.
  *
@@ -22,6 +20,8 @@
 
 #ifndef PSA_CRYPTO_DRIVER_CONTEXTS_PRIMITIVES_H
 #define PSA_CRYPTO_DRIVER_CONTEXTS_PRIMITIVES_H
+
+#if !defined(SL_TRUSTZONE_NONSECURE)
 
 #include "psa/crypto_driver_common.h"
 
@@ -212,5 +212,6 @@ typedef union {
 #endif
 } psa_driver_cipher_context_t;
 
+#endif /* !SL_TRUSTZONE_NONSECURE */
+
 #endif /* PSA_CRYPTO_DRIVER_CONTEXTS_PRIMITIVES_H */
-/* End of automatically generated file. */

@@ -34,8 +34,8 @@
 #include "sl_code_classification.h"
 #include "sli_psec_osal.h"
 
-#include "../../membarriers.h"
-#include "../../hw.h"
+#include "../../../sxsymcrypt/src/membarriers.h"
+#include "../../../sxsymcrypt/src/hw.h"
 
 #include <stddef.h>
 

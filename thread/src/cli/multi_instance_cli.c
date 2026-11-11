@@ -32,6 +32,7 @@
 
 #include "multi_instance_cli.h"
 #include "sl_ot_custom_cli.h"
+#include "sli_ot_instance.h"
 #include <openthread/cli.h>
 #include <openthread/instance.h>
 #include "common/code_utils.hpp"
@@ -114,7 +115,7 @@ static otError instanceListCommand(void *aContext, uint8_t argc, char *argv[])
     for (int i = 0; i < OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_NUM; i++)
     {
         otInstance *instance = otInstanceGetInstance(i);
-        if (instance != NULL && otInstanceIsInitialized(instance))
+        if (sli_ot_instance_is_initialized(instance))
         {
             otCliOutputFormat("%c Index: %d, Id: %lu\r\n",
                               (i == currentIndex) ? '*' : ' ',

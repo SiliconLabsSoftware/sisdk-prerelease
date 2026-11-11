@@ -36,6 +36,14 @@
 #include "sl_enum.h"
 #include <stdint.h>
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_HAL_SYSTEM_INTERNAL_PRESENT)
+#include "sli_hal_system_internal.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -272,6 +280,15 @@ sl_hal_system_part_family_t sl_hal_system_get_family(void);
 
 /***************************************************************************//**
  * @brief
+ *   Get the MSPU size for FLASH (in KB).
+ *
+ * @return
+ *   Size of MSPU for FLASH (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_flash_mspu_size(void);
+
+/***************************************************************************//**
+ * @brief
  *   Get the DMEM Base Address.
  *
  * @return
@@ -310,6 +327,15 @@ uint16_t sl_hal_system_get_dmem_instance_size(uint32_t num);
 
 /***************************************************************************//**
  * @brief
+ *   Get the MSPU size for DMEM (in KB).
+ *
+ * @return
+ *   Size of MSPU for DMEM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_dmem_mspu_size(void);
+
+/***************************************************************************//**
+ * @brief
  *   Get the ITCM Base Address.
  *
  * @return
@@ -326,6 +352,15 @@ uint32_t sl_hal_system_get_itcm_base_address(void);
  *   Size of ITCM (in KB).
  ******************************************************************************/
 uint16_t sl_hal_system_get_itcm_size(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Get the MSPU size for ITCM (in KB).
+ *
+ * @return
+ *   Size of MSPU for ITCM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_itcm_mspu_size(void);
 
 /***************************************************************************//**
  * @brief
@@ -348,6 +383,15 @@ uint16_t sl_hal_system_get_dtcm_size(void);
 
 /***************************************************************************//**
  * @brief
+ *   Get the MSPU size for DTCM (in KB).
+ *
+ * @return
+ *   Size of MSPU for DTCM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_dtcm_mspu_size(void);
+
+/***************************************************************************//**
+ * @brief
  *   Get the PSRAM Base Address.
  *
  * @return
@@ -364,6 +408,15 @@ uint32_t sl_hal_system_get_psram_base_address(void);
  *   Size of PSRAM (in KB).
  ******************************************************************************/
 uint16_t sl_hal_system_get_psram_size(void);
+
+/***************************************************************************//**
+ * @brief
+ *   Get the MSPU size for PSRAM (in KB).
+ *
+ * @return
+ *   Size of MSPU for PSRAM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_psram_mspu_size(void);
 
 /** @} (end addtogroup system) */
 

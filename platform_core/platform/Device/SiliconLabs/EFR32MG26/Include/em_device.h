@@ -116,6 +116,9 @@
 #elif defined(EFR32MG26B611F2048IM48)
 #include "efr32mg26b611f2048im48.h"
 
+#elif defined(EFR32MG26L211F2048GM48)
+#include "efr32mg26l211f2048gm48.h"
+
 #else
 #error "em_device.h: PART NUMBER undefined"
 #endif

@@ -1,0 +1,34 @@
+name: Install libFuzzer
+description: Install host Clang, LLVM, and a libFuzzer runtime.
+
+inputs:
+  smoke:
+    description: Compile a one-input fuzzer to confirm libFuzzer links.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Install host Clang/LLVM
+      shell: bash
+      env:
+        DEBIAN_FRONTEND: noninteractive
+        SMOKE: ${{ inputs.smoke }}
+      run: |
+        set -euo pipefail
+        apt-get update
+        apt-get install -y clang llvm
+        clang_major="$(/usr/bin/clang -dumpversion | cut -d. -f1)"
+        for pkg in \
+          "libclang-rt-${clang_major}-dev" \
+          "libfuzzer-${clang_major}-dev" \
+          compiler-rt
+        do
+          apt-get install -y "$pkg" || true
+        done
+        /usr/bin/clang --version
+        if [[ "$SMOKE" == "true" ]]; then
+          echo 'extern "C" int LLVMFuzzerTestOneInput(const unsigned char*, unsigned long) { return 0; }' \
+            | /usr/bin/clang++ -x c++ -fsanitize=fuzzer -o /tmp/fuzzer-smoke -
+        fi

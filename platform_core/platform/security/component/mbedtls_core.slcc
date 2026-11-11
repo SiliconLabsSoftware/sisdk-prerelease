@@ -33,8 +33,7 @@ requires:
 
   # It's no longer possible to separate PSA Crypto from Mbed TLS now that it's
   # being used under the hood. Mbed TLS does not put effort into guarding
-  # includes of PSA Crypto specific files in Mbed TLS, whether or not
-  # MBEDTLS_USE_PSA_CRYPTO is set or not.
+  # includes of PSA Crypto specific files in Mbed TLS.
 - name: psa_crypto_common
   condition: [trustzone_unaware]
 

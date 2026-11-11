@@ -124,6 +124,22 @@ filter:
   - name: "Project Difficulty"
     value: ["Advanced"]
 
+template_contribution:
+  - name: default_stack_size_override
+    value: 6144
+    condition: [toolchain_lto]
+    unless: [freertos]
+  - name: default_stack_size_override
+    value: 4608
+    condition: [freertos]
+    unless: [toolchain_lto]
+  - name: default_stack_size_override
+    value: 5120
+    condition: [toolchain_lto, freertos]
+  - name: default_stack_size_override
+    value: 5120
+    unless: [toolchain_lto, freertos]
+
 ui_hints:
   highlight:
     - path: ./README-OT-NCP.md

@@ -8,21 +8,19 @@ category: Platform|Security|PSA Crypto
 quality: production
 ui_hints:
   visibility: never
+conflicts:
+- name: trustzone_nonsecure
+
 provides:
 - name: psa_driver
 
 requires:
-- name: sli_psa_driver_contexts
 - name: psa_driver_common
 - name: psa_se_driver
-  condition: [device_has_semailbox, trustzone_unaware]
-- name: psa_se_driver
-  condition: [device_has_semailbox, trustzone_secure]
+  condition: [device_has_semailbox]
 
 - name: psa_vse_driver
-  condition: [device_has_cryptoacc, trustzone_secure]
-- name: psa_vse_driver
-  condition: [device_has_cryptoacc, trustzone_unaware]
+  condition: [device_has_cryptoacc]
 
 - name: psa_hostcrypto_driver
   condition: [device_has_symcrypto, trustzone_unaware]
@@ -41,11 +39,6 @@ recommends:
 - id: trustzone_unaware
 
   vendor: silabs
-template_contribution:
-- name: psa_crypto_builtin_config
-  value: MBEDTLS_PSA_BUILTIN_ALG_HMAC 1
-  condition: [device_series_2, mbedtls_sha512]
-  unless: [device_security_vault]
 
 documentation:
   url: https://docs.silabs.com/gecko-platform/latest/platform-security-psa-crypto/psa-crypto-plugins

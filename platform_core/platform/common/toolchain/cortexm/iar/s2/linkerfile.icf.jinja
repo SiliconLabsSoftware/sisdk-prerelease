@@ -237,8 +237,8 @@ do not initialize
   section .reset_reason,
 {%- endif %}
  section .noinit,
-{%- if crash_manager_enable and crash_manager_backend_ram %}
- section .ram_crash_data.noinit,
+{%- if sl_diag_enable %}
+ section .sl_diag_retained.noinit,
 {%- endif %}
  section .stack,
 {%- if trustzone_secure %}
@@ -252,6 +252,9 @@ do not initialize
 };
 
 keep { section .intvec };
+{%- if sl_diag_enable %}
+keep { section .sl_diag_retained.noinit };
+{%- endif %}
 
 {%- if bootloader_enable %}
 place in ROM_region   { block ROM_CONTENT };

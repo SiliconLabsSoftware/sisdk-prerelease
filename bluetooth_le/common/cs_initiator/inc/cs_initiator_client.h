@@ -112,7 +112,7 @@
     .rtt_type =                       CS_INITIATOR_DEFAULT_RTT_TYPE,                       \
     .channel_selection_type =         CS_INITIATOR_DEFAULT_CHANNEL_SELECTION_TYPE,         \
     .ch3c_shape =                     CS_INITIATOR_DEFAULT_CH3C_SHAPE,                     \
-    .reserved =                       0,                                                   \
+    .cs_enhancements =                0,                                                   \
     .snr_control_initiator =          sl_bt_cs_snr_control_adjustment_not_applied,         \
     .snr_control_reflector =          sl_bt_cs_snr_control_adjustment_not_applied,         \
     .use_real_time_ras_mode =         CS_INITIATOR_RAS_MODE_USE_REAL_TIME_MODE,            \
@@ -250,7 +250,7 @@ typedef struct {
   uint8_t channel_selection_type;
   uint8_t cs_sync_antenna_req;
   uint8_t cs_sync_antenna;
-  uint8_t reserved;
+  uint8_t cs_enhancements;
   uint8_t config_id;
   uint8_t preferred_peer_antenna;
   uint8_t create_context;

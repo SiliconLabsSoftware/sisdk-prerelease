@@ -481,7 +481,7 @@ sl_status_t sl_mpu_disable_execute(uint32_t address_begin,
 }
 
 #if __CORTEX_M != (0u)
-#if !defined(SL_CATALOG_CRASH_MANAGER_COMPONENT_PRESENT)
+#if !defined(SL_CATALOG_CRASH_CAPTURE_COMPONENT_PRESENT)
 /**************************************************************************//**
  * MemManage default exception handler. Reset target.
  *****************************************************************************/

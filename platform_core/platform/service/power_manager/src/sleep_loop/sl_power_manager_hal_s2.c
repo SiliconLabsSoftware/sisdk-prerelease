@@ -613,6 +613,11 @@ void sli_power_manager_restore_states(void)
  *       voltage scaling. When the processor returns from EM2 or EM3, its
  *       execution resumes in a clean and stable state.
  ******************************************************************************/
+#if defined(SLI_POWER_MANAGER_PROFILING)
+extern void sli_power_manager_profiling_wfi(void);
+extern void sli_power_manager_profiling_wfi_exit(void);
+#endif
+
 void sli_power_manager_apply_em(sl_power_manager_em_t em)
 {
 #if defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
@@ -662,7 +667,13 @@ void sli_power_manager_apply_em(sl_power_manager_em_t em)
 #if defined(SLI_POWER_MANAGER_ENABLE_SYSTEMVIEW)
       SEGGER_SYSVIEW_MarkStart(SLI_SYSTEMVIEW_MARKER_ID_SLEEP);
 #endif
+#if defined(SLI_POWER_MANAGER_PROFILING)
+      sli_power_manager_profiling_wfi();
+#endif
       EMU_EnterEM2(false);
+#if defined(SLI_POWER_MANAGER_PROFILING)
+      sli_power_manager_profiling_wfi_exit();
+#endif
 #if defined(SLI_POWER_MANAGER_ENABLE_SYSTEMVIEW)
       SEGGER_SYSVIEW_MarkStop(SLI_SYSTEMVIEW_MARKER_ID_SLEEP);
 #endif

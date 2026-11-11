@@ -8,8 +8,7 @@ quality: production
 provides:
 - name: mbedtls_ssl_cookie
 requires:
-  # requires MBEDTLS_USE_PSA_CRYPTO ( in psa_crypto )
-- name: psa_crypto
+- name: psa_crypto_hmac
 template_contribution:
 - name: mbedtls_config
   value: MBEDTLS_SSL_COOKIE_C

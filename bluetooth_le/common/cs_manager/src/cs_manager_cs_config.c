@@ -91,7 +91,7 @@ sl_status_t cs_manager_cs_config_create(uint8_t conn_handle,
                                           config->channel_selection_type,
                                           config->ch3c_shape,
                                           config->ch3c_jump,
-                                          0u);
+                                          config->cs_enhancements);
   if (sc != SL_STATUS_OK) {
     cs_manager_log_error(INSTANCE_PREFIX "Failed to start CS configuration "
                                          "(config_id=%u, sc=0x%lx)" NL,
@@ -173,6 +173,6 @@ sl_status_t cs_manager_cs_config_get_default_config(cs_config_t *config)
   config->cs_sync_phy            = CS_MANAGER_DEFAULT_CS_SYNC_PHY;
   config->ch3c_shape             = CS_MANAGER_DEFAULT_CH3C_SHAPE;
   config->ch3c_jump              = CS_MANAGER_DEFAULT_CH3C_JUMP;
-  config->reserved               = 0;
+  config->cs_enhancements        = 0;
   return SL_STATUS_OK;
 }

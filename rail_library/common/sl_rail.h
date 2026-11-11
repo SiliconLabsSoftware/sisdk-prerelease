@@ -4155,7 +4155,7 @@ int8_t sl_rail_get_rssi_offset(sl_rail_handle_t rail_handle);
  * @note: If the radio is idled or this function is called with rssi_threshold_dbm as
  *   \ref SL_RAIL_RSSI_INVALID_DBM while RSSI detect is still in effect, a
  *   \ref SL_RAIL_EVENT_DETECT_RSSI_THRESHOLD may not occur and the detection is disabled.
- *   If the RSSI is already above threshold when this function is called then
+ *   If the RSSI is already above or equal to the threshold when this function is called then
  *   \ref SL_RAIL_EVENT_DETECT_RSSI_THRESHOLD will occur.
  *   Once the RSSI goes over the configured threshold and
  *   \ref SL_RAIL_EVENT_DETECT_RSSI_THRESHOLD occurs, this function needs to be
@@ -4165,6 +4165,36 @@ int8_t sl_rail_get_rssi_offset(sl_rail_handle_t rail_handle);
  */
 sl_rail_status_t sl_rail_set_rssi_detect_threshold(sl_rail_handle_t rail_handle,
                                                    int8_t rssi_threshold_dbm);
+
+/**
+ * Set the RSSI detection low threshold in dBm to trigger
+ * \ref SL_RAIL_EVENT_DETECT_RSSI_BELOW_THRESHOLD.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @param[in] rssi_threshold_dbm desired RSSI low threshold in dBm below which the event
+ *   \ref SL_RAIL_EVENT_DETECT_RSSI_BELOW_THRESHOLD is triggered.
+ * @return Status code indicating result of the function call.
+ *   Returns \ref SL_RAIL_STATUS_INVALID_STATE in multiprotocol,
+ *   if the requested rail_handle is not active.
+ *   Returns \ref SL_RAIL_STATUS_INVALID_CALL if called on parts on which this function
+ *   is not supported.
+ *
+ * When in receive, RSSI is sampled and if it is below the threshold,
+ * \ref SL_RAIL_EVENT_DETECT_RSSI_BELOW_THRESHOLD is triggered.
+ *
+ * @note: If the radio is idled or this function is called with rssi_threshold_dbm as
+ *   \ref SL_RAIL_RSSI_INVALID_DBM while RSSI detect is still in effect, a
+ *   \ref SL_RAIL_EVENT_DETECT_RSSI_BELOW_THRESHOLD may not occur and the detection is disabled.
+ *   If the RSSI is already below or equal to the threshold when this function is called then
+ *   \ref SL_RAIL_EVENT_DETECT_RSSI_BELOW_THRESHOLD will occur.
+ *   Once the RSSI goes below the configured threshold and
+ *   \ref SL_RAIL_EVENT_DETECT_RSSI_BELOW_THRESHOLD occurs, this function needs to be
+ *   called again to reactivate the RSSI threshold detection.
+ *
+ * This function is only available on EFR32 Series 2 Sub-GHz parts EFR32xG23 and EFR32xG25.
+ */
+sl_rail_status_t sl_rail_set_rssi_detect_below_threshold(sl_rail_handle_t rail_handle,
+                                                         int8_t rssi_threshold_dbm);
 
 /**
  * Get the RSSI detection threshold in dBm.
@@ -4180,6 +4210,21 @@ sl_rail_status_t sl_rail_set_rssi_detect_threshold(sl_rail_handle_t rail_handle,
  * This function is only available on EFR32 Series 2 Sub-GHz parts EFR32xG23 and EFR32xG25.
  */
 int8_t sl_rail_get_rssi_detect_threshold(sl_rail_handle_t rail_handle);
+
+/**
+ * Get the RSSI detection low threshold in dBm.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @return The RSSI low threshold in dBm corresponding to the rail_handle.
+ *
+ * @note: The function returns \ref SL_RAIL_RSSI_INVALID_DBM when
+ *   \ref sl_rail_set_rssi_detect_below_threshold() is not supported or disabled.
+ *   In multiprotocol, the function returns \ref SL_RAIL_RSSI_INVALID_DBM if rail_handle
+ *   is not active.
+ *
+ * This function is only available on EFR32 Series 2 Sub-GHz parts EFR32xG23 and EFR32xG25.
+ */
+int8_t sl_rail_get_rssi_detect_below_threshold(sl_rail_handle_t rail_handle);
 
 /**
  * Return the RSSI associated with the incoming packet.

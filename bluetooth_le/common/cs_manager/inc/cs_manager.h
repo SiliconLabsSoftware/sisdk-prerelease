@@ -113,7 +113,7 @@ typedef struct {
   uint8_t cs_sync_phy; ///< PHY used for CS sync
   uint8_t ch3c_shape; ///< Channel 3C shape
   uint8_t ch3c_jump; ///< Channel 3C jump value
-  uint8_t reserved; ///< Reserved; set to zero
+  uint8_t cs_enhancements; ///< CS enhancements bitmask (bit 0: reflector inline PCT); 0 = none
 } cs_config_t;
 
 /// CS procedure scheduling and PHY parameters

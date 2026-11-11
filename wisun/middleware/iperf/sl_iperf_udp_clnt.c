@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "netinet/in.h"
 #include "sl_assert.h"
 #include "cmsis_os2.h"
 #include "sl_iperf_types.h"
@@ -62,7 +63,7 @@
 /// Client TX parameters
 typedef struct client_tx_params {
   /// Packet count
-  uint16_t packet_count;
+  uint32_t packet_count;
   /// Packet size
   uint16_t packet_size;
 } client_tx_params_t;
@@ -141,8 +142,15 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
     return;
   }
 
-  // assert minimum buff size for client header
-  EFM_ASSERT(test->conn.buff_size >= sizeof(sl_iperf_udp_clnt_hdr_t));
+  if (memcmp(&srv_addr->sin6_addr, &in6addr_any, sizeof(in6_addr_t)) == 0) {
+    sl_iperf_test_log(test, "UDP Client: Remote address is not set.\n");
+    return;
+  }
+
+  if(test->conn.buff_size < sizeof(sl_iperf_udp_clnt_hdr_t)) {
+    sl_iperf_test_log(test, "UDP Client: buffer size is too small.\n");
+    return;
+  }
 
   sl_iperf_test_log_verbose(test, "UDP Client: started.\n");
   sl_iperf_test_log_verbose(test, "UDP Client: Remote address is '%s'.\n", test->opt.remote_addr);
@@ -352,6 +360,7 @@ static void _prepare_udp_clnt_header(sl_iperf_test_t * const test, const int32_t
   uint32_t flags                = 0UL;
   sl_iperf_time_t t             = { 0U };
   const sockaddr_in6_t *srv_addr = &test->conn.srv_addr;
+  uint64_t amount_bytes;
 
   hdr = (sl_iperf_udp_clnt_hdr_t * ) test->conn.buff;
 
@@ -373,8 +382,13 @@ static void _prepare_udp_clnt_header(sl_iperf_test_t * const test, const int32_t
   hdr->base.num_threads = htonl(1U);
   hdr->base.buf_len     = htonl(test->conn.buff_size);
   hdr->base.port        = (int32_t)srv_addr->sin6_port;
-  hdr->base.amount      = htonl((test->opt.packet_nbr * test->opt.buf_len)
-                                                 & ~SL_IPERF_HEADER_TIME_MODE);
+  // iperf2 amount is signed 32-bit byte-count mode (bit 31 clear). Clamp so large
+  // packet_nbr * buf_len values do not wrap or enter time mode.
+  amount_bytes = (uint64_t)test->opt.packet_nbr * test->opt.buf_len;
+  if (amount_bytes > (uint64_t)INT32_MAX) {
+    amount_bytes = (uint64_t)INT32_MAX;
+  }
+  hdr->base.amount = htonl((uint32_t)(amount_bytes & ~(uint64_t)SL_IPERF_HEADER_TIME_MODE));
 
 #if SL_IPERF_VERBOSE_MODE
   sl_iperf_print_test_clnt_header_json(test, hdr);
@@ -385,7 +399,8 @@ static void _udp_client_calc_tx(sl_iperf_test_t *const test,
                                 client_tx_params_t *const tx_info,
                                 uint32_t target_bytes_per_sec)
 {
-  uint32_t val = 0;
+  uint64_t total_bytes = 0U;
+  uint64_t packet_count = 0U;
   uint64_t duration_ms = 0U;
 
   tx_info->packet_size = test->opt.buf_len;
@@ -397,13 +412,14 @@ static void _udp_client_calc_tx(sl_iperf_test_t *const test,
       duration_ms = ((uint64_t)tx_info->packet_count * tx_info->packet_size
                      * SL_IPERF_TIME_S_TO_MS_ML + target_bytes_per_sec - 1U)
                     / target_bytes_per_sec;
-      test->opt.duration_ms = (duration_ms > UINT16_MAX) ? UINT16_MAX : (uint16_t)duration_ms;
+      test->opt.duration_ms = (duration_ms > UINT32_MAX) ? UINT32_MAX : (uint32_t)duration_ms;
     } else {
-      test->opt.duration_ms = UINT16_MAX;
+      test->opt.duration_ms = UINT32_MAX;
     }
   } else {
-    val = target_bytes_per_sec * (test->opt.duration_ms / SL_IPERF_TIME_S_TO_MS_ML);
-    tx_info->packet_count = (uint16_t)((val + tx_info->packet_size - 1) / tx_info->packet_size);
+    total_bytes = ((uint64_t)target_bytes_per_sec * test->opt.duration_ms) / SL_IPERF_TIME_S_TO_MS_ML;
+    packet_count = (total_bytes + tx_info->packet_size - 1U) / tx_info->packet_size;
+    tx_info->packet_count = (packet_count > UINT32_MAX) ? UINT32_MAX : (uint32_t)packet_count;
   }
 }
 

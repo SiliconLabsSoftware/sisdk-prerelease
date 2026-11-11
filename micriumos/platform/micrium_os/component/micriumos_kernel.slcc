@@ -77,4 +77,6 @@ template_contribution:
 define:
 - name: SL_CODE_COMPONENT_MICRIUMOS_KERNEL
   value: micriumos_kernel
+documentation:
+  url: https://docs.silabs.com/micrium/latest/micrium-kernel-api/
 root_path: micriumos/platform/micrium_os/kernel

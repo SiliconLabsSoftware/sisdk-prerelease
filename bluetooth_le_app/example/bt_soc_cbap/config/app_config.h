@@ -54,10 +54,10 @@
 
 // <o DISALLOWLIST_SIZE> Disallowlist size <1..255>
 // <i> Number of remote devices the application can refuse to authenticate
-// <i> again. A device is added to the disallowlist when the CBAP procedure with
-// <i> it fails, and the application does not start a new procedure with a
-// <i> device on the list. The execution is asserted if a device has to be added
-// <i> to a full disallowlist.
+// <i> again. A device is added to the disallowlist when it fails to
+// <i> authenticate itself, or does not follow the CBAP procedure. The
+// <i> application does not start a new procedure with a device on the list.
+// <i> Once the list is full, a new device replaces the oldest one.
 // <i> Default: 4
 #define DISALLOWLIST_SIZE 4
 

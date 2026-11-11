@@ -1789,7 +1789,6 @@ void Mle::HandleTimeTick(void)
                 if (age >= kMaxNeighborAgeOnChild)
                 {
                     LogInfo("No Adv from router 0x%04x - removing router", router.GetRloc16());
-                    mDelayedSender.RemoveScheduledLinkRequest(router);
                     RemoveNeighbor(router);
                     continue;
                 }
@@ -2146,6 +2145,9 @@ void Mle::HandleChildIdRequest(RxInfo &aRxInfo)
 #if OPENTHREAD_CONFIG_MULTI_RADIO
     child->ClearLastRxFragmentTag();
 #endif
+#if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
+    child->ClearCsl();
+#endif
 
     child->SetNetworkDataVersion(mLeaderData.GetDataVersion(mode.GetNetworkDataType()));
 
@@ -2373,14 +2375,6 @@ void Mle::HandleChildUpdateRequestOnParent(RxInfo &aRxInfo)
                 child->GetDeviceMode().Get(), child->GetDeviceMode().ToString().AsCString());
 
         childDidChange = true;
-
-#if OPENTHREAD_CONFIG_MAC_CSL_TRANSMITTER_ENABLE
-        if (child->IsRxOnWhenIdle())
-        {
-            // Clear CSL synchronization state
-            child->SetCslSynchronized(false);
-        }
-#endif
 
         // The `IndirectSender::HandleChildModeChange()` needs to happen
         // after "Child Update" message is fully parsed to ensure that
@@ -3212,12 +3206,18 @@ void Mle::RemoveNeighbor(Neighbor &aNeighbor)
 
         mChildTable.RemoveStoredChild(child);
     }
-    else if (aNeighbor.IsStateValid())
+    else if (mRouterTable.Contains(aNeighbor))
     {
-        OT_ASSERT(mRouterTable.Contains(aNeighbor));
+        Router &router = static_cast<Router &>(aNeighbor);
 
-        mNeighborTable.Signal(NeighborTable::kRouterRemoved, aNeighbor);
-        mRouterTable.RemoveRouterLink(static_cast<Router &>(aNeighbor));
+        mDelayedSender.RemoveScheduledLinkRequest(router);
+        router.ClearLinkAcceptTimeout();
+
+        if (router.IsStateValid())
+        {
+            mNeighborTable.Signal(NeighborTable::kRouterRemoved, router);
+            mRouterTable.RemoveRouterLink(router);
+        }
     }
 
     aNeighbor.GetLinkInfo().Clear();

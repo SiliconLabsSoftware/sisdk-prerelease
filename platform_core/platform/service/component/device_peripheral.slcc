@@ -32,4 +32,4 @@ template_contribution:
   value: device_peripheral
 documentation:
   docset: gecko-platform
-  document: platform-service/device-manager-peripheral
+  document: platform-service/device-peripheral

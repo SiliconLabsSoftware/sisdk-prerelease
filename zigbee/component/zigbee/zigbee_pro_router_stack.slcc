@@ -15,6 +15,10 @@ requires:
 - name: zigbee_pro_router_stack_rail_mux
   condition:
   - rail_mux
+- name: zigbee_pro_router_stack_rail_mux_aux
+  condition:
+  - rail_mux
+  - rail_mux_aux
 - name: zigbee_pro_router_stack_with_high_datarate_phy
   condition:
   - zigbee_high_datarate_phy
@@ -22,6 +26,11 @@ requires:
   condition:
   - zigbee_high_datarate_phy
   - rail_mux
+- name: zigbee_pro_router_stack_with_high_datarate_phy_rail_mux_aux
+  condition:
+  - zigbee_high_datarate_phy
+  - rail_mux
+  - rail_mux_aux
 - name: zigbee_stack_common
 - name: lower_mac_spinel
   condition:

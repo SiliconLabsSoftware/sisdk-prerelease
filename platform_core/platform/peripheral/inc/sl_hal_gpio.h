@@ -383,7 +383,7 @@ void sl_hal_gpio_enable_pin_em4_wakeup(uint32_t pinmask,
                                        uint32_t polaritymask);
 
 /***************************************************************************//**
- * Configure EM4WU pins as external level-sensitive interrupts.
+ * Configure EM4WU pins as external edge-sensitive interrupts.
  *
  * @note It is recommended to disable interrupts before configuring the GPIO pin interrupt.
  *       See sl_hal_gpio_disable_interrupts() for more information.
@@ -399,8 +399,8 @@ void sl_hal_gpio_enable_pin_em4_wakeup(uint32_t pinmask,
  *
  * @param[in] gpio Pointer to GPIO structure with port and pin
  * @param[in] int_no The EM4WU interrupt number to trigger.
- * @param[in] polarity true = Active high level-sensitive interrupt.
- *                     false = Active low level-sensitive interrupt.
+ * @param[in] polarity true = Rising edge-sensitive interrupt.
+ *                     false = Falling edge-sensitive interrupt.
  *
  * @return Return the available EM4WU interrupt number
  ******************************************************************************/

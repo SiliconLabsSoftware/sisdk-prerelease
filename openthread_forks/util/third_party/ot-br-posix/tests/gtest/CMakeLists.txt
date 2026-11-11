@@ -45,6 +45,7 @@ add_executable(otbr-gtest-unit
     test_logging.cpp
     test_once_callback.cpp
     test_pskc.cpp
+    test_socket_utils.cpp
     test_task_runner.cpp
 )
 target_link_libraries(otbr-gtest-unit
@@ -150,6 +151,7 @@ if(OTBR_MDNS AND NOT OTBR_MDNS STREQUAL "openthread")
     target_link_libraries(otbr-gtest-mdns-subscribe
         otbr-common
         otbr-mdns
+        otbr-posix
         GTest::gmock_main
     )
     gtest_discover_tests(otbr-gtest-mdns-subscribe)
@@ -161,6 +163,7 @@ add_executable(otbr-posix-gtest-unit
     test_backbone_multicast_routing.cpp
     test_cli_daemon.cpp
     test_infra_if.cpp
+    test_infra_link_selector.cpp
     test_netif.cpp
     test_udp_proxy.cpp
 )
@@ -205,6 +208,31 @@ target_link_libraries(otbr-gtest-host-api
 )
 gtest_discover_tests(otbr-gtest-host-api)
 
+if(OTBR_TREL_DNSSD)
+    add_executable(otbr-gtest-trel-dnssd
+        ${OPENTHREAD_PROJECT_DIRECTORY}/tests/gtest/fake_platform.cpp
+        fake_posix_platform.cpp
+        test_trel_dnssd.cpp
+    )
+    target_include_directories(otbr-gtest-trel-dnssd
+        PRIVATE
+            ${OTBR_PROJECT_DIRECTORY}/src
+            ${OPENTHREAD_PROJECT_DIRECTORY}/src/core
+            ${OPENTHREAD_PROJECT_DIRECTORY}/tests/gtest
+    )
+    target_link_libraries(otbr-gtest-trel-dnssd
+        mbedtls
+        otbr-common
+        otbr-utils
+        otbr-posix
+        otbr-host
+        otbr-mdns
+        otbr-trel-dnssd
+        GTest::gmock_main
+    )
+    gtest_discover_tests(otbr-gtest-trel-dnssd)
+endif()
+
 if(OTBR_TELEMETRY_DATA_API)
     add_executable(otbr-gtest-telemetry
         ${OTBR_PROJECT_DIRECTORY}/src/host/telemetry/telemetry_retriever_border_agent.cpp
@@ -228,4 +256,39 @@ if(OTBR_TELEMETRY_DATA_API)
         GTest::gmock_main
     )
     gtest_discover_tests(otbr-gtest-telemetry)
+endif()
+
+if(OTBR_REST)
+    if (CJSON_FOUND)
+        set(CJSON_LIB_TARGETS ${CJSON_LINK_LIBRARIES})
+    else()
+        set(CJSON_LIB_TARGETS cjson)
+    endif()
+
+    add_executable(otbr-gtest-rest
+        ${OPENTHREAD_PROJECT_DIRECTORY}/tests/gtest/fake_platform.cpp
+        fake_posix_platform.cpp
+        test_rest.cpp
+        test_rest_diag.cpp
+    )
+    target_include_directories(otbr-gtest-rest
+        PRIVATE
+            ${OTBR_PROJECT_DIRECTORY}/src
+            ${OPENTHREAD_PROJECT_DIRECTORY}/src/core
+            ${OPENTHREAD_PROJECT_DIRECTORY}/tests/gtest
+            ${CJSON_INCLUDE_DIRS}
+    )
+    target_link_libraries(otbr-gtest-rest
+        ${CJSON_LIB_TARGETS}
+        mbedtls
+        otbr-common
+        otbr-utils
+        otbr-posix
+        otbr-host
+        otbr-rest
+        openthread-ftd
+        openthread-posix
+        GTest::gmock_main
+    )
+    gtest_discover_tests(otbr-gtest-rest)
 endif()

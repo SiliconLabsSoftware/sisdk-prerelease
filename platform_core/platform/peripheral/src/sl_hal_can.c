@@ -132,6 +132,9 @@ extern __INLINE bool sl_hal_can_is_rx_buffer_messages_available(CAN_TypeDef *can
                                                                 uint8_t rx_buffer_index);
 extern __INLINE uint32_t sl_hal_can_get_rx_fifo_fill_level(CAN_TypeDef *can,
                                                            sl_hal_can_rx_location_t rx_fifo);
+extern __INLINE uint32_t sl_hal_can_get_pending_interrupts(CAN_TypeDef *can);
+extern __INLINE uint32_t sl_hal_can_get_enabled_pending_interrupts(CAN_TypeDef *can);
+extern __INLINE void sl_hal_can_clear_interrupts(CAN_TypeDef *can, uint32_t flags);
 /***************************************************************************//**
  * Sets the CAN Operating Mode
  ******************************************************************************/
@@ -506,8 +509,8 @@ sl_status_t sl_hal_can_init(CAN_TypeDef *can,
   // Configure the CAN bit rate.
   status = sl_hal_can_set_bit_rate(can, init->nominal_bitrate, init->data_bitrate);
   SL_PRINT_STRING_INFO("mode=%d fd_enable=%d\r\n",
-    (int)init->mode,
-    (int)init->fd_enable);
+                       (int)init->mode,
+                       (int)init->fd_enable);
   return status;
 }
 
@@ -601,8 +604,8 @@ sl_status_t sl_hal_can_set_bit_rate(CAN_TypeDef *can,
 #endif
   }
   SL_PRINT_STRING_INFO("nominal_br=%d data_br=%d\r\n",
-    (int)nominal_bitrate.prescaler,
-    (int)data_bitrate.prescaler);
+                       (int)nominal_bitrate.prescaler,
+                       (int)data_bitrate.prescaler);
   // Return error code.
   return SL_STATUS_OK;
 }
@@ -668,8 +671,8 @@ sl_status_t sl_hal_can_configure_filter(CAN_TypeDef *can,
     *filter_address = filter_element_word_two;
   }
   SL_PRINT_STRING_DEBUG("idx=%d type=%d\r\n",
-    (int)config_filter->filter_index,
-    (int)config_filter->id_type);
+                        (int)config_filter->filter_index,
+                        (int)config_filter->id_type);
   // Return error code.
   return SL_STATUS_OK;
 }
@@ -1196,7 +1199,7 @@ sl_status_t sl_hal_can_enable_timeout_counter(CAN_TypeDef *can,
 
 // Enable timeout counter.
   can->TOCC |= CAN_TOCC_ETOC;
-  
+
   // Return function status.
   return SL_STATUS_OK;
 }

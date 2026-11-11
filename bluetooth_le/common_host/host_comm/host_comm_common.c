@@ -33,6 +33,9 @@
 #include "app_log.h"
 #include "app_sleep.h"
 #include <pthread.h>
+#if !defined(_WIN32)
+#include <signal.h>
+#endif
 #include <stdio.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -115,15 +118,30 @@ sl_status_t host_comm_threads_create(pthread_t *thread_rx,
                                      host_comm_send_ctx_t *send_ctx)
 {
   int iret;
+#if !defined(_WIN32)
+  sigset_t mask_all, old_mask;
+  bool mask_applied = (sigfillset(&mask_all) == 0)
+                      && (pthread_sigmask(SIG_SETMASK, &mask_all, &old_mask) == 0);
+#endif
 
   iret = pthread_create(thread_rx, NULL, recv_ctx->start_routine, recv_ctx);
   if (iret) {
+#if !defined(_WIN32)
+    if (mask_applied) {
+      (void)pthread_sigmask(SIG_SETMASK, &old_mask, NULL);
+    }
+#endif
     app_log_error("pthread_create() for RX thread return code: %d" APP_LOG_NL,
                   iret);
     return SL_STATUS_FAIL;
   }
 
   iret = pthread_create(thread_tx, NULL, send_ctx->start_routine, send_ctx);
+#if !defined(_WIN32)
+  if (mask_applied) {
+    (void)pthread_sigmask(SIG_SETMASK, &old_mask, NULL);
+  }
+#endif
   if (iret) {
     app_log_error("pthread_create() for TX thread return code: %d" APP_LOG_NL,
                   iret);

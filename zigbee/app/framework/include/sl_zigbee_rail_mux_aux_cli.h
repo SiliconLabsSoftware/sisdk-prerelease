@@ -21,7 +21,7 @@
 #if defined(SL_CATALOG_CLI_PRESENT)
 #include "sl_cli.h"
 
-void sl_zigbee_cli_rail_mux_aux_try_register(sl_cli_command_arg_t *arguments);
+void sl_zigbee_cli_rail_mux_aux_register(sl_cli_command_arg_t *arguments);
 void sl_zigbee_cli_rail_mux_aux_unregister_aux(sl_cli_command_arg_t *arguments);
 void sl_zigbee_cli_rail_mux_aux_mac_rx_unicast(sl_cli_command_arg_t *arguments);
 void sl_zigbee_cli_rail_mux_aux_rx_count(sl_cli_command_arg_t *arguments);
@@ -29,6 +29,7 @@ void sl_zigbee_cli_rail_mux_aux_tx_fixed_psdu(sl_cli_command_arg_t *arguments);
 void sl_zigbee_cli_rail_mux_aux_raw_rx_off(sl_cli_command_arg_t *arguments);
 void sl_zigbee_cli_rail_mux_aux_rxdc_phy_select_get(sl_cli_command_arg_t *arguments);
 void sl_zigbee_cli_rail_mux_aux_rxdc_phy_select_set(sl_cli_command_arg_t *arguments);
+void sl_zigbee_cli_rail_mux_aux_set_interpan_enabled(sl_cli_command_arg_t *arguments);
 
 #endif // SL_CATALOG_CLI_PRESENT
 

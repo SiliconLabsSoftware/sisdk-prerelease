@@ -181,7 +181,8 @@ static void PrintHelp(const char *aProgramName)
             "     -V, --version          Print the application's version and exit.\n"
             "     --radio-version        Print the radio coprocessor version and exit.\n"
             "     --auto-attach          Whether or not to automatically attach to the saved network (default: 1).\n"
-            "     --rest-listen-address  Network address to listen on for the REST API (default: 127.0.0.1).\n"
+            "     --rest-listen-address  Network address to listen on for the REST API, or a unix socket\n"
+            "                            path when it starts with '/' (default: 127.0.0.1).\n"
             "     --rest-listen-port     Network port to listen on for the REST API "
             "(default: " HELP_DEFAULT_REST_PORT_NUMBER ").\n",
             aProgramName);
@@ -396,16 +397,12 @@ static int realmain(int argc, char *argv[])
     }
 
     {
-#if __linux__
         otbr::Utils::InfraLinkSelector    infraLinkSelector(backboneInterfaceNames);
         const std::string                 backboneInterfaceName = infraLinkSelector.Select();
         otbr::Application::ErrorCondition errorCondition        = [&backboneInterfaceName, &infraLinkSelector](void) {
             return std::string(infraLinkSelector.Select()) == backboneInterfaceName ? OTBR_ERROR_NONE
                                                                                            : OTBR_ERROR_INFRA_LINK_CHANGED;
         };
-#else
-        const std::string backboneInterfaceName = backboneInterfaceNames.empty() ? "" : backboneInterfaceNames.front();
-#endif
         std::unique_ptr<otbr::Host::ThreadHost> host = otbr::Host::ThreadHost::Create(
             interfaceName, radioUrls, backboneInterfaceName.c_str(), /* aDryRun */ false, enableAutoAttach, dataPath);
 
@@ -447,9 +444,7 @@ static int realmain(int argc, char *argv[])
         OT_UNUSED_VARIABLE(productName);
 #endif
 
-#if __linux__
         app.SetErrorCondition(errorCondition);
-#endif
 
         ret = app.Run();
 

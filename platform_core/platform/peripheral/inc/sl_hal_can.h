@@ -961,6 +961,63 @@ __INLINE uint32_t sl_hal_can_get_rx_fifo_fill_level(CAN_TypeDef *can,
   }
 }
 
+/***************************************************************************//**
+ * Get pending CAN interrupt flags.
+ *
+ * @param[in] can Pointer to the can peripheral register block.
+ * @return Pending CAN interrupt sources.
+ ******************************************************************************/
+__INLINE uint32_t sl_hal_can_get_pending_interrupts(CAN_TypeDef *can)
+{
+  // Init structure must be provided.
+  SL_LOG_DEBUG_ASSERT(CAN_NUM(can) != -1);
+
+  return can->IR;
+}
+
+/***************************************************************************//**
+ * Get enabled and pending CAN interrupt flags.
+ *
+ * @note Useful for handling more interrupt sources in the same interrupt handler.
+ *
+ * @param[in] can Pointer to the can peripheral register block.
+ * @return    Pending and enabled CAN interrupt sources.
+ ******************************************************************************/
+__INLINE uint32_t sl_hal_can_get_enabled_pending_interrupts(CAN_TypeDef *can)
+{
+  // Init structure must be provided.
+  SL_LOG_DEBUG_ASSERT(CAN_NUM(can) != -1);
+
+  uint32_t tmp;
+
+  /* Store can->IE in temporary variable in order to define explicit order
+   * of volatile accesses. */
+  tmp = can->IE;
+
+  /* Bitwise AND of pending and enabled interrupts */
+  return can->IR & tmp;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Clear one or more pending CAN interrupts.
+ *
+ * @param[in] can
+ *   Pointer to the can peripheral register block.
+ *
+ * @param[in] flags
+ *   Pending CAN interrupt source to clear. Use a bitwise logic
+ *   OR combination of valid interrupt flags for CAN module.
+ ******************************************************************************/
+__INLINE void sl_hal_can_clear_interrupts(CAN_TypeDef *can, uint32_t flags)
+{
+  // Make sure the module exists on the selected chip.
+  SL_LOG_DEBUG_ASSERT(CAN_NUM(can) != -1);
+
+  // IR is write-1-to-clear; a read-modify-write would clear every pending flag.
+  can->IR = flags & _CAN_IR_MASK;
+}
+
 #ifdef __cplusplus
 }
 #endif

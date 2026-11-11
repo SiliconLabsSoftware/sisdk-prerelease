@@ -400,7 +400,7 @@ void DnssdPlatform::StartTxtResolver(const TxtResolver &aTxtResolver, TxtCallbac
 
     mTxtResolversMap[serviceName].AddIfAbsent(aTxtResolver.mInfraIfIndex, std::move(aCallbackPtr));
 
-    if (mServiceNameSubscriptions.find(serviceName) != mServiceNameSubscriptions.end())
+    if (HasSubscriptionForName(mServiceNameSubscriptions, serviceName))
     {
         ReplayResolvedServiceTxtIfAny(serviceName);
     }
@@ -591,7 +591,7 @@ void DnssdPlatform::ReplayResolvedHostAddressesIfAny(const DnsName &aDnsName)
     VerifyOrExit(mState == kStateReady);
     VerifyOrExit(cacheIt != mResolvedHostInfoCache.end());
     VerifyOrExit(!cacheIt->second.mAddresses.empty());
-    VerifyOrExit(mHostSubscriptions.find(aDnsName) != mHostSubscriptions.end());
+    VerifyOrExit(HasSubscriptionForName(mHostSubscriptions, aDnsName));
 
     ProcessIpAddrResolvers(aDnsName.GetName(), cacheIt->second);
 
@@ -605,7 +605,7 @@ void DnssdPlatform::ReplayResolvedServiceTxtIfAny(const DnsServiceName &aService
 
     VerifyOrExit(mState == kStateReady);
     VerifyOrExit(cacheIt != mResolvedServiceInfoCache.end());
-    VerifyOrExit(mServiceNameSubscriptions.find(aServiceName) != mServiceNameSubscriptions.end());
+    VerifyOrExit(HasSubscriptionForName(mServiceNameSubscriptions, aServiceName));
 
     ProcessTxtResolvers(aServiceName.GetType(), cacheIt->second);
 
@@ -619,7 +619,7 @@ void DnssdPlatform::StartAddressResolver(const AddressResolver &aAddressResolver
 
     mIpAddrResolversMap[dnsName].AddIfAbsent(aAddressResolver.mInfraIfIndex, std::move(aCallbackPtr));
 
-    if (mHostSubscriptions.find(dnsName) != mHostSubscriptions.end())
+    if (HasSubscriptionForName(mHostSubscriptions, dnsName))
     {
         ReplayResolvedHostAddressesIfAny(dnsName);
     }
@@ -648,14 +648,21 @@ void DnssdPlatform::StopAddressResolver(const AddressResolver &aAddressResolver,
 
 void DnssdPlatform::ExecuteServiceSubscriptionUpdate(void)
 {
+    std::set<ServiceTypeSubscription> serviceTypeSubscriptions;
+    std::set<ServiceNameSubscription> serviceNameSubscriptions;
+
     mServiceSubscriptionUpdateTaskPosted = false;
+
+    AddSubscriptions(mServiceBrowsersMap, serviceTypeSubscriptions);
+    AddSubscriptions(mServiceResolversMap, serviceNameSubscriptions);
+    AddSubscriptions(mTxtResolversMap, serviceNameSubscriptions);
 
     // Unsubscribe services (DnsServiceType) that are stale.
     for (auto iter = mServiceTypeSubscriptions.begin(); iter != mServiceTypeSubscriptions.end();)
     {
-        if (mServiceBrowsersMap.find(*iter) == mServiceBrowsersMap.end())
+        if (serviceTypeSubscriptions.find(*iter) == serviceTypeSubscriptions.end())
         {
-            mPublisher.UnsubscribeService(iter->ToString(), /* aInstanceName */ "");
+            mPublisher.UnsubscribeService(iter->first.ToString(), /* aInstanceName */ "", iter->second);
             iter = mServiceTypeSubscriptions.erase(iter);
         }
         else
@@ -665,26 +672,27 @@ void DnssdPlatform::ExecuteServiceSubscriptionUpdate(void)
     }
 
     // Subscribe to services (DnsServiceType) that haven't been subscribed.
-    for (const auto &entry : mServiceBrowsersMap)
+    for (const ServiceTypeSubscription &subscription : serviceTypeSubscriptions)
     {
-        const DnsServiceType &serviceType = entry.first;
-
-        if (mServiceTypeSubscriptions.find(serviceType) == mServiceTypeSubscriptions.end())
+        if (mServiceTypeSubscriptions.insert(subscription).second)
         {
-            mServiceTypeSubscriptions.insert(serviceType);
-            mPublisher.SubscribeService(serviceType.ToString(), /* aInstanceName */ "");
+            mPublisher.SubscribeService(subscription.first.ToString(), /* aInstanceName */ "", subscription.second);
         }
     }
 
     // Unsubscribe services (DnsServiceName) that are stale.
     for (auto iter = mServiceNameSubscriptions.begin(); iter != mServiceNameSubscriptions.end();)
     {
-        if (mServiceResolversMap.find(*iter) == mServiceResolversMap.end() &&
-            mTxtResolversMap.find(*iter) == mTxtResolversMap.end())
+        if (serviceNameSubscriptions.find(*iter) == serviceNameSubscriptions.end())
         {
-            mPublisher.UnsubscribeService(iter->GetType(), iter->GetInstance());
-            mResolvedServiceInfoCache.erase(*iter);
+            const DnsServiceName serviceName = iter->first;
+
+            mPublisher.UnsubscribeService(iter->first.GetType(), iter->first.GetInstance(), iter->second);
             iter = mServiceNameSubscriptions.erase(iter);
+            if (!HasSubscriptionForName(mServiceNameSubscriptions, serviceName))
+            {
+                mResolvedServiceInfoCache.erase(serviceName);
+            }
         }
         else
         {
@@ -693,26 +701,13 @@ void DnssdPlatform::ExecuteServiceSubscriptionUpdate(void)
     }
 
     // Subscribe to services (DnsServiceName) that haven't been subscribed.
-    for (const auto &entry : mServiceResolversMap)
+    for (const ServiceNameSubscription &subscription : serviceNameSubscriptions)
     {
-        const DnsServiceName &serviceName = entry.first;
-
-        if (mServiceNameSubscriptions.find(serviceName) == mServiceNameSubscriptions.end())
+        if (mServiceNameSubscriptions.insert(subscription).second)
         {
-            mServiceNameSubscriptions.insert(serviceName);
-            mPublisher.SubscribeService(serviceName.GetType(), serviceName.GetInstance());
-            ReplayResolvedServiceTxtIfAny(serviceName);
-        }
-    }
-    for (const auto &entry : mTxtResolversMap)
-    {
-        const DnsServiceName &serviceName = entry.first;
-
-        if (mServiceNameSubscriptions.find(serviceName) == mServiceNameSubscriptions.end())
-        {
-            mServiceNameSubscriptions.insert(serviceName);
-            mPublisher.SubscribeService(serviceName.GetType(), serviceName.GetInstance());
-            ReplayResolvedServiceTxtIfAny(serviceName);
+            mPublisher.SubscribeService(subscription.first.GetType(), subscription.first.GetInstance(),
+                                        subscription.second);
+            ReplayResolvedServiceTxtIfAny(subscription.first);
         }
     }
 }
@@ -728,18 +723,25 @@ void DnssdPlatform::PostServiceSubscriptionUpdateTask(void)
 
 void DnssdPlatform::ExecuteHostSubscriptionUpdate(void)
 {
+    std::set<HostSubscription> hostSubscriptions;
+
     mHostSubscriptionUpdateTaskPosted = false;
+
+    AddSubscriptions(mIpAddrResolversMap, hostSubscriptions);
 
     // Unsubscribe hosts (DnsName) that are stale.
     for (auto iter = mHostSubscriptions.begin(); iter != mHostSubscriptions.end();)
     {
-        const DnsName &dnsName = *iter;
-
-        if (mIpAddrResolversMap.find(dnsName) == mIpAddrResolversMap.end())
+        if (hostSubscriptions.find(*iter) == hostSubscriptions.end())
         {
-            mPublisher.UnsubscribeHost(dnsName.GetName());
-            mResolvedHostInfoCache.erase(dnsName);
+            const DnsName dnsName = iter->first;
+
+            mPublisher.UnsubscribeHost(iter->first.GetName(), iter->second);
             iter = mHostSubscriptions.erase(iter);
+            if (!HasSubscriptionForName(mHostSubscriptions, dnsName))
+            {
+                mResolvedHostInfoCache.erase(dnsName);
+            }
         }
         else
         {
@@ -748,15 +750,12 @@ void DnssdPlatform::ExecuteHostSubscriptionUpdate(void)
     }
 
     // Subscribe to hosts (DnsName) that haven't been subscribed.
-    for (auto &entry : mIpAddrResolversMap)
+    for (const HostSubscription &subscription : hostSubscriptions)
     {
-        const DnsName &dnsName = entry.first;
-
-        if (mHostSubscriptions.find(dnsName) == mHostSubscriptions.end())
+        if (mHostSubscriptions.insert(subscription).second)
         {
-            mHostSubscriptions.insert(dnsName);
-            mPublisher.SubscribeHost(dnsName.GetName());
-            ReplayResolvedHostAddressesIfAny(dnsName);
+            mPublisher.SubscribeHost(subscription.first.GetName(), subscription.second);
+            ReplayResolvedHostAddressesIfAny(subscription.first);
         }
     }
 }

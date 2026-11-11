@@ -29,4 +29,6 @@ requires:
 template_contribution:
 - name: micriumos_component_avails
   value: COMMON_SHELL
+documentation:
+  url: https://docs.silabs.com/micrium/latest/micrium-common-api/
 root_path: micriumos/platform/micrium_os/common

@@ -51,5 +51,13 @@ toolchain_settings:
   value: "-fmerge-all-constants"
 - option: llvm_compiler_option
   value: "-Wno-error=deprecated-declarations"
+  # The platform linker script assigns .log_fmt to the readonly segment even
+  # though it comes after .data, so that segment spans the whole flash. ld.lld
+  # then page-aligns its file offset and lays .symtab and .debug_* over the
+  # file range of .data, which aborts the link. Addresses come from the linker
+  # script, so dropping page alignment only packs the file offsets. GNU ld
+  # computes those offsets differently and does not need this.
+- option: llvm_linker_option
+  value: "-Wl,--nmagic"
 
 root_path: zwave

@@ -31,6 +31,14 @@ template_contribution:
   value:
     callback_type: local_data_init
     function_name: sli_zigbee_network_test_init
+- name: zigbee_af_callback
+  value:
+    callback_type: init_done
+    function_name: sli_zigbee_network_test_init
+- name: zigbee_af_callback
+  value:
+    callback_type: pre_command_received
+    function_name: sli_zigbee_network_test_pre_command_received_callback
 
 - name: zigbee_stack_callback
   value:

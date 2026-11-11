@@ -190,7 +190,11 @@ void sleeptimer_hal_set_compare(uint32_t value)
 
   if (((sl_hal_sysrtc_get_group_interrupts(0u) & SYSRTC_GRP0_IEN_CMP0) != 0)
       || get_time_diff(compare, counter) > SLEEPTIMER_COMPARE_MIN_DIFF
-      || compare == counter) {
+      || compare == counter
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353)
+      || cc_disabled
+#endif
+      ) {
     // Add margin if necessary
     if (get_time_diff(compare_value, counter) < SLEEPTIMER_COMPARE_MIN_DIFF) {
       compare_value = counter + SLEEPTIMER_COMPARE_MIN_DIFF;

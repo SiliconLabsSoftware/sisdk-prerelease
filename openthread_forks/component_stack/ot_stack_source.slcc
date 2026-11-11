@@ -75,6 +75,7 @@ source:
 - path: api/tcp_api.cpp
 - path: api/tcp_ext_api.cpp
 - path: api/thread_api.cpp
+- path: api/thread_direct_api.cpp
 - path: api/thread_ftd_api.cpp
 - path: api/trel_api.cpp
 - path: api/udp_api.cpp
@@ -233,7 +234,6 @@ source:
 - path: thread/lowpan.cpp
 - path: thread/mesh_forwarder.cpp
 - path: thread/mesh_forwarder_ftd.cpp
-- path: thread/mesh_forwarder_mtd.cpp
 - path: thread/message_framer.cpp
 - path: thread/mle.cpp
 - path: thread/mle_ftd.cpp
@@ -268,6 +268,8 @@ source:
 - path: thread/uri_paths.cpp
 - path: thread/vendor_info.cpp
 - path: thread/version.cpp
+- path: thread_direct/td_key_manager.cpp
+- path: thread_direct/td_types.cpp
 - path: utils/channel_manager.cpp
 - path: utils/channel_monitor.cpp
 - path: utils/flash.cpp

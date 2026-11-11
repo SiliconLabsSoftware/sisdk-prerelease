@@ -153,9 +153,8 @@ static const otRadioCaps sRadioCapabilities =
      // When scheduled tx is required, we support sl_rail_start_scheduled_cca_csma_tx
      // (delay is indicated in tx frame info set in MAC)
      | OT_RADIO_CAPS_TRANSMIT_TIMING
-     // When scheduled rx is required, we support sl_rail_start_scheduled_rx in our
-     // implementation of otPlatRadioReceiveAt
-     | OT_RADIO_CAPS_RECEIVE_TIMING
+// Note that we now default to SubMac software receive timing and therefore do not
+// advertise OT_RADIO_CAPS_RECEIVE_TIMING
 #endif
 #if SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE
      | OT_RADIO_CAPS_ALT_SHORT_ADDR
@@ -836,10 +835,8 @@ void sli_ot_radio_interface_complete_sleep(void)
 {
     sli_ot_radio_state_set_sleep_pending(false);
 
-    if (sli_ot_radio_state_is_rx_scheduled())
+    if (sli_ot_radio_state_has_scheduled_rx())
     {
-        // When a scheduled RX is pending, only yield the radio
-        // since sl_rail_idle cancels a scheduled window
         sli_ot_radio_interface_rail_yield_radio();
     }
     else

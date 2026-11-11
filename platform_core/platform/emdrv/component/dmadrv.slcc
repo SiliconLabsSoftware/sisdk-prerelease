@@ -66,5 +66,5 @@ define:
   value: dmadrv
 documentation:
   docset: gecko-platform
-  document: driver/api/group-dmadrv
+  document: platform-driver/dmadrv
 root_path: platform_core

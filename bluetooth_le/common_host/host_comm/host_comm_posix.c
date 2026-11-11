@@ -308,13 +308,23 @@ void host_comm_deinit(void)
  *****************************************************************************/
 int32_t host_comm_tx(uint32_t len, uint8_t* data)
 {
-  pthread_mutex_lock(&tx_mutex);
-  size_t written = host_comm_ringbuf_write(&tx_buffer, data, (size_t)len);
-  pthread_mutex_unlock(&tx_mutex);
-  if (written < (size_t)len) {
+  size_t total_written = 0;
+
+  while (total_written < (size_t)len && run) {
+    pthread_mutex_lock(&tx_mutex);
+    size_t written = host_comm_ringbuf_write(&tx_buffer,
+                                             data + total_written,
+                                             (size_t)len - total_written);
+    pthread_mutex_unlock(&tx_mutex);
+    total_written += written;
+    if (total_written < (size_t)len && run) {
+      app_sleep_us(RECV_FUNC_US_SLEEP ? RECV_FUNC_US_SLEEP : 10);
+    }
+  }
+  if (total_written < (size_t)len) {
     app_log_error("TX buffer overflow, data lost." APP_LOG_NL);
   }
-  return (int32_t)written;
+  return (int32_t)total_written;
 }
 
 /******************************************************************************

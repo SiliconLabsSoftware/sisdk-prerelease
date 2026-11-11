@@ -133,6 +133,9 @@ int32_t uartRx(void *handle, uint32_t dataLength, uint8_t *data)
   while (dataToRead) {
     dataRead = read(*(int32_t *)handle, (void *)data, dataToRead);
     if (-1 == dataRead) {
+      if (EINTR == errno || EAGAIN == errno || EWOULDBLOCK == errno) {
+        continue;
+      }
       return -1;
     } else {
       dataToRead -= dataRead;
@@ -152,7 +155,10 @@ int32_t uartRxNonBlocking(void *handle, uint32_t dataLength, uint8_t *data)
     return -1;
   }
 
-  dataRead = read(*(int32_t *)handle, (void *)data, (size_t)dataLength);
+  do {
+    dataRead = read(*(int32_t *)handle, (void *)data, (size_t)dataLength);
+  } while (-1 == dataRead && EINTR == errno);
+
   if (-1 == dataRead) {
     return -1;
   }
@@ -210,7 +216,7 @@ int32_t uartTx(void *handle, uint32_t dataLength, uint8_t *data)
   while (dataToWrite) {
     dataWritten = write(*(int32_t *)handle, (void *)data, dataToWrite);
     if (-1 == dataWritten) {
-      if (EAGAIN == errno) {
+      if (EAGAIN == errno || EWOULDBLOCK == errno || EINTR == errno) {
         continue;
       } else {
         return -1;

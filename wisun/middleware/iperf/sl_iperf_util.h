@@ -312,12 +312,15 @@ __STATIC_INLINE bool sl_iperf_test_is_tcp_clnt(const sl_iperf_test_t * const tes
 void sl_iperf_test_fill_buffer_with_pattern(sl_iperf_test_t * const test);
 
 /**************************************************************************//**
- * @brief Check test start time stamp
- * @details Elapsed time calculation and comparison with
+ * @brief Check idle timeout since the last received packet
+ * @details Returns true while the last RX (or test start if none yet) is
+ *          still within SL_IPERF_MAX_TEST_TIMEOUT_MS of now.
+ *          Always true when test->opt.persistent is set, or when
+ *          SL_IPERF_MAX_TEST_TIMEOUT_MS is 0.
  * @param test Test descriptor
- * @return true There is time left, if 'SL_IPERF_MAX_TEST_TIMEOUT_MS' is 0,
- *              always true
- * @return false Time out
+ * @return true Last packet received within SL_IPERF_MAX_TEST_TIMEOUT_MS;
+ *              always true if persistent or SL_IPERF_MAX_TEST_TIMEOUT_MS is 0
+ * @return false Idle timeout expired
  *****************************************************************************/
 bool sl_iperf_test_check_time(const sl_iperf_test_t * const test);
 

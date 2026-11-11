@@ -1345,6 +1345,11 @@
           type: "uint32_t",
           name: "lasy_hop_timestamp",
           description: "Timestamp of the moment when Start Frame Delimiter (SFD) was received.",
+        },
+        {
+          type: "uint8_t",
+          name: "channel",
+          description: "Radio channel the packet was received on.",
         }
       ]
     },

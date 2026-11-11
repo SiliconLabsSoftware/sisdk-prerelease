@@ -1,0 +1,46 @@
+id: zigbee_pro_stack_rail_mux_aux
+label: Pro Stack RAIL MUX with Aux MAC
+package: zigbee
+category: Zigbee|Stack|Pro Core
+quality: evaluation
+description: >
+  Provides Zigbee PRO stack functionality along with APIs to interface with RAIL MUX,
+  compiled with MAC_MUX_AUX_PRESENT for dual-channel auxiliary MAC support.
+
+provides:
+- name: zigbee_pro_stack_rail_mux_aux
+
+requires:
+- name: zigbee_pro_stack_rail_mux_aux_implementation
+- name: zigbee_pro_stack_rail_mux_aux_library
+  condition:
+  - zigbee_use_release_libraries
+- name: zigbee_stack_common
+- name: zigbee_phy_2_4
+
+recommends:
+- id: zigbee_pro_stack_rail_mux_aux_library_internal
+  vendor: silabs
+
+define:
+- name: RAIL_MUX
+  condition:
+  - rail_mux
+- name: MAC_MUX_AUX_PRESENT
+  condition:
+  - rail_mux_aux
+
+template_contribution:
+- name: component_catalog
+  value: zigbee_pro_stack_rail_mux_aux
+  condition:
+  - rail_mux
+  - rail_mux_aux
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/pro-stack-rail-mux
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

@@ -234,26 +234,6 @@
 #endif
 #endif
 
-#if !defined(HFRCO)
-#if defined(HFRCO_COUNT) && (HFRCO_COUNT == 2)
-#define HFRCO(n)                                    (((n) == 0) ? HFRCO0   \
-                                                     : ((n) == 1) ? HFRCO1 \
-                                                     : ((HFRCO_TypeDef *)0))
-#else
-#define HFRCO(n)                                    (((n) == 0) ? HFRCO0 : ((HFRCO_TypeDef *)0))
-#endif
-#endif
-
-#if !defined(DPLL)
-#if defined(DPLL_COUNT) && (DPLL_COUNT == 2)
-#define DPLL(n)                                     (((n) == 0) ? DPLL0   \
-                                                     : ((n) == 1) ? DPLL1 \
-                                                     : ((DPLL_TypeDef *)0))
-#else
-#define DPLL(n)                                     (((n) == 0) ? DPLL0 : ((DPLL_TypeDef *)0))
-#endif
-#endif
-
 #if defined(HFRCO1)
 #define HFRCO_BUS_CLOCK(n)                          (((n) == 0) ? SL_BUS_CLOCK_HFRCO0   \
                                                      : ((n) == 1) ? SL_BUS_CLOCK_HFRCO1 \
@@ -891,10 +871,15 @@ FUNCTION_SCOPE void init_dpll(uint8_t hfrcodpll_num)
                 | (CLOCK_MANAGER_DPLL_EDGE(hfrcodpll_num)  << _DPLL_CFG_EDGESEL_SHIFT)
                 | (CLOCK_MANAGER_DPLL_LOCKMODE(hfrcodpll_num) << _DPLL_CFG_MODE_SHIFT);
 
-    // Update CMSIS HFRCODPLL frequency for instance 0.
+    // Update CMSIS HFRCODPLL frequency.
     if (hfrcodpll_num == 0) {
       SystemHFRCODPLLClockSet(CLOCK_MANAGER_DPLL_FREQ(hfrcodpll_num));
     }
+#if defined(HFRCO1)
+    else if (hfrcodpll_num == 1) {
+      SystemHFRCODPLL1ClockSet(CLOCK_MANAGER_DPLL_FREQ(hfrcodpll_num));
+    }
+#endif
 
     // Clear some interrupt flags.
     dpll->IF_CLR = DPLL_IF_LOCK | DPLL_IF_LOCKFAILLOW | DPLL_IF_LOCKFAILHIGH;
@@ -1004,6 +989,11 @@ FUNCTION_SCOPE void init_hfrco_dpll(uint8_t hfrcodpll_num)
     if (hfrcodpll_num == 0) {
       SystemHFRCODPLLClockSet(CLOCK_MANAGER_HFRCO_BAND(hfrcodpll_num));
     }
+#if defined(HFRCO1)
+    else if (hfrcodpll_num == 1) {
+      SystemHFRCODPLL1ClockSet(CLOCK_MANAGER_HFRCO_BAND(hfrcodpll_num));
+    }
+#endif
 
     SLI_CLOCK_MANAGER_LOG_INFO("HFRCODPLL%u configured, freq=%u", (uint32_t)hfrcodpll_num, (uint32_t)CLOCK_MANAGER_HFRCO_BAND(hfrcodpll_num));
   }

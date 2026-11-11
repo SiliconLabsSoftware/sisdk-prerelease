@@ -83,15 +83,27 @@ int32_t tcp_open(void *handle, char *ip, char *port)
 
 int32_t tcp_tx(void *handle, uint32_t data_length, uint8_t *data)
 {
-  int32_t ret = -1;
+  uint32_t data_to_write = data_length;
+  ssize_t data_written;
 
   if (*(int32_t *)handle < 0) {
-    return ret;
+    return -1;
   }
 
-  ret = write(*(int32_t *)handle, (void *) data, (size_t) data_length);
+  while (data_to_write) {
+    data_written = write(*(int32_t *)handle, (void *)data, (size_t)data_to_write);
+    if (data_written < 0) {
+      if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
+        continue;
+      }
+      perror("TCP transmit failed");
+      return -1;
+    }
+    data_to_write -= (uint32_t)data_written;
+    data += data_written;
+  }
 
-  return ret;
+  return (int32_t)data_length;
 }
 
 int32_t tcp_rx(void *handle, uint32_t data_length, uint8_t *data)
@@ -111,6 +123,9 @@ int32_t tcp_rx(void *handle, uint32_t data_length, uint8_t *data)
     int32_t size = read(*(int32_t *)handle, (void *) data, (size_t) data_to_read);
 
     if (size < 0) {
+      if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
+        continue;
+      }
       perror("TCP receive failed");
       return -1;
     } else {

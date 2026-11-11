@@ -1,0 +1,31 @@
+id: zw_log_tool
+label: Z-Wave Log Tool
+category: Z-Wave
+description: >
+  This component provides the backend-independent ZPAL Log API and keeps the
+  logging symbols linkable for every Z-Wave application. Select the Z-Wave
+  Logging component to add the sl_log backend, output format, and console
+  dependencies. It can be used by applications that require logging support
+  without selecting a specific output backend.
+documentation:
+  docset: z-wave
+  document: zwave-api/logging
+package: zwave
+quality: production
+metadata:
+  sbom:
+    reference: zw_sbom_license
+provides:
+- name: zw_log_tool
+
+include:
+- path: ZAF/ApplicationUtilities
+  file_list:
+  - path: ZAF_PrintAppInfo.h
+source:
+- path: platform/SiliconLabs/components/zw_log/zw_log.c
+- path: ZAF/ApplicationUtilities/ZAF_PrintAppInfo.c
+template_contribution:
+- name: component_catalog
+  value: zw_log_tool
+root_path: zwave

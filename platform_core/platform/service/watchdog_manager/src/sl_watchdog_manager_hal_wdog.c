@@ -37,8 +37,8 @@
 #include "sli_watchdog_manager.h"
 #include "sl_interrupt_manager.h"
 #include "sl_component_catalog.h"
-#if defined(SL_CATALOG_CRASH_MANAGER_COMPONENT_PRESENT)
-#include "sli_crash_manager.h"
+#if defined(SL_CATALOG_CRASH_CAPTURE_COMPONENT_PRESENT)
+#include "sli_crash_capture.h"
 #endif
 #include "em_device.h"
 #if SLI_WATCHDOG_MANAGER_USE_EM_TRANSITION_HOOK
@@ -114,10 +114,10 @@
   #warning "No WDOG peripheral available"
 #endif
 
-#if defined(SL_CATALOG_CRASH_MANAGER_COMPONENT_PRESENT)
-  #define SLI_WATCHDOG_MANAGER_CRASH_MANAGER_INTEGRATION  1
+#if defined(SL_CATALOG_CRASH_CAPTURE_COMPONENT_PRESENT)
+  #define SLI_WATCHDOG_MANAGER_CRASH_CAPTURE_INTEGRATION  1
 #else
-  #define SLI_WATCHDOG_MANAGER_CRASH_MANAGER_INTEGRATION  0
+  #define SLI_WATCHDOG_MANAGER_CRASH_CAPTURE_INTEGRATION  0
 #endif
 
 #ifndef WATCHDOG_CLKSEL_HCLK
@@ -151,8 +151,8 @@ static void watchdog_starve_irq_handler(void)
 
   if ((flags & WDOG_IF_WARN) != 0u) {
     sl_hal_wdog_clear_interrupts(WATCHDOG_PERIPHERAL, WDOG_IF_WARN);
-#if SLI_WATCHDOG_MANAGER_CRASH_MANAGER_INTEGRATION
-    sli_crash_manager_on_watchdog_warning(flags);
+#if SLI_WATCHDOG_MANAGER_CRASH_CAPTURE_INTEGRATION
+    sli_crash_capture_on_watchdog_warning(flags);
 #endif
     sli_watchdog_manager_on_starve();
   }
@@ -210,7 +210,7 @@ static sl_hal_wdog_warning_timeout_select_t hal_map_warning_time(void)
       return SL_WDOG_WARNING_TIME75;
 
     default:
-#if SLI_WATCHDOG_MANAGER_CRASH_MANAGER_INTEGRATION
+#if SLI_WATCHDOG_MANAGER_CRASH_CAPTURE_INTEGRATION
       return SL_WDOG_WARNING_TIME75;
 #else
       return SL_WDOG_WARNING_DISABLE;

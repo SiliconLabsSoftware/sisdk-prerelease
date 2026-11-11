@@ -530,6 +530,56 @@ SL_PACK_END()
 /** @} (end SL_WISUN_MSG_SENDTO_ON_SOCKET) */
 
 /**************************************************************************//**
+ * @defgroup SL_WISUN_MSG_SOCKET_MSGHDR sl_wisun_msg_socket_msghdr
+ * @{
+ *
+ * Serialized representation of a POSIX `struct msghdr`. On NCP it trails
+ * @ref sl_wisun_msg_socket_sendmsg_req_t and
+ * @ref sl_wisun_msg_socket_recvmsg_cnf_t, and the capacity header of a
+ * @ref SL_WISUN_MSG_SOCKET_RECVMSG request (its data[] may be omitted).
+ * SoC passes a native `msghdr` as request/confirmation data instead.
+ *
+ * A native `struct msghdr` cannot be passed through the NCP interface because
+ * it contains host pointers (`msg_name`, `msg_iov`, `msg_control`). The
+ * payload of every iovec entry is flattened into a single contiguous region.
+ *
+ * Layout of #sl_wisun_msg_socket_msghdr_t::data:
+ *   - `uint8_t msg_control[msg_controllen]`
+ *   - `uint8_t msg_payload[msg_payloadlen]`
+ *
+ * The peer IPv6 address and port are fixed fields (`msg_name`, `msg_port`),
+ * not part of data[].
+ *
+ * For recvmsg(), the request carries this header with msg_controllen and
+ * msg_payloadlen set to the receive-buffer capacities (`msg_name` / `msg_port`
+ * are ignored). The request data[] may be omitted. The confirmation carries
+ * the same header followed by the received control and payload bytes, with
+ * `msg_name` / `msg_port` filled from the peer address. The confirmation
+ * updates msg_controllen, msg_payloadlen and msg_flags to the amounts stored.
+ *****************************************************************************/
+
+SL_PACK_START(1)
+typedef struct {
+  /// Peer IPv6 address
+  in6_addr_t msg_name;
+  /// Peer transport port
+  uint16_t msg_port;
+  /// Padding / reserved, set to zero
+  uint16_t reserved;
+  /// Length of the ancillary data stored in data[]
+  uint32_t msg_controllen;
+  /// Length of the flattened iovec payload stored in data[]
+  uint32_t msg_payloadlen;
+  /// Flags on the message (msg_flags)
+  int32_t msg_flags;
+  /// Variable-length: control | payload
+  uint8_t data[];
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_socket_msghdr_t;
+SL_PACK_END()
+
+/** @} (end SL_WISUN_MSG_SOCKET_MSGHDR) */
+
+/**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SOCKET_SENDMSG sl_wisun_msg_socket_sendmsg
  * @{
  *****************************************************************************/
@@ -895,6 +945,14 @@ SL_PACK_END()
 /**************************************************************************//**
  * @defgroup SL_WISUN_MSG_SOCKET_RECVMSG sl_wisun_msg_socket_recvmsg
  * @{
+ *
+ * The fixed request is followed by a #sl_wisun_msg_socket_msghdr_t whose
+ * length fields are the receive-buffer capacities. That trailing header's
+ * data[] is not required and is ignored.
+ *
+ * On NCP the fixed confirmation is followed by a #sl_wisun_msg_socket_msghdr_t
+ * holding the peer address/port and the received control and payload. SoC
+ * passes a native `msghdr` as confirmation data instead.
  *****************************************************************************/
 
 /// Request message body
@@ -907,7 +965,8 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_socket_recvmsg_req_body_t;
 SL_PACK_END()
 
-/// Request message
+/// Request message.
+/// Trailing #sl_wisun_msg_socket_msghdr_t carries the receive-buffer capacities.
 SL_PACK_START(1)
 typedef struct {
   /// Common message header
@@ -931,7 +990,8 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_socket_recvmsg_cnf_body_t;
 SL_PACK_END()
 
-/// Confirmation message
+/// Confirmation message.
+/// On NCP, trailing #sl_wisun_msg_socket_msghdr_t holds control | payload in data[].
 SL_PACK_START(1)
 typedef struct {
   /// Common message header

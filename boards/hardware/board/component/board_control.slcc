@@ -48,6 +48,8 @@ config_file:
 - path: config/sl_board_control_config.h
   file_id: board_control_config
 template_contribution:
+- name: component_catalog
+  value: board_control
 - name: event_handler
   value:
     event: platform_init

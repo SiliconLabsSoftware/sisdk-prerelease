@@ -162,6 +162,7 @@ sl_status_t sl_cpc_drv_instances_init(void)
     },
     .baudrate = SL_CPC_DRV_UART_USART_{{ instance|upper }}_BAUDRATE,
     .flow_control = SL_CPC_DRV_UART_USART_{{ instance|upper }}_FLOW_CONTROL,
+    .oversampling = SL_CPC_DRV_UART_USART_{{ instance|upper }}_OVERSAMPLING,
   };
   {% endfor %}
 

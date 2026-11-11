@@ -9,6 +9,9 @@ quality: production
 requires:
 - name: psa_crypto
 - name: psa_driver
+  condition: [trustzone_unaware]
+- name: psa_driver
+  condition: [trustzone_secure]
 - name: device_has_cryptoacc
 - name: device_has_sepuf
 provides:

@@ -45,6 +45,11 @@
 #include "sl_log_helper.h"
 #include "sl_status.h"
 #include "sl_uart_instances.h"
+{% if ('eusart_vcom' in uart_instances_it or 'usart_vcom' in uart_instances_it) %}
+#if defined(SL_CATALOG_CONFIGURATION_OVER_SWO_PRESENT)
+#include "sl_cos.h"
+#endif
+{% endif %}
 {% for instance in uart_instances_it %}
 #include "sl_uart_{{ instance }}_config.h"
 {% endfor %}
@@ -128,6 +133,15 @@ void sl_uart_instances_init(void)
   status = sl_uart_configure_line(&sl_uart_{{ instance }}_handle,
                                   &sl_uart_{{ instance }}_line_config);
   SL_LOG_DEBUG_ASSERT(status == SL_STATUS_OK);
+{% if (instance == 'eusart_vcom' or instance == 'usart_vcom') %}
+#if defined(SL_CATALOG_CONFIGURATION_OVER_SWO_PRESENT)
+  uint8_t flow_control_{{ instance }} = COS_CONFIG_FLOWCONTROL_NONE;
+  if (sl_uart_{{ instance }}_line_config.flow_control == SL_UART_FLOW_CONTROL_CTS_RTS) {
+    flow_control_{{ instance }} = COS_CONFIG_FLOWCONTROL_CTS_RTS;
+  }
+  sl_cos_config_vcom(sl_uart_{{ instance }}_line_config.baudrate, flow_control_{{ instance }});
+#endif
+{% endif %}
   {%- endfor %}
   (void)status;
   {%- endif %}

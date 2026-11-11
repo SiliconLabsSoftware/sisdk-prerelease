@@ -26,12 +26,12 @@
 #include "stack/include/sl_zigbee_types.h"
 
 typedef void (*sl_zigbee_rail_mux_aux_event_callback_t)(sl_rail_handle_t rail_handle,
-                                                         sl_rail_events_t events,
-                                                         uint8_t *psdu,
-                                                         uint16_t psdu_length,
-                                                         uint8_t lqi,
-                                                         int8_t rssi_dbm,
-                                                         uint32_t packet_time);
+                                                        sl_rail_events_t events,
+                                                        uint8_t *psdu,
+                                                        uint16_t psdu_length,
+                                                        uint8_t lqi,
+                                                        int8_t rssi_dbm,
+                                                        uint32_t packet_time);
 
 /**
  * @brief Register the optional third mux client (fixed context index SUPPORTED_PROTOCOL_COUNT-1).
@@ -43,11 +43,20 @@ sl_rail_status_t sl_zigbee_rail_mux_aux_register_protocol(sl_rail_handle_t *out_
                                                           sl_rail_config_t *rail_config,
                                                           sl_rail_init_complete_callback_t init_complete_callback);
 
-/** @brief Register default aux context and start aux RX listen path. */
-sl_rail_status_t sl_zigbee_rail_mux_aux_try_register_and_start_rx(uint16_t aux_pan,
-                                                                   uint8_t channel);
+/** @brief Register default aux context and start aux RX listen path.
+ *
+ * PAN ID is taken from the primary Zigbee network. When rail_mux_aux / MAC aux
+ * is present this also enables Zigbee MAC aux TX/RX (mac index 1). Aux MAC
+ * traffic stays off until this is called, and is torn down again by
+ * @ref sl_zigbee_rail_mux_aux_unregister_protocol.
+ *
+ * @param channel 802.15.4 channel for aux listen. Persisted and used for aux
+ *                TX/RX. 0 is invalid; unregister disables the aux network.
+ */
+sl_rail_status_t sl_zigbee_rail_mux_aux_register_and_start_rx(uint8_t channel);
 
-/** @brief Tear down the aux mux client and restore 802.15.4 fast channel-switching logical base. */
+/** @brief Tear down the aux mux client, disable Zigbee MAC aux TX/RX if it was
+ *         enabled by register, and restore 802.15.4 fast channel-switching logical base. */
 sl_rail_status_t sl_zigbee_rail_mux_aux_unregister_protocol(void);
 
 /** @brief RAIL handle last registered by the rail-mux-aux path, or NULL. */
@@ -88,9 +97,9 @@ sl_rail_status_t sl_zigbee_rail_mux_aux_start_tx(sl_rail_handle_t rail_handle,
 
 /** @brief Wrapper for @c sl_rail_start_cca_csma_tx on @p rail_handle. */
 sl_rail_status_t sl_zigbee_rail_mux_aux_start_cca_csma_tx(sl_rail_handle_t rail_handle,
-                                                           uint8_t channel,
-                                                           sl_rail_tx_options_t options,
-                                                           const sl_rail_csma_config_t *csma_config,
-                                                           const sl_rail_scheduler_info_t *scheduler_info);
+                                                          uint8_t channel,
+                                                          sl_rail_tx_options_t options,
+                                                          const sl_rail_csma_config_t *csma_config,
+                                                          const sl_rail_scheduler_info_t *scheduler_info);
 
 #endif // SL_ZIGBEE_RAIL_MUX_AUX_RAW_H

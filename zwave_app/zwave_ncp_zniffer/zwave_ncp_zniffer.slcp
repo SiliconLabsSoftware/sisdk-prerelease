@@ -10,6 +10,7 @@ component:
   - id: zaf_config_security_header
   - id: zaf_ncp_zniffer_headers
   - id: zw_core
+  - id: zw_log
   - id: zw_appshw_zniffer
   - id: zw_apputilities
   - id: zw_role_type_always_on
@@ -28,9 +29,6 @@ component:
   - id: clock_manager
   - id: rail_util_pti
 
-requires:
-  - name: iostream_swo
-    condition: [zw_debug]
 source:
   - path: Zniffer.c
   - path: comm_interface.c
@@ -45,6 +43,18 @@ include:
     file_list:
      - path: zaf_config.h
 configuration:
+  # sl_log settings below only apply when the compact backend is selected
+  # (log_backend_iostream_compact). They keep all Z-Wave log levels available
+  # to the wrapper and allow the seven-argument ZPAL_LOG calls.
+  - name: SL_LOG_CONFIG_LEVEL_COMPILE_TIME
+    value: SL_LOG_CONFIG_LEVEL_DEBUG
+    condition: [log_backend_iostream_compact]
+  - name: SL_LOG_CONFIG_ARG
+    value: 7
+    condition: [log_backend_iostream_compact]
+  - name: SL_LOG_NUMBER_OF_EVENTS
+    value: 32
+    condition: [log_backend_iostream_compact]
   - name: ZAF_CONFIG_REQUEST_KEY_S0
     value: 1
   - name: ZAF_CONFIG_REQUEST_KEY_S2_UNAUTHENTICATED
@@ -61,20 +71,15 @@ configuration:
     value: ICON_TYPE_GENERIC_ON_OFF_POWER_SWITCH
   - name: ZAF_CONFIG_INSTALLER_ICON_TYPE
     value: ICON_TYPE_GENERIC_ON_OFF_POWER_SWITCH
+  # The host protocol owns VCOM/UART, so sl_log must not share it (PLATFORM_HYD-9023).
+  - name: SL_LOG_IOSTREAM_HANDLE
+    value: sl_iostream_swo_handle
   - name: NVM3_DEFAULT_MAX_OBJECT_SIZE
     value: 1900
   - name: NVM3_DEFAULT_CACHE_SIZE
     value: 100
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
-  - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
-    value: 1
-  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
-    value: 0    # UART RX shouldn't prevent EM2
-  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
-    value: 1
-  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
-    value: 0    # UART RX shouldn't prevent EM2
   - name: configUSE_IDLE_HOOK
     value: 1
   - name: configTIMER_TASK_PRIORITY

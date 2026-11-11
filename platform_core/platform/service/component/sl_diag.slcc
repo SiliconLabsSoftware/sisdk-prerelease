@@ -1,0 +1,77 @@
+id: sl_diag
+label: SL Diagnostic
+package: platform_core
+description: >
+  Retained diagnostics framework. Reserves a retained, non-initialized RAM
+  region (.sl_diag_retained.noinit) that holds a control block, one or two
+  retained record slots, an optional Summary Ring and an optional Mini
+  Emergency Tail. The diagnostic profile (SL_DIAG_PROFILE) selects the
+  features compiled into the product. With profile Off, no retained region
+  is allocated.
+
+  Profiles: Off has no retained RAM and no API. Crash Basic stores the CPU
+  crash record. Crash Standard adds the Trigger, Reset/Boot and Build
+  metadata. Crash with Summary adds the Summary Ring. Full Template enables
+  all features, including non-crash capture. Stack components link providers
+  through the sl_diag_linked_provider template contribution (see
+  sl_diag_format.h).
+category: Services|Diagnostics
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: sl_diag
+requires:
+- name: sl_core
+- name: component_catalog
+- name: enum
+- name: status
+- name: cycle_counter
+- name: hal_emu
+  condition: [device_has_emu]
+root_path: platform_core/platform/service/sl_diag
+config_file:
+- path: config/sl_diag_config.h
+include:
+- path: inc
+  file_list:
+  - path: sl_diag.h
+  - path: sl_diag_format.h
+  - path: sl_diag_reason_ids.h
+  - path: sli_diag.h
+  - path: sl_diag_linked_providers_default.h
+- path: src
+  file_list:
+  - path: sli_diag_internal.h
+source:
+- path: src/sl_diag.c
+- path: src/sl_diag_capture_profiles.c
+- path: src/sl_diag_crc.c
+- path: src/sl_diag_fault.c
+- path: src/sl_diag_metadata.c
+- path: src/sl_diag_provider.c
+- path: src/sl_diag_record.c
+- path: src/sl_diag_reset_boot.c
+- path: src/sl_diag_summary_ring.c
+- path: src/sl_diag_writer.c
+template_file:
+- path: config/template/sl_diag_linked_providers_autogen.h.jinja
+  export: true
+template_contribution:
+- name: event_handler
+  value:
+    event: platform_init
+    include: sli_diag.h
+    handler: sli_diag_platform_init
+  priority: -9990
+- name: event_handler
+  value:
+    event: service_init
+    include: sli_diag.h
+    handler: sli_diag_service_init
+  priority: 9000
+- name: component_catalog
+  value: sl_diag
+- name: sl_diag_enable
+  value: 1

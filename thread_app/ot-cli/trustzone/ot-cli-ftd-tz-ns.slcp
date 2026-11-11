@@ -117,6 +117,21 @@ template_contribution:
   - name: memory_ram_start
     value: 0x20003000
 
+  - name: default_stack_size_override
+    value: 6144
+    condition: [toolchain_lto]
+    unless: [freertos]
+  - name: default_stack_size_override
+    value: 4608
+    condition: [freertos]
+    unless: [toolchain_lto]
+  - name: default_stack_size_override
+    value: 5120
+    condition: [toolchain_lto, freertos]
+  - name: default_stack_size_override
+    value: 5120
+    unless: [toolchain_lto, freertos]
+
 import:
   # Import the config files from the TZ Secure application
   - id: ot-tz-secure-application

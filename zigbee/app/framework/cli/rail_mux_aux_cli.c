@@ -27,6 +27,8 @@
 #include "sl_rail_mux_rename.h"
 #include "sl_rail_mux.h"
 #endif
+#include "mac-mux-aux.h"
+#include "sl_zigbee_mac_mux_aux.h"
 
 #if defined(SL_CATALOG_CLI_PRESENT)
 
@@ -61,30 +63,24 @@ static void sli_rail_mux_aux_cli_print_rx_psdu(const uint8_t *psdu, uint16_t psd
   sl_zigbee_af_cli_println("");
 }
 
-void sl_zigbee_cli_rail_mux_aux_try_register(sl_cli_command_arg_t *arguments)
+void sl_zigbee_cli_rail_mux_aux_register(sl_cli_command_arg_t *arguments)
 {
-  uint16_t aux_pan = sl_cli_get_argument_uint16(arguments, 0);
-  uint8_t channel = sl_cli_get_argument_uint8(arguments, 1);
+  uint8_t channel = sl_cli_get_argument_uint8(arguments, 0);
   sl_rail_handle_t out_handle;
   sl_rail_status_t st;
 
   sli_rail_mux_aux_cli_deferred_cancel();
 
-  st = sl_zigbee_rail_mux_aux_try_register_and_start_rx(aux_pan, channel);
+  st = sl_zigbee_rail_mux_aux_register_and_start_rx(channel);
   sl_zigbee_af_cli_println("mux_reg:0x%04X", (unsigned int)st);
   if (st != SL_RAIL_STATUS_NO_ERROR) {
-    if (aux_pan == sl_zigbee_get_pan_id()) {
-      sl_zigbee_af_cli_println("mux_aux_pan:error_same_as_stack");
-    } else {
-      sl_zigbee_af_cli_println("mux_aux_pan:skipped");
-    }
     sl_zigbee_af_cli_println("aux_rx_listen:skipped");
     return;
   }
 
   out_handle = sl_zigbee_rail_mux_aux_get_default_rail_handle();
   sl_zigbee_af_cli_println("mux_handle:%08lX", (unsigned long)(uintptr_t)out_handle);
-  sl_zigbee_af_cli_println("mux_aux_pan:0x%04X", aux_pan);
+  sl_zigbee_af_cli_println("mux_aux_pan:0x%04X", sl_zigbee_get_pan_id());
   sl_zigbee_af_cli_println("aux_rx_listen:ok");
 }
 
@@ -98,8 +94,15 @@ void sl_zigbee_cli_rail_mux_aux_unregister_aux(sl_cli_command_arg_t *arguments)
   sl_zigbee_af_cli_println("mux_aux_tear:0x%04X", (unsigned int)st);
 }
 
+void sl_zigbee_cli_rail_mux_aux_set_interpan_enabled(sl_cli_command_arg_t *arguments)
+{
+  bool enable = sl_cli_get_argument_uint8(arguments, 0);
+  sl_zigbee_mac_mux_aux_set_interpan_enabled(enable);
+  sl_zigbee_af_cli_println("interpan_aux on aux channel %s", enable ? "enabled" : "disabled");
+}
+
 // Zigbee stack MAC counter (sl_zigbee_read_counters), not mux/RAIL RX delivered to the
-// try-register handle. For that path use rail-mux-aux auxcount (packets copied+released for aux handle).
+// register handle. For that path use rail-mux-aux auxcount (packets copied+released for aux handle).
 void sl_zigbee_cli_rail_mux_aux_mac_rx_unicast(sl_cli_command_arg_t *arguments)
 {
   (void)arguments;
@@ -133,10 +136,10 @@ static bool sli_rail_mux_aux_cli_is_tx_fixed_psdu_echo(const uint8_t *psdu, uint
 }
 
 /* Observers for rail-mux-aux tx-fixed-psdu only. */
-#define RAIL_MUX_AUX_CLI_TX_COMPLETE_EVENTS (SL_RAIL_EVENT_TX_PACKET_SENT       \
-                                             | SL_RAIL_EVENT_TX_ABORTED          \
-                                             | SL_RAIL_EVENT_TX_UNDERFLOW        \
-                                             | SL_RAIL_EVENT_TX_CHANNEL_BUSY     \
+#define RAIL_MUX_AUX_CLI_TX_COMPLETE_EVENTS (SL_RAIL_EVENT_TX_PACKET_SENT    \
+                                             | SL_RAIL_EVENT_TX_ABORTED      \
+                                             | SL_RAIL_EVENT_TX_UNDERFLOW    \
+                                             | SL_RAIL_EVENT_TX_CHANNEL_BUSY \
                                              | SL_RAIL_EVENT_TX_BLOCKED)
 
 void sl_zigbee_rail_mux_aux_event_callback(sl_rail_handle_t rail_handle,
@@ -189,7 +192,7 @@ void sl_zigbee_cli_rail_mux_aux_tx_fixed_psdu(sl_cli_command_arg_t *arguments)
   sl_rail_csma_config_t csma = SL_RAIL_CSMA_CONFIG_802_15_4_2003_2P4_GHZ_OQPSK_CSMA;
 
   if (h == NULL) {
-    sl_zigbee_af_cli_println("aux_tx:need_try_register");
+    sl_zigbee_af_cli_println("aux_tx:need_register");
     return;
   }
 
@@ -202,7 +205,7 @@ void sl_zigbee_cli_rail_mux_aux_tx_fixed_psdu(sl_cli_command_arg_t *arguments)
   // Raw RX hook is unrelated to TX logic; this CLI bundles observe-next-RX + TX-done for mux CI.
   sli_rail_mux_aux_cli_observe_tx = 1U;
   sli_rail_mux_aux_cli_observe_rx = 1U;
-  
+
   sl_zigbee_af_cli_println("before aux_tx:fifo_written_fixed_psdu:%u", RAIL_MUX_AUX_CLI_TX_FIXED_PSDU_LEN);
 
   // ----- Minimal aux TX: fixed PSDU → FIFO → start_tx / CSMA --------------------
@@ -227,9 +230,9 @@ void sl_zigbee_cli_rail_mux_aux_tx_fixed_psdu(sl_cli_command_arg_t *arguments)
                                                   NULL);
   } else {
     st = sl_zigbee_rail_mux_aux_start_tx(h,
-                                        channel,
-                                        SL_RAIL_TX_OPTIONS_DEFAULT,
-                                        NULL);
+                                         channel,
+                                         SL_RAIL_TX_OPTIONS_DEFAULT,
+                                         NULL);
   }
   sl_zigbee_af_cli_println("aux_tx:tx_st:0x%04X ch:%u csma:%u", (unsigned int)st, channel, use_csma);
   if (st != SL_RAIL_STATUS_NO_ERROR) {

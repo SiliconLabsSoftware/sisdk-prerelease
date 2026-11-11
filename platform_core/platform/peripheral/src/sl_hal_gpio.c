@@ -372,7 +372,7 @@ void sl_hal_gpio_enable_pin_em4_wakeup(uint32_t pinmask,
 }
 
 /***************************************************************************//**
- *    Configure EM4WU pins as external level-sensitive interrupts.
+ *    Configure EM4WU pins as external edge-sensitive interrupts.
  ******************************************************************************/
 int32_t sl_hal_gpio_configure_wakeup_em4_external_interrupt(const sl_gpio_t *gpio,
                                                             int32_t int_no,

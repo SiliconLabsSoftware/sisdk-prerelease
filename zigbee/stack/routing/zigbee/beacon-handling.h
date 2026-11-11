@@ -35,8 +35,13 @@ extern bool useZigbeeBeaconPayload;
 /** @brief Initializes beacon data structures and state variables. */
 void sli_zigbee_beacon_handling_init(void);
 
-/** @brief Handles receiving and responding to beacon requests. */
-void sli_zigbee_process_incoming_beacon_request(sli_zigbee_packet_header_t header,
+/** @brief Handles receiving and responding to beacon requests.
+ *  @param mac_index  Upper-MAC index that received the beacon request (0 = primary,
+ *                    SL_MAC_AUX_INDEX = aux). Association passes MAC_INDEX_FROM_HEADER_SOLO
+ *                    from the stamped RX header; do not infer from channel alone.
+ */
+void sli_zigbee_process_incoming_beacon_request(uint8_t mac_index,
+                                                sli_zigbee_packet_header_t header,
                                                 sli_802154mac_frame_info_element_parse_result result,
                                                 sli_802154mac_info_element_field infoElementsArray[EM_MAC_FRAME_MAX_INFO_ELEMENT_COUNT]);
 

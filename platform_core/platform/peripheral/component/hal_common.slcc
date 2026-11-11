@@ -36,22 +36,24 @@ define:
 documentation:
   docset: gecko-platform
   document:
-  - page: platform-peripheral-efr32xg21/common
+  - page: platform-peripheral-efr32xg21/bus
     condition: [device_sdid_200]
-  - page: platform-peripheral-efr32xg22/common
+  - page: platform-peripheral-efr32xg22/bus
     condition: [device_sdid_205]
-  - page: platform-peripheral-efr32xg23/common
+  - page: platform-peripheral-efr32xg23/bus
     condition: [device_sdid_210]
-  - page: platform-peripheral-efr32xg24/common
+  - page: platform-peripheral-efr32xg24/bus
     condition: [device_sdid_215]
-  - page: platform-peripheral-efr32xg26/common
+  - page: platform-peripheral-efr32xg25/bus
+    condition: [device_sdid_220]
+  - page: platform-peripheral-efr32xg26/bus
     condition: [device_sdid_225]
-  - page: platform-peripheral-efr32xg27/common
+  - page: platform-peripheral-efr32xg27/bus
     condition: [device_sdid_230]
-  - page: platform-peripheral-efr32xg28/common
+  - page: platform-peripheral-efr32xg28/bus
     condition: [device_sdid_235]
-  - page: platform-peripheral-efr32xg29/common
+  - page: platform-peripheral-efr32xg29/bus
     condition: [device_sdid_240]
-  - page: platform-peripheral-sixg301/common
+  - page: platform-peripheral-sixg301/bus
     condition: [device_generic_family_sixx301]
 root_path: platform_core/platform/peripheral

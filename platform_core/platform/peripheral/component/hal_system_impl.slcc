@@ -36,4 +36,6 @@ requires:
   condition: [device_series_3]
 - name: se_manager_device_data
   condition: [device_series_3]
+- name: hal_system_sixx381
+  condition: [device_generic_family_sixx381]
 root_path: platform_core/platform/peripheral

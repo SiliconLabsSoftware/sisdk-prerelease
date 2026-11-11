@@ -116,7 +116,7 @@ Next time you issue the `wisun join_xxxxx` command, the device starts a connecti
 | wisun.device_type                    | R/W | string      | - FFN: Full Function Node (0) <br> - LFN: Limited Function Node (1) | Device type |  |
 | wisun.trace_filter.000-031           | R/W | hexadecimal | (Refer to sl_wisun_types.h / `sl_wisun_trace_group_t` for a list of all 37 trace groups)| RTT Trace filter enable bitfield for first 32 groups |  |
 | wisun.trace_filter.032-063           | R/W | hexadecimal | (Refer to sl_wisun_types.h / `sl_wisun_trace_group_t` for a list of all 37 trace groups)| RTT Trace filter enable bitfield for last  32 groups |  |
-| wisun.lfn_profile | R/W | integer | - Test (0) <br> - Balanced (1) <br> - Eco (2) | Wi-SUN LFN profile | FAN1.1 |
+| wisun.lfn_profile | R/W | integer | - Test (0) <br> - Balanced (1) <br> - Eco (2) <br> - Automatic (3) | Wi-SUN LFN profile | FAN1.1 |
 | wisun.rx_phy_mode_ids | R/W | integer | list of phy_mode_ids | List of PhyModeId to advertise in POM-IE | FAN1.1 |
 | wisun.crc_type | R/W | integer | - no CRC (0) <br> - 2-byte CRC (1) <br> - 4-byte CRC (2) | CRC for custom FSK/OFDM/OQPSK PHY | |
 | wisun.preamble_length | R/W | integer | | Preamble length in bits for custom FSK/OQPSK PHY | |

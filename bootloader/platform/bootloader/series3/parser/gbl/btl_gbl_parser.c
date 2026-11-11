@@ -246,9 +246,9 @@ void handleMemorySectionSHA(ParserContext_t *ctx, const uint8_t* data, size_t le
 
 static void cleanup_parser_memory(ParserContext_t *ctx)
 {
+#ifndef BOOTLOADER_SUPPORT_STORAGE
   MemSectionInfo_t *currentInstance = &ctx->memorySectionInfo;
 
-#ifndef BOOTLOADER_SUPPORT_STORAGE
   // Retained only in streaming builds for per-segment hash verify (parse_blobFromStreamingBuf).
   if (currentInstance->ListOfBlockOfHashes != NULL) {
     free(currentInstance->ListOfBlockOfHashes);
@@ -259,6 +259,8 @@ static void cleanup_parser_memory(ParserContext_t *ctx)
     free(ctx->segmentBuffer);
     ctx->segmentBuffer = NULL;
   }
+#else
+  (void)ctx;
 #endif
 }
 

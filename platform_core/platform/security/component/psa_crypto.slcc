@@ -32,14 +32,7 @@ requires:
   condition: [trustzone_unaware]
 - name: psa_crypto_source
   condition: [trustzone_secure]
-- name: psa_driver_dispatch
-  condition: [device_series_2]
-- name: psa_driver_dispatch
-  condition: [device_series_3]
-- name: psa_driver_dispatch
-  condition: [device_si91x]
-- name: psa_driver_dispatch
-  condition: [device_host]
+- name: psa_driver_dispatch_selection
 - name: sl_si91x_psa_crypto
   condition: [device_si91x]
 - name: mbedtls_iar_workarounds

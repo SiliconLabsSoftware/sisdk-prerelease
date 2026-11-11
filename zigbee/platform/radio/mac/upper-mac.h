@@ -29,7 +29,9 @@
 #include "sl_status.h"
 
 #define MAC_TX_QUEUE_SIZE 8
-#if (defined(PHY_DUAL) || defined(PHY_SIMULATION_DUAL) || defined (MAC_DUAL_PRESENT) || defined(ALT_MAC))
+#if defined(MAC_MUX_AUX_PRESENT)
+#define MAX_MAC_INDEX 2
+#elif (defined(PHY_DUAL) || defined(PHY_SIMULATION_DUAL) || defined (MAC_DUAL_PRESENT) || defined(ALT_MAC))
 #define MAX_MAC_INDEX 2
 #else
 #define MAX_MAC_INDEX 1

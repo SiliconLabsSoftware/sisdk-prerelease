@@ -1,0 +1,32 @@
+project_name: cpc_echo_uart_eusart_primary
+package: cpc_ng_app
+description: |
+  Primary (Host MCU) echo client using the CPC transport layer.
+  Connects to cpc_echo_uart_eusart_secondary on endpoint 90 and ping-pongs a fixed payload.
+category: Examples|CPC-NG
+quality: experimental
+tag:
+  - hwfilter:device:device_has_euart
+component:
+  # CPC
+  - id: cpc_ng_drv_uart_eusart_primary
+    instance: [exp]
+  # Platform
+  - id: clock_manager
+  - id: device_manager
+  - id: freertos
+  - id: sl_main
+  - id: iostream_retarget_stdio
+  - id: iostream_swo
+source:
+  - path: primary/app.c
+define:
+  - name: DEBUG_EFM
+configuration:
+  # Keep the sl_main start task after init at a normal priority (not realtime).
+  - name: SL_MAIN_ENABLE_START_TASK_PRIORITY_CHANGE
+    value: 1
+  - name: SL_MAIN_START_TASK_PRIORITY
+    value: osPriorityNormal
+readme:
+  - path: README.md

@@ -22,6 +22,7 @@
 #include "sl_component_catalog.h"
 #endif
 
+#include "stack/internal/src/ipc/sl_zigbee_mac_mux_aux_ipc_command_messages.h"
 #ifdef SL_CATALOG_RAIL_MUX_AUX_PRESENT
 #include "stack/internal/src/ipc/sl_zigbee_rail_mux_aux_raw_ipc_command_messages.h"
 #endif
@@ -115,14 +116,18 @@
 
 typedef struct {
   union {
+    sli_zigbee_stack_mac_mux_aux_get_channel_ipc_msg_t mac_mux_aux_get_channel;
+    sli_zigbee_stack_mac_mux_aux_is_interpan_enabled_ipc_msg_t mac_mux_aux_is_interpan_enabled;
+    sli_zigbee_stack_mac_mux_aux_send_raw_message_ipc_msg_t mac_mux_aux_send_raw_message;
+    sli_zigbee_stack_mac_mux_aux_set_interpan_enabled_ipc_msg_t mac_mux_aux_set_interpan_enabled;
     #ifdef SL_CATALOG_RAIL_MUX_AUX_PRESENT
     sli_zigbee_stack_rail_mux_aux_get_default_listen_rx_packet_count_ipc_msg_t rail_mux_aux_get_default_listen_rx_packet_count;
     sli_zigbee_stack_rail_mux_aux_get_default_rail_config_ipc_msg_t rail_mux_aux_get_default_rail_config;
     sli_zigbee_stack_rail_mux_aux_get_default_rail_handle_ipc_msg_t rail_mux_aux_get_default_rail_handle;
+    sli_zigbee_stack_rail_mux_aux_register_and_start_rx_ipc_msg_t rail_mux_aux_register_and_start_rx;
     sli_zigbee_stack_rail_mux_aux_register_protocol_ipc_msg_t rail_mux_aux_register_protocol;
     sli_zigbee_stack_rail_mux_aux_start_cca_csma_tx_ipc_msg_t rail_mux_aux_start_cca_csma_tx;
     sli_zigbee_stack_rail_mux_aux_start_tx_ipc_msg_t rail_mux_aux_start_tx;
-    sli_zigbee_stack_rail_mux_aux_try_register_and_start_rx_ipc_msg_t rail_mux_aux_try_register_and_start_rx;
     sli_zigbee_stack_rail_mux_aux_unregister_protocol_ipc_msg_t rail_mux_aux_unregister_protocol;
     sli_zigbee_stack_rail_mux_aux_write_tx_fifo_ipc_msg_t rail_mux_aux_write_tx_fifo;
     #endif

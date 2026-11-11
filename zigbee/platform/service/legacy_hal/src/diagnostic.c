@@ -27,6 +27,10 @@
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
+#if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+#include "sl_watchdog_manager_config.h"
+#endif
+
 #if defined(SL_CATALOG_HAL_EMU_PRESENT)
 #include "sl_hal_emu.h"
 #elif defined(SL_CATALOG_EMLIB_RMU_PRESENT)
@@ -52,6 +56,12 @@ NO_INIT(uint32_t halWatchdogLwmCaptureSignature);
 
 // LWM capture PC live in noinit RAM segment that is not modified during startup.
 NO_INIT(uint32_t halWatchdogLwmCapturePc);
+
+#if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+NO_INIT(uint32_t halWatchdogLwmSwCaptureSignature);
+NO_INIT(uint32_t halWatchdogLwmSwUidCount);
+NO_INIT(uint32_t halWatchdogLwmSwUids[SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS]);
+#endif
 
 //------------------------------------------------------------------------------
 // Preprocessor definitions
@@ -189,6 +199,30 @@ void halWatchdogLwmCaptureMark(uint32_t pc)
   halWatchdogLwmCaptureSignature = HAL_WATCHDOG_LWM_CAPTURE_SIGNATURE;
 }
 
+#if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+void halWatchdogLwmCaptureSetSwUids(const uint32_t *uids, uint32_t count)
+{
+  uint32_t n = count;
+
+  if ((uids == NULL) || (n == 0U)) {
+    halWatchdogLwmSwCaptureSignature = 0U;
+    halWatchdogLwmSwUidCount = 0U;
+    return;
+  }
+
+  if (n > SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS) {
+    n = SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS;
+  }
+
+  for (uint32_t i = 0; i < n; i++) {
+    halWatchdogLwmSwUids[i] = uids[i];
+  }
+
+  halWatchdogLwmSwUidCount = n;
+  halWatchdogLwmSwCaptureSignature = HAL_WATCHDOG_LWM_SW_CAPTURE_SIGNATURE;
+}
+#endif
+
 bool halWatchdogLwmCaptureIsValid(void)
 {
   return (halWatchdogLwmCaptureSignature == HAL_WATCHDOG_LWM_CAPTURE_SIGNATURE)
@@ -200,6 +234,10 @@ void halWatchdogLwmCaptureClear(void)
 {
   halWatchdogLwmCaptureSignature = 0U;
   halWatchdogLwmCapturePc = 0U;
+#if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+  halWatchdogLwmSwCaptureSignature = 0U;
+  halWatchdogLwmSwUidCount = 0U;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -240,61 +278,113 @@ void halPrintCrashData(uint8_t port)
   }
 }
 
-void halPrintCrashDetails(uint8_t port)
+#if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+static void halPrintWatchdogSwUnfedUids(void)
 {
-  (void)port;
+  uint32_t count = halWatchdogLwmSwUidCount;
 
-  HalCrashInfoType *c = &halCrashInfo;
-  uint16_t reason = savedResetCause;
+  if ((halWatchdogLwmSwCaptureSignature != HAL_WATCHDOG_LWM_SW_CAPTURE_SIGNATURE)
+      || (count == 0U)) {
+    return;
+  }
 
+  if (count > SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS) {
+    count = SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS;
+  }
+
+  // Stream UIDs so a full mask (up to MAX) cannot overflow a fixed line buffer.
+  sl_iostream_printf(SL_IOSTREAM_STDOUT, "WDG SW unfed:");
+  for (uint32_t i = 0; i < count; i++) {
+    sl_iostream_printf(SL_IOSTREAM_STDOUT,
+                       " uid=0x%08" PRIx32,
+                       halWatchdogLwmSwUids[i]);
+  }
+  sl_iostream_printf(SL_IOSTREAM_STDOUT, "\n");
+}
+#endif
+
+static void halPrintWatchdogResetDetails(const HalCrashInfoType *crash)
+{
+  if (!halWatchdogLwmCaptureIsValid()) {
+    sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: WDG expired\n");
+    return;
+  }
+
+  sl_iostream_printf(SL_IOSTREAM_STDOUT,
+                     "Reset cause: WDG expired PC=%08" PRIx32 "\n",
+                     crash->PC);
+#if defined(SL_CATALOG_WATCHDOG_MANAGER_PRESENT)
+  halPrintWatchdogSwUnfedUids();
+#endif
+  halWatchdogLwmCaptureClear();
+}
+
+static void halPrintCrashDetailsForReason(uint16_t reason,
+                                          const HalCrashInfoType *crash)
+{
   switch (reason) {
     case RESET_WATCHDOG_EXPIRED:
-      if (halWatchdogLwmCaptureIsValid()) {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: WDG expired PC=%08" PRIx32 "\n",
-                           c->PC);
-        halWatchdogLwmCaptureClear();
-      } else {
-        sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: WDG expired\n");
-      }
+      halPrintWatchdogResetDetails(crash);
       return;
+
     case RESET_WATCHDOG_CAUGHT:
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: WDG caught PC=%08" PRIx32 "\n",
-                         c->PC);
+      sl_iostream_printf(SL_IOSTREAM_STDOUT,
+                         "Reset cause: WDG caught PC=%08" PRIx32 "\n",
+                         crash->PC);
       return;
+
     case RESET_CRASH_ASSERT:
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Assert %s:%ld\n",
-                         c->data.assertInfo.file, (long)c->data.assertInfo.line);
+      sl_iostream_printf(SL_IOSTREAM_STDOUT,
+                         "Reset cause: Assert %s:%ld\n",
+                         crash->data.assertInfo.file,
+                         (long)crash->data.assertInfo.line);
       return;
+
     case RESET_FAULT_HARD:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Hard Fault\n");
-      halPrintActiveHfsrBits(c);
+      halPrintActiveHfsrBits(crash);
       break;
+
     case RESET_FAULT_MEM:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Mem Mgt. Fault\n");
-      halPrintActiveCfsrBits(c->cfsr.word,
+      halPrintActiveCfsrBits(crash->cfsr.word,
                              SCB_CFSR_MEMFAULTSR_Pos,
                              SCB_CFSR_MEMFAULTSR_Pos + 8U);
       break;
+
     case RESET_FAULT_BUS:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Bus Fault\n");
-      halPrintActiveCfsrBits(c->cfsr.word,
+      halPrintActiveCfsrBits(crash->cfsr.word,
                              SCB_CFSR_BUSFAULTSR_Pos,
                              SCB_CFSR_USGFAULTSR_Pos);
       break;
+
     case RESET_FAULT_USAGE:
       sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Usage Fault\n");
-      halPrintActiveCfsrBits(c->cfsr.word,
+      halPrintActiveCfsrBits(crash->cfsr.word,
                              SCB_CFSR_USGFAULTSR_Pos,
                              sizeof(cfsrBits) / sizeof(cfsrBits[0]));
       break;
+
     case RESET_FAULT_DBGMON:
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: Debug Monitor Fault\n");
+      sl_iostream_printf(SL_IOSTREAM_STDOUT,
+                         "Reset cause: Debug Monitor Fault\n");
       break;
+
     default:
-      sl_iostream_printf(SL_IOSTREAM_STDOUT, "Reset cause: 0x%04x\n", reason);
+      sl_iostream_printf(SL_IOSTREAM_STDOUT,
+                         "Reset cause: 0x%04x\n",
+                         reason);
       break;
   }
+
   sl_iostream_printf(SL_IOSTREAM_STDOUT, "\n");
+}
+
+void halPrintCrashDetails(uint8_t port)
+{
+  (void)port;
+  halPrintCrashDetailsForReason(savedResetCause, &halCrashInfo);
 }
 
 void halPrintCrashSummary(uint8_t port)

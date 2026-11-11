@@ -21,6 +21,9 @@
 #include "stack/include/sl_zigbee.h"  // to get correct SL_ZIGBEE_MULTI_NETWORK_STRIPPED symbol
 #include "stack/mac/multi-mac.h"
 #include "upper-mac.h"
+#ifdef MAC_MUX_AUX_PRESENT
+#include "mac-mux-aux.h"
+#endif
 
 // We can only support up to 4 networks mainly because we only had 2 bits
 // available in the MacInfo struct and only 2 bits available in the EZSP frame
@@ -341,6 +344,21 @@ void sli_zigbee_build_and_send_counter_info_with_phy_index(sl_zigbee_counter_typ
 // This is a stub placed everywhere we used to call the current radio network
 // handler to switch the configuration.  Things seem to work replacing it with
 // nothing, but I wanted an easy way to add them back if necessary.
-#define SET_RADIO_PARAMETERS()  if (sli_mac_lower_mac_is_idle(0)) { sli_upper_mac_update_lower_mac_params(0); }
+#ifdef MAC_MUX_AUX_PRESENT
+#define SET_RADIO_PARAMETERS_AUX_PART \
+  if (sli_mac_mux_aux_is_active() && sli_mac_lower_mac_is_idle(SL_MAC_AUX_INDEX)) { \
+    sli_upper_mac_update_lower_mac_params(SL_MAC_AUX_INDEX); \
+  }
+#else
+#define SET_RADIO_PARAMETERS_AUX_PART
+#endif
+
+#define SET_RADIO_PARAMETERS() \
+  do { \
+    if (sli_mac_lower_mac_is_idle(0)) { \
+      sli_upper_mac_update_lower_mac_params(0); \
+    } \
+    SET_RADIO_PARAMETERS_AUX_PART \
+  } while (0)
 
 #endif // SL_ZIGBEE_MULTI_NETWORK_H

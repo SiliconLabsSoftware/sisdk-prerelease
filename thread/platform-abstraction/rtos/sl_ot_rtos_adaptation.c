@@ -46,6 +46,7 @@
 #include "sl_openthread_rtos_config.h"
 #include "sl_ot_init.h"
 #include "sl_ot_rtos_adaptation.h"
+#include "sli_ot_instance.h"
 
 #ifdef SL_CATALOG_MEMORY_MANAGER_PRESENT
 #include "sl_memory_manager.h"
@@ -294,7 +295,7 @@ static void sli_ot_stack_task(void *context)
         // Process callbacks and tasklets
         for (int i = 0; i < instanceCount; i++)
         {
-            if (otInstanceIsInitialized(instances[i]))
+            if (sli_ot_instance_is_initialized(instances[i]))
             {
                 otSysProcessDrivers(instances[i]);
                 otTaskletsProcess(instances[i]);

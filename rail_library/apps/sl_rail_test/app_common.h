@@ -183,6 +183,8 @@ extern "C" {
     "TEMPERATURE_COOL_DOWN",                                            \
     "USER_MBOX",                                                        \
     "TX_CCA_ACTIVATED",                                                 \
+    "RX_BLOCKED",                                                       \
+    "DETECT_RSSI_BELOW_THRESHOLD",                                      \
   }
 
 // Since channel hopping is pretty space intensive, put some limitations on it

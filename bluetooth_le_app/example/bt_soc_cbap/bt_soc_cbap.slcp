@@ -17,6 +17,7 @@ filter:
 
 component:
   - id: bluetooth_stack
+  - id: bluetooth_feature_builtin_bonding_database
   - id: gatt_configuration
   - id: gatt_service_device_information_override
   - id: bluetooth_feature_legacy_advertiser

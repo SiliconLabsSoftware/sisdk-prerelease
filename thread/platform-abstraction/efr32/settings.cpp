@@ -47,6 +47,7 @@ extern "C" {
 
 #include "radio_instance.h"
 #include "sl_memory_manager.h"
+#include "sli_ot_instance.h"
 #include <string.h>
 #include <openthread/instance.h>
 #include <openthread/platform/settings.h>
@@ -158,7 +159,7 @@ sl_status_t settingsApiCheck(otInstance *aInstance)
 
     otEXPECT_ACTION(sl_ot_rtos_task_can_access_pal(), status = SL_STATUS_NOT_SUPPORTED);
     otEXPECT_ACTION(aInstance != nullptr, status = SL_STATUS_NULL_POINTER);
-    otEXPECT_ACTION(otInstanceIsInitialized(aInstance), status = SL_STATUS_NOT_INITIALIZED);
+    otEXPECT_ACTION(sli_ot_instance_is_initialized(aInstance), status = SL_STATUS_NOT_INITIALIZED);
 
 exit:
     return status;

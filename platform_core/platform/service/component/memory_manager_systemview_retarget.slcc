@@ -28,6 +28,9 @@ requires:
 - name: component_catalog
 - name: memory_manager
 - name: segger_systemview
+documentation:
+  docset: gecko-platform
+  document: platform-service/memory-manager
 toolchain_settings:
   # The generic disable feature also suppresses toolchain_gcc_lto's enabled setting.
 - option: link_time_optimization

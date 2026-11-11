@@ -22,7 +22,7 @@
 #define MAC_DUAL_PRESENT
 #endif  //defined(PHY_SIMULATION_DUAL) || defined(PHY_DUAL)
 
-#if defined(MAC_DUAL_PRESENT) || defined(ALT_MAC) || defined(NON_DEFAULT_MAC_INTERFACE)
+#if defined(MAC_MUX_AUX_PRESENT) || defined(MAC_DUAL_PRESENT) || defined(ALT_MAC) || defined(NON_DEFAULT_MAC_INTERFACE)
 #define MULTI_MAC_PRESENT
 #define MAC_INDEX_PARAMETER_SOLO uint8_t mac_index
 #define MAC_INDEX_PARAMETER uint8_t mac_index,

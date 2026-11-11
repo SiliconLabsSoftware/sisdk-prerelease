@@ -466,7 +466,7 @@ sl_status_t sli_zb_sec_man_ecc_import_peer_public_key(sl_zigbee_sec_man_dlk_ecc_
 #if defined(SLI_ZB_DLK_ECDHE_USE_MBEDTLS)
     int crypto_ret = mbedtls_mpi_lset(&cs->Qp.MBEDTLS_PRIVATE(Z), 1);
     if (crypto_ret != 0) {
-      return SL_STATUS_FAIL;
+      return sli_zb_sec_man_ecc_map_crypto_status(crypto_ret);
     }
     crypto_ret = mbedtls_mpi_read_binary(&cs->Qp.MBEDTLS_PRIVATE(X), public_key_buff, DLK_ECC_COORDINATE_SIZE);
     if (crypto_ret != 0) {
@@ -507,7 +507,7 @@ sl_status_t sli_zb_sec_man_ecc_import_peer_public_key(sl_zigbee_sec_man_dlk_ecc_
   // set the Z coord
   crypto_ret = mbedtls_mpi_lset(&sli_zigbee_dlk_ecc_get_crypto_state(dlk_ecc_ctx)->Qp.MBEDTLS_PRIVATE(Z), 1);
   if (crypto_ret != 0) {
-    return SL_STATUS_FAIL;
+    return sli_zb_sec_man_ecc_map_crypto_status(crypto_ret);
   }
   // read in the x coordinate
   if (dlk_ecc_ctx->config.curve_id == DLK_ECC_CURVE_P256) {
@@ -735,7 +735,7 @@ static sl_status_t ecdhe_expand_shared_secret(sl_zigbee_sec_man_dlk_ecc_context_
   memcpy(buffer + DLK_ECC_COORDINATE_SIZE, dlk_ecc_ctx->psk, DLK_KEY_SIZE);
 
   crypto_ret = mbedtls_sha256(buffer, sizeof(buffer), dlk_ecc_ctx->secret, 0);
-  return (crypto_ret == 0) ? SL_STATUS_OK : SL_STATUS_FAIL;
+  return sli_zb_sec_man_ecc_map_crypto_status(crypto_ret);
 }
 
 static sl_status_t ecdhe_derive_link_key(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
@@ -818,17 +818,20 @@ static sl_status_t speke_init(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
       }
     }
   } else { // SHA256
-    mbedtls_sha256(dlk_ecc_ctx->psk, DLK_KEY_SIZE, speke_generator_data, 0);
+    crypto_ret = mbedtls_sha256(dlk_ecc_ctx->psk, DLK_KEY_SIZE, speke_generator_data, 0);
+    if (crypto_ret != 0) {
+      return sli_zb_sec_man_ecc_map_crypto_status(crypto_ret);
+    }
     // set byte[0] = 0x09
     speke_generator_data[0] = 0x09;
   }
   // set coordiantes of G
   crypto_ret = mbedtls_mpi_lset(&g->MBEDTLS_PRIVATE(Z), 1);
   if (crypto_ret != 0) {
-    return SL_STATUS_FAIL;
+    return sli_zb_sec_man_ecc_map_crypto_status(crypto_ret);
   }
   crypto_ret = mbedtls_mpi_read_binary_le(&g->MBEDTLS_PRIVATE(X), speke_generator_data, DLK_ECC_COORDINATE_SIZE);
-  return (crypto_ret == 0) ? SL_STATUS_OK : SL_STATUS_FAIL;
+  return sli_zb_sec_man_ecc_map_crypto_status(crypto_ret);
 }
 
 static sl_status_t speke_generate_keypair(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
@@ -843,7 +846,7 @@ static sl_status_t speke_generate_keypair(sl_zigbee_sec_man_dlk_ecc_context_t *d
     clipped = mbedtls_mpi_cmp_mpi(&sli_zigbee_dlk_ecc_get_crypto_state(dlk_ecc_ctx)->ecc_group.G.MBEDTLS_PRIVATE(X), &sli_zigbee_dlk_ecc_get_crypto_state(dlk_ecc_ctx)->ecc_group.P) == 1;
     crypto_ret = mbedtls_mpi_set_bit(&sli_zigbee_dlk_ecc_get_crypto_state(dlk_ecc_ctx)->ecc_group.G.MBEDTLS_PRIVATE(X), sli_zigbee_dlk_ecc_get_crypto_state(dlk_ecc_ctx)->ecc_group.pbits, 0);
     if (crypto_ret != 0) {
-      return SL_STATUS_FAIL;
+      return sli_zb_sec_man_ecc_map_crypto_status(crypto_ret);
     }
   }
   if (dlk_ecc_ctx->test != NULL) {
@@ -869,14 +872,14 @@ static sl_status_t speke_generate_keypair(sl_zigbee_sec_man_dlk_ecc_context_t *d
                                  NULL);
   }
   if (crypto_ret != 0) {
-    return SL_STATUS_FAIL;
+    return sli_zb_sec_man_ecc_map_crypto_status(crypto_ret);
   }
   if (clipped) {
     // NOTE restoring the high bit
     crypto_ret = mbedtls_mpi_set_bit(&sli_zigbee_dlk_ecc_get_crypto_state(dlk_ecc_ctx)->ecc_group.G.MBEDTLS_PRIVATE(X), sli_zigbee_dlk_ecc_get_crypto_state(dlk_ecc_ctx)->ecc_group.pbits, 1);
   }
   if (crypto_ret != 0) {
-    return SL_STATUS_FAIL;
+    return sli_zb_sec_man_ecc_map_crypto_status(crypto_ret);
   }
   return SL_STATUS_OK;
 }
@@ -910,9 +913,14 @@ static sl_status_t speke_hash_init(sl_zigbee_dlk_ecc_hash_ctx_t *hash_ctx,
                                    const sl_zb_dlk_ecc_config_t *config)
 {
   if (config->hash_id == DLK_ECC_HASH_SHA_256) {
+    int crypto_ret;
     mbedtls_sha256_init(&hash_ctx->sha);
     // NOTE 0 == !is224
-    mbedtls_sha256_starts(&hash_ctx->sha, 0);
+    crypto_ret = mbedtls_sha256_starts(&hash_ctx->sha, 0);
+    if (crypto_ret != 0) {
+      mbedtls_sha256_free(&hash_ctx->sha);
+      return sli_zb_sec_man_ecc_map_crypto_status(crypto_ret);
+    }
     return SL_STATUS_OK;
   }
   if (config->hash_id == DLK_ECC_HASH_AES_MMO_128) {
@@ -928,9 +936,10 @@ static sl_status_t speke_hash_update(sl_zigbee_dlk_ecc_hash_ctx_t *hash_ctx,
                                      size_t len)
 {
   if (config->hash_id == DLK_ECC_HASH_SHA_256) {
-    if (mbedtls_sha256_update(&hash_ctx->sha, data, len) != 0) {
+    int crypto_ret = mbedtls_sha256_update(&hash_ctx->sha, data, len);
+    if (crypto_ret != 0) {
       mbedtls_sha256_free(&hash_ctx->sha);
-      return SL_STATUS_FAIL;
+      return sli_zb_sec_man_ecc_map_crypto_status(crypto_ret);
     }
     return SL_STATUS_OK;
   }
@@ -949,7 +958,7 @@ static sl_status_t speke_hash_finish(sl_zigbee_dlk_ecc_hash_ctx_t *hash_ctx,
   if (config->hash_id == DLK_ECC_HASH_SHA_256) {
     int crypto_ret = mbedtls_sha256_finish(&hash_ctx->sha, digest);
     mbedtls_sha256_free(&hash_ctx->sha);
-    return (crypto_ret == 0) ? SL_STATUS_OK : SL_STATUS_FAIL;
+    return sli_zb_sec_man_ecc_map_crypto_status(crypto_ret);
   }
   if (config->hash_id == DLK_ECC_HASH_AES_MMO_128) {
     sl_status_t status = sli_zigbee_stack_aes_mmo_hash_final(&hash_ctx->aes_mmo, 0, NULL);

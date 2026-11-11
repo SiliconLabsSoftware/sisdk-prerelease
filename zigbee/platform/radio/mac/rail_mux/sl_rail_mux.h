@@ -409,6 +409,11 @@ sl_rail_status_t sl_rail_mux_ieee802154_config_2p4_ghz_radio_rx_duty_cycling(sl_
 
 #ifdef HIGH_DATARATE_PHY
 void sl_rail_mux_set_high_datarate_phy_index(sl_rail_handle_t railHandle);
+/** @brief Clear the HDR context index so no mux context receives HDR packets.
+ *  Call this when the context that registered via sl_rail_mux_set_high_datarate_phy_index()
+ *  (typically the aux mux context) is unregistered.
+ */
+void sl_rail_mux_clear_high_datarate_phy_index(void);
 #endif //HIGH_DATARATE_PHY
 
 sl_rail_status_t sl_rail_mux_config_multi_timer(sl_rail_handle_t rail_handle,

@@ -40,4 +40,6 @@ template_contribution:
     include: cpu.h
     handler: CPU_Init
   priority: 2
+documentation:
+  url: https://docs.silabs.com/micrium/latest/micrium-cpu-api/
 root_path: micriumos/platform/micrium_os/cpu

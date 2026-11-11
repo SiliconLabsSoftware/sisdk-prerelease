@@ -170,6 +170,7 @@ void fetch_sl_zigbee_rx_packet_info_t(sl_zigbee_rx_packet_info_t *value)
   value->last_hop_lqi = fetchInt8u();
   value->last_hop_rssi = (int8_t)fetchInt8u();
   value->last_hop_timestamp = fetchInt32u();
+  value->channel = fetchInt8u();
 }
 
 void append_sl_zigbee_rx_packet_info_t(sl_zigbee_rx_packet_info_t *value)
@@ -181,6 +182,7 @@ void append_sl_zigbee_rx_packet_info_t(sl_zigbee_rx_packet_info_t *value)
   appendInt8u(value->last_hop_lqi);
   appendInt8u(value->last_hop_rssi);
   appendInt32u(value->last_hop_timestamp);
+  appendInt8u(value->channel);
 }
 
 void append_sl_zigbee_multicast_table_entry_t(sl_zigbee_multicast_table_entry_t *value)

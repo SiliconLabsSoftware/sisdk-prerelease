@@ -1106,6 +1106,9 @@ sdk_extension:
   id: cpc_extra
   version: 1.1.0
 - vendor: silabs
+  id: realtime_locationing
+  version: 12.0.0-alpha.26
+- vendor: silabs
   id: micriumos
   version: 6.2.0
 - vendor: silabs
@@ -1116,58 +1119,52 @@ sdk_extension:
   version: 11.2.0
 - vendor: silabs
   id: bluetooth_le_host
-  version: 11.2.0-alpha.144
+  version: 11.2.0-alpha.163
 - vendor: silabs
-  id: realtime_locationing
-  version: 12.0.0-alpha.20
-- vendor: silabs
-  id: unity_test_framework
-  version: 1.2.0
+  id: cmsis_dsp
+  version: 1.16.5
 - vendor: silabs
   id: security_libcryptosoc
   version: 1.2.0
 - vendor: silabs
-  id: bgapi_protocol
-  version: 11.2.0-alpha.144
-- vendor: silabs
-  id: common_15_4
+  id: unity_test_framework
   version: 1.2.0
 - vendor: silabs
   id: platform_core
   version: 1.2.0
 - vendor: silabs
-  id: usb
-  version: 1.8.0
+  id: common_15_4
+  version: 1.2.0
+- vendor: silabs
+  id: bgapi_protocol
+  version: 11.2.0-alpha.163
 - vendor: silabs
   id: security_tfm
   version: 1.2.0
 - vendor: silabs
+  id: usb
+  version: 1.8.0
+- vendor: silabs
   id: boards
   version: 1.2.0
 - vendor: silabs
-  id: cmsis_dsp
-  version: 1.16.3
+  id: bluetooth_common
+  version: 1.2.0-alpha.163
 - vendor: silabs
   id: bootloader
   version: 3.4.0
 - vendor: silabs
-  id: bluetooth_common
-  version: 1.2.0-alpha.144
-- vendor: silabs
   id: cpc
   version: 4.10.0
-- vendor: silabs
-  id: freertos
-  version: 1.2.0
 - vendor: silabs
   id: printf
   version: 1.2.0
 - vendor: silabs
-  id: security_sxsymcrypt
+  id: freertos
   version: 1.2.0
 - vendor: silabs
-  id: bluetooth_le_controller
-  version: 11.2.0-alpha.144
+  id: security_sxsymcrypt
+  version: 1.2.0
 - vendor: silabs
   id: coremark
   version: 1.1.0
@@ -1175,18 +1172,21 @@ sdk_extension:
   id: cpc_ng
   version: 0.1.0
 - vendor: silabs
+  id: bluetooth_le_controller
+  version: 11.2.0-alpha.163
+- vendor: silabs
   id: rail_library
   version: 3.2.0
 - vendor: silabs
   id: thread
   version: 3.2.0
 - vendor: silabs
-  id: bluetooth_apploader
-  version: 11.2.0-alpha.144
-- vendor: silabs
   id: multiprotocol
   version: 1.2.0
 - vendor: silabs
   id: cmsis
   version: 1.2.0
+- vendor: silabs
+  id: bluetooth_apploader
+  version: 11.2.0-alpha.163
 

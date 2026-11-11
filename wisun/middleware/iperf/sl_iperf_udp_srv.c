@@ -145,6 +145,9 @@ void sl_iperf_test_udp_server(sl_iperf_test_t * test)
 
   sl_iperf_test_log(test, "Server listening on UDP port %u\n", test->opt.port);
   sl_iperf_test_log(test, "UDP buffer size: %lu bytes\n", test->conn.buff_size);
+  if (test->opt.persistent) {
+    sl_iperf_test_log(test, "Server in persistent mode (no idle timeout)\n");
+  }
 
   srv_addr->sin6_family = AF_INET6;
   srv_addr->sin6_addr = in6addr_any;
@@ -317,8 +320,10 @@ static void _iperf_udp_finack(sl_iperf_test_t * const test)
   int32_t r                         = SOCKET_RETVAL_ERROR;
   socklen_t addrlen                 = sizeof(sockaddr_in6_t);
 
-  // assert minimum buff size for fin ack
-  EFM_ASSERT(test->conn.buff_size >= SL_IPERF_UDP_SERVER_FIN_ACK_SIZE);
+  if(test->conn.buff_size < SL_IPERF_UDP_SERVER_FIN_ACK_SIZE) {
+    sl_iperf_test_log(test, "UDP Server: buffer size is too small.\n");
+    return;
+  }
 
   if (test->conn.buff == NULL || !test->conn.buff_size) {
     sl_iperf_test_log(test, "UDP Server: error, connection buffer is NULL.\n");

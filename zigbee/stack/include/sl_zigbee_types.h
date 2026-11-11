@@ -3382,6 +3382,8 @@ typedef struct {
   int8_t last_hop_rssi;
   /* Timestamp of the moment when Start Frame Delimiter (SFD) was received */
   uint32_t last_hop_timestamp;
+  /** Radio channel the packet was received on */
+  uint8_t channel;
 } sl_zigbee_rx_packet_info_t;
 
 /** @brief Lightweight link quality information captured at packet reception.

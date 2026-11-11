@@ -106,20 +106,24 @@ int32_t tcp_open(void *handle, char *ip, char *port)
 
 int32_t tcp_tx(void *handle, uint32_t data_length, uint8_t *data)
 {
+  uint32_t data_to_write = data_length;
   int ret;
 
   if (*(SOCKET *)handle == INVALID_SOCKET) {
     return -1;
   }
 
-  ret = send(*(SOCKET *)handle, (const char *) data, (int) data_length, 0);
-
-  if (ret == SOCKET_ERROR) {
-    WINERRORLOG;
-    return -1;
+  while (data_to_write) {
+    ret = send(*(SOCKET *)handle, (const char *)data, (int)data_to_write, 0);
+    if (ret == SOCKET_ERROR) {
+      WINERRORLOG;
+      return -1;
+    }
+    data_to_write -= (uint32_t)ret;
+    data += ret;
   }
 
-  return ret;
+  return (int32_t)data_length;
 }
 
 int32_t tcp_rx(void *handle, uint32_t data_length, uint8_t *data)

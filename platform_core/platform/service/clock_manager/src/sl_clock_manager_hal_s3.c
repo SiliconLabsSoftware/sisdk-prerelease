@@ -662,7 +662,11 @@ sl_status_t sli_clock_manager_hal_set_gpio_clock_output(sl_clock_manager_export_
       break;
 
     case SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_HFRCODPLL:
+#if defined(CMU_EXPORTCLKCTRL_CLKOUTSEL0_HFRCODPLL)
       tmp = CMU_EXPORTCLKCTRL_CLKOUTSEL0_HFRCODPLL;
+#else
+      tmp = CMU_EXPORTCLKCTRL_CLKOUTSEL0_HFRCODPLL0;
+#endif
       break;
 
     case SL_CLOCK_MANAGER_EXPORT_CLOCK_SOURCE_HFRCOEM23:
@@ -1100,15 +1104,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           *frequency = SystemHFXOClockGet();
           break;
 #endif
-#if defined(CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL2)
-        case CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL2:
+#if defined(CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL1)
+        case CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL1:
+          *frequency = SystemHFRCODPLL1ClockGet();
+          break;
 #endif
-#if defined(CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL2)
-        *frequency = 0U;
-        return_status = SL_STATUS_NOT_AVAILABLE;
-        break;
-#endif
-
         default:
           *frequency = 0U;
           return_status = SL_STATUS_INVALID_STATE;
@@ -1154,13 +1154,13 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           *frequency = SystemHFXOClockGet();
           break;
 #endif
-#if defined(CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL2)
-        case CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL2:
+#if defined(CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL1)
+        case CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL1:
+          *frequency = SystemHFRCODPLL1ClockGet();
+          break;
 #endif
 #if defined(CMU_EUSART1CLKCTRL_CLKSEL_DISABLED)
         case CMU_EUSART1CLKCTRL_CLKSEL_DISABLED:
-#endif
-#if defined(CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL2) || defined(CMU_EUSART1CLKCTRL_CLKSEL_DISABLED)
         *frequency = 0U;
         return_status = SL_STATUS_NOT_AVAILABLE;
         break;
@@ -1272,15 +1272,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           *frequency = SystemHFXOClockGet();
           break;
 #endif
-#if defined(CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL2)
-        case CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL2:
+#if defined(CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL1)
+        case CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL1:
+          *frequency = SystemHFRCODPLL1ClockGet();
+          break;
 #endif
-#if defined(CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL2)
-        *frequency = 0U;
-        return_status = SL_STATUS_NOT_AVAILABLE;
-        break;
-#endif
-
         default:
           *frequency = 0U;
           return_status = SL_STATUS_INVALID_STATE;
@@ -1364,6 +1360,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
 #endif
 #if defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL)
         case CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL:
+#endif
+#if defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL0)
+        case CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL0:
+#endif
+#if defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL) || defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL0)
           *frequency = SystemHFRCODPLLClockGet();
           break;
 #endif
@@ -1412,15 +1413,11 @@ sl_status_t sli_clock_manager_hal_get_clock_branch_frequency(sl_clock_branch_t c
           return_status = sli_clock_manager_hal_get_clock_branch_frequency(SL_CLOCK_BRANCH_GRP1CLK, frequency);
           break;
 #endif
-#if defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL2)
-        case CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL2:
+#if defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL1)
+        case CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL1:
+          *frequency = SystemHFRCODPLL1ClockGet();
+          break;
 #endif
-#if defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL2)
-        *frequency = 0U;
-        return_status = SL_STATUS_NOT_AVAILABLE;
-        break;
-#endif
-
         default:
           *frequency = 0U;
           return_status =  SL_STATUS_INVALID_STATE;
@@ -1533,7 +1530,11 @@ static sl_status_t get_high_frequency_branch_precision(sl_clock_branch_t clock_b
           return_status = sli_clock_manager_hal_get_oscillator_precision(SL_OSCILLATOR_HFXO, precision);
           break;
 
+#if defined(CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL)
         case CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL:
+#else
+        case CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL0:
+#endif
         case CMU_SYSCLKCTRL_CLKSEL_FSRCO:
           *precision = 0xFFFF;
           return_status = SL_STATUS_NOT_AVAILABLE;
@@ -1898,13 +1899,13 @@ static sl_status_t get_mixed_frequency_branch_precision(sl_clock_branch_t clock_
 #if defined(CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL0)
         case CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL0:
 #endif
-#if defined(CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL2)
-        case CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL2:
+#if defined(CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL1)
+        case CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL1:
 #endif
 #if defined(CMU_EUSART0CLKCTRL_CLKSEL_FSRCO)             \
         || defined(CMU_EUSART0CLKCTRL_CLKSEL_HFRCOEM23)  \
         || defined(CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL0) \
-        || defined(CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL2)
+        || defined(CMU_EUSART0CLKCTRL_CLKSEL_HFRCODPLL1)
         *precision = 0xFFFF;
         return_status = SL_STATUS_NOT_AVAILABLE;
         break;
@@ -1949,8 +1950,8 @@ static sl_status_t get_mixed_frequency_branch_precision(sl_clock_branch_t clock_
 #if defined(CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL0)
         case CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL0:
 #endif
-#if defined(CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL2)
-        case CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL2:
+#if defined(CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL1)
+        case CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL1:
 #endif
 #if defined(CMU_EUSART1CLKCTRL_CLKSEL_DISABLED)
         case CMU_EUSART1CLKCTRL_CLKSEL_DISABLED:
@@ -1958,7 +1959,7 @@ static sl_status_t get_mixed_frequency_branch_precision(sl_clock_branch_t clock_
 #if defined(CMU_EUSART1CLKCTRL_CLKSEL_FSRCO)             \
         || defined(CMU_EUSART1CLKCTRL_CLKSEL_HFRCOEM23)  \
         || defined(CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL0) \
-        || defined(CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL2) \
+        || defined(CMU_EUSART1CLKCTRL_CLKSEL_HFRCODPLL1) \
         || defined(CMU_EUSART1CLKCTRL_CLKSEL_DISABLED)
         *precision = 0xFFFF;
         return_status = SL_STATUS_NOT_AVAILABLE;
@@ -2039,13 +2040,13 @@ static sl_status_t get_mixed_frequency_branch_precision(sl_clock_branch_t clock_
 #if defined(CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL0)
         case CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL0:
 #endif
-#if defined(CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL2)
-        case CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL2:
+#if defined(CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL1)
+        case CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL1:
 #endif
 #if defined(CMU_I2C0CLKCTRL_CLKSEL_FSRCO)             \
         || defined(CMU_I2C0CLKCTRL_CLKSEL_HFRCOEM23)  \
         || defined(CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL0) \
-        || defined(CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL2)
+        || defined(CMU_I2C0CLKCTRL_CLKSEL_HFRCODPLL1) 
         *precision = 0xFFFF;
         return_status = SL_STATUS_NOT_AVAILABLE;
         break;
@@ -2099,6 +2100,9 @@ static sl_status_t get_mixed_frequency_branch_precision(sl_clock_branch_t clock_
 #if defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL)
         case CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL:
 #endif
+#if defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL0)
+        case CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL0:
+#endif
 #if defined(CMU_VDAC0CLKCTRL_CLKSEL_FSRCO)
         case CMU_VDAC0CLKCTRL_CLKSEL_FSRCO:
 #endif
@@ -2108,14 +2112,15 @@ static sl_status_t get_mixed_frequency_branch_precision(sl_clock_branch_t clock_
 #if defined(CMU_VDAC0CLKCTRL_CLKSEL_ULFRCO)
         case CMU_VDAC0CLKCTRL_CLKSEL_ULFRCO:
 #endif
-#if defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL2)
-        case CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL2:
+#if defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL1)
+        case CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL1:
 #endif
-#if defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL)        \
-        || defined(CMU_VDAC0CLKCTRL_CLKSEL_FSRCO)     \
-        || defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCOEM23) \
-        || defined(CMU_VDAC0CLKCTRL_CLKSEL_ULFRCO)    \
-        || defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL2)
+#if defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL)         \
+        || defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL0) \
+        || defined(CMU_VDAC0CLKCTRL_CLKSEL_FSRCO)      \
+        || defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCOEM23)  \
+        || defined(CMU_VDAC0CLKCTRL_CLKSEL_ULFRCO)     \
+        || defined(CMU_VDAC0CLKCTRL_CLKSEL_HFRCODPLL1)
         *precision = 0xFFFF;
         return_status = SL_STATUS_NOT_AVAILABLE;
         break;
@@ -2922,7 +2927,11 @@ sl_status_t sli_clock_manager_hal_configure_rco_calibration(uint32_t cycles,
       break;
 
     case SL_CLOCK_MANAGER_CLOCK_CALIBRATION_HFRCODPLL:
+#if defined(CMU_CALCTRL_DOWNSEL_HFRCODPLL)
       calCtrl |= CMU_CALCTRL_DOWNSEL_HFRCODPLL;
+#else
+      calCtrl |= CMU_CALCTRL_DOWNSEL_HFRCODPLL0;
+#endif
       break;
 
     case SL_CLOCK_MANAGER_CLOCK_CALIBRATION_HFRCOEM23:
@@ -2961,7 +2970,11 @@ sl_status_t sli_clock_manager_hal_configure_rco_calibration(uint32_t cycles,
       break;
 
     case SL_CLOCK_MANAGER_CLOCK_CALIBRATION_HFRCODPLL:
+#if defined(CMU_CALCTRL_UPSEL_HFRCODPLL)
       calCtrl |= CMU_CALCTRL_UPSEL_HFRCODPLL;
+#else
+      calCtrl |= CMU_CALCTRL_UPSEL_HFRCODPLL0;
+#endif
       break;
 
     case SL_CLOCK_MANAGER_CLOCK_CALIBRATION_HFRCOEM23:
@@ -3098,7 +3111,11 @@ sl_status_t sli_clock_manager_hal_set_sysclk_source(sl_oscillator_t source)
         HFRCO0->CTRL_SET = HFRCO_CTRL_FORCEEN;
         while ((HFRCO0->STATUS & HFRCO_STATUS_RDY) == 0) ;
       }
+#if defined(CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL)
       CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL;
+#else
+      CMU->SYSCLKCTRL = (CMU->SYSCLKCTRL & ~_CMU_SYSCLKCTRL_CLKSEL_MASK) | CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL0;
+#endif
       HFRCO0->CTRL_CLR = HFRCO_CTRL_FORCEEN;
       break;
 
@@ -3177,7 +3194,11 @@ sl_status_t sli_clock_manager_hal_get_sysclk_source(sl_oscillator_t *source)
     case  CMU_SYSCLKCTRL_CLKSEL_HFXO:
       *source = SL_OSCILLATOR_HFXO;
       break;
+#if defined(CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL)
     case  CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL:
+#else
+    case  CMU_SYSCLKCTRL_CLKSEL_HFRCODPLL0:
+#endif
       *source = SL_OSCILLATOR_HFRCODPLL;
       break;
     case  CMU_SYSCLKCTRL_CLKSEL_CLKIN0:
@@ -3376,7 +3397,7 @@ sl_status_t sli_clock_manager_hal_get_ext_flash_clk(sl_oscillator_t *oscillator)
 sl_status_t sli_clock_manager_hal_get_nwp_socpll_freqplan_config(const uint16_t **socpll_freqplan_config,
                                                                  uint8_t *target_frequency_index)
 {
-#if defined(SLI_CLOCK_MANAGER_NWPSOCPLL_FREQPLAN_DATA)
+#if defined(SLI_CLOCK_MANAGER_NWP_FREQPLAN_PRESENT)
   *socpll_freqplan_config = SLI_CLOCK_MANAGER_NWPSOCPLL_FREQPLAN_DATA->socpll_config;
   *target_frequency_index = SLI_CLOCK_MANAGER_NWPSOCPLL_FREQPLAN_DATA->freqplan_data.default_freqsel;
   return SL_STATUS_OK;
@@ -3394,7 +3415,7 @@ sl_status_t sli_clock_manager_hal_get_nwp_clkmult_freqplan_config(uint8_t clkmul
                                                                   const uint8_t **nwp_clkmult_freqplan_config,
                                                                   uint8_t *target_frequency_index)
 {
-#if defined(SLI_CLOCK_MANAGER_NWPCLKMULT_FREQPLAN_DATA)
+#if defined(SLI_CLOCK_MANAGER_NWP_FREQPLAN_PRESENT)
   if (clkmult_index == 0) {
     *nwp_clkmult_freqplan_config = SLI_CLOCK_MANAGER_NWPCLKMULT_FREQPLAN_DATA->clkmult0_config;
   } else if (clkmult_index == 1) {

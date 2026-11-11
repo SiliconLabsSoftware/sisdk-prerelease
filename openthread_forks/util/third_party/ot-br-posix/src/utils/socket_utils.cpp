@@ -35,17 +35,31 @@
 
 #include "common/code_utils.hpp"
 
+#ifdef __APPLE__
+#include <net/net_kev.h>
+#include <sys/ioctl.h>
+#include <sys/kern_event.h>
+#include <sys/sys_domain.h>
+#endif
+
 int SocketWithCloseExec(int aDomain, int aType, int aProtocol, SocketBlockOption aBlockOption)
 {
     int rval = 0;
     int fd   = -1;
 
 #ifdef __APPLE__
-    VerifyOrExit((fd = socket(aDomain, aType, aProtocol)) != -1, perror("socket(SOCK_CLOEXEC)"));
+    // Without SOCK_CLOEXEC and SOCK_NONBLOCK the flags are set afterwards: FD_CLOEXEC is a descriptor flag
+    // (F_SETFD), O_NONBLOCK a file status flag (F_SETFL). F_SETFD silently drops O_NONBLOCK.
+    VerifyOrExit((fd = socket(aDomain, aType, aProtocol)) != -1, perror("socket"));
 
     VerifyOrExit((rval = fcntl(fd, F_GETFD, 0)) != -1, perror("fcntl(F_GETFD)"));
-    rval |= aBlockOption == kSocketNonBlock ? O_NONBLOCK | FD_CLOEXEC : FD_CLOEXEC;
-    VerifyOrExit((rval = fcntl(fd, F_SETFD, rval)) != -1, perror("fcntl(F_SETFD)"));
+    VerifyOrExit((rval = fcntl(fd, F_SETFD, rval | FD_CLOEXEC)) != -1, perror("fcntl(F_SETFD)"));
+
+    if (aBlockOption == kSocketNonBlock)
+    {
+        VerifyOrExit((rval = fcntl(fd, F_GETFL, 0)) != -1, perror("fcntl(F_GETFL)"));
+        VerifyOrExit((rval = fcntl(fd, F_SETFL, rval | O_NONBLOCK)) != -1, perror("fcntl(F_SETFL)"));
+    }
 #else
     aType |= aBlockOption == kSocketNonBlock ? SOCK_CLOEXEC | SOCK_NONBLOCK : SOCK_CLOEXEC;
     VerifyOrExit((fd = socket(aDomain, aType, aProtocol)) != -1, perror("socket(SOCK_CLOEXEC)"));
@@ -76,6 +90,39 @@ int CreateNetLinkRouteSocket(uint32_t aNlGroups)
     addr.nl_groups = aNlGroups; // e.g. RTMGRP_LINK | RTMGRP_IPV6_IFADDR;
 
     rval = bind(sock, reinterpret_cast<struct sockaddr *>(&addr), sizeof(addr));
+
+exit:
+    if (rval != 0)
+    {
+        close(sock);
+        sock = -1;
+    }
+
+    return sock;
+}
+#else
+int CreateRouteSocket(void)
+{
+    return SocketWithCloseExec(PF_ROUTE, SOCK_RAW, AF_UNSPEC, kSocketBlock);
+}
+#endif
+
+#ifdef __APPLE__
+int CreateKernelEventSocket(void)
+{
+    int                sock;
+    int                rval = 0;
+    struct kev_request request;
+
+    sock = SocketWithCloseExec(PF_SYSTEM, SOCK_RAW, SYSPROTO_EVENT, kSocketBlock);
+    VerifyOrExit(sock != -1);
+
+    memset(&request, 0, sizeof(request));
+    request.vendor_code  = KEV_VENDOR_APPLE;
+    request.kev_class    = KEV_NETWORK_CLASS;
+    request.kev_subclass = KEV_DL_SUBCLASS;
+
+    rval = ioctl(sock, SIOCSKEVFILT, &request);
 
 exit:
     if (rval != 0)

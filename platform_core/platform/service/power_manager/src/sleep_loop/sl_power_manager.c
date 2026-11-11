@@ -176,6 +176,11 @@ static void exit_critical_with_primask(CORE_irqState_t primask_state);
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_POWER_MANAGER, SL_CODE_CLASS_TIME_CRITICAL)
 static CORE_irqState_t yield_critical_with_primask(CORE_irqState_t primask_state);
 
+#if defined(SLI_POWER_MANAGER_PROFILING)
+extern void sli_power_manager_profiling_sleep_enter(void);
+extern void sli_power_manager_profiling_sleep_exit(void);
+#endif
+
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
@@ -280,6 +285,10 @@ __NO_INLINE void sl_power_manager_sleep(void)
     exit_critical_with_primask(primask_state);
     return;
   }
+
+#if defined(SLI_POWER_MANAGER_PROFILING)
+  sli_power_manager_profiling_sleep_enter();
+#endif
 
 #if !defined(SL_CATALOG_POWER_MANAGER_NO_DEEPSLEEP_PRESENT)
   // Go to another energy mode (same, higher to lower or lower to higher)
@@ -447,6 +456,10 @@ __NO_INLINE void sl_power_manager_sleep(void)
   current_em = SL_POWER_MANAGER_EM0;
 
   sli_power_manager_resume_log_transmission();
+
+#if defined(SLI_POWER_MANAGER_PROFILING)
+  sli_power_manager_profiling_sleep_exit();
+#endif
 
   exit_critical_with_primask(primask_state);
 }

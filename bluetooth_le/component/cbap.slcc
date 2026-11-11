@@ -2,7 +2,28 @@ id: cbap
 label: Certificate Based Authentication and Pairing
 package: bluetooth_le
 description: >
-  Handles the certificate and OOB data authentication.
+  Certificate Based Authentication and Pairing (CBAP) authenticates a new
+  peer device with the device certificates it was provisioned with, then bonds
+  with it using authenticated LE Secure Connections passkey pairing. Between
+  two devices running this component, no user interaction is required. With a
+  mobile device, the user interacts with the mobile device only, and the
+  device running this component remains headless. The devices exchange their
+  certificates and signed ephemeral ECDH keys through the CBAP GATT service,
+  and the peripheral sends a random passkey and its IO capability encrypted
+  with the derived session key. The peripheral displays the passkey and the
+  central enters it, unless the peripheral has a keyboard, such as a phone:
+  then the central displays the passkey and the peripheral enters it. A bonded
+  peer device skips the procedure, its stored key restores the encryption of
+  the link. If the peer device has lost the bond, the stale bond is deleted,
+  so that the next connection runs the procedure again. Bonding can be
+  disabled in the configuration: then the pairing creates no bond, every
+  connection runs the procedure, and the stored bonds are deleted at boot.
+  The CBAP role selects what the device does: a Prover presents its batch and
+  device certificates, a Verifier validates the certificates of the peer
+  device against its factory certificate, and the Full role does both. The
+  device has to be provisioned with the certificates and the key of its role.
+  The component configures the Security Manager of the Bluetooth stack, and
+  serves one connection at a time.
 category: Bluetooth|Application|Miscellaneous
 metadata:
   sbom:
@@ -28,8 +49,9 @@ requires:
 - name: bluetooth_feature_connection
 - name: bluetooth_feature_gatt
 - name: bluetooth_feature_gatt_server
-- name: bluetooth_feature_sm
 - name: bluetooth_feature_system
+- name: bluetooth_feature_sm
+- name: bluetooth_feature_bonding_database
 - name: cbap_key_id
 - name: component_catalog
 - name: gatt_configuration
@@ -46,6 +68,7 @@ requires:
 - name: psa_crypto_ecc_secp256r1
 - name: psa_its
 - name: psa_crypto_hmac
+- name: psa_crypto_hkdf
 - name: psa_crypto_sha256
 - name: psa_crypto_sha1
 provides:

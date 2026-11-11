@@ -349,7 +349,7 @@ sl_status_t sl_gpio_enable_interrupts(uint32_t int_mask);
 sl_status_t sl_gpio_disable_interrupts(uint32_t int_mask);
 
 /***************************************************************************//**
- * Configuration EM4WU pins as external level-sensitive interrupts.
+ * Configuration EM4WU pins as external edge-sensitive interrupts.
  *
  * @details By default, this function performs callback registration, enables GPIO pin wake-up from EM4,
  *          sets the wake-up polarity, enables GPIO pin retention and enables the EM4 wake-up interrupt.
@@ -375,8 +375,8 @@ sl_status_t sl_gpio_disable_interrupts(uint32_t int_mask);
  *                           Pointer that serves as both an input and an output to return em4_int_no
  *                           when the user lacks an em4_int_no.
  * @param[in] polarity Determines the wakeup polarity.
- *                     true = Active high level-sensitive interrupt.
- *                     false = Active low level-sensitive interrupt.
+ *                     true = Rising edge-sensitive interrupt.
+ *                     false = Falling edge-sensitive interrupt.
  * @param[in] gpio_callback A pointer to callback.
  * @param[in] context A pointer to callback context.
  *

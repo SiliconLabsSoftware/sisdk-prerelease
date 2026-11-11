@@ -1,0 +1,40 @@
+id: zigbee_pro_router_stack_with_high_datarate_phy_rail_mux_aux
+label: Pro Router Stack with High Datarate PHY and RAIL MUX with Aux MAC
+package: zigbee
+category: Zigbee|Stack|Pro Core
+quality: evaluation
+description: >
+  Provides Zigbee PRO router stack functionality with high datarate PHY and RAIL MUX,
+  compiled with MAC_MUX_AUX_PRESENT for dual-channel auxiliary MAC support.
+
+provides:
+- name: zigbee_pro_router_stack_with_high_datarate_phy_rail_mux_aux
+
+requires:
+- name: zigbee_pro_router_stack_with_high_datarate_phy_rail_mux_aux_implementation
+- name: zigbee_pro_router_stack_with_high_datarate_phy_rail_mux_aux_library
+  condition:
+  - zigbee_use_release_libraries
+
+recommends:
+- id: zigbee_pro_router_stack_with_high_datarate_phy_rail_mux_aux_library_internal
+  vendor: silabs
+
+define:
+- name: HIGH_DATARATE_PHY
+  condition:
+  - zigbee_high_datarate_phy
+- name: RAIL_MUX
+  condition:
+  - rail_mux
+- name: MAC_MUX_AUX_PRESENT
+  condition:
+  - rail_mux_aux
+
+documentation:
+  docset: zigbee
+  document: zigbee-af-api/pro-stack
+metadata:
+  sbom:
+    license: MSLA
+root_path: zigbee

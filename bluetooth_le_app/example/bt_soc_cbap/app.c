@@ -59,8 +59,10 @@
 //
 // The Digital characteristic of the Automation IO service demonstrates the
 // difference. It requires an authenticated and encrypted connection, so it can
-// only be written once CBAP has succeeded, which is how the two devices blink
-// the LED of each other. Keep this in mind when adding characteristics to
+// only be written once CBAP has succeeded, which is how the central device
+// blinks the LED of the peripheral device. The central device discovers the
+// characteristic on the remote device first, and skips the write if the remote
+// device does not have it. Keep this in mind when adding characteristics to
 // gatt_configuration.btconf: CBAP does not protect them by itself, their own
 // security requirements do.
 
@@ -139,23 +141,29 @@ static uint8_t open_connections = 0;
 // Properties of the connections that completed the CBAP procedure
 static sl_bt_cbap_conn_t trusted_devices[SL_BT_CONFIG_MAX_CONNECTIONS];
 
-// Bluetooth addresses of the devices that failed the CBAP procedure. The
-// application does not start a new procedure with them.
+// Bluetooth addresses of the devices that failed to authenticate themselves,
+// or that do not follow the CBAP procedure. The application does not start a
+// new procedure with them. Once the list is full, a new entry replaces the
+// oldest one.
 static bd_addr disallowlist[DISALLOWLIST_SIZE];
 // Number of valid entries in disallowlist
 static uint8_t disallowlist_len = 0;
+// Index of the entry that is written next, the oldest one once the list is full
+static uint8_t disallowlist_next = 0;
 
 // Report the outcome of a CBAP procedure. Called by the CBAP component.
 static void on_cbap_result(sl_bt_cbap_conn_t conn, sl_status_t sc);
+// True if another procedure with the remote device would fail the same way.
+static bool is_permanent_failure(sl_status_t sc);
 // Add an authenticated connection to the trusted devices array.
 static void add_trusted_device(sl_bt_cbap_conn_t conn);
 // Remove a closed connection from the trusted devices array.
 static void remove_trusted_device(uint8_t connection);
 // Log the connection handle and the Bluetooth address of the trusted devices.
 static void print_trusted_devices(void);
-// Remember a device that failed the CBAP procedure.
+// Remember a device that failed the CBAP procedure for good.
 static void add_to_disallowlist(bd_addr address);
-// True if the device failed the CBAP procedure before.
+// True if the device failed the CBAP procedure for good before.
 static bool is_disallowed(bd_addr address);
 
 // -----------------------------------------------------------------------------
@@ -170,7 +178,52 @@ static app_timer_t led_timer;
 // Turn the LED on for LED_BLINK_TIME_MS to indicate a successful procedure.
 static void blink_led(void);
 // Timer callback turning the LED off.
-static void led_timer_cb(app_timer_t *handle, void *data);
+static void on_led_timer_expired(app_timer_t *handle, void *data);
+
+// -----------------------------------------------------------------------------
+// LED of the remote device
+
+// UUIDs of the Automation IO service and of its Digital characteristic, which
+// drives the LED of the remote device, in little-endian byte order
+static const uint8_t aio_service_uuid[] = { 0x15, 0x18 };
+static const uint8_t digital_char_uuid[] = { 0x56, 0x2a };
+
+// Value of a GATT handle that has not been discovered
+#define GATT_HANDLE_INVALID    0
+
+// Steps of turning on the LED of a remote device
+typedef enum {
+  REMOTE_LED_IDLE,
+  REMOTE_LED_DISCOVER_SERVICE,
+  REMOTE_LED_DISCOVER_CHARACTERISTIC,
+  REMOTE_LED_WRITE
+} remote_led_state_t;
+
+// The Digital characteristic of a trusted remote device
+typedef struct {
+  // Connection to the remote device, SL_BT_INVALID_CONNECTION_HANDLE if the
+  // slot is free
+  uint8_t connection;
+  // Step of turning on the LED, a remote_led_state_t
+  uint8_t state;
+  // Handle of the Automation IO service on the remote device
+  uint32_t service;
+  // Handle of the Digital characteristic on the remote device
+  uint16_t characteristic;
+} remote_led_t;
+
+// One slot for every connection the stack can keep open
+static remote_led_t remote_leds[SL_BT_CONFIG_MAX_CONNECTIONS];
+
+// Find the Digital characteristic of a trusted remote device, and turn on its
+// LED if it is present.
+static void discover_remote_led(uint8_t connection);
+// Continue with the next step once a GATT procedure has completed.
+static void continue_remote_led(remote_led_t *led, uint16_t result);
+// Find the slot of a connection, NULL if the connection has none.
+static remote_led_t *find_remote_led(uint8_t connection);
+// Free the slot of a closed connection.
+static void release_remote_led(uint8_t connection);
 
 // -----------------------------------------------------------------------------
 // Bluetooth addresses
@@ -190,19 +243,21 @@ void app_init(void)
 {
   sl_status_t sc;
 
-  app_assert(role == sl_bt_connection_role_peripheral
-             || role == sl_bt_connection_role_central,
+  app_assert((role == sl_bt_connection_role_peripheral)
+             || (role == sl_bt_connection_role_central),
              "Invalid Bluetooth role!");
 
-  // Mark every trusted device slot free.
+  // Mark every trusted device slot and remote LED slot free.
   for (uint8_t i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
     trusted_devices[i].handle = SL_BT_INVALID_CONNECTION_HANDLE;
     memset(trusted_devices[i].address.addr, 0xff, sizeof(bd_addr));
+    remote_leds[i].connection = SL_BT_INVALID_CONNECTION_HANDLE;
+    remote_leds[i].state = REMOTE_LED_IDLE;
   }
 
-  // Hand the CBAP procedure over to the component. It authenticates every
-  // device that connects and reports the outcome through the callback. The
-  // responsibility of the application is to open a connection (one at a time)
+  // Hand authentication to the component. It runs CBAP for new peers and
+  // restores encryption for bonded peers, then reports through the callback.
+  // The application opens a connection (one at a time)
   // and to handle CBAP success or failure (disallowlist).
   sc = sl_bt_cbap_init(on_cbap_result, IS_CENTRAL);
   app_assert_status(sc);
@@ -327,8 +382,8 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
       if (evt->data.evt_connection_opened.bonding
           != SL_BT_INVALID_BONDING_HANDLE) {
-        app_log_error("Devices are already bonded and CBAP does not support " \
-                      "bonding." APP_LOG_NL);
+        app_log_info("Bonded peer; restoring encryption without CBAP."
+                     APP_LOG_NL);
       }
 
       // A peripheral device cannot filter out a disallowlisted device before
@@ -352,6 +407,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
         open_connections--;
       }
       remove_trusted_device(evt->data.evt_connection_closed.connection);
+      release_remote_led(evt->data.evt_connection_closed.connection);
 
       // A connection slot became free. Discovery only resumes when no other
       // connection is being established and CBAP is not authenticating one.
@@ -362,9 +418,9 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // This event indicates that the value of an attribute in the local GATT
     // database was changed by a remote GATT client.
     case sl_bt_evt_gatt_server_attribute_value_id:
-      if (evt->data.evt_gatt_server_attribute_value.attribute
-          != gattdb_aio_digital_out
-          || evt->data.evt_gatt_server_attribute_value.value.len == 0) {
+      if ((evt->data.evt_gatt_server_attribute_value.attribute
+           != gattdb_aio_digital_out)
+          || (evt->data.evt_gatt_server_attribute_value.value.len == 0)) {
         break;
       }
 
@@ -378,6 +434,47 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
       }
       break;
 
+    // -------------------------------
+    // This event is generated when a service is discovered on the remote GATT
+    // server.
+    case sl_bt_evt_gatt_service_id: {
+      remote_led_t *led = find_remote_led(
+        evt->data.evt_gatt_service.connection);
+      if ((led != NULL)
+          && (led->state == REMOTE_LED_DISCOVER_SERVICE)
+          && (led->service == GATT_HANDLE_INVALID)) {
+        led->service = evt->data.evt_gatt_service.service;
+      }
+      break;
+    }
+
+    // -------------------------------
+    // This event is generated when a characteristic is discovered on the
+    // remote GATT server.
+    case sl_bt_evt_gatt_characteristic_id: {
+      remote_led_t *led = find_remote_led(
+        evt->data.evt_gatt_characteristic.connection);
+      if ((led != NULL)
+          && (led->state == REMOTE_LED_DISCOVER_CHARACTERISTIC)
+          && (led->characteristic == GATT_HANDLE_INVALID)) {
+        led->characteristic = evt->data.evt_gatt_characteristic.characteristic;
+      }
+      break;
+    }
+
+    // -------------------------------
+    // This event is generated when a GATT procedure, such as a discovery or a
+    // write, has completed.
+    case sl_bt_evt_gatt_procedure_completed_id: {
+      remote_led_t *led = find_remote_led(
+        evt->data.evt_gatt_procedure_completed.connection);
+      if (led != NULL) {
+        continue_remote_led(led,
+                            evt->data.evt_gatt_procedure_completed.result);
+      }
+      break;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Add additional event handlers here as your application requires!      //
     ///////////////////////////////////////////////////////////////////////////
@@ -390,7 +487,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 }
 
 /**************************************************************************//**
- * Report the outcome of a CBAP procedure.
+ * Report the outcome of CBAP pairing or restoring a bonded connection.
  *
  * On success the connection is encrypted with an authenticated key, so the
  * secured characteristics of the remote device become accessible. On failure
@@ -404,46 +501,52 @@ static void on_cbap_result(sl_bt_cbap_conn_t conn, sl_status_t sc)
   char addr_str[ADDR_STR_LEN];
   format_address(conn.address, addr_str);
 
+  // Advertising or scanning is restarted once the connection the component
+  // closed is gone.
+  if (sc == SL_STATUS_DELETED) {
+    // The component deleted the bond that the remote device has lost.
+    app_log_warning("%s has lost the bond. The next connection runs the CBAP " \
+                    "procedure again." APP_LOG_NL,
+                    addr_str);
+    return;
+  }
+  if (sc == SL_STATUS_BT_CTRL_CONNECTION_FAILED_TO_BE_ESTABLISHED) {
+    // A device can reboot and start a new connection before its peer has
+    // released the old one. No CBAP data was exchanged, so this is a
+    // retryable link-layer race, not an authentication failure.
+    app_log_warning("Connection to %s was not established; retrying." \
+                    APP_LOG_NL,
+                    addr_str);
+    return;
+  }
   if (sc != SL_STATUS_OK) {
-    if (sc == SL_STATUS_BT_CTRL_CONNECTION_FAILED_TO_BE_ESTABLISHED) {
-      // A device can reboot and start a new connection before its peer has
-      // released the old one. No CBAP data was exchanged, so this is a
-      // retryable link-layer race, not an authentication failure.
-      app_log_warning("Connection to %s was not established; retrying." \
-                      APP_LOG_NL,
-                      addr_str);
-      return;
-    }
-
     app_log_error("CBAP procedure with %s failed: 0x%04lx" APP_LOG_NL,
                   addr_str,
                   sc);
 
-    // Do not authenticate this device again. Advertising or scanning is
-    // restarted once the connection the component closed is gone.
-    add_to_disallowlist(conn.address);
+    // Do not authenticate this device again if it would fail the same way.
+    // A timeout, a lost connection or a failed pairing, for example one that
+    // the user of a mobile device cancelled, may succeed the next time, with
+    // a new passkey.
+    if (is_permanent_failure(sc)) {
+      add_to_disallowlist(conn.address);
+    }
     return;
   }
 
-  app_log_info("CBAP procedure with %s succeeded." APP_LOG_NL, addr_str);
+  app_log_info("Authenticated connection with %s established." APP_LOG_NL,
+               addr_str);
   add_trusted_device(conn);
   print_trusted_devices();
 
   // The success is indicated on the peripheral device only, by the central
   // device writing its Digital characteristic. The write is only permitted over
   // the authenticated connection that CBAP has just created, which makes the
-  // blink the proof of the outcome. Both devices run this example, so the
-  // attribute handle of the local database is valid on the remote one too.
+  // blink the proof of the outcome. The remote device may not have the
+  // characteristic, a phone for example, so the central device looks it up
+  // first.
   if (IS_CENTRAL) {
-    uint8_t led_state = LED_ON;
-    sl_status_t write_sc;
-
-    write_sc = sl_bt_gatt_write_characteristic_value(
-      conn.handle,
-      gattdb_aio_digital_out,
-      sizeof(led_state),
-      &led_state);
-    app_log_status_error(write_sc);
+    discover_remote_led(conn.handle);
   }
 
   // The component is free again, so another device can be authenticated.
@@ -579,25 +682,25 @@ static bool find_service_in_advertisement(const uint8_t *scan_data,
   uint16_t i = 0;
 
   // An advertising data field is at least a length and a type byte long.
-  while (i + 1 < scan_data_len) {
+  while ((i + 1) < scan_data_len) {
     uint8_t ad_field_length = scan_data[i]; // Length byte itself not counted
     uint8_t ad_field_type = scan_data[i + 1];
 
     // A malformed packet could claim a field longer than the data received.
-    if (i + ad_field_length + 1 > scan_data_len) {
+    if ((i + ad_field_length + 1) > scan_data_len) {
       break;
     }
 
-    if ((uuid_len == UUID_16_LEN
-         && (ad_field_type == GAP_INCOMPLETE_16B_UUID
-             || ad_field_type == GAP_COMPLETE_16B_UUID))
-        || (uuid_len == UUID_128_LEN
-            && (ad_field_type == GAP_INCOMPLETE_128B_UUID
-                || ad_field_type == GAP_COMPLETE_128B_UUID))) {
+    if (((uuid_len == UUID_16_LEN)
+         && ((ad_field_type == GAP_INCOMPLETE_16B_UUID)
+             || (ad_field_type == GAP_COMPLETE_16B_UUID)))
+        || ((uuid_len == UUID_128_LEN)
+            && ((ad_field_type == GAP_INCOMPLETE_128B_UUID)
+                || (ad_field_type == GAP_COMPLETE_128B_UUID)))) {
       // A list of complete or incomplete service UUIDs was found. Loop through
       // the UUIDs that fit into the field.
       uint16_t j = 2;
-      while (j + uuid_len <= ad_field_length + 1) {
+      while ((j + uuid_len) <= (ad_field_length + 1)) {
         if (memcmp(&scan_data[i + j], uuid, uuid_len) == 0) {
           return true;
         }
@@ -675,7 +778,35 @@ static void print_trusted_devices(void)
 }
 
 /**************************************************************************//**
- * Remember a device that failed the CBAP procedure.
+ * True if another procedure with the remote device would fail the same way.
+ *
+ * The remote device failed to authenticate itself, or it does not follow the
+ * CBAP procedure, see sl_bt_cbap_cb_t.
+ *
+ * @param[in] sc The failure that the CBAP component reported.
+ * @return true if the remote device should not be authenticated again.
+ *****************************************************************************/
+static bool is_permanent_failure(sl_status_t sc)
+{
+  switch (sc) {
+    case SL_STATUS_INVALID_SIGNATURE:
+    case SL_STATUS_INVALID_CREDENTIALS:
+    case SL_STATUS_INVALID_STATE:
+    case SL_STATUS_NOT_FOUND:
+    case SL_STATUS_NOT_SUPPORTED:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+/**************************************************************************//**
+ * Remember a device that failed the CBAP procedure for good.
+ *
+ * A full disallowlist is not an error: the new entry replaces the oldest one.
+ * A device that keeps failing with new random addresses cannot fill the list
+ * up, but it can push the older entries out of it.
  *
  * @param[in] address Bluetooth address of the remote device.
  *****************************************************************************/
@@ -689,12 +820,11 @@ static void add_to_disallowlist(bd_addr address)
     return;
   }
 
-  app_assert(disallowlist_len < DISALLOWLIST_SIZE,
-             "The disallowlist is full (DISALLOWLIST_SIZE: %d)!",
-             DISALLOWLIST_SIZE);
-
-  disallowlist[disallowlist_len] = address;
-  disallowlist_len++;
+  disallowlist[disallowlist_next] = address;
+  disallowlist_next = (uint8_t)((disallowlist_next + 1) % DISALLOWLIST_SIZE);
+  if (disallowlist_len < DISALLOWLIST_SIZE) {
+    disallowlist_len++;
+  }
 
   format_address(address, addr_str);
   app_log_info("Device %s added to the disallowlist (%d/%d)." APP_LOG_NL,
@@ -704,7 +834,7 @@ static void add_to_disallowlist(bd_addr address)
 }
 
 /**************************************************************************//**
- * True if the device failed the CBAP procedure before.
+ * True if the device failed the CBAP procedure for good before.
  *
  * @param[in] address Bluetooth address of the remote device.
  * @return true if the device is on the disallowlist.
@@ -732,7 +862,7 @@ static void blink_led(void)
 
   sc = app_timer_start(&led_timer,
                        LED_BLINK_TIME_MS,
-                       led_timer_cb,
+                       on_led_timer_expired,
                        (void *)NULL, // Callback has no parameters
                        false);
   app_assert_status(sc);
@@ -744,7 +874,7 @@ static void blink_led(void)
  * @param[in] handle Pointer to handle instance
  * @param[in] data Pointer to input data
  *****************************************************************************/
-static void led_timer_cb(app_timer_t *handle, void *data)
+static void on_led_timer_expired(app_timer_t *handle, void *data)
 {
   sl_status_t sc;
   uint8_t led_state = LED_OFF;
@@ -761,6 +891,171 @@ static void led_timer_cb(app_timer_t *handle, void *data)
 
   sl_led_turn_off(SL_SIMPLE_LED_INSTANCE(0));
   app_log_info("LED off." APP_LOG_NL);
+}
+
+/**************************************************************************//**
+ * Find the Digital characteristic of a trusted remote device, and turn on its
+ * LED if it is present.
+ *
+ * The attribute handles of the remote GATT database are not known in advance,
+ * so the Automation IO service is discovered first, then its Digital
+ * characteristic. The steps continue in continue_remote_led().
+ *
+ * @param[in] connection Handle of the connection to the remote device.
+ *****************************************************************************/
+static void discover_remote_led(uint8_t connection)
+{
+  sl_status_t sc;
+  remote_led_t *led;
+
+  // Reuse the slot of the connection if it has one. Otherwise take a free slot,
+  // which belongs to no connection.
+  led = find_remote_led(connection);
+  if (led == NULL) {
+    led = find_remote_led(SL_BT_INVALID_CONNECTION_HANDLE);
+  }
+
+  // There are as many slots as connections the stack can keep open, and the
+  // slot of a connection is freed when it closes.
+  app_assert(led != NULL, "The remote LED array is full!");
+
+  if (led->state != REMOTE_LED_IDLE) {
+    // A GATT procedure of the previous attempt is still running.
+    return;
+  }
+
+  led->connection = connection;
+  led->service = GATT_HANDLE_INVALID;
+  led->characteristic = GATT_HANDLE_INVALID;
+
+  sc = sl_bt_gatt_discover_primary_services_by_uuid(connection,
+                                                    sizeof(aio_service_uuid),
+                                                    aio_service_uuid);
+  if (sc != SL_STATUS_OK) {
+    app_log_status_error(sc);
+    release_remote_led(connection);
+    return;
+  }
+
+  led->state = REMOTE_LED_DISCOVER_SERVICE;
+}
+
+/**************************************************************************//**
+ * Continue with the next step once a GATT procedure has completed.
+ *
+ * A discovery by UUID that finds nothing either completes successfully without
+ * reporting anything, or with SL_STATUS_BT_ATT_ATT_NOT_FOUND. Either way, the
+ * handle stays GATT_HANDLE_INVALID, which means that the remote device does not
+ * have the Digital characteristic.
+ *
+ * @param[in] led Slot of the connection the procedure completed on.
+ * @param[in] result Result of the GATT procedure.
+ *****************************************************************************/
+static void continue_remote_led(remote_led_t *led, uint16_t result)
+{
+  sl_status_t sc;
+  uint8_t led_state = LED_ON;
+  bool nothing_found;
+
+  // A GATT procedure that is not part of turning on the remote LED.
+  if (led->state == REMOTE_LED_IDLE) {
+    return;
+  }
+
+  nothing_found = ((led->state != REMOTE_LED_WRITE)
+                   && ((sl_status_t)result == SL_STATUS_BT_ATT_ATT_NOT_FOUND));
+  if ((result != SL_STATUS_OK) && !nothing_found) {
+    app_log_error("Failed to turn on the LED of the remote device: 0x%04x"
+                  APP_LOG_NL,
+                  (unsigned int)result);
+    led->state = REMOTE_LED_IDLE;
+    return;
+  }
+
+  switch (led->state) {
+    case REMOTE_LED_DISCOVER_SERVICE:
+      if (led->service == GATT_HANDLE_INVALID) {
+        app_log_debug("The Digital characteristic is not present on the " \
+                      "remote device (no Automation IO service)." APP_LOG_NL);
+        led->state = REMOTE_LED_IDLE;
+        break;
+      }
+
+      sc = sl_bt_gatt_discover_characteristics_by_uuid(
+        led->connection,
+        led->service,
+        sizeof(digital_char_uuid),
+        digital_char_uuid);
+      if (sc != SL_STATUS_OK) {
+        app_log_status_error(sc);
+        led->state = REMOTE_LED_IDLE;
+        break;
+      }
+
+      led->state = REMOTE_LED_DISCOVER_CHARACTERISTIC;
+      break;
+
+    case REMOTE_LED_DISCOVER_CHARACTERISTIC:
+      if (led->characteristic == GATT_HANDLE_INVALID) {
+        app_log_debug("The Digital characteristic is not present on the " \
+                      "remote device." APP_LOG_NL);
+        led->state = REMOTE_LED_IDLE;
+        break;
+      }
+
+      sc = sl_bt_gatt_write_characteristic_value(led->connection,
+                                                 led->characteristic,
+                                                 sizeof(led_state),
+                                                 &led_state);
+      if (sc != SL_STATUS_OK) {
+        app_log_status_error(sc);
+        led->state = REMOTE_LED_IDLE;
+        break;
+      }
+
+      led->state = REMOTE_LED_WRITE;
+      break;
+
+    case REMOTE_LED_WRITE:
+      led->state = REMOTE_LED_IDLE;
+      break;
+
+    default:
+      break;
+  }
+}
+
+/**************************************************************************//**
+ * Find the slot of a connection.
+ *
+ * @param[in] connection Connection handle, or SL_BT_INVALID_CONNECTION_HANDLE
+ *                       to find a free slot.
+ * @return Pointer to the slot, NULL if the connection has none.
+ *****************************************************************************/
+static remote_led_t *find_remote_led(uint8_t connection)
+{
+  for (uint8_t i = 0; i < SL_BT_CONFIG_MAX_CONNECTIONS; i++) {
+    if (remote_leds[i].connection == connection) {
+      return &remote_leds[i];
+    }
+  }
+
+  return NULL;
+}
+
+/**************************************************************************//**
+ * Free the slot of a closed connection.
+ *
+ * @param[in] connection Handle of the connection that was closed.
+ *****************************************************************************/
+static void release_remote_led(uint8_t connection)
+{
+  remote_led_t *led = find_remote_led(connection);
+
+  if (led != NULL) {
+    led->connection = SL_BT_INVALID_CONNECTION_HANDLE;
+    led->state = REMOTE_LED_IDLE;
+  }
 }
 
 /**************************************************************************//**

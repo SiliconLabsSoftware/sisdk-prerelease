@@ -264,7 +264,7 @@ void GPIO_ExtIntConfig(GPIO_Port_TypeDef port,
 #if _SILICON_LABS_32B_SERIES > 0
 /***************************************************************************//**
  * @brief
- *   Configure EM4WU pins as external level-sensitive interrupts.
+ *   Configure EM4WU pins as external edge-sensitive interrupts.
  *
  * @details
  *   It is recommended to disable interrupts before configuring the GPIO pin interrupt.
@@ -293,8 +293,8 @@ void GPIO_ExtIntConfig(GPIO_Port_TypeDef port,
  *   The EM4WU interrupt number to trigger.
  *
  * @param[in] polarity
- *   true = Active high level-sensitive interrupt.
- *   false = Active low level-sensitive interrupt.
+ *   true = Rising edge-sensitive interrupt.
+ *   false = Falling edge-sensitive interrupt.
  *
  * @param[in] enable
  *   Set to true if the interrupt will be enabled after the configuration is complete.

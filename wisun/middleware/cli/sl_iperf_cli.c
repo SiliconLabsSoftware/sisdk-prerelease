@@ -85,6 +85,9 @@
 /// CLI option bandwidth format
 #define SL_IPERF_CLI_OPT_BW_FORMAT                    "bw_format"
 
+/// CLI option persistent mode
+#define SL_IPERF_CLI_OPT_PERSISTENT                   "persistent"
+
 /// CLI test result
 #define SL_IPERF_CLI_RESULTS_JSON                     "json"
 
@@ -159,7 +162,7 @@ or with packet_number to derive duration  [uint32] (default 20000)"
 /// CLI iPerf options duration help string
 #define SL_IPERF_CLI_OPT_DURATION_HELP \
   "Test duration in seconds. Derived from bandwidth and packet_number when packet_number is set \
-[uint16] (default 10)"
+[uint32] (default 10)"
 
 /// CLI iPerf options interval help string
 #define SL_IPERF_CLI_OPT_INTERVAL_HELP \
@@ -167,7 +170,11 @@ or with packet_number to derive duration  [uint32] (default 20000)"
 
 /// CLI iPerf options packet number help string
 #define SL_IPERF_CLI_OPT_PACKET_NUMBER_HELP \
-  "Number of packets to send. When set, duration is derived from bandwidth  [uint16] (default 0=unset)"
+  "Number of packets to send. When set, duration is derived from bandwidth  [uint32] (default 0=unset)"
+
+/// CLI iPerf options persistent help string
+#define SL_IPERF_CLI_OPT_PERSISTENT_HELP \
+  "Keep the server up with no idle timeout (0=off, 1=on)  [uint16] (default 0)"
 
 /// CLI iPerf results json help string
 #define SL_IPERF_CLI_RES_JSON_HELP \
@@ -343,6 +350,18 @@ __STATIC_INLINE void _opt_bw_format_setter(void *val);
 __STATIC_INLINE const char *_opt_bw_format_getter(void);
 
 /**************************************************************************//**
+ * @brief Persistent mode setter
+ * @param[in] val value
+ *****************************************************************************/
+__STATIC_INLINE void _opt_persistent_setter(void *val);
+
+/**************************************************************************//**
+ * @brief Persistent mode getter
+ * @return string buffer ptr
+ *****************************************************************************/
+__STATIC_INLINE const char *_opt_persistent_getter(void);
+
+/**************************************************************************//**
  * @brief Test result getter
  * @return Always NULL
  *****************************************************************************/
@@ -461,7 +480,8 @@ static sl_iperf_opt_t _options = {
   .port        = SL_IPERF_SERVER_DEFAULT_PORT,
   .duration_ms = SL_IPERF_CLIENT_DEFAULT_SEND_TIME_MS,
   .buf_len     = SL_IPERF_BUFFER_SIZE,
-  .socket_buffer_size = SL_IPERF_SOCKET_BUFFER_SIZE
+  .socket_buffer_size = SL_IPERF_SOCKET_BUFFER_SIZE,
+  .persistent  = false
 };
 
 /// iPerf settings that contains the parameters for test
@@ -511,7 +531,7 @@ static sl_iperf_cli_property_t _iperf_properties[] = {
   {
     .domain = SL_IPERF_CLI_DOMAIN_OPTIONS,
     .name   = SL_IPERF_CLI_OPT_PACKET_NUMBER,
-    .type   = SL_IPERF_CLI_ARG_TYPE_UINT16,
+    .type   = SL_IPERF_CLI_ARG_TYPE_UINT32,
     .setter = _opt_packet_number_setter,
     .getter = _opt_packet_number_getter,
     .help   = SL_IPERF_CLI_OPT_PACKET_NUMBER_HELP,
@@ -541,7 +561,7 @@ static sl_iperf_cli_property_t _iperf_properties[] = {
   {
     .domain = SL_IPERF_CLI_DOMAIN_OPTIONS,
     .name   = SL_IPERF_CLI_OPT_DURATION,
-    .type   = SL_IPERF_CLI_ARG_TYPE_UINT16,
+    .type   = SL_IPERF_CLI_ARG_TYPE_UINT32,
     .setter = _opt_duration_setter,
     .getter = _opt_duration_getter,
     .help   = SL_IPERF_CLI_OPT_DURATION_HELP,
@@ -559,6 +579,16 @@ static sl_iperf_cli_property_t _iperf_properties[] = {
     .flags  = SL_IPERF_CLI_OPT_FLAGS_UDP_MASK
               | SL_IPERF_CLI_OPT_FLAGS_SRV_MASK
               | SL_IPERF_CLI_OPT_FLAGS_CLNT_MASK
+  },
+  {
+    .domain = SL_IPERF_CLI_DOMAIN_OPTIONS,
+    .name   = SL_IPERF_CLI_OPT_PERSISTENT,
+    .type   = SL_IPERF_CLI_ARG_TYPE_UINT16,
+    .setter = _opt_persistent_setter,
+    .getter = _opt_persistent_getter,
+    .help   = SL_IPERF_CLI_OPT_PERSISTENT_HELP,
+    .flags  = SL_IPERF_CLI_OPT_FLAGS_UDP_MASK
+              | SL_IPERF_CLI_OPT_FLAGS_SRV_MASK
   },
   {
     .domain = SL_IPERF_CLI_DOMAIN_RESULTS,
@@ -889,12 +919,12 @@ __STATIC_INLINE const char *_opt_bandwidth_getter(void)
 // packet number
 __STATIC_INLINE void _opt_packet_number_setter(void *val)
 {
-  _options.packet_nbr = *(uint16_t*)val;
+  _options.packet_nbr = *(uint32_t *)val;
 }
 
 __STATIC_INLINE const char *_opt_packet_number_getter(void)
 {
-  __prepare_getter_buff("%u", _options.packet_nbr);
+  __prepare_getter_buff("%"PRIu32, _options.packet_nbr);
 }
 
 // buffer length
@@ -933,18 +963,18 @@ __STATIC_INLINE const char *_opt_socket_buffer_size_getter(void)
 // duration
 __STATIC_INLINE void _opt_duration_setter(void *val)
 {
-  uint32_t val32 = 0UL;
-  val32 = *(uint32_t*) val * SL_IPERF_TIME_S_TO_MS_ML;
-  if (val32 > UINT16_MAX) {
+  uint32_t seconds = *(uint32_t *)val;
+
+  if (seconds > (UINT32_MAX / SL_IPERF_TIME_S_TO_MS_ML)) {
     printf("[Duration Time value is overflowed]\n");
   } else {
-    _options.duration_ms = (uint16_t) val32;
+    _options.duration_ms = seconds * SL_IPERF_TIME_S_TO_MS_ML;
   }
 }
 
 __STATIC_INLINE const char *_opt_duration_getter(void)
 {
-  __prepare_getter_buff("%u s", _options.duration_ms  / SL_IPERF_TIME_S_TO_MS_ML);
+  __prepare_getter_buff("%"PRIu32" s", _options.duration_ms / SL_IPERF_TIME_S_TO_MS_ML);
 }
 
 // interval
@@ -1072,6 +1102,23 @@ __STATIC_INLINE const char *_results_text_getter(void)
 __STATIC_INLINE const char *_opt_bw_format_getter(void)
 {
   __prepare_getter_buff("%s", sl_iperf_opt_bw_format_to_str(_options.bw_format));
+}
+
+// persistent
+__STATIC_INLINE void _opt_persistent_setter(void *val)
+{
+  uint16_t value = *(uint16_t *)val;
+
+  if (value > 1U) {
+    printf("[persistent must be 0 or 1]\n");
+    return;
+  }
+  _options.persistent = (bool)value;
+}
+
+__STATIC_INLINE const char *_opt_persistent_getter(void)
+{
+  __prepare_getter_buff("%u", (unsigned)_options.persistent);
 }
 
 static void _exec_test(const sl_iperf_mode_t mode,

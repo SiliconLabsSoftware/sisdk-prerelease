@@ -33,7 +33,11 @@
  */
 
 #include "radio_instance.h"
+#include "sli_ot_instance.h"
 #include <openthread-core-config.h>
+#ifndef TESTING
+#include "instance/instance.hpp"
+#endif
 
 #include <assert.h>
 #include "common/code_utils.hpp"
@@ -103,6 +107,13 @@ static volatile bool tx_busy = false;
 
 //------------------------------------------------------------------------------
 // Instance Accessor Functions
+
+#ifndef TESTING
+bool sli_ot_instance_is_initialized(const otInstance *aInstance)
+{
+    return (aInstance != nullptr) && static_cast<const ot::Instance *>(aInstance)->IsInitialized();
+}
+#endif
 
 #if OPENTHREAD_CONFIG_MULTIPLE_STATIC_INSTANCE_ENABLE
 instanceIndex_t sli_ot_radio_instance_get_index(otInstance *aInstance)

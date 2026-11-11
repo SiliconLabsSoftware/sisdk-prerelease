@@ -30,67 +30,78 @@
 // Define module name for Power Manager debugging feature.
 #define CURRENT_MODULE_NAME    "APP_BLUETOOTH_EXAMPLE_WAKE_LOCK"
 
-#include "em_gpio.h"
+#include "sl_device_gpio.h"
 #include "sl_common.h"
-#include "gpiointerrupt.h"
+#include "sl_gpio.h"
 #include "sl_wake_lock.h"
 #include "sl_power_manager.h"
 #include "app_assert.h"
 
 #if SL_WAKE_LOCK_ENABLE_LOCAL == 1
-// global mutexes for wake-up handling
-static bool wake_lock_em_req_added = false;
+// Global mutexes for wake-up handling
+static bool wl_em_req_added = false;
+
 // Interrupt number assigned to the input pin
-static unsigned int wake_lock_input_intno = INTERRUPT_UNAVAILABLE;
+static int32_t wl_input_intno = SL_GPIO_INTERRUPT_UNAVAILABLE;
+
+// Wake Lock GPIO in
+static const sl_gpio_t wl_gpio_in = {
+  .port = SL_WAKE_LOCK_INPUT_PORT,
+  .pin  = SL_WAKE_LOCK_INPUT_PIN
+};
 
 // Callback function for wake-up functionality
-static void wake_lock_cb(uint8_t irq_idx, void *ctx);
-
- #if UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION != 0
- #warning Please set "Enable reception when sleeping" to 'Disable' in 'UARTDRV Core' component to enable sleep!
- #endif
-#else //SL_WAKE_LOCK_ENABLE_LOCAL
- #if UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION != 1
- #warning Please set "Enable reception when sleeping" to 'Enable' in 'UARTDRV Core' component to disable sleep!
- #endif
+static void wake_lock_cb(uint8_t int_no, void *context);
 #endif //SL_WAKE_LOCK_ENABLE_LOCAL
+
+#if SL_WAKE_LOCK_ENABLE_REMOTE == 1
+// Wake Lock GPIO out
+static const sl_gpio_t wl_gpio_out = {
+  .port = SL_WAKE_LOCK_OUTPUT_PORT,
+  .pin  = SL_WAKE_LOCK_OUTPUT_PIN
+};
+#endif // SL_WAKE_LOCK_ENABLE_REMOTE
 
 /**************************************************************************//**
  * Wake and sleep (lock) initialization function
  *****************************************************************************/
 void sl_wake_lock_init(void)
 {
+#if SL_WAKE_LOCK_ENABLE_LOCAL == 1
+  sl_status_t ret = SL_STATUS_FAIL;
+#endif //SL_WAKE_LOCK_ENABLE_LOCAL
+
 #if SL_WAKE_LOCK_ENABLE_REMOTE == 1
   // Set output pin to wake-up remote controller
-  GPIO_PinModeSet(SL_WAKE_LOCK_OUTPUT_PORT, SL_WAKE_LOCK_OUTPUT_PIN, gpioModePushPull, SL_WAKE_LOCK_OUTPUT_POLARITY_ACTIVE_HIGH);
+  (void)sl_gpio_set_pin_mode(&wl_gpio_out,
+                             SL_GPIO_MODE_PUSH_PULL,
+                             SL_WAKE_LOCK_OUTPUT_POLARITY_ACTIVE_HIGH);
+
   // Set pin to disable wake-up
   if (SL_WAKE_LOCK_OUTPUT_POLARITY_ACTIVE_HIGH) {
-    GPIO_PinOutSet(SL_WAKE_LOCK_OUTPUT_PORT, SL_WAKE_LOCK_OUTPUT_PIN);
+    (void)sl_gpio_set_pin(&wl_gpio_out);
   } else {
-    GPIO_PinOutClear(SL_WAKE_LOCK_OUTPUT_PORT, SL_WAKE_LOCK_OUTPUT_PIN);
+    (void)sl_gpio_clear_pin(&wl_gpio_out);
   }
 #endif // SL_WAKE_LOCK_ENABLE_REMOTE
 
 #if SL_WAKE_LOCK_ENABLE_LOCAL == 1
-  wake_lock_em_req_added = false;
-  // Set input pin to wake up from sleep and configure interrupt and call-back function
-  GPIOINT_Init();
-  GPIO_PinModeSet(SL_WAKE_LOCK_INPUT_PORT,
-                  SL_WAKE_LOCK_INPUT_PIN,
-                  gpioModeInput,
-                  SL_WAKE_LOCK_INPUT_POLARITY_ACTIVE_HIGH);
-  wake_lock_input_intno =
-    GPIOINT_CallbackRegisterExt(SL_WAKE_LOCK_INPUT_PIN,
-                                (GPIOINT_IrqCallbackPtrExt_t)wake_lock_cb,
-                                NULL);
-  if (wake_lock_input_intno != INTERRUPT_UNAVAILABLE) {
-    GPIO_ExtIntConfig(SL_WAKE_LOCK_INPUT_PORT,
-                      SL_WAKE_LOCK_INPUT_PIN,
-                      wake_lock_input_intno,
-                      true,
-                      true,
-                      true);
-  } else {
+  wl_em_req_added = false;
+
+  // Set input pin to wake up from sleep
+  (void)sl_gpio_init();
+  (void)sl_gpio_set_pin_mode(&wl_gpio_in,
+                             SL_GPIO_MODE_INPUT,
+                             SL_WAKE_LOCK_INPUT_POLARITY_ACTIVE_HIGH);
+
+  // Set callback, interrupt number and interrupt trigger direction
+  ret = sl_gpio_configure_external_interrupt(&wl_gpio_in,
+                                             &wl_input_intno,
+                                             SL_GPIO_INTERRUPT_RISING_FALLING_EDGE,
+                                             wake_lock_cb,
+                                             NULL);
+
+  if (ret != SL_STATUS_OK) {
     app_assert(false, "Failed to register callback function for wake-lock.\n");
   }
 #endif //SL_WAKE_LOCK_ENABLE_LOCAL
@@ -109,9 +120,9 @@ void sl_wake_lock_set_remote_req(void)
 {
   // set pin to wake up remote controller
   if (SL_WAKE_LOCK_OUTPUT_POLARITY_ACTIVE_HIGH) {
-    GPIO_PinOutSet(SL_WAKE_LOCK_OUTPUT_PORT, SL_WAKE_LOCK_OUTPUT_PIN);
+    (void)sl_gpio_set_pin(&wl_gpio_out);
   } else {
-    GPIO_PinOutClear(SL_WAKE_LOCK_OUTPUT_PORT, SL_WAKE_LOCK_OUTPUT_PIN);
+    (void)sl_gpio_clear_pin(&wl_gpio_out);
   }
   // wait until remote side wakes up (typically it takes 600us)
   sl_sleeptimer_delay_millisecond(1);
@@ -127,16 +138,18 @@ void sl_wake_lock_clear_remote_req(void)
 {
   // clear pin to sleep remote controller
   if (SL_WAKE_LOCK_OUTPUT_POLARITY_ACTIVE_HIGH) {
-    GPIO_PinOutClear(SL_WAKE_LOCK_OUTPUT_PORT, SL_WAKE_LOCK_OUTPUT_PIN);
+    (void)sl_gpio_clear_pin(&wl_gpio_out);
   } else {
-    GPIO_PinOutSet(SL_WAKE_LOCK_OUTPUT_PORT, SL_WAKE_LOCK_OUTPUT_PIN);
+    (void)sl_gpio_set_pin(&wl_gpio_out);
   }
 }
+
 #else // SL_WAKE_LOCK_ENABLE_REMOTE
-// unused placeholder functions without wake-up functionality enabled
+// Unused placeholder functions without wake-up functionality enabled
 void sl_wake_lock_set_remote_req(void)
 {
 }
+
 void sl_wake_lock_clear_remote_req(void)
 {
 }
@@ -171,9 +184,9 @@ SL_WEAK void sl_wake_lock_clear_req_rx_cb(void)
 void sl_wake_lock_set_local(void)
 {
   // Only add requirement if not added before.
-  if (wake_lock_em_req_added) {
+  if (wl_em_req_added) {
     sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
-    wake_lock_em_req_added = false;
+    wl_em_req_added = false;
   }
 }
 
@@ -188,9 +201,9 @@ void sl_wake_lock_set_local(void)
 void sl_wake_lock_clear_local(void)
 {
   // Only remove requirement if not removed before
-  if (!wake_lock_em_req_added) {
+  if (!wl_em_req_added) {
     sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
-    wake_lock_em_req_added = true;
+    wl_em_req_added = true;
   }
 }
 
@@ -203,11 +216,15 @@ void sl_wake_lock_clear_local(void)
  * @note: It is the responsibility of the application to call
  * sl_wake_lock_set_local() function.
  *****************************************************************************/
-static void wake_lock_cb(uint8_t irq_idx, void *ctx)
+static void wake_lock_cb(uint8_t int_no, void *context)
 {
-  (void)ctx; // Context is not used here
-  if (irq_idx == wake_lock_input_intno) {
-    if ( GPIO_PinInGet(SL_WAKE_LOCK_INPUT_PORT, SL_WAKE_LOCK_INPUT_PIN) != SL_WAKE_LOCK_INPUT_POLARITY_ACTIVE_HIGH) {
+  (void)context; // Context is not used here
+  bool pin_value = false;
+
+  if (int_no == wl_input_intno) {
+    (void)sl_gpio_get_pin_input(&wl_gpio_in, &pin_value);
+
+    if ( pin_value != SL_WAKE_LOCK_INPUT_POLARITY_ACTIVE_HIGH ) {
       // Go to sleep signal arrived from remote controller.
       sl_wake_lock_clear_req_rx_cb();
     } else {
@@ -217,11 +234,13 @@ static void wake_lock_cb(uint8_t irq_idx, void *ctx)
     }
   }
 }
+
 #else //SL_WAKE_LOCK_ENABLE_LOCAL
-// unused placeholder without deep sleep function enabled
+// Unused placeholder without deep sleep function enabled
 void sl_wake_lock_set_local(void)
 {
 }
+
 void sl_wake_lock_clear_local(void)
 {
 }

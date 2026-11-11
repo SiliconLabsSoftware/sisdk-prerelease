@@ -1275,55 +1275,109 @@ static void sli_zigbee_direct_send_status_via_commissioning_status_notification(
                                       sl_response);
 }
 
-static void sli_zigbee_direct_permit_joining_write(uint8_t connection, byte_array *writeValue)
+#define ZDD_RIGHT_OPEN_TO_PROVISION     (1u << 0)
+#define ZDD_RIGHT_PROVISIONING_SESSION  (1u << 1)
+#define ZDD_RIGHT_BASIC                 (1u << 2)
+#define ZDD_RIGHT_ADMIN                 (1u << 3)
+
+#define ZDD_RIGHTS_ADMIN_OR_PROVISIONING_SESSION \
+  (ZDD_RIGHT_ADMIN | ZDD_RIGHT_PROVISIONING_SESSION)
+
+static uint8_t sli_zigbee_direct_connection_rights_bit(void)
 {
-  uint8_t ble_status = ES_WRITE_OK;
+  switch (sl_zvd_connection_status) {
+    case OPEN_TO_BE_PROVISIONED:
+      return ZDD_RIGHT_OPEN_TO_PROVISION;
+    case PROVISIONED_IN_PROVISIONING_SESSION:
+      return ZDD_RIGHT_PROVISIONING_SESSION;
+    case COMMISSIONED_BASIC:
+      return ZDD_RIGHT_BASIC;
+    case COMMISSIONED_ADMIN:
+      return ZDD_RIGHT_ADMIN;
+    default:
+      return 0;
+  }
+}
 
-  if ((sl_zvd_connection_status != COMMISSIONED_ADMIN)  && (sl_zvd_connection_status != PROVISIONED_IN_PROVISIONING_SESSION)) {
-    sl_zigbee_core_debug_println("Error, no rights to execute pjoin from ZVD %02X", sl_zvd_connection_status);
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
+static void sli_zigbee_direct_schedule_zdd_event(uint32_t delay_ms)
+{
+  if (delay_ms == 0) {
+    sl_zigbee_af_event_set_active(&zigbee_direct_zb_stack_event);
+  } else {
+    sl_zigbee_af_event_set_delay_ms(&zigbee_direct_zb_stack_event, delay_ms);
+  }
+  sl_zigbee_wakeup_common_task();
+}
+
+static bool sli_zigbee_direct_accept_encrypted_write(uint8_t connection,
+                                                   byte_array *writeValue,
+                                                   uint16_t characteristic,
+                                                   uint8_t next_state,
+                                                   uint8_t allowed_rights)
+{
+  if ((sli_zigbee_direct_connection_rights_bit() & allowed_rights) == 0) {
+    sl_zigbee_core_debug_println("Error, no rights for GATT write 0x%04X from ZVD %02X",
+                                 characteristic,
+                                 sl_zvd_connection_status);
+    sl_bt_gatt_server_send_user_write_response(connection,
+                                               characteristic,
+                                               ES_ERR_APPLICATION_SPECIFIC);
+    return false;
   }
 
-  if (!(sli_zigbee_direct_security_decrypt_packet(sl_zvd_eui, writeValue->data, writeValue->len, gattdb_permit_joining))) {
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
+  if (!sli_zigbee_direct_security_decrypt_packet(sl_zvd_eui,
+                                               writeValue->data,
+                                               writeValue->len,
+                                               characteristic)) {
+    sl_bt_gatt_server_send_user_write_response(connection,
+                                               characteristic,
+                                               ES_ERR_APPLICATION_SPECIFIC);
+    return false;
   }
 
-  current_state = PERMIT_JOIN_WRITE;
+  current_state = next_state;
   current_connection = connection;
   current_writeValue = writeValue;
+  return true;
+}
 
-  sl_zigbee_af_event_set_active(&zigbee_direct_zb_stack_event);
-  sl_zigbee_wakeup_common_task();
+static void sli_zigbee_direct_defer_plaintext_write(uint8_t connection,
+                                                    byte_array *writeValue,
+                                                    uint16_t characteristic,
+                                                    uint8_t next_state,
+                                                    uint32_t delay_ms)
+{
+  sl_bt_gatt_server_send_user_write_response(connection, characteristic, ES_WRITE_OK);
+  current_state = next_state;
+  current_connection = connection;
+  current_writeValue = writeValue;
+  sli_zigbee_direct_schedule_zdd_event(delay_ms);
+}
 
-  EXIT:
-  sl_bt_gatt_server_send_user_write_response(connection, gattdb_permit_joining, ble_status);
+static void sli_zigbee_direct_permit_joining_write(uint8_t connection, byte_array *writeValue)
+{
+  if (!sli_zigbee_direct_accept_encrypted_write(connection,
+                                                writeValue,
+                                                gattdb_permit_joining,
+                                                PERMIT_JOIN_WRITE,
+                                                ZDD_RIGHTS_ADMIN_OR_PROVISIONING_SESSION)) {
+    return;
+  }
+  sli_zigbee_direct_schedule_zdd_event(0);
+  sl_bt_gatt_server_send_user_write_response(connection, gattdb_permit_joining, ES_WRITE_OK);
 }
 
 static void sli_zigbee_direct_leave_network_write(uint8_t connection, byte_array *writeValue)
 {
-  uint8_t ble_status = ES_WRITE_OK;
-
-  if ((sl_zvd_connection_status != COMMISSIONED_ADMIN)  && (sl_zvd_connection_status != PROVISIONED_IN_PROVISIONING_SESSION)) {
-    sl_zigbee_core_debug_println("Error, no rights to execute leave from ZVD %02X", sl_zvd_connection_status);
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
+  if (!sli_zigbee_direct_accept_encrypted_write(connection,
+                                                writeValue,
+                                                gattdb_leave_network,
+                                                LEAVE_WRITE,
+                                                ZDD_RIGHTS_ADMIN_OR_PROVISIONING_SESSION)) {
+    return;
   }
-
-  if (!(sli_zigbee_direct_security_decrypt_packet(sl_zvd_eui, writeValue->data, writeValue->len, gattdb_leave_network))) {
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
-  }
-
-  current_state = LEAVE_WRITE;
-  current_connection = connection;
-  current_writeValue = writeValue;
-  sl_zigbee_af_event_set_active(&zigbee_direct_zb_stack_event);
-  sl_zigbee_wakeup_common_task();
-
-  EXIT:
-  sl_bt_gatt_server_send_user_write_response(connection, gattdb_leave_network, ble_status);
+  sli_zigbee_direct_schedule_zdd_event(0);
+  sl_bt_gatt_server_send_user_write_response(connection, gattdb_leave_network, ES_WRITE_OK);
 }
 
 static uint8_t sli_channel_masks_first_channel(uint32_t sl_channel_mask) //see if we already have a helper for this
@@ -1434,28 +1488,14 @@ static sl_status_t sli_zigbee_direct_oob_join(void)
 
 static void sli_zigbee_direct_join_network_write(uint8_t connection, byte_array *writeValue)
 {
-  uint8_t ble_status = ES_WRITE_OK;
-
-  if ((sl_zvd_connection_status != PROVISIONED_IN_PROVISIONING_SESSION) && (sl_zvd_connection_status != COMMISSIONED_ADMIN)) {
-    sl_zigbee_core_debug_println("Error, no rights %02X Line %d", sl_zvd_connection_status, __LINE__);
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
+  if (!sli_zigbee_direct_accept_encrypted_write(connection,
+                                                writeValue,
+                                                gattdb_join_network,
+                                                JOIN_NWK_WRITE,
+                                                ZDD_RIGHTS_ADMIN_OR_PROVISIONING_SESSION)) {
+    return;
   }
-
-  if (!(sli_zigbee_direct_security_decrypt_packet(sl_zvd_eui, writeValue->data, writeValue->len, gattdb_join_network))) {
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
-  }
-
-  current_state = JOIN_NWK_WRITE;
-  current_connection = connection;
-  current_writeValue = writeValue;
-  sl_zigbee_af_event_set_delay_ms(&zigbee_direct_zb_stack_event, 5);
-  sl_zigbee_wakeup_common_task();
-  return;
-
-  EXIT:
-  sl_bt_gatt_server_send_user_write_response(connection, gattdb_join_network, ble_status);
+  sli_zigbee_direct_schedule_zdd_event(5);
 }
 
 void sli_zigbee_direct_zdd_update_keys(sl_zigbee_initial_security_state_t *state)
@@ -1565,59 +1605,26 @@ sl_802154_pan_id_t sl_zigbee_af_network_creator_get_pan_id_cb(void)
 
 static void sli_zigbee_direct_form_network_write(uint8_t connection, byte_array *writeValue)
 {
-  uint8_t ble_status = ES_WRITE_OK;
-
-  if ((sl_zvd_connection_status != PROVISIONED_IN_PROVISIONING_SESSION) && (sl_zvd_connection_status != OPEN_TO_BE_PROVISIONED)) {
-    sl_zigbee_core_debug_println("Error, no rights %02X Line %d", sl_zvd_connection_status, __LINE__);
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
+  if (!sli_zigbee_direct_accept_encrypted_write(connection,
+                                                writeValue,
+                                                gattdb_form_network,
+                                                FORM_NWK_WRITE,
+                                                ZDD_RIGHT_PROVISIONING_SESSION | ZDD_RIGHT_OPEN_TO_PROVISION)) {
+    return;
   }
-
-  if (!(sli_zigbee_direct_security_decrypt_packet(sl_zvd_eui, writeValue->data, writeValue->len, gattdb_form_network))) {
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
-  }
-
-  current_state = FORM_NWK_WRITE;
-  current_connection = connection;
-  current_writeValue = writeValue;
-  sl_zigbee_wakeup_common_task();
-  sl_zigbee_af_event_set_active(&zigbee_direct_zb_stack_event);
-
-  return;
-
-  EXIT:
-  sl_bt_gatt_server_send_user_write_response(connection, gattdb_form_network, ble_status);
+  sli_zigbee_direct_schedule_zdd_event(0);
 }
 
 static void sli_zigbee_direct_identify_write(uint8_t connection, byte_array *writeValue)
 {
-  uint8_t ble_status = ES_WRITE_OK;
-  uint8_t zd_status = SL_ZIGBEE_DIRECT_STATUS_CODE_SUCCESS;
-
-  if ((sl_zvd_connection_status != COMMISSIONED_ADMIN)  && (sl_zvd_connection_status != PROVISIONED_IN_PROVISIONING_SESSION) && (sl_zvd_connection_status != COMMISSIONED_BASIC)) {
-    sl_zigbee_core_debug_println("Error, no rights %02X Line %d", sl_zvd_connection_status, __LINE__);
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
+  if (!sli_zigbee_direct_accept_encrypted_write(connection,
+                                                writeValue,
+                                                gattdb_identify,
+                                                IDENTIFY_WRITE,
+                                                ZDD_RIGHTS_ADMIN_OR_PROVISIONING_SESSION | ZDD_RIGHT_BASIC)) {
+    return;
   }
-
-  if (!(sli_zigbee_direct_security_decrypt_packet(sl_zvd_eui, writeValue->data, writeValue->len, gattdb_identify))) {
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
-  }
-
-  current_state = IDENTIFY_WRITE;
-  current_connection = connection;
-  current_writeValue = writeValue;
-  sl_zigbee_af_event_set_delay_ms(&zigbee_direct_zb_stack_event, 5);
-  sl_zigbee_wakeup_common_task();
-  return;
-
-  EXIT:
-  sl_bt_gatt_server_send_user_write_response(connection, gattdb_identify, ble_status);
-  if (ble_status == ES_WRITE_OK) {
-    sli_zigbee_direct_send_status_via_commissioning_status_notification(connection, SL_ZIGBEE_DIRECT_STATUS_DOMAIN_IDENTIFY, zd_status);
-  }
+  sli_zigbee_direct_schedule_zdd_event(5);
 }
 
 void sl_zigbee_af_identify_start_feedback_cb(uint8_t endpoint,
@@ -1633,86 +1640,47 @@ void sl_zigbee_af_identify_stop_feedback_cb(uint8_t endpoint)
 
 static void sli_zigbee_direct_manage_joiners_write(uint8_t connection, byte_array *writeValue)
 {
-  uint8_t ble_status = ES_WRITE_OK;
-  uint8_t myStatus = SL_ZIGBEE_DIRECT_STATUS_CODE_ERROR;
-
-  if (sl_zvd_connection_status != COMMISSIONED_ADMIN) {
-    sl_zigbee_core_debug_println("Error, no rights %02X Line %d", sl_zvd_connection_status, __LINE__);
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
+  if (!sli_zigbee_direct_accept_encrypted_write(connection,
+                                                writeValue,
+                                                gattdb_manage_joiners,
+                                                MANAGE_JOINERS_WRITE,
+                                                ZDD_RIGHT_ADMIN)) {
+    return;
   }
-
-  if (!(sli_zigbee_direct_security_decrypt_packet(sl_zvd_eui, writeValue->data, writeValue->len, gattdb_manage_joiners))) {
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
-  }
-
-  current_state = MANAGE_JOINERS_WRITE;
-  current_connection = connection;
-  current_writeValue = writeValue;
-  sl_zigbee_af_event_set_delay_ms(&zigbee_direct_zb_stack_event, 5);
-  sl_zigbee_wakeup_common_task();
-  return;
-
-  EXIT:
-  sl_bt_gatt_server_send_user_write_response(connection, gattdb_manage_joiners, ble_status);
-
-  if (ble_status == ES_WRITE_OK) {
-    sli_zigbee_direct_send_status_via_commissioning_status_notification(connection, SL_ZIGBEE_DIRECT_STATUS_DOMAIN_MJOIN, myStatus);
-  }
+  sli_zigbee_direct_schedule_zdd_event(5);
 }
 
 static void sli_zigbee_direct_finding_binding_write(uint8_t connection, byte_array *writeValue)
 {
-  uint8_t ble_status = ES_WRITE_OK;
-  uint8_t my_status = SL_ZIGBEE_DIRECT_STATUS_CODE_SUCCESS;
-
-  if ((sl_zvd_connection_status != COMMISSIONED_ADMIN) && (sl_zvd_connection_status != COMMISSIONED_BASIC)) {
-    sl_zigbee_core_debug_println("Error, no rights %02X Line %d", sl_zvd_connection_status, __LINE__);
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
+  if (!sli_zigbee_direct_accept_encrypted_write(connection,
+                                                writeValue,
+                                                gattdb_finding_binding,
+                                                BINDING_WRITE,
+                                                ZDD_RIGHT_ADMIN | ZDD_RIGHT_BASIC)) {
+    return;
   }
-
-  if (!(sli_zigbee_direct_security_decrypt_packet(sl_zvd_eui, writeValue->data, writeValue->len, gattdb_finding_binding))) {
-    ble_status = ES_ERR_APPLICATION_SPECIFIC;
-    goto EXIT;
-  }
-
-  current_state = BINDING_WRITE;
-  current_connection = connection;
-  current_writeValue = writeValue;
-  sl_zigbee_af_event_set_delay_ms(&zigbee_direct_zb_stack_event, 5);
-  sl_zigbee_wakeup_common_task();
-  return;
-
-  EXIT:
-  sl_bt_gatt_server_send_user_write_response(connection, gattdb_finding_binding, ble_status);
-  if (ble_status == ES_WRITE_OK) {
-    sli_zigbee_direct_send_status_via_commissioning_status_notification(connection, SL_ZIGBEE_DIRECT_STATUS_DOMAIN_FUB, my_status);
-  }
+  sli_zigbee_direct_schedule_zdd_event(5);
 }
 
 #ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
 static void sli_zigbee_direct_authenticate_write_25519(uint8_t connection, byte_array *writeValue)
 {
-  sl_bt_gatt_server_send_user_write_response(connection, gattdb_authenticate_25519, ES_WRITE_OK);
-  current_state = C25519_WRITE;
-  current_connection = connection;
-  current_writeValue = writeValue;
-  sl_zigbee_af_event_set_delay_ms(&zigbee_direct_zb_stack_event, 10);
-  sl_zigbee_wakeup_common_task();
+  sli_zigbee_direct_defer_plaintext_write(connection,
+                                          writeValue,
+                                          gattdb_authenticate_25519,
+                                          C25519_WRITE,
+                                          10);
 }
 #endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_CURVE25519_PRESENT
 
 #ifdef SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
 static void sli_zigbee_direct_authenticate_write_p256(uint8_t connection, byte_array *writeValue)
 {
-  sl_bt_gatt_server_send_user_write_response(connection, gattdb_authenticate_p256, ES_WRITE_OK);
-  current_state = P256_WRITE;
-  current_connection = connection;
-  current_writeValue = writeValue;
-  sl_zigbee_af_event_set_delay_ms(&zigbee_direct_zb_stack_event, 10);
-  sl_zigbee_wakeup_common_task();
+  sli_zigbee_direct_defer_plaintext_write(connection,
+                                          writeValue,
+                                          gattdb_authenticate_p256,
+                                          P256_WRITE,
+                                          10);
 }
 #endif // SL_CATALOG_ZIGBEE_DIRECT_SECURITY_P256_PRESENT
 

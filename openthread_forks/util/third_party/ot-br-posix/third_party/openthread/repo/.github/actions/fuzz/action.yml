@@ -1,0 +1,205 @@
+name: OpenThread fuzz
+description: >-
+  Build and drive the upstream nexus libFuzzer targets without patching CMake.
+  Instrumentation is passed as CMAKE_C_FLAGS and CMAKE_CXX_FLAGS, which is the
+  same path tests/fuzz/oss-fuzz-build uses.
+
+inputs:
+  command:
+    description: build, import, validate, run, or export
+    required: true
+  archive:
+    description: Corpus tarball to import
+    required: false
+    default: ""
+  output:
+    description: >-
+      Snapshot archive written by export. The fuzz workflow publishes a clean
+      snapshot for fuzz-validate; this archive does not replace the stable corpus.
+    required: false
+    default: ""
+  seconds:
+    description: Time box for the run command
+    required: false
+    default: "300"
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        FUZZ_COMMAND: ${{ inputs.command }}
+        FUZZ_ARCHIVE: ${{ inputs.archive }}
+        FUZZ_OUTPUT: ${{ inputs.output }}
+        FUZZ_SECONDS: ${{ inputs.seconds }}
+      run: |
+        set -euo pipefail
+
+        ROOT="${GITHUB_WORKSPACE:-$(pwd)}"
+        BUILD_DIR="${OT_FUZZ_BUILD_DIR:-${ROOT}/build-fuzz}"
+        WORK_CORPUS="${OT_FUZZ_WORK_CORPUS:-${BUILD_DIR}/tests/fuzz/work-corpus}"
+        ARTIFACT_DIR="${OT_FUZZ_ARTIFACT_DIR:-${BUILD_DIR}/tests/fuzz/artifacts}"
+
+        # Applied to every translation unit. C++ fuzzers call assert() without
+        # including <cassert>. Do not -include assert.h on the C flags: it pulls
+        # glibc features.h before mbedtls can set _GNU_SOURCE, so explicit_bzero
+        # is called but never declared.
+        C_FLAGS="${OT_FUZZ_C_FLAGS:--g -O1 -fno-omit-frame-pointer -fsanitize=fuzzer-no-link -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION}"
+        CXX_FLAGS="${OT_FUZZ_CXX_FLAGS:-${C_FLAGS} -include cassert}"
+        export LIB_FUZZING_ENGINE="${LIB_FUZZING_ENGINE:--fsanitize=fuzzer}"
+
+        fuzzer_names() {
+            sed -n 's/^ot_nexus_test(\([^)]*\)).*/\1/p' "${ROOT}/tests/fuzz/CMakeLists.txt"
+        }
+
+        corpus_file_count() {
+            local dir="$1"
+            if [[ ! -d "$dir" ]]; then
+                echo 0
+                return
+            fi
+            find "$dir" -type f ! -name '.gitkeep' | wc -l | tr -d ' '
+        }
+
+        cmd_build() {
+            local name targets=()
+            while IFS= read -r name; do
+                [[ -n "$name" ]] || continue
+                targets+=("${name}-fuzzer")
+            done < <(fuzzer_names)
+            if [[ "${#targets[@]}" -eq 0 ]]; then
+                echo "ERROR: no ot_nexus_test() entries in tests/fuzz/CMakeLists.txt" >&2
+                exit 1
+            fi
+
+            cmake -S "$ROOT" -B "$BUILD_DIR" -G Ninja \
+                -DOT_FUZZ_TARGETS=ON \
+                -DOT_PLATFORM=nexus \
+                -DOT_THREAD_VERSION=1.4 \
+                -DOT_APP_CLI=OFF \
+                -DOT_APP_NCP=OFF \
+                -DOT_APP_RCP=OFF \
+                -DOT_COMPILE_WARNING_AS_ERROR=ON \
+                -DOT_PROJECT_CONFIG="${ROOT}/tests/nexus/openthread-core-nexus-config.h" \
+                -DCMAKE_C_COMPILER="${OT_FUZZ_C_COMPILER:-/usr/bin/clang}" \
+                -DCMAKE_CXX_COMPILER="${OT_FUZZ_CXX_COMPILER:-/usr/bin/clang++}" \
+                -DCMAKE_C_FLAGS="${C_FLAGS}" \
+                -DCMAKE_CXX_FLAGS="${CXX_FLAGS}"
+            cmake --build "$BUILD_DIR" --target "${targets[@]}"
+        }
+
+        cmd_import() {
+            local archive="${FUZZ_ARCHIVE}"
+            if [[ -z "$archive" || ! -f "$archive" ]]; then
+                echo "ERROR: corpus archive not found: ${archive}" >&2
+                exit 1
+            fi
+            rm -rf "$WORK_CORPUS"
+            mkdir -p "$WORK_CORPUS"
+            tar -xf "$archive" -C "$WORK_CORPUS"
+            echo "Imported ${archive} -> ${WORK_CORPUS}"
+        }
+
+        cmd_validate() {
+            local name bin dir count status=0
+            while IFS= read -r name; do
+                [[ -n "$name" ]] || continue
+                bin="${BUILD_DIR}/tests/fuzz/${name}-fuzzer"
+                dir="${WORK_CORPUS}/${name}"
+                if [[ ! -x "$bin" ]]; then
+                    echo "ERROR: fuzzer binary not found: ${bin}" >&2
+                    exit 1
+                fi
+                count="$(corpus_file_count "$dir")"
+                if [[ "$count" -eq 0 ]]; then
+                    echo "SKIP: no corpus inputs for ${name} in ${dir}" >&2
+                    continue
+                fi
+                echo "Validating ${name} against ${count} corpus input(s)"
+                mkdir -p "$ARTIFACT_DIR"
+                if ! "$bin" -runs=0 -artifact_prefix="${ARTIFACT_DIR}/${name}-" "$dir"; then
+                    echo "ERROR: corpus replay failed for ${name}" >&2
+                    status=1
+                fi
+            done < <(fuzzer_names)
+            if [[ "$status" -ne 0 ]]; then
+                echo "ERROR: a fuzz-validate test failed." >&2
+                exit 1
+            fi
+        }
+
+        cmd_run() {
+            local seconds="${FUZZ_SECONDS}"
+            local name bin dir status=0
+            if [[ -z "$seconds" || ! "$seconds" =~ ^[0-9]+$ ]]; then
+                echo "ERROR: run requires a duration in seconds" >&2
+                exit 1
+            fi
+            mkdir -p "$ARTIFACT_DIR"
+            while IFS= read -r name; do
+                [[ -n "$name" ]] || continue
+                bin="${BUILD_DIR}/tests/fuzz/${name}-fuzzer"
+                dir="${WORK_CORPUS}/${name}"
+                if [[ ! -x "$bin" ]]; then
+                    echo "ERROR: fuzzer binary not found: ${bin}" >&2
+                    exit 1
+                fi
+                mkdir -p "$dir"
+                echo "Fuzzing ${name} for ${seconds}s (corpus ${dir})"
+                if ! "$bin" -max_total_time="${seconds}" -artifact_prefix="${ARTIFACT_DIR}/${name}-" "$dir"; then
+                    echo "ERROR: fuzz-run failed for ${name}" >&2
+                    status=1
+                fi
+            done < <(fuzzer_names)
+            exit "$status"
+        }
+
+        cmd_export() {
+            local output="${FUZZ_OUTPUT}"
+            local name bin dir count minimized
+            if [[ -z "$output" ]]; then
+                echo "ERROR: export requires an output archive path" >&2
+                exit 1
+            fi
+            if [[ ! -d "$WORK_CORPUS" ]]; then
+                echo "ERROR: work corpus does not exist: ${WORK_CORPUS}" >&2
+                exit 1
+            fi
+            while IFS= read -r name; do
+                [[ -n "$name" ]] || continue
+                bin="${BUILD_DIR}/tests/fuzz/${name}-fuzzer"
+                dir="${WORK_CORPUS}/${name}"
+                count="$(corpus_file_count "$dir")"
+                if [[ "$count" -eq 0 ]]; then
+                    echo "Nothing to minimize for ${name}: ${dir} is empty"
+                    continue
+                fi
+                if [[ ! -x "$bin" ]]; then
+                    echo "ERROR: fuzzer binary not found: ${bin}" >&2
+                    exit 1
+                fi
+                minimized="${dir}.minimized"
+                rm -rf "$minimized"
+                mkdir -p "$minimized"
+                echo "Minimizing ${count} input(s) for ${name}"
+                "$bin" -merge=1 "$minimized" "$dir"
+                rm -rf "$dir"
+                mv "$minimized" "$dir"
+            done < <(fuzzer_names)
+
+            mkdir -p "$(dirname "$output")"
+            tar -czf "$output" -C "$WORK_CORPUS" .
+            echo "Exported ${WORK_CORPUS} -> ${output}"
+        }
+
+        case "${FUZZ_COMMAND}" in
+            build) cmd_build ;;
+            import) cmd_import ;;
+            validate) cmd_validate ;;
+            run) cmd_run ;;
+            export) cmd_export ;;
+            *)
+                echo "ERROR: command must be build, import, validate, run, or export" >&2
+                exit 2
+                ;;
+        esac

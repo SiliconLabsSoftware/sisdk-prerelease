@@ -30,7 +30,7 @@
 
 #include "sli_sxsymcrypt.h"
 
-#include "../../hw.h"
+#include "../../../sxsymcrypt/src/hw.h"
 
 #include "em_device.h"
 #include "sl_assert.h"

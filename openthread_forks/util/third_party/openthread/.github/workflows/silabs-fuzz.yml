@@ -1,0 +1,275 @@
+name: OpenThread Fuzz
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  FUZZ_CORPUS_STREAM: sisdk-2026.12
+
+jobs:
+  run_fuzz:
+    name: Fuzz run
+    runs-on: [self-hosted, linux, x64, prod, austin, silabs-internal]
+    timeout-minutes: 120
+    container:
+      image: 'artifactory-local.silabs.net/gsdk-docker-production/gsdk_nomad_containers/slt_build_env:latest'
+      options: --user root
+      env:
+        LANG: C.utf8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Tell git this checkout is safe
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install host Clang/LLVM
+        uses: ./.github/actions/install-libfuzzer
+        with:
+          smoke: true
+      - name: Get Artifactory token from Vault
+        id: vault-prod-token
+        uses: hashicorp/vault-action@v3.0.0
+        with:
+          url: https://vault.silabs.net
+          caCertificate: ${{ secrets.SILABS_VAULT_PROD_CA }}
+          method: "jwt"
+          path: "github"
+          role: "siliconlabsinternal-openthread"
+          outputToken: true
+          secrets: |
+            dynamic/data/app/artifactory/users/svc_nwk-15-4 password | PASSWORD ;
+            dynamic/data/app/artifactory/tokens/svc_nwk-15-4 token | artifactory_token ;
+      - name: Resolve corpus stream
+        id: corpus-stream
+        shell: bash
+        run: |
+          set -euo pipefail
+          # OpenThread's default branch is silabs. Release lines are
+          # sisdk-YYYY.M, including patch branches such as sisdk-YYYY.M.P.
+          # A pull request follows its base branch. Pushes, schedule, and
+          # workflow_dispatch follow the ref. silabs stays on the current stream.
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            REF="${GITHUB_BASE_REF}"
+          else
+            REF="${GITHUB_REF_NAME}"
+          fi
+          STREAM="${FUZZ_CORPUS_STREAM}"
+          if [[ "$REF" =~ ^(sisdk-[0-9]{4}\.[0-9]{1,2}) ]]; then
+            STREAM="${BASH_REMATCH[1]}"
+          fi
+          echo "stream=${STREAM}" >> "$GITHUB_OUTPUT"
+          echo "Using fuzz corpus stream: ${STREAM} (ref ${REF})"
+      - name: Set snapshot names
+        id: names
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATE="$(date -u +%Y%m%d)"
+          echo "snapshot=${DATE}-${GITHUB_RUN_ID}-openthread-fuzz-corpora.tar.gz" >> "$GITHUB_OUTPUT"
+          echo "crashes=${DATE}-${GITHUB_RUN_ID}-openthread-fuzz-artifacts.tar.gz" >> "$GITHUB_OUTPUT"
+      - name: Download latest fuzz corpus snapshot
+        id: download-latest
+        continue-on-error: true
+        uses: SiliconLabsInternal/action-jfrog-artifact/download@v1
+        with:
+          jfrog-url: 'https://artifactory.silabs.net/artifactory'
+          username: ${{ vars.SVC_NWK154_USERNAME }}
+          password: ${{ steps.vault-prod-token.outputs.artifactory_token }}
+          repository: 'nwk-15-4-generic'
+          artifact-path: fuzz-testing/corpora/${{ steps.corpus-stream.outputs.stream }}/snapshots/latest/thread-fuzz-corpora.tar.gz
+          target-path: corpus-download/latest/
+      - name: Download stable fuzz corpus
+        if: steps.download-latest.outcome != 'success'
+        uses: SiliconLabsInternal/action-jfrog-artifact/download@v1
+        with:
+          jfrog-url: 'https://artifactory.silabs.net/artifactory'
+          username: ${{ vars.SVC_NWK154_USERNAME }}
+          password: ${{ steps.vault-prod-token.outputs.artifactory_token }}
+          repository: 'nwk-15-4-generic'
+          artifact-path: fuzz-testing/corpora/${{ steps.corpus-stream.outputs.stream }}/thread-fuzz-corpora.tar.gz
+          target-path: corpus-download/stable/
+      - name: Locate corpus archive
+        id: corpus-archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Continue from the snapshot this workflow last published so inputs
+          # generated for new fuzzers are kept. Fall back to the stable corpus
+          # until that snapshot exists.
+          ARCHIVE="$(find "${GITHUB_WORKSPACE}/corpus-download/latest" -type f -name 'thread-fuzz-corpora.tar.gz' -print -quit 2>/dev/null || true)"
+          if [ -n "${ARCHIVE}" ]; then
+            echo "Using latest fuzz corpus snapshot: ${ARCHIVE}"
+          else
+            ARCHIVE="$(find "${GITHUB_WORKSPACE}/corpus-download/stable" -type f -name 'thread-fuzz-corpora.tar.gz' -print -quit 2>/dev/null || true)"
+            echo "Using stable fuzz corpus: ${ARCHIVE}"
+          fi
+          if [ -z "${ARCHIVE}" ]; then
+            echo "ERROR: thread-fuzz-corpora.tar.gz not found after download"
+            find "${GITHUB_WORKSPACE}/corpus-download" -print || true
+            exit 1
+          fi
+          echo "path=${ARCHIVE}" >> "$GITHUB_OUTPUT"
+          echo "Using corpus archive: ${ARCHIVE}"
+      - name: Build fuzzers
+        uses: ./.github/actions/fuzz
+        with:
+          command: build
+      - name: Import corpus
+        uses: ./.github/actions/fuzz
+        with:
+          command: import
+          archive: ${{ steps.corpus-archive.outputs.path }}
+      - name: Show OpenThread fuzz build logs
+        if: failure()
+        run: |
+          find build-fuzz -name '*.log' -path '*CMakeFiles*' \
+            -print -exec echo "===== {} =====" \; -exec cat {} \; || true
+      - name: Run fuzzers
+        id: fuzz-run
+        continue-on-error: true
+        timeout-minutes: 90
+        uses: ./.github/actions/fuzz
+        with:
+          command: run
+          seconds: "300"
+      - name: Minimize and export corpus snapshot
+        id: export
+        continue-on-error: true
+        uses: ./.github/actions/fuzz
+        with:
+          command: export
+          output: ${{ github.workspace }}/${{ steps.names.outputs.snapshot }}
+      - name: Stage corpus snapshot
+        id: package-snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          SNAPSHOT="${{ steps.names.outputs.snapshot }}"
+          if [ ! -f "${SNAPSHOT}" ]; then
+            echo "No corpus export archive to snapshot"
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "present=true" >> "$GITHUB_OUTPUT"
+          echo "Staged snapshot ${SNAPSHOT} (stable thread-fuzz-corpora.tar.gz was not overwritten)"
+      - name: Upload corpus snapshot
+        if: steps.package-snapshot.outputs.present == 'true'
+        uses: SiliconLabsInternal/action-jfrog-artifact/upload@v1
+        with:
+          jfrog-url: 'https://artifactory.silabs.net/artifactory'
+          username: ${{ vars.SVC_NWK154_USERNAME }}
+          password: ${{ steps.vault-prod-token.outputs.artifactory_token }}
+          repository: 'nwk-15-4-generic'
+          artifact-path: ${{ steps.names.outputs.snapshot }}
+          target-path: fuzz-testing/corpora/${{ steps.corpus-stream.outputs.stream }}/snapshots/
+      - name: Package crash artifacts
+        if: always() && steps.names.outcome == 'success'
+        id: package-crashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARTIFACT_DIR="build-fuzz/tests/fuzz/artifacts"
+          PRESENT=false
+          COUNT=0
+          NAMES=""
+          if [ -d "${ARTIFACT_DIR}" ]; then
+            mapfile -t CRASH_FILES < <(
+              find "${ARTIFACT_DIR}" -type f \( \
+                -name '*crash-*' -o -name '*leak-*' -o -name '*timeout-*' -o -name '*oom-*' \
+              \) | sort
+            )
+            COUNT="${#CRASH_FILES[@]}"
+            if [ "${COUNT}" -gt 0 ]; then
+              tar -czf "${{ steps.names.outputs.crashes }}" -C build-fuzz/tests/fuzz artifacts
+              PRESENT=true
+              NAMES="$(printf '%s\n' "${CRASH_FILES[@]}" | xargs -n1 basename | tr '\n' ' ')"
+              echo "Found ${COUNT} crash artifact file(s): ${NAMES}"
+            fi
+          fi
+          if [ "${PRESENT}" != "true" ]; then
+            echo "No crash artifact files after fuzz-run"
+          fi
+          echo "present=${PRESENT}" >> "$GITHUB_OUTPUT"
+          echo "count=${COUNT}" >> "$GITHUB_OUTPUT"
+          echo "names=${NAMES}" >> "$GITHUB_OUTPUT"
+          echo "artifactory_path=fuzz-testing/corpora/${{ steps.corpus-stream.outputs.stream }}/crashes/${{ steps.names.outputs.crashes }}" >> "$GITHUB_OUTPUT"
+      - name: Stage latest corpus snapshot
+        id: stage-latest
+        if: steps.fuzz-run.outcome == 'success' && steps.export.outcome == 'success' && steps.package-snapshot.outputs.present == 'true' && steps.package-crashes.outputs.present != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # This archive is the corpus fuzz-validate replays. It includes inputs
+          # libFuzzer saved for fuzzers that had no corpus directory yet.
+          # A run that crashed does not replace it.
+          mkdir -p "${GITHUB_WORKSPACE}/latest-corpus"
+          cp "${GITHUB_WORKSPACE}/${{ steps.names.outputs.snapshot }}" \
+            "${GITHUB_WORKSPACE}/latest-corpus/thread-fuzz-corpora.tar.gz"
+          echo "Staged latest snapshot for fuzz-validate"
+      - name: Upload latest corpus snapshot
+        if: steps.stage-latest.outcome == 'success'
+        uses: SiliconLabsInternal/action-jfrog-artifact/upload@v1
+        with:
+          jfrog-url: 'https://artifactory.silabs.net/artifactory'
+          username: ${{ vars.SVC_NWK154_USERNAME }}
+          password: ${{ steps.vault-prod-token.outputs.artifactory_token }}
+          repository: 'nwk-15-4-generic'
+          artifact-path: thread-fuzz-corpora.tar.gz
+          target-path: fuzz-testing/corpora/${{ steps.corpus-stream.outputs.stream }}/snapshots/latest/
+          working-dir: ${{ github.workspace }}/latest-corpus
+      - name: Upload crash artifacts
+        if: always() && steps.package-crashes.outputs.present == 'true'
+        uses: SiliconLabsInternal/action-jfrog-artifact/upload@v1
+        with:
+          jfrog-url: 'https://artifactory.silabs.net/artifactory'
+          username: ${{ vars.SVC_NWK154_USERNAME }}
+          password: ${{ steps.vault-prod-token.outputs.artifactory_token }}
+          repository: 'nwk-15-4-generic'
+          artifact-path: ${{ steps.names.outputs.crashes }}
+          target-path: fuzz-testing/corpora/${{ steps.corpus-stream.outputs.stream }}/crashes/
+      - name: Notify Slack of fuzz-run crashes
+        if: always() && steps.package-crashes.outputs.present == 'true'
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: 'the-thread-thread'
+          slack-message: |
+            *OpenThread fuzz-run found crash artifacts*
+            . Repo: ${{ github.repository }}
+            . Branch: ${{ github.ref_name }}
+            . Workflow: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>
+            . Count: ${{ steps.package-crashes.outputs.count }}
+            . Files: ${{ steps.package-crashes.outputs.names }}
+            . Artifacts: https://artifactory.silabs.net/artifactory/nwk-15-4-generic/${{ steps.package-crashes.outputs.artifactory_path }}
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      - name: Fail job if fuzz-run crashed, artifacts remain, or export failed
+        if: always() && (steps.fuzz-run.outcome == 'failure' || steps.export.outcome == 'failure' || steps.package-crashes.outputs.present == 'true')
+        shell: bash
+        run: |
+          echo "fuzz-run outcome: ${{ steps.fuzz-run.outcome }}"
+          echo "export outcome: ${{ steps.export.outcome }}"
+          echo "crash artifacts present: ${{ steps.package-crashes.outputs.present }}"
+          echo "crash artifact count: ${{ steps.package-crashes.outputs.count }}"
+          echo "Crash artifacts were uploaded if present. Stable thread-fuzz-corpora.tar.gz was not overwritten."
+          echo "snapshots/latest/thread-fuzz-corpora.tar.gz was not replaced."
+          if [ "${{ steps.package-crashes.outputs.present }}" = "true" ]; then
+            echo "ERROR: fuzz-run left ${{ steps.package-crashes.outputs.count }} crash/leak/timeout/oom artifact(s) after the time-box."
+          fi
+          exit 1

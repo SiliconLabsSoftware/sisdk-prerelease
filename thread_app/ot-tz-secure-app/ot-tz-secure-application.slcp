@@ -69,6 +69,9 @@ template_contribution:
   - name: memory_ram_size
     value: 0x3000
 
+  - name: default_stack_size_override
+    value: 3072
+
 tag:
   - companion:nonsecure_app # Needs a companion app and cannot be built alone
   - hwfilter:device:device_supports_thread

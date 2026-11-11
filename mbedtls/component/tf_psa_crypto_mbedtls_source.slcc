@@ -1,0 +1,45 @@
+id: tf_psa_crypto_mbedtls_source
+package: mbedtls
+label: Mbed TLS platform and utilities source in TF-PSA-Crypto
+description: >-
+  This component provides the platform and utilities source code in
+  TF-PSA-Crypto which is shared with Mbed TLS. This source code is
+  required by the upper layer Mbed TLS when included in a TrustZone
+  NonSecure application.
+category: Platform|Security|PSA Crypto
+quality: production
+ui_hints:
+  visibility: never
+provides:
+- name: tf_psa_crypto_mbedtls_source
+
+requires:
+- name: tf_psa_crypto_mbedtls
+
+source:
+- path: core/psa_util.c
+- path: drivers/builtin/src/psa_util_internal.c
+- path: extras/md.c
+- path: extras/nist_kw.c
+- path: extras/pk_ecc.c
+- path: extras/pk_rsa.c
+- path: extras/pk_wrap.c
+- path: extras/pk.c
+- path: extras/pkparse.c
+- path: extras/pkwrite.c
+- path: platform/memory_buffer_alloc.c
+- path: platform/platform_util.c
+- path: platform/platform.c
+- path: platform/threading.c
+- path: utilities/asn1parse.c
+- path: utilities/asn1write.c
+- path: utilities/base64.c
+- path: utilities/constant_time.c
+- path: utilities/oid.c
+- path: utilities/pem.c
+- path: utilities/pkcs5.c
+
+metadata:
+  sbom:
+    reference: tf_psa_crypto_sbom
+root_path: mbedtls/tf-psa-crypto

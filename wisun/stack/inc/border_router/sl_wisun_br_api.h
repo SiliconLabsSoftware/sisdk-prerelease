@@ -235,9 +235,11 @@ sl_status_t sl_wisun_br_set_lfn_parameters(const sl_wisun_br_lfn_params_t *param
  * @param[in] lfn_limit Maximum number of LFN children
  *   - **0**: LFN parenting is disabled in the Border Router
  *   - **> 0**: Maximum number of LFN children the Border Router can parent
+ * The default value is 10.
  * @param[in] lfn_support_pan  LFN parenting support in the PAN
  *   - **true**: LFN parenting is enabled in the PAN
  *   - **false**: LFN parenting is disabled in the PAN
+ * The default value is true.
  * @return SL_STATUS_OK if successful, an error code otherwise
  *
  * This function configures LFN parenting support in the Border Router

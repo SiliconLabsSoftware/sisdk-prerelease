@@ -1,0 +1,25 @@
+id: zw_log_output_iostream
+label: Z-Wave Log Output (sl_log iostream)
+category: Z-Wave
+description: >
+  Internal output implementation of the Z-Wave Logging component. It requires an sl_log
+  iostream backend (log_backend_iostream_formatted or log_backend_iostream_compact)
+  and the console iostream: VCOM on SoC applications, SWO on NCP applications.
+ui_hints:
+  visibility: never
+package: zwave
+quality: production
+metadata:
+  sbom:
+    reference: zw_sbom_license
+requires:
+- name: log_backend_iostream_impl
+- name: iostream_eusart
+  condition: [zaf_soc]
+- name: iostream_swo
+  condition: [zaf_ncp]
+- name: zw_ncp_iostream_console
+  condition: [zaf_ncp]
+provides:
+- name: zw_log_output_iostream
+root_path: zwave

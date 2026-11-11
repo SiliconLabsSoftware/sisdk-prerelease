@@ -33,6 +33,11 @@ sl_rail_handle_t sl_zigbee_rail_mux_aux_get_default_rail_handle(void)
   return sli_zigbee_stack_rail_mux_aux_get_default_rail_handle();
 }
 
+sl_rail_status_t sl_zigbee_rail_mux_aux_register_and_start_rx(uint8_t channel)
+{
+  return sli_zigbee_stack_rail_mux_aux_register_and_start_rx(channel);
+}
+
 sl_rail_status_t sl_zigbee_rail_mux_aux_register_protocol(sl_rail_handle_t *out_rail_handle,
                                                           sl_rail_config_t *rail_config,
                                                           sl_rail_init_complete_callback_t init_complete_callback)
@@ -64,13 +69,6 @@ sl_rail_status_t sl_zigbee_rail_mux_aux_start_tx(sl_rail_handle_t rail_handle,
                                                 channel,
                                                 options,
                                                 scheduler_info);
-}
-
-sl_rail_status_t sl_zigbee_rail_mux_aux_try_register_and_start_rx(uint16_t aux_pan,
-                                                                  uint8_t channel)
-{
-  return sli_zigbee_stack_rail_mux_aux_try_register_and_start_rx(aux_pan,
-                                                                 channel);
 }
 
 sl_rail_status_t sl_zigbee_rail_mux_aux_unregister_protocol(void)

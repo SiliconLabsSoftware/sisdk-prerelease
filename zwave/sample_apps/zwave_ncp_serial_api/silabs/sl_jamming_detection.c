@@ -408,7 +408,7 @@ static void jamming_detection_task(void *pvParameters)
       if (jamming_state_changed) {
         if (NULL != jamming_detection_config.report_callback) {
           status = jamming_detection_config.report_callback(&report);
-          ZPAL_LOG_DEBUG(ZPAL_LOG_APP_JAMMING, "3. Callback invoked, jamming state changed (%s)\n", (status == ZPAL_STATUS_OK) ? "success" : "failure");
+          ZPAL_LOG_DEBUG(ZPAL_LOG_APP_JAMMING, "3. Callback invoked, jamming state changed with status:%d\n", status);
         }
 
         /* we need to reset the jamming evaluation interval at every jamming state change */
@@ -420,7 +420,7 @@ static void jamming_detection_task(void *pvParameters)
       if (period_elapsed && !jamming_state_changed && (report.channel_bitmap != 0u)) {
         if (NULL != jamming_detection_config.report_callback) {
           status = jamming_detection_config.report_callback(&report);
-          ZPAL_LOG_DEBUG(ZPAL_LOG_APP_JAMMING, "3. Callback invoked, periodic (%s)\n", (status == ZPAL_STATUS_OK) ? "success" : "failure");
+          ZPAL_LOG_DEBUG(ZPAL_LOG_APP_JAMMING, "3. Callback invoked, periodic state with status:%d\n", status);
         }
       }
 

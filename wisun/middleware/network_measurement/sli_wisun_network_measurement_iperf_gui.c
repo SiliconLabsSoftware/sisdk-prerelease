@@ -72,7 +72,7 @@
 Remote Address: %s\n\
 Bandwidth:  %"PRIu32"\n\
 Buffer Length: %u\n\
-Duration: %u\n\
+Duration: %"PRIu32"\n\
 Interval: %u\n"
 
 /// Remote address structure
@@ -439,7 +439,7 @@ static void _iperf_setting_bandwidth_form(void *args)
 {
   (void) args;
   sl_gui_init_all_widget();
-  snprintf(_str_buff, STR_BUFF_SIZE, "Bandwidth %d [Kbits/s]", _options.duration_ms);
+  snprintf(_str_buff, STR_BUFF_SIZE, "Bandwidth %"PRIu32" [Kbits/s]", _options.bandwidth);
   sl_gui_title_set_label(_str_buff);
   sl_gui_title_update();
   for (uint8_t i = 0; i < MAX_BANDWIDTH_OPTIONS; i++) {
@@ -512,7 +512,7 @@ static void _iperf_setting_duration_form(void *args)
 {
   (void) args;
   sl_gui_init_all_widget();
-  snprintf(_str_buff, STR_BUFF_SIZE, "Duration %d [s]", _options.duration_ms);
+  snprintf(_str_buff, STR_BUFF_SIZE, "Duration %"PRIu32" [ms]", (_options.duration_ms));
   sl_gui_title_set_label(_str_buff);
   sl_gui_title_update();
   for (uint8_t i = 0; i < MAX_DURATION_OPTIONS; i++) {
@@ -533,7 +533,7 @@ static void _iperf_setting_duration_form(void *args)
 
 static void _set_duration(void *args)
 {
-  _options.duration_ms = *(uint16_t *)args;
+  _options.duration_ms = *(uint32_t *)args;
   sl_display_renderer(_iperf_setting_main_form, NULL, 0);
 }
 

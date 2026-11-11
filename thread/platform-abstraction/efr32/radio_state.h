@@ -205,6 +205,32 @@ bool sli_ot_radio_state_is_sleep_pending(void);
 void sli_ot_radio_state_set_sleep_pending(bool aPending);
 
 // ============================================================================
+// Deferred Scheduled RX State
+// ============================================================================
+
+/**
+ * Check if an otPlatRadioReceiveAt() request has been deferred
+ *
+ * @returns True if a scheduled RX is deferred, false otherwise
+ */
+bool sli_ot_radio_state_is_scheduled_rx_deferred(void);
+
+/**
+ * Set or clear the deferred scheduled-RX flag
+ *
+ * @param[in] aDeferred  True to set, false to clear
+ */
+void sli_ot_radio_state_set_scheduled_rx_deferred(bool aDeferred);
+
+/**
+ * Check if a scheduled-RX request is registered, whether handed to RAIL
+ * or still deferred.
+ *
+ * @returns True if a scheduled-RX request is registered, false otherwise
+ */
+bool sli_ot_radio_state_has_scheduled_rx(void);
+
+// ============================================================================
 // CSMA State
 // ============================================================================
 

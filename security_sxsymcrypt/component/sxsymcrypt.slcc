@@ -21,26 +21,26 @@ requires:
 - name: sli_psec_osal
 
 source:
-- path: src/blkcipher.c
-- path: src/channel.c
-- path: src/cmdma.c
-- path: src/cmmask.c
-- path: src/keyref.c
-- path: src/aead.c
-- path: src/cmac.c
-- path: src/chachapoly.c
+- path: sxsymcrypt/src/blkcipher.c
+- path: sxsymcrypt/src/channel.c
+- path: sxsymcrypt/src/cmdma.c
+- path: sxsymcrypt/src/cmmask.c
+- path: sxsymcrypt/src/keyref.c
+- path: sxsymcrypt/src/aead.c
+- path: sxsymcrypt/src/cmac.c
+- path: sxsymcrypt/src/chachapoly.c
   condition: [device_generic_family_sixx353]
-- path: src/chachapoly.c
+- path: sxsymcrypt/src/chachapoly.c
   condition: [device_family_sixg300xiwifi74000]
-- path: src/hmac.c
-- path: src/mac.c
-- path: src/hash.c
-- path: src/interrupts.c
+- path: sxsymcrypt/src/hmac.c
+- path: sxsymcrypt/src/mac.c
+- path: sxsymcrypt/src/hash.c
+- path: sxsymcrypt/src/interrupts.c
 - path: src/platform/silicon_labs/sli_sxsymcrypt_engine_management.c
 - path: src/platform/silicon_labs/sli_sxsymcrypt_hardware_interaction.c
 
 include:
-- path: include
+- path: sxsymcrypt/include
   file_list:
   - path: sxsymcrypt/aes.h
   - path: sxsymcrypt/aead.h
@@ -64,7 +64,7 @@ include:
   - path: sxsymcrypt/memdiff.h
   - path: sxsymcrypt/interrupts.h
 
-- path: src
+- path: sxsymcrypt/src
   file_list:
   - path: ba431regs.h
   - path: blkcipherdefs.h

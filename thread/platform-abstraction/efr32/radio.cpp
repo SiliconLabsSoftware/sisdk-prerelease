@@ -40,6 +40,7 @@
 #include "radio_interface.h"
 #include "radio_security.h"
 #include "radio_state.h"
+#include "sli_ot_instance.h"
 #include <assert.h>
 #include <openthread-core-config.h>
 #include <openthread-system.h>
@@ -172,9 +173,53 @@ static otError          sReceiveError;
 static radioFrame  sTransmitBuffer[RADIO_REQUEST_BUFFER_COUNT];
 static uint8_t     sTransmitPsdu[RADIO_REQUEST_BUFFER_COUNT][IEEE802154_MAX_LENGTH];
 static radioFrame *sCurrentTxPacket = nullptr;
-static uint8_t     sLastLqi         = 0;
-static int8_t      sLastRssi        = 0;
-otExtAddress       sExtAddress[RADIO_EXT_ADDR_COUNT];
+
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+// otPlatRadioReceiveAt() request held while the radio is transmitting or
+// receiving a frame; resumed by startDeferredScheduledRx() on TX/RX completion.
+static struct
+{
+    otInstance   *mInstance;
+    uint8_t       mChannel;
+    otRadioTime32 mStart;
+    uint32_t      mDuration;
+} sDeferredScheduledRx;
+
+// Last request accepted by otPlatRadioReceiveAt(). The stack may submit the
+// same window repeatedly; a repeat submission close to the start time is
+// rejected by RAIL as SL_RAIL_STATUS_INVALID_CALL and blocks for several
+// milliseconds, long enough to lose the window.
+static struct
+{
+    uint8_t       mChannel;
+    otRadioTime32 mStart;
+    uint32_t      mDuration;
+    bool          mValid;
+} sScheduledRx;
+
+static inline bool scheduledRxEquals(uint8_t aChannel, otRadioTime32 aStart, uint32_t aDuration)
+{
+    return sScheduledRx.mValid && sScheduledRx.mChannel == aChannel && sScheduledRx.mStart == aStart
+           && sScheduledRx.mDuration == aDuration;
+}
+
+static inline void updateScheduledRx(uint8_t aChannel, otRadioTime32 aStart, uint32_t aDuration)
+{
+    sScheduledRx.mChannel  = aChannel;
+    sScheduledRx.mStart    = aStart;
+    sScheduledRx.mDuration = aDuration;
+    sScheduledRx.mValid    = true;
+}
+
+static inline void invalidateScheduledRx(void)
+{
+    sScheduledRx.mValid = false;
+}
+#endif
+
+static uint8_t sLastLqi  = 0;
+static int8_t  sLastRssi = 0;
+otExtAddress   sExtAddress[RADIO_EXT_ADDR_COUNT];
 
 #define CSL_CSMA_BACKOFF_TIME_IN_US 150
 sl_rail_csma_config_t csmaConfig    = SL_RAIL_CSMA_CONFIG_802_15_4_2003_2P4_GHZ_OQPSK_CSMA;
@@ -348,6 +393,7 @@ static void efr32PhyStackInit(void);
 
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 static void updateIeInfoTxFrame(uint32_t shrTxTime);
+static void startDeferredScheduledRx(void);
 #endif
 
 #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
@@ -375,16 +421,6 @@ static otError skipRxPacketLengthBytes(sl_rail_rx_packet_info_t *pPacketInfo);
 // This section can be extracted to a separate file for future modularization.
 // These are timing-critical functions that need to be inline-optimized.
 //==============================================================================
-
-// Internal state flags
-#define FLAG_RADIO_INIT_DONE 0x00000001
-#define FLAG_ONGOING_TX_DATA 0x00000002
-#define FLAG_ONGOING_TX_ACK 0x00000004
-#define FLAG_WAITING_FOR_ACK 0x00000008
-#define FLAG_CURRENT_TX_USE_CSMA 0x00000010
-#define FLAG_SCHEDULED_RX_PENDING 0x00000020
-#define FLAG_SCHEDULED_TX_PENDING 0x00000040
-#define FLAG_SLEEP_PENDING 0x00000080
 
 // Internal state variables
 static volatile uint32_t sMiscRadioState = 0;
@@ -532,6 +568,21 @@ void sli_ot_radio_state_set_sleep_pending(bool aPending)
     setInternalFlag(FLAG_SLEEP_PENDING, aPending);
 }
 
+bool sli_ot_radio_state_is_scheduled_rx_deferred(void)
+{
+    return getInternalFlag(FLAG_SCHEDULED_RX_DEFERRED);
+}
+
+void sli_ot_radio_state_set_scheduled_rx_deferred(bool aDeferred)
+{
+    setInternalFlag(FLAG_SCHEDULED_RX_DEFERRED, aDeferred);
+}
+
+bool sli_ot_radio_state_has_scheduled_rx(void)
+{
+    return getInternalFlag(FLAG_SCHEDULED_RX_PENDING | FLAG_SCHEDULED_RX_DEFERRED);
+}
+
 bool sli_ot_radio_state_is_using_csma(void)
 {
     return getInternalFlag(FLAG_CURRENT_TX_USE_CSMA);
@@ -643,12 +694,18 @@ void sli_ot_radio_state_init(void)
 {
     sMiscRadioState = 0;
     sEmPendingData  = false;
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+    invalidateScheduledRx();
+#endif
 }
 
 void sli_ot_radio_state_deinit(void)
 {
     sMiscRadioState = 0;
     sEmPendingData  = false;
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+    invalidateScheduledRx();
+#endif
 }
 
 //==============================================================================
@@ -816,6 +873,16 @@ void sli_ot_radio_events_process_callback(sl_rail_handle_t aRailHandle, sl_rail_
         & (SL_RAIL_EVENT_RX_PACKET_ABORTED | SL_RAIL_EVENT_RX_ADDRESS_FILTERED | SL_RAIL_EVENT_RX_FIFO_OVERFLOW))
     {
         processRxFilteredEvent();
+    }
+#endif
+
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+    // Resume a deferred RX: these paths do not run packetReceivedCallback().
+    if (aEvents
+        & (SL_RAIL_EVENT_RX_FRAME_ERROR | SL_RAIL_EVENT_RX_PACKET_ABORTED | SL_RAIL_EVENT_RX_ADDRESS_FILTERED
+           | SL_RAIL_EVENT_RX_FIFO_OVERFLOW))
+    {
+        startDeferredScheduledRx();
     }
 #endif
 
@@ -1102,6 +1169,9 @@ static inline void processScheduledRxEvent(void)
 static inline void processScheduledRxEndMissedEvent(void)
 {
     sli_ot_radio_state_set_internal_flag(FLAG_SCHEDULED_RX_PENDING | EVENT_SCHEDULED_RX_STARTED, false);
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+    invalidateScheduledRx();
+#endif
     sli_ot_radio_state_set_idle();
 }
 
@@ -1203,6 +1273,73 @@ static otError radioScheduleRx(uint8_t aChannel, uint32_t aStart, uint32_t aDura
     sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_LISTEN, 0U);
 exit:
     return error;
+}
+
+// Starts the scheduled RX that otPlatRadioReceiveAt() held for an ongoing
+// TX or RX. Drops the request when the window has elapsed. On transient
+// failures (band reload, RAIL schedule) leaves DEFERRED set so the next
+// tick retries. A scheduled TX on the shared slot also defers resume.
+SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
+static void startDeferredScheduledRx(void)
+{
+    if (!sli_ot_radio_state_is_scheduled_rx_deferred() || sli_ot_radio_state_is_transmitting()
+        || sli_ot_radio_state_is_tx_scheduled() || sli_ot_radio_interface_rail_is_receiving_frame())
+    {
+        return;
+    }
+
+    // Signed difference handles otRadioTime32 roll-over; a negative value
+    // means aStart is still in the future.
+    uint32_t now        = sl_rail_get_time(SL_RAIL_EFR32_HANDLE);
+    int32_t  sinceStart = (int32_t)(now - sDeferredScheduledRx.mStart);
+    if (sinceStart >= 0 && (uint32_t)sinceStart >= sDeferredScheduledRx.mDuration)
+    {
+        sli_ot_radio_state_set_scheduled_rx_deferred(false);
+        sli_ot_radio_state_set_scheduled_rx_pending(false);
+        invalidateScheduledRx();
+        return;
+    }
+
+    int8_t txPower = sl_get_tx_power_for_current_channel(sDeferredScheduledRx.mInstance);
+    if (sli_ot_radio_interface_load_channel_config(sDeferredScheduledRx.mChannel, txPower) != OT_ERROR_NONE)
+    {
+        // Keep DEFERRED set so the next tick retries.
+        sli_ot_radio_state_set_scheduled_rx_pending(false);
+        return;
+    }
+
+    // Re-sample after load_channel_config(): a cross-band reload idles RAIL
+    // long enough to push past aStart.
+    now        = sl_rail_get_time(SL_RAIL_EFR32_HANDLE);
+    sinceStart = (int32_t)(now - sDeferredScheduledRx.mStart);
+    if (sinceStart >= 0 && (uint32_t)sinceStart >= sDeferredScheduledRx.mDuration)
+    {
+        sli_ot_radio_state_set_scheduled_rx_deferred(false);
+        sli_ot_radio_state_set_scheduled_rx_pending(false);
+        invalidateScheduledRx();
+        return;
+    }
+
+    // If aStart has already passed, run what remains of the window; the
+    // elapsed guard above keeps duration > 0.
+    uint32_t startTime = sDeferredScheduledRx.mStart;
+    uint32_t duration  = sDeferredScheduledRx.mDuration;
+    if (sinceStart > 0)
+    {
+        startTime = now;
+        duration  = sDeferredScheduledRx.mDuration - (uint32_t)sinceStart;
+    }
+
+    // Set PENDING before scheduling (same as in otPlatRadioReceiveAt()).
+    sli_ot_radio_state_set_scheduled_rx_pending(true);
+    if (radioScheduleRx(sDeferredScheduledRx.mChannel, startTime, duration) != OT_ERROR_NONE)
+    {
+        // Keep DEFERRED set so the next tick retries.
+        sli_ot_radio_state_set_scheduled_rx_pending(false);
+        return;
+    }
+
+    sli_ot_radio_state_set_scheduled_rx_deferred(false);
 }
 #endif // (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 
@@ -1469,6 +1606,14 @@ otError otPlatRadioReceive(otInstance *aInstance, uint8_t aChannel)
                     error = OT_ERROR_INVALID_STATE);
 
     sli_ot_radio_state_set_sleep_pending(false);
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+    if (sli_ot_radio_state_has_scheduled_rx())
+    {
+        sli_ot_radio_state_set_scheduled_rx_deferred(false);
+        sli_ot_radio_state_set_scheduled_rx_pending(false);
+        invalidateScheduledRx();
+    }
+#endif
 
 #if (FAST_CHANNEL_SWITCHING_SUPPORT && OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE)
     sli_ot_radio_channel_switching_configure(aInstance, aChannel);
@@ -1480,7 +1625,6 @@ otError otPlatRadioReceive(otInstance *aInstance, uint8_t aChannel)
 
     status = sli_ot_radio_interface_set_rx(aChannel);
     otEXPECT_ACTION(status == SL_RAIL_STATUS_NO_ERROR, error = OT_ERROR_FAILED);
-    sli_ot_radio_state_set_scheduled_rx_pending(false);
 
     sReceive.frame.mChannel    = aChannel;
     sReceiveAck.frame.mChannel = aChannel;
@@ -1494,27 +1638,68 @@ otError otPlatRadioReceiveAt(otInstance *aInstance, uint8_t aChannel, otRadioTim
 {
     otError error = OT_ERROR_NONE;
     int8_t  txPower;
+    bool    deferred;
+    CORE_DECLARE_IRQ_STATE;
 
     otEXPECT_ACTION(sli_ot_radio_state_is_initialized(), error = OT_ERROR_INVALID_STATE);
+    otEXPECT_ACTION(sl_ot_rtos_task_can_access_pal(), error = OT_ERROR_REJECTED);
 
-    txPower = sl_get_tx_power_for_current_channel(aInstance);
+    // Repeat request for a window already handed to RAIL: no-op (see
+    // sScheduledRx).
+    otEXPECT(!(sli_ot_radio_state_is_rx_scheduled() && scheduledRxEquals(aChannel, aStart, aDuration)));
 
-    // We can only have one schedule request i.e. either Rx or Tx as they use the
-    // same RAIL resources.
+    // A new ReceiveAt supersedes any previous deferred window, including
+    // when this call is rejected below.
+    sli_ot_radio_state_set_scheduled_rx_deferred(false);
+
+    // Validate the channel up front so the deferred path cannot accept a
+    // request that would only fail later inside startDeferredScheduledRx().
+    otEXPECT_ACTION(sli_ot_radio_interface_get_band_config(aChannel) != nullptr, error = OT_ERROR_INVALID_ARGS);
+
+    // Scheduled RX and scheduled TX share the same RAIL scheduler slot.
     otEXPECT_ACTION(!sli_ot_radio_state_is_tx_scheduled(), error = OT_ERROR_FAILED);
 
-    otEXPECT_ACTION(sl_ot_rtos_task_can_access_pal(), error = OT_ERROR_REJECTED);
-    OT_UNUSED_VARIABLE(aInstance);
+    // Transmitting or receiving a frame: hold the window. load_channel_config()
+    // below idles RAIL on a band change and would abort the frame;
+    // startDeferredScheduledRx() resumes from TX/RX completion. The in-flight
+    // check and the DEFERRED publish must be atomic, otherwise a RAIL IRQ in
+    // between would drop the request.
+    CORE_ENTER_ATOMIC();
+    deferred = sli_ot_radio_state_is_transmitting() || sli_ot_radio_interface_rail_is_receiving_frame();
+    if (deferred)
+    {
+        sDeferredScheduledRx.mInstance = aInstance;
+        sDeferredScheduledRx.mChannel  = aChannel;
+        sDeferredScheduledRx.mStart    = aStart;
+        sDeferredScheduledRx.mDuration = aDuration;
+        sli_ot_radio_state_set_scheduled_rx_deferred(true);
+        updateScheduledRx(aChannel, aStart, aDuration);
+    }
+    CORE_EXIT_ATOMIC();
 
-    error = sli_ot_radio_interface_load_channel_config(aChannel, txPower);
+    if (deferred)
+    {
+        sReceive.frame.mChannel    = aChannel;
+        sReceiveAck.frame.mChannel = aChannel;
+        ExitNow();
+    }
+
+    txPower = sl_get_tx_power_for_current_channel(aInstance);
+    error   = sli_ot_radio_interface_load_channel_config(aChannel, txPower);
     otEXPECT(error == OT_ERROR_NONE);
 
     // Set the flag first and then schedule the Rx as the rail scheduler can trigger the events even before
     // sl_rail_start_scheduled_rx() API returns the status if start time is too close to the current time which could
     // otherwise cause the race condition.
     sli_ot_radio_state_set_scheduled_rx_pending(true);
+    updateScheduledRx(aChannel, aStart, aDuration);
     error = radioScheduleRx(aChannel, aStart, aDuration);
-    otEXPECT_ACTION(error == OT_ERROR_NONE, sli_ot_radio_state_set_scheduled_rx_pending(false));
+    if (error != OT_ERROR_NONE)
+    {
+        sli_ot_radio_state_set_scheduled_rx_pending(false);
+        invalidateScheduledRx();
+        ExitNow();
+    }
 
     // Set channel for global receive state
     sReceive.frame.mChannel    = aChannel;
@@ -1765,11 +1950,15 @@ void txCurrentPacket(void)
 #endif
 
     // Prioritize the Tx over schedule Rx to avoid missing data check-ins such as data polls.
-    if (sli_ot_radio_state_is_rx_scheduled())
+    // Also cancels a deferred record not yet handed to RAIL.
+    if (sli_ot_radio_state_has_scheduled_rx())
     {
         sli_ot_radio_interface_rail_idle();
         sli_ot_radio_state_set_scheduled_rx_pending(false);
         sli_ot_radio_state_set_scheduled_rx_started(false);
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+        sli_ot_radio_state_set_scheduled_rx_deferred(false);
+#endif
     }
 
     if (sCurrentTxPacket->frame.mInfo.mTxInfo.mTxDelay == 0)
@@ -2384,6 +2573,10 @@ exit:
 
         (void)sl_memory_pool_free(&sRxPacketMemPoolHandle, rxPacketBuf);
     }
+
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+    startDeferredScheduledRx();
+#endif
 }
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
@@ -2422,6 +2615,10 @@ void packetSentCallback(bool isAck)
         railDebugCounters.mRailEventPacketSent++;
 #endif
     }
+
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+    startDeferredScheduledRx();
+#endif
 }
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
@@ -2451,6 +2648,10 @@ void txFailedCallback(bool isAck, uint32_t status)
         sli_ot_radio_state_clear_tx_data_and_wait_for_ack();
         sli_ot_radio_interface_rail_yield_radio();
     }
+
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+    startDeferredScheduledRx();
+#endif
 }
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
@@ -2478,6 +2679,10 @@ void ackTimeoutCallback(void)
     sli_ot_radio_state_set_waiting_for_ack(false);
     sli_ot_radio_interface_rail_yield_radio();
     sli_ot_radio_state_set_em_pending_data(false);
+
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+    startDeferredScheduledRx();
+#endif
 }
 
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
@@ -2730,7 +2935,7 @@ static void processBroadcastRxPacket(void)
     for (uint8_t i = 0; i < RADIO_INTERFACE_COUNT; i++)
     {
         otInstance *instance = sli_ot_radio_instance_get(i);
-        if (instance != nullptr && otInstanceIsInitialized(instance))
+        if (sli_ot_instance_is_initialized(instance))
         {
             deliverRxPacketToInstance(instance);
         }
@@ -2874,6 +3079,16 @@ void efr32RadioProcess(otInstance *aInstance)
     {
         sli_ot_radio_interface_complete_sleep();
     }
+
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+    // Drain a scheduled RX deferred by otPlatRadioReceiveAt() when the
+    // completion callbacks all returned early (e.g. RAIL still receiving).
+    if (sli_ot_radio_state_is_scheduled_rx_deferred() && !sli_ot_radio_state_is_transmitting()
+        && !sli_ot_radio_state_is_tx_scheduled() && !sli_ot_radio_interface_rail_is_receiving_frame())
+    {
+        startDeferredScheduledRx();
+    }
+#endif
 }
 
 //------------------------------------------------------------------------------

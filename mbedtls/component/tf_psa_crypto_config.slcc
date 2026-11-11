@@ -23,6 +23,7 @@ include:
   - path: tf-psa-crypto/version.h
 - path: drivers/builtin/include
   file_list:
+  - path: mbedtls/private/crypto_adjust_config_enable_builtins.h
   - path: mbedtls/private/crypto_adjust_config_tweak_builtins.h
 
 metadata:

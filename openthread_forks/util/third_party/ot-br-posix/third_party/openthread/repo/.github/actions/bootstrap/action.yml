@@ -1,0 +1,18 @@
+name: Bootstrap OpenThread
+description: >-
+  Runs bootstrap script with appropriate permissions.
+
+runs:
+  using: composite
+  steps:
+    - id: bootstrap
+      shell: bash
+      run: |
+        # Create a sudo wrapper when running as root
+        if ! command -v sudo &>/dev/null; then
+          echo '#!/bin/sh' > /usr/local/bin/sudo
+          echo 'exec env "$@"' >> /usr/local/bin/sudo
+          chmod +x /usr/local/bin/sudo
+        fi
+
+        ./script/bootstrap

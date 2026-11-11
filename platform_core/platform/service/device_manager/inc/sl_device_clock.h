@@ -60,76 +60,83 @@ extern "C" {
 // ----------------------------------------------------------------------------
 // ENUMS
 
+/*
+ * Oscillator and clock-branch enum values are a stable ABI (uint8_t via
+ * SL_ENUM). Assign every member explicitly. Always append new members before
+ * *_INVALID. Never reorder or renumber existing members. *_INVALID is 255.
+ *
+ */
+
 /// Oscillators
 #if !defined(SL_CATALOG_DEVICE_CLOCK_INTERNAL_PRESENT)
 SL_ENUM(sl_oscillator_t) {
-  SL_OSCILLATOR_FSRCO,      ///< FSRCO Oscillator
-  SL_OSCILLATOR_HFRCODPLL,  ///< HFRCODPLL Oscillator
-  SL_OSCILLATOR_HFXO,       ///< HFXO Oscillator
-  SL_OSCILLATOR_HFRCOEM23,  ///< HFRCOEM23 Oscillator
-  SL_OSCILLATOR_RFFPLL,     ///< RFFPLL Oscillator
-  SL_OSCILLATOR_USBPLL,     ///< USBPLL Oscillator
-  SL_OSCILLATOR_SOCPLL0,    ///< SOCPLL0 Oscillator
-  SL_OSCILLATOR_LFXO,       ///< LFXO Oscillator
-  SL_OSCILLATOR_LFRCO,      ///< LFRCO Oscillator
-  SL_OSCILLATOR_ULFRCO,     ///< ULFRCO Oscillator
-  SL_OSCILLATOR_CLKIN0,     ///< CLKIN0 Oscillator
-  SL_OSCILLATOR_FLPLL,      ///< FLPLL Oscillator
-  SL_OSCILLATOR_INVALID     ///< INVALID Oscillator
+  SL_OSCILLATOR_FSRCO = 0,      ///< FSRCO Oscillator
+  SL_OSCILLATOR_HFRCODPLL = 1,  ///< HFRCODPLL Oscillator
+  SL_OSCILLATOR_HFXO = 2,       ///< HFXO Oscillator
+  SL_OSCILLATOR_HFRCOEM23 = 3,  ///< HFRCOEM23 Oscillator
+  SL_OSCILLATOR_RFFPLL = 4,     ///< RFFPLL Oscillator
+  SL_OSCILLATOR_USBPLL = 5,     ///< USBPLL Oscillator
+  SL_OSCILLATOR_SOCPLL0 = 6,    ///< SOCPLL0 Oscillator
+  SL_OSCILLATOR_LFXO = 7,       ///< LFXO Oscillator
+  SL_OSCILLATOR_LFRCO = 8,      ///< LFRCO Oscillator
+  SL_OSCILLATOR_ULFRCO = 9,     ///< ULFRCO Oscillator
+  SL_OSCILLATOR_CLKIN0 = 10,    ///< CLKIN0 Oscillator
+  SL_OSCILLATOR_FLPLL = 11,     ///< FLPLL Oscillator
+  SL_OSCILLATOR_INVALID = 255   ///< INVALID Oscillator
 };
 #endif
 
 /// Clock Branches
 #if !defined(SL_CATALOG_DEVICE_CLOCK_INTERNAL_PRESENT)
 SL_ENUM(sl_clock_branch_t) {
-  SL_CLOCK_BRANCH_SYSCLK,        ///< SYSCLK Clock Branch
-  SL_CLOCK_BRANCH_HCLK,          ///< HCLK Clock Branch
-  SL_CLOCK_BRANCH_HCLKRADIO,     ///< HCLK Radio Clock Branch
-  SL_CLOCK_BRANCH_PCLK,          ///< PCLK Clock Branch
-  SL_CLOCK_BRANCH_LSPCLK,        ///< LSPCLK Clock Branch
-  SL_CLOCK_BRANCH_TRACECLK,      ///< TRACECLK Clock Branch
-  SL_CLOCK_BRANCH_ADCCLK,        ///< ADCCLK Clock Branch
-  SL_CLOCK_BRANCH_EXPORTCLK,     ///< EXPORTCLK Clock Branch
-  SL_CLOCK_BRANCH_EM01GRPACLK,   ///< EM01GRPACLK Clock Branch
-  SL_CLOCK_BRANCH_EM01GRPBCLK,   ///< EM01GRPBCLK Clock Branch
-  SL_CLOCK_BRANCH_EM01GRPCCLK,   ///< EM01GRPCCLK Clock Branch
-  SL_CLOCK_BRANCH_EM01GRPDCLK,   ///< EM01GRPDCLK Clock Branch
-  SL_CLOCK_BRANCH_EM23GRPACLK,   ///< EM23GRPACLK Clock Branch
-  SL_CLOCK_BRANCH_EM4GRPACLK,    ///< EM4GRPACLK Clock Branch
-  SL_CLOCK_BRANCH_QSPISYSCLK,    ///< QSPISYSCLK Clock Branch
-  SL_CLOCK_BRANCH_IADCCLK,       ///< IADCCLK Clock Branch
-  SL_CLOCK_BRANCH_WDOG0CLK,      ///< WDOG0CLK Clock Branch
-  SL_CLOCK_BRANCH_WDOG1CLK,      ///< WDOG1CLK Clock Branch
-  SL_CLOCK_BRANCH_RTCCCLK,       ///< RTCCCLK Clock Branch
-  SL_CLOCK_BRANCH_SYSRTCCLK,     ///< SYSRTCCLK Clock Branch
-  SL_CLOCK_BRANCH_EUART0CLK,     ///< EUART0CLK Clock Branch
-  SL_CLOCK_BRANCH_EUSART0CLK,    ///< EUSART0CLK Clock Branch
-  SL_CLOCK_BRANCH_EUSART1CLK,    ///< EUSART1CLK Clock Branch
-  SL_CLOCK_BRANCH_DPLLREFCLK,    ///< DPLLREFCLK Clock Branch
-  SL_CLOCK_BRANCH_I2C0CLK,       ///< I2C0CLK Clock Branch
-  SL_CLOCK_BRANCH_LCDCLK,        ///< LCDCLK Clock Branch
-  SL_CLOCK_BRANCH_PIXELRZCLK,    ///< PIXELRZCLK Clock Branch
-  SL_CLOCK_BRANCH_PCNT0CLK,      ///< PCNT0CLK Clock Branch
-  SL_CLOCK_BRANCH_PRORTCCLK,     ///< PCNT0CLK Clock Branch
-  SL_CLOCK_BRANCH_SYSTICKCLK,    ///< SYSTICKCLK Clock Branch
-  SL_CLOCK_BRANCH_LESENSEHFCLK,  ///< LESENSEHFCLK Clock Branch
-  SL_CLOCK_BRANCH_VDAC0CLK,      ///< VDAC0CLK Clock Branch
-  SL_CLOCK_BRANCH_VDAC1CLK,      ///< VDAC1CLK Clock Branch
-  SL_CLOCK_BRANCH_USB0CLK,       ///< USB0CLK Clock Branch
-  SL_CLOCK_BRANCH_FLPLLREFCLK,   ///< FLPLLREFCLK Clock Branch
-  SL_CLOCK_BRANCH_PDM0CLK,       ///< PDM0CLK Clock Branch
-  SL_CLOCK_BRANCH_CAN0CLK,       ///< CAN0CLK Clock Branch
-  SL_CLOCK_BRANCH_CAN1CLK,       ///< CAN1CLK Clock Branch
-  SL_CLOCK_BRANCH_HCLKDIVN,      ///< HCLKDIVN Clock Branch
-  SL_CLOCK_BRANCH_CPUCLK,        ///< CPUCLK Clock Branch
-  SL_CLOCK_BRANCH_ADC0CLK,       ///< ADC0CLK Clock Branch
-  SL_CLOCK_BRANCH_ADC1CLK,       ///< ADC1CLK Clock Branch
-  SL_CLOCK_BRANCH_LEDSINK0CLK,   ///< LEDSINK0CLK Clock Branch
-  SL_CLOCK_BRANCH_ADCHS0CLK,     ///< ADCHS0CLK Clock Branch
-  SL_CLOCK_BRANCH_ADCHS1CLK,     ///< ADCHS1CLK Clock Branch
-  SL_CLOCK_BRANCH_ADCHS2CLK,     ///< ADCHS2CLK Clock Branch
-  SL_CLOCK_BRANCH_ADCHS3CLK,     ///< ADCHS3CLK Clock Branch
-  SL_CLOCK_BRANCH_INVALID        ///< INVALID Clock Branch
+  SL_CLOCK_BRANCH_SYSCLK = 0,         ///< SYSCLK Clock Branch
+  SL_CLOCK_BRANCH_HCLK = 1,           ///< HCLK Clock Branch
+  SL_CLOCK_BRANCH_HCLKRADIO = 2,      ///< HCLK Radio Clock Branch
+  SL_CLOCK_BRANCH_PCLK = 3,           ///< PCLK Clock Branch
+  SL_CLOCK_BRANCH_LSPCLK = 4,         ///< LSPCLK Clock Branch
+  SL_CLOCK_BRANCH_TRACECLK = 5,       ///< TRACECLK Clock Branch
+  SL_CLOCK_BRANCH_ADCCLK = 6,         ///< ADCCLK Clock Branch
+  SL_CLOCK_BRANCH_EXPORTCLK = 7,      ///< EXPORTCLK Clock Branch
+  SL_CLOCK_BRANCH_EM01GRPACLK = 8,    ///< EM01GRPACLK Clock Branch
+  SL_CLOCK_BRANCH_EM01GRPBCLK = 9,    ///< EM01GRPBCLK Clock Branch
+  SL_CLOCK_BRANCH_EM01GRPCCLK = 10,   ///< EM01GRPCCLK Clock Branch
+  SL_CLOCK_BRANCH_EM01GRPDCLK = 11,   ///< EM01GRPDCLK Clock Branch
+  SL_CLOCK_BRANCH_EM23GRPACLK = 12,   ///< EM23GRPACLK Clock Branch
+  SL_CLOCK_BRANCH_EM4GRPACLK = 13,    ///< EM4GRPACLK Clock Branch
+  SL_CLOCK_BRANCH_QSPISYSCLK = 14,    ///< QSPISYSCLK Clock Branch
+  SL_CLOCK_BRANCH_IADCCLK = 15,       ///< IADCCLK Clock Branch
+  SL_CLOCK_BRANCH_WDOG0CLK = 16,      ///< WDOG0CLK Clock Branch
+  SL_CLOCK_BRANCH_WDOG1CLK = 17,      ///< WDOG1CLK Clock Branch
+  SL_CLOCK_BRANCH_RTCCCLK = 18,       ///< RTCCCLK Clock Branch
+  SL_CLOCK_BRANCH_SYSRTCCLK = 19,     ///< SYSRTCCLK Clock Branch
+  SL_CLOCK_BRANCH_EUART0CLK = 20,     ///< EUART0CLK Clock Branch
+  SL_CLOCK_BRANCH_EUSART0CLK = 21,    ///< EUSART0CLK Clock Branch
+  SL_CLOCK_BRANCH_EUSART1CLK = 22,    ///< EUSART1CLK Clock Branch
+  SL_CLOCK_BRANCH_DPLLREFCLK = 23,    ///< DPLLREFCLK Clock Branch
+  SL_CLOCK_BRANCH_I2C0CLK = 24,       ///< I2C0CLK Clock Branch
+  SL_CLOCK_BRANCH_LCDCLK = 25,        ///< LCDCLK Clock Branch
+  SL_CLOCK_BRANCH_PIXELRZCLK = 26,    ///< PIXELRZCLK Clock Branch
+  SL_CLOCK_BRANCH_PCNT0CLK = 27,      ///< PCNT0CLK Clock Branch
+  SL_CLOCK_BRANCH_PRORTCCLK = 28,     ///< PRORTCCLK Clock Branch
+  SL_CLOCK_BRANCH_SYSTICKCLK = 29,    ///< SYSTICKCLK Clock Branch
+  SL_CLOCK_BRANCH_LESENSEHFCLK = 30,  ///< LESENSEHFCLK Clock Branch
+  SL_CLOCK_BRANCH_VDAC0CLK = 31,      ///< VDAC0CLK Clock Branch
+  SL_CLOCK_BRANCH_VDAC1CLK = 32,      ///< VDAC1CLK Clock Branch
+  SL_CLOCK_BRANCH_USB0CLK = 33,       ///< USB0CLK Clock Branch
+  SL_CLOCK_BRANCH_FLPLLREFCLK = 34,   ///< FLPLLREFCLK Clock Branch
+  SL_CLOCK_BRANCH_PDM0CLK = 35,       ///< PDM0CLK Clock Branch
+  SL_CLOCK_BRANCH_CAN0CLK = 36,       ///< CAN0CLK Clock Branch
+  SL_CLOCK_BRANCH_CAN1CLK = 37,       ///< CAN1CLK Clock Branch
+  SL_CLOCK_BRANCH_HCLKDIVN = 38,      ///< HCLKDIVN Clock Branch
+  SL_CLOCK_BRANCH_CPUCLK = 39,        ///< CPUCLK Clock Branch
+  SL_CLOCK_BRANCH_ADC0CLK = 40,       ///< ADC0CLK Clock Branch
+  SL_CLOCK_BRANCH_ADC1CLK = 41,       ///< ADC1CLK Clock Branch
+  SL_CLOCK_BRANCH_LEDSINK0CLK = 42,   ///< LEDSINK0CLK Clock Branch
+  SL_CLOCK_BRANCH_ADCHS0CLK = 43,     ///< ADCHS0CLK Clock Branch
+  SL_CLOCK_BRANCH_ADCHS1CLK = 44,     ///< ADCHS1CLK Clock Branch
+  SL_CLOCK_BRANCH_ADCHS2CLK = 45,     ///< ADCHS2CLK Clock Branch
+  SL_CLOCK_BRANCH_ADCHS3CLK = 46,     ///< ADCHS3CLK Clock Branch
+  SL_CLOCK_BRANCH_INVALID = 255       ///< INVALID Clock Branch
 };
 #endif
 

@@ -42,13 +42,20 @@ struct stat;
 struct timeval;
 struct timezone;
 
-__WEAK int _close(int file)
+// Newlib can reference these entry points after GCC LTO processes this file.
+#if defined(__GNUC__)
+#define SLI_SYSCALL_USED __USED
+#else
+#define SLI_SYSCALL_USED
+#endif
+
+SLI_SYSCALL_USED __WEAK int _close(int file)
 {
   (void)file;
   return -1;
 }
 
-__WEAK void _exit(int status)
+SLI_SYSCALL_USED __WEAK void _exit(int status)
 {
   (void)status;
 
@@ -58,32 +65,32 @@ __WEAK void _exit(int status)
   }
 }
 
-__WEAK int _fstat(int file, struct stat *st)
+SLI_SYSCALL_USED __WEAK int _fstat(int file, struct stat *st)
 {
   (void)file;
   (void)(void *)st;
   return 0;
 }
 
-__WEAK int _getpid(void)
+SLI_SYSCALL_USED __WEAK int _getpid(void)
 {
   return 1;
 }
 
-__WEAK int _isatty(int file)
+SLI_SYSCALL_USED __WEAK int _isatty(int file)
 {
   (void)file;
   return 1;
 }
 
-__WEAK int _kill(int pid, int sig)
+SLI_SYSCALL_USED __WEAK int _kill(int pid, int sig)
 {
   (void)pid;
   (void)sig;
   return -1;
 }
 
-__WEAK int _lseek(int file, int ptr, int dir)
+SLI_SYSCALL_USED __WEAK int _lseek(int file, int ptr, int dir)
 {
   (void)file;
   (void)ptr;
@@ -91,7 +98,7 @@ __WEAK int _lseek(int file, int ptr, int dir)
   return 0;
 }
 
-__WEAK int _read(int file, char *ptr, int len)
+SLI_SYSCALL_USED __WEAK int _read(int file, char *ptr, int len)
 {
   (void)file;
   (void)(void *)ptr;
@@ -99,7 +106,7 @@ __WEAK int _read(int file, char *ptr, int len)
   return 0;
 }
 
-__WEAK int _write(int file, const char *ptr, int len)
+SLI_SYSCALL_USED __WEAK int _write(int file, const char *ptr, int len)
 {
   (void)file;
   (void)(const void *)ptr;
@@ -107,9 +114,11 @@ __WEAK int _write(int file, const char *ptr, int len)
   return 0;
 }
 
-__WEAK int _gettimeofday(struct timeval *tv, struct timezone *tz)
+SLI_SYSCALL_USED __WEAK int _gettimeofday(struct timeval *tv, struct timezone *tz)
 {
   (void)(void *)tv;
   (void)(void *)tz;
   return 0;
 }
+
+#undef SLI_SYSCALL_USED

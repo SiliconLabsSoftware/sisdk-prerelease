@@ -487,6 +487,124 @@ extern "C" {
 /** @brief Count the number of variadic arguments (up to 10) */
 #define SLI_LOG_COUNT_ARGS(fmt, ...) SLI_LOG_COUNT_ARGS_IMPL(_, ##__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 
+/**
+ * @brief Compile-time strip for @c SL_PRINT_FMT_* (printf path)
+ *
+ * References @p fmt and every variadic argument via a separate
+ * @c (void)sizeof(...) so stripped call sites emit no code, locals used
+ * only as log arguments stay "used" under @c -Wunused-variable /
+ * @c -Wunused-but-set-variable, and a comma expression never trips
+ * @c -Wunused-value under @c -Wall -Wextra -Werror (WiSeConnect).
+ *
+ * Unlike @c sl_printf_common / @c sl_log_common_void, this must not enforce
+ * @ref SL_LOG_CONFIG_ARG: enabled @c SL_PRINT_FMT_* forwards to
+ * @ref SL_LOG_PRINT_TARGET_EX with no arity limit, so the stripped path
+ * must accept the same callsites (arity helpers match @ref SLI_LOG_COUNT_ARGS).
+ */
+#define sli_print_fmt_strip_0(fmt)                                             \
+  do {                                                                         \
+    (void)sizeof(fmt);                                                         \
+  } while (0)
+#define sli_print_fmt_strip_1(fmt, a1)                                         \
+  do {                                                                         \
+    (void)sizeof(fmt);                                                         \
+    (void)sizeof(a1);                                                          \
+  } while (0)
+#define sli_print_fmt_strip_2(fmt, a1, a2)                                     \
+  do {                                                                         \
+    (void)sizeof(fmt);                                                         \
+    (void)sizeof(a1);                                                          \
+    (void)sizeof(a2);                                                          \
+  } while (0)
+#define sli_print_fmt_strip_3(fmt, a1, a2, a3)                                 \
+  do {                                                                         \
+    (void)sizeof(fmt);                                                         \
+    (void)sizeof(a1);                                                          \
+    (void)sizeof(a2);                                                          \
+    (void)sizeof(a3);                                                          \
+  } while (0)
+#define sli_print_fmt_strip_4(fmt, a1, a2, a3, a4)                             \
+  do {                                                                         \
+    (void)sizeof(fmt);                                                         \
+    (void)sizeof(a1);                                                          \
+    (void)sizeof(a2);                                                          \
+    (void)sizeof(a3);                                                          \
+    (void)sizeof(a4);                                                          \
+  } while (0)
+#define sli_print_fmt_strip_5(fmt, a1, a2, a3, a4, a5)                         \
+  do {                                                                         \
+    (void)sizeof(fmt);                                                         \
+    (void)sizeof(a1);                                                          \
+    (void)sizeof(a2);                                                          \
+    (void)sizeof(a3);                                                          \
+    (void)sizeof(a4);                                                          \
+    (void)sizeof(a5);                                                          \
+  } while (0)
+#define sli_print_fmt_strip_6(fmt, a1, a2, a3, a4, a5, a6)                     \
+  do {                                                                         \
+    (void)sizeof(fmt);                                                         \
+    (void)sizeof(a1);                                                          \
+    (void)sizeof(a2);                                                          \
+    (void)sizeof(a3);                                                          \
+    (void)sizeof(a4);                                                          \
+    (void)sizeof(a5);                                                          \
+    (void)sizeof(a6);                                                          \
+  } while (0)
+#define sli_print_fmt_strip_7(fmt, a1, a2, a3, a4, a5, a6, a7)                 \
+  do {                                                                         \
+    (void)sizeof(fmt);                                                         \
+    (void)sizeof(a1);                                                          \
+    (void)sizeof(a2);                                                          \
+    (void)sizeof(a3);                                                          \
+    (void)sizeof(a4);                                                          \
+    (void)sizeof(a5);                                                          \
+    (void)sizeof(a6);                                                          \
+    (void)sizeof(a7);                                                          \
+  } while (0)
+#define sli_print_fmt_strip_8(fmt, a1, a2, a3, a4, a5, a6, a7, a8)             \
+  do {                                                                         \
+    (void)sizeof(fmt);                                                         \
+    (void)sizeof(a1);                                                          \
+    (void)sizeof(a2);                                                          \
+    (void)sizeof(a3);                                                          \
+    (void)sizeof(a4);                                                          \
+    (void)sizeof(a5);                                                          \
+    (void)sizeof(a6);                                                          \
+    (void)sizeof(a7);                                                          \
+    (void)sizeof(a8);                                                          \
+  } while (0)
+#define sli_print_fmt_strip_9(fmt, a1, a2, a3, a4, a5, a6, a7, a8, a9)         \
+  do {                                                                         \
+    (void)sizeof(fmt);                                                         \
+    (void)sizeof(a1);                                                          \
+    (void)sizeof(a2);                                                          \
+    (void)sizeof(a3);                                                          \
+    (void)sizeof(a4);                                                          \
+    (void)sizeof(a5);                                                          \
+    (void)sizeof(a6);                                                          \
+    (void)sizeof(a7);                                                          \
+    (void)sizeof(a8);                                                          \
+    (void)sizeof(a9);                                                          \
+  } while (0)
+#define sli_print_fmt_strip_10(fmt, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)   \
+  do {                                                                         \
+    (void)sizeof(fmt);                                                         \
+    (void)sizeof(a1);                                                          \
+    (void)sizeof(a2);                                                          \
+    (void)sizeof(a3);                                                          \
+    (void)sizeof(a4);                                                          \
+    (void)sizeof(a5);                                                          \
+    (void)sizeof(a6);                                                          \
+    (void)sizeof(a7);                                                          \
+    (void)sizeof(a8);                                                          \
+    (void)sizeof(a9);                                                          \
+    (void)sizeof(a10);                                                         \
+  } while (0)
+
+#define sli_print_fmt_strip(fmt, ...)                                          \
+  SL_CONCAT_PASTER_2(sli_print_fmt_strip_,                                     \
+                     SLI_LOG_COUNT_ARGS(fmt, ##__VA_ARGS__))(fmt, ##__VA_ARGS__)
+
 /** @brief Helper for choosing logging macro based on argument count */
 #define SLI_LOG_MACRO_CHOOSER2(count) SL_CONCAT_PASTER_2(SL_PRINT_ARG, count##_)
 
@@ -535,6 +653,16 @@ extern "C" {
   _Static_assert(SLI_LOG_COUNT_ARGS(fmt, ##__VA_ARGS__) <= SL_LOG_CONFIG_ARG, "Too many arguments!");  \
   SL_CONCAT_PASTER_2(SLI_LOG_MACRO_CHOOSER1(SLI_LOG_COUNT_ARGS(fmt, ##__VA_ARGS__)), level)     \
   ((uintptr_t)SLI_LOG_UNIQUE_NAME(logstr_), 0, ##__VA_ARGS__)
+
+/**
+ * @brief Compile-time strip helper for @c SL_PRINT_FMT_* macros
+ *
+ * @param level Unused (kept for call-site symmetry with @c sl_printf_common)
+ * @param fmt Format string
+ * @param ... Variable arguments (no @ref SL_LOG_CONFIG_ARG ceiling)
+ */
+#define sl_printf_void(level, fmt, ...)                                        \
+  sli_print_fmt_strip(fmt, ##__VA_ARGS__)
 
 /**
  * @brief Common event-based logging macro
@@ -855,8 +983,9 @@ extern "C" {
  * Trade-off: higher CPU and bandwidth than SL_PRINT_STRING_*.
  *
  * Each macro is compile-time gated by SL_LOG_CONFIG_LEVEL_COMPILE_TIME
- * (severities above the build-time level collapse to a (void)sizeof() no-op),
- * consistent with SL_PRINT_STRING_* and SL_PRINT_EVENT_*.
+ * (severities above the build-time level collapse to @c sl_printf_void, which
+ * sizeof-references every argument with no code emitted), consistent with
+ * SL_PRINT_STRING_* / SL_PRINT_EVENT_* when those paths strip.
  * At runtime, @ref SL_LOG_PRINT_TARGET_EX is invoked only when the macro's
  * level passes @ref sl_log_get_loglevel() (same ordering rule as @c sl_log_send_*)
  * and when @c sli_log_init_stage2_done is true (set when @ref sl_log_init_stage2()
@@ -883,7 +1012,7 @@ extern "C" {
     }                                                                          \
   } while (0)
 #else
-#define SL_PRINT_FMT_INFO(fmt, ...)  do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_INFO(fmt, ...)  do { sl_printf_void(INFO, fmt, ##__VA_ARGS__); } while (0)
 #endif
 
 /** @brief Print debug-level message via the active backend's target-side printf. */
@@ -896,7 +1025,7 @@ extern "C" {
     }                                                                          \
   } while (0)
 #else
-#define SL_PRINT_FMT_DEBUG(fmt, ...) do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_DEBUG(fmt, ...) do { sl_printf_void(DBG, fmt, ##__VA_ARGS__); } while (0)
 #endif
 
 /** @brief Print warning-level message via the active backend's target-side printf. */
@@ -909,7 +1038,7 @@ extern "C" {
     }                                                                          \
   } while (0)
 #else
-#define SL_PRINT_FMT_WARN(fmt, ...)  do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_WARN(fmt, ...)  do { sl_printf_void(WRN, fmt, ##__VA_ARGS__); } while (0)
 #endif
 
 /** @brief Print error-level message via the active backend's target-side printf. */
@@ -922,7 +1051,7 @@ extern "C" {
     }                                                                          \
   } while (0)
 #else
-#define SL_PRINT_FMT_ERROR(fmt, ...) do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_ERROR(fmt, ...) do { sl_printf_void(ERR, fmt, ##__VA_ARGS__); } while (0)
 #endif
 
 /** @brief Print crash-level message via the active backend's target-side printf.
@@ -941,11 +1070,11 @@ extern "C" {
 
 #else /* compile-time level == NONE */
 
-#define SL_PRINT_FMT_INFO(fmt, ...)  do { (void)sizeof(fmt); } while (0)
-#define SL_PRINT_FMT_DEBUG(fmt, ...) do { (void)sizeof(fmt); } while (0)
-#define SL_PRINT_FMT_WARN(fmt, ...)  do { (void)sizeof(fmt); } while (0)
-#define SL_PRINT_FMT_ERROR(fmt, ...) do { (void)sizeof(fmt); } while (0)
-#define SL_PRINT_FMT_CRASH(fmt, ...) do { (void)sizeof(fmt); } while (0)
+#define SL_PRINT_FMT_INFO(fmt, ...)  do { sl_printf_void(INFO, fmt, ##__VA_ARGS__); } while (0)
+#define SL_PRINT_FMT_DEBUG(fmt, ...) do { sl_printf_void(DBG, fmt, ##__VA_ARGS__); } while (0)
+#define SL_PRINT_FMT_WARN(fmt, ...)  do { sl_printf_void(WRN, fmt, ##__VA_ARGS__); } while (0)
+#define SL_PRINT_FMT_ERROR(fmt, ...) do { sl_printf_void(ERR, fmt, ##__VA_ARGS__); } while (0)
+#define SL_PRINT_FMT_CRASH(fmt, ...) do { sl_printf_void(CRASH, fmt, ##__VA_ARGS__); } while (0)
 
 #endif
 
@@ -994,13 +1123,13 @@ extern "C" {
 #define SL_PRINT_EVENT_ERROR(event_id, ...)  do { sl_log_common_void(ERR, event_id, ##__VA_ARGS__); } while(0)
 #define SL_PRINT_EVENT_CRASH(event_id, ...)  do { sl_log_common_void(CRASH, event_id, ##__VA_ARGS__); } while(0)
 
-/* In LIBRARY_BUILD, SL_PRINT_FMT_* expand to no-ops but link the
- * to SL_LOG_PRINT_TARGET_EX implementation. */
-#define SL_PRINT_FMT_INFO(fmt, ...)  do { (void)sizeof(fmt); } while (0)
-#define SL_PRINT_FMT_DEBUG(fmt, ...) do { (void)sizeof(fmt); } while (0)
-#define SL_PRINT_FMT_WARN(fmt, ...)  do { (void)sizeof(fmt); } while (0)
-#define SL_PRINT_FMT_ERROR(fmt, ...) do { (void)sizeof(fmt); } while (0)
-#define SL_PRINT_FMT_CRASH(fmt, ...) do { (void)sizeof(fmt); } while (0)
+/* Outside the log-component path, SL_PRINT_FMT_* strip without the compact
+ * SL_LOG_CONFIG_ARG / VOID-arg limiter (printf path, same as above). */
+#define SL_PRINT_FMT_INFO(fmt, ...)  do { sli_print_fmt_strip(fmt, ##__VA_ARGS__); } while (0)
+#define SL_PRINT_FMT_DEBUG(fmt, ...) do { sli_print_fmt_strip(fmt, ##__VA_ARGS__); } while (0)
+#define SL_PRINT_FMT_WARN(fmt, ...)  do { sli_print_fmt_strip(fmt, ##__VA_ARGS__); } while (0)
+#define SL_PRINT_FMT_ERROR(fmt, ...) do { sli_print_fmt_strip(fmt, ##__VA_ARGS__); } while (0)
+#define SL_PRINT_FMT_CRASH(fmt, ...) do { sli_print_fmt_strip(fmt, ##__VA_ARGS__); } while (0)
 
 #endif // LIBRARY_BUILD
 

@@ -20,6 +20,26 @@ requires:
   condition: [trustzone_secure]
 - name: mbedtls_iar_workarounds
   condition: [toolchain_iar]
+- name: tf_psa_crypto_mbedtls_source
+- name: tf_psa_crypto_api
+
+- name: sli_psa_driver_contexts
+  condition: [device_series_2]
+- name: sli_psa_driver_contexts
+  condition: [device_series_3]
+- name: sli_psa_driver_contexts
+  condition: [device_si91x]
+- name: sli_psa_driver_contexts
+  condition: [device_host]
+
+include:
+- path: sl_mbedtls_support/inc
+  file_list:
+  - path: sl_psa_values.h
+  - path: sli_psa_crypto.h
+- path: sl_psa_driver/inc
+  file_list:
+  - path: sli_psa_driver_features.h
 
 template_contribution:
 - name: psa_crypto_config
@@ -30,4 +50,4 @@ documentation:
 metadata:
   sbom:
     license: Zlib
-root_path: platform_core
+root_path: platform_core/platform/security/sl_component

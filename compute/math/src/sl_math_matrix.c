@@ -29,80 +29,9 @@
  ******************************************************************************/
 #include "sl_math_matrix.h"
 
-static inline void sli_math_matrix_init_dimensions(size_t *matrix_num_rows,
-                                                   size_t *matrix_num_cols,
-                                                   size_t num_rows,
-                                                   size_t num_cols)
+void sl_math_matrix_init_f16(sl_math_matrix_f16_t *matrix, size_t num_rows, size_t num_cols, float16_t *data)
 {
-  *matrix_num_rows = num_rows;
-  *matrix_num_cols = num_cols;
-}
-
-static sl_status_t sli_math_matrix_init_validate(const void *matrix,
-                                                 size_t num_rows,
-                                                 size_t num_cols,
-                                                 const void *data)
-{
-  if (matrix == NULL) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-  if (data == NULL && num_rows != 0 && num_cols != 0) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-  return SL_STATUS_OK;
-}
-
-sl_status_t sl_math_matrix_init_f16(sl_math_matrix_f16_t *matrix, size_t num_rows, size_t num_cols, float16_t *data)
-{
-  sl_status_t status = sli_math_matrix_init_validate(matrix, num_rows, num_cols, data);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-  sli_math_matrix_init_dimensions(&matrix->num_rows, &matrix->num_cols, num_rows, num_cols);
+  matrix->num_rows = num_rows;
+  matrix->num_cols = num_cols;
   matrix->data = data;
-  return SL_STATUS_OK;
-}
-
-sl_status_t sl_math_matrix_init_f32(sl_math_matrix_f32_t *matrix, size_t num_rows, size_t num_cols, float32_t *data)
-{
-  sl_status_t status = sli_math_matrix_init_validate(matrix, num_rows, num_cols, data);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-  sli_math_matrix_init_dimensions(&matrix->num_rows, &matrix->num_cols, num_rows, num_cols);
-  matrix->data = data;
-  return SL_STATUS_OK;
-}
-
-sl_status_t sl_math_matrix_init_q7(sl_math_matrix_q7_t *matrix, size_t num_rows, size_t num_cols, q7_t *data)
-{
-  sl_status_t status = sli_math_matrix_init_validate(matrix, num_rows, num_cols, data);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-  sli_math_matrix_init_dimensions(&matrix->num_rows, &matrix->num_cols, num_rows, num_cols);
-  matrix->data = data;
-  return SL_STATUS_OK;
-}
-
-sl_status_t sl_math_matrix_init_q15(sl_math_matrix_q15_t *matrix, size_t num_rows, size_t num_cols, q15_t *data)
-{
-  sl_status_t status = sli_math_matrix_init_validate(matrix, num_rows, num_cols, data);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-  sli_math_matrix_init_dimensions(&matrix->num_rows, &matrix->num_cols, num_rows, num_cols);
-  matrix->data = data;
-  return SL_STATUS_OK;
-}
-
-sl_status_t sl_math_matrix_init_q31(sl_math_matrix_q31_t *matrix, size_t num_rows, size_t num_cols, q31_t *data)
-{
-  sl_status_t status = sli_math_matrix_init_validate(matrix, num_rows, num_cols, data);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-  sli_math_matrix_init_dimensions(&matrix->num_rows, &matrix->num_cols, num_rows, num_cols);
-  matrix->data = data;
-  return SL_STATUS_OK;
 }

@@ -177,6 +177,12 @@ typedef struct {
   bool                            aux_out_enable;           ///< Alternative output enable.
   bool                            main_out_enable;          ///< Main output enable.
   uint32_t                        hold_out_time;            ///< Channel output hold time.
+#if defined(VDAC_CH0CFG_ENBWBOOST)
+  bool                            bw_boost_enable;          ///< Boost DAC channel bandwidth.
+#endif
+#if defined(VDAC_CH0CFG_ENDRIVEBOOST)
+  bool                            drive_boost_enable;       ///< Boost DAC channel driving capability.
+#endif
 } sl_hal_vdac_init_channel_t;
 
 /// Default configuration for VDAC initialization structure.
@@ -258,6 +264,26 @@ typedef struct {
 #endif
 
 /// Default configuration for VDAC channel initialization structure.
+#if defined(VDAC_CH0CFG_ENBWBOOST) && defined(VDAC_CH0CFG_ENDRIVEBOOST)
+#define SL_HAL_VDAC_CHANNEL_INIT_DEFAULT                                                        \
+  {                                                                                             \
+    false,                             /* Turn off between sample off conversions. */           \
+    true,                              /* Enable High cap mode. */                              \
+    0,                                 /* FIFO data low watermark at 0. */                      \
+    SL_HAL_VDAC_REFRESH_NONE,          /* Channel refresh source. */                            \
+    SL_HAL_VDAC_TRIGGER_MODE_SW,       /* Conversion triggered by CH0DATA or COMBDATA write. */ \
+    SL_HAL_VDAC_POWER_MODE_HIGH_POWER, /* High power mode enabled. */                           \
+    false,                             /* Continuous conversion mode. */                        \
+    0,                                 /* ABUS pin selected. */                                 \
+    SL_HAL_VDAC_PORT_NONE,             /* No Analog bus port selected. */                       \
+    false,                             /* Output not shorted. */                                \
+    false,                             /* Alternative output disabled. */                       \
+    true,                              /* Main output enabled. */                               \
+    0,                                 /* Hold out time. Previously called settle time. */      \
+    false,                             /* Bandwidth boost disabled. */                          \
+    false,                             /* Drive boost disabled. */                              \
+  }
+#else
 #define SL_HAL_VDAC_CHANNEL_INIT_DEFAULT                                                        \
   {                                                                                             \
     false,                             /* Turn off between sample off conversions. */           \
@@ -274,6 +300,7 @@ typedef struct {
     true,                              /* Main output enabled. */                               \
     0,                                 /* Hold out time. Previously called settle time. */      \
   }
+#endif
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************

@@ -5,8 +5,6 @@
  * interface. This file contains the context structures for key derivation
  * operations.
  *
- * \warning This file will be auto-generated in the future.
- *
  * \note This file may not be included directly. Applications must
  * include psa/crypto.h.
  *
@@ -22,6 +20,8 @@
 
 #ifndef PSA_CRYPTO_DRIVER_CONTEXTS_KEY_DERIVATION_H
 #define PSA_CRYPTO_DRIVER_CONTEXTS_KEY_DERIVATION_H
+
+#if !defined(SL_TRUSTZONE_NONSECURE)
 
 #include "psa/crypto_driver_common.h"
 
@@ -64,5 +64,6 @@ typedef union {
 #endif /* SL_PSA_DRIVERS_ENABLED */
 } psa_driver_key_derivation_context_t;
 
+#endif /* !SL_TRUSTZONE_NONSECURE */
+
 #endif /* PSA_CRYPTO_DRIVER_CONTEXTS_KEY_DERIVATION_H */
-/* End of automatically generated file. */

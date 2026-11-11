@@ -1,0 +1,20 @@
+id: tfm_psa_framework_error
+package: security_tfm
+label: TF-M PSA Framework Error Codes
+description: >-
+  Provides the TF-M PSA Firmware Framework error definitions
+  for Secure and NonSecure TrustZone components.
+category: Platform|Security|TrustZone
+quality: production
+ui_hints:
+  visibility: never
+provides:
+- name: tfm_psa_framework_error
+include:
+- path: interface/include
+  file_list:
+  - path: psa/error.h
+metadata:
+  sbom:
+    reference: tfm_sbom
+root_path: security_tfm

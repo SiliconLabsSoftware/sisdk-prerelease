@@ -830,11 +830,11 @@ ui_hints:
     focus: true
 sdk_extension:
 - vendor: silabs
-  id: security_tfm
-  version: 1.2.0
-- vendor: silabs
   id: usb
   version: 1.8.0
+- vendor: silabs
+  id: security_tfm
+  version: 1.2.0
 - vendor: silabs
   id: boards
   version: 1.2.0
@@ -860,17 +860,17 @@ sdk_extension:
   id: cpc
   version: 4.10.0
 - vendor: silabs
+  id: printf
+  version: 1.2.0
+- vendor: silabs
   id: freertos
   version: 1.2.0
 - vendor: silabs
-  id: printf
+  id: security_sxsymcrypt
   version: 1.2.0
 - vendor: silabs
   id: openthread_forks
   version: 3.2.0
-- vendor: silabs
-  id: security_sxsymcrypt
-  version: 1.2.0
 - vendor: silabs
   id: coremark
   version: 1.1.0
@@ -881,16 +881,16 @@ sdk_extension:
   id: thread
   version: 3.2.0
 - vendor: silabs
-  id: unity_test_framework
-  version: 1.2.0
-- vendor: silabs
   id: security_libcryptosoc
   version: 1.2.0
 - vendor: silabs
-  id: platform_core
+  id: unity_test_framework
   version: 1.2.0
 - vendor: silabs
   id: common_15_4
+  version: 1.2.0
+- vendor: silabs
+  id: platform_core
   version: 1.2.0
 - vendor: silabs
   id: cmsis

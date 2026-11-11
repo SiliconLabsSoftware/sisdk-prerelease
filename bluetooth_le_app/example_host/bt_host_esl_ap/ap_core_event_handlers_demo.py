@@ -222,11 +222,14 @@ class DemoEventHandlersMixin:
         tag = self.tag_db.find(evt.address)
         if (
             self.pawr_active
+            and not self.max_conn_count_reached
             and tag is not None
+            and not tag.blocked
+            and (tag.provisioned or tag.was_provisioned)
             and tag.esl_state == EslState.UNSYNCHRONIZED
             and tag.state == TagState.IDLE
         ):
-            self.connect(tag)
+            self.check_address_list(tag)
             self.demo_auto_reconfigure = True
 
     def demo_esl_event_configure_tag_response(

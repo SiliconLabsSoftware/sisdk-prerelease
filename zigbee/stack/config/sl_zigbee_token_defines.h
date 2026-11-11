@@ -107,6 +107,14 @@
 // This key is used to store additional link keys beyond the limitations of the token system
 #define COMMON_TOKEN_STACK_KEY_TABLE_EXTENDED                     SL_TOKEN_GET_DYNAMIC_TOKEN((SL_TOKEN_NVM3_REGION_ZIGBEE | 0x892C), 0)
 
+#ifdef MAC_MUX_AUX_PRESENT
+// Aux listen channel. 0 means the aux network is disabled. A non-zero value
+// brings the aux network up on that channel with the primary network's
+// PAN ID, addresses, and other radio parameters.
+#define COMMON_TOKEN_MAC_MUX_AUX_CHANNEL                          SL_TOKEN_GET_DYNAMIC_TOKEN((SL_TOKEN_NVM3_REGION_ZIGBEE | 0x89AB), 0)
+#endif // MAC_MUX_AUX_PRESENT
+
+
 /** @} END Common Token Object Key IDs  */
 
 #define TOKEN_STACK_NVDATA_VERSION_DEFAULT           CURRENT_STACK_TOKEN_VERSION

@@ -6,8 +6,6 @@
  *  operations, i.e. those operations which need to make use of other operations
  *  from the primitives (crypto_driver_contexts_primitives.h)
  *
- * \warning This file will be auto-generated in the future.
- *
  * \note This file may not be included directly. Applications must
  * include psa/crypto.h.
  *
@@ -28,6 +26,8 @@
 
 /* Include the context structure definitions for the Mbed TLS software drivers */
 #include "mbedtls/private/crypto_builtin_composites.h"
+
+#if !defined(SL_TRUSTZONE_NONSECURE)
 
 /* Include the context structure definitions for those drivers that were
  * declared during the autogeneration process. */
@@ -229,5 +229,6 @@ typedef union {
 #endif /* SL_PSA_DRIVERS_ENABLED */
 } psa_driver_pake_context_t;
 
+#endif /* !SL_TRUSTZONE_NONSECURE */
+
 #endif /* PSA_CRYPTO_DRIVER_CONTEXTS_COMPOSITES_H */
-/* End of automatically generated file. */

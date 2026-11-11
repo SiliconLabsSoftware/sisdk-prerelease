@@ -1,0 +1,55 @@
+id: crash_capture
+label: Crash Capture
+package: platform_core
+description: >
+  Captures crashes (faults, asserts, watchdog) as the SL Diagnostic (sl_diag)
+  CPU Crash provider and seals them with sli_diag_fault_seal(). Retained storage, read, and
+  clear are owned by SL_DIAG (.sl_diag_retained.noinit). Requires sl_diag with
+  a non-Off profile.
+  Stack snapshot size is configured in sl_diag_config.h
+  (SL_DIAG_STACK_SNAPSHOT_BYTES). Pulls log_none only (no UART/SystemView).
+  Add log and a log backend (e.g. systemview) if crash-time logging is desired.
+  When Watchdog Manager is also installed, it enables the WDOG warning IRQ so
+  watchdog timeouts are recorded before reset.
+category: Services|Crash Capture
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+provides:
+- name: crash_capture
+requires:
+- name: sl_common
+- name: sl_diag
+- name: log_none
+- name: component_catalog
+- name: cmsis_core
+- name: device
+- name: hal_wdog
+  condition: [device_has_wdog]
+recommends:
+- id: log
+  vendor: silabs
+- id: log_backend_iostream
+  vendor: silabs
+- id: log_backend_systemview
+  vendor: silabs
+root_path: platform_core/platform/service/sl_crash_capture
+include:
+- path: inc
+  file_list:
+  - path: sli_crash_capture.h
+source:
+- path: src/sli_crash_capture.c
+template_contribution:
+- name: event_handler
+  value:
+    event: service_init
+    include: sli_crash_capture.h
+    handler: sli_crash_capture_init
+  priority: 10000
+- name: component_catalog
+  value: crash_capture_component
+documentation:
+  docset: gecko-platform
+  document: platform-service/diagnostics

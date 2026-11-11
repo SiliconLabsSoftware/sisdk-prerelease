@@ -42,25 +42,21 @@
 // </h>
 // <h> Output channels
 
-// <s ZW_LOG_CHANNEL_DEBUG> IO Stream instance for Debug messages
-// <i> rtt, vcom or any custom user-created instance
-// <d> ""
-#define ZW_LOG_CHANNEL_DEBUG  ""
+// <q ZW_LOG_ENABLE_DEBUG> Enable Debug messages
+// <i> Default: 0
+#define ZW_LOG_ENABLE_DEBUG  0
 
-// <s ZW_LOG_CHANNEL_INFO> IO Stream instance for Info messages
-// <i> rtt, vcom or any custom user-created instance
-// <d> "vcom"
-#define ZW_LOG_CHANNEL_INFO  "vcom"
+// <q ZW_LOG_ENABLE_INFO> Enable Info messages
+// <i> Default: 1
+#define ZW_LOG_ENABLE_INFO  1
 
-// <s ZW_LOG_CHANNEL_WARNING> IO Stream instance for Warning messages
-// <i> rtt, vcom or any custom user-created instance
-// <d> ""
-#define ZW_LOG_CHANNEL_WARNING  ""
+// <q ZW_LOG_ENABLE_WARNING> Enable Warning messages
+// <i> Default: 0
+#define ZW_LOG_ENABLE_WARNING  0
 
-// <s ZW_LOG_CHANNEL_ERROR> IO Stream instance for Error messages
-// <i> rtt, vcom or any custom user-created instance
-// <d> ""
-#define ZW_LOG_CHANNEL_ERROR  ""
+// <q ZW_LOG_ENABLE_ERROR> Enable Error messages
+// <i> Default: 0
+#define ZW_LOG_ENABLE_ERROR  0
 
 // </h>
 // <h> Component filtering

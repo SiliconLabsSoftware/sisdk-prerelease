@@ -21,3 +21,114 @@ upgrade:
           - cryptoacc_library
         add:
           - libcryptosoc
+  - sdk:
+      id: platform_core
+      version: "1.2.0"
+    component:
+      - trigger: mbedtls_tls
+        description: >
+          Replaced the deprecated TLS client component with the individual TLS 1.2,
+          SSL client and peer-certificate components. Verify the selected protocol,
+          ciphersuites, handshake hash and certificate configuration. Mbed TLS 4
+          source/API migration must be completed separately.
+        status: user_verification
+        remove:
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_tls
+        add:
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_tls
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_proto_tls12
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_client
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_keep_peer_certificate
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_server_name_indication
+      - trigger: mbedtls_tls_server
+        description: >
+          Replaced the deprecated TLS server component with mbedtls_ssl_server and
+          restored SSL client and peer-certificate support previously pulled in by
+          mbedtls_tls. Mbed TLS 4 source/API migration must be completed separately.
+        status: automatic
+        remove:
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_tls_server
+        add:
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_server
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_client
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_keep_peer_certificate
+      - trigger: mbedtls_dtls
+        description: >
+          Replaced the deprecated DTLS component with the individual DTLS protocol,
+          anti-replay, hello-verification and cookie components, and restored SSL
+          client and peer-certificate support previously pulled in by mbedtls_tls.
+          Verify client/server roles, ciphersuites and cookie configuration. Mbed
+          TLS 4 source/API migration must be completed separately.
+        status: user_verification
+        remove:
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_dtls
+        add:
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_proto_dtls
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_dtls_anti_replay
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_dtls_hello_verify
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_cookie
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_client
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_ssl_keep_peer_certificate
+      - script: platform_core/platform/security/component/scripts/upgrade_mbedtls4_ecdhe.lua
+        description: >
+          Replace the deprecated ECDHE key-exchange component while preserving
+          conditional ECDSA selection (PSK always, ECDSA when provided).
+          ECDHE-RSA auto-migration is deferred.
+      - script: platform_core/platform/security/component/scripts/upgrade_mbedtls4_crypto.lua
+        description: >
+          Replace explicitly selected legacy Mbed TLS crypto components
+          (AES/CCM/GCM/ciphers/hashes/ECDH/ECDSA/ECC/RSA and related) with PSA
+          Crypto equivalents. Does not enable mbedtls_declare_private_identifiers;
+          applications that still call classic mbedtls_* crypto APIs must select
+          that component explicitly. The dependency resolver may retain some
+          mbedtls_* components as software backends.
+      - trigger: mbedtls_jpake
+        description: >
+          Replaced the explicitly selected mbedtls_jpake component with
+          psa_crypto_jpake. The dependency resolver may retain mbedtls_jpake as a
+          built-in backend on devices that require it. Classic EC J-PAKE API calls
+          must be ported to PSA Crypto separately.
+        status: automatic
+        remove:
+          - vendor: silabs
+            package: platform_core
+            id: mbedtls_jpake
+        add:
+          - vendor: silabs
+            package: platform_core
+            id: psa_crypto_jpake
+

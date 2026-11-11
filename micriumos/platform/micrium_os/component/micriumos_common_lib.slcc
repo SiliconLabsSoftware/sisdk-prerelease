@@ -15,4 +15,6 @@ provides:
 requires:
 - name: common_core
 - name: common_platform_manager
+documentation:
+  url: https://docs.silabs.com/micrium/latest/micrium-common-api/
 root_path: micriumos/platform/micrium_os/common

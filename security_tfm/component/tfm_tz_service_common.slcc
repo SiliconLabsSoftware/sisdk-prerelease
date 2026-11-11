@@ -7,14 +7,12 @@ ui_hints:
 quality: production
 provides:
 - name: tfm_tz_service_common
+requires:
+- name: tfm_psa_framework_api
 include:
 - path: interface/include
   file_list:
-  - path: psa_config.h
-  - path: tfm_api.h
-  - path: psa/client.h
   - path: psa/crypto_client_struct.h
-  - path: psa/error.h
 metadata:
   sbom:
     reference: tfm_sbom

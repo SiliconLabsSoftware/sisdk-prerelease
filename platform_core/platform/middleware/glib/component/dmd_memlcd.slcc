@@ -30,4 +30,4 @@ template_contribution:
   value: dmd_memlcd
 documentation:
   docset: gecko-platform
-  document: middleware/api/group-dmd
+  document: platform-middleware/dmd

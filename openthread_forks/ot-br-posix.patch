@@ -71,7 +71,7 @@ index f5441feec9aa2ee58982a01258def461094e36eb..ffe35e8bd111e88c564b2d773daedb87
    && ln -fs /usr/share/zoneinfo/UTC /etc/localtime
  
 diff --git a/script/_nat64 b/script/_nat64
-index ddcec4eca92c44307fae1b4498442383650ce1a4..4df64c36551a7556d5943e2743a1b09d665780d1 100644
+index 0e400bd0a57b8a528ec5948f69125307d1d46bf5..db58b0de84bd329393d0ec84ab8839f5b75dcd6a 100644
 --- a/script/_nat64
 +++ b/script/_nat64
 @@ -29,12 +29,126 @@
@@ -201,7 +201,7 @@ index ddcec4eca92c44307fae1b4498442383650ce1a4..4df64c36551a7556d5943e2743a1b09d
  # When otbr-agent is built with the opt-in in-process nftables firewall
  # backend (-DOTBR_NFTABLES=ON), it installs the NAT44 masquerade rules
  # itself, so the legacy iptables otbr-nat44 service must not duplicate them.
-@@ -66,6 +180,14 @@ nat44_install()
+@@ -61,6 +175,14 @@ nat44_install()
          echo "OTBR_NFTABLES=1: NAT44 masquerade is managed in-process (nftables); installing only the forwarding authorization."
      fi
  
@@ -216,7 +216,7 @@ index ddcec4eca92c44307fae1b4498442383650ce1a4..4df64c36551a7556d5943e2743a1b09d
      sudo tee $NAT44_SERVICE <<EOF
  #! /bin/sh
  #
-@@ -114,20 +236,35 @@ nat44_install()
+@@ -109,20 +231,35 @@ nat44_install()
  case "\$1" in
      start)
  EOF
@@ -266,7 +266,7 @@ index ddcec4eca92c44307fae1b4498442383650ce1a4..4df64c36551a7556d5943e2743a1b09d
      sudo tee -a $NAT44_SERVICE <<EOF
          ;;
      restart|reload|force-reload)
-@@ -189,6 +326,10 @@ nat64_install()
+@@ -184,6 +321,10 @@ nat64_install()
          return 0
      fi
  
@@ -277,7 +277,7 @@ index ddcec4eca92c44307fae1b4498442383650ce1a4..4df64c36551a7556d5943e2743a1b09d
      nat44_install
  }
  
-@@ -201,6 +342,11 @@ nat64_uninstall()
+@@ -196,6 +337,11 @@ nat64_uninstall()
      fi
  
      nat64_stop
@@ -289,7 +289,7 @@ index ddcec4eca92c44307fae1b4498442383650ce1a4..4df64c36551a7556d5943e2743a1b09d
      nat44_uninstall
  }
  
-@@ -212,6 +358,10 @@ nat64_start()
+@@ -207,6 +353,10 @@ nat64_start()
          return 0
      fi
  
@@ -300,7 +300,7 @@ index ddcec4eca92c44307fae1b4498442383650ce1a4..4df64c36551a7556d5943e2743a1b09d
      nat44_start
  }
  
-@@ -223,5 +373,9 @@ nat64_stop()
+@@ -218,5 +368,9 @@ nat64_stop()
          return 0
      fi
  
@@ -311,7 +311,7 @@ index ddcec4eca92c44307fae1b4498442383650ce1a4..4df64c36551a7556d5943e2743a1b09d
      nat44_stop
  }
 diff --git a/script/_otbr b/script/_otbr
-index edb30897e054070282753bf9eb00fc65d770b91f..554a3981b128d3b814d6784017bd7a446874e838 100644
+index 4430287e5aac42921c90623be4c9f723987703fe..bdc652f1ff168957010610aea91676b39e08fa5b 100644
 --- a/script/_otbr
 +++ b/script/_otbr
 @@ -36,6 +36,9 @@ readonly OTBR_TOP_BUILDDIR
@@ -324,7 +324,7 @@ index edb30897e054070282753bf9eb00fc65d770b91f..554a3981b128d3b814d6784017bd7a44
  DISCOVERY_PROXY="${DISCOVERY_PROXY:-1}"
  FIREWALL="${FIREWALL:-1}"
  
-@@ -165,6 +168,16 @@ otbr_install()
+@@ -220,6 +223,16 @@ otbr_install()
          otbr_options+=(
              "-DOTBR_NAT64=OFF"
          )
@@ -342,7 +342,7 @@ index edb30897e054070282753bf9eb00fc65d770b91f..554a3981b128d3b814d6784017bd7a44
  
      # OT Discovery Proxy depends on Border Routing. Disable it if Border Routing is disabled or if explicitly disabled.
 diff --git a/script/bootstrap b/script/bootstrap
-index 4016917b7cfba04991b9485a37fe3c2fc18912fd..368fdd51d87865a2b983b9f295e27de778e59a93 100755
+index 4cde4d2937dea4c7429cf587a2c08357f48d0039..cf552253fbf64194feb3c8b812b234e286f4522b 100755
 --- a/script/bootstrap
 +++ b/script/bootstrap
 @@ -33,6 +33,8 @@
@@ -377,7 +377,7 @@ index 4016917b7cfba04991b9485a37fe3c2fc18912fd..368fdd51d87865a2b983b9f295e27de7
  }
  
  install_packages_opkg()
-@@ -161,17 +172,27 @@ install_packages_rpm()
+@@ -161,12 +172,18 @@ install_packages_rpm()
      with RELEASE || sudo $PM install -y cmake ninja-build
      sudo $PM install -y dbus-devel
      sudo $PM install -y iptables
@@ -396,8 +396,10 @@ index 4016917b7cfba04991b9485a37fe3c2fc18912fd..368fdd51d87865a2b983b9f295e27de7
  }
  
  install_packages_brew()
- {
-     brew install cmake dbus jsoncpp ninja googletest
+@@ -174,6 +191,10 @@ install_packages_brew()
+     brew install cmake dbus jsoncpp ninja googletest pkgconf
+     # The web GUI's frontend is assembled with npm.
+     without WEB_GUI || command -v npm || brew install node
 +
 +    # Python modules required by the mbed TLS PSA crypto driver
 +    python3 -m pip install --break-system-packages jsonschema Jinja2 \
@@ -2497,7 +2499,7 @@ index 7742934b094966dda1d710137cc04bcf9a4b924e..3244c58b06068669939bda50002c93ab
 +    target_compile_definitions(otbr-posix PRIVATE OPENTHREAD_POSIX_CONFIG_FIREWALL_ENABLE=1)
 +endif()
 diff --git a/src/host/posix/dnssd.cpp b/src/host/posix/dnssd.cpp
-index 0e9857247ffdfb0fa8f0f0abe54cd9e33c878995..c2dead977ce2845d2ea2dc93c61e126804877de0 100644
+index 200dc005e71185c5759f72d8ae0b21684480f1d3..b146bb7c4a40153e9b8416553a26886e069f3004 100644
 --- a/src/host/posix/dnssd.cpp
 +++ b/src/host/posix/dnssd.cpp
 @@ -396,9 +396,14 @@ void DnssdPlatform::StopServiceResolver(const SrvResolver &aSrvResolver, const S
@@ -2510,7 +2512,7 @@ index 0e9857247ffdfb0fa8f0f0abe54cd9e33c878995..c2dead977ce2845d2ea2dc93c61e1268
 -    entryList.AddIfAbsent(aTxtResolver.mInfraIfIndex, std::move(aCallbackPtr));
 +    mTxtResolversMap[serviceName].AddIfAbsent(aTxtResolver.mInfraIfIndex, std::move(aCallbackPtr));
 +
-+    if (mServiceNameSubscriptions.find(serviceName) != mServiceNameSubscriptions.end())
++    if (HasSubscriptionForName(mServiceNameSubscriptions, serviceName))
 +    {
 +        ReplayResolvedServiceTxtIfAny(serviceName);
 +    }
@@ -2554,7 +2556,7 @@ index 0e9857247ffdfb0fa8f0f0abe54cd9e33c878995..c2dead977ce2845d2ea2dc93c61e1268
 +    VerifyOrExit(mState == kStateReady);
 +    VerifyOrExit(cacheIt != mResolvedHostInfoCache.end());
 +    VerifyOrExit(!cacheIt->second.mAddresses.empty());
-+    VerifyOrExit(mHostSubscriptions.find(aDnsName) != mHostSubscriptions.end());
++    VerifyOrExit(HasSubscriptionForName(mHostSubscriptions, aDnsName));
 +
 +    ProcessIpAddrResolvers(aDnsName.GetName(), cacheIt->second);
 +
@@ -2568,7 +2570,7 @@ index 0e9857247ffdfb0fa8f0f0abe54cd9e33c878995..c2dead977ce2845d2ea2dc93c61e1268
 +
 +    VerifyOrExit(mState == kStateReady);
 +    VerifyOrExit(cacheIt != mResolvedServiceInfoCache.end());
-+    VerifyOrExit(mServiceNameSubscriptions.find(aServiceName) != mServiceNameSubscriptions.end());
++    VerifyOrExit(HasSubscriptionForName(mServiceNameSubscriptions, aServiceName));
 +
 +    ProcessTxtResolvers(aServiceName.GetType(), cacheIt->second);
 +
@@ -2584,58 +2586,64 @@ index 0e9857247ffdfb0fa8f0f0abe54cd9e33c878995..c2dead977ce2845d2ea2dc93c61e1268
 -    entryList.AddIfAbsent(aAddressResolver.mInfraIfIndex, std::move(aCallbackPtr));
 +    mIpAddrResolversMap[dnsName].AddIfAbsent(aAddressResolver.mInfraIfIndex, std::move(aCallbackPtr));
 +
-+    if (mHostSubscriptions.find(dnsName) != mHostSubscriptions.end())
++    if (HasSubscriptionForName(mHostSubscriptions, dnsName))
 +    {
 +        ReplayResolvedHostAddressesIfAny(dnsName);
 +    }
  
      PostHostSubscriptionUpdateTask();
  }
-@@ -638,6 +683,7 @@ void DnssdPlatform::ExecuteServiceSubscriptionUpdate(void)
-             mTxtResolversMap.find(*iter) == mTxtResolversMap.end())
+@@ -640,8 +685,14 @@ void DnssdPlatform::ExecuteServiceSubscriptionUpdate(void)
+     {
+         if (serviceNameSubscriptions.find(*iter) == serviceNameSubscriptions.end())
          {
-             mPublisher.UnsubscribeService(iter->GetType(), iter->GetInstance());
-+            mResolvedServiceInfoCache.erase(*iter);
++            const DnsServiceName serviceName = iter->first;
++
+             mPublisher.UnsubscribeService(iter->first.GetType(), iter->first.GetInstance(), iter->second);
              iter = mServiceNameSubscriptions.erase(iter);
++            if (!HasSubscriptionForName(mServiceNameSubscriptions, serviceName))
++            {
++                mResolvedServiceInfoCache.erase(serviceName);
++            }
          }
          else
-@@ -655,6 +701,7 @@ void DnssdPlatform::ExecuteServiceSubscriptionUpdate(void)
          {
-             mServiceNameSubscriptions.insert(serviceName);
-             mPublisher.SubscribeService(serviceName.GetType(), serviceName.GetInstance());
-+            ReplayResolvedServiceTxtIfAny(serviceName);
-         }
-     }
-     for (const auto &entry : mTxtResolversMap)
-@@ -665,6 +712,7 @@ void DnssdPlatform::ExecuteServiceSubscriptionUpdate(void)
+@@ -656,6 +707,7 @@ void DnssdPlatform::ExecuteServiceSubscriptionUpdate(void)
          {
-             mServiceNameSubscriptions.insert(serviceName);
-             mPublisher.SubscribeService(serviceName.GetType(), serviceName.GetInstance());
-+            ReplayResolvedServiceTxtIfAny(serviceName);
+             mPublisher.SubscribeService(subscription.first.GetType(), subscription.first.GetInstance(),
+                                         subscription.second);
++            ReplayResolvedServiceTxtIfAny(subscription.first);
          }
      }
  }
-@@ -690,6 +738,7 @@ void DnssdPlatform::ExecuteHostSubscriptionUpdate(void)
-         if (mIpAddrResolversMap.find(dnsName) == mIpAddrResolversMap.end())
+@@ -682,8 +734,14 @@ void DnssdPlatform::ExecuteHostSubscriptionUpdate(void)
+     {
+         if (hostSubscriptions.find(*iter) == hostSubscriptions.end())
          {
-             mPublisher.UnsubscribeHost(dnsName.GetName());
-+            mResolvedHostInfoCache.erase(dnsName);
++            const DnsName dnsName = iter->first;
++
+             mPublisher.UnsubscribeHost(iter->first.GetName(), iter->second);
              iter = mHostSubscriptions.erase(iter);
++            if (!HasSubscriptionForName(mHostSubscriptions, dnsName))
++            {
++                mResolvedHostInfoCache.erase(dnsName);
++            }
          }
          else
-@@ -707,6 +756,7 @@ void DnssdPlatform::ExecuteHostSubscriptionUpdate(void)
          {
-             mHostSubscriptions.insert(dnsName);
-             mPublisher.SubscribeHost(dnsName.GetName());
-+            ReplayResolvedHostAddressesIfAny(dnsName);
+@@ -697,6 +755,7 @@ void DnssdPlatform::ExecuteHostSubscriptionUpdate(void)
+         if (mHostSubscriptions.insert(subscription).second)
+         {
+             mPublisher.SubscribeHost(subscription.first.GetName(), subscription.second);
++            ReplayResolvedHostAddressesIfAny(subscription.first);
          }
      }
  }
 diff --git a/src/host/posix/dnssd.hpp b/src/host/posix/dnssd.hpp
-index 9c22f9cc3ef32fbe085409f773de428f75bf4c24..2a1eac1aa9bb79e18e1d772064ddad4abd1114a8 100644
+index c73fa86b35cfd7075c7b844a3c9f7e307957ddc1..fa60d4c328c1321aafc3f2d55d01475282cbce8d 100644
 --- a/src/host/posix/dnssd.hpp
 +++ b/src/host/posix/dnssd.hpp
-@@ -343,13 +343,48 @@ private:
+@@ -343,6 +343,41 @@ private:
  
          bool IsEmpty(void) { return mEntries.empty(); }
  
@@ -2643,7 +2651,7 @@ index 9c22f9cc3ef32fbe085409f773de428f75bf4c24..2a1eac1aa9bb79e18e1d772064ddad4a
 +         * Returns how many registered callbacks should receive results for @p aReportedInfraIfIndex.
 +         * A registered index of 0 matches any reported index (NCP may use 0 before infra-if is known).
 +         */
-+        size_t GetMatchCountForInfraIf(uint64_t aReportedInfraIfIndex) const
++        size_t GetMatchCountForInfraIf(uint32_t aReportedInfraIfIndex) const
 +        {
 +            size_t n = 0;
 +
@@ -2674,9 +2682,10 @@ index 9c22f9cc3ef32fbe085409f773de428f75bf4c24..2a1eac1aa9bb79e18e1d772064ddad4a
 +            return s.empty() ? std::string("(none)") : s;
 +        }
 +
-         void InvokeAllCallbacks(uint64_t aInfraIfIndex, CallbackResultType &aResult)
+         std::set<uint32_t> GetInfraIfIndexes(void) const
          {
-             std::vector<CallbackPtrType> copyCallbacks;
+             std::set<uint32_t> infraIfIndexes;
+@@ -361,7 +396,7 @@ private:
  
              for (auto &entry : mEntries)
              {
@@ -2685,19 +2694,19 @@ index 9c22f9cc3ef32fbe085409f773de428f75bf4c24..2a1eac1aa9bb79e18e1d772064ddad4a
                  {
                      copyCallbacks.push_back(entry.second);
                  }
-@@ -362,6 +397,11 @@ private:
+@@ -374,6 +409,11 @@ private:
          }
  
      private:
-+        static bool InfraIfIndexMatches(uint64_t aRegisteredIfIndex, uint64_t aReportedIfIndex)
++        static bool InfraIfIndexMatches(uint32_t aRegisteredIfIndex, uint32_t aReportedIfIndex)
 +        {
 +            return aRegisteredIfIndex == aReportedIfIndex || aRegisteredIfIndex == 0;
 +        }
 +
          using IteratorType = typename std::vector<RequestType>::iterator;
  
-         IteratorType FindEntry(uint64_t aInfraIfIndex, const CallbackType &aCallback)
-@@ -388,6 +428,8 @@ private:
+         IteratorType FindEntry(uint32_t aInfraIfIndex, const CallbackType &aCallback)
+@@ -400,6 +440,8 @@ private:
      void ProcessServiceResolvers(const std::string &aType, const Mdns::Publisher::DiscoveredInstanceInfo &aInfo);
      void ProcessTxtResolvers(const std::string &aType, const Mdns::Publisher::DiscoveredInstanceInfo &aInfo);
      void ProcessIpAddrResolvers(const std::string &aHostName, const Mdns::Publisher::DiscoveredHostInfo &aInfo);
@@ -2706,16 +2715,38 @@ index 9c22f9cc3ef32fbe085409f773de428f75bf4c24..2a1eac1aa9bb79e18e1d772064ddad4a
  
      void StartAddressResolver(const AddressResolver &aAddressResolver, AddressCallbackPtr aCallbackPtr);
      void StopAddressResolver(const AddressResolver &aAddressResolver, const AddressCallback &aCallback);
-@@ -413,9 +455,11 @@ private:
+@@ -419,6 +461,21 @@ private:
+         }
+     }
+ 
++    template <typename NameType>
++    static bool HasSubscriptionForName(const std::set<std::pair<NameType, uint32_t>> &aSubscriptions,
++                                       const NameType                               &aName)
++    {
++        for (const auto &subscription : aSubscriptions)
++        {
++            if (subscription.first == aName)
++            {
++                return true;
++            }
++        }
++
++        return false;
++    }
++
+     void ExecuteServiceSubscriptionUpdate(void);
+     void PostServiceSubscriptionUpdateTask(void);
+     void ExecuteHostSubscriptionUpdate(void);
+@@ -445,9 +502,11 @@ private:
      std::map<DnsServiceName, EntryList<TxtEntry>>    mTxtResolversMap;
      std::map<DnsName, EntryList<AddressEntry>>       mIpAddrResolversMap;
  
--    std::set<DnsServiceType> mServiceTypeSubscriptions;
--    std::set<DnsServiceName> mServiceNameSubscriptions;
--    std::set<DnsName>        mHostSubscriptions;
-+    std::set<DnsServiceType>                                          mServiceTypeSubscriptions;
-+    std::set<DnsServiceName>                                          mServiceNameSubscriptions;
-+    std::set<DnsName>                                                 mHostSubscriptions;
+-    std::set<ServiceTypeSubscription> mServiceTypeSubscriptions;
+-    std::set<ServiceNameSubscription> mServiceNameSubscriptions;
+-    std::set<HostSubscription>        mHostSubscriptions;
++    std::set<ServiceTypeSubscription>                                 mServiceTypeSubscriptions;
++    std::set<ServiceNameSubscription>                                 mServiceNameSubscriptions;
++    std::set<HostSubscription>                                        mHostSubscriptions;
 +    std::map<DnsName, Mdns::Publisher::DiscoveredHostInfo>            mResolvedHostInfoCache;
 +    std::map<DnsServiceName, Mdns::Publisher::DiscoveredInstanceInfo> mResolvedServiceInfoCache;
  };
@@ -3635,7 +3666,7 @@ index 09c43181fa6af340d8c6d9b48312c1e0d6a7138a..5618703123748d07486666e20090d233
      instanceInfo.mRemoved    = true;
      instanceInfo.mNetifIndex = aNetifIndex;
 diff --git a/src/mdns/mdns_mdnssd.cpp b/src/mdns/mdns_mdnssd.cpp
-index fc07f8a46bf093566e552baaeb3c786fd352a680..78ce52f894abd6055a386d60c0ae5b6e9173749c 100644
+index 6ded7e48370cee1609b6b080c9e806e893f1c360..5e62c2ca2600cb51e82279faef5134d706f9c6c5 100644
 --- a/src/mdns/mdns_mdnssd.cpp
 +++ b/src/mdns/mdns_mdnssd.cpp
 @@ -988,6 +988,7 @@ otbrError PublisherMDnsSd::PublishHostImpl(const std::string &aName,
@@ -3646,7 +3677,7 @@ index fc07f8a46bf093566e552baaeb3c786fd352a680..78ce52f894abd6055a386d60c0ae5b6e
  
      hostReg = std::make_shared<DnssdHostRegistration>(aName, aAddresses, std::move(aCallback), this);
      AddHostRegistration(hostReg);
-@@ -1266,6 +1267,9 @@ void PublisherMDnsSd::ServiceSubscription::HandleBrowseResult(DNSServiceRef
+@@ -1276,6 +1277,9 @@ void PublisherMDnsSd::ServiceSubscription::HandleBrowseResult(DNSServiceRef
      }
      else
      {
@@ -3860,10 +3891,10 @@ index fc3a0a06fe72fbb9510efb36d0b0235829d05187..d7b61958cf5c9d551dac17c4d6968eff
  #include "utils/crc16.hpp"
  
 diff --git a/src/web/CMakeLists.txt b/src/web/CMakeLists.txt
-index 217341ba2339cc4fee5eda8cc5a2e4b367ed8214..c5deedba544d219aa24051103d73ae2c0db8d25f 100644
+index 1daa424c8ef95b9670167ca38ce21da54fca3dff..eddced4c8d64e17105e286b0d273f56f92c89933 100644
 --- a/src/web/CMakeLists.txt
 +++ b/src/web/CMakeLists.txt
-@@ -51,6 +51,8 @@ target_link_libraries(otbr-web PRIVATE
+@@ -53,6 +53,8 @@ target_link_libraries(otbr-web PRIVATE
      openthread-ftd
      openthread-posix
      mbedtls
@@ -3897,24 +3928,11 @@ index aa7c0b80367562edace0bba4eb4cd1c843b29303..71002fbede3aa83f018c0b57783ab158
      bool     mAllowingJoin;
      uint16_t mPanId;
      uint16_t mChannel;
-diff --git a/src/web/web-service/wpan_service.cpp b/src/web/web-service/wpan_service.cpp
-index d117a01df67011c7ddf5aa7de319d1a67f6a4704..71ff794b03308505b0411864f69437c378389b26 100644
---- a/src/web/web-service/wpan_service.cpp
-+++ b/src/web/web-service/wpan_service.cpp
-@@ -630,7 +630,7 @@ std::string WpanService::HandleGetEpskcStatusRequest(void)
-     std::string                 state;
-     int                         ret = kWpanStatus_Ok;
-     otbr::Web::OpenThreadClient client(mIfName);
--    char                       *rval;
-+    char                       *rval = nullptr;
- 
-     VerifyOrExit(client.Connect(), ret = kWpanStatus_Uninitialized);
- 
 diff --git a/tests/gtest/CMakeLists.txt b/tests/gtest/CMakeLists.txt
-index 5c59dd9f3358c33d987f7e2b8b85c3ed8b946cff..4b213a65b756de3b940ccc86a0fe5a7e0d94892e 100644
+index 7e90004c50abd73919e674c4999e06df7baa1b2b..350f92442360c3da603069f3031b1be5e6925fa1 100644
 --- a/tests/gtest/CMakeLists.txt
 +++ b/tests/gtest/CMakeLists.txt
-@@ -167,7 +167,10 @@ add_executable(otbr-posix-gtest-unit
+@@ -170,7 +170,10 @@ add_executable(otbr-posix-gtest-unit
  target_include_directories(otbr-posix-gtest-unit
      PRIVATE
          ${OTBR_PROJECT_DIRECTORY}/src
@@ -3925,7 +3943,7 @@ index 5c59dd9f3358c33d987f7e2b8b85c3ed8b946cff..4b213a65b756de3b940ccc86a0fe5a7e
          ${OPENTHREAD_PROJECT_DIRECTORY}/tests/gtest
  )
  target_link_libraries(otbr-posix-gtest-unit
-@@ -186,7 +189,10 @@ add_executable(otbr-gtest-host-api
+@@ -189,7 +192,10 @@ add_executable(otbr-gtest-host-api
  target_include_directories(otbr-gtest-host-api
      PRIVATE
          ${OTBR_PROJECT_DIRECTORY}/src
@@ -4066,11 +4084,11 @@ index 2c1844a01f68310c954ac2dc3b36a6e2f02d9348..93849686d64e004391f6f5be7ff2db14
  #endif // OTBR_MBEDTLS_CONFIG_H_
 diff --git a/third_party/openthread/repo b/third_party/openthread/repo
 deleted file mode 160000
-index cb18e0f598059d733b3382b81437c4138195d1ea..0000000000000000000000000000000000000000
+index e577777c308f6c87e5da3056239231a8fc147cb2..0000000000000000000000000000000000000000
 --- a/third_party/openthread/repo
 +++ /dev/null
 @@ -1 +0,0 @@
--Subproject commit cb18e0f598059d733b3382b81437c4138195d1ea
+-Subproject commit e577777c308f6c87e5da3056239231a8fc147cb2
 diff --git a/third_party/openthread/repo b/third_party/openthread/repo
 new file mode 120000
 index 0000000000000000000000000000000000000000..187daed247c149bf839782e61409834b00d53154

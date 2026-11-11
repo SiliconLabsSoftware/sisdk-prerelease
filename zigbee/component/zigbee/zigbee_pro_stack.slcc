@@ -18,10 +18,19 @@ requires:
 - name: zigbee_pro_stack_rail_mux
   condition:
   - rail_mux
+- name: zigbee_pro_stack_rail_mux_aux
+  condition:
+  - rail_mux
+  - rail_mux_aux
 - name: zigbee_pro_stack_with_high_datarate_phy_rail_mux
   condition:
   - zigbee_high_datarate_phy
   - rail_mux
+- name: zigbee_pro_stack_with_high_datarate_phy_rail_mux_aux
+  condition:
+  - zigbee_high_datarate_phy
+  - rail_mux
+  - rail_mux_aux
 
 recommends:
 - id: zigbee_pro_stack_library_internal

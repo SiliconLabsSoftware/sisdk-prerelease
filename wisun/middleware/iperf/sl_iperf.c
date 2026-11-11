@@ -41,7 +41,7 @@
 #include "sl_iperf_udp_srv.h"
 #include "sl_iperf_udp_clnt.h"
 #include "sl_iperf_util.h"
-#include "sl_wisun_app_core_util.h"
+#include "sl_wisun_api.h"
 
 #if !defined(SL_IPERF_CMSIS_RTOS_DISABLED)
 #include "em_common.h"
@@ -343,9 +343,8 @@ static void _iperf_thr_fnc(void *args)
   sl_iperf_test_t *test = (sl_iperf_test_t *)args;
   uint8_t msg_prio      =   0U;
   osStatus_t status     = osError;
-
-  // wait for network connected state
-  sl_wisun_app_core_util_wait_for_connection();
+  sl_wisun_join_state_t join_state = SL_WISUN_JOIN_STATE_DISCONNECTED;
+  sl_status_t ret;
 
   SL_IPERF_SERVICE_LOOP() {
     // Pop Test from the queue
@@ -358,7 +357,8 @@ static void _iperf_thr_fnc(void *args)
     memset(&test->statistic, 0, sizeof(sl_iperf_stats_t));
 
     // check network connection
-    if (!sl_wisun_app_core_util_network_is_connected()) {
+    ret = sl_wisun_get_join_state(&join_state);
+    if (ret != SL_STATUS_OK || join_state != SL_WISUN_JOIN_STATE_OPERATIONAL) {
       sl_iperf_test_set_err_and_stat(test, SL_IPERF_ERR_NETWORK_CONNECTION,
                                      SL_IPERF_TEST_STATUS_ERR);
       sl_iperf_test_log(test, "Network not connected.\n");

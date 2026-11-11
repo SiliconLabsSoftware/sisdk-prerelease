@@ -264,7 +264,7 @@ static void init_cs_configuration(const uint8_t conn_handle)
                               initiator->config.channel_selection_type,
                               initiator->config.ch3c_shape,
                               initiator->config.ch3c_jump,
-                              initiator->config.reserved); // Reserved for future use
+                              initiator->config.cs_enhancements);
 
   if (sc != SL_STATUS_OK) {
     initiator_log_error(INSTANCE_PREFIX "CS - configuration create failed! [sc: 0x%lx]" LOG_NL,

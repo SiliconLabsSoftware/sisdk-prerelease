@@ -43,6 +43,7 @@ from ap_constants import (
     ESL_WSTK_DISPLAY_TYPE,
     OTS_FEATURES_REQUIRED_MASK,
     SIG_VENDOR_ID_SILABS,
+    TAG_SYNC_TIMEOUT,
     TLV_OPCODE_FACTORY_RST,
     TLV_OPCODE_UNASSOCIATE,
     TLV_OPCODE_UPDATE_COMPLETE,
@@ -825,6 +826,8 @@ class Tag:
                     elw.ESL_LIB_STATUS_CONN_CONFIG_FAILED
                 )  # change the reason until at least ESL Address is set
         elif isinstance(evt, esl_lib.EventConnectionRetry):
+            if evt.connection_state == elw.ESL_LIB_CONNECTION_STATE_BONDING_RECOVERY:
+                self.reset(keep_esl_address=True)
             self.state = TagState.CONNECTING
             self._connection_timer.restart()
             self.reset_advertising()  # will stop the advertiser watchdog, if there's any
@@ -1029,10 +1032,13 @@ class Tag:
                             self.ble_address,
                             evt.rssi,
                         )
+                        if self.esl_state == EslState.UNSYNCHRONIZED:
+                            self.update_response_timestamp(dt.now().timestamp() - TAG_SYNC_TIMEOUT)
                     self._advertising = True  # setting this has to precede self.esl_state == EslState.SYNCHRONIZED check!
                 if self.advertising:
                     if self.esl_state == EslState.SYNCHRONIZED:
                         self.reset()  # reset will clear _advertising state, too
+                        self.update_response_timestamp(dt.now().timestamp() - TAG_SYNC_TIMEOUT)
                         self._advertising = True  # set _advertising back - since it is indeed advertising
                         raise PAwRSyncLostError("ESL sync lost!", self.esl_id, self.group_id, self.ble_address)
                     self.start_advertising_governor()

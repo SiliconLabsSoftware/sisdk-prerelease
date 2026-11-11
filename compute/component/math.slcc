@@ -17,33 +17,8 @@ source:
 include:
 - path: inc
   file_list:
-  - path: sl_math.h
-  - path: sl_math_complex_matrix_mult.h
-  - path: sl_math_complex_vector_conjugate.h
-  - path: sl_math_complex_vector_dot_product.h
-  - path: sl_math_complex_vector_magnitude_squared.h
-  - path: sl_math_complex_vector_mult.h
   - path: sl_math_matrix.h
-  - path: sl_math_matrix_add.h
-  - path: sl_math_matrix_mult.h
-  - path: sl_math_matrix_scale.h
-  - path: sl_math_matrix_sub.h
-  - path: sl_math_matrix_transpose.h
-  - path: sl_math_matrix_vector_mult.h
-  - path: sl_math_vector_abs.h
-  - path: sl_math_vector_add.h
-  - path: sl_math_vector_clamp.h
-  - path: sl_math_vector_clip.h
-  - path: sl_math_vector_copy.h
-  - path: sl_math_vector_dot_product.h
-  - path: sl_math_vector_fill.h
-  - path: sl_math_vector_mult.h
-  - path: sl_math_vector_negate.h
-  - path: sl_math_vector_offset.h
-  - path: sl_math_vector_scale.h
-  - path: sl_math_vector_sub.h
 provides:
 - name: math
 requires:
 - name: math_types
-- name: status

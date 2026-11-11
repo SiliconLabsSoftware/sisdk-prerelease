@@ -67,6 +67,11 @@ extern uint8_t *sli_mac_tx_fifo_staging_buffer_ptr;
 extern LowerMacState sli_802154mac_lower_mac_state;
 #ifdef HIGH_DATARATE_PHY
 #define PHY_HEADER_SIZE_ADJUST_2MBPS    4u
+// Size of the channel hopping buffer was experimentally determined
+// Reset part and ensure 0s in the buffer. Run the high datarate phy CI job and see usage
+// If you see a librail assert:48  SL_RAIL_ASSERT_CHANNEL_HOPPING_BUFFER_TOO_SHORT
+// then this number needs adjustment
+#define CHANNEL_HOPPING_BUFFER_SIZE     400u
 // HDR source buffers start with a 2-byte length/offset field.
 #define HIGH_DATARATE_PHY_LENGTH_FIELD_BYTES 2u
 // 802.15.4 2-byte PHR
@@ -262,6 +267,11 @@ int8_t sli_mac_lower_mac_get_radio_power(uint8_t mac_index);
 uint8_t sli_mac_lower_mac_get_radio_channel(uint8_t mac_index);
 void sli_mac_radio_ok_to_idle(void);
 void sli_mac_set_coordinator(bool isCoordinator);
+#ifdef MAC_MUX_AUX_PRESENT
+// Last PAN-coordinator role passed to sli_mac_set_coordinator(); used by the mux aux
+// bridge to apply the coordinator role when the aux is brought up.
+bool sli_mac_get_coordinator(void);
+#endif
 void sli_mac_stack_set_cca_threshold(int8_t threshold);
 int8_t sli_mac_stack_get_ed_cca_threshold(void);
 uint16_t sli_mac_get_symbol_duration_us(void);

@@ -88,6 +88,9 @@
 #include "gp-sink-table-internal-def.h"
 #include "gp-proxy-table-internal-def.h"
 #endif
+#if !defined (SL_COMPONENT_CATALOG_PRESENT) || defined(SL_CATALOG_RAIL_MUX_AUX_PRESENT)
+#include "sl_zigbee_mac_mux_aux_internal_def.h"
+#endif
 #include "internal-callbacks-patch.h"
 
 #define sli_zigbee_stack_is_node_id_valid(nodeId) ((nodeId) < SL_ZIGBEE_DISCOVERY_ACTIVE_NODE_ID)

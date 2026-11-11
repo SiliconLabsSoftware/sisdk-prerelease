@@ -242,7 +242,11 @@ class PAWRMixin:
                     "Unassociate tag %s because of timeout in Unsynchronized state",
                     tag.ble_address,
                 )
-                tag.unassociate()
+                self.key_db.delete_ltk(tag.ble_address)
+                if self.exclusive_network.contains_address(tag.ble_address):
+                    tag.reset(keep_esl_address=True)
+                else:
+                    tag.unassociate()
 
     def create_sync_packet(self, gid, tlvs):
         """

@@ -92,6 +92,11 @@ filter:
   - name: "Project Difficulty"
     value: ["Advanced"]
 
+template_contribution:
+  - name: default_stack_size_override
+    value: 0x800
+    condition: [kernel]
+
 ui_hints:
   highlight:
     - path: ./README-OT-RCP.md

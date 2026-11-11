@@ -31,13 +31,11 @@
 #include "sl_component_catalog.h"
 #endif
 
-/* When Crash Manager is present, include its config. If SL_CRASH_MANAGER_ASSERT_HANDLER_ENABLED
-* is set, the config defines DEBUG_EFM_USER so that sl_assert.c skips its default assertEFM.
-* Crash Manager then provides assertEFM() in sl_crash_manager_hooks.c, which records the
-* assert as SL_CRASH_TYPE_ASSERT and invokes the crash handler before halt.
-*/
-#if defined(SL_CATALOG_CRASH_MANAGER_COMPONENT_PRESENT)
-#include "sl_crash_manager_config.h"
+/* When Crash Capture is present it supplies assertEFM() (Tier-0 + SL_DIAG seal).
+ * Define DEBUG_EFM_USER so this file skips the default assertEFM loop.
+ */
+#if defined(SL_CATALOG_CRASH_CAPTURE_COMPONENT_PRESENT) && !defined(DEBUG_EFM_USER)
+#define DEBUG_EFM_USER
 #endif
 
 #include "sl_assert.h"

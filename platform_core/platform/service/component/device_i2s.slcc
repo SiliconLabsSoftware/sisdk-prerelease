@@ -22,4 +22,4 @@ include:
   - path: sl_device_i2s.h
 documentation:
   docset: gecko-platform
-  document: platform-service/device-manager-i2s
+  document: platform-service/device-i2s

@@ -10,22 +10,11 @@ provides:
 - name: tfm_tz_sl_interface
 requires:
 - name: tfm_crypto_defs
+- name: tfm_psa_framework_api
 include:
 - path: ../
   condition:
   - trustzone_secure
-- path: .
-  condition:
-  - trustzone_secure
-  file_list:
-  - path: interface/include/psa/error.h
-- path: interface/include
-  unless:
-  - tz_service_common
-  file_list:
-  - path: tfm_api.h
-  - path: psa_config.h
-  - path: psa/client.h
 metadata:
   sbom:
     reference: tfm_sbom

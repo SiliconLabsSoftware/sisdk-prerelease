@@ -121,16 +121,16 @@ typedef struct sl_iperf_opt {
   /// expected bandwidth in bits/sec
   uint32_t bandwidth;
   /// Nbr of packets to tx.
-  uint16_t packet_nbr;
+  uint32_t packet_nbr;
   /// Buf len to tx or rx.
   uint16_t buf_len;
   /// Socket buffer size in bytes.
   uint32_t socket_buffer_size;
   /// Time in milliseconds to tx.
-  uint16_t duration_ms;
+  uint32_t duration_ms;
   /// Win size to tx or rx.
   uint16_t win_size;
-  /// Server in persistent mode.
+  /// Server in persistent mode (no idle timeout; stays up until FIN).
   bool persistent;
   /// Interval (ms) between bandwidth update.
   uint16_t interval_ms;
@@ -355,7 +355,9 @@ typedef struct sl_iperf_udp_clnt_hdr_v1 {
   int32_t buf_len;
   /// Win band
   int32_t win_band;
-  /// Amount
+  /// Amount of data to send (bytes) in byte-count mode (bit 31 clear).
+  /// Limited to INT32_MAX (0x7FFFFFFF) by the iperf2 wire format; larger
+  /// packet_nbr * buf_len products are clamped before TX.
   int32_t amount;
 } sl_iperf_clnt_hdr_v1_t;
 #pragma pack(pop)

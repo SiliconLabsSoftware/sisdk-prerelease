@@ -95,6 +95,10 @@ static fih_int bl_assert_tz_iovecs_in_ns(sli_tz_invec *in_vec, size_t in_len,
 
 // -----------------------------------------------------------------------------
 // NSC functions
+//
+// These handlers are only called from the non-secure image, through the CMSE
+// import library. Nothing in the secure image references them, so without
+// __used__ --gc-sections drops the entry before the linker emits its veneer.
 
 __attribute__((cmse_nonsecure_entry, __used__))
 uint32_t bootloader_nsc_getResetReason(void)
@@ -123,7 +127,7 @@ int32_t bootloader_nsc_getInfo(sli_tz_invec *in_vec, size_t in_len,
   return 0; // Workaround for -Wcast-function-type
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_init(void)
 {
   int32_t ret = -1;
@@ -131,7 +135,7 @@ int32_t bootloader_nsc_init(void)
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_deinit(void)
 {
   int32_t ret = -1;
@@ -139,14 +143,14 @@ int32_t bootloader_nsc_deinit(void)
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_rebootAndInstall(void)
 {
   bootloader_rebootAndInstall();
   return 0; // Workaround for -Wcast-function-type
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_parseImageInfo(sli_tz_invec *in_vec, size_t in_len,
                                       sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -188,7 +192,7 @@ int32_t bootloader_nsc_parseImageInfo(sli_tz_invec *in_vec, size_t in_len,
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 uint32_t bootloader_nsc_parserContextSize(void)
 {
   uint32_t ret = 0xFFFFFFFFUL;
@@ -196,7 +200,7 @@ uint32_t bootloader_nsc_parserContextSize(void)
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 bool bootloader_nsc_verifyApplication(uint32_t startAddress, uint32_t notUsed)
 {
   (void) notUsed;
@@ -205,7 +209,7 @@ bool bootloader_nsc_verifyApplication(uint32_t startAddress, uint32_t notUsed)
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_secureBootEnforced(void)
 {
   bool ret = false;
@@ -213,7 +217,7 @@ int32_t bootloader_nsc_secureBootEnforced(void)
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_getUpgradeLocation(sli_tz_invec *in_vec, size_t in_len,
                                           sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -233,7 +237,7 @@ int32_t bootloader_nsc_getUpgradeLocation(sli_tz_invec *in_vec, size_t in_len,
   return (int32_t) ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 uint32_t bootloader_nsc_remainingApplicationUpgrades(void)
 {
   uint32_t ret = 0xFFFFFFFFUL;
@@ -241,7 +245,7 @@ uint32_t bootloader_nsc_remainingApplicationUpgrades(void)
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_getCertificateVersion(sli_tz_invec *in_vec, size_t in_len,
                                              sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -261,7 +265,7 @@ int32_t bootloader_nsc_getCertificateVersion(sli_tz_invec *in_vec, size_t in_len
   return (int32_t) ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_getStorageInfo(sli_tz_invec *in_vec, size_t in_len,
                                       sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -280,7 +284,7 @@ int32_t bootloader_nsc_getStorageInfo(sli_tz_invec *in_vec, size_t in_len,
   return 0; // Workaround for -Wcast-function-type
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_getStorageSlotInfo(sli_tz_invec *in_vec, size_t in_len,
                                           sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -302,7 +306,7 @@ int32_t bootloader_nsc_getStorageSlotInfo(sli_tz_invec *in_vec, size_t in_len,
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_readStorage(sli_tz_invec *in_vec, size_t in_len,
                                    sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -326,7 +330,7 @@ int32_t bootloader_nsc_readStorage(sli_tz_invec *in_vec, size_t in_len,
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_writeStorage(sli_tz_invec *in_vec, size_t in_len,
                                     sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -350,7 +354,7 @@ int32_t bootloader_nsc_writeStorage(sli_tz_invec *in_vec, size_t in_len,
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_eraseWriteStorage(sli_tz_invec *in_vec, size_t in_len,
                                          sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -374,7 +378,7 @@ int32_t bootloader_nsc_eraseWriteStorage(sli_tz_invec *in_vec, size_t in_len,
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_eraseStorageSlot(uint32_t slotId, uint32_t notUsed)
 {
   (void) notUsed;
@@ -383,7 +387,7 @@ int32_t bootloader_nsc_eraseStorageSlot(uint32_t slotId, uint32_t notUsed)
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_initChunkedEraseStorageSlot(sli_tz_invec *in_vec, size_t in_len,
                                                    sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -405,7 +409,7 @@ int32_t bootloader_nsc_initChunkedEraseStorageSlot(sli_tz_invec *in_vec, size_t 
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_chunkedEraseStorageSlot(sli_tz_invec *in_vec, size_t in_len,
                                                sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -435,7 +439,7 @@ int32_t bootloader_nsc_chunkedEraseStorageSlot(sli_tz_invec *in_vec, size_t in_l
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_setImageToBootload(int32_t slotId, uint32_t notUsed)
 {
   (void) notUsed;
@@ -444,7 +448,7 @@ int32_t bootloader_nsc_setImageToBootload(int32_t slotId, uint32_t notUsed)
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_setImagesToBootload(sli_tz_invec *in_vec, size_t in_len,
                                            sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -461,7 +465,7 @@ int32_t bootloader_nsc_setImagesToBootload(sli_tz_invec *in_vec, size_t in_len,
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_getImagesToBootload(sli_tz_invec *in_vec, size_t in_len,
                                            sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -478,7 +482,7 @@ int32_t bootloader_nsc_getImagesToBootload(sli_tz_invec *in_vec, size_t in_len,
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_appendImageToBootloadList(int32_t slotId, uint32_t notUsed)
 {
   (void) notUsed;
@@ -487,7 +491,7 @@ int32_t bootloader_nsc_appendImageToBootloadList(int32_t slotId, uint32_t notUse
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_initVerifyImage(uint32_t slotId, uint32_t notUsed)
 {
   (void) notUsed;
@@ -500,7 +504,7 @@ int32_t bootloader_nsc_initVerifyImage(uint32_t slotId, uint32_t notUsed)
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_continueVerifyImage(void)
 {
   int32_t ret = -1;
@@ -511,7 +515,7 @@ int32_t bootloader_nsc_continueVerifyImage(void)
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_verifyImage(uint32_t slotId, uint32_t notUsed)
 {
   (void) notUsed;
@@ -523,7 +527,7 @@ int32_t bootloader_nsc_verifyImage(uint32_t slotId, uint32_t notUsed)
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_getImageInfo(sli_tz_invec *in_vec, size_t in_len,
                                     sli_tz_outvec *out_vec, size_t out_len)
 {
@@ -551,7 +555,7 @@ int32_t bootloader_nsc_getImageInfo(sli_tz_invec *in_vec, size_t in_len,
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_storageIsBusy(void)
 {
   bool ret = false;
@@ -560,7 +564,7 @@ int32_t bootloader_nsc_storageIsBusy(void)
   return ret;
 }
 
-__attribute__((cmse_nonsecure_entry))
+__attribute__((cmse_nonsecure_entry, __used__))
 int32_t bootloader_nsc_getAllocatedDMAChannel(void)
 {
   int32_t ret = -1;

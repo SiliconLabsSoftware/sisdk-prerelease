@@ -14,15 +14,13 @@ conflicts:
 requires:
 - name: trustzone_nonsecure
 - name: tfm_crypto_defs
-- name: psa_crypto_api_nonsecure
+- name: tfm_psa_framework_api
+- name: tf_psa_crypto_mbedtls
 include:
 - path: interface/include
   file_list:
-  - path: psa/client.h
-  - path: psa/error.h
+  - path: psa/crypto_client_struct.h
   - path: psa/storage_common.h
-  - path: psa_config.h
-  - path: tfm_api.h
   - path: tfm_ns_interface.h
 metadata:
   sbom:

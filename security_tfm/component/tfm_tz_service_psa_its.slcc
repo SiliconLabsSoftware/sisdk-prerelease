@@ -6,6 +6,10 @@ category: Platform|Security|TrustZone
 quality: production
 provides:
 - name: tfm_tz_service_psa_its
+requires:
+- name: tfm_psa_framework_error
+  condition:
+  - trustzone_secure
 include:
 - path: interface/include
   condition:
@@ -13,7 +17,6 @@ include:
   file_list:
   - path: psa/storage_common.h
   - path: psa/internal_trusted_storage.h
-  - path: psa/error.h
 - path: secure_fw/partitions/internal_trusted_storage
   condition:
   - trustzone_secure

@@ -189,5 +189,15 @@ sl_status_t halStackInitTokens(void)
   tokTypeStackAdditionalChildData tokTypeMPStackAdditionalChildDataDefault = TOKEN_MULTI_PAN_STACK_ADDITIONAL_CHILD_DATA_DEFAULT;
   status = sl_zigbee_initialize_index_token(COMMON_TOKEN_MULTI_PAN_STACK_ADDITIONAL_CHILD_DATA, &tokTypeMPStackAdditionalChildDataDefault, sizeof(tokTypeMPStackAdditionalChildDataDefault), multi_pan_child_table_token_size);
   assert(status == SL_STATUS_OK);
+
+#ifdef MAC_MUX_AUX_PRESENT
+  uint8_t mac_mux_aux_channel_default = 0;
+  status = sl_zigbee_initialize_basic_token(COMMON_TOKEN_MAC_MUX_AUX_CHANNEL,
+                                             &mac_mux_aux_channel_default,
+                                             sizeof(mac_mux_aux_channel_default));
+  assert(status == SL_STATUS_OK);
+#endif // MAC_MUX_AUX_PRESENT
+
+
   return status;
 }

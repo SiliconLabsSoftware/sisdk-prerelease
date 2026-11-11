@@ -17,6 +17,7 @@ component:
   - id: zw_role_type_sleeping_listening
   - id: zaf_soc
   - id: zw_core
+  - id: zw_log
   - id: zw_zaf
   - id: zw_true_status
   - id: zw_ota
@@ -80,6 +81,18 @@ include:
       - path: events.h
 
 configuration:
+  # sl_log settings below only apply when the compact backend is selected
+  # (log_backend_iostream_compact). They keep all Z-Wave log levels available
+  # to the wrapper and allow the seven-argument ZPAL_LOG calls.
+  - name: SL_LOG_CONFIG_LEVEL_COMPILE_TIME
+    value: SL_LOG_CONFIG_LEVEL_DEBUG
+    condition: [log_backend_iostream_compact]
+  - name: SL_LOG_CONFIG_ARG
+    value: 7
+    condition: [log_backend_iostream_compact]
+  - name: SL_LOG_NUMBER_OF_EVENTS
+    value: 32
+    condition: [log_backend_iostream_compact]
   - name: SHORT_BUTTON_PRESS_DURATION_MS
     value: (400)
   - name: MEDIUM_BUTTON_PRESS_DURATION_MS

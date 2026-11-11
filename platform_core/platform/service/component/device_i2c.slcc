@@ -20,4 +20,4 @@ include:
   - path: sl_device_i2c.h
 documentation:
   docset: gecko-platform
-  document: platform-service/device-manager-i2c
+  document: platform-service/device-i2c

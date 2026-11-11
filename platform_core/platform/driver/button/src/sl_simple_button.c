@@ -113,7 +113,7 @@ sl_status_t sl_simple_button_init(const sl_button_t *handle)
       (void)status;
     } else {
       // If the pin is EM4WU-compatible, setup the pin as an EM4WU pin
-      // Since EM4WU interrupts are level-sensitive and not edge-sensitive, also register a regular edge-sensitive interrupt to capture the other edge
+      // EM4WU is edge-sensitive; also register a regular edge interrupt for the other edge
       uint8_t flags;
       if (SL_SIMPLE_BUTTON_POLARITY == 0) {
         flags = SL_GPIO_INTERRUPT_RISING_EDGE;

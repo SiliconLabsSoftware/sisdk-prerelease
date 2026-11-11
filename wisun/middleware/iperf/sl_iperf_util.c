@@ -36,6 +36,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "sl_iperf_util.h"
 #include "sl_iperf_config.h"
@@ -209,11 +210,12 @@ void sl_iperf_print_test_log_json(sl_iperf_test_t * const test)
   sl_iperf_log_print(test->log, "%*s\"port\":        %u,\n", __indent(3U), test->opt.port);
   sl_iperf_log_print(test->log, "%*s\"remote_addr\": \"%s\",\n", __indent(3U), test->opt.remote_addr);
   sl_iperf_log_print(test->log, "%*s\"bandwidth\":   %lu,\n", __indent(3U), test->opt.bandwidth);
-  sl_iperf_log_print(test->log, "%*s\"packet_nbr\":  %u,\n", __indent(3U), test->opt.packet_nbr);
+  sl_iperf_log_print(test->log, "%*s\"packet_nbr\":  %"PRIu32",\n", __indent(3U), test->opt.packet_nbr);
   sl_iperf_log_print(test->log, "%*s\"buf_len\":     %u,\n", __indent(3U), test->opt.buf_len);
-  sl_iperf_log_print(test->log, "%*s\"duration_ms\": %u,\n", __indent(3U), test->opt.duration_ms);
+  sl_iperf_log_print(test->log, "%*s\"duration_ms\": %"PRIu32",\n", __indent(3U), test->opt.duration_ms);
   sl_iperf_log_print(test->log, "%*s\"interval_ms\": %u,\n", __indent(3U), test->opt.interval_ms);
   sl_iperf_log_print(test->log, "%*s\"socket_buffer_size\": %u,\n", __indent(3U), test->opt.socket_buffer_size);
+  sl_iperf_log_print(test->log, "%*s\"persistent\":  %s,\n", __indent(3U), test->opt.persistent ? "true" : "false");
   sl_iperf_log_print(test->log, "%*s\"bw_format\":   \"%s\"\n", __indent(3U), sl_iperf_opt_bw_format_to_str(test->opt.bw_format));
   sl_iperf_log_print(test->log, "%*s},\n", __indent(2U));
   sl_iperf_log_print(test->log, "%*s\"statistic\": {\n", __indent(2U));
@@ -634,11 +636,26 @@ void sl_iperf_test_calculate_average_bandwidth(sl_iperf_test_t * const test)
 
 bool sl_iperf_test_check_time(const sl_iperf_test_t * const test)
 {
+  if (test == NULL) {
+    return false;
+  }
+
+  // Persistent server ignores the idle timeout and stays up.
+  if (test->opt.persistent) {
+    return true;
+  }
+
 #if (0U < SL_IPERF_MAX_TEST_TIMEOUT_MS)
-  return (bool)(((sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count()) - test->statistic.ts_start_ms)
-                < (test->opt.duration_ms + SL_IPERF_MAX_TEST_TIMEOUT_MS));
+  sl_iperf_ts_ms_t now_ms;
+  sl_iperf_ts_ms_t last_rx_ms;
+
+  now_ms = (sl_iperf_ts_ms_t)sl_sleeptimer_tick_to_ms(sl_sleeptimer_get_tick_count());
+  // Prefer last RX time; before any packet, fall back to test start.
+  last_rx_ms = (test->statistic.ts_curr_recv_ms != 0U)
+               ? test->statistic.ts_curr_recv_ms
+               : test->statistic.ts_start_ms;
+  return (bool)((now_ms - last_rx_ms) < SL_IPERF_MAX_TEST_TIMEOUT_MS);
 #else
-  (void) test;
   return true;
 #endif
 }

@@ -111,7 +111,6 @@ void sl_ot_create_instance(void)
         // Initialize OpenThread instance with static buffer
         sInstances[i] = otInstanceInitMultiple(i);
         OT_ASSERT(sInstances[i]);
-        OT_ASSERT(otInstanceIsInitialized(sInstances[i]));
     }
 }
 

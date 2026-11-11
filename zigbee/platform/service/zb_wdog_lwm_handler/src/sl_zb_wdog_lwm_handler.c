@@ -34,6 +34,7 @@
 
 #include "sl_code_classification.h"
 #include "sl_watchdog_manager.h"
+#include "sl_watchdog_manager_config.h"
 
 #if defined(SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT)
 #include "sl_iostream.h"
@@ -484,8 +485,34 @@ static inline void starve_capture(void)
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_LEGACY_HAL, SL_CODE_CLASS_TIME_CRITICAL)
 static void starve_callback(const sl_watchdog_manager_starve_context_t *context)
 {
-  (void)context;
   starve_capture();
+
+  if (context != NULL) {
+    uint32_t uids[SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS];
+    uint32_t count = 0U;
+    uint32_t mask = context->unfed_mask;
+
+    for (uint32_t handle = 0U; handle < SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS; handle++) {
+      if ((mask == 0U) || (count >= SL_WATCHDOG_MANAGER_MAX_SW_WATCHDOGS)) {
+        break;
+      }
+
+      if ((mask & (1U << handle)) == 0U) {
+        continue;
+      }
+
+      mask &= ~(1U << handle);
+
+      sl_watchdog_handle_t h = handle;
+      uint32_t uid = 0U;
+
+      if (sl_watchdog_manager_get_uid(&h, &uid) == SL_STATUS_OK) {
+        uids[count++] = uid;
+      }
+    }
+
+    halWatchdogLwmCaptureSetSwUids(uids, count);
+  }
 }
 
 // Register the platform Watchdog Manager starve callback for LWM crash capture.

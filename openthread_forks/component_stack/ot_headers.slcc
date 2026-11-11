@@ -80,6 +80,7 @@ include:
   - path: tcp.h
   - path: tcp_ext.h
   - path: thread.h
+  - path: thread_direct.h
   - path: thread_ftd.h
   - path: trel.h
   - path: udp.h
@@ -382,6 +383,8 @@ include:
   - path: thread/uri_paths.hpp
   - path: thread/vendor_info.hpp
   - path: thread/version.hpp
+  - path: thread_direct/td_key_manager.hpp
+  - path: thread_direct/td_types.hpp
   - path: utils/channel_manager.hpp
   - path: utils/channel_monitor.hpp
   - path: utils/flash.hpp

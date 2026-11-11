@@ -88,6 +88,11 @@ extern "C" {
  *  signal to the leader. The "High Frequency Clock Ouput" section of your device
  *  reference manual also provides more details about this feature.
  *
+ *  The LFXO configuration has a \a SL_CLOCK_MANAGER_LFXO_TIMEOUT configuration to
+ *  specify the amount of cycles the LFXO waits to stabilize. The default value is
+ *  4096 cycles (around 125 ms). This value can be reduced depending on the crystal
+ *  used to reduce the startup time of the device.
+ *
  *  The first HFRCO module, whose output clock is called HFRCODPLL, can be connected to
  *  the DPLL module to have a better precision clock. When the DPLL is enabled through
  *  the configuration define \a SL_CLOCK_MANAGER_HFRCO_DPLL_EN, the DPLL settings

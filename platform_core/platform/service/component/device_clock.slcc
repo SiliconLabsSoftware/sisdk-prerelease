@@ -24,4 +24,4 @@ include:
   - path: sl_device_clock.h
 documentation:
   docset: gecko-platform
-  document: platform-service/device-manager-clock
+  document: platform-service/device-clock

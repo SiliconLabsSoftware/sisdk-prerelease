@@ -32,15 +32,97 @@
 
 #if defined(SLI_MEMORY_MANAGER_ENABLE_SYSTEMVIEW)
 
+#include "sl_core.h"
+
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+#include "cmsis_os2.h"
+#endif
+
 /***************************************************************************//**
- * Emits an ownership event using the established SystemView protocol.
+ * Stack-resident wrapper scope; only the outer scope per context is linked.
  ******************************************************************************/
-static inline void sli_mm_sv_record_ownership(uint32_t ptr,
-                                              uint32_t owner_pc)
+typedef struct sli_mm_sv_scope {
+  struct sli_mm_sv_scope *next; ///< Next outstanding outer scope across contexts.
+  uint32_t exception;          ///< SystemView interrupt ID; zero in thread mode.
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  osThreadId_t thread;         ///< CMSIS thread ID; NULL in interrupt context.
+#endif
+} sli_mm_sv_scope_t;
+
+// Only outer wrappers are linked; their stack frames remain live across preemption.
+static sli_mm_sv_scope_t *sli_mm_sv_outer_scopes_list;
+
+/***************************************************************************//**
+ * Register the outer wrapper for the current task or interrupt context.
+ *
+ * @param[out] scope
+ *   Scope storage in the calling wrapper's stack frame. It must remain valid
+ *   until the paired sli_mm_sv_record_ownership() call after the allocator returns.
+ *   Nested wrappers in the same context leave this scope unlinked.
+ ******************************************************************************/
+static void sli_mm_sv_begin(sli_mm_sv_scope_t *scope)
 {
-  SEGGER_SYSVIEW_RecordU32x2(SLI_SYSTEMVIEW_EVENT_ID_OWNERSHIP_SITE,
-                             ptr,
-                             owner_pc);
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+
+  // Distinguish an interrupt's allocations from those of the interrupted task.
+  scope->exception = SEGGER_SYSVIEW_GET_INTERRUPT_ID();
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+  scope->thread = scope->exception == 0 ? osThreadGetId() : NULL;
+#endif
+  // An existing outer scope in this context owns nested alloc/free events.
+  for (sli_mm_sv_scope_t *active = sli_mm_sv_outer_scopes_list; active != NULL; active = active->next) {
+    if (active->exception == scope->exception
+#if defined(SL_CATALOG_KERNEL_PRESENT)
+        && active->thread == scope->thread
+#endif
+        ) {
+      CORE_EXIT_CRITICAL();
+      return;
+    }
+  }
+
+  scope->next = sli_mm_sv_outer_scopes_list;
+  sli_mm_sv_outer_scopes_list = scope;
+  CORE_EXIT_CRITICAL();
+}
+
+/***************************************************************************//**
+ * Complete a wrapper scope and emit ownership only for the outer wrapper.
+ *
+ * @param[in] scope
+ *   Scope storage passed to sli_mm_sv_begin() by this wrapper, whether linked
+ *   (outer) or unlinked (nested). The scope is no longer used after this call.
+ * @param[in] ptr
+ *   Ownership-event object address, such as the returned allocation or the
+ *   address saved before a free. The payload is recorded without interpretation.
+ * @param[in] owner_pc
+ *   Caller return address captured by this wrapper before calling the allocator.
+ *
+ * @note Only the outer scope for each task/interrupt context is linked. Nested
+ *   scopes are absent and emit no event, preserving the outer caller's PC.
+ *   Separate contexts retain their scopes across RTOS task switches and interrupt
+ *   preemption; unlinking by address lets tasks complete in a different order.
+ ******************************************************************************/
+static void sli_mm_sv_record_ownership(sli_mm_sv_scope_t *scope,
+                                       uint32_t ptr,
+                                       uint32_t owner_pc)
+{
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+
+  sli_mm_sv_scope_t **active = &sli_mm_sv_outer_scopes_list;
+  while (*active != NULL && *active != scope) {
+    active = &(*active)->next;
+  }
+  if (*active != NULL) {
+    *active = scope->next;
+    SEGGER_SYSVIEW_RecordU32x2(SLI_SYSTEMVIEW_EVENT_ID_OWNERSHIP_SITE,
+                               ptr,
+                               owner_pc);
+  }
+
+  CORE_EXIT_CRITICAL();
 }
 
 /***************************************************************************//**
@@ -49,7 +131,8 @@ static inline void sli_mm_sv_record_ownership(uint32_t ptr,
 void sli_memory_track_ownership(const void *ptr,
                                 const void *owner_pc)
 {
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  SEGGER_SYSVIEW_RecordU32x2(SLI_SYSTEMVIEW_EVENT_ID_OWNERSHIP_SITE,
+                             (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)owner_pc);
 }
 
@@ -180,9 +263,11 @@ extern sl_status_t __real_sl_memory_heap_pool_handle_alloc(sl_memory_heap_t *hea
 ATTR_EXT_VIS void *__wrap_sl_malloc(size_t size)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real_sl_malloc(size);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;
@@ -193,9 +278,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_alloc(size_t size,
                                                 void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_alloc(size, type, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -207,9 +294,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_alloc_advanced(size_t size,
                                                          void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_alloc_advanced(size, align, type, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -221,22 +310,26 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_alloc_advanced(size_t size,
 ATTR_EXT_VIS void __wrap_sl_free(void *ptr)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   uint32_t saved_ptr = (uint32_t)(uintptr_t)ptr;
 
   __real_sl_free(ptr);
 
-  sli_mm_sv_record_ownership(saved_ptr,
+  sli_mm_sv_record_ownership(&scope, saved_ptr,
                              (uint32_t)(uintptr_t)return_address);
 }
 
 ATTR_EXT_VIS sl_status_t __wrap_sl_memory_free(void *block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   uint32_t saved_ptr = (uint32_t)(uintptr_t)block;
 
   sl_status_t status = __real_sl_memory_free(block);
 
-  sli_mm_sv_record_ownership(saved_ptr,
+  sli_mm_sv_record_ownership(&scope, saved_ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -249,9 +342,11 @@ ATTR_EXT_VIS void *__wrap_sl_calloc(size_t item_count,
                                     size_t size)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real_sl_calloc(item_count, size);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;
@@ -263,9 +358,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_calloc(size_t item_count,
                                                  void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_calloc(item_count, size, type, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -278,9 +375,11 @@ ATTR_EXT_VIS void *__wrap_sl_realloc(void *ptr,
                                      size_t size)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *new_ptr = __real_sl_realloc(ptr, size);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)new_ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)new_ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return new_ptr;
@@ -291,9 +390,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_realloc(void *ptr,
                                                   void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_realloc(ptr, size, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -308,9 +409,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_heap_alloc(sl_memory_heap_t *heap,
                                                      void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_heap_alloc(heap, size, type, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -323,9 +426,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_heap_alloc_advanced(sl_memory_heap_t *
                                                               void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_heap_alloc_advanced(heap, size, align, type, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -335,11 +440,13 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_heap_free(sl_memory_heap_t *heap,
                                                     void *block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   uint32_t saved_ptr = (uint32_t)(uintptr_t)block;
 
   sl_status_t status = __real_sl_memory_heap_free(heap, block);
 
-  sli_mm_sv_record_ownership(saved_ptr,
+  sli_mm_sv_record_ownership(&scope, saved_ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -352,9 +459,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_heap_calloc(sl_memory_heap_t *heap,
                                                       void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_heap_calloc(heap, item_count, size, type, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -366,9 +475,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_heap_realloc(sl_memory_heap_t *heap,
                                                        void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_heap_realloc(heap, ptr, size, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -383,9 +494,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_reserve_block(size_t size,
                                                         void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_reserve_block(size, align, handle, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -394,11 +507,13 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_reserve_block(size_t size,
 ATTR_EXT_VIS sl_status_t __wrap_sl_memory_release_block(sl_memory_reservation_t *handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   uint32_t saved_ptr = (uint32_t)(uintptr_t)(handle != NULL ? handle->block_address : NULL);
 
   sl_status_t status = __real_sl_memory_release_block(handle);
 
-  sli_mm_sv_record_ownership(saved_ptr,
+  sli_mm_sv_record_ownership(&scope, saved_ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -407,9 +522,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_release_block(sl_memory_reservation_t 
 ATTR_EXT_VIS sl_status_t __wrap_sl_memory_reservation_handle_alloc(sl_memory_reservation_t **handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_reservation_handle_alloc(handle);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(handle != NULL ? *handle : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(handle != NULL ? *handle : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -418,11 +535,13 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_reservation_handle_alloc(sl_memory_res
 ATTR_EXT_VIS sl_status_t __wrap_sl_memory_reservation_handle_free(sl_memory_reservation_t *handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   uint32_t saved_ptr = (uint32_t)(uintptr_t)handle;
 
   sl_status_t status = __real_sl_memory_reservation_handle_free(handle);
 
-  sli_mm_sv_record_ownership(saved_ptr,
+  sli_mm_sv_record_ownership(&scope, saved_ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -431,9 +550,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_reservation_handle_free(sl_memory_rese
 ATTR_EXT_VIS sl_status_t __wrap_sl_memory_reservation_add_retention(const sl_memory_reservation_t *handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_reservation_add_retention(handle);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(handle != NULL ? handle->block_address : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(handle != NULL ? handle->block_address : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -442,9 +563,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_reservation_add_retention(const sl_mem
 ATTR_EXT_VIS sl_status_t __wrap_sl_memory_reservation_remove_retention(const sl_memory_reservation_t *handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_reservation_remove_retention(handle);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(handle != NULL ? handle->block_address : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(handle != NULL ? handle->block_address : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -457,9 +580,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_heap_reserve_block(sl_memory_heap_t *h
                                                              void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_heap_reserve_block(heap, size, align, handle, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -469,9 +594,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_heap_reservation_handle_alloc(sl_memor
                                                                         sl_memory_reservation_t **handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_heap_reservation_handle_alloc(heap, handle);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(handle != NULL ? *handle : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(handle != NULL ? *handle : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -485,9 +612,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_create_pool(size_t block_size,
                                                       sl_memory_pool_t *pool_handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_create_pool(block_size, block_count, pool_handle);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)pool_handle,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)pool_handle,
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -500,13 +629,15 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_create_pool_advanced(sl_memory_reserva
                                                                sl_memory_pool_t *pool_handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_create_pool_advanced(reservation_handle,
                                                              block_size,
                                                              block_count,
                                                              align,
                                                              pool_handle);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)pool_handle,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)pool_handle,
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -515,11 +646,13 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_create_pool_advanced(sl_memory_reserva
 ATTR_EXT_VIS sl_status_t __wrap_sl_memory_delete_pool(sl_memory_pool_t *pool_handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   uint32_t saved_ptr = (uint32_t)(uintptr_t)pool_handle;
 
   sl_status_t status = __real_sl_memory_delete_pool(pool_handle);
 
-  sli_mm_sv_record_ownership(saved_ptr,
+  sli_mm_sv_record_ownership(&scope, saved_ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -528,11 +661,13 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_delete_pool(sl_memory_pool_t *pool_han
 ATTR_EXT_VIS sl_status_t __wrap_sl_memory_delete_pool_no_unreserve(sl_memory_pool_t *pool_handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   uint32_t saved_ptr = (uint32_t)(uintptr_t)pool_handle;
 
   sl_status_t status = __real_sl_memory_delete_pool_no_unreserve(pool_handle);
 
-  sli_mm_sv_record_ownership(saved_ptr,
+  sli_mm_sv_record_ownership(&scope, saved_ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -542,9 +677,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_pool_alloc(sl_memory_pool_t *pool_hand
                                                      void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_pool_alloc(pool_handle, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -554,11 +691,13 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_pool_free(sl_memory_pool_t *pool_handl
                                                     void *block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   uint32_t saved_ptr = (uint32_t)(uintptr_t)block;
 
   sl_status_t status = __real_sl_memory_pool_free(pool_handle, block);
 
-  sli_mm_sv_record_ownership(saved_ptr,
+  sli_mm_sv_record_ownership(&scope, saved_ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -567,9 +706,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_pool_free(sl_memory_pool_t *pool_handl
 ATTR_EXT_VIS sl_status_t __wrap_sl_memory_pool_handle_alloc(sl_memory_pool_t **pool_handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_pool_handle_alloc(pool_handle);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(pool_handle != NULL ? *pool_handle : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(pool_handle != NULL ? *pool_handle : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -578,11 +719,13 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_pool_handle_alloc(sl_memory_pool_t **p
 ATTR_EXT_VIS sl_status_t __wrap_sl_memory_pool_handle_free(sl_memory_pool_t *pool_handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   uint32_t saved_ptr = (uint32_t)(uintptr_t)pool_handle;
 
   sl_status_t status = __real_sl_memory_pool_handle_free(pool_handle);
 
-  sli_mm_sv_record_ownership(saved_ptr,
+  sli_mm_sv_record_ownership(&scope, saved_ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -594,9 +737,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_heap_create_pool(sl_memory_heap_t *hea
                                                            sl_memory_pool_t *pool_handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_heap_create_pool(heap, block_size, block_count, pool_handle);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)pool_handle,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)pool_handle,
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -609,13 +754,15 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_heap_create_pool_advanced(sl_memory_he
                                                                     sl_memory_pool_t *pool_handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_heap_create_pool_advanced(heap,
                                                                   block_size,
                                                                   block_count,
                                                                   align,
                                                                   pool_handle);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)pool_handle,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)pool_handle,
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -625,9 +772,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_heap_pool_handle_alloc(sl_memory_heap_
                                                                  sl_memory_pool_t **pool_handle)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_heap_pool_handle_alloc(heap, pool_handle);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(pool_handle != NULL ? *pool_handle : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(pool_handle != NULL ? *pool_handle : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -641,9 +790,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_reserve_no_retention(size_t size,
                                                                void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_reserve_no_retention(size, align, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -655,9 +806,11 @@ ATTR_EXT_VIS sl_status_t __wrap_sl_memory_heap_reserve_no_retention(sl_memory_he
                                                                     void **block)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   sl_status_t status = __real_sl_memory_heap_reserve_no_retention(heap, size, align, block);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)(block != NULL ? *block : NULL),
                              (uint32_t)(uintptr_t)return_address);
 
   return status;
@@ -672,9 +825,11 @@ extern void *__real_bg_malloc(size_t size);
 ATTR_EXT_VIS void *__wrap_bg_malloc(size_t size)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real_bg_malloc(size);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;
@@ -689,9 +844,11 @@ extern void *__real__ZN4chip8Platform11MemoryAllocEj(size_t size);
 ATTR_EXT_VIS void *__wrap__ZN4chip8Platform11MemoryAllocEj(size_t size)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real__ZN4chip8Platform11MemoryAllocEj(size);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;
@@ -702,9 +859,11 @@ extern void *__real__ZN4chip8Platform12MemoryCallocEjj(size_t count, size_t size
 ATTR_EXT_VIS void *__wrap__ZN4chip8Platform12MemoryCallocEjj(size_t count, size_t size)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real__ZN4chip8Platform12MemoryCallocEjj(count, size);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;
@@ -721,9 +880,11 @@ extern void *__real__Znwj(size_t size);
 ATTR_EXT_VIS void *__wrap__Znwj(size_t size)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real__Znwj(size);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;
@@ -734,9 +895,11 @@ extern void *__real__Znaj(size_t size);
 ATTR_EXT_VIS void *__wrap__Znaj(size_t size)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real__Znaj(size);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;
@@ -747,9 +910,11 @@ extern void *__real__ZnwjRKSt9nothrow_t(size_t size, const void *nothrow_tag);
 ATTR_EXT_VIS void *__wrap__ZnwjRKSt9nothrow_t(size_t size, const void *nothrow_tag)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real__ZnwjRKSt9nothrow_t(size, nothrow_tag);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;
@@ -760,9 +925,11 @@ extern void *__real__ZnajRKSt9nothrow_t(size_t size, const void *nothrow_tag);
 ATTR_EXT_VIS void *__wrap__ZnajRKSt9nothrow_t(size_t size, const void *nothrow_tag)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real__ZnajRKSt9nothrow_t(size, nothrow_tag);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;
@@ -773,9 +940,11 @@ extern void *__real__ZnwjSt11align_val_t(size_t size, size_t align);
 ATTR_EXT_VIS void *__wrap__ZnwjSt11align_val_t(size_t size, size_t align)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real__ZnwjSt11align_val_t(size, align);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;
@@ -786,9 +955,11 @@ extern void *__real__ZnajSt11align_val_t(size_t size, size_t align);
 ATTR_EXT_VIS void *__wrap__ZnajSt11align_val_t(size_t size, size_t align)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real__ZnajSt11align_val_t(size, align);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;
@@ -799,9 +970,11 @@ extern void *__real__ZnwjSt11align_val_tRKSt9nothrow_t(size_t size, size_t align
 ATTR_EXT_VIS void *__wrap__ZnwjSt11align_val_tRKSt9nothrow_t(size_t size, size_t align, const void *nothrow_tag)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real__ZnwjSt11align_val_tRKSt9nothrow_t(size, align, nothrow_tag);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;
@@ -812,9 +985,11 @@ extern void *__real__ZnajSt11align_val_tRKSt9nothrow_t(size_t size, size_t align
 ATTR_EXT_VIS void *__wrap__ZnajSt11align_val_tRKSt9nothrow_t(size_t size, size_t align, const void *nothrow_tag)
 {
   const void * volatile return_address = sli_memory_get_return_address();
+  sli_mm_sv_scope_t scope;
+  sli_mm_sv_begin(&scope);
   void *ptr = __real__ZnajSt11align_val_tRKSt9nothrow_t(size, align, nothrow_tag);
 
-  sli_mm_sv_record_ownership((uint32_t)(uintptr_t)ptr,
+  sli_mm_sv_record_ownership(&scope, (uint32_t)(uintptr_t)ptr,
                              (uint32_t)(uintptr_t)return_address);
 
   return ptr;

@@ -42,7 +42,7 @@ config_file:
 - path: "config/sl_iperf_config.h"
 
 requires:
-- name: "sl_wisun_app_core"
+- name: "a_wisun_stack"
 - name: "sleeptimer"
 
 #-------------- Template Contribution ----------------

@@ -948,6 +948,7 @@ sl_status_t sl_wisun_set_lfn_parameters(const sl_wisun_lfn_params_t *params);
  * @param[in] lfn_limit Maximum number of LFN children
  *   - **0**: LFN parenting is disabled in the node
  *   - **> 0**: Maximum number of LFN children the node can parent
+ * The default value is 10.
  * @return SL_STATUS_OK if successful, an error code otherwise
  *
  * This function sets the maximum number of LFN children this node can

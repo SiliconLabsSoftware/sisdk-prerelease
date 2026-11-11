@@ -29,7 +29,7 @@ provides:
 - name: wake_lock
 requires:
 - name: power_manager
-- name: gpiointerrupt
+- name: gpio
 - name: sleeptimer
 - name: component_catalog
 - name: app_assert

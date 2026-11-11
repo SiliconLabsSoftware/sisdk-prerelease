@@ -25,6 +25,8 @@ provides:
   allow_multiple: true
 requires:
 - name: uart_eusart_core
+- name: configuration_over_swo
+  condition: [hardware_board_has_vcom]
 template_file:
 - path: init/sl_uart_instances.c.jinja
 - path: init/sl_uart_instances.h.jinja

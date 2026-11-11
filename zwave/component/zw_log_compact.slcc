@@ -1,0 +1,30 @@
+id: zw_log_compact
+label: Z-Wave Logging (Compact Output)
+category: Z-Wave
+description: >
+  This component enables Z-Wave logging with compact sl_log output. Select it
+  instead of Z-Wave Logging when binary records decoded with the application ELF
+  are required. It supplies the same Z-Wave logging API and console dependencies
+  without selecting the formatted output implementation.
+documentation:
+  docset: z-wave
+  document: zwave-api/logging
+package: zwave
+quality: production
+metadata:
+  sbom:
+    reference: zw_sbom_license
+requires:
+- name: zw_log_tool
+- name: zw_log_output_iostream
+- name: log_backend_iostream
+- name: log_backend_iostream_compact
+conflicts:
+- name: zw_log
+config_file:
+- path: sample_apps/config/zw_log/zw_log_config.h
+  file_id: zw_log_config
+template_contribution:
+- name: component_catalog
+  value: zw_log
+root_path: zwave

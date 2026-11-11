@@ -346,7 +346,6 @@
 -Xlinker --wrap=otIcmp6SendEchoRequest
 -Xlinker --wrap=otIcmp6GetEchoMode
 -Xlinker --wrap=otIcmp6SetEchoMode
--Xlinker --wrap=otInstanceIsInitialized
 -Xlinker --wrap=otGetRadioVersionString
 -Xlinker --wrap=otGetVersionString
 -Xlinker --wrap=otInstanceErasePersistentInfo
@@ -437,7 +436,6 @@
 -Xlinker --wrap=otLinkIsInTransmitState
 -Xlinker --wrap=otLinkIsPromiscuous
 -Xlinker --wrap=otLinkIsRadioFilterEnabled
--Xlinker --wrap=otLinkIsWakeupListenEnabled
 -Xlinker --wrap=otLinkGetExtendedAddress
 -Xlinker --wrap=otLinkGetCounters
 -Xlinker --wrap=otLinkGetTxDirectRetrySuccessHistogram
@@ -464,9 +462,6 @@
 -Xlinker --wrap=otLinkSetRegion
 -Xlinker --wrap=otLinkSetRxOnWhenIdle
 -Xlinker --wrap=otLinkSetSupportedChannelMask
--Xlinker --wrap=otLinkSetWakeUpListenEnabled
--Xlinker --wrap=otLinkSetWakeupChannel
--Xlinker --wrap=otLinkSetWakeupListenParameters
 -Xlinker --wrap=otLinkFilterGetAddressMode
 -Xlinker --wrap=otLinkGetPanId
 -Xlinker --wrap=otLinkGetAlternateShortAddress
@@ -482,7 +477,6 @@
 -Xlinker --wrap=otLinkGetCslChannel
 -Xlinker --wrap=otLinkGetMaxFrameRetriesDirect
 -Xlinker --wrap=otLinkGetMaxFrameRetriesIndirect
--Xlinker --wrap=otLinkGetWakeupChannel
 -Xlinker --wrap=otLinkFilterClearAddresses
 -Xlinker --wrap=otLinkFilterClearAllRssIn
 -Xlinker --wrap=otLinkFilterClearDefaultRssIn
@@ -491,7 +485,6 @@
 -Xlinker --wrap=otLinkFilterSetAddressMode
 -Xlinker --wrap=otLinkFilterSetDefaultRssIn
 -Xlinker --wrap=otLinkGetFactoryAssignedIeeeEui64
--Xlinker --wrap=otLinkGetWakeupListenParameters
 -Xlinker --wrap=otLinkResetCounters
 -Xlinker --wrap=otLinkResetTxRetrySuccessHistogram
 -Xlinker --wrap=otLinkSetMaxFrameRetriesDirect
@@ -509,6 +502,7 @@
 -Xlinker --wrap=otLinkRawIsEnabled
 -Xlinker --wrap=otLinkRawGetRssi
 -Xlinker --wrap=otLinkRawEnergyScan
+-Xlinker --wrap=otLinkRawGetRadioAvailability
 -Xlinker --wrap=otLinkRawReceive
 -Xlinker --wrap=otLinkRawSetAlternateShortAddress
 -Xlinker --wrap=otLinkRawSetMacFrameCounter
@@ -529,6 +523,7 @@
 -Xlinker --wrap=otLinkRawGetCaps
 -Xlinker --wrap=otLinkRawGetTransmitBuffer
 -Xlinker --wrap=otLinkRawGetRadioTime
+-Xlinker --wrap=otLinkRawSetRadioAvailabilityUpdated
 -Xlinker --wrap=otLoggingSetLevel
 -Xlinker --wrap=otSetLogLevel
 -Xlinker --wrap=otGetLogLevel
@@ -876,6 +871,7 @@
 -Xlinker --wrap=otThreadDiscover
 -Xlinker --wrap=otThreadGetLeaderData
 -Xlinker --wrap=otThreadGetLeaderRloc
+-Xlinker --wrap=otThreadGetNeighborInfoByRloc16
 -Xlinker --wrap=otThreadGetNextNeighborInfo
 -Xlinker --wrap=otThreadGetParentAverageRssi
 -Xlinker --wrap=otThreadGetParentInfo
@@ -892,7 +888,6 @@
 -Xlinker --wrap=otThreadSetNetworkKey
 -Xlinker --wrap=otThreadSetNetworkKeyRef
 -Xlinker --wrap=otThreadSetNetworkName
--Xlinker --wrap=otThreadWakeup
 -Xlinker --wrap=otThreadGetLinkMode
 -Xlinker --wrap=otThreadGetNetworkKeyRef
 -Xlinker --wrap=otThreadGetKeySwitchGuardTime
@@ -918,6 +913,15 @@
 -Xlinker --wrap=otThreadSetKeySequenceCounter
 -Xlinker --wrap=otThreadSetKeySwitchGuardTime
 -Xlinker --wrap=otThreadSetStoreFrameCounterAhead
+-Xlinker --wrap=otThreadDirectFindKey
+-Xlinker --wrap=otThreadDirectGetNextKey
+-Xlinker --wrap=otThreadDirectRegisterKey
+-Xlinker --wrap=otThreadDirectKeyGetId
+-Xlinker --wrap=otThreadDirectKeyGetMaterial
+-Xlinker --wrap=otThreadDirectKeyGetFrameCounter
+-Xlinker --wrap=otThreadDirectInitKeyIterator
+-Xlinker --wrap=otThreadDirectUnregisterAllKeys
+-Xlinker --wrap=otThreadDirectUnregisterKey
 -Xlinker --wrap=otThreadIsRouterEligible
 -Xlinker --wrap=otThreadIsRouterIdAllocated
 -Xlinker --wrap=otThreadIsTmfOriginFilterEnabled

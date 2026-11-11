@@ -37,6 +37,11 @@ void sli_zigbee_stack_rail_mux_aux_get_default_rail_handle_process_ipc_command(s
   msg->data.rail_mux_aux_get_default_rail_handle.response.result = sli_zigbee_stack_rail_mux_aux_get_default_rail_handle();
 }
 
+void sli_zigbee_stack_rail_mux_aux_register_and_start_rx_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
+{
+  msg->data.rail_mux_aux_register_and_start_rx.response.result = sli_zigbee_stack_rail_mux_aux_register_and_start_rx(msg->data.rail_mux_aux_register_and_start_rx.request.channel);
+}
+
 void sli_zigbee_stack_rail_mux_aux_register_protocol_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
 {
   msg->data.rail_mux_aux_register_protocol.response.result = sli_zigbee_stack_rail_mux_aux_register_protocol(&msg->data.rail_mux_aux_register_protocol.request.out_rail_handle,
@@ -59,12 +64,6 @@ void sli_zigbee_stack_rail_mux_aux_start_tx_process_ipc_command(sli_zigbee_ipc_c
                                                                                            msg->data.rail_mux_aux_start_tx.request.channel,
                                                                                            msg->data.rail_mux_aux_start_tx.request.options,
                                                                                            &msg->data.rail_mux_aux_start_tx.request.scheduler_info);
-}
-
-void sli_zigbee_stack_rail_mux_aux_try_register_and_start_rx_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
-{
-  msg->data.rail_mux_aux_try_register_and_start_rx.response.result = sli_zigbee_stack_rail_mux_aux_try_register_and_start_rx(msg->data.rail_mux_aux_try_register_and_start_rx.request.aux_pan,
-                                                                                                                             msg->data.rail_mux_aux_try_register_and_start_rx.request.channel);
 }
 
 void sli_zigbee_stack_rail_mux_aux_unregister_protocol_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
@@ -107,6 +106,15 @@ sl_rail_handle_t sl_zigbee_rail_mux_aux_get_default_rail_handle(void)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_rail_mux_aux_get_default_rail_handle_process_ipc_command, &msg);
 
   return msg.data.rail_mux_aux_get_default_rail_handle.response.result;
+}
+
+sl_rail_status_t sl_zigbee_rail_mux_aux_register_and_start_rx(uint8_t channel)
+{
+  sli_zigbee_ipc_cmd_t msg = { 0, };
+  msg.data.rail_mux_aux_register_and_start_rx.request.channel = channel;
+  sli_zigbee_send_ipc_cmd(sli_zigbee_stack_rail_mux_aux_register_and_start_rx_process_ipc_command, &msg);
+
+  return msg.data.rail_mux_aux_register_and_start_rx.response.result;
 }
 
 sl_rail_status_t sl_zigbee_rail_mux_aux_register_protocol(sl_rail_handle_t *out_rail_handle,
@@ -178,17 +186,6 @@ sl_rail_status_t sl_zigbee_rail_mux_aux_start_tx(sl_rail_handle_t rail_handle,
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_rail_mux_aux_start_tx_process_ipc_command, &msg);
 
   return msg.data.rail_mux_aux_start_tx.response.result;
-}
-
-sl_rail_status_t sl_zigbee_rail_mux_aux_try_register_and_start_rx(uint16_t aux_pan,
-                                                                  uint8_t channel)
-{
-  sli_zigbee_ipc_cmd_t msg = { 0, };
-  msg.data.rail_mux_aux_try_register_and_start_rx.request.aux_pan = aux_pan;
-  msg.data.rail_mux_aux_try_register_and_start_rx.request.channel = channel;
-  sli_zigbee_send_ipc_cmd(sli_zigbee_stack_rail_mux_aux_try_register_and_start_rx_process_ipc_command, &msg);
-
-  return msg.data.rail_mux_aux_try_register_and_start_rx.response.result;
 }
 
 sl_rail_status_t sl_zigbee_rail_mux_aux_unregister_protocol(void)

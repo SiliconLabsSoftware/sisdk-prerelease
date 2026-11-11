@@ -222,7 +222,7 @@ static void record_faulty_watchdog(void)
 static sl_status_t sync_starve_interrupt(void)
 {
 #if defined(_WDOG_CFG_WARNSEL_MASK)
-#if defined(SL_CATALOG_CRASH_MANAGER_COMPONENT_PRESENT)
+#if defined(SL_CATALOG_CRASH_CAPTURE_COMPONENT_PRESENT)
   return sli_watchdog_manager_hal_enable_starve_interrupt();
 #else
   if (starve_callback != NULL

@@ -18,6 +18,9 @@ requires:
 - name: psa_crypto
 - name: psa_crypto_gcm
 - name: psa_driver
+  condition: [trustzone_unaware]
+- name: psa_driver
+  condition: [trustzone_secure]
 
 template_contribution:
 - name: psa_crypto_config

@@ -138,7 +138,9 @@
 #define MBEDTLS_PK_WRITE_C
 #endif
 
-#if defined(MBEDTLS_USER_CONFIG_FILE)
+// Spans multiple lines to avoid being processed by unifdef
+#if defined(\
+    MBEDTLS_USER_CONFIG_FILE)
 #include MBEDTLS_USER_CONFIG_FILE
 #endif
 

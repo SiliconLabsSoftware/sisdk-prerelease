@@ -33,20 +33,22 @@ conflicts:
 documentation:
   docset: gecko-platform
   document:
-  - page: platform-emlib-efr32xg21/common
+  - page: platform-emlib-efr32xg21
     condition: [device_sdid_200]
-  - page: platform-emlib-efr32xg22/common
+  - page: platform-emlib-efr32xg22
     condition: [device_sdid_205]
-  - page: platform-emlib-efr32xg23/common
+  - page: platform-emlib-efr32xg23
     condition: [device_sdid_210]
-  - page: platform-emlib-efr32xg24/common
+  - page: platform-emlib-efr32xg24
     condition: [device_sdid_215]
-  - page: platform-emlib-efr32xg26/common
+  - page: platform-emlib-efr32xg25
+    condition: [device_sdid_220]
+  - page: platform-emlib-efr32xg26
     condition: [device_sdid_225]
-  - page: platform-emlib-efr32xg27/common
+  - page: platform-emlib-efr32xg27
     condition: [device_sdid_230]
-  - page: platform-emlib-efr32xg28/common
+  - page: platform-emlib-efr32xg28
     condition: [device_sdid_235]
-  - page: platform-emlib-efr32xg29/common
+  - page: platform-emlib-efr32xg29
     condition: [device_sdid_240]
 root_path: platform_core/platform/emlib

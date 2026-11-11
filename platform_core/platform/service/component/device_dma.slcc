@@ -24,4 +24,4 @@ include:
   - path: sl_device_dma.h
 documentation:
   docset: gecko-platform
-  document: platform-service/device-manager-dma
+  document: platform-service/device-dma

@@ -39,21 +39,30 @@
       </properties>
     </characteristic>
 
-    <!--Out-Of-Band Data Server-->
-    <characteristic const="false" id="oob_data_server" name="Out-Of-Band Data Server" sourceId="" uuid="c05c6ccd-c4e4-4def-90a1-08fbe00f901c">
+    <!--Session Key Server-->
+    <characteristic const="false" id="session_key_server" name="Session Key Server" sourceId="" uuid="1e8d4b2f-3e9d-5fcc-ab5b-9e6f4d4c7288">
       <informativeText/>
       <value length="0" type="user" variable_length="false"/>
       <properties>
-        <read authenticated="false" bonded="false" encrypted="false"/>
+        <indicate authenticated="false" bonded="false" encrypted="false"/>
       </properties>
     </characteristic>
 
-    <!--Out-Of-Band Data Client-->
-    <characteristic const="false" id="oob_data_client" name="Out-Of-Band Data Client" sourceId="" uuid="e8d35751-897d-4e2c-8ab6-cd85ebf1192c">
+    <!--Session Key Client-->
+    <characteristic const="false" id="session_key_client" name="Session Key Client" sourceId="" uuid="0d7c3a1f-2d8c-4ebb-9aa4-8f5e3c2b6177">
       <informativeText/>
       <value length="0" type="user" variable_length="false"/>
       <properties>
         <write authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+
+    <!--Pairing Parameters Server-->
+    <characteristic const="false" id="pairing_parameters_server" name="Pairing Parameters Server" sourceId="" uuid="30af514f-50bf-61ee-cdd7-b091906f946e">
+      <informativeText/>
+      <value length="0" type="user" variable_length="false"/>
+      <properties>
+        <indicate authenticated="false" bonded="false" encrypted="false"/>
       </properties>
     </characteristic>
   </service>

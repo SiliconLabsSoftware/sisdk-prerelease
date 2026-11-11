@@ -657,6 +657,8 @@ void TestMacFrameApi(void)
     Mac::Frame            frame;
     Mac::Frame::ParseInfo parseInfo;
 
+    frame.mRadioType = 0;
+
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
     uint8_t data_psdu1[] = {0x29, 0xee, 0x53, 0xce, 0xfa, 0x01, 0x00, 0x00, 0x00, 0x00, 0x0a,
                             0x6e, 0x16, 0x05, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x6e, 0x16, 0x0d,
@@ -806,8 +808,10 @@ void TestMacFrameAckGeneration(void)
     const Mac::CslIe *csl;
 #endif
 
-    ackFrame.mPsdu   = ackFrameBuffer;
-    ackFrame.mLength = sizeof(ackFrameBuffer);
+    ackFrame.mPsdu           = ackFrameBuffer;
+    ackFrame.mLength         = sizeof(ackFrameBuffer);
+    ackFrame.mRadioType      = 0;
+    receivedFrame.mRadioType = 0;
 
     // Received Frame 1
     // IEEE 802.15.4 Data
@@ -964,8 +968,9 @@ void TestMacFrameValidation(void)
     Mac::Frame            frame;
     Mac::Frame::ParseInfo frameInfo;
 
-    frame.mPsdu   = psdu;
-    frame.mLength = sizeof(psdu);
+    frame.mPsdu      = psdu;
+    frame.mLength    = sizeof(psdu);
+    frame.mRadioType = 0;
 
     // Verify valid 2003 Data frame passes validation
     SuccessOrQuit(frameInfo.ParseFrom(frame, Mac::Frame::kParseFully));

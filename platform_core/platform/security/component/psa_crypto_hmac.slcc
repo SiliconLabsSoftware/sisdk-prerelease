@@ -9,7 +9,7 @@ quality: production
 provides:
 - name: psa_crypto_hmac
 requires:
-- name: psa_crypto
+- name: psa_crypto_hash
 - name: sl_si91x_psa_mac
   condition: [device_si91x]
 template_contribution:

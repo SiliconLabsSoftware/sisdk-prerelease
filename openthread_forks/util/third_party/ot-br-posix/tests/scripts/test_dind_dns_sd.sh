@@ -85,11 +85,6 @@ test_teardown()
     ip -6 route del 2002:1234::1234 || true
     ip route del 38.106.217.165 || true
 
-    echo "Agent logs:"
-    for c in "${CONTAINER_NAME}" "otbr-test-container-1" "otbr-test-container-2" "otbr-test-container-3" "otbr-test-container-web"; do
-        docker exec -i "$c" cat /var/log/otbr-agent.log || true
-    done
-
     for c in "${CONTAINER_NAME}" "otbr-test-container-1" "otbr-test-container-2" "otbr-test-container-3" "otbr-test-container-web" "test-client" "dhcp6-server"; do
         docker stop "$c" || true
         docker rm "$c" || true
@@ -277,10 +272,23 @@ test_run()
 
 main()
 {
+    local do_setup=1
+    local do_run=1
+
     while [[ $# -gt 0 ]]; do
         case $1 in
             --mdnsresponder)
                 OTBR_MDNS="mDNSResponder"
+                shift
+                ;;
+            --setup-only)
+                do_setup=1
+                do_run=0
+                shift
+                ;;
+            --run-only)
+                do_setup=0
+                do_run=1
                 shift
                 ;;
             *)
@@ -289,8 +297,13 @@ main()
         esac
     done
 
-    test_setup
-    test_run
+    if [[ ${do_setup} -eq 1 ]]; then
+        test_setup
+    fi
+
+    if [[ ${do_run} -eq 1 ]]; then
+        test_run
+    fi
 }
 
 main "$@"

@@ -46,4 +46,4 @@ config_file:
   file_id: glib_config
 documentation:
   docset: gecko-platform
-  document: middleware/api/group-glib
+  document: platform-middleware/glib

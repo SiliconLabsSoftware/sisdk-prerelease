@@ -66,6 +66,14 @@ filter:
   - name: "Project Difficulty"
     value: ["Beginner"]
 
+template_contribution:
+  - name: default_stack_size_override
+    value: 6144
+    condition: [toolchain_lto]
+  - name: default_stack_size_override
+    value: 5120
+    unless: [toolchain_lto]
+
 ui_hints:
   highlight:
     - path: ./README.md

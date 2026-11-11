@@ -12,4 +12,6 @@ provides:
 define:
 - name: ENABLE_MICRIUM_TASK_EXIT_GARBAGE_COLLECT
   value: 1
+documentation:
+  url: https://docs.silabs.com/micrium/latest/micrium-kernel/
 root_path: micriumos/platform/micrium_os

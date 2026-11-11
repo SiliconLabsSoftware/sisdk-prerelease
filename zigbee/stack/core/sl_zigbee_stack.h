@@ -453,7 +453,12 @@ typedef struct sli_parcel_s_t {
 #define NWK_INDEX 0
 #endif
 
-#if (defined(MAC_DUAL_PRESENT) || defined(ALT_MAC))
+// Must match the MULTI_MAC_PRESENT gate in stack/mac/multi-mac.h: whenever a MAC function takes a
+// runtime `mac_index` parameter, its body must resolve MAC_INDEX to that parameter rather than a
+// hard-coded 0. MAC_MUX_AUX_PRESENT (and NON_DEFAULT_MAC_INTERFACE) were missing here, so under the
+// RAIL mux-aux build the upper/lower MAC treated every packet as mac_index 0 -- aux-injected beacon
+// requests were answered on the primary interface instead of the aux channel.
+#if (defined(MAC_DUAL_PRESENT) || defined(ALT_MAC) || defined(MAC_MUX_AUX_PRESENT) || defined(NON_DEFAULT_MAC_INTERFACE))
 #define MAC_INDEX mac_index
 #else
 #define MAC_INDEX 0

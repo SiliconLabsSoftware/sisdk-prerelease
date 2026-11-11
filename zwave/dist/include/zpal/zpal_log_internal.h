@@ -14,8 +14,33 @@
 #ifndef ZPAL_LOG_INTERNAL_H_
 #define ZPAL_LOG_INTERNAL_H_
 
-#include "zw_log_config.h"
 #include <assert.h>
+#include <zpal_log_platform.h>
+
+#if ZPAL_LOG_PLATFORM_LOG_AVAILABLE
+#include "zw_log_config.h"
+#endif
+
+/*
+ * Selects the sl_log output backend at build time.
+ *
+ * The platform selector chooses the backend. On Silicon Labs platforms, the
+ * selector derives it from the application project's SLC catalog. Platforms
+ * without an sl_log backend (for example x86) use the formatted path.
+ */
+#if !ZPAL_LOG_PLATFORM_LOG_AVAILABLE
+
+#define ZPAL_LOG_COMPILE_CONDITIONALLY(COMPONENT, LEVEL, ...)
+
+#if !defined(NDEBUG)
+#define ZPAL_LOG_PRINT(...) \
+  do {} while (0)
+#else
+#define ZPAL_LOG_PRINT(PFORMAT, ...) \
+  _Static_assert(false, "STATIC_ASSERT_FAILED_Ad_hoc_log_message_was_left_in_production_code");
+#endif
+
+#else // ZPAL_LOG_PLATFORM_LOG_AVAILABLE
 
 // Logging is not available for unit tests.
 #if defined(UNIT_TEST)
@@ -23,12 +48,12 @@
 #else // defined(UNIT_TEST)
 
 // Helper function to determine if a log level is enabled
-#define ZPAL_LOG_FILTER_LEVEL(LEVEL) (                                            \
-    ((LEVEL == ZPAL_LOG_LEVEL_DEBUG)      && (ZW_LOG_CHANNEL_DEBUG[0] != '\0'))   \
-    || ((LEVEL == ZPAL_LOG_LEVEL_INFO)    && (ZW_LOG_CHANNEL_INFO[0] != '\0'))    \
-    || ((LEVEL == ZPAL_LOG_LEVEL_WARNING) && (ZW_LOG_CHANNEL_WARNING[0] != '\0')) \
-    || ((LEVEL == ZPAL_LOG_LEVEL_ERROR)   && (ZW_LOG_CHANNEL_ERROR[0] != '\0'))   \
-    )
+#define ZPAL_LOG_FILTER_LEVEL(LEVEL) (                               \
+    (((LEVEL == ZPAL_LOG_LEVEL_DEBUG)      && ZW_LOG_ENABLE_DEBUG)   \
+     || ((LEVEL == ZPAL_LOG_LEVEL_INFO)    && ZW_LOG_ENABLE_INFO)    \
+     || ((LEVEL == ZPAL_LOG_LEVEL_WARNING) && ZW_LOG_ENABLE_WARNING) \
+     || ((LEVEL == ZPAL_LOG_LEVEL_ERROR)   && ZW_LOG_ENABLE_ERROR)   \
+    ))
 
 /**
  * The helper macros below are used to determine if logging of a specific
@@ -240,7 +265,9 @@
 #define ZW_LOG_SHUTDOWN_MANAGER_ENABLED 0
 #endif
 
-#define ZPAL_LOG_COMPILE_CONDITIONALLY(COMPONENT, LEVEL, PFORMAT, ...)                                 \
+#if !ZPAL_LOG_BACKEND_COMPACT
+
+#define ZPAL_LOG_COMPILE_CONDITIONALLY(COMPONENT, LEVEL, ...)                                          \
   do {                                                                                                 \
     if (ZPAL_LOG_FILTER_LEVEL(LEVEL)                                                                   \
         && (                                                                                           \
@@ -274,9 +301,74 @@
           || ((COMPONENT == ZPAL_LOG_ZAF_TSE) && (ZW_LOG_ZAF_TSE_ENABLED))                             \
           || ((COMPONENT == ZPAL_LOG_SHUTDOWN_MANAGER) && (ZW_LOG_SHUTDOWN_MANAGER_ENABLED))           \
           )) {                                                                                         \
-      zpal_log(COMPONENT, LEVEL, PFORMAT, ##__VA_ARGS__);                                              \
+      zpal_log(COMPONENT, LEVEL, __VA_ARGS__);                                                         \
     }                                                                                                  \
   } while (0)
+
+#else // ZPAL_LOG_BACKEND_COMPACT
+
+#include "sl_log_helper.h"
+
+#define ZPAL_LOG_COMPONENT_ENABLED(COMPONENT)                                                   \
+  ((((COMPONENT) == ZPAL_LOG_APP) && ZW_LOG_APP_ENABLED)                                        \
+   || (((COMPONENT) == ZPAL_LOG_APP_JAMMING) && ZW_LOG_APP_JAMMING_ENABLED)                     \
+   || (((COMPONENT) == ZPAL_LOG_HW) && ZW_LOG_HW_ENABLED)                                       \
+   || (((COMPONENT) == ZPAL_LOG_CC_ASSOCIATION) && ZW_LOG_CC_ASSOCIATION_ENABLED)               \
+   || (((COMPONENT) == ZPAL_LOG_CC_BATTERY) && ZW_LOG_CC_BATTERY_ENABLED)                       \
+   || (((COMPONENT) == ZPAL_LOG_CC_BINARY_SWITCH) && ZW_LOG_CC_BINARY_SWITCH_ENABLED)           \
+   || (((COMPONENT) == ZPAL_LOG_CC_CENTRAL_SCENE) && ZW_LOG_CC_CENTRAL_SCENE_ENABLED)           \
+   || (((COMPONENT) == ZPAL_LOG_CC_COLOR_SWITCH) && ZW_LOG_CC_COLOR_SWITCH_ENABLED)             \
+   || (((COMPONENT) == ZPAL_LOG_CC_DOOR_LOCK) && ZW_LOG_CC_DOOR_LOCK_ENABLED)                   \
+   || (((COMPONENT) == ZPAL_LOG_CC_FIRMWARE_UPDATE) && ZW_LOG_CC_FIRMWARE_UPDATE_ENABLED)       \
+   || (((COMPONENT) == ZPAL_LOG_CC_INDICATOR) && ZW_LOG_CC_INDICATOR_ENABLED)                   \
+   || (((COMPONENT) == ZPAL_LOG_CC_MULTI_CHANNEL) && ZW_LOG_CC_MULTI_CHANNEL_ENABLED)           \
+   || (((COMPONENT) == ZPAL_LOG_CC_MULTILEVEL_SENSOR) && ZW_LOG_CC_MULTILEVEL_SENSOR_ENABLED)   \
+   || (((COMPONENT) == ZPAL_LOG_CC_MULTILEVEL_SWITCH) && ZW_LOG_CC_MULTILEVEL_SWITCH_ENABLED)   \
+   || (((COMPONENT) == ZPAL_LOG_CC_NOTIFICATION) && ZW_LOG_CC_NOTIFICATION_ENABLED)             \
+   || (((COMPONENT) == ZPAL_LOG_CC_USER_CODE) && ZW_LOG_CC_USER_CODE_ENABLED)                   \
+   || (((COMPONENT) == ZPAL_LOG_CC_USER_CREDENTIAL) && ZW_LOG_CC_USER_CREDENTIAL_ENABLED)       \
+   || (((COMPONENT) == ZPAL_LOG_CC_VERSION) && ZW_LOG_CC_VERSION_ENABLED)                       \
+   || (((COMPONENT) == ZPAL_LOG_CC_WAKE_UP) && ZW_LOG_CC_WAKE_UP_ENABLED)                       \
+   || (((COMPONENT) == ZPAL_LOG_CC_ZWAVE_PLUS_INFO) && ZW_LOG_CC_ZWAVE_PLUS_INFO_ENABLED)       \
+   || (((COMPONENT) == ZPAL_LOG_ZAF_ACTUATOR) && ZW_LOG_ZAF_ACTUATOR_ENABLED)                   \
+   || (((COMPONENT) == ZPAL_LOG_ZAF_APP_TIMER) && ZW_LOG_ZAF_APP_TIMER_ENABLED)                 \
+   || (((COMPONENT) == ZPAL_LOG_ZAF_CMD_PUBLISHER) && ZW_LOG_ZAF_CMD_PUBLISHER_ENABLED)         \
+   || (((COMPONENT) == ZPAL_LOG_ZAF_COMMON) && ZW_LOG_ZAF_COMMON_ENABLED)                       \
+   || (((COMPONENT) == ZPAL_LOG_ZAF_EVENT_DISTRIBUTOR) && ZW_LOG_ZAF_EVENT_DISTRIBUTOR_ENABLED) \
+   || (((COMPONENT) == ZPAL_LOG_ZAF_NVM) && ZW_LOG_ZAF_NVM_ENABLED)                             \
+   || (((COMPONENT) == ZPAL_LOG_ZAF_TRANSPORT) && ZW_LOG_ZAF_TRANSPORT_ENABLED)                 \
+   || (((COMPONENT) == ZPAL_LOG_ZAF_TSE) && ZW_LOG_ZAF_TSE_ENABLED)                             \
+   || (((COMPONENT) == ZPAL_LOG_SHUTDOWN_MANAGER) && ZW_LOG_SHUTDOWN_MANAGER_ENABLED))
+
+#if ZW_LOG_DISPLAY_COMPONENT
+#define ZPAL_LOG_COMPACT_ARGS(COMPONENT, PFORMAT, ...) \
+  "[C=%u] " PFORMAT, (uint32_t)(COMPONENT), ##__VA_ARGS__
+#else
+#define ZPAL_LOG_COMPACT_ARGS(COMPONENT, PFORMAT, ...) \
+  PFORMAT, ##__VA_ARGS__
+#endif
+
+#define ZPAL_LOG_COMPACT_EMIT_ZPAL_LOG_LEVEL_DEBUG(COMPONENT, PFORMAT, ...) \
+  SL_PRINT_STRING_DEBUG(ZPAL_LOG_COMPACT_ARGS(COMPONENT, PFORMAT, ##__VA_ARGS__))
+#define ZPAL_LOG_COMPACT_EMIT_ZPAL_LOG_LEVEL_INFO(COMPONENT, PFORMAT, ...) \
+  SL_PRINT_STRING_INFO(ZPAL_LOG_COMPACT_ARGS(COMPONENT, PFORMAT, ##__VA_ARGS__))
+#define ZPAL_LOG_COMPACT_EMIT_ZPAL_LOG_LEVEL_WARNING(COMPONENT, PFORMAT, ...) \
+  SL_PRINT_STRING_WARN(ZPAL_LOG_COMPACT_ARGS(COMPONENT, PFORMAT, ##__VA_ARGS__))
+#define ZPAL_LOG_COMPACT_EMIT_ZPAL_LOG_LEVEL_ERROR(COMPONENT, PFORMAT, ...) \
+  SL_PRINT_STRING_ERROR(ZPAL_LOG_COMPACT_ARGS(COMPONENT, PFORMAT, ##__VA_ARGS__))
+
+#define ZPAL_LOG_COMPACT_EMIT(LEVEL, COMPONENT, PFORMAT, ...) \
+  ZPAL_LOG_COMPACT_EMIT_##LEVEL(COMPONENT, PFORMAT, ##__VA_ARGS__)
+
+#define ZPAL_LOG_COMPILE_CONDITIONALLY(COMPONENT, LEVEL, PFORMAT, ...) \
+  do {                                                                 \
+    if (ZPAL_LOG_FILTER_LEVEL(LEVEL)                                   \
+        && ZPAL_LOG_COMPONENT_ENABLED(COMPONENT)) {                    \
+      ZPAL_LOG_COMPACT_EMIT(LEVEL, COMPONENT, PFORMAT, ##__VA_ARGS__); \
+    }                                                                  \
+  } while (0)
+
+#endif // !ZPAL_LOG_BACKEND_COMPACT
 
 #endif // !defined(UNIT_TEST)
 
@@ -287,13 +379,20 @@
  * @param[in] PFORMAT The log message (format string)
  * @param[in] ... The arguments to the format string
  */
-#define ZPAL_LOG_PRINT(PFORMAT, ...)                                       \
-  do {                                                                     \
-    zpal_log(ZPAL_LOG_NONE, ZPAL_LOG_LEVEL_DEBUG, PFORMAT, ##__VA_ARGS__); \
+#if !ZPAL_LOG_BACKEND_COMPACT
+#define ZPAL_LOG_PRINT(...)                                     \
+  do {                                                          \
+    zpal_log(ZPAL_LOG_NONE, ZPAL_LOG_LEVEL_DEBUG, __VA_ARGS__); \
   } while (0)
-#else // !defined(NDEBUG)
+#else
 #define ZPAL_LOG_PRINT(PFORMAT, ...) \
+  do { SL_PRINT_STRING_DEBUG(PFORMAT, ##__VA_ARGS__); } while (0)
+#endif
+#else // !defined(NDEBUG)
+#define ZPAL_LOG_PRINT(...) \
   _Static_assert(false, "STATIC_ASSERT_FAILED_Ad_hoc_log_message_was_left_in_production_code");
 #endif // !defined(NDEBUG)
+
+#endif // ZPAL_LOG_PLATFORM_LOG_AVAILABLE
 
 #endif // ZPAL_LOG_INTERNAL_H_

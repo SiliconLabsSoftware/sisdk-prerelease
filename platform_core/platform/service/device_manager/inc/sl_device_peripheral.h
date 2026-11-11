@@ -2290,10 +2290,13 @@ __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_serial_dma_signal_tx_tr
  * @param peripheral  A pointer to peripheral.
  *
  * @return  The RXFL signal
+ *
+ * @deprecated Use sl_device_peripheral_get_serial_dma_signal_rx_trigger() instead.
  ******************************************************************************/
+SL_DEPRECATED_API_SDK_2026_12
 __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_eusart_rxfl_dma_signal(const sl_peripheral_t peripheral)
 {
-  return ((sl_peripheral_eusart_t)peripheral)->dma_signal_rxfl;
+  return sl_device_peripheral_get_serial_dma_signal_rx_trigger(peripheral);
 }
 
 /***************************************************************************//**
@@ -2302,10 +2305,13 @@ __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_eusart_rxfl_dma_signal(
  * @param peripheral  A pointer to peripheral.
  *
  * @return  The TXFL signal
+ *
+ * @deprecated Use sl_device_peripheral_get_serial_dma_signal_tx_trigger() instead.
  ******************************************************************************/
+SL_DEPRECATED_API_SDK_2026_12
 __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_eusart_txfl_dma_signal(const sl_peripheral_t peripheral)
 {
-  return ((sl_peripheral_eusart_t)peripheral)->dma_signal_txfl;
+  return sl_device_peripheral_get_serial_dma_signal_tx_trigger(peripheral);
 }
 
 /***************************************************************************//**
@@ -2314,10 +2320,13 @@ __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_eusart_txfl_dma_signal(
  * @param peripheral  A pointer to peripheral.
  *
  * @return  The RXFL signal
+ *
+ * @deprecated Use sl_device_peripheral_get_serial_dma_signal_rx_trigger() instead.
  ******************************************************************************/
+SL_DEPRECATED_API_SDK_2026_12
 __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_euart_rxfl_dma_signal(const sl_peripheral_t peripheral)
 {
-  return ((sl_peripheral_euart_t)peripheral)->dma_signal_rxfl;
+  return sl_device_peripheral_get_serial_dma_signal_rx_trigger(peripheral);
 }
 
 /***************************************************************************//**
@@ -2326,10 +2335,13 @@ __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_euart_rxfl_dma_signal(c
  * @param peripheral  A pointer to peripheral.
  *
  * @return  The TXFL signal
+ *
+ * @deprecated Use sl_device_peripheral_get_serial_dma_signal_tx_trigger() instead.
  ******************************************************************************/
+SL_DEPRECATED_API_SDK_2026_12
 __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_euart_txfl_dma_signal(const sl_peripheral_t peripheral)
 {
-  return ((sl_peripheral_euart_t)peripheral)->dma_signal_txfl;
+  return sl_device_peripheral_get_serial_dma_signal_tx_trigger(peripheral);
 }
 
 /***************************************************************************//**
@@ -2338,10 +2350,13 @@ __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_euart_txfl_dma_signal(c
  * @param peripheral  A pointer to peripheral.
  *
  * @return  The RXDATAV signal
+ *
+ * @deprecated Use sl_device_peripheral_get_serial_dma_signal_rx_trigger() instead.
  ******************************************************************************/
+SL_DEPRECATED_API_SDK_2026_12
 __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_usart_rxdatav_dma_signal(const sl_peripheral_t peripheral)
 {
-  return ((sl_peripheral_usart_t)peripheral)->dma_signal_rxdatav;
+  return sl_device_peripheral_get_serial_dma_signal_rx_trigger(peripheral);
 }
 
 /***************************************************************************//**
@@ -2362,10 +2377,13 @@ __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_usart_rxdatavright_dma_
  * @param peripheral  A pointer to peripheral.
  *
  * @return  The TXBL signal
+ *
+ * @deprecated Use sl_device_peripheral_get_serial_dma_signal_tx_trigger() instead.
  ******************************************************************************/
+SL_DEPRECATED_API_SDK_2026_12
 __STATIC_INLINE sl_dma_signal_t sl_device_peripheral_get_usart_txbl_dma_signal(const sl_peripheral_t peripheral)
 {
-  return ((sl_peripheral_usart_t)peripheral)->dma_signal_txbl;
+  return sl_device_peripheral_get_serial_dma_signal_tx_trigger(peripheral);
 }
 
 /***************************************************************************//**

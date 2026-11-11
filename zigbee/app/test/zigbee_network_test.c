@@ -31,6 +31,10 @@
 #include "zigbee_debug_channel.h"
 #endif //SL_CATALOG_ZIGBEE_DEBUG_BASIC_PRESENT
 #include "network_test_config.h"
+#if (LARGE_NETWORK_TESTING == 1)
+#include "sl_zigbee_pro_stack_config.h"
+extern uint8_t sli_zigbee_new_broadcast_entry_threshold;
+#endif
 
 #include "sl_zigbee_system_common.h"
 #include "app/framework/util/util.h"
@@ -110,6 +114,14 @@ void sli_zigbee_network_test_init(uint8_t init_level)
     {
       sl_zigbee_af_event_init(&zigbee_tx_test_event, zigbee_tx_test_event_handler);
       sl_zigbee_af_event_init(&zigbee_large_network_event, zigbee_large_network_event_handler);
+      break;
+    }
+
+    case SL_ZIGBEE_INIT_LEVEL_DONE:
+    {
+#if (LARGE_NETWORK_TESTING == 1)
+      sli_zigbee_new_broadcast_entry_threshold = SL_ZIGBEE_BROADCAST_TABLE_SIZE;
+#endif
       break;
     }
 
@@ -560,19 +572,15 @@ void zigbee_frag_raw_tx_command(sl_cli_command_arg_t *arguments)
   }
 }
 
-#if (LARGE_NETWORK_TESTING == 1)
-
-#include "sl_zigbee_pro_stack_config.h"
-extern uint8_t sli_zigbee_new_broadcast_entry_threshold;
-
 // raw 0x0042 { FA DE FE 00 01}
 // send 0xffff 1 1
 
 // For ping
 // raw 0x0043 { FA DE FE 00 01}
 // send 0x0000 1 1
-bool sl_zigbee_af_pre_command_received_cb(sl_zigbee_af_cluster_command_t* cmd)
+bool sli_zigbee_network_test_pre_command_received_callback(sl_zigbee_af_cluster_command_t* cmd)
 {
+#if (LARGE_NETWORK_TESTING == 1)
   // Print debug message for latency timing.
   if (cmd->apsFrame->clusterId == 0x0042 || cmd->apsFrame->clusterId == 0x0043) {
     uint8_t *msg_contents = cmd->buffer;
@@ -608,7 +616,14 @@ bool sl_zigbee_af_pre_command_received_cb(sl_zigbee_af_cluster_command_t* cmd)
     return true;
   }
   return false;
+#else
+  (void)cmd;
+  return false;
+#endif // #if (LARGE_NETWORK_TESTING == 1)
 }
+
+#if (LARGE_NETWORK_TESTING == 1)
+
 // raw 0x0042 { FA DE FE 00 01}
 // send 0xffff 1 1
 bool sl_zigbee_af_pre_message_send_cb(sl_zigbee_af_message_struct_t* messageStruct,
@@ -632,10 +647,5 @@ bool sl_zigbee_af_pre_message_send_cb(sl_zigbee_af_message_struct_t* messageStru
   }
 
   return false;
-}
-
-void sl_zigbee_af_main_init_cb(void)
-{
-  sli_zigbee_new_broadcast_entry_threshold = SL_ZIGBEE_BROADCAST_TABLE_SIZE;
 }
 #endif // #if (LARGE_NETWORK_TESTING == 1)

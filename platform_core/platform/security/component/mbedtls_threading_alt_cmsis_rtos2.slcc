@@ -14,6 +14,9 @@ requires:
 - name: psa_crypto_config
 - name: sli_psec_osal
   condition: [kernel]
+  # Need threading.c from tf_psa_crypto_mbedtls_source
+- name: tf_psa_crypto_mbedtls_source
+  condition: [kernel]
 
 provides:
 - name: mbedtls_threading_alt

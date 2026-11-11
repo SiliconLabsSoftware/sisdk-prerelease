@@ -14,14 +14,10 @@ provides:
 
 include:
 - path: include
-  unless: [trustzone_nonsecure]
   file_list:
   - path: psa/crypto_driver_contexts_composites.h
-    unless: [trustzone_nonsecure]
   - path: psa/crypto_driver_contexts_key_derivation.h
-    unless: [trustzone_nonsecure]
   - path: psa/crypto_driver_contexts_primitives.h
-    unless: [trustzone_nonsecure]
 
 metadata:
   sbom:

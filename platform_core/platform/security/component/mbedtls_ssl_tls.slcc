@@ -17,8 +17,6 @@ provides:
 - name: mbedtls_ssl_tls
 requires:
 - name: mbedtls_core
-  # requires MBEDTLS_USE_PSA_CRYPTO ( in psa_crypto )
-- name: psa_crypto
   # requires at least one MBEDTLS_SSL_PROTO_XXX 
 - name: mbedtls_ssl_proto
   # MBEDTLS_SSL_TLS_C requires PSA_WANT_ALG_SHA_256 or PSA_WANT_ALG_SHA_384.

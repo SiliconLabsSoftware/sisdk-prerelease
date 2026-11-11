@@ -171,6 +171,12 @@ void sl_hal_vdac_init_channel(VDAC_TypeDef *vdac,
                    | ((uint32_t)init->trigger_mode             << _VDAC_CH0CFG_TRIGMODE_SHIFT)
                    | ((uint32_t)init->power_mode               << _VDAC_CH0CFG_POWERMODE_SHIFT)
                    | ((uint32_t)init->sample_off_mode          << _VDAC_CH0CFG_CONVMODE_SHIFT);
+#if defined(VDAC_CH0CFG_ENBWBOOST)
+  channel_config |= ((uint32_t)init->bw_boost_enable << _VDAC_CH0CFG_ENBWBOOST_SHIFT);
+#endif
+#if defined(VDAC_CH0CFG_ENDRIVEBOOST)
+  channel_config |= ((uint32_t)init->drive_boost_enable << _VDAC_CH0CFG_ENDRIVEBOOST_SHIFT);
+#endif
 
   if (channel == SL_HAL_VDAC_CHANNEL_0) {
     vdac->CH0CFG = channel_config;

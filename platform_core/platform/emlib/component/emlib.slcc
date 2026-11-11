@@ -47,8 +47,6 @@ requires:
   condition: [device_has_letimer]
 - name: emlib_msc
   condition: [device_has_msc]
-- name: emlib_opamp
-  condition: [device_has_vdac]
 - name: emlib_pcnt
   condition: [device_has_pcnt]
 - name: emlib_pdm

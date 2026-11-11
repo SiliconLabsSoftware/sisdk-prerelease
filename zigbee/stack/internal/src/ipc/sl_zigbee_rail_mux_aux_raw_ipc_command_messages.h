@@ -46,6 +46,19 @@ typedef struct {
 } sli_zigbee_stack_rail_mux_aux_get_default_rail_handle_ipc_msg_t;
 
 typedef struct {
+  uint8_t channel;
+} sli_zigbee_stack_rail_mux_aux_register_and_start_rx_ipc_req_t;
+
+typedef struct {
+  sl_rail_status_t result;
+} sli_zigbee_stack_rail_mux_aux_register_and_start_rx_ipc_rsp_t;
+
+typedef struct {
+  sli_zigbee_stack_rail_mux_aux_register_and_start_rx_ipc_req_t request;
+  sli_zigbee_stack_rail_mux_aux_register_and_start_rx_ipc_rsp_t response;
+} sli_zigbee_stack_rail_mux_aux_register_and_start_rx_ipc_msg_t;
+
+typedef struct {
   sl_rail_handle_t out_rail_handle;
   sl_rail_config_t rail_config;
   sl_rail_init_complete_callback_t init_complete_callback;
@@ -92,20 +105,6 @@ typedef struct {
   sli_zigbee_stack_rail_mux_aux_start_tx_ipc_req_t request;
   sli_zigbee_stack_rail_mux_aux_start_tx_ipc_rsp_t response;
 } sli_zigbee_stack_rail_mux_aux_start_tx_ipc_msg_t;
-
-typedef struct {
-  uint16_t aux_pan;
-  uint8_t channel;
-} sli_zigbee_stack_rail_mux_aux_try_register_and_start_rx_ipc_req_t;
-
-typedef struct {
-  sl_rail_status_t result;
-} sli_zigbee_stack_rail_mux_aux_try_register_and_start_rx_ipc_rsp_t;
-
-typedef struct {
-  sli_zigbee_stack_rail_mux_aux_try_register_and_start_rx_ipc_req_t request;
-  sli_zigbee_stack_rail_mux_aux_try_register_and_start_rx_ipc_rsp_t response;
-} sli_zigbee_stack_rail_mux_aux_try_register_and_start_rx_ipc_msg_t;
 
 typedef struct {
   sl_rail_status_t result;

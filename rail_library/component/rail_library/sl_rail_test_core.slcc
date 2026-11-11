@@ -2778,9 +2778,24 @@ template_contribution:
 
 - name: cli_command
   value:
+    name: setRssiDetectBelowThreshold
+    handler: setRssiDetectBelowThreshold
+    help: ' Sets the RSSI detect below threshold in dBm.'
+    argument:
+    - type: int8
+      help: dBm threshold (-128 disables detection)
+
+- name: cli_command
+  value:
     name: getRssiDetectThreshold
     handler: getRssiDetectThreshold
     help: ' Gets the RSSI detect threshold (in dBm).'
+
+- name: cli_command
+  value:
+    name: getRssiDetectBelowThreshold
+    handler: getRssiDetectBelowThreshold
+    help: ' Gets the RSSI detect below threshold (in dBm).'
 
 - name: cli_command
   value:

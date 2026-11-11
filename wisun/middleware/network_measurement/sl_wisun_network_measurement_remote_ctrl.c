@@ -658,7 +658,7 @@ static sl_wisun_coap_packet_t * _parse_iperf(const sl_wisun_coap_packet_t * cons
     } else if (!strncmp(iperf_cmd.arg2,
                         SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_DURATION_STR,
                         SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
-      _options.duration_ms = (uint16_t)atoi(iperf_cmd.arg3);
+      _options.duration_ms = (uint32_t)atoi(iperf_cmd.arg3);
       resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
     } else if (!strncmp(iperf_cmd.arg2,
                         SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_INTERVAL_STR,

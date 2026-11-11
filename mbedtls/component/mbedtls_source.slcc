@@ -9,10 +9,8 @@ ui_hints:
 provides:
 - name: mbedtls_source
 requires:
+- name: tf_psa_crypto_mbedtls_source
 - name: tf_psa_crypto_api
-  condition: [trustzone_unaware]
-- name: psa_crypto_api_nonsecure
-  condition: [trustzone_nonsecure]
 source:
 - path: library/debug.c
   condition:

@@ -8,18 +8,24 @@
 #include <sl_rail.h>
 #include <sl_power_manager.h>
 #include <sl_status.h>
+#include "sl_component_catalog.h"
 
 #define SL_BTCTRL_HCI_SLEEP_EXCLUDE_WEAKS
 #include "sl_btctrl_hci_sleep.h"
 #include "sl_btctrl_hci_transport.h"
 
+#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT) \
+  || defined(SL_CATALOG_CPC_NG_SECONDARY_PRESENT)
+#define SLI_BTCTRL_HCI_SLEEP_ON_CPC_SECONDARY
+#endif
+
 static bool sleep_requested;
 static bool em1_required = false;
 static bool send_sleep_command_complete = false;
-#if (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
+#if (!defined(SLI_BTCTRL_HCI_SLEEP_ON_CPC_SECONDARY))
 static sl_gpio_t wakeup_gpio;
 static int32_t wakeup_int_no = SL_GPIO_INTERRUPT_UNAVAILABLE;
-#endif // (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
+#endif // (!defined(SLI_BTCTRL_HCI_SLEEP_ON_CPC_SECONDARY))
 
 SL_WEAK bool sl_hci_uart_is_ok_to_sleep(void)
 {
@@ -38,8 +44,9 @@ static void sl_btctrl_hci_clear_sleep_request(void)
 
 bool sl_btctrl_hci_sleep_request()
 {
-// Vendor specific sleep command not supported for CPC
-#if defined(SL_CATALOG_CPC_SECONDARY_PRESENT)
+// Vendor sleep + UART RX GPIO wake are for UART HCI only, not CPC secondary
+// (classic or CPC-NG).
+#if defined(SLI_BTCTRL_HCI_SLEEP_ON_CPC_SECONDARY)
   return false;
 #endif
 
@@ -51,11 +58,11 @@ bool sl_btctrl_hci_sleep_request()
   CORE_ENTER_ATOMIC();
 
   sleep_requested = true;
-#if (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
+#if (!defined(SLI_BTCTRL_HCI_SLEEP_ON_CPC_SECONDARY))
   uint32_t mask = 1U << (uint32_t)wakeup_int_no;
   sl_hal_gpio_clear_interrupts(mask);
   sl_gpio_enable_interrupts(mask);
-#endif // (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
+#endif // (!defined(SLI_BTCTRL_HCI_SLEEP_ON_CPC_SECONDARY))
 
   sli_power_manager_update_em_requirement(SL_POWER_MANAGER_EM1, false);
 
@@ -80,7 +87,7 @@ void sl_btctrl_hci_sleep_require_em1(bool req)
   CORE_EXIT_ATOMIC();
 }
 
-#if (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
+#if (!defined(SLI_BTCTRL_HCI_SLEEP_ON_CPC_SECONDARY))
 static void wakeup_interrupt(uint8_t int_no, void *context)
 {
   (void)context;
@@ -95,7 +102,7 @@ static void wakeup_interrupt(uint8_t int_no, void *context)
     sli_power_manager_update_em_requirement(SL_POWER_MANAGER_EM1, true);
   }
 }
-#endif // (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
+#endif // (!defined(SLI_BTCTRL_HCI_SLEEP_ON_CPC_SECONDARY))
 
 void sl_btctrl_hci_sleep_sleep(void)
 {
@@ -108,7 +115,7 @@ void sl_btctrl_hci_sleep_sleep(void)
 
 void sl_btctrl_hci_sleep_init(void)
 {
-#if (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
+#if (!defined(SLI_BTCTRL_HCI_SLEEP_ON_CPC_SECONDARY))
   uint8_t port;
   uint8_t pin;
   sl_status_t status;
@@ -131,7 +138,7 @@ void sl_btctrl_hci_sleep_init(void)
   sl_gpio_disable_interrupts(mask);
   sl_hal_gpio_clear_interrupts(mask);
   CORE_EXIT_ATOMIC();
-#endif // (!defined(SL_CATALOG_CPC_SECONDARY_PRESENT))
+#endif // (!defined(SLI_BTCTRL_HCI_SLEEP_ON_CPC_SECONDARY))
   sl_btctrl_hci_clear_sleep_request();
   sli_power_manager_update_em_requirement(SL_POWER_MANAGER_EM1, true);
 }

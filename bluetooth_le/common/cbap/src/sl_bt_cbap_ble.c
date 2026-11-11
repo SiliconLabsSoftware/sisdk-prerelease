@@ -39,85 +39,104 @@
 // -----------------------------------------------------------------------------
 // Definitions
 
-// Value of a GATT handle that has not been discovered yet
+// Value of a GATT handle that has not been discovered yet.
 #define HANDLE_NOT_INITIALIZED  0
 
-// A prover device sends its own certificates to prove itself, a verifier device
-// validates the certificates received from the remote device. One device can
-// be both (Full-role)
-#define IS_PROVER    ((SL_BT_CBAP_ROLE & SL_BT_CBAP_ROLE_PROVER) != 0)
-#define IS_VERIFIER  ((SL_BT_CBAP_ROLE & SL_BT_CBAP_ROLE_VERIFIER) != 0)
+// The number of characteristics carrying certificates.
+#define CERT_CHAR_COUNT  ((uint8_t)(SL_BT_CBAP_CHAR_DEVICE_CERT_CLIENT + 1))
 
-// The characteristics carrying certificates are the leading ones of
-// sl_bt_cbap_characteristics_t, followed by the OOB data characteristics.
-#define CERT_CHAR_COUNT  ((uint8_t)SL_BT_CBAP_CHAR_OOB_DATA_SERVER)
-
-// Every certificate fragment carries a one-byte continuation flag before its
+// Every CBAP fragment carries a one-byte continuation flag before its
 // payload. A value of one means that another fragment follows; zero marks the
 // final fragment. This keeps the individual GATT values below ATT's 512-byte
-// attribute-value limit while allowing the full DER certificate to be larger.
-#define CERT_FRAGMENT_HEADER_LEN  1U
-#define CERT_FRAGMENT_MORE        1U
-#define CERT_FRAGMENT_LAST        0U
+// attribute-value limit while allowing the full value to be larger.
+#define GATT_FRAGMENT_HEADER_LEN  1U
+#define GATT_FRAGMENT_MORE        1U
+#define GATT_FRAGMENT_LAST        0U
 #define ATT_ATTRIBUTE_VALUE_MAX_LENGTH  512U
+// Opcode and attribute handle in front of the value of an ATT indication or
+// Write Request.
+#define ATT_VALUE_HEADER_LEN  3U
+// Connection, characteristic, opcode, offset and byte-array length in a
+// received GATT value event. Keep fragments within the BGAPI event buffer too.
+#define GATT_VALUE_EVENT_HEADER_LEN  8U
 
-// ATT error code that reports a request served successfully
+// ATT error code that reports a request served successfully.
 #define ATT_SUCCESS  0
 
-// Shorthands for event data types of the user attribute requests
-typedef sl_bt_evt_gatt_server_user_read_request_t  user_read_request_t;
+// True if the pairing creates a bond, see SL_BT_CBAP_BONDING.
+#define BONDING_ENABLED  (SL_BT_CBAP_BONDING != 0)
+
+// The passkey is exchanged by CBAP, so the pairing is authenticated by the
+// certificates. Bonding requests are confirmed only once CBAP has
+// authenticated the remote device. Encryption requires bonding only if
+// bonding is enabled, otherwise the pairing could not secure the link.
+#define SM_CONFIGURATION_FLAGS                       \
+  (SL_BT_SM_CONFIGURATION_SC_ONLY                    \
+   | SL_BT_SM_CONFIGURATION_MITM_REQUIRED            \
+   | SL_BT_SM_CONFIGURATION_BONDING_REQUEST_REQUIRED \
+   | (BONDING_ENABLED ? SL_BT_SM_CONFIGURATION_BONDING_REQUIRED : 0))
+
+// The peripheral device displays the passkey that it generates. The central
+// device enters it, unless the peripheral device has a keyboard: then the
+// central device displays the passkey for the duration of the procedure.
+#define PERIPHERAL_IO_CAPABILITY  sl_bt_sm_io_capability_displayonly
+#define CENTRAL_IO_CAPABILITY     sl_bt_sm_io_capability_keyboardonly
+
+// Shorthand for the event data type of the user write requests.
 typedef sl_bt_evt_gatt_server_user_write_request_t user_write_request_t;
 
-// The certificates that the remote device presents about itself
+// The certificates that the remote device presents about itself.
 typedef enum {
   REMOTE_CERT_BATCH,
   REMOTE_CERT_DEVICE,
   REMOTE_CERT_COUNT
 } remote_cert_t;
 
-// Properties of a characteristic that carries a certificate
+// Properties of a characteristic that carries a certificate.
 typedef struct {
-  // Handle of the characteristic in the local GATT database
+  // Handle of the characteristic in the local GATT database.
   uint16_t local_handle;
   // True if the GATT server presents its own certificate on the
   // characteristic, false if the GATT client sends its own certificate on it.
   bool server;
-  // Storage ID of the local certificate presented on the characteristic
+  // Storage ID of the local certificate presented on the characteristic.
   cbap_key_id_t local_id;
-  // Storage ID the certificate received on the characteristic is written to
+  // Storage ID the certificate received on the characteristic is written to.
   cbap_key_id_t remote_id;
-  // The remote certificate carried by the characteristic
-  remote_cert_t remote_cert;
+  // The remote certificate carried by the characteristic, a remote_cert_t.
+  uint8_t remote_cert;
 } cert_char_t;
 
-// Central device states
+// Central device states.
 typedef enum {
   CENTRAL_IDLE,
   CENTRAL_DISCOVER_SERVICES,
   CENTRAL_DISCOVER_CHARACTERISTICS,
   CENTRAL_EXCHANGE_CERTIFICATES,
-  CENTRAL_EXCHANGE_OOB_DATA,
+  CENTRAL_CREATE_SESSION,
+  CENTRAL_RECEIVE_PAIRING_PARAMETERS,
   CENTRAL_INCREASE_SECURITY,
   CENTRAL_DONE,
   CENTRAL_STATE_NUM
 } central_state_t;
 
-// GATT procedure completions during the certificate phase only belong to the
+// GATT procedure completions during framed exchanges belong to the
 // CCCD write that enables indications or to one outgoing write fragment. The
 // indication stream itself is advanced by characteristic-status events.
 typedef enum {
-  CENTRAL_CERT_OPERATION_NONE,
-  CENTRAL_CERT_OPERATION_ENABLE_INDICATIONS,
-  CENTRAL_CERT_OPERATION_WRITE_FRAGMENT
-} central_cert_operation_t;
+  CENTRAL_GATT_OPERATION_NONE,
+  CENTRAL_GATT_OPERATION_ENABLE_INDICATIONS,
+  CENTRAL_GATT_OPERATION_WRITE_FRAGMENT
+} central_gatt_operation_t;
 
 // -----------------------------------------------------------------------------
 // Private variables
 
-// State of the central device
-static central_state_t central_state = (central_state_t)0;
-// Pointing to the characteristic that shall be discovered next
-static sl_bt_cbap_characteristics_t char_state = (sl_bt_cbap_characteristics_t)0;
+// State of the central device.
+static central_state_t central_state = CENTRAL_IDLE;
+// The characteristic that the central device discovers or transfers next.
+static sl_bt_cbap_characteristics_t char_state =
+  SL_BT_CBAP_CHAR_BATCH_CERT_SERVER;
 // Flag indicating if the device is in the central role.
 static bool is_central = false;
 
@@ -141,11 +160,14 @@ static const uuid_128 cbap_char_uuids[SL_BT_CBAP_CHAR_COUNT] = {
   [SL_BT_CBAP_CHAR_DEVICE_CERT_CLIENT] = {
     .data = { SL_BT_CBAP_DEVICE_CERT_CLIENT_CHAR_UUID }
   },
-  [SL_BT_CBAP_CHAR_OOB_DATA_SERVER] = {
-    .data = { SL_BT_CBAP_OOB_DATA_SERVER_CHAR_UUID }
+  [SL_BT_CBAP_CHAR_SESSION_KEY_SERVER] = {
+    .data = { SL_BT_CBAP_SESSION_KEY_SERVER_CHAR_UUID }
   },
-  [SL_BT_CBAP_CHAR_OOB_DATA_CLIENT] = {
-    .data = { SL_BT_CBAP_OOB_DATA_CLIENT_CHAR_UUID }
+  [SL_BT_CBAP_CHAR_SESSION_KEY_CLIENT] = {
+    .data = { SL_BT_CBAP_SESSION_KEY_CLIENT_CHAR_UUID }
+  },
+  [SL_BT_CBAP_CHAR_PAIRING_PARAMETERS_SERVER] = {
+    .data = { SL_BT_CBAP_PAIRING_PARAMETERS_SERVER_CHAR_UUID }
   }
 };
 
@@ -195,34 +217,29 @@ static const char * const remote_cert_names[REMOTE_CERT_COUNT] = {
   [REMOTE_CERT_DEVICE] = "device"
 };
 
-// Buffer of the certificate transfer in progress. A certificate rarely fits
-// into a single ATT PDU, so it is assembled here before it is stored, and kept
-// here while it is being sent in parts.
-static uint8_t cert_buf[SL_BT_CBAP_CERTIFICATE_MAX_SIZE];
-// Number of valid bytes in cert_buf
-static size_t cert_len = 0;
-// Index of the certificate characteristic cert_buf belongs to
-static uint8_t cert_char = CERT_CHAR_COUNT;
-// True while cert_buf is collecting the framed parts of a certificate of the
-// remote device that has not been stored yet. Incoming writes are rejected
-// while this buffer is instead sending a local certificate indication.
-static bool cert_receiving = false;
+// Buffer for GATT transfer in progress.
+// A certificate rarely fits into a single ATT PDU, so it is assembled here
+// before it is stored, and kept here while it is being sent in parts.
+static uint8_t gatt_buf[SL_BT_CBAP_CERTIFICATE_MAX_SIZE];
+// Number of valid bytes in gatt_buf
+static size_t gatt_buf_len = 0;
+// True while gatt_buf collects an incoming framed value. Incoming writes are
+// rejected while the same buffer supplies an outgoing indication stream.
+static bool gatt_receiving = false;
 
-// Outgoing certificate state. Indications are sent one at a time and each
+// Index of the characteristic gatt_buf belongs to
+static uint8_t gatt_char = SL_BT_CBAP_CHAR_COUNT;
+// Outgoing framed transfer state. Indications are sent one at a time and each
 // write request is completed before the next fragment is sent, so a shared
 // fragment buffer is sufficient for either transport direction.
-static uint8_t cert_fragment[SL_BT_CBAP_CERTIFICATE_MAX_SIZE
-                             + CERT_FRAGMENT_HEADER_LEN];
-static size_t cert_send_offset = 0;
-static bool cert_sending = false;
+static uint8_t gatt_fragment[SL_BT_CBAP_CERTIFICATE_MAX_SIZE
+                             + GATT_FRAGMENT_HEADER_LEN];
+static size_t gatt_send_offset = 0;
+static bool gatt_sending = false;
 
-// Only the fixed-size OOB data may use a legacy prepared write when a peer has
-// a very small ATT MTU. Certificate transfers always use the framed protocol.
-static uint8_t prepared_write_char = (uint8_t)SL_BT_CBAP_CHAR_COUNT;
-
-// The GATT operation the central has in flight during certificate exchange.
-static central_cert_operation_t central_cert_operation
-  = CENTRAL_CERT_OPERATION_NONE;
+// The GATT operation the central has in flight during a framed exchange.
+static central_gatt_operation_t central_gatt_operation
+  = CENTRAL_GATT_OPERATION_NONE;
 
 // Flags of the remote certificates that have been received and stored.
 static bool remote_cert_stored[REMOTE_CERT_COUNT] = { false };
@@ -232,27 +249,29 @@ static bool remote_cert_stored[REMOTE_CERT_COUNT] = { false };
 // certificates are genuine, not that the remote device owns them.
 static bool remote_chain_valid = false;
 
-// The signed OOB data of this device, presented to the remote device. Only a
-// prover has the device key that is needed to sign it, so on a verifier only
-// device it stays empty.
-static uint8_t local_oob[SL_BT_CBAP_SIGNED_OOB_DATA_LEN];
-// Number of valid bytes in local_oob
-static size_t local_oob_len = 0;
+// Retain our signed key while gatt_buf assembles the peer's key.
+static uint8_t local_session_data[SLI_BT_CBAP_SESSION_DATA_LEN];
+static size_t local_session_len = 0;
+static bool local_session_sent = false;
+static bool session_ready = false;
 
-// The signed OOB data being received from the remote device.
-static uint8_t remote_oob[SL_BT_CBAP_SIGNED_OOB_DATA_LEN];
-// Number of bytes collected into remote_oob
-static size_t remote_oob_len = 0;
+// The server generates one passkey and one CCM ciphertext per fresh session.
+static uint32_t pairing_passkey = 0;
+static bool passkey_ready = false;
+static bool pairing_parameters_transferred = false;
+// True if the local device displays the passkey in passkey entry pairing,
+// false if it enters the passkey.
+static bool displays_passkey = false;
+// Fresh pairings must consume the exchanged passkey before they can succeed.
+static bool passkey_used = false;
 
-// True once the OOB data of this pairing has been generated by the stack.
-// Generating it again would invalidate the confirm value that the remote
-// device has already received, therefore it is done once per procedure.
-static bool local_oob_ready = false;
-
-// True once the OOB data of the remote device has been verified with its
-// validated device certificate and handed over to the stack. This is what
-// completes the authentication of the remote device.
-static bool remote_oob_verified = false;
+// A stored bond skips CBAP, but its key must still secure the current link.
+static bool bonded_reconnect = false;
+static uint8_t candidate_bonding = SL_BT_INVALID_BONDING_HANDLE;
+static bool link_secured = false;
+// True once the stack reported the pairing complete, and stored the bond if
+// bonding is enabled.
+static bool pairing_complete = false;
 
 // The connection handle and the Bluetooth address of the remote device we have
 // CBAP in progress with.
@@ -266,117 +285,63 @@ static sl_bt_cbap_conn_t candidate_device = {
 // procedure can just as well fail because the connection is already gone.
 static bool candidate_connected = false;
 
-// Callback storage
+// Function that the result of every procedure is reported to.
 static sl_bt_cbap_cb_t callback = NULL;
 
-// Timer handle
+// Timer that limits the duration of the procedure.
 static app_timer_t timer;
 
 // -----------------------------------------------------------------------------
 // Private function declarations
 
-// Start the discovery of the CBAP service on the remote device.
 static sl_status_t discover_service(void);
-
-// Start the discovery of the characteristic selected by char_state.
 static sl_status_t discover_characteristic(void);
-
-// Continue the certificate exchange on the characteristic selected by
-// char_state, or finish it if there is none left.
 static sl_status_t continue_cert_exchange(void);
-
-// Send the next framed certificate indication from the local GATT server.
-static sl_status_t send_certificate_indication(uint8_t index);
-
-// Send the next framed certificate write from the central GATT client.
-static sl_status_t send_certificate_write(uint8_t index);
-
-// Find the certificate characteristic by its handle in the local GATT database.
+static sl_status_t prepare_data_fragment(size_t *fragment_length);
+static sl_status_t send_indication_fragment(uint8_t index);
+static sl_status_t send_write_fragment(uint8_t index);
 static uint8_t find_cert_char(uint16_t local_handle, bool server);
-
-// Collect a part of a value being received into the given buffer.
 static sl_status_t collect_part(uint8_t *buf,
                                 size_t *buf_len,
                                 size_t capacity,
                                 uint16_t offset,
                                 const uint8_t *data,
                                 size_t len);
-
-// Write the certificate collected in cert_buf to the persistent storage.
+static sl_status_t collect_fragment(const uint8_t *data,
+                                    size_t len,
+                                    size_t capacity,
+                                    bool *complete);
 static sl_status_t store_remote_cert(uint8_t index);
-
-// Check that every remote certificate the local role requires has arrived.
 static sl_status_t check_remote_certs(bool report);
-
-// Validate the certificate chain the remote device presented.
 static sl_status_t validate_remote_cert_chain(void);
-
-// Generate the OOB data of this pairing, and sign it if this device can.
-static sl_status_t ensure_local_oob(void);
-
-// Continue the OOB data exchange on the characteristic selected by char_state,
-// or finish it if there is none left.
-static sl_status_t continue_oob_exchange(void);
-
-// Verify the OOB data collected from the remote device and pass it to the
-// stack.
-static sl_status_t process_remote_oob(void);
-
-// Check that the OOB data of the remote device arrived if it is required.
-static sl_status_t check_remote_oob(void);
-
-// True if this device has done everything its role requires of it, so that the
-// security level may be increased.
-static bool procedure_complete(void);
-
-// Serve a read request of the remote device on the OOB data characteristic.
-static void serve_oob_read(const user_read_request_t *req);
-
-// Handle a write request of the remote device on the OOB data characteristic.
-static void receive_oob_write(const user_write_request_t *req);
-
-// Get the number of bytes that fit in a user-read response for this request.
-static sl_status_t get_read_response_length(const user_read_request_t *req,
-                                            size_t remaining,
-                                            size_t *response_length);
-
-// Handle a write request of the remote device on a certificate characteristic.
-static void receive_cert_write(const user_write_request_t *req, uint8_t index);
-
-// Refuse a write request of the remote device with the given ATT error.
+static sl_status_t ensure_local_session(void);
+static sl_status_t continue_session(void);
+static sl_status_t prepare_pairing_parameters(void);
+static sl_status_t process_pairing_parameters(void);
+static sl_status_t adapt_io_capability(uint8_t peer_io_capability);
+static bool is_procedure_complete(void);
+static void receive_indication(
+  const sl_bt_evt_gatt_characteristic_value_t *value);
+static void receive_data_write(const user_write_request_t *req, uint8_t index);
 static void refuse_write(const user_write_request_t *req, uint8_t att_error);
-
-// Find the CBAP characteristic a read request of the remote device targets.
-static uint8_t resolve_read_target(uint16_t local_handle);
-
-// Find the CBAP characteristic a write request of the remote device targets.
 static uint8_t resolve_write_target(uint16_t local_handle);
-
-// Route a read request of the remote device to the handler of its
-// characteristic.
-static void serve_user_read(const user_read_request_t *req);
-
-// Route a write request of the remote device to the handler of its
-// characteristic.
 static void receive_user_write(const user_write_request_t *req);
-
-// Advance a local certificate indication after a CCCD change or confirmation.
-static void handle_cert_indication_status(
+static void handle_indication_status(
   const sl_bt_evt_gatt_server_characteristic_status_t *status);
-
-// Reset the procedure states and the handles discovered on the remote device.
 static void reset_procedure(void);
-
-// Timer callback.
-static void timer_cb(app_timer_t *handle, void *data);
-
-// Error handler.
+static void complete_connection(void);
+static void forget_stale_bond(void);
+static void send_security_request(void);
+static void stop_procedure_timer(void);
+static void on_timer_expired(app_timer_t *handle, void *data);
 static void on_error(sl_status_t sc);
 
 // -----------------------------------------------------------------------------
 // Public function definitions
 
-// Initialize CBAP BLE module.
+/******************************************************************************
+ * Initialize the CBAP component.
+ *****************************************************************************/
 sl_status_t sl_bt_cbap_init(sl_bt_cbap_cb_t cb, bool central)
 {
   // Register callback.
@@ -394,7 +359,7 @@ sl_status_t sl_bt_cbap_init(sl_bt_cbap_cb_t cb, bool central)
 }
 
 /******************************************************************************
- * Check whether this component currently owns a CBAP procedure.
+ * Check whether the component is serving a connection.
  *****************************************************************************/
 bool sl_bt_cbap_is_procedure_in_progress(void)
 {
@@ -402,9 +367,11 @@ bool sl_bt_cbap_is_procedure_in_progress(void)
 }
 
 // -----------------------------------------------------------------------------
-// Private function definitions
+// Internal function definitions
 
-// Bluetooth event handler.
+/******************************************************************************
+ * Handle the Bluetooth events of the CBAP procedure.
+ *****************************************************************************/
 void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
 {
   // Check if the component was initialized.
@@ -416,65 +383,43 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
   switch (SL_BT_MSG_ID(evt->header)) {
     // -------------------------------
     // This event indicates the device has started and the radio is ready.
-    case sl_bt_evt_system_boot_id: {
-      // Configure the security manager for the role of the device. Pairing is
-      // always Secure Connections, and Man-In-The-Middle protection comes from
-      // the OOB association model. There is nothing to display or enter, the
-      // OOB data travels over the CBAP characteristics.
-      //
-      // Requiring MITM protection here is not an option: with no input and no
-      // output the stack has no association model to provide it at this point,
-      // as the OOB data of the procedure does not exist yet, and it rejects the
-      // combination. What the stack cannot demand up front, this module checks
-      // when the link is secured: a procedure that ends in anything but mode 1
-      // level 4 fails.
-      //
-      // Every bonding request has to be confirmed by this module, so that the
-      // remote device cannot pair before it is authenticated.
-      uint8_t sm_flags = SL_BT_SM_CONFIGURATION_SC_ONLY
-                         | SL_BT_SM_CONFIGURATION_BONDING_REQUEST_REQUIRED;
-
-      if (SL_BT_CBAP_ROLE == SL_BT_CBAP_ROLE_FULL) {
-        // A Full-role device authenticates the remote device and proves itself
-        // in return, so the OOB exchange has to run in both directions. Were
-        // one direction enough, an attacker could drop the OOB data of one side
-        // and silently downgrade the pairing to a one-sided one.
-        //
-        // This is the half of the requirement that the stack can enforce and
-        // this module cannot: whether the remote device consumed the OOB data
-        // of this device is only visible inside the pairing. The other half,
-        // that the data of the remote device carries a signature of a validated
-        // certificate chain, is checked by this module.
-        //
-        // A Full-role device is therefore only compatible with a remote device
-        // that both proves itself and verifies, so with another Full-role one.
-        sm_flags |= SL_BT_SM_CONFIGURATION_OOB_FROM_BOTH_DEVICES_REQUIRED;
-      }
-
-      sc = sl_bt_sm_configure(sm_flags,
-                              sl_bt_sm_io_capability_noinputnooutput);
+    case sl_bt_evt_system_boot_id:
+      sc = sl_bt_sm_configure(SM_CONFIGURATION_FLAGS,
+                              is_central ? CENTRAL_IO_CAPABILITY
+                              : PERIPHERAL_IO_CAPABILITY);
       if (sc != SL_STATUS_OK) {
-        CBAP_LOG_ERROR("Failed to configure sm: [0x%04lx]" CBAP_LOG_NL, sc);
+        SLI_BT_CBAP_LOG_ERROR("Failed to configure sm: [0x%04lx]"
+                              SLI_BT_CBAP_LOG_NL,
+                              sc);
+        app_assert_status(sc);
+      }
+      sc = sl_bt_sm_set_bondable_mode(BONDING_ENABLED ? 1 : 0);
+      app_assert_status(sc);
+      if (!BONDING_ENABLED) {
+        // A bond stored while bonding was enabled would still let its peer
+        // device skip the procedure.
+        sc = sl_bt_sm_delete_bondings();
         app_assert_status(sc);
       }
       break;
-    }
 
     // -------------------------------
     // This event indicates that a new connection was opened.
     case sl_bt_evt_connection_opened_id:
       // Check if there is a CBAP procedure in progress already.
       if (candidate_device.handle != SL_BT_INVALID_CONNECTION_HANDLE) {
-        CBAP_LOG_ERROR("There cannot be multiple procedures in progress at " \
-                       "the same time. Closing new connection." CBAP_LOG_NL);
-        (void)sl_bt_connection_close(evt->data.evt_connection_opened.connection);
+        SLI_BT_CBAP_LOG_ERROR("There cannot be multiple procedures in "
+                              "progress at the same time. Closing new "
+                              "connection." SLI_BT_CBAP_LOG_NL);
+        (void)sl_bt_connection_close(
+          evt->data.evt_connection_opened.connection);
         break;
       }
 
       // CBAP procedure can be started. Start timeout.
       sc = app_timer_start(&timer,
-                           SL_BT_CBAP_PROCEDURE_TIMEOUT,
-                           timer_cb,
+                           SL_BT_CBAP_PROCEDURE_TIMEOUT_MS,
+                           on_timer_expired,
                            (void *)NULL, // Callback has no parameters
                            false);
       app_assert_status(sc);
@@ -486,6 +431,26 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
 
       // Discard the handles discovered on the previous remote device.
       reset_procedure();
+
+      candidate_bonding = evt->data.evt_connection_opened.bonding;
+      bonded_reconnect = (candidate_bonding != SL_BT_INVALID_BONDING_HANDLE);
+      if (bonded_reconnect) {
+        SLI_BT_CBAP_LOG_INFO("Restoring bonded connection %d."
+                             SLI_BT_CBAP_LOG_NL, candidate_device.handle);
+        // The central restores encryption with the stored key, and the
+        // peripheral asks for it. Neither device starts a new certificate
+        // exchange.
+        central_state = CENTRAL_INCREASE_SECURITY;
+        if (is_central) {
+          sc = sl_bt_sm_increase_security(candidate_device.handle);
+          if (sc != SL_STATUS_OK) {
+            on_error(sc);
+          }
+        } else {
+          send_security_request();
+        }
+        break;
+      }
 
       // If in central role, invoke CBAP procedure.
       if (is_central) {
@@ -502,57 +467,75 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
     case sl_bt_evt_connection_closed_id:
       if (evt->data.evt_connection_closed.connection
           == candidate_device.handle) {
-        CBAP_LOG_ERROR("The connection was closed in mid-procedure! " \
-                       "Reason: 0x%04x" CBAP_LOG_NL,
-                       evt->data.evt_connection_closed.reason);
+        SLI_BT_CBAP_LOG_ERROR("The connection was closed in mid-procedure! "
+                              "Reason: 0x%04x" SLI_BT_CBAP_LOG_NL,
+                              evt->data.evt_connection_closed.reason);
 
         // The error handler reports the candidate device to the application,
         // therefore it clears the connection parameters, not this handler.
         candidate_connected = false;
-        on_error(evt->data.evt_connection_closed.reason);
+
+        // A peer device that has lost the bond may close the connection
+        // instead of rejecting the stored key.
+        if (bonded_reconnect
+            && (evt->data.evt_connection_closed.reason
+                == SL_STATUS_BT_CTRL_PIN_OR_KEY_MISSING)) {
+          forget_stale_bond();
+        } else {
+          on_error(evt->data.evt_connection_closed.reason);
+        }
       }
       break;
 
     // -------------------------------
-    // This event is generated when a new service is discovered
+    // This event is generated when a new service is discovered.
     case sl_bt_evt_gatt_service_id:
-      if (evt->data.evt_gatt_service.connection == candidate_device.handle
+      if ((evt->data.evt_gatt_service.connection == candidate_device.handle)
           && is_central
-          && cbap_service_handle == HANDLE_NOT_INITIALIZED) {
+          && (cbap_service_handle == HANDLE_NOT_INITIALIZED)) {
         // Save the handle of the first matching service for future reference.
         cbap_service_handle = evt->data.evt_gatt_service.service;
-        CBAP_LOG_DEBUG("CBAP service found. Handle: %lu" CBAP_LOG_NL,
-                       cbap_service_handle);
+        SLI_BT_CBAP_LOG_DEBUG("CBAP service found. Handle: %lu"
+                              SLI_BT_CBAP_LOG_NL,
+                              cbap_service_handle);
       }
       break;
 
     // -------------------------------
-    // This event is generated when a new characteristic is discovered
+    // This event is generated when a new characteristic is discovered.
     case sl_bt_evt_gatt_characteristic_id:
-      if (evt->data.evt_gatt_characteristic.connection == candidate_device.handle
+      if ((evt->data.evt_gatt_characteristic.connection
+           == candidate_device.handle)
           && is_central
-          && cbap_char_handles[char_state] == HANDLE_NOT_INITIALIZED) {
+          && (central_state == CENTRAL_DISCOVER_CHARACTERISTICS)
+          && (char_state < SL_BT_CBAP_CHAR_COUNT)
+          && (cbap_char_handles[char_state] == HANDLE_NOT_INITIALIZED)) {
         // Save the handle of the characteristic being discovered.
         cbap_char_handles[char_state] =
           evt->data.evt_gatt_characteristic.characteristic;
-        CBAP_LOG_DEBUG("Characteristic %d found. Handle: %d" CBAP_LOG_NL,
-                       char_state,
-                       cbap_char_handles[char_state]);
+        SLI_BT_CBAP_LOG_DEBUG("Characteristic %d found. Handle: %d"
+                              SLI_BT_CBAP_LOG_NL,
+                              char_state,
+                              cbap_char_handles[char_state]);
       }
       break;
 
     // -------------------------------
     // This event is generated for various procedure completions, e.g. when a
-    // write procedure is completed, or service discovery is completed
+    // write procedure is completed, or service discovery is completed.
     case sl_bt_evt_gatt_procedure_completed_id:
+      if (bonded_reconnect) {
+        break;
+      }
       if (evt->data.evt_gatt_procedure_completed.connection
           == candidate_device.handle) {
         // Check result
         if (evt->data.evt_gatt_procedure_completed.result != 0) {
-          CBAP_LOG_ERROR("GATT procedure completed error. Connection: %d. " \
-                         "Error: 0x%04x." CBAP_LOG_NL,
-                         evt->data.evt_gatt_procedure_completed.connection,
-                         evt->data.evt_gatt_procedure_completed.result);
+          SLI_BT_CBAP_LOG_ERROR(
+            "GATT procedure completed error. Connection: %d. "
+            "Error: 0x%04x." SLI_BT_CBAP_LOG_NL,
+            evt->data.evt_gatt_procedure_completed.connection,
+            evt->data.evt_gatt_procedure_completed.result);
           on_error(evt->data.evt_gatt_procedure_completed.result);
           break;
         }
@@ -563,8 +546,8 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
               // A discovery that found nothing also completes successfully,
               // so the handle has to be checked here.
               if (cbap_service_handle == HANDLE_NOT_INITIALIZED) {
-                CBAP_LOG_ERROR("CBAP service not found on the remote " \
-                               "device." CBAP_LOG_NL);
+                SLI_BT_CBAP_LOG_ERROR("CBAP service not found on the remote "
+                                      "device." SLI_BT_CBAP_LOG_NL);
                 on_error(SL_STATUS_NOT_FOUND);
                 break;
               }
@@ -580,8 +563,9 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
 
             case CENTRAL_DISCOVER_CHARACTERISTICS:
               if (cbap_char_handles[char_state] == HANDLE_NOT_INITIALIZED) {
-                CBAP_LOG_ERROR("Characteristic %d not found on the remote " \
-                               "device." CBAP_LOG_NL, char_state);
+                SLI_BT_CBAP_LOG_ERROR("Characteristic %d not found on the "
+                                      "remote device." SLI_BT_CBAP_LOG_NL,
+                                      char_state);
                 on_error(SL_STATUS_NOT_FOUND);
                 break;
               }
@@ -594,7 +578,8 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
                   on_error(sc);
                 }
               } else {
-                CBAP_LOG_INFO("GATT discovery complete." CBAP_LOG_NL);
+                SLI_BT_CBAP_LOG_DEBUG("GATT discovery complete."
+                                      SLI_BT_CBAP_LOG_NL);
 
                 // Continue with the certificate exchange, starting with the
                 // first certificate characteristic.
@@ -608,49 +593,40 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
               break;
 
             case CENTRAL_EXCHANGE_CERTIFICATES:
-              if (central_cert_operation
-                  == CENTRAL_CERT_OPERATION_ENABLE_INDICATIONS) {
-                // The peripheral starts its indication stream only after the
-                // CCCD write is complete. Its final fragment advances the
-                // characteristic walk in the value-event handler.
-                central_cert_operation = CENTRAL_CERT_OPERATION_NONE;
-              } else if (central_cert_operation
-                         == CENTRAL_CERT_OPERATION_WRITE_FRAGMENT) {
-                if (cert_send_offset < cert_len) {
-                  sc = send_certificate_write(char_state);
-                } else {
-                  // The final write response acknowledged the complete
-                  // certificate. The peripheral has stored it by now.
-                  cert_sending = false;
-                  cert_len = 0;
-                  cert_char = CERT_CHAR_COUNT;
-                  char_state++;
-                  central_cert_operation = CENTRAL_CERT_OPERATION_NONE;
-                  sc = continue_cert_exchange();
+            case CENTRAL_CREATE_SESSION:
+              if (central_gatt_operation
+                  == CENTRAL_GATT_OPERATION_ENABLE_INDICATIONS) {
+                central_gatt_operation = CENTRAL_GATT_OPERATION_NONE;
+                break;
+              }
+              if (central_gatt_operation
+                  != CENTRAL_GATT_OPERATION_WRITE_FRAGMENT) {
+                on_error(SL_STATUS_INVALID_STATE);
+                break;
+              }
+              if (gatt_send_offset < gatt_buf_len) {
+                sc = send_write_fragment((uint8_t)char_state);
+              } else {
+                if (central_state == CENTRAL_CREATE_SESSION) {
+                  local_session_sent = true;
                 }
-
-                if (sc != SL_STATUS_OK) {
-                  on_error(sc);
-                }
+                gatt_sending = false;
+                gatt_buf_len = 0;
+                gatt_char = SL_BT_CBAP_CHAR_COUNT;
+                central_gatt_operation = CENTRAL_GATT_OPERATION_NONE;
+                char_state++;
+                sc = (central_state == CENTRAL_EXCHANGE_CERTIFICATES)
+                     ? continue_cert_exchange() : continue_session();
+              }
+              if (sc != SL_STATUS_OK) {
+                on_error(sc);
               }
               break;
 
-            case CENTRAL_EXCHANGE_OOB_DATA:
-              // The transfer on the current characteristic is over: a read has
-              // delivered the signed OOB data of the remote device by now, a
-              // write has delivered ours.
-              if (char_state == SL_BT_CBAP_CHAR_OOB_DATA_SERVER) {
-                sc = process_remote_oob();
-                if (sc != SL_STATUS_OK) {
-                  on_error(sc);
-                  break;
-                }
-              }
-
-              char_state++;
-              sc = continue_oob_exchange();
-              if (sc != SL_STATUS_OK) {
-                on_error(sc);
+            case CENTRAL_RECEIVE_PAIRING_PARAMETERS:
+              if (central_gatt_operation
+                  == CENTRAL_GATT_OPERATION_ENABLE_INDICATIONS) {
+                central_gatt_operation = CENTRAL_GATT_OPERATION_NONE;
               }
               break;
 
@@ -665,82 +641,14 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
     // This event is generated when a characteristic value was received from
     // the remote GATT server.
     case sl_bt_evt_gatt_characteristic_value_id:
-      if (evt->data.evt_gatt_characteristic_value.connection
-          != candidate_device.handle
-          || !is_central) {
+      if ((evt->data.evt_gatt_characteristic_value.connection
+           != candidate_device.handle)
+          || !is_central
+          || bonded_reconnect) {
         break;
       }
 
-      if (central_state == CENTRAL_EXCHANGE_CERTIFICATES) {
-        const sl_bt_evt_gatt_characteristic_value_t *value
-          = &evt->data.evt_gatt_characteristic_value;
-        uint8_t more;
-
-        if (char_state >= CERT_CHAR_COUNT
-            || !cert_chars[char_state].server
-            || central_cert_operation != CENTRAL_CERT_OPERATION_NONE
-            || value->characteristic != cbap_char_handles[char_state]
-            || value->att_opcode != sl_bt_gatt_handle_value_indication
-            || value->value.len < CERT_FRAGMENT_HEADER_LEN) {
-          CBAP_LOG_ERROR("Received an unexpected certificate indication." \
-                         CBAP_LOG_NL);
-          on_error(SL_STATUS_INVALID_STATE);
-          break;
-        }
-
-        more = value->value.data[0];
-        if (more != CERT_FRAGMENT_MORE && more != CERT_FRAGMENT_LAST) {
-          CBAP_LOG_ERROR("Received a certificate fragment with an invalid " \
-                         "continuation flag." CBAP_LOG_NL);
-          on_error(SL_STATUS_INVALID_PARAMETER);
-          break;
-        }
-
-        sc = collect_part(
-          cert_buf,
-          &cert_len,
-          sizeof(cert_buf),
-          cert_len,
-          &value->value.data[CERT_FRAGMENT_HEADER_LEN],
-          value->value.len - CERT_FRAGMENT_HEADER_LEN);
-        if (sc == SL_STATUS_OK) {
-          CBAP_LOG_DEBUG("Received %u certificate bytes (%u total)." \
-                         CBAP_LOG_NL,
-                         (unsigned int)(value->value.len
-                                        - CERT_FRAGMENT_HEADER_LEN),
-                         (unsigned int)cert_len);
-          sc = sl_bt_gatt_send_characteristic_confirmation(value->connection);
-        }
-
-        if (sc == SL_STATUS_OK && more == CERT_FRAGMENT_LAST) {
-          sc = store_remote_cert(char_state);
-          if (sc == SL_STATUS_OK) {
-            char_state++;
-            sc = continue_cert_exchange();
-          }
-        }
-      } else if (central_state == CENTRAL_EXCHANGE_OOB_DATA) {
-        sc = collect_part(
-          remote_oob,
-          &remote_oob_len,
-          sizeof(remote_oob),
-          evt->data.evt_gatt_characteristic_value.offset,
-          evt->data.evt_gatt_characteristic_value.value.data,
-          evt->data.evt_gatt_characteristic_value.value.len);
-      } else {
-        break;
-      }
-
-      if (sc != SL_STATUS_OK) {
-        on_error(sc);
-      }
-      break;
-
-    // -------------------------------
-    // This event indicates that the remote GATT client is reading a
-    // characteristic handled by the application.
-    case sl_bt_evt_gatt_server_user_read_request_id:
-      serve_user_read(&evt->data.evt_gatt_server_user_read_request);
+      receive_indication(&evt->data.evt_gatt_characteristic_value);
       break;
 
     // -------------------------------
@@ -751,52 +659,133 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
       break;
 
     // -------------------------------
-    // This event reports a certificate indication subscription or its
+    // This event reports a CBAP indication subscription or its
     // confirmation. The peripheral advances one indication at a time.
     case sl_bt_evt_gatt_server_characteristic_status_id:
-      handle_cert_indication_status(
+      handle_indication_status(
         &evt->data.evt_gatt_server_characteristic_status);
+      break;
+
+    // -------------------------------
+    // This event requests the passkey on the input side of passkey pairing,
+    // which is the central device, unless the peripheral device has a
+    // keyboard. Enter the passkey exchanged by CBAP.
+    case sl_bt_evt_sm_passkey_request_id:
+      if (evt->data.evt_sm_passkey_request.connection
+          == candidate_device.handle) {
+        if (bonded_reconnect || displays_passkey || !is_procedure_complete()) {
+          on_error(SL_STATUS_INVALID_STATE);
+          break;
+        }
+        sc = sl_bt_sm_enter_passkey(candidate_device.handle,
+                                    (int32_t)pairing_passkey);
+        if (sc != SL_STATUS_OK) {
+          on_error(sc);
+        } else {
+          passkey_used = true;
+          stop_procedure_timer();
+        }
+      }
+      break;
+
+    // -------------------------------
+    // This event reports the passkey on the display side of passkey pairing,
+    // which is the peripheral device, unless it has a keyboard. It has to be
+    // the passkey that CBAP installed.
+    case sl_bt_evt_sm_passkey_display_id:
+      if (evt->data.evt_sm_passkey_display.connection
+          == candidate_device.handle) {
+        if (bonded_reconnect || !displays_passkey || !is_procedure_complete()
+            || (evt->data.evt_sm_passkey_display.passkey != pairing_passkey)) {
+          on_error(SL_STATUS_INVALID_CREDENTIALS);
+        } else {
+          passkey_used = true;
+          stop_procedure_timer();
+        }
+      }
       break;
 
     // -------------------------------
     // This event indicates that the remote device requests bonding. Every
     // request has to be confirmed, which is how a remote device that has not
-    // been authenticated yet is kept from pairing.
+    // been authenticated yet is kept from pairing. A pairing that creates no
+    // bond is also refused by the passkey and security level checks.
     case sl_bt_evt_sm_confirm_bonding_id: {
       uint8_t connection = evt->data.evt_sm_confirm_bonding.connection;
       bool accept = (connection == candidate_device.handle)
-                    && procedure_complete();
+                    && !bonded_reconnect
+                    && (evt->data.evt_sm_confirm_bonding.bonding_handle
+                        == SL_BT_INVALID_BONDING_HANDLE)
+                    && is_procedure_complete();
 
       if (!accept) {
-        CBAP_LOG_ERROR("Rejecting the bonding request of connection %d, " \
-                       "CBAP has not authenticated it." CBAP_LOG_NL,
-                       connection);
+        SLI_BT_CBAP_LOG_ERROR("Rejecting the bonding request of connection "
+                              "%d, CBAP has not authenticated it."
+                              SLI_BT_CBAP_LOG_NL,
+                              connection);
       }
 
       sc = sl_bt_sm_bonding_confirm(connection, accept ? 1 : 0);
       if (sc != SL_STATUS_OK) {
-        CBAP_LOG_ERROR("Failed to answer the bonding request: " \
-                       "0x%04lx!" CBAP_LOG_NL, sc);
+        SLI_BT_CBAP_LOG_ERROR("Failed to answer the bonding request: "
+                              "0x%04lx!" SLI_BT_CBAP_LOG_NL, sc);
       }
 
-      // A remote device that tries to pair too early is not trustworthy.
-      if (!accept && connection == candidate_device.handle) {
-        on_error(SL_STATUS_INVALID_STATE);
+      if (!accept && (connection == candidate_device.handle)) {
+        if (bonded_reconnect) {
+          // A bonded peer device that asks for a new pairing has lost the
+          // bond. A new bond requires the CBAP procedure.
+          forget_stale_bond();
+        } else {
+          // A remote device that tries to pair too early is not trustworthy.
+          on_error(SL_STATUS_INVALID_STATE);
+        }
       }
       break;
     }
 
     // -------------------------------
-    // This event indicates that the pairing failed. A Full-role device requires
-    // the OOB exchange to be mutual, and the stack rejects the pairing if the
-    // remote device did not consume the OOB data of this one. That happens when
-    // the remote device does not verify, so when the two roles do not fit.
+    // This event indicates that the pairing completed, and that the bond was
+    // stored if it has a bonding handle. A secured link alone does not
+    // guarantee that its key was persisted.
+    case sl_bt_evt_sm_bonded_id: {
+      if (evt->data.evt_sm_bonded.connection != candidate_device.handle) {
+        break;
+      }
+      // With bonding enabled the pairing has to create a bond, and without it
+      // the pairing must not create one.
+      bool bonded = (evt->data.evt_sm_bonded.bonding
+                     != SL_BT_INVALID_BONDING_HANDLE);
+      if (bonded_reconnect || !is_procedure_complete() || !passkey_used
+          || (bonded != BONDING_ENABLED)
+          || (evt->data.evt_sm_bonded.security_mode
+              != sl_bt_connection_mode1_level4)) {
+        on_error(SL_STATUS_INVALID_CREDENTIALS);
+        break;
+      }
+      candidate_bonding = evt->data.evt_sm_bonded.bonding;
+      pairing_complete = true;
+      complete_connection();
+      break;
+    }
+
+    // -------------------------------
+    // This event indicates that authenticated passkey pairing failed.
     case sl_bt_evt_sm_bonding_failed_id:
       if (evt->data.evt_sm_bonding_failed.connection
           == candidate_device.handle) {
-        CBAP_LOG_ERROR("Pairing failed: 0x%04lx!" CBAP_LOG_NL,
-                       (unsigned long)evt->data.evt_sm_bonding_failed.reason);
-        on_error((sl_status_t)evt->data.evt_sm_bonding_failed.reason);
+        SLI_BT_CBAP_LOG_ERROR(
+          "Pairing failed: 0x%04lx!" SLI_BT_CBAP_LOG_NL,
+          (unsigned long)evt->data.evt_sm_bonding_failed.reason);
+
+        // A bonded peer device that rejects the stored key has lost the bond.
+        if (bonded_reconnect
+            && (evt->data.evt_sm_bonding_failed.reason
+                == SL_STATUS_BT_CTRL_PIN_OR_KEY_MISSING)) {
+          forget_stale_bond();
+        } else {
+          on_error((sl_status_t)evt->data.evt_sm_bonding_failed.reason);
+        }
       }
       break;
 
@@ -809,21 +798,23 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
         break;
       }
 
-      CBAP_LOG_DEBUG("Security mode: %d" CBAP_LOG_NL,
-                     evt->data.evt_connection_parameters.security_mode);
+      SLI_BT_CBAP_LOG_DEBUG("Security mode: %d" SLI_BT_CBAP_LOG_NL,
+                            evt->data.evt_connection_parameters.security_mode);
 
       if (evt->data.evt_connection_parameters.security_mode
           == sl_bt_connection_mode1_level1) {
         // The link is not secured, so this is a plain parameter update.
+        link_secured = false;
         break;
       }
 
       // Securing the link is the last step of the procedure. If it happens
       // before the local role is done, the remote device was not authenticated,
       // so the connection cannot be trusted.
-      if (!procedure_complete()) {
-        CBAP_LOG_ERROR("The security level was raised before CBAP could " \
-                       "authenticate the remote device!" CBAP_LOG_NL);
+      if (!bonded_reconnect && (!is_procedure_complete() || !passkey_used)) {
+        SLI_BT_CBAP_LOG_ERROR("The security level was raised before CBAP "
+                              "could authenticate the remote device!"
+                              SLI_BT_CBAP_LOG_NL);
         on_error(SL_STATUS_INVALID_STATE);
         break;
       }
@@ -831,47 +822,27 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
       if (evt->data.evt_connection_parameters.security_mode
           != sl_bt_connection_mode1_level4) {
         // Anything below Secure Connections pairing with an authenticated key
-        // means that the pairing did not run the OOB association model, so the
-        // session keys are not tied to the certificate chain. The stack is
-        // configured to rule this out, this is the second line of defence.
-        CBAP_LOG_ERROR("The link was secured in mode %d instead of "        \
-                       "mode 1 level 4, the keys are not authenticated by " \
-                       "CBAP!" CBAP_LOG_NL,
-                       evt->data.evt_connection_parameters.security_mode);
+        // means that authenticated passkey pairing did not complete. The stack
+        // is configured to rule this out, this is the second line of defence.
+        SLI_BT_CBAP_LOG_ERROR(
+          "The link was secured in mode %d instead of mode 1 level 4, the "
+          "keys are not authenticated by CBAP!" SLI_BT_CBAP_LOG_NL,
+          evt->data.evt_connection_parameters.security_mode);
         on_error(SL_STATUS_INVALID_CREDENTIALS);
         break;
       }
 
-      // Secure Connections pairing with an authenticated key. The OOB
-      // association model tied it to the validated certificate chain.
-      {
-        sl_bt_cbap_conn_t completed_device = candidate_device;
-        sl_status_t timer_sc = app_timer_stop(&timer);
-        app_assert_status(timer_sc);
-
-        central_state = CENTRAL_DONE;
-        CBAP_LOG_INFO("CBAP procedure complete." CBAP_LOG_NL);
-
-        // The connection is authenticated, so it belongs to the application
-        // from here on. Release CBAP before the callback: the application can
-        // safely start looking for its next candidate from that callback.
-        candidate_connected = false;
-        candidate_device.handle = SL_BT_INVALID_CONNECTION_HANDLE;
-        for (uint8_t i = 0; i < sizeof(bd_addr); i++) {
-          candidate_device.address.addr[i] = 0xff;
-        }
-        reset_procedure();
-
-        if (callback != NULL) {
-          callback(completed_device, SL_STATUS_OK);
-        }
-      }
+      link_secured = true;
+      complete_connection();
       break;
 
     default:
       break;
   }
 }
+
+// -----------------------------------------------------------------------------
+// Private function definitions
 
 /******************************************************************************
  * Start the discovery of the CBAP service on the remote device.
@@ -888,7 +859,7 @@ static sl_status_t discover_service(void)
   }
 
   central_state = CENTRAL_DISCOVER_SERVICES;
-  CBAP_LOG_DEBUG("Discovering CBAP service." CBAP_LOG_NL);
+  SLI_BT_CBAP_LOG_DEBUG("Discovering CBAP service." SLI_BT_CBAP_LOG_NL);
 
   return sc;
 }
@@ -910,7 +881,8 @@ static sl_status_t discover_characteristic(void)
   }
 
   central_state = CENTRAL_DISCOVER_CHARACTERISTICS;
-  CBAP_LOG_DEBUG("Discovering characteristic %d." CBAP_LOG_NL, char_state);
+  SLI_BT_CBAP_LOG_DEBUG("Discovering characteristic %d." SLI_BT_CBAP_LOG_NL,
+                        char_state);
 
   return sc;
 }
@@ -932,49 +904,49 @@ static sl_status_t continue_cert_exchange(void)
   while (char_state < CERT_CHAR_COUNT) {
     const cert_char_t *desc = &cert_chars[char_state];
 
-    if (desc->server && IS_VERIFIER) {
+    if (desc->server && SLI_BT_CBAP_ROLE_IS_VERIFIER) {
       // The peripheral/server presents its certificate through an indication
       // stream. Each indication is framed below the ATT value limit.
-      cert_len = 0;
-      cert_char = char_state;
-      cert_receiving = true;
-      central_cert_operation = CENTRAL_CERT_OPERATION_ENABLE_INDICATIONS;
+      gatt_buf_len = 0;
+      gatt_char = char_state;
+      gatt_receiving = true;
+      central_gatt_operation = CENTRAL_GATT_OPERATION_ENABLE_INDICATIONS;
       sc = sl_bt_gatt_set_characteristic_notification(
         candidate_device.handle,
         cbap_char_handles[char_state],
         sl_bt_gatt_indication);
       if (sc == SL_STATUS_OK) {
-        CBAP_LOG_INFO("Requesting the %s certificate of the remote " \
-                      "device." CBAP_LOG_NL,
-                      remote_cert_names[desc->remote_cert]);
+        SLI_BT_CBAP_LOG_DEBUG("Requesting the %s certificate of the remote "
+                              "device." SLI_BT_CBAP_LOG_NL,
+                              remote_cert_names[desc->remote_cert]);
       }
       return sc;
     }
 
-    if (!desc->server && IS_PROVER) {
+    if (!desc->server && SLI_BT_CBAP_ROLE_IS_PROVER) {
       // Send our own (central/client) certificate to the peripheral.
       sc = sli_bt_cbap_get_certificate(desc->local_id,
-                                       cert_buf,
-                                       &cert_len,
-                                       sizeof(cert_buf));
+                                       gatt_buf,
+                                       &gatt_buf_len,
+                                       sizeof(gatt_buf));
       if (sc != SL_STATUS_OK) {
-        CBAP_LOG_ERROR("Failed to load the local %s certificate: " \
-                       "0x%04lx!" CBAP_LOG_NL,
-                       remote_cert_names[desc->remote_cert],
-                       sc);
+        SLI_BT_CBAP_LOG_ERROR("Failed to load the local %s certificate: "
+                              "0x%04lx!" SLI_BT_CBAP_LOG_NL,
+                              remote_cert_names[desc->remote_cert],
+                              sc);
         return sc;
       }
 
-      cert_char = char_state;
-      cert_send_offset = 0;
-      cert_sending = true;
-      central_cert_operation = CENTRAL_CERT_OPERATION_WRITE_FRAGMENT;
-      sc = send_certificate_write(char_state);
+      gatt_char = char_state;
+      gatt_send_offset = 0;
+      gatt_sending = true;
+      central_gatt_operation = CENTRAL_GATT_OPERATION_WRITE_FRAGMENT;
+      sc = send_write_fragment(char_state);
       if (sc == SL_STATUS_OK) {
-        CBAP_LOG_INFO("Sending the local %s certificate " \
-                      "(%u bytes)." CBAP_LOG_NL,
-                      remote_cert_names[desc->remote_cert],
-                      (unsigned int)cert_len);
+        SLI_BT_CBAP_LOG_DEBUG("Sending the local %s certificate "
+                              "(%u bytes)." SLI_BT_CBAP_LOG_NL,
+                              remote_cert_names[desc->remote_cert],
+                              (unsigned int)gatt_buf_len);
       }
       return sc;
     }
@@ -988,29 +960,33 @@ static sl_status_t continue_cert_exchange(void)
   if (sc != SL_STATUS_OK) {
     return sc;
   }
-  CBAP_LOG_INFO("Certificate exchange complete." CBAP_LOG_NL);
+  SLI_BT_CBAP_LOG_INFO("Certificate exchange complete." SLI_BT_CBAP_LOG_NL);
 
   // The certificates have to lead back to the trust hierarchy of this device
   // before the procedure continues. The caller closes the connection if they do
-  // not. Whether the remote device owns them is settled later, by the OOB data.
+  // not. The signed ephemeral key subsequently proves ownership.
   sc = validate_remote_cert_chain();
   if (sc != SL_STATUS_OK) {
     return sc;
   }
 
-  // Continue with the OOB data exchange. char_state already selects the first
-  // OOB characteristic, as that is where the certificate walk stopped.
-  central_state = CENTRAL_EXCHANGE_OOB_DATA;
-  return continue_oob_exchange();
+  // Continue with the signed session key exchange.
+  central_state = CENTRAL_CREATE_SESSION;
+  return continue_session();
 }
 
 /******************************************************************************
- * Build the next framed certificate fragment in cert_fragment.
+ * Build the next framed CBAP fragment in gatt_fragment.
  *
  * An ATT indication or Write Request carries at most ATT_MTU - 3 bytes in its
  * value. One byte is reserved for the CBAP continuation flag.
+ *
+ * @param[out] fragment_length Length of the fragment, including its flag.
+ *
+ * @return SL_STATUS_OK on success, SL_STATUS_INVALID_STATE if there is nothing
+ *         left to send, error code otherwise.
  *****************************************************************************/
-static sl_status_t prepare_certificate_fragment(size_t *fragment_length)
+static sl_status_t prepare_data_fragment(size_t *fragment_length)
 {
   sl_status_t sc;
   uint16_t mtu;
@@ -1018,7 +994,7 @@ static sl_status_t prepare_certificate_fragment(size_t *fragment_length)
   size_t maximum_payload;
   size_t remaining;
 
-  if (!cert_sending || cert_send_offset >= cert_len) {
+  if (!gatt_sending || (gatt_send_offset >= gatt_buf_len)) {
     return SL_STATUS_INVALID_STATE;
   }
 
@@ -1026,76 +1002,105 @@ static sl_status_t prepare_certificate_fragment(size_t *fragment_length)
   if (sc != SL_STATUS_OK) {
     return sc;
   }
-  if (mtu <= CERT_FRAGMENT_HEADER_LEN + 3U) {
+  if (mtu <= (ATT_VALUE_HEADER_LEN + GATT_FRAGMENT_HEADER_LEN)) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  maximum_payload = (size_t)mtu - 3U - CERT_FRAGMENT_HEADER_LEN;
-  if (maximum_payload > ATT_ATTRIBUTE_VALUE_MAX_LENGTH
-      - CERT_FRAGMENT_HEADER_LEN) {
-    maximum_payload = ATT_ATTRIBUTE_VALUE_MAX_LENGTH
-                      - CERT_FRAGMENT_HEADER_LEN;
+  maximum_payload = ((size_t)mtu
+                     - ATT_VALUE_HEADER_LEN
+                     - GATT_FRAGMENT_HEADER_LEN);
+  if (maximum_payload > (ATT_ATTRIBUTE_VALUE_MAX_LENGTH
+                         - GATT_FRAGMENT_HEADER_LEN)) {
+    maximum_payload = (ATT_ATTRIBUTE_VALUE_MAX_LENGTH
+                       - GATT_FRAGMENT_HEADER_LEN);
   }
-  if (maximum_payload > sizeof(cert_fragment) - CERT_FRAGMENT_HEADER_LEN) {
-    maximum_payload = sizeof(cert_fragment) - CERT_FRAGMENT_HEADER_LEN;
+  if (maximum_payload > (SL_BGAPI_MAX_PAYLOAD_SIZE
+                         - GATT_VALUE_EVENT_HEADER_LEN
+                         - GATT_FRAGMENT_HEADER_LEN)) {
+    maximum_payload = (SL_BGAPI_MAX_PAYLOAD_SIZE
+                       - GATT_VALUE_EVENT_HEADER_LEN
+                       - GATT_FRAGMENT_HEADER_LEN);
+  }
+  if (maximum_payload > (sizeof(gatt_fragment) - GATT_FRAGMENT_HEADER_LEN)) {
+    maximum_payload = (sizeof(gatt_fragment) - GATT_FRAGMENT_HEADER_LEN);
   }
 
-  remaining = cert_len - cert_send_offset;
+  remaining = gatt_buf_len - gatt_send_offset;
   payload_length = (remaining < maximum_payload) ? remaining : maximum_payload;
-  cert_fragment[0] = (remaining > payload_length)
-                     ? CERT_FRAGMENT_MORE : CERT_FRAGMENT_LAST;
-  memcpy(&cert_fragment[CERT_FRAGMENT_HEADER_LEN],
-         &cert_buf[cert_send_offset],
+  gatt_fragment[0] = (remaining > payload_length)
+                     ? GATT_FRAGMENT_MORE : GATT_FRAGMENT_LAST;
+  memcpy(&gatt_fragment[GATT_FRAGMENT_HEADER_LEN],
+         &gatt_buf[gatt_send_offset],
          payload_length);
-  cert_send_offset += payload_length;
-  *fragment_length = payload_length + CERT_FRAGMENT_HEADER_LEN;
+  gatt_send_offset += payload_length;
+  *fragment_length = payload_length + GATT_FRAGMENT_HEADER_LEN;
 
   return SL_STATUS_OK;
 }
 
 /******************************************************************************
- * Send the next certificate fragment from the local GATT server.
+ * Indicate the next CBAP fragment from the local GATT server.
+ *
+ * @param[in] index The server characteristic the fragment is indicated on.
+ *
+ * @return SL_STATUS_OK on success, error code otherwise.
  *****************************************************************************/
-static sl_status_t send_certificate_indication(uint8_t index)
+static sl_status_t send_indication_fragment(uint8_t index)
 {
   sl_status_t sc;
   size_t fragment_length;
 
-  if (index >= CERT_CHAR_COUNT || cert_char != index) {
+  if ((index >= SL_BT_CBAP_CHAR_COUNT) || (gatt_char != index)
+      || ((index < CERT_CHAR_COUNT) && !cert_chars[index].server)
+      || ((index >= CERT_CHAR_COUNT)
+          && (index != SL_BT_CBAP_CHAR_SESSION_KEY_SERVER)
+          && (index != SL_BT_CBAP_CHAR_PAIRING_PARAMETERS_SERVER))) {
     return SL_STATUS_INVALID_STATE;
   }
 
-  sc = prepare_certificate_fragment(&fragment_length);
+  sc = prepare_data_fragment(&fragment_length);
   if (sc != SL_STATUS_OK) {
     return sc;
   }
 
+  uint16_t handle = (index < CERT_CHAR_COUNT)
+                    ? cert_chars[index].local_handle
+                    : ((index == SL_BT_CBAP_CHAR_SESSION_KEY_SERVER)
+                       ? gattdb_session_key_server
+                       : gattdb_pairing_parameters_server);
   sc = sl_bt_gatt_server_send_indication(candidate_device.handle,
-                                         cert_chars[index].local_handle,
+                                         handle,
                                          fragment_length,
-                                         cert_fragment);
+                                         gatt_fragment);
   if (sc == SL_STATUS_OK) {
-    CBAP_LOG_DEBUG("Sent %u bytes of the local %s certificate." CBAP_LOG_NL,
-                   (unsigned int)(fragment_length - CERT_FRAGMENT_HEADER_LEN),
-                   remote_cert_names[cert_chars[index].remote_cert]);
+    SLI_BT_CBAP_LOG_DEBUG(
+      "Sent %u bytes of local CBAP data." SLI_BT_CBAP_LOG_NL,
+      (unsigned int)(fragment_length - GATT_FRAGMENT_HEADER_LEN));
   }
 
   return sc;
 }
 
 /******************************************************************************
- * Send the next certificate fragment from the central GATT client.
+ * Write the next CBAP fragment from the central GATT client.
+ *
+ * @param[in] index The client characteristic the fragment is written to.
+ *
+ * @return SL_STATUS_OK on success, error code otherwise.
  *****************************************************************************/
-static sl_status_t send_certificate_write(uint8_t index)
+static sl_status_t send_write_fragment(uint8_t index)
 {
   sl_status_t sc;
   size_t fragment_length;
 
-  if (index >= CERT_CHAR_COUNT || cert_char != index) {
+  if ((index >= SL_BT_CBAP_CHAR_COUNT) || (gatt_char != index)
+      || ((index < CERT_CHAR_COUNT) && cert_chars[index].server)
+      || ((index >= CERT_CHAR_COUNT)
+          && (index != SL_BT_CBAP_CHAR_SESSION_KEY_CLIENT))) {
     return SL_STATUS_INVALID_STATE;
   }
 
-  sc = prepare_certificate_fragment(&fragment_length);
+  sc = prepare_data_fragment(&fragment_length);
   if (sc != SL_STATUS_OK) {
     return sc;
   }
@@ -1103,49 +1108,53 @@ static sl_status_t send_certificate_write(uint8_t index)
   sc = sl_bt_gatt_write_characteristic_value(candidate_device.handle,
                                              cbap_char_handles[index],
                                              fragment_length,
-                                             cert_fragment);
+                                             gatt_fragment);
   if (sc == SL_STATUS_OK) {
-    CBAP_LOG_DEBUG("Sent %u bytes of the local %s certificate." CBAP_LOG_NL,
-                   (unsigned int)(fragment_length - CERT_FRAGMENT_HEADER_LEN),
-                   remote_cert_names[cert_chars[index].remote_cert]);
+    SLI_BT_CBAP_LOG_DEBUG(
+      "Sent %u bytes of local CBAP data." SLI_BT_CBAP_LOG_NL,
+      (unsigned int)(fragment_length - GATT_FRAGMENT_HEADER_LEN));
   }
 
   return sc;
 }
 
 /******************************************************************************
- * Find the certificate characteristic by its handle in the local GATT database.
+ * Find a certificate characteristic by its local handle and direction.
  *
- * @return Index of the characteristic, CERT_CHAR_COUNT if there is no
- *         certificate characteristic with the given handle and direction.
+ * @param[in] local_handle Handle of the characteristic in the local GATT
+ *                         database.
+ * @param[in] server True to look for a server characteristic, false to look
+ *                   for a client characteristic.
+ *
+ * @return Index of the characteristic, SL_BT_CBAP_CHAR_COUNT if there is no
+ *         such certificate characteristic.
  *****************************************************************************/
 static uint8_t find_cert_char(uint16_t local_handle, bool server)
 {
-  uint8_t index;
-
-  for (index = 0; index < CERT_CHAR_COUNT; index++) {
-    if (cert_chars[index].local_handle == local_handle
-        && cert_chars[index].server == server) {
-      break;
+  for (uint8_t index = 0; index < CERT_CHAR_COUNT; index++) {
+    if ((cert_chars[index].local_handle == local_handle)
+        && (cert_chars[index].server == server)) {
+      return index;
     }
   }
-
-  return index;
+  return (uint8_t)SL_BT_CBAP_CHAR_COUNT;
 }
 
 /******************************************************************************
  * Collect a part of a value being received into the given buffer.
  *
- * Serves both the certificate and the OOB data transfers, each of which keeps
- * its own buffer and length.
+ * Used by all framed CBAP transfers.
  *
- * @param[in] buf Buffer collecting the parts.
+ * @param[out] buf Buffer collecting the parts.
  * @param[in,out] buf_len Number of bytes already collected, advanced by the
  *   length of the part on success.
  * @param[in] capacity Size of @p buf in bytes.
  * @param[in] offset Offset the part was received at.
  * @param[in] data The part received.
  * @param[in] len Length of @p data.
+ *
+ * @return SL_STATUS_OK on success, SL_STATUS_INVALID_STATE if the part is out
+ *         of order, SL_STATUS_WOULD_OVERFLOW if it does not fit into @p buf.
  *****************************************************************************/
 static sl_status_t collect_part(uint8_t *buf,
                                 size_t *buf_len,
@@ -1156,16 +1165,17 @@ static sl_status_t collect_part(uint8_t *buf,
 {
   // The parts are expected in order, without gaps between them.
   if (offset != *buf_len) {
-    CBAP_LOG_ERROR("A part arrived at offset %u instead of %u." CBAP_LOG_NL,
-                   (unsigned int)offset,
-                   (unsigned int)*buf_len);
+    SLI_BT_CBAP_LOG_ERROR("A part arrived at offset %u instead of %u."
+                          SLI_BT_CBAP_LOG_NL,
+                          (unsigned int)offset,
+                          (unsigned int)*buf_len);
     return SL_STATUS_INVALID_STATE;
   }
 
-  if (len > capacity - *buf_len) {
-    CBAP_LOG_ERROR("The value of the remote device is longer than " \
-                   "%u bytes." CBAP_LOG_NL,
-                   (unsigned int)capacity);
+  if (((*buf_len) > capacity) || (len > (capacity - (*buf_len)))) {
+    SLI_BT_CBAP_LOG_ERROR("The value of the remote device is longer than "
+                          "%u bytes." SLI_BT_CBAP_LOG_NL,
+                          (unsigned int)capacity);
     return SL_STATUS_WOULD_OVERFLOW;
   }
 
@@ -1176,36 +1186,41 @@ static sl_status_t collect_part(uint8_t *buf,
 }
 
 /******************************************************************************
- * Write the certificate collected in cert_buf to the persistent storage.
+ * Write the certificate collected in gatt_buf to the persistent storage.
+ *
+ * @param[in] index The certificate characteristic the certificate arrived on.
+ *
+ * @return SL_STATUS_OK on success, SL_STATUS_EMPTY if nothing was collected,
+ *         error code otherwise.
  *****************************************************************************/
 static sl_status_t store_remote_cert(uint8_t index)
 {
   sl_status_t sc;
   remote_cert_t remote_cert = cert_chars[index].remote_cert;
 
-  if (cert_len == 0) {
-    CBAP_LOG_ERROR("The remote device presented an empty %s " \
-                   "certificate." CBAP_LOG_NL,
-                   remote_cert_names[remote_cert]);
+  if (gatt_buf_len == 0) {
+    SLI_BT_CBAP_LOG_ERROR("The remote device presented an empty %s "
+                          "certificate." SLI_BT_CBAP_LOG_NL,
+                          remote_cert_names[remote_cert]);
     return SL_STATUS_EMPTY;
   }
 
   sc = sli_bt_cbap_set_certificate(cert_chars[index].remote_id,
-                                   cert_buf,
-                                   cert_len);
+                                   gatt_buf,
+                                   gatt_buf_len);
   if (sc != SL_STATUS_OK) {
     return sc;
   }
 
   remote_cert_stored[remote_cert] = true;
-  CBAP_LOG_INFO("The %s certificate of the remote device is stored " \
-                "(%u bytes)." CBAP_LOG_NL,
-                remote_cert_names[remote_cert],
-                (unsigned int)cert_len);
+  SLI_BT_CBAP_LOG_DEBUG("The %s certificate of the remote device is stored "
+                        "(%u bytes)." SLI_BT_CBAP_LOG_NL,
+                        remote_cert_names[remote_cert],
+                        (unsigned int)gatt_buf_len);
 
-  cert_len = 0;
-  cert_char = CERT_CHAR_COUNT;
-  cert_receiving = false;
+  gatt_buf_len = 0;
+  gatt_char = SL_BT_CBAP_CHAR_COUNT;
+  gatt_receiving = false;
 
   return SL_STATUS_OK;
 }
@@ -1219,19 +1234,22 @@ static sl_status_t store_remote_cert(uint8_t index)
  * @param[in] report Log the first missing certificate. Pass false when the
  *   transfer may still be in progress, as a missing certificate is expected
  *   in that case.
+ *
+ * @return SL_STATUS_OK if every required certificate is stored,
+ *         SL_STATUS_NOT_FOUND otherwise.
  *****************************************************************************/
 static sl_status_t check_remote_certs(bool report)
 {
-  if (!IS_VERIFIER) {
+  if (!SLI_BT_CBAP_ROLE_IS_VERIFIER) {
     return SL_STATUS_OK;
   }
 
   for (uint8_t i = 0; i < REMOTE_CERT_COUNT; i++) {
     if (!remote_cert_stored[i]) {
       if (report) {
-        CBAP_LOG_ERROR("The %s certificate of the remote device is " \
-                       "missing." CBAP_LOG_NL,
-                       remote_cert_names[i]);
+        SLI_BT_CBAP_LOG_ERROR("The %s certificate of the remote device is "
+                              "missing." SLI_BT_CBAP_LOG_NL,
+                              remote_cert_names[i]);
       }
       return SL_STATUS_NOT_FOUND;
     }
@@ -1252,7 +1270,7 @@ static sl_status_t check_remote_certs(bool report)
  * authorities, not that the remote device owns them. The certificates are
  * public, so anyone could replay them. Authentication is only complete once the
  * remote device also proves that it holds the private key of the chain, which
- * is what the OOB data it signs is for.
+ * is what its signed ephemeral session key proves.
  *
  * @note Call only once every required remote certificate has been stored.
  *
@@ -1260,645 +1278,261 @@ static sl_status_t check_remote_certs(bool report)
  *****************************************************************************/
 static sl_status_t validate_remote_cert_chain(void)
 {
-  if (!IS_VERIFIER) {
+  if (!SLI_BT_CBAP_ROLE_IS_VERIFIER || remote_chain_valid) {
     return SL_STATUS_OK;
   }
 
   sl_status_t sc;
   sc = sli_bt_cbap_validate_remote_chain();
   if (sc != SL_STATUS_OK) {
-    CBAP_LOG_ERROR("The certificate chain of the remote device is invalid, " \
-                   "it does not belong to the trust hierarchy of this "      \
-                   "device!" CBAP_LOG_NL);
+    SLI_BT_CBAP_LOG_ERROR("The certificate chain of the remote device is "
+                          "invalid, it does not belong to the trust hierarchy "
+                          "of this device!" SLI_BT_CBAP_LOG_NL);
     return sc;
   }
 
   remote_chain_valid = true;
-  CBAP_LOG_INFO("The certificate chain of the remote device is " \
-                "valid." CBAP_LOG_NL);
+  SLI_BT_CBAP_LOG_INFO("The certificate chain of the remote device is "
+                       "valid." SLI_BT_CBAP_LOG_NL);
   return SL_STATUS_OK;
 }
 
 /******************************************************************************
- * Generate the OOB data of this pairing, and sign it if this device can.
+ * Check whether the CBAP exchange is complete, so pairing may proceed.
  *
- * Enabling OOB makes the stack generate the random and the confirm value of the
- * pairing, and discards any OOB data that was set for a remote device earlier.
- * It is therefore done exactly once per procedure, and before the data of the
- * remote device is passed to the stack. Generating the values again would
- * invalidate the confirm value the remote device may already have received.
- *
- * A prover signs the values with its device key. That signature is what proves
- * to the remote device that this device owns the certificate chain it
- * presented. A verifier only device has no device key, so it leaves the
- * generated values unsigned and unsent, and only enables OOB so that it is
- * able to accept the data of the remote device.
+ * @return true once the session is established, the passkey is ready for
+ *         authenticated pairing and, for a verifier, the certificate chain of
+ *         the remote device is valid. false otherwise.
  *****************************************************************************/
-static sl_status_t ensure_local_oob(void)
+static bool is_procedure_complete(void)
 {
-  if (local_oob_ready) {
-    return SL_STATUS_OK;
-  }
+  // The central must authenticate the complete ciphertext. The server is
+  // ready once it installs the passkey: SMP may arrive before the last GATT
+  // indication confirmation, because those protocols use different channels.
+  return (session_ready && local_session_sent && passkey_ready
+          && (!is_central || pairing_parameters_transferred)
+          && (!SLI_BT_CBAP_ROLE_IS_VERIFIER || remote_chain_valid));
+}
 
+/******************************************************************************
+ * Continue the session on the characteristic selected by char_state.
+ *
+ * The central device first subscribes to the session key of the peripheral
+ * device, then writes its own one. Once the session is established, it
+ * subscribes to the pairing parameters of the peripheral device.
+ *
+ * @return SL_STATUS_OK on success, SL_STATUS_INVALID_STATE if char_state
+ *         selects no session step, error code otherwise.
+ *****************************************************************************/
+static sl_status_t continue_session(void)
+{
   sl_status_t sc;
-  aes_key_128 random;
-  aes_key_128 confirm;
 
-  sc = sl_bt_sm_set_oob(1, &random, &confirm);
-  if (sc != SL_STATUS_OK) {
-    CBAP_LOG_ERROR("Failed to generate the local OOB data: " \
-                   "0x%04lx!" CBAP_LOG_NL, sc);
-    return sc;
-  }
-
-  if (IS_PROVER) {
-    sc = sli_bt_cbap_sign_oob_data(random.data,
-                                   confirm.data,
-                                   local_oob,
-                                   &local_oob_len);
+  if (char_state == SL_BT_CBAP_CHAR_SESSION_KEY_SERVER) {
+    // Create our key before processing the peer's public key. Keep our signed
+    // bundle separate from the shared receive buffer until it can be written.
+    sc = ensure_local_session();
     if (sc != SL_STATUS_OK) {
-      CBAP_LOG_ERROR("Failed to sign the local OOB data: " \
-                     "0x%04lx!" CBAP_LOG_NL, sc);
-      local_oob_len = 0;
       return sc;
     }
+    gatt_buf_len = 0;
+    gatt_char = (uint8_t)char_state;
+    gatt_receiving = true;
+    central_gatt_operation = CENTRAL_GATT_OPERATION_ENABLE_INDICATIONS;
+    return sl_bt_gatt_set_characteristic_notification(
+      candidate_device.handle,
+      cbap_char_handles[char_state],
+      sl_bt_gatt_indication);
+  }
+  if (char_state == SL_BT_CBAP_CHAR_SESSION_KEY_CLIENT) {
+    memcpy(gatt_buf, local_session_data, local_session_len);
+    gatt_buf_len = local_session_len;
+    gatt_char = (uint8_t)char_state;
+    gatt_send_offset = 0;
+    gatt_sending = true;
+    central_gatt_operation = CENTRAL_GATT_OPERATION_WRITE_FRAGMENT;
+    return send_write_fragment((uint8_t)char_state);
+  }
+  if ((char_state != SL_BT_CBAP_CHAR_PAIRING_PARAMETERS_SERVER)
+      || !session_ready || !local_session_sent) {
+    return SL_STATUS_INVALID_STATE;
   }
 
-  local_oob_ready = true;
-
-  return SL_STATUS_OK;
+  SLI_BT_CBAP_LOG_INFO("Session key exchange complete." SLI_BT_CBAP_LOG_NL);
+  central_state = CENTRAL_RECEIVE_PAIRING_PARAMETERS;
+  gatt_buf_len = 0;
+  gatt_char = (uint8_t)char_state;
+  gatt_receiving = true;
+  central_gatt_operation = CENTRAL_GATT_OPERATION_ENABLE_INDICATIONS;
+  return sl_bt_gatt_set_characteristic_notification(
+    candidate_device.handle,
+    cbap_char_handles[char_state],
+    sl_bt_gatt_indication);
 }
 
 /******************************************************************************
- * Verify the OOB data collected from the remote device and pass it to the
- * stack.
+ * Collect a fragment that the central device writes to a client
+ * characteristic, and answer the write request.
  *
- * The signature is verified with the public key of the device certificate that
- * the validated certificate chain of the remote device ends with. The
- * confirm value commits the remote device to the public key it uses in this
- * pairing, so a valid signature means that the pairing runs with the very
- * device that owns the chain, and not with someone relaying it.
- *****************************************************************************/
-static sl_status_t process_remote_oob(void)
-{
-  sl_status_t sc;
-  aes_key_128 random;
-  aes_key_128 confirm;
-
-  if (remote_oob_len != SL_BT_CBAP_SIGNED_OOB_DATA_LEN) {
-    CBAP_LOG_ERROR("The remote device presented %u bytes of OOB data " \
-                   "instead of %u." CBAP_LOG_NL,
-                   (unsigned int)remote_oob_len,
-                   (unsigned int)SL_BT_CBAP_SIGNED_OOB_DATA_LEN);
-    return SL_STATUS_INVALID_COUNT;
-  }
-
-  // The stack only accepts the data of the remote device once OOB is enabled
-  // locally. That is already done if this device presented its own data first,
-  // but a device that only receives has not reached it yet.
-  sc = ensure_local_oob();
-  if (sc != SL_STATUS_OK) {
-    return sc;
-  }
-
-  memcpy(random.data, remote_oob, SL_BT_CBAP_OOB_RANDOM_LEN);
-  memcpy(confirm.data,
-         &remote_oob[SL_BT_CBAP_OOB_RANDOM_LEN],
-         SL_BT_CBAP_OOB_RANDOM_LEN);
-
-  sc = sli_bt_cbap_verify_remote_oob_data(
-    random.data,
-    confirm.data,
-    &remote_oob[SL_BT_CBAP_OOB_DATA_LEN]);
-  if (sc != SL_STATUS_OK) {
-    CBAP_LOG_ERROR("The OOB data of the remote device does not match the " \
-                   "device certificate it presented!" CBAP_LOG_NL);
-    return sc;
-  }
-
-  // The stack checks the confirm value against the public key that the remote
-  // device uses in the pairing, which is what carries the authentication over
-  // into the encrypted link.
-  sc = sl_bt_sm_set_remote_oob(1, random, confirm);
-  if (sc != SL_STATUS_OK) {
-    CBAP_LOG_ERROR("Failed to set the OOB data of the remote device: " \
-                   "0x%04lx!" CBAP_LOG_NL, sc);
-    return sc;
-  }
-
-  remote_oob_verified = true;
-  CBAP_LOG_INFO("The OOB data of the remote device is verified." CBAP_LOG_NL);
-
-  // The public key of the remote device has served its purpose.
-  return sli_destroy_remote_pub_key();
-}
-
-/******************************************************************************
- * Check that the OOB data of the remote device arrived if it is required.
+ * A complete certificate is stored, a complete session key completes the
+ * session. A prover-only device has no use for the certificates of the
+ * central device, so it collects and discards them.
  *
- * A verifier authenticates the remote device by verifying the OOB data it
- * signed, so the procedure cannot succeed without it. A prover only device
- * cannot verify anything and expects no OOB data in return.
+ * @param[in] req The write request.
+ * @param[in] index The client characteristic the request writes.
  *****************************************************************************/
-static sl_status_t check_remote_oob(void)
-{
-  if (IS_VERIFIER && !remote_oob_verified) {
-    CBAP_LOG_ERROR("The remote device presented no OOB data to prove that " \
-                   "it owns the certificates it sent!" CBAP_LOG_NL);
-    return SL_STATUS_NOT_FOUND;
-  }
-
-  return SL_STATUS_OK;
-}
-
-/******************************************************************************
- * True if this device has done everything its role requires of it, so that the
- * security level may be increased.
- *
- * A verifier has to have authenticated the remote device: its certificate chain
- * validated and the OOB data it signed verified. A prover has nothing to
- * verify, it only has to have presented its own signed OOB data.
- *****************************************************************************/
-static bool procedure_complete(void)
-{
-  if (IS_VERIFIER
-      && (check_remote_certs(false) != SL_STATUS_OK
-          || !remote_chain_valid
-          || !remote_oob_verified)) {
-    return false;
-  }
-
-  return local_oob_ready;
-}
-
-/******************************************************************************
- * Continue the OOB data exchange on the characteristic selected by char_state,
- * or finish it if there is none left.
- *
- * The central drives the exchange the same way as the certificate exchange. It
- * reads the OOB data of the peripheral if it has to verify it, and writes its
- * own if it has a signature to prove itself with. Between two Full-role devices
- * both directions are used, otherwise only the one that ends at the verifier.
- *****************************************************************************/
-static sl_status_t continue_oob_exchange(void)
-{
-  sl_status_t sc;
-
-  // The values of this pairing have to exist before the data of the remote
-  // device can be accepted, and before there is anything to sign and send.
-  sc = ensure_local_oob();
-  if (sc != SL_STATUS_OK) {
-    return sc;
-  }
-
-  while (char_state < SL_BT_CBAP_CHAR_COUNT) {
-    if (char_state == SL_BT_CBAP_CHAR_OOB_DATA_SERVER && IS_VERIFIER) {
-      // Read the OOB data that the peripheral signed with its device key.
-      remote_oob_len = 0;
-      sc = sl_bt_gatt_read_characteristic_value(
-        candidate_device.handle,
-        cbap_char_handles[char_state]);
-      if (sc == SL_STATUS_OK) {
-        CBAP_LOG_INFO("Reading the OOB data of the remote " \
-                      "device." CBAP_LOG_NL);
-      }
-      return sc;
-    }
-
-    if (char_state == SL_BT_CBAP_CHAR_OOB_DATA_CLIENT && IS_PROVER) {
-      // Send our own signed OOB data to the peripheral.
-      sc = sl_bt_gatt_write_characteristic_value(
-        candidate_device.handle,
-        cbap_char_handles[char_state],
-        local_oob_len,
-        local_oob);
-      if (sc == SL_STATUS_OK) {
-        CBAP_LOG_INFO("Sending the signed OOB data of this device " \
-                      "(%u bytes)." CBAP_LOG_NL,
-                      (unsigned int)local_oob_len);
-      }
-      return sc;
-    }
-
-    // The local role takes no part in the transfer on this characteristic.
-    char_state++;
-  }
-
-  // Both directions have been walked.
-  sc = check_remote_oob();
-  if (sc != SL_STATUS_OK) {
-    return sc;
-  }
-  CBAP_LOG_INFO("OOB data exchange complete." CBAP_LOG_NL);
-
-  // Everything the local role requires is done, so the link can be secured.
-  // The pairing uses the OOB association model, which ties the session keys to
-  // the certificate chain that was validated above.
-  sc = sl_bt_sm_increase_security(candidate_device.handle);
-  if (sc != SL_STATUS_OK) {
-    CBAP_LOG_ERROR("Failed to increase the security level: " \
-                   "0x%04lx!" CBAP_LOG_NL, sc);
-    return sc;
-  }
-
-  central_state = CENTRAL_INCREASE_SECURITY;
-  CBAP_LOG_INFO("Increasing security level." CBAP_LOG_NL);
-
-  return SL_STATUS_OK;
-}
-
-/******************************************************************************
- * Get the number of bytes that fit in a user-read response for this request.
- *****************************************************************************/
-static sl_status_t get_read_response_length(const user_read_request_t *req,
-                                            size_t remaining,
-                                            size_t *response_length)
-{
-  sl_status_t sc;
-  uint16_t mtu;
-  size_t maximum_length;
-
-  sc = sl_bt_gatt_server_get_mtu(req->connection, &mtu);
-  if (sc != SL_STATUS_OK) {
-    return sc;
-  }
-
-  // A read response carries ATT_MTU - 1 bytes, except a Read By Type response
-  // which also contains the attribute handle and therefore carries ATT_MTU - 4.
-  maximum_length = (size_t)mtu
-                   - ((req->att_opcode == sl_bt_gatt_read_by_type_request)
-                      ? 4U : 1U);
-  *response_length = (remaining < maximum_length) ? remaining : maximum_length;
-
-  return SL_STATUS_OK;
-}
-
-/******************************************************************************
- * Handle a write request of the remote device on a certificate characteristic.
- *
- * A fragment starts with a CBAP continuation flag, followed by certificate
- * bytes. The final flag lets certificates larger than an ATT value travel as a
- * sequence of ordinary Write Requests rather than an unsupported Write Long.
- *****************************************************************************/
-static void receive_cert_write(const user_write_request_t *req, uint8_t index)
+static void receive_data_write(const user_write_request_t *req, uint8_t index)
 {
   sl_status_t sc = SL_STATUS_OK;
-  uint8_t att_error = ATT_SUCCESS;
   bool complete = false;
-  uint8_t more = CERT_FRAGMENT_LAST;
+  bool session_data = (index == SL_BT_CBAP_CHAR_SESSION_KEY_CLIENT);
+  bool discard = !session_data && !SLI_BT_CBAP_ROLE_IS_VERIFIER;
 
-  // A prover only device has no trust anchor to validate a certificate
-  // against, so it accepts what it cannot use and drops it. Failing the
-  // transfer would be misleading, as nothing is wrong with the certificate
-  // itself. Whether the two roles fit together at all is decided by the
-  // pairing requirements once the procedure reaches that point.
-  bool discard = !IS_VERIFIER;
-
-  if (req->att_opcode != sl_bt_gatt_write_request
-      || req->offset != 0
-      || req->value.len < CERT_FRAGMENT_HEADER_LEN) {
-    att_error = (uint8_t)SL_STATUS_BT_ATT_REQUEST_NOT_SUPPORTED;
-  } else if (cert_sending) {
-    // cert_buf holds the local certificate being indicated. Do not let an
-    // incoming write replace it before the client confirms the final fragment.
-    att_error = (uint8_t)SL_STATUS_BT_ATT_PROCEDURE_ALREADY_IN_PROGRESS;
+  if ((req->offset != 0) || gatt_sending
+      || (gatt_receiving && (gatt_char != index))) {
+    sc = SL_STATUS_INVALID_STATE;
   } else {
-    more = req->value.data[0];
-    if (more != CERT_FRAGMENT_MORE && more != CERT_FRAGMENT_LAST) {
-      att_error = (uint8_t)SL_STATUS_BT_ATT_INVALID_ATT_LENGTH;
+    if (!gatt_receiving) {
+      gatt_buf_len = 0;
+      gatt_char = index;
+      gatt_receiving = true;
+    }
+    sc = collect_fragment(req->value.data, req->value.len,
+                          session_data ? SLI_BT_CBAP_SESSION_DATA_LEN
+                          : sizeof(gatt_buf),
+                          &complete);
+  }
+  if ((sc == SL_STATUS_OK) && complete) {
+    if (session_data) {
+      sc = sli_bt_cbap_session_process(gatt_buf, gatt_buf_len);
+      session_ready = (sc == SL_STATUS_OK);
     } else if (!discard) {
-      if (!cert_receiving) {
-        cert_len = 0;
-        cert_char = index;
-        cert_receiving = true;
-      }
-
-      if (cert_char != index) {
-        CBAP_LOG_ERROR("The remote device interleaved the transfer of its " \
-                       "%s certificate with another one." CBAP_LOG_NL,
-                       remote_cert_names[cert_chars[index].remote_cert]);
-        att_error = (uint8_t)SL_STATUS_BT_ATT_PROCEDURE_ALREADY_IN_PROGRESS;
-      } else {
-        sc = collect_part(cert_buf,
-                          &cert_len,
-                          sizeof(cert_buf),
-                          cert_len,
-                          &req->value.data[CERT_FRAGMENT_HEADER_LEN],
-                          req->value.len - CERT_FRAGMENT_HEADER_LEN);
-        if (sc == SL_STATUS_WOULD_OVERFLOW) {
-          att_error = (uint8_t)SL_STATUS_BT_ATT_INSUFFICIENT_RESOURCES;
-        } else if (sc != SL_STATUS_OK) {
-          att_error = (uint8_t)SL_STATUS_BT_ATT_INVALID_OFFSET;
-        } else {
-          CBAP_LOG_DEBUG("Received %u bytes of the remote %s certificate " \
-                         "(%u total)." CBAP_LOG_NL,
-                         (unsigned int)(req->value.len
-                                        - CERT_FRAGMENT_HEADER_LEN),
-                         remote_cert_names[cert_chars[index].remote_cert],
-                         (unsigned int)cert_len);
-        }
-      }
-    }
-
-    complete = (att_error == ATT_SUCCESS && more == CERT_FRAGMENT_LAST);
-  }
-
-  if (complete) {
-    if (discard) {
-      CBAP_LOG_DEBUG("Discarded the %s certificate of the remote device, " \
-                     "this device cannot validate it." CBAP_LOG_NL,
-                     remote_cert_names[cert_chars[index].remote_cert]);
-    } else {
       sc = store_remote_cert(index);
-      if (sc != SL_STATUS_OK) {
-        att_error = (uint8_t)SL_STATUS_BT_ATT_WRITE_REQUEST_REJECTED;
-      }
     }
+    gatt_buf_len = 0;
+    gatt_receiving = false;
+    gatt_char = SL_BT_CBAP_CHAR_COUNT;
   }
 
-  // A rejected write is reported to the central, which cannot complete the
-  // procedure without the response either.
-  sc = sl_bt_gatt_server_send_user_write_response(req->connection,
-                                                  req->characteristic,
-                                                  att_error);
-  if (sc != SL_STATUS_OK) {
-    CBAP_LOG_ERROR("Failed to send the write response: " \
-                   "0x%04lx!" CBAP_LOG_NL, sc);
-    on_error(sc);
-    return;
-  }
-
-  // Every certificate the peripheral has to verify may have arrived by now. It
-  // cannot tell when the central is done, so it checks on every stored one.
-  if (!is_central && att_error == ATT_SUCCESS
-      && check_remote_certs(false) == SL_STATUS_OK) {
-    CBAP_LOG_INFO("Certificate exchange complete." CBAP_LOG_NL);
-
-    // The write is already confirmed at this point, so a remote device whose
-    // certificates do not check out is rejected by closing the connection.
+  // Validate the last certificate before acknowledging it. The client can
+  // subscribe to the session characteristic immediately after this response.
+  if ((sc == SL_STATUS_OK) && complete && !session_data
+      && (check_remote_certs(false) == SL_STATUS_OK)) {
     sc = validate_remote_cert_chain();
-    if (sc != SL_STATUS_OK) {
-      on_error(sc);
-    }
+  }
+  uint8_t att_error = (sc == SL_STATUS_OK) ? ATT_SUCCESS
+                      : (uint8_t)SL_STATUS_BT_ATT_WRITE_REQUEST_REJECTED;
+  sl_status_t response_sc = sl_bt_gatt_server_send_user_write_response(
+    req->connection, req->characteristic, att_error);
+  if ((sc != SL_STATUS_OK) || (response_sc != SL_STATUS_OK)) {
+    on_error((sc != SL_STATUS_OK) ? sc : response_sc);
   }
 }
 
 /******************************************************************************
- * Advance the indication stream that presents a local certificate.
+ * Serve the indications of the server characteristics on the peripheral.
  *
- * The first fragment follows the CCCD update. Every later fragment waits for
- * the confirmation of the preceding indication, as required by ATT.
+ * Enabling the indications of a server characteristic starts the transfer of
+ * its value: a certificate, the local session key, or the encrypted pairing
+ * parameters, which are generated at that point. The confirmation of each
+ * indication sends the next fragment, until the whole value is transferred.
+ * Disabling the indications in mid-transfer aborts the procedure.
+ *
+ * @param[in] status The characteristic status event.
  *****************************************************************************/
-static void handle_cert_indication_status(
+static void handle_indication_status(
   const sl_bt_evt_gatt_server_characteristic_status_t *status)
 {
+  if ((status->connection != candidate_device.handle) || is_central
+      || bonded_reconnect) {
+    return;
+  }
+
+  uint8_t index = find_cert_char(status->characteristic, true);
+  if (status->characteristic == gattdb_session_key_server) {
+    index = (uint8_t)SL_BT_CBAP_CHAR_SESSION_KEY_SERVER;
+  } else if (status->characteristic == gattdb_pairing_parameters_server) {
+    index = (uint8_t)SL_BT_CBAP_CHAR_PAIRING_PARAMETERS_SERVER;
+  }
+  if (index == SL_BT_CBAP_CHAR_COUNT) {
+    return;
+  }
+
   sl_status_t sc;
-  uint8_t index;
-
-  if (status->connection != candidate_device.handle || is_central) {
-    return;
-  }
-
-  index = find_cert_char(status->characteristic, true);
-  if (index >= CERT_CHAR_COUNT) {
-    return;
-  }
-
   if (status->status_flags == sl_bt_gatt_server_client_config) {
     if ((status->client_config_flags & sl_bt_gatt_server_indication) == 0U) {
-      if (cert_sending && cert_char == index) {
-        CBAP_LOG_ERROR("The remote device disabled the %s certificate " \
-                       "indications before the transfer completed."     \
-                       CBAP_LOG_NL,
-                       remote_cert_names[cert_chars[index].remote_cert]);
+      if (gatt_sending && (gatt_char == index)) {
         on_error(SL_STATUS_ABORT);
       }
       return;
     }
-
-    if (!IS_PROVER || cert_receiving || cert_sending) {
-      CBAP_LOG_ERROR("The remote device requested a certificate indication " \
-                     "at an invalid time." CBAP_LOG_NL);
+    if (gatt_receiving || gatt_sending) {
       on_error(SL_STATUS_INVALID_STATE);
       return;
     }
 
-    sc = sli_bt_cbap_get_certificate(cert_chars[index].local_id,
-                                     cert_buf,
-                                     &cert_len,
-                                     sizeof(cert_buf));
-    if (sc != SL_STATUS_OK || cert_len == 0) {
-      CBAP_LOG_ERROR("Failed to load the local %s certificate: 0x%04lx!" \
-                     CBAP_LOG_NL,
-                     remote_cert_names[cert_chars[index].remote_cert],
-                     (sc == SL_STATUS_OK) ? SL_STATUS_EMPTY : sc);
+    if (index == SL_BT_CBAP_CHAR_SESSION_KEY_SERVER) {
+      if ((local_session_len != 0) || session_ready
+          || (check_remote_certs(false) != SL_STATUS_OK)) {
+        on_error(SL_STATUS_INVALID_STATE);
+        return;
+      }
+      sc = validate_remote_cert_chain();
+      if (sc == SL_STATUS_OK) {
+        sc = ensure_local_session();
+      }
+      if (sc == SL_STATUS_OK) {
+        memcpy(gatt_buf, local_session_data, local_session_len);
+        gatt_buf_len = local_session_len;
+      }
+    } else if (index == SL_BT_CBAP_CHAR_PAIRING_PARAMETERS_SERVER) {
+      if (!session_ready || !local_session_sent || passkey_ready) {
+        on_error(SL_STATUS_INVALID_STATE);
+        return;
+      }
+      sc = prepare_pairing_parameters();
+    } else {
+      if (!SLI_BT_CBAP_ROLE_IS_PROVER || (local_session_len != 0)
+          || session_ready) {
+        on_error(SL_STATUS_INVALID_STATE);
+        return;
+      }
+      sc = sli_bt_cbap_get_certificate(cert_chars[index].local_id,
+                                       gatt_buf,
+                                       &gatt_buf_len,
+                                       sizeof(gatt_buf));
+    }
+    if ((sc != SL_STATUS_OK) || (gatt_buf_len == 0)) {
       on_error((sc == SL_STATUS_OK) ? SL_STATUS_EMPTY : sc);
       return;
     }
-
-    cert_char = index;
-    cert_send_offset = 0;
-    cert_sending = true;
-    CBAP_LOG_INFO("Presenting the local %s certificate (%u bytes)." \
-                  CBAP_LOG_NL,
-                  remote_cert_names[cert_chars[index].remote_cert],
-                  (unsigned int)cert_len);
-    sc = send_certificate_indication(index);
+    gatt_char = index;
+    gatt_send_offset = 0;
+    gatt_sending = true;
   } else if (status->status_flags == sl_bt_gatt_server_confirmation) {
-    if (!cert_sending || cert_char != index) {
+    if (!gatt_sending || (gatt_char != index)) {
       return;
     }
-
-    if (cert_send_offset == cert_len) {
-      cert_sending = false;
-      cert_send_offset = 0;
-      cert_len = 0;
-      cert_char = CERT_CHAR_COUNT;
-      CBAP_LOG_DEBUG("Finished sending the local %s certificate." CBAP_LOG_NL,
-                     remote_cert_names[cert_chars[index].remote_cert]);
+    if (gatt_send_offset == gatt_buf_len) {
+      if (index == SL_BT_CBAP_CHAR_SESSION_KEY_SERVER) {
+        local_session_sent = true;
+      } else if (index == SL_BT_CBAP_CHAR_PAIRING_PARAMETERS_SERVER) {
+        pairing_parameters_transferred = true;
+        send_security_request();
+      }
+      gatt_sending = false;
+      gatt_send_offset = 0;
+      gatt_buf_len = 0;
+      gatt_char = SL_BT_CBAP_CHAR_COUNT;
       return;
     }
-
-    sc = send_certificate_indication(index);
   } else {
     return;
   }
 
+  sc = send_indication_fragment(index);
   if (sc != SL_STATUS_OK) {
-    CBAP_LOG_ERROR("Failed to send the local %s certificate fragment: " \
-                   "0x%04lx!" CBAP_LOG_NL,
-                   remote_cert_names[cert_chars[index].remote_cert],
-                   sc);
     on_error(sc);
-  }
-}
-
-/******************************************************************************
- * Serve a read request of the remote device on the OOB data characteristic.
- *
- * The data is generated and signed when the remote device starts reading it at
- * offset zero, and the consecutive reads of the same transfer are served from
- * local_oob. Each response is limited to the negotiated ATT MTU, and the rest
- * is requested by the remote device at the next offset.
- *****************************************************************************/
-static void serve_oob_read(const user_read_request_t *req)
-{
-  sl_status_t sc;
-  uint8_t att_error = ATT_SUCCESS;
-  size_t response_length = 0;
-  uint16_t sent_length;
-
-  if (!IS_PROVER) {
-    // Without a device key there is nothing to sign the OOB data with, and
-    // unsigned OOB data would prove nothing to the remote device.
-    CBAP_LOG_ERROR("The remote device is reading OOB data that this device " \
-                   "cannot sign." CBAP_LOG_NL);
-    att_error = (uint8_t)SL_STATUS_BT_ATT_REQUEST_NOT_SUPPORTED;
-  } else if (req->offset == 0) {
-    // Start of a transfer, generate and sign the data to be sent.
-    sc = ensure_local_oob();
-    if (sc != SL_STATUS_OK) {
-      att_error = (uint8_t)SL_STATUS_BT_ATT_UNLIKELY_ERROR;
-    } else {
-      CBAP_LOG_INFO("Presenting the signed OOB data of this device " \
-                    "(%u bytes)." CBAP_LOG_NL,
-                    (unsigned int)local_oob_len);
-    }
-  } else if (req->offset > local_oob_len) {
-    // The remote device continues a transfer that was not started, or reads
-    // past the end of the data.
-    CBAP_LOG_ERROR("Invalid read offset %u on the OOB data." CBAP_LOG_NL,
-                   (unsigned int)req->offset);
-    att_error = (uint8_t)SL_STATUS_BT_ATT_INVALID_OFFSET;
-  }
-
-  if (att_error == ATT_SUCCESS) {
-    sc = get_read_response_length(req,
-                                  local_oob_len - req->offset,
-                                  &response_length);
-    if (sc != SL_STATUS_OK) {
-      CBAP_LOG_ERROR("Failed to get the ATT MTU: 0x%04lx!" CBAP_LOG_NL, sc);
-      on_error(sc);
-      return;
-    }
-  }
-
-  // On a rejected read the remote device gets an empty response carrying the
-  // error code. Aborting is left to the central, which cannot complete the
-  // procedure without the OOB data either.
-  sc = sl_bt_gatt_server_send_user_read_response(
-    req->connection,
-    req->characteristic,
-    att_error,
-    response_length,
-    (att_error == ATT_SUCCESS) ? &local_oob[req->offset] : NULL,
-    &sent_length);
-  if (sc != SL_STATUS_OK) {
-    CBAP_LOG_ERROR("Failed to send the read response: " \
-                   "0x%04lx!" CBAP_LOG_NL, sc);
-    on_error(sc);
-  } else if (att_error == ATT_SUCCESS) {
-    CBAP_LOG_INFO("Sent %u bytes of signed OOB data at offset %u." \
-                  CBAP_LOG_NL,
-                  (unsigned int)sent_length,
-                  (unsigned int)req->offset);
-  }
-}
-
-/******************************************************************************
- * Handle a write request of the remote device on the OOB data characteristic.
- *
- * OOB data that fits into a single ATT PDU arrives in one write request. A
- * longer one arrives in consecutive prepared writes that are collected until
- * the remote device executes them.
- *****************************************************************************/
-static void receive_oob_write(const user_write_request_t *req)
-{
-  sl_status_t sc = SL_STATUS_OK;
-  uint8_t att_error = ATT_SUCCESS;
-  bool complete = false;
-
-  // A prover only device cannot verify a signature, as it has no trust anchor
-  // to authenticate the remote device with. It accepts what it cannot use and
-  // drops it, which leaves the OOB data of the remote device unconsumed. A
-  // remote device that requires the exchange to be mutual notices exactly that
-  // and fails the pairing, so the roles are matched up where it matters.
-  bool discard = !IS_VERIFIER;
-
-  if (req->att_opcode == sl_bt_gatt_execute_write_request) {
-    // The collected parts are complete.
-    complete = true;
-  } else {
-    if (!discard) {
-      if (req->offset == 0) {
-        // Start of a transfer, discard what an aborted one has left behind.
-        remote_oob_len = 0;
-      }
-
-      sc = collect_part(remote_oob,
-                        &remote_oob_len,
-                        sizeof(remote_oob),
-                        req->offset,
-                        req->value.data,
-                        req->value.len);
-      if (sc == SL_STATUS_WOULD_OVERFLOW) {
-        att_error = (uint8_t)SL_STATUS_BT_ATT_INSUFFICIENT_RESOURCES;
-      } else if (sc != SL_STATUS_OK) {
-        att_error = (uint8_t)SL_STATUS_BT_ATT_INVALID_OFFSET;
-      }
-    }
-
-    if (req->att_opcode == sl_bt_gatt_prepare_write_request) {
-      // More parts are on the way, the data is verified on the execute write.
-      // The response echoes the collected part.
-      sc = sl_bt_gatt_server_send_user_prepare_write_response(
-        req->connection,
-        req->characteristic,
-        att_error,
-        req->offset,
-        req->value.len,
-        req->value.data);
-      if (sc != SL_STATUS_OK) {
-        CBAP_LOG_ERROR("Failed to send the prepare write response: " \
-                       "0x%04lx!" CBAP_LOG_NL, sc);
-        on_error(sc);
-      }
-      return;
-    }
-
-    // The OOB data arrived in a single write.
-    complete = (att_error == ATT_SUCCESS);
-  }
-
-  if (complete) {
-    if (discard) {
-      CBAP_LOG_DEBUG("Discarded the OOB data of the remote device, this " \
-                     "device cannot verify it." CBAP_LOG_NL);
-    } else {
-      // The signature has to match the validated device certificate of the
-      // remote device. It is the proof that the remote device owns the private
-      // key of the certificate chain it presented.
-      sc = process_remote_oob();
-      if (sc != SL_STATUS_OK) {
-        att_error = (uint8_t)SL_STATUS_BT_ATT_WRITE_REQUEST_REJECTED;
-      }
-    }
-  }
-
-  sc = sl_bt_gatt_server_send_user_write_response(req->connection,
-                                                  req->characteristic,
-                                                  att_error);
-  if (sc != SL_STATUS_OK) {
-    CBAP_LOG_ERROR("Failed to send the write response: " \
-                   "0x%04lx!" CBAP_LOG_NL, sc);
-    on_error(sc);
-    return;
-  }
-
-  if (complete && att_error != ATT_SUCCESS) {
-    // The remote device failed to prove itself. The write is rejected above,
-    // and the connection is dropped so that it cannot try again.
-    on_error(SL_STATUS_INVALID_SIGNATURE);
   }
 }
 
@@ -1907,18 +1541,22 @@ static void receive_oob_write(const user_write_request_t *req)
  *
  * A prepared write has a response of its own, which normally echoes the part
  * that was collected. A refused one has nothing to echo.
+ *
+ * @param[in] req The write request.
+ * @param[in] att_error The ATT error code to respond with.
  *****************************************************************************/
 static void refuse_write(const user_write_request_t *req, uint8_t att_error)
 {
   sl_status_t sc;
 
   if (req->att_opcode == sl_bt_gatt_prepare_write_request) {
-    sc = sl_bt_gatt_server_send_user_prepare_write_response(req->connection,
-                                                            req->characteristic,
-                                                            att_error,
-                                                            req->offset,
-                                                            0,
-                                                            NULL);
+    sc = sl_bt_gatt_server_send_user_prepare_write_response(
+      req->connection,
+      req->characteristic,
+      att_error,
+      req->offset,
+      0,     // value_len
+      NULL); // value
   } else {
     sc = sl_bt_gatt_server_send_user_write_response(req->connection,
                                                     req->characteristic,
@@ -1926,140 +1564,66 @@ static void refuse_write(const user_write_request_t *req, uint8_t att_error)
   }
 
   if (sc != SL_STATUS_OK) {
-    CBAP_LOG_ERROR("Failed to refuse the write: 0x%04lx!" CBAP_LOG_NL, sc);
+    SLI_BT_CBAP_LOG_ERROR("Failed to refuse the write: 0x%04lx!"
+                          SLI_BT_CBAP_LOG_NL, sc);
   }
-}
-
-/******************************************************************************
- * Find the CBAP characteristic a read request of the remote device targets.
- *
- * @return Index of the characteristic, SL_BT_CBAP_CHAR_COUNT if the handle
- *         belongs to no CBAP characteristic that the remote device may read.
- *****************************************************************************/
-static uint8_t resolve_read_target(uint16_t local_handle)
-{
-  if (local_handle == gattdb_oob_data_server) {
-    return (uint8_t)SL_BT_CBAP_CHAR_OOB_DATA_SERVER;
-  }
-
-  return (uint8_t)SL_BT_CBAP_CHAR_COUNT;
 }
 
 /******************************************************************************
  * Find the CBAP characteristic a write request of the remote device targets.
+ *
+ * @param[in] local_handle Handle of the characteristic in the local GATT
+ *                         database.
  *
  * @return Index of the characteristic, SL_BT_CBAP_CHAR_COUNT if the handle
  *         belongs to no CBAP characteristic that the remote device may write.
  *****************************************************************************/
 static uint8_t resolve_write_target(uint16_t local_handle)
 {
-  if (local_handle == gattdb_oob_data_client) {
-    return (uint8_t)SL_BT_CBAP_CHAR_OOB_DATA_CLIENT;
+  if (local_handle == gattdb_session_key_client) {
+    return (uint8_t)SL_BT_CBAP_CHAR_SESSION_KEY_CLIENT;
   }
-
-  uint8_t index = find_cert_char(local_handle, false);
-
-  return (index < CERT_CHAR_COUNT) ? index : (uint8_t)SL_BT_CBAP_CHAR_COUNT;
+  return find_cert_char(local_handle, false);
 }
 
 /******************************************************************************
- * Route a read request of the remote device to the handler of its
- * characteristic.
+ * Check a write request to a CBAP characteristic before collecting it.
  *
- * The CBAP characteristics carry no security requirement, as they have to be
- * reachable before the link is secured. Any connected device can therefore
- * request them, but only the one the procedure is running with is served. The
- * rest are refused instead of ignored, otherwise they would be left waiting
- * for a response that never comes.
- *****************************************************************************/
-static void serve_user_read(const user_read_request_t *req)
-{
-  uint8_t index = resolve_read_target(req->characteristic);
-
-  if (index == (uint8_t)SL_BT_CBAP_CHAR_COUNT) {
-    // Not a CBAP characteristic, it belongs to the application.
-    return;
-  }
-
-  if (req->connection != candidate_device.handle) {
-    CBAP_LOG_ERROR("Refusing the CBAP read of connection %d, there is no " \
-                   "procedure in progress with it." CBAP_LOG_NL,
-                   req->connection);
-    (void)sl_bt_gatt_server_send_user_read_response(
-      req->connection,
-      req->characteristic,
-      (uint8_t)SL_STATUS_BT_ATT_INSUFFICIENT_AUTHORIZATION,
-      0,
-      NULL,
-      NULL);
-    return;
-  }
-
-  if (index == (uint8_t)SL_BT_CBAP_CHAR_OOB_DATA_SERVER) {
-    serve_oob_read(req);
-  }
-}
-
-/******************************************************************************
- * Route a write request of the remote device to the handler of its
- * characteristic.
+ * Only the candidate device may write, with plain write requests, and only in
+ * the order of the procedure. Any other write is refused, and a write in the
+ * wrong order fails the procedure.
  *
- * The fixed-size OOB data still accepts prepared writes for links using a
- * small ATT MTU. Certificate writes deliberately do not: they are framed
- * ordinary Write Requests. Requests that do not belong to the procedure in
- * progress are refused, see @ref serve_user_read.
+ * @param[in] req The write request.
  *****************************************************************************/
 static void receive_user_write(const user_write_request_t *req)
 {
-  uint8_t index;
-
-  if (req->att_opcode == sl_bt_gatt_execute_write_request) {
-    index = prepared_write_char;
-    prepared_write_char = (uint8_t)SL_BT_CBAP_CHAR_COUNT;
-  } else {
-    index = resolve_write_target(req->characteristic);
-  }
-
+  uint8_t index = resolve_write_target(req->characteristic);
   if (index == (uint8_t)SL_BT_CBAP_CHAR_COUNT) {
-    // Not a CBAP characteristic, it belongs to the application.
     return;
   }
-
-  if (req->connection != candidate_device.handle) {
-    CBAP_LOG_ERROR("Refusing the CBAP write of connection %d, there is no " \
-                   "procedure in progress with it." CBAP_LOG_NL,
-                   req->connection);
+  if ((req->connection != candidate_device.handle) || is_central
+      || bonded_reconnect) {
     refuse_write(req, (uint8_t)SL_STATUS_BT_ATT_INSUFFICIENT_AUTHORIZATION);
     return;
   }
-
-  if (index < CERT_CHAR_COUNT && req->att_opcode != sl_bt_gatt_write_request) {
+  if (req->att_opcode != sl_bt_gatt_write_request) {
     refuse_write(req, (uint8_t)SL_STATUS_BT_ATT_REQUEST_NOT_SUPPORTED);
     return;
   }
 
-  // Verifying the OOB data of the remote device closes the exchange. Letting it
-  // write again afterwards would let it authenticate with the certificates of
-  // one identity and then leave those of another behind in the storage, which
-  // is what the application reads the remote device back from.
-  if (remote_oob_verified) {
-    CBAP_LOG_ERROR("The remote device is still writing after it has been " \
-                   "authenticated." CBAP_LOG_NL);
+  // Freeze identity once its signed session key is accepted. Certificates must
+  // also stay fixed after validation, before any session data is processed.
+  if (session_ready
+      || ((index < CERT_CHAR_COUNT)
+          && (remote_chain_valid || (local_session_len != 0)))
+      || ((index == SL_BT_CBAP_CHAR_SESSION_KEY_CLIENT)
+          && ((local_session_len == 0) || !local_session_sent
+              || (SLI_BT_CBAP_ROLE_IS_VERIFIER && !remote_chain_valid)))) {
     refuse_write(req, (uint8_t)SL_STATUS_BT_ATT_WRITE_REQUEST_REJECTED);
     on_error(SL_STATUS_INVALID_STATE);
     return;
   }
-
-  if (index == (uint8_t)SL_BT_CBAP_CHAR_OOB_DATA_CLIENT
-      && req->att_opcode == sl_bt_gatt_prepare_write_request) {
-    prepared_write_char = index;
-  }
-
-  if (index == (uint8_t)SL_BT_CBAP_CHAR_OOB_DATA_CLIENT) {
-    receive_oob_write(req);
-  } else {
-    receive_cert_write(req, index);
-  }
+  receive_data_write(req, index);
 }
 
 /******************************************************************************
@@ -2077,62 +1641,443 @@ static void reset_procedure(void)
     cbap_char_handles[i] = HANDLE_NOT_INITIALIZED;
   }
 
-  // Certificate transfer. The certificates of the previous remote device are
+  // Framed transfer. The certificates of the previous remote device are
   // left in the storage, they are overwritten as the new ones arrive.
-  cert_len = 0;
-  cert_char = CERT_CHAR_COUNT;
-  cert_receiving = false;
-  cert_send_offset = 0;
-  cert_sending = false;
-  prepared_write_char = (uint8_t)SL_BT_CBAP_CHAR_COUNT;
-  central_cert_operation = CENTRAL_CERT_OPERATION_NONE;
+  gatt_buf_len = 0;
+  gatt_char = SL_BT_CBAP_CHAR_COUNT;
+  gatt_receiving = false;
+  gatt_send_offset = 0;
+  gatt_sending = false;
+  central_gatt_operation = CENTRAL_GATT_OPERATION_NONE;
   for (uint8_t i = 0; i < REMOTE_CERT_COUNT; i++) {
     remote_cert_stored[i] = false;
   }
   remote_chain_valid = false;
 
-  // OOB data. The values are bound to a single pairing, so the next procedure
-  // has to generate and sign new ones.
-  local_oob_len = 0;
-  remote_oob_len = 0;
-  local_oob_ready = false;
-  remote_oob_verified = false;
+  memset(local_session_data, 0, sizeof(local_session_data));
+  local_session_len = 0;
+  local_session_sent = false;
+  session_ready = false;
+  pairing_passkey = 0;
+  passkey_ready = false;
+  pairing_parameters_transferred = false;
+  passkey_used = false;
+  bonded_reconnect = false;
+  candidate_bonding = SL_BT_INVALID_BONDING_HANDLE;
+  link_secured = false;
+  pairing_complete = false;
 
-  // The OOB settings of the stack are global, not per connection, so the data
-  // of the finished procedure is taken out of the way of the next pairing. The
-  // values are of no use to the caller here, they are only written because the
-  // command reports the generated ones.
-  aes_key_128 random;
-  aes_key_128 confirm;
-  sl_status_t oob_sc = sl_bt_sm_set_oob(0, &random, &confirm);
-  if (oob_sc != SL_STATUS_OK) {
-    CBAP_LOG_ERROR("Failed to disable the OOB data of the stack: " \
-                   "0x%04lx!" CBAP_LOG_NL, oob_sc);
+  sl_status_t clear_sc = sli_bt_cbap_session_clear();
+  if (clear_sc != SL_STATUS_OK) {
+    SLI_BT_CBAP_LOG_ERROR("Failed to clear the session: 0x%04lx!"
+                          SLI_BT_CBAP_LOG_NL, clear_sc);
   }
+  // The stack's fixed display passkey is global. Release it for the next link.
+  clear_sc = sl_bt_sm_set_passkey(-1);
+  if (clear_sc != SL_STATUS_OK) {
+    SLI_BT_CBAP_LOG_ERROR("Failed to reset the passkey: 0x%04lx!"
+                          SLI_BT_CBAP_LOG_NL, clear_sc);
+  }
+  // The IO capability is global too. The central device displays the passkey
+  // only for the peripheral device that asked for it.
+  if (is_central && displays_passkey) {
+    clear_sc = sl_bt_sm_configure(SM_CONFIGURATION_FLAGS,
+                                  CENTRAL_IO_CAPABILITY);
+    if (clear_sc != SL_STATUS_OK) {
+      SLI_BT_CBAP_LOG_ERROR("Failed to restore the IO capability: 0x%04lx!"
+                            SLI_BT_CBAP_LOG_NL, clear_sc);
+    }
+  }
+  displays_passkey = false;
 
-  // Release the public key of the previous remote device if the procedure ended
-  // before the OOB data was verified.
-  sl_status_t sc = sli_destroy_remote_pub_key();
+  sl_status_t sc = sli_bt_cbap_destroy_peer_pub_key();
   if (sc != SL_STATUS_OK) {
-    CBAP_LOG_ERROR("Failed to release the key of the remote device: " \
-                   "0x%04lx!" CBAP_LOG_NL, sc);
+    SLI_BT_CBAP_LOG_ERROR("Failed to release the key of the remote device: "
+                          "0x%04lx!" SLI_BT_CBAP_LOG_NL, sc);
   }
 }
 
 /******************************************************************************
- * Timer callback.
+ * Report success once the authenticated link is ready, and its bond is stored
+ * if bonding is enabled.
+ *
+ * Fresh pairing can report encryption and its completion in either order. A
+ * reconnect already has a bond, and only waits for encryption to be restored.
  *****************************************************************************/
-static void timer_cb(app_timer_t *handle, void *data)
+static void complete_connection(void)
+{
+  if (!link_secured || (!bonded_reconnect && !pairing_complete)) {
+    return;
+  }
+
+  sl_bt_cbap_conn_t completed_device = candidate_device;
+  sl_status_t sc = app_timer_stop(&timer);
+  app_assert_status(sc);
+
+  if (bonded_reconnect) {
+    SLI_BT_CBAP_LOG_INFO("Bonded connection authenticated."
+                         SLI_BT_CBAP_LOG_NL);
+  } else if (BONDING_ENABLED) {
+    SLI_BT_CBAP_LOG_INFO("CBAP pairing and bonding complete."
+                         SLI_BT_CBAP_LOG_NL);
+  } else {
+    SLI_BT_CBAP_LOG_INFO("CBAP pairing complete, no bond stored."
+                         SLI_BT_CBAP_LOG_NL);
+  }
+
+  // Release the candidate before notifying the application, which may start
+  // looking for another peer from its callback.
+  candidate_connected = false;
+  candidate_device.handle = SL_BT_INVALID_CONNECTION_HANDLE;
+  memset(candidate_device.address.addr, 0xff, sizeof(bd_addr));
+  reset_procedure();
+  if (callback != NULL) {
+    callback(completed_device, SL_STATUS_OK);
+  }
+}
+
+/******************************************************************************
+ * Validate one fragment and collect its payload into gatt_buf.
+ *
+ * A fragment without payload cannot advance a transfer, so it is invalid.
+ *
+ * @param[in] data The fragment, starting with its continuation flag.
+ * @param[in] len Length of the fragment.
+ * @param[in] capacity Maximum length of the complete value.
+ * @param[out] complete Set to true if this was the last fragment of the value.
+ *
+ * @return SL_STATUS_OK on success, SL_STATUS_INVALID_PARAMETER if the fragment
+ *         is malformed, SL_STATUS_WOULD_OVERFLOW if the value is longer than
+ *         @p capacity, error code otherwise.
+ *****************************************************************************/
+static sl_status_t collect_fragment(const uint8_t *data,
+                                    size_t len,
+                                    size_t capacity,
+                                    bool *complete)
+{
+  *complete = false;
+  if ((len <= GATT_FRAGMENT_HEADER_LEN)
+      || ((data[0] != GATT_FRAGMENT_MORE)
+          && (data[0] != GATT_FRAGMENT_LAST))) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  sl_status_t sc = collect_part(gatt_buf, &gatt_buf_len, capacity,
+                                (uint16_t)gatt_buf_len,
+                                &data[GATT_FRAGMENT_HEADER_LEN],
+                                len - GATT_FRAGMENT_HEADER_LEN);
+  if (sc == SL_STATUS_OK) {
+    *complete = (data[0] == GATT_FRAGMENT_LAST);
+    if (!(*complete) && (gatt_buf_len == capacity)) {
+      return SL_STATUS_WOULD_OVERFLOW;
+    }
+  }
+  return sc;
+}
+
+/******************************************************************************
+ * Create the local session data, unless it already exists.
+ *
+ * The session data is kept until it is sent, because gatt_buf is in use for
+ * receiving the session data of the remote device in the meantime.
+ *
+ * @return SL_STATUS_OK on success, error code otherwise.
+ *****************************************************************************/
+static sl_status_t ensure_local_session(void)
+{
+  if (local_session_len != 0) {
+    return SL_STATUS_OK;
+  }
+  return sli_bt_cbap_session_init(local_session_data, &local_session_len,
+                                  sizeof(local_session_data));
+}
+
+/******************************************************************************
+ * Generate the pairing parameters on the peripheral and encrypt them into
+ * gatt_buf.
+ *
+ * The pairing parameters are a random passkey and the IO capability of the
+ * peripheral device, which tells the central device to enter the passkey. The
+ * passkey is installed in the Bluetooth stack before it is sent, so that the
+ * pairing that the central device starts on receiving it can use it.
+ *
+ * @return SL_STATUS_OK on success, error code otherwise.
+ *****************************************************************************/
+static sl_status_t prepare_pairing_parameters(void)
+{
+  sl_status_t sc = sli_bt_cbap_generate_random(0,
+                                               SLI_BT_CBAP_PASSKEY_LIMIT,
+                                               &pairing_passkey);
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+  // Network byte order, most significant byte first.
+  uint8_t plaintext[SLI_BT_CBAP_PAIRING_PARAMETERS_LEN];
+  for (size_t i = 0; i < SLI_BT_CBAP_PASSKEY_LEN; i++) {
+    size_t shift = 8U * (SLI_BT_CBAP_PASSKEY_LEN - 1U - i);
+    plaintext[i] = (uint8_t)(pairing_passkey >> shift);
+  }
+  plaintext[SLI_BT_CBAP_PASSKEY_LEN] = (uint8_t)PERIPHERAL_IO_CAPABILITY;
+  sc = sli_bt_cbap_session_encrypt(plaintext, sizeof(plaintext),
+                                   gatt_buf, &gatt_buf_len, sizeof(gatt_buf));
+  memset(plaintext, 0, sizeof(plaintext));
+  if (sc != SL_STATUS_OK) {
+    return sc;
+  }
+  if (gatt_buf_len != SLI_BT_CBAP_ENCRYPTED_PAIRING_PARAMETERS_LEN) {
+    return SL_STATUS_INVALID_COUNT;
+  }
+  sc = sl_bt_sm_set_passkey((int32_t)pairing_passkey);
+  if (sc == SL_STATUS_OK) {
+    displays_passkey = true;
+    passkey_ready = true;
+  }
+  return sc;
+}
+
+/******************************************************************************
+ * Decrypt the pairing parameters that the central device collected in
+ * gatt_buf, and prepare the pairing with them.
+ *
+ * The CCM tag authenticates the ciphertext, so pairing parameters that were
+ * not encrypted with the session key are rejected.
+ *
+ * @return SL_STATUS_OK on success, SL_STATUS_INVALID_PARAMETER if the passkey
+ *         has more than six digits, SL_STATUS_NOT_SUPPORTED if the IO
+ *         capability of the peripheral device rules out passkey entry
+ *         pairing, error code otherwise.
+ *****************************************************************************/
+static sl_status_t process_pairing_parameters(void)
+{
+  if (!session_ready || passkey_ready
+      || (gatt_buf_len != SLI_BT_CBAP_ENCRYPTED_PAIRING_PARAMETERS_LEN)) {
+    return SL_STATUS_INVALID_STATE;
+  }
+  uint8_t plaintext[SLI_BT_CBAP_PAIRING_PARAMETERS_LEN];
+  size_t plaintext_len = 0;
+  sl_status_t sc = sli_bt_cbap_session_decrypt(gatt_buf, gatt_buf_len,
+                                               plaintext, &plaintext_len,
+                                               sizeof(plaintext));
+  if ((sc == SL_STATUS_OK) && (plaintext_len != sizeof(plaintext))) {
+    sc = SL_STATUS_INVALID_COUNT;
+  }
+  if (sc == SL_STATUS_OK) {
+    uint32_t value = 0;
+    for (size_t i = 0; i < SLI_BT_CBAP_PASSKEY_LEN; i++) {
+      value = (value << 8) | plaintext[i];
+    }
+    if (value >= SLI_BT_CBAP_PASSKEY_LIMIT) {
+      sc = SL_STATUS_INVALID_PARAMETER;
+    } else {
+      pairing_passkey = value;
+      passkey_ready = true;
+      sc = adapt_io_capability(plaintext[SLI_BT_CBAP_PASSKEY_LEN]);
+    }
+  }
+  memset(plaintext, 0, sizeof(plaintext));
+  return sc;
+}
+
+/******************************************************************************
+ * Adapt the IO capability of the central device to the peripheral device.
+ *
+ * Passkey entry pairing needs one device that displays the passkey and one
+ * that enters it. The central device keeps entering the passkey for a
+ * peripheral device without a keyboard. For a peripheral device with a
+ * keyboard, it displays the passkey instead: it installs the passkey in the
+ * Bluetooth stack, so the passkey that is displayed is the one CBAP exchanged.
+ *
+ * @param[in] peer_io_capability IO capability of the peripheral device, a
+ *                               sl_bt_sm_io_capability_t.
+ *
+ * @return SL_STATUS_OK on success, SL_STATUS_NOT_SUPPORTED if the peripheral
+ *         device can neither display nor enter a passkey, error code
+ *         otherwise.
+ *****************************************************************************/
+static sl_status_t adapt_io_capability(uint8_t peer_io_capability)
+{
+  sl_status_t sc;
+
+  switch (peer_io_capability) {
+    case sl_bt_sm_io_capability_displayonly:
+    case sl_bt_sm_io_capability_displayyesno:
+      displays_passkey = false;
+      return SL_STATUS_OK;
+
+    case sl_bt_sm_io_capability_keyboardonly:
+    case sl_bt_sm_io_capability_keyboarddisplay:
+      // Set before configuring, so that the reset restores the configuration
+      // even if this step fails halfway.
+      displays_passkey = true;
+      sc = sl_bt_sm_configure(SM_CONFIGURATION_FLAGS,
+                              sl_bt_sm_io_capability_displayonly);
+      if (sc == SL_STATUS_OK) {
+        sc = sl_bt_sm_set_passkey((int32_t)pairing_passkey);
+      }
+      if (sc == SL_STATUS_OK) {
+        SLI_BT_CBAP_LOG_DEBUG("The remote device enters the passkey."
+                              SLI_BT_CBAP_LOG_NL);
+      }
+      return sc;
+
+    default:
+      SLI_BT_CBAP_LOG_ERROR("The remote device cannot take part in passkey "
+                            "entry pairing, its IO capability is %u!"
+                            SLI_BT_CBAP_LOG_NL,
+                            (unsigned int)peer_io_capability);
+      return SL_STATUS_NOT_SUPPORTED;
+  }
+}
+
+/******************************************************************************
+ * Collect an indicated fragment on the central, and confirm it.
+ *
+ * Once the whole value has arrived, the central device stores the certificate,
+ * completes the session, or starts the pairing with the pairing parameters,
+ * and moves on to the next step of the procedure.
+ *
+ * @param[in] value The characteristic value event of the indication.
+ *****************************************************************************/
+static void receive_indication(
+  const sl_bt_evt_gatt_characteristic_value_t *value)
+{
+  bool certificate = ((central_state == CENTRAL_EXCHANGE_CERTIFICATES)
+                      && (char_state < CERT_CHAR_COUNT)
+                      && cert_chars[char_state].server);
+  bool session_data = ((central_state == CENTRAL_CREATE_SESSION)
+                       && (char_state == SL_BT_CBAP_CHAR_SESSION_KEY_SERVER));
+  bool pairing_parameters =
+    ((central_state == CENTRAL_RECEIVE_PAIRING_PARAMETERS)
+     && (char_state == SL_BT_CBAP_CHAR_PAIRING_PARAMETERS_SERVER));
+  if ((!certificate && !session_data && !pairing_parameters)
+      || !gatt_receiving || (gatt_char != (uint8_t)char_state)
+      || (central_gatt_operation != CENTRAL_GATT_OPERATION_NONE)
+      || (value->characteristic != cbap_char_handles[char_state])
+      || (value->att_opcode != sl_bt_gatt_handle_value_indication)
+      || (value->offset != 0)) {
+    on_error(SL_STATUS_INVALID_STATE);
+    return;
+  }
+
+  bool complete;
+  size_t capacity = certificate ? sizeof(gatt_buf)
+                    : (session_data ? SLI_BT_CBAP_SESSION_DATA_LEN
+                       : SLI_BT_CBAP_ENCRYPTED_PAIRING_PARAMETERS_LEN);
+  sl_status_t sc = collect_fragment(value->value.data, value->value.len,
+                                    capacity, &complete);
+  if ((sc == SL_STATUS_OK) && complete) {
+    if (certificate) {
+      sc = store_remote_cert((uint8_t)char_state);
+    } else if (session_data) {
+      sc = sli_bt_cbap_session_process(gatt_buf, gatt_buf_len);
+      session_ready = (sc == SL_STATUS_OK);
+    } else {
+      sc = process_pairing_parameters();
+    }
+  }
+  if (sc == SL_STATUS_OK) {
+    sc = sl_bt_gatt_send_characteristic_confirmation(value->connection);
+  }
+  if ((sc == SL_STATUS_OK) && complete) {
+    gatt_buf_len = 0;
+    gatt_receiving = false;
+    gatt_char = SL_BT_CBAP_CHAR_COUNT;
+    if (pairing_parameters) {
+      pairing_parameters_transferred = true;
+      central_state = CENTRAL_INCREASE_SECURITY;
+      sc = sl_bt_sm_increase_security(candidate_device.handle);
+    } else {
+      char_state++;
+      sc = certificate ? continue_cert_exchange() : continue_session();
+    }
+  }
+  if (sc != SL_STATUS_OK) {
+    on_error(sc);
+  }
+}
+
+/******************************************************************************
+ * Delete the bond that the bonded peer device has lost, and fail the
+ * procedure.
+ *
+ * A peer device that was reset, or a phone whose user removed the device, no
+ * longer has the keys of the bond, so the stored bond can never restore the
+ * encryption again. Deleting it lets the next connection run the CBAP
+ * procedure. A new bond requires the CBAP procedure, so a peer device that
+ * only claims to have lost the bond gains nothing.
+ *****************************************************************************/
+static void forget_stale_bond(void)
+{
+  SLI_BT_CBAP_LOG_INFO("The remote device has lost bond %d. Deleting it, the "
+                       "next connection runs the CBAP procedure."
+                       SLI_BT_CBAP_LOG_NL,
+                       candidate_bonding);
+
+  // The stack also closes the connection if it is still open.
+  sl_status_t sc = sl_bt_sm_delete_bonding(candidate_bonding);
+  if (sc != SL_STATUS_OK) {
+    SLI_BT_CBAP_LOG_ERROR("Failed to delete the bond: 0x%04lx!"
+                          SLI_BT_CBAP_LOG_NL, sc);
+    on_error(sc);
+    return;
+  }
+
+  on_error(SL_STATUS_DELETED);
+}
+
+/******************************************************************************
+ * Ask the central device to secure the link with a Security Request.
+ *
+ * A phone central neither starts the pairing nor restores the encryption with
+ * a stored key by itself. A central device that is already securing the link
+ * ignores the request, and the stack may refuse to send it then, which is not
+ * an error: the procedure timer still limits the time until the link is
+ * secured.
+ *****************************************************************************/
+static void send_security_request(void)
+{
+  sl_status_t sc = sl_bt_sm_increase_security(candidate_device.handle);
+  if (sc != SL_STATUS_OK) {
+    SLI_BT_CBAP_LOG_DEBUG("Security Request not sent: 0x%04lx."
+                          SLI_BT_CBAP_LOG_NL, sc);
+  }
+}
+
+/******************************************************************************
+ * Stop the procedure timer once passkey entry pairing has started.
+ *
+ * The pairing may wait for a user who types the passkey on a phone, which
+ * takes longer than the exchanges before it. The Security Manager Protocol
+ * limits every step of the pairing to 30 seconds, and the stack reports a
+ * pairing that times out, is cancelled or fails in a bonding failed event.
+ *****************************************************************************/
+static void stop_procedure_timer(void)
+{
+  sl_status_t sc = app_timer_stop(&timer);
+  app_assert_status(sc);
+}
+
+/******************************************************************************
+ * Fail the procedure that did not complete in time.
+ *
+ * @param[in] handle The expired timer.
+ * @param[in] data Unused.
+ *****************************************************************************/
+static void on_timer_expired(app_timer_t *handle, void *data)
 {
   (void)handle;
   (void)data;
 
-  CBAP_LOG_ERROR("Procedure timeout!" CBAP_LOG_NL);
+  SLI_BT_CBAP_LOG_ERROR("Procedure timeout!" SLI_BT_CBAP_LOG_NL);
   on_error(SL_STATUS_TIMEOUT);
 }
 
 /******************************************************************************
- * Error handler.
+ * Fail the procedure.
+ *
+ * Reset the procedure, close the connection of the candidate device if it is
+ * still open, and report the failure to the application.
+ *
+ * @param[in] sc The reason of the failure.
  *****************************************************************************/
 static void on_error(sl_status_t sc)
 {
@@ -2144,13 +2089,14 @@ static void on_error(sl_status_t sc)
   // Reset states and discovered handles
   reset_procedure();
 
-  CBAP_LOG_ERROR("Error for connection %d. Status: 0x%04lx" CBAP_LOG_NL,
-                 candidate_device.handle,
-                 sc);
+  SLI_BT_CBAP_LOG_ERROR("Error for connection %d. Status: 0x%04lx"
+                        SLI_BT_CBAP_LOG_NL,
+                        candidate_device.handle,
+                        sc);
 
   // It is the responsibility of the module to close the suspicious connection
   if (candidate_connected) {
-    CBAP_LOG_ERROR("Closing connection..." CBAP_LOG_NL);
+    SLI_BT_CBAP_LOG_ERROR("Closing connection..." SLI_BT_CBAP_LOG_NL);
     (void)sl_bt_connection_close(candidate_device.handle);
     candidate_connected = false;
   }

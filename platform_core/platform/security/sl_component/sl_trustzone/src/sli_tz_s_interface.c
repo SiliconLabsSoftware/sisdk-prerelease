@@ -39,7 +39,6 @@
 #endif
 
 #include "sli_tz_iovec_check.h"
-#include "interface/include/psa/error.h"
 #include "sli_tz_s_interface.h"
 #if defined(SL_CATALOG_PSA_CRYPTO_KEY_PROTECTION_PRESENT)
   #include "sli_tz_secure_psa_key_protection.h"

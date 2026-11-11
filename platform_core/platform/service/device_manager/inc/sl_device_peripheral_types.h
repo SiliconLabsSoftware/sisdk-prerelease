@@ -30,6 +30,7 @@
 #ifndef SL_DEVICE_PERIPHERAL_TYPES_H
 #define SL_DEVICE_PERIPHERAL_TYPES_H
 
+#include "sl_common.h"
 #include "sl_device_clock.h"
 #include "sl_device_dma.h"
 #include <stdint.h>
@@ -192,11 +193,11 @@ typedef struct sl_peripheral_eusart {
   uint32_t rx_irqn;                         // RX interrupt number
   uint32_t tx_irqn;                         // TX interrupt number
   union {
-    sl_dma_signal_t dma_signal_rxfl;        // RX DMA channel
+    sl_dma_signal_t dma_signal_rxfl SL_DEPRECATED_API_SDK_2026_12;        // RX DMA channel
     sl_dma_signal_t dma_signal_rx_trigger;  // RX data available DMA signal
   };
   union {
-    sl_dma_signal_t dma_signal_txfl;        // TX DMA channel
+    sl_dma_signal_t dma_signal_txfl SL_DEPRECATED_API_SDK_2026_12;        // TX DMA channel
     sl_dma_signal_t dma_signal_tx_trigger;  // TX buffer level DMA signal
   };
 } sl_peripheral_eusart_val_t;
@@ -215,11 +216,11 @@ typedef struct sl_peripheral_euart {
   uint32_t rx_irqn;                         // RX interrupt number
   uint32_t tx_irqn;                         // TX interrupt number
   union {
-    sl_dma_signal_t dma_signal_rxfl;        // RX DMA channel
+    sl_dma_signal_t dma_signal_rxfl SL_DEPRECATED_API_SDK_2026_12;        // RX DMA channel
     sl_dma_signal_t dma_signal_rx_trigger;  // RX data available DMA signal
   };
   union {
-    sl_dma_signal_t dma_signal_txfl;        // TX DMA channel
+    sl_dma_signal_t dma_signal_txfl SL_DEPRECATED_API_SDK_2026_12;        // TX DMA channel
     sl_dma_signal_t dma_signal_tx_trigger;  // TX buffer level DMA signal
   };
 } sl_peripheral_euart_val_t;
@@ -239,11 +240,11 @@ typedef struct sl_peripheral_usart {
   uint32_t tx_irqn;                        // TX interrupt number
   union {
     sl_dma_signal_t dma_signal_rx_trigger; // RX data available DMA signal
-    sl_dma_signal_t dma_signal_rxdatav;    // RXDATAV DMA channel
+    sl_dma_signal_t dma_signal_rxdatav SL_DEPRECATED_API_SDK_2026_12;    // RXDATAV DMA channel
   };
   union {
     sl_dma_signal_t dma_signal_tx_trigger; // TX buffer level DMA signal
-    sl_dma_signal_t dma_signal_txbl;       // TXBL DMA channel
+    sl_dma_signal_t dma_signal_txbl SL_DEPRECATED_API_SDK_2026_12;       // TXBL DMA channel
   };
   sl_dma_signal_t dma_signal_rxdatavright; // RXDATAVRIGHT DMA channel
   sl_dma_signal_t dma_signal_txblright;    // TXBLRIGHT DMA channel

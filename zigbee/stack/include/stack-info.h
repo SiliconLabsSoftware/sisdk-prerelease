@@ -307,6 +307,7 @@ void *sl_zigbee_get_rail_handle(void);
 
 #if defined(SL_CATALOG_RAIL_MUX_AUX_PRESENT)
 #include "app/framework/include/sl_zigbee_rail_mux_aux_raw.h"
+#include "app/framework/include/sl_zigbee_mac_mux_aux.h"
 #endif
 
 /** @brief Return the local node's PAN ID of the current logical network.

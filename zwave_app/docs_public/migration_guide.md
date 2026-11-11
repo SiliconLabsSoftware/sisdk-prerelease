@@ -34,6 +34,146 @@ Update includes: replace `zpal_misc.h` usage for these APIs with `ZW_product_inf
 
 `zaf_stay_awake()` and its callback accessors are deprecated. The stack now manages linger periods automatically through `zw_linger`. Applications that used the callback accessors should migrate to `ZW_LingerSetCallback()`; its callback runs when the linger period expires. The legacy symbols remain available through `zw_legacy_api` until removal.
 
+## Z-Wave Log uses `sl_log` (sink via `SL_LOG_IOSTREAM_HANDLE`)
+
+`zw_log` provides the backend-independent `zpal_log` API. Silicon Labs builds
+enable output through the explicit `zw_log` component, which pulls in
+`sl_log`, the output backend, and the required console dependencies. Two output
+formats are supported:
+
+| Backend component | Output | Default |
+|-------------------|--------|---------|
+| `log_backend_iostream_formatted` | Human-readable text, readable in any serial terminal | Yes (all sample apps) |
+| `log_backend_iostream_compact` | Binary records, decoded offline with the application ELF | No |
+
+- Replace the legacy `ZW_LOG_CHANNEL_DEBUG`, `ZW_LOG_CHANNEL_INFO`,
+  `ZW_LOG_CHANNEL_WARNING`, and `ZW_LOG_CHANNEL_ERROR` definitions with the Boolean
+  level-enable macros `ZW_LOG_ENABLE_DEBUG`, `ZW_LOG_ENABLE_INFO`,
+  `ZW_LOG_ENABLE_WARNING`, and `ZW_LOG_ENABLE_ERROR`. Set each to `1` to enable the
+  level or `0` to disable it. The old channel values (`"vcom"`, `"rtt"`, and `"1"`)
+  are not iostream selections and must not be retained as the new configuration.
+- The output sink is selected by `SL_LOG_IOSTREAM_HANDLE`. SoC applications normally
+  use the recommended console (VCOM). NCP applications use SWO, typically by setting
+  `SL_LOG_IOSTREAM_HANDLE` to `sl_iostream_swo_handle`, because the host protocol owns
+  the VCOM/UART.
+- To select another output, add the corresponding iostream component and set
+  `SL_LOG_IOSTREAM_HANDLE` to its handle symbol.
+- `zw_log` automatically selects `log_backend_iostream` and the formatted
+  backend by default. On NCP, it selects `zw_ncp_iostream_console` and SWO so SLC
+  does not instantiate `iostream_eusart:vcom`. Do not add a VCOM iostream instance on
+  NCP: it shares the Serial API UART pins and DMA and breaks host communication. Keep
+  `SL_BOARD_ENABLE_VCOM` so the WSTK still routes the host UART; that board switch is
+  not the iostream driver.
+- NCP Serial API / Zniffer hardware components require DMA Manager so ZPAL UART DMA
+  channels are reserved without re-initializing LDMA.
+
+### Selecting the log backend
+
+Add `zw_log` to the application `.slcp` file to enable logging. Formatted
+output is selected by default. To use compact output, replace it with
+`zw_log_compact`; the compact component supplies the shared iostream
+backend:
+
+```yaml
+component:
+  - id: zw_log_compact # Use zw_log for formatted output.
+```
+
+When switching to the compact backend, also add the compact-only `sl_log` settings
+that the sample applications apply conditionally:
+
+```yaml
+configuration:
+  - name: SL_LOG_CONFIG_LEVEL_COMPILE_TIME
+    value: SL_LOG_CONFIG_LEVEL_DEBUG
+    condition: [log_backend_iostream_compact]
+  - name: SL_LOG_CONFIG_ARG
+    value: 7
+    condition: [log_backend_iostream_compact]
+  - name: SL_LOG_NUMBER_OF_EVENTS
+    value: 32
+    condition: [log_backend_iostream_compact]
+```
+
+The `ZW_LOG_ENABLE_*` level and component filters apply to both backends.
+
+### Formatted backend
+
+- Log messages are formatted on the target. A low-priority FreeRTOS task writes them
+  to `SL_LOG_IOSTREAM_HANDLE`. Task-context producers format the message and enqueue
+  it without blocking; messages are dropped when the queue is full. Logging from
+  interrupt context is forbidden because it can significantly increase interrupt
+  latency and is not generally safe. The logging task emits a warning containing
+  the number of dropped messages.
+- `ZW_LOG_BUFFER_SIZE`, `ZW_LOG_DISPLAY_TIMESTAMP`, `ZW_LOG_DISPLAY_LEVEL`, and
+  `ZW_LOG_DISPLAY_COMPONENT` control the message prefix and the maximum message length.
+- Runtime strings (`%s`) are supported.
+
+### Compact backend
+
+- Compact output stores the format literal and numeric arguments in binary
+  records. Keep the exact application ELF, including `.log_fmt`, for host-side
+  decoding; a serial terminal cannot display compact output directly.
+- The timestamp and level are part of each compact record, so `ZW_LOG_BUFFER_SIZE`,
+  `ZW_LOG_DISPLAY_TIMESTAMP`, and `ZW_LOG_DISPLAY_LEVEL` have no effect.
+  `ZW_LOG_DISPLAY_COMPONENT` adds the component ID as one extra argument, which counts
+  towards `SL_LOG_CONFIG_ARG`.
+- Compact log arguments must be numeric and fit the configured argument limit.
+  Runtime strings (for example `%s` values read from NVM or `__func__`) must be
+  replaced by stable numeric identifiers or use the formatted backend. As an example,
+  `ZAF_PrintAppInfo()` logs a hash of the application name instead of the name.
+- Records are drained by a low-priority task. Call `sl_log_flush()` before a deliberate
+  sleep or shutdown when pending records must be retained.
+- `zpal_log()` must never be called directly. With the compact backend it is an empty
+  function kept only for link compatibility; use the `ZPAL_LOG_*` macros.
+
+### Changing the log output
+
+To route logs to a different iostream, for example RTT, add the `iostream_rtt`
+component and set `SL_LOG_IOSTREAM_HANDLE` to `sl_iostream_rtt_handle`. The
+project's `.slcp` file is the preferred place to make this change:
+
+```yaml
+component:
+  - id: iostream_rtt
+
+configuration:
+  - name: SL_LOG_IOSTREAM_HANDLE
+    value: sl_iostream_rtt_handle
+```
+
+The same change can be supplied when generating the project with the SLC command
+line. Include the component with `--with` and override the configuration with
+`--configuration`:
+
+```text
+slc generate -p <project>.slcp -d <output-directory> \
+  --with iostream_rtt \
+  --configuration SL_LOG_IOSTREAM_HANDLE:sl_iostream_rtt_handle
+```
+
+Use the handle provided by the selected iostream component. For example, use
+`sl_iostream_swo_handle` with `iostream_swo`. Do not add a VCOM iostream to NCP
+applications because the host protocol owns the VCOM/UART.
+
+### Removing the logging backend from a production build
+
+Logging is enabled by selecting the `zw_log` component. It pulls in the
+Z-Wave logging implementation, the selected `sl_log` backend, and the required
+console dependencies.
+
+- To remove logging infrastructure from a production build, remove `zw_log`
+  from the application project. The base `zw_log` API remains available with
+  link-compatible no-op functions.
+
+```yaml
+component:
+  - id: zw_log # Omit this component to remove logging infrastructure.
+```
+
+Formatted output remains the default; select
+`log_backend_iostream_compact` explicitly when compact records are required.
+
 # 8.1.0 {#migrate-section-8-1-0}
 
 ## Sleeptimer peripheral configuration 
@@ -176,9 +316,13 @@ and removing any references to the old component.
 
 To enable debug output, either use the *Configure* button of the *Z-Wave Log* component in Simplicity Studio
 or edit **zw_log_config.h** directly in the project's `config` directory:
- - configure the output channels for the 4 log levels (debug, info, warning, error)
-   by setting `ZW_LOG_CHANNEL_<log level>` to an existing IO Stream instance (`vcom`, `rtt`, etc.)
- - set the relevant defines `ZPAL_LOG_ENABLE_<component name>` to `1`.
+ - enable the four log levels (debug, info, warning, error) by setting the corresponding
+   `ZW_LOG_ENABLE_<level>` macro to `1`.
+ - set the relevant `ZW_LOG_ENABLE_<component name>` component-filter macros to `1`.
+
+For SDK 8.2.0, configure the output sink separately through `SL_LOG_IOSTREAM_HANDLE`;
+`ZW_LOG_CHANNEL_*` is no longer used for either enabling a level or selecting an
+iostream. See [8.2.0](#migrate-section-8-2-0).
 
 To extend the ZPAL Log API with a new component, add a new entry to the enum `zpal_log_component_t`
 and update the helper macros in **zpal_log_internal.h**.

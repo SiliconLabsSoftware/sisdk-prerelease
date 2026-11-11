@@ -67,9 +67,10 @@
 // <i> Default value 1000
 #define SL_IPERF_DEFAULT_INTERVAL_MS               1000U ///< Default statistic update interval
 
-// <o SL_IPERF_MAX_TEST_TIMEOUT_MS> Maximum possible additional test timeout after duration time
-// <i> Default value 2000
-#define SL_IPERF_MAX_TEST_TIMEOUT_MS               2000U ///< Maximum possible additional test timeout after duration time
+// <o SL_IPERF_MAX_TEST_TIMEOUT_MS> Idle timeout since last received packet (ms)
+// <i> Default value 2000. Server stops when no packet is received within this window.
+// <i> Set to 0 to disable the idle timeout, or set options.persistent at runtime.
+#define SL_IPERF_MAX_TEST_TIMEOUT_MS               2000U ///< Idle timeout since last received packet (ms)
 // </h>
 
 // <h>iPerf Server configuration

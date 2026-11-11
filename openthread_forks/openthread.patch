@@ -1,41 +1,8 @@
-diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
-index 1626605d6117690972758aaf9b0d00fe1e108525..e8bc426f0a445b20e25f892b75a9063fd427950f 100644
---- a/.github/workflows/build.yml
-+++ b/.github/workflows/build.yml
-@@ -113,7 +113,7 @@ jobs:
-         cmake --build --preset simulation
-         ctest --preset simulation
- 
--  cmake-presets-ccm-one-shot:
-+  cmake-presets-platform-options:
-     runs-on: ubuntu-24.04
-     steps:
-     - name: Harden Runner
-@@ -128,9 +128,9 @@ jobs:
-       timeout-minutes: 10
-       run: |
-         sudo apt-get --no-install-recommends install -y build-essential ninja-build libreadline-dev libncurses-dev
--    - name: Build and test with platform CCM one-shot enabled
-+    - name: Build and test with platform-specific options enabled
-       run: |
--        cmake --preset simulation -DOT_CRYPTO_CCM_ONE_SHOT=ON
-+        cmake --preset simulation -DOT_CRYPTO_CCM_ONE_SHOT=ON -DOT_MAC_ALLOW_INCOMPLETE_RX_ENH_ACK=ON
-         cmake --build --preset simulation
-         ctest --preset simulation
- 
 diff --git a/etc/cmake/options.cmake b/etc/cmake/options.cmake
-index 528218576dc4e5ac0630f59bc128c571ea7f1b9d..5186e884d7d4206314db1e8e07c52b0b1101fc80 100644
+index d2fb1f9f51b3be9a2f65653a0f4f215c0e90789d..5186e884d7d4206314db1e8e07c52b0b1101fc80 100644
 --- a/etc/cmake/options.cmake
 +++ b/etc/cmake/options.cmake
-@@ -224,6 +224,7 @@ ot_option(OT_LINK_METRICS_MANAGER  OPENTHREAD_CONFIG_LINK_METRICS_MANAGER_ENABLE
- ot_option(OT_LINK_METRICS_SUBJECT OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE "link metrics subject")
- ot_option(OT_LINK_RAW OPENTHREAD_CONFIG_LINK_RAW_ENABLE "link raw service")
- ot_option(OT_LOG_LEVEL_DYNAMIC OPENTHREAD_CONFIG_LOG_LEVEL_DYNAMIC_ENABLE "dynamic log level control")
-+ot_option(OT_MAC_ALLOW_INCOMPLETE_RX_ENH_ACK OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK "allow incomplete rx frames when generating Enh-ACKs")
- ot_option(OT_MAC_FILTER OPENTHREAD_CONFIG_MAC_FILTER_ENABLE "mac filter")
- ot_option(OT_MDNS OPENTHREAD_CONFIG_MULTICAST_DNS_ENABLE "multicast DNS (mDNS)")
- ot_option(OT_MDNS_VERBOSE OPENTHREAD_CONFIG_MULTICAST_DNS_VERBOSE_LOGGING_ENABLE "mDNS verbose logging")
-@@ -235,6 +236,7 @@ ot_option(OT_MLR OPENTHREAD_CONFIG_MLR_ENABLE "Multicast Listener Registration (
+@@ -236,6 +236,7 @@ ot_option(OT_MLR OPENTHREAD_CONFIG_MLR_ENABLE "Multicast Listener Registration (
  ot_option(OT_MULTIPAN_RCP OPENTHREAD_CONFIG_MULTIPAN_RCP_ENABLE "enable multi-PAN RCP")
  ot_option(OT_MULTIPLE_INSTANCE OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE "multiple instances")
  ot_option(OT_NAT64_BORDER_ROUTING OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE "border routing NAT64")
@@ -43,7 +10,7 @@ index 528218576dc4e5ac0630f59bc128c571ea7f1b9d..5186e884d7d4206314db1e8e07c52b0b
  ot_option(OT_NAT64_TRANSLATOR OPENTHREAD_CONFIG_NAT64_TRANSLATOR_ENABLE "NAT64 translator support")
  ot_option(OT_NEIGHBOR_DISCOVERY_AGENT OPENTHREAD_CONFIG_NEIGHBOR_DISCOVERY_AGENT_ENABLE "neighbor discovery agent")
  ot_option(OT_NETDATA_PUBLISHER OPENTHREAD_CONFIG_NETDATA_PUBLISHER_ENABLE "Network Data publisher")
-@@ -366,7 +368,9 @@ ot_int_option(OT_VENDOR_OUI OPENTHREAD_CONFIG_NET_DIAG_VENDOR_OUI "set the vendo
+@@ -367,7 +368,9 @@ ot_int_option(OT_VENDOR_OUI OPENTHREAD_CONFIG_NET_DIAG_VENDOR_OUI "set the vendo
  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  
  if(NOT OT_EXTERNAL_MBEDTLS)
@@ -106,22 +73,22 @@ index e08fad368ebc5b4209d21c061a8e1d9fd3f2b3db..0cfa4abeba6d32454229245e9334870d
  /**
   * @}
   */
-diff --git a/script/check-simulation-build-cmake b/script/check-simulation-build-cmake
-index a273da85b3155e5cc32a985ee5d48400f010a3bf..21c7cab0b68d66b124bde5bee2e688ba25b167da 100755
---- a/script/check-simulation-build-cmake
-+++ b/script/check-simulation-build-cmake
-@@ -203,9 +203,9 @@ build_all_features()
-     reset_source
-     "$(dirname "$0")"/cmake-build simulation -DOT_BLE_TCAT=ON
+diff --git a/script/bootstrap b/script/bootstrap
+index a6ded7c545402628ec5c6670a452ce5a00fc3909..20ee99d78a9b00b2260365149ce0f2986225ebc3 100755
+--- a/script/bootstrap
++++ b/script/bootstrap
+@@ -88,6 +88,11 @@ install_packages_apt()
+     sudo apt-get update
+     sudo DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends install -y g++ lsb-release cmake ninja-build shellcheck expect libgtest-dev libgmock-dev python3-pip python3-venv
  
--    # Build with platform CCM one-shot enabled
-+    # Build with platform-specific options enabled
-     reset_source
--    "$(dirname "$0")"/cmake-build simulation -DOT_CRYPTO_CCM_ONE_SHOT=ON
-+    "$(dirname "$0")"/cmake-build simulation -DOT_CRYPTO_CCM_ONE_SHOT=ON -DOT_MAC_ALLOW_INCOMPLETE_RX_ENH_ACK=ON
- }
- 
- build_nest_common()
++    # python3-jinja2 and python3-jsonschema are imported by Mbed TLS
++    # generate_driver_wrappers.py.
++    sudo apt-get --no-install-recommends install -y \
++        python3-jinja2 python3-jsonschema
++
+     echo 'Installing GNU Arm Embedded Toolchain...'
+     PLATFORM=$(lsb_release -is)
+     ARCH=$(arch)
 diff --git a/src/cli/cli_tcp.cpp b/src/cli/cli_tcp.cpp
 index 7c5dadba62802a20767d86724a893a1cd3599466..1fc448c1f43501f75a66c0688671d545caabb66a 100644
 --- a/src/cli/cli_tcp.cpp
@@ -215,10 +182,10 @@ index a70d696e4278703f1a4ee1f3fa9f68d373680aad..206fab90f47cff33e0c9a19a8fbb7f7e
 +
  #endif // OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
 diff --git a/src/core/border_router/routing_manager.cpp b/src/core/border_router/routing_manager.cpp
-index 6929f8e20ff5ba3ba669c751b66ed75024e66cd6..8e2f845ad0424265ac4727caed0e6c94336d9032 100644
+index 4634840a3336d302ee6882ae8e29b480f4135e7c..a37be99b163e1463c3efe30a2f9b2a426134231b 100644
 --- a/src/core/border_router/routing_manager.cpp
 +++ b/src/core/border_router/routing_manager.cpp
-@@ -2338,6 +2338,9 @@ RoutingManager::Nat64PrefixManager::Nat64PrefixManager(Instance &aInstance)
+@@ -2361,6 +2361,9 @@ RoutingManager::Nat64PrefixManager::Nat64PrefixManager(Instance &aInstance)
      mPlatformPrefix.Clear();
      mLocalPrefix.Clear();
      mPublishedPrefix.Clear();
@@ -228,7 +195,7 @@ index 6929f8e20ff5ba3ba669c751b66ed75024e66cd6..8e2f845ad0424265ac4727caed0e6c94
  }
  
  void RoutingManager::Nat64PrefixManager::SetEnabled(bool aEnabled)
-@@ -2431,10 +2434,18 @@ void RoutingManager::Nat64PrefixManager::Evaluate(void)
+@@ -2454,10 +2457,18 @@ void RoutingManager::Nat64PrefixManager::Evaluate(void)
  
      VerifyOrExit(mEnabled);
  
@@ -249,7 +216,7 @@ index 6929f8e20ff5ba3ba669c751b66ed75024e66cd6..8e2f845ad0424265ac4727caed0e6c94
      error = Get<NetworkData::Leader>().FindPreferredNat64Prefix(netdataPrefixConfig);
  
      // NAT64 prefix is expected to be published from this BR
-@@ -2481,6 +2492,20 @@ exit:
+@@ -2504,6 +2515,20 @@ exit:
      return;
  }
  
@@ -270,7 +237,7 @@ index 6929f8e20ff5ba3ba669c751b66ed75024e66cd6..8e2f845ad0424265ac4727caed0e6c94
  void RoutingManager::Nat64PrefixManager::Publish(const Ip6::Prefix &aPrefix, RoutePreference aPreference)
  {
      // Publishes the given prefix and preference in the Network Data
-@@ -3128,6 +3153,11 @@ extern "C" void otPlatBorderRoutingProcessDhcp6PdPrefix(otInstance
+@@ -3151,6 +3176,11 @@ extern "C" void otPlatBorderRoutingProcessDhcp6PdPrefix(otInstance
  
  #endif // OPENTHREAD_CONFIG_BORDER_ROUTING_DHCP6_PD_ENABLE
  
@@ -283,7 +250,7 @@ index 6929f8e20ff5ba3ba669c751b66ed75024e66cd6..8e2f845ad0424265ac4727caed0e6c94
  
  } // namespace ot
 diff --git a/src/core/border_router/routing_manager.hpp b/src/core/border_router/routing_manager.hpp
-index 942a82cbd29a2f959e5394969b49d0a255323adf..191342b7d089642ccf5ff16ba565f2ae26eaa3f1 100644
+index 566220604a4ffcade77912120721f6c4810f4090..536f800fb519e32cf00c02e3a55c9f8a105fb346 100644
 --- a/src/core/border_router/routing_manager.hpp
 +++ b/src/core/border_router/routing_manager.hpp
 @@ -408,6 +408,16 @@ public:
@@ -325,38 +292,6 @@ index 942a82cbd29a2f959e5394969b49d0a255323adf..191342b7d089642ccf5ff16ba565f2ae
      };
  
  #endif // OPENTHREAD_CONFIG_NAT64_BORDER_ROUTING_ENABLE
-diff --git a/src/core/config/mac.h b/src/core/config/mac.h
-index bbb26f33cb23917b2e5f7a9e674bdcac8b06c2c7..48ef603caa6c02ab8123e9af7629b7c90614913f 100644
---- a/src/core/config/mac.h
-+++ b/src/core/config/mac.h
-@@ -282,6 +282,27 @@
- #endif
- #endif
- 
-+/**
-+ * @def OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK
-+ *
-+ * Define as 1 to have `TxFrame::GenerateEnhAck()` require only fields through the Auxiliary Security Header to be
-+ * parseable in the received frame, rather than the full frame (Header IEs and MAC Command ID).
-+ *
-+ * This is intended for radio platforms that construct Enhanced ACKs mid-RX from a partially received PSDU (e.g.,
-+ * inside an early frame-pending callback), where the Header IE and MAC Command ID bytes may not yet be in RAM.
-+ * Those bytes are not required for Enh-ACK construction.
-+ *
-+ * @note `aRxFrame.mLength` must still reflect the full PSDU length, including the MIC and FCS footers.
-+ * `ParseInfo::ParseFrom()` strips those footers via `RemoveFooter()`, so a length that counts only the bytes
-+ * received into RAM so far will cause `GenerateEnhAck()` to return `kErrorParse`.
-+ *
-+ * @note The platform remains responsible for suppressing Enh-ACK transmission for frames not successfully received per
-+ * IEEE 802.15.4.
-+ */
-+#ifndef OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK
-+#define OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK 0
-+#endif
-+
- /**
-  * @def OPENTHREAD_CONFIG_MAC_ATTACH_DATA_POLL_PERIOD
-  *
 diff --git a/src/core/config/nat64.h b/src/core/config/nat64.h
 index 76e4eb179bfd6cbadb8f24cb474e5e38c30c5ff0..1071a06f39b58ec71885cad0df7ddc50d88591f2 100644
 --- a/src/core/config/nat64.h
@@ -381,7 +316,7 @@ index 76e4eb179bfd6cbadb8f24cb474e5e38c30c5ff0..1071a06f39b58ec71885cad0df7ddc50
   * @def OPENTHREAD_CONFIG_NAT64_PORT_TRANSLATION_ENABLE
   *
 diff --git a/src/core/config/openthread-core-config-check.h b/src/core/config/openthread-core-config-check.h
-index 0e70776689e5b6a7e4e67dd2400f8b822d563bf2..36d8b2a6b39d7c2efa7e44db77f0f99270733318 100644
+index f6d9d2f3789f78b1cea74264b66adb8ae5f5ec85..50a5f6e132679ae5ea494d109335347e7e44ab54 100644
 --- a/src/core/config/openthread-core-config-check.h
 +++ b/src/core/config/openthread-core-config-check.h
 @@ -643,6 +643,11 @@
@@ -1018,31 +953,8 @@ index 17dba846a8cd1a3bc918654ee0cdc5d9b6fe862b..fd6bf0fd19a7d12b52c8f14fe54659d4
  /**
   * @}
   */
-diff --git a/src/core/mac/mac_frame.cpp b/src/core/mac/mac_frame.cpp
-index 25f5392289aa91300baf9f1745abe8da43f532c1..1dc954da256bdc0db8c2477ddd4e11623a5bda49 100644
---- a/src/core/mac/mac_frame.cpp
-+++ b/src/core/mac/mac_frame.cpp
-@@ -977,7 +977,18 @@ Error TxFrame::GenerateEnhAck(const RxFrame &aRxFrame, bool aIsFramePending, con
- 
-     // Validate the received frame.
- 
-+#if OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK
-+    switch (rxInfo.ParseFrom(aRxFrame, kParseSecurityHeader))
-+    {
-+    case kErrorNone:
-+    case kErrorNotFound:
-+        break;
-+    default:
-+        ExitNow();
-+    }
-+#else
-     SuccessOrExit(rxInfo.ParseFrom(aRxFrame, kParseFully));
-+#endif
- 
-     VerifyOrExit(rxInfo.mVersion == kVersion2015);
-     VerifyOrExit(rxInfo.mIsAckRequest);
 diff --git a/src/core/meshcop/secure_transport.cpp b/src/core/meshcop/secure_transport.cpp
-index 447e55079446ed8a87dfd322c1eaefa2c6fa1eee..bbd8a47f319d95e34ffed2560b656924aa3f4478 100644
+index ff85a55d0a78605b628a2a9872af716794fbc8b5..721bc9c141ff06243d241b5df376179ed3d92e70 100644
 --- a/src/core/meshcop/secure_transport.cpp
 +++ b/src/core/meshcop/secure_transport.cpp
 @@ -69,6 +69,7 @@ void SecureSession::Init(void)
@@ -1070,7 +982,7 @@ index 447e55079446ed8a87dfd322c1eaefa2c6fa1eee..bbd8a47f319d95e34ffed2560b656924
  void SecureSession::SetState(State aState)
  {
      VerifyOrExit(mState != aState);
-@@ -313,7 +320,7 @@ Error SecureSession::Setup(void)
+@@ -314,7 +321,7 @@ Error SecureSession::Setup(void)
  
      if (mTransport.mCipherSuite == SecureTransport::kEcjpakeWithAes128Ccm8)
      {
@@ -1079,7 +991,7 @@ index 447e55079446ed8a87dfd322c1eaefa2c6fa1eee..bbd8a47f319d95e34ffed2560b656924
          VerifyOrExit(rval == 0);
      }
  
-@@ -605,7 +612,7 @@ void SecureSession::Process(void)
+@@ -606,7 +613,7 @@ void SecureSession::Process(void)
  
              if (mTransport.mCipherSuite == SecureTransport::kEcjpakeWithAes128Ccm8)
              {
@@ -1089,7 +1001,7 @@ index 447e55079446ed8a87dfd322c1eaefa2c6fa1eee..bbd8a47f319d95e34ffed2560b656924
          }
  
 diff --git a/src/core/meshcop/secure_transport.hpp b/src/core/meshcop/secure_transport.hpp
-index c80f258b2aaa58444b329b7d2480f97312c73930..9094b4b7975f569ca6f34b35381f7fccdbfd4350 100644
+index 842eb9088729a467c435d227d5d6f84d1ed2b667..fe3ec4e62070776214e929ab4d79fac0dab28a22 100644
 --- a/src/core/meshcop/secure_transport.hpp
 +++ b/src/core/meshcop/secure_transport.hpp
 @@ -93,6 +93,7 @@
@@ -1178,7 +1090,7 @@ index f483f1262809048ed5642aad92c6252b58d41c0d..0464643167b35908ee661dac0c2275d9
  
      /**
 diff --git a/src/core/radio/trel_interface.cpp b/src/core/radio/trel_interface.cpp
-index d1cedb8a843ab6b489f50e2655de064883dfe6a7..d41ba00d00aebffef1237380c95c57ad4dd283f7 100644
+index 1f0b0c83a20e32f0e4973735d63ab0a5bbab7105..fdfc3426a53010b7e32ac6b73028ac24062b058b 100644
 --- a/src/core/radio/trel_interface.cpp
 +++ b/src/core/radio/trel_interface.cpp
 @@ -35,6 +35,7 @@
@@ -1254,7 +1166,7 @@ index d1cedb8a843ab6b489f50e2655de064883dfe6a7..d41ba00d00aebffef1237380c95c57ad
  const Counters *Interface::GetCounters(void) const { return otPlatTrelGetCounters(&GetInstance()); }
  
  void Interface::ResetCounters(void) { otPlatTrelResetCounters(&GetInstance()); }
-@@ -199,6 +224,18 @@ exit:
+@@ -193,6 +218,18 @@ exit:
      return;
  }
  
@@ -1418,7 +1330,7 @@ index 2e82d9f7209099de9f6375ffeefe5925c03417f4..d9ded70f26843a860917d04186699289
      Heap::String mServiceName;
      Heap::String mHostName;
 diff --git a/src/core/radio/trel_peer_discoverer.cpp b/src/core/radio/trel_peer_discoverer.cpp
-index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8967e68aa 100644
+index ec1a5451a4ae844dba7e6ab24621ea53d2f3e556..c10cda3536ce325d922765cc6f956796f80e4499 100644
 --- a/src/core/radio/trel_peer_discoverer.cpp
 +++ b/src/core/radio/trel_peer_discoverer.cpp
 @@ -42,8 +42,9 @@ namespace Trel {
@@ -1479,7 +1391,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
  }
  
  #if !OPENTHREAD_CONFIG_TREL_MANAGE_DNSSD_ENABLE
-@@ -266,8 +285,12 @@ void PeerDiscoverer::HandleDnssdPlatformStateChange(void)
+@@ -261,8 +280,12 @@ void PeerDiscoverer::HandleDnssdPlatformStateChange(void)
      else
      {
          VerifyOrExit(mState != kStateStopped);
@@ -1492,7 +1404,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
          Get<PeerTable>().Clear();
      }
  
-@@ -338,6 +361,123 @@ void PeerDiscoverer::HandleBrowseResult(otInstance *aInstance, const otPlatDnssd
+@@ -333,6 +356,123 @@ void PeerDiscoverer::HandleBrowseResult(otInstance *aInstance, const otPlatDnssd
      AsCoreType(aInstance).Get<PeerDiscoverer>().HandleBrowseResult(*aResult);
  }
  
@@ -1616,7 +1528,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
  void PeerDiscoverer::HandleBrowseResult(const Dnssd::BrowseResult &aResult)
  {
      Peer *peer;
-@@ -350,14 +490,47 @@ void PeerDiscoverer::HandleBrowseResult(const Dnssd::BrowseResult &aResult)
+@@ -345,14 +485,47 @@ void PeerDiscoverer::HandleBrowseResult(const Dnssd::BrowseResult &aResult)
      {
          // Previously discovered service is now removed.
  
@@ -1664,7 +1576,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
          Peer::Action action = Peer::kAdded;
  
          if (peer == nullptr)
-@@ -375,6 +548,7 @@ void PeerDiscoverer::HandleBrowseResult(const Dnssd::BrowseResult &aResult)
+@@ -370,6 +543,7 @@ void PeerDiscoverer::HandleBrowseResult(const Dnssd::BrowseResult &aResult)
          peer->Log(action);
  
          StartServiceResolvers(*peer);
@@ -1672,7 +1584,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
      }
  
  exit:
-@@ -385,6 +559,9 @@ void PeerDiscoverer::StartServiceResolvers(Peer &aPeer)
+@@ -380,6 +554,9 @@ void PeerDiscoverer::StartServiceResolvers(Peer &aPeer)
  {
      VerifyOrExit(!aPeer.mResolvingService);
  
@@ -1682,7 +1594,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
      aPeer.mResolvingService = true;
      Get<Dnssd>().StartSrvResolver(SrvResolver(aPeer));
      Get<Dnssd>().StartTxtResolver(TxtResolver(aPeer));
-@@ -395,6 +572,9 @@ exit:
+@@ -390,6 +567,9 @@ exit:
  
  void PeerDiscoverer::StopServiceResolvers(Peer &aPeer)
  {
@@ -1692,7 +1604,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
      VerifyOrExit(aPeer.mResolvingService);
  
      aPeer.mResolvingService = false;
-@@ -405,9 +585,32 @@ void PeerDiscoverer::StopServiceResolvers(Peer &aPeer)
+@@ -400,9 +580,32 @@ void PeerDiscoverer::StopServiceResolvers(Peer &aPeer)
      Get<Dnssd>().StopSrvResolver(SrvResolver(aPeer));
      Get<Dnssd>().StopTxtResolver(TxtResolver(aPeer));
  
@@ -1725,7 +1637,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
  
  void PeerDiscoverer::HandleSrvResult(otInstance *aInstance, const otPlatDnssdSrvResult *aResult)
  {
-@@ -422,6 +625,10 @@ void PeerDiscoverer::HandleSrvResult(const Dnssd::SrvResult &aResult)
+@@ -417,6 +620,10 @@ void PeerDiscoverer::HandleSrvResult(const Dnssd::SrvResult &aResult)
  
      peer = Get<PeerTable>().FindMatching(Peer::kMatchServiceName, aResult.mServiceInstance);
      VerifyOrExit(peer != nullptr);
@@ -1736,7 +1648,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
  
      if (aResult.mTtl == 0)
      {
-@@ -438,6 +645,16 @@ void PeerDiscoverer::HandleSrvResult(const Dnssd::SrvResult &aResult)
+@@ -433,6 +640,16 @@ void PeerDiscoverer::HandleSrvResult(const Dnssd::SrvResult &aResult)
              SuccessOrAssert(peer->mHostName.Set(aResult.mHostName));
              StartHostAddressResolver(*peer);
          }
@@ -1753,7 +1665,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
      }
  
      UpdatePeerState(*peer);
-@@ -461,6 +678,10 @@ void PeerDiscoverer::HandleTxtResult(const Dnssd::TxtResult &aResult)
+@@ -456,6 +673,10 @@ void PeerDiscoverer::HandleTxtResult(const Dnssd::TxtResult &aResult)
  
      peer = Get<PeerTable>().FindMatching(Peer::kMatchServiceName, aResult.mServiceInstance);
      VerifyOrExit(peer != nullptr);
@@ -1764,7 +1676,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
  
      peer->mTxtDataValidated = false;
  
-@@ -496,6 +717,12 @@ void PeerDiscoverer::HandleTxtResult(const Dnssd::TxtResult &aResult)
+@@ -491,6 +712,12 @@ void PeerDiscoverer::HandleTxtResult(const Dnssd::TxtResult &aResult)
  exit:
      if (peer != nullptr)
      {
@@ -1777,7 +1689,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
          UpdatePeerState(*peer);
      }
  }
-@@ -504,13 +731,31 @@ void PeerDiscoverer::StartHostAddressResolver(Peer &aPeer)
+@@ -499,13 +726,31 @@ void PeerDiscoverer::StartHostAddressResolver(Peer &aPeer)
  {
      Peer *sameHostPeer;
  
@@ -1809,7 +1721,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
      {
          UpdatePeerAddresses(aPeer, sameHostPeer->mHostAddresses);
      }
-@@ -612,10 +857,26 @@ void PeerDiscoverer::HandleAddressResult(const Dnssd::AddressResult &aResult)
+@@ -607,10 +852,26 @@ void PeerDiscoverer::HandleAddressResult(const Dnssd::AddressResult &aResult)
  
      for (Peer &peer : Get<PeerTable>())
      {
@@ -1836,7 +1748,7 @@ index 9bfedf9a751b0d515f296cbf660eef0f23cb36e2..bfa1a19555a73c6e143dd19b762d72c8
  
          if (peer.Matches(Peer::kMatchHostName, aResult.mHostName))
          {
-@@ -722,9 +983,18 @@ void PeerDiscoverer::HandlePeerRemoval(Peer &aPeer)
+@@ -717,9 +978,18 @@ void PeerDiscoverer::HandlePeerRemoval(Peer &aPeer)
      // The order of calls is important here since the
      // `StopServiceResolvers()` clears the `aPeer.mHostName` which
      // would be needed in `StopHostAddressResolver()`.
@@ -1905,10 +1817,10 @@ index 4061a97a23445d8974802c51cfcd4cde77000215..afaa435637607688d9fd3a8dfd607300
  };
  
 diff --git a/src/lib/spinel/spinel.c b/src/lib/spinel/spinel.c
-index 3f8938dab995d8d405e9179414a33971d5e3b2f4..d0d4a7eb25ca5453fbe086241558baff0129de8f 100644
+index f304af73b21273983d09c0b76b7ed1cb5f967511..eeab77c73822e7d4ac53405707020618df1c7e5e 100644
 --- a/src/lib/spinel/spinel.c
 +++ b/src/lib/spinel/spinel.c
-@@ -1429,6 +1429,12 @@ const char *spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
+@@ -1433,6 +1433,12 @@ const char *spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
          {SPINEL_PROP_DNSSD_IP6_ADDRESS_RESULT, "DNSSD_IP6_ADDRESS_RESULT"},
          {SPINEL_PROP_DNSSD_IP4_ADDRESS_RESOLVER, "DNSSD_IP4_ADDRESS_RESOLVER"},
          {SPINEL_PROP_DNSSD_IP4_ADDRESS_RESULT, "DNSSD_IP4_ADDRESS_RESULT"},
@@ -1921,7 +1833,7 @@ index 3f8938dab995d8d405e9179414a33971d5e3b2f4..d0d4a7eb25ca5453fbe086241558baff
          {SPINEL_PROP_BORDER_AGENT_MESHCOP_SERVICE_STATE, "BORDER_AGENT_MESHCOP_SERVICE_STATE"},
          {SPINEL_PROP_BORDER_AGENT_EPHEMERAL_KEY_STATE, "SPINEL_PROP_BORDER_AGENT_EPHEMERAL_KEY_STATE"},
          {SPINEL_PROP_BORDER_AGENT_EPHEMERAL_KEY_ENABLE, "SPINEL_PROP_BORDER_AGENT_EPHEMERAL_KEY_ENABLE"},
-@@ -1524,6 +1530,9 @@ const char *spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
+@@ -1528,6 +1534,9 @@ const char *spinel_prop_key_to_cstr(spinel_prop_key_t prop_key)
          {SPINEL_PROP_DEBUG_TREL_TEST_MODE_ENABLE, "DEBUG_TREL_TEST_MODE_ENABLE"},
          {SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_ENABLE, "SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_ENABLE"},
          {SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_PREFIX, "SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_PREFIX"},
@@ -1932,10 +1844,10 @@ index 3f8938dab995d8d405e9179414a33971d5e3b2f4..d0d4a7eb25ca5453fbe086241558baff
      };
  
 diff --git a/src/lib/spinel/spinel.h b/src/lib/spinel/spinel.h
-index 31e5c80ad2e5bc180e57f1df68025c5737f48a88..b37b574ae56f135748d3ccccc815316d0ff844d5 100644
+index 00867d07b4265de03571e02a5d13c8dbbd97bce9..cca3ebb5b673c1c9fc8be1db60a8c15177536496 100644
 --- a/src/lib/spinel/spinel.h
 +++ b/src/lib/spinel/spinel.h
-@@ -5018,7 +5018,64 @@ enum
+@@ -5061,7 +5061,64 @@ enum
       */
      SPINEL_PROP_DNSSD_IP4_ADDRESS_RESULT = SPINEL_PROP_DNSSD__BEGIN + 15,
  
@@ -2001,7 +1913,7 @@ index 31e5c80ad2e5bc180e57f1df68025c5737f48a88..b37b574ae56f135748d3ccccc815316d
  
      SPINEL_PROP_BORDER_AGENT__BEGIN = 0x950,
  
-@@ -5131,8 +5188,59 @@ enum
+@@ -5174,8 +5231,59 @@ enum
       */
      SPINEL_PROP_BORDER_ROUTER_DHCP6_PD_PREFIX = SPINEL_PROP_BORDER_ROUTER__BEGIN + 2,
  
@@ -2219,13 +2131,13 @@ index d88fbe293b5eed1a7fd6eed5033cfe84e7cb2b42..ccbbde2501d17a6d69f57a28fe649f2a
  
  set(OT_NCP_VENDOR_HOOK_SOURCE "" CACHE STRING "set vendor hook source file for NCP")
 diff --git a/src/ncp/changed_props_set.cpp b/src/ncp/changed_props_set.cpp
-index 3133683ff7d74c56d178a7dc574ee9804cc44c41..0f70e320a173288253c262c5a1bca8d221ad27e0 100644
+index 94fa15d5751ca0e8b51ae3a8c78eb950be9273fc..e34e68b5ba316201ca82b76a05b0383d54ce5883 100644
 --- a/src/ncp/changed_props_set.cpp
 +++ b/src/ncp/changed_props_set.cpp
-@@ -103,6 +103,13 @@ const ChangedPropsSet::Entry ChangedPropsSet::mSupportedProps[] = {
+@@ -106,6 +106,13 @@ const ChangedPropsSet::Entry ChangedPropsSet::mSupportedProps[] = {
+ #if OPENTHREAD_RADIO || OPENTHREAD_CONFIG_LINK_RAW_ENABLE
+     {SPINEL_PROP_RCP_RADIO_AVAILABILITY, SPINEL_STATUS_OK, true},
  #endif
- #endif
-     {SPINEL_PROP_BACKBONE_ROUTER_STATE, SPINEL_STATUS_OK, false},
 +#if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
 +    {SPINEL_PROP_TREL_STATE, SPINEL_STATUS_OK, false},
 +#endif
@@ -2237,10 +2149,10 @@ index 3133683ff7d74c56d178a7dc574ee9804cc44c41..0f70e320a173288253c262c5a1bca8d2
  
  uint8_t ChangedPropsSet::GetNumEntries(void) const
 diff --git a/src/ncp/ncp_base.cpp b/src/ncp/ncp_base.cpp
-index 1fbdec903ddbf584b238670a2fd394430b75174f..a28fed60b959184fb1e26bff081f6f35cce2183a 100644
+index 923edb6475f1e7f0babf0e6d86923da7b802bff0..9571b4f9e7187c2538a6afc5b03f651b694dcd76 100644
 --- a/src/ncp/ncp_base.cpp
 +++ b/src/ncp/ncp_base.cpp
-@@ -280,6 +280,10 @@ NcpBase::NcpBase(Instance *aInstance)
+@@ -285,6 +285,10 @@ NcpBase::NcpBase(Instance *aInstance)
      , mDiscoveryScanEnableFiltering(false)
      , mDiscoveryScanPanId(0xffff)
      , mUpdateChangedPropsTask(*aInstance, NcpBase::UpdateChangedProps)
@@ -2251,7 +2163,7 @@ index 1fbdec903ddbf584b238670a2fd394430b75174f..a28fed60b959184fb1e26bff081f6f35
      , mThreadChangedFlags(0)
      , mHostPowerState(SPINEL_HOST_POWER_STATE_ONLINE)
      , mHostPowerReplyFrameTag(Spinel::Buffer::kInvalidTag)
-@@ -328,6 +332,12 @@ NcpBase::NcpBase(Instance *aInstance)
+@@ -333,6 +337,12 @@ NcpBase::NcpBase(Instance *aInstance)
  #if OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
      , mDnssdState(OT_PLAT_DNSSD_STOPPED)
  #endif
@@ -2264,7 +2176,7 @@ index 1fbdec903ddbf584b238670a2fd394430b75174f..a28fed60b959184fb1e26bff081f6f35
  #endif
  #if OPENTHREAD_CONFIG_DIAG_ENABLE
      , mDiagOutput(nullptr)
-@@ -382,6 +392,9 @@ NcpBase::NcpBase(Instance *aInstance)
+@@ -388,6 +398,9 @@ NcpBase::NcpBase(Instance *aInstance)
  #if OPENTHREAD_CONFIG_SRP_CLIENT_ENABLE
      otSrpClientSetCallback(mInstance, HandleSrpClientCallback, this);
  #endif
@@ -2275,7 +2187,7 @@ index 1fbdec903ddbf584b238670a2fd394430b75174f..a28fed60b959184fb1e26bff081f6f35
  #if OPENTHREAD_CONFIG_DIAG_ENABLE
      otDiagSetOutputCallback(mInstance, &NcpBase::HandleDiagOutput_Jump, this);
 diff --git a/src/ncp/ncp_base.hpp b/src/ncp/ncp_base.hpp
-index 0c8677930e7dc1fc39fa3ff9e59111167d70c95c..7ecd4c866e9f88ce0da1f40a617839ffa32be337 100644
+index 50ac3f2bfd2e5a531189619e2aed3716c1493c31..82522bfb4c4ee8cf4a92912a721b85677b7100c7 100644
 --- a/src/ncp/ncp_base.hpp
 +++ b/src/ncp/ncp_base.hpp
 @@ -117,6 +117,14 @@ public:
@@ -2293,7 +2205,7 @@ index 0c8677930e7dc1fc39fa3ff9e59111167d70c95c..7ecd4c866e9f88ce0da1f40a617839ff
      /**
       * Returns an IID for the given instance
       *
-@@ -388,6 +396,44 @@ public:
+@@ -395,6 +403,44 @@ public:
      otPlatDnssdState DnssdGetState(void);
  #endif // OPENTHREAD_FTD && OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
  
@@ -2338,7 +2250,7 @@ index 0c8677930e7dc1fc39fa3ff9e59111167d70c95c..7ecd4c866e9f88ce0da1f40a617839ff
  protected:
      static constexpr uint8_t kBitsPerByte = 8; ///< Number of bits in a byte.
  
-@@ -629,6 +675,11 @@ protected:
+@@ -637,6 +683,11 @@ protected:
      void HandleUdpForwardStream(otMessage *aMessage, uint16_t aPeerPort, otIp6Address &aPeerAddr, uint16_t aPort);
  
  #endif // OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
@@ -2350,7 +2262,7 @@ index 0c8677930e7dc1fc39fa3ff9e59111167d70c95c..7ecd4c866e9f88ce0da1f40a617839ff
  #endif // OPENTHREAD_MTD || OPENTHREAD_FTD
  
  #if OPENTHREAD_CONFIG_MLE_LINK_METRICS_INITIATOR_ENABLE || OPENTHREAD_CONFIG_MLE_LINK_METRICS_SUBJECT_ENABLE
-@@ -824,7 +875,11 @@ protected:
+@@ -832,7 +883,11 @@ protected:
      bool            mDiscoveryScanEnableFiltering;
      uint16_t        mDiscoveryScanPanId;
  
@@ -2363,7 +2275,7 @@ index 0c8677930e7dc1fc39fa3ff9e59111167d70c95c..7ecd4c866e9f88ce0da1f40a617839ff
      uint32_t        mThreadChangedFlags;
      ChangedPropsSet mChangedPropsSet;
  
-@@ -1028,6 +1083,22 @@ protected:
+@@ -1036,6 +1091,22 @@ protected:
      otPlatDnssdState mDnssdState;
  #endif // OPENTHREAD_CONFIG_NCP_DNSSD_ENABLE && OPENTHREAD_CONFIG_PLATFORM_DNSSD_ENABLE
  
@@ -2387,10 +2299,10 @@ index 0c8677930e7dc1fc39fa3ff9e59111167d70c95c..7ecd4c866e9f88ce0da1f40a617839ff
      static void HandleBackboneRouterMulticastListenerEvent(void                                  *aContext,
                                                             otBackboneRouterMulticastListenerEvent aEvent,
 diff --git a/src/ncp/ncp_base_dispatcher.cpp b/src/ncp/ncp_base_dispatcher.cpp
-index 0b041d093a5b7dc99527cd03620f2a67a14a9f9b..ca09891f9eba439666522ecaf62da6dda6f3b94f 100644
+index 269764053a02c263c19c948846e6420e182bcf29..ab8df7a4555053f962dcb66a07d5b881529bc7ce 100644
 --- a/src/ncp/ncp_base_dispatcher.cpp
 +++ b/src/ncp/ncp_base_dispatcher.cpp
-@@ -224,6 +224,10 @@ NcpBase::PropertyHandler NcpBase::FindGetPropertyHandler(spinel_prop_key_t aKey)
+@@ -227,6 +227,10 @@ NcpBase::PropertyHandler NcpBase::FindGetPropertyHandler(spinel_prop_key_t aKey)
  #if OPENTHREAD_CONFIG_BORDER_ROUTING_ENABLE
          OT_NCP_GET_HANDLER_ENTRY(SPINEL_PROP_SRP_SERVER_AUTO_ENABLE_MODE),
  #endif
@@ -2401,7 +2313,7 @@ index 0b041d093a5b7dc99527cd03620f2a67a14a9f9b..ca09891f9eba439666522ecaf62da6dd
  #if OPENTHREAD_FTD && OPENTHREAD_CONFIG_BORDER_AGENT_ENABLE
          OT_NCP_GET_HANDLER_ENTRY(SPINEL_PROP_BORDER_AGENT_MESHCOP_SERVICE_STATE),
  #if OPENTHREAD_CONFIG_BORDER_AGENT_EPHEMERAL_KEY_ENABLE
-@@ -233,6 +237,11 @@ NcpBase::PropertyHandler NcpBase::FindGetPropertyHandler(spinel_prop_key_t aKey)
+@@ -236,6 +240,11 @@ NcpBase::PropertyHandler NcpBase::FindGetPropertyHandler(spinel_prop_key_t aKey)
  #if OPENTHREAD_FTD && OPENTHREAD_CONFIG_BACKBONE_ROUTER_ENABLE
          OT_NCP_GET_HANDLER_ENTRY(SPINEL_PROP_BACKBONE_ROUTER_STATE),
  #endif
@@ -2434,7 +2346,7 @@ index 0b041d093a5b7dc99527cd03620f2a67a14a9f9b..ca09891f9eba439666522ecaf62da6dd
 +        OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_BORDER_ROUTER_NAT64_ENABLE),
 +#endif
  #endif // OPENTHREAD_FTD
-+#if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE
++#if OPENTHREAD_CONFIG_RADIO_LINK_TREL_ENABLE && (OPENTHREAD_FTD || OPENTHREAD_MTD)
 +        OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_TREL_STATE),
 +        OT_NCP_SET_HANDLER_ENTRY(SPINEL_PROP_TREL_USER_ENABLE),
 +#endif
@@ -2894,7 +2806,7 @@ index 12279a4f8f665244f96f58a404acf86f091e7c4f..4ed5699c68aee3ccaee11e81b5990292
  
  template <> otError NcpBase::HandlePropertyGet<SPINEL_PROP_BORDER_AGENT_MESHCOP_SERVICE_STATE>(void)
 diff --git a/src/ncp/ncp_base_mtd.cpp b/src/ncp/ncp_base_mtd.cpp
-index 3d1fd143d2855f70d8906a463a28bac5ef5e9795..01456f26cfce3894e8f6adaf53976690acbee451 100644
+index 593d6ec2942982b42ed285037a6f17c457adc17c..fe10a726c2f508b55d52a91d894c40a0ca1cc5dd 100644
 --- a/src/ncp/ncp_base_mtd.cpp
 +++ b/src/ncp/ncp_base_mtd.cpp
 @@ -53,6 +53,14 @@
@@ -3702,61 +3614,60 @@ index aad13a748820d3406187b14325a04d9414163bd3..e8ba141c7cbedeecc9a1519cabc59e38
  
  namespace ot {
 diff --git a/tests/unit/test_mac_frame.cpp b/tests/unit/test_mac_frame.cpp
-index af5e208e3faedc43ebb6330d9fdfc1b942e447f1..42d3836041df2954d2377acf91f94150b6b91d08 100644
+index 42d3836041df2954d2377acf91f94150b6b91d08..ced73a469f1f70779565fa1a4b7977cd3ad22644 100644
 --- a/tests/unit/test_mac_frame.cpp
 +++ b/tests/unit/test_mac_frame.cpp
-@@ -909,6 +909,51 @@ void TestMacFrameAckGeneration(void)
-     VerifyOrQuit(csl != nullptr);
-     VerifyOrQuit(csl->GetPeriod() == 123 && csl->GetPhase() == 456);
- #endif
-+
-+#if OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK
-+    // Received Frame 3
-+    // Same header layout as Received Frame 2 but with Information Elements
-+    // Present set to True in the FCF (byte 1: 0xa8 -> 0xaa) and the bytes
-+    // past the Auxiliary Security Header filled with garbage, simulating a
-+    // mid-RX Enh-ACK build where the Header IEs and encrypted payload are
-+    // not yet in RAM. `mLength` still reflects the full PSDU length.
-+    uint8_t data_psdu3[] = {0x69, 0xaa, 0x8e, 0xce, 0xfa, 0x02, 0x24, 0x00, 0x24, 0x0d, 0x02,
-+                            0x00, 0x00, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-+                            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-+
-+    receivedFrame.mPsdu   = data_psdu3;
-+    receivedFrame.mLength = sizeof(data_psdu3);
-+
-+    // `kParseFully` would fail on the garbage Header IE bytes; `GenerateEnhAck()`
-+    // uses `kParseSecurityHeader` under this config and must still succeed.
-+    VerifyOrQuit(ackInfo.ParseFrom(receivedFrame, Mac::Frame::kParseFully) != kErrorNone);
-+    SuccessOrQuit(ackFrame.GenerateEnhAck(receivedFrame, false, ie_data, sizeof(ie_data)));
-+
-+    SuccessOrQuit(ackInfo.ParseFrom(ackFrame, Mac::Frame::kParseFully));
-+    VerifyOrQuit(ackInfo.mType == Mac::Frame::kTypeAck);
-+    VerifyOrQuit(ackInfo.mIsSecurityEnabled);
-+    VerifyOrQuit(ackInfo.mIsIePresent);
-+    VerifyOrQuit(ackInfo.mPanIds.IsDestinationPresent());
-+    VerifyOrQuit(ackInfo.mPanIds.GetDestination() == 0xface);
-+    VerifyOrQuit(ackInfo.mVersion == Mac::Frame::kVersion2015);
-+    VerifyOrQuit(ackInfo.mSequenceNum == 142);
-+
-+    // Clear the Security Enabled bit in the FCF to verify Enh-ACK
-+    // generation on a received frame without security.
-+    data_psdu3[0] &= ~0x08;
-+
-+    VerifyOrQuit(ackInfo.ParseFrom(receivedFrame, Mac::Frame::kParseFully) != kErrorNone);
-+    SuccessOrQuit(ackFrame.GenerateEnhAck(receivedFrame, false, ie_data, sizeof(ie_data)));
-+
-+    SuccessOrQuit(ackInfo.ParseFrom(ackFrame, Mac::Frame::kParseFully));
-+    VerifyOrQuit(ackInfo.mType == Mac::Frame::kTypeAck);
-+    VerifyOrQuit(!ackInfo.mIsSecurityEnabled);
-+    VerifyOrQuit(ackInfo.mIsIePresent);
-+    VerifyOrQuit(ackInfo.mPanIds.IsDestinationPresent());
-+    VerifyOrQuit(ackInfo.mPanIds.GetDestination() == 0xface);
-+    VerifyOrQuit(ackInfo.mVersion == Mac::Frame::kVersion2015);
-+    VerifyOrQuit(ackInfo.mSequenceNum == 142);
-+#endif // OPENTHREAD_CONFIG_MAC_ALLOW_INCOMPLETE_RX_FRAME_WHEN_GEN_ENH_ACK
- #endif // (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
- }
+@@ -657,6 +657,8 @@ void TestMacFrameApi(void)
+     Mac::Frame            frame;
+     Mac::Frame::ParseInfo parseInfo;
  
++    frame.mRadioType = 0;
++
+ #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+     uint8_t data_psdu1[] = {0x29, 0xee, 0x53, 0xce, 0xfa, 0x01, 0x00, 0x00, 0x00, 0x00, 0x0a,
+                             0x6e, 0x16, 0x05, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x6e, 0x16, 0x0d,
+@@ -806,8 +808,10 @@ void TestMacFrameAckGeneration(void)
+     const Mac::CslIe *csl;
+ #endif
+ 
+-    ackFrame.mPsdu   = ackFrameBuffer;
+-    ackFrame.mLength = sizeof(ackFrameBuffer);
++    ackFrame.mPsdu           = ackFrameBuffer;
++    ackFrame.mLength         = sizeof(ackFrameBuffer);
++    ackFrame.mRadioType      = 0;
++    receivedFrame.mRadioType = 0;
+ 
+     // Received Frame 1
+     // IEEE 802.15.4 Data
+@@ -964,8 +968,9 @@ void TestMacFrameValidation(void)
+     Mac::Frame            frame;
+     Mac::Frame::ParseInfo frameInfo;
+ 
+-    frame.mPsdu   = psdu;
+-    frame.mLength = sizeof(psdu);
++    frame.mPsdu      = psdu;
++    frame.mLength    = sizeof(psdu);
++    frame.mRadioType = 0;
+ 
+     // Verify valid 2003 Data frame passes validation
+     SuccessOrQuit(frameInfo.ParseFrom(frame, Mac::Frame::kParseFully));
+diff --git a/tests/unit/test_tcat.cpp b/tests/unit/test_tcat.cpp
+index 69f1abc804792fd865ba826b38b1633bce0e3a06..44131a74312f25c80371f0200fe779b115bc8344 100644
+--- a/tests/unit/test_tcat.cpp
++++ b/tests/unit/test_tcat.cpp
+@@ -396,10 +396,10 @@ static void HandleNotifierStateChanged(otChangedFlags aFlags, void *aContext)
+ 
+ static Instance *TestInitInstanceTcat(void)
+ {
+-    Instance *instance = testInitInstance();
+-
+     sAlarmOn = false; // discard any pending alarm of a previous test's instance
+ 
++    Instance *instance = testInitInstance();
++
+     otBleSecureSetCertificate(instance, reinterpret_cast<const uint8_t *>(OT_TCAT_X509_CERT), sizeof(OT_TCAT_X509_CERT),
+                               reinterpret_cast<const uint8_t *>(OT_TCAT_PRIV_KEY), sizeof(OT_TCAT_PRIV_KEY));
+     otBleSecureSetCaCertificateChain(instance, reinterpret_cast<const uint8_t *>(OT_TCAT_TRUSTED_ROOT_CERTIFICATE),
 diff --git a/third_party/mbedtls/BUILD.gn b/third_party/mbedtls/BUILD.gn
 index 35828980e565084f44866f5d4407f4b0bbb6ec95..c968548df211e18d5b1d7b5971333dde9b680822 100644
 --- a/third_party/mbedtls/BUILD.gn
@@ -4542,10 +4453,10 @@ index 54bdfad729940faf498360979caecff83208ef3c..9bfb41f959be4b89f53e2c836c3d3f96
  #endif /* MBEDTLS_CONFIG_H */
 diff --git a/third_party/mbedtls/psa-crypto-config.h b/third_party/mbedtls/psa-crypto-config.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..fbd082016fbc48d8feca3f17c77b9e2b2c9118ba
+index 0000000000000000000000000000000000000000..5a300d340fd90df4eed61b9f475e9c564fbc1cf2
 --- /dev/null
 +++ b/third_party/mbedtls/psa-crypto-config.h
-@@ -0,0 +1,145 @@
+@@ -0,0 +1,147 @@
 +/*
 + *  Copyright (c) 2018, The OpenThread Authors.
 + *  All rights reserved.
@@ -4686,7 +4597,9 @@ index 0000000000000000000000000000000000000000..fbd082016fbc48d8feca3f17c77b9e2b
 +#define MBEDTLS_PK_WRITE_C
 +#endif
 +
-+#if defined(MBEDTLS_USER_CONFIG_FILE)
++// Spans multiple lines to avoid being processed by unifdef
++#if defined(\
++    MBEDTLS_USER_CONFIG_FILE)
 +#include MBEDTLS_USER_CONFIG_FILE
 +#endif
 +

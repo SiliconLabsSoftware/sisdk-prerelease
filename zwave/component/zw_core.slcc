@@ -83,7 +83,7 @@ requires:
 - name: zw_toolchain_settings
 - name: zw_stack_libraries
 - name: zw_build_mode
-- name: zw_log
+- name: zw_log_tool
 - name: zw_board_attributes
   # Platform
 - name: power_manager
@@ -154,6 +154,7 @@ include:
 - path: "platform/SiliconLabs/PAL/inc"
   file_list:
   - path: "zpal_uart_config_ext.h"
+  - path: "zpal_log_platform.h"
 - path: "platform/SiliconLabs/PAL/inc/application_properties"
   file_list:
   - path: "application_properties_config.h"

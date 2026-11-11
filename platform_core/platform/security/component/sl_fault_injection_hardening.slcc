@@ -19,7 +19,9 @@ requires:
 - name: cryptoacc_library
   condition: [device_has_cryptoacc, trustzone_secure]
 - name: psa_driver
-  condition: [device_has_cryptoacc]
+  condition: [device_has_cryptoacc, trustzone_unaware]
+- name: psa_driver
+  condition: [device_has_cryptoacc, trustzone_secure]
 - name: mbedtls_config
   condition: [device_has_cryptoacc]
 

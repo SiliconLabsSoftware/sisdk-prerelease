@@ -51,6 +51,7 @@
 #include "sl_core.h"
 #include "sl_rail.h"
 #include "sl_sleeptimer.h"
+#include "sli_ot_instance.h"
 
 #ifndef TESTING
 #define STATIC static
@@ -472,14 +473,29 @@ exit:
 
 bool efr32AlarmIsRunning(otInstance *aInstance)
 {
-    return (otInstanceIsInitialized(aInstance) ? GetAlarmHandle(sMsAlarmHandles, aInstance)->mIsRunning : false);
+    return (sli_ot_instance_is_initialized(aInstance) ? GetAlarmHandle(sMsAlarmHandles, aInstance)->mIsRunning : false);
 }
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 // Callback to determine if the system can sleep after an interrupt has fired
 bool efr32AlarmIsReady(void)
 {
-    return HasAnyAlarmFired();
+    if (HasAnyAlarmFired())
+    {
+        return true;
+    }
+
+    for (uint8_t i = 0; i < RADIO_INTERFACE_COUNT; i++)
+    {
+        if (sUsAlarmHandles[i].mIsRunning
+            && sl_rail_is_multi_timer_expired(SL_RAIL_EFR32_HANDLE,
+                                              (sl_rail_multi_timer_t *)sUsAlarmHandles[i].mTimerHandle))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 #endif // SL_CATALOG_POWER_MANAGER_PRESENT
 

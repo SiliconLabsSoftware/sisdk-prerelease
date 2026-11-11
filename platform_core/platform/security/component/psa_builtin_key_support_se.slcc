@@ -10,6 +10,9 @@ quality: production
 requires:
 - name: psa_crypto
 - name: psa_driver
+  condition: [trustzone_unaware]
+- name: psa_driver
+  condition: [trustzone_secure]
 - name: device_has_semailbox
 provides:
 - name: psa_builtin_key_support_se

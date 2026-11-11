@@ -358,6 +358,18 @@
 #endif
 
 /**
+ * @def OPENTHREAD_CONFIG_MLE_LINK_METRICS_MAX_SERIES_SUPPORTED
+ *
+ * The max number of series that a Link Metrics Subject can track simultaneously.
+ *
+ */
+#if OPENTHREAD_MTD
+#ifndef OPENTHREAD_CONFIG_MLE_LINK_METRICS_MAX_SERIES_SUPPORTED
+#define OPENTHREAD_CONFIG_MLE_LINK_METRICS_MAX_SERIES_SUPPORTED OPENTHREAD_CONFIG_MLE_LINK_METRICS_SERIES_MTD
+#endif
+#endif
+
+/**
  * @def OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD
  *
  * The minimum time (in microseconds) before the MHR start that the radio should be in receive state and ready to

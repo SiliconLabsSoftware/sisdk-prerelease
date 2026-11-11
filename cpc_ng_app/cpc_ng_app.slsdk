@@ -1,0 +1,3 @@
+id=com.silabs.sdk.cpc_ng_app
+version=0.1.0
+prop.file.templatesFile=templates.xml

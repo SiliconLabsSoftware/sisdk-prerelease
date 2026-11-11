@@ -874,6 +874,51 @@ uint16_t sl_hal_system_get_dmem_instance_size(uint32_t num)
 }
 
 /***************************************************************************//**
+ * Get the MSPU size for DMEM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_dmem_mspu_size(void)
+{
+#if defined(_SMU_MSPUDMEMREGIONSIZE_MSPURSIZE_MASK)
+#if defined(SL_TRUSTZONE_SECURE)
+  uint16_t mspu_size = (SMU->MSPUDMEMREGIONSIZE & _SMU_MSPUDMEMREGIONSIZE_MSPURSIZE_MASK) >> _SMU_MSPUDMEMREGIONSIZE_MSPURSIZE_SHIFT;
+#else
+  uint16_t mspu_size = _SMU_MSPUDMEMREGIONSIZE_MSPURSIZE_DEFAULT;
+#endif
+#if defined(_SMU_MSPUDMEMREGIONSIZE_MSPURSIZE_MSPU_16KB) && (_SMU_MSPUDMEMREGIONSIZE_MSPURSIZE_MSPU_16KB == 0)
+  return (uint16_t)(1U << (4 + mspu_size)); // Convert the bitfield value to the actual size in KB (power of 2)
+#else
+  #error (sl_hal_system.c): MSPU bitfield is not supported.
+#endif
+#elif defined(_SMU_MSPUDMEMCTRL_SECTORSIZE_MASK)
+#if defined(SL_TRUSTZONE_SECURE)
+  uint16_t mspu_size = (SMU->MSPUDMEMCTRL & _SMU_MSPUDMEMCTRL_SECTORSIZE_MASK) >> _SMU_MSPUDMEMCTRL_SECTORSIZE_SHIFT;
+#else
+  uint16_t mspu_size = _SMU_MSPUDMEMCTRL_SECTORSIZE_DEFAULT;
+#endif
+#if defined(_SMU_MSPUDMEMCTRL_SECTORSIZE_MSPU_4KB) && (_SMU_MSPUDMEMCTRL_SECTORSIZE_MSPU_4KB == 0)
+  return (uint16_t)(1U << (2 + mspu_size)); // Convert the bitfield value to the actual size in KB (power of 2)
+#elif defined(_SMU_MSPUDMEMCTRL_SECTORSIZE_MSPU_16KB) && (_SMU_MSPUDMEMCTRL_SECTORSIZE_MSPU_16KB == 0)
+  return (uint16_t)(1U << (4 + mspu_size)); // Convert the bitfield value to the actual size in KB (power of 2)
+#else
+  #error (sl_hal_system.c): MSPU bitfield is not supported.
+#endif
+#elif defined(_IMU_MSPUSECTOR_DMEM_MASK)
+#if defined(SL_TRUSTZONE_SECURE)
+  uint16_t mspu_size = (IMU->MSPUSECTOR & _IMU_MSPUSECTOR_DMEM_MASK) >> _IMU_MSPUSECTOR_DMEM_SHIFT;
+#else
+  uint16_t mspu_size = _IMU_MSPUSECTOR_DMEM_DEFAULT;
+#endif
+#if defined(_IMU_MSPUSECTOR_DMEM_MSPU_4KB) && (_IMU_MSPUSECTOR_DMEM_MSPU_4KB == 0)
+  return (uint16_t)(1U << (2 + mspu_size)); // Convert the bitfield value to the actual size in KB (power of 2)
+#else
+  #error (sl_hal_system.c): MSPU bitfield is not supported.
+#endif
+#else
+  return 0;
+#endif
+}
+
+/***************************************************************************//**
  * Get the ITCM Base Address.
  ******************************************************************************/
 uint32_t sl_hal_system_get_itcm_base_address(void)
@@ -912,6 +957,27 @@ uint16_t sl_hal_system_get_itcm_size(void)
 }
 
 /***************************************************************************//**
+ * Get the MSPU size for ITCM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_itcm_mspu_size(void)
+{
+#if defined(_IMU_MSPUSECTOR_CPUTCM_MASK)
+#if defined(SL_TRUSTZONE_SECURE)
+  uint16_t mspu_size = (IMU->MSPUSECTOR & _IMU_MSPUSECTOR_CPUTCM_MASK) >> _IMU_MSPUSECTOR_CPUTCM_SHIFT;
+#else
+  uint16_t mspu_size = _IMU_MSPUSECTOR_CPUTCM_DEFAULT;
+#endif
+#if defined(_IMU_MSPUSECTOR_CPUTCM_MSPU_4KB) && (_IMU_MSPUSECTOR_CPUTCM_MSPU_4KB == 0)
+  return (uint16_t)(1U << (2 + mspu_size)); // Convert the bitfield value to the actual size in KB (power of 2)
+#else
+  #error (sl_hal_system.c): MSPU bitfield is not supported.
+#endif
+#else
+  return 0;
+#endif
+}
+
+/***************************************************************************//**
  * Get the DTCM Base Address.
  ******************************************************************************/
 uint32_t sl_hal_system_get_dtcm_base_address(void)
@@ -936,6 +1002,19 @@ uint16_t sl_hal_system_get_dtcm_size(void)
 }
 
 /***************************************************************************//**
+ * Get the MSPU size for DTCM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_dtcm_mspu_size(void)
+{
+#if defined(_IMU_MSPUSECTOR_CPUTCM_MASK)
+  // DTCM and ITCM share the same MSPU configuration.
+  return sl_hal_system_get_itcm_mspu_size();
+#else
+  return 0;
+#endif
+}
+
+/***************************************************************************//**
  * Get the PSRAM Base Address.
  ******************************************************************************/
 uint32_t sl_hal_system_get_psram_base_address(void)
@@ -954,6 +1033,38 @@ uint16_t sl_hal_system_get_psram_size(void)
 {
 #if defined(PSRAM_BASE)
   return (uint16_t)(PSRAM_MAX_SIZE / 1024U);
+#else
+  return 0;
+#endif
+}
+
+/***************************************************************************//**
+ * Get the MSPU size for PSRAM (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_psram_mspu_size(void)
+{
+#if defined(_SMU_MSPUOSPI1CTRL_SECTORSIZE_MASK)
+#if defined(SL_TRUSTZONE_SECURE)
+  uint16_t mspu_size = (SMU->MSPUOSPI1CTRL & _SMU_MSPUOSPI1CTRL_SECTORSIZE_MASK) >> _SMU_MSPUOSPI1CTRL_SECTORSIZE_SHIFT;
+#else
+  uint16_t mspu_size = _SMU_MSPUOSPI1CTRL_SECTORSIZE_DEFAULT;
+#endif
+#if defined(_SMU_MSPUOSPI1CTRL_SECTORSIZE_MSPU_16KB) && (_SMU_MSPUOSPI1CTRL_SECTORSIZE_MSPU_16KB == 0)
+  return (uint16_t)(1U << (4 + mspu_size)); // Convert the bitfield value to the actual size in KB (power of 2)
+#else
+  #error (sl_hal_system.c): MSPU bitfield is not supported.
+#endif
+#elif defined(_IMU_MSPUSECTOR_OSPI1_MASK)
+#if defined(SL_TRUSTZONE_SECURE)
+  uint16_t mspu_size = (IMU->MSPUSECTOR & _IMU_MSPUSECTOR_OSPI1_MASK) >> _IMU_MSPUSECTOR_OSPI1_SHIFT;
+#else
+  uint16_t mspu_size = _IMU_MSPUSECTOR_OSPI1_DEFAULT;
+#endif
+#if defined(_IMU_MSPUSECTOR_OSPI1_MSPU_4KB) && (_IMU_MSPUSECTOR_OSPI1_MSPU_4KB == 0)
+  return (uint16_t)(1U << (2 + mspu_size)); // Convert the bitfield value to the actual size in KB (power of 2)
+#else
+  #error (sl_hal_system.c): MSPU bitfield is not supported.
+#endif
 #else
   return 0;
 #endif
@@ -996,6 +1107,56 @@ uint32_t sl_hal_system_get_flash_page_size(void)
   // Defined in linker script for external flash provided by customers.
   extern uint32_t __flash_page_size__;
   return (uintptr_t)&__flash_page_size__;
+#endif
+}
+
+/***************************************************************************//**
+ * Get the MSPU size for FLASH (in KB).
+ ******************************************************************************/
+uint16_t sl_hal_system_get_flash_mspu_size(void)
+{
+#if defined(SL_TZ_NON_SECURE_EXECUTION)
+  // Get the MSPU size from the linker script.
+  extern uint32_t __mspu_region_size__;
+  uint32_t mspu_size = (uint32_t)&__mspu_region_size__;
+  return (uint16_t)(mspu_size / 1024U);
+#elif defined(_SMU_MSPUNVMREGIONSIZE_MSPURSIZE_MASK)
+#if defined(SL_TRUSTZONE_SECURE)
+  uint16_t mspu_size = (SMU->MSPUNVMREGIONSIZE & _SMU_MSPUNVMREGIONSIZE_MSPURSIZE_MASK) >> _SMU_MSPUNVMREGIONSIZE_MSPURSIZE_SHIFT;
+#else
+  uint16_t mspu_size = _SMU_MSPUNVMREGIONSIZE_MSPURSIZE_DEFAULT;
+#endif
+#if defined(_SMU_MSPUNVMREGIONSIZE_MSPURSIZE_MSPU_16KB) && (_SMU_MSPUNVMREGIONSIZE_MSPURSIZE_MSPU_16KB == 0)
+  return (uint16_t)(1U << (4 + mspu_size)); // Convert the bitfield value to the actual size in KB (power of 2)
+#else
+  #error (sl_hal_system.c): MSPU bitfield is not supported.
+#endif
+#elif defined(_SMU_MSPUOSPI0CTRL_SECTORSIZE_MASK)
+#if defined(SL_TRUSTZONE_SECURE)
+  uint16_t mspu_size = (SMU->MSPUOSPI0CTRL & _SMU_MSPUOSPI0CTRL_SECTORSIZE_MASK) >> _SMU_MSPUOSPI0CTRL_SECTORSIZE_SHIFT;
+#else
+  uint16_t mspu_size = _SMU_MSPUOSPI0CTRL_SECTORSIZE_DEFAULT;
+#endif
+#if defined(_SMU_MSPUOSPI0CTRL_SECTORSIZE_MSPU_4KB) && (_SMU_MSPUOSPI0CTRL_SECTORSIZE_MSPU_4KB == 0)
+  return (uint16_t)(1U << (2 + mspu_size)); // Convert the bitfield value to the actual size in KB (power of 2)
+#elif defined(_SMU_MSPUOSPI0CTRL_SECTORSIZE_MSPU_16KB) && (_SMU_MSPUOSPI0CTRL_SECTORSIZE_MSPU_16KB == 0)
+  return (uint16_t)(1U << (4 + mspu_size)); // Convert the bitfield value to the actual size in KB (power of 2)
+#else
+  #error (sl_hal_system.c): MSPU bitfield is not supported.
+#endif
+#elif defined(_IMU_MSPUSECTOR_OSPI0_MASK)
+#if defined(SL_TRUSTZONE_SECURE)
+  uint16_t mspu_size = (IMU->MSPUSECTOR & _IMU_MSPUSECTOR_OSPI0_MASK) >> _IMU_MSPUSECTOR_OSPI0_SHIFT;
+#else
+  uint16_t mspu_size = _IMU_MSPUSECTOR_OSPI0_DEFAULT;
+#endif
+#if defined(_IMU_MSPUSECTOR_OSPI0_MSPU_4KB) && (_IMU_MSPUSECTOR_OSPI0_MSPU_4KB == 0)
+  return (uint16_t)(1U << (2 + mspu_size)); // Convert the bitfield value to the actual size in KB (power of 2)
+#else
+  #error (sl_hal_system.c): MSPU bitfield is not supported.
+#endif
+#else
+  return 0;
 #endif
 }
 

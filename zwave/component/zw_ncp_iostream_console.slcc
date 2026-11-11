@@ -1,0 +1,28 @@
+id: zw_ncp_iostream_console
+label: Z-Wave NCP IO Stream Console (SWO)
+category: Z-Wave|NCP
+description: >
+  Z-Wave component for NCP applications and logging dependencies for iostream_recommended_console.
+  NCP applications should output log messages to SWO.
+  This component resolves that dependency and does not instantiate iostream_eusart:vcom.
+  This is a dependency of the zw_log component.
+  Be aware that adding or modifying this component may break the logging functionality for NCP apps.
+documentation:
+  docset: z-wave
+  document: zwave-api/logging
+package: zwave
+quality: production
+metadata:
+  sbom:
+    reference: zw_sbom_license
+provides:
+- name: zw_ncp_iostream_console
+- name: iostream_console_support
+  allow_multiple: true
+requires:
+- name: iostream_swo
+- name: zaf_ncp
+template_contribution:
+- name: component_catalog
+  value: zw_ncp_iostream_console
+root_path: zwave

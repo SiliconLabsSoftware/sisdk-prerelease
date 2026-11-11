@@ -394,8 +394,8 @@ sl_status_t sl_pwm_led_init(void *led_handler)
   *(route_register + led->channel) = (led->port << _GPIO_TIMER_CC0ROUTE_PORT_SHIFT)
                                      | (led->pin << _GPIO_TIMER_CC0ROUTE_PIN_SHIFT);
 #elif defined(_GPIO_TIMER0_ROUTEEN_MASK)
+  volatile uint32_t * route_register = NULL;
   switch (TIMER_NUM(led->timer)) {
-    volatile uint32_t * route_register;
     case 0:
       route_register = &GPIO->TIMER0ROUTE[0].CC0ROUTE;
       *(route_register + led->channel) = (led->port << _GPIO_TIMER0_CC0ROUTE_PORT_SHIFT)

@@ -19,6 +19,9 @@
 #include "app/framework/include/af.h"
 #include "interpan.h"
 #include "app/framework/util/af-main.h"
+#ifdef SL_CATALOG_RAIL_MUX_AUX_PRESENT
+#include "sl_zigbee_mac_mux_aux.h"
+#endif
 
 static const sl_zigbee_mac_filter_match_data_t filters[] = {
   SL_ZIGBEE_AF_PLUGIN_INTERPAN_FILTER_LIST
@@ -35,17 +38,34 @@ void sli_zigbee_af_interpan_mac_filter_match_message_callback(sl_zigbee_mac_filt
 {
   (void)filterValueMatch;
   (void)legacyPassthroughType;
+#ifdef SL_CATALOG_RAIL_MUX_AUX_PRESENT
+  if ((sl_zigbee_mac_mux_aux_is_interpan_enabled() && (packetInfo->channel == sl_zigbee_mac_mux_aux_get_channel()))
+      || (!sl_zigbee_mac_mux_aux_is_interpan_enabled() && (packetInfo->channel == sl_zigbee_get_radio_channel()))) {
+    sli_zigbee_af_interpan_process_message(legacyPassthroughType,
+                                           messageLength,
+                                           messageContents);
+  }
+#else // !SL_CATALOG_RAIL_MUX_AUX_PRESENT
   (void)packetInfo;
   sli_zigbee_af_interpan_process_message(legacyPassthroughType,
                                          messageLength,
                                          messageContents);
+#endif // SL_CATALOG_RAIL_MUX_AUX_PRESENT
 }
 
 sl_status_t sli_zigbee_af_interpan_send_raw_message(uint8_t length, uint8_t* message)
 {
   sl_status_t status;
 
+#ifdef SL_CATALOG_RAIL_MUX_AUX_PRESENT
+  if (sl_zigbee_mac_mux_aux_is_interpan_enabled()) {
+    status = sl_zigbee_mac_mux_aux_send_raw_message(message, length, SL_802154_TRANSMIT_PRIORITY_NORMAL, true);
+  } else {
+    status = sl_zigbee_send_raw_message(message, length, SL_802154_TRANSMIT_PRIORITY_NORMAL, true);
+  }
+#else // !SL_CATALOG_RAIL_MUX_AUX_PRESENT
   status = sl_zigbee_send_raw_message(message, length, SL_802154_TRANSMIT_PRIORITY_NORMAL, true);
+#endif // SL_CATALOG_RAIL_MUX_AUX_PRESENT
   return status;
 }
 

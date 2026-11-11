@@ -984,6 +984,7 @@ public:
      * @retval  OT_ERROR_RESPONSE_TIMEOUT  Failed due to no response received from the transceiver.
      */
     otError ClearCalibratedPowers(void);
+#endif
 
     /**
      * Set the target power for the given channel.
@@ -998,7 +999,6 @@ public:
      * @retval  OT_ERROR_RESPONSE_TIMEOUT  Failed due to no response received from the transceiver.
      */
     otError SetChannelTargetPower(uint8_t aChannel, int16_t aTargetPower);
-#endif
 
 #if OPENTHREAD_SPINEL_CONFIG_RCP_RESTORATION_MAX_COUNT > 0
     /**
@@ -1139,6 +1139,11 @@ private:
                                        spinel_prop_key_t aKey,
                                        const char       *aFormat,
                                        va_list           aArgs);
+    otError RequestWithExpectedCommand(uint32_t          aExpectedCommand,
+                                       uint32_t          aCommand,
+                                       spinel_prop_key_t aKey,
+                                       const char       *aFormat,
+                                       ...);
     otError RequestWithExpectedCommandV(uint32_t          aExpectedCommand,
                                         uint32_t          aCommand,
                                         spinel_prop_key_t aKey,
@@ -1159,7 +1164,7 @@ private:
      */
     bool IsSafeToHandleNow(spinel_prop_key_t aKey) const
     {
-        return !(aKey == SPINEL_PROP_STREAM_RAW || aKey == SPINEL_PROP_MAC_ENERGY_SCAN_RESULT);
+        return aKey != SPINEL_PROP_STREAM_RAW && aKey != SPINEL_PROP_MAC_ENERGY_SCAN_RESULT;
     }
 
     void HandleNotification(const uint8_t *aFrame, uint16_t aLength, bool &aShouldSaveFrame);

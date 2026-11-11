@@ -63,6 +63,10 @@ SL_WEAK void sli_rail_mux_aux_on_register_success(sl_rail_handle_t rail_handle)
   (void)rail_handle;
 }
 
+SL_WEAK void sli_rail_mux_aux_on_unregister_begin(void)
+{
+}
+
 SL_WEAK void sli_rail_mux_aux_on_unregister_success(void)
 {
 }
@@ -270,7 +274,8 @@ HIDDEN void fn_timer_callback(struct sl_rail_multi_timer *tmr,
 
 #define tx_in_progress()                                          \
   fn_operation_in_progress(RAIL_MUX_PROTOCOL_FLAGS_TX_IN_PROGRESS \
-                           | RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK)
+                           | RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK \
+                           | RAIL_MUX_PROTOCOL_FLAGS_TX_SCHEDULED)
 
 // ( no lock is active || lock acquired by current context_index )
 #define check_lock_permissions(context_index)                      \
@@ -319,7 +324,9 @@ static void sli_rail_mux_fcs_resync_table(void)
   RAIL_MUX_EXIT_CRITICAL();
 }
 
-/** After aux unregister: reprogram FCS for slot_base 0 and restart RX on each peer (ZB then OT).
+/** Reprogram FCS from protocol_context channels for current slot_base and restart RX on each
+ * in-window peer (base+0, base+1). Used after aux unregister (base=0) and relies on resync
+ * at aux register / start_rx when base=1.
  * CONFIGURE does not call sl_rail_start_rx(); a single start_rx on ZB only left OT not listening
  * when Thread was already up on the mux (MULTIPROT-2308). */
 static void sli_rail_mux_fcs_refresh_listen(void)
@@ -591,6 +598,23 @@ static sl_rail_status_t sli_rail_mux_init_common(sl_rail_handle_t *p_rail_handle
   }
   RAIL_MUX_EXIT_CRITICAL();
 
+#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
+  /* Aux register bumps slot_base to 1; rebuild FCS from ctx1+ctx2 (drop stale base=0 slot0). */
+  if (SUPPORTED_PROTOCOL_COUNT > 2U
+      && i == (uint8_t)(SUPPORTED_PROTOCOL_COUNT - 1U)
+      && s_sl_rail_mux_base_rail_started
+      && (mux_rail_handle != NULL)) {
+#ifdef MAC_MUX_AUX_PRESENT
+    sli_rail_mux_aux_dbg_step(0xE0, ((uint32_t)i << 8) | sli_rail_mux_rx_cs_slot_base_runtime);
+#endif // MAC_MUX_AUX_PRESENT
+    sli_rail_mux_fcs_resync_table();
+    CONFIGURE_RX_CHANNEL_SWITCHING(mux_rail_handle, channel_switching_cfg);
+#ifdef MAC_MUX_AUX_PRESENT
+    sli_rail_mux_aux_dbg_step(0xE1, 0);
+#endif // MAC_MUX_AUX_PRESENT
+  }
+#endif
+
   // Enable use of RAIL multi-timer.
   sl_rail_config_multi_timer(mux_rail_handle, true);
 
@@ -646,8 +670,71 @@ sl_rail_status_t sli_zigbee_stack_rail_mux_aux_register_protocol(sl_rail_handle_
   return status;
 }
 
+#ifdef MAC_MUX_AUX_PRESENT
+void sli_rail_mux_dbg_fcs(void)
+{
+#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
+  uint8_t aux = (uint8_t)(SUPPORTED_PROTOCOL_COUNT - 1U);
+  sli_rail_mux_aux_dbg_step(0xC9,
+                            ((uint32_t)sli_rail_mux_rx_cs_slot_base_runtime << 24)
+                            | ((uint32_t)(channel_switching_cfg.channels[0] & 0xFFU) << 16)
+                            | ((uint32_t)(channel_switching_cfg.channels[1] & 0xFFU) << 8)
+                            | (uint32_t)(protocol_context[aux].channel & 0xFFU));
+#endif
+}
+
+bool sli_rail_mux_aux_tx_is_active(void)
+{
+  if (SUPPORTED_PROTOCOL_COUNT < 2U) {
+    return false;
+  }
+  uint8_t aux = (uint8_t)(SUPPORTED_PROTOCOL_COUNT - 1U);
+  return (fn_get_context_flag_by_index(aux, RAIL_MUX_PROTOCOL_FLAGS_START_TX_PENDING)
+          || fn_get_context_flag_by_index(aux, RAIL_MUX_PROTOCOL_FLAGS_SCHEDULED_TX_PENDING)
+          || fn_get_context_flag_by_index(aux, RAIL_MUX_PROTOCOL_FLAGS_TX_IN_PROGRESS)
+          || fn_get_context_flag_by_index(aux, RAIL_MUX_PROTOCOL_FLAGS_TX_SCHEDULED)
+          || fn_get_context_flag_by_index(aux, RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK));
+}
+
+uint32_t sli_rail_mux_aux_tx_debug_word(void)
+{
+  if (SUPPORTED_PROTOCOL_COUNT < 2U) {
+    return (uint32_t)SUPPORTED_PROTOCOL_COUNT << 24;
+  }
+  uint8_t aux = (uint8_t)(SUPPORTED_PROTOCOL_COUNT - 1U);
+  uint8_t active = fn_get_active_tx_context_index();
+  uint8_t flags = 0U;
+  if (fn_get_context_flag_by_index(aux, RAIL_MUX_PROTOCOL_FLAGS_START_TX_PENDING)) {
+    flags |= 0x01U;
+  }
+  if (fn_get_context_flag_by_index(aux, RAIL_MUX_PROTOCOL_FLAGS_TX_IN_PROGRESS)) {
+    flags |= 0x02U;
+  }
+  if (fn_get_context_flag_by_index(aux, RAIL_MUX_PROTOCOL_FLAGS_WAIT_FOR_ACK)) {
+    flags |= 0x04U;
+  }
+  if (fn_get_context_flag_by_index(aux, RAIL_MUX_PROTOCOL_FLAGS_SETUP_TX_FIFO)) {
+    flags |= 0x08U;
+  }
+  if (fn_get_context_flag_by_index(aux, RAIL_MUX_PROTOCOL_FLAGS_TX_SCHEDULED)) {
+    flags |= 0x10U;
+  }
+  if (fn_get_context_flag_by_index(aux, RAIL_MUX_PROTOCOL_FLAGS_SCHEDULED_TX_PENDING)) {
+    flags |= 0x20U;
+  }
+  return ((uint32_t)SUPPORTED_PROTOCOL_COUNT << 24)
+         | ((uint32_t)active << 16)
+         | ((uint32_t)aux << 8)
+         | (uint32_t)flags;
+}
+#endif // MAC_MUX_AUX_PRESENT
+
 sl_rail_status_t sli_zigbee_stack_rail_mux_aux_unregister_protocol(void)
 {
+  // Clear the stored aux channel (unless this is an internal unregister) even if
+  // the mux context was never initialized, so a pending bring-up cannot start later.
+  sli_rail_mux_aux_on_unregister_begin();
+
   if (SUPPORTED_PROTOCOL_COUNT < 3) {
     return SL_RAIL_STATUS_INVALID_CALL;
   }
@@ -670,7 +757,7 @@ sl_rail_status_t sli_zigbee_stack_rail_mux_aux_unregister_protocol(void)
 
   // Aux listen enables promiscuous mode for sniffing stimulus traffic.
   // Restore default non-promiscuous behavior before releasing the aux context.
-  (void)sl_rail_mux_ieee802154_set_promiscuous_mode((sl_rail_handle_t)&protocol_context[aux], false);
+  //(void)sl_rail_mux_ieee802154_set_promiscuous_mode((sl_rail_handle_t)&protocol_context[aux], false);
 
   (void)sl_rail_mux_cancel_multi_timer(mux_rail_handle, &protocol_context[aux].timer);
 
@@ -982,7 +1069,17 @@ sl_rail_status_t sl_rail_mux_start_rx(sl_rail_handle_t railHandle,
   // and rx events will use the channel to determine whether to
   // pass the event up or not
   protocol_context[context_index].channel = channel;
+#if defined(SL_CATALOG_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT) || defined(SL_CATALOG_SL_RAIL_UTIL_IEEE802154_FAST_CHANNEL_SWITCHING_PRESENT)
+  /* With slot_base=1 (aux registered), rebuild the full FCS table so slot0=ctx1 not stale ctx0. */
+  if ((sli_rail_mux_rx_cs_slot_base_runtime > 0U)
+      && sli_rx_cs_logical_maps_to_rail(context_index)) {
+    sli_rail_mux_fcs_resync_table();
+  } else {
+    SET_CHANNEL_SWITCHING_CFG_CH(context_index, channel);
+  }
+#else
   SET_CHANNEL_SWITCHING_CFG_CH(context_index, channel);
+#endif
 
   // Check to ensure lock is not active before acting on startRx
   if ( check_lock_permissions(context_index) && !tx_in_progress()) {
@@ -1000,7 +1097,7 @@ sl_rail_status_t sl_rail_mux_start_rx(sl_rail_handle_t railHandle,
     CONFIGURE_RX_CHANNEL_SWITCHING(mux_rail_handle, channel_switching_cfg);
     // TODO: for now we pass down the schedulerInfo "as is".
     ret_status = sl_rail_start_rx(mux_rail_handle, channel, schedulerInfo);
-  }
+  } 
   RAIL_MUX_EXIT_CRITICAL();
 
   return ret_status;
@@ -1595,6 +1692,9 @@ sl_rail_status_t sl_rail_mux_start_cca_csma_tx(sl_rail_handle_t railHandle,
 
   // Reject operation if other protocol holds lock
   RAIL_MUX_ENTER_CRITICAL();
+#ifdef MAC_MUX_AUX_PRESENT
+  uint8_t was_busy = tx_in_progress() ? 1U : 0U;
+#endif
   if ( check_lock_permissions(context_index) ) {
     if (!fn_get_context_flag_by_index(context_index, RAIL_MUX_PROTOCOL_FLAGS_START_TX_PENDING)) {
       fn_set_context_flag_by_index(context_index, RAIL_MUX_PROTOCOL_FLAGS_START_TX_PENDING, true);
@@ -1618,7 +1718,17 @@ sl_rail_status_t sl_rail_mux_start_cca_csma_tx(sl_rail_handle_t railHandle,
     }
     ret_status = fn_start_pending_tx();
   }
+#ifdef MAC_MUX_AUX_PRESENT
+  uint8_t still_pending = fn_get_context_flag_by_index(context_index, RAIL_MUX_PROTOCOL_FLAGS_START_TX_PENDING) ? 1U : 0U;
+  uint8_t aux_tx = fn_get_context_flag_by_index(context_index, RAIL_MUX_PROTOCOL_FLAGS_TX_IN_PROGRESS) ? 1U : 0U;
+#endif
   RAIL_MUX_EXIT_CRITICAL();
+#ifdef MAC_MUX_AUX_PRESENT
+  sli_rail_mux_aux_dbg_step(0xC6, ((uint32_t)was_busy << 16)
+                            | ((uint32_t)still_pending << 8)
+                            | ((uint32_t)aux_tx << 4)
+                            | (uint32_t)(uint8_t)ret_status);
+#endif
   return ret_status;
 }
 
@@ -2250,6 +2360,14 @@ void sl_rail_mux_set_high_datarate_phy_index(sl_rail_handle_t railHandle)
 {
   high_datarate_phy_index = fn_get_context_index(railHandle);
 }
+/** @brief Remove any previously registered HDR context.
+ *  Call this when the context that owns HDR (e.g. the aux mux context)
+ *  unregisters so that stale HDR events are not delivered to a freed slot.
+ */
+void sl_rail_mux_clear_high_datarate_phy_index(void)
+{
+  high_datarate_phy_index = 0xFF;
+}
 #else // !HIGH_DATARATE_PHY
 #define not_high_datarate_packet() true
 #define high_datarate_packet() false
@@ -2394,7 +2512,14 @@ HIDDEN void fn_mux_rail_events_callback(sl_rail_handle_t railHandle, sl_rail_eve
       // packet did not satisfy any of the protocol filtering: we mask out the
       // SL_RAIL_EVENT_RX_PACKET_RECEIVED event.
       if ( not_high_datarate_packet() ) {
-        if ( (CHANNEL_CHECK != protocol_context[i].channel && (!packet_details.is_ack || (CHANNEL_CHECK != protocol_context[i].csma_tx_info.channel)))
+        // packet_details.channel is the channel that actually received this
+        // frame. CHANNEL_CHECK describes configured RX state and, under fast
+        // channel switching, resolves to each context's own configured slot;
+        // comparing it with that same context therefore lets every context
+        // consume the frame. Route RX ownership from the actual packet channel.
+        if ( (packet_details.channel != protocol_context[i].channel
+              && (!packet_details.is_ack
+                  || (packet_details.channel != protocol_context[i].csma_tx_info.channel)))
              // MAC acks and beacons do not contain any addressing information
              // Do not check for filterMask on Rx packets that are acks or beacons
              || (!packet_details.is_ack && !is_beacon && (rx_info.filter_mask & protocol_context[i].addr_filter_mask_802154) == 0)

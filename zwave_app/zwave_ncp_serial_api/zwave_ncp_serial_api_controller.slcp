@@ -13,6 +13,7 @@ component:
   - id: zaf_ncp
   - id: zaf_config_security_header
   - id: zw_core
+  - id: zw_log
   - id: zw_appshw_serialapi
   - id: zw_apputilities_minimal
   - id: zw_app_timer_deep_sleep
@@ -81,6 +82,18 @@ config_file:
     directory: sample_keys
 
 configuration:
+  # sl_log settings below only apply when the compact backend is selected
+  # (log_backend_iostream_compact). They keep all Z-Wave log levels available
+  # to the wrapper and allow the seven-argument ZPAL_LOG calls.
+  - name: SL_LOG_CONFIG_LEVEL_COMPILE_TIME
+    value: SL_LOG_CONFIG_LEVEL_DEBUG
+    condition: [log_backend_iostream_compact]
+  - name: SL_LOG_CONFIG_ARG
+    value: 7
+    condition: [log_backend_iostream_compact]
+  - name: SL_LOG_NUMBER_OF_EVENTS
+    value: 32
+    condition: [log_backend_iostream_compact]
   - name: ZAF_CONFIG_GENERIC_TYPE
     value: GENERIC_TYPE_STATIC_CONTROLLER
   - name: ZAF_CONFIG_SPECIFIC_TYPE
@@ -93,14 +106,6 @@ configuration:
     value: 100
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
-  - name: SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
-    value: 1
-  - name: SL_IOSTREAM_USART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
-    value: 0    # UART RX shouldn't prevent EM2
-  - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
-    value: 1
-  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
-    value: 0    # UART RX shouldn't prevent EM2
   - name: configUSE_IDLE_HOOK
     value: 1
   - name: configTIMER_TASK_PRIORITY
@@ -124,6 +129,9 @@ configuration:
     condition: ["device_series_2"]
   - name: ZAF_CONFIG_INSTALLER_ICON_TYPE
     value: 0
+  # The host protocol owns VCOM/UART, so sl_log must not share it (PLATFORM_HYD-9023).
+  - name: SL_LOG_IOSTREAM_HANDLE
+    value: sl_iostream_swo_handle
   - name: ZAF_APP_NAME
     value: '"serial_api_controller"'
 define:

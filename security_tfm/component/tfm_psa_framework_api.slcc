@@ -1,0 +1,24 @@
+id: tfm_psa_framework_api
+package: security_tfm
+label: TF-M PSA Framework Client API
+description: >-
+  Provides shared TF-M PSA Firmware Framework client API headers
+  for Secure and NonSecure TrustZone components.
+category: Platform|Security|TrustZone
+quality: production
+ui_hints:
+  visibility: never
+provides:
+- name: tfm_psa_framework_api
+requires:
+- name: tfm_psa_framework_error
+include:
+- path: interface/include
+  file_list:
+  - path: psa/client.h
+  - path: psa_config.h
+  - path: tfm_api.h
+metadata:
+  sbom:
+    reference: tfm_sbom
+root_path: security_tfm

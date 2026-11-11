@@ -54,4 +54,6 @@ provides:
 - name: common_core
 requires:
 - name: common_lib
+documentation:
+  url: https://docs.silabs.com/micrium/latest/micrium-common-api/
 root_path: micriumos/platform/micrium_os/common
