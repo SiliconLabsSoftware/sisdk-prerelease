@@ -81,7 +81,7 @@ typedef struct sl_cpc_ep sl_cpc_ep_t;
 /// IDs 100–255 are reserved for temporary endpoints allocated dynamically at runtime.
 typedef enum sl_cpc_reserved_ep_id {
   SL_CPC_EP_ID_CONTROL = 0,           ///< CPC control endpoint.
-  SL_CPC_EP_ID_SECURITY = 1,          ///< Security-related functionality.
+  SL_CPC_EP_ID_RESERVED = 1,          ///< Reserved; do not use.
   SL_CPC_EP_ID_BLUETOOTH = 2,         ///< Bluetooth endpoint.
   SL_CPC_EP_ID_RAIL_DOWNSTREAM = 3,   ///< RAIL downstream endpoint.
   SL_CPC_EP_ID_RAIL_UPSTREAM = 4,     ///< RAIL upstream endpoint.

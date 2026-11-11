@@ -72,14 +72,25 @@ class PhysRailBaseStandardBluetoothHadmCurl(IPhy):
     def PHY_Bluetooth_2M_HADM_2BT(self, model, phy_name='PHY_Bluetooth_2M_HADM_2BT'):
         phy = self.PHY_Bluetooth_2M_HADM(model, phy_name)
         model.vars.ble_feature.value_forced = model.vars.ble_feature.var_enum.HADM_2M_2BT
+        self.BLE_TX_Shaping_Coeffs_2bt(phy)
 
         phy.profile_inputs.shaping_filter_param.value = 2.0
+
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI1.override = 64
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI2.override = 53
         phy.profile_outputs.MODEM_VITERBIDEMOD_VITERBIKSI3.override = 41
 
         return phy
 
+
+    def BLE_TX_Shaping_Coeffs_2bt(self, phy):
+        phy.profile_outputs.MODEM_CTRL0_SHAPING.override = 3
+
+        coeffs = [-2, 9, -21, 127, 51, 48, 96, 50, 100, 45, 115, -65, 41, 15, -2, 11, 0, 8, 1, 6, 1, 5, 1, 4, 0, 3, 1,
+                  2, 0, 2, 0, 2, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, -1, 2, -2, 1]
+        for n, c in enumerate(coeffs):
+            reg = getattr(phy.profile_outputs, f"MODEM_SHAPING{n // 4}_COEFF{n}")
+            reg.override = c
 
 
     def PHY_Bluetooth_1M_HADM_38MHz(self, model, phy_name='PHY_Bluetooth_1M_HADM_38MHz'):

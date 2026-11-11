@@ -15,8 +15,6 @@ from pycalcmodel.core import default_phy
 from pycalcmodel.core.variable import ModelVariableContainer
 import sys
 
-from pycalcmodel.py2_and_3_compatibility import *
-
 __all__ = [ 'ModelProfileMissingVariable',
             'ModelProfile',
             'ModelProfileContainer',
@@ -54,7 +52,7 @@ class ModelProfile(object):
 
     @name.setter
     def name(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._name = value
 
     @property
@@ -63,7 +61,7 @@ class ModelProfile(object):
 
     @readable_name.setter
     def readable_name(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._readable_name = value
 
     @property
@@ -72,7 +70,7 @@ class ModelProfile(object):
 
     @category.setter
     def category(self, value):
-        assert isinstance(value, basestring), "FATAL ERROR: value must be str"
+        assert isinstance(value, str), "FATAL ERROR: value must be str"
         self._category = value
 
     @property
@@ -81,7 +79,7 @@ class ModelProfile(object):
 
     @version.setter
     def version(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._version = value
 
     @property
@@ -90,7 +88,7 @@ class ModelProfile(object):
 
     @desc.setter
     def desc(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._desc = value
 
     @property
@@ -108,7 +106,7 @@ class ModelProfile(object):
 
     @act_logic.setter
     def act_logic(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._act_logic = value
 
     @property

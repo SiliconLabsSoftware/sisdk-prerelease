@@ -272,6 +272,7 @@ static const uint32_t {{phyInfoEntryName}}[] = {
   (uint32_t) {{phyInfoEntry.phyInfoData.trecsPreBitsToSync}}UL,
   (uint32_t) {{phyInfoEntry.phyInfoData.preambleDurationUs}}UL,
   (uint32_t) {{phyInfoEntry.phyInfoData.syncwordDurationUs}}UL,
+  (uint32_t) {{phyInfoEntry.phyInfoData.csRttDigDelay}}UL,
 };
 {% endfor %}
 {%- for modemConfigName, modemConfig in multiPhyConfig.commonStructures.modemConfigEntriesBase.items() %}

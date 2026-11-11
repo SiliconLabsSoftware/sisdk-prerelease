@@ -6,8 +6,8 @@ description: >
 category: Compute
 quality: production
 documentation:
-  docset: compute
-  document: platform-compute-math
+  docset: machine-learning
+  document: platform-compute-math/math-mvp-matrix
 root_path: compute/math
 metadata:
   sbom:

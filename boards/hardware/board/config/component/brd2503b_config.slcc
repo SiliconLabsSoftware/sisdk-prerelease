@@ -1,4 +1,19 @@
+id: brd2503b_config
+label: brd2503b config
+description: Configuration files for BRD2503B
 category: Platform|Board|Config
+package: boards
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+root_path: boards/hardware/board/config
+requires:
+- name: brd2503b
+provides:
+- name: brd2503b_config
 config_file:
 - override:
     component: board_control
@@ -435,18 +450,3 @@ config_file:
     instance: vcom
     vendor: silabs
   path: brd2503b/sl_uart_usart_vcom_config.h
-description: Configuration files for BRD2503B
-id: brd2503b_config
-label: brd2503b config
-metadata:
-  sbom:
-    license: Zlib
-package: boards
-provides:
-- name: brd2503b_config
-quality: production
-requires:
-- name: brd2503b
-root_path: boards/hardware/board/config
-ui_hints:
-  visibility: never

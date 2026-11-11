@@ -35,9 +35,12 @@
 #ifndef __BOARD_CONFIG_H__
 #define __BOARD_CONFIG_H__
 
-#if (!defined(RADIO_CONFIG_SUBGHZ_SUPPORT) || !RADIO_CONFIG_SUBGHZ_SUPPORT)
+#ifndef RADIO_CONFIG_SUBGHZ_SUPPORT
+#define RADIO_CONFIG_SUBGHZ_SUPPORT 0 /// Set to 1 by the ot_subghz_phy component
+#endif
+
+#if (!RADIO_CONFIG_SUBGHZ_SUPPORT)
 #define RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT 1 /// Enable OQPSK modulation in 2.4GHz band
-#define RADIO_CONFIG_915MHZ_OQPSK_SUPPORT 0 /// Dev board doesn't support OQPSK modulation in 915MHz band.
 #endif
 
 #ifndef RADIO_CONFIG_ENABLE_CUSTOM_EUI_SUPPORT

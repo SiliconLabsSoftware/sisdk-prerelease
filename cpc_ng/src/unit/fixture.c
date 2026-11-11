@@ -48,9 +48,9 @@
 #include "sl_status.h"
 
 #include "sl_cpc_bus.h"
-#include "sl_cpc_drv_mock_default_config.h"
+#include "sl_cpc_ng_drv_mock_default_config.h"
 #if defined(SL_CATALOG_KERNEL_PRESENT)
-#include "sl_cpc_drv_mock_default_kernel_config.h"
+#include "sl_cpc_ng_drv_mock_default_kernel_config.h"
 #endif
 
 #include "../sli_cpc_control.h"

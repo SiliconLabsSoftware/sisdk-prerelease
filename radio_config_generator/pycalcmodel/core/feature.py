@@ -6,7 +6,6 @@ from .. import model_type as model_type
 from .. import model_instance as model_inst
 from collections import OrderedDict
 from pycalcmodel.core.parser import ModelParser
-from pycalcmodel.py2_and_3_compatibility import *
 
 __all__ = [ 'ModelFeature', 'ModelFeatureContainer',
             'ModelFeatureTypeXml', 'ModelFeatureInstanceXml' ]
@@ -32,7 +31,7 @@ class ModelFeature(object):
 
     @name.setter
     def name(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._name = value
 
     @property
@@ -41,7 +40,7 @@ class ModelFeature(object):
 
     @desc.setter
     def desc(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._desc = value
 
     @property

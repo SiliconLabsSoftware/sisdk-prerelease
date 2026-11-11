@@ -38,8 +38,12 @@
 #include "sl_wisun_app_core.h"
 #include "sl_wisun_app_core_util.h"
 #include "sl_component_catalog.h"
-#include "sl_wisun_event_mgr.h"
 #include "sl_wisun_config.h"
+#if defined(SL_CATALOG_WISUN_COAP_PRESENT)
+#include "sl_wisun_coap_meter.h"
+#else
+#include "sl_wisun_meter.h"
+#endif
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
@@ -60,6 +64,19 @@
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
 
+#if defined(SL_WISUN_FG23_SUPPORT)
+/* app_custom_callback.c is excluded on FG23; provide the event handler here. */
+void sl_wisun_on_event(sl_wisun_evt_t *evt)
+{
+  sl_wisun_app_core_on_event(evt);
+#if defined(SL_CATALOG_WISUN_COAP_PRESENT)
+  sl_wisun_coap_meter_on_event(evt);
+#else
+  sl_wisun_meter_on_event(evt);
+#endif
+}
+#endif
+
 ////////////////////////////////////////////////////////
 //        CoAP Meter Application task function
 ////////////////////////////////////////////////////////
@@ -68,7 +85,6 @@ void app_task(void *args)
 {
   (void) args;
 
-  uint8_t lfn_evt_ch = 0U;
   sl_wisun_device_type_t dev_type = SL_WISUN_ROUTER;
 
   // connect to the wisun network
@@ -76,14 +92,9 @@ void app_task(void *args)
 
   dev_type = sl_wisun_app_core_get_device_type();
 
-  if (dev_type == SL_WISUN_LFN) {
-    EFM_ASSERT(app_wisun_em_subscribe_evt_notification(SL_WISUN_MSG_LFN_WAKE_UP_IND_ID,
-                                                       &lfn_evt_ch) != SL_STATUS_FAIL);
-  }
-
   while (1) {
     if (dev_type == SL_WISUN_LFN) {
-      app_wisun_em_wait_evt_notification(SL_WISUN_MSG_LFN_WAKE_UP_IND_ID, lfn_evt_ch);
+      sl_wisun_coap_meter_wait_lfn_wakeup();
     } else {
       sl_wisun_app_core_util_dispatch_thread();
     }
@@ -94,8 +105,6 @@ void app_task(void *args)
 //        Simple UDP Meter Application task function
 ////////////////////////////////////////////////////////
 #else
-
-#include "sl_wisun_meter.h"
 
 void app_task(void *args)
 {

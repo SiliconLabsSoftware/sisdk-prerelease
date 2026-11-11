@@ -156,7 +156,7 @@ typedef enum {
   SL_WISUN_MSG_GET_BROADCAST_SCHEDULE_TIME_REQ_ID         = 0x65,
   SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBOR_COUNT_REQ_ID       = 0x66,
   SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBORS_REQ_ID            = 0x67,
-  SL_WISUN_MSG_SET_FFN_POWER_SAVING_SCHEDULE_REQ_ID       = 0x68,
+  SL_WISUN_MSG_SET_FFN_UNICAST_IDLE_SCHEDULE_REQ_ID       = 0x68,
 } sl_wisun_msg_req_id_t;
 
 /// Wi-SUN Message API confirmation IDs
@@ -259,7 +259,7 @@ typedef enum {
   SL_WISUN_MSG_GET_BROADCAST_SCHEDULE_TIME_CNF_ID         = 0x65,
   SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBOR_COUNT_CNF_ID       = 0x66,
   SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBORS_CNF_ID            = 0x67,
-  SL_WISUN_MSG_SET_FFN_POWER_SAVING_SCHEDULE_CNF_ID       = 0x68,
+  SL_WISUN_MSG_SET_FFN_UNICAST_IDLE_SCHEDULE_CNF_ID       = 0x68,
 } sl_wisun_msg_cnf_id_t;
 
 /**************************************************************************//**
@@ -4738,22 +4738,32 @@ SL_PACK_END()
 /** @} (end SL_WISUN_MSG_GET_LXPM_GROUP_NEIGHBORS) */
 
 /**************************************************************************//**
- * @defgroup SL_WISUN_MSG_SET_FFN_POWER_SAVING_SCHEDULE sl_wisun_msg_set_ffn_power_saving_schedule
+ * @defgroup SL_WISUN_MSG_SET_FFN_UNICAST_IDLE_SCHEDULE sl_wisun_msg_set_ffn_unicast_idle_schedule
  * @{
+ *
+ * Message interface for @ref sl_wisun_set_ffn_unicast_idle_schedule.
+ *
+ * Configures a repeating pattern of nominal unicast listening and idle dwell
+ * periods for a FFN. Idle periods allow background unicast listening to be
+ * omitted, creating opportunities for radio-off time and device sleep.
+ *
+ * The schedule must be configured before @ref sl_wisun_join. See
+ * @ref sl_wisun_set_ffn_unicast_idle_schedule for the schedule semantics,
+ * usage requirements, and status codes.
  *****************************************************************************/
 
 /// Request message body.
-// See @ref sl_wisun_set_ffn_power_saving_schedule for schedule semantics,
+/// See @ref sl_wisun_set_ffn_unicast_idle_schedule for schedule semantics,
 /// usage requirements, and status codes.
 SL_PACK_START(1)
 typedef struct {
-  /// Consecutive unicast dwell periods spent listening.
+  /// Consecutive nominal unicast listening dwell periods.
   uint8_t listen_slots;
-  /// Consecutive unicast dwell periods that may be spent sleeping.
-  uint8_t sleep_slots;
+  /// Consecutive nominal dwell periods in which background unicast listening may be omitted.
+  uint8_t idle_slots;
   /// Reserved, set to zero
   uint8_t reserved[2];
-} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_power_saving_schedule_req_body_t;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_unicast_idle_schedule_req_body_t;
 SL_PACK_END()
 
 /// Request message
@@ -4762,8 +4772,8 @@ typedef struct {
   /// Common message header
   sl_wisun_msg_header_t header;
   /// Request message body
-  sl_wisun_msg_set_ffn_power_saving_schedule_req_body_t body;
-} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_power_saving_schedule_req_t;
+  sl_wisun_msg_set_ffn_unicast_idle_schedule_req_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_unicast_idle_schedule_req_t;
 SL_PACK_END()
 
 /// Confirmation message body
@@ -4771,7 +4781,7 @@ SL_PACK_START(1)
 typedef struct {
   /// Status of the request
   uint32_t status;
-} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_power_saving_schedule_cnf_body_t;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_unicast_idle_schedule_cnf_body_t;
 SL_PACK_END()
 
 /// Confirmation message
@@ -4780,11 +4790,11 @@ typedef struct {
   /// Common message header
   sl_wisun_msg_header_t header;
   /// Confirmation message body
-  sl_wisun_msg_set_ffn_power_saving_schedule_cnf_body_t body;
-} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_power_saving_schedule_cnf_t;
+  sl_wisun_msg_set_ffn_unicast_idle_schedule_cnf_body_t body;
+} SL_ATTRIBUTE_PACKED sl_wisun_msg_set_ffn_unicast_idle_schedule_cnf_t;
 SL_PACK_END()
 
-/** @} (end SL_WISUN_MSG_SET_FFN_POWER_SAVING_SCHEDULE) */
+/** @} (end SL_WISUN_MSG_SET_FFN_UNICAST_IDLE_SCHEDULE) */
 
 /**************************************************************************//**
  * @brief Send a request to the Wi-SUN stack

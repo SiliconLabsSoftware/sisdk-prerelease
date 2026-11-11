@@ -82,11 +82,9 @@ source:
 other_file:
   - path: ../../../script/connect_create_gbl_image.bat
   - path: ../../../script/connect_create_gbl_image.sh
-  - path: hw_filter_tags.yaml
-    condition: [add_hw_filter_to_project]
-
+  - path: switch.hts
 readme:
-  - path: ../../../documentation/example/connect_dmp_light_switch/readme.md
+  - path: ../../../documentation/connect_dmp_light_switch/readme.md
 
 #----------------- Project macros --------------------
 

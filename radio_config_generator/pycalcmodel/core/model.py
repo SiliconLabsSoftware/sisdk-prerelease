@@ -22,16 +22,22 @@ from pycalcmodel.core.feature import *
 from pycalcmodel.core.common import IPCategory
 from datetime import datetime
 import sys
-from py_2_and_3_compatibility import *
 
 __all__ = [ 'ModelRoot', 'ModelRootTypeXml', 'ModelRootInstanceXml' ]
 
 
 class ModelRoot(object):
 
-    def __init__(self, part_family, calc_version, target=None, part_revision='ANY', ip_category=IPCategory.LPW):
-        assert isinstance(part_family, basestring)
-        assert isinstance(calc_version, basestring)
+    def __init__(
+        self,
+        part_family,
+        calc_version,
+        target=None,
+        part_revision='ANY',
+        ip_category=IPCategory.LPW,
+    ):
+        assert isinstance(part_family, str)
+        assert isinstance(calc_version, str)
         self.part_family = part_family
         self.part_revision = part_revision
         self.calc_version = calc_version
@@ -54,7 +60,7 @@ class ModelRoot(object):
 
     @part_family.setter
     def part_family(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._part_family = value
 
     @property
@@ -67,7 +73,7 @@ class ModelRoot(object):
 
     @calc_version.setter
     def calc_version(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._calc_version = value
 
     @property
@@ -76,7 +82,7 @@ class ModelRoot(object):
 
     @target.setter
     def target(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._target = value
 
     @property
@@ -262,13 +268,18 @@ class ModelRoot(object):
 
 class ModelRootTypeXml(ModelRoot):
 
-    def __init__(self, filename):
+    def __init__(
+        self,
+        filename,
+    ):
 
         _root = model_type.parse(filename)
         assert isinstance(_root, model_type.model)
 
-        super(ModelRootTypeXml, self).__init__(_root.part_family,
-                                               _root.calc_version)
+        super().__init__(_root.part_family,
+                        _root.calc_version
+                        )
+
         if self.xsd_version != _root.xsd_version:
             print("WARNING: Parsing XML with XSD version {} in pycalcmodel {}".format(self.xsd_version,
                                                                                       _root.xsd_version))
@@ -293,15 +304,21 @@ class ModelRootTypeXml(ModelRoot):
 
 class ModelRootInstanceXml(ModelRoot):
 
-    def __init__(self, filename):
+    def __init__(
+        self,
+        filename,
+    ):
 
         _root = model_inst.parse(filename)
         assert isinstance(_root, model_inst.model)
         ip_category = IPCategory[_root.ip_category] if _root.ip_category is not None else IPCategory.LPW
-        super(ModelRootInstanceXml, self).__init__(_root.part_family,
-                                                   _root.calc_version,
-                                                   _root.target,
-                                                   ip_category=ip_category)
+        super().__init__(
+            _root.part_family,
+            _root.calc_version,
+            _root.target,
+            ip_category=ip_category
+        )
+
         if self.xsd_version != _root.xsd_version:
             print("WARNING: Parsing XML with XSD version {} in pycalcmodel {}".format(self.xsd_version,
                                                                                       _root.xsd_version))

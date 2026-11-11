@@ -47,7 +47,6 @@ requires:
 - name: "wisun_keychain"
 - name: "sl_wisun_app_brd_feature"
 - name: "sl_wisun_full_config"
-- name: "sl_wisun_event_mgr"
 - name: "sleeptimer"
 - name: "app_project_info"
 

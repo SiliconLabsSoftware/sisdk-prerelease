@@ -47,12 +47,25 @@
 #include "sl_rail_types.h"
 
 // PHY layer constants
-#if RADIO_CONFIG_SUBGHZ_SUPPORT
-#define PHY_HEADER_SIZE 2
-#define SHR_SIZE 6 // 4 bytes preamble, 2 bytes SFD
-#else
 #define PHY_HEADER_SIZE 1
-#define SHR_SIZE 5 // 4 bytes of preamble, 1 byte sync-word
+#define SHR_SIZE 5 // 4-byte preamble + 1-byte SFD (802.15.4 OQPSK)
+
+// 915 MHz OQPSK-DSSS 800 kcps / 100 kbps (1-byte PHR, not GB868/R23 2-byte PHR).
+#define IEEE802154_SUBGHZ_BITRATE_HZ 100000U
+#define IEEE802154_SUBGHZ_ACK_TIMEOUT_US 2160U
+#define IEEE802154_SUBGHZ_RX_TO_TX_US 480U
+#define IEEE802154_SUBGHZ_TX_TO_RX_US 480U
+// PTI: 0x97 = R23 915 MHz + 2-byte PHR flag; use 0x17 for 1-byte PHR (Network Analyzer).
+#define IEEE802154_SUBGHZ_PTI_PHY_ID ((sl_rail_ieee802154_phy_t)0x17U)
+
+#if RADIO_CONFIG_SUBGHZ_SUPPORT
+#define SHR_DURATION_US 400
+#else
+#define SHR_DURATION_US 160
+#endif
+
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+#define IEEE802154_2015_ENH_ACK_TIMING_RX_TO_TX_US 256
 #endif
 
 // Need higher than default rxToTx turnaround time for enhanced ACKs

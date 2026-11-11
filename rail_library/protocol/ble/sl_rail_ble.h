@@ -194,6 +194,10 @@ SLI_RAIL_ENUM(sl_rail_ble_phy_t) {
    */
   SL_RAIL_BLE_PHY_CS_2_MBPS = 8u,
   /**
+   * BLE 2 Mbps 2BT PHY with CS.
+   */
+  SL_RAIL_BLE_PHY_CS_2_MBPS_2_BT = 9u,
+  /**
    * BLE PHY undefined.
    */
   SL_RAIL_BLE_PHY_UNDEFINED = 0xFFu,
@@ -210,6 +214,7 @@ SLI_RAIL_ENUM(sl_rail_ble_phy_t) {
 #define SL_RAIL_BLE_PHY_QUUPPA_1_MBPS  ((sl_rail_ble_phy_t) SL_RAIL_BLE_PHY_QUUPPA_1_MBPS)
 #define SL_RAIL_BLE_PHY_CS_1_MBPS      ((sl_rail_ble_phy_t) SL_RAIL_BLE_PHY_CS_1_MBPS)
 #define SL_RAIL_BLE_PHY_CS_2_MBPS      ((sl_rail_ble_phy_t) SL_RAIL_BLE_PHY_CS_2_MBPS)
+#define SL_RAIL_BLE_PHY_CS_2_MBPS_2_BT  ((sl_rail_ble_phy_t) SL_RAIL_BLE_PHY_CS_2_MBPS_2_BT)
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 ///
@@ -252,6 +257,12 @@ extern const sl_rail_channel_config_t *const sl_rail_ble_phy_1_mbps_cs;
  * be NULL for non 40MHz HFXO frequencies.
  */
 extern const sl_rail_channel_config_t *const sl_rail_ble_phy_2_mbps_cs;
+
+/**
+ * Default PHY to use for BLE 2 Mbps 2BT CS. Will be NULL if
+ * \ref SL_RAIL_BLE_SUPPORTS_CS_HW_BLOCK is 0.
+ */
+extern const sl_rail_channel_config_t *const sl_rail_ble_phy_2_mbps_2bt_cs;
 #endif//DOXYGEN_UNDOCUMENTED
 
 /**
@@ -530,6 +541,20 @@ sl_rail_status_t sl_rail_ble_config_phy_1_mbps_cs(sl_rail_handle_t rail_handle);
  * @note This PHY is only supported when \ref SL_RAIL_BLE_SUPPORTS_CS is not 0.
  */
 sl_rail_status_t sl_rail_ble_config_phy_2_mbps_cs(sl_rail_handle_t rail_handle);
+
+/**
+ * Switch to the 2 Mbps 2BT BLE PHY for CS.
+ *
+ * @param[in] rail_handle A real RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ *
+ * Use this function to switch back to the BLE 2 Mbps 2BT CS PHY from
+ * another configuration. You may only call this
+ * function after initializing BLE and while the radio is idle.
+ *
+ * @note This PHY is only supported when \ref SL_RAIL_BLE_SUPPORTS_CS_HW_BLOCK is not 0.
+ */
+sl_rail_status_t sl_rail_ble_config_phy_2_mbps_2_bt_cs(sl_rail_handle_t rail_handle);
 #endif //DOXYGEN_UNDOCUMENTED
 
 /**
@@ -1087,6 +1112,14 @@ typedef struct sl_rail_ble_cs_config {
    * Equivalent AGC STATUS0 register to force.
    */
   uint32_t forced_agc_status0;
+  /**
+   * Indicates whether to use an EPL threshold for RTT RBS packet validation.
+   */
+  bool use_epl_threshold;
+  /**
+   * EPL threshold in thousandths of a percent for RTT RBS packet validation.
+   */
+  uint32_t epl_threshold_thousandths;
   /**
    * Indicates whether to have FW compute the FFO for the RTT step
    * or if it should be manually applied externally.
@@ -2193,6 +2226,8 @@ sl_rail_status_t sl_rail_ble_calibrate_ir(sl_rail_handle_t rail_handle,
   ((const sl_rail_channel_config_t *)RAIL_BLE_Phy1MbpsViterbiCs)
 #define sl_rail_ble_phy_2_mbps_cs \
   ((const sl_rail_channel_config_t *)RAIL_BLE_Phy2MbpsViterbiCs)
+#define sl_rail_ble_phy_2_mbps_2bt_cs \
+  ((const sl_rail_channel_config_t *)RAIL_BLE_Phy2Mbps2BtViterbiCs)
 #define sl_rail_ble_phy_2_mbps_aox \
   ((const sl_rail_channel_config_t *)RAIL_BLE_Phy2MbpsAox)
 #define sl_rail_ble_phy_125_kbps \

@@ -11,8 +11,6 @@ from pycalcmodel.core.variable import ModelVariable
 from collections import OrderedDict
 from enum import Enum, unique
 
-from pycalcmodel.py2_and_3_compatibility import *
-
 __all__ = [ 'ModelInput', 'ModelInputContainer', 'ModelInputType',
             'ModelInputValue', 'ModelInputValueContainer', 'ModelInputDefaultVisibilityType' ]
 
@@ -71,7 +69,7 @@ class ModelInput(object):
 
     @readable_name.setter
     def readable_name(self, value):
-        assert isinstance(value, basestring), "FATAL ERROR: value must be str"
+        assert isinstance(value, str), "FATAL ERROR: value must be str"
         self._readable_name = value
 
     @property
@@ -80,7 +78,7 @@ class ModelInput(object):
 
     @category.setter
     def category(self, value):
-        assert isinstance(value, basestring), "FATAL ERROR: value must be str"
+        assert isinstance(value, str), "FATAL ERROR: value must be str"
         self._category = value
 
     @property
@@ -174,7 +172,7 @@ class ModelInput(object):
 
     @units_multiplier.setter
     def units_multiplier(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._units_multiplier = value
 
     def to_type_xml(self):

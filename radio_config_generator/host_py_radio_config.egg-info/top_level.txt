@@ -1,7 +1,0 @@
-host_py_rm_studio_internal
-pro2_chip_configurator
-py_2_and_3_compatibility
-pycalcmodel
-pylib_multi_phy_model
-pyradioconfig
-rail_scripts

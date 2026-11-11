@@ -58,7 +58,7 @@
 /* Wi-SUN event handler */
 void sl_wisun_on_event(sl_wisun_evt_t *evt)
 {
-  (void) evt->header.id;
+  sl_wisun_app_core_on_event(evt);
 
   /////////////////////////////////////////////////////////////////////////////
   // Put your Wi-SUN event handling here!                                    //

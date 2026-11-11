@@ -10,10 +10,12 @@
 #include "seqacc_shared.h"
 #include <stdint.h>
 
-// This sequence accelerator register base is designed to be modified at runtime as needed by firmware.
-// It should NOT be used for other purposes.
-#define SEQACC_REGBASES_DYNAMIC_BASE_ENTRY 15U
-
+// Reserved SEQACC BASE[] slots from RuntimeBases in seqacc_regbases.yml.
+// These are not loaded from BaseAddrCfgDefaultArray. Firmware or the runtime
+// encoder patches them as needed. Do not use them as peripheral bases.
+{% for base in RuntimeBases -%}
+#define {{ base.macro }} ({{ base.index }}U)
+{% endfor %}
 {% for baseAddrName, baseAddrCfg in RegBases.items() -%}
 #define {{"{}".format(baseAddrCfg['Define'])}} ({{ baseAddrCfg['BaseAddr'] | length }}U)
 
@@ -47,4 +49,11 @@ extern SeqAccBaseAddrCfg_t {{baseAddrName}};
   {%- endfor %}
 {%- endfor %}
     : SEQACC_REGBASES_DYNAMIC_BASE_ENTRY)
+
+{% for base in RuntimeBases if base.alias == 'REPAINT_MEM' -%}
+_Static_assert(SEQACC_REGBASES_REPAINT_BASE_ENTRY != SEQACC_REGBASES_DYNAMIC_BASE_ENTRY,
+               "REPAINT_MEM and DYNAMIC must use different SEQACC BASE[] slots. See RuntimeBases in seqacc_regbases.yml.");
+_Static_assert(SEQACC_REGBASES_REPAINT_BASE_ENTRY > SEQACC_BASE_ADDR_CFG_DFLT_ARRAY_SZ,
+               "REPAINT_MEM BASE[] slot must sit past BaseAddrCfgDefaultArray so SEQACC_BaseAddrInit() does not overwrite it.");
+{% endfor -%}
 #endif // __SEQACC_REGBASES_H__

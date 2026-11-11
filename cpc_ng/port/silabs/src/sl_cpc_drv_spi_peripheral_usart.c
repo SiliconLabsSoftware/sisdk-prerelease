@@ -28,24 +28,23 @@
  *
  ******************************************************************************/
 
-#include "sl_cpc_drv_spi_peripheral_usart.h"
-#include "sl_cpc_drv_instances.h"
-#include "sl_cpc_drv_spi_peripheral.h"
-#include "sli_cpc_drv_spi_peripheral.h"
-
 #include <string.h>
 
 #include "sl_clock_manager.h"
 #include "sl_common.h"
 #include "sl_component_catalog.h"
 #include "sl_device_peripheral.h"
+#include "sl_hal_gpio.h"
+#include "sl_hal_prs.h"
 #include "sl_status.h"
+
+#include "sl_cpc_drv_instances.h"
+#include "sl_cpc_drv_spi_peripheral.h"
+#include "sl_cpc_drv_spi_peripheral_usart.h"
 
 #include "../../../src/sli_cpc_assert.h"
 #include "../../../src/sli_cpc_endianness.h"
-
-#include "sl_hal_gpio.h"
-#include "sl_hal_prs.h"
+#include "sli_cpc_drv_spi_peripheral.h"
 
 static uint32_t prs_signal_txc(uint8_t peripheral_no)
 {

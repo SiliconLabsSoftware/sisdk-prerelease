@@ -139,7 +139,7 @@ extern "C" {
  * @brief The EFR32xG2B series size needed for
  *   \ref sl_rail_state_buffer_entry_t::buffer_bytes.
  */
-#define SL_RAIL_EFR32XG2B_STATE_BUFFER_BYTES 784U  // DO NOT HAND-EDIT THESE VALUES
+#define SL_RAIL_EFR32XG2B_STATE_BUFFER_BYTES 792U  // DO NOT HAND-EDIT THESE VALUES
 
 /**
  * @def SL_RAIL_EFR32XG2D_STATE_BUFFER_BYTES

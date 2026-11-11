@@ -57,7 +57,7 @@ The list of available commands is output on the console with the associated help
 | wisun reset_statistics | Reset the statistics | > wisun reset_statistics |
 | wisun set_trace_level \<string> | Set [trace level](https://docs.silabs.com/wisun/latest/wisun-stack-api/sl-wisun-types#sl-wisun-trace-level-t) for a [trace group](https://docs.silabs.com/wisun/latest/wisun-stack-api/sl-wisun-types#sl-wisun-trace-group-t) | > wisun set_trace_level all,debug<br>[Set 64 trace groups]<br>> wisun set_trace_level 1,none;4,info<br>[Set 2 trace groups]|
 | wisun set_lfn_support \<lfn_limit> | configure LFN support: <br> - [uint8] lfn_limit: Number of LFN children | > wisun set_lfn_support 3 |
-| wisun set_ffn_power_saving \<listen_slots> \<sleep_slots> | Configure FFN listen/sleep schedule before join (FFN only); use `0 0` to disable | > wisun set_ffn_power_saving 2 1 |
+| wisun set_ffn_unicast_idle_schedule \<listen_slots> \<idle_slots> | Configure the FFN unicast idle schedule before join (FFN only); zero idle slots disables it, including while `ACTIVE` | > wisun set_ffn_unicast_idle_schedule 2 1 |
 | wisun mode_switch \<mode> \<phy_mode_id> \<neighbor_mac_address> |  configure mode switch: <br> - [uint8] mode: 0=disabled, 1=enabled, 2=default <br> - [uint8] PhyModeID <br> - [string] neighbor MAC address (optional)   | > wisun mode_switch 1 84 <br> > wisun mode_switch 1 84 01:02:03:04:05:06:07:08 |
 | wisun trigger \<frame type> | Trigger a transmission of a periodic frame <br> - [string] pas: PAN Advertisement Solicit, pa: PAN Advertisement, pcs: PAN Configuration Solicit, pc: PAN Configuration, dis: DODAG Information Solicitation, dio: DODAG Information Object | > wisun trigger pas |
 | wisun getsockname \<socket> | Get local IP address of the socket | > wisun getsockname 3 |
@@ -170,11 +170,13 @@ The settings part of the *statistics* section are counters maintained by the Wi-
 | statistics.network | R | 6LoWPAN/IP stack statistics |
 | statistics.regulation | R | Regional regulation statistics and errors |
 | statistics.heap | R | Memory consumption statistics |
-| statistics.ffn_power_saving | R | Local FFN power-saving ratios and interval durations |
+| statistics.ffn_unicast_idle_schedule | R | Nominal idle ratio and observed radio off/on intervals |
 
-Reading FFN power saving metrics requires local FFN power-saving support. The stack returns `SL_STATUS_NOT_READY` until positive `ACTIVE` time has been measured since the last reset, and `SL_STATUS_NOT_AVAILABLE` for peer-only or feature-disabled providers.
+Reading FFN unicast idle schedule metrics requires local FFN unicast idle schedule support. The stack returns `SL_STATUS_NOT_READY` until positive `ACTIVE` time has been measured since the last reset, and `SL_STATUS_NOT_AVAILABLE` for peer-only or feature-disabled providers.
 
-The FFN power-saving metrics accumulate only while power saving is `ACTIVE`. They are kept when power saving leaves `ACTIVE` (for example on a schedule change, FHSS timing invalidation or disable), so the latest values can still be read afterwards, and later `ACTIVE` time accumulates on top of them. They are cleared by `wisun reset_statistics`, or automatically when power saving becomes `ACTIVE` again with a different listen/sleep schedule than the one they were measured with. `nominal_sleep_ratio` is the target of that measured schedule.
+The metrics accumulate only while the schedule is `ACTIVE`. They are kept when the schedule leaves `ACTIVE`, so the latest values remain readable afterwards and later `ACTIVE` time adds to them. They are cleared by `wisun reset_statistics`, or when the schedule becomes `ACTIVE` again with different listen/idle counts. `nominal_idle_ratio` is the nominal idle fraction of the schedule associated with those measurements.
+
+Idle slots omit background unicast listening. Broadcast reception, compensation listening, ACK handling, and outgoing transmissions can still keep the radio active.
 
 ### *info* Section Settings
 

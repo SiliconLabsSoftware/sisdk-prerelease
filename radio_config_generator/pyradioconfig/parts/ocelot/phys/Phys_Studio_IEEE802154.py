@@ -108,3 +108,4 @@ class PhysStudioIEEE802154Ocelot(IPhy):
         phy.profile_inputs.rail_tx_power_max.value = [-1] * 25
 
         return phy
+    

@@ -40,6 +40,7 @@ from pyradioconfig.calculator_model_framework.model_serializers.import_isc_files
 from pyradioconfig import parts
 from pycalcmodel.core.model import ModelRootInstanceXml
 from pycalcmodel.core.output import ModelOutputType
+from pyradioconfig.calculator_model_framework.Utils.rm_studio_factory_builder import RMStudioFactoryBuilder
 
 from py_2_and_3_compatibility import *
 
@@ -1039,8 +1040,15 @@ class CalcManager(object):
 
 
         self.__verifyPartFamilyPartRevisionIsSet()
+        
+        RMStudioFactoryBuilder.build()
 
-        modem_model_instance = ModelRoot(self.__part_family, self.__MODEL_VER, self.__target, part_revision=self.__part_revision)
+        modem_model_instance = ModelRoot(
+            self.__part_family,
+            self.__MODEL_VER,
+            self.__target,
+            part_revision=self.__part_revision,
+        )
 
         Features.build(modem_model_instance)
 
@@ -1128,8 +1136,16 @@ class CalcManager(object):
             modem_model (ModelRoot) : Data model type (lists all phys, profiles, varaibles, etc...)
         """
         self.__verifyPartFamilyPartRevisionIsSet()
+        
+        RMStudioFactoryBuilder.build()
 
-        modem_type_model = ModelRoot(self.__part_family, self.__MODEL_VER, target=self.__target, part_revision=self.__part_revision, ip_category=ip_category)
+        modem_type_model = ModelRoot(
+            self.__part_family,
+            self.__MODEL_VER,
+            target=self.__target,
+            part_revision=self.__part_revision,
+            ip_category=ip_category
+        )
 
         Features.build(modem_type_model)
 
@@ -1306,6 +1322,7 @@ class CalcManager(object):
             static_phy_path = self.find_static_phy_path(phy_name)
             if os.path.exists(static_phy_path):
                 LogMgr.Info('Loading {} from STATIC PHY.'.format(phy_name))
+                RMStudioFactoryBuilder.build()
                 model_instance = ModelRootInstanceXml(static_phy_path)
             else:
                 result_code, error_message = self.calculate(model_instance)
@@ -2040,22 +2057,23 @@ class CalcManager(object):
                 f"Expected path: {import_path}"
             )
 
-        init_file = os.path.join(targets_dir, '__init__.py')
-        if not os.path.exists(init_file):
+        init_file = os.path.join(targets_dir, "__init__")
+        if not (os.path.exists(f"{init_file}.py") or os.path.exists(f"{init_file}.pyc")):
             raise ImportError(
-                f"Missing __init__.py in targets directory for '{self.part_family}' at '{targets_dir}'. "
+                f"Missing __init__.py or __init__.pyc in targets directory for '{self.part_family}' at '{targets_dir}'. "
                 f"Create an __init__.py file with: "
                 f"'from pyradioconfig.calculator_model_framework.Utils.ClassManager import ClassManager; "
                 f"__all__ = ClassManager.getModuleNamesFromPath(__file__)'"
             )
 
         py_files = [f for f in os.listdir(targets_dir)
-                   if f.endswith('.py') and f != '__init__.py' and not f.startswith('__pycache__')]
+                   if f.endswith((".py", ".pyc"))
+                   and f not in ("__init__.py", "__init__.pyc")]
 
         if len(py_files) == 0:
             raise ValueError(
                 f"Targets directory for '{self.part_family}' at '{targets_dir}' exists but contains no target definition files. "
-                f"Add at least one Target_*.py file or remove the empty directory."
+                f"Add at least one Target_*.py/.pyc file or remove the empty directory."
             )
 
     def getTargetCFGInfo(self):

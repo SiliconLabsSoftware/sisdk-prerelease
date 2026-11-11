@@ -68,11 +68,8 @@ source:
 other_file:
   - path: ../../script/connect_create_gbl_image.bat
   - path: ../../script/connect_create_gbl_image.sh
-  - path: hw_filter_tags.yaml
-    condition: [add_hw_filter_to_project]
-
 readme:
-  - path: ../../documentation/example/connect_bt_dmp_soc_empty/readme.md
+  - path: ../../documentation/connect_bt_dmp_soc_empty/readme.md
 
 #------------ Configuration overrides ----------------
 configuration:
@@ -114,7 +111,7 @@ tag:
   - hwfilter:board:hardware:has:vcom
   - hwfilter:board:hardware:has:pti
   - hwfilter:ram:53k
-  - hwfilter:flash:321k
+  - hwfilter:flash:371k
   - hwfilter:board:hardware_board_supports_rf_band_2400
 
 #--------------------- Toolchain ------------------------

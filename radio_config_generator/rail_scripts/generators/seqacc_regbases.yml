@@ -4,10 +4,40 @@ Version: 0.01
 # Warning: This file should be unique and modified only when necessary.
 # The base address configurations can be referenced by their name in the source YAML file located in RAIL,
 # under the field BaseAddrCfg.
+#
+# SEQACC BASE[] slots
+# -------------------
+# Hardware provides 16 BASE entries (indices 0-15). BaseAddr lists real peripheral
+# windows loaded sequentially by SEQACC_BaseAddrInit() into BASE[0..n).
+# All BaseAddr maps must end with 0xFFFFFFFF: 0xFFFFFFFF (terminator).
+#
+# Indices in RuntimeBases are reserved only when they apply to the family.
+# DYNAMIC (15) is always reserved. REPAINT_MEM (14) is reserved only if that
+# family opts in with "REPAINT_MEM: runtime" under Alias; otherwise index 14
+# may be used as a normal BaseAddr slot.
+# Reserved slots are not loaded from the table. Firmware or the runtime
+# encoder patches SEQACC->BASE[index] as needed:
+#   REPAINT_MEM  - sleep register-repaint buffer (see register_repaint.c)
+#   DYNAMIC      - fallback for addresses not present in BaseAddr
+#
+# Sequence YAML destinations resolve in two ways:
+#   1. Address aliases (e.g. SEQRAM: 0xB0000000) look up that address in BaseAddr.
+#   2. Runtime aliases (e.g. REPAINT_MEM: runtime) encode RuntimeBases[alias]
+#      and never go through BaseAddr. Do NOT add a sentinel address such as
+#      0xD0000000 to BaseAddr for these.
+#
+# To opt a family into register-repaint sequences, add under that family's Alias:
+#   REPAINT_MEM: runtime
+# Omitting it makes any sequence that uses REPAINT_MEM fail at compile time,
+# and leaves index 14 free for a normal BaseAddr entry.
+# Do not assign REPAINT_MEM a numeric index in BaseAddr on families that opt in.
+# Analog-IP sequence folders are shared; every family that compiles a folder
+# containing REPAINT_MEM sequences must opt in.
 
-# All config must end with 0xFFFFFFFF: 0xFFFFFFFF
-
-#sixg301
+# Reserved SEQACC BASE[] indices. DYNAMIC is always applied. REPAINT_MEM is
+# applied only for families that opt in (see Alias). The compiler emits
+# SEQACC_REGBASES_<name>_BASE_ENTRY from the active set (_MEM is stripped from
+# the alias when forming the C macro, so REPAINT_MEM -> SEQACC_REGBASES_REPAINT_BASE_ENTRY).
 RAINIER:
   BaseAddrCfgDefault:
     Define: SEQACC_BASE_ADDR_CFG_DFLT_ARRAY_SZ

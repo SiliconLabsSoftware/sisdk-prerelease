@@ -10,8 +10,8 @@ description: >
 category: Compute
 quality: production
 documentation:
-  docset: compute
-  document: compute-reference-guide
+  docset: machine-learning
+  document: platform-compute-math
 metadata:
   sbom:
     license: Zlib

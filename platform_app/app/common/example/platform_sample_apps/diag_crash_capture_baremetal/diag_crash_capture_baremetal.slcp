@@ -1,0 +1,55 @@
+project_name: diag_crash_capture_baremetal
+package: platform_app
+quality: production
+label: Platform - SL Diagnostic Crash Capture Bare-metal
+description: >
+  Demonstrates SL Diagnostic (sl_diag) with Crash Capture in a bare-metal
+  configuration. Press BTN0 to raise a HardFault. Crash Capture seals the CPU
+  state into sl_diag and resets; the next boot prints the decoded record and a
+  raw hex dump over VCOM. The default profile is Crash Basic; change
+  SL_DIAG_PROFILE in the SL Diagnostic UC screen for Standard or higher.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+source:
+  - path: app.c
+  - path: diag_crash_capture_app.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: diag_crash_capture_app.h
+component:
+  - id: sl_main
+  - id: device_init
+  - id: clock_manager
+  - id: sl_diag
+  - id: crash_capture
+  - id: iostream_stdlib_config
+  - id: iostream_retarget_stdio
+  - id: iostream_recommended_stream
+  - id: log
+  - id: log_backend_iostream
+  - id: log_backend_iostream_formatted
+  - id: simple_button
+    instance:
+      - btn0
+define:
+  - name: DEBUG_EFM
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+  - name: SL_DIAG_PROFILE
+    value: SL_DIAG_PROFILE_CRASH_BASIC
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - hardware:component:button:1+
+  - hwfilter:board:simple_button:btn0

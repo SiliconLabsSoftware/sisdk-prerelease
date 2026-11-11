@@ -38,7 +38,6 @@
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #include "app.h"
-#include "sl_wisun_event_mgr.h"
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_app_core_config.h"
 // -----------------------------------------------------------------------------
@@ -69,7 +68,6 @@ void app_init(void)
     .stack_size = app_stack_size_word_to_byte(SL_WISUN_APP_CORE_MAIN_STACK_SIZE_WORD),
     .priority   = osPriorityNormal
   };
-
 
   osThreadId_t app_thr_id = osThreadNew(app_task,
                                         NULL,

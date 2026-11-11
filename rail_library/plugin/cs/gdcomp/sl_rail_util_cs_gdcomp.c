@@ -41,6 +41,7 @@
      && (defined(SL_RAIL_UTIL_CS_GDCOMP_LP_PA_DBM)      \
   || defined(SL_RAIL_UTIL_CS_GDCOMP_HP_PA_DBM)))
 
+#if !SL_RAIL_BLE_SUPPORTS_CS_HW_BLOCK
 #if     SLI_RAIL_3_API
 sl_rail_status_t sl_railcb_ble_cs_gd_comp_table_load(void)
 #else//!SLI_RAIL_3_API
@@ -62,7 +63,7 @@ RAIL_Status_t RAILCb_BLE_CsGdCompTableLoad(void)
 #endif
   return status;
 }
-
+#endif//!SL_RAIL_BLE_SUPPORTS_CS_HW_BLOCK
 #endif//(!SL_RAIL_UTIL_CS_GDCOMP_RUNTIME_PA_TABLE_SELECTION  ...)
 
 #endif // SL_RAIL_BLE_SUPPORTS_CS

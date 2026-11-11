@@ -3,7 +3,7 @@ from pycalcmodel.core.variable import ModelVariable
 from enum import Enum, unique
 import ast
 
-from pycalcmodel.py2_and_3_compatibility import *
+from pycalcmodel.py2_and_3_compatibility import long
 
 __all__ = [ 'IPCategory',
             'get_xml_str_values',

@@ -17,15 +17,15 @@ include:
 source:
 - path: src/sl_cpc_drv_spi_peripheral_eusart.c
 config_file:
-- path: config/sl_cpc_drv_spi_peripheral_eusart_{{instance}}_config.h
+- path: config/sl_cpc_ng_drv_spi_peripheral_eusart_{{instance}}_config.h
   file_id: cpc_ng_drv_spi_peripheral_eusart_config
-- path: config/sl_cpc_drv_spi_peripheral_eusart_{{instance}}_kernel_config.h
+- path: config/sl_cpc_ng_drv_spi_peripheral_eusart_{{instance}}_kernel_config.h
   file_id: cpc_ng_drv_spi_peripheral_eusart_kernel_config
   condition: [kernel]
-- path: config/sl_cpc_drv_spi_peripheral_eusart_{{instance}}_pm_runtime_config.h
+- path: config/sl_cpc_ng_drv_spi_peripheral_eusart_{{instance}}_pm_runtime_config.h
   file_id: cpc_ng_drv_spi_peripheral_eusart_pm_runtime_config
   condition: [cpc_ng_pm_runtime]
-- path: config/sl_cpc_drv_spi_peripheral_eusart_{{instance}}_wake_host_config.h
+- path: config/sl_cpc_ng_drv_spi_peripheral_eusart_{{instance}}_wake_host_config.h
   file_id: cpc_ng_drv_spi_peripheral_eusart_wake_host_config
   condition: [cpc_ng_wake_host]
 provides:

@@ -14,6 +14,9 @@ description: >
   math_mvp or nn_mvp instead.
 category: Compute
 quality: production
+documentation:
+  docset: machine-learning
+  document: platform-compute-math
 ui_hints:
   visibility: never
 provides:

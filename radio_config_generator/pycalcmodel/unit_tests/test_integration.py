@@ -14,28 +14,38 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 from pycalcmodel.core.model import ModelRoot
 from pycalcmodel.core.variable import ModelVariable, ModelVariableFormat, CreateModelVariableEnum
 from pycalcmodel.core.feature import ModelFeature
+from pycalcmodel.core.rm_studio_factory import RMStudioFactory
 from pycalcmodel.core.common import cast_value_from_xml, get_dummy_var_value, get_xml_str_values
 
-if sys.version_info[0] > 2:
-    long = int
+from pycalcmodel.py2_and_3_compatibility import long
 
 
 class TestSystemIntegration(unittest.TestCase):
     """Test integration between different pycalcmodel components."""
-    
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up any state specific to the test class."""
+        RMStudioFactory()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up any state specific to the test class."""
+        RMStudioFactory.clear()
+
     def test_model_root_with_variables(self):
         """Test adding variables to a ModelRoot."""
         model = ModelRoot(
             part_family="EFR32MG12", 
             calc_version="1.0.0"
         )
-        
+
         int_var = ModelVariable(name="test_int", var_type=int, is_array=False)
-        int_var.value = 42
+        int_var.value_forced = 42
         str_var = ModelVariable(name="test_str", var_type=str, is_array=False)
-        str_var.value = "hello"
+        str_var.value_forced = "hello"
         dict_var = ModelVariable(name="test_dict", var_type=dict, is_array=False)
-        dict_var.value = {"key": "value"}
+        dict_var.value_forced = {"key": "value"}
         
         assert model.vars is not None
         
@@ -114,7 +124,7 @@ class TestSystemIntegration(unittest.TestCase):
         var.format = ModelVariableFormat.DECIMAL
         assert var.format == ModelVariableFormat.DECIMAL
         
-        var.value = 255
+        var.value_forced = 255
         assert var.value == 255
     
     def test_dummy_values_integration(self):
@@ -138,7 +148,17 @@ class TestSystemIntegration(unittest.TestCase):
 
 class TestComplexScenarios(unittest.TestCase):
     """Test complex real-world scenarios."""
-    
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up any state specific to the test class."""
+        RMStudioFactory()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up any state specific to the test class."""
+        RMStudioFactory.clear()
+
     def test_nested_dict_variable(self):
         """Test deeply nested dictionary variable."""
         complex_dict = {
@@ -159,7 +179,7 @@ class TestComplexScenarios(unittest.TestCase):
         }
         
         var = ModelVariable(name="complex_dict", var_type=dict, is_array=False)
-        var.value = complex_dict
+        var.value_forced = complex_dict
         
         xml_values = get_xml_str_values(is_array=False, value=var.value)
         reconstructed = cast_value_from_xml(var, xml_values)
@@ -171,11 +191,11 @@ class TestComplexScenarios(unittest.TestCase):
         model = ModelRoot(part_family="EFR32MG12", calc_version="1.0.0")
         
         int_array_var = ModelVariable(name="int_array", var_type=int, is_array=True)
-        int_array_var.value = [1, 2, 3]
+        int_array_var.value_forced = [1, 2, 3]
         str_array_var = ModelVariable(name="str_array", var_type=str, is_array=True)
-        str_array_var.value = ["a", "b", "c"]
+        str_array_var.value_forced = ["a", "b", "c"]
         dict_array_var = ModelVariable(name="dict_array", var_type=dict, is_array=True)
-        dict_array_var.value = [{"x": 1}, {"y": 2}]
+        dict_array_var.value_forced = [{"x": 1}, {"y": 2}]
         
         assert int_array_var.value == [1, 2, 3]
         assert str_array_var.value == ["a", "b", "c"]
@@ -192,7 +212,7 @@ class TestComplexScenarios(unittest.TestCase):
             }
         
         var = ModelVariable(name="large_dict", var_type=dict, is_array=False)
-        var.value = large_dict
+        var.value_forced = large_dict
         
         xml_values = get_xml_str_values(is_array=False, value=var.value)
         assert xml_values is not None
@@ -220,7 +240,7 @@ class TestErrorHandlingIntegration(unittest.TestCase):
         """Test type mismatch error scenarios."""
         int_var = ModelVariable(name="test_int", var_type=int, is_array=False)
         
-        int_var.value = 42
+        int_var.value_forced = 42
         assert int_var.value == 42
         
         dict_var = ModelVariable(name="test_dict", var_type=dict, is_array=False)

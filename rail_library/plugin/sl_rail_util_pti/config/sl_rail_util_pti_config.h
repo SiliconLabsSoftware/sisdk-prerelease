@@ -54,7 +54,7 @@
 // <pti signal=DOUT,(DFRAME),(DCLK)> SL_RAIL_UTIL_PTI
 // $[PTI_SL_RAIL_UTIL_PTI]
 #warning "RAIL PTI peripheral not configured"
-#define SL_RAIL_UTIL_PTI_PERIPHERAL         PTI
+// #define SL_RAIL_UTIL_PTI_PERIPHERAL         PTI
 
 // SL_RAIL_UTIL_PTI_DOUT_* needed for UART_ONEWIRE and UART and SPI modes
 // #define SL_RAIL_UTIL_PTI_DOUT_PORT         gpioPortB

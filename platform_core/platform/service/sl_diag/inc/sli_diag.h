@@ -488,8 +488,8 @@ sl_status_t sli_diag_ring_record(uint32_t reason_id,
  *       exceptions 2 to 7 are SLI_DIAG_CONTEXT_FAULT, others are
  *       SLI_DIAG_CONTEXT_ISR. An assert adds SLI_DIAG_CONTEXT_FAULT and a
  *       watchdog warning adds SLI_DIAG_CONTEXT_PRE_RESET.
- * @note A watchdog warning is captured at minimal depth within
- *       SL_DIAG_CAPTURE_TIME_BUDGET_WDT_US.
+ * @note A watchdog warning is captured at minimal depth using the platform
+ *       watchdog-warning profile provider budget (SLI_DIAG_CAPTURE_TIME_BUDGET_WDT_US).
  * @note The record is INCOMPLETE if any evidence is missing, including the
  *       CPU Crash TLV. A CPU Crash provider that wrote nothing, for example
  *       because it is not registered, is reported as UNAVAILABLE.

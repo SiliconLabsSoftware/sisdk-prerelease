@@ -1,4 +1,19 @@
+id: brd4183b_config
+label: brd4183b config
+description: Configuration files for BRD4183B
+package: boards
 category: Platform|Board|Config
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+root_path: boards/hardware/board/config
+requires:
+- name: brd4183b
+provides:
+- name: brd4183b_config
 config_file:
 - condition:
   - brd4001a
@@ -1013,18 +1028,3 @@ config_file:
     instance: vcom
     vendor: silabs
   path: brd4183b_brd4002b/sl_uart_usart_vcom_config.h
-description: Configuration files for BRD4183B
-id: brd4183b_config
-label: brd4183b config
-metadata:
-  sbom:
-    license: Zlib
-package: boards
-provides:
-- name: brd4183b_config
-quality: production
-requires:
-- name: brd4183b
-root_path: boards/hardware/board/config
-ui_hints:
-  visibility: never

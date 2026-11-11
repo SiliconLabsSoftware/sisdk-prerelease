@@ -1,0 +1,45 @@
+repos:
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    # uv-pre-commit version
+    rev: 0.11.25
+    hooks:
+      - id: uv-lock
+        args: ["--verbose"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.16
+    hooks:
+      # Local linter with only warning
+      - id: ruff
+        name: ruff-lint-warnings
+        args:
+        - --exit-zero
+        - --output-format=full
+        verbose: true
+        stages: [pre-commit]
+
+      # CI: strict linter with fail
+      - id: ruff
+        name: ruff-strict
+        args: [--output-format=full]
+        stages: [manual]
+
+  - repo: local
+    hooks:
+      - id: ruff-format-warning
+        name: ruff format (warning only)
+        entry: python internal/tools/ci_scripts/ruff_format.py --mode WARNING
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+        stages: [ pre-commit ]
+
+      - id: ruff-format-strict
+        name: ruff format (strict)
+        entry: python internal/tools/ci_scripts/ruff_format.py --mode ERROR
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+        stages: [ manual ]

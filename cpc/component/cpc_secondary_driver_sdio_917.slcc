@@ -28,4 +28,7 @@ template_contribution:
   value: sdio
 - name: component_catalog
   value: cpc_driver_sdio
+documentation:
+  docset: gecko-platform
+  document: platform-cpc-overview
 root_path: cpc

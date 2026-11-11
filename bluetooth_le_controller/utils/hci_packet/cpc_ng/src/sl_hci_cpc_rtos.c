@@ -1,0 +1,124 @@
+/***************************************************************************//**
+ * @file
+ * @brief RTOS interface for Bluetooth HCI CPC-NG driver
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <cmsis_os2.h>
+#include "sl_status.h"
+#include "sl_core.h"
+#include "sl_cmsis_os2_common.h"
+#include "sl_btctrl_hci_cpc_rtos.h"
+#include "sl_btctrl_hci_packet.h"
+#include "sli_hci_cpc.h"
+#include "sli_hci_cpc_rtos.h"
+
+#define SL_HCI_CPC_NG_RX_NOTIFY_DEPTH 3U
+
+#define SL_BTCTRL_RTOS_HCI_TASK_PRIORITY osPriorityRealtime3
+#define SL_BTCTRL_RTOS_HCI_TASK_STACK_SIZE 1000
+
+static osSemaphoreId_t hci_cpc_signal_semaphore;
+
+static void hci_cpc_rtos_deinit(void);
+static void hci_cpc_thread(void *p_arg);
+static osThreadId_t tid_thread_hci;
+__ALIGNED(8) static uint8_t thread_hci_stk[
+  SL_BTCTRL_RTOS_HCI_TASK_STACK_SIZE & 0xFFFFFFF8u];
+__ALIGNED(4) static uint8_t thread_hci_cb[osThreadCbSize];
+static const osThreadAttr_t thread_hci_attr = {
+  .name = "Bluetooth HCI CPC-NG",
+  .stack_mem = thread_hci_stk,
+  .stack_size = sizeof(thread_hci_stk),
+  .cb_mem = thread_hci_cb,
+  .cb_size = osThreadCbSize,
+  .priority = (osPriority_t) SL_BTCTRL_RTOS_HCI_TASK_PRIORITY
+};
+
+uint8_t sl_btctrl_hci_cpc_get_stack_space(uint32_t *stack_space)
+{
+  *stack_space = osThreadGetStackSpace(tid_thread_hci);
+  return 0;
+}
+
+static void hci_cpc_rtos_deinit(void)
+{
+  (void) osSemaphoreDelete(hci_cpc_signal_semaphore);
+  hci_cpc_signal_semaphore = NULL;
+
+  (void) osThreadTerminate(tid_thread_hci);
+  tid_thread_hci = NULL;
+}
+
+sl_status_t sl_btctrl_hci_cpc_rtos_init(void)
+{
+  if (hci_cpc_signal_semaphore == NULL) {
+    hci_cpc_signal_semaphore = osSemaphoreNew(SL_HCI_CPC_NG_RX_NOTIFY_DEPTH, 0, NULL);
+  }
+  if (hci_cpc_signal_semaphore == NULL) {
+    goto failed;
+  }
+
+  if (tid_thread_hci == NULL) {
+    tid_thread_hci = osThreadNew(hci_cpc_thread,
+                                 NULL,
+                                 &thread_hci_attr);
+  }
+  if (tid_thread_hci == NULL) {
+    goto failed;
+  }
+
+  // CPC-NG apps do not run sl_system service_process_action; kick the HCI thread once.
+  (void) osSemaphoreRelease(hci_cpc_signal_semaphore);
+
+  return SL_STATUS_OK;
+  failed:
+  hci_cpc_rtos_deinit();
+  return SL_STATUS_FAIL;
+}
+
+void sli_hci_cpc_rtos_on_transport_notify(uint8_t endpoint_id, void *arg)
+{
+  (void)endpoint_id;
+  (void)arg;
+
+  osSemaphoreRelease(hci_cpc_signal_semaphore);
+}
+
+static void hci_cpc_thread(void *p_arg)
+{
+  (void)p_arg;
+  while (true) {
+    (void) osSemaphoreAcquire(hci_cpc_signal_semaphore, osWaitForever);
+    do {
+      sl_btctrl_hci_packet_step();
+    } while (sli_hci_cpc_new_data() > 0 && sli_hci_cpc_is_connected());
+  }
+}

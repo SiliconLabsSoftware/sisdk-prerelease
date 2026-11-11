@@ -47,7 +47,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 #include "netinet/in.h"
-#include "sl_wisun_event_mgr.h"
+#include "sl_wisun_events.h"
 #include "sl_component_catalog.h"
 
 #if defined(SL_CATALOG_WISUN_LFN_DEVICE_SUPPORT_PRESENT)
@@ -150,6 +150,16 @@ typedef struct sl_wisun_app_core_time_stat {
  * @details Initializing mutex, socket handler and set Wi-SUN settings.
  *****************************************************************************/
 void sl_wisun_app_core_init(void);
+
+/**************************************************************************//**
+ * @brief Handle Wi-SUN stack indications for Application Core.
+ * @details Updates connection state, join state, address cache and related
+ *          Application Core bookkeeping. Applications that implement
+ *          sl_wisun_on_event() should call this helper so helpers such as
+ *          sl_wisun_app_core_util_connect_and_wait() keep working.
+ * @param[in] evt Event received from the stack
+ *****************************************************************************/
+void sl_wisun_app_core_on_event(sl_wisun_evt_t *evt);
 
 /**************************************************************************//**
  * @brief Get application core state

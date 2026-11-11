@@ -5,16 +5,47 @@ description: >
   Retained diagnostics framework. Reserves a retained, non-initialized RAM
   region (.sl_diag_retained.noinit) that holds a control block, one or two
   retained record slots, an optional Summary Ring and an optional Mini
-  Emergency Tail. The diagnostic profile (SL_DIAG_PROFILE) selects the
-  features compiled into the product. With profile Off, no retained region
-  is allocated.
+  Emergency Tail. Crash Capture and stack components capture incidents into
+  this region as TLV records. Stack teams link optional providers through the
+  sl_diag_linked_provider template contribution (see sl_diag_format.h).
 
-  Profiles: Off has no retained RAM and no API. Crash Basic stores the CPU
-  crash record. Crash Standard adds the Trigger, Reset/Boot and Build
-  metadata. Crash with Summary adds the Summary Ring. Full Template enables
-  all features, including non-crash capture. Stack components link providers
-  through the sl_diag_linked_provider template contribution (see
-  sl_diag_format.h).
+  Diagnostic profile (SL_DIAG_PROFILE) selects which features are compiled in.
+  With profile Off, no retained region is allocated and the public API is
+  stubbed; RAM cost matches not having the component.
+
+  Profiles:
+    Off — no retained diagnostics.
+    Crash Basic — CPU crash record (Crash Capture / CPU Crash provider).
+    Crash Standard — Crash Basic plus Trigger, Reset/Boot and Build metadata.
+    Crash with Summary — Crash Standard plus Summary Ring and recent-event tail.
+    Full Template — all features, including non-crash capture and extended
+    providers (System, heap, host interface, NWP health, and similar).
+
+  SL_DIAG_PROFILE — Diagnostic profile. Controls SL_DIAG_ENABLE, retained layout
+  size, Summary Ring, non-crash triggers, extended providers, and repeat
+  counting. Default: Off.
+
+  SL_DIAG_SLOT_COUNT — Number of retained record slots (1 or 2). Two slots
+  enable copy-on-commit so a new capture can be written while the previous
+  record remains readable until commit completes. Default: 1.
+
+  SL_DIAG_EMERGENCY_ENABLE — When enabled, reserves a Mini Emergency Tail with
+  minimal crash evidence if a full record commit does not finish before reset.
+  Default: disabled.
+
+  SL_DIAG_STACK_SNAPSHOT_BYTES — Optional raw stack bytes copied into the CPU
+  crash scratch and CPU Crash TLV (0 disables). Must be a multiple of 4; range
+  0–256. Increases fault-handler scratch and every record slot size. Default: 0.
+
+  SL_DIAG_CAPTURE_TIME_BUDGET_US — Provider capture time budget in microseconds
+  for hard fault, assert, and non-crash triggers (IPC timeout, manual capture,
+  and similar). Only provider callbacks consume this budget; core TLVs and
+  commit are not charged. Crash paths run with interrupts masked while the
+  hardware watchdog may still run. Range 1–5000; reference default 5000.
+
+  SL_DIAG_MAX_PRIVACY_CLASS — Highest provider privacy class executed in this
+  build. Providers above this class are not run; their status is recorded as
+  REDACTED. Values: Public, Operational (default), Sensitive, Secret. 
 category: Services|Diagnostics
 quality: evaluation
 metadata:

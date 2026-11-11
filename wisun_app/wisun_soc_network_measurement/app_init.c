@@ -41,7 +41,6 @@
 #include "sl_wisun_network_measurement.h"
 #include "sl_wisun_network_measurement_remote_ctrl.h"
 #include "sl_wisun_network_measurement_stat.h"
-#include "sl_wisun_event_mgr.h"
 #include "app.h"
 #include "sl_wisun_coap_rhnd.h"
 
@@ -132,7 +131,6 @@ void app_init(void)
   coap_resource.redirect_response      = NULL;
   coap_resource.discoverable           = true;
   EFM_ASSERT(sl_wisun_coap_rhnd_resource_add(&coap_resource) == SL_STATUS_OK);
-
 
   // Creating App main thread
   const osThreadAttr_t app_task_attr = {

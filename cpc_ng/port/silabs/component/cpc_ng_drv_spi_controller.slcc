@@ -1,0 +1,32 @@
+id: cpc_ng_drv_spi_controller
+package: cpc_ng
+description: |
+  Shared SPI-controller physical-link driver.
+  Controller-specific (USART/EUSART) instances are provided by the corresponding
+  SPI primary components.
+category: Services|CPC-NG|Driver
+quality: internal
+label: CPC-NG - SPI Controller
+ui_hints:
+  visibility: never
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/silabs
+source:
+- path: src/sl_cpc_drv_spi_controller.c
+- path: src/sli_cpc_drv_spi_controller.h
+include:
+- path: inc
+  file_list:
+  - path: sl_cpc_drv_spi_controller.h
+provides:
+- name: cpc_ng_drv_spi_controller
+requires:
+- name: clock_manager_runtime
+- name: cpc_ng
+- name: cpc_ng_port_silabs
+- name: hal_gpio
+- name: sl_common
+- name: spidrv_core
+- name: status

@@ -14,13 +14,23 @@
  */
 
 #include <stdarg.h>
+#include <stdbool.h>
 
 #include "SEGGER_SYSVIEW.h"
 #include "sl_sysview_custom_api.h"
 #include "sl_log_platform_specific.h"
 #include "sl_log_common_config.h"
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
 extern SEGGER_SYSVIEW_CORE_CONTEXT _ContextCaptiveCore;
+
+#if defined(SL_CATALOG_LOG_CAPTIVE_NWP_SYSTEMVIEW_PRESENT)
+extern SEGGER_SYSVIEW_CORE_CONTEXT _ContextNwpTxCore;
+extern bool sli_log_systemview_nwp_tx_context_available(void);
+#endif
 /**
  * @brief Global timestamp variable for SystemView events
  *
@@ -90,8 +100,9 @@ sl_status_t sl_log_systemview_deinit(void)
  * Iterates over a ring buffer of log events starting at the provided read_index and
  * attempts to record up to event_count events via sl_log_systemview_record_event().
  * The read_index wraps to 0 when it reaches SL_LOG_NUMBER_OF_EVENTS (ring buffer behavior).
- * Processing stops early if any call to sl_log_systemview_record_event() returns a status
- * different from SL_STATUS_OK.
+ * A dropped packet (SL_STATUS_HAS_OVERFLOWED or SL_STATUS_NOT_AVAILABLE) does not stop the
+ * batch, so every event is still offered to SystemView. Any other status different from
+ * SL_STATUS_OK stops processing early.
  *
  * @param[in] buffer
  *   Pointer to the ring buffer containing log events. The buffer is expected to have
@@ -106,12 +117,13 @@ sl_status_t sl_log_systemview_deinit(void)
  *
  * @return sl_status_t
  *   - SL_STATUS_OK if all requested events were successfully recorded.
- *   - The first non-OK status returned by sl_log_systemview_record_event() if a failure occurs.
+ *   - Otherwise the last non-OK status returned by sl_log_systemview_record_event().
  *
  */
 sl_status_t sl_log_systemview_write(const sl_log_event_t *buffer, uint32_t read_index, uint32_t event_count)
 {
   sl_status_t status = SL_STATUS_OK;
+  sl_status_t event_status;
   if(event_count == 0){
     return SL_STATUS_OK;
   }
@@ -125,9 +137,13 @@ sl_status_t sl_log_systemview_write(const sl_log_event_t *buffer, uint32_t read_
     if (read_index == SL_LOG_NUMBER_OF_EVENTS) {
       read_index = 0;
     }
-    status = sl_log_systemview_record_event(&buffer[read_index]);
-    if(status!=SL_STATUS_OK){
-      break;
+    event_status = sl_log_systemview_record_event(&buffer[read_index]);
+    if (event_status != SL_STATUS_OK) {
+      status = event_status;
+      if ((event_status != SL_STATUS_HAS_OVERFLOWED)
+          && (event_status != SL_STATUS_NOT_AVAILABLE)) {
+        break;
+      }
     }
     read_index++;
   }
@@ -157,14 +173,24 @@ sl_status_t sl_log_systemview_write(const sl_log_event_t *buffer, uint32_t read_
  *                  - args: Array of up to SL_LOG_CONFIG_ARG 32-bit arguments
  *                  - arg_count: Number of valid arguments (0 to SL_LOG_CONFIG_ARG)
  *                  - Additional metadata (core_id, flags, version)
+ *
+ * @return SL_STATUS_OK               Packet stored in the RTT buffer.
+ * @return SL_STATUS_NOT_READY        Target context stopped; nothing stored,
+ *                                    the event can be offered again.
+ * @return SL_STATUS_HAS_OVERFLOWED   RTT buffer full; the packet was dropped
+ *                                    and SEGGER is in its overflow state.
+ * @return SL_STATUS_NOT_AVAILABLE    NWP TX event, but the TX context has no
+ *                                    RTT channel; the packet was dropped.
+ * @return SL_STATUS_INVALID_PARAMETER NULL event or too many arguments.
  */
 sl_status_t sl_log_systemview_record_event(const sl_log_event_t *event)
 {
-  sl_status_t status = SL_STATUS_OK;
   U8 *pPayload;
   U8 *pPayloadStart;
   unsigned int NumBytes;
   int i;
+  int sent;
+  SEGGER_SYSVIEW_CORE_CONTEXT *context;
 
   if (event == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -219,19 +245,38 @@ sl_status_t sl_log_systemview_record_event(const sl_log_event_t *event)
     *--pPayloadStart = (U8)(event->event_id | 0x80);
   }
 
-  if (event->core_id == 1) {
-    SEGGER_SYSVIEW_SendPacket_Ex(&_ContextCaptiveCore,
-                                 event->timestamp,
-                                 pPayloadStart,
-                                 pPayload);
+  if (event->core_id == 1u) {
+    context = &_ContextCaptiveCore;
+#if defined(SL_CATALOG_LOG_CAPTIVE_NWP_SYSTEMVIEW_PRESENT)
+  } else if (event->core_id == 2u) {
+    /* Allocation is attempted once, in SEGGER_SYSVIEW_Conf(); it never recovers. */
+    if (!sli_log_systemview_nwp_tx_context_available()) {
+      return SL_STATUS_NOT_AVAILABLE;
+    }
+
+    context = &_ContextNwpTxCore;
+#endif
   } else {
-    SEGGER_SYSVIEW_SendPacket_Ex(SEGGER_SYSVIEW_GetMainContext(),
-                                 event->timestamp,
-                                 pPayloadStart,
-                                 pPayload);
+    context = SEGGER_SYSVIEW_GetMainContext();
   }
 
-  return status;
+  sent = SEGGER_SYSVIEW_SendPacket_Ex(context,
+                                     event->timestamp,
+                                     pPayloadStart,
+                                     pPayload);
+  if (sent != 0) {
+    return SL_STATUS_OK;
+  }
+
+  /*
+   * SendPacket_Ex() returns 0 both when the context is stopped and when RTT is
+   * full. Only a full buffer leaves EnableState at 2: SEGGER has entered its
+   * overflow state and reports the loss once RTT drains. Any other state
+   * (stopped, or restarted concurrently) stored nothing, so a retry cannot
+   * duplicate the packet.
+   */
+  return (context->EnableState == 2u) ? SL_STATUS_HAS_OVERFLOWED
+                                      : SL_STATUS_NOT_READY;
 }
 
 /**

@@ -66,3 +66,5 @@ class PhysStudioIEEE802154Margay(PhysStudioIEEE802154Ocelot):
         self._set_xtal_frequency(phy, xtal_freq_hz=39000000)
 
         return phy
+
+    

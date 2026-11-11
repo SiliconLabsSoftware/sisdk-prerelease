@@ -1,0 +1,64 @@
+id: "wisun_ffn_unicast_idle_schedule"
+label: "Wi-SUN FFN unicast idle scheduling"
+description: >
+  Adds the capability to set a repeating FFN schedule in which some of the background unicast listening slots are omitted.
+  FFNs receive local scheduling and peer prediction; LFNs and BRs receive peer prediction only.
+package: "wisun"
+category: "Wi-SUN"
+quality: "production"
+root_path: "wisun/./stack"
+
+requires:
+- name: "a_wisun_stack"
+- name: "wisun_low_power"
+  condition:
+  - "wisun_stack_ffn"
+
+provides:
+- name: "wisun_ffn_unicast_idle_schedule_implementation"
+- name: "wisun_ffn_unicast_idle_schedule"
+
+library:
+- path: "libwisun_ffn_unicast_idle_schedule_efr32xg2x_gcc_debug.a"
+  condition: [device_series_2, toolchain_gcc, wisun_stack_debug, wisun_stack_ffn]
+- path: "libwisun_ffn_unicast_idle_schedule_efr32xg2x_iar_debug.a"
+  condition: [device_series_2, toolchain_iar, wisun_stack_debug, wisun_stack_ffn]
+- path: "libwisun_ffn_unicast_idle_schedule_efr32xg2x_llvm_debug.a"
+  condition: [device_series_2, toolchain_llvm, wisun_stack_debug, wisun_stack_ffn]
+- path: "libwisun_ffn_unicast_idle_schedule_efr32xg2x_gcc_release.a"
+  condition: [device_series_2, toolchain_gcc, wisun_stack_ffn]
+  unless: [wisun_stack_debug]
+- path: "libwisun_ffn_unicast_idle_schedule_efr32xg2x_iar_release.a"
+  condition: [device_series_2, toolchain_iar, wisun_stack_ffn]
+  unless: [wisun_stack_debug]
+- path: "libwisun_ffn_unicast_idle_schedule_efr32xg2x_llvm_release.a"
+  condition: [device_series_2, toolchain_llvm, wisun_stack_ffn]
+  unless: [wisun_stack_debug]
+- path: "libwisun_ffn_unicast_idle_schedule_peer_only_efr32xg2x_gcc_debug.a"
+  condition: [device_series_2, toolchain_gcc, wisun_stack_debug]
+  unless: [wisun_stack_ffn]
+- path: "libwisun_ffn_unicast_idle_schedule_peer_only_efr32xg2x_iar_debug.a"
+  condition: [device_series_2, toolchain_iar, wisun_stack_debug]
+  unless: [wisun_stack_ffn]
+- path: "libwisun_ffn_unicast_idle_schedule_peer_only_efr32xg2x_llvm_debug.a"
+  condition: [device_series_2, toolchain_llvm, wisun_stack_debug]
+  unless: [wisun_stack_ffn]
+- path: "libwisun_ffn_unicast_idle_schedule_peer_only_efr32xg2x_gcc_release.a"
+  condition: [device_series_2, toolchain_gcc]
+  unless: [wisun_stack_debug, wisun_stack_ffn]
+- path: "libwisun_ffn_unicast_idle_schedule_peer_only_efr32xg2x_iar_release.a"
+  condition: [device_series_2, toolchain_iar]
+  unless: [wisun_stack_debug, wisun_stack_ffn]
+- path: "libwisun_ffn_unicast_idle_schedule_peer_only_efr32xg2x_llvm_release.a"
+  condition: [device_series_2, toolchain_llvm]
+  unless: [wisun_stack_debug, wisun_stack_ffn]
+
+template_contribution:
+- name: component_catalog
+  value: wisun_ffn_unicast_idle_schedule_support
+  condition:
+  - "wisun_stack_ffn"
+
+metadata:
+  sbom:
+    license: MSLA

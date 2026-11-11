@@ -11,11 +11,22 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from pycalcmodel.core.model import ModelRoot
+from pycalcmodel.core.rm_studio_factory import RMStudioFactory
 
 
 class TestModelRoot(unittest.TestCase):
     """Test ModelRoot class creation and basic properties."""
-    
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up any state specific to the test class."""
+        RMStudioFactory()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up any state specific to the test class."""
+        RMStudioFactory.clear()
+
     def test_create_model_root_basic(self):
         """Test creating a ModelRoot with basic parameters."""
         model = ModelRoot(
@@ -103,7 +114,17 @@ class TestModelRoot(unittest.TestCase):
 
 class TestModelRootValidation(unittest.TestCase):
     """Test ModelRoot parameter validation."""
-    
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up any state specific to the test class."""
+        RMStudioFactory()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up any state specific to the test class."""
+        RMStudioFactory.clear()
+
     def test_invalid_part_family_type(self):
         """Test that non-string part_family raises assertion error."""
         with self.assertRaises(AssertionError):
@@ -139,7 +160,17 @@ class TestModelRootValidation(unittest.TestCase):
 
 class TestModelRootEdgeCases(unittest.TestCase):
     """Test edge cases for ModelRoot."""
-    
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up any state specific to the test class."""
+        RMStudioFactory()
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up any state specific to the test class."""
+        RMStudioFactory.clear()
+
     def test_empty_string_part_family(self):
         """Test creating ModelRoot with empty string part_family."""
         model = ModelRoot(

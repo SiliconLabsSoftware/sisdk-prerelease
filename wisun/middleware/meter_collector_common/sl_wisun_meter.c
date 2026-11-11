@@ -46,8 +46,8 @@
 #include "sys/socket.h"
 #include "arpa/inet.h"
 #include "netinet/in.h"
-#include "sl_wisun_event_mgr.h"
 #include "sl_wisun_app_core.h"
+#include "sl_wisun_events.h"
 #include "sl_wisun_config.h"
 #include "sl_wisun_trace_util.h"
 #include "sl_wisun_meter.h"
@@ -144,8 +144,11 @@ static uint8_t _device_type = WISUN_CONFIG_DEVICE_TYPE;
 static uint8_t _device_type = SL_WISUN_ROUTER;
 #endif
 
-/// LFN event notification channel
-static uint8_t _lfn_evt_notify_ch = 0U;
+/// LFN wake-up event flags
+static osEventFlagsId_t _lfn_wake_flags = NULL;
+
+/// LFN wake-up event flag bit
+#define SL_WISUN_METER_LFN_WAKE_FLAG  (1UL << 0)
 
 /// Metrics storage mempool
 static sl_mempool_t _metrics_mpool = { 0 };
@@ -179,8 +182,8 @@ void sl_wisun_meter_init(void)
   sl_wisun_rht_init();
 #endif
   if (_device_type == SL_WISUN_LFN) {
-    EFM_ASSERT(app_wisun_em_subscribe_evt_notification(SL_WISUN_MSG_LFN_WAKE_UP_IND_ID,
-                                                       &_lfn_evt_notify_ch) != SL_STATUS_FAIL);
+    _lfn_wake_flags = osEventFlagsNew(NULL);
+    EFM_ASSERT(_lfn_wake_flags != NULL);
   }
   // Init metrics buffer
   EFM_ASSERT(sl_mempool_create(&_metrics_mpool,
@@ -198,6 +201,15 @@ void sl_wisun_meter_init(void)
   if (SL_WISUN_METER_MAX_TX_PKT < SL_WISUN_METER_MEASUREMENT_BUFFER_SIZE) {
     printf("[Warning: TX buffer is truncated to store %u packets]\n",
            SL_WISUN_METER_MAX_TX_PKT);
+  }
+}
+
+void sl_wisun_meter_on_event(sl_wisun_evt_t *evt)
+{
+  if ((_device_type == SL_WISUN_LFN)
+      && (_lfn_wake_flags != NULL)
+      && (evt->header.id == SL_WISUN_MSG_LFN_WAKE_UP_IND_ID)) {
+    (void) osEventFlagsSet(_lfn_wake_flags, SL_WISUN_METER_LFN_WAKE_FLAG);
   }
 }
 
@@ -227,7 +239,10 @@ void sl_wisun_meter_loop(void)
   // Receiver loop
   SL_WISUN_THREAD_LOOP {
     if (_device_type == SL_WISUN_LFN) {
-      app_wisun_em_wait_evt_notification(SL_WISUN_MSG_LFN_WAKE_UP_IND_ID, _lfn_evt_notify_ch);
+      (void) osEventFlagsWait(_lfn_wake_flags,
+                              SL_WISUN_METER_LFN_WAKE_FLAG,
+                              osFlagsWaitAny,
+                              osWaitForever);
     }
     memset(buff, 0U, SL_WISUN_METER_RECV_BUFF_SIZE);
     res = recvfrom(sockd, buff, SL_WISUN_METER_RECV_BUFF_SIZE - 1, 0L,

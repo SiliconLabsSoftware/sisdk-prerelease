@@ -43,7 +43,7 @@
 #include "sl_memory_manager.h"
 #include "border_router/sl_wisun_br_api.h"
 #include "sl_wisun_api.h"
-#include "sl_wisun_event_mgr.h"
+#include "sl_wisun_app_core.h"
 #include "sl_wisun_keychain.h"
 #include "sl_select_util.h"
 #include "sys/socket.h"
@@ -93,19 +93,23 @@ static osEventFlagsId_t app_service_event_flags = NULL;
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
-/* Wi-SUN socket data available event handler */
-void sl_wisun_socket_data_available_event_hnd(sl_wisun_evt_t *evt)
+#ifndef SL_CATALOG_WISUN_EVENT_MGR_PRESENT
+void sl_wisun_on_event(sl_wisun_evt_t *evt)
 {
-  (void) evt;
-  sl_wisun_check_read_sockfd_set();
-}
+  sl_wisun_app_core_on_event(evt);
 
-/* Wi-SUN socket data sent event handler */
-void sl_wisun_socket_data_sent_event_hnd(sl_wisun_evt_t *evt)
-{
-  (void) evt;
-  sl_wisun_check_write_sockfd_set();
+  switch (evt->header.id) {
+    case SL_WISUN_MSG_SOCKET_DATA_AVAILABLE_IND_ID:
+      sl_wisun_check_read_sockfd_set();
+      break;
+    case SL_WISUN_MSG_SOCKET_DATA_SENT_IND_ID:
+      sl_wisun_check_write_sockfd_set();
+      break;
+    default:
+      break;
+  }
 }
+#endif
 
 /* App task function */
 void app_task(void *args)

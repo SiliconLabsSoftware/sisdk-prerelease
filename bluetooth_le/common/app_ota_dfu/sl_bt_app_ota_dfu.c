@@ -636,13 +636,18 @@ void sl_bt_app_ota_dfu_reboot(void)
 *****************************************************************************/
 SL_WEAK void sl_bt_app_ota_dfu_on_status_event(sl_bt_app_ota_dfu_status_evt_t *evt)
 {
-  // Default error handling: trying to recover.
-  if (evt->evt_info.sts.status == SL_BT_APP_OTA_DFU_ERROR) {
-    // Restart the system, install the image.
-    (void)sl_bt_app_ota_dfu_restart_progress();
-  } else if (evt->evt_info.sts.status == SL_BT_APP_OTA_DFU_WAIT_FOR_REBOOT) {
-    // Default finish action: auto-reboot.
-    sl_bt_app_ota_dfu_reboot();
+  switch (evt->event_id) {
+    case SL_BT_APP_OTA_DFU_EVT_STATE_CHANGE_ID:
+      if (evt->evt_info.sts.status == SL_BT_APP_OTA_DFU_ERROR) {
+        // Default error handling: trying to recover.
+        (void)sl_bt_app_ota_dfu_restart_progress();
+      } else if (evt->evt_info.sts.status == SL_BT_APP_OTA_DFU_WAIT_FOR_REBOOT) {
+        // Default finish action: auto-reboot.
+        sl_bt_app_ota_dfu_reboot();
+      }
+      break;
+    default:
+      break;
   }
 }
 

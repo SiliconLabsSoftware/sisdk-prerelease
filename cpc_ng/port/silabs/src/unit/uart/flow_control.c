@@ -42,7 +42,7 @@
 #include <unity_fixture.h>
 
 #include "sl_cpc_drv_uart_eusart.h"
-#include "sl_cpc_drv_uart_eusart_exp_config.h"
+#include "sl_cpc_ng_drv_uart_eusart_exp_config.h"
 
 #include "harness/uart.h"
 

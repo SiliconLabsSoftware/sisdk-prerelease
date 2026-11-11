@@ -1,3 +1,1 @@
-
-from pycalcmodel._version import __version__
-
+from pycalcmodel._version import __version__ as __version__

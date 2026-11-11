@@ -43,11 +43,14 @@
 #include "sl_wisun_types.h"
 #include "sl_wisun_api.h"
 #include "sl_wisun_config.h"
-#include "sl_wisun_event_mgr.h"
 #include "sl_wisun_trace_util.h"
 #include "sl_sleeptimer.h"
 #include "sl_memory_manager.h"
 #include "sl_component_catalog.h"
+
+#if defined(SL_CATALOG_WISUN_EVENT_MGR_PRESENT)
+#include "sl_wisun_event_mgr.h"
+#endif
 
 #if defined(SL_CATALOG_WISUN_APP_SETTING_PRESENT)
 #include "sl_wisun_app_setting.h"
@@ -345,7 +348,6 @@ void sl_wisun_network_update_event_hnd(sl_wisun_evt_t *evt)
   app_wisun_trace_util_destroy_ip_str(ip_str);
   app_wisun_trace_util_destroy_time_str(time_str);
   __CHECK_FOR_STATUS(evt->evt.network_update.status);
-  sl_wisun_network_update_event_app_hnd(evt);
 }
 
 /* Connected event handler */
@@ -421,13 +423,11 @@ void sl_wisun_join_state_event_hnd(sl_wisun_evt_t *evt)
   }
 #endif
   __CHECK_FOR_STATUS(evt->evt.join_state.status);
-  sl_wisun_join_state_event_app_hnd(evt);
 }
 
 void sl_wisun_lfn_wake_up_hnd(sl_wisun_evt_t *evt)
 {
   __CHECK_FOR_STATUS(evt->evt.lfn_wake_up.status);
-  sl_wisun_lfn_wake_up_app_hnd(evt);
 }
 
 void sl_wisun_multicast_reg_finish_hnd(sl_wisun_evt_t *evt)
@@ -462,7 +462,6 @@ void sl_wisun_direct_connect_status_hnd(sl_wisun_evt_t *evt)
 void sl_wisun_br_stopped_hnd(sl_wisun_evt_t *evt)
 {
   __CHECK_FOR_STATUS(evt->evt.br_stopped.status);
-  sl_wisun_br_stopped_app_hnd(evt);
 }
 
 void sl_wisun_mode_switch_fallback_hnd(sl_wisun_evt_t *evt)
@@ -473,12 +472,72 @@ void sl_wisun_mode_switch_fallback_hnd(sl_wisun_evt_t *evt)
 void sl_wisun_regulation_tx_level_hnd(sl_wisun_evt_t *evt)
 {
   __CHECK_FOR_STATUS(evt->evt.regulation_tx_level.status);
-  sl_wisun_regulation_tx_level_app_hnd(evt);
 }
 
 void sl_wisun_br_routing_table_update_hnd(sl_wisun_evt_t *evt)
 {
   __CHECK_FOR_STATUS(evt->evt.br_routing_table_update.status);
+}
+
+void sl_wisun_app_core_on_event(sl_wisun_evt_t *evt)
+{
+  switch (evt->header.id) {
+    case SL_WISUN_MSG_NETWORK_UPDATE_IND_ID:
+      sl_wisun_network_update_event_hnd(evt);
+      break;
+    case SL_WISUN_MSG_CONNECTED_IND_ID:
+      sl_wisun_connected_event_hnd(evt);
+      break;
+    case SL_WISUN_MSG_DISCONNECTED_IND_ID:
+      sl_wisun_disconnected_event_hnd(evt);
+      break;
+    case SL_WISUN_MSG_CONNECTION_LOST_IND_ID:
+      sl_wisun_connection_lost_event_hnd(evt);
+      break;
+    case SL_WISUN_MSG_ERROR_IND_ID:
+      sl_wisun_error_event_hnd(evt);
+      break;
+    case SL_WISUN_MSG_JOIN_STATE_IND_ID:
+      sl_wisun_join_state_event_hnd(evt);
+      break;
+    case SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID:
+      sl_wisun_regulation_tx_level_hnd(evt);
+      break;
+    case SL_WISUN_MSG_LFN_WAKE_UP_IND_ID:
+      sl_wisun_lfn_wake_up_hnd(evt);
+      break;
+    case SL_WISUN_MSG_LFN_MULTICAST_REG_IND_ID:
+      sl_wisun_multicast_reg_finish_hnd(evt);
+      break;
+    case SL_WISUN_MSG_DHCP_VENDOR_DATA_IND_ID:
+      sl_wisun_dhcp_vendor_data_hnd(evt);
+      break;
+    case SL_WISUN_MSG_PAN_DEFECT_IND_ID:
+      sl_wisun_pan_defect_hnd(evt);
+      break;
+    case SL_WISUN_MSG_DIRECT_CONNECT_LINK_AVAILABLE_IND_ID:
+      sl_wisun_direct_connect_link_available_hnd(evt);
+      break;
+    case SL_WISUN_MSG_DIRECT_CONNECT_LINK_STATUS_IND_ID:
+      sl_wisun_direct_connect_status_hnd(evt);
+      break;
+    case SL_WISUN_BR_MSG_STOPPED_IND_ID:
+      sl_wisun_br_stopped_hnd(evt);
+      break;
+    case SL_WISUN_MSG_MODE_SWITCH_FALLBACK_IND_ID:
+      sl_wisun_mode_switch_fallback_hnd(evt);
+      break;
+    case SL_WISUN_BR_MSG_ROUTING_TABLE_UPDATE_IND_ID:
+      sl_wisun_br_routing_table_update_hnd(evt);
+      break;
+    default:
+      break;
+  }
+}
+
+SL_WEAK void sl_wisun_on_event(sl_wisun_evt_t *evt)
+{
+  sl_wisun_app_core_on_event(evt);
 }
 
 /* Wi-SUN app core init */

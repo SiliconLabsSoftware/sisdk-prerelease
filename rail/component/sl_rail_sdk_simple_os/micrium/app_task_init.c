@@ -37,6 +37,7 @@
 #include "app_process.h"
 #include "os_cfg.h"
 #include "os.h"
+#include "sl_code_classification.h"
 
 #if defined(SL_CATALOG_APP_LOG_PRESENT)
 #include "app_log.h"
@@ -111,7 +112,7 @@ void app_task_init(void)
 /*******************************************************************************
  * The function is used to notify kernel to allow the proprietary task to run.
  ******************************************************************************/
-void app_task_notify(void)
+SL_CODE_RAM void app_task_notify(void)
 {
   RTOS_ERR err;
   if (prop_task_running) {

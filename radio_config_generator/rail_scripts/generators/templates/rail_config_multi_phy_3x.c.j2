@@ -246,6 +246,7 @@ static const sl_rail_phy_info_t {{phyInfoEntryName}} = {
   .trecs_pre_bits_to_sync = {{phyInfoEntry.phyInfoData.trecsPreBitsToSync}}UL,
   .preamble_duration_us = {{phyInfoEntry.phyInfoData.preambleDurationUs}}UL,
   .syncword_duration_us = {{phyInfoEntry.phyInfoData.syncwordDurationUs}}UL,
+  .cs_rtt_dig_delay = {{phyInfoEntry.phyInfoData.csRttDigDelay}}UL,
 };
 {% endfor %}
 {%- for modemConfigName, modemConfig in multiPhyConfig.commonStructures.modemConfigEntriesBase.items() %}

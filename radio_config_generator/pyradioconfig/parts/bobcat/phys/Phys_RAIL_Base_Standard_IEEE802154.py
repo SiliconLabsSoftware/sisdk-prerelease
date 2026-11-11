@@ -258,3 +258,10 @@ class PhysRAILBaseStandardIEEE802154Bobcat(PhysInternalBaseStandardIEEE802154Oce
             phy.profile_outputs.AGC_GAINRANGE_PNGAINSTEP.override = 2
             phy.profile_outputs.AGC_CTRL4_PERIODRFPKD.override = 2000
             phy.profile_outputs.AGC_GAINRANGE_GAININCSTEP.override = 2
+
+    def PHY_Internal_IEEE802154_868MHz_coh_thread_sf8(self, model, phy_name=None):
+        pass
+
+    def PHY_Internal_IEEE802154_915MHz_coh_thread_sf8(self, model, phy_name=None):
+        pass
+    

@@ -43,8 +43,9 @@
 #include "sl_mempool.h"
 #include "sl_string.h"
 #include "sl_sleeptimer.h"
-#include "sl_wisun_event_mgr.h"
+#include "cmsis_os2.h"
 #include "sl_wisun_app_core.h"
+#include "sl_wisun_events.h"
 #if defined(SL_CATALOG_WISUN_BR_STACK_PRESENT)
 #include "sl_wisun_app_br_core.h"
 #include "border_router/sl_wisun_br_api.h"
@@ -288,10 +289,6 @@ static sl_wisun_coap_packet_t *_prepare_measurement_resp(const sl_wisun_coap_pac
 static void _redirect_resp(sockaddr_in6_t * const new_addr,
                            const sl_wisun_coap_packet_t * const req_packet);
 
-#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT) \
-  && SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
-#endif
-
 #if SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
 /**************************************************************************//**
  * @brief Handle notification event
@@ -377,9 +374,15 @@ static const sl_wisun_lfn_params_t *_lfn_params = NULL;
 /// LFN threshold in milliseconds to send
 static uint32_t _lfn_threshold_ms = 0;
 
-/// Whether LFN wake-up app hook is active
-static bool _lfn_wakeup_app_hnd_enabled = false;
+/// Whether LFN wake-up handling is active
+static bool _lfn_wakeup_enabled = false;
 #endif
+
+/// LFN wake-up event flags (used by the application task wait helper)
+static osEventFlagsId_t _lfn_wake_flags = NULL;
+
+/// LFN wake-up event flag bit
+#define SL_WISUN_COAP_METER_LFN_WAKE_FLAG  (1UL << 0)
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
@@ -387,13 +390,10 @@ static bool _lfn_wakeup_app_hnd_enabled = false;
 void sl_wisun_coap_meter_init(void)
 {
   static sl_wisun_coap_rhnd_resource_t coap_resource = { 0 };
-#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT) \
-  && SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
 #if defined(WISUN_CONFIG_DEVICE_TYPE)
   uint8_t device_type = WISUN_CONFIG_DEVICE_TYPE;
 #else
   uint8_t device_type = SL_WISUN_ROUTER;
-#endif
 #endif
 
 #if defined(SL_CATALOG_TEMP_SENSOR_PRESENT)
@@ -461,17 +461,19 @@ void sl_wisun_coap_meter_init(void)
   EFM_ASSERT(sl_wisun_coap_rhnd_resource_add(&coap_resource) == SL_STATUS_OK);
 #endif
 
-#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT) \
-  && SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
-  // For LFN devices, tick event should be enabled
   if (device_type == SL_WISUN_LFN) {
+    _lfn_wake_flags = osEventFlagsNew(NULL);
+    EFM_ASSERT(_lfn_wake_flags != NULL);
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT) \
+    && SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
+    // For LFN devices, tick event should be enabled
     sl_wisun_coap_notify_tick_evt_enable(true);
     _lfn_params = _get_lfn_profile();
     EFM_ASSERT(_lfn_params != NULL);
     _lfn_threshold_ms = _calc_lfn_threshold_ms(_lfn_params);
-    _lfn_wakeup_app_hnd_enabled = true;
-  }
+    _lfn_wakeup_enabled = true;
 #endif
+  }
 
   // Init metrics mempool
   EFM_ASSERT(sl_mempool_create(&_metrics_mpool,
@@ -850,17 +852,22 @@ static void _redirect_resp(sockaddr_in6_t * const new_addr,
   }
 }
 
-#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT) \
-  && SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
-void sl_wisun_lfn_wake_up_app_hnd(sl_wisun_evt_t *evt)
+void sl_wisun_coap_meter_on_event(sl_wisun_evt_t *evt)
 {
   uint32_t time = 0UL;
   static uint32_t prev_time = 0UL;
   uint32_t elapsed_time = 0UL;
 
-  (void) evt;
+  if (evt->header.id != SL_WISUN_MSG_LFN_WAKE_UP_IND_ID) {
+    return;
+  }
 
-  if (!_lfn_wakeup_app_hnd_enabled) {
+  if (_lfn_wake_flags != NULL) {
+    (void) osEventFlagsSet(_lfn_wake_flags, SL_WISUN_COAP_METER_LFN_WAKE_FLAG);
+  }
+
+#if !defined(SL_CATALOG_WISUN_BR_STACK_PRESENT) && SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
+  if (!_lfn_wakeup_enabled) {
     return;
   }
 
@@ -871,8 +878,21 @@ void sl_wisun_lfn_wake_up_app_hnd(sl_wisun_evt_t *evt)
     prev_time = time;
     (void) sl_wisun_coap_notify_tick();
   }
-}
+#else
+  (void) time;
+  (void) prev_time;
+  (void) elapsed_time;
 #endif
+}
+
+void sl_wisun_coap_meter_wait_lfn_wakeup(void)
+{
+  EFM_ASSERT(_lfn_wake_flags != NULL);
+  (void) osEventFlagsWait(_lfn_wake_flags,
+                          SL_WISUN_COAP_METER_LFN_WAKE_FLAG,
+                          osFlagsWaitAny,
+                          osWaitForever);
+}
 
 #if SL_WISUN_COAP_NOTIFY_SERVICE_ENABLE
 static sl_wisun_coap_packet_t * _notify_hnd_cb(const sl_wisun_coap_notify_t *notify)

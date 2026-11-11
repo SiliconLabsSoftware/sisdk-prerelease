@@ -15,8 +15,6 @@ class Profile_Base_Sol(Profile_Base_Ocelot):
 
         super().profile_calculate(model)
 
-        model.vars.ofdm_option.value = model.vars.ofdm_option.var_enum.OPT1_OFDM_BW_1p2MHz
-
     def build_optional_profile_inputs(self, model, profile):
         self.make_optional_input(profile, model.vars.syncword_tx_skip, "syncword",
                                      readable_name="Sync Word TX Skip", default=False)

@@ -37,6 +37,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
+#include "sl_wisun_events.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -55,6 +56,22 @@ extern "C" {
  * @details Init CoAP Meter component resources
  *****************************************************************************/
 void sl_wisun_coap_meter_init(void);
+
+/**************************************************************************//**
+ * @brief Handle Wi-SUN stack indications for the CoAP Meter component.
+ * @details Applications that implement sl_wisun_on_event() should call this
+ *          helper so LFN wake-up notification ticks keep working.
+ * @param[in] evt Event received from the stack
+ *****************************************************************************/
+void sl_wisun_coap_meter_on_event(sl_wisun_evt_t *evt);
+
+/**************************************************************************//**
+ * @brief Wait for the next LFN wake-up indication.
+ * @details Blocks until sl_wisun_coap_meter_on_event() observes
+ *          SL_WISUN_MSG_LFN_WAKE_UP_IND_ID. Valid only for LFN devices after
+ *          sl_wisun_coap_meter_init().
+ *****************************************************************************/
+void sl_wisun_coap_meter_wait_lfn_wakeup(void);
 
 #ifdef __cplusplus
 }

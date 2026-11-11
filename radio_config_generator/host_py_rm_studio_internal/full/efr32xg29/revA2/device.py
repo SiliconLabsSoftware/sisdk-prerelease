@@ -151,7 +151,7 @@ class RM_Device_EFR32XG29XFULL_RevA2(Base_RM_Device):
         self.__dict__['zz_frozen'] = False
         super(RM_Device_EFR32XG29XFULL_RevA2, self).__init__(rmio, label,
             'EFR32XG29XFULL',
-            RM_SVD_Info('EFR32XG29XFULL_SEQ.svd', 'eaea617942dc091f643b2ff695b1de37'))
+            RM_SVD_Info('EFR32XG29XFULL_SEQ.svd', '26eb6c286e1cb2e58d47105a66a0f653'))
 
         self.__dict__['zz_peripheral_names'] = _PERIPHERAL_NAMES
         self.__dict__['zz_peripheral_name_set'] = _PERIPHERAL_NAME_SET

@@ -123,6 +123,18 @@ extern SEGGER_SYSVIEW_OS_API SYSVIEW_X_OS_TraceAPI;
 extern SEGGER_SYSVIEW_OS_API SYSVIEW_X_OS_TraceAPI;
 #endif
 
+
+/*
+ * Optional additional SystemView context for Everest NWP TX.
+ * Enabled only when the product selects the NWP SystemView integration.
+ */
+#if defined(SL_CATALOG_LOG_CAPTIVE_NWP_SYSTEMVIEW_PRESENT)
+void sli_systemview_extra_context_init(void);
+void sli_systemview_extra_context_start(void);
+void sli_systemview_extra_context_stop(void);
+void sli_systemview_extra_context_update_freq(void);
+#endif
+
 static SEGGER_SYSVIEW_MODULE gecko_sdk_module;
 static bool is_configured = false;
 
@@ -155,9 +167,15 @@ static void _cbStart(void) {
 
   SEGGER_SYSVIEW_Start_Ex(&_ContextCaptiveCore, 0);
   SendSystemDescription_CaptiveCore(1);
+#if defined(SL_CATALOG_LOG_CAPTIVE_NWP_SYSTEMVIEW_PRESENT)
+  sli_systemview_extra_context_start();
+#endif
 }
 
 static void _cbStop(void) {
+#if defined(SL_CATALOG_LOG_CAPTIVE_NWP_SYSTEMVIEW_PRESENT)
+  sli_systemview_extra_context_stop();
+#endif
   SEGGER_SYSVIEW_Stop_Ex(&_ContextCaptiveCore);
 }
 
@@ -223,6 +241,9 @@ void SEGGER_SYSVIEW_Conf(void) {
   SEGGER_SYSVIEW_Init_Ex(SYSVIEW_TIMESTAMP_FREQ, SYSVIEW_CPU_FREQ,
                          os_api, _cbSendSystemDesc, _cbStart, _cbStop);
   SEGGER_SYSVIEW_InitAdditionalBuffer(&_ContextCaptiveCore, &_UpBufferCaptiveCore[0], sizeof(_UpBufferCaptiveCore), &_DownBufferCaptiveCore[0], sizeof(_DownBufferCaptiveCore));
+#if defined(SL_CATALOG_LOG_CAPTIVE_NWP_SYSTEMVIEW_PRESENT)
+  sli_systemview_extra_context_init();
+#endif
   SEGGER_SYSVIEW_SetRAMBase(SYSVIEW_RAM_BASE);
 }
 
@@ -252,6 +273,9 @@ void sli_systemview_update_timestamp_freq(void) {
   // frequency; keep it in sync with the main context once the source is ready.
   _ContextCaptiveCore.SysFreq = timestamp_freq;
   _ContextCaptiveCore.CPUFreq = cpu_freq;
+#if defined(SL_CATALOG_LOG_CAPTIVE_NWP_SYSTEMVIEW_PRESENT)
+  sli_systemview_extra_context_update_freq();
+#endif
 }
 
 /*************************** End of file ****************************/

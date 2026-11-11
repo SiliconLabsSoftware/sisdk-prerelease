@@ -103,46 +103,58 @@ class TestModelVariableValueAssignment(unittest.TestCase):
     def test_assign_valid_int_value(self):
         """Test assigning valid integer values."""
         var = ModelVariable(name="test", var_type=int, is_array=False)
-        var.value = 100
+        var.value_forced = 100
         assert var.value == 100
     
     def test_assign_valid_float_value(self):
         """Test assigning valid float values."""
         var = ModelVariable(name="test", var_type=float, is_array=False)
-        var.value = 99.5
+        var.value_forced = 99.5
         assert var.value == 99.5
     
     def test_assign_valid_bool_value(self):
         """Test assigning valid boolean values."""
         var = ModelVariable(name="test", var_type=bool, is_array=False)
-        var.value = True
+        var.value_forced = True
         assert var.value is True
     
     def test_assign_valid_str_value(self):
         """Test assigning valid string values."""
         var = ModelVariable(name="test", var_type=str, is_array=False)
-        var.value = "new_value"
+        var.value_forced = "new_value"
         assert var.value == "new_value"
     
     def test_assign_valid_dict_value(self):
         """Test assigning valid dictionary values."""
         var = ModelVariable(name="test", var_type=dict, is_array=False)
         new_dict = {"a": 1, "b": [1, 2, 3], "c": {"nested": True}}
-        var.value = new_dict
+        var.value_forced = new_dict
         assert var.value == new_dict
     
     def test_assign_valid_enum_value(self):
         """Test assigning valid enum values."""
         var = ModelVariable(name="test", var_type=Enum, is_array=False)
         var.var_enum = SampleEnum
-        var.value = SampleEnum.OPTION_B
+        var.value_forced = SampleEnum.OPTION_B
         assert var.value == SampleEnum.OPTION_B
     
     def test_assign_valid_array_value(self):
         """Test assigning valid array values."""
         var = ModelVariable(name="test", var_type=int, is_array=True)
-        var.value = [10, 20, 30]
+        var.value_forced = [10, 20, 30]
         assert var.value == [10, 20, 30]
+        
+    def test_raise_exception_when_value_used(self) -> None:
+        """Test that using 'value' for assignment raises an exception."""
+        var = ModelVariable(name="test", var_type=int, is_array=False)
+        with self.assertRaises(ModelVariableWriteAccess):
+            var.value = 100
+            
+    def test_exception_message(self) -> None:
+        """Test the exception message when using 'value' for assignment."""
+        var = ModelVariable(name="test", var_type=int, is_array=False)
+        with self.assertRaisesRegex(ModelVariableWriteAccess, "Attempt to set variable test out of calculation !"):
+            var.value = 100
 
 
 class TestModelVariableFormat(unittest.TestCase):

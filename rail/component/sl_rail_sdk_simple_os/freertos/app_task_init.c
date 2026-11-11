@@ -44,6 +44,7 @@
 #include "FreeRTOSConfig.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "sl_code_classification.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -125,7 +126,7 @@ void app_task_init(void)
 /*******************************************************************************
  * The function is used to notify kernel to allow the proprietary task to run.
  ******************************************************************************/
-void app_task_notify(void)
+SL_CODE_RAM void app_task_notify(void)
 {
   if (proprietary_task_notify != NULL && prop_task_running) {
     vTaskNotifyGiveFromISR(proprietary_task_notify, false);

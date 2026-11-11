@@ -16,6 +16,9 @@ class ProfileIEEE802154OQPSKBobcat(ProfileIEEE802154Ocelot):
         self._family = "bobcat"
         self._sw_profile_outputs_common = sw_profile_outputs_common_bobcat()
 
+    def build_advanced_profile_inputs(self, model, profile):
+        super(ProfileIEEE802154Ocelot, self).build_advanced_profile_inputs(model, profile)
+
     def build_register_profile_outputs(self, model, profile):
         build_modem_regs_bobcat(model, profile)
 

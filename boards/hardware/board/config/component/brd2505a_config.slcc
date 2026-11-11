@@ -1,4 +1,19 @@
+id: brd2505a_config
+label: brd2505a config
+description: Configuration files for BRD2505A
 category: Platform|Board|Config
+package: boards
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+root_path: boards/hardware/board/config
+requires:
+- name: brd2505a
+provides:
+- name: brd2505a_config
 config_file:
 - override:
     component: board_control
@@ -343,18 +358,3 @@ config_file:
     instance: vcom
     vendor: silabs
   path: brd2505a/sl_uart_usart_vcom_config.h
-description: Configuration files for BRD2505A
-id: brd2505a_config
-label: brd2505a config
-metadata:
-  sbom:
-    license: Zlib
-package: boards
-provides:
-- name: brd2505a_config
-quality: production
-requires:
-- name: brd2505a
-root_path: boards/hardware/board/config
-ui_hints:
-  visibility: never

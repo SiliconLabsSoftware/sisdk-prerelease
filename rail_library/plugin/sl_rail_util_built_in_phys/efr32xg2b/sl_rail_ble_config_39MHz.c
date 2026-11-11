@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config  -  DO NOT EDIT
- *   Radio Configurator Version: 2604.3.0rc1
+ *   Radio Configurator Version: 2604.3.0rc3
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -75,10 +75,11 @@ __ALIGNED(4) static const uint8_t stackInfo_0[2] = { 0x03, 0x01 };
 __ALIGNED(4) static const uint8_t stackInfo_1[2] = { 0x03, 0x02 };
 __ALIGNED(4) static const uint8_t stackInfo_2[2] = { 0x03, 0x06 };
 __ALIGNED(4) static const uint8_t stackInfo_3[2] = { 0x03, 0x07 };
-__ALIGNED(4) static const uint8_t stackInfo_4[2] = { 0x03, 0x03 };
-__ALIGNED(4) static const uint8_t stackInfo_5[2] = { 0x03, 0x04 };
-__ALIGNED(4) static const uint8_t stackInfo_6[2] = { 0x03, 0x05 };
-__ALIGNED(4) static const uint8_t stackInfo_7[2] = { 0x03, 0x09 };
+__ALIGNED(4) static const uint8_t stackInfo_4[2] = { 0x03, 0x0b };
+__ALIGNED(4) static const uint8_t stackInfo_5[2] = { 0x03, 0x03 };
+__ALIGNED(4) static const uint8_t stackInfo_6[2] = { 0x03, 0x04 };
+__ALIGNED(4) static const uint8_t stackInfo_7[2] = { 0x03, 0x05 };
+__ALIGNED(4) static const uint8_t stackInfo_8[2] = { 0x03, 0x09 };
 #endif // RADIO_CONFIG_ENABLE_STACK_INFO
 
 static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr = {
@@ -93,7 +94,7 @@ static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr = {
 };
 
 static const uint32_t phyInfo_0[] = {
-  21UL,
+  22UL,
   0x0034832DUL, // 52.51240932187062
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -116,10 +117,12 @@ static const uint32_t phyInfo_0[] = {
   (uint32_t) 0UL,
   (uint32_t) 8UL,
   (uint32_t) 32UL,
+  (uint32_t) 631196UL,
+  (uint32_t) 89UL,
 };
 
 static const uint32_t phyInfo_1[] = {
-  21UL,
+  22UL,
   0x006905FBUL, // 105.02337137551177
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -142,10 +145,12 @@ static const uint32_t phyInfo_1[] = {
   (uint32_t) 0UL,
   (uint32_t) 8UL,
   (uint32_t) 16UL,
+  (uint32_t) 328894UL,
+  (uint32_t) 89UL,
 };
 
 static const uint32_t phyInfo_2[] = {
-  21UL,
+  22UL,
   0x00348348UL, // 52.51282051282051
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -168,10 +173,12 @@ static const uint32_t phyInfo_2[] = {
   (uint32_t) 0UL,
   (uint32_t) 8UL,
   (uint32_t) 32UL,
+  (uint32_t) 620602UL,
+  (uint32_t) 89UL,
 };
 
 static const uint32_t phyInfo_3[] = {
-  21UL,
+  22UL,
   0x00690690UL, // 105.02564102564102
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -194,10 +201,12 @@ static const uint32_t phyInfo_3[] = {
   (uint32_t) 0UL,
   (uint32_t) 8UL,
   (uint32_t) 16UL,
+  (uint32_t) 308920UL,
+  (uint32_t) 0UL,
 };
 
 static const uint32_t phyInfo_4[] = {
-  21UL,
+  22UL,
   0x00348340UL, // 52.5127098663658
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -220,10 +229,12 @@ static const uint32_t phyInfo_4[] = {
   (uint32_t) 0UL,
   (uint32_t) 20UL,
   (uint32_t) 32UL,
+  (uint32_t) 635148UL,
+  (uint32_t) 89UL,
 };
 
 static const uint32_t phyInfo_5[] = {
-  21UL,
+  22UL,
   0x00348340UL, // 52.5127098663658
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -246,10 +257,12 @@ static const uint32_t phyInfo_5[] = {
   (uint32_t) 0UL,
   (uint32_t) 20UL,
   (uint32_t) 32UL,
+  (uint32_t) 635148UL,
+  (uint32_t) 89UL,
 };
 
 static const uint32_t phyInfo_6[] = {
-  21UL,
+  22UL,
   0x00348340UL, // 52.5127098663658
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -272,10 +285,12 @@ static const uint32_t phyInfo_6[] = {
   (uint32_t) 0UL,
   (uint32_t) 20UL,
   (uint32_t) 32UL,
+  (uint32_t) 623148UL,
+  (uint32_t) 89UL,
 };
 
 static const uint32_t phyInfo_7[] = {
-  21UL,
+  22UL,
   0x00348316UL, // 52.51206786971421
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -298,10 +313,12 @@ static const uint32_t phyInfo_7[] = {
   (uint32_t) 0UL,
   (uint32_t) 8UL,
   (uint32_t) 32UL,
+  (uint32_t) 631232UL,
+  (uint32_t) 89UL,
 };
 
 static const uint32_t phyInfo_8[] = {
-  21UL,
+  22UL,
   0x00348318UL, // 52.51209149924942
   (uint32_t) NULL,
   (uint32_t) irCalConfig,
@@ -324,6 +341,8 @@ static const uint32_t phyInfo_8[] = {
   (uint32_t) 0UL,
   (uint32_t) 8UL,
   (uint32_t) 32UL,
+  (uint32_t) 628991UL,
+  (uint32_t) 89UL,
 };
 
 const uint32_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfigBase[] = {
@@ -502,15 +521,12 @@ const uint32_t sl_rail_ble_phy_1Mbps_viterbi_cs_39MHz_modemConfigBase[] = {
   /*    406C */ 0x00000000UL,
   0x01024080UL, 0x020C008CUL,
   /*    4084 */ 0x00000000UL,
-  0x010240BCUL, 0x00000000UL,
-  /*    40C0 */ 0x00000000UL,
   0x010240E0UL, 0x00000033UL,
   /*    40E4 */ 0x00000000UL,
   0x010140ECUL, 0x8CE00080UL,
   0x010240F4UL, 0x07830464UL,
   /*    40F8 */ 0x3AC81388UL,
-  0x01024100UL, 0x80585B05UL,
-  /*    4104 */ 0x4A413747UL,
+  0x01014104UL, 0x4A413747UL,
   0x0103410CUL, 0x00523F87UL,
   /*    4110 */ 0x2949192AUL,
   /*    4114 */ 0x40403B89UL,
@@ -566,6 +582,7 @@ const uint32_t sl_rail_ble_phy_1Mbps_viterbi_cs_39MHz_modemConfigBase[] = {
   0x01018010UL, 0x00000003UL,
   0x01028038UL, 0x001047F1UL,
   /*    803C */ 0x00000001UL,
+  0x010180A0UL, 0x00037870UL,
   0x010280B0UL, 0x02000300UL,
   /*    80B4 */ 0x01000037UL,
   0x02020098UL, 0x04000C00UL,
@@ -671,7 +688,7 @@ const uint32_t sl_rail_ble_phy_quuppa_39MHz_modemConfigBase[] = {
   /*    406C */ 0x00000000UL,
   0x01114080UL, 0x020C008CUL,
   /*    4084 */ 0x00000000UL,
-  /*    4088 */ 0x002203B6UL,
+  /*    4088 */ 0x002203B7UL,
   /*    408C */ 0x00000000UL,
   /*    4090 */ 0x00000000UL,
   /*    4094 */ 0x0E050200UL,
@@ -790,7 +807,7 @@ const uint32_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_modemConfig[] = {
   /*    4064 */ 0x00040091UL,
   0x010F4080UL, 0x020C008CUL,
   /*    4084 */ 0x00000000UL,
-  /*    4088 */ 0x002203B6UL,
+  /*    4088 */ 0x002203B7UL,
   /*    408C */ 0x00000000UL,
   /*    4090 */ 0x00000000UL,
   /*    4094 */ 0x0E050200UL,
@@ -920,7 +937,7 @@ const uint32_t sl_rail_ble_phy_125kbps_39MHz_modemConfig[] = {
   /*    4064 */ 0x000A0092UL,
   0x010F4080UL, 0x022C008CUL,
   /*    4084 */ 0x00000000UL,
-  /*    4088 */ 0x001203B6UL,
+  /*    4088 */ 0x001203B7UL,
   /*    408C */ 0x1B8C805BUL,
   /*    4090 */ 0x00000000UL,
   /*    4094 */ 0x0E050200UL,
@@ -986,7 +1003,7 @@ const uint32_t sl_rail_ble_phy_500kbps_39MHz_modemConfig[] = {
   /*    4064 */ 0x000A0092UL,
   0x010F4080UL, 0x022C008CUL,
   /*    4084 */ 0x00000000UL,
-  /*    4088 */ 0x001203B6UL,
+  /*    4088 */ 0x001203B7UL,
   /*    408C */ 0x1B8C805BUL,
   /*    4090 */ 0x00000000UL,
   /*    4094 */ 0x0E050200UL,
@@ -1052,7 +1069,7 @@ const uint32_t sl_rail_ble_phy_simulscan_39MHz_modemConfig[] = {
   /*    4064 */ 0x00040091UL,
   0x010F4080UL, 0x022C008CUL,
   /*    4084 */ 0x00000000UL,
-  /*    4088 */ 0x001203B6UL,
+  /*    4088 */ 0x001203B7UL,
   /*    408C */ 0x198C8000UL,
   /*    4090 */ 0x00000000UL,
   /*    4094 */ 0x0E050200UL,
@@ -1105,7 +1122,7 @@ const uint32_t sl_rail_ble_phy_1Mbps_viterbi_cs_39MHz_0_78_modemConfig[] = {
   /*    405C */ 0x00000BE0UL,
   /*    4060 */ 0x00000009UL,
   /*    4064 */ 0x00040091UL,
-  0x010D4088UL, 0x002203B6UL,
+  0x010F4088UL, 0x002203B7UL,
   /*    408C */ 0x00000000UL,
   /*    4090 */ 0x00000000UL,
   /*    4094 */ 0x0E050200UL,
@@ -1118,10 +1135,12 @@ const uint32_t sl_rail_ble_phy_1Mbps_viterbi_cs_39MHz_0_78_modemConfig[] = {
   /*    40B0 */ 0x02020303UL,
   /*    40B4 */ 0x01010102UL,
   /*    40B8 */ 0x00010101UL,
-  0x010140FCUL, 0x000A2090UL,
+  /*    40BC */ 0x00000000UL,
+  /*    40C0 */ 0x00000000UL,
+  0x010240FCUL, 0x000A2090UL,
+  /*    4100 */ 0x80585B05UL,
   0x01014280UL, 0x00000012UL,
-  0x010280A0UL, 0x00037870UL,
-  /*    80A4 */ 0x000000D0UL,
+  0x010180A4UL, 0x000000D0UL,
   0x0101A0A8UL, 0xFFFFFE09UL,
   0x010190A8UL, 0x01CB4201UL,
   0x0101A0ACUL, 0xFFFFFE09UL,
@@ -1148,7 +1167,7 @@ const uint32_t sl_rail_ble_phy_2Mbps_viterbi_cs_39MHz_0_78_modemConfig[] = {
   /*    405C */ 0x00000BE0UL,
   /*    4060 */ 0x00000001UL,
   /*    4064 */ 0x00080091UL,
-  0x010D4088UL, 0x002203D8UL,
+  0x010F4088UL, 0x002203D8UL,
   /*    408C */ 0x00000000UL,
   /*    4090 */ 0x00000000UL,
   /*    4094 */ 0x0D050200UL,
@@ -1161,10 +1180,12 @@ const uint32_t sl_rail_ble_phy_2Mbps_viterbi_cs_39MHz_0_78_modemConfig[] = {
   /*    40B0 */ 0x02030303UL,
   /*    40B4 */ 0x02020202UL,
   /*    40B8 */ 0x01010101UL,
-  0x010140FCUL, 0x000A209CUL,
+  /*    40BC */ 0x00000000UL,
+  /*    40C0 */ 0x00000000UL,
+  0x010240FCUL, 0x000A209CUL,
+  /*    4100 */ 0x80585B05UL,
   0x01014280UL, 0x00000002UL,
-  0x010280A0UL, 0x00037870UL,
-  /*    80A4 */ 0x0002C0FFUL,
+  0x010180A4UL, 0x0002C0FFUL,
   0x0101A0A8UL, 0xFFFFFE09UL,
   0x010190A8UL, 0x01CB4201UL,
   0x0101A0ACUL, 0xFFFFFE09UL,
@@ -1182,6 +1203,51 @@ const uint32_t sl_rail_ble_phy_2Mbps_viterbi_cs_39MHz_0_78_modemConfig[] = {
   /*    40D8 */ 0x018C0635UL,
   /*    40DC */ 0x00570051UL,
   /*    40E0 */ 0x00780040UL,
+  0xFFFFFFFFUL,
+};
+
+const uint32_t sl_rail_ble_phy_2Mbps_2bt_viterbi_cs_39MHz_0_78_modemConfig[] = {
+  0x04018FFCUL, (uint32_t) &phyInfo_3,
+  0x01044058UL, 0x00F00249UL,
+  /*    405C */ 0x00000BE0UL,
+  /*    4060 */ 0x00000001UL,
+  /*    4064 */ 0x00080091UL,
+  0x010F4088UL, 0x002203F2UL,
+  /*    408C */ 0x00000000UL,
+  /*    4090 */ 0x00000000UL,
+  /*    4094 */ 0x7FEB09FEUL,
+  /*    4098 */ 0x32603033UL,
+  /*    409C */ 0xBF732D64UL,
+  /*    40A0 */ 0x0BFE0F29UL,
+  /*    40A4 */ 0x06010800UL,
+  /*    40A8 */ 0x04010501UL,
+  /*    40AC */ 0x02010300UL,
+  /*    40B0 */ 0x02000200UL,
+  /*    40B4 */ 0x01000100UL,
+  /*    40B8 */ 0x01000100UL,
+  /*    40BC */ 0x01000100UL,
+  /*    40C0 */ 0x01FE02FFUL,
+  0x010240FCUL, 0x000A209CUL,
+  /*    4100 */ 0x80696B01UL,
+  0x01014280UL, 0x00000002UL,
+  0x010180A4UL, 0x0002C0FFUL,
+  0x0101A0A8UL, 0xFFFFFE09UL,
+  0x010190A8UL, 0x01CB4201UL,
+  0x0101A0ACUL, 0xFFFFFE09UL,
+  0x010190ACUL, 0x000D0A01UL,
+  0x0304403CUL, 0x00802908UL,
+  /*    4040 */ 0x04625FE3UL,
+  /*    4044 */ 0x088040FAUL,
+  /*    4048 */ 0x00010021UL,
+  0x030940C0UL, 0x00150000UL,
+  /*    40C4 */ 0x001C0026UL,
+  /*    40C8 */ 0xFFAA0057UL,
+  /*    40CC */ 0x11E2040CUL,
+  /*    40D0 */ 0x20471C75UL,
+  /*    40D4 */ 0x0E731C0FUL,
+  /*    40D8 */ 0x000702FCUL,
+  /*    40DC */ 0x003C0001UL,
+  /*    40E0 */ 0x00980056UL,
   0xFFFFFFFFUL,
 };
 
@@ -1382,6 +1448,26 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_2Mbps_viterbi_cs_39MHz_channels[
   },
 };
 
+const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_2Mbps_2bt_viterbi_cs_39MHz_channels[] = {
+  {
+    .phyConfigDeltaAdd = sl_rail_ble_phy_2Mbps_2bt_viterbi_cs_39MHz_0_78_modemConfig,
+    .baseFrequency = 2402000000,
+    .channelSpacing = 1000000,
+    .physicalChannelOffset = 0,
+    .channelNumberStart = 0,
+    .channelNumberEnd = 78,
+    .maxPower = RAIL_TX_POWER_MAX,
+    .attr = &channelConfigEntryAttr,
+#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = stackInfo_4,
+#endif
+    .alternatePhy = NULL,
+  },
+};
+
 const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_125kbps_39MHz_channels[] = {
   {
     .phyConfigDeltaAdd = sl_rail_ble_phy_125kbps_39MHz_modemConfig,
@@ -1396,7 +1482,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_125kbps_39MHz_channels[] = {
     .entryType = 0,
 #endif
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-    .stackInfo = stackInfo_4,
+    .stackInfo = stackInfo_5,
 #endif
     .alternatePhy = NULL,
   },
@@ -1416,7 +1502,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_500kbps_39MHz_channels[] = {
     .entryType = 0,
 #endif
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-    .stackInfo = stackInfo_5,
+    .stackInfo = stackInfo_6,
 #endif
     .alternatePhy = NULL,
   },
@@ -1436,7 +1522,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_simulscan_39MHz_channels[] = {
     .entryType = 0,
 #endif
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-    .stackInfo = stackInfo_6,
+    .stackInfo = stackInfo_7,
 #endif
     .alternatePhy = NULL,
   },
@@ -1456,7 +1542,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_quuppa_39MHz_channels[] = {
     .entryType = 0,
 #endif
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-    .stackInfo = stackInfo_7,
+    .stackInfo = stackInfo_8,
 #endif
     .alternatePhy = NULL,
   },
@@ -1473,7 +1559,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_quuppa_39MHz_channels[] = {
     .entryType = 0,
 #endif
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-    .stackInfo = stackInfo_7,
+    .stackInfo = stackInfo_8,
 #endif
     .alternatePhy = NULL,
   },
@@ -1490,7 +1576,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_quuppa_39MHz_channels[] = {
     .entryType = 0,
 #endif
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-    .stackInfo = stackInfo_7,
+    .stackInfo = stackInfo_8,
 #endif
     .alternatePhy = NULL,
   },
@@ -1507,7 +1593,7 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_quuppa_39MHz_channels[] = {
     .entryType = 0,
 #endif
 #ifdef RADIO_CONFIG_ENABLE_STACK_INFO
-    .stackInfo = stackInfo_7,
+    .stackInfo = stackInfo_8,
 #endif
     .alternatePhy = NULL,
   },
@@ -1544,6 +1630,15 @@ const RAIL_ChannelConfig_t sl_rail_ble_phy_2Mbps_viterbi_cs_39MHz_channelConfig 
   .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_cs_39MHz_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,
   .configs = sl_rail_ble_phy_2Mbps_viterbi_cs_39MHz_channels,
+  .length = 1U,
+  .signature = 0UL,
+  .xtalFrequencyHz = 39000000UL,
+};
+
+const RAIL_ChannelConfig_t sl_rail_ble_phy_2Mbps_2bt_viterbi_cs_39MHz_channelConfig = {
+  .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_cs_39MHz_modemConfigBase,
+  .phyConfigDeltaSubtract = NULL,
+  .configs = sl_rail_ble_phy_2Mbps_2bt_viterbi_cs_39MHz_channels,
   .length = 1U,
   .signature = 0UL,
   .xtalFrequencyHz = 39000000UL,

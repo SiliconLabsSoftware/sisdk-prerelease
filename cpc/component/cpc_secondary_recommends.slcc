@@ -14,4 +14,7 @@ provides:
 recommends:
 - id: cpc_security_secondary
   vendor: silabs
+documentation:
+  docset: gecko-platform
+  document: platform-cpc-overview
 root_path: cpc

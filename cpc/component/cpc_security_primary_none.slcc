@@ -11,4 +11,7 @@ metadata:
     license: Zlib
 provides:
 - name: cpc_security_primary
+documentation:
+  docset: gecko-platform
+  document: platform-cpc/cpc-system-primary
 root_path: cpc

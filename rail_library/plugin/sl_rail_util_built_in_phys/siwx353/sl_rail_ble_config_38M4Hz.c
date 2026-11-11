@@ -147,6 +147,7 @@ static const uint32_t phyInfo_0[] = {
   (uint32_t) 8UL,
   (uint32_t) 32UL,
   (uint32_t) 0UL,
+  (uint32_t) 0UL,
 };
 
 static const uint32_t phyInfo_1[] = {
@@ -173,6 +174,7 @@ static const uint32_t phyInfo_1[] = {
   (uint32_t) 0UL,
   (uint32_t) 8UL,
   (uint32_t) 16UL,
+  (uint32_t) 0UL,
   (uint32_t) 0UL,
 };
 
@@ -201,6 +203,7 @@ static const uint32_t phyInfo_2[] = {
   (uint32_t) 20UL,
   (uint32_t) 32UL,
   (uint32_t) 0UL,
+  (uint32_t) 0UL,
 };
 
 static const uint32_t phyInfo_3[] = {
@@ -227,6 +230,7 @@ static const uint32_t phyInfo_3[] = {
   (uint32_t) 0UL,
   (uint32_t) 20UL,
   (uint32_t) 32UL,
+  (uint32_t) 0UL,
   (uint32_t) 0UL,
 };
 
@@ -255,6 +259,7 @@ static const uint32_t phyInfo_4[] = {
   (uint32_t) 20UL,
   (uint32_t) 32UL,
   (uint32_t) 0UL,
+  (uint32_t) 0UL,
 };
 
 static const uint32_t phyInfo_5[] = {
@@ -282,6 +287,7 @@ static const uint32_t phyInfo_5[] = {
   (uint32_t) 8UL,
   (uint32_t) 32UL,
   (uint32_t) 0UL,
+  (uint32_t) 0UL,
 };
 
 static const uint32_t phyInfo_6[] = {
@@ -308,6 +314,7 @@ static const uint32_t phyInfo_6[] = {
   (uint32_t) 0UL,
   (uint32_t) 8UL,
   (uint32_t) 16UL,
+  (uint32_t) 0UL,
   (uint32_t) 0UL,
 };
 

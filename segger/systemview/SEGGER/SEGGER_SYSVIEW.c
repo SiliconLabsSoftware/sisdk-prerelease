@@ -2155,7 +2155,7 @@ void SEGGER_SYSVIEW_Stop(void) {
 }
 
 void SEGGER_SYSVIEW_Stop_Ex(SEGGER_SYSVIEW_CORE_CONTEXT* pContext) {
-  U8 aPacket[SEGGER_SYSVIEW_INFO_SIZE];
+  U8 aPacket[SEGGER_SYSVIEW_INFO_SIZE + 1];  // The event ID is part of the payload: _SendPacket_Ex() appends up to 5 bytes of time stamp delta after it.
   U8* pPayload;
   U8* pPayloadStart;
   

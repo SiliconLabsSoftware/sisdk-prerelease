@@ -1464,43 +1464,55 @@ sl_status_t sl_wisun_set_last_gasp(bool enable);
 sl_status_t sl_wisun_set_first_breath(bool enable);
 
 /**************************************************************************//**
- * Configure the FFN's unicast listen/sleep schedule for power saving.
+ * Configure the FFN's repeating unicast idle schedule.
  *
- * The FFN listens for @p listen_slots consecutive unicast dwell periods,
- * followed by @p sleep_slots dwell periods during which its radio may be
- * turned off. This pattern repeats while power saving is active.
+ * Each period contains @p listen_slots nominal listening dwell periods,
+ * followed by @p idle_slots nominal dwell periods in which background
+ * unicast listening would be omitted.
  *
- * @param[in] listen_slots Number of consecutive unicast dwell periods spent listening.
- * @param[in] sleep_slots Number of consecutive unicast dwell periods that may be spent sleeping.
+ * Broadcast reception and compensation listening take precedence.
+ * Ongoing radio activity, ACK handling, and outgoing transmissions may
+ * keep the radio active. Channel hopping and schedule phase advancement
+ * continue during idle slots.
  *
- * @return SL_STATUS_OK on success.
- * @return SL_STATUS_INVALID_PARAMETER if @p listen_slots is zero and
- *         @p sleep_slots is nonzero, or their sum exceeds
- *         @ref SL_WISUN_FFN_POWER_SAVING_MAX_PERIOD_SLOTS.
- * @return SL_STATUS_INVALID_STATE if the stack is already started (joining or already joined).
- * @return SL_STATUS_NOT_AVAILABLE if FFN operation is unavailable.
+ * Idle slots create opportunities for radio-off time and device sleep.
+ * Radio-off time, device sleep, EM2 entry, and energy savings are not guaranteed.
  *
- * Passing 0, 0 or a positive @p listen_slots with zero @p sleep_slots disables power saving.
- * While both values positive enables the listen/sleep pattern.
+ * @param[in] listen_slots Number of consecutive nominal listening dwell periods.
+ * @param[in] idle_slots Number of consecutive nominal unicast idle dwell periods.
  *
- * Must be called before @ref sl_wisun_join. The schedule is static until disconnect;
- * runtime changes are not supported. Disconnecting (@ref sl_wisun_disconnect)
- * clears the schedule and disables power saving: call this function again before
- * the next join to use power saving. Losing the connection and reconnecting
- * automatically keeps the schedule.
+ * @return SL_STATUS_OK if the schedule is stored or disabled successfully.
+ * @return SL_STATUS_INVALID_PARAMETER if @p idle_slots is nonzero and
+ *         either @p listen_slots is zero or their sum exceeds
+ *         @ref SL_WISUN_FFN_UNICAST_IDLE_SCHEDULE_MAX_PERIOD_SLOTS.
+ * @return SL_STATUS_INVALID_STATE if the stack is already started, except
+ *         when disabling an active schedule with @p idle_slots equal to zero.
+ * @return SL_STATUS_NOT_AVAILABLE if local FFN unicast idle scheduling
+ *         is unavailable.
  *
- * Power saving is not supported with a fixed unicast channel: if the network uses one,
- * the stack disables power saving at join start (see @ref SL_WISUN_MSG_FFN_POWER_SAVING_STATE_IND_ID).
+ * Passing zero @p idle_slots disables the schedule; @p listen_slots is
+ * ignored in that case. Both values must be positive to enable the pattern.
  *
- * @warning This is a proprietary feature intended only for a homogeneous,
- * controlled PAN where every possible FFN parent and unicast sender supports
- * this feature. Legacy or third-party devices may transmit to this FFN while
- * it may be sleeping, which can cause failed joins, packet loss, and broken
- * interoperability.
+ * Enable or configure the schedule before @ref sl_wisun_join.
+ * Runtime reconfiguration is not supported. An active schedule may be
+ * disabled by passing zero @p idle_slots.
  *
- * Available in libraries: Full, FFN (see @ref API_AVAILABILITY)
+ * Disconnecting with @ref sl_wisun_disconnect clears the schedule.
+ * Configure it again before the next join to use unicast idle scheduling.
+ * Losing the connection and reconnecting automatically keeps the schedule.
+ *
+ * A fixed unicast channel is unsupported. A fixed channel configured at
+ * join start disables the schedule.
+ *
+ * @warning This proprietary feature is intended for a homogeneous,
+ * controlled PAN where every possible FFN parent and unicast sender
+ * supports the feature. Legacy or third-party devices may transmit while
+ * background unicast listening is omitted, causing failed joins, packet
+ * loss, and interoperability failures.
+ *
+ * Available in libraries: Full, FFN (see @ref API_AVAILABILITY).
  *****************************************************************************/
-sl_status_t sl_wisun_set_ffn_power_saving_schedule(uint8_t listen_slots, uint8_t sleep_slots);
+sl_status_t sl_wisun_set_ffn_unicast_idle_schedule(uint8_t listen_slots, uint8_t idle_slots);
 
 /** @} (end SL_WISUN_API) */
 

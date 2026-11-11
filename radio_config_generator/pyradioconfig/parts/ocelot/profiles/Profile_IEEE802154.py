@@ -1,6 +1,7 @@
 from pyradioconfig.parts.common.profiles.ocelot_regs import build_modem_regs_ocelot
 from pyradioconfig.parts.lynx.profiles.Profile_IEEE802154_OQPSK import ProfileIEEE802154OQPSKLynx
 from pyradioconfig.parts.ocelot.profiles.sw_profile_outputs_common import sw_profile_outputs_common_ocelot
+from pyradioconfig.calculator_model_framework.Utils.CustomExceptions import InvalidOptionOverride
 from pycalcmodel.core.output import ModelOutput, ModelOutputType
 from pyradioconfig.parts.common.profiles.profile_common import buildCrcOutputs, buildFecOutputs, buildFrameOutputs, \
     buildWhiteOutputs
@@ -38,6 +39,10 @@ class ProfileIEEE802154Ocelot(ProfileIEEE802154OQPSKLynx):
 
         self._sw_profile_outputs_common.buildStudioLogOutput(model, profile)
 
+    def build_advanced_profile_inputs(self, model, profile):
+        self.make_linked_io(profile, model.vars.thread_feature, 'Advanced', readable_name="Thread PHY Feature Selection")
+        super().build_advanced_profile_inputs(model, profile)
+
     def build_register_profile_outputs(self, model, profile):
         build_modem_regs_ocelot(model, profile)
 
@@ -67,13 +72,40 @@ class ProfileIEEE802154Ocelot(ProfileIEEE802154OQPSKLynx):
 
     def _build_feature_settings(self, model):
         zigbee_feature = model.profile.inputs.zigbee_feature.var_value
+        thread_feature = model.profile.inputs.thread_feature.var_value
+        is_zigbee = zigbee_feature not in (model.vars.zigbee_feature.var_enum.NONE, None)
+        is_thread = thread_feature not in (model.vars.thread_feature.var_enum.NONE, None)
 
+        if is_zigbee and is_thread:
+            raise InvalidOptionOverride("Feature must be either Zigbee or Thread, not both !")
+        if is_zigbee:
+            self._build_zigbee_settings(model, zigbee_feature)
+        elif is_thread:
+            self._build_thread_settings(model, thread_feature)
+
+    def _build_zigbee_settings(self, model, zigbee_feature):
+        model.vars.protocol_id.value_forced = model.vars.protocol_id.var_enum.Zigbee
         if zigbee_feature == model.vars.zigbee_feature.var_enum.GB868_863:
             self._copy_model_variables_from_phy(model, 'PHY_IEEE802154_GB868_863MHz_PHR2')
         elif zigbee_feature == model.vars.zigbee_feature.var_enum.GB868_915:
             self._copy_model_variables_from_phy(model, 'PHY_IEEE802154_GB868_915MHz_PHR2')
         elif zigbee_feature == model.vars.zigbee_feature.var_enum.NA915_R23:
             self._copy_model_variables_from_phy(model, 'PHY_IEEE802154_915MHz_2GFSK_R23_NA')
+
+    def _build_thread_settings(self, model, thread_feature):
+        model.vars.protocol_id.value_forced = model.vars.protocol_id.var_enum.Thread
+        chcfg_base_frequency_hz = model.profile.inputs.chcfg_base_frequency_hz.var_value
+
+        if thread_feature == model.vars.thread_feature.var_enum.THREAD_SUBGHZ:
+            match chcfg_base_frequency_hz:
+                case 863500000:
+                    self._copy_model_variables_from_phy(model, 'PHY_Internal_IEEE802154_868MHz_coh_thread_sf8')
+                case 902500000:
+                    self._copy_model_variables_from_phy(model, 'PHY_Internal_IEEE802154_915MHz_coh_thread_sf8')
+                case _:
+                    raise InvalidOptionOverride(f"Unsupported base frequency: {chcfg_base_frequency_hz}")
+        else:
+            raise InvalidOptionOverride(f"Unsupported THREAD feature: {thread_feature}")
 
     def _build_delay_settings(self, model):
         zigbee_feature = model.profile.inputs.zigbee_feature.var_value

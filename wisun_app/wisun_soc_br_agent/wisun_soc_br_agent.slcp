@@ -29,7 +29,6 @@ component:
 - id: "wisun_br_config"
 - id: "wisun_br_si91x"
 - id: "sl_wisun_br_agent_service"
-- id: "sl_wisun_event_mgr"
 - id: "sl_wisun_app_core"
 - id: "sl_wisun_trace_util"
 - id: "sl_wisun_app_setting"

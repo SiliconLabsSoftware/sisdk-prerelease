@@ -48,8 +48,8 @@
 #define SL_WISUN_MAC_ADDRESS_SIZE 8
 /// Size of a channel mask
 #define SL_WISUN_CHANNEL_MASK_SIZE 32
-/// Maximum total number of listen and sleep slots in an FFN power-saving pattern.
-#define SL_WISUN_FFN_POWER_SAVING_MAX_PERIOD_SLOTS 32
+/// Maximum total number of nominal listen and idle slots in an FFN unicast idle schedule.
+#define SL_WISUN_FFN_UNICAST_IDLE_SCHEDULE_MAX_PERIOD_SLOTS 32
 /// Size of the filter bitfield
 #define SL_WISUN_FILTER_BITFIELD_SIZE ((SL_WISUN_TRACE_GROUP_COUNT + 7) / 8)
 /// Maximum fragment duration. Disables advert fragmentation.
@@ -151,8 +151,8 @@ typedef enum {
   SL_WISUN_STATISTICS_TYPE_LXPM       = 7,
   /// DMP statistics
   SL_WISUN_STATISTICS_TYPE_DMP        = 8,
-  /// Local FFN power-saving statistics
-  SL_WISUN_STATISTICS_TYPE_FFN_POWER_SAVING = 9,
+  /// Local FFN unicast idle schedule statistics
+  SL_WISUN_STATISTICS_TYPE_FFN_UNICAST_IDLE_SCHEDULE = 9,
 } sl_wisun_statistics_type_t;
 
 /// Enumerations for regulatory domain
@@ -361,12 +361,12 @@ typedef enum {
   SL_WISUN_DC_CLIENT_STATE_SCAN_COMPLETE = 4,
 } sl_wisun_dc_client_state_t;
 
-/// Effective FFN local power-saving activation state.
+/// Local FFN unicast idle schedule state.
 typedef enum {
-  SL_WISUN_FFN_POWER_SAVING_DISABLED = 0,
-  SL_WISUN_FFN_POWER_SAVING_SET,
-  SL_WISUN_FFN_POWER_SAVING_ACTIVE,
-} sl_wisun_ffn_power_saving_activation_state_t;
+  SL_WISUN_FFN_UNICAST_IDLE_SCHEDULE_DISABLED = 0,
+  SL_WISUN_FFN_UNICAST_IDLE_SCHEDULE_SET,
+  SL_WISUN_FFN_UNICAST_IDLE_SCHEDULE_ACTIVE,
+} sl_wisun_ffn_unicast_idle_schedule_state_t;
 
 /// Wi-SUN Message API common header
 SL_PACK_START(1)
@@ -603,23 +603,24 @@ typedef struct {
   uint32_t scheduler_internal_error_count;
 } sl_wisun_statistics_dmp_t;
 
-/// Local FFN power-saving statistics, measured only during ACTIVE operation.
-/// Sleep describes the Wi-SUN radio interface being off.
-/// The values are kept when leaving ACTIVE. They are cleared by an explicit reset, or when
-/// ACTIVE is entered again with a different listen/sleep schedule.
+/// Local FFN unicast idle schedule statistics, measured only while the schedule is active.
+/// "Radio off" means the Wi-SUN RF interface is not using the radio: the radio may be used by
+/// another protocol (in the case of DMP) or sleeping. It does not measure device sleep or energy consumption.
+/// The values are kept when leaving active state. They are cleared by an explicit reset, or when
+/// active state is entered again with a different listen/idle schedule.
 typedef struct {
-  /// Configured sleep target. 0..10000 represents 0..100.00%, rounded to nearest.
-  uint16_t nominal_sleep_ratio;
-  /// Observed interface-off time / ACTIVE time, up to latest active time.
+  /// Nominal idle fraction of the measured schedule. 0..10000 represents 0..100.00%, rounded to nearest.
+  uint16_t nominal_idle_ratio;
+  /// Observed radio-off duration / active duration, up to latest active time.
   /// 0..10000 represents 0..100.00%, rounded to nearest, with ties upward.
-  uint16_t actual_sleep_ratio;
-  /// Longest sleep interval.
-  uint32_t max_sleep_duration_ms;
-  /// Mean duration of closed sleep intervals.
-  uint32_t avg_sleep_duration_ms;
-  /// Longest awake interval during ACTIVE.
-  uint32_t max_awake_duration_ms;
-} sl_wisun_statistics_ffn_power_saving_t;
+  uint16_t radio_off_ratio;
+  /// Longest observed radio-off interval.
+  uint32_t max_radio_off_duration_ms;
+  /// Mean duration of closed radio-off intervals.
+  uint32_t avg_radio_off_duration_ms;
+  /// Longest observed radio-on interval during active state.
+  uint32_t max_radio_on_duration_ms;
+} sl_wisun_statistics_ffn_unicast_idle_schedule_t;
 
 /// Statistics
 typedef union {
@@ -641,8 +642,8 @@ typedef union {
   sl_wisun_statistics_lxpm_t lxpm;
   /// DMP statistics
   sl_wisun_statistics_dmp_t dmp;
-  /// Local FFN power-saving statistics
-  sl_wisun_statistics_ffn_power_saving_t ffn_power_saving;
+  /// Local FFN unicast idle schedule statistics
+  sl_wisun_statistics_ffn_unicast_idle_schedule_t ffn_unicast_idle_schedule;
 } sl_wisun_statistics_t;
 
 /// FAN1.0 PHY configuration
@@ -1074,7 +1075,7 @@ typedef enum {
   SL_WISUN_TRACE_GROUP_MAC_FSM = 45,    ///< MAC Finite state machine
   SL_WISUN_TRACE_GROUP_FB      = 46,    ///< First breath
   SL_WISUN_TRACE_GROUP_LXPM    = 47,    ///< Local Cross-PAN Multicast
-  SL_WISUN_TRACE_GROUP_FFNPS  = 48,     ///< FFN Power Saving
+  SL_WISUN_TRACE_GROUP_FFNUIS  = 48,    ///< FFN Unicast Idle Schedule
   // [...] reserved for future use
   SL_WISUN_TRACE_GROUP_INT     = 63,    ///< Internal usage
   SL_WISUN_TRACE_GROUP_COUNT   = 64     ///< Max number of trace group in this enum

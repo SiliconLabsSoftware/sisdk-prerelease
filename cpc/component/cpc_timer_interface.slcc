@@ -17,4 +17,7 @@ include:
   - path: sli_cpc_timer.h
 provides:
 - name: cpc_timer_interface
+documentation:
+  docset: gecko-platform
+  document: platform-cpc-overview
 root_path: cpc

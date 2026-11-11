@@ -2473,13 +2473,23 @@ static void restart_dma(void)
   sl_hal_ldma_enable_channel(LDMA_PERIPH, read_channel);
 
 #if (SL_CPC_DRV_UART_FLOW_CONTROL_TYPE == WITHOUT_HWFC)
-  LDMA_PERIPH->CH[read_channel].LINK |= LDMA_CH_LINK_LINK;
+  // It takes a few cycles between the LINKLOAD and the value of the loaded descriptor
+  // actually being visible in channel's CTRL, SRC, DST, and LINK registers. Code used to
+  // do a software Read-Modify-Write and saw the non-updated fields. That resulted in
+  // rx_descriptor_head linking to itself instead of the next descriptor.
+  // Instead of the software Read-Modify-Write immediately, wait for LINK register to read the
+  // expected value and then use atomic CH_SET to update the LINK
+  while ((LDMA_PERIPH->CH[read_channel].LINK & _LDMA_CH_LINK_LINKADDR_MASK)
+         != (uint32_t)SL_HAL_LDMA_DESCRIPTOR_LINKABS_LINKADDR_TO_ADDR(rx_descriptor_head->xfer.link_addr)) {
+  }
+
+  LDMA_PERIPH->CH_SET[read_channel].LINK = LDMA_CH_LINK_LINK;
 
   // Enable interrupts
 #ifdef _LDMA_CH_CTRL_DONEIEN_MASK
-  LDMA_PERIPH->CH[read_channel].CTRL |= LDMA_CH_CTRL_DONEIEN;
+  LDMA_PERIPH->CH_SET[read_channel].CTRL = LDMA_CH_CTRL_DONEIEN;
 #else
-  LDMA_PERIPH->CH[read_channel].CTRL |= LDMA_CH_CTRL_DONEIFSEN;
+  LDMA_PERIPH->CH_SET[read_channel].CTRL = LDMA_CH_CTRL_DONEIFSEN;
 #endif
 #endif
 

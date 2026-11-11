@@ -15,7 +15,7 @@ requires:
 - name: "wisun_lxpm_implementation"
 - name: "wisun_dc_server_implementation"
 - name: "wisun_lfn_parent_implementation"
-- name: "wisun_ffn_power_saving_implementation"
+- name: "wisun_ffn_unicast_idle_schedule_implementation"
 
 recommends:
 - id: wisun_stack
@@ -28,7 +28,7 @@ recommends:
   vendor: silabs
 - id: wisun_lfn_parent
   vendor: silabs
-- id: wisun_ffn_power_saving_stubs
+- id: wisun_ffn_unicast_idle_schedule_stubs
 
   vendor: silabs
 provides:

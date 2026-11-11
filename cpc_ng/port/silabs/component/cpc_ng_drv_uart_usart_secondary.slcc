@@ -11,15 +11,15 @@ root_path: cpc_ng/port/silabs
 instantiable:
   prefix: instance
 config_file:
-- path: config/sl_cpc_drv_uart_usart_{{instance}}_config.h
+- path: config/sl_cpc_ng_drv_uart_usart_{{instance}}_config.h
   file_id: cpc_ng_drv_uart_usart_config
-- path: config/sl_cpc_drv_uart_usart_{{instance}}_kernel_config.h
+- path: config/sl_cpc_ng_drv_uart_usart_{{instance}}_kernel_config.h
   file_id: cpc_ng_drv_uart_usart_kernel_config
   condition: [kernel]
-- path: config/sl_cpc_drv_uart_usart_{{instance}}_pm_runtime_config.h
+- path: config/sl_cpc_ng_drv_uart_usart_{{instance}}_pm_runtime_config.h
   file_id: cpc_ng_drv_uart_usart_pm_runtime_config
   condition: [cpc_ng_pm_runtime]
-- path: config/sl_cpc_drv_uart_usart_{{instance}}_wake_host_config.h
+- path: config/sl_cpc_ng_drv_uart_usart_{{instance}}_wake_host_config.h
   file_id: cpc_ng_drv_uart_usart_wake_host_config
   condition: [cpc_ng_wake_host]
 provides:

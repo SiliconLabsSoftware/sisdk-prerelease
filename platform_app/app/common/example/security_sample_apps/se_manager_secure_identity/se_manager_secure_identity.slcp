@@ -42,10 +42,11 @@ component:
   - id: iostream_retarget_stdio
   - id: iostream_recommended_stream
   - id: mbedtls_core
-  - id: mbedtls_ccm
-  - id: mbedtls_ecdsa
   - id: mbedtls_x509
-  - id: mbedtls_slcrypto
+  - id: mbedtls_pk_write
+  - id: psa_crypto_ecdsa
+  - id: psa_crypto_ecc_secp256r1
+  - id: psa_crypto_sha256
 requires:
   - name: device_security_vault
 configuration:

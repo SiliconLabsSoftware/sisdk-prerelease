@@ -340,6 +340,7 @@ typedef void (*zpal_radio_tx_callback_t)(zpal_radio_tx_event_t event);
 typedef void (*zpal_radio_cal_callback_t)(zpal_radio_cal_event_t event);
 typedef void (*zpal_radio_region_change_callback_t)(void);
 typedef void (*zpal_radio_assert_callback_t)(void);
+typedef void (*zpal_radio_flirs_timeout_callback_t)(void);
 
 #define ZWAVE_MAXIMUM_PAYLOAD_LEGACY        64
 #define ZWAVE_MAXIMUM_PAYLOAD_SIZE          170
@@ -416,6 +417,7 @@ typedef struct {
   zpal_radio_tx_callback_t tx_cb;                  ///< Pointer to function called by RF on Tx completion.
   zpal_radio_region_change_callback_t region_change_cb; ///< Pointer to function called by RF on region change.
   zpal_radio_assert_callback_t assert_cb;          ///< Pointer to function called by RF on fatal assert.
+  zpal_radio_flirs_timeout_callback_t flirs_timeout_cb; ///< Pointer to function called by RF when FLiRS timeout expires.
   zpal_radio_network_stats_t *network_stats;       ///< Pointer to structure where to RF Statistics are placed.
   uint8_t radio_debug_enable;                      ///< Enable radio debugging which is vendor specific.
   zpal_radio_application_t radio_application;      ///< Application type.
@@ -882,6 +884,16 @@ typedef void (*zpal_radio_status_callback_t)(const zpal_radio_status_t state);
  * @return zpal_status_t Returns status code indicating success or failure of the operation.
  */
 zpal_status_t zpal_radio_set_status_callback(zpal_radio_status_callback_t callback);
+
+/**
+ * @brief Handle FLiRS timeout actions from task context.
+ *
+ * This function applies the FLiRS RX configuration after a timeout event
+ * notified through @ref zpal_radio_profile_t::flirs_timeout_cb.
+ *
+ * @return @ref ZPAL_STATUS_OK if the RX operation was started successfully.
+ */
+zpal_status_t zpal_radio_handle_flirs_timeout(void);
 
 /**
  * @brief Inform the ZPAL radio layer that the node has been correctly included in a network.

@@ -9,7 +9,6 @@ from pycalcmodel import model_type
 from pycalcmodel import model_instance as model_inst
 from collections import OrderedDict
 from enum import Enum, unique, EnumMeta, IntEnum
-from pycalcmodel.py2_and_3_compatibility import *
 from pycalcmodel.core.variable_access_name import *
 import sys
 import types
@@ -96,7 +95,7 @@ class ModelVariable(object):
         self.name = name
 
         if not issubclass(var_type, Enum):
-            assert var_type in (basestring, bool, complex, float, int, long, str, dict), \
+            assert var_type in (bool, complex, float, int, str, dict), \
                 "FATAL ERROR: Unsupported class for var_type: {}".format(var_type)
         self._var_type = var_type
         if self.var_type == Enum:
@@ -127,7 +126,7 @@ class ModelVariable(object):
 
     @name.setter
     def name(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._name = value
 
     @property
@@ -144,7 +143,7 @@ class ModelVariable(object):
 
     @desc.setter
     def desc(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._desc = value
 
     @property
@@ -166,7 +165,7 @@ class ModelVariable(object):
 
     @svd_mapping.setter
     def svd_mapping(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         assert len(value.split('.')) == 3, \
             "FATAL ERROR: {} must be PERIPHERAL.REGISTER.FIELD format".format(value)
         self._svd_mapping = value
@@ -185,7 +184,7 @@ class ModelVariable(object):
 
     @units.setter
     def units(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._units = value
 
     @property
@@ -210,6 +209,8 @@ class ModelVariable(object):
                 self._access_write.append(self.function.name)
             elif self._access_write[0] != self.function.name:
                 raise ModelVariableWriteAccess("Function: " + self.function.name + " tried to access variable: " + self.name + ". This variable was already written to by: " + str(self._access_write[0]))
+        else:
+            raise ModelVariableWriteAccess(f"Attempt to set variable {self.name} out of calculation !")
 
         self.validate_type(value)
         self._value_calc = value
@@ -292,20 +293,15 @@ class ModelVariable(object):
         return True
 
     def _check_instance(self, value, var_type):
-        if self._var_type is long:
-            if type(value) is int:
-                return True
-        elif self._var_type == Enum:
+        if self._var_type == Enum:
             if type(value).__name__ != self.var_enum.__name__:
                 return False
 
         return isinstance(value, var_type)
 
     def _get_type_str(self):
-        if self._var_type in (bool, complex, float, int, long, dict):
+        if self._var_type in (bool, complex, float, int, dict):
             return self._var_type.__name__
-        elif self._var_type is basestring:
-            return "string"
         elif self._var_type is str:
             return "string"
         elif issubclass(self._var_type, Enum):
@@ -533,10 +529,8 @@ class ModelVariableXml(ModelVariable):
     def _get_var_type(self, var_root):
         if var_root.type_ in ('bool', 'complex', 'float', 'int', 'long'):
             if sys.version_info[0] > 2:
-                type = var_root.type_
-                if type == 'long':
-                    type = "int"
-                return getattr(builtins, type)
+                type_name = "int" if var_root.type_ == "long" else var_root.type_
+                return getattr(builtins, type_name)
             else:
                 return getattr(__builtin__, var_root.type_)
         if var_root.type_ =='string':

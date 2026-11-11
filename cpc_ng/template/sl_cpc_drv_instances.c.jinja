@@ -11,6 +11,8 @@
   "mock": (cpc_ng_drv_mock_instances, cpc_ng_drv_mock_role_secondary),
   "sdio_device": (cpc_ng_drv_sdio_device_instances, cpc_ng_drv_sdio_device_role_secondary),
   "sdio_host": (cpc_ng_drv_sdio_host_instances, cpc_ng_drv_sdio_host_role_secondary),
+  "spi_controller_eusart": (cpc_ng_drv_spi_controller_eusart_instances, cpc_ng_drv_spi_controller_eusart_role_secondary),
+  "spi_controller_usart": (cpc_ng_drv_spi_controller_usart_instances, cpc_ng_drv_spi_controller_usart_role_secondary),
   "spi_peripheral_eusart": (cpc_ng_drv_spi_peripheral_eusart_instances, cpc_ng_drv_spi_peripheral_eusart_role_secondary),
   "spi_peripheral_usart": (cpc_ng_drv_spi_peripheral_usart_instances, cpc_ng_drv_spi_peripheral_usart_role_secondary),
   "uart_eusart": (cpc_ng_drv_uart_eusart_instances, cpc_ng_drv_uart_eusart_role_secondary),
@@ -20,16 +22,16 @@
 
 {% for drv_name, drv_instances_role in drv_instances_dict.items() %}
 {% for instance in drv_instances_role.0 %}
-#include "sl_cpc_drv_{{ drv_name }}_{{ instance }}_config.h"
+#include "sl_cpc_ng_drv_{{ drv_name }}_{{ instance }}_config.h"
 #if defined(SL_CATALOG_KERNEL_PRESENT)
-#include "sl_cpc_drv_{{ drv_name }}_{{ instance }}_kernel_config.h"
+#include "sl_cpc_ng_drv_{{ drv_name }}_{{ instance }}_kernel_config.h"
 #endif
 {% if drv_name not in drv_without_wake %}
 #if defined(SL_CATALOG_CPC_NG_PM_RUNTIME_PRESENT)
-#include "sl_cpc_drv_{{ drv_name }}_{{ instance }}_pm_runtime_config.h"
+#include "sl_cpc_ng_drv_{{ drv_name }}_{{ instance }}_pm_runtime_config.h"
 #endif
 #if defined(SL_CATALOG_CPC_NG_WAKE_HOST_PRESENT)
-#include "sl_cpc_drv_{{ drv_name }}_{{ instance }}_wake_host_config.h"
+#include "sl_cpc_ng_drv_{{ drv_name }}_{{ instance }}_wake_host_config.h"
 #endif
 {% endif %}
 {% endfor %}
@@ -89,8 +91,8 @@ sl_status_t sl_cpc_drv_instances_init(void)
       .pin = SL_CPC_DRV_SPI_PERIPHERAL_EUSART_{{ instance | upper }}_CIPO_PIN,
     },
     .clk = {
-      .port = SL_CPC_DRV_SPI_PERIPHERAL_EUSART_{{ instance | upper }}_CLK_PORT,
-      .pin = SL_CPC_DRV_SPI_PERIPHERAL_EUSART_{{ instance | upper }}_CLK_PIN,
+      .port = SL_CPC_DRV_SPI_PERIPHERAL_EUSART_{{ instance | upper }}_SCLK_PORT,
+      .pin = SL_CPC_DRV_SPI_PERIPHERAL_EUSART_{{ instance | upper }}_SCLK_PIN,
     },
     .cs = {
       .port = SL_CPC_DRV_SPI_PERIPHERAL_EUSART_{{ instance | upper }}_CS_PORT,
@@ -106,6 +108,60 @@ sl_status_t sl_cpc_drv_instances_init(void)
     .tx_availability_synctrig_ch = SL_CPC_DRV_SPI_PERIPHERAL_EUSART_{{ instance | upper }}_TX_AVAILABILITY_SYNCTRIG_CH,
   };
   {%- endfor %}
+
+  {% for instance in cpc_ng_drv_spi_controller_eusart_instances -%}
+  const sl_cpc_drv_spi_controller_eusart_config_t sl_cpc_drv_spi_controller_eusart_{{ instance }}_cfg = {
+    .peripheral = SL_CONCAT_PASTER_2(SL_PERIPHERAL_EUSART, SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_PERIPHERAL_NO),
+    .copi = {
+      .port = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_COPI_PORT,
+      .pin = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_COPI_PIN,
+    },
+    .cipo = {
+      .port = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_CIPO_PORT,
+      .pin = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_CIPO_PIN,
+    },
+    .clk = {
+      .port = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_SCLK_PORT,
+      .pin = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_SCLK_PIN,
+    },
+    .cs = {
+      .port = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_CS_PORT,
+      .pin = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_CS_PIN,
+    },
+    .irq = {
+      .port = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_IRQ_PORT,
+      .pin = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_IRQ_PIN,
+    },
+    .bitrate = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_BITRATE,
+  };
+  {%- endfor %}
+
+  {% for instance in cpc_ng_drv_spi_controller_usart_instances -%}
+  const sl_cpc_drv_spi_controller_usart_config_t sl_cpc_drv_spi_controller_usart_{{ instance }}_cfg = {
+    .peripheral = SL_CONCAT_PASTER_2(SL_PERIPHERAL_USART, SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_PERIPHERAL_NO),
+    .copi = {
+      .port = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_COPI_PORT,
+      .pin = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_COPI_PIN,
+    },
+    .cipo = {
+      .port = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_CIPO_PORT,
+      .pin = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_CIPO_PIN,
+    },
+    .clk = {
+      .port = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_CLK_PORT,
+      .pin = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_CLK_PIN,
+    },
+    .cs = {
+      .port = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_CS_PORT,
+      .pin = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_CS_PIN,
+    },
+    .irq = {
+      .port = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_IRQ_PORT,
+      .pin = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_IRQ_PIN,
+    },
+    .bitrate = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_BITRATE,
+  };
+  {% endfor %}
 
   {% for instance in cpc_ng_drv_spi_peripheral_usart_instances -%}
   const sl_cpc_drv_spi_peripheral_usart_config_t sl_cpc_drv_spi_peripheral_usart_{{ instance }}_cfg = {
@@ -138,7 +194,11 @@ sl_status_t sl_cpc_drv_instances_init(void)
 
   {% for instance in cpc_ng_drv_uart_eusart_instances -%}
   const sl_cpc_drv_uart_eusart_config_t sl_cpc_drv_uart_eusart_{{ instance }}_cfg = {
+  #if defined(EUART0_BASE)
+    .peripheral = SL_CONCAT_PASTER_2(SL_PERIPHERAL_EUART, SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_PERIPHERAL_NO),
+  #else
     .peripheral = SL_CONCAT_PASTER_2(SL_PERIPHERAL_EUSART, SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_PERIPHERAL_NO),
+  #endif
     .pins = {
       .tx = { SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_TX_PORT, SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_TX_PIN },
       .rx = { SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_RX_PORT, SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_RX_PIN },

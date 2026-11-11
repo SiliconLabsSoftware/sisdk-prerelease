@@ -37,4 +37,7 @@ template_contribution:
   value: cpc_security
 validation_helper:
 - path: cpc_configuration_security_validation.lua
+documentation:
+  docset: gecko-platform
+  document: platform-cpc/cpc-security
 root_path: cpc

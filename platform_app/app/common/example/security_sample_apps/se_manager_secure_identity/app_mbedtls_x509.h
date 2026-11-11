@@ -22,8 +22,8 @@
 // -----------------------------------------------------------------------------
 #include "app_se_manager_macro.h"
 #include "app_se_manager_secure_identity.h"
+#include "mbedtls/pk.h"
 #include "mbedtls/x509_crt.h"
-#include "mbedtls/private_access.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs

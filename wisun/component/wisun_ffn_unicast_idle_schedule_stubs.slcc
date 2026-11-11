@@ -1,0 +1,26 @@
+id: "wisun_ffn_unicast_idle_schedule_stubs"
+label: "Wi-SUN FFN unicast idle scheduling stubs"
+description: "Adds stubs with no local FFN unicast idle schedule or peer prediction"
+package: "wisun"
+category: "Wi-SUN"
+quality: "production"
+root_path: "wisun/./stack"
+
+ui_hints:
+  visibility: never
+
+provides:
+- name: "wisun_ffn_unicast_idle_schedule_implementation"
+- name: "wisun_ffn_unicast_idle_schedule_stubs"
+
+conflicts:
+- name: "wisun_ffn_unicast_idle_schedule"
+
+source:
+- path: "nanostack-stack/source/6lowpan/ws/ws_ffn_uc_idle_schedule_local_stubs.c"
+- path: "nanostack-stack/source/6lowpan/ws/ws_ffn_uc_idle_schedule_peer_stubs.c"
+- path: "src/sli_wisun_task_ffn_uc_idle_schedule_stubs.c"
+
+metadata:
+  sbom:
+    license: MSLA

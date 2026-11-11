@@ -1,0 +1,44 @@
+id: cpc_ng_drv_spi_controller_eusart_primary
+package: cpc_ng
+description: Instantiable SPI-controller (EUSART) driver for a CPC-NG Primary device.
+category: Services|CPC-NG|Driver|Primary Device
+quality: internal
+label: CPC-NG Primary - SPI Controller (EUSART)
+metadata:
+  sbom:
+    license: Zlib
+root_path: cpc_ng/port/silabs
+instantiable:
+  prefix: instance
+source:
+- path: src/sl_cpc_drv_spi_controller_eusart.c
+include:
+- path: inc
+  file_list:
+  - path: sl_cpc_drv_spi_controller_eusart.h
+config_file:
+- path: config/sl_cpc_ng_drv_spi_controller_eusart_{{instance}}_config.h
+  file_id: cpc_ng_drv_spi_controller_eusart_config
+- path: config/sl_cpc_ng_drv_spi_controller_eusart_{{instance}}_kernel_config.h
+  file_id: cpc_ng_drv_spi_controller_eusart_kernel_config
+  condition: [kernel]
+- path: config/sl_cpc_ng_drv_spi_controller_eusart_{{instance}}_pm_runtime_config.h
+  file_id: cpc_ng_drv_spi_controller_eusart_pm_runtime_config
+  condition: [cpc_ng_pm_runtime]
+- path: config/sl_cpc_ng_drv_spi_controller_eusart_{{instance}}_wake_host_config.h
+  file_id: cpc_ng_drv_spi_controller_eusart_wake_host_config
+  condition: [cpc_ng_wake_host]
+provides:
+- name: cpc_ng_drv_spi_controller_eusart_primary
+- name: cpc_ng_drv_primary_instance
+  allow_multiple: true
+requires:
+- name: cpc_ng_drv_spi_controller
+- name: cpc_ng_primary
+template_contribution:
+- name: cpc_ng_drv_spi_controller_eusart_instances
+  value: "{{instance}}"
+- name: event_handler
+  value:
+    event: cpc_drv_instances_start_buses
+    handler: sl_cpc_drv_spi_controller_eusart_instances_start_buses

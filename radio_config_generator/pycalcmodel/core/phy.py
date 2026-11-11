@@ -14,8 +14,6 @@ from pycalcmodel.core.output import ModelOutputOverrideContainer, ModelOutputOve
 from pycalcmodel.core.parser import ModelParser
 import sys
 
-from pycalcmodel.py2_and_3_compatibility import *
-
 
 __all__ = [ 'ModelPhy', 'ModelPhyContainer', 'ModelPhyTypeXml', 'ModelPhyInstanceXml' ]
 
@@ -59,7 +57,7 @@ class ModelPhy(object):
 
     @name.setter
     def name(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._name = value
 
     @property
@@ -68,7 +66,7 @@ class ModelPhy(object):
 
     @readable_name.setter
     def readable_name(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._readable_name = value
 
     @property
@@ -77,7 +75,7 @@ class ModelPhy(object):
 
     @desc.setter
     def desc(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._desc = value
 
     @property
@@ -94,7 +92,7 @@ class ModelPhy(object):
 
     @group_name.setter
     def group_name(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._group_name = value
 
     @property
@@ -103,7 +101,7 @@ class ModelPhy(object):
 
     @act_logic.setter
     def act_logic(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._act_logic = value
 
     @property
@@ -112,7 +110,7 @@ class ModelPhy(object):
 
     @tags.setter
     def tags(self, value):
-        assert isinstance(value, basestring)
+        assert isinstance(value, str)
         self._tags = value
 
     @property
@@ -131,7 +129,7 @@ class ModelPhy(object):
     @guid.setter
     def guid(self, value):
         if value is not None:
-            assert isinstance(value, basestring)
+            assert isinstance(value, str)
         self._guid = value
 
     @property

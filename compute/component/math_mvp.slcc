@@ -6,7 +6,7 @@ description: >
 category: Compute
 quality: production
 documentation:
-  docset: compute
+  docset: machine-learning
   document: platform-compute-math
 root_path: compute/math/mvp
 metadata:

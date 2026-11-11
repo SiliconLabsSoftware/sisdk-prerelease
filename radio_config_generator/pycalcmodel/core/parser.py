@@ -5,7 +5,6 @@ This module contains the parser object, that is consumed by all
 parser objects to determine factory view and evaluate the activation and
 visibility logic strings.
 """
-from pycalcmodel.py2_and_3_compatibility import *
 
 __all__ = [ 'ModelParser' ]
 
@@ -17,7 +16,7 @@ class ModelParser(object):
         self.ZZ_EVAL_VARS = {}
 
     def update_feature(self, name, value):
-        assert isinstance(name, basestring)
+        assert isinstance(name, str)
         assert isinstance(value, bool)
         self.ZZ_EVAL_VARS['feature_' + name] = value
 

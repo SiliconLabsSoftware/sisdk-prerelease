@@ -393,6 +393,8 @@ RAILModel:
                                 dataType: FieldDataType.UINT32_T
                               - name: syncwordDurationUs
                                 dataType: FieldDataType.UINT32_T
+                              - name: csRttDigDelay
+                                dataType: FieldDataType.INT32_T
 
             - RAILModelObjectArray:
                 name: modemConfigEntries

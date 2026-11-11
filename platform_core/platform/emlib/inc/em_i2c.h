@@ -61,25 +61,8 @@ extern "C" {
  * @note
  *   Due to chip characteristics, max value is somewhat reduced.
  */
-#if defined(_SILICON_LABS_32B_SERIES_0) \
-  && (defined(_EFM32_GECKO_FAMILY)      \
-  || defined(_EFM32_TINY_FAMILY)        \
-  || defined(_EFM32_ZERO_FAMILY)        \
-  || defined(_EFM32_HAPPY_FAMILY))
-#define I2C_FREQ_STANDARD_MAX    93000
-#elif defined(_SILICON_LABS_32B_SERIES_0) \
-  && (defined(_EFM32_GIANT_FAMILY)        \
-  || defined(_EFM32_WONDER_FAMILY))
-#define I2C_FREQ_STANDARD_MAX    92000
-#elif defined(_SILICON_LABS_32B_SERIES_1)
-// None of the chips on this platform has been characterized on this parameter.
-// Use same value as on Wonder until further notice.
-#define I2C_FREQ_STANDARD_MAX    92000
-#elif defined(_SILICON_LABS_32B_SERIES_2)
+/* Series 2 characterized standard-mode max frequency. */
 #define I2C_FREQ_STANDARD_MAX   100000
-#else
-#error "Unknown device family."
-#endif
 
 /**
  * @brief

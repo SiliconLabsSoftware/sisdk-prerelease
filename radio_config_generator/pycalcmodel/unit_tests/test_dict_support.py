@@ -21,7 +21,7 @@ def test_dict_value_assignment():
     """Test assigning dict values"""
     var = ModelVariable('test_dict', dict, False)
     test_dict = {'key1': 'value1', 'key2': 42}
-    var.value = test_dict
+    var.value_forced = test_dict
     assert var.value == test_dict
     print("Dict value assignment works")
 
@@ -29,7 +29,7 @@ def test_dict_array_assignment():
     """Test assigning array of dicts"""
     var = ModelVariable('test_dict_array', dict, True)
     test_dicts = [{'a': 1}, {'b': 2}, {'c': 3}]
-    var.value = test_dicts
+    var.value_forced = test_dicts
     assert var.value == test_dicts
     print("Dict array assignment works")
 

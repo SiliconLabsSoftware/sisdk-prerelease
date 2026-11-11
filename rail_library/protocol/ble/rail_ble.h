@@ -205,6 +205,12 @@ RAIL_ENUM(RAIL_BLE_Phy_t) {
    * @deprecated RAIL 2.x synonym of \ref SL_RAIL_BLE_PHY_CS_2_MBPS.
    */
   RAIL_BLE_CS2Mbps = 8U,
+  /**
+   * BLE 2 Mbps 2BT PHY with CS.
+   *
+   * @deprecated RAIL 2.x synonym of \ref SL_RAIL_BLE_PHY_CS_2_MBPS_2_BT.
+   */
+  RAIL_BLE_CS2Mbps2BT = 9U,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -218,6 +224,7 @@ RAIL_ENUM(RAIL_BLE_Phy_t) {
 #define RAIL_BLE_Quuppa1Mbps  ((RAIL_BLE_Phy_t) RAIL_BLE_Quuppa1Mbps)
 #define RAIL_BLE_CS1Mbps      ((RAIL_BLE_Phy_t) RAIL_BLE_CS1Mbps)
 #define RAIL_BLE_CS2Mbps      ((RAIL_BLE_Phy_t) RAIL_BLE_CS2Mbps)
+#define RAIL_BLE_CS2Mbps2BT   ((RAIL_BLE_Phy_t) RAIL_BLE_CS2Mbps2BT)
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 ///
@@ -284,6 +291,14 @@ extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy1MbpsViterbiCs;
  * @deprecated RAIL 2.x synonym of \ref sl_rail_ble_phy_2_mbps_cs.
  */
 extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2MbpsViterbiCs;
+
+/**
+ * Default PHY to use for BLE 2 Mbps 2BT Viterbi CS. Will be NULL if
+ * \ref SL_RAIL_BLE_SUPPORTS_CS_HW_BLOCK is 0.
+ *
+ * @deprecated RAIL 2.x synonym of \ref sl_rail_ble_phy_2_mbps_2bt_cs.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_Phy2Mbps2BtViterbiCs;
 #endif//DOXYGEN_UNDOCUMENTED
 
 /**
@@ -640,6 +655,22 @@ RAIL_Status_t RAIL_BLE_ConfigPhy1MbpsCs(RAIL_Handle_t railHandle);
  * @deprecated RAIL 2.x synonym of \ref sl_rail_ble_config_phy_2_mbps_cs().
  */
 RAIL_Status_t RAIL_BLE_ConfigPhy2MbpsCs(RAIL_Handle_t railHandle);
+
+/**
+ * Switch to the 2 Mbps 2BT BLE PHY for CS.
+ *
+ * @param[in] railHandle A handle for RAIL instance.
+ * @return Status code indicating success of the function call.
+ *
+ * Use this function to switch back to the BLE 2 Mbps 2BT CS PHY from
+ * another configuration. You may only call this
+ * function after initializing BLE and while the radio is idle.
+ *
+ * @note This PHY is only supported when \ref RAIL_BLE_SUPPORTS_CS_HW_BLOCK is not 0.
+ *
+ * @deprecated RAIL 2.x synonym of \ref sl_rail_ble_config_phy_2_mbps_2bt_cs().
+ */
+RAIL_Status_t RAIL_BLE_ConfigPhy2Mbps2BtCs(RAIL_Handle_t railHandle);
 #endif //DOXYGEN_UNDOCUMENTED
 
 #endif//SLI_LIBRAIL_ALIAS

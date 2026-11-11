@@ -905,3 +905,33 @@ class PhysInternalBaseStandardIEEE802154Ocelot(PhysRAILBaseStandardIEEE802154Lyn
         phy.profile_inputs.antdivmode.value = model.vars.antdivmode.var_enum.ANTSELCORR
         phy.profile_inputs.antdivrepeatdis.value = model.vars.antdivrepeatdis.var_enum.NOREPEATFIRST
         return phy
+
+    def PHY_Internal_IEEE802154_868MHz_coh_thread_sf8(self, model, phy_name=None):
+        phy = self.PHY_IEEE802154_2p4GHz_cohdsa(model, phy_name=phy_name)
+        self._set_xtal_frequency(phy, 39000000)
+
+        phy.profile_inputs.base_frequency_hz.value = 863_500_000
+        phy.profile_inputs.channel_spacing_hz.value = 1_250_000
+
+        phy.profile_inputs.bitrate.value = 100000
+        phy.profile_inputs.deviation.value = 200000
+        phy.profile_inputs.if_frequency_hz.value = 600000
+
+        phy.profile_inputs.shaping_filter.value = model.vars.shaping_filter.var_enum.Gaussian
+        phy.profile_inputs.shaping_filter_param.value = 0.5
+        phy.profile_inputs.synth_tx_mode.value = model.vars.synth_tx_mode.var_enum.MODE4
+
+        phy.profile_outputs.MODEM_TXBR_TXBRDEN.override = None
+        phy.profile_outputs.MODEM_TXBR_TXBRNUM.override = None
+
+        phy.profile_inputs.bandwidth_hz.value = 980_000
+
+        return phy
+
+    def PHY_Internal_IEEE802154_915MHz_coh_thread_sf8(self, model, phy_name=None):
+        phy = self.PHY_Internal_IEEE802154_868MHz_coh_thread_sf8(model, phy_name=phy_name)
+
+        phy.profile_inputs.base_frequency_hz.value = 902_500_000
+
+        return phy
+    

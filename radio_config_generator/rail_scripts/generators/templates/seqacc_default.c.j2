@@ -27,7 +27,7 @@ uint32_t {{name}}[] = {
 {{ sequence.condition }}
 {% endif -%}
 SeqAccEntry_t {{name}}Entry = {
-  .baseAddrCfgPtr = &({{sequence.baseAddrAccess}}),
+  .baseAddrCfgPtr = &({{sequence|getAccess}}),
   .sequenceCfg = {{"0x{0:08X}U,".format(sequence.sequenceCfg)}}
   .sequencePtr = (RAILInt_SeqAccCmdPtr_t) {{name}},
   .sequenceWords = {{sequence.lengthWord}}U

@@ -2,7 +2,7 @@
  * @brief RAIL Configuration
  * @details
  *   WARNING: Auto-Generated Radio Config Header  -  DO NOT EDIT
- *   Radio Configurator Version: 2604.3.0rc1
+ *   Radio Configurator Version: 2604.3.0rc3
  *   RAIL Adapter Version: 2.4.33
  *   RAIL Compatibility: 2.x
  *******************************************************************************
@@ -49,6 +49,7 @@ extern const uint32_t sl_rail_ble_phy_500kbps_39MHz_modemConfig[];
 extern const uint32_t sl_rail_ble_phy_simulscan_39MHz_modemConfig[];
 extern const uint32_t sl_rail_ble_phy_1Mbps_viterbi_cs_39MHz_0_78_modemConfig[];
 extern const uint32_t sl_rail_ble_phy_2Mbps_viterbi_cs_39MHz_0_78_modemConfig[];
+extern const uint32_t sl_rail_ble_phy_2Mbps_2bt_viterbi_cs_39MHz_0_78_modemConfig[];
 extern const uint32_t sl_rail_ble_phy_quuppa_39MHz_0_modemConfig[];
 extern const uint32_t sl_rail_ble_phy_quuppa_39MHz_1_modemConfig[];
 extern const uint32_t sl_rail_ble_phy_quuppa_39MHz_2_modemConfig[];
@@ -64,15 +65,20 @@ extern const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_1Mbps_viterbi_39MHz_chann
 extern const RAIL_ChannelConfig_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_channelConfig;
 extern const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_2Mbps_viterbi_39MHz_channels[];
 
-#define RAIL0_SL_RAIL_BLE_PHY_1MBPS_VITERBI_CS_39MHZ_PHY_BLUETOOTH_1M_HADM_40MHZ
+#define RAIL0_SL_RAIL_BLE_PHY_1MBPS_VITERBI_CS_39MHZ_PHY_BLUETOOTH_1M_HADM_39MHZ
 #define RAIL0_SL_RAIL_BLE_PHY_1MBPS_VITERBI_CS_39MHZ_PROFILE_BASE
 extern const RAIL_ChannelConfig_t sl_rail_ble_phy_1Mbps_viterbi_cs_39MHz_channelConfig;
 extern const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_1Mbps_viterbi_cs_39MHz_channels[];
 
-#define RAIL0_SL_RAIL_BLE_PHY_2MBPS_VITERBI_CS_39MHZ_PHY_BLUETOOTH_2M_HADM_40MHZ
+#define RAIL0_SL_RAIL_BLE_PHY_2MBPS_VITERBI_CS_39MHZ_PHY_BLUETOOTH_2M_HADM_39MHZ
 #define RAIL0_SL_RAIL_BLE_PHY_2MBPS_VITERBI_CS_39MHZ_PROFILE_BASE
 extern const RAIL_ChannelConfig_t sl_rail_ble_phy_2Mbps_viterbi_cs_39MHz_channelConfig;
 extern const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_2Mbps_viterbi_cs_39MHz_channels[];
+
+#define RAIL0_SL_RAIL_BLE_PHY_2MBPS_2BT_VITERBI_CS_39MHZ_PHY_BLUETOOTH_2M_HADM_2BT_39MHZ
+#define RAIL0_SL_RAIL_BLE_PHY_2MBPS_2BT_VITERBI_CS_39MHZ_PROFILE_BASE
+extern const RAIL_ChannelConfig_t sl_rail_ble_phy_2Mbps_2bt_viterbi_cs_39MHz_channelConfig;
+extern const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_2Mbps_2bt_viterbi_cs_39MHz_channels[];
 
 #define RAIL0_SL_RAIL_BLE_PHY_125KBPS_39MHZ_PHY_BLUETOOTH_LONGRANGE_DSA_125KBPS
 #define RAIL0_SL_RAIL_BLE_PHY_125KBPS_39MHZ_PROFILE_BASE

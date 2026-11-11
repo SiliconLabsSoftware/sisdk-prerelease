@@ -19,4 +19,7 @@ recommends:
   instance:
   - exp
   vendor: silabs
+documentation:
+  docset: gecko-platform
+  document: platform-cpc-overview
 root_path: cpc

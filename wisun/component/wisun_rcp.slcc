@@ -28,12 +28,12 @@ requires:
 - name: sleeptimer
 - name: hal_prs
 - name: clock_manager_runtime
-- name: wisun_ffn_power_saving_implementation
+- name: wisun_ffn_unicast_idle_schedule_implementation
 
 recommends:
 - id: rail_lib_singleprotocol
   vendor: silabs
-- id: wisun_ffn_power_saving_stubs
+- id: wisun_ffn_unicast_idle_schedule_stubs
 
   vendor: silabs
 define:

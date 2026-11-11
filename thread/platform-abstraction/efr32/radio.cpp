@@ -113,6 +113,10 @@ extern "C" {
 #include "sl_gp_interface.h"
 }
 
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+#include "radio_duty_cycle_manager.h"
+#endif
+
 //------------------------------------------------------------------------------
 // Enums, macros and static variables
 
@@ -237,8 +241,6 @@ static otRadioIeInfo sTransmitIeInfo[RADIO_REQUEST_BUFFER_COUNT];
 extern struct efr32RadioCounters railDebugCounters;
 #define rxDebugStep (railDebugCounters.mRadioDebugData.m8[RX_DEBUG_COUNTER0])
 #endif
-
-#define SHR_DURATION_US 160
 
 #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 enum
@@ -773,6 +775,59 @@ void sli_ot_radio_events_update_config(sl_rail_events_t mask, sl_rail_events_t v
     }
 }
 
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+static sl_ot_duty_cycle_status_t sDutyCycleAlertStatus;
+static bool                      sDutyCycleAlertPending;
+
+OT_TOOL_WEAK void sli_ot_radio_duty_cycle_alert_callback(const sl_ot_duty_cycle_status_t *status, void *context)
+{
+    (void)context;
+
+    if (status == nullptr)
+    {
+        return;
+    }
+
+    CORE_DECLARE_IRQ_STATE;
+    CORE_ENTER_ATOMIC();
+    sDutyCycleAlertStatus  = *status;
+    sDutyCycleAlertPending = true;
+    CORE_EXIT_ATOMIC();
+
+    otSysEventSignalPending();
+}
+
+static void processDutyCycleAlert(void)
+{
+    sl_ot_duty_cycle_status_t status;
+    bool                      pending;
+
+    CORE_DECLARE_IRQ_STATE;
+    CORE_ENTER_ATOMIC();
+    pending = sDutyCycleAlertPending;
+    if (pending)
+    {
+        status                 = sDutyCycleAlertStatus;
+        sDutyCycleAlertPending = false;
+    }
+    CORE_EXIT_ATOMIC();
+
+    if (!pending)
+    {
+        return;
+    }
+
+    otLogCritPlat("!!!Duty cycle alert triggered!!!");
+    otLogCritPlat("Total TX time: %ld", status.total_tx_us);
+    otLogCritPlat("Current period TX time: %ld", status.current_period_tx_us);
+    otLogCritPlat("Max budget: %ld", status.max_budget_us);
+    otLogCritPlat("Remaining budget: %ld", status.remaining_budget_us);
+    otLogCritPlat("Duty permille: %d", status.duty_permille);
+    otLogCritPlat("Max duty permille: %d", status.max_duty_permille);
+    otLogCritPlat("Level: %s", sl_ot_duty_cycle_alert_level_to_string(status.level));
+}
+#endif
+
 #ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 SL_CODE_CLASSIFY(SL_CODE_COMPONENT_OT_PLATFORM_ABSTRACTION, SL_CODE_CLASS_TIME_CRITICAL)
 sl_rail_util_ieee802154_stack_event_t sli_ot_radio_events_handle_phy_stack_event_with_status(
@@ -878,13 +933,18 @@ void sli_ot_radio_events_process_callback(sl_rail_handle_t aRailHandle, sl_rail_
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
     // Resume a deferred RX: these paths do not run packetReceivedCallback().
+    // PAL ACK duty-cycle accounting. Remove when duty cycling moves to the stack.
+    // A frame that dies after the ACK was prepared produces no TXACK event.
     if (aEvents
         & (SL_RAIL_EVENT_RX_FRAME_ERROR | SL_RAIL_EVENT_RX_PACKET_ABORTED | SL_RAIL_EVENT_RX_ADDRESS_FILTERED
            | SL_RAIL_EVENT_RX_FIFO_OVERFLOW))
     {
         startDeferredScheduledRx();
-    }
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+        sli_ot_duty_cycle_ack_tx_discard();
 #endif
+    }
+#endif // OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 
     // Process ACK events
     sli_ot_radio_events_process_ack_events(aEvents);
@@ -1133,6 +1193,10 @@ static inline void processAckSentEvent(void)
 {
     sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_SENT,
                                                static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+    // PAL ACK duty-cycle accounting. Remove when duty cycling moves to the stack.
+    sli_ot_duty_cycle_ack_tx_notify_transmitted();
+#endif
     packetSentCallback(true);
 }
 
@@ -1140,6 +1204,10 @@ static inline void processAckAbortedEvent(void)
 {
     sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_ABORTED,
                                                static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+    // PAL ACK duty-cycle accounting. Remove when duty cycling moves to the stack.
+    sli_ot_duty_cycle_ack_tx_discard();
+#endif
     txFailedCallback(true, 0xFF);
 }
 
@@ -1147,6 +1215,10 @@ static inline void processAckBlockedEvent(void)
 {
     sli_ot_radio_events_handle_phy_stack_event(SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_BLOCKED,
                                                static_cast<uint32_t>(sli_ot_radio_state_is_receiving_frame()));
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+    // PAL ACK duty-cycle accounting. Remove when duty cycling moves to the stack.
+    sli_ot_duty_cycle_ack_tx_discard();
+#endif
 }
 
 static inline void processScheduledTxEvent(void)
@@ -1383,6 +1455,12 @@ void efr32RadioInit(void)
     sl_status_t                 rxMemPoolStatus;
     bool                        queueStatus;
     sl_rail_timer_sync_config_t timer_sync_config = SL_RAIL_TIMER_SYNC_DEFAULT;
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+    sl_ot_duty_cycle_config_t config = {
+        .on_alert         = sli_ot_radio_duty_cycle_alert_callback,
+        .on_alert_context = nullptr,
+    };
+#endif
 
     // check if RAIL_TX_FIFO_SIZE is power of two..
     OT_ASSERT((RAIL_TX_FIFO_SIZE & (RAIL_TX_FIFO_SIZE - 1)) == 0);
@@ -1458,6 +1536,20 @@ void efr32RadioInit(void)
         sl_memory_create_pool(sizeof(rxBuffer), SL_OPENTHREAD_RADIO_RX_BUFFER_COUNT, &sRxPacketMemPoolHandle);
     OT_ASSERT(rxMemPoolStatus == SL_STATUS_OK);
 
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+    (void)sl_ot_duty_cycle_deinit();
+    status = sl_ot_duty_cycle_init(&config);
+    OT_ASSERT(status == SL_STATUS_OK);
+#endif
+
+#if RADIO_CONFIG_SUBGHZ_SUPPORT
+    csmaConfig.cca_backoff_us  = 800;
+    csmaConfig.cca_duration_us = 320;
+
+    cslCsmaConfig.cca_backoff_us  = 800;
+    cslCsmaConfig.cca_duration_us = 320;
+#endif
+
     otLogInfoPlat("Initialized");
 }
 
@@ -1474,6 +1566,10 @@ void efr32RadioDeinit(void)
 
     // Clean up any ongoing energy scan
     sli_ot_energy_scan_deinit();
+
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+    (void)sl_ot_duty_cycle_deinit();
+#endif
 
 #if OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
     sli_ot_radio_csl_deinit();
@@ -1502,6 +1598,7 @@ void otPlatRadioSetPanId(otInstance *aInstance, uint16_t aPanId)
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
     sli_ot_radio_instance_update_rail_filter_mask_for_pan_id(aPanId, panIndex);
 #endif
+
 exit:
     return;
 }
@@ -1800,6 +1897,14 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
         }
 #endif // OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2
 
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+        // Check if the duty cycle is exceeded.
+        // Set it after all the processing, so that the error reported to the stack has the correct packet and frame
+        // information.
+        sl_status_t status = sl_ot_duty_cycle_check_tx(aFrame->mLength);
+        otEXPECT_ACTION(status != SL_STATUS_FAIL, sli_ot_radio_state_set_tx_failed(true));
+#endif
+
         if (!sli_ot_radio_state_has_tx_failed())
         {
             CORE_DECLARE_IRQ_STATE;
@@ -1807,10 +1912,7 @@ otError otPlatRadioTransmit(otInstance *aInstance, otRadioFrame *aFrame)
             sli_ot_radio_state_set_tx_data_ongoing(true);
             tryTxCurrentPacket();
             CORE_EXIT_ATOMIC();
-        }
 
-        if (sli_ot_radio_state_has_tx_failed())
-        {
             otPlatRadioTxStarted(aInstance, aFrame);
         }
     }
@@ -1884,18 +1986,7 @@ void txCurrentPacket(void)
 
     frameLength = (uint8_t)sCurrentTxPacket->frame.mLength;
 
-    if (PHY_HEADER_SIZE == 1)
-    {
-        sli_ot_radio_interface_rail_write_tx_fifo(&frameLength, sizeof frameLength, true);
-    }
-    else
-    { // 2 byte PHR for Sub-GHz
-        uint8_t PHRByte1 = (0x08U /*FCS=2byte*/ | 0x10U /*Whiten=enabled*/);
-        uint8_t PHRByte2 = (uint8_t)(__RBIT(frameLength) >> 24);
-
-        sli_ot_radio_interface_rail_write_tx_fifo(&PHRByte1, sizeof PHRByte1, true);
-        sli_ot_radio_interface_rail_write_tx_fifo(&PHRByte2, sizeof PHRByte2, false);
-    }
+    sli_ot_radio_interface_rail_write_tx_fifo(&frameLength, sizeof frameLength, true);
     sli_ot_radio_interface_rail_write_tx_fifo(sCurrentTxPacket->frame.mPsdu, frameLength - 2, false);
 
     sl_rail_scheduler_info_t txSchedulerInfo = {
@@ -2299,21 +2390,21 @@ static bool writeIeee802154EnhancedAck(sl_rail_handle_t          aRailHandle,
     }
 
     // Fill in PHR now that we know Enh-ACK's length
-    if (PHY_HEADER_SIZE == 2U)
-    { // Not true till SubGhz implementation is in place
-        enhAckPsdu[0] = (0x08U /*FCS=2byte*/ | 0x10U /*Whiten=enabled*/);
-        enhAckPsdu[1] = (uint8_t)(__RBIT(enhAckFrame.mLength) >> 24);
-    }
-    else
-    {
-        enhAckPsdu[0] = enhAckFrame.mLength;
-    }
+    enhAckPsdu[0] = enhAckFrame.mLength;
 
     enhAckStatus = sl_rail_ieee802154_write_enh_ack(aRailHandle, enhAckPsdu, enhAckFrame.mLength);
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
     otEXPECT_ACTION(enhAckStatus == SL_RAIL_STATUS_NO_ERROR, railDebugCounters.mRailEventsEnhAckTxFailed++);
 #else
     otEXPECT(enhAckStatus == SL_RAIL_STATUS_NO_ERROR);
+#endif
+
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+    // PAL ACK duty-cycle accounting. Remove when duty cycling moves to the stack.
+    if (enhAckStatus == SL_RAIL_STATUS_NO_ERROR)
+    {
+        sli_ot_duty_cycle_ack_tx_prepare(enhAckFrame.mLength);
+    }
 #endif
 
 exit:
@@ -2403,14 +2494,19 @@ void dataRequestCommandCallback(sl_rail_handle_t aRailHandle)
         *macFcfPointer |= IEEE802154_FRAME_PENDING_SET_IN_OUTGOING_ACK;
     }
 
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+    // PAL ACK duty-cycle accounting. Remove when duty cycling moves to the stack.
+    sli_ot_duty_cycle_ack_tx_prepare(SLI_OT_DUTY_CYCLE_IMMEDIATE_ACK_PSDU_LEN);
+#endif
+
 exit:
     if (status == SL_RAIL_STATUS_INVALID_STATE)
     {
         otLogWarnPlat("Too late to modify outgoing FP");
     }
-    else
+    else if (status != SL_RAIL_STATUS_NO_ERROR)
     {
-        OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
+        otLogCritPlat("dataRequestCommandCallback failed: status=0x%lx", status);
     }
 #endif // RADIO_CONFIG_SRC_MATCH_SHORT_ENTRY_NUM || RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM
 }
@@ -2802,9 +2898,9 @@ static bool validatePacketTimestamp(sl_rail_rx_packet_details_t *pPacketDetails,
     // + PHY HEADER SIZE for PHY header
     // We would not need this if PHR is not included and we want the MHR
     pPacketDetails->time_received.total_packet_bytes = packetLength + PHY_HEADER_SIZE;
-
     otEXPECT_ACTION((sli_ot_radio_interface_rail_get_rx_time_sync_word_end(pPacketDetails) == SL_RAIL_STATUS_NO_ERROR),
                     rxTimestampValid = false);
+
 exit:
     return rxTimestampValid;
 }
@@ -2979,7 +3075,8 @@ static void processTxComplete(otInstance *aInstance)
 {
     OT_UNUSED_VARIABLE(aInstance);
     otError       txStatus;
-    otRadioFrame *ackFrame = nullptr;
+    otRadioFrame *ackFrame        = nullptr;
+    bool          report_tx_bytes = false;
 
     if (sli_ot_radio_state_has_tx_events())
     {
@@ -2993,6 +3090,7 @@ static void processTxComplete(otInstance *aInstance)
             }
 
             sli_ot_radio_state_set_tx_success(false);
+            report_tx_bytes = true;
         }
         else if (sli_ot_radio_state_has_tx_cca_failed())
         {
@@ -3003,6 +3101,7 @@ static void processTxComplete(otInstance *aInstance)
         {
             txStatus = OT_ERROR_NO_ACK;
             sli_ot_radio_state_set_tx_no_ack(false);
+            report_tx_bytes = true;
         }
         else
         {
@@ -3046,6 +3145,13 @@ static void processTxComplete(otInstance *aInstance)
 #endif
         otPlatRadioTxDone(sCurrentTxPacket->instance, &sCurrentTxPacket->frame, ackFrame, txStatus);
 
+        if (report_tx_bytes)
+        {
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+            sl_ot_duty_cycle_record_tx_complete(sCurrentTxPacket->frame.mLength);
+#endif
+        }
+
 #if RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
         railDebugCounters.mRailPlatRadioTxDoneCbCount++;
 #endif
@@ -3055,7 +3161,11 @@ static void processTxComplete(otInstance *aInstance)
 
 bool efr32RadioIsDataReady(void)
 {
-    return !queueIsEmpty(&sRxPacketQueue) || sli_ot_radio_state_has_tx_events();
+    return !queueIsEmpty(&sRxPacketQueue) || sli_ot_radio_state_has_tx_events()
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+           || sDutyCycleAlertPending || sli_ot_duty_cycle_ack_tx_is_pending()
+#endif
+        ;
 }
 
 void efr32RadioProcess(otInstance *aInstance)
@@ -3067,6 +3177,11 @@ void efr32RadioProcess(otInstance *aInstance)
     processRxPackets(aInstance);
     processTxComplete(aInstance);
     sli_ot_energy_scan_process(aInstance);
+
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+    processDutyCycleAlert();
+    sli_ot_duty_cycle_ack_tx_process_pending();
+#endif
 
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
     sli_ot_radio_instance_process_commands();

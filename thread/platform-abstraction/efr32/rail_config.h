@@ -33,8 +33,14 @@
 #include "sl_rail_types.h"
 #include <stdint.h>
 
-#if RADIO_CONFIG_SUBGHZ_SUPPORT
-extern const sl_rail_channel_config_t *channelConfigs[];
+#ifdef RADIO_CONFIG_SUBGHZ_SUPPORT_868_XG23
+#include "rail_config_868_xg23.h"
+#elif RADIO_CONFIG_SUBGHZ_SUPPORT_915_XG23
+#include "rail_config_915_xg23.h"
+#elif RADIO_CONFIG_SUBGHZ_SUPPORT_868_XG28
+#include "rail_config_868_xg28.h"
+#elif RADIO_CONFIG_SUBGHZ_SUPPORT_915_XG28
+#include "rail_config_915_xg28.h"
 #endif
 
 #endif // __RAIL_CONFIG_H__

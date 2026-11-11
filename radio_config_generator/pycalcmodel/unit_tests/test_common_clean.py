@@ -15,11 +15,7 @@ from pycalcmodel.core.variable import ModelVariable
 from pycalcmodel.core.common import (
     cast_value_from_xml, get_dummy_var_value, get_xml_str_values, DUMMY_VAR_VALUE
 )
-
-try:
-    long
-except NameError:
-    long = int
+from pycalcmodel.py2_and_3_compatibility import long
 
 
 class TestDummyVarValue(unittest.TestCase):

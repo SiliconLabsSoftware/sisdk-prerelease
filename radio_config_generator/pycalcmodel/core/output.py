@@ -11,8 +11,6 @@ from pycalcmodel.core.variable import ModelVariable, ModelVariableEmptyValue
 from collections import OrderedDict
 from enum import Enum, unique
 
-from pycalcmodel.py2_and_3_compatibility import *
-
 __all__ = [ 'ModelOutput', 'ModelOutputContainer', 'ModelOutputType',
             'ModelOutputOverride', 'ModelOutputOverrideContainer']
 
@@ -63,7 +61,7 @@ class ModelOutput(object):
 
     @readable_name.setter
     def readable_name(self, value):
-        assert isinstance(value, basestring), "FATAL ERROR: value must be str"
+        assert isinstance(value, str), "FATAL ERROR: value must be str"
         self._readable_name = value
 
     @property
@@ -72,7 +70,7 @@ class ModelOutput(object):
 
     @category.setter
     def category(self, value):
-        assert isinstance(value, basestring), "FATAL ERROR: value must be str"
+        assert isinstance(value, str), "FATAL ERROR: value must be str"
         self._category = value
 
     @property

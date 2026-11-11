@@ -28,11 +28,6 @@
  *
  ******************************************************************************/
 
-#include "sl_cpc_drv_spi_peripheral.h"
-#include "sl_cpc_drv_spi.h"
-#include "sl_cpc_frame.h"
-#include "sli_cpc_drv_spi_peripheral.h"
-
 #include "sl_common.h"
 #include "sl_component_catalog.h"
 #include "sl_device_peripheral.h"
@@ -46,6 +41,10 @@
 #include "sl_hal_gpcrc.h"
 #endif
 
+#include "sl_cpc_drv_spi.h"
+#include "sl_cpc_drv_spi_peripheral.h"
+#include "sl_cpc_frame.h"
+
 #include "../../../src/sli_cpc_assert.h"
 #include "../../../src/sli_cpc_atomic.h"
 #include "../../../src/sli_cpc_bus.h"
@@ -55,6 +54,7 @@
 #include "../../../src/sli_cpc_hdr.h"
 #include "../../../src/sli_cpc_log.h"
 #include "../../../src/sli_cpc_memory.h"
+#include "sli_cpc_drv_spi_peripheral.h"
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
@@ -219,6 +219,11 @@ static sl_status_t spi_drv_read_data(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *fr
 
   SLI_CPC_FRAME_LIST_FOR_EACH(&rx_pending_frames, frame)
   {
+    if (frame->payload == NULL) {
+      frame->payload_csum_is_valid = true;
+      continue;
+    }
+
     computed_crc = sli_cpc_crc_buf(frame->payload);
     received_crc = sli_cpc_u16_from_le(frame->payload_csum_le);
     frame->payload_csum_is_valid = computed_crc == received_crc;
@@ -493,8 +498,9 @@ static void prime_dma_for_transmission(struct sl_cpc_drv_spi_peripheral *drv)
   header = &frame->hdr;
   memcpy(&drv->tx.current_header.hdr, header, sizeof(drv->tx.current_header.hdr));
 
-  sli_cpc_u16_to_le(sli_cpc_crc((uint8_t *)&drv->tx.current_header.hdr, sizeof(drv->tx.current_header.hdr)),
-                    drv->tx.current_header.csum_le);
+  sli_cpc_u16_to_le(
+    sli_cpc_crc(&drv->tx.current_header, sizeof(drv->tx.current_header) - sizeof(drv->tx.current_header.csum_le)),
+    drv->tx.current_header.csum_le);
 
   if (drv->tx.current_frame == NULL || drv->tx.current_frame->payload == NULL) {
     // Turn off branching to payload descriptor
@@ -580,7 +586,7 @@ static uint32_t spi_drv_write(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames)
 
   SLI_CPC_FRAME_LIST_FOR_EACH(frames, frame)
   {
-    if (!frame->payload_csum_is_valid) {
+    if (frame->payload && !frame->payload_csum_is_valid) {
       sli_cpc_u16_to_le(sli_cpc_crc_buf(frame->payload), frame->payload_csum_le);
       frame->payload_csum_is_valid = true;
     }
@@ -801,6 +807,7 @@ static void rx_dma_callback(void)
  ******************************************************************************/
 static sl_status_t ldma_init(struct sl_cpc_drv_spi_peripheral *drv)
 {
+  sl_status_t status;
   sl_status_t ret = sl_dma_manager_get_default_handle(&drv->dma_handle);
   if (ret != SL_STATUS_OK) {
     return ret;
@@ -811,26 +818,15 @@ static sl_status_t ldma_init(struct sl_cpc_drv_spi_peripheral *drv)
     return ret;
   }
 
-  LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)drv->dma_handle->dma_peripheral);
-
-  if (drv->rx.dma_channel < 16) {
-    sl_hal_ldma_enable_interrupts(ldma, (1 << drv->rx.dma_channel));
-  }
-#if defined(_LDMA_IFH_MASK)
-  else {
-    sl_hal_ldma_enable_high_interrupts(ldma, (1 << (drv->rx.dma_channel - 16)));
-  }
-#endif
-
   ret = sl_dma_manager_allocate_channel(drv->dma_handle, &drv->tx.dma_channel);
   if (ret != SL_STATUS_OK) {
-    return ret;
+    goto free_rx_ch;
   }
 
 #if defined(SL_CATALOG_CPC_DRIVER_HW_CRC_PRESENT)
   ret = sl_dma_manager_allocate_channel(drv->dma_handle, &drv->rx.gpcrc_dma_channel);
   if (ret != SL_STATUS_OK) {
-    return ret;
+    goto free_tx_ch;
   }
 #endif
 
@@ -845,16 +841,33 @@ static sl_status_t ldma_init(struct sl_cpc_drv_spi_peripheral *drv)
     drv->tx.dma_channel = tmp;
   }
 
+  LDMA_TypeDef *ldma = sl_device_peripheral_ldma_get_base_addr((sl_peripheral_t)drv->dma_handle->dma_peripheral);
+
+  if (drv->rx.dma_channel < 16) {
+    sl_hal_ldma_enable_interrupts(ldma, (1 << drv->rx.dma_channel));
+  }
+#if defined(_LDMA_IFH_MASK)
+  else {
+    sl_hal_ldma_enable_high_interrupts(ldma, (1 << (drv->rx.dma_channel - 16)));
+  }
+#endif
+
   ret = sl_dma_manager_register_channel_irq_callback(drv->dma_handle, drv->rx.dma_channel, rx_dma_callback);
   if (ret != SL_STATUS_OK) {
-    SLI_CPC_ASSERT(0);
-    return SL_STATUS_INVALID_PARAMETER;
+#if defined(SL_CATALOG_CPC_DRIVER_HW_CRC_PRESENT)
+    goto free_gpcrc_ch;
+#else
+    goto free_tx_ch;
+#endif
   }
 
   ret = sl_dma_manager_register_channel_user_data(drv->dma_handle, drv->rx.dma_channel, drv);
   if (ret != SL_STATUS_OK) {
-    SLI_CPC_ASSERT(0);
-    return ret;
+#if defined(SL_CATALOG_CPC_DRIVER_HW_CRC_PRESENT)
+    goto free_gpcrc_ch;
+#else
+    goto free_tx_ch;
+#endif
   }
 
   // Create DMA configs for TX/RX from the DMA-REQ signals of the E/USART
@@ -873,6 +886,22 @@ static sl_status_t ldma_init(struct sl_cpc_drv_spi_peripheral *drv)
 #endif
 
   return SL_STATUS_OK;
+
+#if defined(SL_CATALOG_CPC_DRIVER_HW_CRC_PRESENT)
+free_gpcrc_ch:
+  status = sl_dma_manager_free_channel(drv->dma_handle, drv->rx.gpcrc_dma_channel);
+  SLI_CPC_ASSERT(status == SL_STATUS_OK);
+#endif
+
+free_tx_ch:
+  status = sl_dma_manager_free_channel(drv->dma_handle, drv->tx.dma_channel);
+  SLI_CPC_ASSERT(status == SL_STATUS_OK);
+
+free_rx_ch:
+  status = sl_dma_manager_free_channel(drv->dma_handle, drv->rx.dma_channel);
+  SLI_CPC_ASSERT(status == SL_STATUS_OK);
+
+  return ret;
 }
 
 /**************************************************************************/ /**

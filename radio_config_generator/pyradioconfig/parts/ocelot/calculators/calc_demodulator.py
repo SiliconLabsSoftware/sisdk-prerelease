@@ -116,10 +116,21 @@ class CALC_Demodulator_ocelot(ICalculator):
             member_data
         )
 
+        var = self._addModelVariable(model, 'thread_feature', Enum, ModelVariableFormat.DECIMAL, 'Thread Feature')
+        member_data = [
+            ['NONE', 0, 'None'],
+            ['THREAD_SUBGHZ', 1, 'THREAD_SUBGHZ'],
+        ]
+        var.var_enum = CreateModelVariableEnum(
+            'ThreadFeatureEnum',
+            'List of supported Thread PHY features',
+            member_data)
+
 
     def calc_default_feature_mode(self, model):
         model.vars.zigbee_feature.value = model.vars.zigbee_feature.var_enum.NONE
         model.vars.ble_feature.value = model.vars.ble_feature.var_enum.NONE
+        model.vars.thread_feature.value = model.vars.thread_feature.var_enum.NONE
 
     def _add_demod_rate_variable(self, model):
         self._addModelActual(model, 'demod_rate', float, ModelVariableFormat.DECIMAL)

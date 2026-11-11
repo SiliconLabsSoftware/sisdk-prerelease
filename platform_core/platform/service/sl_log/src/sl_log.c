@@ -669,7 +669,8 @@ sl_status_t sli_log_ingest_captive_event(const sl_log_event_t *event)
   local = *event;
 
 #if ((defined(SL_LOG_CONFIG_MODE) && (SL_LOG_CONFIG_MODE == SL_LOG_CONFIG_MODE_CONSOLE)) \
-  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT))
+  || defined(SL_CATALOG_LOG_DEFAULT_RING_BUFFER_PRESENT) \
+  || defined(SL_CATALOG_LOG_CAPTIVE_NWP_SYSTEMVIEW_PRESENT))
   return sl_log_backend_write(&local, READ_INDEX_DEFAULT, EVENT_COUNT_DEFAULT);
 #else
   return log_write_to_ring_buffer(&local, sizeof(local));

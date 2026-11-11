@@ -1,0 +1,47 @@
+project_name: can_baremetal
+package: platform_app
+quality: evaluation
+label: Platform - CAN Bare-metal
+description: >
+  This example project shows how to use the CAN HAL (sl_hal_can) in a bare-metal
+  configuration. It runs in internal loopback and checks classic CAN, CAN-FD,
+  and CAN-FD with bit-rate switching.
+category: Example|Platform
+filter:
+  - name: "Device Type"
+    value: ["SoC"]
+  - name: "MCU"
+    value: ["32-bit MCU"]
+  - name: "Project Difficulty"
+    value: ["Beginner"]
+source:
+  - path: app.c
+  - path: can_app.c
+include:
+  - path: .
+    file_list:
+    - path: app.h
+    - path: can_app.h
+component:
+  - id: sl_main
+  - id: device_init
+  - id: clock_manager
+  - id: sleeptimer
+  - id: hal_can
+  - id: hal_gpio
+  - id: iostream
+  - id: iostream_stdlib_config
+  - id: iostream_retarget_stdio
+  - id: iostream_recommended_stream
+configuration:
+  - name: SL_BOARD_ENABLE_VCOM
+    value: 1
+define:
+  - name: DEBUG_EFM
+readme:
+  - path: readme.md
+ui_hints:
+  highlight: readme.md
+tag:
+  - hwfilter:board:brd4418a
+  - hwfilter:device:device_generic_family_efr32xg2b

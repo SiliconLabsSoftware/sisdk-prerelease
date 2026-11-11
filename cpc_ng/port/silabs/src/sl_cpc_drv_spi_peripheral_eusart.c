@@ -28,11 +28,6 @@
  *
  ******************************************************************************/
 
-#include "sl_cpc_drv_spi_peripheral_eusart.h"
-#include "sl_cpc_drv_instances.h"
-#include "sl_cpc_drv_spi_peripheral.h"
-#include "sli_cpc_drv_spi_peripheral.h"
-
 #include <string.h>
 
 #include "sl_clock_manager.h"
@@ -41,31 +36,37 @@
 #include "sl_device_peripheral.h"
 #include "sl_hal_gpio.h"
 #include "sl_hal_prs.h"
+#include "sl_hal_prs_enums.h"
 #include "sl_status.h"
+
+#include "sl_cpc_drv_instances.h"
+#include "sl_cpc_drv_spi_peripheral.h"
+#include "sl_cpc_drv_spi_peripheral_eusart.h"
 
 #include "../../../src/sli_cpc_assert.h"
 #include "../../../src/sli_cpc_endianness.h"
+#include "sli_cpc_drv_spi_peripheral.h"
 
 static uint32_t prs_signal_txc(uint8_t peripheral_no)
 {
   switch (peripheral_no) {
-#if defined(SL_HAL_PRS_ASYNC_EUSART0L_TXC)
+#if defined(PRS_ASYNC_EUSART0L_TXC)
     case 0:
       return SL_HAL_PRS_ASYNC_EUSART0L_TXC;
 #endif
-#if defined(SL_HAL_PRS_ASYNC_EUSART1L_TXC)
+#if defined(PRS_ASYNC_EUSART1L_TXC)
     case 1:
       return SL_HAL_PRS_ASYNC_EUSART1L_TXC;
 #endif
-#if defined(SL_HAL_PRS_ASYNC_EUSART2L_TXC)
+#if defined(PRS_ASYNC_EUSART2L_TXC)
     case 2:
       return SL_HAL_PRS_ASYNC_EUSART2L_TXC;
 #endif
-#if defined(SL_HAL_PRS_ASYNC_EUSART3L_TXC)
+#if defined(PRS_ASYNC_EUSART3L_TXC)
     case 3:
       return SL_HAL_PRS_ASYNC_EUSART3L_TXC;
 #endif
-#if defined(SL_HAL_PRS_ASYNC_EUSART4L_TXC)
+#if defined(PRS_ASYNC_EUSART4L_TXC)
     case 4:
       return SL_HAL_PRS_ASYNC_EUSART4L_TXC;
 #endif
@@ -78,35 +79,35 @@ static uint32_t prs_signal_txc(uint8_t peripheral_no)
 static uint32_t prs_signal_exti(uint8_t exti_no)
 {
   switch (exti_no) {
-#if defined(SL_HAL_PRS_ASYNC_GPIO_PIN0)
+#if defined(PRS_ASYNC_GPIO_PIN0)
     case 0:
       return SL_HAL_PRS_ASYNC_GPIO_PIN0;
 #endif
-#if defined(SL_HAL_PRS_ASYNC_GPIO_PIN1)
+#if defined(PRS_ASYNC_GPIO_PIN1)
     case 1:
       return SL_HAL_PRS_ASYNC_GPIO_PIN1;
 #endif
-#if defined(SL_HAL_PRS_ASYNC_GPIO_PIN2)
+#if defined(PRS_ASYNC_GPIO_PIN2)
     case 2:
       return SL_HAL_PRS_ASYNC_GPIO_PIN2;
 #endif
-#if defined(SL_HAL_PRS_ASYNC_GPIO_PIN3)
+#if defined(PRS_ASYNC_GPIO_PIN3)
     case 3:
       return SL_HAL_PRS_ASYNC_GPIO_PIN3;
 #endif
-#if defined(SL_HAL_PRS_ASYNC_GPIO_PIN4)
+#if defined(PRS_ASYNC_GPIO_PIN4)
     case 4:
       return SL_HAL_PRS_ASYNC_GPIO_PIN4;
 #endif
-#if defined(SL_HAL_PRS_ASYNC_GPIO_PIN5)
+#if defined(PRS_ASYNC_GPIO_PIN5)
     case 5:
       return SL_HAL_PRS_ASYNC_GPIO_PIN5;
 #endif
-#if defined(SL_HAL_PRS_ASYNC_GPIO_PIN6)
+#if defined(PRS_ASYNC_GPIO_PIN6)
     case 6:
       return SL_HAL_PRS_ASYNC_GPIO_PIN6;
 #endif
-#if defined(SL_HAL_PRS_ASYNC_GPIO_PIN7)
+#if defined(PRS_ASYNC_GPIO_PIN7)
     case 7:
       return SL_HAL_PRS_ASYNC_GPIO_PIN7;
 #endif

@@ -1,4 +1,19 @@
+id: brd4115a_config
+label: brd4115a config
+description: Configuration files for BRD4115A
 category: Platform|Board|Config
+package: boards
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+root_path: boards/hardware/board/config
+requires:
+- name: brd4115a
+provides:
+- name: brd4115a_config
 config_file:
 - condition:
   - brd4001a
@@ -1620,18 +1635,3 @@ config_file:
     instance: vcom
     vendor: silabs
   path: brd4115a_brd4002b/sl_uart_usart_vcom_config.h
-description: Configuration files for BRD4115A
-id: brd4115a_config
-label: brd4115a config
-metadata:
-  sbom:
-    license: Zlib
-package: boards
-provides:
-- name: brd4115a_config
-quality: production
-requires:
-- name: brd4115a
-root_path: boards/hardware/board/config
-ui_hints:
-  visibility: never

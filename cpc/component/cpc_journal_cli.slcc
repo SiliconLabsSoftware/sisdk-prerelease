@@ -30,5 +30,5 @@ template_contribution:
 
 documentation:
   docset: gecko-platform
-  document: service/api/group-cpc
+  document: platform-cpc/cpc
 root_path: cpc

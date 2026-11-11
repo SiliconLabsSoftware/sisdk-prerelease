@@ -17,5 +17,6 @@ uint32_t {{name}}[];
 {% endfor -%}
 {% for name, sequence in Sequences.items() -%}
 extern SeqAccEntry_t {{name}}Entry;
+#define {{name}}_WORDS ({{sequence.lengthWord}}U)
 {% endfor -%}
 #endif // __{{ FileName | upper }}_H__

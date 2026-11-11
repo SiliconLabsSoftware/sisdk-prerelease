@@ -12,4 +12,7 @@ metadata:
 provides:
 - name: cpc_security_secondary
 - name: cpc_security_secondary_none
+documentation:
+  docset: gecko-platform
+  document: platform-cpc/cpc-security
 root_path: cpc

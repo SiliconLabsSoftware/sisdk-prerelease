@@ -10,7 +10,7 @@ tag:
 component:
   # CPC
   - id: cpc_ng_drv_sdio_host_primary
-    instance: [exp]
+    instance: [hs_exp0]
   # Platform
   - id: clock_manager
   - id: device_manager

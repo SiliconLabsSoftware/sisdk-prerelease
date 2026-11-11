@@ -38,6 +38,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 //                                   Includes
 // -----------------------------------------------------------------------------
+#include "sl_wisun_events.h"
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -56,6 +57,14 @@ extern "C" {
  * @details Init Meter component resources
  *****************************************************************************/
 void sl_wisun_meter_init(void);
+
+/**************************************************************************//**
+ * @brief Handle Wi-SUN stack indications for the Meter component.
+ * @details Applications that implement sl_wisun_on_event() should call this
+ *          helper so LFN wake-up waits in sl_wisun_meter_loop() keep working.
+ * @param[in] evt Event received from the stack
+ *****************************************************************************/
+void sl_wisun_meter_on_event(sl_wisun_evt_t *evt);
 
 /**************************************************************************//**
  * @brief Meter loop function

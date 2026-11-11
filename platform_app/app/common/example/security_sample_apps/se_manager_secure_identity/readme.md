@@ -13,7 +13,7 @@ Demonstrates how to read on-chip device certificates, verify an X.509 chain, and
 
 ## Purpose / Scope
 
-This example models **device authentication** for **Secure Vault High** parts: read factory-programmed **device** and **batch** certificates from the SE, parse and verify an **X.509 certificate chain** with **mbed TLS** (accelerated by the SE crypto engine via `mbedtls_slcrypto`), then perform a **challenge–response** proof using the **private device key** in Secure Key Storage.
+This example models **device authentication** for **Secure Vault High** parts: read factory-programmed **device** and **batch** certificates from the SE, parse and verify an **X.509 certificate chain** with **mbed TLS** using the configured PSA Crypto implementation, then perform a **challenge–response** proof using the **private device key** in Secure Key Storage.
 The demo runs **automatically** on reset (no serial menu). Progress and optional certificate dumps print on **VCOM**. **Clock-cycle counts** print when `SE_MANAGER_PRINT=1` (default).
 
 ### Flow (high level)
@@ -35,10 +35,9 @@ The demo runs **automatically** on reset (no serial menu). Progress and optional
 |--------|---------|--------|
 | `SE_MANAGER_PRINT` | `1` | Cycle counts per operation |
 | `SE_MANAGER_PRINT_CERT` | `1` | Print parsed certificates on VCOM |
-| `NO_CRYPTO_ACCELERATION` | undefined | Define to use software mbed TLS crypto only; increase `SL_HEAP_SIZE` to **10240** (e.g. in `sl_memory_config.h`) for IAR |
-| `SL_HEAP_SIZE` | `7504` | Set in `.slcp` for accelerated path |
+| `SL_HEAP_SIZE` | `7504` | Set in `.slcp` |
 **Requires:** `device_security_vault` (**Secure Vault High**).
-**Components:** `se_manager`, `mbedtls_core`, `mbedtls_x509`, `mbedtls_ecdsa`, `mbedtls_ccm`, `mbedtls_slcrypto`, VCOM stdio.
+**Components:** `se_manager`, `mbedtls_core`, `mbedtls_x509`, `mbedtls_pk_write`, `psa_crypto_ecdsa`, `psa_crypto_ecc_secp256r1`, `psa_crypto_sha256`, VCOM stdio.
 
 ### SE Manager APIs exercised
 
@@ -78,7 +77,6 @@ Success ends with signature verification OK on both local and “remote” paths
 
 - **`SE_MANAGER_PRINT=0`** — disable cycle timing prints
 - **`SE_MANAGER_PRINT_CERT=0`** — suppress certificate text (verification step message still prints when certs are hidden)
-- **`NO_CRYPTO_ACCELERATION`** — software-only mbed TLS; increase heap as noted above
 
 ## Troubleshooting
 
@@ -88,7 +86,6 @@ Success ends with signature verification OK on both local and “remote” paths
 | Read cert **failed** | Not Vault High or certificates not provisioned on device |
 | Parse / chain verify **failed** | Wrong or missing on-chip certs; factory/root PEM mismatch |
 | Sign or verify **failed** | Attestation key or cert/key inconsistency |
-| Heap / malloc failures with `NO_CRYPTO_ACCELERATION` | Raise `SL_HEAP_SIZE` to **10240** |
 | Garbled output | Line terminator must be **None** in Device Console |
 
 ## Resources

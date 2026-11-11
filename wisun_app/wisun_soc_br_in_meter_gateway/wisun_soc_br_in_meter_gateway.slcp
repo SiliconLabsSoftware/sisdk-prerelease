@@ -26,7 +26,6 @@ component:
   - id: "wisun_silabs_certificates"
   - id: "wisun_br_dhcpv6_server"
   - id: "wisun_select"
-  - id: "sl_wisun_event_mgr"
   - id: "wisun_br_config"
   - id: "sl_wisun_trace_util"
   - id: "sl_wisun_app_core"

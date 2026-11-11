@@ -1,0 +1,60 @@
+id: ot_subghz_phy_868
+label: Sub-GHz PHY (868 MHz)
+package: thread
+category: OpenThread
+quality: evaluation
+description: This component provides Sub-GHz PHY support for OpenThread using 802.15.4 OQPSK-DSSS at 863-868 MHz (800 kcps, 100 kbps).
+provides:
+- name: ot_subghz_phy_868
+- name: ot_subghz_phy
+requires:
+- name: ot_platform_abstraction_efr32
+- name: ot_duty_cycle_manager
+conflicts:
+- name: ot_subghz_phy_915
+source:
+- path: platform-abstraction/phy/868MHZ_OQPSK_100KBPS_XG28.c
+  condition:
+  - device_generic_family_efr32xg28
+  - hardware_board_supports_rf_band_868
+- path: platform-abstraction/phy/868MHZ_OQPSK_100KBPS_XG23.c
+  condition:
+  - device_generic_family_efr32xg23
+  - hardware_board_supports_rf_band_868
+- path: src/cli/radio_subghz_cli.c
+  condition: [sl_ot_custom_cli]
+define:
+- name: RADIO_CONFIG_SUBGHZ_SUPPORT
+  value: 1
+  condition:
+  - device_generic_family_efr32xg28
+  - hardware_board_supports_rf_band_868
+- name: RADIO_CONFIG_SUBGHZ_SUPPORT
+  value: 1
+  condition:
+  - device_generic_family_efr32xg23
+  - hardware_board_supports_rf_band_868
+- name: RADIO_CONFIG_SUBGHZ_SUPPORT_868_XG23
+  value: 1
+  condition:
+  - device_generic_family_efr32xg23
+  - hardware_board_supports_rf_band_868
+- name: RADIO_CONFIG_SUBGHZ_SUPPORT_868_XG28
+  value: 1
+  condition:
+  - device_generic_family_efr32xg28
+  - hardware_board_supports_rf_band_868
+- name: SL_OPENTHREAD_SUBGHZ_CLI_ENABLE
+  value: 1
+  condition: [sl_ot_custom_cli]
+template_contribution:
+- name: sl_ot_cli_command
+  value:
+    macro: "SL_OPENTHREAD_SUBGHZ_CLI_ENABLE"
+    name: "subghz"
+    handler: "subghzCommandHandler"
+  condition: [sl_ot_custom_cli]
+metadata:
+  sbom:
+    license: Zlib
+root_path: thread

@@ -161,14 +161,14 @@
  * @def OPENTHREAD_CONFIG_RADIO_915MHZ_OQPSK_SUPPORT
  *
  * Define to 1 if you want to enable physical layer to support OQPSK modulation in 915MHz band.
- * (currently not supported).
+ * This platform does not support the standard IEEE 802.15.4-2006 915 MHz OQPSK mode.
+ * Sub-GHz uses OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_SUPPORT instead.
+ *
+ * Forced to 0 so the stack cannot pick IEEE 915 channel masks (1-10) over
+ * the proprietary channel page when both flags would otherwise be considered.
  *
  */
-#if RADIO_CONFIG_915MHZ_OQPSK_SUPPORT
-#define OPENTHREAD_CONFIG_RADIO_915MHZ_OQPSK_SUPPORT 1
-#else
 #define OPENTHREAD_CONFIG_RADIO_915MHZ_OQPSK_SUPPORT 0
-#endif
 
 /*
  * @def OPENTHREAD_CONFIG_RADIO_2P4GHZ_OQPSK_SUPPORT
@@ -200,41 +200,41 @@
 /**
  * @def OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_PAGE
  *
- * Channel Page value for (proprietary) Sub-GHz PHY using 2GFSK modulation in 915MHz band.
+ * Channel Page value for (proprietary) Sub-GHz OQPSK PHY (915 MHz and 863-868 MHz bands).
  *
  */
 #ifndef OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_PAGE
 #define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_PAGE 23
 #endif
 
+#if defined(RADIO_CONFIG_SUBGHZ_SUPPORT_868_XG23) || defined(RADIO_CONFIG_SUBGHZ_SUPPORT_868_XG28)
 /**
- * @def OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN
- *
- * Minimum Channel number supported with (proprietary) Sub-GHz PHY using 2GFSK modulation in 915MHz band.
- *
+ * 868 MHz PHY: channels 0-3. Channel 0 is 863.7 MHz, then +1.2 MHz.
  */
 #ifndef OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN
 #define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN 0
 #endif
-
-/**
- * @def OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX
- *
- * Maximum Channel number supported with (proprietary) Sub-GHz PHY using 2GFSK modulation in 915MHz band.
- *
- */
 #ifndef OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX
-#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX 24
+#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX 3
 #endif
-
-/**
- * @def OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MASK
- *
- * Default Channel Mask for (proprietary) Sub-GHz PHY using 2GFSK modulation in 915MHz band.
- *
- */
 #ifndef OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MASK
-#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MASK 0x1ffffff
+#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MASK 0x0000000f
+#endif
+#elif defined(RADIO_CONFIG_SUBGHZ_SUPPORT_915_XG23) || defined(RADIO_CONFIG_SUBGHZ_SUPPORT_915_XG28)
+/**
+ * 915 MHz PHY: channels 4-23. Channel 4 is 903.2 MHz, then +1.2 MHz.
+ */
+#ifndef OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN
+#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MIN 4
+#endif
+#ifndef OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX
+#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MAX 23
+#endif
+#ifndef OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MASK
+#define OPENTHREAD_CONFIG_PLATFORM_RADIO_PROPRIETARY_CHANNEL_MASK 0x00fffff0
+#endif
+#else
+#error "Sub-GHz support is enabled without an 868 or 915 channel map"
 #endif
 
 /**
@@ -378,17 +378,17 @@
  * 802.15.4 2.4GHz OQPSK:
  * SHR: 4 bytes of preamble, 1 byte of sync word
  * PHR: 1 byte
- * Total (6 * 32) = 192 us.
+ * Total (6 * 32 us per byte at 250kbps) = 192 us.
  *
- * Proprietary SubGhz (2GFSK in 915MHz):
- * SHR: 4 bytes preamble, 2 bytes SFD = 6 bytes
- * PHR: 2 bytes
- * Total (8 * 32) = 256 us.
+ * Proprietary SubGhz (OQPSK-DSSS in 915MHz):
+ * SHR: 4 bytes preamble, 1 bytes SFD = 5 bytes
+ * PHR: 1 byte
+ * Total (6 * 80 us per byte @ 100kbps) = 480 us.
  *
  */
 #ifndef OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD
 #if RADIO_CONFIG_SUBGHZ_SUPPORT
-#define OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD 256
+#define OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD 480
 #else
 #define OPENTHREAD_CONFIG_MIN_RECEIVE_ON_AHEAD 192
 #endif

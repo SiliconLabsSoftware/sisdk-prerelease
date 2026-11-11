@@ -1,0 +1,30 @@
+id: ot_duty_cycle_manager
+label: Sub-GHz TX Duty Cycle
+package: thread
+category: OpenThread|Radio
+quality: evaluation
+description: This component accounts for Sub-GHz transmit on-air time over a rolling hour and denies a frame that would exceed the budget.
+provides:
+- name: ot_duty_cycle_manager
+requires:
+- name: ot_platform_abstraction
+- name: ot_subghz_phy
+- name: sleeptimer
+template_contribution:
+- name: component_catalog
+  value: ot_duty_cycle_manager
+config_file:
+- path: config/sl_openthread_subghz_config.h
+include:
+- path: platform-abstraction/efr32/duty-cycle-manager
+  file_list:
+  - path: radio_duty_cycle_manager.hpp
+- path: platform-abstraction/include
+  file_list:
+  - path: radio_duty_cycle_manager.h
+source:
+- path: platform-abstraction/efr32/duty-cycle-manager/radio_duty_cycle_manager.cpp
+metadata:
+  sbom:
+    license: Zlib
+root_path: thread

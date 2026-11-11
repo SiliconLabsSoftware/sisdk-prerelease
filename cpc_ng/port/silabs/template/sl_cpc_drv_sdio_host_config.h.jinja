@@ -2,7 +2,7 @@
 #define SL_CPC_DRV_SDIO_HOST_CONFIG_H
 
 {% for instance in cpc_ng_drv_sdio_host_instances %}
-#include "sl_cpc_drv_sdio_host_{{ instance }}_config.h"
+#include "sl_cpc_ng_drv_sdio_host_{{ instance }}_config.h"
 
 // Frame pool sizes
 #define SL_CPC_DRV_SDIO_HOST_RX_FRAME_POOL_COUNT     SL_CPC_DRV_SDIO_HOST_{{ instance|upper }}_RX_FRAME_POOL_COUNT

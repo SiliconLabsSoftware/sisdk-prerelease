@@ -103,6 +103,16 @@ extern "C" {
 #define SLI_DIAG_SUMMARY_RING_TAIL_MINIMAL  3u
 #endif // SL_DIAG_SUMMARY_RING_ENABLE
 
+/** @brief Provider time budget (us) for watchdog-warning capture profiles.
+ *  @details Default 500 us for the static watchdog-warning profile.
+ *  Override with a preprocessor define (an .slcp or .slcc @c define: entry, or
+ *  toolchain @c -D) when Watchdog Manager warning timing requires it. Must stay
+ *  below the warning window minus record commit time.
+ */
+#ifndef SLI_DIAG_CAPTURE_TIME_BUDGET_WDT_US
+#define SLI_DIAG_CAPTURE_TIME_BUDGET_WDT_US  500u
+#endif
+
 /// TLV header size in bytes.
 #define SLI_DIAG_TLV_HDR_BYTES  6u
 

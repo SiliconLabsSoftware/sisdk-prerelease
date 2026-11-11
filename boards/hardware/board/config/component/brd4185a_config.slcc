@@ -1,4 +1,19 @@
+id: brd4185a_config
+label: brd4185a config
+description: Configuration files for BRD4185A
+package: boards
 category: Platform|Board|Config
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+root_path: boards/hardware/board/config
+requires:
+- name: brd4185a
+provides:
+- name: brd4185a_config
 config_file:
 - condition:
   - brd4001a
@@ -1815,18 +1830,3 @@ config_file:
     instance: vcom
     vendor: silabs
   path: brd4185a_brd4002b/sl_uart_usart_vcom_config.h
-description: Configuration files for BRD4185A
-id: brd4185a_config
-label: brd4185a config
-metadata:
-  sbom:
-    license: Zlib
-package: boards
-provides:
-- name: brd4185a_config
-quality: production
-requires:
-- name: brd4185a
-root_path: boards/hardware/board/config
-ui_hints:
-  visibility: never

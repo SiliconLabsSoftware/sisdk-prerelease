@@ -9,7 +9,7 @@ class RM_EFR32XG2D_Info(object):
     short_name = 'efr32xg2d'
     val_die_name = 'EFR32XG2DXFULL'
     arm_core_revs = []
-    rtl_revs = ['A0']
+    rtl_revs = ['A0', 'A1']
     di_revs = []
     pte_revs = []
     pkg_path = _PKG_PATH

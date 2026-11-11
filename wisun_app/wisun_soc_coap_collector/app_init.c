@@ -34,7 +34,6 @@
 #include "sl_assert.h"
 #include "sl_main_init.h"
 #include "sl_cmsis_os2_common.h"
-#include "sl_wisun_event_mgr.h"
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_app_core_config.h"
 #include "app.h"
@@ -73,7 +72,6 @@ void app_init(void)
 #else
   sl_wisun_app_core_util_project_info_init("Wi-SUN Collector Application");
 #endif
-
 
   /* Creating App main thread */
   const osThreadAttr_t app_task_attr = {

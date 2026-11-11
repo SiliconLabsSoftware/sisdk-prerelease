@@ -94,11 +94,9 @@ config_file:
 other_file:
   - path: ../../../script/connect_create_gbl_image.bat
   - path: ../../../script/connect_create_gbl_image.sh
-  - path: hw_filter_tags.yaml
-    condition: [add_hw_filter_to_project]
-
+  - path: light_dmp.hts
 readme:
-  - path: ../../../documentation/example/connect_dmp_light_switch/readme.md
+  - path: ../../../documentation/connect_dmp_light_switch/readme.md
 
 #------------ Configuration overrides ----------------
 configuration:

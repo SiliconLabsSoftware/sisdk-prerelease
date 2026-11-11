@@ -74,7 +74,52 @@ static const app_enum_t app_regulation_tx_level_enum[] =
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
 
-void sl_wisun_join_state_event_app_hnd(sl_wisun_evt_t *evt)
+void sl_wisun_on_event(sl_wisun_evt_t *evt)
+{
+  sl_wisun_app_core_on_event(evt);
+
+  switch (evt->header.id) {
+    case SL_WISUN_MSG_CONNECTED_IND_ID:
+      app_custom_connected_callback(evt);
+      break;
+    case SL_WISUN_MSG_SOCKET_DATA_IND_ID:
+      app_custom_socket_data_callback(evt);
+      break;
+    case SL_WISUN_MSG_SOCKET_DATA_SENT_IND_ID:
+      app_custom_socket_data_sent_callback(evt);
+      break;
+    case SL_WISUN_MSG_JOIN_STATE_IND_ID:
+      app_custom_join_state_callback(evt);
+      break;
+    case SL_WISUN_MSG_REGULATION_TX_LEVEL_IND_ID:
+      app_custom_regulation_tx_level_callback(evt);
+      break;
+    default:
+      break;
+  }
+}
+
+
+
+/* Wi-SUN connected custom callback */
+void app_custom_connected_callback(sl_wisun_evt_t *evt)
+{
+  (void) evt;
+}
+
+/* Socket data custom callback */
+void app_custom_socket_data_callback(sl_wisun_evt_t *evt)
+{
+  (void) evt;
+}
+
+/* Socket data sent custom callback */
+void app_custom_socket_data_sent_callback(sl_wisun_evt_t *evt)
+{
+  (void) evt;
+}
+
+void app_custom_join_state_callback(sl_wisun_evt_t *evt)
 {
 #if defined(SL_CATALOG_GUI_PRESENT)
   static char nw_name[APP_SETTING_NETWORK_NAME_MAX_SIZE] = { 0 };
@@ -110,7 +155,7 @@ void sl_wisun_join_state_event_app_hnd(sl_wisun_evt_t *evt)
 #endif
 }
 
-void sl_wisun_regulation_tx_level_app_hnd(sl_wisun_evt_t *evt)
+void app_custom_regulation_tx_level_callback(sl_wisun_evt_t *evt)
 {
   const app_enum_t *ptr;
 

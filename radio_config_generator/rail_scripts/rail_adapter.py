@@ -49,6 +49,18 @@ class RAILAdapter(object):
     0xB5000000,
     0xA6040000
   )
+  _REG_BASES_EFR32XG2A= (
+    0x400C0000,
+    0xA8000000,
+    0xA8010000,
+    0xA8020000,
+    0xA8030000,
+    0xA8040000,
+    0xB0000000,
+    0xB4010000,
+    0xA6040000
+  )
+
 
   # NOT AN OPTIMAL SOLUTION:
   # Placeholder for sequence cfg setting in rail_scripts for wifi generation.
@@ -74,6 +86,10 @@ class RAILAdapter(object):
     "_everest_Rx_Gain_LUT_5GHz_HP",
     "_everest_Rx_Gain_LUT_5GHz_LP",
     "_everest_TX_PP_LUT",
+    "_everest_TONE_SCALE_LUT",
+    "_everest_AUX_LUT_2X",
+    "_everest_AUX_LUT_OFDM_4X",
+    "_everest_AUX_LUT_CW_4X",
     "_everest_WLAN_OFDM",
   ]
 
@@ -183,12 +199,15 @@ class RAILAdapter(object):
     elif self.series == 2:
       regBases = self._REG_BASES_EFR32XG2x
 
-      if family in ["sol", "mercurio"]:
+      if family in ["sol"]:
         # Sol has 16 base addresses because of its virtual registers defined at the same address.
         # So let's consider basePos is 24 which is not true since bit position 24 is for the VERIFY bit
         # but it's not used anyway
         basePos = 24
         regBases = self._REG_BASES_EFR32XG25
+      elif family in ["mercurio"]:
+        basePos = 24
+        regBases = self._REG_BASES_EFR32XG2A
       elif family in ["curl"]:
         regBases = self._REG_BASES_EFR32XG2B
       else:
@@ -219,10 +238,10 @@ class RAILAdapter(object):
 
       if self.wifi_script_seqacc is True:
         config = self._SEQUENCE_CFG_DEFAULT
+        config['CNTWRPOS'] = contWrPos
         self.sequenceCfg = (config.get('MOVSWAP', 0) << 14) | (config.get('DISABSRST', 0) << 13) | (config.get('HWSTTRIG', 0) << 10)\
-                | (config.get('HWSTSEL', 0)) << 5 | config.get('CNTWRPOS', 16)
-        config = self._BASEADDR_CFG_DEFAULT
-        self.baseAddrAccess = config.get('Access', config)
+                | (config.get('HWSTSEL', 0)) << 5 | contWrPos
+        self.baseAddrAccess = config.get('Access', 'BaseAddrCfgDefault')
       else:
         self.sequenceCfg = None
         self.baseAddrAccess = None
@@ -241,6 +260,7 @@ class RAILAdapter(object):
 
     self._regBases = regBases
     self._contWrPos = contWrPos
+    self._contWrPosMask = 2 ** (basePos - self._contWrPos) - 1
     self._offsetAddrMask = (2 ** (self._contWrPos) - 1)
     self._baseAddrMask = self._offsetAddrMask ^ 0xFFFFFFFF
 

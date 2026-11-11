@@ -21,10 +21,6 @@ requires:
 - name: ot_ant_div
   condition:
   - rail_util_ant_div
-- name: ot_subghz_board_support
-- name: ot_subghz_phy
-  condition:
-  - hardware_board_supports_ot_subghz
 - name: gatt_configuration
   condition:
   - bluetooth_stack
@@ -33,17 +29,9 @@ config_file:
 - path: config/sl_openthread_rtos_config.h
   condition:
   - kernel
-- path: config/sl_openthread_subghz_config.h
-  condition:
-  - hardware_board_supports_ot_subghz
 - path: config/sl_openthread_radio_config.h
   condition:
   - ot_platform_abstraction_source
-toolchain_settings:
-- option: preinclude
-  value: sl_openthread_subghz_config.h
-  condition:
-  - hardware_board_supports_ot_subghz
 include:
 - path: platform-abstraction/rtos
   condition:

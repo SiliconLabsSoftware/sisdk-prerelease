@@ -848,26 +848,26 @@ static void app_handle_fb_ready_ind(sl_wisun_evt_t *evt)
   printf("[First Breath ready]\r\n");
 }
 
-#if defined(SL_CATALOG_WISUN_FFN_POWER_SAVING_SUPPORT_PRESENT)
-static void app_handle_ffn_power_saving_state_ind(sl_wisun_evt_t *evt)
+#if defined(SL_CATALOG_WISUN_FFN_UNICAST_IDLE_SCHEDULE_SUPPORT_PRESENT)
+static void app_handle_ffn_unicast_idle_schedule_state_ind(sl_wisun_evt_t *evt)
 {
   const char *state_name;
 
-  switch ((sl_wisun_ffn_power_saving_activation_state_t)evt->evt.ffn_power_saving_state.activation_state) {
-    case SL_WISUN_FFN_POWER_SAVING_DISABLED:
+  switch ((sl_wisun_ffn_unicast_idle_schedule_state_t)evt->evt.ffn_unicast_idle_schedule_state.state) {
+    case SL_WISUN_FFN_UNICAST_IDLE_SCHEDULE_DISABLED:
       state_name = "DISABLED";
       break;
-    case SL_WISUN_FFN_POWER_SAVING_SET:
+    case SL_WISUN_FFN_UNICAST_IDLE_SCHEDULE_SET:
       state_name = "SET";
       break;
-    case SL_WISUN_FFN_POWER_SAVING_ACTIVE:
+    case SL_WISUN_FFN_UNICAST_IDLE_SCHEDULE_ACTIVE:
       state_name = "ACTIVE";
       break;
     default:
       state_name = "UNKNOWN";
       break;
   }
-  printf("[FFN power saving state: %s]\r\n", state_name);
+  printf("[FFN unicast idle schedule state: %s]\r\n", state_name);
 }
 #endif
 
@@ -959,9 +959,9 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
     case SL_WISUN_MSG_FB_READY_IND_ID:
       app_handle_fb_ready_ind(evt);
       break;
-#if defined(SL_CATALOG_WISUN_FFN_POWER_SAVING_SUPPORT_PRESENT)
-    case SL_WISUN_MSG_FFN_POWER_SAVING_STATE_IND_ID:
-      app_handle_ffn_power_saving_state_ind(evt);
+#if defined(SL_CATALOG_WISUN_FFN_UNICAST_IDLE_SCHEDULE_SUPPORT_PRESENT)
+    case SL_WISUN_MSG_FFN_UNICAST_IDLE_SCHEDULE_STATE_IND_ID:
+      app_handle_ffn_unicast_idle_schedule_state_ind(evt);
       break;
 #endif
 #if defined(SL_CATALOG_WISUN_LXPM_CLI_PRESENT)
@@ -2747,7 +2747,7 @@ void app_reset_statistics(sl_cli_command_arg_t *arguments)
     goto cleanup;
   }
 
-  ret = sl_wisun_reset_statistics(SL_WISUN_STATISTICS_TYPE_FFN_POWER_SAVING);
+  ret = sl_wisun_reset_statistics(SL_WISUN_STATISTICS_TYPE_FFN_UNICAST_IDLE_SCHEDULE);
 
 cleanup:
 
@@ -2779,24 +2779,24 @@ void app_set_lfn_support(sl_cli_command_arg_t *arguments)
   app_wisun_cli_mutex_unlock();
 }
 
-#ifdef SL_CATALOG_WISUN_FFN_POWER_SAVING_SUPPORT_PRESENT
-void app_set_ffn_power_saving_schedule(sl_cli_command_arg_t *arguments)
+#if defined(SL_CATALOG_WISUN_FFN_UNICAST_IDLE_SCHEDULE_SUPPORT_PRESENT)
+void app_set_ffn_unicast_idle_schedule(sl_cli_command_arg_t *arguments)
 {
   sl_status_t ret;
   uint8_t listen_slots;
-  uint8_t sleep_slots;
+  uint8_t idle_slots;
 
   app_wisun_cli_mutex_lock();
 
   listen_slots = sl_cli_get_argument_uint8(arguments, 0);
-  sleep_slots = sl_cli_get_argument_uint8(arguments, 1);
+  idle_slots = sl_cli_get_argument_uint8(arguments, 1);
 
-  ret = sl_wisun_set_ffn_power_saving_schedule(listen_slots, sleep_slots);
+  ret = sl_wisun_set_ffn_unicast_idle_schedule(listen_slots, idle_slots);
   if (ret == SL_STATUS_OK) {
-    printf("[FFN power saving schedule set: listen=%u sleep=%u]\r\n",
-           (unsigned)listen_slots, (unsigned)sleep_slots);
+    printf("[FFN unicast idle schedule set: listen=%u idle=%u]\r\n",
+           (unsigned)listen_slots, (unsigned)idle_slots);
   } else {
-    printf("[Failed: unable to set FFN power saving schedule: %"PRIu32"]\r\n", ret);
+    printf("[Failed: unable to set FFN unicast idle schedule: %"PRIu32"]\r\n", ret);
   }
 
   app_wisun_cli_mutex_unlock();

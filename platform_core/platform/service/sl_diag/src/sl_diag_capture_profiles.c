@@ -44,8 +44,8 @@
 // TLV. Crash profiles without extended providers keep the CPU Crash-only
 // recipe. Each must be added to SLI_DIAG_LINKED_PROVIDER_LIST,
 // only in the build profiles that link it. This grows the slot and changes
-// the retained layout signature. The System latency must leave enough of
-// SL_DIAG_CAPTURE_TIME_BUDGET_WDT_US for the CPU Crash max_latency_us.
+// the retained layout signature. The System provider max_latency_us must leave
+// enough of SLI_DIAG_CAPTURE_TIME_BUDGET_WDT_US for the CPU Crash max_latency_us.
 
 #if SL_DIAG_EXTENDED_PROVIDERS_ENABLE
 static const uint16_t hard_fault_providers[] = {
@@ -130,7 +130,7 @@ static const sli_diag_capture_profile_t capture_profiles[] = {
   {
     .trigger = SL_DIAG_TRIGGER_WATCHDOG_WARNING,
     .max_depth = SLI_DIAG_CAPTURE_DEPTH_MINIMAL,
-    .time_budget_us = SL_DIAG_CAPTURE_TIME_BUDGET_WDT_US,
+    .time_budget_us = SLI_DIAG_CAPTURE_TIME_BUDGET_WDT_US,
     .provider_count = (uint16_t)SL_ARRAY_SIZE(watchdog_warning_providers),
     .providers = watchdog_warning_providers
   },

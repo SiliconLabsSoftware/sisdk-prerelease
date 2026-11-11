@@ -29,7 +29,7 @@ requires:
 - name: "event_queue_task"
 - name: "wisun_lxpm_implementation"
 - name: "wisun_dc_server_implementation"
-- name: "wisun_ffn_power_saving_implementation"
+- name: "wisun_ffn_unicast_idle_schedule_implementation"
 
 recommends:
 - id: "wisun_dc_client_stubs"
@@ -44,7 +44,7 @@ recommends:
   vendor: silabs
 - id: "wisun_lxpm_stubs"
   vendor: silabs
-- id: "wisun_ffn_power_saving_stubs"
+- id: "wisun_ffn_unicast_idle_schedule_stubs"
 
   vendor: silabs
 conflicts:

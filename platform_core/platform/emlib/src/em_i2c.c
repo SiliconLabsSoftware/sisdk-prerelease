@@ -72,20 +72,8 @@
 #define I2C_IF_ERRORS    (I2C_IF_BUSERR | I2C_IF_ARBLOST)
 #define I2C_IEN_ERRORS   (I2C_IEN_BUSERR | I2C_IEN_ARBLOST)
 
-/* Maximum I2C transmission rate constant.  */
-#if defined(_SILICON_LABS_32B_SERIES_0)
-#if defined(_EFM32_HAPPY_FAMILY) || defined(_EFM32_ZERO_FAMILY)
+/* Maximum I2C transmission rate constant (Series 2). */
 #define I2C_CR_MAX       8
-#else
-#define I2C_CR_MAX       4
-#endif
-#elif defined(_SILICON_LABS_32B_SERIES_1)
-#define I2C_CR_MAX       8
-#elif defined(_SILICON_LABS_32B_SERIES_2)
-#define I2C_CR_MAX       8
-#else
-#warning "Max I2C transmission rate constant is not defined"
-#endif
 
 /** @endcond */
 
@@ -317,36 +305,17 @@ void I2C_BusFreqSet(I2C_TypeDef *i2c,
   if (i2c->CTRL & I2C_CTRL_SLAVE) {
     switch (i2cMode) {
       case i2cClockHLRStandard:
-#if defined(_SILICON_LABS_32B_SERIES_0)
-        minFreq = 4200000; break;
-#elif defined(_SILICON_LABS_32B_SERIES_1)
         minFreq = 2000000; break;
-#elif defined(_SILICON_LABS_32B_SERIES_2)
-        minFreq = 2000000; break;
-#endif
       case i2cClockHLRAsymetric:
-#if defined(_SILICON_LABS_32B_SERIES_0)
-        minFreq = 11000000; break;
-#elif defined(_SILICON_LABS_32B_SERIES_1)
         minFreq = 5000000; break;
-#elif defined(_SILICON_LABS_32B_SERIES_2)
-        minFreq = 5000000; break;
-#endif
       case i2cClockHLRFast:
-#if defined(_SILICON_LABS_32B_SERIES_0)
-        minFreq = 24400000; break;
-#elif defined(_SILICON_LABS_32B_SERIES_1)
         minFreq = 14000000; break;
-#elif defined(_SILICON_LABS_32B_SERIES_2)
-        minFreq = 14000000; break;
-#endif
       default:
         /* MISRA requires the default case. */
         break;
     }
   } else {
-    /* For master mode, platform 1 and 2 share the same
-       minimum frequencies. */
+    /* Master mode minimum HF peripheral clock frequencies. */
     switch (i2cMode) {
       case i2cClockHLRStandard:
         minFreq = 2000000; break;

@@ -25,6 +25,10 @@ include:
   - path: radio_security.h
   - path: radio_state.h
   - path: rail_config.h
+  - path: rail_config_868_xg23.h
+  - path: rail_config_868_xg28.h
+  - path: rail_config_915_xg23.h
+  - path: rail_config_915_xg28.h
   - path: sl_packet_utils.h
   - path: soft_source_match_table.h
 - path: include

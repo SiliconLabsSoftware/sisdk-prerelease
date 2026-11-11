@@ -1,4 +1,19 @@
+id: brd4205a_config
+label: brd4205a config
+description: Configuration files for BRD4205A
+package: boards
 category: Platform|Board|Config
+quality: production
+metadata:
+  sbom:
+    license: Zlib
+ui_hints:
+  visibility: never
+root_path: boards/hardware/board/config
+requires:
+- name: brd4205a
+provides:
+- name: brd4205a_config
 config_file:
 - condition:
   - brd4001a
@@ -2223,18 +2238,3 @@ config_file:
     instance: vcom
     vendor: silabs
   path: brd4205a_brd4002b/sl_uart_usart_vcom_config.h
-description: Configuration files for BRD4205A
-id: brd4205a_config
-label: brd4205a config
-metadata:
-  sbom:
-    license: Zlib
-package: boards
-provides:
-- name: brd4205a_config
-quality: production
-requires:
-- name: brd4205a
-root_path: boards/hardware/board/config
-ui_hints:
-  visibility: never

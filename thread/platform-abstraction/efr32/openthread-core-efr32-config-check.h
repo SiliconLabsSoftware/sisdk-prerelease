@@ -31,22 +31,9 @@
 
 #include "board_config.h"
 #include "sl_openthread_radio_config.h"
-#ifndef RADIO_CONFIG_915MHZ_OQPSK_SUPPORT
-#if OPENTHREAD_CONFIG_RADIO_915MHZ_OQPSK_SUPPORT
-#error "Platform not configured to support configuration option: OPENTHREAD_CONFIG_RADIO_915MHZ_OQPSK_SUPPORT"
-#endif
-#endif
 
-#ifndef RADIO_CONFIG_915MHZ_2GFSK_SUPPORT
-#if OPENTHREAD_CONFIG_RADIO_915MHZ_2GFSK_SUPPORT
-#error "Platform not configured to support configuration option: OPENTHREAD_CONFIG_RADIO_915MHZ_2GFSK_SUPPORT"
-#endif
-#endif
-
-#if !defined(RADIO_CONFIG_915MHZ_OQPSK_SUPPORT) && !defined(RADIO_CONFIG_SUBGHZ_SUPPORT) \
-    && !defined(RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT)
-#error \
-    "One of the following must be defined: RADIO_CONFIG_915MHZ_OQPSK_SUPPORT, RADIO_CONFIG_SUBGHZ_SUPPORT or RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT"
+#if !defined(RADIO_CONFIG_SUBGHZ_SUPPORT) && !defined(RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT)
+#error "One of the following must be defined: RADIO_CONFIG_SUBGHZ_SUPPORT or RADIO_CONFIG_2P4GHZ_OQPSK_SUPPORT"
 #endif
 
 #if SL_OPENTHREAD_RADIO_ALT_SHORT_ADDR_ENABLE && OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE

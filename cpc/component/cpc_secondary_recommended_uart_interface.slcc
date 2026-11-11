@@ -18,4 +18,7 @@ recommends:
 - id: cpc_recommend_vcom_usart
   condition: [device_has_usart, hardware_board_has_vcom]
   vendor: silabs
+documentation:
+  docset: gecko-platform
+  document: platform-cpc-overview
 root_path: cpc

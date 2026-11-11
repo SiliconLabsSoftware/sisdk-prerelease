@@ -71,11 +71,10 @@ source:
 other_file:
   - path: ../../script/connect_create_gbl_image.bat
   - path: ../../script/connect_create_gbl_image.sh
-  - path: hw_filter_tags.yaml
-    condition: [add_hw_filter_to_project]
-
+  - path: ecdh_key_exchange_device_A.hts
+  - path: ecdh_key_exchange_device_B.hts
 readme:
-  - path: ../../documentation/example/connect_soc_ecdh_key_exchange/readme.md
+  - path: ../../documentation/connect_soc_ecdh_key_exchange/readme.md
 
 #----------------- Project macros --------------------
 

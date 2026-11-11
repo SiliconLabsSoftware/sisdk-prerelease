@@ -45,7 +45,7 @@
 #include "../sli_cpc_hdr.h"
 #include "../sli_cpc_memory.h"
 #include "sl_cpc_drv_mock.h"
-#include "sl_cpc_drv_mock_default_config.h"
+#include "sl_cpc_ng_drv_mock_default_config.h"
 
 #include "../../port/mock/src/mock_cpc_timer.h"
 #include "expect.h"

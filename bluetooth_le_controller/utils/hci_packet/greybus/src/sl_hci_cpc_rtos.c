@@ -122,6 +122,6 @@ static void hci_cpc_thread(void *p_arg)
     (void) osSemaphoreAcquire(hci_cpc_signal_semaphore, osWaitForever);
     do {
       sl_btctrl_hci_packet_step();
-    } while (sli_hci_cpc_new_data() > 0);
+    } while (sli_hci_cpc_new_data() > 0 && sli_hci_cpc_is_connected());
   }
 }

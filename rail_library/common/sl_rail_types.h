@@ -3354,6 +3354,13 @@ typedef struct sl_rail_phy_info {
    * Available when phy info version is 22 or greater.
    */
   int32_t cs_rtt_dig_delay;
+  /**
+   * CS RTT RBS (random bit sequence) bias from the radio configurator,
+   * S32.4 (1/16 ns). Additional digital-delay term applied only for the
+   * correlator (RBS) RTT method.
+   * Available when phy info version is 23 or greater.
+   */
+  int32_t cs_rtt_rbs_bias;
 } sl_rail_phy_info_t;
 #endif // DOXYGEN_UNDOCUMENTED
 

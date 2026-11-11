@@ -19,10 +19,13 @@
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include "app_mbedtls_x509.h"
+#include <string.h>
 
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
 // -----------------------------------------------------------------------------
+/* SEC1/X9.62: uncompressed point = 0x04 || X || Y for short Weierstrass curves. */
+#define SEC1_EC_POINT_UNCOMPRESSED  (0x04u)
 
 // -----------------------------------------------------------------------------
 //                          Static Function Declarations
@@ -105,31 +108,32 @@ uint32_t parse_device_cert(void)
 
 /***************************************************************************//**
  * Get the public key in device certificate.
+ *
+ * Extract the public key coordinates for Secure Engine verification.
  ******************************************************************************/
 int32_t get_pub_device_key(void)
 {
   int32_t ret;
-  mbedtls_ecp_keypair ecp_key;
+  size_t pubkey_len = 0;
+  // Allow one byte for the uncompressed point prefix.
+  uint8_t pubkey_psa[1 + SL_SE_CERT_KEY_SIZE];
 
-  // Copy public key in device certificate to an ECP key-pair structure
-  mbedtls_ecp_keypair_init(&ecp_key);
-  ret = mbedtls_ecp_copy(&ecp_key.MBEDTLS_PRIVATE(Q), &mbedtls_pk_ec(cert_chain.pk)->MBEDTLS_PRIVATE(Q));
+  ret = mbedtls_pk_write_pubkey_psa(&cert_chain.pk,
+                                    pubkey_psa,
+                                    sizeof(pubkey_psa),
+                                    &pubkey_len);
   if (ret != 0) {
     return ret;
   }
 
-  // Save public key X to a buffer
-  ret = mbedtls_mpi_write_binary(&ecp_key.MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(X),
-                                 (uint8_t *)get_pub_device_key_buf_ptr(),
-                                 SL_SE_CERT_KEY_SIZE / 2);
-  if (ret != 0) {
-    return ret;
+  // Verify the uncompressed public key format before extracting X and Y.
+  if ((pubkey_len != sizeof(pubkey_psa))
+      || (pubkey_psa[0] != SEC1_EC_POINT_UNCOMPRESSED)) {
+    return MBEDTLS_ERR_PK_BAD_INPUT_DATA;
   }
 
-  // Save public key Y to a buffer
-  return mbedtls_mpi_write_binary(&ecp_key.MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(Y),
-                                  (uint8_t *)get_pub_device_key_buf_ptr() + 32,
-                                  SL_SE_CERT_KEY_SIZE / 2);
+  memcpy(get_pub_device_key_buf_ptr(), &pubkey_psa[1], SL_SE_CERT_KEY_SIZE);
+  return 0;
 }
 
 /***************************************************************************//**

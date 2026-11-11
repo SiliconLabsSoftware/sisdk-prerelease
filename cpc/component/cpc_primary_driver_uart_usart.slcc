@@ -51,4 +51,7 @@ template_contribution:
   value: usart
 - name: component_catalog
   value: cpc_driver_uart
+documentation:
+  docset: gecko-platform
+  document: platform-cpc-overview
 root_path: cpc

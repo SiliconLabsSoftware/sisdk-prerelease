@@ -11,7 +11,7 @@ from enum import IntEnum
 import itertools
 
 # Update kRAILVersion to be used in phyInfoData.
-kRAILVersion = 21
+kRAILVersion = 22
 
 class ConcPhyEnum(IntEnum):
   """
@@ -449,7 +449,7 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       for registerAddress, registerValue, registerName in registerEntries:
 
         if self.pte_script is False and self.wifi_script is False:
-          if (registerAddress - currentAddress) == (4 * length):
+          if ((registerAddress - currentAddress) == (4 * length)) and (length < self._contWrPosMask):
             length += 1
             values.append(registerValue)
             names.append(registerName)
@@ -785,6 +785,13 @@ class RAILAdapter_MultiPhy(RAILAdapter):
       data.syncwordDurationUs.value = round(model.vars.syncword_duration_us.value or 0)
     else:
       data.syncwordDurationUs.value = 0
+    # Packed as-is from the calculator (S32.4 / 1/16 ns). Missing on parts
+    # without the HADM RTT delay calculator (e.g. non-curl); default 0 keeps
+    # phyInfo valid.
+    if hasattr(model.vars, 'cs_rtt_dig_delay_ns') and model.vars.cs_rtt_dig_delay_ns.value is not None:
+      data.csRttDigDelay.value = int(model.vars.cs_rtt_dig_delay_ns.value)
+    else:
+      data.csRttDigDelay.value = 0
 
     # Traverse existing irCalConfigEntries and check for duplicates
     entryFound = False

@@ -34,12 +34,9 @@
 #include "sl_assert.h"
 #include "sl_main_init.h"
 #include "sl_cmsis_os2_common.h"
-#include "sl_wisun_event_mgr.h"
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_app_core_config.h"
 #include "app.h"
-#if !defined(SL_WISUN_FG23_SUPPORT)
-#endif
 #include "sl_component_catalog.h"
 
 #if defined(SL_CATALOG_WISUN_COAP_PRESENT)
@@ -73,8 +70,6 @@ void app_init(void)
   sl_wisun_app_core_util_project_info_init("Wi-SUN Meter Application");
 #endif
 
-#if !defined(SL_WISUN_FG23_SUPPORT)
-#endif
 
   /* Creating App main thread */
   const osThreadAttr_t app_task_attr = {

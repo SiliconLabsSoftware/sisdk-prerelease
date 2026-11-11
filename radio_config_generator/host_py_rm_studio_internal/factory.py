@@ -101,7 +101,7 @@ def rm_dynamic_import(part_family_name, rev_name=None):
         raise ValueError("Invalid register revision '{}'. "
                          "Available revisions: {}".format(rev_name,
                                                           ','.join(rm_info.all_revs)))
-    rev_path = os.path.join(rm_info.pkg_path, 'rev' + rev_name, 'device.py')
+    rev_path = _find_module_file(os.path.join(rm_info.pkg_path, f'rev{rev_name}'), 'device')
     abs_mod_name = os.path.basename(_PKG_PATH) + '.full.' + rm_info.short_name + '.rev' + rev_name + '.device'
     spec = importlib.util.spec_from_file_location(abs_mod_name, rev_path)
     rev_pkg = importlib.util.module_from_spec(spec)
@@ -119,7 +119,7 @@ def RM_Factory(part_family_name, rev_name=None):
 
 def RM_GetInfo(part_family_name):
     mod_name = get_mod_name(part_family_name)
-    die_path = os.path.join(_PKG_PATH, 'full', mod_name, 'factory.py')
+    die_path = _find_module_file(os.path.join(_PKG_PATH, 'full', mod_name), 'factory')
     abs_mod_name = os.path.basename(_PKG_PATH) + '.full.' + mod_name + '.factory'
     spec = importlib.util.spec_from_file_location(abs_mod_name, die_path)
     die_pkg = importlib.util.module_from_spec(spec)
@@ -130,3 +130,21 @@ def RM_GetInfo(part_family_name):
 
     factory_func = getattr(die_pkg, 'RM_GetInfo')
     return factory_func()
+
+
+def _find_module_file(dir_path: str, module_name: str) -> str:
+    """Get the path with the right extension (.py or .pyc).
+
+    Args:
+        dir_path (str): The base directory path.
+        module_name (str): The name of the module file without extension.
+
+    Returns:
+        str: The absolute path to the file.
+    """
+    for ext in ('.py', '.pyc'):
+        candidate = os.path.join(dir_path, module_name + ext)
+        if os.path.isfile(candidate):
+            return candidate
+
+    raise FileNotFoundError(f"File '{module_name}.py' or '{module_name}.pyc' not found in path '{dir_path}'")

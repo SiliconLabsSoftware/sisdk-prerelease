@@ -1,0 +1,42 @@
+id: bluetooth_hci_cpc_ng
+label: HCI CPC-NG component
+package: bluetooth_le_controller
+description: CPC-NG transport for HCI (RTOS).
+
+category: Bluetooth|Host Controller Interface (HCI)
+quality: experimental
+root_path: bluetooth_le_controller/utils/hci_packet
+source:
+- path: cpc_ng/src/sl_hci_packet.c
+- path: cpc_ng/src/sl_hci_cpc.c
+- path: cpc_ng/src/sl_hci_cpc_rtos.c
+include:
+- path: inc
+  file_list:
+  - path: sl_btctrl_hci_packet.h
+  - path: sl_btctrl_hci_transport.h
+- path: cpc_ng/inc
+  file_list:
+  - path: sl_btctrl_hci_cpc_rtos.h
+provides:
+- name: bluetooth_hci_cpc_ng
+- name: bluetooth_hci_transport
+requires:
+- name: cpc_ng_secondary
+- name: bluetooth_hci
+- name: kernel
+conflicts:
+- name: bluetooth_hci_cpc
+- name: bluetooth_hci_uart
+template_contribution:
+- name: component_catalog
+  value: bluetooth_hci_transport
+  # Reuse classic catalog symbol so sl_btctrl_init() starts the HCI RTOS task.
+- name: component_catalog
+  value: bluetooth_hci_cpc_rtos
+documentation:
+  docset: bluetooth
+  document: enabling-rcp-using-bt-hci/02-enabling-hci-functionality
+metadata:
+  sbom:
+    license: MSLA

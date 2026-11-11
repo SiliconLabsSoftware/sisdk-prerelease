@@ -13,9 +13,9 @@ root_path: cpc_ng/port/mock
 instantiable:
   prefix: instance
 config_file:
-- path: config/sl_cpc_drv_mock_{{instance}}_config.h
+- path: config/sl_cpc_ng_drv_mock_{{instance}}_config.h
   file_id: cpc_ng_drv_mock_config
-- path: config/sl_cpc_drv_mock_{{instance}}_kernel_config.h
+- path: config/sl_cpc_ng_drv_mock_{{instance}}_kernel_config.h
   file_id: cpc_ng_drv_mock_kernel_config
   condition: [kernel]
 source:

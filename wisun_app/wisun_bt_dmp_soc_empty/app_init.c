@@ -36,7 +36,6 @@
 #include "sl_assert.h"
 #include "sl_main_init.h"
 #include "app.h"
-#include "sl_wisun_event_mgr.h"
 #include "sl_wisun_app_core_util.h"
 #include "sl_wisun_app_core_config.h"
 #include "cmsis_os2.h"

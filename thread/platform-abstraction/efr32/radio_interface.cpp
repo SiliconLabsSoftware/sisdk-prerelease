@@ -59,6 +59,7 @@
 
 extern "C" {
 #include "rail_config.h"
+#include "sl_common.h"
 #include "sl_openthread_radio_config.h"
 #include "sl_rail.h"
 #include "sl_rail_ieee802154.h"
@@ -345,6 +346,48 @@ void sli_ot_radio_interface_cancel_timer(struct sl_rail_multi_timer *aTimer)
     sl_rail_cancel_multi_timer(gRailHandle, aTimer);
 }
 
+#if RADIO_CONFIG_SUBGHZ_SUPPORT
+static void sli_ot_radio_interface_configure_ieee802154_phy_timings(bool aIsSubGhz)
+{
+    sl_rail_status_t          status;
+    sl_rail_auto_ack_config_t ackConfig = sRailIeee802154Config.ack_config;
+    sl_rail_state_timing_t    stateTiming;
+
+    if (aIsSubGhz)
+    {
+        ackConfig.ack_timeout_us           = IEEE802154_SUBGHZ_ACK_TIMEOUT_US;
+        stateTiming.idle_to_rx             = 100;
+        stateTiming.tx_to_rx               = IEEE802154_SUBGHZ_TX_TO_RX_US;
+        stateTiming.idle_to_tx             = 100;
+        stateTiming.rx_to_tx               = IEEE802154_SUBGHZ_RX_TO_TX_US;
+        stateTiming.rxsearch_timeout       = 0;
+        stateTiming.tx_to_rxsearch_timeout = 0;
+        stateTiming.tx_to_tx               = 0;
+    }
+    else
+    {
+        ackConfig.ack_timeout_us = sRailIeee802154Config.ack_config.ack_timeout_us;
+        stateTiming              = sRailIeee802154Config.timings;
+    }
+
+    status = sl_rail_config_auto_ack(gRailHandle, &ackConfig);
+    OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
+
+    status = sl_rail_set_state_timing(gRailHandle, &stateTiming);
+    OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
+
+#if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
+    {
+        sl_rail_transition_time_t rxToEnhAckTxUs =
+            aIsSubGhz ? IEEE802154_SUBGHZ_RX_TO_TX_US : IEEE802154_2015_ENH_ACK_TIMING_RX_TO_TX_US;
+
+        status = sl_rail_ieee802154_set_rx_to_enh_ack_tx(gRailHandle, &rxToEnhAckTxUs);
+        OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
+    }
+#endif
+}
+#endif // RADIO_CONFIG_SUBGHZ_SUPPORT
+
 efr32BandConfig *sli_ot_radio_interface_get_band_config(uint8_t aChannel)
 {
     efr32BandConfig *config = nullptr;
@@ -365,7 +408,7 @@ void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_
 
     if (aBandConfig->mChannelConfig != nullptr)
     {
-        status = sl_rail_ieee802154_set_phy_id(gRailHandle, RAIL_IEEE802154_PTI_RADIO_CONFIG_915MHZ_R23_NA_EXT);
+        status = sl_rail_ieee802154_set_phy_id(gRailHandle, IEEE802154_SUBGHZ_PTI_PHY_ID);
         OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
         status = sl_rail_config_channels(gRailHandle, aBandConfig->mChannelConfig, nullptr);
         OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
@@ -373,10 +416,10 @@ void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_
         OT_ASSERT(firstChannel == aBandConfig->mChannelMin);
         status = sl_rail_prepare_channel(gRailHandle, firstChannel);
         OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
-        status = sl_rail_ieee802154_config_g_options(gRailHandle,
-                                                     SL_RAIL_IEEE802154_G_OPTION_GB868,
-                                                     SL_RAIL_IEEE802154_G_OPTION_GB868);
-        OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
+
+#if RADIO_CONFIG_SUBGHZ_SUPPORT
+        sli_ot_radio_interface_configure_ieee802154_phy_timings(true);
+#endif
 
         pa_mode = SL_RAIL_TX_PA_MODE_SUB_GHZ;
     }
@@ -389,6 +432,9 @@ void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
         OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
 
+#if RADIO_CONFIG_SUBGHZ_SUPPORT
+        sli_ot_radio_interface_configure_ieee802154_phy_timings(false);
+#endif
         pa_mode = SL_RAIL_TX_PA_MODE_2P4_GHZ;
     }
 
@@ -396,9 +442,20 @@ void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_
     // 802.15.4E support (only on platforms that support it, so error checking is disabled)
     // Note: This has to be called after sl_rail_ieee802154_config_2p4_ghz_radio due to a bug where this call
     // can overwrite options set below.
-    sl_rail_ieee802154_config_e_options(gRailHandle,
-                                        (SL_RAIL_IEEE802154_E_OPTION_GB868 | SL_RAIL_IEEE802154_E_OPTION_ENH_ACK),
-                                        (SL_RAIL_IEEE802154_E_OPTION_GB868 | SL_RAIL_IEEE802154_E_OPTION_ENH_ACK));
+#if RADIO_CONFIG_SUBGHZ_SUPPORT
+    if (aBandConfig->mChannelConfig != NULL)
+    {
+        sl_rail_ieee802154_config_e_options(gRailHandle,
+                                            SL_RAIL_IEEE802154_E_OPTION_ENH_ACK,
+                                            SL_RAIL_IEEE802154_E_OPTION_ENH_ACK);
+    }
+    else
+#endif
+    {
+        sl_rail_ieee802154_config_e_options(gRailHandle,
+                                            (SL_RAIL_IEEE802154_E_OPTION_GB868 | SL_RAIL_IEEE802154_E_OPTION_ENH_ACK),
+                                            (SL_RAIL_IEEE802154_E_OPTION_GB868 | SL_RAIL_IEEE802154_E_OPTION_ENH_ACK));
+    }
 #endif // (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
 
     if (aTxPower != SL_INVALID_TX_POWER)
@@ -1142,3 +1199,16 @@ void sli_ot_radio_interface_clear_radio_counters(void)
     memset(&railDebugCounters, 0, sizeof(railDebugCounters));
 }
 #endif // RADIO_CONFIG_DEBUG_COUNTERS_SUPPORT
+
+extern "C" {
+// RAIL declares this callback with sl_rail_handle_t (void *). The handle is
+// not written, so the definition takes a pointer-to-const. The function does
+// not return: a RAIL assert stops in OT_ASSERT.
+SL_NORETURN void sl_rail_util_on_assert_failed(const void *rail_handle, sl_rail_assert_error_codes_t error_code)
+{
+    OT_UNUSED_VARIABLE(rail_handle);
+
+    otLogWarnPlat("Rail assert failed: %ld", static_cast<long>(error_code));
+    OT_ASSERT(false);
+}
+}

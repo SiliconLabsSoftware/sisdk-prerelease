@@ -78,19 +78,18 @@
 // <i> Default: 0
 #define SL_DIAG_EMERGENCY_ENABLE  0
 
-// <o SL_DIAG_STACK_SNAPSHOT_BYTES> CPU crash stack snapshot size (bytes)
-// <i> 0 disables the stack snapshot.
+// <o SL_DIAG_STACK_SNAPSHOT_BYTES> CPU crash stack snapshot size (bytes) <0-256:4>
+// <i> 0 disables the stack snapshot. Must be a multiple of 4.
+// <i> Each byte is added to the crash scratch and to every record slot.
 // <i> Default: 0
 #define SL_DIAG_STACK_SNAPSHOT_BYTES  0
 
-// <o SL_DIAG_CAPTURE_TIME_BUDGET_US> Capture time budget (us)
+// <o SL_DIAG_CAPTURE_TIME_BUDGET_US> Capture time budget (us) <1-5000>
+// <i> Provider time budget for fault, assert and non-crash captures.
+// <i> Reference default is 5000 us. Crash captures run with interrupts masked and
+// <i> the hardware watchdog still counting; values above 5000 us are not supported.
 // <i> Default: 5000
 #define SL_DIAG_CAPTURE_TIME_BUDGET_US  5000
-
-// <o SL_DIAG_CAPTURE_TIME_BUDGET_WDT_US> Watchdog capture time budget (us)
-// <i> Initial value. Validate against the shortest watchdog warning window.
-// <i> Default: 500
-#define SL_DIAG_CAPTURE_TIME_BUDGET_WDT_US  500
 
 // <o SL_DIAG_MAX_PRIVACY_CLASS> Maximum provider privacy class
 // <i> Providers above this class are skipped and reported as REDACTED.
