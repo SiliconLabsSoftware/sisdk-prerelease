@@ -120,7 +120,7 @@ static void init_mock_instance(unsigned int lineno, sl_cpc_drv_mock_t *drv, bool
 #if defined(SL_CATALOG_KERNEL_PRESENT)
     .task_priority = SL_CPC_DRV_MOCK_DEFAULT_TASK_PRIORITY,
     .task_stack_ptr = s_test_task_stacks[index],
-    .task_stack_len = (uint32_t)sizeof(s_test_task_stacks[index]),
+    .task_stack_len = sizeof(s_test_task_stacks[index]),
 #endif
   };
   sl_status_t status = sl_cpc_drv_mock_init(drv, &s_test_drv_cfg, &bus_cfg);
