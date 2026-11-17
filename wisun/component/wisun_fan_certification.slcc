@@ -111,6 +111,10 @@ template_contribution:
   - wisun_br_stack
   priority: 3
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api
+
 metadata:
   sbom:
     license: MSLA

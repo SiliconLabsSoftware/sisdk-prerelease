@@ -30,9 +30,9 @@
 
 #include <inttypes.h>
 #include "core/sl-connect-assert.h"
-#include "stack/include/ember.h"
+#include "include/ember.h"
 #include "core/sli-connect-api.h"
-#include "stack/core/sli-connect-interrupt-manipulation.h"
+#include "core/sli-connect-interrupt-manipulation.h"
 #include "event-queue.h"
 
 #ifdef EMBER_TEST

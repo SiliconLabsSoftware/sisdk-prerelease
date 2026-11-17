@@ -49,6 +49,10 @@ template_contribution:
 - name: component_catalog
   value: wisun_dc_client_support
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api
+
 metadata:
   sbom:
     license: MSLA

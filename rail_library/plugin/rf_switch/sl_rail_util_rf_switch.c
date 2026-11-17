@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief RAIL utility for external RF switch configuration (antenna-to-pin
- *   mapping, VDD power-gating, and idle behavior).
+ *   mapping, VDD power-gating or an always-on supply, and idle behavior).
  *******************************************************************************
  * # License
  * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>
@@ -14,6 +14,7 @@
 #include "sl_rail.h"
 #include "sl_rail_util_rf_switch.h"
 #include "sl_rail_util_rf_switch_config.h"
+#include "sl_gpio.h"
 #include "em_common.h"
 
 bool sl_rail_util_rf_switch_config_allowed(void)
@@ -27,10 +28,15 @@ bool sl_rail_util_rf_switch_config_allowed(void)
 #define SL_RAIL_UTIL_RF_SWITCH_HAS_ANTENNA_GPIO_PATTERN  1
 #endif
 
+#if SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE && SL_RAIL_UTIL_RF_SWITCH_VDD_ALWAYS_ON
+#error "Select either RF switch VDD power-gating or always-on VDD, not both."
+#endif
+
 // The antenna-switch control GPIO(s) come from the AoX Antenna utility. This
-// component layers the antenna-to-pin mapping and optional VDD power-gating on
-// top by calling sl_rail_config_rf_switch(). It is always called, so the
-// control pins rest low from boot even with neither a pattern nor VDD.
+// component layers the antenna-to-pin mapping and optional VDD on top by
+// calling sl_rail_config_rf_switch(). It is always called, so the control pins
+// rest low from boot even with neither a pattern nor VDD. Always-on VDD does
+// not route the supply pin to radio activity; the pin is driven high below.
 void sl_rail_util_rf_switch_init(void)
 {
   sl_rail_rf_switch_config_t rf_switch_config = {
@@ -54,8 +60,8 @@ void sl_rail_util_rf_switch_init(void)
     .use_antenna_gpio_pattern = false,
     .antenna_gpio_pattern = { 0U, 1U, 2U, 3U },
 #endif // SL_RAIL_UTIL_RF_SWITCH_HAS_ANTENNA_GPIO_PATTERN
-    .vdd_enable = (SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE != 0),
 #if SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE
+    .vdd_enable = true,
     .vdd_pin = {
       .gpio_port = (uint8_t)SL_RAIL_UTIL_RF_SWITCH_VDD_PIN_PORT,
       .gpio_pin = SL_RAIL_UTIL_RF_SWITCH_VDD_PIN_PIN,
@@ -64,6 +70,8 @@ void sl_rail_util_rf_switch_init(void)
     .vdd_prs_signal =
       (sl_rail_rf_switch_vdd_prs_signal_t)SL_RAIL_UTIL_RF_SWITCH_VDD_PRS_SIGNAL,
 #else
+    // An always-on supply pin must not be routed to radio activity.
+    .vdd_enable = false,
     .vdd_pin = { 0U, 0U },
     .vdd_settle_time_us = SL_RAIL_RF_SWITCH_VDD_SETTLE_TIME_US_DEFAULT,
     .vdd_prs_signal = SL_RAIL_RF_SWITCH_VDD_PRS_SIGNAL_PAEN_OR_LNAEN,
@@ -72,8 +80,20 @@ void sl_rail_util_rf_switch_init(void)
 
   sl_rail_status_t status =
     sl_rail_config_rf_switch(SL_RAIL_EFR32_HANDLE, &rf_switch_config);
-  // Without a pattern or VDD this only idles the control pins, so it may fail
-  // (e.g. GPIO is a secure TrustZone peripheral) without breaking the app.
+#if SL_RAIL_UTIL_RF_SWITCH_VDD_ALWAYS_ON
+  // SL_RAIL_STATUS_INVALID_CALL means GPIO is a secure TrustZone peripheral,
+  // which this non-secure code must not write.
+  EFM_ASSERT(status != SL_RAIL_STATUS_INVALID_CALL);
+  if (status != SL_RAIL_STATUS_INVALID_CALL) {
+    sl_gpio_t vdd_pin = {
+      .port = SL_RAIL_UTIL_RF_SWITCH_VDD_PIN_PORT,
+      .pin = SL_RAIL_UTIL_RF_SWITCH_VDD_PIN_PIN,
+    };
+    sl_gpio_set_pin_mode(&vdd_pin, SL_GPIO_MODE_PUSH_PULL, true);
+  }
+#endif
+  // Without a pattern or gated VDD this only idles the control pins, so it may
+  // fail (e.g. GPIO is a secure TrustZone peripheral) without breaking the app.
 #if defined(SL_RAIL_UTIL_RF_SWITCH_HAS_ANTENNA_GPIO_PATTERN) \
   || (SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE != 0)
   EFM_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);

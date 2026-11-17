@@ -8,7 +8,7 @@ description: >-
   application, therefore it leaves the original firmware untouched. Please
   refer to the readme document for the usage.
 category: Bluetooth Examples
-quality: experimental
+quality: production
 
 filter:
   - name: "Wireless Technology"

@@ -34,6 +34,7 @@
 #include "sl_btctrl_reset.h"
 #include <sl_common.h>
 #include <sl_core.h>
+#include <em_device.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -41,6 +42,15 @@ SL_ALIGN(4) static uint32_t reset_custom_reason SL_ATTRIBUTE_ALIGN(4) SL_ATTRIBU
 
 void sl_btctrl_hci_reset(void)
 {
+  /* PGEVEREST-4485 / PSEC-7854: avoid long SE watchdog recovery when Wi-Fi is
+   * off but WIFICLK is still enabled. Clear the clock only while Wi-Fi power
+   * domain is down. TODO: remove when Platform provides a supported reset. */
+#if defined(_SILICON_LABS_32B_SERIES_3_CONFIG_353) && !defined(FPGA)
+  __disable_irq(); /* Keep interrupts from changing host power state before reset. */
+  if ((EMU_CFGNS->PWRSTATUS & EMU_PWRSTATUS_DIGDOMSTATUS_PD1WIFI0BASE) == 0U) {
+    CMU->WIFICLKCTRL_CLR = CMU_WIFICLKCTRL_CLKEN;
+  }
+#endif
   CORE_ResetSystem();
 }
 

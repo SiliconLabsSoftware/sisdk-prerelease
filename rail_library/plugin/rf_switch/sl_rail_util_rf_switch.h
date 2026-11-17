@@ -1,7 +1,7 @@
 /***************************************************************************//**
  * @file
  * @brief RAIL utility for external RF switch configuration (antenna-to-pin
- *   mapping, VDD power-gating, and idle behavior).
+ *   mapping, VDD power-gating or an always-on supply, and idle behavior).
  *******************************************************************************
  * # License
  * <b>Copyright 2026 Silicon Laboratories Inc. www.silabs.com</b>

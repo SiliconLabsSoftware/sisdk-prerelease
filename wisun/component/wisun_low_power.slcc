@@ -19,6 +19,10 @@ template_contribution:
 - name: component_catalog
   value: wisun_low_power
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-low-power
+
 metadata:
   sbom:
     license: MSLA

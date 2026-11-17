@@ -36,6 +36,11 @@
 #define DHCPV6_SERVER_PORT 547
 #define DHCPV6_CLIENT_PORT 546
 
+/**************************************************************************//**
+ * @addtogroup SL_WISUN_BR_DHCPV6 DHCPv6 Relay
+ * @{
+ *****************************************************************************/
+
 /***************************************************************************//**
  * Initialize DHCPv6 Relay.
  * This function must be called before any other DHCPv6 Relay function.
@@ -71,5 +76,7 @@ void sl_wisun_br_dhcpv6_relay_pan_on_recv(uint8_t *buffer, ssize_t length, in6_a
  * @return SL_STATUS_OK if successful, an error code otherwise
  ******************************************************************************/
 sl_status_t sl_wisun_br_dhcpv6_relay_stop(void);
+
+/** @} (end addtogroup SL_WISUN_BR_DHCPV6) */
 
 #endif  /* __SL_WISUN_BR_DHCPV6_RELAY_H__ */

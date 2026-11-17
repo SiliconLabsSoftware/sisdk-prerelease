@@ -32,8 +32,8 @@
 /*                     FIELD MASKS / LIMITS                                 */
 /****************************************************************************/
 
-#define WAKE_ON_CRITICAL_MESSAGE_SEVERITY_MASK    0x0F
-#define WAKE_ON_CRITICAL_MESSAGE_SEVERITY_MAX     15
+#define WAKE_ON_CRITICAL_MESSAGE_SEVERITY_MASK    0x07
+#define WAKE_ON_CRITICAL_MESSAGE_SEVERITY_MAX     7
 #define WAKE_ON_CRITICAL_MESSAGE_SEVERITY_DEFAULT 0
 #define WAKE_ON_CRITICAL_MESSAGE_NOTIFY_HEADER_SIZE 4
 
@@ -41,11 +41,11 @@
 /*                     FRAME STRUCTURES                                     */
 /****************************************************************************/
 
-/** Configuration Set frame: [CC][Cmd][Reserved(4) | Severity(4)] */
+/** Configuration Set frame: [CC][Cmd][Reserved(5) | Severity(3)] */
 typedef struct _ZW_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_SET_FRAME_ {
   uint8_t cmdClass;
   uint8_t cmd;
-  uint8_t properties1;  /* bits 7-4: Reserved, bits 3-0: Severity */
+  uint8_t properties1;  /* bits 7-3: Reserved, bits 2-0: Severity */
 } ZW_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_SET_FRAME;
 
 /** Configuration Get frame: [CC][Cmd] */
@@ -54,11 +54,11 @@ typedef struct _ZW_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_GET_FRAME_ {
   uint8_t cmd;
 } ZW_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_GET_FRAME;
 
-/** Configuration Report frame: [CC][Cmd][Reserved(4) | Severity(4)] */
+/** Configuration Report frame: [CC][Cmd][Reserved(5) | Severity(3)] */
 typedef struct _ZW_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_REPORT_FRAME_ {
   uint8_t cmdClass;
   uint8_t cmd;
-  uint8_t properties1;  /* bits 7-4: Reserved (0), bits 3-0: Severity */
+  uint8_t properties1;  /* bits 7-3: Reserved (0), bits 2-0: Severity */
 } ZW_WAKE_ON_CRITICAL_MESSAGE_CONFIGURATION_REPORT_FRAME;
 
 typedef struct _wocm_context_t_ {

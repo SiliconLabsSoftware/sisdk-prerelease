@@ -42,6 +42,10 @@ template_contribution:
 - name: component_catalog
   value: wisun_direct_connect_pmk
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api
+
 metadata:
   sbom:
     license: MSLA

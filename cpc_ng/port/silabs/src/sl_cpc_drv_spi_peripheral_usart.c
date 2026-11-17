@@ -88,26 +88,6 @@ static uint32_t prs_signal_cs(uint8_t peripheral_no)
   }
 }
 
-static sl_status_t init_caps(struct sl_cpc_drv_spi_peripheral *drv)
-{
-  sl_clock_branch_t spi_clock_branch;
-  sl_status_t status;
-  uint32_t max_speed;
-
-  spi_clock_branch = sl_device_peripheral_get_clock_branch(drv->peripheral);
-  status = sl_clock_manager_get_clock_branch_frequency(spi_clock_branch, &max_speed);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-
-  // The max speed of the USART in mode secondary is the peripheral clock feeding the USART / 10
-  max_speed /= 10;
-
-  sli_cpc_u32_to_le(max_speed, drv->local_caps.max_speed_le);
-
-  return SL_STATUS_OK;
-}
-
 /***************************************************************************/ /**
  * Initialize peripheral clocks.
  ******************************************************************************/
@@ -225,13 +205,9 @@ sl_status_t sl_cpc_drv_spi_peripheral_usart_init(sl_cpc_drv_spi_peripheral_usart
 
   memset(drv, 0, sizeof(*drv));
   drv->peripheral = cfg->peripheral;
+  drv->max_bitrate = cfg->max_bitrate;
 
   status = init_hw(drv, cfg);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-
-  status = init_caps(drv);
   if (status != SL_STATUS_OK) {
     return status;
   }

@@ -59,6 +59,10 @@ template_contribution:
   condition:
   - "wisun_stack_ffn"
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api
+
 metadata:
   sbom:
     license: MSLA

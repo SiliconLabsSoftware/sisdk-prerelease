@@ -28,7 +28,7 @@ struct sl_cpc_drv_spi_controller_config {
   sl_gpio_t clk;
   sl_gpio_t cs;
   sl_gpio_t irq;
-  uint32_t bitrate;
+  uint32_t max_bitrate;
 };
 
 struct sl_cpc_drv_spi_controller_rx {
@@ -73,6 +73,8 @@ struct sl_cpc_drv_spi_controller_tx {
 struct sl_cpc_drv_spi_controller {
   sl_peripheral_t peripheral;
   SPIDRV_HandleData_t spidrv;
+  uint32_t max_bitrate;
+  uint32_t new_bitrate;
   sl_cpc_bus_t bus;
   struct {
     sl_gpio_t gpio;

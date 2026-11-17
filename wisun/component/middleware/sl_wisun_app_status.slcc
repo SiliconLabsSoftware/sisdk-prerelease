@@ -18,6 +18,10 @@ description: >
 
 category: "Wi-SUN|Wi-SUN Services"
 quality: "evaluation"
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-app-status
+
 metadata:
   sbom:
     license: Zlib

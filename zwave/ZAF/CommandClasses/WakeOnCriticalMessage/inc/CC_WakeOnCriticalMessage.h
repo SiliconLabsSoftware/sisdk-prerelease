@@ -35,7 +35,7 @@
 
 /**
  * @brief Returns the currently configured severity threshold.
- * @return Severity threshold value (0-15).
+ * @return Severity threshold value (0-7).
  */
 uint8_t CC_WakeOnCriticalMessage_getSeverityThreshold(void);
 

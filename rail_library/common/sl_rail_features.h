@@ -940,10 +940,7 @@ extern "C" {
 #ifndef DOXYGEN_UNDOCUMENTED
 /// Boolean to indicate whether the selected chip supports sequencer-driven
 /// protocol switching without host-side startup configuration.
-#if (_SILICON_LABS_32B_SERIES_3_CONFIG == 353)
-#define SL_RAIL_SUPPORTS_SEQUENCER_PROTOCOL_SWITCH 1
-#elif (defined(_SILICON_LABS_IP_PROJ_IS_LPWH74000) \
-  && (_SILICON_LABS_32B_SERIES_3_CONFIG >= 300)    \
+#if ((_SILICON_LABS_32B_SERIES_3_CONFIG >= 300) \
   && (_SILICON_LABS_32B_SERIES_3_CONFIG != 301))
 #define SL_RAIL_SUPPORTS_SEQUENCER_PROTOCOL_SWITCH 1
 #else

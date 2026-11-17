@@ -24,6 +24,11 @@
 extern "C" {
 #endif
 
+/**************************************************************************//**
+ * @addtogroup SL_WISUN_CRASH_HANDLER Wi-SUN Crash Handler
+ * @{
+ *****************************************************************************/
+
 /// Maximum length of a file name field
 #define SL_WISUN_CRASH_FILENAME_SIZE 128
 /// Maximum length of a task name field
@@ -122,8 +127,10 @@ typedef struct {
 
 /// Data structure for crash data
 typedef struct {
+  /// Checksum over the rest of the structure
+  uint16_t checksum;
   /// Type of the crash
-  uint32_t type;
+  uint16_t type;
   union {
     /// Crash data for an assert
     sl_wisun_crash_assert_t assert;
@@ -164,6 +171,8 @@ void sl_wisun_crash_handler_clear();
  * @return NULL if no crash data available, a pointer to the data otherwise.
  *****************************************************************************/
 const sl_wisun_crash_t *sl_wisun_crash_handler_read();
+
+/** @} (end addtogroup SL_WISUN_CRASH_HANDLER) */
 
 #ifdef __cplusplus
 }

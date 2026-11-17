@@ -33,6 +33,7 @@
 #include "em_system.h"
 #include "sl_common.h"
 
+#include "mbedtls/platform_util.h"
 #include "mbedtls/x509_crt.h"
 #include "psa/crypto.h"
 #include "psa/crypto_values.h"
@@ -711,12 +712,14 @@ sl_status_t sli_bt_cbap_session_process(const uint8_t *data, size_t data_len)
   SLI_BT_CBAP_LOG_INFO("Session complete." SLI_BT_CBAP_LOG_NL);
 
   cleanup:
-  // Clear local variables
+  // Clear local variables. The compiler may remove a memset() of a buffer that
+  // is not read again, which would leave the shared secret in RAM, but it
+  // keeps mbedtls_platform_zeroize().
   psa_reset_key_attributes(&attributes);
   (void)psa_key_derivation_abort(&derivation);
-  memset(shared_secret, 0, sizeof(shared_secret));
-  memset(peer_key_public, 0, sizeof(peer_key_public));
-  memset(peer_key_signature, 0, sizeof(peer_key_signature));
+  mbedtls_platform_zeroize(shared_secret, sizeof(shared_secret));
+  mbedtls_platform_zeroize(peer_key_public, sizeof(peer_key_public));
+  mbedtls_platform_zeroize(peer_key_signature, sizeof(peer_key_signature));
 
   if (shared_secret_key_id != MBEDTLS_SVC_KEY_ID_INIT) {
     (void)psa_destroy_key(shared_secret_key_id);
@@ -890,6 +893,9 @@ sl_status_t sli_bt_cbap_generate_random(uint32_t min_inclusive,
     // Rejection sampling to avoid bias
     if ((sc == SL_STATUS_OK) && (random_value >= threshold)) {
       *random = min_inclusive + (random_value % range);
+      // The result can be derived from the raw value, and it may be a secret,
+      // such as the passkey. Wipe it, a memset() could be optimized away.
+      mbedtls_platform_zeroize(&random_value, sizeof(random_value));
       return SL_STATUS_OK;
     }
   }

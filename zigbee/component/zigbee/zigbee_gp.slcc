@@ -35,11 +35,13 @@ include:
 
 - path: stack/internal/inc
   file_list:
+  - path: gp-install-code-internal-def.h
   - path: gp-proxy-table-internal-def.h
   - path: gp-sink-table-internal-def.h
   - path: gp-types-internal-def.h
 - path: stack/internal/src/ipc
   file_list:
+  - path: gp-install-code-ipc-command-messages.h
   - path: gp-proxy-table-ipc-command-messages.h
   - path: gp-sink-table-ipc-command-messages.h
   - path: gp-types-ipc-command-messages.h
@@ -48,9 +50,16 @@ include:
   condition:
   - zigbee_use_ipc
 source:
+- path: stack/internal/src/ipc/gp-install-code-ipc-command-messages.c
+  condition:
+  - zigbee_use_ipc
 - path: app/em260/command-handlers-green-power-generated.c
   condition:
   - zigbee_ncp
+- path: stack/internal/src/baremetal/gp-install-code-baremetal-wrapper.c
+  unless:
+  - zigbee_use_ipc
+  - native_host
 - path: stack/internal/src/baremetal/gp-proxy-table-baremetal-wrapper.c
   unless:
   - zigbee_use_ipc

@@ -510,7 +510,7 @@ def setup_pki(root_cert: str, root_key: Optional[str] = None, mca_cert: Optional
     )
     dest_pki = []
     for src, name, label in source_pki:
-        if src is None:
+        if not src:
             continue
         if not os.path.isfile(src):
             raise FileNotFoundError(src)

@@ -37,6 +37,10 @@ template_contribution:
 - name: component_catalog
   value: wisun_select
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-select-api
+
 metadata:
   sbom:
     license: MSLA

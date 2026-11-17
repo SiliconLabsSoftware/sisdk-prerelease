@@ -104,7 +104,7 @@ typedef void (*StackAlarmCallback)(otInstance *);
 static AlarmHandle sMsAlarmHandles[RADIO_INTERFACE_COUNT];
 static AlarmHandle sUsAlarmHandles[RADIO_INTERFACE_COUNT];
 
-static uint64_t sPendingTimeMs[RADIO_INTERFACE_COUNT];
+static uint32_t sPendingTimeMs[RADIO_INTERFACE_COUNT];
 
 // millisecond-alarm callback
 STATIC void msAlarmCallback(sl_sleeptimer_timer_handle_t *aHandle, void *aData);
@@ -133,15 +133,15 @@ static void StopActiveAlarm(AlarmHandle *aAlarm);
 static void AlarmCallback(AlarmHandle *aAlarm);
 
 // pending time utility functions
-static inline uint64_t GetPendingTime(otInstance *aInstance);
-static inline void     SetPendingTime(otInstance *aInstance, uint64_t aPendingTime);
+static inline uint32_t GetPendingTime(otInstance *aInstance);
+static inline void     SetPendingTime(otInstance *aInstance, uint32_t aPendingTime);
 
 // alarm handle utility functions
 static inline AlarmHandle *GetAlarmHandle(AlarmHandle *aHandleList, otInstance *aInstance);
 static AlarmHandle        *GetFirstFiredAlarm(AlarmHandle *aAlarm);
 static AlarmHandle        *GetNextFiredAlarm(AlarmHandle *aAlarm, const AlarmHandle *aAlarmEnd);
 static inline bool         HasAnyAlarmFired(void);
-static inline uint32_t     SetAlarmWrappedDuration(AlarmHandle *aAlarm, uint64_t aRemainingTime);
+static inline uint32_t     SetAlarmWrappedDuration(AlarmHandle *aAlarm, uint32_t aRemainingTime);
 
 static void msTimerStart(AlarmHandle *aMsAlarm, uint32_t aAlarmDuration)
 {
@@ -257,7 +257,15 @@ static void ProcessAlarm(AlarmHandle *aAlarm, StackAlarmCallback aCallback)
     }
 }
 
-static inline uint32_t SetAlarmWrappedDuration(AlarmHandle *aAlarm, uint64_t aRemainingTime)
+// OpenThread guarantees aDt <= Timer::kMaxDelay (2^31 - 1), so the signed 32-bit
+// difference from now to (aT0 + aDt) modulo 2^32 is the true remaining time.
+// A result of zero or less means the alarm is already due.
+static int32_t AlarmRemaining(uint32_t aFireTime, uint32_t aNow)
+{
+    return (int32_t)(aFireTime - aNow);
+}
+
+static inline uint32_t SetAlarmWrappedDuration(AlarmHandle *aAlarm, uint32_t aRemainingTime)
 {
     OT_ASSERT(aAlarm != NULL);
     uint64_t          initial_wrap_time = aRemainingTime;
@@ -279,8 +287,7 @@ static void StartAlarmAt(AlarmHandle *aAlarm, uint32_t aT0, uint32_t aDt)
     otEXPECT(sl_ot_rtos_task_can_access_pal());
     StopActiveAlarm(aAlarm);
 
-    uint64_t requested_time = (uint64_t)aT0 + (uint64_t)aDt;
-    int64_t  remaining      = (int64_t)requested_time - (int64_t)aAlarm->mTimerGetNow();
+    int32_t remaining = AlarmRemaining(aT0 + aDt, aAlarm->mTimerGetNow());
 
     if (remaining <= 0)
     {
@@ -288,7 +295,7 @@ static void StartAlarmAt(AlarmHandle *aAlarm, uint32_t aT0, uint32_t aDt)
     }
     else
     {
-        aAlarm->mTimerStart(aAlarm, SetAlarmWrappedDuration(aAlarm, (uint64_t)remaining));
+        aAlarm->mTimerStart(aAlarm, SetAlarmWrappedDuration(aAlarm, (uint32_t)remaining));
         aAlarm->mIsRunning = true;
     }
 
@@ -323,12 +330,12 @@ static void AlarmCallback(AlarmHandle *aAlarm)
     }
 }
 
-static inline uint64_t GetPendingTime(otInstance *aInstance)
+static inline uint32_t GetPendingTime(otInstance *aInstance)
 {
     return sPendingTimeMs[sli_ot_radio_instance_get_index(aInstance)];
 }
 
-static inline void SetPendingTime(otInstance *aInstance, uint64_t aPendingTime)
+static inline void SetPendingTime(otInstance *aInstance, uint32_t aPendingTime)
 {
     sPendingTimeMs[sli_ot_radio_instance_get_index(aInstance)] = aPendingTime;
 }
@@ -457,14 +464,16 @@ exit:
 
 uint64_t efr32AlarmPendingTime(otInstance *aInstance)
 {
-    uint64_t remaining = GetPendingTime(aInstance);
-    uint32_t now       = otPlatAlarmMilliGetNow();
+    uint64_t remaining = 0;
+    int32_t  delta;
 
-    otEXPECT_ACTION(GetAlarmHandle(sMsAlarmHandles, aInstance)->mIsRunning, remaining = 0);
+    otEXPECT(GetAlarmHandle(sMsAlarmHandles, aInstance)->mIsRunning);
 
-    if (remaining > now)
+    delta = AlarmRemaining(GetPendingTime(aInstance), otPlatAlarmMilliGetNow());
+
+    if (delta > 0)
     {
-        remaining -= (uint64_t)now;
+        remaining = (uint32_t)delta;
     }
 
 exit:
@@ -526,8 +535,7 @@ void otPlatAlarmMilliStartAt(otInstance *aInstance, uint32_t aT0, uint32_t aDt)
         alarm->mThreadInstance = aInstance;
     }
 
-    SetPendingTime(aInstance, (uint64_t)aT0 + (uint64_t)aDt);
-    CORE_ATOMIC_SECTION(StartAlarmAt(alarm, aT0, aDt);)
+    CORE_ATOMIC_SECTION(SetPendingTime(aInstance, aT0 + aDt); StartAlarmAt(alarm, aT0, aDt);)
 }
 
 void otPlatAlarmMilliStop(otInstance *aInstance)

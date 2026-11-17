@@ -97,6 +97,15 @@
 #define SL_CPC_DRV_SPI_PERIPHERAL_EUSART_INSTANCE_CS_EXTI_NO 0
 // </h>
 
+// <h> SPI bus configuration
+
+// <o SL_CPC_DRV_SPI_PERIPHERAL_EUSART_INSTANCE_MAX_BITRATE> SPI maximum bitrate
+// <i> Default: 0
+// <i> Optional upper limit on the negotiated SPI bitrate.
+// <i> Set to 0 for no maximum bitrate limit.
+#define SL_CPC_DRV_SPI_PERIPHERAL_EUSART_INSTANCE_MAX_BITRATE 0
+// </h>
+
 // </h>
 // <<< end of configuration section >>>
 

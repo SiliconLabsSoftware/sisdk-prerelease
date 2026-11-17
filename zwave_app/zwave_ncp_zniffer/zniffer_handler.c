@@ -2,9 +2,11 @@
 
 #include <stdbool.h>
 
+#include "FreeRTOS.h"
 #include <string.h>
 #include "SizeOf.h"
 #include <assert.h>
+#include "task.h"
 #include "zpal_log.h"
 #include <zpal_watchdog.h>
 #include <zpal_misc.h>
@@ -315,6 +317,7 @@ void run_zniffer(void)
           /* We got a frame... */
           state = stateFrameParse;
         } else if (conState == PARSE_IDLE) {
+          vTaskDelay(pdMS_TO_TICKS(1));
         }
       }
       break;

@@ -485,6 +485,11 @@ sl_status_t sl_wisun_br_dhcpv6_server_init(void)
   return SL_STATUS_OK;
 }
 
+bool sl_wisun_br_dhcpv6_supports_link_local_socket(void)
+{
+  return true;
+}
+
 sl_status_t sl_wisun_br_dhcpv6_server_start_with_link_local_socket(int socket, int link_local_socket, uint8_t prefix[8],
                                                                    uint8_t DUID[8], uint32_t dhcp_address_lifetime)
 {

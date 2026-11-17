@@ -7,7 +7,7 @@ category: Bluetooth|Application|Miscellaneous
 metadata:
   sbom:
     license: Zlib
-quality: experimental
+quality: production
 root_path: bluetooth_le/common/cbap_key_id
 provides:
 - name: cbap_key_id

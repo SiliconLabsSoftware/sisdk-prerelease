@@ -99,6 +99,7 @@ define:
 tag:
   - prebuilt_demo
   - hwfilter:device:device_supports_zigbee
+  - hwfilter:ram:64k
   - toolchain:gcc
   - toolchain:iar
   - toolchain:llvm

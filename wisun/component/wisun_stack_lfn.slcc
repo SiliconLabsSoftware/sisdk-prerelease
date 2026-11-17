@@ -44,7 +44,7 @@ define:
 
 documentation:
   docset: wisun
-  document: wisun-stack-api/sl-wisun-lfn-api
+  document: wisun-stack-api
 
 template_contribution:
 - name: component_catalog

@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include "sl_clock_manager.h"
 #include "sl_common.h"
 #include "sl_component_catalog.h"
 #include "sl_device_peripheral.h"
@@ -37,6 +38,7 @@
 #include "sl_hal_prs.h"
 #include "sl_slist.h"
 #include "sl_status.h"
+#include "sli_cpc_endianness.h"
 #if defined(SL_CATALOG_CPC_DRIVER_HW_CRC_PRESENT)
 #include "sl_hal_gpcrc.h"
 #endif
@@ -145,6 +147,9 @@ static inline void flush_tx(struct sl_cpc_drv_spi_peripheral *drv)
   drv->tx.current_frame = NULL;
 }
 
+/***************************************************************************/ /**
+ * Start a DMA transfer.
+ ******************************************************************************/
 static inline void spi_ldma_start_transfer(const struct sl_cpc_drv_spi_peripheral *drv, uint8_t channel,
                                            const sl_hal_ldma_transfer_config_t *transfer,
                                            const sl_hal_ldma_descriptor_t *descriptor)
@@ -154,14 +159,49 @@ static inline void spi_ldma_start_transfer(const struct sl_cpc_drv_spi_periphera
   sl_hal_ldma_start_transfer(ldma, channel);
 }
 
-SLI_CPC_STATIC_ASSERT_PACKED_SIZE(struct sli_cpc_drv_spi_peripheral_caps, 4);
-
+/***************************************************************************/ /**
+ * Get the local capabilities.
+ *
+ * Advertise the hardware bitrate limit, optionally capped by a configured maximum.
+ ******************************************************************************/
 static void get_local_capabilities(sl_cpc_bus_t *bus, const void **caps_p, uint16_t *caps_size_p)
 {
-  const struct sl_cpc_drv_spi_peripheral *drv = to_drv(bus);
+  struct sl_cpc_drv_spi_peripheral *drv = to_drv(bus);
+  uint32_t bitrate = 0;
 
-  *caps_p = &drv->local_caps;
-  *caps_size_p = sizeof(drv->local_caps);
+  switch (sl_device_peripheral_get_serial_ip_type(drv->peripheral)) {
+    case SL_PERIPHERAL_SERIAL_TYPE_EUSART:
+      // In peripheral mode, EUSART has a maximum bitrate of 10MHz.
+      bitrate = 10E6;
+      break;
+    case SL_PERIPHERAL_SERIAL_TYPE_USART: {
+      // In peripheral mode, USART has a maximum bitrate of the peripheral's clock rate / 6.
+      sl_clock_branch_t clk_branch = sl_device_peripheral_get_clock_branch(drv->peripheral);
+
+      uint32_t clock_freq;
+      sl_status_t status = sl_clock_manager_get_clock_branch_frequency(clk_branch, &clock_freq);
+      if (status != SL_STATUS_OK) {
+        SLI_CPC_PANIC("Failed to get clock branch frequency: 0x%lu", status);
+      }
+
+      bitrate = clock_freq / 6;
+      break;
+    }
+    default:
+      // Unsupported peripheral type.
+      SLI_CPC_ASSERT(false);
+      break;
+  }
+
+  //
+  // max_bitrate of 0 means no user-configured limit.
+  if (drv->max_bitrate != 0) {
+    bitrate = SL_MIN(bitrate, drv->max_bitrate);
+  }
+  sli_cpc_u32_to_le(bitrate, drv->caps.bitrate_le);
+
+  *caps_p = &drv->caps;
+  *caps_size_p = sizeof(drv->caps);
 }
 
 /***************************************************************************/ /**
@@ -653,6 +693,11 @@ static void alloc_rx_frames(struct sl_cpc_drv_spi_peripheral *drv)
   }
 }
 
+/***************************************************************************/ /**
+ * Callback handler for the end of the header transfer.
+ *
+ * After completion, another DMA transfer is started to receive the payload.
+ ******************************************************************************/
 static void end_of_header_xfer(struct sl_cpc_drv_spi_peripheral *drv)
 {
   bool received_valid_header = false;

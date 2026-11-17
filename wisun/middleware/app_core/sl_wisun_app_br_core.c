@@ -315,6 +315,26 @@ SL_WEAK void app_service_task_sockets_ready_notify(void)
 {
 }
 
+/*
+ * NOTE: Allows the app to fall back to the old sl_wisun_br_dhcpv6_server_start
+ * function if the new sl_wisun_br_dhcpv6_server_start_with_link_local_socket function is not
+ * available.
+ */
+SL_WEAK bool sl_wisun_br_dhcpv6_supports_link_local_socket(void)
+{
+  return false;
+}
+
+SL_WEAK sl_status_t sl_wisun_br_dhcpv6_server_start_with_link_local_socket(int socket,
+                                                                           int link_local_socket,
+                                                                           uint8_t prefix[8],
+                                                                           uint8_t DUID[8],
+                                                                           uint32_t dhcp_address_lifetime)
+{
+  EFM_ASSERT(link_local_socket == SOCKET_INVALID_ID);
+  return sl_wisun_br_dhcpv6_server_start(socket, prefix, DUID, dhcp_address_lifetime);
+}
+
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
@@ -702,7 +722,7 @@ void sl_wisun_app_br_core_start(void)
   EFM_ASSERT(sl_wisun_br_start((const uint8_t *)_br_setting.network_name, &phy_config) == SL_STATUS_OK);
 
   EFM_ASSERT(sl_wisun_br_get_ip_addresses(link_local_addr.address, global_unicast_addr.address, dodagid_addr.address) == SL_STATUS_OK);
-  EFM_ASSERT(app_init_dhcpv6_sockets(&link_local_addr) == SL_STATUS_OK);
+  EFM_ASSERT(app_init_dhcpv6_sockets(sl_wisun_br_dhcpv6_supports_link_local_socket() ? &link_local_addr : NULL) == SL_STATUS_OK);
   EFM_ASSERT(sl_wisun_get_mac_address(&address) == SL_STATUS_OK);
   EFM_ASSERT(sl_wisun_br_dhcpv6_server_start_with_link_local_socket(app_dhcpv6_socket,
                                                                     app_dhcpv6_link_local_socket,

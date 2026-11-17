@@ -21,6 +21,7 @@ include:
 - path: si91x_socket
   file_list:
   - path: sl_si91x_socket_support.h
+  - path: sl_si91x_bsd_socket_log_helper.h
 
 requires:
 - name: bsd_socket_api

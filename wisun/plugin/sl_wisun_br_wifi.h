@@ -31,6 +31,11 @@
 #ifndef __SL_WISUN_BR_WIFI_H__
 #define __SL_WISUN_BR_WIFI_H__
 
+/**************************************************************************//**
+ * @addtogroup SL_WISUN_BR_WIFI Wi-SUN Border Router Wi-Fi
+ * @{
+ *****************************************************************************/
+
 typedef enum {
   WIFI_SECURITY_TYPE_NONE = 0,
   WIFI_SECURITY_TYPE_WPA_PSK = 1,
@@ -93,5 +98,7 @@ sl_status_t sl_wisun_br_wifi_set_join_handler(sl_wisun_br_wifi_join_handler_t ha
  * @return SL_STATUS_OK if success, an error code otherwise
  ******************************************************************************/
 sl_status_t sl_wisun_br_wifi_init(void);
+
+/** @} (end addtogroup SL_WISUN_BR_WIFI) */
 
 #endif  /* __SL_WISUN_BR_WIFI_H__ */

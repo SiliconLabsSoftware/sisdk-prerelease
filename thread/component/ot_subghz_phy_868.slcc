@@ -1,7 +1,7 @@
 id: ot_subghz_phy_868
 label: Sub-GHz PHY (868 MHz)
 package: thread
-category: OpenThread
+category: OpenThread|PHY
 quality: evaluation
 description: This component provides Sub-GHz PHY support for OpenThread using 802.15.4 OQPSK-DSSS at 863-868 MHz (800 kcps, 100 kbps).
 provides:
@@ -34,6 +34,8 @@ define:
   condition:
   - device_generic_family_efr32xg23
   - hardware_board_supports_rf_band_868
+- name: RADIO_CONFIG_SUBGHZ_SUPPORT_868
+  value: 1
 - name: RADIO_CONFIG_SUBGHZ_SUPPORT_868_XG23
   value: 1
   condition:

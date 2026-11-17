@@ -14,8 +14,8 @@
  *
  ******************************************************************************/
 
-#include "stack/include/ember.h"
-#include "stack/core/sli-connect-api.h"
+#include "include/ember.h"
+#include "core/sli-connect-api.h"
 #ifdef SL_CATALOG_CONNECT_AES_SECURITY_PRESENT
 #include "psa/crypto.h"
 #endif

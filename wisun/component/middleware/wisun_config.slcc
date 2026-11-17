@@ -9,6 +9,10 @@ description: >
   These examples do not have the application and security infrastructure.
 category: Wi-SUN|Application
 quality: production
+documentation:
+  docset: wisun
+  document: wisun-stack-api
+
 metadata:
   sbom:
     license: Zlib

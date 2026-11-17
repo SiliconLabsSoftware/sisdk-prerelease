@@ -105,6 +105,7 @@ sl_status_t sl_cpc_drv_instances_init(void)
     .cs_synctrig_prs_ch = SL_CPC_DRV_SPI_PERIPHERAL_EUSART_{{ instance | upper }}_CS_SYNCTRIG_PRS_CH,
     .txc_synctrig_prs_ch = SL_CPC_DRV_SPI_PERIPHERAL_EUSART_{{ instance | upper }}_TXC_SYNCTRIG_PRS_CH,
     .tx_availability_synctrig_ch = SL_CPC_DRV_SPI_PERIPHERAL_EUSART_{{ instance | upper }}_TX_AVAILABILITY_SYNCTRIG_CH,
+    .max_bitrate = SL_CPC_DRV_SPI_PERIPHERAL_EUSART_{{ instance | upper }}_MAX_BITRATE,
   };
   {%- endfor %}
 
@@ -131,7 +132,7 @@ sl_status_t sl_cpc_drv_instances_init(void)
       .port = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_IRQ_PORT,
       .pin = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_IRQ_PIN,
     },
-    .bitrate = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_BITRATE,
+    .max_bitrate = SL_CPC_DRV_SPI_CONTROLLER_EUSART_{{ instance | upper }}_MAX_BITRATE,
   };
   {%- endfor %}
 
@@ -158,7 +159,7 @@ sl_status_t sl_cpc_drv_instances_init(void)
       .port = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_IRQ_PORT,
       .pin = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_IRQ_PIN,
     },
-    .bitrate = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_BITRATE,
+    .max_bitrate = SL_CPC_DRV_SPI_CONTROLLER_USART_{{ instance | upper }}_MAX_BITRATE,
   };
   {% endfor %}
 
@@ -188,12 +189,13 @@ sl_status_t sl_cpc_drv_instances_init(void)
     .cs_synctrig_prs_ch = SL_CPC_DRV_SPI_PERIPHERAL_USART_{{ instance | upper }}_CS_SYNCTRIG_PRS_CH,
     .txc_synctrig_prs_ch = SL_CPC_DRV_SPI_PERIPHERAL_USART_{{ instance | upper }}_TXC_SYNCTRIG_PRS_CH,
     .tx_availability_synctrig_ch = SL_CPC_DRV_SPI_PERIPHERAL_USART_{{ instance | upper }}_TX_AVAILABILITY_SYNCTRIG_CH,
+    .max_bitrate = SL_CPC_DRV_SPI_PERIPHERAL_USART_{{ instance | upper }}_MAX_BITRATE,
   };
   {% endfor %}
 
   {% for instance in cpc_ng_drv_uart_eusart_instances -%}
   const sl_cpc_drv_uart_eusart_config_t sl_cpc_drv_uart_eusart_{{ instance }}_cfg = {
-  #if defined(EUART0_BASE)
+  #if defined(EUART_COUNT) && (EUART_COUNT > 0)
     .peripheral = SL_CONCAT_PASTER_2(SL_PERIPHERAL_EUART, SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_PERIPHERAL_NO),
   #else
     .peripheral = SL_CONCAT_PASTER_2(SL_PERIPHERAL_EUSART, SL_CPC_DRV_UART_EUSART_{{ instance|upper }}_PERIPHERAL_NO),

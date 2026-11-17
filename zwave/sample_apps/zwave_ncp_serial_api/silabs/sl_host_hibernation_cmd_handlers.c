@@ -48,6 +48,7 @@ static const sl_gpio_t host_wake_gpio = {
 #include "ZAF_Common_interface.h"
 #include "ZW_transport_api.h"
 #include "ZW_application_transport_interface.h"
+#include "ZW_wake_on_critical_message.h"
 
 void gpio_wakeup_host_init(void)
 {
@@ -345,10 +346,10 @@ static void host_sleep_subcommand_notify_host_state(const comm_interface_frame_p
 {
   /** HOST->ZW: subcommand 0x02 | host_state */
   const uint8_t host_state = frame->payload[1];
-  const uint8_t severity_level = frame->payload[2] & 0x0F; // Severity level is 0-15
+  const uint8_t severity_level = frame->payload[2] & WAKE_ON_CRITICAL_MESSAGE_SEVERITY_MASK; // Severity level is 0-7
   compl_workbuf[0] = HOST_SLEEP_SUBCOMMAND_NOTIFY_HOST_STATE;
   compl_workbuf[1] = SAPI_COMMAND_STATUS_SUCCESS;
-  compl_workbuf[2] = severity_level & 0x0F;
+  compl_workbuf[2] = severity_level & WAKE_ON_CRITICAL_MESSAGE_SEVERITY_MASK;
   switch (host_state) {
     case NOTIFY_HOST_STATE_AWAKE:
       keep_alive_stop_tracking();

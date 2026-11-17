@@ -31,6 +31,7 @@ _COMMANDER_ZIP_URL = (
 class DdpHostRecipe(ConanFile):
     name = "wisun_ddp_host"
     user = "silabs"
+    # YYYY-MM only: conan-cleanup.yml excludes silabs/**/20??-??/* for 0.dev TTL.
     release_stream_channel = "2026-12"
 
     description = "Wi-SUN DDP host-side Python tooling."
@@ -39,6 +40,9 @@ class DdpHostRecipe(ConanFile):
     homepage = "https://github.com/SiliconLabsInternal/wisun"
     url = "https://github.com/SiliconLabsInternal/wisun"
     topics = ("silabs", "wi-sun", "ddp", "python", "tools")
+
+    # Python module for channel resolution
+    python_requires = "silabs_package_assistant/[~2]@silabs"
 
     build_policy = "never"
     no_copy_source = True
@@ -75,6 +79,14 @@ class DdpHostRecipe(ConanFile):
 
     def set_version(self):
         self.version = os.environ.get("SL_VERSION", "0.0.0")
+
+        # Release branches publish under @silabs/<release_stream_channel>,
+        # dev branches pass their own channel through --channel.
+        if not self.channel:
+            silabs_package_assistant = self.python_requires[
+                "silabs_package_assistant"
+            ].module
+            self.channel = silabs_package_assistant.get_channel(self)
 
     def export(self):
         commit = Git(self).get_commit()

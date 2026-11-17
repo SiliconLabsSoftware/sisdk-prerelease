@@ -6,6 +6,10 @@ description: >
   information, with a particular focus on software layer versions and toolchains.
 category: "Wi-SUN|Wi-SUN Services"
 quality: "production"
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-services
+
 metadata:
   sbom:
     license: Zlib

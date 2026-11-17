@@ -8,7 +8,7 @@ This is a board-independent Zigbee SoC empty template that runs on **FreeRTOS**.
 
 This application does **not** include a CLI. To verify join, use a second device with CLI (for example **Zigbee - SoC Z3 Light**). As a **router**, check Light **neighbor-table**; as an **end device**, check **child-table**.
 
-As configured, only network-layer functionality is provided; no Zigbee Cluster Library (ZCL) application-layer clusters are enabled. The application's ZCL ProfileId and DeviceId are set to undefined value 0xFFFF.
+As configured, the endpoint uses the Zigbee HA profile (`0x0104`) with a custom DeviceId (`0xFFFF`) and only the Basic server cluster enabled, so the device can respond to Basic Read Attributes from a Z3 coordinator.
 
 The application maintains persistent storage using NVM3.
 

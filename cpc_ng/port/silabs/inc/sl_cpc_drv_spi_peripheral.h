@@ -53,10 +53,6 @@ enum sl_cpc_drv_spi_peripheral_irq_state {
   SL_CPC_DRV_SPI_PERIPHERAL_IRQ_STATE_PAYLOAD,
 };
 
-struct sli_cpc_drv_spi_peripheral_caps {
-  uint8_t max_speed_le[4];
-};
-
 struct sl_cpc_drv_spi_peripheral_config {
   sl_peripheral_t peripheral;
   sl_gpio_t copi;
@@ -68,6 +64,7 @@ struct sl_cpc_drv_spi_peripheral_config {
   uint8_t cs_synctrig_prs_ch;
   uint8_t txc_synctrig_prs_ch;
   uint8_t tx_availability_synctrig_ch;
+  uint32_t max_bitrate;
 };
 
 struct sl_cpc_drv_spi_peripheral_prs_producer {
@@ -188,9 +185,10 @@ struct sl_cpc_drv_spi_peripheral_tx {
 
 struct sl_cpc_drv_spi_peripheral {
   sl_peripheral_t peripheral;
+  uint32_t max_bitrate;
   sl_dma_handle_t *dma_handle;
   sl_cpc_bus_t bus;
-  struct sli_cpc_drv_spi_peripheral_caps local_caps;
+  sli_cpc_drv_spi_capabilities_t caps;
   struct sl_cpc_drv_spi_peripheral_prs_producers prs_producers;
   uint32_t rx_blocken_cmd;
   uint32_t rx_blockdis_cmd;

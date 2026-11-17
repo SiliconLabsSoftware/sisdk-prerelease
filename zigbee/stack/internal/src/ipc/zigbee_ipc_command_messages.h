@@ -22,7 +22,9 @@
 #include "sl_component_catalog.h"
 #endif
 
+#ifdef SL_CATALOG_RAIL_MUX_AUX_PRESENT
 #include "stack/internal/src/ipc/sl_zigbee_mac_mux_aux_ipc_command_messages.h"
+#endif
 #ifdef SL_CATALOG_RAIL_MUX_AUX_PRESENT
 #include "stack/internal/src/ipc/sl_zigbee_rail_mux_aux_raw_ipc_command_messages.h"
 #endif
@@ -35,6 +37,9 @@
 #include "stack/internal/src/ipc/child_ipc_command_messages.h"
 #ifdef SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
 #include "stack/internal/src/ipc/force_sleep_wakeup_stack_interface_ipc_command_messages.h"
+#endif
+#ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT
+#include "stack/internal/src/ipc/gp-install-code-ipc-command-messages.h"
 #endif
 #ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT
 #include "stack/internal/src/ipc/gp-proxy-table-ipc-command-messages.h"
@@ -116,10 +121,12 @@
 
 typedef struct {
   union {
+    #ifdef SL_CATALOG_RAIL_MUX_AUX_PRESENT
     sli_zigbee_stack_mac_mux_aux_get_channel_ipc_msg_t mac_mux_aux_get_channel;
     sli_zigbee_stack_mac_mux_aux_is_interpan_enabled_ipc_msg_t mac_mux_aux_is_interpan_enabled;
     sli_zigbee_stack_mac_mux_aux_send_raw_message_ipc_msg_t mac_mux_aux_send_raw_message;
     sli_zigbee_stack_mac_mux_aux_set_interpan_enabled_ipc_msg_t mac_mux_aux_set_interpan_enabled;
+    #endif
     #ifdef SL_CATALOG_RAIL_MUX_AUX_PRESENT
     sli_zigbee_stack_rail_mux_aux_get_default_listen_rx_packet_count_ipc_msg_t rail_mux_aux_get_default_listen_rx_packet_count;
     sli_zigbee_stack_rail_mux_aux_get_default_rail_config_ipc_msg_t rail_mux_aux_get_default_rail_config;
@@ -194,6 +201,14 @@ typedef struct {
     sli_zigbee_stack_set_parent_incoming_nwk_frame_counter_ipc_msg_t set_parent_incoming_nwk_frame_counter;
     #ifdef SL_CATALOG_ZIGBEE_FORCE_SLEEP_AND_WAKEUP_PRESENT
     sli_mac_stack_lower_mac_force_sleep_ipc_msg_t lower_mac_force_sleep;
+    #endif
+    #ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT
+    sli_zigbee_stack_gp_derive_key_from_install_code_ipc_msg_t gp_derive_key_from_install_code;
+    sli_zigbee_stack_gp_encode_gpd_device_address_ipc_msg_t gp_encode_gpd_device_address;
+    sli_zigbee_stack_gp_lookup_ic_derived_key_ipc_msg_t gp_lookup_ic_derived_key;
+    sli_zigbee_stack_gp_tc_register_install_code_ipc_msg_t gp_tc_register_install_code;
+    sli_zigbee_stack_gp_tc_remove_install_code_ipc_msg_t gp_tc_remove_install_code;
+    sli_zigbee_stack_gp_validate_install_code_crc_ipc_msg_t gp_validate_install_code_crc;
     #endif
     #ifdef SL_CATALOG_ZIGBEE_GREEN_POWER_PRESENT
     sli_zigbee_stack_gp_proxy_table_get_entry_ipc_msg_t gp_proxy_table_get_entry;

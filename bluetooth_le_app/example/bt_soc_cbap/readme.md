@@ -2,8 +2,6 @@
 
 This example application demonstrates CBAP: certificate-based authentication followed by passkey pairing and bonding. The devices exchange the passkey through an encrypted application session that is protected by their device certificates. Between two devices running this example, no user interaction is required. With a mobile device, the user interacts with the mobile device only, see [Goals of CBAP](#goals-of-cbap). By default, the devices bond, and on subsequent connections the stored bond restores authenticated encryption without repeating CBAP. With bonding disabled, every connection runs CBAP.
 
-> **Note: This example project is at EXPERIMENTAL quality level and is not meant to be used in production!**
-
 ## Goals of CBAP
 
 CBAP establishes a bond that is authenticated by the device certificates. It does so with LE Secure Connections passkey entry pairing, using a passkey that the devices exchange over a security session established by the certificates. What CBAP achieves beyond this depends on the peer device:

@@ -28,6 +28,10 @@ template_contribution:
 - name: component_catalog
   value: wisun_br_dhcpv6_server
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-br-dhcpv6
+
 metadata:
   sbom:
     license: MSLA

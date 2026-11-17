@@ -2506,7 +2506,7 @@ exit:
     }
     else if (status != SL_RAIL_STATUS_NO_ERROR)
     {
-        otLogCritPlat("dataRequestCommandCallback failed: status=0x%lx", status);
+        OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
     }
 #endif // RADIO_CONFIG_SRC_MATCH_SHORT_ENTRY_NUM || RADIO_CONFIG_SRC_MATCH_EXT_ENTRY_NUM
 }
@@ -3159,13 +3159,20 @@ static void processTxComplete(otInstance *aInstance)
     }
 }
 
+static bool sli_ot_radio_events_pending(void)
+{
+    bool eventsPending = !queueIsEmpty(&sRxPacketQueue) || sli_ot_radio_state_has_tx_events();
+
+#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
+    eventsPending |= sDutyCycleAlertPending || sli_ot_duty_cycle_ack_tx_is_pending();
+#endif
+
+    return eventsPending;
+}
+
 bool efr32RadioIsDataReady(void)
 {
-    return !queueIsEmpty(&sRxPacketQueue) || sli_ot_radio_state_has_tx_events()
-#if defined(SL_CATALOG_OT_DUTY_CYCLE_MANAGER_PRESENT)
-           || sDutyCycleAlertPending || sli_ot_duty_cycle_ack_tx_is_pending()
-#endif
-        ;
+    return sli_ot_radio_events_pending();
 }
 
 void efr32RadioProcess(otInstance *aInstance)

@@ -25,6 +25,10 @@ include:
   file_list:
   - path: sl_wisun_keychain.h
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-keychain
+
 metadata:
   sbom:
     license: MSLA

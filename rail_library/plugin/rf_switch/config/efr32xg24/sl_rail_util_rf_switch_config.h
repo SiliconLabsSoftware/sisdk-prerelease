@@ -51,8 +51,15 @@
 // <q SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE> Enable VDD power pin
 // <i> VDD follows radio activity. The control pins always follow the same
 // <i> radio activity and rest low while the radio is inactive, from boot.
-// <i> Default: 0
+// <i> Mutually exclusive with always-on VDD. Default: 0
 #define SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE  0
+
+// <q SL_RAIL_UTIL_RF_SWITCH_VDD_ALWAYS_ON> Hold VDD power pin high
+// <i> Drive the VDD pin push-pull high once and leave it there. The pin is
+// <i> not routed to radio activity. Use this on boards where power-gating the
+// <i> switch supply degrades multi-antenna Channel Sounding. Mutually exclusive
+// <i> with VDD power-gating. Default: 0
+#define SL_RAIL_UTIL_RF_SWITCH_VDD_ALWAYS_ON  0
 
 #if SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE
 // <o SL_RAIL_UTIL_RF_SWITCH_VDD_SETTLE_TIME_US> VDD settle time (us)
@@ -74,14 +81,14 @@
 
 // <<< sl:start pin_tool >>>
 
-#if SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE
-// RF switch VDD power pin
+#if SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE || SL_RAIL_UTIL_RF_SWITCH_VDD_ALWAYS_ON
+// RF switch VDD power pin. Compiled for radio-activity gating and always-on.
 // <gpio> SL_RAIL_UTIL_RF_SWITCH_VDD_PIN
 // $[GPIO_SL_RAIL_UTIL_RF_SWITCH_VDD_PIN]
 // #define SL_RAIL_UTIL_RF_SWITCH_VDD_PIN_PORT           SL_GPIO_PORT_A
 // #define SL_RAIL_UTIL_RF_SWITCH_VDD_PIN_PIN            2
 // [GPIO_SL_RAIL_UTIL_RF_SWITCH_VDD_PIN]$
-#endif
+#endif // SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE || SL_RAIL_UTIL_RF_SWITCH_VDD_ALWAYS_ON
 
 // <<< sl:end pin_tool >>>
 

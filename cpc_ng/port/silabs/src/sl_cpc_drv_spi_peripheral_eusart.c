@@ -117,14 +117,6 @@ static uint32_t prs_signal_exti(uint8_t exti_no)
   }
 }
 
-static sl_status_t init_caps(struct sl_cpc_drv_spi_peripheral *drv)
-{
-  // The max bitrate of the EUSART in secondary mode is 10MHz no matter what.
-  sli_cpc_u32_to_le(10000000UL, drv->local_caps.max_speed_le);
-
-  return SL_STATUS_OK;
-}
-
 /***************************************************************************/ /**
  * Initialize peripheral clocks.
  ******************************************************************************/
@@ -278,13 +270,9 @@ sl_status_t sl_cpc_drv_spi_peripheral_eusart_init(sl_cpc_drv_spi_peripheral_eusa
 
   memset(drv, 0, sizeof(*drv));
   drv->peripheral = cfg->peripheral;
+  drv->max_bitrate = cfg->max_bitrate;
 
   status = init_hw(drv, cfg);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-
-  status = init_caps(drv);
   if (status != SL_STATUS_OK) {
     return status;
   }

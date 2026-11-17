@@ -48,6 +48,10 @@ template_contribution:
 - name: component_catalog
   value: wisun_ffn_device_support
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api
+
 metadata:
   sbom:
     license: MSLA

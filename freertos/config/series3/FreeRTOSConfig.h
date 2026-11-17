@@ -308,7 +308,6 @@
 
 /* Prefer SL_LOG_DEBUG_ASSERT when enabled; otherwise fall back to EFM_ASSERT. */
 #if defined(SL_LOG_DEBUG_ASSERT_ENABLE) && (SL_LOG_DEBUG_ASSERT_ENABLE == 1)
-#include "sl_log_helper.h"
 #define configASSERT(x)                               SL_LOG_DEBUG_ASSERT(x)
 #else
 #define configASSERT(x)                               EFM_ASSERT(x)

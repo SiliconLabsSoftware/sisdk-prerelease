@@ -32,6 +32,10 @@ toolchain_settings:
 - option: gcc_linker_option
   value: "-Wl,--wrap=__stack_chk_fail,--wrap=__assert_func"
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-crash-handler
+
 metadata:
   sbom:
     license: MSLA

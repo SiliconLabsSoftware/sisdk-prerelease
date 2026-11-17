@@ -72,6 +72,10 @@ template_contribution:
     shortcuts:
     - name: "ss"
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api
+
 metadata:
   sbom:
     license: MSLA

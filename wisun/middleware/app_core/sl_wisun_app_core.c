@@ -784,18 +784,11 @@ const sl_wisun_lfn_params_t *sl_wisun_app_core_get_lfn_params(void)
 // -----------------------------------------------------------------------------
 static sl_status_t app_set_options(const app_setting_wisun_t * const setting)
 {
-#if defined(WISUN_CONFIG_BROADCAST_RETRIES)
-  uint8_t broadcast_retries = WISUN_CONFIG_BROADCAST_RETRIES;
-#endif
-
   struct {
     sl_wisun_option_id_t id;
     const void *val;
     uint32_t val_len;
   } opts[] = {
-#if defined(WISUN_CONFIG_BROADCAST_RETRIES)
-    { SL_WISUN_OPTION_MPL_TRICKLE_E,                   &broadcast_retries,                  sizeof(broadcast_retries) },
-#endif
     { SL_WISUN_OPTION_MAC_MIN_BE,                      &setting->mac.min_be,                      sizeof(setting->mac.min_be) },
     { SL_WISUN_OPTION_MAC_MAX_BE,                      &setting->mac.max_be,                      sizeof(setting->mac.max_be) },
     { SL_WISUN_OPTION_MAC_BACKOFF_PERIOD_US,           &setting->mac.backoff_period_us,           sizeof(setting->mac.backoff_period_us) },
@@ -888,6 +881,16 @@ static sl_status_t _app_wisun_application_setting(const app_setting_wisun_t * co
         printf("[Failed: unable to set stack options: %"PRIu32"]\n", ret);
         return ret;
       }
+#if defined(WISUN_CONFIG_BROADCAST_RETRIES)
+      {
+        uint8_t broadcast_retries = WISUN_CONFIG_BROADCAST_RETRIES;
+        ret = sl_wisun_set_option(SL_WISUN_OPTION_MPL_TRICKLE_E, &broadcast_retries, sizeof(broadcast_retries));
+        if (ret != SL_STATUS_OK) {
+          printf("[Failed: unable to set broadcast retries: %"PRIu32"]\n", ret);
+          return ret;
+        }
+      }
+#endif
     }
   }
 #endif

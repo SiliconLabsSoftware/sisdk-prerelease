@@ -165,6 +165,6 @@ typedef EmberEUI64 tokTypeParentLongId;
  * @name MAC debug tokens
  * @brief Additional tokens for MAC debug
  *@{*/
-#include "stack/mac/token-mac-debug.h"
+#include "mac/token-mac-debug.h"
 /** @} END MAC debug tokens  */
 #endif

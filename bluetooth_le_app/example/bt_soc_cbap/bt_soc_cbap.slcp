@@ -5,7 +5,7 @@ description: >-
   Demonstrates Certificate Based Authentication and Pairing over BLE.
   This example utilizes Secure Vault for storing keys.
 category: Bluetooth Examples
-quality: experimental
+quality: production
 
 filter:
   - name: "Wireless Technology"

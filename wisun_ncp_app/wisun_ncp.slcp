@@ -49,7 +49,6 @@ define:
     value: 1500
   - name: SL_WSNCP_MAX_TIMEOUT_COUNT
     value: 1000
-  - name: SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_2026_12
 
 configuration:
   # CPC Interface Configuration
@@ -76,11 +75,17 @@ configuration:
     condition: [cpc_secondary, cpc_secondary_driver_uart_eusart]
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
-  - name: SL_UARTDRV_EUSART_VCOM_FLOW_CONTROL_TYPE
-    value: uartdrvFlowControlHwUart
+  - name: SL_UART_EUSART_VCOM_FLOW_CONTROL
+    value: SL_UART_FLOW_CONTROL_CTS_RTS
     condition: [device_has_eusart]
-  - name: SL_UARTDRV_USART_VCOM_FLOW_CONTROL_TYPE
-    value: uartdrvFlowControlHwUart
+  - name: SL_UART_USART_VCOM_FLOW_CONTROL
+    value: SL_UART_FLOW_CONTROL_CTS_RTS
+    unless: [device_has_eusart]
+  - name: SL_UART_EUSART_VCOM_ASYNC_ENABLE
+    value: 1
+    condition: [device_has_eusart]
+  - name: SL_UART_USART_VCOM_ASYNC_ENABLE
+    value: 1
     unless: [device_has_eusart]
   - name: CPU_CFG_TS_32_EN
     value: 1

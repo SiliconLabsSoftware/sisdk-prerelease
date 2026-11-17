@@ -21,6 +21,10 @@ requires:
 - name: wisun_lxpm_cli
   condition: [wisun_lxpm]
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api
+
 metadata:
   sbom:
     license: MSLA

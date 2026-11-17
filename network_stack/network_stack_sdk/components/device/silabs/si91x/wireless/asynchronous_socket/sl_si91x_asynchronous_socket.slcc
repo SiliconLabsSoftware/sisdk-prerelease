@@ -16,6 +16,7 @@ include:
 - path: inc
   file_list:
   - path: sl_si91x_socket.h
+  - path: sl_si91x_async_socket_log_helper.h
 
 requires:
 - name: sl_si91x_socket

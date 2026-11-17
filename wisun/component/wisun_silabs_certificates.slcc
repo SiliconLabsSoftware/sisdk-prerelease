@@ -39,6 +39,10 @@ template_contribution:
   - wisun_br_stack
   priority: 1
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-keychain
+
 metadata:
   sbom:
     license: MSLA

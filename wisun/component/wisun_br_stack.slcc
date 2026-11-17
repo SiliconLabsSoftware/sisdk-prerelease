@@ -117,6 +117,10 @@ include:
   - path: "ns_types.h"
   - path: "string_extra.h"
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-br-api
+
 metadata:
   sbom:
     license: MSLA AND Apache-2.0

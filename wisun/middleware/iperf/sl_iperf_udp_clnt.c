@@ -133,7 +133,7 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
   uint64_t elapsed_ms;
   uint64_t ideal_bytes;
   socklen_t addrlen = sizeof(sockaddr_in6_t);
-  sockaddr_in6_t *srv_addr = &test->conn.srv_addr;
+  sockaddr_in6_t *srv_addr;
 
   bool packet_nbr_explicit;
   sl_sleeptimer_timer_handle_t status_timer = { 0U };
@@ -142,6 +142,8 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
     return;
   }
 
+  srv_addr = &test->conn.srv_addr;
+  inet_pton(AF_INET6, test->opt.remote_addr, &srv_addr->sin6_addr);
   if (memcmp(&srv_addr->sin6_addr, &in6addr_any, sizeof(in6_addr_t)) == 0) {
     sl_iperf_test_log(test, "UDP Client: Remote address is not set.\n");
     return;
@@ -183,7 +185,6 @@ void sl_iperf_test_udp_client(sl_iperf_test_t * test)
 
   // set remote address
   srv_addr->sin6_family = AF_INET6;
-  inet_pton(AF_INET6, test->opt.remote_addr, &srv_addr->sin6_addr);
   sl_iperf_test_log_verbose(test, "UDP Client: Listener port is %u.\n", test->opt.port ? test->opt.port : SL_IPERF_SERVER_DEFAULT_PORT);
   srv_addr->sin6_port = htons(test->opt.port ? test->opt.port : SL_IPERF_SERVER_DEFAULT_PORT);
   setsockopt(test->conn.socket_id,

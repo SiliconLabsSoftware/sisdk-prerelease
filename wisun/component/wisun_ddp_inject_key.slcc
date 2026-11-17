@@ -29,6 +29,10 @@ template_contribution:
     id: SL_WISUN_DDP_INJECT_KEY
     handler: sl_wisun_ddp_inject_key
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-keychain
+
 metadata:
   sbom:
     license: MSLA

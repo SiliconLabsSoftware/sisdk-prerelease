@@ -33,6 +33,7 @@
 
 #include "sli_cpc_crc.h"
 #include "sli_cpc_types.h"
+#include "sli_cpc_utils.h"
 
 #define SLI_CPC_DRV_SPI_SOF 0xEB
 
@@ -48,5 +49,14 @@ typedef struct {
   sli_cpc_hdr_t hdr;
   uint8_t csum_le[SLI_CPC_CRC_LEN];
 } sli_cpc_drv_spi_header_t;
+
+/***************************************************************************/ /**
+ * CPC SPI capabilities structure.
+ ******************************************************************************/
+typedef struct {
+  uint8_t bitrate_le[4];
+} sli_cpc_drv_spi_capabilities_t;
+
+SLI_CPC_STATIC_ASSERT_PACKED_SIZE(sli_cpc_drv_spi_capabilities_t, 4);
 
 #endif /* SLI_CPC_DRV_SPI_H */

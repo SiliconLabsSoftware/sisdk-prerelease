@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include "ember.h"
 #include "config/config.h"
-#include "stack/core/sli-connect-api.h"
+#include "core/sli-connect-api.h"
 #include "sl_platform_version.h"
 
 #if BOOTLOADER_ENABLE

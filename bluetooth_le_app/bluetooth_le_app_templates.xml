@@ -935,7 +935,7 @@ The CS RRSP Reflector accepts at least one connection from CS RREQ  Initiator de
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar llvm"/>
     <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>
@@ -950,7 +950,7 @@ The CS RRSP Reflector accepts at least one connection from CS RREQ  Initiator de
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <properties key="solutionProjects" value="bluetooth_le_app.bootloader.bootloader-apploader-nonsecure.slcp bluetooth_le_app.bootloader.bootloader-apploader-secure.slcp bluetooth_le_app.example.bt_soc_cbap.bt_soc_cbap_tz_ns.slcp bluetooth_le_app.example.bt_soc_tz_secure_application.bt_soc_tz_secure_application.slcp"/>
@@ -966,7 +966,7 @@ The CS RRSP Reflector accepts at least one connection from CS RREQ  Initiator de
     <properties key="ideCompatibility" value="generic-template iar-embedded-workbench makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc iar llvm"/>
     <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
     <properties key="hidden" value="true"/>
@@ -982,7 +982,7 @@ The CS RRSP Reflector accepts at least one connection from CS RREQ  Initiator de
     <properties key="ideCompatibility" value="generic-template makefile-ide simplicity-ide visual-studio-code"/>
     <properties key="toolchainCompatibility" value="gcc"/>
     <properties key="category" value="Bluetooth Examples"/>
-    <properties key="quality" value="EXPERIMENTAL"/>
+    <properties key="quality" value="PRODUCTION"/>
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC Project\ Difficulty|Advanced Wireless\ Technology|Bluetooth"/>
   </descriptors>

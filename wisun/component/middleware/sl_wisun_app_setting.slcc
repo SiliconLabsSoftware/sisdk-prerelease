@@ -9,6 +9,10 @@ description: >
   This component also includes SoC Border Router specific functions, which are compiled only if the Border Router stack is selected.
 category: "Wi-SUN|Wi-SUN Services"
 quality: "production"
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-app-setting
+
 metadata:
   sbom:
     license: Zlib

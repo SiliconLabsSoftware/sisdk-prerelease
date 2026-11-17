@@ -88,7 +88,7 @@ static sli_zigbee_gp_ic_key_entry_t *sli_zigbee_gp_allocate_ic_entry(void)
   return NULL;
 }
 
-sl_status_t sl_zigbee_gp_validate_install_code_crc(const uint8_t ic[SL_ZIGBEE_GP_INSTALL_CODE_SIZE])
+sl_status_t sli_zigbee_stack_gp_validate_install_code_crc(const uint8_t *ic)
 {
   uint16_t calculatedCrc;
   uint16_t storedCrc;
@@ -103,8 +103,8 @@ sl_status_t sl_zigbee_gp_validate_install_code_crc(const uint8_t ic[SL_ZIGBEE_GP
   return (calculatedCrc == storedCrc) ? SL_STATUS_OK : SL_STATUS_INVALID_PARAMETER;
 }
 
-sl_status_t sl_zigbee_gp_derive_key_from_install_code(const uint8_t ic[SL_ZIGBEE_GP_INSTALL_CODE_SIZE],
-                                                       sl_zigbee_key_data_t *derivedKey)
+sl_status_t sli_zigbee_stack_gp_derive_key_from_install_code(const uint8_t *ic,
+                                                              sl_zigbee_key_data_t *derivedKey)
 {
   sl_status_t status;
 
@@ -112,7 +112,7 @@ sl_status_t sl_zigbee_gp_derive_key_from_install_code(const uint8_t ic[SL_ZIGBEE
     return SL_STATUS_NULL_POINTER;
   }
 
-  status = sl_zigbee_gp_validate_install_code_crc(ic);
+  status = sli_zigbee_stack_gp_validate_install_code_crc(ic);
   if (status != SL_STATUS_OK) {
     return status;
   }
@@ -122,7 +122,7 @@ sl_status_t sl_zigbee_gp_derive_key_from_install_code(const uint8_t ic[SL_ZIGBEE
                                           sl_zigbee_key_contents(derivedKey));
 }
 
-sl_status_t sl_zigbee_gp_encode_gpd_device_address(sl_zigbee_gp_application_id_t appId,
+sl_status_t sli_zigbee_stack_gp_encode_gpd_device_address(sl_zigbee_gp_application_id_t appId,
                                                     uint32_t srcId,
                                                     sl_802154_long_addr_t ieee,
                                                     sl_802154_long_addr_t deviceAddressOut)
@@ -150,7 +150,7 @@ sl_status_t sl_zigbee_gp_encode_gpd_device_address(sl_zigbee_gp_application_id_t
   return SL_STATUS_INVALID_PARAMETER;
 }
 
-sl_status_t sl_zigbee_gp_lookup_ic_derived_key(const sl_zigbee_gp_address_t *gpdAddr,
+sl_status_t sli_zigbee_stack_gp_lookup_ic_derived_key(const sl_zigbee_gp_address_t *gpdAddr,
                                                 sl_zigbee_key_data_t *keyOut)
 {
   const sli_zigbee_gp_ic_key_entry_t *entry;
@@ -168,8 +168,8 @@ sl_status_t sl_zigbee_gp_lookup_ic_derived_key(const sl_zigbee_gp_address_t *gpd
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_zigbee_gp_tc_register_install_code(const sl_zigbee_gp_address_t *gpdAddr,
-                                                   const uint8_t ic[SL_ZIGBEE_GP_INSTALL_CODE_SIZE])
+sl_status_t sli_zigbee_stack_gp_tc_register_install_code(const sl_zigbee_gp_address_t *gpdAddr,
+                                                          const uint8_t *ic)
 {
   sli_zigbee_gp_ic_key_entry_t *entry;
   sl_status_t status;
@@ -179,7 +179,7 @@ sl_status_t sl_zigbee_gp_tc_register_install_code(const sl_zigbee_gp_address_t *
     return SL_STATUS_NULL_POINTER;
   }
 
-  status = sl_zigbee_gp_derive_key_from_install_code(ic, &derivedKey);
+  status = sli_zigbee_stack_gp_derive_key_from_install_code(ic, &derivedKey);
   if (status != SL_STATUS_OK) {
     return status;
   }
@@ -199,7 +199,7 @@ sl_status_t sl_zigbee_gp_tc_register_install_code(const sl_zigbee_gp_address_t *
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_zigbee_gp_tc_remove_install_code(const sl_zigbee_gp_address_t *gpdAddr)
+sl_status_t sli_zigbee_stack_gp_tc_remove_install_code(const sl_zigbee_gp_address_t *gpdAddr)
 {
   sli_zigbee_gp_ic_key_entry_t *entry;
 
@@ -219,7 +219,7 @@ sl_status_t sl_zigbee_gp_tc_remove_install_code(const sl_zigbee_gp_address_t *gp
 sl_status_t sli_zigbee_gp_tc_register_gpd_install_code(sl_zigbee_gp_application_id_t appId,
                                                         uint32_t srcId,
                                                         sl_802154_long_addr_t ieee,
-                                                        const uint8_t ic[SL_ZIGBEE_GP_INSTALL_CODE_SIZE])
+                                                        const uint8_t *ic)
 {
   sl_zigbee_gp_address_t gpdAddr = { 0 };
 
@@ -232,5 +232,5 @@ sl_status_t sli_zigbee_gp_tc_register_gpd_install_code(sl_zigbee_gp_application_
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  return sl_zigbee_gp_tc_register_install_code(&gpdAddr, ic);
+  return sli_zigbee_stack_gp_tc_register_install_code(&gpdAddr, ic);
 }

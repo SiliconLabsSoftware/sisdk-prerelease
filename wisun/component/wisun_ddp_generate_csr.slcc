@@ -28,6 +28,10 @@ template_contribution:
     id: SL_WISUN_DDP_GENERATE_CSR
     handler: sl_wisun_ddp_generate_csr
 
+documentation:
+  docset: wisun
+  document: wisun-stack-api/sl-wisun-keychain
+
 metadata:
   sbom:
     license: MSLA

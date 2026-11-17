@@ -45,7 +45,7 @@
 
 #define SLI_SI91X_NO_ERROR 0 // This is returned by socket functions after successful execution
 #define SLI_SI91X_UNDEFINED_ERROR \
-  0 // This value is set to errno global variable when a socket API failed due to unknown error.
+  5 // Nonzero fallback (EIO) when a socket API fails without a more specific mapped errno.
 
 #define SLI_SI91X_HOST_WAIT_FOR_SELECT_RSP 1000
 

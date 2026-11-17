@@ -46,9 +46,12 @@
 #include "sl_bsd_utility.h"
 #include "sl_si91x_socket_constants.h"
 #include "sl_constants.h"
+#include "sl_si91x_bsd_socket_log_helper.h"
 #include "sli_utility.h"
 #include "sl_si91x_socket_support.h"
 #include <sl_string.h>
+
+sl_log_level_t sl_log_si91x_bsd_socket_component_level = SL_LOG_SI91X_BSD_SOCKET_COMPONENT_LEVEL;
 /******************************************************
 
  *                    Constants
@@ -346,7 +349,12 @@ int listen(int socket_id, int backlog)
 
   status = sli_create_and_send_socket_request(socket_id, SLI_SI91X_SOCKET_TCP_SERVER, &backlog);
 
-  SLI_SOCKET_VERIFY_STATUS_AND_RETURN(status, SL_STATUS_OK, SLI_SI91X_UNDEFINED_ERROR);
+  if (status != SL_STATUS_OK) {
+    if (errno == 0) {
+      errno = (si91x_socket->pending_error != 0) ? si91x_socket->pending_error : SLI_SI91X_UNDEFINED_ERROR;
+    }
+    return -1;
+  }
 
   si91x_socket->state = LISTEN;
 
@@ -479,7 +487,12 @@ static sl_status_t sli_prepare_socket(sli_si91x_socket_t *si91x_socket, int sock
   // Initialize UDP socket if necessary
   if (si91x_socket->type == SOCK_DGRAM && (si91x_socket->state == BOUND || si91x_socket->state == INITIALIZED)) {
     sl_status_t bsd_status = sli_create_and_send_socket_request(socket_id, SLI_SI91X_SOCKET_UDP_CLIENT, NULL);
-    SLI_SOCKET_VERIFY_STATUS_AND_RETURN(bsd_status, SL_STATUS_OK, SLI_SI91X_UNDEFINED_ERROR);
+    if (bsd_status != SL_STATUS_OK) {
+      if (errno == 0) {
+        errno = (si91x_socket->pending_error != 0) ? si91x_socket->pending_error : SLI_SI91X_UNDEFINED_ERROR;
+      }
+      return SL_STATUS_FAIL;
+    }
     si91x_socket->state = UDP_UNCONNECTED_READY;
   }
 
@@ -582,7 +595,12 @@ ssize_t recvfrom(int socket_id, void *buf, size_t buf_len, int flags, struct soc
                                        NULL);
   if (status != SL_STATUS_IN_PROGRESS) {
     si91x_socket->is_receive_cmd_pending = false;
-    VERIFY_STATUS_AND_RETURN(status);
+    if (status != SL_STATUS_OK) {
+      if (errno == 0) {
+        errno = sli_si91x_socket_status_to_errno(status);
+      }
+      return -1;
+    }
   }
 
   status = sli_wifi_receive_response_buffer((uint16_t)(SLI_SI91X_CMD_MAX + si91x_socket->index),
@@ -601,7 +619,12 @@ ssize_t recvfrom(int socket_id, void *buf, size_t buf_len, int flags, struct soc
     sli_buffer_manager_free_buffer(response_buffer);
   }
   si91x_socket->is_receive_cmd_pending = false;
-  SLI_SOCKET_VERIFY_STATUS_AND_RETURN(status, SL_STATUS_OK, SLI_SI91X_UNDEFINED_ERROR);
+  if (status != SL_STATUS_OK) {
+    if (errno == 0) {
+      errno = sli_si91x_socket_status_to_errno(status);
+    }
+    return -1;
+  }
 
   // Process the response
   response_packet = (sl_wifi_system_packet_t *)sli_wifi_host_get_buffer_data(response_buffer, 0, NULL);
@@ -706,7 +729,7 @@ static int sli_handle_so_max_retransmission_timeout_value(sli_si91x_socket_t *si
            SLI_GET_SAFE_MEMCPY_LENGTH(sizeof(si91x_socket->max_retransmission_timeout_value), option_length));
   } else {
     SL_DEBUG_LOG_V2(INFO,
-                    "\n Max retransmission timeout value in between 1 - 128 and "
+                    "[si91x_bsd_socket] Max retransmission timeout value in between 1 - 128 and "
                     "should be power of two. ex:1,2,4,8,16,32,64,128 \n");
     SLI_SET_ERROR_AND_RETURN(EINVAL);
   }

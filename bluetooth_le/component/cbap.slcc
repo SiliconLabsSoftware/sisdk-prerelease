@@ -24,11 +24,13 @@ description: >
   device has to be provisioned with the certificates and the key of its role.
   The component configures the Security Manager of the Bluetooth stack, and
   serves one connection at a time.
+  In its current state, the component does not support RTOS, only bare-metal
+  applications.
 category: Bluetooth|Application|Miscellaneous
 metadata:
   sbom:
     license: Zlib
-quality: experimental
+quality: production
 root_path: bluetooth_le/common/cbap
 include:
 - path: inc
@@ -73,6 +75,8 @@ requires:
 - name: psa_crypto_sha1
 provides:
 - name: cbap
+conflicts:
+- name: kernel
 template_contribution:
 - name: event_handler
   value:

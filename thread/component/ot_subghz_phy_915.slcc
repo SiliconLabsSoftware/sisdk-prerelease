@@ -1,9 +1,9 @@
 id: ot_subghz_phy_915
 label: Sub-GHz PHY (915 MHz)
 package: thread
-category: OpenThread
+category: OpenThread|PHY
 quality: evaluation
-description: This component provides Sub-GHz PHY support for OpenThread using 802.15.4 OQPSK-DSSS at 903--926 MHz (800 kcps, 100 kbps).
+description: This component provides Sub-GHz PHY support for OpenThread using 802.15.4 OQPSK-DSSS at 902-928 MHz (800 kcps, 100 kbps).
 provides:
 - name: ot_subghz_phy_915
 - name: ot_subghz_phy
@@ -33,6 +33,8 @@ define:
   condition:
   - device_generic_family_efr32xg23
   - hardware_board_supports_rf_band_915
+- name: RADIO_CONFIG_SUBGHZ_SUPPORT_915
+  value: 1
 - name: RADIO_CONFIG_SUBGHZ_SUPPORT_915_XG23
   value: 1
   condition:

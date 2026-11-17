@@ -21,6 +21,7 @@ include:
   - path: sl_si91x_socket_types.h
   - path: sl_si91x_socket_utility.h
   - path: sli_si91x_socket_defs.h
+  - path: sl_si91x_socket_log_helper.h
 define:
 - name: SLI_SI91X_SOCKETS
 

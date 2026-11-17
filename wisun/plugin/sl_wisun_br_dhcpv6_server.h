@@ -31,6 +31,7 @@
 #ifndef __SL_WISUN_BR_DHCPV6_SERVER_H__
 #define __SL_WISUN_BR_DHCPV6_SERVER_H__
 
+#include <stdbool.h>
 #include "sl_status.h"
 #include "sl_wisun_types.h"
 #include "common/ns_list.h"
@@ -38,6 +39,11 @@
 /**  UDP Port Number definition */
 #define DHCPV6_SERVER_PORT 547
 #define DHCPV6_CLIENT_PORT 546
+
+/**************************************************************************//**
+ * @addtogroup SL_WISUN_BR_DHCPV6 DHCPv6 Server
+ * @{
+ *****************************************************************************/
 
 typedef struct dhcpv6_vendor_data_s {
     uint32_t enterprise_number;
@@ -83,6 +89,13 @@ sl_status_t sl_wisun_br_dhcpv6_server_start_with_link_local_socket(int socket, i
                                                                    uint8_t DUID[8], uint32_t dhcp_address_lifetime);
 
 /***************************************************************************//**
+ * Report whether link-local DHCPv6 socket start is supported.
+ *
+ * @return true
+ ******************************************************************************/
+bool sl_wisun_br_dhcpv6_supports_link_local_socket(void);
+
+/***************************************************************************//**
  * Start DHCPv6 Server.
  *
  * @param[in] socket Socket open and bound to DHCPv6 Server port.
@@ -121,5 +134,7 @@ sl_status_t sl_wisun_br_dhcpv6_set_vendor_data(uint32_t enterprise_number, uint1
  * @return SL_STATUS_OK if successful, an error code otherwise
  ******************************************************************************/
 sl_status_t sl_wisun_br_dhcpv6_server_stop(void);
+
+/** @} (end addtogroup SL_WISUN_BR_DHCPV6) */
 
 #endif  /* __SL_WISUN_BR_DHCPV6_SERVER_H__ */

@@ -32,10 +32,10 @@
 #undef SKIP_API_RENAME
 #endif
 
-#include "stack/include/ember.h"
+#include "include/ember.h"
 #include "sl_component_catalog.h"
-#include "stack/include/radio-stream.h"
-#include "stack/core/sli-connect-api.h"
+#include "include/radio-stream.h"
+#include "core/sli-connect-api.h"
 
 // Frequency Hopping
 
@@ -148,7 +148,7 @@ EmberStatus emApiFrequencyHoppingStop(void)
 // Parent Support
 
 #ifndef SL_CATALOG_CONNECT_PARENT_SUPPORT_PRESENT
-#include "stack/framework/sli-connect-random.h"
+#include "framework/sli-connect-random.h"
 
 extern EmberNodeId emNewChildShortId;
 

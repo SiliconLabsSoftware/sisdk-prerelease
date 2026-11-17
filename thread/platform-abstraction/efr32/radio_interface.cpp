@@ -347,28 +347,20 @@ void sli_ot_radio_interface_cancel_timer(struct sl_rail_multi_timer *aTimer)
 }
 
 #if RADIO_CONFIG_SUBGHZ_SUPPORT
-static void sli_ot_radio_interface_configure_ieee802154_phy_timings(bool aIsSubGhz)
+static void sli_ot_radio_interface_configure_ieee802154_phy_timings()
 {
     sl_rail_status_t          status;
     sl_rail_auto_ack_config_t ackConfig = sRailIeee802154Config.ack_config;
     sl_rail_state_timing_t    stateTiming;
 
-    if (aIsSubGhz)
-    {
-        ackConfig.ack_timeout_us           = IEEE802154_SUBGHZ_ACK_TIMEOUT_US;
-        stateTiming.idle_to_rx             = 100;
-        stateTiming.tx_to_rx               = IEEE802154_SUBGHZ_TX_TO_RX_US;
-        stateTiming.idle_to_tx             = 100;
-        stateTiming.rx_to_tx               = IEEE802154_SUBGHZ_RX_TO_TX_US;
-        stateTiming.rxsearch_timeout       = 0;
-        stateTiming.tx_to_rxsearch_timeout = 0;
-        stateTiming.tx_to_tx               = 0;
-    }
-    else
-    {
-        ackConfig.ack_timeout_us = sRailIeee802154Config.ack_config.ack_timeout_us;
-        stateTiming              = sRailIeee802154Config.timings;
-    }
+    ackConfig.ack_timeout_us           = IEEE802154_SUBGHZ_ACK_TIMEOUT_US;
+    stateTiming.idle_to_rx             = 100;
+    stateTiming.tx_to_rx               = IEEE802154_SUBGHZ_TX_TO_RX_US;
+    stateTiming.idle_to_tx             = 100;
+    stateTiming.rx_to_tx               = IEEE802154_SUBGHZ_RX_TO_TX_US;
+    stateTiming.rxsearch_timeout       = 0;
+    stateTiming.tx_to_rxsearch_timeout = 0;
+    stateTiming.tx_to_tx               = 0;
 
     status = sl_rail_config_auto_ack(gRailHandle, &ackConfig);
     OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
@@ -377,13 +369,10 @@ static void sli_ot_radio_interface_configure_ieee802154_phy_timings(bool aIsSubG
     OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
 
 #if (OPENTHREAD_CONFIG_THREAD_VERSION >= OT_THREAD_VERSION_1_2)
-    {
-        sl_rail_transition_time_t rxToEnhAckTxUs =
-            aIsSubGhz ? IEEE802154_SUBGHZ_RX_TO_TX_US : IEEE802154_2015_ENH_ACK_TIMING_RX_TO_TX_US;
+    sl_rail_transition_time_t rxToEnhAckTxUs = IEEE802154_SUBGHZ_RX_TO_TX_US;
 
-        status = sl_rail_ieee802154_set_rx_to_enh_ack_tx(gRailHandle, &rxToEnhAckTxUs);
-        OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
-    }
+    status = sl_rail_ieee802154_set_rx_to_enh_ack_tx(gRailHandle, &rxToEnhAckTxUs);
+    OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
 #endif
 }
 #endif // RADIO_CONFIG_SUBGHZ_SUPPORT
@@ -418,7 +407,7 @@ void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_
         OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
 
 #if RADIO_CONFIG_SUBGHZ_SUPPORT
-        sli_ot_radio_interface_configure_ieee802154_phy_timings(true);
+        sli_ot_radio_interface_configure_ieee802154_phy_timings();
 #endif
 
         pa_mode = SL_RAIL_TX_PA_MODE_SUB_GHZ;
@@ -431,10 +420,6 @@ void sli_ot_radio_interface_load_rail_config(efr32BandConfig *aBandConfig, int8_
         status = sl_rail_ieee802154_config_2p4_ghz_radio(gRailHandle);
 #endif // SL_CATALOG_RAIL_UTIL_IEEE802154_PHY_SELECT_PRESENT
         OT_ASSERT(status == SL_RAIL_STATUS_NO_ERROR);
-
-#if RADIO_CONFIG_SUBGHZ_SUPPORT
-        sli_ot_radio_interface_configure_ieee802154_phy_timings(false);
-#endif
         pa_mode = SL_RAIL_TX_PA_MODE_2P4_GHZ;
     }
 

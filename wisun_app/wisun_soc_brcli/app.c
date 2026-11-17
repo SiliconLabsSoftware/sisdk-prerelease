@@ -1734,6 +1734,17 @@ void app_set_dhcp_vendor_data(sl_cli_command_arg_t *arguments)
 
   app_wisun_cli_mutex_unlock();
 }
+#else
+/*
+ * NOTE: When replacing the DHCPv6 server with the DHCPv6 relay,
+ * SL_CATALOG_WISUN_BR_DHCPV6_SERVER_PRESENT becomes undefined while the CLI
+ * command remains present.
+ */
+void app_set_dhcp_vendor_data(sl_cli_command_arg_t *arguments)
+{
+  (void)arguments;
+  printf("[Failed: DHCPv6 server not present]\r\n");
+}
 #endif
 
 void app_pan_defect_advertise(sl_cli_command_arg_t *arguments)

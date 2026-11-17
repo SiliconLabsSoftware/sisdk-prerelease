@@ -126,7 +126,7 @@
     {
       "endpointTypeName": "Anonymous Endpoint Type",
       "endpointTypeIndex": 0,
-      "profileId": 65535,
+      "profileId": 260,
       "endpointId": 1,
       "networkId": 0
     }

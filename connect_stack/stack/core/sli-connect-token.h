@@ -17,7 +17,7 @@
 #define __SLI_CONNECT_TOKEN_H__
 
 #include "sl_token_manager_defines.h"
-#include "stack/config/sl_connect_token_defines.h"
+#include "config/sl_connect_token_defines.h"
 #ifndef EMBER_TEST
 #include "sl_token_manager_api.h"
 #include "sl_token_manager_manufacturing.h"

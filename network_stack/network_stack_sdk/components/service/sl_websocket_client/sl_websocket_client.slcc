@@ -20,6 +20,7 @@ include:
   - path: sl_websocket_client.h
   - path: sl_websocket_client_types.h
   - path: sli_websocket_client_sync.h
+  - path: sl_websocket_client_log_helper.h
 
 requires:
 - name: bsd_socket

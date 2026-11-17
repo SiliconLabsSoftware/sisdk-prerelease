@@ -33,6 +33,7 @@
 #include "gatt_db.h"
 #include "app_assert.h"
 #include "app_timer.h"
+#include "mbedtls/platform_util.h"
 #include "sli_bt_cbap.h"
 #include "sl_bt_cbap.h"
 
@@ -288,7 +289,11 @@ static bool candidate_connected = false;
 // Function that the result of every procedure is reported to.
 static sl_bt_cbap_cb_t callback = NULL;
 
-// Timer that limits the duration of the procedure.
+// Timer that limits the duration of the procedure. The procedure state above is
+// not protected against concurrent access. It is safe only because the timer
+// callback and the Bluetooth event handler run in the same context, the main
+// loop of a bare-metal application. With an RTOS kernel, the timer callback
+// would run in the timer task, therefore the component conflicts with it.
 static app_timer_t timer;
 
 // -----------------------------------------------------------------------------
@@ -1819,7 +1824,11 @@ static sl_status_t prepare_pairing_parameters(void)
   plaintext[SLI_BT_CBAP_PASSKEY_LEN] = (uint8_t)PERIPHERAL_IO_CAPABILITY;
   sc = sli_bt_cbap_session_encrypt(plaintext, sizeof(plaintext),
                                    gatt_buf, &gatt_buf_len, sizeof(gatt_buf));
-  memset(plaintext, 0, sizeof(plaintext));
+  // The compiler may remove a memset() of a buffer that is not read again,
+  // which would leave the passkey in RAM, but it keeps
+  // mbedtls_platform_zeroize(). Only pairing_passkey keeps the passkey, until
+  // the procedure is reset.
+  mbedtls_platform_zeroize(plaintext, sizeof(plaintext));
   if (sc != SL_STATUS_OK) {
     return sc;
   }
@@ -1854,6 +1863,7 @@ static sl_status_t process_pairing_parameters(void)
   }
   uint8_t plaintext[SLI_BT_CBAP_PAIRING_PARAMETERS_LEN];
   size_t plaintext_len = 0;
+  uint32_t value = 0;
   sl_status_t sc = sli_bt_cbap_session_decrypt(gatt_buf, gatt_buf_len,
                                                plaintext, &plaintext_len,
                                                sizeof(plaintext));
@@ -1861,7 +1871,6 @@ static sl_status_t process_pairing_parameters(void)
     sc = SL_STATUS_INVALID_COUNT;
   }
   if (sc == SL_STATUS_OK) {
-    uint32_t value = 0;
     for (size_t i = 0; i < SLI_BT_CBAP_PASSKEY_LEN; i++) {
       value = (value << 8) | plaintext[i];
     }
@@ -1873,7 +1882,9 @@ static sl_status_t process_pairing_parameters(void)
       sc = adapt_io_capability(plaintext[SLI_BT_CBAP_PASSKEY_LEN]);
     }
   }
-  memset(plaintext, 0, sizeof(plaintext));
+  // Wipe the local copies of the passkey, see prepare_pairing_parameters().
+  mbedtls_platform_zeroize(plaintext, sizeof(plaintext));
+  mbedtls_platform_zeroize(&value, sizeof(value));
   return sc;
 }
 

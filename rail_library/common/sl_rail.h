@@ -5620,10 +5620,9 @@ sl_rail_status_t sl_rail_get_scheduler_status(sl_rail_handle_t rail_handle,
  * @return Status code indicating success of the function call.
  *
  * \ref SL_RAIL_TASK_TYPE_START_RX / \ref SL_RAIL_TASK_TYPE_OTHER update
- * scheduler priority (e.g. raise infinite RX after sync detect).
- * \ref SL_RAIL_TASK_TYPE_RX / \ref SL_RAIL_TASK_TYPE_TX /
- * \ref SL_RAIL_TASK_TYPE_ACK set PITA arbitration priority only (PITA
- * platforms; live-applied when that LPW request is already asserted).
+ * scheduler priority. \ref SL_RAIL_TASK_TYPE_RX / \ref SL_RAIL_TASK_TYPE_TX
+ * also update a matching scheduled RX/TX. \ref SL_RAIL_TASK_TYPE_ACK /
+ * \ref SL_RAIL_TASK_TYPE_RX_FRAME set PITA priority only.
  */
 sl_rail_status_t sl_rail_set_task_priority(sl_rail_handle_t rail_handle,
                                            uint8_t priority,

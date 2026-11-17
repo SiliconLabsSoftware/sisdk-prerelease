@@ -379,13 +379,6 @@ using namespace ot;
 // Referenced from src/posix/platform/system.cpp
 char gNetifName[0];
 
-// Found in src/core/api/instance_api.cpp and referenced from timer.cpp
-bool otInstanceIsInitialized(otInstance *aInstance)
-{
-    OT_UNUSED_VARIABLE(aInstance);
-    return true;
-}
-
 // Referenced from system.cpp
 bool otTaskletsArePending(otInstance *aInstance)
 {

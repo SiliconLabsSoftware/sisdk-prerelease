@@ -68,9 +68,11 @@
 
 // <h> SPI bus configuration
 
-// <o SL_CPC_DRV_SPI_CONTROLLER_EUSART_INSTANCE_BITRATE> SPI bitrate
-// <i> Default: 1000000
-#define SL_CPC_DRV_SPI_CONTROLLER_EUSART_INSTANCE_BITRATE 1000000
+// <o SL_CPC_DRV_SPI_CONTROLLER_EUSART_INSTANCE_MAX_BITRATE> SPI maximum bitrate
+// <i> Default: 0
+// <i> Optional upper limit on the negotiated SPI bitrate.
+// <i> Set to 0 for no maximum bitrate limit.
+#define SL_CPC_DRV_SPI_CONTROLLER_EUSART_INSTANCE_MAX_BITRATE 0
 // </h>
 
 // <<< end of configuration section >>>

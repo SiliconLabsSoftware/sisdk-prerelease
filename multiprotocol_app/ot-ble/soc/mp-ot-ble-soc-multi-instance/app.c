@@ -63,6 +63,7 @@
 #endif
 
 #include "sl_ot_custom_cli.h"
+#include "sli_ot_instance.h"
 #include <common/code_utils.hpp>
 #include <common/debug.hpp>
 
@@ -156,7 +157,7 @@ void sl_ot_create_instance(void)
         // Initialize OpenThread instance with static buffer
         sInstances[i] = otInstanceInitMultiple(i);
         OT_ASSERT(sInstances[i]);
-        OT_ASSERT(otInstanceIsInitialized(sInstances[i]));
+        OT_ASSERT(sli_ot_instance_is_initialized(sInstances[i]));
     }
 }
 

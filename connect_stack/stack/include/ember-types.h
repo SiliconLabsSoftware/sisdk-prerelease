@@ -49,7 +49,7 @@
 #include <stddef.h>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#include "stack/config/ember-configuration-defaults.h"
+#include "config/ember-configuration-defaults.h"
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 /**

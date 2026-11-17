@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <stddef.h>
 #include "sl_common.h"
 #include "em_rmu.h"
 #include "sl_rail.h"
@@ -50,6 +51,10 @@
 #define HALT_IF_DEBUGGER()
 #endif
 
+#define CRASH_DATA_ADDR ((const uint8_t *)&sl_wisun_crash_data.type)
+#define CRASH_DATA_SIZE (sizeof(sl_wisun_crash_t) - offsetof(sl_wisun_crash_t, type))
+#define CRASH_DATA_CHECKSUM() (fletcher16(CRASH_DATA_ADDR, CRASH_DATA_SIZE))
+
 // Processor context state
 typedef struct {
   // R0
@@ -74,6 +79,26 @@ typedef struct {
 // by the C library on boot.
 SL_ALIGN(4) sl_wisun_crash_t sl_wisun_crash_data SL_ATTRIBUTE_ALIGN(4) SL_ATTRIBUTE_SECTION(".noinit");
 
+// Calculate Fletcher-16 checksum over the data
+static uint16_t fletcher16(const uint8_t *data, size_t len)
+{
+  uint16_t sum1 = 0;
+  uint16_t sum2 = 0;
+
+  for (size_t i = 0; i < len; i++) {
+    sum1 = (sum1 + data[i]) % 255;
+    sum2 = (sum2 + sum1) % 255;
+  }
+
+  return (uint16_t)((sum2 << 8) | sum1);
+}
+
+// Seal the crash record by calculating a checksum over the data.
+static void sl_wisun_crash_finalize()
+{
+  sl_wisun_crash_data.checksum = CRASH_DATA_CHECKSUM();
+}
+
 #if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) \
     && (OS_CFG_TASK_STK_REDZONE_EN == DEF_ENABLED) \
     && (OS_CFG_APP_HOOKS_EN == DEF_ENABLED)
@@ -89,6 +114,7 @@ void sl_wisun_crash_handler_redzone(OS_TCB *p_tcb)
 #if (OS_CFG_DBG_EN == DEF_ENABLED)
   strncpy(sl_wisun_crash_data.u.stack_overflow.task, p_tcb->NamePtr, SL_WISUN_CRASH_TASKNAME_SIZE - 1);
 #endif
+  sl_wisun_crash_finalize();
 
   NVIC_SystemReset();
 }
@@ -109,6 +135,7 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask,
   memset(&sl_wisun_crash_data, 0, sizeof(sl_wisun_crash_data));
   sl_wisun_crash_data.type = SL_WISUN_CRASH_TYPE_STACK_OVERFLOW;
   strncpy(sl_wisun_crash_data.u.stack_overflow.task, pcTaskName, SL_WISUN_CRASH_TASKNAME_SIZE - 1);
+  sl_wisun_crash_finalize();
 
   NVIC_SystemReset();
 }
@@ -129,6 +156,7 @@ void __wrap___stack_chk_fail(void)
   memset(&sl_wisun_crash_data, 0, sizeof(sl_wisun_crash_data));
   sl_wisun_crash_data.type = SL_WISUN_CRASH_TYPE_STACK_PROTECTOR;
   sl_wisun_crash_data.u.stack_protector.lr = (uint32_t)__builtin_return_address(0);
+  sl_wisun_crash_finalize();
 
   NVIC_SystemReset();
 }
@@ -159,6 +187,7 @@ void __wrap___assert_func(const char *file,
   sl_wisun_crash_data.type = SL_WISUN_CRASH_TYPE_ASSERT;
   sl_wisun_crash_data.u.assert.line = line;
   strncpy(sl_wisun_crash_data.u.assert.file, file, SL_WISUN_CRASH_FILENAME_SIZE - 1);
+  sl_wisun_crash_finalize();
 
   NVIC_SystemReset();
 }
@@ -180,6 +209,7 @@ void __aeabi_assert(const char *mess,
   sl_wisun_crash_data.type = SL_WISUN_CRASH_TYPE_ASSERT;
   sl_wisun_crash_data.u.assert.line = line;
   strncpy(sl_wisun_crash_data.u.assert.file, file, SL_WISUN_CRASH_FILENAME_SIZE - 1);
+  sl_wisun_crash_finalize();
 
   NVIC_SystemReset();
 }
@@ -198,6 +228,7 @@ void assertEFM(const char *file,
   sl_wisun_crash_data.type = SL_WISUN_CRASH_TYPE_ASSERT;
   sl_wisun_crash_data.u.assert.line = line;
   strncpy(sl_wisun_crash_data.u.assert.file, file, SL_WISUN_CRASH_FILENAME_SIZE - 1);
+  sl_wisun_crash_finalize();
 
   NVIC_SystemReset();
 }
@@ -218,6 +249,7 @@ void sl_railcb_assert_failed(sl_rail_handle_t rail_handle,
   memset(&sl_wisun_crash_data, 0, sizeof(sl_wisun_crash_data));
   sl_wisun_crash_data.type = SL_WISUN_CRASH_TYPE_RAIL_ASSERT;
   sl_wisun_crash_data.u.rail_assert.error_code = error_code;
+  sl_wisun_crash_finalize();
 
   NVIC_SystemReset();
 }
@@ -233,6 +265,7 @@ void __iar_ReportCheckFailed(void *d)
   memset(&sl_wisun_crash_data, 0, sizeof(sl_wisun_crash_data));
   sl_wisun_crash_data.type = SL_WISUN_CRASH_TYPE_CRUN_ERROR;
   sl_wisun_crash_data.u.crun_error.error_code = *((uint32_t *)d);
+  sl_wisun_crash_finalize();
 
   NVIC_SystemReset();
 }
@@ -249,6 +282,7 @@ void __exit(int x)
   memset(&sl_wisun_crash_data, 0, sizeof(sl_wisun_crash_data));
   sl_wisun_crash_data.type = SL_WISUN_CRASH_TYPE_EXIT;
   sl_wisun_crash_data.u.exit.status = x;
+  sl_wisun_crash_finalize();
 
   NVIC_SystemReset();
 }
@@ -281,6 +315,7 @@ void hard_fault_handler(const uint32_t *sp)
   sl_wisun_crash_data.u.fault.mmfar = SCB->MMFAR;
   sl_wisun_crash_data.u.fault.bfar = SCB->BFAR;
   sl_wisun_crash_data.u.fault.afsr = SCB->AFSR;
+  sl_wisun_crash_finalize();
 
   NVIC_SystemReset();
 }
@@ -305,6 +340,7 @@ void HardFault_Handler(void)
 void sl_wisun_crash_handler_clear()
 {
   sl_wisun_crash_data.type = SL_WISUN_CRASH_TYPE_NONE;
+  sl_wisun_crash_data.checksum = 0;
 }
 
 void sl_wisun_crash_handler_init()
@@ -341,7 +377,7 @@ void sl_wisun_crash_handler_init()
     }
   }
 
-  // Device reset was't due to crash, clear crash data
+  // Device reset wasn't due to a crash or crash data is corrupted
   sl_wisun_crash_handler_clear();
 }
 
@@ -349,9 +385,13 @@ const sl_wisun_crash_t *sl_wisun_crash_handler_read()
 {
   if ((sl_wisun_crash_data.type > SL_WISUN_CRASH_TYPE_NONE) &&
       (sl_wisun_crash_data.type < SL_WISUN_CRASH_TYPE_MAX)) {
-    // Crash data looks sane
-    return &sl_wisun_crash_data;
+    // Crash type looks sane, verify crash data checksum
+    if (sl_wisun_crash_data.checksum == CRASH_DATA_CHECKSUM()) {
+      // Crash data is valid
+      return &sl_wisun_crash_data;
+    }
   }
 
+  // Crash data is not valid
   return NULL;
 }

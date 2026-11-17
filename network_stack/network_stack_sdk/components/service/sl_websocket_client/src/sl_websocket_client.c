@@ -30,6 +30,7 @@
 #include "sl_websocket_client_types.h"
 #include "sli_websocket_client_sync.h"
 #include "sl_constants.h"
+#include "sl_websocket_client_log_helper.h"
 #include "sl_slist.h"
 #include "sl_net.h"
 #include "sl_net_constants.h"
@@ -49,6 +50,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+sl_log_level_t sl_log_websocket_client_component_level = SL_LOG_WEBSOCKET_CLIENT_COMPONENT_LEVEL;
 
 /******************************************************
  *               External Declarations
@@ -70,14 +73,14 @@ sl_websocket_error_t sl_websocket_init(sl_websocket_client_t *handle, const sl_w
 
   // Check if the WebSocket client is in a valid state to initialize
   if (handle->state != SL_WEBSOCKET_STATE_DISCONNECTED) {
-    SL_DEBUG_LOG_V2(DEBUG, "\r\nInvalid state for initializing a WebSocket client\r\n");
+    SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Invalid state for initializing a WebSocket client\r\n");
     return SL_WEBSOCKET_ERR_INVALID_PARAMETER;
   }
 
   // Copy host
   if (config->host != NULL) {
     if (strlen(config->host) >= SL_SI91X_WEBSOCKET_MAX_HOST_LENGTH) {
-      SL_DEBUG_LOG_V2(DEBUG, "\r\nHost name length exceeds maximum allowed length\r\n");
+      SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Host name length exceeds maximum allowed length\r\n");
       return SL_WEBSOCKET_ERR_INVALID_PARAMETER;
     }
     snprintf(handle->host, sizeof(handle->host), "%s", config->host);
@@ -86,7 +89,7 @@ sl_websocket_error_t sl_websocket_init(sl_websocket_client_t *handle, const sl_w
   // Copy resource
   if (config->resource != NULL) {
     if (strlen(config->resource) >= SL_SI91X_WEBSOCKET_MAX_RESOURCE_LENGTH) {
-      SL_DEBUG_LOG_V2(DEBUG, "\r\nResource name length exceeds maximum allowed length\r\n");
+      SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Resource name length exceeds maximum allowed length\r\n");
       return SL_WEBSOCKET_ERR_INVALID_PARAMETER;
     }
     snprintf(handle->resource, sizeof(handle->resource), "%s", config->resource);
@@ -99,14 +102,14 @@ sl_websocket_error_t sl_websocket_init(sl_websocket_client_t *handle, const sl_w
                                      hex_addr,
                                      (unsigned int *)handle->ip_address.ip.v6.value);
   if (status != 0x1) {
-    SL_DEBUG_LOG_V2(ERROR, "\r\nIPv6 conversion failed.\r\n");
+    SL_DEBUG_LOG_V2(ERROR, "[websocket_client] IPv6 conversion failed.\r\n");
     return SL_WEBSOCKET_ERR_INVALID_PARAMETER;
   }
   handle->ip_address.type = SL_IPV6;
 #else
   sl_status_t status = sl_net_inet_addr(config->ip_address, &(handle->ip_address.ip.v4.value));
   if (status != SL_STATUS_OK) {
-    SL_DEBUG_LOG_V2(ERROR, "Failed to convert IP address \r\n");
+    SL_DEBUG_LOG_V2(ERROR, "[websocket_client] Failed to convert IP address \r\n");
     return SL_WEBSOCKET_ERR_INVALID_PARAMETER;
   }
   handle->ip_address.type           = SL_IPV4;
@@ -151,11 +154,11 @@ sl_websocket_error_t sl_websocket_connect(sl_websocket_client_t *handle)
 
   // Check if the WebSocket client is in a valid state to connect
   if (handle->state != SL_WEBSOCKET_STATE_DISCONNECTED) {
-    SL_DEBUG_LOG_V2(DEBUG, "\r\nInvalid state for connecting a WebSocket client\r\n");
+    SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Invalid state for connecting a WebSocket client\r\n");
     return SL_WEBSOCKET_ERR_INVALID_PARAMETER;
   }
 
-  SL_DEBUG_LOG_V2(INFO, "\r\nIn websocket connect");
+  SL_DEBUG_LOG_V2(INFO, "[websocket_client] In websocket connect");
 
   int client_socket       = -1;
   int socket_return_value = 0;
@@ -195,12 +198,12 @@ sl_websocket_error_t sl_websocket_connect(sl_websocket_client_t *handle)
 #endif
 
   if (client_socket < 0) {
-    SL_DEBUG_LOG_V2(ERROR, "\r\nSocket creation failed with bsd error: %d\r\n", errno);
+    SL_DEBUG_LOG_V2(ERROR, "[websocket_client] Socket creation failed with bsd error: %d\r\n", errno);
     handle->state = SL_WEBSOCKET_STATE_DISCONNECTED;
     return SL_WEBSOCKET_ERR_SOCKET_CREATION;
   }
 
-  SL_DEBUG_LOG_V2(DEBUG, "\r\nClient Socket ID : %d\r\n", client_socket);
+  SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Client Socket ID : %d\r\n", client_socket);
   handle->socket_fd = client_socket;
 
   if (handle->enable_ssl) {
@@ -231,7 +234,7 @@ sl_websocket_error_t sl_websocket_connect(sl_websocket_client_t *handle)
     }
     socket_return_value = setsockopt(client_socket, SOL_TCP, TCP_ULP, tls_opt, tls_opt_len);
     if (socket_return_value < 0) {
-      SL_DEBUG_LOG_V2(ERROR, "\r\nSet socket failed with bsd error: %d\r\n", errno);
+      SL_DEBUG_LOG_V2(ERROR, "[websocket_client] Set socket failed with bsd error: %d\r\n", errno);
       close(client_socket);
       return SL_WEBSOCKET_ERR_SSL_SETSOCKOPT;
     }
@@ -239,7 +242,7 @@ sl_websocket_error_t sl_websocket_connect(sl_websocket_client_t *handle)
 
   socket_return_value = sl_si91x_bind(client_socket, (struct sockaddr *)&client_address, socket_length);
   if (socket_return_value < 0) {
-    SL_DEBUG_LOG_V2(ERROR, "\r\nSocket bind failed with bsd error: %d\r\n", errno);
+    SL_DEBUG_LOG_V2(ERROR, "[websocket_client] Socket bind failed with bsd error: %d\r\n", errno);
     close(client_socket);
     handle->state = SL_WEBSOCKET_STATE_DISCONNECTED;
     return SL_WEBSOCKET_ERR_SOCKET_BIND;
@@ -248,7 +251,7 @@ sl_websocket_error_t sl_websocket_connect(sl_websocket_client_t *handle)
   // Retrieve the socket using the socket index
   sli_si91x_socket_t *si91x_socket = sli_get_si91x_socket(client_socket);
   if (!si91x_socket) {
-    SL_DEBUG_LOG_V2(DEBUG, "\r\nFailed to retrieve si91x socket\r\n");
+    SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Failed to retrieve si91x socket\r\n");
     close(client_socket);
     handle->state = SL_WEBSOCKET_STATE_DISCONNECTED;
     return SL_WEBSOCKET_ERR_SOCKET_CREATION;
@@ -280,7 +283,7 @@ sl_websocket_error_t sl_websocket_connect(sl_websocket_client_t *handle)
 
   // Check if memory allocation was successful
   if (si91x_socket->websocket_info == NULL) {
-    SL_DEBUG_LOG_V2(DEBUG, "\r\nMemory allocation for websocket_info failed\r\n");
+    SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Memory allocation for websocket_info failed\r\n");
     close(client_socket);
     handle->state = SL_WEBSOCKET_STATE_DISCONNECTED;
     return SL_WEBSOCKET_ERR_SOCKET_CREATION;
@@ -314,12 +317,12 @@ sl_websocket_error_t sl_websocket_connect(sl_websocket_client_t *handle)
   }
 
   if (socket_return_value < 0) {
-    SL_DEBUG_LOG_V2(ERROR, "\r\nSocket Connect failed with bsd error: %d\r\n", errno);
+    SL_DEBUG_LOG_V2(ERROR, "[websocket_client] Socket Connect failed with bsd error: %d\r\n", errno);
     close(client_socket);
     handle->state = SL_WEBSOCKET_STATE_DISCONNECTED;
     return SL_WEBSOCKET_ERR_SOCKET_CONNECT;
   }
-  SL_DEBUG_LOG_V2(INFO, "\r\nSocket connected to TCP server\r\n");
+  SL_DEBUG_LOG_V2(INFO, "[websocket_client] Socket connected to TCP server\r\n");
 
   handle->state = SL_WEBSOCKET_STATE_CONNECTED;
   return SL_WEBSOCKET_SUCCESS;
@@ -340,14 +343,14 @@ sl_websocket_error_t sl_websocket_send_frame(sl_websocket_client_t *handle,
 
   // Check if the WebSocket client is in a valid state to send a frame
   if (handle->state != SL_WEBSOCKET_STATE_CONNECTED) {
-    SL_DEBUG_LOG_V2(DEBUG, "\r\nInvalid state for sending a WebSocket frame\r\n");
+    SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Invalid state for sending a WebSocket frame\r\n");
     return SL_WEBSOCKET_ERR_INVALID_PARAMETER;
   }
 
   // Retrieve the socket using the socket index
   sli_si91x_socket_t *si91x_socket = sli_get_si91x_socket(handle->socket_fd);
   if (!si91x_socket) {
-    SL_DEBUG_LOG_V2(DEBUG, "\r\nFailed to retrieve socket\r\n");
+    SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Failed to retrieve socket\r\n");
     return SL_WEBSOCKET_ERR_SOCKET_CREATION;
   }
 
@@ -360,11 +363,11 @@ sl_websocket_error_t sl_websocket_send_frame(sl_websocket_client_t *handle,
     if (errno == ENOBUFS) {
       return SL_WEBSOCKET_SUCCESS;
     }
-    SL_DEBUG_LOG_V2(ERROR, "\r\nFailed to send WebSocket frame with error: %d\r\n", errno);
+    SL_DEBUG_LOG_V2(ERROR, "[websocket_client] Failed to send WebSocket frame with error: %d\r\n", errno);
     return SL_WEBSOCKET_ERR_SEND_FRAME;
   }
 
-  SL_DEBUG_LOG_V2(DEBUG, "\r\nSent bytes: %d\r\n", sent_bytes);
+  SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Sent bytes: %d\r\n", sent_bytes);
   return SL_WEBSOCKET_SUCCESS;
 }
 
@@ -376,21 +379,21 @@ sl_websocket_error_t sl_websocket_close(sl_websocket_client_t *handle)
 
   // Check if the WebSocket client is in a valid state to be closed
   if (handle->state != SL_WEBSOCKET_STATE_CONNECTED && handle->state != SL_WEBSOCKET_STATE_CLOSING) {
-    SL_DEBUG_LOG_V2(DEBUG, "\r\nInvalid state for closing the WebSocket connection\r\n");
+    SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Invalid state for closing the WebSocket connection\r\n");
     return SL_WEBSOCKET_ERR_INVALID_PARAMETER;
   }
 
   // Update state to closing
   handle->state = SL_WEBSOCKET_STATE_CLOSING;
-  SL_DEBUG_LOG_V2(DEBUG, "\r\nAttempting to close socket with fd: %d\r\n", handle->socket_fd);
+  SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Attempting to close socket with fd: %d\r\n", handle->socket_fd);
   int status = close(handle->socket_fd);
   if (status == 0) {
-    SL_DEBUG_LOG_V2(INFO, "\r\nSocket closed in FW");
+    SL_DEBUG_LOG_V2(INFO, "[websocket_client] Socket closed in FW");
     handle->socket_fd = -1;                        // Invalidate the socket file descriptor
     handle->state     = SL_WEBSOCKET_STATE_CLOSED; // Update state to closed
     return SL_WEBSOCKET_SUCCESS;
   } else {
-    SL_DEBUG_LOG_V2(ERROR, "\r\nSocket closed in FW failed with error: %d\r\n", errno);
+    SL_DEBUG_LOG_V2(ERROR, "[websocket_client] Socket closed in FW failed with error: %d\r\n", errno);
     return SL_WEBSOCKET_ERR_CLOSE_FRAME;
   }
 }
@@ -403,13 +406,14 @@ sl_websocket_error_t sl_websocket_deinit(sl_websocket_client_t *handle)
 
   // Check if the socket is closed
   if (handle->state != SL_WEBSOCKET_STATE_CLOSED) {
-    SL_DEBUG_LOG_V2(INFO, "\r\nSocket is not closed. Deinit can only be called if the socket is closed.\r\n");
+    SL_DEBUG_LOG_V2(INFO,
+                    "[websocket_client] Socket is not closed. Deinit can only be called if the socket is closed.\r\n");
     return SL_WEBSOCKET_ERR_INVALID_PARAMETER;
   }
 
   // Close the WebSocket connection if it's still open
   if (handle->socket_fd >= 0) {
-    SL_DEBUG_LOG_V2(DEBUG, "\r\nDeinit: Closing socket with fd: %d\r\n", handle->socket_fd);
+    SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Deinit: Closing socket with fd: %d\r\n", handle->socket_fd);
     close(handle->socket_fd);
     handle->socket_fd = -1;
   }
@@ -425,7 +429,7 @@ sl_websocket_error_t sl_websocket_deinit(sl_websocket_client_t *handle)
   memset(handle, 0, sizeof(sl_websocket_client_t));
   handle->state = SL_WEBSOCKET_STATE_DISCONNECTED;
 
-  SL_DEBUG_LOG_V2(DEBUG, "\r\nWebSocket deinit success\r\n");
+  SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] WebSocket deinit success\r\n");
   return SL_WEBSOCKET_SUCCESS;
 }
 

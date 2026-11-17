@@ -30,11 +30,15 @@
 
 #include <string.h>
 
+#include "sl_clock_manager.h"
 #include "sl_common.h"
 #include "sl_component_catalog.h"
+#include "sl_cpc_drv_spi_controller.h"
+#include "sl_device_peripheral.h"
 #include "sl_gpio.h"
 #include "sl_hal_gpio.h"
 #include "sl_slist.h"
+#include "sli_cpc_atomic.h"
 #include "spidrv.h"
 
 #include "cpc_atomic.h"
@@ -465,6 +469,15 @@ static void spi_drv_tfer_hdr(struct sl_cpc_drv_spi_controller *drv)
   SLI_CPC_ASSERT(drv->tx.active.frame == NULL);
   SLI_CPC_ASSERT(drv->rx.active.frame == NULL);
 
+  if (SL_BRANCH_UNLIKELY(drv->new_bitrate != 0)) {
+    SLI_CPC_LOG_INFO("Switching to %luHz...", drv->new_bitrate);
+
+    Ecode_t err = SPIDRV_SetBitrate(&drv->spidrv, drv->new_bitrate);
+    SLI_CPC_ASSERT(err == ECODE_OK);
+
+    drv->new_bitrate = 0;
+  }
+
   // Check if we have something to send.
   if (!sli_cpc_frame_list_empty(&drv->tx.submitted_frame_list)) {
     // Driver has a frame pending transmission, queue it.
@@ -594,14 +607,57 @@ static uint32_t spi_drv_write(sl_cpc_bus_t *bus, sli_cpc_frame_list_t *frames)
 }
 
 /**************************************************************************/ /**
- * Get the local capabilities of the driver.
+ * Set the remote capabilities of the driver.
+ *
+ * Apply the maximum negotiated bitrate between the local and remote capabilities,
+ * optionally capped by a configured maximum.
  ******************************************************************************/
-static void spi_drv_get_local_capabilities(sl_cpc_bus_t *bus, const void **caps_p, uint16_t *caps_size_p)
+static sl_status_t spi_drv_set_remote_capabilities(sl_cpc_bus_t *bus, const void *caps, uint16_t caps_size)
 {
-  const struct sl_cpc_drv_spi_controller *drv = bus_to_drv(bus);
-  (void)drv;
-  (void)caps_p;
-  (void)caps_size_p;
+  struct sl_cpc_drv_spi_controller *drv = bus_to_drv(bus);
+  uint32_t local_bitrate;
+  uint32_t remote_bitrate;
+
+  if (caps_size != sizeof(sli_cpc_drv_spi_capabilities_t)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  const sli_cpc_drv_spi_capabilities_t *remote_caps = caps;
+  remote_bitrate = sli_cpc_u32_from_le(remote_caps->bitrate_le);
+
+  // Apply the minimum bitrate between the local and remote maximum.
+  sl_peripheral_serial_type_t ip_type = sl_device_peripheral_get_serial_ip_type(drv->peripheral);
+  switch (ip_type) {
+    case SL_PERIPHERAL_SERIAL_TYPE_EUSART:
+      // In controller mode, EUSART has a maximum bitrate of 20MHz.
+      local_bitrate = 20E6;
+      break;
+    case SL_PERIPHERAL_SERIAL_TYPE_USART: {
+      // In controller mode, USART has a maximum bitrate of the peripheral's clock rate / 2.
+      sl_clock_branch_t clk_branch = sl_device_peripheral_get_clock_branch(drv->peripheral);
+      sl_status_t status = sl_clock_manager_get_clock_branch_frequency(clk_branch, &local_bitrate);
+      if (status != SL_STATUS_OK) {
+        SLI_CPC_PANIC("Failed to get clock branch frequency: 0x%lu", status);
+      }
+
+      local_bitrate /= 2;
+      break;
+    }
+    default:
+      // Unsupported peripheral type.
+      return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  uint32_t bitrate = SL_MIN(local_bitrate, remote_bitrate);
+  if (drv->max_bitrate != 0) {
+    bitrate = SL_MIN(bitrate, drv->max_bitrate);
+  }
+
+  MCU_ATOMIC_STORE(drv->new_bitrate, bitrate);
+
+  SLI_CPC_LOG_INFO("Applying negotiated bitrate of %luHz on the next frame transfer...", bitrate);
+
+  return SL_STATUS_OK;
 }
 
 /**************************************************************************/ /**
@@ -668,7 +724,7 @@ static const sli_cpc_drv_ops_t ops = {
   .start_rx = &spi_drv_start_rx,
   .read = &spi_drv_read,
   .write = &spi_drv_write,
-  .get_local_capabilities = &spi_drv_get_local_capabilities,
+  .set_remote_capabilities = &spi_drv_set_remote_capabilities,
   .get_available_write_frame_slots = &spi_drv_get_available_write_frame_slots,
   .on_rx_frame_free = &spi_drv_on_rx_frame_free,
   .deinit = &spi_drv_deinit,
@@ -682,9 +738,15 @@ sl_status_t sli_cpc_drv_spi_controller_init(struct sl_cpc_drv_spi_controller *dr
                                             const sl_cpc_bus_config_t *bus_cfg)
 {
   sl_status_t status;
+  uint32_t bitrate;
 
   memset(drv, 0, sizeof(*drv));
   drv->peripheral = spi_cfg->peripheral;
+
+  // Start bus at 1MHz, then negotiate the actual bitrate with the remote. When the new bitrate
+  // is negotiated, it will be applied on the next frame transfer via new_bitrate.
+  drv->max_bitrate = spi_cfg->max_bitrate;
+  bitrate = 1E6;
 
   // CS needs to stay asserted between payload chunks, so handle it in this driver.
   drv->cs = spi_cfg->cs;
@@ -720,7 +782,7 @@ sl_status_t sli_cpc_drv_spi_controller_init(struct sl_cpc_drv_spi_controller *dr
     .pinRx = spi_cfg->cipo.pin,
     .portTx = spi_cfg->copi.port,
     .pinTx = spi_cfg->copi.pin,
-    .bitRate = spi_cfg->bitrate,
+    .bitRate = bitrate,
     .frameLength = 8,
     .dummyTxValue = 0,                       // Send 0 when RX only
     .csControl = spidrvCsControlApplication, // CS must be maintained between payload chunks

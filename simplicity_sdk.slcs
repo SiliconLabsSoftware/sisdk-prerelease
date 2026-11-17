@@ -8,14 +8,14 @@ component_path:
 - path: generative_ai/component
 - path: bgapi_protocol/component
 - path: bluetooth_le_controller/component
-- path: bluetooth_common/component
-- path: bluetooth_mesh_stack/component
 - path: bluetooth_mesh/component
-- path: bluetooth_le_internal/component
-- path: bluetooth_le/component
-- path: bluetooth_le_host/component
 - path: bluetooth_apploader/component
+- path: bluetooth_le_internal/component
+- path: bluetooth_common/component
+- path: bluetooth_le_host/component
+- path: bluetooth_mesh_stack/component
 - path: bluetooth_mesh_srtest/component
+- path: bluetooth_le/component
 - path: boards_internal/hardware/kit/component
 - path: boards_internal/hardware/kit/common/component
 - path: boards_internal/hardware/board/component
@@ -39,22 +39,24 @@ component_path:
 - path: common_15_4/mac/component
 - path: compute/component
 - path: connect_app/component
-- path: connect_stack/component
 - path: connect/component
+- path: connect_stack/stack/component
 - path: coremark/component
 - path: cpc/component
 - path: cpc_extra/cpc-gpio/component
 - path: cpc_extra/cpc-nvm3/component
 - path: cpc_extra_tests/cpc-gpio/component
 - path: cpc_extra_tests/cpc-nvm3/component
+- path: cpc_ng_tests/component
 - path: cpc_ng/component
 - path: cpc_ng/port/mock/component
 - path: cpc_ng/port/silabs/component
-- path: cpc_ng_tests/component
 - path: cpc_tests/component
 - path: delta_dfu/component
-- path: freertos/component
 - path: freertos_internal/component
+- path: freertos/component
+- path: greybus/component
+- path: greybus_tests/component
 - path: mbedtls/component
 - path: micriumos/platform/micrium_os/component
 - path: micriumos_internal/platform/micrium_os/component
@@ -115,21 +117,14 @@ component_path:
 - path: security_tfm/component
 - path: segger/component
 - path: network_stack/silabs_lwip/component
-- path: thread_internal/component/internal
 - path: thread/component
+- path: thread_internal/component/internal
 - path: unity_test_framework/component
 - path: unity_internal/component
 - path: usb/protocol/usb/component
 - path: usb_internal/protocol/usb/component
 - path: wisun/component
 - path: wisun/component/middleware
-- path: zigbee/platform/radio/mac/component/zigbee
-- path: zigbee/platform/radio/rail_lib/plugin/component/zigbee
-- path: zigbee/component/zigbee
-- path: zigbee/util/plugin/component/zigbee
-- path: zigbee/util/silicon_labs/silabs_core/component/zigbee
-- path: zigbee/app/framework/component/zigbee
-- path: zigbee/platform/service/component/zigbee
 - path: zigbee_smart_energy/component/zigbee_smart_energy
 - path: zigbee_internal/platform/radio/mac/component/zigbee_internal
 - path: zigbee_internal/platform/radio/rail_lib/plugin/component/zigbee_internal
@@ -138,6 +133,13 @@ component_path:
 - path: zigbee_internal/util/silicon_labs/silabs_core/component/zigbee_internal
 - path: zigbee_internal/app/framework/component/zigbee_internal
 - path: zigbee_internal/platform/service/component/zigbee_internal
+- path: zigbee/platform/radio/mac/component/zigbee
+- path: zigbee/platform/radio/rail_lib/plugin/component/zigbee
+- path: zigbee/component/zigbee
+- path: zigbee/util/plugin/component/zigbee
+- path: zigbee/util/silicon_labs/silabs_core/component/zigbee
+- path: zigbee/app/framework/component/zigbee
+- path: zigbee/platform/service/component/zigbee
 - path: zwave/component
 - path: zwave/component/CommandClasses
 - path: zwave/component-internal
@@ -200,23 +202,23 @@ documentation:
   version: 1.0.8
 - docset: protocol-usb
   version: 1.8.0
-- docset: wifi
-  version: 4.2.0
 - docset: wifi_siwx353
   version: 0.1.0
 - docset: wifi_internal
+  version: 4.2.0
+- docset: wifi
   version: 4.2.0
 - docset: wiseconnect_common
   version: 4.2.0
 - docset: zigbee
   version: 9.2.0
 upgrade_manifest:
-- path: bluetooth_mesh_stack/component/upgrade.slcu
 - path: bluetooth_mesh/upgrade.slcu
-- path: bluetooth_le/upgrade.slcu
 - path: bluetooth_le_host/component/upgrade.slcu
+- path: bluetooth_mesh_stack/component/upgrade.slcu
+- path: bluetooth_le/upgrade.slcu
 - path: connect_app/connect_app.slcu
-- path: connect_stack/component/upgrade.slcu
+- path: connect_stack/stack/component/upgrade.slcu
 - path: cpc/upgrade.slcu
 - path: multiprotocol/component/upgrade.slcu
 - path: platform_core/app/common/upgrade.slcu
