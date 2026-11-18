@@ -306,8 +306,8 @@ sl_status_t sli_token_manager_init_static(void)
   sl_status_t status = SL_STATUS_OK;
 #if defined(SL_TOKEN_MANAGER_BACKEND_EXT_FLASH)
   // Initialization for static secure tokens usage.
-  status = sli_token_manager_flash_open((uint32_t)SLI_TOKEN_STATIC_SECURE_TOKEN_BASE,
-                                        (uint32_t)SL_TOKEN_MANAGER_STATIC_SECURE_TOKEN_SIZE);
+  status = sli_token_manager_nvm_open((uint32_t)SLI_TOKEN_STATIC_SECURE_TOKEN_BASE,
+                                      (uint32_t)SL_TOKEN_MANAGER_STATIC_SECURE_TOKEN_SIZE);
 #endif
   return status;
 }
@@ -370,7 +370,7 @@ sl_status_t sli_token_manager_set_static_data(uint32_t token,
   // once the legacy folder is deprecated, bring the definition to this file.
   return sl_token_set_manufacturing_data((token & 0xFFFF), data, length);
 #elif defined(SL_TOKEN_MANAGER_BACKEND_EXT_FLASH)
-  sl_token_type_t token_type = SL_TOKEN_TYPE_INVALID;
+  sl_token_type_t token_type = SL_TOKEN_TYPE_MAX;
   // Get the token type
   token_type = sli_token_manager_decode_token_type(token);
 
@@ -437,7 +437,8 @@ sl_status_t sli_token_manager_get_static_token_size(sl_token_type_t token_type,
  * To read an override token, the token manager must be initialized and
  * the override feature must be enabled.
  *
- * @param[in]  token     The manufacturing key for the override token.
+ * @param[in]  token     Phase-1 16-bit manufacturing key, or the 32-bit static
+ *                       token. Bits 31:27 are required for a new 16-bit key.
  * @param[out] data      A pointer to where the token data should be placed.
  * @param[in]  offset    Indicates the number of bytes to skip from the beginning of the
  *                       token data before starting to read.
@@ -466,8 +467,13 @@ sl_status_t sli_token_manager_get_override_token_data(uint32_t token,
       memcpy((char*)data, eui64, length);
     }
   } else {
-    // Read the override token
-    status = sli_token_manager_get_dynamic_data(SL_TOKEN_GET_DYNAMIC_OVER_RIDE_TOKEN(token & 0xFFFF), data, offset, length);
+    uint32_t override_token = SL_TOKEN_GET_DYNAMIC_OVER_RIDE_TOKEN(token);
+
+    if (override_token == SL_TOKEN_NVM3_DYNAMIC_OVERRIDE_TOKEN_INVALID) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+
+    status = sli_token_manager_get_dynamic_data(override_token, data, offset, length);
   }
 
   return status;

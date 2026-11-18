@@ -207,7 +207,7 @@ sl_status_t sl_iostream_eusart_init_{{ instance }}(void)
     .rx_when_sleeping = SL_IOSTREAM_EUSART_{{ instance | upper }}_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION,
     .uart_periph = &uart_periph_{{ instance }}
   };
-  uart_config_{{ instance }}.sw_flow_control = SL_IOSTREAM_EUSART_{{ instance | upper }}_FLOW_CONTROL_TYPE == SL_IOSTREAM_EUSART_UART_FLOW_CTRL_SOFT;
+  uart_config_{{ instance }}.sw_flow_control = config_{{ instance }}.flow_control == SLI_IOSTREAM_EUSART_UART_FLOW_CTRL_SOFT;
 #if defined(SL_IOSTREAM_EUSART_{{ instance | upper }}_ASYNC_TX)
   uart_config_{{ instance }}.async_tx_enabled = SL_IOSTREAM_EUSART_{{ instance | upper }}_ASYNC_TX;
 #else
@@ -224,10 +224,9 @@ sl_status_t sl_iostream_eusart_init_{{ instance }}(void)
   // Send VCOM config to WSTK
   uint8_t flow_control = COS_CONFIG_FLOWCONTROL_NONE;
   if (!uart_config_{{ instance }}.sw_flow_control) {
-    switch (SL_IOSTREAM_EUSART_{{ instance | upper }}_FLOW_CONTROL_TYPE)
+    switch (config_{{ instance }}.flow_control)
     {
       case SL_IOSTREAM_EUSART_UART_FLOW_CTRL_NONE:
-      case SL_IOSTREAM_EUSART_UART_FLOW_CTRL_SOFT:
         flow_control = COS_CONFIG_FLOWCONTROL_NONE;
         break;
       case SL_IOSTREAM_EUSART_UART_FLOW_CTRL_CTS:

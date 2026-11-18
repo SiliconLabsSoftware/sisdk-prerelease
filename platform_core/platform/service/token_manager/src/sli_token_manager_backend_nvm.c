@@ -1,7 +1,7 @@
-/***************************************************************************//**
+/*****************************************************************************//**
  * @file sli_token_manager_backend_nvm.c
- * @brief Flash backend operation. Invokes respective flash read, write request
- * to internal or external flash HAL driver.
+ * @brief NVM backend operation. Invokes respective NVM read/write request
+ * to the configured HAL driver.
  * @version 1.0.0
  *******************************************************************************
  * # License
@@ -32,30 +32,30 @@
 #include "sli_token_manager_hal_flash.h"
 #include "sli_token_manager_backend_nvm.h"
 
-sl_status_t sli_token_manager_flash_open(uint32_t flash_adr, uint32_t flash_size)
+sl_status_t sli_token_manager_nvm_open(uint32_t nvm_adr, uint32_t nvm_size)
 {
   // Init static secure token region
-  return sli_token_manager_hal_flash_handle.open(flash_adr, flash_size);
+  return sli_token_manager_hal_nvm_handle.open(nvm_adr, nvm_size);
 }
 
-void sli_token_manager_flash_close(void)
+void sli_token_manager_nvm_close(void)
 {
-  sli_token_manager_hal_flash_handle.close();
-}
-
-// Odd size is not supported by this function
-sl_status_t sli_token_manager_flash_write(uint32_t flash_adr, void const *data, uint32_t size)
-{
-  return sli_token_manager_hal_flash_handle.write(flash_adr, data, size);
+  sli_token_manager_hal_nvm_handle.close();
 }
 
 // Odd size is not supported by this function
-sl_status_t sli_token_manager_flash_read(uint32_t flash_adr, void *data, uint32_t size)
+sl_status_t sli_token_manager_nvm_write(uint32_t nvm_adr, void const *data, uint32_t size)
 {
-  return sli_token_manager_hal_flash_handle.read(flash_adr, data, size);
+  return sli_token_manager_hal_nvm_handle.write(nvm_adr, data, size);
 }
 
-sl_status_t sli_token_manager_flash_erase(uint32_t flash_adr, uint32_t size)
+// Odd size is not supported by this function
+sl_status_t sli_token_manager_nvm_read(uint32_t nvm_adr, void *data, uint32_t size)
 {
-  return sli_token_manager_hal_flash_handle.erase(flash_adr, size);
+  return sli_token_manager_hal_nvm_handle.read(nvm_adr, data, size);
+}
+
+sl_status_t sli_token_manager_nvm_page_erase(uint32_t nvm_adr)
+{
+  return sli_token_manager_hal_nvm_handle.erase(nvm_adr);
 }

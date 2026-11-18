@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 #include "em_device.h"
+#include "sl_clock_manager.h"
 #include "sli_crypto_ksu_manager.h"
 #include "sl_se_manager.h"
 
@@ -84,6 +85,20 @@ sl_status_t sli_ksu_init(void)
     ksu_slots[i].user_ref = NULL;
     ksu_slots[i].state = SLI_KSU_SLOT_STATUS_AVAILABLE;
     ksu_slots[i].crypto_engine_id = 0; // Initialize engine ID to 0
+  }
+
+  return SL_STATUS_OK;
+}
+
+sl_status_t sli_ksu_ensure_setupdone(void)
+{
+  sl_status_t status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_KSU);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  if ((KSU->INFO & KSU_INFO_SETUPDONE) == 0U) {
+    return SL_STATUS_INVALID_STATE;
   }
 
   return SL_STATUS_OK;

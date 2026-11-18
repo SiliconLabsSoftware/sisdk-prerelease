@@ -158,4 +158,18 @@ sl_status_t sli_ksu_allocate_key_slot(sl_se_key_descriptor_t *key_desc,
 sl_status_t sli_ksu_key_slot_generate(sl_se_key_descriptor_t *key_desc,
                                       void *user_ref);
 
+/***************************************************************************//**
+ * @brief
+ *   Check whether the KSU SE/USER handshake (SETUPDONE) is complete.
+ *
+ * @details
+ *   Enables the KSU bus clock before checking SETUPDONE without waiting.
+ *   HostCrypto must not reference KSU key slots unless SETUPDONE is set.
+ *
+ * @return
+ *   SL_STATUS_OK when SETUPDONE is set, SL_STATUS_INVALID_STATE otherwise.
+ *   Propagates the clock manager error if enabling the bus clock fails.
+ ******************************************************************************/
+sl_status_t sli_ksu_ensure_setupdone(void);
+
 #endif // SLI_CRYPTO_KSU_MANAGER_H

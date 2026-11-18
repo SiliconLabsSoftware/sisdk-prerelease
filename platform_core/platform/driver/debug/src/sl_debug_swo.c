@@ -44,6 +44,10 @@
 #include "sl_debug_swo_config.h"
 #include "sl_component_catalog.h"
 
+/*******************************************************************************
+ ******************************   DEFINES   ************************************
+ ******************************************************************************/
+
 #define SL_DEBUG_SWO_ITM_LOCK_ACCESS_KEY       (0xC5ACCE55UL)
 
 #ifndef SL_DEBUG_SWO_TRACE_BUS_ID
@@ -64,6 +68,21 @@
 #define SL_DEBUG_SWO_TCR_SWOENA_MASK           (0UL)
 #endif
 
+// Frames still in the TPIU NRZ shifter after ITM_TCR_BUSY clears.
+// Two characters are four frames (header plus payload). 32 covers that FIFO.
+#define SL_DEBUG_SWO_SHIFTER_DRAIN_FRAMES      32U
+#define SL_DEBUG_SWO_FRAME_BITS                10U
+
+/*******************************************************************************
+ ******************************   VARIABLES   **********************************
+ ******************************************************************************/
+
+static uint32_t swo_last_write_cycle = 0U;
+static uint32_t swo_shifter_drain_cycles = 0U;
+
+/*******************************************************************************
+ **************************   GLOBAL FUNCTIONS   *******************************
+ ******************************************************************************/
 sl_status_t sl_debug_swo_init(void)
 {
   sl_status_t status;
@@ -103,6 +122,10 @@ sl_status_t sl_debug_swo_init(void)
   if (status != SL_STATUS_OK) {
     return status;
   }
+
+  swo_shifter_drain_cycles = (SystemCoreClockGet() / SL_DEBUG_SWO_FREQ)
+                             * SL_DEBUG_SWO_SHIFTER_DRAIN_FRAMES
+                             * SL_DEBUG_SWO_FRAME_BITS;
 
   // Enable trace in core debug
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
@@ -148,6 +171,7 @@ sl_status_t sl_debug_swo_init(void)
   // sent on the SWO channel shortly after initialization.
   ITM->TER |= (1UL << 8);
   ITM->PORT[8].u8 = 0xFF;
+  swo_last_write_cycle = DWT->CYCCNT;
   ITM->TER &= ~(1UL << 8);
 
   return SL_STATUS_OK;
@@ -178,6 +202,7 @@ sl_status_t sl_debug_swo_write_u8(uint32_t channel, uint8_t byte)
     } while (ITM->PORT[channel].u32 == 0);
 
     ITM->PORT[channel].u8 = byte;
+    swo_last_write_cycle = DWT->CYCCNT;
 
     return SL_STATUS_OK;
   }
@@ -198,6 +223,7 @@ sl_status_t sl_debug_swo_write_u16(uint32_t channel, uint16_t half_word)
     } while (ITM->PORT[channel].u32 == 0);
 
     ITM->PORT[channel].u16 = half_word;
+    swo_last_write_cycle = DWT->CYCCNT;
 
     return SL_STATUS_OK;
   }
@@ -218,11 +244,30 @@ sl_status_t sl_debug_swo_write_u32(uint32_t channel, uint32_t word)
     } while (ITM->PORT[channel].u32 == 0);
 
     ITM->PORT[channel].u32 = word;
+    swo_last_write_cycle = DWT->CYCCNT;
 
     return SL_STATUS_OK;
   }
 
   return SL_STATUS_NOT_INITIALIZED;
+}
+
+void sli_debug_swo_flush(void)
+{
+  uint32_t start = swo_last_write_cycle;
+
+  // BUSY means the ITM still holds bytes. The shifter residual starts when
+  // BUSY clears, so the saved write time no longer bounds it.
+  if ((ITM->TCR & ITM_TCR_BUSY_Msk) != 0U) {
+    while ((ITM->TCR & ITM_TCR_BUSY_Msk) != 0U) {
+      // Wait for BUSY to clear.
+    }
+    start = DWT->CYCCNT;
+  }
+
+  while ((DWT->CYCCNT - start) < swo_shifter_drain_cycles) {
+    // Wait for the shifter to drain.
+  }
 }
 
 #else // __CORTEX_M
@@ -263,6 +308,10 @@ sl_status_t sl_debug_swo_write_u32(uint32_t channel, uint32_t word)
   (void) channel;
   (void) word;
   return SL_STATUS_NOT_SUPPORTED;
+}
+
+void sli_debug_swo_flush(void)
+{
 }
 
 #endif // __CORTEX_M

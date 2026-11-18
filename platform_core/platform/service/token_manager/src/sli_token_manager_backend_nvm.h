@@ -43,45 +43,45 @@ extern "C" {
 
 /***************************************************************************//**
  * @brief
- *  Open the flash hal for usage.
+ *  Open the NVM hal for usage.
  *
  * @details
  *   This function must be run at initialization, before any other functions
  *   are called. It is used to call necessary startup routines before the
- *   flash can be accessed.
+ *   NVM can be accessed.
  *
- * @param[in] flash_adr
- *   A pointer to the destination in flash.
+ * @param[in] nvm_adr
+ *   A pointer to the destination in NVM.
  *
- * @param[in] flash_size
- *   The flash size.
+ * @param[in] nvm_size
+ *   The NVM size.
  *
  * @return
  *   The result of the open call.
  *   @ref SL_STATUS_OK if successful, an error code otherwise.
  ******************************************************************************/
-sl_status_t sli_token_manager_flash_open(uint32_t flash_adr, uint32_t flash_size);
+sl_status_t sli_token_manager_nvm_open(uint32_t nvm_adr, uint32_t nvm_size);
 
 /***************************************************************************//**
  * @brief
- *  Close the flash hal.
+ *  Close the NVM hal.
  *
  * @details
  *   This function should be called at program termination.
- *   Should be done before any graceful halts.
+ *   Should be done before any graceful NVM halts.
  ******************************************************************************/
-void sli_token_manager_flash_close(void);
+void sli_token_manager_nvm_close(void);
 
 /***************************************************************************//**
  * @brief
- *  Write data to the flash.
+ *  Write data to the NVM.
  *
  * @details
- *   This function is used to write data to the flash. This is a blocking
+ *   This function is used to write data to the NVM. This is a blocking
  *   function.
  *
- * @param[in] flash_adr
- *   A pointer to the destination in flash.
+ * @param[in] nvm_adr
+ *   A pointer to the destination in NVM.
  *
  * @param[in] data
  *   A pointer to the source data.
@@ -93,19 +93,19 @@ void sli_token_manager_flash_close(void);
  *   The result of the write operation.
  *   @ref SL_STATUS_OK if successful, an error code otherwise.
  ******************************************************************************/
-sl_status_t sli_token_manager_flash_write(uint32_t flash_adr, void const *data, uint32_t size);
+sl_status_t sli_token_manager_nvm_write(uint32_t nvm_adr, void const *data, uint32_t size);
 
 /***************************************************************************//**
  * @brief
- *  Read data from flash.
+ *  Read data from NVM.
  *
  * @details
- *   This function is used to read data from the flash. It will be a
+ *   This function is used to read data from the NVM. It will be a
  *   blocking call, since the thread asking for data to be read cannot continue
  *   without the data.
  *
- * @param[in] flash_adr
- *   A pointer to the destination in flash.
+ * @param[in] nvm_adr
+ *   A pointer to the destination in NVM.
  *
  * @param[out] data
  *   A pointer to the destination buffer.
@@ -117,34 +117,31 @@ sl_status_t sli_token_manager_flash_write(uint32_t flash_adr, void const *data, 
  *   The result of the read operation.
  *   @ref SL_STATUS_OK if successful, an error code otherwise.
  ******************************************************************************/
-sl_status_t sli_token_manager_flash_read(uint32_t flash_adr, void *data, uint32_t size);
+sl_status_t sli_token_manager_nvm_read(uint32_t nvm_adr, void *data, uint32_t size);
 
 /***************************************************************************//**
  * @brief
- *   Erase a page in the flash.
+ *   Erase a page in the NVM.
  *
  * @details
- *   This function is used to erase a flash page.
+ *   This function is used to erase a page in the NVM.
  *
- * @param[in] flash_adr
- *   A memory address pointing to the start of the page to erase.
- *
- * @param[in] flash_size
- *   The flash size, the value should be multiple of flash page size.
+ * @param[in] nvm_adr
+ *   A page-aligned memory address pointing to the start of the page to erase.
  *
  * @return
  *   The result of the erase operation.
  *   @ref SL_STATUS_OK if successful, an error code otherwise.
  ******************************************************************************/
-sl_status_t sli_token_manager_flash_erase(uint32_t flash_adr, uint32_t flash_size);
+sl_status_t sli_token_manager_nvm_page_erase(uint32_t nvm_adr);
 
 #if defined(SL_TOKEN_MANAGER_BACKEND_INT_FLASH)
 /***************************************************************************//**
  * @brief
- *  Write first 2 bytes of token data to the flash.
+ *  Write first 2 bytes of token data to the NVM.
  *
- * @param[in] flash_adr
- *   A pointer to the destination in flash.
+ * @param[in] nvm_adr
+ *   A pointer to the destination in NVM.
  *
  * @param[in] data
  *   A pointer to the source data.
@@ -156,14 +153,14 @@ sl_status_t sli_token_manager_flash_erase(uint32_t flash_adr, uint32_t flash_siz
  *   The result of the write operation.
  *   @ref SL_STATUS_OK if successful, an error code otherwise.
  ******************************************************************************/
-sl_status_t sli_token_manager_flash_write_end_word(uint32_t flash_adr, void const *data, uint32_t size);
+sl_status_t sli_token_manager_nvm_write_end_word(uint32_t nvm_adr, void const *data, uint32_t size);
 
 /***************************************************************************//**
  * @brief
- *  Write last 2 bytes of token data to the flash.
+ *  Write last 2 bytes of token data to the NVM.
  *
- * @param[in] flash_adr
- *   A pointer to the destination in flash.
+ * @param[in] nvm_adr
+ *   A pointer to the destination in NVM.
  *
  * @param[in] data
  *   A pointer to the source data.
@@ -172,7 +169,7 @@ sl_status_t sli_token_manager_flash_write_end_word(uint32_t flash_adr, void cons
  *   The result of the write operation.
  *   @ref SL_STATUS_OK if successful, an error code otherwise.
  ******************************************************************************/
-sl_status_t sli_token_manager_flash_write_start_word(uint32_t flash_adr, void const *data);
+sl_status_t sli_token_manager_nvm_write_start_word(uint32_t nvm_adr, void const *data);
 #endif
 
 #ifdef __cplusplus

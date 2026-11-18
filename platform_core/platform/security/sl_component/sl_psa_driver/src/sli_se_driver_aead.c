@@ -42,7 +42,13 @@
 #include "sl_se_manager_cipher.h"
 #include "sli_se_manager_internal.h"
 
+#include "sl_common.h"
+
+#include <stdint.h>
 #include <string.h>
+
+_Static_assert(PSA_AEAD_FINISH_OUTPUT_MAX_SIZE <= UINT8_MAX,
+               "SE multipart finish uses uint8_t output cap; update if PSA max exceeds 255");
 
 // -----------------------------------------------------------------------------
 // Static functions
@@ -1432,13 +1438,6 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
     return PSA_ERROR_BUFFER_TOO_SMALL;
   }
 
-  // The ciphertext size should not exceed 255 bytes which is the maximum size
-  // allowed by the sl_se_ccm_multipart_finish and sl_se_gcm_multipart_finish
-  // functions, since the output_size argument is of type uint8_t.
-  if (ciphertext_size > 255) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-
   if (ciphertext_length == NULL
       || tag == NULL
       || tag_length == NULL) {
@@ -1467,6 +1466,11 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
+  /* SE Manager finish APIs take uint8_t buffer/length; PSA uses size_t. Truncate
+   * to the PSA-documented maximum finish output (one block), which fits uint8_t. */
+  uint8_t se_output_size = (uint8_t) SL_MIN(ciphertext_size, (size_t)PSA_AEAD_FINISH_OUTPUT_MAX_SIZE);
+  uint8_t se_output_length = 0;
+
   switch (alg) {
     #if defined(SLI_PSA_DRIVER_FEATURE_GCM)
     case PSA_ALG_GCM:
@@ -1480,8 +1484,8 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
                                           tag,
                                           tag_len,
                                           ciphertext,
-                                          ciphertext_size,
-                                          (uint8_t *)ciphertext_length);
+                                          se_output_size,
+                                          &se_output_length);
       *tag_length = tag_len;
       break;
     #endif   // SLI_PSA_DRIVER_FEATURE_GCM
@@ -1498,8 +1502,8 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
                                           tag,
                                           tag_len,
                                           ciphertext,
-                                          ciphertext_size,
-                                          (uint8_t *)ciphertext_length);
+                                          se_output_size,
+                                          &se_output_length);
       *tag_length = operation->ctx.ccm.tag_len;
       break;
     #endif   // SLI_PSA_DRIVER_FEATURE_CCM
@@ -1518,6 +1522,7 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
       psa_status = PSA_ERROR_HARDWARE_FAILURE;
     }
   } else {
+    *ciphertext_length = se_output_length;
     psa_status = PSA_SUCCESS;
   }
 
@@ -1573,13 +1578,6 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
     return PSA_ERROR_INVALID_SIGNATURE;
   }
 
-  // The plaintext size should not exceed 255 bytes which is the maximum size
-  // allowed by the sl_se_ccm_multipart_finish and sl_se_gcm_multipart_finish
-  // functions, since the output_size argument is of type uint8_t.
-  if (plaintext_size > 255) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-
   psa_algorithm_t alg = PSA_ALG_AEAD_WITH_DEFAULT_LENGTH_TAG(operation->alg);
 
   if (operation->alg == 0) {
@@ -1600,6 +1598,9 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
+  uint8_t se_output_size = (uint8_t) SL_MIN(plaintext_size, (size_t)PSA_AEAD_FINISH_OUTPUT_MAX_SIZE);
+  uint8_t se_output_length = 0;
+
   switch (alg) {
     #if defined(SLI_PSA_DRIVER_FEATURE_GCM)
     case PSA_ALG_GCM:
@@ -1613,8 +1614,8 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
                                           (uint8_t *)tag,
                                           tag_length,
                                           plaintext,
-                                          plaintext_size,
-                                          (uint8_t *)plaintext_length);
+                                          se_output_size,
+                                          &se_output_length);
       break;
     #endif   // SLI_PSA_DRIVER_FEATURE_GCM
 
@@ -1636,8 +1637,8 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
                                           (uint8_t *)tag,
                                           tag_length,
                                           plaintext,
-                                          plaintext_size,
-                                          (uint8_t *)plaintext_length);
+                                          se_output_size,
+                                          &se_output_length);
       break;
     }
     #endif   // SLI_PSA_DRIVER_FEATURE_CCM
@@ -1656,6 +1657,7 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
       psa_status = PSA_ERROR_HARDWARE_FAILURE;
     }
   } else {
+    *plaintext_length = se_output_length;
     psa_status = PSA_SUCCESS;
   }
 

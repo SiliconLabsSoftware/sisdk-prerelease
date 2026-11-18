@@ -14,6 +14,8 @@ provides:
 
 requires:
 - name: psa_crypto
+  # EC J-PAKE needs PSA key-pair derivation (ECC provider by default).
+- name: psa_crypto_key_pair_derive
 
   # Builtin / classic mbedtls_jpake is only needed where there is no SE PSA
   # PAKE driver. On HSE (device_has_semailbox) the transparent SE driver
@@ -23,6 +25,10 @@ requires:
 - name: mbedtls_jpake
   condition: [device_security_rot]
 
+recommends:
+- id: psa_crypto_ecc_key_pair_derive
+
+  vendor: silabs
 template_contribution:
 - name: psa_crypto_config
   value: PSA_WANT_ALG_JPAKE 1

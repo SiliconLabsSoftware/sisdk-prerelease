@@ -61,7 +61,10 @@
 // <i> the connection is closed, so every connection runs the CBAP procedure.
 // <i> All bonds stored in the bonding database are deleted at boot.
 // <i> Both devices have to use the same setting: a device with bonding enabled
-// <i> refuses a pairing that does not create a bond.
+// <i> refuses a pairing that does not create a bond. Mobile devices (Android
+// <i> and iOS) always bond when pairing, therefore bonding has to remain
+// <i> enabled when connecting with a mobile device. Disabling bonding is only
+// <i> supported between two devices running this component.
 #define SL_BT_CBAP_BONDING                  (1)
 
 // <o SL_BT_CBAP_PROCEDURE_TIMEOUT_MS> Procedure timeout (ms) <20..65535>

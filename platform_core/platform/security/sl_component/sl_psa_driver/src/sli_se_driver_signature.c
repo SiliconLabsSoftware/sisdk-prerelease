@@ -90,8 +90,7 @@ static psa_status_t check_curve_availability(
   #if defined(SLI_PSA_DRIVER_FEATURE_ECDSA)
   if (curvetype == PSA_ECC_FAMILY_SECP_R1) {
     if (is_sign) {
-  #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
-      // Curl supports both randomized and deterministic ECDSA signing.
+  #if defined(SLI_SE_SUPPORTS_DETERMINISTIC_ECDSA)
       // Deterministic ECDSA hashes in hardware (psa_sign_message only).
       if (!PSA_ALG_IS_ECDSA(alg)) {
         return PSA_ERROR_NOT_SUPPORTED;
@@ -100,12 +99,13 @@ static psa_status_t check_curve_availability(
         return PSA_ERROR_NOT_SUPPORTED;
       }
   #else
-      // Non-Curl SE can only sign with randomized ECDSA
+      // SE devices that lack the deterministic ECDSA path
+      // can only sign with randomized ECDSA
       if (!PSA_ALG_IS_RANDOMIZED_ECDSA(alg)) {
         return PSA_ERROR_NOT_SUPPORTED;
       }
       (void) is_hash;
-  #endif // _SILICON_LABS_32B_SERIES_2_CONFIG_11
+  #endif // SLI_SE_SUPPORTS_DETERMINISTIC_ECDSA
     } else {
       // SE can verify hashes and messages with any ECDSA
       // Randomized and deterministic ECDSA use the same verification
@@ -1041,9 +1041,9 @@ static psa_status_t sli_se_sign_message(
   #endif   // SLI_SE_VERSION_ED25519_ERRATA_CHECK_REQUIRED
 
   // Run signature generation
-  #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+  #if defined(SLI_SE_SUPPORTS_DETERMINISTIC_ECDSA)
   if (PSA_ALG_ECDSA_IS_DETERMINISTIC(alg)) {
-    // Use deterministic ECDSA (RFC 6979) on Curl (xG2B) devices
+    // Use deterministic ECDSA (RFC 6979) on Series 2 Config 11 and Config 14
     status = sl_se_ecc_sign_deterministic(&cmd_ctx,
                                           &key_desc,
                                           get_hash_for_algorithm(alg),
@@ -1052,7 +1052,7 @@ static psa_status_t sli_se_sign_message(
                                           tmp_signature_p,
                                           tmp_signature_size);
   } else
-  #endif // _SILICON_LABS_32B_SERIES_2_CONFIG_11
+  #endif // SLI_SE_SUPPORTS_DETERMINISTIC_ECDSA
   {
     status = sl_se_ecc_sign(&cmd_ctx,
                             &key_desc,

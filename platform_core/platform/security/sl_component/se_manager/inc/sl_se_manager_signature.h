@@ -116,13 +116,13 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
                            unsigned char *signature,
                            size_t signature_len);
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+#if defined(SLI_SE_SUPPORTS_DETERMINISTIC_ECDSA)
 /***************************************************************************//**
  * @brief
  *   This function computes deterministic ECDSA digital signatures
  *
  * @note
- *   Deterministic ECDSA is only available on Curl (xG2B) devices.
+ *   Deterministic ECDSA is only available on Series 2 Config 11 and Config 14.
  *   Unlike regular ECDSA which uses random nonces, deterministic ECDSA
  *   derives the nonce from the message and private key, making the signature
  *   reproducible for the same message and key pair.
@@ -168,7 +168,7 @@ sl_status_t sl_se_ecc_sign_deterministic(sl_se_command_context_t *cmd_ctx,
                                          size_t message_len,
                                          unsigned char *signature,
                                          size_t signature_len);
-#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_11
+#endif // SLI_SE_SUPPORTS_DETERMINISTIC_ECDSA
 
 /***************************************************************************//**
  * @brief

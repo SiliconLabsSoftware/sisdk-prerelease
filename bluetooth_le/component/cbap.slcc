@@ -16,8 +16,11 @@ description: >
   peer device skips the procedure, its stored key restores the encryption of
   the link. If the peer device has lost the bond, the stale bond is deleted,
   so that the next connection runs the procedure again. Bonding can be
-  disabled in the configuration: then the pairing creates no bond, every
-  connection runs the procedure, and the stored bonds are deleted at boot.
+  disabled in the configuration between two devices running this component:
+  then the pairing creates no bond, every connection runs the procedure, and
+  the stored bonds are deleted at boot. Mobile devices always bond when
+  pairing, so bonding has to remain enabled when connecting with a mobile
+  device.
   The CBAP role selects what the device does: a Prover presents its batch and
   device certificates, a Verifier validates the certificates of the peer
   device against its factory certificate, and the Full role does both. The

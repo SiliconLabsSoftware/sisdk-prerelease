@@ -325,6 +325,7 @@ static sl_status_t prepare_pairing_parameters(void);
 static sl_status_t process_pairing_parameters(void);
 static sl_status_t adapt_io_capability(uint8_t peer_io_capability);
 static bool is_procedure_complete(void);
+static bool is_remote_cbap_char(uint16_t remote_handle);
 static void receive_indication(
   const sl_bt_evt_gatt_characteristic_value_t *value);
 static void receive_data_write(const user_write_request_t *req, uint8_t index);
@@ -679,6 +680,9 @@ void sli_bt_cbap_on_event(sl_bt_msg_t *evt)
       if (evt->data.evt_sm_passkey_request.connection
           == candidate_device.handle) {
         if (bonded_reconnect || displays_passkey || !is_procedure_complete()) {
+          SLI_BT_CBAP_LOG_ERROR("Unexpected passkey request on connection "
+                                "%d!" SLI_BT_CBAP_LOG_NL,
+                                candidate_device.handle);
           on_error(SL_STATUS_INVALID_STATE);
           break;
         }
@@ -1940,6 +1944,28 @@ static sl_status_t adapt_io_capability(uint8_t peer_io_capability)
 }
 
 /******************************************************************************
+ * Check whether an attribute handle on the remote device is one of the
+ * discovered CBAP characteristics.
+ *
+ * @param[in] remote_handle Attribute handle on the remote GATT server.
+ *
+ * @return true if @p remote_handle belongs to a discovered CBAP
+ *         characteristic, false otherwise.
+ *****************************************************************************/
+static bool is_remote_cbap_char(uint16_t remote_handle)
+{
+  if (remote_handle == HANDLE_NOT_INITIALIZED) {
+    return false;
+  }
+  for (uint8_t i = 0; i < SL_BT_CBAP_CHAR_COUNT; i++) {
+    if (cbap_char_handles[i] == remote_handle) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/******************************************************************************
  * Collect an indicated fragment on the central, and confirm it.
  *
  * Once the whole value has arrived, the central device stores the certificate,
@@ -1951,6 +1977,12 @@ static sl_status_t adapt_io_capability(uint8_t peer_io_capability)
 static void receive_indication(
   const sl_bt_evt_gatt_characteristic_value_t *value)
 {
+  // Ignore values of non-CBAP characteristics, such as notifications or
+  // indications owned by another component or the application.
+  if (!is_remote_cbap_char(value->characteristic)) {
+    return;
+  }
+
   bool certificate = ((central_state == CENTRAL_EXCHANGE_CERTIFICATES)
                       && (char_state < CERT_CHAR_COUNT)
                       && cert_chars[char_state].server);
@@ -1965,6 +1997,11 @@ static void receive_indication(
       || (value->characteristic != cbap_char_handles[char_state])
       || (value->att_opcode != sl_bt_gatt_handle_value_indication)
       || (value->offset != 0)) {
+    SLI_BT_CBAP_LOG_ERROR("Unexpected GATT value on handle %u (opcode 0x%02x, "
+                          "state %d)!" SLI_BT_CBAP_LOG_NL,
+                          (unsigned int)value->characteristic,
+                          (unsigned int)value->att_opcode,
+                          (int)central_state);
     on_error(SL_STATUS_INVALID_STATE);
     return;
   }

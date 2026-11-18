@@ -30,8 +30,10 @@
 
 #include "sli_psa_driver_features.h"
 #include "psa/crypto.h"
+#include "sl_status.h"
 #if defined(SLI_MBEDTLS_DEVICE_HC)
 #include "sli_hostcrypto_transparent_functions.h"
+#include "sli_crypto_ksu_manager.h"
 #include "sxsymcrypt/keyref.h"
 #include "sl_psa_values.h"
 
@@ -52,6 +54,10 @@ psa_status_t sli_hostcrypto_load_key(struct sxkeyref *sx_key_ref,
     return PSA_SUCCESS;
 #if defined(SLI_PSA_DRIVER_FEATURE_KSU)
   } else if (location == SL_PSA_KEY_LOCATION_KSU_0) {
+    sl_status_t sl_status = sli_ksu_ensure_setupdone();
+    if (sl_status != SL_STATUS_OK) {
+      return PSA_ERROR_HARDWARE_FAILURE;
+    }
     size_t key_index = (size_t) *key_buffer;
     *sx_key_ref = sx_keyref_load_by_id(key_index);
     return PSA_SUCCESS;

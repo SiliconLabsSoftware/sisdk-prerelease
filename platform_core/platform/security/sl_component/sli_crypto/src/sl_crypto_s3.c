@@ -61,6 +61,46 @@ typedef enum _sli_engine_idx {
 #define INVALID_ENGINE(engine) \
         (((engine) != SLI_CRYPTO_LPWAES) && ((engine) != SLI_CRYPTO_HOSTSYMCRYPTO))
 
+#if defined(KSU_PRESENT)
+// Keep this check local and inline for the time-sensitive driver paths.
+static inline sl_status_t sli_crypto_s3_ksu_ensure_setupdone(void)
+{
+  sl_status_t status = sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_KSU);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  if ((KSU->INFO & KSU_INFO_SETUPDONE) == 0U) {
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  return SL_STATUS_OK;
+}
+#endif
+
+static sl_status_t sli_crypto_load_sxkeyref(const sli_crypto_descriptor_t *key_descriptor,
+                                            struct sxkeyref              *key_ref)
+{
+  if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_PLAINTEXT) {
+    *key_ref = sx_keyref_load_material(key_descriptor->key.plaintext_key.key_size,
+                                       (const char *)key_descriptor->key.plaintext_key.buffer.pointer);
+    return SL_STATUS_OK;
+  }
+  if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_KSU) {
+#if defined(KSU_PRESENT)
+    sl_status_t status = sli_crypto_s3_ksu_ensure_setupdone();
+    if (status != SL_STATUS_OK) {
+      return status;
+    }
+    *key_ref = sx_keyref_load_by_id(key_descriptor->key.key_slot);
+    return SL_STATUS_OK;
+#else
+    return SL_STATUS_INVALID_PARAMETER;
+#endif
+  }
+  return SL_STATUS_INVALID_PARAMETER;
+}
+
 sl_status_t sli_crypto_countermeasure_reseed(sli_crypto_engine_t engine, sli_crypto_seed_t *seed)
 {
   if (INVALID_ENGINE(engine)) {
@@ -178,15 +218,10 @@ sl_status_t sli_crypto_gcm(sli_crypto_descriptor_t  *key_descriptor,
   struct sxaead aead;
   struct sxkeyref key_ref;
 
-  if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_PLAINTEXT) {
-    key_ref = sx_keyref_load_material(key_descriptor->key.plaintext_key.key_size,
-                                      (const char *)key_descriptor->key.plaintext_key.buffer.pointer);
-  } else if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_KSU) {
-    key_ref = sx_keyref_load_by_id(key_descriptor->key.key_slot);
-  } else {
-    return SL_STATUS_INVALID_PARAMETER;
+  sl_status_t status = sli_crypto_load_sxkeyref(key_descriptor, &key_ref);
+  if (status != SL_STATUS_OK) {
+    return status;
   }
-  sl_status_t status;
   int sx_status;
   status = sli_sxsymcrypt_lock_cryptomaster_selection(key_descriptor->engine, key_descriptor->yield);
   if (status != SL_STATUS_OK) {
@@ -320,16 +355,11 @@ sl_status_t sli_crypto_ccm(sli_crypto_descriptor_t  *key_descriptor,
   bool is_isr = false;
   sli_cryptomaster_state_t lpwaes_state;
 
-  if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_PLAINTEXT) {
-    key_ref = sx_keyref_load_material(key_descriptor->key.plaintext_key.key_size,
-                                      (const char *)key_descriptor->key.plaintext_key.buffer.pointer);
-  } else if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_KSU) {
-    key_ref = sx_keyref_load_by_id(key_descriptor->key.key_slot);
-  } else {
-    return SL_STATUS_INVALID_PARAMETER;
+  sl_status_t status = sli_crypto_load_sxkeyref(key_descriptor, &key_ref);
+  if (status != SL_STATUS_OK) {
+    return status;
   }
 
-  sl_status_t status;
   status = sli_sxsymcrypt_lock_cryptomaster_selection(key_descriptor->engine, key_descriptor->yield);
   if (status != SL_STATUS_OK) {
     if (status == SL_STATUS_ISR && key_descriptor->engine == SLI_CRYPTO_LPWAES) {
@@ -413,16 +443,11 @@ sl_status_t sli_crypto_ecb(sli_crypto_descriptor_t *key_descriptor,
   bool is_isr = false;
   sli_cryptomaster_state_t lpwaes_state;
 
-  if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_PLAINTEXT) {
-    key_ref = sx_keyref_load_material(key_descriptor->key.plaintext_key.key_size,
-                                      (const char *)key_descriptor->key.plaintext_key.buffer.pointer);
-  } else if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_KSU) {
-    key_ref = sx_keyref_load_by_id(key_descriptor->key.key_slot);
-  } else {
-    return SL_STATUS_INVALID_PARAMETER;
+  sl_status_t status = sli_crypto_load_sxkeyref(key_descriptor, &key_ref);
+  if (status != SL_STATUS_OK) {
+    return status;
   }
 
-  sl_status_t status;
   status = sli_sxsymcrypt_lock_cryptomaster_selection(key_descriptor->engine, key_descriptor->yield);
   if (status != SL_STATUS_OK) {
     if (status == SL_STATUS_ISR && key_descriptor->engine == SLI_CRYPTO_LPWAES) {
@@ -479,16 +504,11 @@ sl_status_t sli_crypto_cmac(sli_crypto_descriptor_t    *key_descriptor,
   bool is_isr = false;
   sli_cryptomaster_state_t lpwaes_state;
 
-  if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_PLAINTEXT) {
-    key_ref = sx_keyref_load_material(key_descriptor->key.plaintext_key.key_size,
-                                      (const char *)key_descriptor->key.plaintext_key.buffer.pointer);
-  } else if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_KSU) {
-    key_ref = sx_keyref_load_by_id(key_descriptor->key.key_slot);
-  } else {
-    return SL_STATUS_INVALID_PARAMETER;
+  sl_status_t status = sli_crypto_load_sxkeyref(key_descriptor, &key_ref);
+  if (status != SL_STATUS_OK) {
+    return status;
   }
 
-  sl_status_t status;
   status = sli_sxsymcrypt_lock_cryptomaster_selection(key_descriptor->engine, key_descriptor->yield);
   if (status != SL_STATUS_OK) {
     if (status == SL_STATUS_ISR && key_descriptor->engine == SLI_CRYPTO_LPWAES) {
@@ -543,16 +563,11 @@ sl_status_t sli_crypto_ctr(sli_crypto_descriptor_t *key_descriptor,
   bool is_isr = false;
   sli_cryptomaster_state_t lpwaes_state;
 
-  if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_PLAINTEXT) {
-    key_ref = sx_keyref_load_material(key_descriptor->key.plaintext_key.key_size,
-                                      (const char *)key_descriptor->key.plaintext_key.buffer.pointer);
-  } else if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_KSU) {
-    key_ref = sx_keyref_load_by_id(key_descriptor->key.key_slot);
-  } else {
-    return SL_STATUS_INVALID_PARAMETER;
+  sl_status_t status = sli_crypto_load_sxkeyref(key_descriptor, &key_ref);
+  if (status != SL_STATUS_OK) {
+    return status;
   }
 
-  sl_status_t status;
   status = sli_sxsymcrypt_lock_cryptomaster_selection(key_descriptor->engine, key_descriptor->yield);
   if (status != SL_STATUS_OK) {
     if (status == SL_STATUS_ISR && key_descriptor->engine == SLI_CRYPTO_LPWAES) {
@@ -754,6 +769,15 @@ sl_status_t sli_crypto_process_rpa(sli_crypto_descriptor_t     *key_descriptor,
   RPA->IRKMASK = keymask & _RPA_IRKMASK_IRKMASK_MASK;
 
   if (key_descriptor->location == SLI_CRYPTO_KEY_LOCATION_KSU) {
+#if defined(KSU_PRESENT)
+    sl_status_t ksu_status = sli_crypto_s3_ksu_ensure_setupdone();
+    if (ksu_status != SL_STATUS_OK) {
+      RPA->EN_CLR = RPA_EN_EN;
+      sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_RPA);
+      sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_LPWAES);
+      return ksu_status;
+    }
+#endif
     RPA->CTRL_CLR = RPA_CTRL_IRKDMEMSEL;
     RPA->IRKKEYSLOTID = key_descriptor->key.key_slot & _RPA_IRKKEYSLOTID_MASK;
   } else {

@@ -160,7 +160,7 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
   return sli_se_execute_and_wait(cmd_ctx);
 }
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_11)
+#if defined(SLI_SE_SUPPORTS_DETERMINISTIC_ECDSA)
 /***************************************************************************//**
  * Deterministic ECDSA signature generation (RFC 6979).
  ******************************************************************************/
@@ -217,7 +217,7 @@ sl_status_t sl_se_ecc_sign_deterministic(sl_se_command_context_t *cmd_ctx,
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
-#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_11
+#endif // SLI_SE_SUPPORTS_DETERMINISTIC_ECDSA
 
 /***************************************************************************//**
  * ECC signature verification.

@@ -1,0 +1,49 @@
+id: common_token_manager_upgradable
+label: Common Token Manager - Upgradable token
+package: platform_core
+description: >
+  The `common_token_manager_upgradable` component provides APIs to read and write upgradable tokens.
+  By default, upgradable token storage is configured using the default settings. If additional storage
+  space is required, the configuration parameter `SL_TOKEN_MANAGER_UT_DEFAULT_NVM_SIZE` can be set accordingly
+  in sl_token_manager_config.h file.
+category: Services|Token Manager
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+requires:
+- name: component_catalog
+- name: se_manager
+  condition: [device_series_2, device_sdid_200]
+- name: se_manager
+  condition: [device_series_3]
+- name: device_clock
+  condition: [device_series_3]
+- name: hal_generic_gpcrc
+  condition: [device_series_3]
+- name: common_token_manager_dynamic
+- name: common_token_manager_core
+provides:
+- name: common_token_manager_upgradable
+define:
+- name: SL_COMMON_TOKEN_MANAGER_ENABLE_UPGRADABLE_TOKENS
+source:
+- path: platform/service/token_manager/src/sli_token_manager_hal_flash.c
+  condition: [device_series_2]
+- path: platform/service/token_manager/src/sli_token_manager_hal_ext_flash.c
+  condition: [device_series_3]
+- path: platform/service/token_manager/src/sli_token_manager_format_klv.c
+- path: platform/service/token_manager/src/sli_token_manager_backend_nvm.c
+- path: platform/service/token_manager/src/sli_token_manager_upgradable.c
+include:
+- path: platform/service/token_manager/src
+  file_list:
+  - path: sli_token_manager_hal_flash.h
+  - path: sli_token_manager_backend_nvm.h
+  - path: sli_token_manager_format_klv.h
+ui_hints:
+  visibility: advanced
+documentation:
+  docset: gecko-platform
+  document: platform-service/token-manager
+root_path: platform_core

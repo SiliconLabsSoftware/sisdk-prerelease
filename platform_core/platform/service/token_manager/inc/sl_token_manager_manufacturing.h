@@ -45,11 +45,15 @@
 #include "sl_token_manufacturing_generic.h"
 
 //--- Static device token Data ---
+// Phase-1 Series 3 token type nibble (bits 15:12 = 0x1) and the Series 2
+// static device offset base. Keep this value. Do not OR it into a new token id range from Series 3 onwards.
 #ifndef SL_TOKEN_STATIC_DEVICE_TOKENS
 #define SL_TOKEN_STATIC_DEVICE_TOKENS             (0x1000)
 #endif
 
 //--- Static secure token Data    ---
+// Phase-1 Series 3 token type nibble (bits 15:12 = 0x3) and the Series 2
+// static secure data offset base. Keep this value. Do not OR it into a new token id range from Series 3 onwards.
 #ifndef SL_TOKEN_STATIC_SECURE_DATA_TOKENS
 #define SL_TOKEN_STATIC_SECURE_DATA_TOKENS        (0x3000)
 #endif
@@ -251,12 +255,20 @@
 #define TOKEN_MFG_ZW_QR_CODE_EXT_SIZE             (16u)               //  16 bytes
 #endif
 #else
-// Note: In series 3, since the tokens are stored in klv chain format,
-//       these key don't specify the memory offset, rather treated as a key.
-//       The 16-bit key value is used in KLV header for identification purposes.
-//       CTM has reserved dedicated token key ranges for each domain, 
-//       with a total of 128 token keys allocated per domain.
-//       The token key ranges are defined in sl_token_manager_defines.h
+// Note: From series 3 onwards, tokens are stored in KLV chain format. The value is a
+//       16-bit key in the KLV header, not a flash offset.
+//       Two formats share that field. See sl_token_manager_defines.h.
+//       Phase-1 keys keep bits 15:12 as the token type nibble (0x1 static
+//       device, 0x3 static secure) and bits 11:0 as the 12-bit logical key.
+//       Those keys are unchanged on devices that already store them.
+//       New Series 3 keys use all 16 bits and do not OR in
+//       SL_TOKEN_STATIC_DEVICE_TOKENS or SL_TOKEN_STATIC_SECURE_DATA_TOKENS.
+//       Static device versus static secure for a new key comes from bits 31:27
+//       of the 32-bit token, set by SL_TOKEN_GET_STATIC_*_TOKEN().
+//       Phase-1 ranges 0x1000-0x1FFF (static device) and 0x3000-0x3FFF
+//       (static secure) stay reserved so the two formats cannot alias.
+//       The Phase-1 domain map (128 keys per domain) and the 16-bit domain map
+//       (1024 keys per domain) are documented in sl_token_manager_defines.h.
 
 //--- Static device token Data ---
 // In case of series 3 device, static device space is located in SE MTP region. The 16 bit
@@ -265,7 +277,8 @@
 
 // MAX token length that can be embedded as part of token is 0x1FFF.
 
-// Below defined tokens are reserved and should not be used for defining new tokens in the specific domain.
+// Below defined tokens are reserved Phase-1 logical ids. Do not reuse them for a
+// different token, including as a new 16-bit key with another high nibble.
 //    | Static device token (Domain : Token IDs)                  | Static secure token (Domain : Token IDs)     |
 //    |-----------------------------------------------------------|----------------------------------------------|
 //    | Common : 0x002, 0x00C, 0x020, 0x030, 0x034, 0x038, 0x064  | Bluetooth : 0x204, 0x260, 0x270              |
@@ -315,10 +328,11 @@
 #endif
 
 //--- Static secure token ---
-// In case of series 3 device, static secure space is located in data region of flash,
-// appending the token with 0x3000 will indicate that the token belongs to static secure range.
-// This resulting 16-bit key will be used in KLV header for identification purposes.
-// Note: Since the tokens are stored in klv chain format, these key don't specify the memory offset,
+// In case of series 3 device, static secure space is located in data region of flash.
+// Phase-1 static secure keys are the logical id ORed with 0x3000. That 16-bit
+// value is the KLV key. A new static secure key is the raw 16-bit id; the
+// static secure type is bits 31:27 of the 32-bit token, not bits 15:12.
+// Note: Since the tokens are stored in klv chain format, these keys don't specify the memory offset,
 // rather treated as a key.
 
 // MAX token length that can be embedded as part of token is 0x1FFF.
@@ -342,6 +356,9 @@
 #endif // SL_TOKEN_MANAGER_FORMAT_LEGACY
 
 //--- Virtual manufacturing Tokens ---
+// This token is a virtual token that is used to read the EUI-64 from
+// either the device info register or the custom EUI-64 token.
+// This token is not stored hence there can be no override for it.
 #ifndef TOKEN_MFG_EUI_64
 #define TOKEN_MFG_EUI_64                          (0xb634)
 #define TOKEN_MFG_EUI_64_SIZE                     (8u)                //   8 bytes

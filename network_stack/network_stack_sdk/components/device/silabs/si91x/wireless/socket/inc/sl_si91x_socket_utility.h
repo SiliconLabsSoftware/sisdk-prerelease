@@ -382,12 +382,16 @@ void sli_handle_accept_response(sli_si91x_socket_t *si91x_client_socket,
 int sli_handle_select_response(const sli_si91x_socket_select_rsp_t *response,
                                fd_set *readfds,
                                fd_set *writefds,
-                               fd_set *exception_fd);
+                               fd_set *exception_fd,
+                               uint32_t read_interest_host_mask,
+                               uint32_t write_interest_host_mask);
 #else
 int sli_handle_select_response(const sli_si91x_socket_select_rsp_t *response,
                                sl_si91x_fdset_t *readfds,
                                sl_si91x_fdset_t *writefds,
-                               sl_si91x_fdset_t *exception_fd);
+                               sl_si91x_fdset_t *exception_fd,
+                               uint32_t read_interest_host_mask,
+                               uint32_t write_interest_host_mask);
 #endif
 
 void sli_si91x_set_accept_callback(sli_si91x_socket_t *server_socket,

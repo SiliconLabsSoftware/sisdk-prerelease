@@ -125,30 +125,27 @@ typedef sl_status_t (*sli_token_hal_flash_write_t)(uint32_t flash_address, void 
  *   Erase a page in the flash.
  *
  * @details
- *   This function is used to erase a flash page.
+ *   This function is used to erase a page in the flash.
  *
  * @param[in] flash_address
- *   A memory address pointing to the start of the page to erase.
- *
- * @param[in] flash_size
- *   The flash size, the value should be multiple of flash page size.
+ *   A page-aligned memory address pointing to the start of the page to erase.
  *
  * @return
  *   The result of the erase operation.
  *   @ref SL_STATUS_OK if successful, an error code otherwise.
  ******************************************************************************/
-typedef sl_status_t (*sli_token_hal_flash_erase_t)(uint32_t flash_address, size_t flash_size);
+ typedef sl_status_t (*sli_token_hal_flash_page_erase_t)(uint32_t flash_address);
 
 /// @brief The HAL handle definition.
 typedef struct {
-  sli_token_hal_flash_open_t     open;
-  sli_token_hal_flash_close_t    close;
-  sli_token_hal_flash_read_t     read;
-  sli_token_hal_flash_write_t    write;
-  sli_token_hal_flash_erase_t    erase;
+  sli_token_hal_flash_open_t          open;
+  sli_token_hal_flash_close_t         close;
+  sli_token_hal_flash_read_t          read;
+  sli_token_hal_flash_write_t         write;
+  sli_token_hal_flash_page_erase_t    erase;
 } sli_token_hal_flash_handle_t;
 
-extern const sli_token_hal_flash_handle_t sli_token_manager_hal_flash_handle;
+extern const sli_token_hal_flash_handle_t sli_token_manager_hal_nvm_handle;
 
 #ifdef __cplusplus
 }

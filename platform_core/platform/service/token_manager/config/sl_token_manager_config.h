@@ -74,6 +74,20 @@
 // </e>
 #endif
 #endif
+
+#if defined(SL_COMMON_TOKEN_MANAGER_ENABLE_UPGRADABLE_TOKENS)
+#ifndef SL_TOKEN_MANAGER_UT_DEFAULT_NVM_SIZE
+// <o SL_TOKEN_MANAGER_UT_DEFAULT_NVM_SIZE> Upgradable Tokens (UT) Default Size
+// <i> Default size of the upgradable tokens. This size should be aligned with
+// <i> the flash page size of the device. Note that this size is not fully available for token storage.
+// <i> The actual size available for upgradable token storage will be reduced by the repack region size.
+// <i> The repack region size is max object size rounded up to the nearest page size plus one page size.
+// <i> For more details, refer to Common Token Manager documentation
+// <i> https://docs.silabs.com/gecko-platform/latest/platform-service/common-token-manager .
+// <i> Default: 24576
+#define SL_TOKEN_MANAGER_UT_DEFAULT_NVM_SIZE 24576
+#endif
+#endif
 // </h>
 
 #if (SL_TOKEN_MANAGER_CUSTOM_MANUFACTURING_TOKENS_PRESENT)

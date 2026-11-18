@@ -46,9 +46,9 @@
 // <q SL_POWER_MANAGER_ENABLE_EM01_VOLTAGE_SCALING> Enable voltage scaling in EM0 and EM1 mode.
 // <i> Enable or disable voltage scaling in EM0/1 modes. With this config enabled, the voltage
 // <i> scaling will be configured at the lowest possible level based on the system clock.
-// <i> Default: 0
+// <i> Default: 1
 #ifndef SL_POWER_MANAGER_ENABLE_EM01_VOLTAGE_SCALING
-#define SL_POWER_MANAGER_ENABLE_EM01_VOLTAGE_SCALING   0
+#define SL_POWER_MANAGER_ENABLE_EM01_VOLTAGE_SCALING   1
 #endif
 
 // <q SL_POWER_MANAGER_ENABLE_LFXO_EM2_CTUNE_COMPENSATION> Enable LFXO EM2 CTUNE compensation

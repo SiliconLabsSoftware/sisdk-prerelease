@@ -195,6 +195,7 @@
 
 #if SL_PSA_DRIVERS_ENABLED
   #include "sli_psa_acceleration.h"
+  #include "sli_psa_acceleration_optim.h"
 #endif
 
 #include "sl_psa_driver_config.h"

@@ -61,7 +61,9 @@
  *   reports the IO capability KeyboardDisplay, and its applications can
  *   neither change it nor install a passkey of their own choice. Therefore,
  *   the mobile device enters the passkey, and its user takes part in the
- *   pairing. The device running this component remains headless.
+ *   pairing. The device running this component remains headless. Mobile
+ *   devices always bond when pairing, so @ref SL_BT_CBAP_BONDING has to remain
+ *   enabled.
  *
  * In both cases, the IO capability that this component reports to the
  * Bluetooth stack describes the part that the device takes in passkey entry
@@ -139,7 +141,11 @@
  * procedure. The component deletes all bonds of the bonding database at boot,
  * so that a bond stored while bonding was enabled does not skip the
  * procedure either. Both devices have to use the same setting: a device with
- * bonding enabled refuses a pairing that does not create a bond.
+ * bonding enabled refuses a pairing that does not create a bond. Mobile
+ * devices always bond when pairing and cannot disable bonding, therefore
+ * @ref SL_BT_CBAP_BONDING has to remain enabled when connecting with a mobile
+ * device. Disabling bonding is only supported between two devices running this
+ * component.
  *
  * A device in the Verifier or Full role only bonds with a peer device that
  * can prove itself, that is, a device in the Prover or Full role. The table

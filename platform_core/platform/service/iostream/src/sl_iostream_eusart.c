@@ -203,7 +203,7 @@ static inline sl_hal_eusart_stop_bits_t iostream_to_hal_stop(sl_iostream_eusart_
 static inline sl_hal_eusart_hw_flow_control_t iostream_to_hal_flow_control(sl_iostream_eusart_uart_flow_control_t fc)
 {
   switch (fc) {
-    case SL_IOSTREAM_EUSART_UART_FLOW_CTRL_SOFT:
+    case SLI_IOSTREAM_EUSART_UART_FLOW_CTRL_SOFT:
     case SL_IOSTREAM_EUSART_UART_FLOW_CTRL_NONE:
       return SL_HAL_EUSART_HW_FLOW_CONTROL_NONE;
     case SL_IOSTREAM_EUSART_UART_FLOW_CTRL_CTS:
@@ -257,7 +257,7 @@ static inline EUSART_Stopbits_TypeDef iostream_to_hal_stop(sl_iostream_eusart_ua
 static inline EUSART_HwFlowControl_TypeDef iostream_to_hal_flow_control(sl_iostream_eusart_uart_flow_control_t fc)
 {
   switch (fc) {
-    case SL_IOSTREAM_EUSART_UART_FLOW_CTRL_SOFT:
+    case SLI_IOSTREAM_EUSART_UART_FLOW_CTRL_SOFT:
     case SL_IOSTREAM_EUSART_UART_FLOW_CTRL_NONE:
       return eusartHwFlowControlNone;
     case SL_IOSTREAM_EUSART_UART_FLOW_CTRL_CTS:

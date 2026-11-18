@@ -35,6 +35,15 @@
 #include "sli_token_manager_internal.h"
 #include "sl_token_manager_defines.h"
 #include "sl_token_manager_config.h"
+#include "sl_token_manager_manufacturing.h"
+
+#if defined(SL_COMMON_TOKEN_MANAGER_ENABLE_UPGRADABLE_TOKENS)
+#if defined (__ICCARM__)
+__root __no_init uint8_t upgradable_tokens_storage[SL_TOKEN_MANAGER_UT_DEFAULT_NVM_SIZE] @ "UPGRADABLE_TOKENS";
+#elif defined (__GNUC__)
+__attribute__((used)) uint8_t upgradable_tokens_storage[SL_TOKEN_MANAGER_UT_DEFAULT_NVM_SIZE] __attribute__ ((section(".upgradable_tokens")));
+#endif
+#endif // SL_COMMON_TOKEN_MANAGER_ENABLE_UPGRADABLE_TOKENS
 
 #if defined(SL_COMMON_TOKEN_MANAGER_ENABLE_STATIC_TOKENS)
 /**************************************************************************//**
@@ -75,18 +84,20 @@ sl_status_t sli_token_manager_get_token_data_preinit(uint32_t token,
  ******************************************************************************/
 sl_token_type_t sli_token_manager_decode_token_type(uint32_t token)
 {
-  sl_token_type_t token_type = SL_TOKEN_TYPE_INVALID;
+  sl_token_type_t token_type = SL_TOKEN_TYPE_MAX;
 
-  if ((token & SL_TOKEN_DYNAMIC_MASK) == SL_TOKEN_TYPE_NVM3) {
-    token_type = SL_TOKEN_TYPE_NVM3_DEFAULT;
-  } else if ((token & SL_TOKEN_DYNAMIC_MASK) == SL_TOKEN_TYPE_NVM3_SECONDARY) {
-    token_type = SL_TOKEN_TYPE_NVM3_ZWAVE;
+  if ((token & SL_TOKEN_DYNAMIC_MASK) == SL_TOKEN_TYPE_DYNAMIC) {
+    token_type = SL_TOKEN_TYPE_DYNAMIC_TOKEN;
+  } else if ((token & SL_TOKEN_DYNAMIC_MASK) == SL_TOKEN_TYPE_DYNAMIC_SECONDARY) {
+    token_type = SL_TOKEN_TYPE_DYNAMIC_TOKEN_SECONDARY;
   } else if ((token & SL_TOKEN_STATIC_MASK) == SL_TOKEN_TYPE_STATIC_DEVICE) {
     token_type = SL_TOKEN_TYPE_STATIC_DEVICE_TOKEN;
   } else if ((token & SL_TOKEN_STATIC_MASK) == SL_TOKEN_TYPE_STATIC_SECURE) {
     token_type = SL_TOKEN_TYPE_STATIC_SECURE_TOKEN;
+  } else if ((token & SL_TOKEN_STATIC_MASK) == SL_TOKEN_TYPE_UPGRADABLE) {
+    token_type = SL_TOKEN_TYPE_UPGRADABLE_TOKEN;
   } else {
-    token_type = SL_TOKEN_TYPE_INVALID;
+    token_type = SL_TOKEN_TYPE_MAX;
   }
   return token_type;
 }
@@ -95,24 +106,23 @@ sl_token_type_t sli_token_manager_decode_token_type(uint32_t token)
 /***************************************************************************//**
  * When NVM3_OVERRIDE is active, returns NVM3 key region value allocated
  * for manufacturing tokens.
- *
- * @param[in] token The token identifier in 32-bit token format.
- *
- * @return either SL_TOKEN_NVM3_REGION_STATIC_DEVICE_TOKEN_RANGE or
- * SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_RANGE.
  ******************************************************************************/
 uint32_t sli_token_manager_get_nvm3_key_space_region(uint32_t token)
 {
-  uint32_t nvm3_key_region = 0;
-  sl_token_type_t token_type = sli_token_manager_decode_token_type(token);
+  uint32_t key_nibble = token & SL_TOKEN_STATIC_TOKEN_BASE_TYPE_KEY_MASK;
 
-  if (token_type == SL_TOKEN_TYPE_STATIC_DEVICE_TOKEN) {
-    nvm3_key_region = SL_TOKEN_NVM3_REGION_STATIC_DEVICE_TOKEN_RANGE;
-  } else if (token_type == SL_TOKEN_TYPE_STATIC_SECURE_TOKEN) {
-    nvm3_key_region = SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_RANGE;
-  } else {
-    //should not come here for manufacturing tokens
+  if (key_nibble == SL_TOKEN_STATIC_DEVICE_TOKENS) {
+    return SL_TOKEN_NVM3_REGION_STATIC_DEVICE_TOKEN_RANGE;
   }
-  return nvm3_key_region;
+  if (key_nibble == SL_TOKEN_STATIC_SECURE_DATA_TOKENS) {
+    return SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_RANGE;
+  }
+  if ((token & SL_TOKEN_STATIC_MASK) == SL_TOKEN_TYPE_STATIC_DEVICE) {
+    return SL_TOKEN_NVM3_REGION_STATIC_DEVICE_TOKEN_16BIT_RANGE;
+  }
+  if ((token & SL_TOKEN_STATIC_MASK) == SL_TOKEN_TYPE_STATIC_SECURE) {
+    return SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_16BIT_RANGE;
+  }
+  return 0;
 }
 #endif // SL_COMMON_TOKEN_MANAGER_ENABLE_DYNAMIC_TOKENS

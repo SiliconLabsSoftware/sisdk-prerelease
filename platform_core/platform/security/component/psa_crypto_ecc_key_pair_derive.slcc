@@ -1,0 +1,35 @@
+id: psa_crypto_ecc_key_pair_derive
+package: platform_core
+label: ECC Key Pair Derivation
+description: >-
+  Enable ECC key-pair derivation through PSA Crypto. Select this component
+  when ECC key-pair derivation is required.
+
+  If hardware acceleration is available and the 'Mbed TLS Support for ECC'
+  component is not included, PSA will not enable fallback to the software
+  implementation in the Mbed TLS library.
+category: Platform|Security|PSA Crypto|Elliptic Curves
+quality: production
+
+provides:
+- name: psa_crypto_ecc_key_pair_derive
+- name: psa_crypto_key_pair_derive
+  allow_multiple: true
+
+requires:
+- name: psa_crypto_ecc
+
+template_contribution:
+- name: psa_crypto_config
+  value: PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_DERIVE 1
+- name: psa_crypto_builtin_config
+  value: "MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR_DERIVE 1"
+  condition: [mbedtls_ecc]
+
+documentation:
+  url: https://arm-software.github.io/psa-api/crypto/1.2/api/keys/types.html#c.PSA_KEY_TYPE_ECC_KEY_PAIR
+
+metadata:
+  sbom:
+    reference: mbedtls_sbom
+root_path: platform_core

@@ -15,6 +15,7 @@ include:
 - path: config
   file_list:
   - path: sli_psa_acceleration.h
+  - path: sli_psa_acceleration_optim.h
   - path: sli_mbedtls_omnipresent.h
   - path: sli_psa_tfm_translation.h
     condition: [tz_secure_key_library_s]

@@ -31,6 +31,8 @@
 #ifndef SL_TOKEN_MANAGER_DEFINES_H
 #define SL_TOKEN_MANAGER_DEFINES_H
 
+#include <stdint.h>
+
 /***************************************************************************//**
  * @addtogroup common_token_manager Common Token Manager (CTM)
  * @{
@@ -59,13 +61,13 @@
  *
  * bit (31:27) Maps to:
  *
- * 0b00000 NVM3 (Default instance)
- * 0b00001 NVM3 (Secondary instance - Zwave usage)
- * 0b0001x Reserved for additional NVM3 instances
+ * 0b00000 Dynamic token (Default instance)
+ * 0b00001 Dynamic token (Secondary instance - Zwave usage)
+ * 0b0001x Reserved for future use
  * 0b110xx Static device tokens
  * 0b111xx Static secure tokens
  * 0b100xx Reserved for future use
- * 0b101xx Reserved for future use
+ * 0b101xx Upgradable tokens
  *
  * The Key-Length-Value system works as a chain of KLV objects.
  * A KLV object is identified in the following way:
@@ -74,10 +76,16 @@
  * 0b1xx | Reserved | Key
  *
  * */
-#define SL_TOKEN_TYPE_NVM3                        (0x00000000U)
-#define SL_TOKEN_TYPE_NVM3_SECONDARY              (0x08000000U)
+// For backwards compatibility only. Don't use these macros for new code.
+#define SL_TOKEN_TYPE_NVM3                        SL_TOKEN_TYPE_DYNAMIC
+#define SL_TOKEN_TYPE_NVM3_SECONDARY              SL_TOKEN_TYPE_DYNAMIC_SECONDARY
+// Use below macros
+#define SL_TOKEN_TYPE_DYNAMIC                     (0x00000000U)
+#define SL_TOKEN_TYPE_DYNAMIC_SECONDARY           (0x08000000U)
 #define SL_TOKEN_TYPE_STATIC_DEVICE               (0xC0000000U)
 #define SL_TOKEN_TYPE_STATIC_SECURE               (0xE0000000U)
+#define SL_TOKEN_TYPE_UPGRADABLE                  (0xA0000000U)
+
 /** @endcond */
 
 /**
@@ -99,7 +107,11 @@
  * visible to the user so they can avoid using the same keys for NVM3 objects created manually in
  * the application code. Refer application note 'AN1135: Using Third Generation Non-Volatile Memory (NVM3) Data Storage' for more details.
  *
- * @note The key regions from 0xC0000 to 0xFFFFF are reserved.
+ * @note The key regions from 0xC0000 to 0xDFFFF are reserved.
+ * @note Key regions 0xE0000-0xEFFFF and 0xF0000-0xFFFFF are reserved for
+ *       Series 3(onwards) 16-bit static override tokens. 0xExxxx holds the full 16-bit
+ *       static device key. 0xFxxxx holds the full 16-bit static secure key.
+ *       These ranges do not overlap the Phase-1 override ranges 0x8E000-0x8FFFF.
  */
 
 /** @ingroup NVM3 key space regions
@@ -221,9 +233,13 @@
 *   This region allocates keys from 0x8DC00 to 0x8FFFF.
 *   Below are the keys that are used within this region:
 *   - 0x8DC00: Crash log token
-*   - 0x8DC01 - 0x8DFFF: Unused keys
-*   - 0x8E000 - 0x8EFFF: Static device override tokens
-*   - 0x8F000 - 0x8FFFF: Static secure override tokens
+*   - 0x8DC01: Upgradable token (UT) KLV chain anchor
+*   - 0x8DC02: Upgradable token (UT) KLV extension info
+*   - 0x8DC03: Upgradable token (UT) KLV repair info
+*   - 0x8DC04: Upgradable token (UT) KLV tail info
+*   - 0x8DC05 - 0x8DFFF: Unused keys
+*   - 0x8E000 - 0x8EFFF: Phase-1 static device override tokens
+*   - 0x8F000 - 0x8FFFF: Phase-1 static secure override tokens
 */
 #define SL_TOKEN_NVM3_REGION_PLATFORM            (0x8DC00)
 
@@ -244,46 +260,62 @@
 
 /**
  * @defgroup StaticToken Static Token Key Space Regions
- * @brief MACRO's for Static Token Key Space Regions. Applicable for both static device and static secure tokens for series 3 devices.
+ * @brief MACRO's for Static Token Key Space Regions. Applicable for static device, static secure and upgradable tokens from series 3 devices onwards.
  *
- * CTM has reserved dedicated token key ranges for each domain, with a total of 128 token keys allocated per domain.
+ * CTM has reserved dedicated token key ranges for each domain, with a total of 1024 token keys allocated per domain.
  * The token key ranges are defined as follows:
- * - 0x000 to 0x07F used for defining tokens for the Common domain.
- * - 0x080 to 0x0FF used for defining tokens for the Zigbee domain.
- * - 0x100 to 0x17F used for defining tokens for the Thread domain.
- * - 0x180 to 0x1FF used for defining tokens for the Connect domain.
- * - 0x200 to 0x27F used for defining tokens for the Bluetooth domain.
- * - 0x280 to 0x2FF used for defining tokens for the Z-Wave domain.
- * - 0x300 to 0x37F used for defining tokens for the Bluetooth Mesh domain.
- * - 0x380 to 0x3FF used for defining tokens for the Matter domain.
- * - 0x400 to 0x47F used for defining tokens for the Wi-Sun domain.
- * - 0x480 to 0x4FF used for defining tokens for the Sidewalk domain.
- * - 0x500 to 0x57F used for defining tokens for the Wi-Fi domain.
- * - 0x580 to 0x5FF reserved for future use.
- * - 0x600 to 0x67F used for defining tokens for the User domain.
- * - 0x680 to 0xFFF reserved for future use.
+ * |----------------------------------------------------------------|
+ * | Domain         | Phase-1 logical keys     | New logical keys   |
+ * |                | (Don't use these ranges) | (Use these ranges) |
+ * |----------------|--------------------------|--------------------|
+ * | Common         | 0x000-0x07F              | 0x0000-0x03FF      |
+ * | Zigbee         | 0x080-0x0FF              | 0x0400–0x07FF      |
+ * | Thread         | 0x100-0x17F              | 0x0800–0x0BFF      |
+ * | Connect        | 0x180-0x1FF              | 0x0C00–0x0FFF      |
+ * | Phase-1 SDT    | NA                       | 0x1000-0x1FFF      |
+ * | Bluetooth      | 0x200-0x27F              | 0x2000–0x23FF      |
+ * | Z-Wave         | 0x280-0x2FF              | 0x2400–0x27FF      |
+ * | Bluetooth Mesh | 0x300-0x37F              | 0x2800–0x2BFF      |
+ * | Matter         | 0x380-0x3FF              | 0x2C00–0x2FFF      |
+ * | Phase-1 SST    | NA                       | 0x3000-0x3FFF      |
+ * | Wi-Sun         | 0x400-0x47F              | 0x4000–0x43FF      |
+ * | Sidewalk       | 0x480-0x4FF              | 0x4400–0x47FF      |
+ * | Wi-Fi          | 0x500-0x57F              | 0x4800–0x4BFF      |
+ * | Reserved       | 0x580-0x5FF              | 0x4C00–0x5FFF      |
+ * | User           | 0x600-0x67F              | 0x6000–0x63FF      |
+ * | Reserved       | 0x680–0xFFF              | 0x6400–0xb633      |
+ * | Virtual EUI-64 | NA                       | 0xb634             |
+ * | Reserved       | NA                       | 0xb635–0xFFFF      |
  *
  * A new token added for series 3 devices must follow the domain-specific token Id ranges mentioned above.
  * And the new tokens must not conflict with the existing tokens. Below is an example of how to define a new token:
  *
  *       @code{.c}
- *       // Defining a new static device token for the Matter domain:
- *       #define TOKEN_MFG_MATTER_NEW_STATIC_DEVICE_TOKEN          (SL_TOKEN_STATIC_DEVICE_TOKENS | SL_TOKEN_DOMAIN_STATIC_MATTER | 0x0)
- *       #define TOKEN_MFG_MATTER_NEW_STATIC_DEVICE_TOKEN_SIZE     (2u)                //   2 bytes
+ *       New 16-bit static device token for a matter token would be 0x2C00.
+ *       In order to identify the token as static device, the type nibble comes from the GET macro.
+ *       The illustration below provides the 32-bit token format for the new 16-bit static device token.
+ *       #define MFG_MATTER_STATIC_DEVICE_TOKEN                (SL_TOKEN_STATIC_MATTER_DOMAIN | 0x1)
+ *       #define TOKEN_MFG_MATTER_STATIC_DEVICE_TOKEN          (SL_TOKEN_GET_STATIC_DEVICE_TOKEN(MFG_MATTER_STATIC_DEVICE_TOKEN))
+ *       #define TOKEN_MFG_MATTER_STATIC_DEVICE_TOKEN_SIZE     (2u)
  *
- *       // Defining a new static secure token for the Matter domain:
- *       #define TOKEN_MFG_MATTER_NEW_STATIC_SECURE_TOKEN          (SL_TOKEN_STATIC_SECURE_DATA_TOKENS | SL_TOKEN_DOMAIN_STATIC_MATTER | 0x0)
- *       #define TOKEN_MFG_MATTER_NEW_STATIC_SECURE_TOKEN_SIZE     (2u)                //   2 bytes
+ *       New 16-bit static secure token for a matter token would be 0x2C01. Do not OR a type-nibble macro.
+ *       In order to identify the token as static secure, the type nibble comes from the GET macro.
+ *       The illustration below provides the 32-bit token format for the new 16-bit static secure token.
+ *       #define MFG_MATTER_STATIC_SECURE_TOKEN                (SL_TOKEN_STATIC_MATTER_DOMAIN | 0x1)
+ *       #define TOKEN_MFG_MATTER_STATIC_SECURE_TOKEN          (SL_TOKEN_GET_STATIC_SECURE_TOKEN(MFG_MATTER_STATIC_SECURE_TOKEN))
+ *       #define TOKEN_MFG_MATTER_STATIC_SECURE_TOKEN_SIZE     (2u)
  *       @endcode
  *
- * @note The token IDs listed below are reserved and must not be used to define tokens for any specific domain.
- *       For example, the token @ref TOKEN_MFG_CTUNE (a static device token) is reserved with Id 0x100 and must not be
- *       reused to define a static device token for the Thread domain. Similarly, the token
- *       @ref TOKEN_MFG_CBKE_DATA (a static secure token) is reserved with Id 0x204 and must not be reused to define
- *       a static secure token for the Bluetooth domain. These reservations exist because there are already deployed
- *       devices using these token Id values, which are distributed across the overall token Id space.
- *       Reusing these Id's would create compatibility issues with existing devices.
- * @note Reserved token IDs by type (do not use below IDs for defining new tokens for the respective domains):
+ * @note `SL_TOKEN_STATIC_DEVICE_TOKENS` and `SL_TOKEN_STATIC_SECURE_DATA_TOKENS`
+ *       stay defined so Phase-1 Series 3 keys and Series 2 offsets keep their
+ *       values. Do not OR them into a new Series 3 key.
+ * @note The Phase-1 logical ids below are already taken. Do not reuse them for
+ *       another token. Deleted ids may be reused only as Phase-1 12-bit keys in
+ *       the original domain, not as a new 16-bit key with a different high nibble.
+ *       For example, @ref TOKEN_MFG_CTUNE is reserved at logical id 0x100 (stored
+ *       as 0x1100) and must not be reused for a Thread static device token.
+ *       @ref TOKEN_MFG_CBKE_DATA is reserved at logical id 0x204.
+ * @note Reserved Phase-1 logical ids (do not use these ids for a different token):
  *    | Static device token (Domain : Token IDs)                  | Static secure token (Domain : Token IDs)     |
  *    |-----------------------------------------------------------|----------------------------------------------|
  *    | Common : 0x002, 0x00C, 0x020, 0x030, 0x034, 0x038, 0x064  | Bluetooth : 0x204, 0x260, 0x270              |
@@ -292,77 +324,144 @@
  *    | Connect : 0x1f0                                           |                                              |
  *
  */
- /** @ingroup StaticToken
+
+/** @ingroup StaticToken
  *  @brief Static Token Domain for Common tokens.
  */
-#define SL_TOKEN_DOMAIN_STATIC_COMMON       (0x000)
+ #define SL_TOKEN_STATIC_COMMON_DOMAIN       (0x0000)
 
  /** @ingroup StaticToken
  *  @brief Static Token Domain for Zigbee tokens.
  */
-#define SL_TOKEN_DOMAIN_STATIC_ZIGBEE       (0x080)
+#define SL_TOKEN_STATIC_ZIGBEE_DOMAIN       (0x0400)
 
  /** @ingroup StaticToken
  *  @brief Static Token Domain for Thread tokens.
  */
-#define SL_TOKEN_DOMAIN_STATIC_THREAD       (0x100)
+#define SL_TOKEN_STATIC_THREAD_DOMAIN       (0x0800)
 
  /** @ingroup StaticToken
  *  @brief Static Token Domain for Connect tokens.
  */
-#define SL_TOKEN_DOMAIN_STATIC_CONNECT      (0x180)
+#define SL_TOKEN_STATIC_CONNECT_DOMAIN      (0x0C00)
 
  /** @ingroup StaticToken
  *  @brief Static Token Domain for Bluetooth tokens.
  */
-#define SL_TOKEN_DOMAIN_STATIC_BT           (0x200)
+#define SL_TOKEN_STATIC_BT_DOMAIN           (0x2000)
 
  /** @ingroup StaticToken
  *  @brief Static Token Domain for Z-Wave tokens.
  */
-#define SL_TOKEN_DOMAIN_STATIC_ZWAVE        (0x280)
+#define SL_TOKEN_STATIC_ZWAVE_DOMAIN        (0x2400)
 
  /** @ingroup StaticToken
  *  @brief Static Token Domain for Bluetooth Mesh tokens.
  */
-#define SL_TOKEN_DOMAIN_STATIC_BT_MESH      (0x300)
+#define SL_TOKEN_STATIC_BT_MESH_DOMAIN      (0x2800)
 
  /** @ingroup StaticToken
  *  @brief Static Token Domain for Matter tokens.
  */
-#define SL_TOKEN_DOMAIN_STATIC_MATTER       (0x380)
+#define SL_TOKEN_STATIC_MATTER_DOMAIN       (0x2C00)
 
  /** @ingroup StaticToken
  *  @brief Static Token Domain for Wi-Sun tokens.
  */
-#define SL_TOKEN_DOMAIN_STATIC_WI_SUN       (0x400)
+#define SL_TOKEN_STATIC_WI_SUN_DOMAIN       (0x4000)
 
  /** @ingroup StaticToken
  *  @brief Static Token Domain for Sidewalk tokens.
  */
-#define SL_TOKEN_DOMAIN_STATIC_SIDEWALK     (0x480)
+#define SL_TOKEN_STATIC_SIDEWALK_DOMAIN     (0x4400)
 
  /** @ingroup StaticToken
  *  @brief Static Token Domain for Wi-Fi tokens.
  */
-#define SL_TOKEN_DOMAIN_STATIC_WI_FI        (0x500)
+#define SL_TOKEN_STATIC_WI_FI_DOMAIN        (0x4800)
 
  /** @ingroup StaticToken
  *  @brief Static Token Domain for User tokens.
  */
+#define SL_TOKEN_STATIC_USER_DOMAIN         (0x6000)
+
+ /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+ /** @ingroup StaticToken
+ *  @brief Phase-1 Static Token Domain for Common tokens.
+ */
+#define SL_TOKEN_DOMAIN_STATIC_COMMON       (0x000)
+
+ /** @ingroup StaticToken
+ *  @brief Phase-1 Static Token Domain for Zigbee tokens.
+ */
+#define SL_TOKEN_DOMAIN_STATIC_ZIGBEE       (0x080)
+
+ /** @ingroup StaticToken
+ *  @brief Phase-1 Static Token Domain for Thread tokens.
+ */
+#define SL_TOKEN_DOMAIN_STATIC_THREAD       (0x100)
+
+ /** @ingroup StaticToken
+ *  @brief Phase-1 Static Token Domain for Connect tokens.
+ */
+#define SL_TOKEN_DOMAIN_STATIC_CONNECT      (0x180)
+
+ /** @ingroup StaticToken
+ *  @brief Phase-1 Static Token Domain for Bluetooth tokens.
+ */
+#define SL_TOKEN_DOMAIN_STATIC_BT           (0x200)
+
+ /** @ingroup StaticToken
+ *  @brief Phase-1 Static Token Domain for Z-Wave tokens.
+ */
+#define SL_TOKEN_DOMAIN_STATIC_ZWAVE        (0x280)
+
+ /** @ingroup StaticToken
+ *  @brief Phase-1 Static Token Domain for Bluetooth Mesh tokens.
+ */
+#define SL_TOKEN_DOMAIN_STATIC_BT_MESH      (0x300)
+
+ /** @ingroup StaticToken
+ *  @brief Phase-1 Static Token Domain for Matter tokens.
+ */
+#define SL_TOKEN_DOMAIN_STATIC_MATTER       (0x380)
+
+ /** @ingroup StaticToken
+ *  @brief Phase-1 Static Token Domain for Wi-Sun tokens.
+ */
+#define SL_TOKEN_DOMAIN_STATIC_WI_SUN       (0x400)
+
+ /** @ingroup StaticToken
+ *  @brief Phase-1 Static Token Domain for Sidewalk tokens.
+ */
+#define SL_TOKEN_DOMAIN_STATIC_SIDEWALK     (0x480)
+
+ /** @ingroup StaticToken
+ *  @brief Phase-1 Static Token Domain for Wi-Fi tokens.
+ */
+#define SL_TOKEN_DOMAIN_STATIC_WI_FI        (0x500)
+
+ /** @ingroup StaticToken
+ *  @brief Phase-1 Static Token Domain for User tokens.
+ */
 #define SL_TOKEN_DOMAIN_STATIC_USER         (0x600)
+/** @endcond */
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 #ifndef SL_TOKEN_NVM3_OVERRIDE
-//To store a static token in NVM3 region we shall follow NVM3 key format.
-//Each object in the NVM3 is addressed by a 20-bit key
-//4MSB bits(19:16) of the NVM3 key are used to identify the static tokens
-//that are stored in NVM3 memory space. The values used for representing static tokens in NVM3 region are
-//0x8E->for static device tokens
-//0x8F->for static secure tokens is used along with the existing static token ID to form a 20bit NVM3 key.
-#define SL_TOKEN_STATIC_TOKEN_KEY_MASK                      (0x0FFF)
-#define SL_TOKEN_STATIC_TOKEN_RANGE_MASK                    (0xFF000)
-#define SL_TOKEN_STATIC_TOKEN_BASE_TYPE_KEY_MASK            (0x3000)
+//To store a static token in NVM3 region as an override token we shall follow NVM3 key format.
+//Each object in the NVM3 is addressed by a 20-bit key.
+//Phase-1 override keys keep a 12-bit key. Bits 19:16 of the NVM3 key are used to identify
+//the static tokens that are stored in NVM3 memory space. Bits 15:12 of the static token keys
+//are used to identify the token type.
+//NVM3 key select the range: 0x8E000 for static device, 0x8F000 for static secure.
+//New 16-bit override keys use one NVM3 domain each (bits 19:16), with the
+//NVM3 domain 0xE0000 for static device, 0xF0000 for static secure.
+#define SL_TOKEN_STATIC_TOKEN_KEY_MASK                      (0x0FFFU)
+#define SL_TOKEN_STATIC_TOKEN_16BIT_KEY_MASK                (0xFFFFU)
+#define SL_TOKEN_STATIC_TOKEN_RANGE_MASK                    (0xFF000U)
+// Bits 15:12 of the static key. Phase-1 device is 0x1, Phase-1 secure is 0x3.
+#define SL_TOKEN_STATIC_TOKEN_BASE_TYPE_KEY_MASK            (0xF000U)
 #define SL_TOKEN_NVM3_REGION_STATIC_TOKEN_RANGE_OFFSET      (0xC)
 #define SL_TOKEN_NVM3_REGION_STATIC_DEVICE_TOKEN_RANGE_ID   (0x8E)
 #define SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_RANGE_ID   (0x8F)
@@ -372,7 +471,19 @@
 #define SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_RANGE      (SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_RANGE_ID \
                                                              << SL_TOKEN_NVM3_REGION_STATIC_TOKEN_RANGE_OFFSET)
 
+// 16-bit override domains. Bits 19:16 are the domain. Bits 15:0 are the key.
+#define SL_TOKEN_NVM3_REGION_STATIC_TOKEN_16BIT_RANGE_OFFSET    (0x10)
+#define SL_TOKEN_NVM3_REGION_STATIC_DEVICE_TOKEN_16BIT_RANGE_ID (0xE)
+#define SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_16BIT_RANGE_ID (0xF)
+#define SL_TOKEN_NVM3_REGION_STATIC_DEVICE_TOKEN_16BIT_RANGE    (SL_TOKEN_NVM3_REGION_STATIC_DEVICE_TOKEN_16BIT_RANGE_ID \
+                                                                 << SL_TOKEN_NVM3_REGION_STATIC_TOKEN_16BIT_RANGE_OFFSET)
+#define SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_16BIT_RANGE    (SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_16BIT_RANGE_ID \
+                                                                 << SL_TOKEN_NVM3_REGION_STATIC_TOKEN_16BIT_RANGE_OFFSET)
+
 #endif
+
+// Returned when @ref SL_TOKEN_GET_DYNAMIC_OVER_RIDE_TOKEN cannot identify token type.
+#define SL_TOKEN_NVM3_DYNAMIC_OVERRIDE_TOKEN_INVALID              (0xFFFFFFFFU)
 
 //The bits 28:16 has the size of the static token embedded
 #define SL_TOKEN_STATIC_TOKEN_SIZE_OFFSET                (0x10)
@@ -399,8 +510,8 @@
  *        this MACRO can be used with `sl_token_get_data()` or `sl_token_set_data()` functions,
  *        for more information @ref `sl_token_manager_defines.h`.
  *
- * @param[in] token  16-bit unique key @ref sl_token_manager_manufacturing.h file
- *                   or sl_custom_manufacturing_token_header.h.
+ * @param[in] token  16-bit key for the static device token.
+ *                   Refer @ref StaticToken for more information on 16-bit token id ranges.
  * Key format  :
  *    | 31:30 | 29                 | 28:16       | 15:0 |
  *    |-------|--------------------|-------------|------|
@@ -408,7 +519,8 @@
  *
  *    - type              : Static Token.
  *    - static token type : 0 - Static device token region (secure memory region)
- *    - key               : 16-bit unique key.
+ *    - key               : 16-bit key. Phase-1: type nibble plus 12-bit id.
+ *                          New token id ranges for Series 3 onwards: 16-bit id.
  *
  */
 #define SL_TOKEN_GET_STATIC_DEVICE_TOKEN(token)    (SL_TOKEN_TYPE_STATIC_DEVICE \
@@ -422,8 +534,8 @@
  *        this MACRO can be used with `sl_token_get_data()` or `sl_token_set_data()` functions,
  *        for more information @ref `sl_token_manager_defines.h`.
  *
- * @param[in] token  16-bit unique key @ref sl_token_manager_manufacturing.h file
- *                   or sl_custom_manufacturing_token_header.h.
+ * @param[in] token  16-bit key for the static secure token.
+ *                   Refer @ref StaticToken for more information on 16-bit token id ranges.
  * Key format  :
  *    | 31:30 | 29                 | 28:16       | 15:0 |
  *    |-------|--------------------|-------------|------|
@@ -431,7 +543,8 @@
  *
  *    - type              : Static Token.
  *    - static token type : 1 - Static secure token region (dedicated flash region)
- *    - key               : 16-bit unique key.
+ *    - key               : 16-bit key. Phase-1: type nibble plus 12-bit id.
+ *                          New token id ranges for Series 3 onwards: 16-bit id.
  *
  */
 #define SL_TOKEN_GET_STATIC_SECURE_TOKEN(token)    (SL_TOKEN_TYPE_STATIC_SECURE \
@@ -453,13 +566,14 @@
  *    |-------|----------|------------------|-------------|----------|
  *    | type  | reserved | NVM3 object type | NVM3 domain | NVM3 key |
  *
+ *    - type              : Dynamic Token.
  *    - NVM3 object type : 0 - Data object
  *                         1 - Counter object
  *    - NVM3 domain      : NVM3 Default Instance Key Space Regions @ref NVM3 key space regions
  *    - NVM3 key         : 16-bit unique key.
  *
  */
-#define SL_TOKEN_GET_DYNAMIC_TOKEN(token, IsCounterObj)   (SL_TOKEN_TYPE_NVM3 \
+#define SL_TOKEN_GET_DYNAMIC_TOKEN(token, IsCounterObj)   (SL_TOKEN_TYPE_DYNAMIC \
                                                            | token            \
                                                            | (IsCounterObj << SL_TOKEN_NVM3_OBJ_TYPE_OFFSET))
 
@@ -476,6 +590,8 @@
  *    | 31:27 | 26:21    | 20               |19:16        | 15:0     |
  *    |-------|----------|------------------|-------------|----------|
  *    | type  | reserved | NVM3 object type | NVM3 domain | NVM3 key |
+ *
+ *    - type              : Dynamic Secondary Token.
  *    - NVM3 object type : 0 - Data object
  *                         1 - Counter object
  *    - NVM3 domain      : @ref NVM3 key space regions
@@ -484,41 +600,82 @@
  * @note This is specifically used for Z-Wave usage, where the secondary instance of NVM3 is utilized.
  *
  */
-#define SL_TOKEN_GET_DYNAMIC_SECONDARY_INSTANCE_TOKEN(token, IsCounterObj)   (SL_TOKEN_TYPE_NVM3_SECONDARY \
+#define SL_TOKEN_GET_DYNAMIC_SECONDARY_INSTANCE_TOKEN(token, IsCounterObj)   (SL_TOKEN_TYPE_DYNAMIC_SECONDARY \
                                                                               | token                      \
                                                                               | (IsCounterObj << SL_TOKEN_NVM3_OBJ_TYPE_OFFSET))
 
 /**
- * @brief Helper MACRO to create a NVM3 override key for static token,
- *        this MACRO can be used with `sl_token_get_data()` or `sl_token_set_data()` functions,
- *        the range for NVM3 Domain region for a static token override key is predefined
- *        for more information @ref `sl_token_manager_defines.h`.
+ * @brief Helper MACRO to create a NVM3 override key for a static token.
+ *        This MACRO can be used with `sl_token_get_data()` or `sl_token_set_data()`.
  *
- * @param[in] token 16-bit unique key @ref sl_token_manager_manufacturing.h file
- *                  or sl_custom_manufacturing_token_header.h.
- * Key format  :
- *    | 31:27 | 26:21    | 20       |19:16        | 15:12                  | 11:0                   |
- *    |-------|----------|----------|-------------|------------------------|------------------------|
- *    | type  | reserved | reserved | NVM3 region | NVM3 key (high nibble) | NVM3 key (low 12 bits) |
+ * @param[in] token A 32-bit static token from `SL_TOKEN_GET_STATIC_DEVICE_TOKEN()` / `SL_TOKEN_GET_STATIC_SECURE_TOKEN()`.
  *
- *    - type                  : NVM3 Override Token.
- *    - NVM3 region           : The region 0x80000 is used for static override tokens.
- *    - NVM3 key (high nibble): Most significant 4 bits of the NVM3 key.
- *                              0xE000 for static device tokens.
- *                              0xF000 for static secure tokens.
- *    - NVM3 key (low 12 bits): Least significant 12 bits of the NVM3 key.
- *                              The static token key is a 16-bit unique value.
- *                              For override tokens, the high nibble identifies
- *                              the key type(NVM3 key (high nibble)), and the remaining 12 bits are reused.
+ * Range selection (first match wins):
+ *
+ * 1. **Phase-1 key** — bits 15:12 are `SL_TOKEN_STATIC_DEVICE_TOKENS` (`0x1000`) or
+ *    `SL_TOKEN_STATIC_SECURE_DATA_TOKENS` (`0x3000`). Applies to a bare Phase-1 16-bit
+ *    value or to a 32-bit token that still carries that nibble in bits 15:12.
+ *    - Static device: NVM3 key `0x8E000 | (token & 0xFFF)`
+ *    - Static secure: NVM3 key `0x8F000 | (token & 0xFFF)`
+ *
+ * 2. **New 16-bit key** — bits 15:12 are not a Phase-1 type nibble, and bits 31:29
+ *    (`@ref SL_TOKEN_STATIC_MASK`) select static device (`0xC0000000`) or static secure
+ *    (`0xE0000000`).
+ *    - Static device: NVM3 key `0xE0000 | (token & 0xFFFF)`
+ *    - Static secure: NVM3 key `0xF0000 | (token & 0xFFFF)`
+ *
+ * 3. **Invalid** — neither bits 15:12 nor bits 31:29 identify the token type. Returns
+ *    @ref SL_TOKEN_NVM3_DYNAMIC_OVERRIDE_TOKEN_INVALID.
+ *
+ * @note Bits 28:27 hold the top of the embedded static-token size, so type detection
+ *       uses @ref SL_TOKEN_STATIC_MASK (bits 31:29), not an equality test on all of
+ *       bits 31:27.
+ *
+ * @note The MACRO expands to an integer constant expression, so it can be used in
+ *       static initializers. The Phase-1 comparison uses `SL_TOKEN_STATIC_DEVICE_TOKENS`
+ *       and `SL_TOKEN_STATIC_SECURE_DATA_TOKENS`, which are defined in
+ *       `sl_token_manager_manufacturing.h`. Include that header before using this MACRO.
+ *       @p token may be evaluated more than once, so do not pass an expression with side effects.
  */
 #ifndef SL_TOKEN_GET_DYNAMIC_OVER_RIDE_TOKEN
-#define SL_TOKEN_GET_DYNAMIC_OVER_RIDE_TOKEN(token)   (SL_TOKEN_TYPE_NVM3                                                                       \
-                                                       | (token & SL_TOKEN_STATIC_TOKEN_KEY_MASK)                                               \
-                                                       | (((token & SL_TOKEN_STATIC_TOKEN_BASE_TYPE_KEY_MASK) == SL_TOKEN_STATIC_DEVICE_TOKENS) \
-                                                          ? SL_TOKEN_NVM3_REGION_STATIC_DEVICE_TOKEN_RANGE                                      \
-                                                          : SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_RANGE))
+#define SL_TOKEN_GET_DYNAMIC_OVER_RIDE_TOKEN(token)                                                                  \
+  ((((uint32_t)(token) & SL_TOKEN_STATIC_TOKEN_BASE_TYPE_KEY_MASK) == (uint32_t)SL_TOKEN_STATIC_DEVICE_TOKENS)       \
+   ? (SL_TOKEN_TYPE_NVM3                                                                                             \
+      | SL_TOKEN_NVM3_REGION_STATIC_DEVICE_TOKEN_RANGE                                                               \
+      | ((uint32_t)(token) & SL_TOKEN_STATIC_TOKEN_KEY_MASK))                                                        \
+   : ((((uint32_t)(token) & SL_TOKEN_STATIC_TOKEN_BASE_TYPE_KEY_MASK) == (uint32_t)SL_TOKEN_STATIC_SECURE_DATA_TOKENS) \
+      ? (SL_TOKEN_TYPE_NVM3                                                                                          \
+         | SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_RANGE                                                            \
+         | ((uint32_t)(token) & SL_TOKEN_STATIC_TOKEN_KEY_MASK))                                                     \
+      : ((((uint32_t)(token) & SL_TOKEN_STATIC_MASK) == SL_TOKEN_TYPE_STATIC_DEVICE)                                 \
+         ? (SL_TOKEN_TYPE_NVM3                                                                                       \
+            | SL_TOKEN_NVM3_REGION_STATIC_DEVICE_TOKEN_16BIT_RANGE                                                   \
+            | ((uint32_t)(token) & SL_TOKEN_STATIC_TOKEN_16BIT_KEY_MASK))                                            \
+         : ((((uint32_t)(token) & SL_TOKEN_STATIC_MASK) == SL_TOKEN_TYPE_STATIC_SECURE)                              \
+            ? (SL_TOKEN_TYPE_NVM3                                                                                    \
+               | SL_TOKEN_NVM3_REGION_STATIC_SECURE_TOKEN_16BIT_RANGE                                                \
+               | ((uint32_t)(token) & SL_TOKEN_STATIC_TOKEN_16BIT_KEY_MASK))                                         \
+            : SL_TOKEN_NVM3_DYNAMIC_OVERRIDE_TOKEN_INVALID))))
 #endif
 
+/**
+ * @brief Helper MACRO to create a new upgradable token in 32-bit identifier format.
+ *        Tokens created using this macro are stored in the upgradable NVM region and
+ *        can be updated (overwritten) at runtime. This dedicated NVM region is reserved
+ *        exclusively for upgradable tokens.
+ *        This MACRO can be used with `sl_token_get_data()` or `sl_token_set_data()` functions.
+ *
+ * @param[in] token  16-bit unique key
+ * Key format  :
+ *    | 31:29 | 28:16       | 15:0 |
+ *    |-------|-------------|------|
+ *    | type  | Reserved    | key  |
+ *
+ *    - type : Upgradable token
+ *    - key  : 16-bit unique key.
+ *
+ */
+#define SL_TOKEN_GET_UPGRADABLE_TOKEN(token)           (SL_TOKEN_TYPE_UPGRADABLE | token)
 /** @} (end addtogroup defines) */
 /** @} (end addtogroup common_token_manager) */
 

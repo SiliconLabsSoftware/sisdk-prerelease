@@ -36,8 +36,10 @@
 #include "sl_log_helper.h"
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include <stdbool.h>
 #include "sl_power_manager.h"
 #include "em_device.h"
+#include "sl_hal_gpio.h"
 #endif
 
 #if defined(SL_CATALOG_KERNEL_PRESENT)
@@ -96,9 +98,12 @@ swo_stream_context_t swo_context;
 #endif
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+static bool swo_trace_stopped = false;
 static sl_power_manager_em_transition_event_handle_t event_handle;
 static sl_power_manager_em_transition_event_info_t event_info = {
-  .event_mask = SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM0,
+  .event_mask = SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM0
+                | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM0
+                | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM2,
   .on_event = sli_iosteam_swo_em_transition,
 };
 #endif
@@ -260,15 +265,32 @@ static sl_status_t swo_write(void *context,
 }
 
 /***************************************************************************//**
- * wait for the ITM busy bit to clear before going to sleep
+ * Hold the SWO line idle across EM2, then restore the trace route in EM0.
  ******************************************************************************/
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 static void sli_iosteam_swo_em_transition(sl_power_manager_em_t from,
                                           sl_power_manager_em_t to)
 {
-  (void)to;
-  SL_LOG_DEBUG_ASSERT(from == SL_POWER_MANAGER_EM0);
-  (void)from;
-  while (ITM->TCR & ITM_TCR_BUSY_Msk) ;
+  // EM1 does not keep shifting. Drain the ITM before leaving EM0, or the
+  // last stimulus word is still queued when the trace clock stops.
+  if ((from == SL_POWER_MANAGER_EM0) && (to == SL_POWER_MANAGER_EM1)) {
+    while ((ITM->TCR & ITM_TCR_BUSY_Msk) != 0U) {
+      // Wait for BUSY to clear.
+    }
+  }
+
+  // EM2 stops the trace clock.
+  if ((to == SL_POWER_MANAGER_EM2)
+      && ((GPIO->TRACEROUTEPEN & GPIO_TRACEROUTEPEN_SWVPEN) != 0U)) {
+    sli_debug_swo_flush();
+    sl_hal_gpio_enable_debug_swo(false);
+    swo_trace_stopped = true;
+  }
+
+  // Restore the route only when this hook released it.
+  if ((to == SL_POWER_MANAGER_EM0) && swo_trace_stopped) {
+    swo_trace_stopped = false;
+    sl_hal_gpio_enable_debug_swo(true);
+  }
 }
 #endif

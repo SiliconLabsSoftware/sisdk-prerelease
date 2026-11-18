@@ -180,6 +180,12 @@ __NO_RETURN void sl_power_manager_enter_em4(void)
 #if defined(_DCDC_IF_EM4ERR_MASK)
   // Workaround for bug that may cause a Hard Fault on EM4 entry
   CMU_CLOCK_SELECT_SET(SYSCLK, FSRCO);
+  // DCDC registers are not accessible while the bus clock is gated
+  // or the module is disabled.
+  CMU_ClockEnable(cmuClock_DCDC, true);
+#if defined(_DCDC_EN_EN_MASK)
+  DCDC->EN_SET = DCDC_EN_EN;
+#endif
   // The buck DC-DC is available in all energy modes except for EM4.
   // The DC-DC converter must first be turned off and switched over to bypass mode.
 #if (defined(EMU_SERIES2_DCDC_BUCK_PRESENT) \

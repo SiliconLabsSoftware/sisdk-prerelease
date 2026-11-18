@@ -33,8 +33,12 @@
  *
  * Refer sl_token_manager_manufacturing.h file on how to create a token
  *
- * The TOKEN_MFG_* is or'ed with either SL_TOKEN_STATIC_DEVICE_TOKENS or SL_TOKEN_STATIC_SECURE_DATA_TOKENS
- * to control which segment of memory the token is placed in.
+ * On Series 2, and for a Phase-1 Series 3 key, TOKEN_MFG_* is ORed with either
+ * SL_TOKEN_STATIC_DEVICE_TOKENS or SL_TOKEN_STATIC_SECURE_DATA_TOKENS.
+ * A new Series 3 key is the raw 16-bit id from the 16-bit map in
+ * sl_token_manager_defines.h. Do not OR either type-nibble macro into that key.
+ * Static device versus static secure is selected by SL_TOKEN_GET_STATIC_DEVICE_TOKEN()
+ * or SL_TOKEN_GET_STATIC_SECURE_TOKEN().
  *
  * REMEMBER: For series 2 devices, by definition, manufacturing tokens exist at fixed addresses.
  *           Tokens should not overlap.
@@ -63,14 +67,21 @@
  * Note that the token key value used here is just an example.
  * To review the key value of an existing tokens when choosing a new token key, refer
  * to the file
- * platform/service/token_manager/inc/sl_token_manager_manufacturing.h
+ * platform/service/token_manager/inc/sl_token_manager_defines.h, for token id
+ * range information. The keys use a free 16-bit id.
+ *
  *
  * @code
- * #define TOKEN_MFG_EXAMPLE            (SL_TOKEN_STATIC_DEVICE_TOKENS | 0x100)
- * #define TOKEN_MFG_EXAMPLE_SIZE       (8u) //8 bytes
  *
- * #define TOKEN_MFG_EXAMPLE_1          (SL_TOKEN_STATIC_SECURE_TOKENS | 0x101)
- * #define TOKEN_MFG_EXAMPLE_1_SIZE     (4u) //4 bytes
+ * // New token id range from Series 3 onwards. User window starts at 0x6000.
+ * // To create a SST
+ * #define SST_MFG_EXAMPLE_1          (0x6000)
+ * #define SST_MFG_EXAMPLE_1_SIZE     (4u) //4 bytes
+ * #define TOKEN_SST_MFG_EXAMPLE_1    (SL_TOKEN_GET_STATIC_SECURE_TOKEN(SST_MFG_EXAMPLE_1))
+ * // TO create a SDT
+ * #define SDT_MFG_EXAMPLE_1          (0x6000)
+ * #define SDT_MFG_EXAMPLE_1_SIZE     (4u) //4 bytes
+ * #define TOKEN_SDT_MFG_EXAMPLE_1    (SL_TOKEN_GET_STATIC_DEVICE_TOKEN(SDT_MFG_EXAMPLE_1))
  * @endcode
  * To use this example:
  *   Ensure the Common Token Manager's configuration in Studio

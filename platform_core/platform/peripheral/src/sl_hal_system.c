@@ -107,6 +107,26 @@ const sl_hal_system_devinfo_adc_t SL_HAL_SYSTEM_DEVINFO_ADC_RESET_VALUES = {
   }
 };
 
+/* Soft fallback when DEVINFO OPA cal cannot be read. Packed as DEVINFO
+ * OPAxTRIM0/1 (not OPA_TRIM). TRIMOUTBIAS=P00 at [31:30] matches OPA_TRIM
+ * hardware reset (0x400); offset fields remain 0. */
+#if defined(DEVINFO_GP_OPA0TRIM0_TRIMOUTBIAS_SHIFT)
+#define SLI_HAL_SYSTEM_OPA_TRIM0_RESET  (1UL << DEVINFO_GP_OPA0TRIM0_TRIMOUTBIAS_SHIFT)
+#else
+#define SLI_HAL_SYSTEM_OPA_TRIM0_RESET  0UL
+#endif
+
+const sl_hal_system_devinfo_opa_block_t SL_HAL_SYSTEM_DEVINFO_OPA_RESET_VALUES = {
+  .opa0 = {
+    .trim0 = SLI_HAL_SYSTEM_OPA_TRIM0_RESET,
+    .trim1 = 0U
+  },
+  .opa1 = {
+    .trim0 = SLI_HAL_SYSTEM_OPA_TRIM0_RESET,
+    .trim1 = 0U
+  }
+};
+
 const sl_hal_system_devinfo_temperature_t SL_HAL_SYSTEM_DEVINFO_TEMPERATURE_RESET_VALUES = {
   .emu_temp_room = 0,
   .cal_temp = 0
@@ -1316,6 +1336,53 @@ void sl_hal_system_get_adc_calibration_info(sl_hal_system_devinfo_adc_t *info)
   }
 #else
   *info = SL_HAL_SYSTEM_DEVINFO_ADC_RESET_VALUES;
+#endif
+}
+
+/***************************************************************************//**
+ * Get the OPA factory trim words from DEVINFO.
+ ******************************************************************************/
+void sl_hal_system_get_opa_calibration_info(sl_hal_system_devinfo_opa_block_t *info)
+{
+#if defined(HAL_SYSTEM_CALIBRATION_SUPPORT) \
+  && defined(DEVINFO_GP_OPA0TRIM0_OFFSET)
+  sl_status_t status;
+  sl_se_command_context_t se_command_ctx;
+  sli_se_device_data_t otp_section_id = (sli_se_device_data_t)(SLI_SE_DEVICE_DATA_DI0 + DEVINFO_GP_FRAGMENT_INDEX);
+
+  SL_LOG_DEBUG_ASSERT(info != NULL);
+  
+  // Initialize command context.
+  status = sl_se_init_command_context(&se_command_ctx);
+  if (status != SL_STATUS_OK) {
+    *info = SL_HAL_SYSTEM_DEVINFO_OPA_RESET_VALUES;
+    return;
+  }
+
+  *info = SL_HAL_SYSTEM_DEVINFO_OPA_RESET_VALUES;
+
+  // Send the SE command to retrieve the OPA calibration from the DEVINFO OTP section.
+  status = sli_se_device_data_read_chunk(&se_command_ctx,
+                                         otp_section_id,
+                                         DEVINFO_GP_OPA0TRIM0_OFFSET,
+                                         sizeof(sl_hal_system_devinfo_opa_t),
+                                         &info->opa0);
+  if (status != SL_STATUS_OK) {
+    info->opa0 = SL_HAL_SYSTEM_DEVINFO_OPA_RESET_VALUES.opa0;
+  }
+#if defined(DEVINFO_GP_OPA1TRIM0_OFFSET)
+  // Send the SE command to retrieve the OPA calibration from the DEVINFO OTP section.
+  status = sli_se_device_data_read_chunk(&se_command_ctx,
+                                         otp_section_id,
+                                         DEVINFO_GP_OPA1TRIM0_OFFSET,
+                                         sizeof(sl_hal_system_devinfo_opa_t),
+                                         &info->opa1);
+  if (status != SL_STATUS_OK) {
+    info->opa1 = SL_HAL_SYSTEM_DEVINFO_OPA_RESET_VALUES.opa1;
+  }
+#endif
+#else
+  *info = SL_HAL_SYSTEM_DEVINFO_OPA_RESET_VALUES;
 #endif
 }
 

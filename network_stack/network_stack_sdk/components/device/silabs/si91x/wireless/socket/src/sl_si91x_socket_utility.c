@@ -71,11 +71,18 @@ typedef struct {
   uint8_t in_use;
   uint8_t select_id;
   uint16_t frame_status;
+  // Host-index interest masks captured at select() submit time so response
+  // remapping cannot set descriptors the caller did not request.
+  uint32_t read_interest_host_mask;
+  uint32_t write_interest_host_mask;
   union {
     sl_si91x_socket_select_callback_t select_callback;
     sli_si91x_socket_select_rsp_t *response_data;
   };
 } sli_si91x_select_request_t;
+
+// Firmware select bitmaps are carried in fd_array[0] (uint32_t).
+#define SLI_SI91X_SELECT_FW_ID_BIT_WIDTH 32U
 
 /******************************************************
  *               Static Function Declarations
@@ -190,12 +197,16 @@ void sli_handle_accept_response(sli_si91x_socket_t *si91x_client_socket,
 int sli_handle_select_response(const sli_si91x_socket_select_rsp_t *response,
                                fd_set *readfds,
                                fd_set *writefds,
-                               fd_set *exception_fd)
+                               fd_set *exception_fd,
+                               uint32_t read_interest_host_mask,
+                               uint32_t write_interest_host_mask)
 #else
 int sli_handle_select_response(const sli_si91x_socket_select_rsp_t *response,
                                sl_si91x_fdset_t *readfds,
                                sl_si91x_fdset_t *writefds,
-                               sl_si91x_fdset_t *exception_fd)
+                               sl_si91x_fdset_t *exception_fd,
+                               uint32_t read_interest_host_mask,
+                               uint32_t write_interest_host_mask)
 #endif
 {
   // To track of the total number of file descriptors set
@@ -214,8 +225,18 @@ int sli_handle_select_response(const sli_si91x_socket_select_rsp_t *response,
       continue;
     }
 
+    // socket->id is int32_t and starts at -1 before firmware assignment. Shifting by a
+    // negative or out-of-range id is undefined behavior; skip such sockets.
+    if (socket->id < 0 || (uint32_t)socket->id >= SLI_SI91X_SELECT_FW_ID_BIT_WIDTH) {
+      continue;
+    }
+
+    const uint32_t firmware_bit = (1U << (uint32_t)socket->id);
+    const uint32_t host_bit     = (1U << (uint32_t)host_socket_index);
+
+    // Restrict remapping to descriptors the caller originally requested.
     // Check if the read file descriptor set is provided and if the corresponding bit is set in the response
-    if (readfds != NULL && (response->read_fds.fd_array[0] & (1 << socket->id))) {
+    if (readfds != NULL && (read_interest_host_mask & host_bit) && (response->read_fds.fd_array[0] & firmware_bit)) {
       // Ignore premature read-ready for outbound non-blocking TCP client connect (RX1).
       if (socket->type == SOCK_STREAM && sli_si91x_socket_is_nonblocking(socket) && socket->state == CONNECTING
           && socket->role == SLI_SI91X_SOCKET_TCP_CLIENT) {
@@ -230,7 +251,7 @@ int sli_handle_select_response(const sli_si91x_socket_select_rsp_t *response,
     }
 
     // Check if the write file descriptor set is provided and if the corresponding bit is set in the response.
-    if (writefds != NULL && (response->write_fds.fd_array[0] & (1 << socket->id))) {
+    if (writefds != NULL && (write_interest_host_mask & host_bit) && (response->write_fds.fd_array[0] & firmware_bit)) {
       // Ignore premature write-ready while a non-blocking TCP client connect is still in progress (RX1).
       if (socket->type == SOCK_STREAM && sli_si91x_socket_is_nonblocking(socket) && socket->state == CONNECTING
           && socket->role == SLI_SI91X_SOCKET_TCP_CLIENT) {
@@ -1606,10 +1627,14 @@ static sl_status_t sli_handle_socket_accept_request(sl_wifi_system_packet_t *rx_
 
   sli_handle_accept_response(client_socket, accept_response);
 
-  if (server_socket->user_accept_callback != NULL) {
+  if (server_socket->user_accept_callback != NULL && client_socket != NULL) {
+    // Peer address is filled on the accepted client socket (same as sync accept).
+    // Server socket remote_address is unused here and remains 0.0.0.0.
+    uint8_t ip_version = (client_socket->remote_address.sin6_family == AF_INET6) ? (uint8_t)SL_IPV6_VERSION
+                                                                                 : (uint8_t)SL_IPV4_VERSION;
     server_socket->user_accept_callback(client_socket_id,
-                                        (struct sockaddr *)&server_socket->remote_address,
-                                        (uint8_t)server_socket->type);
+                                        (struct sockaddr *)&client_socket->remote_address,
+                                        ip_version);
   }
 
   return SL_STATUS_OK;
@@ -1812,7 +1837,12 @@ static sl_status_t sli_handle_select_request(sl_wifi_system_packet_t *rx_packet,
 #endif
 
     // This function handles responses received from the SI91X socket driver
-    sli_handle_select_response(socket_select_rsp, read_fd, write_fd, exception_fd);
+    sli_handle_select_response(socket_select_rsp,
+                               read_fd,
+                               write_fd,
+                               exception_fd,
+                               select_request->read_interest_host_mask,
+                               select_request->write_interest_host_mask);
 
     // Call the user-defined select callback function with the updated file descriptor sets and status
     select_request->select_callback(read_fd, write_fd, exception_fd, select_request->frame_status);
@@ -2371,8 +2401,9 @@ uint8_t sli_prepare_select_request(int nfds,
       continue;
     }
 
-    // A host fd is selectable only once the firmware has assigned a socket id
-    if (socket->id < 0
+    // A host fd is selectable only once the firmware has assigned a valid socket id
+    // that fits in the firmware select bitmap (fd_array[0]).
+    if ((socket->id < 0 || (uint32_t)socket->id >= SLI_SI91X_SELECT_FW_ID_BIT_WIDTH)
 #ifndef __ZEPHYR__
         && ((readfds != NULL && FD_ISSET(host_socket_index, readfds))
             || (writefds != NULL && FD_ISSET(host_socket_index, writefds)))) {
@@ -2390,7 +2421,7 @@ uint8_t sli_prepare_select_request(int nfds,
 #else
     if ((readfds != NULL) && (SL_SI91X_FD_ISSET(host_socket_index, readfds))) {
 #endif
-      request->read_fds.fd_array[0] |= (1U << socket->id);
+      request->read_fds.fd_array[0] |= (1U << (uint32_t)socket->id);
     }
 
     // Check if the socket is set for write operations in the writefds set
@@ -2400,7 +2431,7 @@ uint8_t sli_prepare_select_request(int nfds,
 #else
     if ((writefds != NULL) && (SL_SI91X_FD_ISSET(host_socket_index, writefds))) {
 #endif
-      request->write_fds.fd_array[0] |= (1U << socket->id);
+      request->write_fds.fd_array[0] |= (1U << (uint32_t)socket->id);
     }
 
     // Update the maximum file descriptor number encountered
@@ -2441,7 +2472,12 @@ int32_t sli_handle_select_result(const sli_si91x_select_request_t *select_reques
     (sl_wifi_system_packet_t *)sli_wifi_host_get_buffer_data(response_buffer, 0, NULL);
   const sli_si91x_socket_select_rsp_t *select_rsp = (sli_si91x_socket_select_rsp_t *)response_packet->data;
 
-  total_fd_set_count = sli_handle_select_response(select_rsp, readfds, writefds, exceptfds);
+  total_fd_set_count = sli_handle_select_response(select_rsp,
+                                                  readfds,
+                                                  writefds,
+                                                  exceptfds,
+                                                  select_request->read_interest_host_mask,
+                                                  select_request->write_interest_host_mask);
 
   // Free the response buffer
   sli_buffer_manager_free_buffer(response_buffer);
@@ -2501,6 +2537,25 @@ int sli_si91x_select(int nfds,
   SLI_SET_ERRNO_AND_RETURN_IF_TRUE((select_request == NULL), EPERM);
   // Assign the callback function for this select request
   select_request->select_callback = callback;
+  // Capture caller interest before response remapping clears the fd sets.
+  select_request->read_interest_host_mask  = 0;
+  select_request->write_interest_host_mask = 0;
+  for (int host_socket_index = 0; host_socket_index < nfds; host_socket_index++) {
+#ifndef __ZEPHYR__
+    if ((readfds != NULL) && FD_ISSET(host_socket_index, readfds)) {
+#else
+    if ((readfds != NULL) && SL_SI91X_FD_ISSET(host_socket_index, readfds)) {
+#endif
+      select_request->read_interest_host_mask |= (1U << (uint32_t)host_socket_index);
+    }
+#ifndef __ZEPHYR__
+    if ((writefds != NULL) && FD_ISSET(host_socket_index, writefds)) {
+#else
+    if ((writefds != NULL) && SL_SI91X_FD_ISSET(host_socket_index, writefds)) {
+#endif
+      select_request->write_interest_host_mask |= (1U << (uint32_t)host_socket_index);
+    }
+  }
   // Set the select_id in the request structure
   request.select_id = select_request->select_id;
 

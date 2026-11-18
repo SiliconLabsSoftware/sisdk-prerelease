@@ -214,8 +214,9 @@ psa_status_t sl_psa_key_derivation_single_shot(
  * SHA-256.
  *
  * \note Available when the transparent SE PAKE driver is built
- *       (#SLI_MBEDTLS_DEVICE_HSE and #SLI_PSA_DRIVER_FEATURE_PAKE) and not on
- *       TrustZone non-secure clients.
+ *       (#SLI_MBEDTLS_DEVICE_HSE and #SLI_PSA_DRIVER_FEATURE_PAKE). The
+ *       implementation lives on Secure / trustzone_unaware; TrustZone
+ *       non-secure clients call the TF-M NS veneer which dispatches here.
  *
  * \param[in,out] operation  Active PAKE operation in the computation stage
  *                           after a finished J-PAKE exchange. Aborted on

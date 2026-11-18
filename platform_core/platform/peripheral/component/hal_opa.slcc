@@ -1,0 +1,30 @@
+# HAL for the Operational Amplifier (OPA).
+id: hal_opa
+label: OPA
+package: platform_core
+description: >
+  Operational Amplifier (OPA) peripheral API
+category: Platform|Peripheral|HAL
+quality: evaluation
+metadata:
+  sbom:
+    license: Zlib
+source:
+- path: src/sl_hal_opa.c
+include:
+- path: inc
+  file_list:
+  - path: sl_hal_opa.h
+provides:
+- name: hal_opa
+- name: hal_generic_opa
+  condition: [device_series_3]
+requires:
+- name: device
+- name: device_has_opa
+- name: hal_common
+- name: hal_system
+- name: cmsis_core
+- name: enum
+- name: status
+root_path: platform_core/platform/peripheral

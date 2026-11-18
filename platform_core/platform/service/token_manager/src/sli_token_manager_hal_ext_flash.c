@@ -123,11 +123,11 @@ static void sli_hal_external_flash_close(void)
 /***************************************************************************//**
  * This function is used to read data from the static secure token region.
  ******************************************************************************/
-static sl_status_t sli_hal_external_flash_read(uint32_t srcAdr,
+static sl_status_t sli_hal_external_flash_read(uint32_t src_adr,
                                                void *dst,
                                                size_t length)
 {
-  (void)memcpy(dst, (void *)srcAdr, length);
+  (void)memcpy(dst, (void *)src_adr, length);
 
   return SL_STATUS_OK;
 }
@@ -135,7 +135,7 @@ static sl_status_t sli_hal_external_flash_read(uint32_t srcAdr,
 /***************************************************************************//**
  * This function is used to write data to the static secure page, using SE API.
  ******************************************************************************/
-static sl_status_t sli_hal_external_flash_write(uint32_t dstAdr,
+static sl_status_t sli_hal_external_flash_write(uint32_t dst_adr,
                                                 void const *src,
                                                 size_t length)
 {
@@ -143,10 +143,10 @@ static sl_status_t sli_hal_external_flash_write(uint32_t dstAdr,
   sl_se_command_context_t cmd_ctx;
 
   sl_se_init_command_context(&cmd_ctx);
-  status = sl_se_data_region_write(&cmd_ctx, (void *)dstAdr, src, length);
+  status = sl_se_data_region_write(&cmd_ctx, (void *)dst_adr, src, length);
 
 #if CHECK_DATA
-  if ((status == SL_STATUS_OK) && (memcmp((void *)dstAdr, src, length) != 0)) {
+  if ((status == SL_STATUS_OK) && (memcmp((void *)dst_adr, src, length) != 0)) {
     status = SL_STATUS_FLASH_PROGRAM_FAILED;
   }
 #endif
@@ -154,26 +154,20 @@ static sl_status_t sli_hal_external_flash_write(uint32_t dstAdr,
 }
 
 /***************************************************************************//**
- * This function is used to erase static secure page.
+ * This function is used to erase an NVM page.
  ******************************************************************************/
-static sl_status_t sli_hal_external_flash_page_erase(uint32_t address, size_t size)
+static sl_status_t sli_hal_external_flash_page_erase(uint32_t flash_adr)
 {
   sl_status_t status = SL_STATUS_OK;
   sl_se_command_context_t cmd_ctx = { 0u };
-  uint32_t flash_page_size = sl_hal_system_get_flash_page_size();
-  size_t num_sectors = size / flash_page_size;
-
-  // Ensure erase is page aligned
-  if ( (address % flash_page_size) && (size % flash_page_size)) {
-    return SL_STATUS_FLASH_ERASE_FAILED;
-  }
+  size_t num_sectors = 1;
 
   sl_se_init_command_context(&cmd_ctx);
-  status = sl_se_data_region_erase(&cmd_ctx, (void *)address, num_sectors);
+  status = sl_se_data_region_erase(&cmd_ctx, (void *)flash_adr, num_sectors);
 
 #if CHECK_DATA
   if ((status == SL_STATUS_OK)
-      && !sli_hal_external_flash_verify_erased(address, size)) {
+      && !sli_hal_external_flash_verify_erased(flash_adr, sl_hal_system_get_flash_page_size())) {
     status = SL_STATUS_FLASH_ERASE_FAILED;
   }
 #endif
@@ -181,7 +175,7 @@ static sl_status_t sli_hal_external_flash_page_erase(uint32_t address, size_t si
   return status;
 }
 
-const sli_token_hal_flash_handle_t sli_token_manager_hal_flash_handle = {
+const sli_token_hal_flash_handle_t sli_token_manager_hal_nvm_handle = {
   .open = sli_hal_external_flash_open,
   .close = sli_hal_external_flash_close,
   .read = sli_hal_external_flash_read,

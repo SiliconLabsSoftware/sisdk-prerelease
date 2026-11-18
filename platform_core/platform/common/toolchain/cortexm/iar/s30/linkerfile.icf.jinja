@@ -301,9 +301,16 @@ define block MEMORY_MANAGER_STACK with fixed order, alignment = 8
 {%- endif %}
 
 {#-
-  Exclude the NVM3 region for the TZ secure applications
+  Exclude the NVM3 and upgradable token regions for the TZ secure applications
 #}
 {% if trustzone_secure is not defined %}
+{#- Required for upgradable token storage. #}
+define block uts with alignment = {{ flash_page_size }}
+{
+  section UPGRADABLE_TOKENS,
+};
+keep { block uts };
+
 {%- if linker_zwave_nvm is defined %}
 define block zwavenvm with alignment = {{ flash_page_size }}
 {
@@ -688,6 +695,7 @@ place at start of ROM_region
 place at end of MAIN_FLASH_region {
   block storage,
 {% if trustzone_secure is not defined %}
+  block uts,
 {%- if linker_zwave_nvm is defined %}
   block zwavenvm,
 {%- endif %}

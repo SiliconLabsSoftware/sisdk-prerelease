@@ -36,6 +36,7 @@
 #endif
 #include "sl_iostream.h"
 #include "sl_iostream_uart.h"
+#include "sl_common.h"
 #include "sl_status.h"
 #include "sl_slist.h"
 #include "sl_device_peripheral.h"
@@ -108,7 +109,8 @@ SL_ENUM(sl_iostream_eusart_uart_flow_control_t) {
   SL_IOSTREAM_EUSART_UART_FLOW_CTRL_CTS,        ///< CTS HWFC
   SL_IOSTREAM_EUSART_UART_FLOW_CTRL_RTS,        ///< RTS HWFC
   SL_IOSTREAM_EUSART_UART_FLOW_CTRL_CTS_RTS,    ///< CTS & RTS HWFC
-  SL_IOSTREAM_EUSART_UART_FLOW_CTRL_SOFT        ///< Software flow control
+  SLI_IOSTREAM_EUSART_UART_FLOW_CTRL_SOFT,      ///< Internal software flow control value
+  SL_IOSTREAM_EUSART_UART_FLOW_CTRL_SOFT SL_DEPRECATED_API_SDK_2026_12 = SLI_IOSTREAM_EUSART_UART_FLOW_CTRL_SOFT ///< Software flow control
 };
 
 /// @brief Struct representing an I/O Stream EUSART configuration.

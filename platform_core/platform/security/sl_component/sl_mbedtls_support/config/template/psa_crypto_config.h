@@ -195,6 +195,10 @@
 
 #include "sli_psa_builtin_config_autogen.h"
 
+#if SL_PSA_DRIVERS_ENABLED
+  #include "sli_psa_acceleration_optim.h"
+#endif
+
 // set MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS if SL_MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS is enabled
 #if SL_MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS
   #define MBEDTLS_PSA_ASSUME_EXCLUSIVE_BUFFERS

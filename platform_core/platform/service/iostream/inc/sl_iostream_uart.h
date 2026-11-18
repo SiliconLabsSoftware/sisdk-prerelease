@@ -44,6 +44,7 @@ extern "C" {
 #include "em_device.h"
 
 #include "sl_hal_ldma.h"
+#include "sl_common.h"
 #include "sl_iostream.h"
 #include "sl_slist.h"
 #include "sl_status.h"
@@ -159,7 +160,10 @@ extern "C" {
 #define IOSTREAM_LDMA_DESCRIPTOR_SINGLE_M2P_BYTE(src, dst, cnt) SL_HAL_LDMA_DESCRIPTOR_SINGLE_M2P(SL_HAL_LDMA_CTRL_SIZE_BYTE, src, dst, cnt)
 
 #define uartFlowControlNone  0                     ///< uart flow control none
-#define uartFlowControlSoftware    0xFFFF          ///< uart flow control software
+enum {
+  SLI_IOSTREAM_UART_FLOW_CONTROL_SOFTWARE = 0xFFFF,
+  uartFlowControlSoftware SL_DEPRECATED_API_SDK_2026_12 = SLI_IOSTREAM_UART_FLOW_CONTROL_SOFTWARE ///< uart flow control software
+};
 #define UARTXON     0x11                           ///< uartx on
 #define UARTXOFF    0x13                           ///< uartx off
 

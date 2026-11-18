@@ -95,12 +95,15 @@ sl_iostream_instance_info_t sl_iostream_instance_{{ instance }}_info = {
 sl_status_t sl_iostream_usart_init_{{ instance }}(void)
 {
   sl_status_t status;
+  const int flow_control_type = SL_IOSTREAM_USART_{{ instance | upper }}_FLOW_CONTROL_TYPE;
   USART_InitAsync_TypeDef init_{{ instance }} = USART_INITASYNC_DEFAULT;
   init_{{ instance }}.baudrate = SL_IOSTREAM_USART_{{ instance | upper }}_BAUDRATE;
   init_{{ instance }}.parity = SL_IOSTREAM_USART_{{ instance | upper }}_PARITY;
   init_{{ instance }}.stopbits = SL_IOSTREAM_USART_{{ instance | upper }}_STOP_BITS;
 #if (_SILICON_LABS_32B_SERIES > 0)
-  init_{{ instance }}.hwFlowControl = SL_IOSTREAM_USART_{{ instance | upper }}_FLOW_CONTROL_TYPE != uartFlowControlSoftware ? SL_IOSTREAM_USART_{{ instance | upper }}_FLOW_CONTROL_TYPE : usartHwFlowControlNone;
+  init_{{ instance }}.hwFlowControl = flow_control_type != SLI_IOSTREAM_UART_FLOW_CONTROL_SOFTWARE
+                                       ? (USART_HwFlowControl_TypeDef)flow_control_type
+                                       : usartHwFlowControlNone;
 #endif
   sl_iostream_usart_config_t config_{{ instance }} = { {# create init struct #}
     .usart = SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL,
@@ -151,7 +154,7 @@ sl_status_t sl_iostream_usart_init_{{ instance }}(void)
     .rx_when_sleeping = SL_IOSTREAM_USART_{{ instance | upper }}_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION,
     .uart_periph = &uart_periph_{{ instance }}
   };
-  uart_config_{{ instance }}.sw_flow_control = SL_IOSTREAM_USART_{{ instance | upper }}_FLOW_CONTROL_TYPE == uartFlowControlSoftware;
+  uart_config_{{ instance }}.sw_flow_control = flow_control_type == SLI_IOSTREAM_UART_FLOW_CONTROL_SOFTWARE;
 
 
 #if defined(SL_IOSTREAM_USART_{{ instance | upper }}_ASYNC_TX)
@@ -174,7 +177,7 @@ sl_status_t sl_iostream_usart_init_{{ instance }}(void)
   // Series 0 boards don't have HWFC.
   #if !defined(_SILICON_LABS_32B_SERIES_0)
   if (!uart_config_{{ instance }}.sw_flow_control) {
-    switch (SL_IOSTREAM_USART_{{ instance | upper }}_FLOW_CONTROL_TYPE) 
+    switch (flow_control_type)
     {
       case uartFlowControlNone:
         flow_control = COS_CONFIG_FLOWCONTROL_NONE;

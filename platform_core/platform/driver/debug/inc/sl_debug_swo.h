@@ -156,9 +156,18 @@ sl_status_t sl_debug_swo_write_u32(uint32_t channel, uint32_t word);
  * alias for backward compatibility
  */
 #define sl_debug_swo_write sl_debug_swo_write_u8
-
 /** @} end debug_swo */
 /** @} end debug */
+
+/**
+ * Wait for ITM bytes still in flight to leave the NRZ shifter.
+ *
+ * @details
+ * Returns immediately when the latest stimulus write is already older than
+ * the shifter drain window. When the ITM is still busy, waits for that to
+ * clear and then for the full drain window.
+ */
+void sli_debug_swo_flush(void);
 
 #ifdef __cplusplus
 }

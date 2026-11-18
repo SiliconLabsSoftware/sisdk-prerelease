@@ -110,6 +110,18 @@ typedef struct sl_hal_system_devinfo_adc_t {
   sl_hal_system_devinfo_adc_offset_t   offset;   ///< DEVINFO offset data.
 } sl_hal_system_devinfo_adc_t;
 
+/// Raw OPA factory trim words from DEVINFO GP fragment.
+typedef struct sl_hal_system_devinfo_opa_t {
+  uint32_t trim0; ///< OPAxTRIM0 factory calibration word.
+  uint32_t trim1; ///< OPAxTRIM1 factory calibration word.
+} sl_hal_system_devinfo_opa_t;
+
+/// OPA0 and OPA1 factory trim block from DEVINFO GP fragment.
+typedef struct sl_hal_system_devinfo_opa_block_t {
+  sl_hal_system_devinfo_opa_t opa0; ///< OPA0 factory trim words.
+  sl_hal_system_devinfo_opa_t opa1; ///< OPA1 factory trim words.
+} sl_hal_system_devinfo_opa_block_t;
+
 /// Temperature DEVINFO Structure.
 typedef struct sl_hal_system_devinfo_temperature_t {
   uint16_t emu_temp_room; ///< Temperature value.
@@ -128,6 +140,8 @@ typedef struct sl_hal_system_features {
  ******************************************************************************/
 /// DEVINFO ADC reset values.
 extern const sl_hal_system_devinfo_adc_t SL_HAL_SYSTEM_DEVINFO_ADC_RESET_VALUES;
+/// DEVINFO OPA reset values.
+extern const sl_hal_system_devinfo_opa_block_t SL_HAL_SYSTEM_DEVINFO_OPA_RESET_VALUES;
 /// DEVINFO temperature reset values.
 extern const sl_hal_system_devinfo_temperature_t SL_HAL_SYSTEM_DEVINFO_TEMPERATURE_RESET_VALUES;
 
@@ -367,6 +381,13 @@ void sl_hal_system_fpu_set_access_mode(sl_hal_system_fpu_access_t access_mode);
  *   Pointer to variable where to store the adc calibration info.
  ******************************************************************************/
 void sl_hal_system_get_adc_calibration_info(sl_hal_system_devinfo_adc_t *info);
+
+/***************************************************************************//**
+ * @brief Get the OPA factory trim words from DEVINFO.
+ *
+ * @param[out] info Pointer to the structure that receives the OPA trim words.
+ ******************************************************************************/
+void sl_hal_system_get_opa_calibration_info(sl_hal_system_devinfo_opa_block_t *info);
 
 /***************************************************************************//**
  * @brief

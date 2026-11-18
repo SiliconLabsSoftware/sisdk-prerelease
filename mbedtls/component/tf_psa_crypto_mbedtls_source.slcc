@@ -38,6 +38,25 @@ source:
 - path: utilities/oid.c
 - path: utilities/pem.c
 - path: utilities/pkcs5.c
+  # pk_ecc.c compressed-point fallback needs ECP + bignum on Non-Secure.
+  # psa_crypto_source (which normally supplies these) conflicts with the
+  # Secure Key Library NS interface, so pull them in with mbedtls_pk_parse.
+- path: drivers/builtin/src/bignum_core.c
+  condition: [mbedtls_pk_parse, trustzone_nonsecure]
+- path: drivers/builtin/src/bignum.c
+  condition: [mbedtls_pk_parse, trustzone_nonsecure]
+- path: drivers/builtin/src/ecp_curves.c
+  condition: [mbedtls_pk_parse, trustzone_nonsecure]
+- path: drivers/builtin/src/ecp.c
+  condition: [mbedtls_pk_parse, trustzone_nonsecure]
+
+include:
+- path: drivers/builtin/src
+  condition: [mbedtls_pk_parse, trustzone_nonsecure]
+  file_list:
+  - path: bn_mul.h
+  - path: bignum_internal.h
+  - path: ecp_invasive.h
 
 metadata:
   sbom:

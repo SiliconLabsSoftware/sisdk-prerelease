@@ -678,6 +678,28 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
 
   *output_length = PSA_BITS_TO_BYTES(key_bits);
 
+  #if defined(SLI_PSA_DRIVER_FEATURE_MONTGOMERY)
+  // Reject low-order / out-of-range Montgomery peer keys that yield an
+  // all-zero shared secret. SE HW accepts them (RFC 7748), but PSA Crypto
+  // and mbedtls_psa expect PSA_ERROR_INVALID_ARGUMENT (matches Everest /
+  // ecp_check_bad_points_mx). Needed once PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_DERIVE
+  // unmasks those upstream vectors.
+  if (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) == PSA_ECC_FAMILY_MONTGOMERY) {
+    // X25519=32, X448=56; keep a small fixed zero buffer on the stack.
+    uint8_t zero[64] = { 0 };
+    if (*output_length > sizeof(zero)) {
+      sli_psa_zeroize(output, *output_length);
+      *output_length = 0;
+      return PSA_ERROR_CORRUPTION_DETECTED;
+    }
+    if (sli_psa_safer_memcmp(output, zero, *output_length) == 0) {
+      // output already matches the zero buffer; only clear the length.
+      *output_length = 0;
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+  }
+  #endif // SLI_PSA_DRIVER_FEATURE_MONTGOMERY
+
   return PSA_SUCCESS;
 
   #else // SLI_PSA_DRIVER_FEATURE_ECDH

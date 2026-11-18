@@ -2025,6 +2025,10 @@ psa_status_t sli_hostcrypto_transparent_aead_verify(
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
+  if (tag_length != PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg)) {
+    return PSA_ERROR_INVALID_SIGNATURE;
+  }
+
   if (operation->processed_ad == 0 && operation->processed_len == 0) {
 #if defined(SLI_PSA_DRIVER_FEATURE_CCM)
     if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg,
@@ -2093,7 +2097,8 @@ psa_status_t sli_hostcrypto_transparent_aead_verify(
 #if defined(SLI_PSA_DRIVER_FEATURE_GCM)
   if (PSA_ALG_AEAD_WITH_SHORTENED_TAG(operation->alg,
                                       0) == PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0)) {
-    sx_status = sx_aead_truncate_tag(&operation->aead_ctx, tag_length);
+    size_t configured_tag_len = PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg);
+    sx_status = sx_aead_truncate_tag(&operation->aead_ctx, configured_tag_len);
     if (sx_status != SX_OK) {
       return PSA_ERROR_HARDWARE_FAILURE;
     }
