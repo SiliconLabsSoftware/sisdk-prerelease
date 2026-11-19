@@ -4654,6 +4654,10 @@ sl_status_t sl_bt_sync_set_reporting_mode(uint16_t sync,
  * increase the @p skip value to minimize wakeups when power saving is
  * prioritized over receiving every periodic advertisement.
  *
+ * For an already synchronized train, @p timeout takes effect immediately. The
+ * scanner listens on the next periodic advertising interval, then continues
+ * skipping according to the updated @p skip.
+ *
  * Irrespective of the value of the @p skip parameter, the Controller stops
  * skipping packets if the skipping would cause a timeout.
  *

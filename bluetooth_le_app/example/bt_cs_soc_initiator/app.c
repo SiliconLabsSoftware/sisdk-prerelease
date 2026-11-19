@@ -349,6 +349,10 @@ static const char *antenna_usage_to_str(const cs_initiator_config_t *config)
         return "antenna ID 1";
       case CS_SYNC_ANTENNA_2:
         return "antenna ID 2";
+      case CS_SYNC_ANTENNA_3:
+        return "antenna ID 3";
+      case CS_SYNC_ANTENNA_4:
+        return "antenna ID 4";
       case CS_SYNC_SWITCHING:
         return "switch between all antenna IDs";
       default:
@@ -360,8 +364,16 @@ static const char *antenna_usage_to_str(const cs_initiator_config_t *config)
         return "single antenna on both sides (1:1)";
       case CS_ANTENNA_CONFIG_INDEX_DUAL_I_SINGLE_R:
         return "dual antenna initiator & single antenna reflector (2:1)";
+      case CS_ANTENNA_CONFIG_INDEX_TRIPLE_I_SINGLE_R:
+        return "triple antenna initiator & single antenna reflector (3:1)";
+      case CS_ANTENNA_CONFIG_INDEX_QUAD_I_SINGLE_R:
+        return "quad antenna initiator & single antenna reflector (4:1)";
       case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_DUAL_R:
         return "single antenna initiator & dual antenna reflector (1:2)";
+      case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_TRIPLE_R:
+        return "single antenna initiator & triple antenna reflector (1:3)";
+      case CS_ANTENNA_CONFIG_INDEX_SINGLE_I_QUAD_R:
+        return "single antenna initiator & quad antenna reflector (1:4)";
       case CS_ANTENNA_CONFIG_INDEX_DUAL_ONLY:
         return "dual antennas on both sides (2:2)";
       default:

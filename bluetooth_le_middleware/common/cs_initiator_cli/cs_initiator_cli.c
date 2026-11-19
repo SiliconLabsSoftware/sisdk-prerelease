@@ -46,14 +46,20 @@
 // Channel Sounding specification for Antenna Configuration Index (ACI)
 // In PBR mode these values specify the antenna configuration of the initiator
 // and reflector device
-#define ACI_SINGLE           0u
-#define ACI_DUAL_I_SINGLE_R  1u
-#define ACI_SINGLE_I_DUAL_R  4u
-#define ACI_DUAL             7u
+#define ACI_SINGLE              0u
+#define ACI_DUAL_I_SINGLE_R     1u
+#define ACI_TRIPLE_I_SINGLE_R   2u
+#define ACI_QUAD_I_SINGLE_R     3u
+#define ACI_SINGLE_I_DUAL_R     4u
+#define ACI_SINGLE_I_TRIPLE_R   5u
+#define ACI_SINGLE_I_QUAD_R     6u
+#define ACI_DUAL                7u
 // HCI specification for CS SYNC antenna usage
 // In RTT mode these values specify the antenna usage for CS SYNC packets
 #define CS_SYNC_ANT_ID_1             1
 #define CS_SYNC_ANT_ID_2             2
+#define CS_SYNC_ANT_ID_3             3
+#define CS_SYNC_ANT_ID_4             4
 #define CS_SYNC_ANT_SWITCHING     0xFE
 
 #define cli_print(...) \
@@ -349,11 +355,17 @@ void cs_initiator_cli_aci(sl_cli_command_arg_t *arguments)
   } else {
     if (arg_data != ACI_SINGLE
         && arg_data != ACI_DUAL_I_SINGLE_R
+        && arg_data != ACI_TRIPLE_I_SINGLE_R
+        && arg_data != ACI_QUAD_I_SINGLE_R
         && arg_data != ACI_SINGLE_I_DUAL_R
+        && arg_data != ACI_SINGLE_I_TRIPLE_R
+        && arg_data != ACI_SINGLE_I_QUAD_R
         && arg_data != ACI_DUAL) {
-      cli_print("ERROR. Only (%d, %d, %d, %d) are supported.\n",
+      cli_print("ERROR. Only (%d, %d, %d, %d, %d, %d, %d, %d) are supported.\n",
                 ACI_SINGLE, ACI_DUAL_I_SINGLE_R,
-                ACI_SINGLE_I_DUAL_R, ACI_DUAL);
+                ACI_TRIPLE_I_SINGLE_R, ACI_QUAD_I_SINGLE_R,
+                ACI_SINGLE_I_DUAL_R, ACI_SINGLE_I_TRIPLE_R,
+                ACI_SINGLE_I_QUAD_R, ACI_DUAL);
     } else {
       cli_print("OK. Antenna configuration index set to %d\n", arg_data);
       antenna_config_idx = arg_data;
@@ -382,9 +394,12 @@ void cs_initiator_cli_cs_sync_antenna_usage(sl_cli_command_arg_t *arguments)
   }
   if (arg_data != CS_SYNC_ANT_ID_1
       && arg_data != CS_SYNC_ANT_ID_2
+      && arg_data != CS_SYNC_ANT_ID_3
+      && arg_data != CS_SYNC_ANT_ID_4
       && arg_data != CS_SYNC_ANT_SWITCHING) {
-    cli_print("ERROR. Only (%x, %x, %#x) are supported.\n",
-              CS_SYNC_ANT_ID_1, CS_SYNC_ANT_ID_2, CS_SYNC_ANT_SWITCHING);
+    cli_print("ERROR. Only (%x, %x, %x, %x, %#x) are supported.\n",
+              CS_SYNC_ANT_ID_1, CS_SYNC_ANT_ID_2,
+              CS_SYNC_ANT_ID_3, CS_SYNC_ANT_ID_4, CS_SYNC_ANT_SWITCHING);
   } else {
     cli_print("OK. Antenna usage for CS SYNC packets set to %#x\n",
               arg_data);

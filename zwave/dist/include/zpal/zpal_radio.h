@@ -474,6 +474,7 @@ zpal_radio_region_t zpal_radio_get_region(void);
  * @param[in] frame_header_buffer   Pointer to data array containing the frame header.
  * @param[in] frame_payload_length  Length of frame payload data to transmit.
  * @param[in] frame_payload_buffer  Pointer to data array containing the frame payload.
+ * @param[in] is_retransmission     True if this transmission is a retransmission.
  * @return @ref ZPAL_STATUS_OK if the data was successfully transmit, @ref ZPAL_STATUS_BUFFER_FULL when queue is full.
  */
 zpal_status_t zpal_radio_transmit(zpal_radio_transmit_parameter_t const *const tx_parameters,
@@ -582,7 +583,8 @@ void zpal_radio_clear_network_stats(void);
  *                        @ref ZPAL_RADIO_BACKGROUND_RSSI_NOT_AVAILABLE_TX if Tx is in progress.
  * @return @ref ZPAL_STATUS_OK if a valid RSSI value is available and read.
  *         @ref ZPAL_STATUS_BUSY if the radio is busy (TX/RX active), or if the
- *         underlying RAIL channel-hopping RSSI read is invalid.
+ *         underlying RAIL channel-hopping RSSI read is invalid. In those cases @a rssi is set to
+ *         @ref ZPAL_RADIO_INVALID_RSSI_DBM.
  *         @ref ZPAL_STATUS_INVALID_ARGUMENT if rssi pointer is null.
  */
 zpal_status_t zpal_radio_get_background_rssi(uint8_t channel, int8_t *rssi);
