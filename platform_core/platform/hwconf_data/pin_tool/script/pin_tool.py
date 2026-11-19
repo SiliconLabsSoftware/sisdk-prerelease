@@ -327,19 +327,23 @@ def validate_abus_routes(abus_routes, changeset):
       bus_polarity = "O"
 
     # Finding the ABUS i.e. ABUSA/ABUSB/ABUSCD
+    # Dedicated AIN pads use PortBankIndex >= 4 and are not ABUS A/B/CD clients
     if route_properties["PortBankIndex"] == 0:
       bus_name = "A"
     elif route_properties["PortBankIndex"] == 1:
       bus_name = "B"
     elif route_properties["PortBankIndex"] == 2 or route_properties["PortBankIndex"] == 3:
       bus_name = "CD"
+    else:
+      bus_name = None
 
-    # Appending the active analog peripheral to relevant ABUS, to which it is mapped to
-    abus_active_clients["ABUS"+bus_name+"_"+bus_polarity].add(route_properties['ModuleName'])
+    if bus_name is not None:
+      # Appending the active analog peripheral to relevant ABUS, to which it is mapped to
+      abus_active_clients["ABUS"+bus_name+"_"+bus_polarity].add(route_properties['ModuleName'])
 
-    # Bus Over-subscription Error Check: No more than two analog peripherals should request access to EVEN/ODD BUS
-    if len(abus_active_clients["ABUS"+bus_name+"_"+bus_polarity]) > 2:
-      changeset.append(Studio.halConfig.newWarning(route_properties['Route'].enablePropertyReference,'ABUS{} OVER-SUBSCRIBED : not more than two peripherals allowed for an EVEN/ODD ABUS'.format(bus_name)))
+      # Bus Over-subscription Error Check: No more than two analog peripherals should request access to EVEN/ODD BUS
+      if len(abus_active_clients["ABUS"+bus_name+"_"+bus_polarity]) > 2:
+        changeset.append(Studio.halConfig.newWarning(route_properties['Route'].enablePropertyReference,'ABUS{} OVER-SUBSCRIBED : not more than two peripherals allowed for an EVEN/ODD ABUS'.format(bus_name)))
 
     if "CEXT" in analog_signal:
       analog_signal_prefix = "CSEN_"

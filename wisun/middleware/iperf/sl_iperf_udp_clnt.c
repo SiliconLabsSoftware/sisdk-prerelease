@@ -410,15 +410,14 @@ static void _udp_client_calc_tx(sl_iperf_test_t *const test,
   if (test->opt.packet_nbr) {
     tx_info->packet_count = test->opt.packet_nbr;
     if (target_bytes_per_sec > 0U) {
-      duration_ms = ((uint64_t)tx_info->packet_count * tx_info->packet_size
-                     * SL_IPERF_TIME_S_TO_MS_ML + target_bytes_per_sec - 1U)
+      duration_ms = (S_TO_MS((uint64_t)tx_info->packet_count * tx_info->packet_size) + target_bytes_per_sec - 1U)
                     / target_bytes_per_sec;
       test->opt.duration_ms = (duration_ms > UINT32_MAX) ? UINT32_MAX : (uint32_t)duration_ms;
     } else {
       test->opt.duration_ms = UINT32_MAX;
     }
   } else {
-    total_bytes = ((uint64_t)target_bytes_per_sec * test->opt.duration_ms) / SL_IPERF_TIME_S_TO_MS_ML;
+    total_bytes = MS_TO_S((uint64_t)target_bytes_per_sec * test->opt.duration_ms);
     packet_count = (total_bytes + tx_info->packet_size - 1U) / tx_info->packet_size;
     tx_info->packet_count = (packet_count > UINT32_MAX) ? UINT32_MAX : (uint32_t)packet_count;
   }
@@ -449,7 +448,7 @@ static void _parse_srv_finack(sl_iperf_test_t * const test)
   t.usec = ntohl(hdr->stop_usec);
   test->statistic.finack_duration_ms = sl_iperf_calc_ms_from_time(&t);
   test->statistic.finack_pkt = ntohl(hdr->packet_cnt);
-  test->statistic.finack_bw = (uint32_t)(((uint64_t)test->statistic.finack_tot_len * SL_IPERF_DATA_BYTE_TO_BIT_ML * SL_IPERF_TIME_S_TO_MS_ML) / test->statistic.finack_duration_ms);
+  test->statistic.finack_bw = (uint32_t)(S_TO_MS((uint64_t)test->statistic.finack_tot_len * SL_IPERF_DATA_BYTE_TO_BIT_ML) / test->statistic.finack_duration_ms);
   test->statistic.udp_lost_pkt = ntohl(hdr->lost_pkt_cnt);
   test->statistic.udp_out_of_order = ntohl(hdr->out_of_order_cnt);
   t.sec = ntohl(hdr->jitter_sec);

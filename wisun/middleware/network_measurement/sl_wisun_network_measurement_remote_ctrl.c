@@ -113,6 +113,14 @@
 #define SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_SOCKET_BUFFER_SIZE_STR "options.socket_buffer_size"
 /// Arg options interval str
 #define SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_INTERVAL_STR         "options.interval"
+/// Arg options port str
+#define SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_PORT_STR             "options.port"
+/// Arg options packet number str
+#define SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_PACKET_NUMBER_STR    "options.packet_number"
+/// Arg options bandwidth format str
+#define SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_BW_FORMAT_STR        "options.bw_format"
+/// Arg options persistent str
+#define SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_PERSISTENT_STR       "options.persistent"
 
 /// Response no coap payload str
 #define SL_WISUN_NWM_REMOTE_CTRL_RESP_NO_COAP_PAYLOAD_STR         "[No CoAP payload: -e \"<cli command>\"]"
@@ -141,6 +149,7 @@
 /// Response iperf help str
 #define SL_WISUN_NWM_REMOTE_CTRL_RESP_IPERF_HELP_STR \
   "\niPerf Remote Control CLI Help.\n\n\
+  Options are shared with the local iPerf CLI.\n\n\
   Writable options:\n\
     - remote_addr\n\
     - bandwidth\n\
@@ -148,7 +157,12 @@
     - interval\n\
     - buffer_length\n\
     - socket_buffer_size\n\
-  Example: iperf set options.bandwidth 10000\n\n\
+    - port\n\
+    - packet_number\n\
+    - bw_format\n\
+    - persistent\n\
+  Example: iperf set options.bandwidth 10000\n\
+           iperf set options.persistent 1\n\n\
   Start iPerf command: iperf <client|server>\n\n\
   Get iPerf results: iperf get <text|json>\n"
 
@@ -424,19 +438,6 @@ static int32_t _log_print_only_buff(sl_iperf_log_t * const log, const char * for
 //                                Static Variables
 // -----------------------------------------------------------------------------
 
-/// iperf structure with default settings of options
-static sl_iperf_opt_t _options = {
-  .bandwidth = SL_IPERF_CLIENT_DEFAULT_BANDWIDTH_BPS,
-  .bw_format = SL_IPERF_OPT_BW_FORMAT_BITS_PER_SEC,
-  .interval_ms = SL_IPERF_DEFAULT_INTERVAL_MS,
-  .mode = SL_IPERF_MODE_SERVER,
-  .protocol = SL_IPERF_IPROTOV6_UDP,
-  .port = SL_IPERF_SERVER_DEFAULT_PORT,
-  .duration_ms = SL_IPERF_CLIENT_DEFAULT_SEND_TIME_MS,
-  .buf_len = SL_IPERF_BUFFER_SIZE,
-  .socket_buffer_size = SL_IPERF_SOCKET_BUFFER_SIZE
-};
-
 /// Network Measurement Remote Control Ping stat
 static sl_wisun_nwm_node_stat_t _stat;
 
@@ -560,6 +561,8 @@ static sl_wisun_coap_packet_t * _parse_iperf(const sl_wisun_coap_packet_t * cons
   char* req_payload = NULL;
   sl_wisun_nwm_remote_ctrl_buf_target_t get_res_type = SL_WISUN_NWM_REMOTE_CTRL_BUF_TARGET_NONE;
   sl_wisun_coap_packet_t * resp_packet = NULL;
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+  int seconds = 0;
 
   // Parsing incoming cli command string.
   req_payload = sl_wisun_coap_get_payload_str(req_packet);
@@ -643,38 +646,87 @@ static sl_wisun_coap_packet_t * _parse_iperf(const sl_wisun_coap_packet_t * cons
   if (!strncmp(iperf_cmd.arg1,
                SL_WISUN_NWM_REMOTE_CTRL_ARG_SET_STR,
                SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
+
     if (!strncmp(iperf_cmd.arg2,
                  SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_BW_STR,
                  SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
-      _options.bandwidth = atoi(iperf_cmd.arg3);
+      options->bandwidth = atoi(iperf_cmd.arg3);
       resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
     } else if (!strncmp(iperf_cmd.arg2,
                         SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_REMOTE_ADDR_STR,
                         SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
-      memcpy(_options.remote_addr,
-             iperf_cmd.arg3,
-             sl_strnlen(iperf_cmd.arg3, SL_WISUN_NWM_REMOTE_CTRL_MAX_QUERY_LENGTH));
+      sl_strcpy_s(options->remote_addr, SL_IPERF_IP_STR_BUFF_LEN, iperf_cmd.arg3);
       resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
     } else if (!strncmp(iperf_cmd.arg2,
                         SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_DURATION_STR,
                         SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
-      _options.duration_ms = (uint32_t)atoi(iperf_cmd.arg3);
-      resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
+      seconds = atoi(iperf_cmd.arg3);
+      if ((seconds < 0)
+          || ((uint32_t)seconds > MS_TO_S(UINT32_MAX))) {
+        resp_packet = _build_response_packet(&_resp_iperf_set_failed, req_packet);
+      } else {
+        options->duration_ms = S_TO_MS((uint32_t)seconds);
+        resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
+      }
     } else if (!strncmp(iperf_cmd.arg2,
                         SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_INTERVAL_STR,
                         SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
-      _options.interval_ms = (uint16_t)atoi(iperf_cmd.arg3);
-      resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
+      seconds = atoi(iperf_cmd.arg3);
+      if ((seconds < 0)
+          || ((uint32_t)seconds > MS_TO_S(UINT16_MAX))) {
+        resp_packet = _build_response_packet(&_resp_iperf_set_failed, req_packet);
+      } else {
+        options->interval_ms = (uint16_t)S_TO_MS((uint32_t)seconds);
+        resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
+      }
     } else if (!strncmp(iperf_cmd.arg2,
                         SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_BUFFER_LENGTH_STR,
                         SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
-      _options.buf_len = (uint16_t)atoi(iperf_cmd.arg3);
+      options->buf_len = (uint16_t)atoi(iperf_cmd.arg3);
       resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
     } else if (!strncmp(iperf_cmd.arg2,
                         SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_SOCKET_BUFFER_SIZE_STR,
                         SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
-      _options.socket_buffer_size = (uint16_t)atoi(iperf_cmd.arg3);
+      options->socket_buffer_size = (uint16_t)atoi(iperf_cmd.arg3);
       resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
+    } else if (!strncmp(iperf_cmd.arg2,
+                        SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_PORT_STR,
+                        SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
+      int port = atoi(iperf_cmd.arg3);
+      if ((port < 0) || (port > UINT16_MAX)) {
+        resp_packet = _build_response_packet(&_resp_iperf_set_failed, req_packet);
+      } else {
+        options->port = (uint16_t)port;
+        resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
+      }
+    } else if (!strncmp(iperf_cmd.arg2,
+                        SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_PACKET_NUMBER_STR,
+                        SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
+      int packet_nbr = atoi(iperf_cmd.arg3);
+      if (packet_nbr < 0) {
+        resp_packet = _build_response_packet(&_resp_iperf_set_failed, req_packet);
+      } else {
+        options->packet_nbr = (uint32_t)packet_nbr;
+        resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
+      }
+    } else if (!strncmp(iperf_cmd.arg2,
+                        SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_BW_FORMAT_STR,
+                        SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
+      if (!sl_iperf_opt_bw_format_from_str(iperf_cmd.arg3, &options->bw_format)) {
+        resp_packet = _build_response_packet(&_resp_iperf_set_failed, req_packet);
+      } else {
+        resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
+      }
+    } else if (!strncmp(iperf_cmd.arg2,
+                        SL_WISUN_NWM_REMOTE_CTRL_ARG_OPTIONS_PERSISTENT_STR,
+                        SL_WISUN_NWM_REMOTE_CTRL_MAX_ARG_STRING_LENGTH)) {
+      int persistent = atoi(iperf_cmd.arg3);
+      if ((persistent != 0) && (persistent != 1)) {
+        resp_packet = _build_response_packet(&_resp_iperf_set_failed, req_packet);
+      } else {
+        options->persistent = (bool)persistent;
+        resp_packet = _build_response_packet(&_resp_iperf_set_succeed, req_packet);
+      }
     } else {
       resp_packet = _build_response_packet(&_resp_iperf_set_failed, req_packet);
     }
@@ -690,12 +742,13 @@ static sl_wisun_coap_packet_t * _parse_iperf(const sl_wisun_coap_packet_t * cons
 static  sl_wisun_coap_packet_t * _start_iperf_server(const sl_wisun_coap_packet_t * const req_packet)
 {
   static sl_iperf_test_t test = { 0U };
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
 
   // Set iPerf server options and init test descriptor.
-  _options.mode = SL_IPERF_MODE_SERVER;
-  _options.protocol = SL_IPERF_IPROTOV6_UDP;
-  sl_iperf_test_init(&test, SL_IPERF_MODE_SERVER, SL_IPERF_IPROTOV6_UDP, _options.buf_len);
-  memcpy(&test.opt, &_options, sizeof(sl_iperf_opt_t));
+  options->mode = SL_IPERF_MODE_SERVER;
+  options->protocol = SL_IPERF_IPROTOV6_UDP;
+  sl_iperf_test_init(&test, SL_IPERF_MODE_SERVER, SL_IPERF_IPROTOV6_UDP, options->buf_len);
+  memcpy(&test.opt, options, sizeof(sl_iperf_opt_t));
 
   // Adds the test to the queue
   if (!sl_iperf_test_add(&test)) {
@@ -711,12 +764,13 @@ static  sl_wisun_coap_packet_t * _start_iperf_server(const sl_wisun_coap_packet_
 static sl_wisun_coap_packet_t * _start_iperf_client(const sl_wisun_coap_packet_t * const req_packet)
 {
   static sl_iperf_test_t test = { 0U };
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
 
   /// 1. Set iPerf client options and init test descriptor.
-  _options.mode = SL_IPERF_MODE_CLIENT;
-  _options.protocol = SL_IPERF_IPROTOV6_UDP;
-  sl_iperf_test_init(&test, SL_IPERF_MODE_CLIENT, SL_IPERF_IPROTOV6_UDP, _options.buf_len);
-  memcpy(&test.opt, &_options, sizeof(sl_iperf_opt_t));
+  options->mode = SL_IPERF_MODE_CLIENT;
+  options->protocol = SL_IPERF_IPROTOV6_UDP;
+  sl_iperf_test_init(&test, SL_IPERF_MODE_CLIENT, SL_IPERF_IPROTOV6_UDP, options->buf_len);
+  memcpy(&test.opt, options, sizeof(sl_iperf_opt_t));
 
   // Adds the test to the queue.
   if (!sl_iperf_test_add(&test)) {

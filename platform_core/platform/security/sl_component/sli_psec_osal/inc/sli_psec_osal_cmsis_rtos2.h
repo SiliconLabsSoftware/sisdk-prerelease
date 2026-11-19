@@ -299,7 +299,7 @@ sli_psec_osal_wait_completion(sli_psec_osal_completion_t *p_comp, int ticks)
     return SL_STATUS_FAIL;
   }
 
-  osStatus_t status = osOK;
+  osStatus_t status = osError;
   if (osKernelGetState() == osKernelRunning) {
     status = osSemaphoreAcquire(p_comp->semaphore_ID,
                                 (uint32_t)ticks);

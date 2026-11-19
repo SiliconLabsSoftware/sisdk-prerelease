@@ -53,12 +53,18 @@ include:
     condition: ["sl_si91x_lwip_stack"]
   - path: sli_mqtt_tls_alpn.h
     condition: ["sl_si91x_network_dual_stack"]
+  - path: sl_paho_error_codes.h
+    condition: ["sl_si91x_lwip_stack"]
+  - path: sl_paho_error_codes.h
+    condition: ["sl_si91x_network_dual_stack"]
 
 - path: MQTTClient-C/src/Si91x
   file_list:
   - path: MQTTSi91x.h
     condition: ["sl_si91x_internal_stack"]
   - path: sli_mqtt_tls_alpn.h
+    condition: ["sl_si91x_internal_stack"]
+  - path: sl_paho_error_codes.h
     condition: ["sl_si91x_internal_stack"]
 
 - path: MQTTPacket/src/

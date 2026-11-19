@@ -66,6 +66,12 @@ void InitTimer(Timer *timer)
   timer->end_time = 0;
 }
 
+/* Idle/no-data within SO_RCVTIME → 0 for sl_paho_network_connect reads only. */
+static int mqtt_recv_idle_timeout(int err)
+{
+  return (err == EAGAIN || err == EWOULDBLOCK || err == ETIMEDOUT);
+}
+
 static int mqtt_tcp_read(Network *n, unsigned char *buffer, int len, int timeout_ms)
 {
   sl_si91x_time_value timeout;
@@ -80,6 +86,35 @@ static int mqtt_tcp_read(Network *n, unsigned char *buffer, int len, int timeout
     int rc = sl_si91x_recv(n->socket, &buffer[total_bytes_read], (len - total_bytes_read), 0);
     if (rc == -1) {
       if (errno != ENOTCONN && errno != ECONNRESET)
+        total_bytes_read = -1;
+      break;
+    } else if (rc == 0) {
+      total_bytes_read = 0;
+      break;
+    } else
+      total_bytes_read += rc;
+  }
+  return total_bytes_read;
+}
+
+/* sl_paho_network_connect TCP read: idle timeout returns 0 (legacy mqtt_tcp_read unchanged). */
+static int sli_paho_mqtt_tcp_read(Network *n, unsigned char *buffer, int len, int timeout_ms)
+{
+  sl_si91x_time_value timeout;
+  timeout.tv_sec  = timeout_ms / 1000;
+  timeout.tv_usec = (timeout_ms % 1000) * 1000;
+
+  sl_si91x_setsockopt(n->socket, SL_SI91X_SOL_SOCKET, SL_SI91X_SO_RCVTIME, &timeout, sizeof(timeout));
+
+  int total_bytes_read = 0;
+  while (total_bytes_read < len) {
+    int rc = sl_si91x_recv(n->socket, &buffer[total_bytes_read], (len - total_bytes_read), 0);
+    if (rc == -1) {
+      int err = errno;
+      if (mqtt_recv_idle_timeout(err)) {
+        break;
+      }
+      if (err != ENOTCONN && err != ECONNRESET)
         total_bytes_read = -1;
       break;
     } else if (rc == 0) {
@@ -140,13 +175,13 @@ static int mqtt_tcpconnection_handler(Network *n, uint8_t flags, char *addr, int
         sl_si91x_setsockopt(n->socket, SL_SI91X_SOL_SOCKET, SL_SI91X_SO_SSL_ENABLE, &ssl_enable, sizeof(ssl_enable));
       if (status < 0) {
         SL_DEBUG_LOG_V2(ERROR, "Set Socket SSL option failed with error: %d\r\n", errno);
-        sl_si91x_shutdown(n->socket, 0);
+        mqtt_tcp_disconnect(n);
         return -1;
       }
 
 #if MQTT_TLS_ALPN_ENABLED
       if (sli_mqtt_tls_alpn_set_async(n->socket) < 0) {
-        sl_si91x_shutdown(n->socket, 0);
+        mqtt_tcp_disconnect(n);
         return -1;
       }
 #endif
@@ -186,13 +221,13 @@ static int mqtt_tcpconnection_handler(Network *n, uint8_t flags, char *addr, int
         sl_si91x_setsockopt(n->socket, SL_SI91X_SOL_SOCKET, SL_SI91X_SO_SSL_ENABLE, &ssl_enable, sizeof(ssl_enable));
       if (status < 0) {
         SL_DEBUG_LOG_V2(ERROR, "Set Socket SSL option failed with error: %d\r\n", errno);
-        sl_si91x_shutdown(n->socket, 0);
+        mqtt_tcp_disconnect(n);
         return -1;
       }
 
 #if MQTT_TLS_ALPN_ENABLED
       if (sli_mqtt_tls_alpn_set_async(n->socket) < 0) {
-        sl_si91x_shutdown(n->socket, 0);
+        mqtt_tcp_disconnect(n);
         return -1;
       }
 #endif
@@ -210,8 +245,7 @@ static int mqtt_tcpconnection_handler(Network *n, uint8_t flags, char *addr, int
 
   if (rc == -1) {
     SL_DEBUG_LOG_V2(ERROR, "Socket Connect failed with error: %d\r\n", errno);
-    sl_si91x_shutdown(n->socket, 0);
-    n->socket = -1;
+    mqtt_tcp_disconnect(n);
     return NETWORK_ERROR_CONNECT_FAILED;
   }
   SL_DEBUG_LOG_V2(INFO, "Socket connection success\r\n");
@@ -222,7 +256,7 @@ static int mqtt_tcpconnection_handler(Network *n, uint8_t flags, char *addr, int
  * SiLabs dual-IP TCP connect: family selected by flags, addr is raw IP bytes.
  * Does not alter mqtt_tcpconnection_handler / NetworkConnect behavior.
  */
-static int sl_paho_mqtt_tcpconnection_handler(Network *n,
+static int sli_paho_mqtt_tcpconnection_handler(Network *n,
                                               uint8_t flags,
                                               char *addr,
                                               int dst_port,
@@ -237,7 +271,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
 
   if (is_ipv4_requested == is_ipv6_requested) {
     SL_DEBUG_LOG_V2(ERROR, "sl_paho_network_connect: set exactly one of IPV4/IPV6 flags\r\n");
-    return NETWORK_ERROR_INVALID_FLAGS;
+    return SL_NETWORK_ERR_INVALID_FLAGS;
   }
 
 #ifdef SLI_SI91X_ENABLE_IPV6
@@ -253,7 +287,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     n->socket = sl_si91x_socket(AF_INET, type, IPPROTO_TCP);
     if (n->socket < 0) {
       SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with error: %d\r\n", errno);
-      return -1;
+      return SL_NETWORK_TCP_ERR_SOCKET_CREATE;
     }
 
     client_address.sin_family = AF_INET;
@@ -265,14 +299,14 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
         sl_si91x_setsockopt(n->socket, SL_SI91X_SOL_SOCKET, SL_SI91X_SO_SSL_ENABLE, &ssl_enable, sizeof(ssl_enable));
       if (status < 0) {
         SL_DEBUG_LOG_V2(ERROR, "Set Socket SSL option failed with error: %d\r\n", errno);
-        sl_si91x_shutdown(n->socket, 0);
-        return -1;
+        mqtt_tcp_disconnect(n);
+        return SL_NETWORK_TCP_ERR_SETSOCKOPT;
       }
 
 #if MQTT_TLS_ALPN_ENABLED
       if (sli_mqtt_tls_alpn_set_async(n->socket) < 0) {
-        sl_si91x_shutdown(n->socket, 0);
-        return -1;
+        mqtt_tcp_disconnect(n);
+        return SL_NETWORK_TLS_ERR_ALPN;
       }
 #endif
     }
@@ -281,7 +315,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     if (status != 0) {
       SL_DEBUG_LOG_V2(ERROR, "Socket bind failed with error: %d\r\n", errno);
       mqtt_tcp_disconnect(n);
-      return status;
+      return SL_NETWORK_TCP_ERR_SOCKET_BIND;
     }
 
     rc = sl_si91x_connect(n->socket, (struct sockaddr *)&server_address, socket_length);
@@ -297,7 +331,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     n->socket = sl_si91x_socket(AF_INET6, type, IPPROTO_TCP);
     if (n->socket < 0) {
       SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with error: %d\r\n", errno);
-      return -1;
+      return SL_NETWORK_TCP_ERR_SOCKET_CREATE;
     }
 
     client_address_v6.sin6_family = AF_INET6;
@@ -309,14 +343,14 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
         sl_si91x_setsockopt(n->socket, SL_SI91X_SOL_SOCKET, SL_SI91X_SO_SSL_ENABLE, &ssl_enable, sizeof(ssl_enable));
       if (status < 0) {
         SL_DEBUG_LOG_V2(ERROR, "Set Socket SSL option failed with error: %d\r\n", errno);
-        sl_si91x_shutdown(n->socket, 0);
-        return -1;
+        mqtt_tcp_disconnect(n);
+        return SL_NETWORK_TCP_ERR_SETSOCKOPT;
       }
 
 #if MQTT_TLS_ALPN_ENABLED
       if (sli_mqtt_tls_alpn_set_async(n->socket) < 0) {
-        sl_si91x_shutdown(n->socket, 0);
-        return -1;
+        mqtt_tcp_disconnect(n);
+        return SL_NETWORK_TLS_ERR_ALPN;
       }
 #endif
     }
@@ -325,7 +359,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     if (status != 0) {
       SL_DEBUG_LOG_V2(ERROR, "Socket bind failed with error: %d\r\n", errno);
       mqtt_tcp_disconnect(n);
-      return status;
+      return SL_NETWORK_TCP_ERR_SOCKET_BIND;
     }
 
     rc = sl_si91x_connect(n->socket, (struct sockaddr *)&server_address_v6, socket_length_v6);
@@ -333,7 +367,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
 #else
   if (is_ipv6_requested) {
     SL_DEBUG_LOG_V2(ERROR, "sl_paho_network_connect: IPv6 not available in this build\r\n");
-    return NETWORK_ERROR_INVALID_FLAGS;
+    return SL_NETWORK_ERR_INVALID_FLAGS;
   }
 
   {
@@ -348,7 +382,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     n->socket = sl_si91x_socket(AF_INET, type, IPPROTO_TCP);
     if (n->socket < 0) {
       SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with error: %d\r\n", errno);
-      return -1;
+      return SL_NETWORK_TCP_ERR_SOCKET_CREATE;
     }
 
     client_address.sin_family = AF_INET;
@@ -360,14 +394,14 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
         sl_si91x_setsockopt(n->socket, SL_SI91X_SOL_SOCKET, SL_SI91X_SO_SSL_ENABLE, &ssl_enable, sizeof(ssl_enable));
       if (status < 0) {
         SL_DEBUG_LOG_V2(ERROR, "Set Socket SSL option failed with error: %d\r\n", errno);
-        sl_si91x_shutdown(n->socket, 0);
-        return -1;
+        mqtt_tcp_disconnect(n);
+        return SL_NETWORK_TCP_ERR_SETSOCKOPT;
       }
 
 #if MQTT_TLS_ALPN_ENABLED
       if (sli_mqtt_tls_alpn_set_async(n->socket) < 0) {
-        sl_si91x_shutdown(n->socket, 0);
-        return -1;
+        mqtt_tcp_disconnect(n);
+        return SL_NETWORK_TLS_ERR_ALPN;
       }
 #endif
     }
@@ -376,7 +410,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     if (status != 0) {
       SL_DEBUG_LOG_V2(ERROR, "Socket bind failed with error: %d\r\n", errno);
       mqtt_tcp_disconnect(n);
-      return status;
+      return SL_NETWORK_TCP_ERR_SOCKET_BIND;
     }
 
     rc = sl_si91x_connect(n->socket, (struct sockaddr *)&server_address, socket_length);
@@ -385,12 +419,12 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
 
   if (rc == -1) {
     SL_DEBUG_LOG_V2(ERROR, "Socket Connect failed with error: %d\r\n", errno);
-    sl_si91x_shutdown(n->socket, 0);
-    n->socket = -1;
-    return NETWORK_ERROR_CONNECT_FAILED;
+    mqtt_tcp_disconnect(n);
+    return SL_NETWORK_TCP_ERR_SOCKET_CONNECT;
   }
+  n->mqttread = sli_paho_mqtt_tcp_read;
   SL_DEBUG_LOG_V2(INFO, "Socket connection success\r\n");
-  return 0;
+  return SL_NETWORK_SUCCESS;
 }
 
 void NetworkInit(Network *n)
@@ -424,18 +458,18 @@ int NetworkConnect(Network *n, uint8_t flags, char *addr, int dst_port, int src_
 int sl_paho_network_connect(Network *n, uint8_t flags, char *addr, int dst_port, int src_port, bool ssl)
 {
   if (n == NULL) {
-    return NETWORK_ERROR_NULL_STRUCTURE;
+    return SL_NETWORK_ERR_NULL_STRUCTURE;
   }
 
   if (addr == NULL) {
-    return NETWORK_ERROR_NULL_ADDRESS;
+    return SL_NETWORK_ERR_NULL_ADDRESS;
   }
 
   if (n->transport_type == MQTT_TRANSPORT_TCP) {
-    return sl_paho_mqtt_tcpconnection_handler(n, flags, addr, dst_port, src_port, ssl);
+    return sli_paho_mqtt_tcpconnection_handler(n, flags, addr, dst_port, src_port, ssl);
   }
 
-  return NETWORK_ERROR_INVALID_TYPE;
+  return SL_NETWORK_ERR_INVALID_TYPE;
 }
 
 void NetworkDisconnect(Network *n)

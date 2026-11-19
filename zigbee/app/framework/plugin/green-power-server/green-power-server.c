@@ -2628,9 +2628,16 @@ void sl_zigbee_af_green_power_server_commissioning_window_timeout_event_handler(
   UNUSED_VAR(event);
 
   sl_zigbee_af_event_set_inactive(commissioningWindowTimeout);
+  // Stop subordinate timers so they do not notify commissioning closure again.
+  sl_zigbee_af_event_set_inactive(multiSensorCommissioningTimeout);
+  sl_zigbee_af_event_set_inactive(genericSwitchCommissioningTimeout);
   sl_zigbee_af_green_power_server_commissioning_timeout_cb(COMMISSIONING_TIMEOUT_TYPE_COMMISSIONING_WINDOW_TIMEOUT,
                                                            noOfCommissionedEndpoints,
                                                            commissionedEndPoints);
+  // Drop report and switch state the subordinate timers would have cleared.
+  for (int i = 0; i < SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_SERVER_COMMISSIONING_GPD_INSTANCES; i++) {
+    resetOfMultisensorDataSaved(true, &gpdCommDataSaved[i]);
+  }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Green Power Server Initialisation and stack status callbacks.
@@ -2854,7 +2861,10 @@ sl_zigbee_af_zcl_request_status_t sli_zigbee_af_green_power_server_gp_sink_commi
     }
   } else if (commissioningState.inCommissioningMode) {
     commissioningState.inCommissioningMode = false;
+    // Deactive the timer, and the subordinate commissioning timers with it.
     sl_zigbee_af_event_set_inactive(commissioningWindowTimeout);
+    sl_zigbee_af_event_set_inactive(multiSensorCommissioningTimeout);
+    sl_zigbee_af_event_set_inactive(genericSwitchCommissioningTimeout);
     if (commissioningState.proxiesInvolved) {
       proxyOptions = 0;
     }

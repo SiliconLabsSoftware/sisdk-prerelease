@@ -106,11 +106,13 @@ int readPacket(Client *c, Timer *timer)
   // MQTT over WebSocket -  WebSocket header is 2 bytes, requiring a read request greater than 2 bytes for proper processing.
 
   if (c->ipstack->transport_type == MQTT_TRANSPORT_WEBSOCKET) {
-    if (c->ipstack->mqttread(c->ipstack, c->readbuf, MQTT_WITH_WEBSOCKET_HEADER_LEN, left_ms_mqtt(timer)) != 1)
+    rc = c->ipstack->mqttread(c->ipstack, c->readbuf, MQTT_WITH_WEBSOCKET_HEADER_LEN, left_ms_mqtt(timer));
+    if (rc != 1)
       goto exit;
   } else {
     /* 1. read the header byte.  This has the packet type in it */
-    if (c->ipstack->mqttread(c->ipstack, c->readbuf, 1, left_ms_mqtt(timer)) != 1)
+    rc = c->ipstack->mqttread(c->ipstack, c->readbuf, 1, left_ms_mqtt(timer));
+    if (rc != 1)
       goto exit;
   }
 
@@ -121,8 +123,10 @@ int readPacket(Client *c, Timer *timer)
 
   /* 3. read the rest of the buffer using a callback to supply the rest of the data */
   if (rem_len > 0
-      && (c->ipstack->mqttread(c->ipstack, c->readbuf + len, rem_len, SINGLE_PKT_TCP_STREAM_TIMEOUT) != rem_len))
+      && (rc = c->ipstack->mqttread(c->ipstack, c->readbuf + len, rem_len, SINGLE_PKT_TCP_STREAM_TIMEOUT)) != rem_len) {
+    rc = 0;
     goto exit;
+  }
 
   header.byte = c->readbuf[0];
   rc          = header.bits.type;
@@ -188,15 +192,16 @@ int deliverMessage(Client *c, MQTTString *topicName, MQTTMessage *message)
 
 int keepalive(Client *c)
 {
-  int rc = FAILURE;
+  int rc = SUCCESS;
 
-  if (c->keepAliveInterval == 0) {
-    rc = SUCCESS;
+  if (c->keepAliveInterval == 0)
     goto exit;
-  }
 
   if (expired(&c->ping_timer)) {
-    if (!c->ping_outstanding) {
+    if (c->ping_outstanding) {
+      /* PINGRESP not received within the keep-alive interval after PINGREQ */
+      rc = FAILURE;
+    } else {
       int len = MQTTSerialize_pingreq(c->buf, c->buf_size);
       Timer timer;
       InitTimer(&timer);
@@ -211,17 +216,26 @@ exit:
   return rc;
 }
 
+static void MQTTCloseSession(Client *c)
+{
+  c->ping_outstanding = 0;
+  c->isconnected      = 0;
+}
+
 int cycle(Client *c, Timer *timer)
 {
   // read the socket, see what work is due
-  unsigned short packet_type = readPacket(c, timer);
+  int packet_type = readPacket(c, timer);
 
   int len = 0, rc = SUCCESS;
 
   switch (packet_type) {
+    case 0: /* timed out reading packet / idle - continue so keepalive can run */
+      break;
     case CONNACK:
     case PUBACK:
     case SUBACK:
+    case UNSUBACK:
       break;
     case PUBLISH: {
       MQTTString topicName;
@@ -252,14 +266,20 @@ int cycle(Client *c, Timer *timer)
       }
       break;
     }
-    case PUBREC: {
+    case PUBREC:
+    case PUBREL: {
       unsigned short mypacketid;
       unsigned char dup, type;
       if (MQTTDeserialize_ack(&type, &dup, &mypacketid, c->readbuf, c->readbuf_size) != 1)
         rc = FAILURE;
-      else if ((len = MQTTSerialize_ack(c->buf, c->buf_size, PUBREL, 0, mypacketid)) <= 0)
+      else if ((len = MQTTSerialize_ack(c->buf,
+                                       c->buf_size,
+                                       (packet_type == PUBREC) ? PUBREL : PUBCOMP,
+                                       0,
+                                       mypacketid))
+               <= 0)
         rc = FAILURE;
-      else if ((rc = sendPacket(c, len, timer)) != SUCCESS) // send the PUBREL packet
+      else if ((rc = sendPacket(c, len, timer)) != SUCCESS) // send PUBREL or PUBCOMP
         rc = FAILURE;                                       // there was a problem
       if (rc == FAILURE)
         goto exit; // there was a problem
@@ -270,11 +290,23 @@ int cycle(Client *c, Timer *timer)
     case PINGRESP:
       c->ping_outstanding = 0;
       break;
+    default:
+      /* Hard read/network error (mqttread < 0) or unexpected packet type */
+      rc = packet_type;
+      goto exit;
   }
-  keepalive(c);
+
+  if (keepalive(c) != SUCCESS) {
+    // Propagate keepalive failure so MQTTYield can report disconnect/timeout
+    rc = FAILURE;
+  }
+
 exit:
-  if (rc == SUCCESS)
+  if (rc == SUCCESS) {
     rc = packet_type;
+  } else if (c->isconnected) {
+    MQTTCloseSession(c);
+  }
   return rc;
 }
 
@@ -307,7 +339,7 @@ int MQTTYield(Client *c, int timeout_ms)
         timer1.end_time = timer.end_time;
       }
     }
-    if (cycle(c, &timer1) == FAILURE) {
+    if (cycle(c, &timer1) < 0) {
       rc = FAILURE;
       break;
     }
@@ -324,7 +356,7 @@ int waitfor(Client *c, int packet_type, Timer *timer)
   do {
     if (expired(timer))
       break; // we timed out
-  } while ((rc = cycle(c, timer)) != packet_type);
+  } while ((rc = cycle(c, timer)) != packet_type && rc >= 0);
 
   return rc;
 }

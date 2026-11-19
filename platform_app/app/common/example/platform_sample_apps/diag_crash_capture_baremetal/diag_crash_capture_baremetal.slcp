@@ -1,6 +1,6 @@
 project_name: diag_crash_capture_baremetal
 package: platform_app
-quality: production
+quality: evaluation
 label: Platform - SL Diagnostic Crash Capture Bare-metal
 description: >
   Demonstrates SL Diagnostic (sl_diag) with Crash Capture in a bare-metal

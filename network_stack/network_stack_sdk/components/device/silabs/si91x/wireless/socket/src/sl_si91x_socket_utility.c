@@ -278,6 +278,25 @@ void sli_si91x_set_accept_callback(sli_si91x_socket_t *server_socket,
   server_socket->client_id            = client_socket_id;
 }
 
+/**
+ * @brief Undo accept arming after a failed SOCKET_ACCEPT submission.
+ *
+ * Accept stores the placeholder child in server_socket->client_id before the
+ * command is sent so an async LTCP response can find it. If submission fails,
+ * that latch must be cleared and the INITIALIZED child freed; otherwise the
+ * next accept is rejected with EINVAL and the listener appears stuck (SI91X-22627).
+ */
+static void sli_si91x_rollback_accept_arm(sli_si91x_socket_t *server_socket, int32_t client_socket_id)
+{
+  if (server_socket != NULL) {
+    server_socket->client_id            = -1;
+    server_socket->user_accept_callback = NULL;
+  }
+  if (client_socket_id >= 0) {
+    sli_si91x_shutdown(client_socket_id, SHUTDOWN_BY_ID);
+  }
+}
+
 void sli_si91x_set_remote_socket_termination_callback(sl_si91x_socket_remote_termination_callback_t callback)
 {
   user_remote_socket_termination_callback = callback;
@@ -1448,7 +1467,8 @@ int sli_si91x_accept(int socket, struct sockaddr *addr, socklen_t *addr_len, sl_
   accept_request.socket_id   = (uint8_t)si91x_server_socket->id;
   accept_request.source_port = si91x_server_socket->local_address.sin6_port;
 
-  // Set the callback and client socket ID.
+  // Latch callback + placeholder child before submit so an async LTCP response
+  // can resolve the child; rollback on any submission/response failure.
   sli_si91x_set_accept_callback(si91x_server_socket, callback, client_socket_id);
   if (callback != NULL) {
     status = sli_wifi_send_command(SLI_WIFI_REQ_SOCKET_ACCEPT,
@@ -1458,22 +1478,22 @@ int sli_si91x_accept(int socket, struct sockaddr *addr, socklen_t *addr_len, sl_
                                    SLI_WIFI_RETURN_IMMEDIATELY,
                                    NULL,
                                    NULL);
-    SLI_SOCKET_VERIFY_STATUS_AND_RETURN(status, SL_STATUS_IN_PROGRESS, SLI_SI91X_UNDEFINED_ERROR);
+    if (status != SL_STATUS_IN_PROGRESS) {
+      sli_si91x_rollback_accept_arm(si91x_server_socket, client_socket_id);
+      SLI_SET_ERROR_AND_RETURN(SLI_SI91X_UNDEFINED_ERROR);
+    }
     return SL_STATUS_OK;
-  } else {
-    status = sli_wifi_send_command(SLI_WIFI_REQ_SOCKET_ACCEPT,
-                                   (client_socket_id + SLI_SI91X_CMD_MAX),
-                                   &accept_request,
-                                   sizeof(accept_request),
-                                   (SLI_WIFI_WAIT_FOR_EVER | SLI_WIFI_WAIT_FOR_RESPONSE_BIT),
-                                   NULL,
-                                   (void **)&buffer);
-    SLI_SOCKET_VERIFY_STATUS_AND_RETURN(status, SL_STATUS_OK, SLI_SI91X_UNDEFINED_ERROR);
   }
 
-  // If the accept request fails, clean up allocated memory and return an error
+  status = sli_wifi_send_command(SLI_WIFI_REQ_SOCKET_ACCEPT,
+                                 (client_socket_id + SLI_SI91X_CMD_MAX),
+                                 &accept_request,
+                                 sizeof(accept_request),
+                                 (SLI_WIFI_WAIT_FOR_EVER | SLI_WIFI_WAIT_FOR_RESPONSE_BIT),
+                                 NULL,
+                                 (void **)&buffer);
   if (status != SL_STATUS_OK) {
-    sli_si91x_shutdown(client_socket_id, SHUTDOWN_BY_ID);
+    sli_si91x_rollback_accept_arm(si91x_server_socket, client_socket_id);
     if (buffer != NULL) {
       sli_buffer_manager_free_buffer(buffer);
     }
@@ -1482,6 +1502,8 @@ int sli_si91x_accept(int socket, struct sockaddr *addr, socklen_t *addr_len, sl_
 
   sl_wifi_system_packet_t *packet = sli_wifi_host_get_buffer_data(buffer, 0, NULL);
   if (packet == NULL) {
+    sli_si91x_rollback_accept_arm(si91x_server_socket, client_socket_id);
+    sli_buffer_manager_free_buffer(buffer);
     SLI_SET_ERROR_AND_RETURN(SLI_SI91X_UNDEFINED_ERROR);
   }
   const sli_si91x_rsp_ltcp_est_t *ltcp = (sli_si91x_rsp_ltcp_est_t *)packet->data;

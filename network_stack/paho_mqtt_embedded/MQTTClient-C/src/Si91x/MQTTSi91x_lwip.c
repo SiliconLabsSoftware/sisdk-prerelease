@@ -679,7 +679,7 @@ static int mqtt_tcpconnection_handler(Network *n,
   return 0; // Success
 }
 
-static int sl_paho_mqtt_tcpconnection_handler(Network *n,
+static int sli_paho_mqtt_tcpconnection_handler(Network *n,
                                               uint8_t flags,
                                               char *addr,
                                               uint32_t dst_port,
@@ -694,7 +694,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
 
   if (is_ipv4_requested == is_ipv6_requested) {
     SL_DEBUG_LOG_V2(ERROR, "[LwIP] sl_paho_network_connect: set exactly one of IPV4/IPV6 flags\r\n");
-    return NETWORK_ERROR_INVALID_FLAGS;
+    return SL_NETWORK_ERR_INVALID_FLAGS;
   }
 
 #ifdef SLI_SI91X_ENABLE_IPV6
@@ -708,7 +708,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     n->socket = socket(AF_INET, type, IPPROTO_TCP);
     if (n->socket < 0) {
       SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with bsd error: %d\r\n", errno);
-      return -1;
+      return SL_NETWORK_TCP_ERR_SOCKET_CREATE;
     }
 
     SL_DEBUG_LOG_V2(INFO,
@@ -726,7 +726,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     n->socket = socket(AF_INET6, type, IPPROTO_TCP);
     if (n->socket < 0) {
       SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with bsd error: %d\r\n", errno);
-      return -1;
+      return SL_NETWORK_TCP_ERR_SOCKET_CREATE;
     }
 
     SL_DEBUG_LOG_V2(INFO,
@@ -738,7 +738,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
 #else
   if (is_ipv6_requested) {
     SL_DEBUG_LOG_V2(ERROR, "[LwIP] sl_paho_network_connect: IPv6 not available in this build\r\n");
-    return NETWORK_ERROR_INVALID_FLAGS;
+    return SL_NETWORK_ERR_INVALID_FLAGS;
   }
 
   struct sockaddr_in server_address = { 0 };
@@ -752,7 +752,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
   n->socket = socket(AF_INET, type, IPPROTO_TCP);
   if (n->socket < 0) {
     SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with bsd error: %d\r\n", errno);
-    return -1;
+    return SL_NETWORK_TCP_ERR_SOCKET_CREATE;
   }
 
   SL_DEBUG_LOG_V2(INFO,
@@ -765,7 +765,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     SL_DEBUG_LOG_V2(ERROR, "Socket Connect failed with bsd error: %d\r\n", errno);
     close(n->socket);
     n->socket = -1;
-    return rc;
+    return SL_NETWORK_TCP_ERR_SOCKET_CONNECT;
   }
   SL_DEBUG_LOG_V2(INFO, "Socket connection success\r\n");
 
@@ -775,7 +775,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
       SL_DEBUG_LOG_V2(ERROR, "Error: TLS requires hostname. Call NetworkSetTlsHostname() before connect.\r\n");
       close(n->socket);
       n->socket = -1;
-      return NETWORK_ERROR_TLS_HOSTNAME_REQUIRED;
+      return SL_NETWORK_TLS_ERR_HOSTNAME_REQUIRED;
     }
 
     n->tls = allocate_tls_context(n);
@@ -783,21 +783,21 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
       SL_DEBUG_LOG_V2(ERROR, "Failed to allocate TLS context\r\n");
       close(n->socket);
       n->socket = -1;
-      return -1;
+      return SL_NETWORK_TLS_ERR_CONTEXT_ALLOC;
     }
 
     const char *hostname = n->tls_hostname;
     if (mqtt_tls_init(n->tls, n->socket, hostname) != 0) {
       SL_DEBUG_LOG_V2(ERROR, "TLS initialization failed\r\n");
       NetworkDisconnect(n);
-      return -1;
+      return SL_NETWORK_TLS_ERR_INIT;
     }
     SL_DEBUG_LOG_V2(INFO, "TLS init completed successfully\r\n");
 
     if (mqtt_tls_handshake(n->tls) != 0) {
       SL_DEBUG_LOG_V2(ERROR, "TLS handshake failed\r\n");
       NetworkDisconnect(n);
-      return -1;
+      return SL_NETWORK_TLS_ERR_HANDSHAKE;
     }
 
     SL_DEBUG_LOG_V2(INFO, "TLS connection established\r\n");
@@ -805,7 +805,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     SL_DEBUG_LOG_V2(ERROR, "ERROR: TLS requested but mbedTLS not available!\r\n");
     close(n->socket);
     n->socket = -1;
-    return -1;
+    return SL_NETWORK_TLS_ERR_NOT_AVAILABLE;
 #endif
   } else {
     SL_DEBUG_LOG_V2(DEBUG, "TCP connection without SSL established\r\n");
@@ -814,7 +814,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
 #endif
   }
 
-  return 0;
+  return SL_NETWORK_SUCCESS;
 }
 
 // Initialize the network structure
@@ -877,18 +877,18 @@ int NetworkConnect(Network *n, uint8_t flags, char *addr, int dst_port, int src_
 int sl_paho_network_connect(Network *n, uint8_t flags, char *addr, int dst_port, int src_port, bool ssl)
 {
   if (n == NULL) {
-    return NETWORK_ERROR_NULL_STRUCTURE;
+    return SL_NETWORK_ERR_NULL_STRUCTURE;
   }
 
   if (addr == NULL) {
-    return NETWORK_ERROR_NULL_ADDRESS;
+    return SL_NETWORK_ERR_NULL_ADDRESS;
   }
 
   if (n->transport_type == MQTT_TRANSPORT_TCP) {
-    return sl_paho_mqtt_tcpconnection_handler(n, flags, addr, dst_port, src_port, ssl);
+    return sli_paho_mqtt_tcpconnection_handler(n, flags, addr, dst_port, src_port, ssl);
   }
 
-  return NETWORK_ERROR_INVALID_TYPE;
+  return SL_NETWORK_ERR_INVALID_TYPE;
 }
 
 // Cleans up and closes the network connection.

@@ -438,7 +438,8 @@ sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
   sli_se_mailbox_execute_command(&cmd_ctx->command);
 
   #if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
-  if (cmd_ctx->yield) {
+  // Yielding requires a running scheduler, otherwise fall back to polling.
+  if (cmd_ctx->yield && SLI_PSEC_OSAL_KERNEL_RUNNING) {
     // Enable SEMAILBOX RXINT interrupt
     sli_se_mailbox_enable_interrupt(SEMAILBOX_CONFIGURATION_RXINTEN);
 

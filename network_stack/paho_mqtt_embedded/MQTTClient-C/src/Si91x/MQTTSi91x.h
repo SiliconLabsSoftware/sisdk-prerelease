@@ -30,10 +30,8 @@
 #define TX_WAIT_TIME                           0
 #define SLI_SOCKET_RECVFROM_RESPONSE_WAIT_TIME ((SLI_917_WAIT_FOREVER * WIFI_BLOCKED_TIMEOUT_SF) + (DEFAULT_TIMEOUT))
 #define SINGLE_PKT_TCP_STREAM_TIMEOUT          WAIT_TIMEOUT + SLI_SOCKET_RECVFROM_RESPONSE_WAIT_TIME
-#define NETWORK_ERROR_NULL_STRUCTURE           -1 // Error: NULL network structure
-#define NETWORK_ERROR_NULL_ADDRESS             -2 // Error: NULL address
-#define NETWORK_ERROR_INVALID_TYPE             -3 // Error: Invalid transport type
-#define NETWORK_ERROR_INVALID_FLAGS            -5 // Error: sl_paho_network_connect flags invalid
+
+#include "sl_paho_error_codes.h"
 
 // Address family for sl_paho_network_connect; set exactly one (distinct bits).
 #define SL_PAHO_NETWORK_FLAG_IPV4 (1U << 0)
@@ -134,7 +132,7 @@ void NetworkInit(Network *n);
  * - `NETWORK_ERROR_NULL_STRUCTURE (-1)` if the `Network` structure is `NULL`.
  * - `NETWORK_ERROR_NULL_ADDRESS (-2)` if the `addr` is `NULL`.
  * - `NETWORK_ERROR_INVALID_TYPE (-3)` if the `transport_type` is invalid.
- * - Transport-specific error codes for connection failures.
+ * - Transport-specific error codes for connection failures (legacy values unchanged).
  *
  * @details
  * - This function establishes a connection to the MQTT broker using either TCP or WebSocket transport.
@@ -157,36 +155,70 @@ void NetworkInit(Network *n);
 int NetworkConnect(Network *n, uint8_t flags, char *addr, int dst_port, int src_port, bool ssl);
 
 /**
- * @brief Establishes a TCP connection to the MQTT broker with explicit IPv4/IPv6 selection.
+ * @brief Establishes a connection to the MQTT broker with unique domain error codes.
  *
- * @param[in] n         Pointer to the initialized Network structure.
- * @param[in] flags     Address family: set exactly one of `SL_PAHO_NETWORK_FLAG_IPV4` or
- *                      `SL_PAHO_NETWORK_FLAG_IPV6`.
- * @param[in] addr      Pointer to raw broker IP octets (4 bytes for IPv4, 16 bytes for IPv6).
+ * Supports TCP (`MQTT_TRANSPORT_TCP`) and WebSocket (`MQTT_TRANSPORT_WEBSOCKET`).
+ * Parameter meaning for `flags` and `addr` depends on `n->transport_type` (see contract below).
+ *
+ * @param[in] n         Pointer to the initialized Network structure (`transport_type` must be set).
+ * @param[in] flags     Transport-specific (see **Parameter contract**).
+ * @param[in] addr      Transport-specific (see **Parameter contract**). Must not be `NULL`.
  * @param[in] dst_port  Destination port of the MQTT broker.
- * @param[in] src_port  Source port for the connection.
- * @param[in] ssl       Boolean flag to enable/disable SSL for the connection.
+ * @param[in] src_port  Source / client port for the connection.
+ * @param[in] ssl       Boolean flag to enable/disable SSL/TLS (or WSS for WebSocket).
  *
  * @return
- * - `0` on success.
- * - `NETWORK_ERROR_NULL_STRUCTURE (-1)` if the `Network` structure is `NULL`.
- * - `NETWORK_ERROR_NULL_ADDRESS (-2)` if the `addr` is `NULL`.
- * - `NETWORK_ERROR_INVALID_TYPE (-3)` if the `transport_type` is not TCP.
- * - `NETWORK_ERROR_INVALID_FLAGS (-5)` if neither or both of IPV4/IPV6 are set, or if IPV6
- *   is requested on an IPv4-only build.
- * - Transport-specific error codes for connection failures.
+ * - `SL_NETWORK_SUCCESS (0)` on success.
+ * - `SL_NETWORK_ERR_NULL_STRUCTURE (-1)` if the `Network` structure is `NULL`.
+ * - `SL_NETWORK_ERR_NULL_ADDRESS (-2)` if the `addr` is `NULL`.
+ * - `SL_NETWORK_ERR_INVALID_TYPE (-3)` if the `transport_type` is invalid.
+ * - `SL_NETWORK_ERR_INVALID_FLAGS (-5)` if TCP flags are invalid (neither/both IPV4/IPV6,
+ *   or IPV6 on an IPv4-only build). Not applicable to WebSocket (`flags` ignored).
+ * - `SL_NETWORK_WS_ERR_*` (-101 .. -199) for WebSocket failures (mapped from WiseConnect).
+ * - `SL_NETWORK_TCP_ERR_*` (-201 .. -299) for TCP socket failures.
+ * - `SL_NETWORK_TLS_ERR_*` (-301 .. -399) for TLS configuration failures (TCP path).
+ *
+ * @par Parameter contract (TCP vs WebSocket)
+ * | | TCP (`MQTT_TRANSPORT_TCP`) | WebSocket (`MQTT_TRANSPORT_WEBSOCKET`) |
+ * |---|---------------------------|----------------------------------------|
+ * | `flags` | Exactly one of `SL_PAHO_NETWORK_FLAG_IPV4` or `SL_PAHO_NETWORK_FLAG_IPV6` | Ignored (pass `0`) |
+ * | `addr` | Raw IP octets: 4 bytes (IPv4) or 16 bytes (IPv6) | NUL-terminated host or IP **string** for the WebSocket client |
+ *
+ * Do not pass a hostname string as `addr` for TCP, and do not pass raw IP octets as `addr` for
+ * WebSocket—the same parameter has different layouts per transport.
+ *
+ * @par Examples
+ * @code
+ * // TCP IPv4: addr is 4 raw octets
+ * uint8_t broker_ip[4] = { 192, 168, 1, 10 };
+ * n.transport_type = MQTT_TRANSPORT_TCP;
+ * NetworkInit(&n);
+ * sl_paho_network_connect(&n, SL_PAHO_NETWORK_FLAG_IPV4, (char *)broker_ip, 8883, 0, true);
+ *
+ * // WebSocket: addr is a host string; flags unused
+ * n.transport_type = MQTT_TRANSPORT_WEBSOCKET;
+ * NetworkInit(&n);
+ * sl_paho_network_connect(&n, 0, "mqtt.example.com", 443, 0, true);
+ * @endcode
  *
  * @details
- * - Prefer this API over NetworkConnect when the application must choose the MQTT TCP socket
- *   family on dual-IP builds.
+ * - Prefer this API over NetworkConnect for unique, domain-based error codes.
+ * - For TCP on dual-IP builds, use `flags` to select the socket family.
+ * - All return codes are unique by domain; see `sl_paho_error_codes.h`.
+ * - On successful WebSocket connect, `n->mqttwrite` / `n->mqttread` are switched to
+ *   mapped callbacks so subsequent Paho MQTT I/O returns `SL_NETWORK_WS_ERR_*`
+ *   (-101 .. -199). `NetworkConnect` leaves the legacy raw WiseConnect write/read
+ *   callbacks in place for backward compatibility.
  * - SSL can be enabled for secure connections by setting the `ssl` parameter to `true`.
  * - When `MQTT_TLS_ALPN_ENABLED` is set to `1`, ALPN is configured automatically during
  *   TCP connection setup (after socket creation and TLS enable, before connect).
  *   Set `MQTT_TLS_ALPN_PROTOCOL` to the broker's ALPN name (e.g. `"mqtt"` for Mosquitto on port 443).
+ * - ALPN applies to TCP/TLS only; WebSocket/WSS does not configure MQTT ALPN through this path.
  *
  * @note
- * - Ensure that the `Network` structure is initialized using `NetworkInit` before calling this function.
- * - WebSocket transport is not supported by this API; use NetworkConnect for WebSocket.
+ * - Call `NetworkInit` after setting `n->transport_type` and before calling this function.
+ * - Choosing the wrong `addr` layout for the transport is a caller error and may fail with
+ *   TCP/WS domain codes rather than `SL_NETWORK_ERR_INVALID_FLAGS`.
  */
 int sl_paho_network_connect(Network *n, uint8_t flags, char *addr, int dst_port, int src_port, bool ssl);
 

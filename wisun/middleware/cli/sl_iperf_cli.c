@@ -44,6 +44,7 @@
 #include "sl_iperf_config.h"
 #include "sl_iperf.h"
 #include "sl_iperf_util.h"
+#include "sl_wisun_common.h"
 #include "cmsis_os2.h"
 // -----------------------------------------------------------------------------
 //                              Macros and Typedefs
@@ -470,20 +471,6 @@ __STATIC_INLINE bool _check_arg_uint_val(const sl_iperf_cli_arg_type_t arg_type,
 /// Getter buffer
 static char _getter_buff[SL_IPERF_CLI_MAX_STR_ARG_LEN] = { 0 };
 
-/// iperf structure with default settings of options
-static sl_iperf_opt_t _options = {
-  .bandwidth   = SL_IPERF_CLIENT_DEFAULT_BANDWIDTH_BPS,
-  .bw_format   = SL_IPERF_OPT_BW_FORMAT_BITS_PER_SEC,
-  .interval_ms = SL_IPERF_DEFAULT_INTERVAL_MS,
-  .mode        = SL_IPERF_MODE_SERVER,
-  .protocol    = SL_IPERF_IPROTOV6_UDP,
-  .port        = SL_IPERF_SERVER_DEFAULT_PORT,
-  .duration_ms = SL_IPERF_CLIENT_DEFAULT_SEND_TIME_MS,
-  .buf_len     = SL_IPERF_BUFFER_SIZE,
-  .socket_buffer_size = SL_IPERF_SOCKET_BUFFER_SIZE,
-  .persistent  = false
-};
-
 /// iPerf settings that contains the parameters for test
 static sl_iperf_cli_property_t _iperf_properties[] = {
   {
@@ -886,118 +873,151 @@ void sl_iperf_cli_exec_client(const sl_cli_command_arg_t *arguments)
 // port
 __STATIC_INLINE void _opt_port_setter(void *val)
 {
-  _options.port = *(uint16_t*)val;
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  options->port = *(uint16_t*)val;
 }
 
 __STATIC_INLINE const char *_opt_port_getter(void)
 {
-  __prepare_getter_buff("%u", _options.port);
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  __prepare_getter_buff("%u", options->port);
 }
 
 // remote address
 __STATIC_INLINE void _opt_remote_address_setter(void *val)
 {
-  sl_strcpy_s(_options.remote_addr, SL_IPERF_IP_STR_BUFF_LEN, val);
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  sl_strcpy_s(options->remote_addr, SL_IPERF_IP_STR_BUFF_LEN, val);
 }
 
 __STATIC_INLINE const char *_opt_remote_address_getter(void)
 {
-  __prepare_getter_buff("\"%s\"", _options.remote_addr);
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  __prepare_getter_buff("\"%s\"", options->remote_addr);
 }
 
 // bandwidth
 __STATIC_INLINE void _opt_bandwidth_setter(void *val)
 {
-  _options.bandwidth =  *(uint32_t*)val;
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  options->bandwidth = *(uint32_t*)val;
 }
 
 __STATIC_INLINE const char *_opt_bandwidth_getter(void)
 {
-  __prepare_getter_buff("%"PRIu32, _options.bandwidth);
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  __prepare_getter_buff("%"PRIu32, options->bandwidth);
 }
 
 // packet number
 __STATIC_INLINE void _opt_packet_number_setter(void *val)
 {
-  _options.packet_nbr = *(uint32_t *)val;
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  options->packet_nbr = *(uint32_t *)val;
 }
 
 __STATIC_INLINE const char *_opt_packet_number_getter(void)
 {
-  __prepare_getter_buff("%"PRIu32, _options.packet_nbr);
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  __prepare_getter_buff("%"PRIu32, options->packet_nbr);
 }
 
 // buffer length
 __STATIC_INLINE void _opt_buffer_length_setter(void *val)
 {
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
   uint16_t value = *(uint16_t*)val;
-  if (!value || value > _options.socket_buffer_size) {
+
+  if (!value || value > options->socket_buffer_size) {
     printf("[Not valid buffer size]\n");
     return;
   }
-  _options.buf_len = value;
+  options->buf_len = value;
 }
 
 __STATIC_INLINE const char *_opt_buffer_length_getter(void)
 {
-  __prepare_getter_buff("%u bytes", _options.buf_len);
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  __prepare_getter_buff("%u bytes", options->buf_len);
 }
 
 // socket buffer size
 __STATIC_INLINE void _opt_socket_buffer_size_setter(void *val)
 {
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
   uint32_t val32 = 0UL;
+
   val32 = *(uint32_t*)val;
   if (val32 > UINT16_MAX) {
     printf("[Socket buffer size value is overflowed]\n");
   } else {
-    _options.socket_buffer_size = val32;
+    options->socket_buffer_size = val32;
   }
 }
 
 __STATIC_INLINE const char *_opt_socket_buffer_size_getter(void)
 {
-  __prepare_getter_buff("%lu bytes", _options.socket_buffer_size);
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  __prepare_getter_buff("%lu bytes", options->socket_buffer_size);
 }
 
 // duration
 __STATIC_INLINE void _opt_duration_setter(void *val)
 {
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
   uint32_t seconds = *(uint32_t *)val;
 
-  if (seconds > (UINT32_MAX / SL_IPERF_TIME_S_TO_MS_ML)) {
+  if (seconds > MS_TO_S(UINT32_MAX)) {
     printf("[Duration Time value is overflowed]\n");
   } else {
-    _options.duration_ms = seconds * SL_IPERF_TIME_S_TO_MS_ML;
+    options->duration_ms = S_TO_MS(seconds);
   }
 }
 
 __STATIC_INLINE const char *_opt_duration_getter(void)
 {
-  __prepare_getter_buff("%"PRIu32" s", _options.duration_ms / SL_IPERF_TIME_S_TO_MS_ML);
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  __prepare_getter_buff("%"PRIu32" s", (uint32_t)MS_TO_S(options->duration_ms));
 }
 
 // interval
 __STATIC_INLINE void _opt_interval_setter(void *val)
 {
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
   uint32_t val32 = 0UL;
-  val32 = *(uint32_t*) val * SL_IPERF_TIME_S_TO_MS_ML;
+
+  val32 = S_TO_MS(*(uint32_t*)val);
   if (val32 > UINT16_MAX) {
     printf("[Interval Time value is overflowed]\n");
   } else {
-    _options.interval_ms = (uint16_t) val32;
+    options->interval_ms = (uint16_t) val32;
   }
 }
 
 __STATIC_INLINE const char *_opt_interval_getter(void)
 {
-  __prepare_getter_buff("%u s", _options.interval_ms / SL_IPERF_TIME_S_TO_MS_ML);
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  __prepare_getter_buff("%"PRIu32" s", (uint32_t)MS_TO_S(options->interval_ms));
 }
 
 // bandwidth format
 __STATIC_INLINE void _opt_bw_format_setter(void *val)
 {
-  if (!sl_iperf_opt_bw_format_from_str(val, &_options.bw_format)) {
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  if (!sl_iperf_opt_bw_format_from_str(val, &options->bw_format)) {
     printf("[Wrong bandwidth format added]\n");
   }
 }
@@ -1101,38 +1121,44 @@ __STATIC_INLINE const char *_results_text_getter(void)
 
 __STATIC_INLINE const char *_opt_bw_format_getter(void)
 {
-  __prepare_getter_buff("%s", sl_iperf_opt_bw_format_to_str(_options.bw_format));
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  __prepare_getter_buff("%s", sl_iperf_opt_bw_format_to_str(options->bw_format));
 }
 
 // persistent
 __STATIC_INLINE void _opt_persistent_setter(void *val)
 {
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
   uint16_t value = *(uint16_t *)val;
 
   if (value > 1U) {
     printf("[persistent must be 0 or 1]\n");
     return;
   }
-  _options.persistent = (bool)value;
+  options->persistent = (bool)value;
 }
 
 __STATIC_INLINE const char *_opt_persistent_getter(void)
 {
-  __prepare_getter_buff("%u", (unsigned)_options.persistent);
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
+
+  __prepare_getter_buff("%u", (unsigned)options->persistent);
 }
 
 static void _exec_test(const sl_iperf_mode_t mode,
                        const sl_iperf_protocol_t protocol)
 {
   sl_iperf_test_t test = { 0U };
+  sl_iperf_opt_t *options = sl_iperf_get_opt();
 
-  _options.mode = mode;
-  _options.protocol = protocol;
+  options->mode = mode;
+  options->protocol = protocol;
   // init test
-  sl_iperf_test_init(&test, _options.mode, _options.protocol, _options.buf_len);
+  sl_iperf_test_init(&test, options->mode, options->protocol, options->buf_len);
 
   // set stored options
-  memcpy(&test.opt, &_options, sizeof(sl_iperf_opt_t));
+  memcpy(&test.opt, options, sizeof(sl_iperf_opt_t));
 
   // adds the test to the queue
   if (!sl_iperf_test_add(&test)) {

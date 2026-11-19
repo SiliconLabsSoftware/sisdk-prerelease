@@ -39,6 +39,7 @@ extern "C" {
 //                                   Includes
 // -----------------------------------------------------------------------------
 #include "sl_iperf_types.h"
+#include "sl_wisun_common.h"
 
 /**************************************************************************//**
  * @addtogroup SL_IPERF_UTIL_API iPerf - Utilities
@@ -211,7 +212,7 @@ __STATIC_INLINE void sl_iperf_test_set_err_and_stat(sl_iperf_test_t * const test
  *****************************************************************************/
 __STATIC_INLINE uint32_t sl_iperf_test_calc_time_duration_sec(const sl_iperf_test_t * const test)
 {
-  return (uint32_t)((test->statistic.ts_end_ms - test->statistic.ts_start_ms) / SL_IPERF_TIME_S_TO_MS_ML);
+  return (uint32_t)(MS_TO_S(test->statistic.ts_end_ms - test->statistic.ts_start_ms));
 }
 
 /**************************************************************************//**
@@ -233,8 +234,8 @@ __STATIC_INLINE uint32_t sl_iperf_test_calc_time_duration_ms(const sl_iperf_test
  *****************************************************************************/
 __STATIC_INLINE void sl_iperf_calc_time_from_ms(sl_iperf_time_t * const dst_time, const sl_iperf_ts_ms_t ms)
 {
-  dst_time->sec = (uint32_t)(ms / SL_IPERF_TIME_S_TO_MS_ML);
-  dst_time->usec = (uint32_t)((ms - (dst_time->sec * SL_IPERF_TIME_S_TO_MS_ML)) * SL_IPERF_TIME_MS_TO_US_ML);
+  dst_time->sec = (uint32_t)(ms / 1000UL);
+  dst_time->usec = (uint32_t)MS_TO_US(ms - S_TO_MS(dst_time->sec));
 }
 
 /**************************************************************************//**
@@ -245,7 +246,7 @@ __STATIC_INLINE void sl_iperf_calc_time_from_ms(sl_iperf_time_t * const dst_time
  *****************************************************************************/
 __STATIC_INLINE sl_iperf_ts_ms_t sl_iperf_calc_ms_from_time(const sl_iperf_time_t * const time)
 {
-  return (sl_iperf_ts_ms_t)time->sec * SL_IPERF_TIME_S_TO_MS_ML + time->usec / SL_IPERF_TIME_MS_TO_US_ML;
+  return S_TO_MS((sl_iperf_ts_ms_t)time->sec) + US_TO_MS(time->usec);
 }
 
 /**************************************************************************//**

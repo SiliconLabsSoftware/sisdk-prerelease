@@ -169,6 +169,20 @@ static const osMutexAttr_t _iperf_stats_mtx_attr = {
 /// Default log instance
 static sl_iperf_log_t _def_log = { 0 };
 
+/// Shared test options for the console CLI and CoAP remote control.
+static sl_iperf_opt_t _iperf_opt = {
+  .bandwidth          = SL_IPERF_CLIENT_DEFAULT_BANDWIDTH_BPS,
+  .bw_format          = SL_IPERF_OPT_BW_FORMAT_BITS_PER_SEC,
+  .interval_ms        = SL_IPERF_DEFAULT_INTERVAL_MS,
+  .mode               = SL_IPERF_MODE_SERVER,
+  .protocol           = SL_IPERF_IPROTOV6_UDP,
+  .port               = SL_IPERF_SERVER_DEFAULT_PORT,
+  .duration_ms        = SL_IPERF_CLIENT_DEFAULT_SEND_TIME_MS,
+  .buf_len            = SL_IPERF_BUFFER_SIZE,
+  .socket_buffer_size = SL_IPERF_SOCKET_BUFFER_SIZE,
+  .persistent         = false
+};
+
 void sl_iperf_service_init(void)
 {
   static sl_iperf_test_t test = { 0 };
@@ -214,6 +228,11 @@ void sl_iperf_service_init(void)
 // -----------------------------------------------------------------------------
 //                          Public Function Definitions
 // -----------------------------------------------------------------------------
+
+sl_iperf_opt_t *sl_iperf_get_opt(void)
+{
+  return &_iperf_opt;
+}
 
 void sl_iperf_test_free_buff(sl_iperf_test_t * const test)
 {

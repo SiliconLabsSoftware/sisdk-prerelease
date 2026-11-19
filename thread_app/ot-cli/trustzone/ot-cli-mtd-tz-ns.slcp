@@ -115,7 +115,7 @@ template_contribution:
     unless: [device_sdid_200]
 
   - name: memory_ram_start
-    value: 0x20003000
+    value: 0x20006000
 
   - name: default_stack_size_override
     value: 6144

@@ -19,6 +19,10 @@
 // TrustZone SKL builds, this file does not include anything at all. This is
 // because our driver implementations only uses error codes that already exist
 // in crypto_values.h.
+//
+// Keep this header out of sl_psa_driver/inc. That directory is a general
+// include root and would shadow TF-M's psa/error.h on TrustZone builds
+// (PSEC-7966).
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
   #include "interface/include/psa/error.h"
 #endif

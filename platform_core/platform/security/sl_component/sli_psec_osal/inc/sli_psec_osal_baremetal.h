@@ -48,6 +48,8 @@ extern "C" {
 /// In order to return immediately in blocking functions the user can pass the
 /// following value.
 #define SLI_PSEC_OSAL_NON_BLOCKING  (0)
+/// Bare-metal applications do not have a scheduler to yield to.
+#define SLI_PSEC_OSAL_KERNEL_RUNNING (0)
 
 // -----------------------------------------------------------------------------
 // Typedefs

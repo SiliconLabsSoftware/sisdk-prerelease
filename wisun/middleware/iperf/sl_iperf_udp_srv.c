@@ -42,6 +42,7 @@
 #include "sl_iperf_network_interface.h"
 #include "sl_iperf.h"
 #include "sl_iperf_util.h"
+#include "sl_wisun_common.h"
 #include "sl_iperf_udp_srv.h"
 #include "socket/socket.h"
 #include "arpa/inet.h"
@@ -378,8 +379,8 @@ static void _iperf_udp_finack(sl_iperf_test_t * const test)
 
 __STATIC_INLINE sl_iperf_ts_ms_t _get_ms_ts_from_clnt_header(const sl_iperf_udp_clnt_hdr_t * const hdr)
 {
-  return ntohl(hdr->dtg.time_var_sec) * SL_IPERF_TIME_S_TO_MS_ML
-         + ntohl(hdr->dtg.time_var_usec) / SL_IPERF_TIME_MS_TO_US_ML;
+  return S_TO_MS(ntohl(hdr->dtg.time_var_sec))
+         + US_TO_MS(ntohl(hdr->dtg.time_var_usec));
 }
 
 static uint32_t _calc_jitter_abs_delta(const sl_iperf_test_t * const test)

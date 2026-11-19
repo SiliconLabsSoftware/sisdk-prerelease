@@ -87,8 +87,15 @@ extern "C" {
 #ifndef SOCK_DGRAM
 #define SOCK_DGRAM 2
 #endif
+#ifndef SOCK_RAW
+#define SOCK_RAW 3
+#endif
 #ifndef SOCK_NONBLOCK
 #define SOCK_NONBLOCK 0x4000
+#endif
+
+#ifndef SOL_SOCKET
+#define SOL_SOCKET 0xffff
 #endif
 
 #ifndef MSG_PEEK

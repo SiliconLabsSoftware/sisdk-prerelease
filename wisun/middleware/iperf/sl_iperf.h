@@ -175,6 +175,13 @@ void sl_iperf_stats_lock(void);
  *****************************************************************************/
 void sl_iperf_stats_unlock(void);
 
+/**************************************************************************//**
+ * @brief Get shared iPerf test options.
+ * @details Console CLI and CoAP remote control read and write this instance.
+ * @return Pointer to the shared options
+ *****************************************************************************/
+sl_iperf_opt_t *sl_iperf_get_opt(void);
+
 /** @}*/
 
 #ifdef __cplusplus

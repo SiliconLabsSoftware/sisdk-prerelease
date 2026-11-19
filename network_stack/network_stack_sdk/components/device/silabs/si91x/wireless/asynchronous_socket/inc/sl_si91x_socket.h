@@ -442,7 +442,8 @@ int sl_si91x_listen(int socket, int max_number_of_clients);
  * @retval -1/ECONNABORTED       A connection has been aborted before @ref sl_si91x_accept() returned.
  *
  * @note Thread safety:
- * - Not thread-safe on the same listening descriptor; serialize concurrent @ref sl_si91x_accept() calls.
+ * - Not thread-safe on the same listening descriptor. Concurrent or mixed @ref sl_si91x_accept() /
+ *   @ref sl_si91x_accept_async() arming on one listener is undefined; serialize accept arming.
  *
  * @note Side effects:
  * - Blocks the calling thread until a client connects. Allocates a new socket slot for the accepted connection.
@@ -497,6 +498,7 @@ int sl_si91x_accept(int socket, const struct sockaddr *addr, socklen_t addr_len)
  *
  * @note Thread safety:
  * - Thread-safe for registration. The registered @p callback is invoked from an internal stack thread; user logic inside the callback must be thread-safe with the rest of the application.
+ * - Concurrent or mixed @ref sl_si91x_accept_async() / @ref sl_si91x_accept() arming on one listener is undefined; serialize accept arming.
  *
  * @note Side effects:
  * - Registers the async-accept handler in the SiWx91x stack.

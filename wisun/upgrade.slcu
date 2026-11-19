@@ -126,3 +126,10 @@ upgrade:
           LFN parenting has been moved to its own component and is not provided by wisun_stack_ffn by default.
         add:
           - wisun_lfn_parent
+      - trigger: sl_wisun_app_core
+        description: >
+          sl_wisun_event_mgr is no longer required by sl_wisun_app_core. Upgraded
+          projects that already use Application Core keep the event manager so
+          existing application code and sl_wisun_event_mgr.h includes keep working.
+        add:
+          - sl_wisun_event_mgr

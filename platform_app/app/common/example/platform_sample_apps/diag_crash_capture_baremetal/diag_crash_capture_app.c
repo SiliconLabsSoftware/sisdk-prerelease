@@ -395,7 +395,8 @@ static void raise_hardfault(void)
   __DSB();
   __ISB();
 
-  *(volatile uint32_t *)0xFFFFFFFCu = 0u;
+  // Execute UDF to trigger UNDEFINSTR; with UsageFault disabled, it escalates to HardFault.
+  __asm volatile ("udf #0" ::: "memory");
 
   for (;;) {
   }

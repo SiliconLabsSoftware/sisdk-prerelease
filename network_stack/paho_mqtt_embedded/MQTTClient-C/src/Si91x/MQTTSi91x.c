@@ -66,6 +66,12 @@ void InitTimer(Timer *timer)
   timer->end_time = 0;
 }
 
+/* Idle/no-data within SO_RCVTIMEO → 0 for sl_paho_network_connect reads only. */
+static int mqtt_recv_idle_timeout(int err)
+{
+  return (err == EAGAIN || err == EWOULDBLOCK || err == ETIMEDOUT);
+}
+
 static int mqtt_tcp_read(Network *n, unsigned char *buffer, int len, int timeout_ms)
 {
   struct timeval timeout;
@@ -92,6 +98,35 @@ static int mqtt_tcp_read(Network *n, unsigned char *buffer, int len, int timeout
   return total_bytes_read;
 }
 
+/* sl_paho_network_connect TCP read: idle timeout returns 0 (legacy mqtt_tcp_read unchanged). */
+static int sli_paho_mqtt_tcp_read(Network *n, unsigned char *buffer, int len, int timeout_ms)
+{
+  struct timeval timeout;
+  timeout.tv_sec  = timeout_ms / 1000;
+  timeout.tv_usec = (timeout_ms % 1000) * 1000;
+
+  setsockopt(n->socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+
+  int total_bytes_read = 0;
+  while (total_bytes_read < len) {
+    int rc = recv(n->socket, &buffer[total_bytes_read], (len - total_bytes_read), 0);
+    if (rc == -1) {
+      int err = errno;
+      if (mqtt_recv_idle_timeout(err)) {
+        break;
+      }
+      if (err != ENOTCONN && err != ECONNRESET)
+        total_bytes_read = -1;
+      break;
+    } else if (rc == 0) {
+      total_bytes_read = 0;
+      break;
+    } else
+      total_bytes_read += rc;
+  }
+  return total_bytes_read;
+}
+
 static int mqtt_tcp_write(Network *n, unsigned char *buffer, int len, int timeout_ms)
 {
   UNUSED_PARAMETER(timeout_ms);
@@ -102,6 +137,7 @@ static void mqtt_tcp_disconnect(Network *n)
 {
   if (n->socket >= 0) {
     close(n->socket);
+    n->socket = -1;
   }
 }
 
@@ -168,13 +204,13 @@ static int mqtt_tcpconnection_handler(Network *n, uint8_t flags, char *addr, int
     socket_return_value     = setsockopt(n->socket, SOL_SOCKET, TCP_ULP, TLS, sizeof(TLS));
     if (socket_return_value < 0) {
       SL_DEBUG_LOG_V2(ERROR, "Set Socket option failed with bsd error: %d\r\n", errno);
-      close(n->socket);
+      mqtt_tcp_disconnect(n);
       return -1;
     }
 
 #if MQTT_TLS_ALPN_ENABLED
     if (sli_mqtt_tls_alpn_set_bsd(n->socket) < 0) {
-      close(n->socket);
+      mqtt_tcp_disconnect(n);
       return -1;
     }
 #endif
@@ -196,11 +232,11 @@ static int mqtt_tcpconnection_handler(Network *n, uint8_t flags, char *addr, int
 #ifdef SLI_SI91X_ENABLE_IPV6
   rc = connect(n->socket, (struct sockaddr *)&server_address_v6, socket_length_v6);
 #else
-  rc     = connect(n->socket, (struct sockaddr *)&server_address, socket_length);
+  rc = connect(n->socket, (struct sockaddr *)&server_address, socket_length);
 #endif
   if (rc == -1) {
     SL_DEBUG_LOG_V2(ERROR, "Socket Connect failed with bsd error: %d\r\n", errno);
-    close(n->socket);
+    mqtt_tcp_disconnect(n);
     return rc;
   }
   SL_DEBUG_LOG_V2(INFO, "Socket connection success\r\n");
@@ -211,7 +247,7 @@ static int mqtt_tcpconnection_handler(Network *n, uint8_t flags, char *addr, int
  * SiLabs dual-IP TCP connect: family selected by flags, addr is raw IP bytes.
  * Does not alter mqtt_tcpconnection_handler / NetworkConnect behavior.
  */
-static int sl_paho_mqtt_tcpconnection_handler(Network *n,
+static int sli_paho_mqtt_tcpconnection_handler(Network *n,
                                               uint8_t flags,
                                               char *addr,
                                               int dst_port,
@@ -226,7 +262,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
 
   if (is_ipv4_requested == is_ipv6_requested) {
     SL_DEBUG_LOG_V2(ERROR, "sl_paho_network_connect: set exactly one of IPV4/IPV6 flags\r\n");
-    return NETWORK_ERROR_INVALID_FLAGS;
+    return SL_NETWORK_ERR_INVALID_FLAGS;
   }
 
 #ifdef SLI_SI91X_ENABLE_IPV6
@@ -242,7 +278,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     n->socket = socket(AF_INET, type, IPPROTO_TCP);
     if (n->socket < 0) {
       SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with bsd error: %d\r\n", errno);
-      return -1;
+      return SL_NETWORK_TCP_ERR_SOCKET_CREATE;
     }
 
     client_address.sin_family = AF_INET;
@@ -252,13 +288,13 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
       int socket_return_value = setsockopt(n->socket, SOL_SOCKET, TCP_ULP, TLS, sizeof(TLS));
       if (socket_return_value < 0) {
         SL_DEBUG_LOG_V2(ERROR, "Set Socket option failed with bsd error: %d\r\n", errno);
-        close(n->socket);
-        return -1;
+        mqtt_tcp_disconnect(n);
+        return SL_NETWORK_TCP_ERR_SETSOCKOPT;
       }
 #if MQTT_TLS_ALPN_ENABLED
       if (sli_mqtt_tls_alpn_set_bsd(n->socket) < 0) {
-        close(n->socket);
-        return -1;
+        mqtt_tcp_disconnect(n);
+        return SL_NETWORK_TLS_ERR_ALPN;
       }
 #endif
     }
@@ -267,7 +303,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     if (status != SL_STATUS_OK) {
       SL_DEBUG_LOG_V2(ERROR, "Socket bind failed with bsd error: %d\r\n", errno);
       mqtt_tcp_disconnect(n);
-      return status;
+      return SL_NETWORK_TCP_ERR_SOCKET_BIND;
     }
 
     rc = connect(n->socket, (struct sockaddr *)&server_address, socket_length);
@@ -283,7 +319,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     n->socket = socket(AF_INET6, type, IPPROTO_TCP);
     if (n->socket < 0) {
       SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with bsd error: %d\r\n", errno);
-      return -1;
+      return SL_NETWORK_TCP_ERR_SOCKET_CREATE;
     }
 
     client_address_v6.sin6_family = AF_INET6;
@@ -293,13 +329,13 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
       int socket_return_value = setsockopt(n->socket, SOL_SOCKET, TCP_ULP, TLS, sizeof(TLS));
       if (socket_return_value < 0) {
         SL_DEBUG_LOG_V2(ERROR, "Set Socket option failed with bsd error: %d\r\n", errno);
-        close(n->socket);
-        return -1;
+        mqtt_tcp_disconnect(n);
+        return SL_NETWORK_TCP_ERR_SETSOCKOPT;
       }
 #if MQTT_TLS_ALPN_ENABLED
       if (sli_mqtt_tls_alpn_set_bsd(n->socket) < 0) {
-        close(n->socket);
-        return -1;
+        mqtt_tcp_disconnect(n);
+        return SL_NETWORK_TLS_ERR_ALPN;
       }
 #endif
     }
@@ -308,7 +344,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     if (status != SL_STATUS_OK) {
       SL_DEBUG_LOG_V2(ERROR, "Socket bind failed with bsd error: %d\r\n", errno);
       mqtt_tcp_disconnect(n);
-      return status;
+      return SL_NETWORK_TCP_ERR_SOCKET_BIND;
     }
 
     rc = connect(n->socket, (struct sockaddr *)&server_address_v6, socket_length_v6);
@@ -316,7 +352,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
 #else
   if (is_ipv6_requested) {
     SL_DEBUG_LOG_V2(ERROR, "sl_paho_network_connect: IPv6 not available in this build\r\n");
-    return NETWORK_ERROR_INVALID_FLAGS;
+    return SL_NETWORK_ERR_INVALID_FLAGS;
   }
 
   {
@@ -331,7 +367,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     n->socket = socket(AF_INET, type, IPPROTO_TCP);
     if (n->socket < 0) {
       SL_DEBUG_LOG_V2(ERROR, "Socket creation failed with bsd error: %d\r\n", errno);
-      return -1;
+      return SL_NETWORK_TCP_ERR_SOCKET_CREATE;
     }
 
     client_address.sin_family = AF_INET;
@@ -341,13 +377,13 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
       int socket_return_value = setsockopt(n->socket, SOL_SOCKET, TCP_ULP, TLS, sizeof(TLS));
       if (socket_return_value < 0) {
         SL_DEBUG_LOG_V2(ERROR, "Set Socket option failed with bsd error: %d\r\n", errno);
-        close(n->socket);
-        return -1;
+        mqtt_tcp_disconnect(n);
+        return SL_NETWORK_TCP_ERR_SETSOCKOPT;
       }
 #if MQTT_TLS_ALPN_ENABLED
       if (sli_mqtt_tls_alpn_set_bsd(n->socket) < 0) {
-        close(n->socket);
-        return -1;
+        mqtt_tcp_disconnect(n);
+        return SL_NETWORK_TLS_ERR_ALPN;
       }
 #endif
     }
@@ -356,7 +392,7 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
     if (status != SL_STATUS_OK) {
       SL_DEBUG_LOG_V2(ERROR, "Socket bind failed with bsd error: %d\r\n", errno);
       mqtt_tcp_disconnect(n);
-      return status;
+      return SL_NETWORK_TCP_ERR_SOCKET_BIND;
     }
 
     rc = connect(n->socket, (struct sockaddr *)&server_address, socket_length);
@@ -365,11 +401,12 @@ static int sl_paho_mqtt_tcpconnection_handler(Network *n,
 
   if (rc == -1) {
     SL_DEBUG_LOG_V2(ERROR, "Socket Connect failed with bsd error: %d\r\n", errno);
-    close(n->socket);
-    return rc;
+    mqtt_tcp_disconnect(n);
+    return SL_NETWORK_TCP_ERR_SOCKET_CONNECT;
   }
+  n->mqttread = sli_paho_mqtt_tcp_read;
   SL_DEBUG_LOG_V2(INFO, "Socket connection success\r\n");
-  return 0;
+  return SL_NETWORK_SUCCESS;
 }
 
 static int mqtt_ws_read(Network *n, unsigned char *buffer, int len, int timeout_ms)
@@ -397,10 +434,53 @@ static int mqtt_ws_write(Network *n, unsigned char *buffer, int len, int timeout
 
   sl_websocket_error_t ws_error = sl_websocket_send_frame(&ws_handle, &send_request);
   if (ws_error != SL_WEBSOCKET_SUCCESS) {
+    /* Legacy NetworkConnect path: keep raw sl_websocket_error_t (-1 .. -9). */
     return ws_error;
   }
 
   return len;
+}
+
+/**
+ * sl_paho_network_connect WebSocket write: map WiseConnect errors into
+ * SL_NETWORK_WS_ERR_* (-101 .. -199). Installed as n->mqttwrite after a
+ * successful sl_paho_network_connect on MQTT_TRANSPORT_WEBSOCKET.
+ */
+static int sli_paho_mqtt_ws_write(Network *n, unsigned char *buffer, int len, int timeout_ms)
+{
+  UNUSED_PARAMETER(n);
+  UNUSED_PARAMETER(timeout_ms);
+
+  sl_websocket_send_request_t send_request;
+  send_request.opcode = SL_WEBSOCKET_OPCODE_BINARY | SL_WEBSOCKET_FIN_BIT;
+  send_request.buffer = buffer;
+  send_request.length = len;
+
+  sl_websocket_error_t ws_error = sl_websocket_send_frame(&ws_handle, &send_request);
+  if (ws_error != SL_WEBSOCKET_SUCCESS) {
+    return sl_paho_map_websocket_error(ws_error);
+  }
+
+  return len;
+}
+
+/**
+ * sl_paho_network_connect WebSocket read: idle timeout returns 0;
+ * hard failures return SL_NETWORK_WS_ERR_RECEIVE_FRAME.
+ */
+static int sli_paho_mqtt_ws_read(Network *n, unsigned char *buffer, int len, int timeout_ms)
+{
+  struct timeval timeout;
+
+  timeout.tv_sec  = timeout_ms / 1000;
+  timeout.tv_usec = (timeout_ms % 1000) * 1000;
+
+  setsockopt(n->socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+  int bytes = recv(n->socket, buffer, len, 0);
+  if (bytes < 0) {
+    return mqtt_recv_idle_timeout(errno) ? 0 : SL_NETWORK_WS_ERR_RECEIVE_FRAME;
+  }
+  return bytes;
 }
 
 static void mqtt_ws_disconnect(Network *n)
@@ -449,6 +529,54 @@ static int mqtt_websocketconnection_handler(Network *n, uint8_t flags, char *add
   return 0;
 }
 
+/**
+ * Internal WebSocket connect for sl_paho_network_connect: same flow as
+ * mqtt_websocketconnection_handler, but maps WiseConnect sl_websocket_error_t
+ * values into SL_NETWORK_WS_ERR_* (-101 .. -199).
+ */
+static int sli_paho_mqtt_websocketconnection_handler(Network *n,
+                                                    uint8_t flags,
+                                                    char *addr,
+                                                    int dst_port,
+                                                    int src_port,
+                                                    bool ssl)
+{
+  UNUSED_PARAMETER(flags);
+  sl_websocket_config_t ws_config = {
+    .host                = addr,
+    .resource            = MQTT_WEBSOCKET_RESOURCE,
+    .server_port         = dst_port,
+    .client_port         = src_port,
+    .ip_address          = addr,
+    .data_cb             = NULL,
+    .remote_terminate_cb = NULL,
+    .enable_ssl          = ssl,
+  };
+
+  sl_websocket_error_t ws_error = sl_websocket_init(&ws_handle, &ws_config);
+  if (ws_error != SL_WEBSOCKET_SUCCESS) {
+    return sl_paho_map_websocket_error(ws_error);
+  }
+
+  ws_error = sli_websocket_set_subprotocol(&ws_handle, MQTT_WEBSOCKET_SUBPROTOCOL);
+  if (ws_error != SL_WEBSOCKET_SUCCESS) {
+    sl_websocket_deinit(&ws_handle);
+    return sl_paho_map_websocket_error(ws_error);
+  }
+
+  ws_error = sli_websocket_connect_sync(&ws_handle);
+  if (ws_error != SL_WEBSOCKET_SUCCESS) {
+    sl_websocket_deinit(&ws_handle);
+    return sl_paho_map_websocket_error(ws_error);
+  }
+
+  n->socket    = ws_handle.socket_fd;
+  /* Domain-scoped codes for subsequent Paho mqttwrite/mqttread and sl_paho_network_* I/O. */
+  n->mqttread  = sli_paho_mqtt_ws_read;
+  n->mqttwrite = sli_paho_mqtt_ws_write;
+  return SL_NETWORK_SUCCESS;
+}
+
 // Initialize the network structure
 void NetworkInit(Network *n)
 {
@@ -491,18 +619,20 @@ int NetworkConnect(Network *n, uint8_t flags, char *addr, int dst_port, int src_
 int sl_paho_network_connect(Network *n, uint8_t flags, char *addr, int dst_port, int src_port, bool ssl)
 {
   if (n == NULL) {
-    return NETWORK_ERROR_NULL_STRUCTURE;
+    return SL_NETWORK_ERR_NULL_STRUCTURE;
   }
 
   if (addr == NULL) {
-    return NETWORK_ERROR_NULL_ADDRESS;
+    return SL_NETWORK_ERR_NULL_ADDRESS;
   }
 
   if (n->transport_type == MQTT_TRANSPORT_TCP) {
-    return sl_paho_mqtt_tcpconnection_handler(n, flags, addr, dst_port, src_port, ssl);
+    return sli_paho_mqtt_tcpconnection_handler(n, flags, addr, dst_port, src_port, ssl);
+  } else if (n->transport_type == MQTT_TRANSPORT_WEBSOCKET) {
+    return sli_paho_mqtt_websocketconnection_handler(n, flags, addr, dst_port, src_port, ssl);
   }
 
-  return NETWORK_ERROR_INVALID_TYPE;
+  return SL_NETWORK_ERR_INVALID_TYPE;
 }
 
 // Cleans up and closes the network connection.

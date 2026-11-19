@@ -592,8 +592,7 @@ void sl_iperf_test_calculate_average_bandwidth(sl_iperf_test_t * const test)
                   &params.fval_data);
   if (time_duration_ms) {
     // calculate bandwidth for statistic in bits/sec
-    test->statistic.bandwidth = (uint32_t)(((uint64_t)test->statistic.bytes * SL_IPERF_DATA_BYTE_TO_BIT_ML
-                                            * SL_IPERF_TIME_S_TO_MS_ML) / time_duration_ms);
+    test->statistic.bandwidth = (uint32_t)(S_TO_MS((uint64_t)test->statistic.bytes * SL_IPERF_DATA_BYTE_TO_BIT_ML) / time_duration_ms);
   } else {
     test->statistic.bandwidth = 0UL;
   }
@@ -747,8 +746,8 @@ static void _calculate_formatted_bw(const sl_iperf_opt_bw_format bw_format,
     return;
   }
 
-  byteps_val = (uint32_t) (((uint64_t) bytes * SL_IPERF_TIME_S_TO_MS_ML) / time_ms);
-  bitps_val = (uint32_t) (((uint64_t) bytes * SL_IPERF_DATA_BYTE_TO_BIT_ML * SL_IPERF_TIME_S_TO_MS_ML) / time_ms);
+  byteps_val = (uint32_t) (S_TO_MS((uint64_t) bytes) / time_ms);
+  bitps_val = (uint32_t) (S_TO_MS((uint64_t) bytes * SL_IPERF_DATA_BYTE_TO_BIT_ML) / time_ms);
 
   switch (bw_format) {
     case SL_IPERF_OPT_BW_FORMAT_BITS_PER_SEC:

@@ -525,7 +525,7 @@ int listen(int socket_id, int backlog);
  * @retval -1/ECONNABORTED  A connection is aborted before @ref accept() returned.
  *
  * @note Thread safety:
- * - Not thread-safe on the same listening descriptor; serialize concurrent @ref accept() calls.
+ * - Not thread-safe on the same listening descriptor. Concurrent @ref accept() on one listener is undefined; serialize accept arming.
  *
  * @note Side effects:
  * - Allocates a new socket slot for the accepted connection.

@@ -63,6 +63,15 @@ include:
   condition: [trustzone_unaware]
   file_list:
   - path: psa/internal_trusted_storage.h
+  # Unaware ITS needs a psa/error.h because TF-PSA-Crypto includes it, and
+  # those builds have no TF-M. The Silabs file is an empty stub (error codes
+  # already come from crypto_values.h). Keep it out of sl_psa_driver/inc.
+  # This component still puts that directory on the TrustZone include path,
+  # so the stub would be found before TF-M's interface/include/psa/error.h
+  # and psa/client.h would noy compile.
+- path: sl_component/sl_psa_driver/inc_unaware
+  condition: [trustzone_unaware]
+  file_list:
   - path: psa/error.h
 - path: sl_component/sl_psa_driver/inc
   condition: [trustzone_nonsecure]

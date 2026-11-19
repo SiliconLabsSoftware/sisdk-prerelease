@@ -49,6 +49,7 @@ DECLARE_FAKE_VALUE_FUNC4(int, send, int, const void *, size_t, int);
 DECLARE_FAKE_VALUE_FUNC3(int, socket, int, int, int);
 DECLARE_FAKE_VALUE_FUNC3(int, bind, int, const struct sockaddr *, socklen_t);
 DECLARE_FAKE_VALUE_FUNC3(int, connect, int, const struct sockaddr *, socklen_t);
+DECLARE_FAKE_VALUE_FUNC1(int, close, int);
 
 // WebSocket functions
 DECLARE_FAKE_VALUE_FUNC4(int, sl_websocket_send_frame, int, const void *, size_t, int);

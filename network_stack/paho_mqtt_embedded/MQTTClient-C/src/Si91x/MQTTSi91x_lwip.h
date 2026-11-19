@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include "sl_utility.h"
 #include "cmsis_os2.h"
+#include "sl_paho_error_codes.h"
 
 // MQTT TLS Configuration
 #ifndef MQTT_TLS_ENABLE
@@ -49,12 +50,10 @@
 #define TX_WAIT_TIME                           0
 #define SLI_SOCKET_RECVFROM_RESPONSE_WAIT_TIME ((SLI_917_WAIT_FOREVER * WIFI_BLOCKED_TIMEOUT_SF) + (DEFAULT_TIMEOUT))
 #define SINGLE_PKT_TCP_STREAM_TIMEOUT          WAIT_TIMEOUT + SLI_SOCKET_RECVFROM_RESPONSE_WAIT_TIME
-#define NETWORK_ERROR_NULL_STRUCTURE           -1 // Error: NULL network structure
-#define NETWORK_ERROR_NULL_ADDRESS             -2 // Error: NULL address
-#define NETWORK_ERROR_INVALID_TYPE             -3 // Error: Invalid transport type
-#define NETWORK_ERROR_TLS_HOSTNAME_REQUIRED \
-  -4 // Error: TLS requires hostname; call NetworkSetTlsHostname() before NetworkConnect()
-#define NETWORK_ERROR_INVALID_FLAGS       -5 // Error: sl_paho_network_connect flags invalid
+
+/* NetworkConnect backward-compatible alias (value -4 in Network range). */
+#define NETWORK_ERROR_TLS_HOSTNAME_REQUIRED (-4)
+
 #define MQTT_TLS_HANDSHAKE_TIMEOUT_MIN_MS 10000
 #define MQTT_TLS_HANDSHAKE_TIMEOUT_MAX_MS 30000
 
@@ -213,19 +212,15 @@ void NetworkInit(Network *n);
  * - `NETWORK_ERROR_NULL_ADDRESS (-2)` if the `addr` is `NULL`.
  * - `NETWORK_ERROR_INVALID_TYPE (-3)` if the `transport_type` is invalid.
  * - `NETWORK_ERROR_TLS_HOSTNAME_REQUIRED (-4)` if TLS is requested but no hostname was set (call NetworkSetTlsHostname first).
- * - Transport-specific error codes for connection failures.
+ * - Transport-specific error codes for connection failures (legacy values unchanged).
  *
  * @details
- * - This function establishes a connection to the MQTT broker using either TCP or WebSocket transport.
- * - It delegates the connection logic to transport-specific handlers:
- *   - `mqtt_tcpconnection_handler` for TCP.
- *   - `mqtt_websocketconnection_handler` for WebSocket.
+ * - This function establishes a TCP connection to the MQTT broker (LwIP port).
+ * - WebSocket is not supported on this port; use the BSD Si91x port for MQTT over WebSocket.
  * - SSL can be enabled for secure connections by setting the `ssl` parameter to `true`.
  * - When `MQTT_TLS_ALPN_ENABLED` is set to `1`, ALPN is configured during the mbedTLS
  *   handshake (requires `MBEDTLS_SSL_ALPN`). Set `MQTT_TLS_ALPN_PROTOCOL` to the broker's
  *   ALPN name (e.g. `"mqtt"` for Mosquitto on port 443).
- * - ALPN applies to TCP/TLS connections only. WebSocket transport does not configure TLS
- *   ALPN through this SDK path. WSS on port 443 typically uses `http/1.1` at the TLS layer.
  *
  * @note
  * - Ensure that the `Network` structure is initialized using `NetworkInit` before calling this function.
@@ -245,19 +240,20 @@ int NetworkConnect(Network *n, uint8_t flags, char *addr, int dst_port, int src_
  * @param[in] ssl       Boolean flag to enable/disable SSL for the connection.
  *
  * @return
- * - `0` on success.
- * - `NETWORK_ERROR_NULL_STRUCTURE (-1)` if the `Network` structure is `NULL`.
- * - `NETWORK_ERROR_NULL_ADDRESS (-2)` if the `addr` is `NULL`.
- * - `NETWORK_ERROR_INVALID_TYPE (-3)` if the `transport_type` is not TCP.
- * - `NETWORK_ERROR_TLS_HOSTNAME_REQUIRED (-4)` if TLS is requested but no hostname was set
- *   (call NetworkSetTlsHostname first).
- * - `NETWORK_ERROR_INVALID_FLAGS (-5)` if neither or both of IPV4/IPV6 are set, or if IPV6
+ * - `SL_NETWORK_SUCCESS (0)` on success.
+ * - `SL_NETWORK_ERR_NULL_STRUCTURE (-1)` if the `Network` structure is `NULL`.
+ * - `SL_NETWORK_ERR_NULL_ADDRESS (-2)` if the `addr` is `NULL`.
+ * - `SL_NETWORK_ERR_INVALID_TYPE (-3)` if the `transport_type` is not TCP
+ *   (WebSocket is not supported on the LwIP port).
+ * - `SL_NETWORK_ERR_INVALID_FLAGS (-5)` if neither or both of IPV4/IPV6 are set, or if IPV6
  *   is requested on an IPv4-only build.
- * - Transport-specific error codes for connection failures.
+ * - `SL_NETWORK_TCP_ERR_*` (-201 .. -299) for TCP socket failures.
+ * - `SL_NETWORK_TLS_ERR_*` (-301 .. -399) for TLS failures (including hostname required).
  *
  * @details
  * - Prefer this API over NetworkConnect when the application must choose the MQTT TCP socket
  *   family on dual-IP builds.
+ * - All return codes are unique by domain; see `sl_paho_error_codes.h`.
  * - SSL can be enabled for secure connections by setting the `ssl` parameter to `true`.
  * - When `MQTT_TLS_ALPN_ENABLED` is set to `1`, ALPN is configured during the mbedTLS
  *   handshake (requires `MBEDTLS_SSL_ALPN`). Set `MQTT_TLS_ALPN_PROTOCOL` to the broker's
@@ -266,7 +262,7 @@ int NetworkConnect(Network *n, uint8_t flags, char *addr, int dst_port, int src_
  * @note
  * - Ensure that the `Network` structure is initialized using `NetworkInit` before calling this function.
  * - Call `NetworkSetTlsHostname` before connecting with TLS.
- * - WebSocket transport is not supported by this API.
+ * - WebSocket is not available on this LwIP port; use the BSD Si91x port (`MQTTSi91x.c`) for MQTT over WebSocket.
  */
 int sl_paho_network_connect(Network *n, uint8_t flags, char *addr, int dst_port, int src_port, bool ssl);
 

@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include "sl_utility.h"
 #include "cmsis_os2.h"
+#include "sl_paho_error_codes.h"
 
 #define MQTT_WITH_WEBSOCKET_HEADER_LEN         3
 #define WAIT_TIMEOUT                           5000
@@ -30,11 +31,9 @@
 #define TX_WAIT_TIME                           0
 #define SLI_SOCKET_RECVFROM_RESPONSE_WAIT_TIME ((SLI_917_WAIT_FOREVER * WIFI_BLOCKED_TIMEOUT_SF) + (DEFAULT_TIMEOUT))
 #define SINGLE_PKT_TCP_STREAM_TIMEOUT          WAIT_TIMEOUT + SLI_SOCKET_RECVFROM_RESPONSE_WAIT_TIME
-#define NETWORK_ERROR_NULL_STRUCTURE           -1 // Error: NULL network structure
-#define NETWORK_ERROR_NULL_ADDRESS             -2 // Error: NULL address
-#define NETWORK_ERROR_INVALID_TYPE             -3 // Error: Invalid transport type
-#define NETWORK_ERROR_CONNECT_FAILED           -4 // Error: Socket connect failed
-#define NETWORK_ERROR_INVALID_FLAGS            -5 // Error: sl_paho_network_connect flags invalid
+
+/* NetworkConnect backward-compatible alias (value -4 in Network range). */
+#define NETWORK_ERROR_CONNECT_FAILED (-4)
 
 // Address family for sl_paho_network_connect; set exactly one (distinct bits).
 #define SL_PAHO_NETWORK_FLAG_IPV4 (1U << 0)
@@ -116,25 +115,27 @@ int NetworkConnect(Network *n, uint8_t flags, char *addr, int dst_port, int src_
  * @param[in] ssl       Set to true to enable TLS on the TCP connection.
  *
  * @return
- * - `0` on success.
- * - `NETWORK_ERROR_NULL_STRUCTURE (-1)` if the `Network` structure is `NULL`.
- * - `NETWORK_ERROR_NULL_ADDRESS (-2)` if the `addr` is `NULL`.
- * - `NETWORK_ERROR_INVALID_TYPE (-3)` if the `transport_type` is not TCP.
- * - `NETWORK_ERROR_CONNECT_FAILED (-4)` if the socket connect fails.
- * - `NETWORK_ERROR_INVALID_FLAGS (-5)` if neither or both of IPV4/IPV6 are set, or if IPV6
+ * - `SL_NETWORK_SUCCESS (0)` on success.
+ * - `SL_NETWORK_ERR_NULL_STRUCTURE (-1)` if the `Network` structure is `NULL`.
+ * - `SL_NETWORK_ERR_NULL_ADDRESS (-2)` if the `addr` is `NULL`.
+ * - `SL_NETWORK_ERR_INVALID_TYPE (-3)` if the `transport_type` is not TCP
+ *   (WebSocket is not supported on the dual-stack port).
+ * - `SL_NETWORK_ERR_INVALID_FLAGS (-5)` if neither or both of IPV4/IPV6 are set, or if IPV6
  *   is requested on an IPv4-only build.
- * - Other negative error codes for bind/TLS setup failures.
+ * - `SL_NETWORK_TCP_ERR_*` (-201 .. -299) for TCP socket / bind / connect / setsockopt failures.
+ * - `SL_NETWORK_TLS_ERR_ALPN (-306)` if TLS ALPN configuration fails.
  *
  * @details
  * - Prefer this API over NetworkConnect when the application must choose the MQTT TCP socket
  *   family on dual-IP builds.
+ * - All return codes are unique by domain; see `sl_paho_error_codes.h`.
  * - When `MQTT_TLS_ALPN_ENABLED` is set to `1`, ALPN is configured automatically during
  *   TCP connection setup (after socket creation and TLS enable, before connect).
  *   Set `MQTT_TLS_ALPN_PROTOCOL` to the broker's ALPN name (e.g. `"mqtt"` for Mosquitto on port 443).
  *
  * @note
  * - Ensure that the `Network` structure is initialized using `NetworkInit` before calling this function.
- * - WebSocket transport is not supported by this API.
+ * - WebSocket is not available on this dual-stack port; use the BSD Si91x port (`MQTTSi91x.c`) for MQTT over WebSocket.
  */
 int sl_paho_network_connect(Network *n, uint8_t flags, char *addr, int dst_port, int src_port, bool ssl);
 
