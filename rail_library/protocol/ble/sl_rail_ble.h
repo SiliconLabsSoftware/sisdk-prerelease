@@ -198,6 +198,10 @@ SLI_RAIL_ENUM(sl_rail_ble_phy_t) {
    */
   SL_RAIL_BLE_PHY_CS_2_MBPS_2_BT = 9u,
   /**
+   * BLE HDT PHY.
+   */
+  SL_RAIL_BLE_PHY_HDT = 10u,
+  /**
    * BLE PHY undefined.
    */
   SL_RAIL_BLE_PHY_UNDEFINED = 0xFFu,
@@ -214,7 +218,8 @@ SLI_RAIL_ENUM(sl_rail_ble_phy_t) {
 #define SL_RAIL_BLE_PHY_QUUPPA_1_MBPS  ((sl_rail_ble_phy_t) SL_RAIL_BLE_PHY_QUUPPA_1_MBPS)
 #define SL_RAIL_BLE_PHY_CS_1_MBPS      ((sl_rail_ble_phy_t) SL_RAIL_BLE_PHY_CS_1_MBPS)
 #define SL_RAIL_BLE_PHY_CS_2_MBPS      ((sl_rail_ble_phy_t) SL_RAIL_BLE_PHY_CS_2_MBPS)
-#define SL_RAIL_BLE_PHY_CS_2_MBPS_2_BT  ((sl_rail_ble_phy_t) SL_RAIL_BLE_PHY_CS_2_MBPS_2_BT)
+#define SL_RAIL_BLE_PHY_CS_2_MBPS_2_BT ((sl_rail_ble_phy_t) SL_RAIL_BLE_PHY_CS_2_MBPS_2_BT)
+#define SL_RAIL_BLE_PHY_HDT            ((sl_rail_ble_phy_t) SL_RAIL_BLE_PHY_HDT)
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
 ///
@@ -2116,9 +2121,6 @@ typedef struct sl_rail_ble_tx_repeat_config {
    * Repeat option(s) to apply.
    */
   sl_rail_tx_repeat_options_t repeat_options;
-  /**
-   * Per-repeat delay or hopping configuration, depending on repeat_options.
-   */
   union {
     /**
      * When \ref SL_RAIL_TX_REPEAT_OPTION_HOP is not set, this specifies
@@ -2135,7 +2137,7 @@ typedef struct sl_rail_ble_tx_repeat_config {
      * this union's delay_us field.
      */
     sl_rail_ble_tx_channel_hopping_config_t channel_hopping;
-  } delay_or_hop;
+  } delay_or_hop; /**< Per-repeat delay or hopping configuration, depending on repeat_options. */
 } sl_rail_ble_tx_repeat_config_t;
 
 /**
@@ -2240,6 +2242,24 @@ sl_rail_status_t sl_rail_ble_calibrate_ir(sl_rail_handle_t rail_handle,
   ((const sl_rail_channel_config_t *)RAIL_BLE_PhyQuuppa)
 
 #endif//DOXYGEN_SHOULD_SKIP_THIS
+
+#if SL_RAIL_BLE_SUPPORTS_PROTOCOL_HDT
+/**
+ * Configure the radio for BLE HDT PHY operation.
+ *
+ * Must be called after \ref sl_rail_ble_init().
+ *
+ * @param[in] rail_handle A RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ */
+sl_rail_status_t sl_rail_ble_config_phy_hdt(sl_rail_handle_t rail_handle);
+
+/**
+ * Default PHY to use for BLE HDT. Will be NULL if
+ * \ref SL_RAIL_BLE_SUPPORTS_PROTOCOL_HDT is 0.
+ */
+extern const RAIL_ChannelConfig_t *const RAIL_BLE_PhyHDT;
+#endif // SL_RAIL_BLE_SUPPORTS_PROTOCOL_HDT
 
 #ifdef __cplusplus
 }

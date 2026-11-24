@@ -7,8 +7,15 @@
 #include "sl_btctrl_hci_packet.h"
 #include "sl_sleeptimer.h"
 #include "sl_hci_packet_3wire_config.h"
+#include "sl_component_catalog.h"
 // Only VCOM instance is supported.
+#if defined(SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT)
+#include "sl_iostream_eusart_vcom_config.h"
+#define HCI_3WIRE_VCOM_BAUDRATE SL_IOSTREAM_EUSART_VCOM_BAUDRATE
+#else
 #include "sl_uartdrv_usart_vcom_config.h"
+#define HCI_3WIRE_VCOM_BAUDRATE SL_UARTDRV_USART_VCOM_BAUDRATE
+#endif
 
 // Special characters of the SLIP layer.
 #define SLIP_DELIM      0xc0
@@ -25,7 +32,7 @@
 
 // The maximum time in milliseconds it takes to transmit the largest packet.
 // Derived from the actual baud rate. Only VCOM instance is supported.
-#define T_MAX_MS (MAX_PAYLOAD_LENGTH * 10 * 1000 / SL_UARTDRV_USART_VCOM_BAUDRATE)
+#define T_MAX_MS (MAX_PAYLOAD_LENGTH * 10 * 1000 / HCI_3WIRE_VCOM_BAUDRATE)
 // Recommended timeout for acknowledgment packets.
 #define DEFAULT_ACK_TIMEOUT_MS (2 * T_MAX_MS)
 // Recommended timeout for resending reliable packets.
@@ -681,9 +688,8 @@ static void hci_3wire_peer_reset(void)
  */
 void sl_btctrl_hci_packet_step(void)
 {
-  // Check if data is available from host.
-  if (sl_hci_uart_rx_buffered_length() > 0) {
-    uint16_t bytes_read = sl_hci_uart_read(hci_rx_buffer, sizeof(hci_rx_buffer));
+  uint16_t bytes_read = sl_hci_uart_read(hci_rx_buffer, sizeof(hci_rx_buffer));
+  if (bytes_read > 0) {
     hci_3wire_rx(hci_rx_buffer, bytes_read);
   }
   if (hci_3wire.ack_timeout) {

@@ -236,6 +236,9 @@ void slxi_zigbee_stack_change_pan_id_now_process_ipc_command(sli_zigbee_ipc_cmd_
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_clear_stored_beacons(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -245,6 +248,9 @@ sl_status_t sl_zigbee_clear_stored_beacons(void)
   return msg.data.clear_stored_beacons.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_delayed_join_activate(bool activated)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -252,6 +258,9 @@ void sl_zigbee_delayed_join_activate(bool activated)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_delayed_join_activate_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_delayed_join_is_activated(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -261,6 +270,9 @@ bool sl_zigbee_delayed_join_is_activated(void)
   return msg.data.delayed_join_is_activated.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_find_and_rejoin_network(bool haveCurrentNetworkKey,
                                               uint32_t channelMask,
                                               sl_zigbee_rejoin_reason_t reason,
@@ -276,6 +288,9 @@ sl_status_t sl_zigbee_find_and_rejoin_network(bool haveCurrentNetworkKey,
   return msg.data.find_and_rejoin_network.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_find_unused_pan_id(uint32_t channelMask,
                                          uint8_t duration)
 {
@@ -287,6 +302,9 @@ sl_status_t sl_zigbee_find_unused_pan_id(uint32_t channelMask,
   return msg.data.find_unused_pan_id.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_form_network(sl_zigbee_network_parameters_t *parameters)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -304,6 +322,9 @@ sl_status_t sl_zigbee_form_network(sl_zigbee_network_parameters_t *parameters)
   return msg.data.form_network.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_get_beacon_classification_params(sl_zigbee_beacon_classification_params_t *param)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -321,6 +342,9 @@ sl_status_t sl_zigbee_get_beacon_classification_params(sl_zigbee_beacon_classifi
   return msg.data.get_beacon_classification_params.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_get_join_uses_install_code(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -330,6 +354,9 @@ bool sl_zigbee_get_join_uses_install_code(void)
   return msg.data.get_join_uses_install_code.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_leave_reason_t sl_zigbee_get_last_leave_reason(sl_802154_short_addr_t *returnNodeIdThatSentLeave)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -347,6 +374,9 @@ sl_zigbee_leave_reason_t sl_zigbee_get_last_leave_reason(sl_802154_short_addr_t 
   return msg.data.get_last_leave_reason.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_rejoin_reason_t sl_zigbee_get_last_rejoin_reason(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -356,6 +386,9 @@ sl_zigbee_rejoin_reason_t sl_zigbee_get_last_rejoin_reason(void)
   return msg.data.get_last_rejoin_reason.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t sl_zigbee_get_network_key_timeout(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -365,6 +398,9 @@ uint8_t sl_zigbee_get_network_key_timeout(void)
   return msg.data.get_network_key_timeout.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t sl_zigbee_get_num_stored_beacons(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -374,6 +410,9 @@ uint8_t sl_zigbee_get_num_stored_beacons(void)
   return msg.data.get_num_stored_beacons.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_get_permit_joining(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -383,6 +422,9 @@ bool sl_zigbee_get_permit_joining(void)
   return msg.data.get_permit_joining.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_get_stored_beacon(uint8_t beacon_number,
                                         sl_zigbee_beacon_data_t *beacon)
 {
@@ -402,6 +444,9 @@ sl_status_t sl_zigbee_get_stored_beacon(uint8_t beacon_number,
   return msg.data.get_stored_beacon.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_init(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -411,6 +456,9 @@ sl_status_t sl_zigbee_init(void)
   return msg.data.init.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_is_performing_rejoin(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -420,6 +468,9 @@ bool sl_zigbee_is_performing_rejoin(void)
   return msg.data.is_performing_rejoin.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_join_network(sl_zigbee_node_type_t nodeType,
                                    sl_zigbee_network_parameters_t *parameters)
 {
@@ -439,6 +490,9 @@ sl_status_t sl_zigbee_join_network(sl_zigbee_node_type_t nodeType,
   return msg.data.join_network.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_join_network_directly(sl_zigbee_node_type_t localNodeType,
                                             sl_zigbee_beacon_data_t *beacon,
                                             int8_t radioTxPower,
@@ -462,6 +516,9 @@ sl_status_t sl_zigbee_join_network_directly(sl_zigbee_node_type_t localNodeType,
   return msg.data.join_network_directly.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_leave_network(sl_zigbee_leave_network_option_t options)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -471,6 +528,9 @@ sl_status_t sl_zigbee_leave_network(sl_zigbee_leave_network_option_t options)
   return msg.data.leave_network.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_network_init(sl_zigbee_network_init_struct_t *networkInitStruct)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -488,6 +548,9 @@ sl_status_t sl_zigbee_network_init(sl_zigbee_network_init_struct_t *networkInitS
   return msg.data.network_init.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_permit_joining(uint8_t duration)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -497,6 +560,9 @@ sl_status_t sl_zigbee_permit_joining(uint8_t duration)
   return msg.data.permit_joining.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_reschedule_link_status_msg(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -506,6 +572,9 @@ sl_status_t sl_zigbee_reschedule_link_status_msg(void)
   return msg.data.reschedule_link_status_msg.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_send_pan_id_update(sl_802154_pan_id_t newPan)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -515,6 +584,9 @@ bool sl_zigbee_send_pan_id_update(sl_802154_pan_id_t newPan)
   return msg.data.send_pan_id_update.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_send_zigbee_leave(sl_802154_short_addr_t destination,
                                         sl_zigbee_leave_request_flags_t flags)
 {
@@ -526,6 +598,9 @@ sl_status_t sl_zigbee_send_zigbee_leave(sl_802154_short_addr_t destination,
   return msg.data.send_zigbee_leave.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_beacon_classification_params(sl_zigbee_beacon_classification_params_t *param)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -543,6 +618,9 @@ sl_status_t sl_zigbee_set_beacon_classification_params(sl_zigbee_beacon_classifi
   return msg.data.set_beacon_classification_params.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_beacon_jitter_duration(uint8_t beaconJitterDuration)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -552,6 +630,9 @@ sl_status_t sl_zigbee_set_beacon_jitter_duration(uint8_t beaconJitterDuration)
   return msg.data.set_beacon_jitter_duration.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_set_join_uses_install_code(bool enable)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -559,6 +640,9 @@ void sl_zigbee_set_join_uses_install_code(bool enable)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_set_join_uses_install_code_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_num_beacons_to_store(uint8_t numBeacons)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -568,6 +652,9 @@ sl_status_t sl_zigbee_set_num_beacons_to_store(uint8_t numBeacons)
   return msg.data.set_num_beacons_to_store.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_nwk_update_id(uint8_t nwkUpdateId,
                                         bool set_when_on_network)
 {
@@ -579,6 +666,9 @@ sl_status_t sl_zigbee_set_nwk_update_id(uint8_t nwkUpdateId,
   return msg.data.set_nwk_update_id.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_set_pending_network_update_pan_id(uint16_t panId)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -586,6 +676,9 @@ void sl_zigbee_set_pending_network_update_pan_id(uint16_t panId)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_set_pending_network_update_pan_id_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_tc_rejoins_using_well_known_key_allowed(bool allow)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -595,6 +688,9 @@ sl_status_t sl_zigbee_set_tc_rejoins_using_well_known_key_allowed(bool allow)
   return msg.data.set_tc_rejoins_using_well_known_key_allowed.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_tc_rejoins_using_well_known_key_timeout_sec(uint16_t timeout_sec)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -604,6 +700,9 @@ sl_status_t sl_zigbee_set_tc_rejoins_using_well_known_key_timeout_sec(uint16_t t
   return msg.data.set_tc_rejoins_using_well_known_key_timeout_sec.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_setup_delayed_join(uint8_t networkKeyTimeoutS)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -613,6 +712,9 @@ sl_status_t sl_zigbee_setup_delayed_join(uint8_t networkKeyTimeoutS)
   return msg.data.setup_delayed_join.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_sleepy_to_sleepy_network_start(sl_zigbee_network_parameters_t *parameters,
                                                      bool initiator)
 {
@@ -632,6 +734,9 @@ sl_status_t sl_zigbee_sleepy_to_sleepy_network_start(sl_zigbee_network_parameter
   return msg.data.sleepy_to_sleepy_network_start.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_start_scan(sl_zigbee_network_scan_type_t scanType,
                                  uint32_t channelMask,
                                  uint8_t duration)
@@ -645,6 +750,9 @@ sl_status_t sl_zigbee_start_scan(sl_zigbee_network_scan_type_t scanType,
   return msg.data.start_scan.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_stop_scan(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -654,6 +762,9 @@ sl_status_t sl_zigbee_stop_scan(void)
   return msg.data.stop_scan.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_survey_beacons(bool useStandardBeacons,
                                      uint32_t channel_mask,
                                      sl_zigbee_network_found_callback_t networkFoundCallback,
@@ -669,6 +780,9 @@ sl_status_t sl_zigbee_survey_beacons(bool useStandardBeacons,
   return msg.data.survey_beacons.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_tc_rejoins_using_well_known_key_allowed(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -678,6 +792,9 @@ bool sl_zigbee_tc_rejoins_using_well_known_key_allowed(void)
   return msg.data.tc_rejoins_using_well_known_key_allowed.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void slx_zigbee_change_pan_id_now(sl_802154_pan_id_t panId)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

@@ -105,15 +105,17 @@
 // This key is used for an indexed token that tracks additional information of the key table.
 #define COMMON_TOKEN_STACK_KEY_TABLE_ADDITIONAL_INFO              SL_TOKEN_GET_DYNAMIC_TOKEN((SL_TOKEN_NVM3_REGION_ZIGBEE | 0x1000), 0)
 // This key is used to store additional link keys beyond the limitations of the token system
+// This token can span up to 1024 entries, so 0x892C-0x8D2B are reserved
 #define COMMON_TOKEN_STACK_KEY_TABLE_EXTENDED                     SL_TOKEN_GET_DYNAMIC_TOKEN((SL_TOKEN_NVM3_REGION_ZIGBEE | 0x892C), 0)
 
 #ifdef MAC_MUX_AUX_PRESENT
 // Aux listen channel. 0 means the aux network is disabled. A non-zero value
 // brings the aux network up on that channel with the primary network's
 // PAN ID, addresses, and other radio parameters.
-#define COMMON_TOKEN_MAC_MUX_AUX_CHANNEL                          SL_TOKEN_GET_DYNAMIC_TOKEN((SL_TOKEN_NVM3_REGION_ZIGBEE | 0x89AB), 0)
+// Single key at 0x8DAC, after the extended link key table (0x892C-0x8D2B)
+// and the Green Power OOB key reservation (0x8D2C-0x8DAB).
+#define COMMON_TOKEN_MAC_MUX_AUX_CHANNEL                          SL_TOKEN_GET_DYNAMIC_TOKEN((SL_TOKEN_NVM3_REGION_ZIGBEE | 0x8DAC), 0)
 #endif // MAC_MUX_AUX_PRESENT
-
 
 /** @} END Common Token Object Key IDs  */
 

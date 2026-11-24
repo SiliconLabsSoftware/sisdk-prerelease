@@ -469,6 +469,20 @@ extern "C" {
 #define SL_RAIL_BLE_SUPPORTS_PHY_SWITCH_TO_RX 0
 #endif
 
+// BLE HDT features
+// Some features may not be available on all platforms
+// due to radio hardware limitations.
+
+/// Boolean to indicate whether the selected chip supports BLE HDT.
+/// See also runtime refinement \ref sl_rail_ble_supports_hdt_phy().
+#ifndef SL_RAIL_BLE_SUPPORTS_PROTOCOL_HDT
+#if defined(BLEHDT_PRESENT)
+#define SL_RAIL_BLE_SUPPORTS_PROTOCOL_HDT SL_RAIL_SUPPORTS_PROTOCOL_BLE
+#else
+#define SL_RAIL_BLE_SUPPORTS_PROTOCOL_HDT 0
+#endif
+#endif//#ifndef SL_RAIL_BLE_SUPPORTS_PROTOCOL_HDT
+
 // IEEE 802.15.4 features
 // Some features may not be available on all platforms
 // due to radio hardware limitations.

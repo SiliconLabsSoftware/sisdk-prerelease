@@ -5,15 +5,15 @@ version = 2
   slc-cli = {version = "6.0.25", installer = "archive", type = "tools", ref = "slc-cli/6.0.25"}
   python = {version = "3.10.4", installer = "archive", type = "apack", ref = "python/3.10.4"}
   java21 = {version = "21.0.6", installer = "archive", type = "tools", ref = "java21/21.0.6"}
-  zap = {version = "2026.10.15", installer = "archive", type = "apack", ref = "zap/2026.10.15"}
+  zap = {version = "2026.11.13", installer = "archive", type = "apack"}
   base_sdk = {version = "2026.12.0", installer = "conan", type = "sdk", ref = "base_sdk/2026.12.0@silabs/2026-12#5430da17a010025655b2a28fed660256"}
-  bgapi_protocol = {version = "11.2.0-alpha.186", installer = "conan", type = "sdk", ref = "bgapi_protocol/11.2.0-alpha.186@silabs/2026-12#01d832d6297a5aabf1e496336232aee6c341c944"}
-  bluetooth_apploader = {version = "11.2.0-alpha.186", installer = "conan", type = "sdk", ref = "bluetooth_apploader/11.2.0-alpha.186@silabs/2026-12#01d832d6297a5aabf1e496336232aee6c341c944"}
-  bluetooth_bgbuild = {version = "11.2.0-alpha.186", installer = "conan", type = "sdk", ref = "bluetooth_bgbuild/11.2.0-alpha.186@silabs/2026-12|build_requires#01d832d6297a5aabf1e496336232aee6c341c944"}
-  bluetooth_common = {version = "1.2.0-alpha.186", installer = "conan", type = "sdk", ref = "bluetooth_common/1.2.0-alpha.186@silabs/2026-12#01d832d6297a5aabf1e496336232aee6c341c944"}
-  bluetooth_le = {version = "11.2.0-beta.18", installer = "conan", type = "sdk", ref = "bluetooth_le/11.2.0-beta.18@silabs/2026-12#2960cd95332dc68ad160ae321f76a454f17c1bc7"}
-  bluetooth_le_controller = {version = "11.2.0-alpha.186", installer = "conan", type = "sdk", ref = "bluetooth_le_controller/11.2.0-alpha.186@silabs/2026-12#01d832d6297a5aabf1e496336232aee6c341c944"}
-  bluetooth_le_host = {version = "11.2.0-alpha.186", installer = "conan", type = "sdk", ref = "bluetooth_le_host/11.2.0-alpha.186@silabs/2026-12#01d832d6297a5aabf1e496336232aee6c341c944"}
+  bgapi_protocol = {version = "11.2.0-beta.1", installer = "conan", type = "sdk", ref = "bgapi_protocol/11.2.0-beta.1@silabs/2026-12#72b7d4075ae4078072fb797a430261784c82cbcc"}
+  bluetooth_apploader = {version = "11.2.0-beta.1", installer = "conan", type = "sdk", ref = "bluetooth_apploader/11.2.0-beta.1@silabs/2026-12#72b7d4075ae4078072fb797a430261784c82cbcc"}
+  bluetooth_bgbuild = {version = "11.2.0-beta.1", installer = "conan", type = "sdk", ref = "bluetooth_bgbuild/11.2.0-beta.1@silabs/2026-12|build_requires#72b7d4075ae4078072fb797a430261784c82cbcc"}
+  bluetooth_common = {version = "1.2.0-beta.1", installer = "conan", type = "sdk", ref = "bluetooth_common/1.2.0-beta.1@silabs/2026-12#72b7d4075ae4078072fb797a430261784c82cbcc"}
+  bluetooth_le = {version = "11.2.0-beta.24", installer = "conan", type = "sdk", ref = "bluetooth_le/11.2.0-beta.24@silabs/2026-12#44695dbf4d5f79911fdb4a68593acddc64d6577b"}
+  bluetooth_le_controller = {version = "11.2.0-beta.1", installer = "conan", type = "sdk", ref = "bluetooth_le_controller/11.2.0-beta.1@silabs/2026-12#72b7d4075ae4078072fb797a430261784c82cbcc"}
+  bluetooth_le_host = {version = "11.2.0-beta.1", installer = "conan", type = "sdk", ref = "bluetooth_le_host/11.2.0-beta.1@silabs/2026-12#72b7d4075ae4078072fb797a430261784c82cbcc"}
   boards = {version = "1.2.0", installer = "conan", type = "sdk", ref = "boards/1.2.0@silabs/2026-12#d328c1ee299b1fbec2e18e62f699a147"}
   bootloader = {version = "3.4.0", installer = "conan", type = "sdk", ref = "bootloader/3.4.0@silabs/2026-12#70c3f2f896af70f8c7e2a338c4485c15"}
   cmake = {version = "3.30.2", installer = "conan", type = "apack", ref = "cmake/3.30.2@silabs#8798657aa78b2da38a3ae465f2d10090"}
@@ -36,18 +36,18 @@ version = 2
   platform_core = {version = "1.2.0", installer = "conan", type = "sdk", ref = "platform_core/1.2.0@silabs/2026-12#8e6a37f0100d04afd0cb32ca89a88274"}
   printf = {version = "1.2.0", installer = "conan", type = "sdk", ref = "printf/1.2.0@silabs/2026-12#17d8e2c2b7b59b85592d976f578d85ec"}
   rail_library = {version = "3.2.0-alpha.22", installer = "conan", type = "sdk", ref = "rail_library/3.2.0-alpha.22@silabs/2026-12#b8f3435e8f27d93214c7cc7c4de80bd08c39dc6b"}
-  realtime_locationing = {version = "12.0.0-alpha.29", installer = "conan", type = "sdk", ref = "realtime_locationing/12.0.0-alpha.29@silabs/2026-12#f19fe265c9950894113cb6043cda35cf23415bf4"}
+  realtime_locationing = {version = "12.0.0-alpha.30", installer = "conan", type = "sdk", ref = "realtime_locationing/12.0.0-alpha.30@silabs/2026-12#65c5009b40c376c37242b2231ebe4551dd4c07b6"}
   security_libcryptosoc = {version = "1.2.0", installer = "conan", type = "sdk", ref = "security_libcryptosoc/1.2.0@silabs/2026-12#42a9890f9b2dd4ca6aa97960eae57dce"}
   security_sxsymcrypt = {version = "1.2.0", installer = "conan", type = "sdk", ref = "security_sxsymcrypt/1.2.0@silabs#059c0dec8aa6b0592db386c6223554ff"}
   security_tfm = {version = "1.2.0", installer = "conan", type = "sdk", ref = "security_tfm/1.2.0@silabs/2026-12#86644133c261cfa5d3a040aaadbc82be"}
   segger = {version = "1.2.0", installer = "conan", type = "sdk", ref = "segger/1.2.0@silabs/2026-12#bca12f7dda989a8cb730a890a5d737de"}
   silabs_package_assistant = [
-    {version = "1.8.0", installer = "conan", type = "python_requires", ref = "silabs_package_assistant/1.8.0@silabs|python_requires#1f4a525f99fdcc0d289cfd2fd532b6aefa7006c7"},
     {version = "2.0.3", installer = "conan", type = "python_requires", ref = "silabs_package_assistant/2.0.3@silabs|python_requires#3049ef4c4d1a9c9b2bfcc48fb931e7d41e707434"},
+    {version = "1.8.0", installer = "conan", type = "python_requires", ref = "silabs_package_assistant/1.8.0@silabs|python_requires#1f4a525f99fdcc0d289cfd2fd532b6aefa7006c7"},
   ]
   unity_test_framework = {version = "1.2.0", installer = "conan", type = "sdk", ref = "unity_test_framework/1.2.0@silabs/2026-12#781714e52e8e666477080a606340b003"}
   usb = {version = "1.8.0", installer = "conan", type = "sdk", ref = "usb/1.8.0@silabs/2026-12#01cbe72ebb3adb140ce650e11f741a9a"}
-  zigbee = {version = "9.2.0-alpha.66", installer = "conan", type = "sdk", ref = "zigbee/9.2.0-alpha.66@silabs/2026-12#749bf04c52625aee3d5540afe6a74acc952bd8d4"}
+  zigbee = {version = "9.2.0-beta.69", installer = "conan", type = "sdk", ref = "zigbee/9.2.0-beta.69@silabs/2026-12#e2eff959c6f0e00b89d318c0a868deb879f7c2f3"}
 
 [engine]
   conan-repos = [

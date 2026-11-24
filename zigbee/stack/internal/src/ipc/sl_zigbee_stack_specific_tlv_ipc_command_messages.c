@@ -114,6 +114,9 @@ void sli_zigbee_stack_global_tlv_symmetric_passphrase_process_ipc_command(sli_zi
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_global_tlv_add_configurations(sli_buffer_manager_buffer_t *buffer,
                                                     uint16_t index,
                                                     uint8_t tag_c,
@@ -143,6 +146,9 @@ sl_status_t sl_zigbee_global_tlv_add_configurations(sli_buffer_manager_buffer_t 
   return msg.data.global_tlv_add_configurations.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_global_tlv_beacon_appendix_encapsulation(sl_zigbee_global_tlv_beacon_appendix_encap_t *encapTlv)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -160,6 +166,9 @@ sl_status_t sl_zigbee_global_tlv_beacon_appendix_encapsulation(sl_zigbee_global_
   return msg.data.global_tlv_beacon_appendix_encapsulation.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_global_tlv_configuration_params_t sl_zigbee_global_tlv_configuration_params_from_bitmask(uint16_t mask)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -169,6 +178,9 @@ sl_zigbee_global_tlv_configuration_params_t sl_zigbee_global_tlv_configuration_p
   return msg.data.global_tlv_configuration_params_from_bitmask.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint16_t sl_zigbee_global_tlv_configuration_params_get_bitmask(sl_zigbee_global_tlv_configuration_params_t *tlv)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -186,6 +198,9 @@ uint16_t sl_zigbee_global_tlv_configuration_params_get_bitmask(sl_zigbee_global_
   return msg.data.global_tlv_configuration_params_get_bitmask.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_global_tlv_device_capability_extension_t sl_zigbee_global_tlv_device_capability_extension_param(uint16_t bitmask)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -195,6 +210,9 @@ sl_zigbee_global_tlv_device_capability_extension_t sl_zigbee_global_tlv_device_c
   return msg.data.global_tlv_device_capability_extension_param.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_global_tlv_fragmentation_param_t sl_zigbee_global_tlv_fragmentation_param(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -204,6 +222,9 @@ sl_zigbee_global_tlv_fragmentation_param_t sl_zigbee_global_tlv_fragmentation_pa
   return msg.data.global_tlv_fragmentation_param.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sli_buffer_manager_buffer_t sl_zigbee_global_tlv_get_configurations(uint8_t tag_c,
                                                                     const uint8_t *tag_v)
 {
@@ -221,6 +242,9 @@ sli_buffer_manager_buffer_t sl_zigbee_global_tlv_get_configurations(uint8_t tag_
   return msg.data.global_tlv_get_configurations.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_global_tlv_joiner_encapsulation(sl_zigbee_global_tlv_joiner_encap_t *encapTlv)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -238,6 +262,9 @@ sl_status_t sl_zigbee_global_tlv_joiner_encapsulation(sl_zigbee_global_tlv_joine
   return msg.data.global_tlv_joiner_encapsulation.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint32_t sl_zigbee_global_tlv_next_channel_change_get_bitmask(sl_zigbee_global_tlv_next_channel_change_t *tlv)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -255,6 +282,9 @@ uint32_t sl_zigbee_global_tlv_next_channel_change_get_bitmask(sl_zigbee_global_t
   return msg.data.global_tlv_next_channel_change_get_bitmask.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_global_tlv_next_channel_change_t sl_zigbee_global_tlv_next_channel_from_pg_ch(uint8_t page,
                                                                                         uint8_t channel)
 {
@@ -266,6 +296,9 @@ sl_zigbee_global_tlv_next_channel_change_t sl_zigbee_global_tlv_next_channel_fro
   return msg.data.global_tlv_next_channel_from_pg_ch.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_global_tlv_next_pan_id_t sl_zigbee_global_tlv_next_pan_from_pan(sl_802154_pan_id_t pan_id)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -275,6 +308,9 @@ sl_zigbee_global_tlv_next_pan_id_t sl_zigbee_global_tlv_next_pan_from_pan(sl_802
   return msg.data.global_tlv_next_pan_from_pan.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_802154_pan_id_t sl_zigbee_global_tlv_next_pan_get_pan(sl_zigbee_global_tlv_next_pan_id_t *tlv)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -292,6 +328,9 @@ sl_802154_pan_id_t sl_zigbee_global_tlv_next_pan_get_pan(sl_zigbee_global_tlv_ne
   return msg.data.global_tlv_next_pan_get_pan.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_global_tlv_pan_id_conflict_t sl_zigbee_global_tlv_pan_id_conflict(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -301,6 +340,9 @@ sl_zigbee_global_tlv_pan_id_conflict_t sl_zigbee_global_tlv_pan_id_conflict(void
   return msg.data.global_tlv_pan_id_conflict.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_global_tlv_router_information_t sl_zigbee_global_tlv_router_information(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -310,6 +352,9 @@ sl_zigbee_global_tlv_router_information_t sl_zigbee_global_tlv_router_informatio
   return msg.data.global_tlv_router_information.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint16_t sl_zigbee_global_tlv_router_information_get_bitmask(sl_zigbee_global_tlv_router_information_t *tlv)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -327,6 +372,9 @@ uint16_t sl_zigbee_global_tlv_router_information_get_bitmask(sl_zigbee_global_tl
   return msg.data.global_tlv_router_information_get_bitmask.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_global_tlv_supp_key_negotiation_t sl_zigbee_global_tlv_supp_key_negotiation(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -336,6 +384,9 @@ sl_zigbee_global_tlv_supp_key_negotiation_t sl_zigbee_global_tlv_supp_key_negoti
   return msg.data.global_tlv_supp_key_negotiation.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_global_tlv_symmetric_passphrase_t sl_zigbee_global_tlv_symmetric_passphrase(const uint8_t *passphrase)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

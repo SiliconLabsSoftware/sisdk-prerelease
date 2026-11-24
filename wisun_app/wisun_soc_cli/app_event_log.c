@@ -27,6 +27,8 @@
 #include "sl_wisun_rf_test.h"
 #include "sl_sleeptimer.h"
 #include "app_event_log.h"
+#include "app_settings.h"
+#include "sl_wisun_cli_util.h"
 
 #define APP_EVENT_LOG_TASK_PRIORITY osPriorityBelowNormal7
 #define APP_EVENT_LOG_TASK_STACK_SIZE 500 // in units of CPU_INT32U
@@ -55,6 +57,27 @@ static const char * const APP_EVENT_FRAME_TYPE[] =
   "LPC",
   "LTS",
   "DATA",
+};
+
+static const char * const APP_EVENT_RX_DROP_REASON[] =
+{
+  [SL_WISUN_LOGGER_RX_DROP_REASON_INVALID_FCF] = "invalid fcf",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_INVALID_LENGTH] = "invalid length",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_MAC_FILTER] = "mac filter",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_INVALID_ACK] = "invalid ack",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_INVALID_HEADER_IE] = "invalid header ie",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_ACK_REQUEST_BROADCAST] = "ack on broadcast",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_EDFE_BUILD_RESPONSE] = "edfe build response",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_DECRYPT] = "decrypt",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_FRAME_COUNTER] = "frame counter",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_NO_KEY] = "no key",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_UNSUPPORTED_SECURITY] = "unsupported security",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_UNSUPPORTED_LEGACY] = "unsupported legacy",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_INVALID_ADDRESS] = "invalid address",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_INVALID_PAYLOAD_IE] = "invalid payload ie",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_UNSUPPORTED_COMMAND] = "unsupported command",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_FILTERED] = "filtered",
+  [SL_WISUN_LOGGER_RX_DROP_REASON_OUT_OF_MEMORY] = "out of memory",
 };
 
 static void app_event_log_print_event(const app_event_log_event_t *evt)
@@ -95,7 +118,9 @@ static void app_event_log_print_event(const app_event_log_event_t *evt)
       break;
     case SL_WISUN_LOGGER_EVENT_TYPE_RF_TEST:
       if (evt->logger_event.u.rf_test.events & SL_RAIL_EVENT_RX_PACKET_RECEIVED) {
-        printf("RF test RX");
+        printf("RF test RX len=%u rssi=%d",
+               evt->logger_event.u.rf_test.u.rx.packet_length,
+               evt->logger_event.u.rf_test.u.rx.rssi);
       } else if (evt->logger_event.u.rf_test.events & SL_RAIL_EVENT_TX_PACKET_SENT) {
         printf("RF test TX");
       } else {
@@ -104,11 +129,62 @@ static void app_event_log_print_event(const app_event_log_event_t *evt)
                (uint32_t)evt->logger_event.u.rf_test.events);
       }
       break;
+    case SL_WISUN_LOGGER_EVENT_TYPE_RX_DROP: {
+      const char *reason_name = "unknown";
+
+      if (evt->logger_event.u.rx_drop.reason < ARRAY_SIZE(APP_EVENT_RX_DROP_REASON)
+          && APP_EVENT_RX_DROP_REASON[evt->logger_event.u.rx_drop.reason]) {
+        reason_name = APP_EVENT_RX_DROP_REASON[evt->logger_event.u.rx_drop.reason];
+      }
+      printf("RX drop from %s @ %d dBm, packet_length: %u, reason: %s (%u)",
+             address,
+             evt->logger_event.u.rx_drop.rssi,
+             evt->logger_event.u.rx_drop.packet_length,
+             reason_name,
+             evt->logger_event.u.rx_drop.reason);
+      break;
+    }
     default:
       printf("Unknown event 0x%08" PRIx32 "%08" PRIx32,
              (uint32_t)(evt->logger_event.type >> 32),
              (uint32_t)evt->logger_event.type);
       break;
+  }
+}
+
+// Length of the packet trailing the event, 0 if the event does not carry one
+static uint16_t app_event_log_packet_length(const sl_wisun_logger_event_t *logger_event)
+{
+  if (logger_event->type == SL_WISUN_LOGGER_EVENT_TYPE_RX_DROP) {
+    return logger_event->u.rx_drop.packet_length;
+  }
+  if (logger_event->type == SL_WISUN_LOGGER_EVENT_TYPE_RF_TEST
+      && (logger_event->u.rf_test.events & SL_RAIL_EVENT_RX_PACKET_RECEIVED)) {
+    return logger_event->u.rf_test.u.rx.packet_length;
+  }
+
+  return 0;
+}
+
+// Print the packet like app_handle_socket_data() does, one line per
+// app.printable_data_length characters
+static void app_event_log_print_packet(const uint8_t *packet, uint16_t length)
+{
+  app_printable_data_ctx_t printable_data_ctx;
+  char *printable_data;
+
+  if (length == 0 || !app_settings_app.printable_data_length) {
+    return;
+  }
+
+  printable_data = app_util_printable_data_init(&printable_data_ctx,
+                                                packet,
+                                                length,
+                                                app_settings_app.printable_data_as_hex,
+                                                app_settings_app.printable_data_length);
+  while (printable_data) {
+    printf("\r\n%s", printable_data);
+    printable_data = app_util_printable_data_next(&printable_data_ctx);
   }
 }
 
@@ -143,7 +219,7 @@ void app_handle_event_logger_ind(sl_wisun_evt_t *evt) {
   sl_status_t status;
   app_event_log_event_t *event_log_event;
   sl_slist_node_t *item;
-  sl_wisun_logger_event_t logger_event = evt->evt.logger_event.logger_event;
+  sl_wisun_logger_event_t *logger_event = &evt->evt.logger_event.logger_event;
 
   status = sl_memory_pool_alloc(&app_event_log_pool, (void **)&event_log_event);
   if (status != SL_STATUS_OK) {
@@ -153,14 +229,17 @@ void app_handle_event_logger_ind(sl_wisun_evt_t *evt) {
     event_log_event = SL_SLIST_ENTRY(item, app_event_log_event_t, node);
   }
   event_log_event->timestamp = sl_sleeptimer_get_time();
-  memcpy(&event_log_event->logger_event, &logger_event, sizeof(sl_wisun_logger_event_t));
+  memcpy(&event_log_event->logger_event, logger_event, sizeof(sl_wisun_logger_event_t));
   // List is oldest-first
   sl_slist_push_back(&app_event_log_list, &event_log_event->node);
+  // The packet trailing the event is only printed, it is not kept in the log
   printf("[");
   app_event_log_print_event(event_log_event);
+  app_event_log_print_packet(evt->evt.logger_event.payload,
+                             app_event_log_packet_length(logger_event));
   printf("]\r\n");
 
-  if (logger_event.type == SL_WISUN_LOGGER_EVENT_TYPE_RF_TEST) {
-    sl_wisun_rf_test_event_callback(logger_event.u.rf_test.events, logger_event.u.rf_test.u.rx.rssi);
+  if (logger_event->type == SL_WISUN_LOGGER_EVENT_TYPE_RF_TEST) {
+    sl_wisun_rf_test_event_callback(logger_event->u.rf_test.events, logger_event->u.rf_test.u.rx.rssi);
   }
 }

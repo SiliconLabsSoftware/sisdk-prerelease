@@ -10,6 +10,7 @@ provides:
 requires:
 - name: ot_platform_abstraction_efr32
 - name: ot_duty_cycle_manager
+- name: hardware_board_supports_rf_band_868
 conflicts:
 - name: ot_subghz_phy_915
 source:

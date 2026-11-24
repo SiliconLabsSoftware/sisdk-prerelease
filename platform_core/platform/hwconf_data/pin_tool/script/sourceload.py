@@ -23,9 +23,9 @@ def load_requirement(requirement, candidates, options, changeset):
   elif requirement.getType() in ['prs']:
     channel = options.get('CHANNEL')
     if channel:
+      channel_type = options.get('CHANNEL_TYPE')
       for prs in candidates:
-        prs_channel = sourcegen.get_module_instance(str(prs.getName()))
-        if prs_channel == channel:
+        if sourcegen.prs_channel_matches(prs, channel, channel_type):
           requirement.setModule(prs)
           # TODO make requirement module selection readonly
 
@@ -148,9 +148,9 @@ def remove_requirement(requirement, candidates, options, changeset):
   elif requirement.getType() in ['prs']:
     channel = options.get('CHANNEL')
     if channel:
+      channel_type = options.get('CHANNEL_TYPE')
       for prs in candidates:
-        prs_channel = sourcegen.get_module_instance(str(prs.getName()))
-        if prs_channel == channel:
+        if sourcegen.prs_channel_matches(prs, channel, channel_type):
           # # TODO make requirement module selection readonly
 
           if 'PORT' in options and 'PIN' in options:

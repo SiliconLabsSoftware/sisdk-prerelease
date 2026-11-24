@@ -1786,6 +1786,8 @@ typedef enum {
   SL_WISUN_LOGGER_EVENT_TYPE_TX_FAILURE = 8,
   /// Event published when RF test receives a packet or completes a TX
   SL_WISUN_LOGGER_EVENT_TYPE_RF_TEST = 16,
+  /// Event published when a frame is dropped due to RX drop
+  SL_WISUN_LOGGER_EVENT_TYPE_RX_DROP = 32,
 } sl_wisun_logger_event_type_t;
 
 /// Enumeration for event log frame types
@@ -1861,6 +1863,56 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_tx_failure_t;
 SL_PACK_END()
 
+/// Reason a received frame was dropped
+typedef enum {
+  /// Frame control field failed validation.
+  SL_WISUN_LOGGER_RX_DROP_REASON_INVALID_FCF = 0,
+  /// Header, security header, or MIC length is invalid.
+  SL_WISUN_LOGGER_RX_DROP_REASON_INVALID_LENGTH = 1,
+  /// Source address is on the MAC block list
+  SL_WISUN_LOGGER_RX_DROP_REASON_MAC_FILTER = 2,
+  /// Acknowledgement did not match the outstanding transmission or could not be confirmed.
+  SL_WISUN_LOGGER_RX_DROP_REASON_INVALID_ACK = 3,
+  /// Header information elements could not be parsed.
+  SL_WISUN_LOGGER_RX_DROP_REASON_INVALID_HEADER_IE = 4,
+  /// Broadcast frame requested an acknowledgement
+  SL_WISUN_LOGGER_RX_DROP_REASON_ACK_REQUEST_BROADCAST = 5,
+  /// EDFE exchange could not continue.
+  SL_WISUN_LOGGER_RX_DROP_REASON_EDFE_BUILD_RESPONSE = 6,
+  /// Security processing failed.
+  SL_WISUN_LOGGER_RX_DROP_REASON_DECRYPT = 7,
+  /// Frame counter was rejected.
+  SL_WISUN_LOGGER_RX_DROP_REASON_FRAME_COUNTER = 8,
+  /// No decryption key for this source.
+  SL_WISUN_LOGGER_RX_DROP_REASON_NO_KEY = 9,
+  /// Frame security level is not supported.
+  SL_WISUN_LOGGER_RX_DROP_REASON_UNSUPPORTED_SECURITY = 10,
+  /// Frame uses IEEE 802.15.4-2003 security, which is not supported.
+  SL_WISUN_LOGGER_RX_DROP_REASON_UNSUPPORTED_LEGACY = 11,
+  /// Source address mode cannot be used to decrypt.
+  SL_WISUN_LOGGER_RX_DROP_REASON_INVALID_ADDRESS = 12,
+  /// Payload information elements could not be parsed.
+  SL_WISUN_LOGGER_RX_DROP_REASON_INVALID_PAYLOAD_IE = 13,
+  /// MAC command is not vendor-specific.
+  SL_WISUN_LOGGER_RX_DROP_REASON_UNSUPPORTED_COMMAND = 14,
+  /// Frame is addressed to another PAN or device.
+  SL_WISUN_LOGGER_RX_DROP_REASON_FILTERED = 15,
+  /// Frame could not be queued for processing.
+  SL_WISUN_LOGGER_RX_DROP_REASON_OUT_OF_MEMORY = 16,
+} sl_wisun_logger_rx_drop_reason_t;
+
+/// RX drop information
+SL_PACK_START(1)
+typedef struct {
+  /// RSSI in dBm; @ref SL_WISUN_RF_TEST_RSSI_NOT_AVAILABLE when not applicable
+  int8_t rssi;
+  /// Why the frame was dropped (@ref sl_wisun_logger_rx_drop_reason_t)
+  uint8_t reason;
+  /// Copied payload length in bytes (see trailing payload on the indication)
+  uint16_t packet_length;
+} SL_ATTRIBUTE_PACKED sl_wisun_logger_event_rx_drop_t;
+SL_PACK_END()
+
 /// Value for rssi when not applicable (e.g. TX or non-RX events)
 #define SL_WISUN_RF_TEST_RSSI_NOT_AVAILABLE  (-128)
 
@@ -1869,8 +1921,10 @@ SL_PACK_START(1)
 typedef struct {
   /// RSSI in dBm; @ref SL_WISUN_RF_TEST_RSSI_NOT_AVAILABLE when not applicable
   int8_t rssi;
-  /// Reserved for future use
-  uint8_t reserved[3];
+  /// Link quality indicator (0-255)
+  uint8_t lqi;
+  /// Copied payload length in bytes (see trailing \c payload[] on the indication)
+  uint16_t packet_length;
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_rf_test_rx_t;
 SL_PACK_END()
 
@@ -1904,6 +1958,8 @@ typedef struct {
     sl_wisun_logger_event_tx_failure_t tx_failure;
     /// RF test event information
     sl_wisun_logger_event_rf_test_t rf_test;
+    /// RX drop information
+    sl_wisun_logger_event_rx_drop_t rx_drop;
   } u;
 } SL_ATTRIBUTE_PACKED sl_wisun_logger_event_t;
 SL_PACK_END()

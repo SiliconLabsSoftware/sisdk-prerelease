@@ -61,10 +61,10 @@ extern "C" {
  * in deci-dBm.
  *
  * @note If the curves are generated with
- *   maxPower and increment other than \ref RAIL_TX_POWER_CURVE_DEFAULT_MAX and
- *   \ref RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT respectively, then the first
- *   \ref RAIL_TxPowerCurveSegment_t has its maxPowerLevel equal to
- *   \ref RAIL_TX_POWER_LEVEL_INVALID and its slope and intercept stores the
+ *   maxPower and increment other than RAIL_TX_POWER_CURVE_DEFAULT_MAX and
+ *   RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT respectively, then the first
+ *   RAIL_TxPowerCurveSegment_t has its maxPowerLevel equal to
+ *   RAIL_TX_POWER_LEVEL_INVALID and its slope and intercept stores the
  *   maxPower and increment in deci-dBm respectively.
  *
  * @deprecated This RAIL 2.x type has been eliminated in RAIL 3 by

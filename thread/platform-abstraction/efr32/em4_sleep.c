@@ -34,8 +34,8 @@
  *   Requires Series 2 with BURTC and EM4GRPACLK sourced from ULFRCO.
  *   Only a single OpenThread instance is supported.
  *
- *   EM4 entry only occurs on the next EM2 transition after arming. If Power
- *   Manager never enters EM2, EM4 will never be entered.
+ *   EM4 entry is attempted on ENTERING_EM2 after arming, and from
+ *   sl_ot_em4_process() when the stack/radio are idle.
  */
 
 #define CURRENT_MODULE_NAME "OPENTHREAD"
@@ -43,6 +43,7 @@
 #include "em4_sleep.h"
 
 #include <openthread-core-config.h>
+#include <openthread/cli.h>
 #include <openthread/instance.h>
 #include <openthread/tasklet.h>
 #include <openthread/thread.h>
@@ -98,6 +99,10 @@ uint32_t sl_ot_em4_get_default_wake_ms(otInstance *aInstance)
     return 0;
 }
 
+void sl_ot_em4_process(void)
+{
+}
+
 #else /* BURTC_PRESENT */
 
 #include "sl_clock_manager.h"
@@ -144,6 +149,7 @@ static bool          sWokeFromEm4     = false;
 static volatile bool sPending         = false;
 static volatile bool sEnterStarted    = false;
 static bool          sBurtcConfigured = false;
+static bool          sLoggedSkip      = false;
 static uint32_t      sWakeMs          = 0;
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
@@ -244,29 +250,43 @@ static bool radioIsIdle(otInstance *aInstance)
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 static void tryEnterEm4(void)
 {
-    otInstance *instance = otInstanceGetSingle();
+    otInstance  *instance = otInstanceGetSingle();
+    otRadioState radioState;
+
+    if (!sPending || sEnterStarted)
+    {
+        return;
+    }
+
+    radioState = otPlatRadioGetState(instance);
 
     if (otTaskletsArePending(instance) || !radioIsIdle(instance))
     {
-        sEnterStarted = false;
+        if (!sLoggedSkip)
+        {
+            otCliOutputFormat("em4 wait (tasklets=%d radio=%d)\r\n",
+                              otTaskletsArePending(instance) ? 1 : 0,
+                              (int)radioState);
+            sLoggedSkip = true;
+        }
         return;
     }
 
     if (!sBurtcConfigured
         && (configureBurtcWake(sWakeMs != 0U ? sWakeMs : sl_ot_em4_get_default_wake_ms(instance)) != OT_ERROR_NONE))
     {
-        sEnterStarted = false;
-        sPending      = false;
+        sPending = false;
+        otCliOutputFormat("em4 burtc config failed\r\n");
         return;
     }
 
+    sEnterStarted = true;
+    otCliOutputFormat("entering em4\r\n");
     sl_hal_burtc_reset_counter();
     sl_hal_burtc_wait_sync();
     sl_power_manager_enter_em4();
 }
 
-// EM4 entry only occurs on the next EM2 transition after arming. If Power
-// Manager never enters EM2, EM4 will never be entered and sPending stays true.
 static void em4OnEmTransition(sl_power_manager_em_t aFrom, sl_power_manager_em_t aTo)
 {
     OT_UNUSED_VARIABLE(aFrom);
@@ -276,12 +296,6 @@ static void em4OnEmTransition(sl_power_manager_em_t aFrom, sl_power_manager_em_t
         return;
     }
 
-    if (!sPending || sEnterStarted)
-    {
-        return;
-    }
-
-    sEnterStarted = true;
     tryEnterEm4();
 }
 #endif
@@ -370,6 +384,7 @@ otError sl_ot_em4_request(otInstance *aInstance, uint32_t aWakeMs)
 
     sPending      = true;
     sEnterStarted = false;
+    sLoggedSkip   = false;
     return OT_ERROR_NONE;
 }
 
@@ -384,11 +399,19 @@ void sl_ot_em4_cancel(void)
     sPending         = false;
     sEnterStarted    = false;
     sBurtcConfigured = false;
+    sLoggedSkip      = false;
 }
 
 bool sl_ot_em4_is_pending(void)
 {
     return sPending;
+}
+
+void sl_ot_em4_process(void)
+{
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+    tryEnterEm4();
+#endif
 }
 
 #endif /* BURTC_PRESENT */

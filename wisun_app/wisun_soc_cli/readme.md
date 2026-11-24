@@ -193,8 +193,8 @@ The settings in the *app* section relate to the application options. A detailed 
 
 | Variable | R/W | Type | Values | Description |
 |---|---|---|---|---|
-| app.printable_data_length | R/W | integer | 0: received socket data is not printed<br>1 - 64: amount of characters per line | If enabled, received socket data is printed |
-| app.printable_data_as_hex | R/W | integer | 0: print received socket data as ASCII<br>1: print received socket data as hex | Output type for received socket data |
+| app.printable_data_length | R/W | integer | 0: received socket data, RF test RX packets and dropped RX frames are not printed<br>1 - 64: amount of characters per line | If enabled, received socket data, RF test RX packets and dropped RX frames are printed |
+| app.printable_data_as_hex | R/W | integer | 0: print received data as ASCII<br>1: print received data as hex | Output type for received socket data, RF test RX packets and dropped RX frames |
 | app.autoconnect | R/W | bool | 0: disable autoconnect<br>1: enable autoconnect | Enable or disable autoconnect [bool] |
 | app.pti_state | R/W | bool | 0: disable PTI <br>1: enable PTI | Disable or enable PTI |
 
@@ -236,7 +236,7 @@ The list of available commands is output on the console with the associated help
 | rftest start_tone \<channel ID> [phy config type] | Start an RF test tone on a specific channel | > rftest start_tone 5<br>RF Test tone started 21|
 | rftest stop_tone | Stop RF test tone | > rftest stop_tone<br>RF Test tone stopped 2|
 | rftest start_tx \<channel ID> \<count> \<data_length> \<interval> \<cca> [phy config type] | Start RF test TX: channel, packet count, data length per packet, interval (ms), CCA (0=off, else=on) | > rftest start_tx 5 10 64 100 0 |
-| rftest start_rx \<channel ID> \<duration> [phy config type] | Start RF test RX on a channel for given duration (ms) | > rftest start_rx 5 5000 |
+| rftest start_rx \<channel ID> \<duration> [phy config type] | Start RF test RX on a channel for given duration (ms). Received packets are reported via SL_WISUN_LOGGER_EVENT_TYPE_RF_TEST with RSSI, metadata, and payload on the indication. | > rftest start_rx 5 5000 |
 | rftest stop_rx | Stop RF test RX | > rftest stop_rx |
 | rftest set_tx_power \<value> | Set Tx power for the RF test in dBm |> rftest set_tx_power 17<br>RF Test tx Power set to  17|
 

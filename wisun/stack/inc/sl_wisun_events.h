@@ -297,6 +297,9 @@ typedef struct {
   uint32_t status;
   /// Logger event data
   sl_wisun_logger_event_t logger_event;
+  /// Optional trailing bytes. Length is header.length minus
+  /// sizeof(sl_wisun_msg_logger_event_ind_t). Zero when the event has no payload.
+  uint8_t payload[];
 } SL_ATTRIBUTE_PACKED sl_wisun_msg_logger_event_ind_body_t;
 SL_PACK_END()
 

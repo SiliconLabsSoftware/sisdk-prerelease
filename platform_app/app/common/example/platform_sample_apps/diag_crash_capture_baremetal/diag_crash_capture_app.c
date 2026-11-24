@@ -16,11 +16,12 @@
  ******************************************************************************/
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
-
-#include "em_device.h"
 #include "sl_diag.h"
+#if SL_DIAG_ENABLE
+#include <string.h>
+#include "em_device.h"
 #include "sl_diag_format.h"
+#endif
 #include "sl_log.h"
 #include "sl_log_helper.h"
 #include "sl_simple_button_instances.h"
@@ -34,6 +35,7 @@
 #define BUTTON_INSTANCE_0   sl_button_btn0
 #endif
 
+#if SL_DIAG_ENABLE
 // Busy-wait iterations that let the UART drain before the fault
 #define OUTPUT_DRAIN_SPIN     20000u
 
@@ -42,6 +44,9 @@
 
 // Bytes requested per sl_diag_read() call
 #define RECORD_READ_CHUNK     64u
+
+/** Keep compact-log bursts below the configured event ring capacity. */
+#define LOG_FLUSH_BATCH_SIZE  32u
 
 // Exported record header that precedes the TLV stream in sl_diag_read()
 #define RECORD_HEADER_BYTES   32u
@@ -118,11 +123,13 @@ static const fault_bit_t hfsr_bits[] = {
   { 1UL << 30, "FORCED (configurable fault escalated to HardFault)" },
   { 1UL << 31, "DEBUGEVT (debug event)" },
 };
+#endif // SL_DIAG_ENABLE
 
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 
+#if SL_DIAG_ENABLE
 static const char *record_state_to_string(sl_diag_record_state_t state)
 {
   switch (state) {
@@ -148,7 +155,7 @@ static void print_fault_bits(const char *reg_name,
 {
   for (uint32_t i = 0; i < bit_count; i++) {
     if ((value & bits[i].mask) != 0u) {
-      SL_PRINT_STRING_INFO("    %s: %s\r\n", reg_name, bits[i].name);
+      SL_PRINT_STRING_ERROR("    %s: %s\r\n", reg_name, bits[i].name);
     }
   }
 }
@@ -181,9 +188,10 @@ static sl_status_t read_exported_record(uint32_t total_size, uint32_t *exported_
   // sl_diag_read() exports the 32-byte record header followed by total_size TLV bytes
   expected_len = RECORD_HEADER_BYTES + total_size;
   if ((exported_len == NULL) || (expected_len > sizeof(record_buffer))) {
-    SL_PRINT_STRING_ERROR("Retained record (%lu bytes: %u header + %lu TLV) does not fit in the %u byte buffer\r\n",
+    SL_PRINT_STRING_ERROR("Retained record: %lu bytes total, %u bytes header\r\n",
                           (unsigned long)expected_len,
-                          (unsigned int)RECORD_HEADER_BYTES,
+                          (unsigned int)RECORD_HEADER_BYTES);
+    SL_PRINT_STRING_ERROR("Retained TLV: %lu bytes; buffer capacity: %u bytes\r\n",
                           (unsigned long)total_size,
                           (unsigned int)sizeof(record_buffer));
     return SL_STATUS_WOULD_OVERFLOW;
@@ -259,28 +267,29 @@ static bool find_cpu_crash_payload(uint32_t exported_len, cpu_crash_payload_t *p
  ******************************************************************************/
 static void print_cpu_crash_evidence(const cpu_crash_payload_t *payload)
 {
-  SL_PRINT_STRING_INFO("CPU crash evidence\r\n");
-  SL_PRINT_STRING_INFO("  PC   : 0x%08lX  <- faulting instruction\r\n", (unsigned long)payload->pc);
-  SL_PRINT_STRING_INFO("  LR   : 0x%08lX\r\n", (unsigned long)payload->lr);
-  SL_PRINT_STRING_INFO("  SP   : 0x%08lX\r\n", (unsigned long)payload->sp);
-  SL_PRINT_STRING_INFO("  xPSR : 0x%08lX\r\n", (unsigned long)payload->xpsr);
-  SL_PRINT_STRING_INFO("  R0   : 0x%08lX  R1 : 0x%08lX\r\n",
+  SL_PRINT_STRING_ERROR("CPU crash evidence\r\n");
+  SL_PRINT_STRING_ERROR("  PC   : 0x%08lX  <- faulting instruction\r\n", (unsigned long)payload->pc);
+  SL_PRINT_STRING_ERROR("  LR   : 0x%08lX\r\n", (unsigned long)payload->lr);
+  SL_PRINT_STRING_ERROR("  SP   : 0x%08lX\r\n", (unsigned long)payload->sp);
+  SL_PRINT_STRING_ERROR("  xPSR : 0x%08lX\r\n", (unsigned long)payload->xpsr);
+  SL_PRINT_STRING_ERROR("  R0   : 0x%08lX  R1 : 0x%08lX\r\n",
                        (unsigned long)payload->r0,
                        (unsigned long)payload->r1);
-  SL_PRINT_STRING_INFO("  R2   : 0x%08lX  R3 : 0x%08lX\r\n",
+  SL_PRINT_STRING_ERROR("  R2   : 0x%08lX  R3 : 0x%08lX\r\n",
                        (unsigned long)payload->r2,
                        (unsigned long)payload->r3);
-  SL_PRINT_STRING_INFO("  R12  : 0x%08lX\r\n", (unsigned long)payload->r12);
-  SL_PRINT_STRING_INFO("  CFSR : 0x%08lX\r\n", (unsigned long)payload->cfsr);
+  SL_PRINT_STRING_ERROR("  R12  : 0x%08lX\r\n", (unsigned long)payload->r12);
+  SL_PRINT_STRING_ERROR("  CFSR : 0x%08lX\r\n", (unsigned long)payload->cfsr);
   print_fault_bits("CFSR", payload->cfsr, cfsr_bits, sizeof(cfsr_bits) / sizeof(cfsr_bits[0]));
-  SL_PRINT_STRING_INFO("  HFSR : 0x%08lX\r\n", (unsigned long)payload->hfsr);
+  SL_PRINT_STRING_ERROR("  HFSR : 0x%08lX\r\n", (unsigned long)payload->hfsr);
   print_fault_bits("HFSR", payload->hfsr, hfsr_bits, sizeof(hfsr_bits) / sizeof(hfsr_bits[0]));
-  SL_PRINT_STRING_INFO("  BFAR : 0x%08lX  MMFAR : 0x%08lX\r\n",
+  SL_PRINT_STRING_ERROR("  BFAR : 0x%08lX  MMFAR : 0x%08lX\r\n",
                        (unsigned long)payload->bfar,
                        (unsigned long)payload->mmfar);
   if ((payload->flags & CPU_CRASH_FLAG_FRAME_VALID) == 0u) {
-    SL_PRINT_STRING_WARN("  stacked exception frame was not marked valid\r\n");
+    SL_PRINT_STRING_ERROR("  stacked exception frame was not marked valid\r\n");
   }
+  (void)sl_log_flush();
 }
 
 /***************************************************************************//**
@@ -294,11 +303,16 @@ static bool print_retained_raw_dump(uint32_t exported_len, uint32_t total_size)
     return false;
   }
 
-  SL_PRINT_STRING_INFO("=== STREAM ===\r\n");
+  SL_PRINT_STRING_ERROR("=== STREAM ===\r\n");
+  (void)sl_log_flush();
   for (uint32_t i = 0; i < exported_len; i++) {
-    SL_PRINT_STRING_INFO("%02X ", (unsigned int)record_buffer[i]);
+    SL_PRINT_STRING_ERROR("%02X ", (unsigned int)record_buffer[i]);
+    if (((i + 1u) % LOG_FLUSH_BATCH_SIZE) == 0u) {
+      (void)sl_log_flush();
+    }
   }
-  SL_PRINT_STRING_INFO("\r\n");
+  SL_PRINT_STRING_ERROR("\r\n");
+  (void)sl_log_flush();
   return true;
 }
 
@@ -316,36 +330,30 @@ static sl_status_t print_record(void)
   uint32_t exported_len = 0u;
   sl_status_t status;
 
-  // The runtime level can be raised above the compile-time ceiling. INFO
-  // output is then suppressed, which is not a delivered export.
-  if ((sl_log_level_t)SL_LOG_CONFIG_LEVEL_INFO < sl_log_get_loglevel()) {
-    return SL_STATUS_NOT_AVAILABLE;
-  }
-
   status = sl_diag_get_info(&info);
   if (status != SL_STATUS_OK) {
     SL_PRINT_STRING_ERROR("No retained crash record (status 0x%04lX)\r\n", (unsigned long)status);
     return status;
   }
 
-  SL_PRINT_STRING_INFO("SL Diagnostic record\r\n");
-  SL_PRINT_STRING_INFO("SL Diagnostic profile: %u\r\n", (unsigned int)SL_DIAG_PROFILE);
-  SL_PRINT_STRING_INFO("  state          : %s\r\n", record_state_to_string(info.state));
-  SL_PRINT_STRING_INFO("  core_id        : %u\r\n", (unsigned int)info.core_id);
-  SL_PRINT_STRING_INFO("  format_version : %u\r\n", (unsigned int)info.format_version);
-  SL_PRINT_STRING_INFO("  generation     : %lu\r\n", (unsigned long)info.generation);
-  SL_PRINT_STRING_INFO("  block_count    : %u\r\n", (unsigned int)info.block_count);
-  SL_PRINT_STRING_INFO("  total_size     : %lu bytes\r\n", (unsigned long)info.total_size);
+  SL_PRINT_STRING_ERROR("SL Diagnostic record\r\n");
+  SL_PRINT_STRING_ERROR("SL Diagnostic profile: %u\r\n", (unsigned int)SL_DIAG_PROFILE);
+  SL_PRINT_STRING_ERROR("  state          : %s\r\n", record_state_to_string(info.state));
+  SL_PRINT_STRING_ERROR("  core_id        : %u\r\n", (unsigned int)info.core_id);
+  SL_PRINT_STRING_ERROR("  format_version : %u\r\n", (unsigned int)info.format_version);
+  SL_PRINT_STRING_ERROR("  generation     : %lu\r\n", (unsigned long)info.generation);
+  SL_PRINT_STRING_ERROR("  block_count    : %u\r\n", (unsigned int)info.block_count);
+  SL_PRINT_STRING_ERROR("  total_size     : %lu bytes\r\n", (unsigned long)info.total_size);
 #if SL_DIAG_INCIDENT_METADATA_ENABLE
-  SL_PRINT_STRING_INFO("  trigger        : %u\r\n", (unsigned int)info.trigger);
-  SL_PRINT_STRING_INFO("  reason_id      : 0x%04lX\r\n", (unsigned long)info.reason_id);
-  SL_PRINT_STRING_INFO("  detail         : 0x%08lX\r\n", (unsigned long)info.detail);
-  SL_PRINT_STRING_INFO("  uptime_ms      : %lu\r\n", (unsigned long)info.uptime_ms);
-  SL_PRINT_STRING_INFO("  boot_id        : %lu\r\n", (unsigned long)info.boot_id);
-  SL_PRINT_STRING_INFO("  reset_reason   : 0x%08lX\r\n", (unsigned long)info.reset_reason);
+  SL_PRINT_STRING_ERROR("  trigger        : %u\r\n", (unsigned int)info.trigger);
+  SL_PRINT_STRING_ERROR("  reason_id      : 0x%04lX\r\n", (unsigned long)info.reason_id);
+  SL_PRINT_STRING_ERROR("  detail         : 0x%08lX\r\n", (unsigned long)info.detail);
+  SL_PRINT_STRING_ERROR("  uptime_ms      : %lu\r\n", (unsigned long)info.uptime_ms);
+  SL_PRINT_STRING_ERROR("  boot_id        : %lu\r\n", (unsigned long)info.boot_id);
+  SL_PRINT_STRING_ERROR("  reset_reason   : 0x%08lX\r\n", (unsigned long)info.reset_reason);
 #endif
 #if SL_DIAG_REPEAT_COUNT_ENABLE
-  SL_PRINT_STRING_INFO("  repeat_count   : %u\r\n", (unsigned int)info.repeat_count);
+  SL_PRINT_STRING_ERROR("  repeat_count   : %u\r\n", (unsigned int)info.repeat_count);
 #endif
 
   status = read_exported_record(info.total_size, &exported_len);
@@ -356,7 +364,7 @@ static sl_status_t print_record(void)
   if (find_cpu_crash_payload(exported_len, &crash)) {
     print_cpu_crash_evidence(&crash);
   } else {
-    SL_PRINT_STRING_WARN("No CPU Crash TLV found in the retained record\r\n");
+    SL_PRINT_STRING_ERROR("No CPU Crash TLV found in the retained record\r\n");
   }
 
   if (!print_retained_raw_dump(exported_len, info.total_size)) {
@@ -368,6 +376,7 @@ static sl_status_t print_record(void)
   // SL_STATUS_OK without checking that write.
   return SL_STATUS_OK;
 }
+#endif // SL_DIAG_ENABLE
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -379,9 +388,10 @@ static sl_status_t print_record(void)
  * Crash Capture (provider) captures the CPU state, seals it into the SL
  * Diagnostic retained record and resets the device.
  ******************************************************************************/
+#if SL_DIAG_ENABLE
 static void raise_hardfault(void)
 {
-  SL_PRINT_STRING_WARN("Raising a HardFault (store to unmapped address). The device resets...\r\n");
+  SL_PRINT_STRING_ERROR("Raising a HardFault (store to unmapped address). The device resets...\r\n");
   (void)sl_log_flush();
   output_drain();
   output_drain();
@@ -401,44 +411,63 @@ static void raise_hardfault(void)
   for (;;) {
   }
 }
+#endif // SL_DIAG_ENABLE
 
 /***************************************************************************//**
  * Initialize the SL Diagnostic crash capture example.
  ******************************************************************************/
+/*
+ * NOTE: All the status messages in this example, SL_PRINT_STRING_ERROR is intentionally used for both
+ * successful and failed operations so all messages remain visible at the
+ * default log level. This is a demonstration choice, not a recommendation:
+ * production code should use INFO for successful operations and ERROR for
+ * failures. Use DEBUG for verbose trace output.
+ */
 void diag_crash_capture_app_init(void)
 {
+#if SL_DIAG_ENABLE
   sl_status_t status;
 
-  SL_PRINT_STRING_INFO("\r\nSL Diagnostic crash capture example\r\n");
+  SL_PRINT_STRING_ERROR("\r\nSL Diagnostic crash capture example\r\n");
+  (void)sl_log_flush();
 
   // sl_diag and Crash Capture are initialized by the service_init event,
   // before app_init(). A record sealed before the last reset is readable here.
   if (sl_diag_has_record()) {
-    SL_PRINT_STRING_INFO("A crash record from a previous boot was found:\r\n");
+    SL_PRINT_STRING_ERROR("A crash record from a previous boot was found:\r\n");
+    (void)sl_log_flush();
     status = print_record();
     if (status != SL_STATUS_OK) {
       // Keep the only retained copy when the export did not complete.
       SL_PRINT_STRING_ERROR("Export failed (status 0x%04lX); retained record was not cleared.\r\n",
                             (unsigned long)status);
+      (void)sl_log_flush();
     } else {
       // Clear after a completed export so the next BTN0 HardFault can
       // WRITE_NEW on every profile (Crash Basic keeps the first VALID
       // record; Standard may REPEAT).
       status = sl_diag_clear(SL_DIAG_CLEAR_RECORD);
       if ((status == SL_STATUS_OK) && (sl_diag_has_record() == false)) {
-        SL_PRINT_STRING_INFO("Record cleared; next BTN0 will seal a new generation.\r\n");
+        SL_PRINT_STRING_ERROR("Record cleared; next BTN0 will seal a new generation.\r\n");
+        (void)sl_log_flush();
       } else {
         SL_PRINT_STRING_ERROR("sl_diag_clear failed (status 0x%04lX); has_record=%u.\r\n",
                               (unsigned long)status,
                               (unsigned int)sl_diag_has_record());
+        (void)sl_log_flush();
       }
     }
   } else {
-    SL_PRINT_STRING_INFO("No crash record.\r\n");
+    SL_PRINT_STRING_ERROR("No crash record.\r\n");
+    (void)sl_log_flush();
   }
 
-  SL_PRINT_STRING_INFO("Press BTN0 to raise a HardFault (Crash Capture seals + resets).\r\n");
-  SL_PRINT_STRING_INFO("After reset.\r\n");
+  SL_PRINT_STRING_ERROR("Press BTN0 to raise a HardFault (Crash Capture seals + resets).\r\n");
+  (void)sl_log_flush();
+#else
+  SL_PRINT_STRING_ERROR("SL Diagnostic profile is OFF; crash capture is disabled.\r\n");
+#endif
+  (void)sl_log_flush();
 }
 
 /***************************************************************************//**
@@ -446,10 +475,12 @@ void diag_crash_capture_app_init(void)
  ******************************************************************************/
 void diag_crash_capture_app_process_action(void)
 {
+#if SL_DIAG_ENABLE
   if (hardfault_pending) {
     hardfault_pending = false;
     raise_hardfault();
   }
+#endif
 }
 
 /***************************************************************************//**
@@ -465,5 +496,7 @@ void sl_button_on_change(const sl_button_t *handle)
     return;
   }
 
+#if SL_DIAG_ENABLE
   hardfault_pending = true;
+#endif
 }

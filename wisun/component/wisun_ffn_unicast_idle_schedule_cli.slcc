@@ -1,0 +1,50 @@
+id: "wisun_ffn_unicast_idle_schedule_cli"
+label: "Wi-SUN FFN unicast idle schedule CLI"
+description: "Provides the CLI command to configure the Wi-SUN FFN unicast idle schedule"
+package: "wisun"
+category: "Wi-SUN|Wi-SUN Plugin"
+quality: "production"
+
+ui_hints:
+  visibility: never
+
+requires:
+- name: "wisun_cli_util"
+- name: "wisun_stack_ffn"
+- name: "wisun_ffn_unicast_idle_schedule"
+
+provides:
+- name: "wisun_ffn_unicast_idle_schedule_cli"
+
+source:
+- path: "plugin/sl_wisun_ffn_unicast_idle_schedule_cli.c"
+  project:
+    transfer_ownership: true
+
+include:
+- path: "plugin"
+  file_list:
+  - path: "sl_wisun_ffn_unicast_idle_schedule_cli.h"
+
+template_contribution:
+- name: "cli_command"
+  value:
+    group: "wisun"
+    name: "set_ffn_unicast_idle_schedule"
+    handler: "sl_wisun_ffn_unicast_idle_schedule_cli_set"
+    help: "Configure FFN unicast idle schedule before join (0 idle slots disables, including while ACTIVE)"
+    shortcuts:
+    - name: "sffnui"
+    argument:
+    - type: uint8
+      help: "listen_slots: consecutive nominal unicast listening dwells"
+    - type: uint8
+      help: "idle_slots: consecutive nominal dwells in which background unicast listening may be omitted"
+
+- name: component_catalog
+  value: wisun_ffn_unicast_idle_schedule_cli
+
+metadata:
+  sbom:
+    license: MSLA
+root_path: wisun

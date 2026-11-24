@@ -60,6 +60,9 @@ void sli_zigbee_stack_gp_validate_install_code_crc_process_ipc_command(sli_zigbe
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_gp_derive_key_from_install_code(const uint8_t *ic,
                                                       sl_zigbee_key_data_t *derivedKey)
 {
@@ -82,6 +85,9 @@ sl_status_t sl_zigbee_gp_derive_key_from_install_code(const uint8_t *ic,
   return msg.data.gp_derive_key_from_install_code.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_gp_encode_gpd_device_address(sl_zigbee_gp_application_id_t appId,
                                                    uint32_t srcId,
                                                    sl_802154_long_addr_t ieee,
@@ -112,6 +118,9 @@ sl_status_t sl_zigbee_gp_encode_gpd_device_address(sl_zigbee_gp_application_id_t
   return msg.data.gp_encode_gpd_device_address.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_gp_lookup_ic_derived_key(const sl_zigbee_gp_address_t *gpdAddr,
                                                sl_zigbee_key_data_t *keyOut)
 {
@@ -134,6 +143,9 @@ sl_status_t sl_zigbee_gp_lookup_ic_derived_key(const sl_zigbee_gp_address_t *gpd
   return msg.data.gp_lookup_ic_derived_key.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_gp_tc_register_install_code(const sl_zigbee_gp_address_t *gpdAddr,
                                                   const uint8_t *ic)
 {
@@ -152,6 +164,9 @@ sl_status_t sl_zigbee_gp_tc_register_install_code(const sl_zigbee_gp_address_t *
   return msg.data.gp_tc_register_install_code.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_gp_tc_remove_install_code(const sl_zigbee_gp_address_t *gpdAddr)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -165,6 +180,9 @@ sl_status_t sl_zigbee_gp_tc_remove_install_code(const sl_zigbee_gp_address_t *gp
   return msg.data.gp_tc_remove_install_code.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_gp_validate_install_code_crc(const uint8_t *ic)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

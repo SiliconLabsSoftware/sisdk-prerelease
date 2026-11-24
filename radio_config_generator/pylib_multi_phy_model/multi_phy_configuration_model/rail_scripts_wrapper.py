@@ -4,6 +4,7 @@ import yaml
 
 from pylib_multi_phy_model.multi_phy_configuration_model import fileType
 from rail_scripts.generators.railConfig_sourceCodeGenerator import RAILConfig_generator
+from rail_scripts.generators.railConfig_binarySerializer import serialize_rail_config
 from rail_scripts.generators.railTest_rmrCommandGenerator import RailTest_rmrConfigGenerator
 from rail_scripts.rail_adapter import RAILAdapter
 
@@ -11,7 +12,7 @@ class RAILScriptsWrapper(object):
     rail_signature_function = None
 
     @staticmethod
-    def run_rail_scripts(multi_phy_model, generate_debug_yaml=False, output_filename="rail_config", internal=False, secondary=False, sign=False, wifi_script=False, wifi_script_seqacc=False):
+    def run_rail_scripts(multi_phy_model, generate_debug_yaml=False, output_filename="rail_config", internal=False, secondary=False, sign=False, serialize=False, wifi_script=False, wifi_script_seqacc=False):
         railAdapter = RAILAdapter(mphyConfig=multi_phy_model, adapter_name=multi_phy_model.rail_adapter_version, wifi_script=wifi_script, wifi_script_seqacc=wifi_script_seqacc)
         railAdapter.populateModel()
 
@@ -47,6 +48,11 @@ class RAILScriptsWrapper(object):
         rail_config_c = generator.render(generator.template_path_c)
         multi_phy_model.output_files.file.append(fileType("{}.c".format(output_filename), rail_config_c))
 
+        if serialize:
+            binary_files, _plan = serialize_rail_config(railAdapter, output_filename)
+            for name, content in binary_files.items():
+                multi_phy_model.output_files.file.append(fileType(name, content))
+
         if wifi_script is False and wifi_script_seqacc is False :
             railtest_generator = RailTest_rmrConfigGenerator(railAdapter)
             rail_railtest_commands = railtest_generator.render(railtest_generator.template_path_railtest)
@@ -64,7 +70,11 @@ class RAILScriptsWrapper(object):
             if os.path.exists(file_path):
                 os.remove(file_path)
 
-            with open(file_path, 'w') as fc:
-                print ("Creating '{}'...".format(file_path))
-                fc.write(file.source_code)
-                fc.close()
+            if isinstance(file.source_code, bytes):
+                with open(file_path, 'wb') as fc:
+                    print ("Creating '{}'...".format(file_path))
+                    fc.write(file.source_code)
+            else:
+                with open(file_path, 'w') as fc:
+                    print ("Creating '{}'...".format(file_path))
+                    fc.write(file.source_code)

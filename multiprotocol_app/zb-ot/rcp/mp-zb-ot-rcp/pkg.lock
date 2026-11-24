@@ -21,7 +21,7 @@ version = 2
   mbedtls = {version = "4.1.0", installer = "conan", type = "sdk", ref = "mbedtls/4.1.0@silabs/2026-12#4ed4d20938ab0d079a877ead58c2b5d8"}
   micriumos = {version = "6.2.0", installer = "conan", type = "sdk", ref = "micriumos/6.2.0@silabs/2026-12#2c72a912dbc10438a8900783dd2fd4a3"}
   ninja = {version = "1.12.1", installer = "conan", type = "apack", ref = "ninja/1.12.1@silabs#9ce59e07a142d4da1c532b49742fe16d"}
-  openthread_forks = {version = "3.2.0-alpha.63", installer = "conan", type = "sdk", ref = "openthread_forks/3.2.0-alpha.63@silabs/2026-12#be3cec726833666da42d89c373f1bef2655bfbd1"}
+  openthread_forks = {version = "3.2.0-beta.66", installer = "conan", type = "sdk", ref = "openthread_forks/3.2.0-beta.66@silabs/2026-12#687f43c268101fd4a83e19bfa74247cf51ce9104"}
   platform = {version = "6.2.0-alpha.89", installer = "conan", type = "sdk", ref = "platform/6.2.0-alpha.89@silabs/2026-12#5370a7eafb5850c42e11c32775561889"}
   platform_core = {version = "1.2.0", installer = "conan", type = "sdk", ref = "platform_core/1.2.0@silabs/2026-12#8e6a37f0100d04afd0cb32ca89a88274"}
   printf = {version = "1.2.0", installer = "conan", type = "sdk", ref = "printf/1.2.0@silabs/2026-12#17d8e2c2b7b59b85592d976f578d85ec"}
@@ -34,7 +34,7 @@ version = 2
     {version = "1.8.0", installer = "conan", type = "python_requires", ref = "silabs_package_assistant/1.8.0@silabs|python_requires#1f4a525f99fdcc0d289cfd2fd532b6aefa7006c7"},
     {version = "2.0.3", installer = "conan", type = "python_requires", ref = "silabs_package_assistant/2.0.3@silabs|python_requires#3049ef4c4d1a9c9b2bfcc48fb931e7d41e707434"},
   ]
-  thread = {version = "3.2.0-alpha.63", installer = "conan", type = "sdk", ref = "thread/3.2.0-alpha.63@silabs/2026-12#be3cec726833666da42d89c373f1bef2655bfbd1"}
+  thread = {version = "3.2.0-beta.66", installer = "conan", type = "sdk", ref = "thread/3.2.0-beta.66@silabs/2026-12#687f43c268101fd4a83e19bfa74247cf51ce9104"}
   unity_test_framework = {version = "1.2.0", installer = "conan", type = "sdk", ref = "unity_test_framework/1.2.0@silabs/2026-12#781714e52e8e666477080a606340b003"}
   usb = {version = "1.8.0", installer = "conan", type = "sdk", ref = "usb/1.8.0@silabs/2026-12#01cbe72ebb3adb140ce650e11f741a9a"}
 

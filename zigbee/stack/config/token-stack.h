@@ -287,6 +287,7 @@
 #define NVM3KEY_STACK_GP_INCOMING_FC_IN_SINK               (NVM3KEY_DOMAIN_ZIGBEE | 0x0780)
 
 // This key is used to store additional link keys beyond the limitations of the token system
+// This token can span up to 1024 entries, so 0x892C-0x8D2B are reserved
 #define NVM3KEY_STACK_KEY_TABLE_EXTENDED                    (NVM3KEY_DOMAIN_ZIGBEE | 0x892C)
 /** @} END NVM3 Object Keys  */
 

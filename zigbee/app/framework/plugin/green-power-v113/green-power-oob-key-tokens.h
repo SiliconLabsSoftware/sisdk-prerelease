@@ -24,12 +24,12 @@
 
 #if (SL_ZIGBEE_AF_PLUGIN_GREEN_POWER_V113_USE_OOB_KEY_TOKENS == 1)
 
-#define CREATOR_GP_OOB_KEY_TABLE  (0x8730)
-
 // Indexed token: subsequent 0x7F keys are reserved (AN1135 §3.1.2).
-#define NVM3KEY_GP_OOB_KEY_TABLE  (NVM3KEY_DOMAIN_ZIGBEE | 0x8930)
+// 0x8D2C is the first key after a 1024-entry extended link key table
+// (0x892C-0x8D2B). This reservation ends at 0x8DAB. MAC mux aux is 0x8DAC.
+#define NVM3KEY_GP_OOB_KEY_TABLE  (NVM3KEY_DOMAIN_ZIGBEE | 0x8D2C)
 #define COMMON_TOKEN_GP_OOB_KEY_TABLE \
-  SL_TOKEN_GET_DYNAMIC_TOKEN((SL_TOKEN_NVM3_REGION_ZIGBEE | 0x8930), 0)
+  SL_TOKEN_GET_DYNAMIC_TOKEN((SL_TOKEN_NVM3_REGION_ZIGBEE | 0x8D2C), 0)
 
 // Fully-braced default for -Werror=missing-braces (union id + key.contents).
 #define TOKEN_GP_OOB_KEY_TABLE_DEFAULT { false, { { { 0 } }, 0, 0 }, { { 0 } } }

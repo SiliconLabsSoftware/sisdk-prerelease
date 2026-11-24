@@ -9,6 +9,11 @@ root_path: bluetooth_le_controller/utils/hci_packet
 source:
 - path: uart/src/sl_hci_packet_3wire.c
 - path: uart/src/sl_hci_uart.c
+  condition:
+  - device_series_2
+- path: uart/src/sl_hci_uart_iostream.c
+  condition:
+  - device_series_3
 - path: uart/src/sl_hci_uart_rtos.c
   condition:
   - "kernel"
@@ -27,11 +32,17 @@ include:
 - path: uart/src
   file_list:
   - path: sl_hci_uart.h
+
 provides:
 - name: bluetooth_hci_3wire
 - name: bluetooth_hci_transport
 requires:
 - name: uartdrv_usart
+  condition:
+  - device_series_2
+- name: iostream_eusart
+  condition:
+  - device_series_3
 - name: bluetooth_hci
 template_contribution:
 - name: component_catalog

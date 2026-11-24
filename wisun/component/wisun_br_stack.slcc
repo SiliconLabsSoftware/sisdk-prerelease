@@ -28,6 +28,7 @@ requires:
 - name: "clock_manager_runtime"
 - name: "event_queue_task"
 - name: "wisun_lxpm_implementation"
+- name: "wisun_rate_algorithm_implementation"
 - name: "wisun_dc_server_implementation"
 - name: "wisun_ffn_unicast_idle_schedule_implementation"
 
@@ -43,6 +44,8 @@ recommends:
 - id: "wisun_event_task"
   vendor: silabs
 - id: "wisun_lxpm_stubs"
+  vendor: silabs
+- id: "wisun_rate_algorithm_implementation"
   vendor: silabs
 - id: "wisun_ffn_unicast_idle_schedule_stubs"
 

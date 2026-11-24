@@ -271,8 +271,19 @@ void sli_power_manager_save_oscillators_usage(void)
   // Get SYSCLK prescalers.
   sysclk_prescalers_value = (CMU->SYSCLKCTRL & (_CMU_SYSCLKCTRL_HCLKPRESC_MASK | _CMU_SYSCLKCTRL_PCLKPRESC_MASK));
 
-  // Get DPLL state.
+  // Get DPLL state. The bus clock may be gated, which faults a STATUS read.
+#if defined(CMU_CLKEN0_DPLL0)
+  bool dpll_clock_was_enabled = false;
+  sl_clock_manager_is_bus_clock_enabled(SL_BUS_CLOCK_DPLL0, &dpll_clock_was_enabled);
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_DPLL0);
+#endif
   is_dpll_used = ((DPLL0->STATUS & _DPLL_STATUS_ENS_MASK) != 0);
+#if defined(CMU_CLKEN0_DPLL0)
+  // Later DPLL register access needs the bus clock while the DPLL is in use.
+  if (!dpll_clock_was_enabled && !is_dpll_used) {
+    sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_DPLL0);
+  }
+#endif
 
   // Get HFXO state.
   is_hf_x_oscillator_used = ((cmu_sys_clock_register == CMU_SYSCLKCTRL_CLKSEL_HFXO)

@@ -1,7 +1,6 @@
 from pyradioconfig.calculator_model_framework.interfaces.itarget import ITarget
 from os.path import join
-from pyradioconfig.calculator_model_framework.CalcManager import CalcManager
-from copy import deepcopy
+from pyradioconfig.calculator_model_framework.Utils.LogMgr import LogMgr
 
 
 class Target_FPGA_Curl(ITarget):
@@ -25,26 +24,21 @@ class Target_FPGA_Curl(ITarget):
 
         model.vars.xtal_frequency_hz.value_forced = int(38.4e6)
 
+        self.modem_shaping_overrides(model)
 
-        calc_manager = CalcManager(part_family=model.part_family, part_rev='ANY', target='IC')
-        IC_model_instance_copy = deepcopy(model)
-        IC_model_instance_copy.target = 'IC'
-        calc_manager.calculate(IC_model_instance_copy)
-
-        self.modem_shaping_overrides(model, IC_model_instance_copy)
-
-    def modem_shaping_overrides(self, model, IC_model_instance_copy):
-
+    def modem_shaping_overrides(self, model):
+        ble_feature = model.vars.ble_feature.value
         if (
-                IC_model_instance_copy.vars.shaping_filter.value == IC_model_instance_copy.vars.shaping_filter.var_enum.Gaussian
-                and IC_model_instance_copy.vars.shaping_filter_param.value == 0.5
+                model.vars.shaping_filter.value == model.vars.shaping_filter.var_enum.Gaussian
+                and model.vars.shaping_filter_param.value == 0.5
         ):
             self.GAUSSIAN_BT_0p5_MODEM_SHAPING_OVERRIDE(model)
         if (
-                IC_model_instance_copy.vars.shaping_filter.value == IC_model_instance_copy.vars.shaping_filter.var_enum.Gaussian
-                and float(IC_model_instance_copy.vars.shaping_filter_param.value) == 2.0
-                and IC_model_instance_copy.vars.hadm_enable.value == IC_model_instance_copy.vars.hadm_enable.var_enum.ENABLED
+            model.vars.shaping_filter.value == model.vars.shaping_filter.var_enum.Gaussian
+            and float(model.vars.shaping_filter_param.value) == 2.0
+            and ble_feature == model.vars.ble_feature.var_enum.HADM_2M_2BT
         ):
+            LogMgr.Info("HADM 2BT shaping filter override applied")
             self.GAUSSIAN_BT_2_MODEM_SHAPING_OVERRIDE(model)
         return
 

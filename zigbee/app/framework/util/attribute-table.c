@@ -816,6 +816,14 @@ sl_zigbee_af_status_t sli_zigbee_af_write_attribute_with_sync(uint8_t endpoint,
       sl_zigbee_af_attributes_flush();
       return SL_ZIGBEE_ZCL_STATUS_READ_ONLY;
     }
+
+    if (metadata->attributeType == ZCL_BOOLEAN_ATTRIBUTE_TYPE
+        && sl_zigbee_af_attribute_size(metadata) == 1u
+        && ((data[0] != 0x00u) && (data[0] != 0x01u) && (data[0] != 0xFFu))) {
+      sl_zigbee_af_attributes_println("%sinvalid boolean value", "WRITE ERR: ");
+      sl_zigbee_af_attributes_flush();
+      return SL_ZIGBEE_ZCL_STATUS_INVALID_VALUE;
+    }
   }
 
   // if the value the attribute is being set to is out of range

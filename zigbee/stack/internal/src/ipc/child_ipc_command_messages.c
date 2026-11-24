@@ -182,6 +182,9 @@ void sli_zigbee_stack_stack_power_up_process_ipc_command(sli_zigbee_ipc_cmd_t *m
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_add_child(sl_802154_short_addr_t shortId,
                                 sl_802154_long_addr_t longId,
                                 sl_zigbee_node_type_t nodeType)
@@ -203,6 +206,9 @@ sl_status_t sl_zigbee_add_child(sl_802154_short_addr_t shortId,
   return msg.data.add_child.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t sl_zigbee_child_count(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -212,6 +218,9 @@ uint8_t sl_zigbee_child_count(void)
   return msg.data.child_count.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_802154_short_addr_t sl_zigbee_child_id(uint8_t childIndex)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -221,6 +230,9 @@ sl_802154_short_addr_t sl_zigbee_child_id(uint8_t childIndex)
   return msg.data.child_id.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t sl_zigbee_child_index(sl_802154_short_addr_t childId)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -230,6 +242,9 @@ uint8_t sl_zigbee_child_index(sl_802154_short_addr_t childId)
   return msg.data.child_index.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 int8_t sl_zigbee_child_power(uint8_t childIndex)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -239,6 +254,9 @@ int8_t sl_zigbee_child_power(uint8_t childIndex)
   return msg.data.child_power.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_clear_message_flag(sl_802154_short_addr_t childId)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -248,6 +266,9 @@ sl_status_t sl_zigbee_clear_message_flag(sl_802154_short_addr_t childId)
   return msg.data.clear_message_flag.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint16_t sl_zigbee_current_stack_tasks(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -257,6 +278,9 @@ uint16_t sl_zigbee_current_stack_tasks(void)
   return msg.data.current_stack_tasks.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 int8_t sl_zigbee_get_avg_parent_rssi(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -266,6 +290,9 @@ int8_t sl_zigbee_get_avg_parent_rssi(void)
   return msg.data.get_avg_parent_rssi.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_get_child_data(uint8_t index,
                                      sl_zigbee_child_data_t *childData)
 {
@@ -285,6 +312,9 @@ sl_status_t sl_zigbee_get_child_data(uint8_t index,
   return msg.data.get_child_data.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_keep_alive_mode_t sl_zigbee_get_keep_alive_mode(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -294,6 +324,9 @@ sl_zigbee_keep_alive_mode_t sl_zigbee_get_keep_alive_mode(void)
   return msg.data.get_keep_alive_mode.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t sl_zigbee_get_max_end_device_children(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -303,6 +336,9 @@ uint8_t sl_zigbee_get_max_end_device_children(void)
   return msg.data.get_max_end_device_children.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t * sl_zigbee_get_parent_eui64(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -312,6 +348,9 @@ uint8_t * sl_zigbee_get_parent_eui64(void)
   return msg.data.get_parent_eui64.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_802154_short_addr_t sl_zigbee_get_parent_id(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -321,6 +360,9 @@ sl_802154_short_addr_t sl_zigbee_get_parent_id(void)
   return msg.data.get_parent_id.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint32_t sl_zigbee_get_parent_incoming_nwk_frame_counter(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -330,6 +372,9 @@ uint32_t sl_zigbee_get_parent_incoming_nwk_frame_counter(void)
   return msg.data.get_parent_incoming_nwk_frame_counter.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_802154_short_addr_t sl_zigbee_get_parent_node_id(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -339,6 +384,9 @@ sl_802154_short_addr_t sl_zigbee_get_parent_node_id(void)
   return msg.data.get_parent_node_id.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_parent_token_set(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -348,6 +396,9 @@ bool sl_zigbee_parent_token_set(void)
   return msg.data.parent_token_set.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_poll_for_data(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -357,6 +408,9 @@ sl_status_t sl_zigbee_poll_for_data(void)
   return msg.data.poll_for_data.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_remove_child(sl_802154_long_addr_t childEui64)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -374,6 +428,9 @@ sl_status_t sl_zigbee_remove_child(sl_802154_long_addr_t childEui64)
   return msg.data.remove_child.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_remove_neighbor(sl_802154_short_addr_t shortId,
                                sl_802154_long_addr_t longId)
 {
@@ -391,6 +448,9 @@ void sl_zigbee_remove_neighbor(sl_802154_short_addr_t shortId,
   }
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_send_link_power_delta_request(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -400,6 +460,9 @@ sl_status_t sl_zigbee_send_link_power_delta_request(void)
   return msg.data.send_link_power_delta_request.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_child_data(uint8_t index,
                                      const sl_zigbee_child_data_t *childData)
 {
@@ -415,6 +478,9 @@ sl_status_t sl_zigbee_set_child_data(uint8_t index,
   return msg.data.set_child_data.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_set_child_power(uint8_t childIndex,
                                int8_t newPower)
 {
@@ -424,6 +490,9 @@ void sl_zigbee_set_child_power(uint8_t childIndex,
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_set_child_power_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_child_timeout_option_mask(uint16_t mask)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -433,6 +502,9 @@ sl_status_t sl_zigbee_set_child_timeout_option_mask(uint16_t mask)
   return msg.data.set_child_timeout_option_mask.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_keep_alive_mode(sl_zigbee_keep_alive_mode_t mode)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -442,6 +514,9 @@ sl_status_t sl_zigbee_set_keep_alive_mode(sl_zigbee_keep_alive_mode_t mode)
   return msg.data.set_keep_alive_mode.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_set_mac_poll_failure_wait_time(uint32_t waitBeforeRetryIntervalMs)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -449,6 +524,9 @@ void sl_zigbee_set_mac_poll_failure_wait_time(uint32_t waitBeforeRetryIntervalMs
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_set_mac_poll_failure_wait_time_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_max_end_device_children(uint8_t max)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -458,6 +536,9 @@ sl_status_t sl_zigbee_set_max_end_device_children(uint8_t max)
   return msg.data.set_max_end_device_children.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_message_flag(sl_802154_short_addr_t childId)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -467,6 +548,9 @@ sl_status_t sl_zigbee_set_message_flag(sl_802154_short_addr_t childId)
   return msg.data.set_message_flag.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_parent_incoming_nwk_frame_counter(uint32_t value)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -476,6 +560,9 @@ sl_status_t sl_zigbee_set_parent_incoming_nwk_frame_counter(uint32_t value)
   return msg.data.set_parent_incoming_nwk_frame_counter.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_stack_power_down(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -483,6 +570,9 @@ void sl_zigbee_stack_power_down(void)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_stack_power_down_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_stack_power_up(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

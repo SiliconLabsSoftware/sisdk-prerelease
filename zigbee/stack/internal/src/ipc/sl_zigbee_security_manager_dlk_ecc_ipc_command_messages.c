@@ -69,6 +69,9 @@ void sli_zigbee_stack_sec_man_speke_expand_shared_secret_process_ipc_command(sli
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_sec_man_ecc_derive_link_key(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -86,6 +89,9 @@ sl_status_t sl_zigbee_sec_man_ecc_derive_link_key(sl_zigbee_sec_man_dlk_ecc_cont
   return msg.data.sec_man_ecc_derive_link_key.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_sec_man_ecc_expand_shared_secret(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx,
                                                        const uint8_t *our_eui,
                                                        const uint8_t *their_eui)
@@ -113,6 +119,9 @@ sl_status_t sl_zigbee_sec_man_ecc_expand_shared_secret(sl_zigbee_sec_man_dlk_ecc
   return msg.data.sec_man_ecc_expand_shared_secret.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_sec_man_ecc_extract_shared_secret(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx,
                                                         const uint8_t *peer_public_key,
                                                         size_t peer_key_len)
@@ -139,6 +148,9 @@ sl_status_t sl_zigbee_sec_man_ecc_extract_shared_secret(sl_zigbee_sec_man_dlk_ec
   return msg.data.sec_man_ecc_extract_shared_secret.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_sec_man_ecc_free(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -154,6 +166,9 @@ void sl_zigbee_sec_man_ecc_free(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx
   }
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_sec_man_ecc_generate_keypair(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx,
                                                    uint8_t *public_key_buff,
                                                    size_t *key_len_out)
@@ -189,6 +204,9 @@ sl_status_t sl_zigbee_sec_man_ecc_generate_keypair(sl_zigbee_sec_man_dlk_ecc_con
   return msg.data.sec_man_ecc_generate_keypair.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_sec_man_ecc_init(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx,
                                        sl_zb_dlk_ecc_config_t *config,
                                        const uint8_t *psk)
@@ -220,6 +238,9 @@ sl_status_t sl_zigbee_sec_man_ecc_init(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_
   return msg.data.sec_man_ecc_init.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_sec_man_speke_expand_shared_secret(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx,
                                                          const uint8_t *our_eui,
                                                          const uint8_t *their_eui)

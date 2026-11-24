@@ -46,6 +46,7 @@ extern const uint32_t sl_rail_ble_phy_2Mbps_viterbi_40MHz_0_34_modemConfig[];
 extern const uint32_t sl_rail_ble_phy_125kbps_40MHz_modemConfig[];
 extern const uint32_t sl_rail_ble_lr_dsa_500kb_40MHz_modemConfig[];
 extern const uint32_t sl_rail_ble_phy_simulscan_40MHz_modemConfig[];
+extern const uint32_t sl_rail_ble_phy_hdt_40MHz_modemConfig[];
 extern const uint32_t sl_rail_ble_phy_1Mbps_viterbi_cs_0_78_40MHz_modemConfig[];
 extern const uint32_t sl_rail_ble_phy_2Mbps_viterbi_cs_0_78_40MHz_modemConfig[];
 extern const uint32_t sl_rail_ble_phy_2Mbps_2bt_viterbi_cs_40MHz_0_78_modemConfig[];
@@ -74,6 +75,11 @@ extern const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_500kbps_40MHz_channels[];
 #define RAIL0_SL_RAIL_BLE_PHY_SIMULSCAN_40MHZ_PROFILE_BASE
 extern const RAIL_ChannelConfig_t sl_rail_ble_phy_simulscan_40MHz_channelConfig;
 extern const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_simulscan_40MHz_channels[];
+
+#define RAIL0_SL_RAIL_BLE_PHY_HDT_40MHZ_PHY_BLUETOOTH_LE_HDT
+#define RAIL0_SL_RAIL_BLE_PHY_HDT_40MHZ_PROFILE_BASE
+extern const RAIL_ChannelConfig_t sl_rail_ble_phy_hdt_40MHz_channelConfig;
+extern const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_hdt_40MHz_channels[];
 
 #define RAIL0_SL_RAIL_BLE_PHY_1MBPS_VITERBI_CS_40MHZ_PHY_BLUETOOTH_1M_HADM_40MHZ
 #define RAIL0_SL_RAIL_BLE_PHY_1MBPS_VITERBI_CS_40MHZ_PROFILE_BASE

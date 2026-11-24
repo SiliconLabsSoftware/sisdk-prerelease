@@ -29,6 +29,9 @@ void sli_zigbee_stack_get_library_status_process_ipc_command(sli_zigbee_ipc_cmd_
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_library_status_t sl_zigbee_get_library_status(sl_zigbee_library_id_t libraryId)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

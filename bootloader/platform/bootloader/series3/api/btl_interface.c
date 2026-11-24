@@ -195,6 +195,16 @@ void bootloader_rebootAndInstall(void)
   LFRCO->CTRL_CLR = LFRCO_CTRL_DISONDEMAND;
   btl_driver_disable_lfrco_clock();
 
+#if defined(CMU_WIFICLKCTRL_CLKEN)
+  // Clear the Wi-Fi bus clock before the software reset. Same bit
+  // sl_clock_manager_disable_bus_clock(SL_BUS_CLOCK_WIFI) writes.
+  // Leaving WIFICLK enabled across a soft reset can trigger an SE
+  // tamper reset that wipes retention RAM and the bootloader reset
+  // reason.
+  CMU->WIFICLKCTRL_CLR = CMU_WIFICLKCTRL_CLKEN;
+  __DSB();
+#endif
+
   NVIC_SystemReset();
 }
 

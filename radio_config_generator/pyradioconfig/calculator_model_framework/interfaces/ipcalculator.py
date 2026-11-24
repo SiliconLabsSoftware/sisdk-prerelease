@@ -59,7 +59,7 @@ class IPCalculator(ICalculator):
 
     def _add_registers_to_model_variable(self, model, reg_field_list):
         for reg_field in reg_field_list:
-            reg_field_name = self._peripheral_name + "." + reg_field
+            reg_field_name = self._peripheral_name.upper() + "." + reg_field
             self._addModelRegister(model, reg_field_name, int, ModelVariableFormat.HEX)
 
     def _ip_reg_write(self, model, reg_field_name, field_value=None,

@@ -39,6 +39,9 @@ void sli_zigbee_stack_set_current_network_process_ipc_command(sli_zigbee_ipc_cmd
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t sl_zigbee_get_callback_network(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -48,6 +51,9 @@ uint8_t sl_zigbee_get_callback_network(void)
   return msg.data.get_callback_network.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t sl_zigbee_get_current_network(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -57,6 +63,9 @@ uint8_t sl_zigbee_get_current_network(void)
   return msg.data.get_current_network.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_current_network(uint8_t index)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

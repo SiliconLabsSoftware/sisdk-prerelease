@@ -20,6 +20,8 @@ requires:
   condition: [wisun_dc_client_plugin]
 - name: wisun_lxpm_cli
   condition: [wisun_lxpm]
+- name: wisun_ffn_unicast_idle_schedule_cli
+  condition: [wisun_ffn_unicast_idle_schedule, wisun_stack_ffn]
 
 documentation:
   docset: wisun

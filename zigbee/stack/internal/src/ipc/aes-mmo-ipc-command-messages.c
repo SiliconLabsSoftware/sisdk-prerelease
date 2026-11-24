@@ -50,6 +50,9 @@ void sli_zigbee_stack_aes_mmo_hash_update_process_ipc_command(sli_zigbee_ipc_cmd
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_aes_hash_simple(uint8_t totalLength,
                                       const uint8_t *data,
                                       uint8_t *result)
@@ -81,6 +84,9 @@ sl_status_t sl_zigbee_aes_hash_simple(uint8_t totalLength,
   return msg.data.aes_hash_simple.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_aes_mmo_hash_final(sl_zigbee_aes_mmo_hash_context_t *context,
                                          uint32_t length,
                                          const uint8_t *finalData)
@@ -108,6 +114,9 @@ sl_status_t sl_zigbee_aes_mmo_hash_final(sl_zigbee_aes_mmo_hash_context_t *conte
   return msg.data.aes_mmo_hash_final.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_aes_mmo_hash_init(sl_zigbee_aes_mmo_hash_context_t *context)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -123,6 +132,9 @@ void sl_zigbee_aes_mmo_hash_init(sl_zigbee_aes_mmo_hash_context_t *context)
   }
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_aes_mmo_hash_update(sl_zigbee_aes_mmo_hash_context_t *context,
                                           uint32_t length,
                                           const uint8_t *data)

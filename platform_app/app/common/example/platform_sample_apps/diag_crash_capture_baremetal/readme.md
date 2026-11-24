@@ -1,6 +1,6 @@
 # SL Diagnostic Crash Capture Bare-metal
 
-This example project demonstrates SL Diagnostic (`sl_diag`) with Crash Capture in a bare-metal configuration. Press **BTN0** to raise a HardFault. Crash Capture seals the CPU state into the retained SL Diagnostic record and resets the device. After the reset, the decoded record and a raw hex dump of the retained region are printed over VCOM. The app clears the record only after that export succeeds and `sl_diag_has_record()` is false, so the next BTN0 press can seal a new generation on any enabled profile. A failed export or a failed clear leaves the record in place.
+This example project demonstrates SL Diagnostic (`sl_diag`) with Crash Capture in a bare-metal configuration. Press the board's supported button input to trigger a fault. Crash Capture seals the CPU state into the retained SL Diagnostic record and resets the device. After the reset, the decoded record and a raw hex dump of the retained region are printed over VCOM. The app clears the record only after that export succeeds and `sl_diag_has_record()` is false, so the next button press can seal a new generation on any enabled profile. A failed export or a failed clear leaves the record in place.
 
 ## Table of Contents
 
@@ -21,13 +21,13 @@ This example shows the complete crash path for a HardFault:
 
 1. Boot: `sl_diag` validates its retained region and Crash Capture registers the CPU Crash provider. Both run from the `service_init` event, before `app_init()`.
 2. If a sealed record from the previous boot exists, the app prints it, then clears it with `sl_diag_clear(SL_DIAG_CLEAR_RECORD)`.
-3. Crash: press **BTN0**. The app writes to an unmapped address. Crash Capture records PC, LR, SP, R0-R3, R12, xPSR, CFSR, HFSR, BFAR and MMFAR, seals the record and resets the device (`NVIC_SystemReset` in Crash Capture).
-4. Post-reset: print again, clear, press BTN0 for another cycle. `generation` advances on each new seal.
+3. Crash: press the configured board button. The app executes an undefined instruction. Crash Capture records the CPU state and fault status, seals the record and resets the device (`NVIC_SystemReset` in Crash Capture).
+4. Post-reset: print again, clear, press the button for another cycle. `generation` advances on each new seal.
 
 ## Prerequisites / Setup Requirements
 
 **Hardware**
-- Silicon Labs Series 2 or Series 3 kit with VCOM and **BTN0**.
+- A supported board with button input and VCOM support. The button input is used to trigger the fault.
 
 **Software**
 - Simplicity Studio 5 (or later).
@@ -42,11 +42,11 @@ This example shows the complete crash path for a HardFault:
    ```text
    SL Diagnostic crash capture example
    No crash record.
-   Press BTN0 to raise a HardFault (Crash Capture seals + resets).
+   Press the board button to trigger a fault (Crash Capture seals + resets).
    After reset, compare generation with the previous print.
    ```
 
-4. Press **BTN0**. The device faults, Crash Capture seals the record, then soft-resets.
+4. Press the board button. The device faults, Crash Capture seals the record, then soft-resets.
 5. After the reset, the record from the previous boot is printed, then cleared:
 
    ```text
@@ -60,23 +60,21 @@ This example shows the complete crash path for a HardFault:
      ...
    Retained record raw dump (... bytes: ... byte header + ... TLV bytes)
      0000: ...
-   Record cleared; next BTN0 will seal a new generation.
-   Press BTN0 to raise a HardFault ...
+   Record cleared; the next button press will seal a new generation.
+   Press the board button to trigger a fault ...
    ```
 
-6. Press **BTN0** again. After the next reset, `generation` should be higher than in step 5.
+6. Press the board button again. After the next reset, `generation` should be higher than in step 5.
 
 Look up the printed PC in the `.map` file or with `arm-none-eabi-addr2line -e <image>.out <PC>`.
 
 ## How It Works
 
-BTN0 sets a pending flag from `sl_button_on_change()` (interrupt context). The super-loop flushes the log, then raises the HardFault — the same deferred-action pattern as the debug logger and watchdog samples.
-
-Crash Capture enables the MemManage, BusFault and UsageFault handlers at initialization. The example disables those enables in `SCB->SHCSR`, then stores to `0xFFFFFFFC`. The fault escalates to HardFault (`HFSR.FORCED`). Crash Capture seals into `.sl_diag_retained.noinit` and calls `NVIC_SystemReset()`.
+The supported button input sets a pending flag from `sl_button_on_change()` (interrupt context). The super-loop flushes the log, then executes `__asm volatile ("udf #0" ::: "memory")` to trigger an undefined-instruction UsageFault. Since the example disables configurable fault handlers, it escalates to a HardFault. Crash Capture handles the HardFault, seals the CPU state into `.sl_diag_retained.noinit`, and resets the device. The app triggers the fault; it does not implement the crash handler or capture logic.
 
 The record survives a software reset. A power cycle clears retained RAM.
 
-The record is cleared only after the export returns success, `sl_diag_clear()` returns success, and `sl_diag_has_record()` is false. A failed read, a record that does not fit the export buffer, a logger level above INFO, or a busy clear leaves the retained record in place. Clearing after a successful export makes BTN0 create a new generation on every profile. Without that clear, Crash Basic keeps the first VALID record, and Crash Standard may only bump `repeat_count` for the same HardFault.
+The record is cleared only after the export returns success, `sl_diag_clear()` returns success, and `sl_diag_has_record()` is false. A failed read, a record that does not fit the export buffer, a logger level above INFO, or a busy clear leaves the retained record in place. Clearing after a successful export makes each button press create a new generation on every profile. Without that clear, Crash Basic keeps the first VALID record, and Crash Standard may only bump `repeat_count` for the same HardFault.
 
 ## Configuration
 
@@ -93,7 +91,7 @@ Default profile is **Crash Basic**. Change `SL_DIAG_PROFILE` (and other options)
 
 ## Troubleshooting
 
-- **No VCOM output:** Confirm `SL_BOARD_ENABLE_VCOM` is 1, set logger level to at least INFO in the Logger UC screen, and that the terminal uses the correct port and baud rate. Keep the terminal open before pressing BTN0.
+- **No VCOM output:** Confirm `SL_BOARD_ENABLE_VCOM` is 1, set logger level to at least INFO in the Logger UC screen, and that the terminal uses the correct port and baud rate. Keep the terminal open before pressing the board button.
 - **The device resets but no record is printed:** Detach the debugger (or disable halt-on-HardFault). If the debugger catches the fault, Crash Capture never seals the retained record. Flash with `commander`, open only a serial terminal, then reset the kit.
 - **The device does not reset after the HardFault message:** A debugger may halt the core on the fault. Run without a debug session, or resume the core.
 - **No record after a power cycle:** The record is kept in retained RAM, which a power cycle clears. Soft reset (Crash Capture) keeps it; unplug clears it.

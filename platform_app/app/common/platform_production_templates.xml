@@ -224,8 +224,7 @@
     <properties key="stockConfigCompatibility" value="com.silabs.ss.framework.project.toolchain.core.default"/>
     <properties key="filters" value="Device\ Type|SoC MCU|32-bit\ MCU Project\ Difficulty|Beginner"/>
   </descriptors>
-<descriptors name="diag_crash_capture_baremetal" label="Platform - SL Diagnostic Crash Capture Bare-metal" description="Demonstrates SL Diagnostic (sl_diag) with Crash Capture in a bare-metal configuration. With DIAG_CRASH_CAPTURE_AUTO_HARDFAULT enabled (default), the app raises a HardFault on boot when no retained record exists. Crash Capture seals the CPU state into sl_diag and resets; the next boot prints the decoded record over VCOM.
-">
+  <descriptors name="diag_crash_capture_baremetal" label="Platform - SL Diagnostic Crash Capture Bare-metal" description="Demonstrates SL Diagnostic (sl_diag) with Crash Capture in a bare-metal configuration. Press BTN0 to raise a HardFault. Crash Capture seals the CPU state into sl_diag and resets; the next boot prints the decoded record over VCOM.">
     <properties key="namespace" value="template.uc"/>
     <properties key="keywords" value="universal\ configurator"/>
     <properties key="solutionReferenceId" value="platform_app.example.platform_sample_apps.diag_crash_capture_baremetal.diag_crash_capture_baremetal.slcp"/>

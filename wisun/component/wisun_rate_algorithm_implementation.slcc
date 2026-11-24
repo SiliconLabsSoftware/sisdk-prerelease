@@ -1,0 +1,41 @@
+id: "wisun_rate_algorithm_implementation"
+label: "Wi-SUN Rate Algorithm (implementation)"
+package: "wisun"
+category: "Wi-SUN"
+quality: "production"
+description: >
+  Provides the rate algorithm implementation. The rate algorithm libraries are
+  linked when the internal wisun_rate_algorithm component is selected,
+  otherwise stub implementations are used.
+root_path: "wisun/./stack"
+
+ui_hints:
+  visibility: never
+
+provides:
+- name: "wisun_rate_algorithm_implementation"
+
+library:
+- path: "libwisun_rate_algorithms_efr32xg2x_gcc_debug.a"
+  condition: [toolchain_gcc, wisun_rate_algorithm, wisun_stack_debug]
+- path: "libwisun_rate_algorithms_efr32xg2x_iar_debug.a"
+  condition: [toolchain_iar, wisun_rate_algorithm, wisun_stack_debug]
+- path: "libwisun_rate_algorithms_efr32xg2x_llvm_debug.a"
+  condition: [toolchain_llvm, wisun_rate_algorithm, wisun_stack_debug]
+- path: "libwisun_rate_algorithms_efr32xg2x_gcc_release.a"
+  condition: [toolchain_gcc, wisun_rate_algorithm]
+  unless: [wisun_stack_debug]
+- path: "libwisun_rate_algorithms_efr32xg2x_iar_release.a"
+  condition: [toolchain_iar, wisun_rate_algorithm]
+  unless: [wisun_stack_debug]
+- path: "libwisun_rate_algorithms_efr32xg2x_llvm_release.a"
+  condition: [toolchain_llvm, wisun_rate_algorithm]
+  unless: [wisun_stack_debug]
+
+source:
+- path: "nanostack-stack/source/rate-algorithms/sli_wisun_rate_algorithm_stubs.c"
+  unless: [wisun_rate_algorithm]
+
+metadata:
+  sbom:
+    license: MSLA

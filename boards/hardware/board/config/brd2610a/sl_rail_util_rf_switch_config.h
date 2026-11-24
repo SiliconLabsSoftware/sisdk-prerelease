@@ -53,21 +53,30 @@
 // <i> control pins are parked low directly by the antenna-switch LDMA, so this
 // <i> consumes no additional PRS channels.
 // <i> Default: 0
-#define SL_RAIL_UTIL_RF_SWITCH_IDLE_CONTROL_PINS_LOW  1
+#define SL_RAIL_UTIL_RF_SWITCH_IDLE_CONTROL_PINS_LOW  0
 
 // <q SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE> Enable VDD power pin
 // <i> Default: 0
-#define SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE  1
+#define SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE  0
+
+// <q SL_RAIL_UTIL_RF_SWITCH_VDD_ALWAYS_ON> Hold VDD power pin high
+// <i> Drive the VDD pin push-pull high once and leave it there. The pin is
+// <i> not routed to radio activity. Use this on boards where power-gating the
+// <i> switch supply degrades multi-antenna Channel Sounding. Mutually exclusive
+// <i> with VDD power-gating. Default: 0
+#define SL_RAIL_UTIL_RF_SWITCH_VDD_ALWAYS_ON  1
 
 #if SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE
 // <o SL_RAIL_UTIL_RF_SWITCH_VDD_SETTLE_TIME_US> VDD settle time (us)
 // <1-255:1>
+// <i> Delay after VDD rises before the Channel Sounding antenna is selected.
 // <i> Default: 2
 #define SL_RAIL_UTIL_RF_SWITCH_VDD_SETTLE_TIME_US  5
 
 // <o SL_RAIL_UTIL_RF_SWITCH_VDD_PRS_SIGNAL> VDD PRS signal
 // <0=> PA enable OR LNA enable
 // <1=> TX active OR RX active
+// <i> Channel Sounding events always use PA enable OR LNA enable.
 // <i> Default: PA enable OR LNA enable
 #define SL_RAIL_UTIL_RF_SWITCH_VDD_PRS_SIGNAL  0
 #endif // SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE
@@ -77,8 +86,8 @@
 
 // <<< sl:start pin_tool >>>
 
-#if SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE
-// RF switch VDD power pin
+#if SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE || SL_RAIL_UTIL_RF_SWITCH_VDD_ALWAYS_ON
+// RF switch VDD power pin. Compiled for radio-activity gating and always-on.
 // <gpio> SL_RAIL_UTIL_RF_SWITCH_VDD_PIN
 // $[GPIO_SL_RAIL_UTIL_RF_SWITCH_VDD_PIN]
 #ifndef SL_RAIL_UTIL_RF_SWITCH_VDD_PIN_PORT     
@@ -88,7 +97,7 @@
 #define SL_RAIL_UTIL_RF_SWITCH_VDD_PIN_PIN       4
 #endif
 // [GPIO_SL_RAIL_UTIL_RF_SWITCH_VDD_PIN]$
-#endif
+#endif // SL_RAIL_UTIL_RF_SWITCH_VDD_ENABLE || SL_RAIL_UTIL_RF_SWITCH_VDD_ALWAYS_ON
 
 // <<< sl:end pin_tool >>>
 

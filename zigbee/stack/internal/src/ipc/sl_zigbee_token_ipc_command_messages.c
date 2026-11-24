@@ -84,6 +84,9 @@ void slxi_zigbee_stack_token_manager_get_data_process_ipc_command(sli_zigbee_ipc
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint32_t sl_zigbee_get_token_count(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -93,6 +96,9 @@ uint32_t sl_zigbee_get_token_count(void)
   return msg.data.get_token_count.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_get_token_data(uint32_t token,
                                      uint32_t index,
                                      sl_zigbee_token_data_t *tokenData)
@@ -114,6 +120,9 @@ sl_status_t sl_zigbee_get_token_data(uint32_t token,
   return msg.data.get_token_data.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_get_token_default(uint32_t token,
                                         uint8_t *default_token_value)
 {
@@ -133,6 +142,9 @@ sl_status_t sl_zigbee_get_token_default(uint32_t token,
   return msg.data.get_token_default.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_get_token_info(uint8_t index,
                                      sl_zigbee_token_info_t *tokenInfo)
 {
@@ -152,6 +164,9 @@ sl_status_t sl_zigbee_get_token_info(uint8_t index,
   return msg.data.get_token_info.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_initialize_basic_token(uint32_t token,
                                              void *default_token_value,
                                              uint32_t token_size)
@@ -177,6 +192,9 @@ sl_status_t sl_zigbee_initialize_basic_token(uint32_t token,
   return msg.data.initialize_basic_token.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_initialize_counter_token(uint32_t token,
                                                void *default_token_value,
                                                uint32_t token_size)
@@ -202,6 +220,9 @@ sl_status_t sl_zigbee_initialize_counter_token(uint32_t token,
   return msg.data.initialize_counter_token.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_initialize_index_token(uint32_t token_base,
                                              void *default_token_value,
                                              uint32_t token_size,
@@ -229,6 +250,9 @@ sl_status_t sl_zigbee_initialize_index_token(uint32_t token_base,
   return msg.data.initialize_index_token.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_token_data(uint32_t token,
                                      uint32_t index,
                                      sl_zigbee_token_data_t *tokenData)
@@ -250,6 +274,9 @@ sl_status_t sl_zigbee_set_token_data(uint32_t token,
   return msg.data.set_token_data.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t slx_zigbee_token_manager_get_data(uint32_t token,
                                               void *data,
                                               uint32_t length)

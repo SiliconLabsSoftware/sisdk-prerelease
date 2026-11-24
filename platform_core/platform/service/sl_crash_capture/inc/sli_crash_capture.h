@@ -99,6 +99,17 @@ void sli_crash_capture_init(void);
  */
 void sli_crash_capture_on_watchdog_warning(uint32_t unfed_mask);
 
+/**
+ * @brief Request a system reset after a crash has been sealed.
+ *
+ * @note Weak default issues @c NVIC_SystemReset() on Cortex-M and otherwise
+ *       spins forever. Applications may override this to change post-seal
+ *       reset behavior (e.g. delay, alternate reset path).
+ *
+ * @note Does not return.
+ */
+void sli_crash_capture_system_reset(void);
+
 /** @} (end addtogroup sli_crash_capture_api) */
 
 /** @} (end addtogroup crash_capture) */

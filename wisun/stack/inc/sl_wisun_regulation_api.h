@@ -32,7 +32,7 @@
 #define SL_WISUN_REGULATION_API_H
 
 /// API version used to check compatibility (do not edit when using this header)
-#define SL_WISUN_REGULATION_PARAMS_API_VERSION  1
+#define SL_WISUN_REGULATION_PARAMS_API_VERSION  2
 
 /**************************************************************************//**
  * @addtogroup SL_WISUN_REGULATION_API Regional Regulation API
@@ -97,12 +97,12 @@ typedef struct {
   uint8_t duty_cycle_arib_skip_ack;
   /// Enable Adaptive Power Control
   uint8_t enable_apc;
-  /// Ensure a min IFS before ACKs (ARIB conditions)
+  /// Apply ARIB-STD-T108 channel-access rules to successive transmissions (Part 2 §3.4)
   uint8_t enable_arib_channel_access;
-  /// Fixed CCA threshold in dBm, INT8_MAX to use adaptive CCA threshold
+  /// Fixed CCA threshold in dBm, INT8_MAX to use definition from PHY TPS Section 5.5.2
   int8_t fixed_cca_threshold_dbm;
-  /// Reserved, set to zero
-  uint8_t reserved;
+  /// Enforce Toff_min before transmitting again on the same channel (ETSI EN 300 220-2)
+  uint8_t enable_etsi_channel_access;
 } SL_ATTRIBUTE_PACKED sl_wisun_regulation_params_t;
 SL_PACK_END()
 
@@ -130,7 +130,8 @@ static const sl_wisun_regulation_params_t SL_WISUN_REGULATION_PARAMS_NONE = {
   .duty_cycle_arib_skip_ack = false,
   .enable_apc = false,
   .enable_arib_channel_access = false,
-  .fixed_cca_threshold_dbm = INT8_MAX,  // Use adaptive CCA threshold
+  .fixed_cca_threshold_dbm = INT8_MAX,
+  .enable_etsi_channel_access = false,
 };
 
 /// Parameter set for ARIB regional regulation (ARIB-STD-T108).
@@ -147,6 +148,7 @@ static const sl_wisun_regulation_params_t SL_WISUN_REGULATION_PARAMS_ARIB = {
   .enable_apc = false,
   .enable_arib_channel_access = true,  // ARIB-STD-T108, Part 2 Section 3.4.1
   .fixed_cca_threshold_dbm = -80,  // ARIB-STD-T108, Part 2 Section 3.4.2
+  .enable_etsi_channel_access = false,
 };
 
 /// Parameter set for WPC regional regulation.
@@ -162,24 +164,26 @@ static const sl_wisun_regulation_params_t SL_WISUN_REGULATION_PARAMS_WPC = {
   .duty_cycle_arib_skip_ack = false,
   .enable_apc = true,
   .enable_arib_channel_access = false,
-  .fixed_cca_threshold_dbm = INT8_MAX,  // Use adaptive CCA threshold
+  .fixed_cca_threshold_dbm = INT8_MAX,
+  .enable_etsi_channel_access = false,
 };
 
-/// Parameter set for ETSI regional regulation (ETSI EN 300 220-1).
+/// Parameter set for ETSI regional regulation (ETSI EN 300 220-2).
 /// This parameter set is used for Europe and other ETSI compliant regions.
 static const sl_wisun_regulation_params_t SL_WISUN_REGULATION_PARAMS_ETSI = {
   .version = SL_WISUN_REGULATION_PARAMS_API_VERSION,
   .max_edfe_duration_ms = UINT32_MAX,  // No EDFE duration limit
   .duty_cycle_budget_s = -1,
   .duty_cycle_budget_per_channel_s = 100,  // 100 s / 1 h per 200 kHz spectrum
-                                           // (Section 5.21 Polite spectrum access)
+                                           // (ETSI EN 300 220-2 Section 5.21)
   .duty_cycle_warning_threshold_percent = 50,
   .duty_cycle_alert_threshold_percent = 90,
   .duty_cycle_skip_ack = false,
   .duty_cycle_arib_skip_ack = false,
   .enable_apc = true,
   .enable_arib_channel_access = false,
-  .fixed_cca_threshold_dbm = INT8_MAX,  // Use adaptive CCA threshold
+  .fixed_cca_threshold_dbm = INT8_MAX,
+  .enable_etsi_channel_access = true,  // Enforce Toff_min (ETSI EN 300 220-2 Section 5.21)
 };
 
 /** @} (end SL_WISUN_REGULATION_PARAMETER_SETS) */

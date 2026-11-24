@@ -73,6 +73,9 @@ void slxi_zigbee_stack_zdo_dlk_start_key_update_with_aps_encryption_process_ipc_
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_zdo_dlk_enabled(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -82,6 +85,9 @@ bool sl_zigbee_zdo_dlk_enabled(void)
   return msg.data.zdo_dlk_enabled.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_zdo_dlk_get_supported_negotiation_parameters(sl_zigbee_dlk_supported_negotiation_method *method_mask,
                                                             sl_zigbee_dlk_negotiation_supported_shared_secret_source *secret_mask)
 {
@@ -106,6 +112,9 @@ void sl_zigbee_zdo_dlk_get_supported_negotiation_parameters(sl_zigbee_dlk_suppor
   }
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_zdo_dlk_start_key_negotiation(sl_zigbee_address_info *partner,
                                                     sl_zigbee_dlk_negotiation_method selected_method,
                                                     sl_zigbee_dlk_negotiation_shared_secret_source selected_secret)
@@ -127,6 +136,9 @@ sl_status_t sl_zigbee_zdo_dlk_start_key_negotiation(sl_zigbee_address_info *part
   return msg.data.zdo_dlk_start_key_negotiation.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_zdo_dlk_start_key_update(sl_zigbee_address_info *target,
                                                sl_zigbee_dlk_negotiation_method selected_method,
                                                sl_zigbee_dlk_negotiation_shared_secret_source selected_secret)
@@ -148,6 +160,9 @@ sl_status_t sl_zigbee_zdo_dlk_start_key_update(sl_zigbee_address_info *target,
   return msg.data.zdo_dlk_start_key_update.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool slx_zigbee_gu_zdo_dlk_mangle_packet(sli_buffer_manager_buffer_t *buffer)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -165,6 +180,9 @@ bool slx_zigbee_gu_zdo_dlk_mangle_packet(sli_buffer_manager_buffer_t *buffer)
   return msg.data.gu_zdo_dlk_mangle_packet.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool slx_zigbee_gu_zdo_dlk_override_psk_fetch(uint8_t *key_buffer)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -182,6 +200,9 @@ bool slx_zigbee_gu_zdo_dlk_override_psk_fetch(uint8_t *key_buffer)
   return msg.data.gu_zdo_dlk_override_psk_fetch.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void slx_zigbee_gu_zdo_dlk_override_supported_params(sl_zigbee_dlk_supported_negotiation_method *method_mask,
                                                      sl_zigbee_dlk_negotiation_supported_shared_secret_source *secret_mask)
 {
@@ -206,6 +227,9 @@ void slx_zigbee_gu_zdo_dlk_override_supported_params(sl_zigbee_dlk_supported_neg
   }
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t slx_zigbee_zdo_dlk_start_key_update_with_aps_encryption(sl_zigbee_address_info *target,
                                                                     sl_zigbee_dlk_negotiation_method selected_method,
                                                                     sl_zigbee_dlk_negotiation_shared_secret_source selected_secret,

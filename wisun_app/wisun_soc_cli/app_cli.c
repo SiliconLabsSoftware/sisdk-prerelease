@@ -30,6 +30,7 @@
 #include "sl_wisun_rf_test.h"
 #include "sl_wisun_cli_core.h"
 #include "sl_wisun_api.h"
+#include "sl_wisun_common.h"
 #include "sl_wisun_trace_api.h"
 #include "sl_wisun_cli_core.h"
 #if defined(SL_CATALOG_WISUN_DC_SERVER_CLI_PRESENT)
@@ -976,39 +977,6 @@ void sl_wisun_on_event(sl_wisun_evt_t *evt)
   app_wisun_cli_mutex_unlock();
 }
 
-static sl_status_t channel_spacing_khz_to_id(uint32_t channel_spacing_khz, uint8_t *channel_spacing_id)
-{
-  sl_status_t result = SL_STATUS_OK;
-
-  switch (channel_spacing_khz) {
-    case 100:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_100KHZ;
-      break;
-    case 200:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_200KHZ;
-      break;
-    case 250:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_250KHZ;
-      break;
-    case 400:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_400KHZ;
-      break;
-    case 600:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_600KHZ;
-      break;
-    case 800:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_800KHZ;
-      break;
-    case 1200:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_1200KHZ;
-      break;
-    default:
-      result = SL_STATUS_FAIL;
-  }
-
-  return result;
-}
-
 static sl_status_t app_build_phy_config(sl_wisun_phy_config_type_t phy_config_type, const uint8_t *channel_mask, sl_wisun_phy_config_t* phy_config)
 {
   uint8_t channel_spacing_id;
@@ -1030,7 +998,8 @@ static sl_status_t app_build_phy_config(sl_wisun_phy_config_type_t phy_config_ty
     case SL_WISUN_PHY_CONFIG_EXPLICIT:
       phy_config->config.explicit_plan.ch0_frequency_khz = app_settings_wisun.ch0_frequency;
       phy_config->config.explicit_plan.number_of_channels = app_settings_wisun.number_of_channels;
-      if (channel_spacing_khz_to_id(app_settings_wisun.channel_spacing, &channel_spacing_id) != SL_STATUS_OK) {
+      if (sl_wisun_channel_spacing_hz_to_id(app_settings_wisun.channel_spacing * 1000,
+                                            &channel_spacing_id) != SL_STATUS_OK) {
         return SL_STATUS_INVALID_PARAMETER;
       }
       phy_config->config.explicit_plan.channel_spacing = channel_spacing_id;
@@ -2778,30 +2747,6 @@ void app_set_lfn_support(sl_cli_command_arg_t *arguments)
 
   app_wisun_cli_mutex_unlock();
 }
-
-#if defined(SL_CATALOG_WISUN_FFN_UNICAST_IDLE_SCHEDULE_SUPPORT_PRESENT)
-void app_set_ffn_unicast_idle_schedule(sl_cli_command_arg_t *arguments)
-{
-  sl_status_t ret;
-  uint8_t listen_slots;
-  uint8_t idle_slots;
-
-  app_wisun_cli_mutex_lock();
-
-  listen_slots = sl_cli_get_argument_uint8(arguments, 0);
-  idle_slots = sl_cli_get_argument_uint8(arguments, 1);
-
-  ret = sl_wisun_set_ffn_unicast_idle_schedule(listen_slots, idle_slots);
-  if (ret == SL_STATUS_OK) {
-    printf("[FFN unicast idle schedule set: listen=%u idle=%u]\r\n",
-           (unsigned)listen_slots, (unsigned)idle_slots);
-  } else {
-    printf("[Failed: unable to set FFN unicast idle schedule: %"PRIu32"]\r\n", ret);
-  }
-
-  app_wisun_cli_mutex_unlock();
-}
-#endif
 
 void app_set_leaf(sl_cli_command_arg_t *arguments)
 {

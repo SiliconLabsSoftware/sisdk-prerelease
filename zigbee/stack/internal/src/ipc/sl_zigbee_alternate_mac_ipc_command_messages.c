@@ -29,6 +29,9 @@ void sli_zigbee_stack_alt_mac_init_process_ipc_command(sli_zigbee_ipc_cmd_t *msg
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_mac_interface_id_t sl_zigbee_alt_mac_init(const sl_zigbee_alt_mac_config_t *config)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

@@ -87,9 +87,6 @@ class RAILAdapter(object):
     "_everest_Rx_Gain_LUT_5GHz_LP",
     "_everest_TX_PP_LUT",
     "_everest_TONE_SCALE_LUT",
-    "_everest_AUX_LUT_2X",
-    "_everest_AUX_LUT_OFDM_4X",
-    "_everest_AUX_LUT_CW_4X",
     "_everest_WLAN_OFDM",
   ]
 

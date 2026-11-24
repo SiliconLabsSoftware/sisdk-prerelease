@@ -33,6 +33,7 @@
 #include "sl_wisun_rf_test_tools.h"
 #include "sl_wisun_trace_api.h"
 #include "sl_wisun_regdb.h"
+#include "sl_wisun_common.h"
 #include "common/endian.h"
 #include "em_core.h"
 
@@ -339,7 +340,13 @@ sl_status_t rf_test_phy_config_to_chan_config(sl_wisun_phy_config_t *phy_config,
       *reg_domain = STACK_INFO_REG_DOMAIN_UNUSED;
       channel_0_center_frequency_hz = phy_config->config.explicit_plan.ch0_frequency_khz * 1000;
       number_of_channels = phy_config->config.explicit_plan.number_of_channels;
-      channel_spacing_hz = ws_regdb_chan_spacing_value(phy_config->config.explicit_plan.channel_spacing);
+      status = sl_wisun_channel_spacing_id_to_hz(phy_config->config.explicit_plan.channel_spacing,
+                                                 &channel_spacing_hz);
+      if (status != SL_STATUS_OK) {
+        sl_wisun_trace_error("rf_test: unsupported channel spacing %u",
+                             phy_config->config.explicit_plan.channel_spacing);
+        return status;
+      }
       phy_version = STACK_INFO_VERSION_UNUSED;
       *reg_domain = STACK_INFO_REG_DOMAIN_UNUSED;
       *crc_length = 0;

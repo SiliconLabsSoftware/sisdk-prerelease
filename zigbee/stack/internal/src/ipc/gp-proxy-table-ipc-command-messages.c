@@ -60,6 +60,9 @@ void sli_zigbee_stack_gp_proxy_table_remove_entry_process_ipc_command(sli_zigbee
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_gp_clear_proxy_table(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -67,6 +70,9 @@ void sl_zigbee_gp_clear_proxy_table(void)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_gp_clear_proxy_table_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_gp_proxy_table_get_entry(uint8_t proxyIndex,
                                                sl_zigbee_gp_proxy_table_entry_t *entry)
 {
@@ -86,6 +92,9 @@ sl_status_t sl_zigbee_gp_proxy_table_get_entry(uint8_t proxyIndex,
   return msg.data.gp_proxy_table_get_entry.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t sl_zigbee_gp_proxy_table_lookup(sl_zigbee_gp_address_t *addr)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -103,6 +112,9 @@ uint8_t sl_zigbee_gp_proxy_table_lookup(sl_zigbee_gp_address_t *addr)
   return msg.data.gp_proxy_table_lookup.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_gp_proxy_table_process_gp_pairing(uint32_t options,
                                                  sl_zigbee_gp_address_t *addr,
                                                  uint8_t commMode,
@@ -153,6 +165,9 @@ bool sl_zigbee_gp_proxy_table_process_gp_pairing(uint32_t options,
   return msg.data.gp_proxy_table_process_gp_pairing.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_gp_proxy_table_remove_entry(uint8_t index)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

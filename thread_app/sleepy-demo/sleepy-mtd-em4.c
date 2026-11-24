@@ -71,11 +71,13 @@ void        mtdReceiveCallback(void *aContext, otMessage *aMessage, const otMess
 extern void otSysEventSignalPending(void);
 
 // Variables
-static otUdpSocket                  sMtdSocket;
-static volatile bool                sRequestRetryPending = false;
-static volatile bool                sRequestRetryArmed   = false;
-static bool                         sReconnectLogged     = false;
-static bool                         sSampleSent          = false;
+static otUdpSocket   sMtdSocket;
+static volatile bool sRequestRetryPending = false;
+static volatile bool sRequestRetryArmed   = false;
+static bool          sReconnectLogged     = false;
+static bool          sSampleSent          = false;
+// Hold EM1 until EM4 is armed so CLI stays usable during attach.
+static bool                         sAllowSleep = false;
 static sl_sleeptimer_timer_handle_t sRequestRetryTimer;
 
 /*
@@ -84,6 +86,25 @@ static sl_sleeptimer_timer_handle_t sRequestRetryTimer;
 bool sleepyEm4IsWakeFromEm4(void)
 {
     return sl_ot_em4_is_wake_from_em4();
+}
+
+/*
+ * Callback from sl_ot_is_ok_to_sleep. false => stay EM1; true => allow EM2 (and EM4 enter).
+ */
+bool efr32AllowSleepCallback(void)
+{
+    return sAllowSleep;
+}
+
+static void setAllowSleep(bool aAllow)
+{
+    if (sAllowSleep == aAllow)
+    {
+        return;
+    }
+
+    sAllowSleep = aAllow;
+    otSysEventSignalPending();
 }
 
 /*
@@ -174,6 +195,7 @@ static void requestEm4(otInstance *aInstance)
 
     if (sl_ot_em4_is_pending())
     {
+        setAllowSleep(true);
         return;
     }
 
@@ -181,6 +203,8 @@ static void requestEm4(otInstance *aInstance)
     if (error == OT_ERROR_NONE)
     {
         cancelRequestRetry();
+        // Allow EM2 so PAL can catch ENTERING_EM2 and enter EM4.
+        setAllowSleep(true);
         otCliOutputFormat("em4 armed; enter when stack idle\r\n");
         return;
     }
@@ -218,8 +242,8 @@ static void logReconnectIfNeeded(otInstance *aInstance)
 }
 
 /*
- * On CHILD: send one sample, then arm EM4.
- * On detach: cancel pending EM4 / retry so we do not sleep offline.
+ * On CHILD: send one sample, then arm EM4 (then allow EM2→EM4).
+ * On detach: cancel pending EM4 / retry and hold EM1 so we do not deep-sleep offline.
  */
 static void stateChangedCallback(otChangedFlags aFlags, void *aContext)
 {
@@ -245,6 +269,7 @@ static void stateChangedCallback(otChangedFlags aFlags, void *aContext)
         sSampleSent = false;
         sl_ot_em4_cancel();
         cancelRequestRetry();
+        setAllowSleep(false);
     }
 }
 
@@ -254,6 +279,8 @@ void sleepyInit(void)
     otInstance *instance = otInstanceGetSingle();
 
     SuccessOrExit(error = sl_ot_em4_init());
+    setAllowSleep(false);
+
     if (sl_ot_em4_is_wake_from_em4())
     {
         otCliOutputFormat("woke from EM4\r\n");
@@ -263,6 +290,7 @@ void sleepyInit(void)
         otCliOutputFormat("starting (child_timeout=%lu s, wake_s=%lu)\r\n",
                           (unsigned long)otThreadGetChildTimeout(instance),
                           (unsigned long)(sl_ot_em4_get_default_wake_ms(instance) / 1000U));
+        otCliOutputFormat("holding EM1 until EM4 armed\r\n");
     }
 
     otCliOutputFormat("[poll period: %d ms.]\r\n", SLEEPY_POLL_PERIOD_MS);
@@ -384,6 +412,9 @@ void applicationTick(void)
         sRequestRetryPending = false;
         requestEm4(otInstanceGetSingle());
     }
+
+    // Complete pending EM4 once radio/tasklets are idle (may miss EM2 edge).
+    sl_ot_em4_process();
 }
 
 void mtdReceiveCallback(void *aContext, otMessage *aMessage, const otMessageInfo *aMessageInfo)

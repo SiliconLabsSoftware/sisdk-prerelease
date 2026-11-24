@@ -36,6 +36,9 @@ void sli_zigbee_stack_make_device_id_pair_process_ipc_command(sli_zigbee_ipc_cmd
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_device_id_matches(const sl_zigbee_address_info *set_a,
                                  const sl_zigbee_address_info *set_b)
 {
@@ -54,6 +57,9 @@ bool sl_zigbee_device_id_matches(const sl_zigbee_address_info *set_a,
   return msg.data.device_id_matches.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_address_info sl_zigbee_make_device_id_pair(const sl_802154_short_addr_t short_id,
                                                      const sl_802154_long_addr_t long_id)
 {

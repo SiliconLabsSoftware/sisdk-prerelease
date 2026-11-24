@@ -23,15 +23,25 @@
 #include "sl_dma_manager.h"
 #include "sl_dma_channel.h"
 #include "sl_assert.h"
+#include "sl_iostream_usart_vcom_config.h"
 
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
 
 // Max length of one DMA transfer is defined by the DMA channel driver.
-#define RX_BUFFER_SIZE (8)
+#define RX_BUFFER_SIZE              (8)
 //
-#define TX_BUFFER_SIZE (RX_BUFFER_SIZE + 64)
+#define TX_BUFFER_SIZE              (RX_BUFFER_SIZE + 64)
+
+#define _DMADRV_CONCAT(a, b, c)     a##b##c
+#define DMADRV_CONCAT(a, b, c)      _DMADRV_CONCAT(a, b, c)
+
+#define DMADRV_USART                SL_IOSTREAM_USART_VCOM_PERIPHERAL
+#define DMADRV_USART_NO             SL_IOSTREAM_USART_VCOM_PERIPHERAL_NO
+
+#define DMADRV_TX_SIGNAL            DMADRV_CONCAT(SL_DMA_SIGNAL_USART, DMADRV_USART_NO, _TXBL)
+#define DMADRV_RX_SIGNAL            DMADRV_CONCAT(SL_DMA_SIGNAL_USART, DMADRV_USART_NO, _RXDATAV)
 
 /*******************************************************************************
  ***************************  LOCAL VARIABLES   ********************************
@@ -91,7 +101,7 @@ static void transmit_data(void)
   // Transfer data from tx buffer to USART peripheral.
   sl_dma_channel_submit_transfer_m2p(&tx_handle,
                                      tx_buffer,
-                                     (void *)&(USART0->TXDATA),
+                                     (void *)&(DMADRV_USART->TXDATA),
                                      strlen(tx_buffer),
                                      SL_DMA_CTRL_SIZE_BYTE,
                                      NULL);
@@ -125,8 +135,8 @@ void dmadrv_app_init(void)
 
   // Set peripheral signals once; these do not change between transfers.
   // Verify exact signal names against sl_dma_signals.h for the target device.
-  sl_dma_channel_set_peripheral_signal(&tx_handle, SL_DMA_SIGNAL_USART0_TXBL);
-  sl_dma_channel_set_peripheral_signal(&rx_handle, SL_DMA_SIGNAL_USART0_RXDATAV);
+  sl_dma_channel_set_peripheral_signal(&tx_handle, DMADRV_TX_SIGNAL);
+  sl_dma_channel_set_peripheral_signal(&rx_handle, DMADRV_RX_SIGNAL);
 
   // Initialise transfer complete flag.
   rx_transfer_complete = false;
@@ -153,7 +163,7 @@ void dmadrv_app_process_action(void)
   if (!status.active) {
     // Start data transfer from USART peripheral to rx buffer.
     sl_dma_channel_submit_transfer_p2m(&rx_handle,
-                                       (void *)&(USART0->RXDATA),
+                                       (void *)&(DMADRV_USART->RXDATA),
                                        rx_buffer,
                                        RX_BUFFER_SIZE,
                                        SL_DMA_CTRL_SIZE_BYTE,

@@ -141,6 +141,15 @@ def on_peripheral_selection(requirement, changeset):
     # Reset channel settings
     if module.getProperty('channel.count') is not None:
       pin_tool.reset_channels(module, changeset)
+    # Drop leftover PRS enables when switching channel; GPIO/other types unchanged
+    if module.getProperty('type') == 'prs':
+      still_in_use = False
+      for req in requirement.container.requirements:
+        if req.getModule() == module:
+          still_in_use = True
+          break
+      if not still_in_use:
+        pin_tool.disable_prs_routes(module, changeset)
     # Pin reservation
     pin_reserve = module.ref('pin.reserve')
     if pin_reserve is not None:

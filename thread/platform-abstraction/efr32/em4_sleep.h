@@ -68,8 +68,8 @@ uint32_t sl_ot_em4_get_default_wake_ms(otInstance *aInstance);
 /**
  * Request EM4 when the stack is next idle. Does not enter EM4 synchronously.
  *
- * EM4 entry only occurs on the next EM2 transition after arming. If Power
- * Manager never enters EM2, EM4 will never be entered.
+ * Entry is attempted on the next Power Manager ENTERING_EM2 transition and
+ * from sl_ot_em4_process() once tasklets are clear and the radio is idle.
  *
  * Call sl_ot_em4_cancel() (or allow the pending request to complete) before
  * calling again with a different wake time; otherwise OT_ERROR_INVALID_STATE.
@@ -88,6 +88,14 @@ void sl_ot_em4_cancel(void);
  * @retval true  An EM4 request is armed.
  */
 bool sl_ot_em4_is_pending(void);
+
+/**
+ * Try to complete a pending EM4 request from the main/app loop.
+ *
+ * Call periodically (e.g. applicationTick) so entry is not missed if the radio
+ * was still busy on the ENTERING_EM2 edge.
+ */
+void sl_ot_em4_process(void);
 
 #ifdef __cplusplus
 } // extern "C"

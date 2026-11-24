@@ -269,6 +269,7 @@ void sli_zigbee_af_cli_info_command(sl_cli_command_arg_t *arguments)
   sl_802154_long_addr_t myEui64;
   sl_zigbee_network_parameters_t networkParams;
   uint8_t numPhyInterfaces;
+  sl_status_t networkParamsStatus;
 #if defined SL_CATALOG_ZIGBEE_TEST_HARNESS_Z3_PRESENT && !defined SL_ZIGBEE_TEST
   char versionString[10] = { 0 };
   sli_get_ztt_version_number_string(versionString);
@@ -278,7 +279,11 @@ void sli_zigbee_af_cli_info_command(sl_cli_command_arg_t *arguments)
 #endif
   sl_zigbee_af_cli_println("AppBuilder MFG Code: 0x%04X", SL_ZIGBEE_ZCL_MANUFACTURER_CODE);
   sl_zigbee_af_get_eui64(myEui64);
-  sl_zigbee_af_get_network_parameters(&nodeTypeResult, &networkParams);
+  networkParamsStatus = sl_zigbee_af_get_network_parameters(&nodeTypeResult, &networkParams);
+  // When not joined, treat node type as unknown for display (0xFF → "unknown").
+  if (networkParamsStatus != SL_STATUS_OK) {
+    nodeTypeResult = 0xFF;
+  }
   sl_zigbee_af_cli_print("node [");
   sl_zigbee_af_cli_exec(sl_zigbee_af_print_big_endian_eui64(myEui64));
   sl_zigbee_af_cli_flush();

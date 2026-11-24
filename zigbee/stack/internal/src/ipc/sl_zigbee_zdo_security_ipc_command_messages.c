@@ -50,6 +50,9 @@ void sli_zigbee_stack_retrieve_authentication_token_process_ipc_command(sli_zigb
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_get_authentication_level(sl_802154_short_addr_t dest,
                                                sl_802154_long_addr_t target)
 {
@@ -69,6 +72,9 @@ sl_status_t sl_zigbee_get_authentication_level(sl_802154_short_addr_t dest,
   return msg.data.get_authentication_level.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_get_symmetric_passphrase(sl_802154_long_addr_t eui64,
                                                sl_802154_short_addr_t short_id,
                                                uint8_t *passphrase)
@@ -98,6 +104,9 @@ sl_status_t sl_zigbee_get_symmetric_passphrase(sl_802154_long_addr_t eui64,
   return msg.data.get_symmetric_passphrase.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_initiate_security_challenge(sl_802154_short_addr_t partnerNodeId,
                                                   sl_802154_long_addr_t partnerLong,
                                                   uint8_t keyIndex)
@@ -119,6 +128,9 @@ sl_status_t sl_zigbee_initiate_security_challenge(sl_802154_short_addr_t partner
   return msg.data.initiate_security_challenge.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_retrieve_authentication_token(sl_802154_short_addr_t destination,
                                              sl_zigbee_aps_option_t options)
 {

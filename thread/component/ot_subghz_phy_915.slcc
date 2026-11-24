@@ -9,6 +9,7 @@ provides:
 - name: ot_subghz_phy
 requires:
 - name: ot_platform_abstraction_efr32
+- name: hardware_board_supports_rf_band_915
 conflicts:
 - name: ot_subghz_phy_868
 source:

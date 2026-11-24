@@ -47,6 +47,9 @@ void sli_zigbee_stack_mac_mux_aux_set_interpan_enabled_process_ipc_command(sli_z
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t sl_zigbee_mac_mux_aux_get_channel(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -56,6 +59,9 @@ uint8_t sl_zigbee_mac_mux_aux_get_channel(void)
   return msg.data.mac_mux_aux_get_channel.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_mac_mux_aux_is_interpan_enabled(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -65,6 +71,9 @@ bool sl_zigbee_mac_mux_aux_is_interpan_enabled(void)
   return msg.data.mac_mux_aux_is_interpan_enabled.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_mac_mux_aux_send_raw_message(const uint8_t *message,
                                                    uint8_t message_length,
                                                    sl_zigbee_transmit_priority_t priority,
@@ -86,6 +95,9 @@ sl_status_t sl_zigbee_mac_mux_aux_send_raw_message(const uint8_t *message,
   return msg.data.mac_mux_aux_send_raw_message.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_mac_mux_aux_set_interpan_enabled(bool enable)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

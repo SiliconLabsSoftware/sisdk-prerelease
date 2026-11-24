@@ -35,6 +35,9 @@ void sli_zigbee_stack_memory_usage_init_process_ipc_command(sli_zigbee_ipc_cmd_t
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint32_t sl_zigbee_get_memory_usage_data(sl_zigbee_memory_usage_data_t type)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -44,6 +47,9 @@ uint32_t sl_zigbee_get_memory_usage_data(sl_zigbee_memory_usage_data_t type)
   return msg.data.get_memory_usage_data.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_memory_usage_init(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

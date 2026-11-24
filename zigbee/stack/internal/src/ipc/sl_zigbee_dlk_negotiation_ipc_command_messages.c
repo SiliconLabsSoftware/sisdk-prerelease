@@ -54,6 +54,9 @@ void sli_zigbee_stack_dlk_start_key_exchange_process_ipc_command(sli_zigbee_ipc_
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_dlk_close_key_exchange(sl_zigbee_dlk_negotiation_context_t *dlk_negotiation_ctx)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -69,6 +72,9 @@ void sl_zigbee_dlk_close_key_exchange(sl_zigbee_dlk_negotiation_context_t *dlk_n
   }
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_dlk_finish_key_exchange(sl_zigbee_dlk_negotiation_context_t *dlk_negotiation_ctx,
                                               const sl_zigbee_address_info *partner,
                                               const uint8_t *partner_key,
@@ -100,6 +106,9 @@ sl_status_t sl_zigbee_dlk_finish_key_exchange(sl_zigbee_dlk_negotiation_context_
   return msg.data.dlk_finish_key_exchange.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_dlk_open_key_exchange(sl_zigbee_dlk_negotiation_context_t *dlk_negotiation_ctx,
                                             const sl_zigbee_address_info *partner,
                                             sl_zigbee_dlk_negotiation_method keyProtocol,
@@ -136,6 +145,9 @@ sl_status_t sl_zigbee_dlk_open_key_exchange(sl_zigbee_dlk_negotiation_context_t 
   return msg.data.dlk_open_key_exchange.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_dlk_start_key_exchange(sl_zigbee_dlk_negotiation_context_t *dlk_negotiation_ctx,
                                              const sl_zigbee_address_info *partner)
 {

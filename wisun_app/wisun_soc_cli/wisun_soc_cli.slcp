@@ -37,8 +37,6 @@ component:
   - id: "wisun_cli"
   - id: "errno"
   - id: "wisun_crash_handler"
-  - id: "device_init_dcdc"
-    condition: [device_has_dcdc, wisun_low_power]
   - id: wisun_direct_connect_pmk
   - id: wisun_stack_dc_server
 
@@ -47,8 +45,6 @@ source:
   - path: "app_cli.c"
   - path: "app_settings.c"
   - path: "app_event_log.c"
-  - path: "app_custom_cli_tick.c"
-    condition: [wisun_low_power]
 
 include:
   - path: "."
@@ -85,8 +81,12 @@ configuration:
     value: "true"
     condition: [iostream_eusart]
   - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
+    value: 0 # Low power: allow EM2/3/4
+    condition: [iostream_eusart, wisun_low_power]
+  - name: SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION
     value: 1
     condition: [iostream_eusart]
+    unless: [wisun_low_power]
   - name: SL_IOSTREAM_EUSART_VCOM_RX_BUFFER_SIZE
     value: "128" # Increase from default 32 to account for automated command
                  # storage entry and for when long command strings are
@@ -435,20 +435,6 @@ template_contribution:
       argument:
         - type: uint8
           help: "lfn_limit: Number of locally supported LFN"
-  - name: "cli_command"
-    condition: [wisun_stack_ffn, wisun_ffn_unicast_idle_schedule]
-    value:
-      group: "wisun"
-      name: "set_ffn_unicast_idle_schedule"
-      handler: "app_set_ffn_unicast_idle_schedule"
-      help: "Configure FFN unicast idle schedule before join (0 idle slots disables, including while ACTIVE)"
-      shortcuts:
-        - name: "sffnui"
-      argument:
-        - type: uint8
-          help: "listen_slots: consecutive nominal unicast listening dwells"
-        - type: uint8
-          help: "idle_slots: consecutive nominal dwells in which background unicast listening may be omitted"
   - name: "cli_command"
     value:
       group: "wisun"

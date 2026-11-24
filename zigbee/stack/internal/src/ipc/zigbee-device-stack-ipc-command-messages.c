@@ -86,6 +86,9 @@ void sli_zigbee_stack_set_zdo_configuration_mode_process_ipc_command(sli_zigbee_
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_energy_scan_request(sl_802154_short_addr_t target,
                                           uint32_t scanChannels,
                                           uint8_t scanDuration,
@@ -101,6 +104,9 @@ sl_status_t sl_zigbee_energy_scan_request(sl_802154_short_addr_t target,
   return msg.data.energy_scan_request.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t sl_zigbee_get_last_stack_zig_dev_request_sequence(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -110,6 +116,9 @@ uint8_t sl_zigbee_get_last_stack_zig_dev_request_sequence(void)
   return msg.data.get_last_stack_zig_dev_request_sequence.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_ieee_address_request(sl_802154_short_addr_t target,
                                            bool reportKids,
                                            uint8_t childStartIndex,
@@ -125,6 +134,9 @@ sl_status_t sl_zigbee_ieee_address_request(sl_802154_short_addr_t target,
   return msg.data.ieee_address_request.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_ieee_address_request_to_target(sl_802154_short_addr_t discoveryNodeId,
                                                      bool reportKids,
                                                      uint8_t childStartIndex,
@@ -142,6 +154,9 @@ sl_status_t sl_zigbee_ieee_address_request_to_target(sl_802154_short_addr_t disc
   return msg.data.ieee_address_request_to_target.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_network_address_request(sl_802154_long_addr_t target,
                                               bool reportKids,
                                               uint8_t childStartIndex)
@@ -163,6 +178,9 @@ sl_status_t sl_zigbee_network_address_request(sl_802154_long_addr_t target,
   return msg.data.network_address_request.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_send_device_announcement(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -172,6 +190,9 @@ sl_status_t sl_zigbee_send_device_announcement(void)
   return msg.data.send_device_announcement.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_send_parent_announcement(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -181,6 +202,9 @@ sl_status_t sl_zigbee_send_parent_announcement(void)
   return msg.data.send_parent_announcement.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_manufacturer_code(uint16_t code)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -190,6 +214,9 @@ sl_status_t sl_zigbee_set_manufacturer_code(uint16_t code)
   return msg.data.set_manufacturer_code.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_set_pending_network_update_channel(uint8_t channel)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -197,6 +224,9 @@ void sl_zigbee_set_pending_network_update_channel(uint8_t channel)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_set_pending_network_update_channel_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_set_zdo_configuration_mode(bool enabled)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

@@ -10,12 +10,14 @@
  *
  * [1]: https://www.silabs.com/about-us/legal/master-software-license-agreement
  */
-#include <em_device.h>
-#include <stdint.h>
-#include <stdbool.h>
 
 #ifndef BITS_H
 #define BITS_H
+
+#include <em_device.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 /*
  * FIELD_GET() and FIELD_PREP() are macros make access to bit fields easy. The

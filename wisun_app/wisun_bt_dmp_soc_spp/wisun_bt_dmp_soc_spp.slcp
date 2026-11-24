@@ -203,11 +203,18 @@ configuration:
       - "iostream_eusart"
       - "wisun_low_power"
   - name: "SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION"
-    value: "1"      # Disable this so that the chip can enter EM2/3/4
+    value: "0"      # Disable this so that the chip can enter EM2/3/4
                     # and be woken by other wake sources, setting this
                     # to true adds an EM1 requirement to the Power Manager.
     condition:
       - "iostream_eusart"
+      - "wisun_low_power"
+  - name: "SL_IOSTREAM_EUSART_VCOM_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION"
+    value: "1"
+    condition:
+      - "iostream_eusart"
+    unless:
+      - "wisun_low_power"
   - name: "SL_IOSTREAM_USART_VCOM_RX_BUFFER_SIZE"
     value: "128" # Increase from default 32 to account for automated command
                  # storage entry and for when long command strings are

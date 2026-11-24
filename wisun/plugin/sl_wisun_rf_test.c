@@ -64,6 +64,7 @@ static uint16_t rf_test_physical_channel_offset;
 static uint16_t rf_test_channel_start;
 static uint16_t rf_test_channel_end;
 static uint32_t rf_test_rx_packet_count;
+static uint16_t rf_test_rx_channel;
 static uint16_t rf_test_tx_remaining_count;
 static uint32_t rf_test_base_frequency_hz;
 
@@ -222,36 +223,66 @@ static void rf_test_tx_failure_callback(uint64_t events)
   stop_rf_test(RF_TEST_TX_ACTIVE);
 }
 
-static void rf_test_rx_received_callback(int8_t rssi)
+static void rf_test_rx_received_callback(void)
 {
   rf_test_rx_packet_count++;
-  printf("RF test RX rssi=%d dBm, packets since start_rx: %lu\r\n",
-         rssi,
+  // RSSI, length and payload are reported by the logger event, only count here
+  printf("RF test RX packets since start_rx: %lu\r\n",
          (unsigned long)rf_test_rx_packet_count);
 }
 
 static void rf_test_cal_needed_callback(void)
 {
   sl_rail_handle_t rail_handle;
-  sl_status_t status;
-  status = sli_wisun_get_rail_handle(&rail_handle);
-  SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_STATUS_OK == status, status);
-  status = sl_rail_calibrate(rail_handle, &rf_phy_cal_values, SL_RAIL_CAL_ALL_PENDING);
-  SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_RAIL_STATUS_NO_ERROR == status, SL_STATUS_FAIL);
-error_handler:
-  if (status != SL_STATUS_OK) {
+  sl_rail_status_t rail_status;
+  uint8_t mode = rf_test_running;
+
+  if (mode == RF_TEST_OFF) {
+    return;
+  }
+
+  if (sli_wisun_get_rail_handle(&rail_handle) != SL_STATUS_OK) {
     sl_wisun_trace_error("rf_test: rail calibration failed");
-    stop_rf_test(RF_TEST_TX_ACTIVE);
+    stop_rf_test(mode);
+    return;
+  }
+
+  // Image-rejection calibration only runs while the radio is idle. RX has
+  // already started by the time RAIL posts CAL_NEEDED after a PHY switch.
+  if (mode == RF_TEST_RX_ACTIVE) {
+    rail_status = sl_rail_idle(rail_handle, SL_RAIL_IDLE_ABORT, true);
+    if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
+      sl_wisun_trace_error("rf_test: rail calibration failed");
+      stop_rf_test(RF_TEST_RX_ACTIVE);
+      return;
+    }
+  }
+
+  rail_status = sl_rail_calibrate(rail_handle, &rf_phy_cal_values, SL_RAIL_CAL_ALL_PENDING);
+  if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
+    sl_wisun_trace_error("rf_test: rail calibration failed");
+    stop_rf_test(mode);
+    return;
+  }
+
+  if (mode == RF_TEST_RX_ACTIVE) {
+    rail_status = sl_rail_start_rx(rail_handle, rf_test_rx_channel, &rf_scheduler_info);
+    if (rail_status != SL_RAIL_STATUS_NO_ERROR) {
+      sl_wisun_trace_error("rf_test: rail calibration failed");
+      stop_rf_test(RF_TEST_RX_ACTIVE);
+    }
   }
 }
 
 void sl_wisun_rf_test_event_callback(uint64_t events, int8_t rssi)
 {
+  (void)rssi;
+
   if (events & SL_RAIL_EVENT_TX_PACKET_SENT) {
     rf_test_tx_sent_callback();
   }
   if (events & SL_RAIL_EVENT_RX_PACKET_RECEIVED) {
-    rf_test_rx_received_callback(rssi);
+    rf_test_rx_received_callback();
   }
   if (events & SL_RAIL_EVENT_TX_UNDERFLOW ||
       events & SL_RAIL_EVENT_TX_CHANNEL_BUSY) {
@@ -294,7 +325,10 @@ sl_status_t sl_wisun_rf_test_start_tx(uint16_t channel,
   status = sli_wisun_enable_rf_test_event_callback();
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_STATUS_OK == status, status);
 
-  if (count == 0 || data_length == 0 || interval_ms == 0 || data_length > MAX_PACKET_LENGTH) {
+  // The inter-packet delay is a RAIL TX repeat delay, limited by RAIL.
+  if (count == 0 || data_length == 0 || interval_ms == 0
+      || interval_ms > US_TO_MS(SL_RAIL_MAXIMUM_TRANSITION_US)
+      || data_length > MAX_PACKET_LENGTH) {
     SLI_WISUN_ERROR_SET_STATUS(SL_STATUS_INVALID_PARAMETER);
   }
 
@@ -406,6 +440,7 @@ sl_status_t sl_wisun_rf_test_start_rx(uint16_t channel, uint32_t duration)
     SLI_WISUN_ERROR_SET_STATUS(SL_STATUS_INVALID_PARAMETER);
   }
   rf_test_running = RF_TEST_RX_ACTIVE;
+  rf_test_rx_channel = channel;
   //tx power will be set during the stop proceedure
   stack_tx_power_ddbm = sl_rail_get_tx_power_dbm(rail_handle);
 
@@ -413,6 +448,11 @@ sl_status_t sl_wisun_rf_test_start_rx(uint16_t channel, uint32_t duration)
   // filtering so they are not dropped.
   status = rf_test_set_promiscuous_mode(rail_handle, true);
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_STATUS_OK == status, status);
+
+  rail_status = sl_rail_prepare_channel(rail_handle, channel);
+  SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_RAIL_STATUS_NO_ERROR == rail_status, SL_STATUS_FAIL);
+  rail_status = sl_rail_calibrate(rail_handle, &rf_phy_cal_values, SL_RAIL_CAL_ALL_PENDING);
+  SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_RAIL_STATUS_NO_ERROR == rail_status, SL_STATUS_FAIL);
 
   rail_status = sl_rail_start_rx(rail_handle, channel, &rf_scheduler_info);
   SLI_WISUN_ERROR_CHECK_SET_STATUS(SL_RAIL_STATUS_NO_ERROR == rail_status, SL_STATUS_FAIL);

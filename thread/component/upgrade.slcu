@@ -79,3 +79,14 @@ upgrade:
           OPENTHREAD_CONFIG_MLE_IP_ADDRS_TO_REGISTER has been removed (OpenThread PR #12997).
           MTDs now register all valid unicast/multicast addresses unconditionally.
           Projects that override this config will fail to compile; the override is removed automatically.
+
+  - sdk:
+      id: simplicity_sdk
+      version: "2026.12.0"
+    component:
+      - script: thread/component/script/upgrade_mbedtls_aes_rom_tables.lua
+        description: >
+          NCP FTD projects that use the mbedTLS software AES implementation
+          need mbedtls_aes_rom_tables so the AES lookup tables stay in flash.
+          Without it, those tables consume about 8 KB of RAM and the link
+          fails on 96 KB parts.

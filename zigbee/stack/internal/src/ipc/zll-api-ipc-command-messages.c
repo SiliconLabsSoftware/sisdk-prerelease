@@ -162,6 +162,9 @@ void sli_zigbee_stack_zll_start_scan_process_ipc_command(sli_zigbee_ipc_cmd_t *m
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint32_t sl_zigbee_get_zll_primary_channel_mask(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -171,6 +174,9 @@ uint32_t sl_zigbee_get_zll_primary_channel_mask(void)
   return msg.data.get_zll_primary_channel_mask.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint32_t sl_zigbee_get_zll_secondary_channel_mask(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -180,6 +186,9 @@ uint32_t sl_zigbee_get_zll_secondary_channel_mask(void)
   return msg.data.get_zll_secondary_channel_mask.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_is_zll_network(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -189,6 +198,9 @@ bool sl_zigbee_is_zll_network(void)
   return msg.data.is_zll_network.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_set_zll_additional_state(uint16_t mask)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -196,6 +208,9 @@ void sl_zigbee_set_zll_additional_state(uint16_t mask)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_set_zll_additional_state_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_set_zll_node_type(sl_zigbee_node_type_t nodeType)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -203,6 +218,9 @@ void sl_zigbee_set_zll_node_type(sl_zigbee_node_type_t nodeType)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_set_zll_node_type_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_set_zll_primary_channel_mask(uint32_t mask)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -210,6 +228,9 @@ void sl_zigbee_set_zll_primary_channel_mask(uint32_t mask)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_set_zll_primary_channel_mask_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_set_zll_secondary_channel_mask(uint32_t mask)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -217,6 +238,9 @@ void sl_zigbee_set_zll_secondary_channel_mask(uint32_t mask)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_set_zll_secondary_channel_mask_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_zll_clear_tokens(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -224,6 +248,9 @@ void sl_zigbee_zll_clear_tokens(void)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_zll_clear_tokens_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_zll_form_network(sl_zigbee_zll_network_t *networkInfo,
                                        int8_t radioTxPower)
 {
@@ -243,6 +270,9 @@ sl_status_t sl_zigbee_zll_form_network(sl_zigbee_zll_network_t *networkInfo,
   return msg.data.zll_form_network.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_zll_policy_t sl_zigbee_zll_get_policy(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -252,6 +282,9 @@ sl_zigbee_zll_policy_t sl_zigbee_zll_get_policy(void)
   return msg.data.zll_get_policy.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t sl_zigbee_zll_get_radio_idle_mode(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -261,6 +294,9 @@ uint8_t sl_zigbee_zll_get_radio_idle_mode(void)
   return msg.data.zll_get_radio_idle_mode.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_zll_get_token_stack_zll_data(sl_zigbee_tok_type_stack_zll_data_t *token)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -276,6 +312,9 @@ void sl_zigbee_zll_get_token_stack_zll_data(sl_zigbee_tok_type_stack_zll_data_t 
   }
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_zll_get_token_stack_zll_security(sl_zigbee_tok_type_stack_zll_security_t *token)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -291,6 +330,9 @@ void sl_zigbee_zll_get_token_stack_zll_security(sl_zigbee_tok_type_stack_zll_sec
   }
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_zll_get_tokens_stack_zll(sl_zigbee_tok_type_stack_zll_data_t *data,
                                         sl_zigbee_tok_type_stack_zll_security_t *security)
 {
@@ -315,6 +357,9 @@ void sl_zigbee_zll_get_tokens_stack_zll(sl_zigbee_tok_type_stack_zll_data_t *dat
   }
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_zll_join_target(const sl_zigbee_zll_network_t *targetNetworkInfo)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -328,6 +373,9 @@ sl_status_t sl_zigbee_zll_join_target(const sl_zigbee_zll_network_t *targetNetwo
   return msg.data.zll_join_target.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_zll_operation_in_progress(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -337,6 +385,9 @@ bool sl_zigbee_zll_operation_in_progress(void)
   return msg.data.zll_operation_in_progress.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 bool sl_zigbee_zll_rx_on_when_idle_get_active(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -346,6 +397,9 @@ bool sl_zigbee_zll_rx_on_when_idle_get_active(void)
   return msg.data.zll_rx_on_when_idle_get_active.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_zll_scanning_complete(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -353,6 +407,9 @@ void sl_zigbee_zll_scanning_complete(void)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_zll_scanning_complete_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_zll_set_initial_security_state(const sl_zigbee_key_data_t *networkKey,
                                                      const sl_zigbee_zll_initial_security_state_t *securityState)
 {
@@ -371,6 +428,9 @@ sl_status_t sl_zigbee_zll_set_initial_security_state(const sl_zigbee_key_data_t 
   return msg.data.zll_set_initial_security_state.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_zll_set_non_zll_network(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -378,6 +438,9 @@ void sl_zigbee_zll_set_non_zll_network(void)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_zll_set_non_zll_network_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_zll_set_policy(sl_zigbee_zll_policy_t policy)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -387,6 +450,9 @@ sl_status_t sl_zigbee_zll_set_policy(sl_zigbee_zll_policy_t policy)
   return msg.data.zll_set_policy.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_zll_set_radio_idle_mode(sl_zigbee_radio_power_mode_t mode)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -394,6 +460,9 @@ void sl_zigbee_zll_set_radio_idle_mode(sl_zigbee_radio_power_mode_t mode)
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_zll_set_radio_idle_mode_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_zll_set_rx_on_when_idle(uint32_t durationMs)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -403,6 +472,9 @@ sl_status_t sl_zigbee_zll_set_rx_on_when_idle(uint32_t durationMs)
   return msg.data.zll_set_rx_on_when_idle.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_zll_set_security_state_without_key(const sl_zigbee_zll_initial_security_state_t *securityState)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -416,6 +488,9 @@ sl_status_t sl_zigbee_zll_set_security_state_without_key(const sl_zigbee_zll_ini
   return msg.data.zll_set_security_state_without_key.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_zll_set_token_stack_zll_data(sl_zigbee_tok_type_stack_zll_data_t *token)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -431,6 +506,9 @@ void sl_zigbee_zll_set_token_stack_zll_data(sl_zigbee_tok_type_stack_zll_data_t 
   }
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_zll_start_scan(uint32_t channelMask,
                                      int8_t radioPowerForScan,
                                      sl_zigbee_node_type_t nodeType)

@@ -857,10 +857,10 @@ sdk_extension:
   id: cpc
   version: 4.10.0
 - vendor: silabs
-  id: freertos
+  id: printf
   version: 1.2.0
 - vendor: silabs
-  id: printf
+  id: freertos
   version: 1.2.0
 - vendor: silabs
   id: delta_dfu

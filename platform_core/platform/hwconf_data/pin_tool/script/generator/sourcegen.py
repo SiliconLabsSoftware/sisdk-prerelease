@@ -18,6 +18,9 @@ def generate_requirement(region, req, module):
     generate_gpio(region, module, req.getName())
   elif req.getType() in ['prs']:
     region.define('{}_CHANNEL'.format(req.getName()), get_module_instance(str(module.getName())))
+    channel_type = get_prs_channel_type(module) or module.getProperty('channel.type')
+    if channel_type:
+      region.define('{}_CHANNEL_TYPE'.format(req.getName()), channel_type)
     region.write('')
     if 'gpio' in req.properties:
       signal = get_signals(module)[0]
@@ -142,3 +145,32 @@ def get_module_instance(name):
   instance = name[len(name.rstrip('0123456789')):]
 
   return instance
+
+def _prs_short_name(name):
+  return str(name).split('.')[-1].upper()
+
+
+def get_prs_channel_type(module):
+  """ASYNCH, SYNCH, or '' for legacy PRS.CHn names."""
+  short = _prs_short_name(module.getName())
+  if short.startswith('ASYNCH'):
+    return 'ASYNCH'
+  if short.startswith('SYNCH'):
+    return 'SYNCH'
+  return ''
+
+
+def prs_channel_matches(module, channel, channel_type=None):
+  instance = get_module_instance(str(module.getName()))
+  try:
+    if int(instance) != int(channel):
+      return False
+  except (TypeError, ValueError):
+    if str(instance) != str(channel):
+      return False
+
+  kind = get_prs_channel_type(module)
+  if channel_type:
+    return kind == str(channel_type).upper()
+  # Headers without CHANNEL_TYPE are async (or series-1 CH).
+  return kind != 'SYNCH'

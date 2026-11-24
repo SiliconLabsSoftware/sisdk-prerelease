@@ -1466,8 +1466,8 @@ SLI_RAIL_ENUM_GENERIC(sl_rail_events_t, uint64_t) {
  * transition at the end of the packet.
  *
  * @note This event differs from RAIL 2.x behavior: In RAIL 2.x when
- *   \ref RAIL_ScheduleRxConfig_t::rxTransitionEndSchedule was passed as true,
- *   this event would be suppressed when any of the \ref RAIL_EVENTS_RX_COMPLETION
+ *   RAIL_ScheduleRxConfig_t::rxTransitionEndSchedule was passed as true,
+ *   this event would be suppressed when any of the RAIL_EVENTS_RX_COMPLETION
  *   events occurred and are enabled. In RAIL 3 the
  *   \ref SL_RAIL_EVENT_RX_SCHEDULED_RX_END is never suppressed.
  */
@@ -4891,9 +4891,6 @@ typedef struct sl_rail_tx_repeat_config {
    * Repeat option(s) to apply.
    */
   sl_rail_tx_repeat_options_t repeat_options;
-  /**
-   * Per-repeat delay or hopping configuration, depending on repeat_options.
-   */
   union {
     /**
      * When \ref SL_RAIL_TX_REPEAT_OPTION_HOP is not set, specifies
@@ -4914,7 +4911,7 @@ typedef struct sl_rail_tx_repeat_config {
      * must be long enough to cover the prior transmit's time.
      */
     sl_rail_tx_channel_hopping_config_t channel_hopping;
-  } delay_or_hop;
+  } delay_or_hop; /**< Per-repeat delay or hopping configuration, depending on repeat_options. */
 } sl_rail_tx_repeat_config_t;
 
 /**
@@ -5338,7 +5335,7 @@ typedef struct sl_rail_scheduled_rx_config {
    * to 1 to transition to normal RX and 0 to stay in the scheduled RX.
    *
    * @note This field's behavior differs from RAIL 2.x behavior: In RAIL 2.x
-   *   when this field is true, it would suppress \ref RAIL_EVENT_RX_SCHEDULED_RX_END
+   *   when this field is true, it would suppress RAIL_EVENT_RX_SCHEDULED_RX_END
    *   when the scheduled Rx window is implicitly ended by a packet receive
    *   (any of the \ref SL_RAIL_EVENTS_RX_COMPLETION events). In RAIL 3 the
    *   \ref SL_RAIL_EVENT_RX_SCHEDULED_RX_END is never suppressed.
@@ -5668,6 +5665,81 @@ typedef struct sl_rail_rx_packet_details {
    */
   uint16_t channel;
 } sl_rail_rx_packet_details_t;
+
+/**
+ * @struct sl_rail_rx_packet_details_hdt_t
+ * @brief BLE HDT received packet details.
+ *
+ */
+typedef struct sl_rail_rx_packet_details_hdt {
+  /**
+   * The time stamp of the received packet in the RAIL timebase.
+   *
+   * When not available it will be \ref SL_RAIL_PACKET_TIME_INVALID.
+   */
+  sl_rail_packet_time_stamp_t time_received;
+  /**
+   * Indicates whether the received packet successfully passed HEC-C and HEC-P checks
+   * (payload CRC may still fails).
+   *
+   * It is always available.
+   */
+  bool hec_c_p_passed;
+  /**
+   * Estimated Link Quality SNR of the received packet in integer dB.
+   *
+   * It is always available.
+   */
+  int8_t snr_db;
+  /**
+   * RSSI of the received packet in integer dBm. This RSSI measurement is
+   * started as soon as the sync word is detected. The duration of the
+   * measurement is PHY-specific.
+   *
+   * When not available it will be \ref SL_RAIL_RSSI_INVALID_DBM.
+   */
+  int8_t rssi_dbm;
+  /**
+   * Pad byte reserved for future use and currently ignored.
+   */
+  uint8_t reserved;
+  /**
+   * The channel on which the packet was received.
+   *
+   * It is always available.
+   *
+   * @note It is best to fully process (empty or clear) the receive FIFO
+   *   before changing channel configurations (\ref sl_rail_config_channels()
+   *   or a built-in configuration) as unprocessed packets' channel
+   *   could reflect the wrong configuration.
+   */
+  uint16_t channel;
+  /**
+   * Indicates whether the received packet payload block CRC successfully passed.
+   * Each bit should correspond to a bit in Tx portion's TxBlockMap.
+   *
+   * It is always available for HDT FORMAT1, otherwise undefined.
+   */
+  uint16_t rxBlockCrc[4];
+} sl_rail_rx_packet_details_hdt_t;
+
+/**
+ * @struct sl_rail_seq_rx_packet_details_t
+ * @brief Sequencer received packet details.
+ *
+ */
+typedef struct sl_rail_seq_rx_packet_details {
+  union {
+    /**
+     * BLE HDT FORMAT1 received packet details.
+     */
+    sl_rail_rx_packet_details_hdt_t hdt;
+    /**
+     * non-(BLE HDT FORMAT1) received packet details.
+     */
+    sl_rail_rx_packet_details_t legacy;
+  };
+} sl_rail_seq_rx_packet_details_t;
 
 /**
  * @typedef sl_rail_convert_lqi_callback_t

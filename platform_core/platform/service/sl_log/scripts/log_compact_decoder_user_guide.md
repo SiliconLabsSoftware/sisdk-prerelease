@@ -36,7 +36,7 @@ Optional:
 | `--max-args` | Must match firmware `SL_LOG_CONFIG_ARG` (**3**..**10**). Default: **3**. |
 | `--level` | Minimum severity to print (`all`, `debug`, `info`, `warn`, `error`, `crash`). Same as `sl_log_set_loglevel`: the selected level and every more severe level are shown. Default: `all`. |
 | `--baud` | UART baud rate. Default **115200**; use **921600** when NWP logging is enabled on UART. |
-| `--layout` | `auto` (default): timestamped host `sl_log_event_t` (`timestamp` + `epoch` + `event_id` + args). When `--max-args` is not 3, also accept 28-byte NWP records. Force `no-ts` for older event_id-first captures; `ts` for timestamped-only. |
+| `--layout` | `auto` (default): timestamped host `sl_log_event_t` (`timestamp` + `epoch` + `event_id` + args) and 28-byte NWP records. `nwp`: NWP records only (no host frames in the capture). |
 | `--source` | `uart` (default) or `rtt`. |
 | `--log-file` | Mirror decoded output to a file. |
 | `--list-formats` | Dump `.log_fmt` addresses and strings from `--app-out` / `--nwp-out`, then exit (no UART/RTT). |
@@ -82,21 +82,24 @@ python log_compact_decoder.py --app-out app.out --list-formats
 
 ## Wire format (default `--layout auto`)
 
-The VCOM stream may interleave:
+Each record is an `sl_log_event_t`: `uint32 timestamp` + `uint32 epoch` + `event_id` + `args[N]` + trailer (`arg_count`, `core_id`, `flags`, `version`, one byte each). The record size is `12 + 4*N + 4` bytes, with `N` = `--max-args`. TS/DELTA use the firmware time from the record.
 
-- **Core 0 (host M4/M55):** `sl_log_event_t` — `uint32 timestamp` + `uint32 epoch` + `event_id` + `args[N]` + trailer (`12+4*N+4`). TS/DELTA use firmware time.
-- **Core 1 (NWP):** `sl_log_entry_t` — 64-bit firmware timestamp; 28 bytes when NWP `SL_LOG_MAX_ARGS` is 3.
+Firmware from SDKs that predate the `epoch` field has a 32-bit timestamp. Those records still decode, but without their firmware time: TS/DELTA show the PC receive time instead.
 
-When `--max-args` is 3, host and NWP share the same record size; `core_id` in the trailer selects the `.log_fmt` map.
+### GCC and LLVM builds
 
-Use `--layout no-ts` only for captures that predate the timestamp+epoch fields (event_id first, `4+4*N+4`). Those lines use PC receive time in TS/DELTA.
+Event IDs are the link-time addresses of the format strings in `.log_fmt`. For flash builds, compact logging keeps `.log_fmt` out of the image as a non-allocated section. GNU ld still assigns it a non-zero address after the image in flash; the value depends on the device flash base. LLD always links non-allocated sections at address `0`, so an LLVM build sends section offsets as event IDs. RAM builds place `.log_fmt` in RAM, and both linkers give it a RAM address.
+
+The decoder reads the base address from `--app-out` and handles all of these; it prints `Host .log_fmt is linked at address 0 (LLVM/LLD build)` when it applies. For such a build, `--app-out` must be the ELF of the firmware on the board: event IDs are matched on exact format-string addresses, so records from a different build are dropped instead of shown as `<Unknown Event>`.
+
+With either toolchain, a `%s` argument is resolved only when it points to a constant string in the ELF. A pointer to a RAM buffer (for example one filled with `snprintf`) is printed as its address.
 
 ## Troubleshooting
 
 - **`ERROR: --app-out is required`** — Pass the application ELF that matches the running firmware (`--m4-out` still works as an alias).
 - **`ERROR: --port is required`** — Specify the VCOM port; auto-detection is disabled so the wrong adapter is not opened on multi-board benches.
-- **Only DEBUG lines, or garbled `(null)` messages** — Wrong ELF, wrong `--max-args`, or `--layout no-ts` on a timestamped stream. Current firmware needs default `--layout auto`.
-- **NWP lines show “no descriptor/nwp-out match”** — Add `--nwp-out` or, for legacy builds, `--descriptor`.
+- **Only DEBUG lines, or garbled `(null)` messages** — Wrong ELF, wrong `--max-args`, or the Formatted Output backend is on the target instead of Compact Binary Output.
+- **Last log lines missing in Host mode, but printed in Console mode** — In Host mode logs wait in the ring buffer until `sl_log_flush()` runs, typically from the idle task. If an RTOS task function returns, FreeRTOS halts in `prvTaskExitError()` and the idle task never runs again, so the logs queued just before the return are never sent. End the task with `osThreadExit()` instead of `return`, including on error paths.
 - **Missing Python modules** — Install `pyelftools` and `pyserial` (and `pylink-square` for RTT).
 
 ## Related documentation

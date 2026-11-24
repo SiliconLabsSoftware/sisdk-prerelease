@@ -4,24 +4,35 @@ Log Console - hybrid decoder for host (.log_fmt) + NWP (.log_fmt and/or SYSVIEW)
 
 Reads fixed-size binary log records from UART or RTT and prints readable lines.
 
-Wire format: the SoC VCOM stream interleaves two record shapes of different size,
-and ``--layout auto`` (default) accepts both.
+Wire format: the SoC VCOM stream may carry these record shapes, and
+``--layout auto`` (default) accepts all of them.
 
-  host / M4 sl_log_event_t : event_id + args[N] + arg_count/core_id/flags/version
-                             size = 4 + 4*N + 4, N = --max-args (host
-                             SL_LOG_CONFIG_ARG, often 3 or 10), core_id 0
-                             *** no on-wire firmware timestamp ***
+  host / M4 sl_log_event_t : timestamp + epoch + event_id + args[N] + trailer
+                             size = 12 + 4*N + 4, N = --max-args (host
+                             SL_LOG_CONFIG_ARG, often 3 or 10), core_id 0, or
+                             core_id 1 for NWP events the M4 forwards in Host mode
+  timestamp-less fallback  : event_id + args[N] + trailer, size = 4 + 4*N + 4.
+                             This is the tail of every sl_log_event_t, so it
+                             still decodes a record whose timestamp has another
+                             width (32 bits before the epoch field was added),
+                             once the framer has skipped that timestamp.
   NWP sl_log_entry_t       : uint64 timestamp + event_id + args[3] + trailer
                              size = 28 bytes (12 + 4*3 + 4; SL_LOG_MAX_ARGS is
                              fixed at 3 in sl_logging.h), core_id 1
 
+  trailer = arg_count/core_id/flags/version, one byte each.
+
 Timestamps in the console TS/DELTA columns:
-  * NWP (has_ts)     -> firmware TSF from the record (1 us ticks on NWP)
-  * Host/M4 (no-ts)  -> synthetic PC receive time in microseconds since the
-    decoder started (perf_counter). This is intentional: Gecko sl_log_event_t
-    does not carry a timestamp field. Older log_compact_decoder.py always unpacked a
-    leading uint32 as "TS", which for host frames was usually the .log_fmt
-    VMA misread as a huge fake timestamp (~0x08xxxxxx).
+  * Timestamped records -> firmware time from the record, in microseconds. Host
+    records logged before the host/NWP time sync carry 0.
+  * Records decoded through the timestamp-less fallback -> synthetic PC
+    receive time in microseconds since the decoder started (perf_counter).
+
+Host event ids are link-time addresses of the format strings in .log_fmt. GNU ld
+gives the non-allocated compact .log_fmt a non-zero VMA after the image in
+flash (the value depends on the device flash base); LLD always links
+non-allocated sections at VMA 0, so an LLVM build sends plain section offsets
+(0..size). Both are decoded; see _host_fmt_zero_based().
 
 Use ``--layout nwp`` when the capture contains only NWP timestamp-first records
 (no interleaved host frames).
@@ -55,7 +66,7 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 try:
     from elftools.elf.elffile import ELFFile
@@ -404,7 +415,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--max-args", type=_parse_max_args, default=10, metavar="N",
                    help=f"Arg slots per record; MUST match host SL_LOG_CONFIG_ARG "
                         f"(often 3 or 10). With --layout auto, host record size "
-                        f"is 4+4*N+4. "
+                        f"is 12+4*N+4. "
                         f"Range 1..{SL_LOG_CONFIG_ARG_HARD_MAX} (default 10).")
     p.add_argument("--layout",
                    choices=("auto", "nwp"),
@@ -482,20 +493,28 @@ def parse_args() -> argparse.Namespace:
 # -------------------------------------------------------------------------
 # Record parsing
 # -------------------------------------------------------------------------
-# Two record shapes travel on the SoC VCOM stream, and they differ in size:
+# These record shapes travel on the SoC VCOM stream:
 #
-#   host / M4 sl_log_event_t  (no timestamp, core_id 0)
+#   host / M4 sl_log_event_t  (timestamp + epoch, core_id 0, or core_id 1 for
+#                              NWP events the M4 forwards in Host mode)
+#     timestamp(I) + epoch(I) + event_id + args[N] + arg_count/core_id/flags/version
+#     size = 12 + 4*N + 4         -> 28 bytes for N=3
+#
+#   timestamp-less fallback   (the tail of every sl_log_event_t)
 #     event_id + args[N] + arg_count/core_id/flags/version
 #     size = 4 + 4*N + 4          -> 20 bytes for N=3
+#     Matched only after a resync has skipped the timestamp, so that a record
+#     whose timestamp has another width still decodes (it was 32 bits before the
+#     epoch field was added). Such records show PC receive time.
 #
 #   NWP sl_log_entry_t        (leading uint64 timestamp, core_id 1, SL_LOG_MAX_ARGS=3)
 #     timestamp(Q) + event_id + args[3] + arg_count/core_id/flags/version
 #     size = 12 + 4*3 + 4 = 28 bytes  (was 24 when timestamp was uint32)
 #
-# --layout auto (default) accepts both shapes interleaved. The host .log_fmt
-# range (0x08xxxxxx) and the NWP .log_fmt range (0xFExxxxxx) are disjoint, and the
-# NWP shape additionally pins core_id=1 / version=1 / timestamp!=0, so the two
-# shapes are separable without any framing marker on the wire.
+# --layout auto (default) accepts all of them. timestamp + epoch are read as one
+# little-endian uint64, so for N=3 the host shape and the NWP shape are the same
+# 28 bytes and differ only in core_id. No framing marker is on the wire: a record
+# is recognised by its trailer and by event_id being a known .log_fmt address.
 #
 WIRE_LAYOUT_AUTO = "auto"
 WIRE_LAYOUT_NWP = "nwp"
@@ -504,6 +523,14 @@ WIRE_LAYOUT_NO_TS = "no-ts"  # internal default for host-shaped helpers only
 # NWP sl_log_entry_t is compiled with SL_LOG_MAX_ARGS = 3 (sl_logging.h) and is
 # forwarded to the host verbatim, so its size never follows host SL_LOG_CONFIG_ARG.
 NWP_ENTRY_ARGS = 3
+
+# Largest epoch accepted in a host timestamp: 65535 wraps is almost 9 years.
+HOST_EPOCH_MAX = 0xFFFF
+
+# Seconds without new bytes after which a timestamp-less match on a short window
+# is accepted (see _parse_buffer in main). One record takes about 2.5 ms at
+# 115200 baud, so this is far longer than any gap inside a record.
+SHORT_WINDOW_SETTLE_S = 0.1
 
 
 def normalize_layout(layout: str) -> str:
@@ -554,21 +581,26 @@ class RecordSpec:
 def build_record_specs(layout: str, max_args: int, big_endian: bool) -> List[RecordSpec]:
     """Ordered candidate shapes. Strictest (NWP wire) first so it wins ambiguity."""
     mode = normalize_layout(layout)
+    # nwp: core 1 only. auto: core 0 plus core 1 forwarded by the M4 (Host mode).
+    host_core = 1 if mode == WIRE_LAYOUT_NWP else None
     # Raw 28-byte NWP sl_log_entry_t (timestamp + core_id 1).
     nwp_wire = RecordSpec("nwp", NWP_ENTRY_ARGS, big_endian, has_ts=True, expect_core=1)
-    # Host-shaped sl_log_event_t repacked by the M4 for NWP (core_id 1, no timestamp).
-    host_nwp = RecordSpec("host-nwp", max_args, big_endian, has_ts=False, expect_core=1)
-    # Host-shaped records for core 0 (and, in auto, repacked core 1).
-    host = RecordSpec("host", max_args, big_endian, has_ts=False, expect_core=None)
-    if mode == WIRE_LAYOUT_NWP:
-        # Host Mode UART often sends NWP only as host-packed core 1, not 28-byte wire.
-        if nwp_wire.size != host_nwp.size:
-            return [nwp_wire, host_nwp]
-        return [host_nwp]
-    # auto: NWP wire + any host-shaped record (core 0 or repacked core 1).
-    if nwp_wire.size != host.size:
-        return [nwp_wire, host]
-    return [host]
+    # Current sl_log_event_t: timestamp + epoch ahead of event_id.
+    host_ts = RecordSpec("host-ts", max_args, big_endian, has_ts=True,
+                         expect_core=host_core)
+    # Timestamp-less fallback: the event_id..trailer tail of a host record.
+    # Tried last: its window is the shortest, so it is the easiest one to
+    # satisfy by accident.
+    host = RecordSpec("host-nwp" if host_core == 1 else "host", max_args, big_endian,
+                      has_ts=False, expect_core=host_core)
+    specs: List[RecordSpec] = []
+    # For SL_LOG_CONFIG_ARG = 3 host-ts is byte-identical to the NWP wire shape
+    # and already covers it. The NWP wire shape is also dropped when it has the
+    # size of the timestamp-less shape, as size alone cannot tell those apart.
+    if nwp_wire.fmt != host_ts.fmt and nwp_wire.size != host.size:
+        specs.append(nwp_wire)
+    specs.extend((host_ts, host))
+    return specs
 
 
 def parse_record_spec(chunk: bytes,
@@ -645,21 +677,25 @@ _TA_FMT_MIN: int = 0
 _TA_FMT_MAX: int = 0
 _MANIFEST_MAX_ID: int = 0
 _WIRE_HAS_TS: bool = True
+# Start address of every host format string; see _host_fmt_zero_based().
+_HOST_FMT_ADDRS: frozenset = frozenset()
 
 
 def set_event_id_bounds(host_fmt_min: int, host_fmt_max: int,
                         ta_fmt_min: int, ta_fmt_max: int,
                         manifest_max_id: int,
-                        has_timestamp: bool = True) -> None:
+                        has_timestamp: bool = True,
+                        host_fmt_addrs: Optional[Iterable[int]] = None) -> None:
     """Configure per-core event_id sanity ranges."""
     global _HOST_FMT_MIN, _HOST_FMT_MAX, _TA_FMT_MIN, _TA_FMT_MAX
-    global _MANIFEST_MAX_ID, _WIRE_HAS_TS
+    global _MANIFEST_MAX_ID, _WIRE_HAS_TS, _HOST_FMT_ADDRS
     _HOST_FMT_MIN = int(host_fmt_min)
     _HOST_FMT_MAX = int(host_fmt_max)
     _TA_FMT_MIN = int(ta_fmt_min)
     _TA_FMT_MAX = int(ta_fmt_max)
     _MANIFEST_MAX_ID = int(manifest_max_id)
     _WIRE_HAS_TS = bool(has_timestamp)
+    _HOST_FMT_ADDRS = frozenset(host_fmt_addrs or ())
 
 
 def _event_id_in_host_fmt(event_id: int) -> bool:
@@ -672,6 +708,25 @@ def _event_id_in_ta_fmt(event_id: int) -> bool:
 
 def _event_id_in_fmt_range(event_id: int) -> bool:
     return _event_id_in_host_fmt(event_id) or _event_id_in_ta_fmt(event_id)
+
+
+def _host_fmt_zero_based() -> bool:
+    """True when the host .log_fmt is linked at VMA 0, as LLD does.
+
+    Compact .log_fmt is a non-allocated (INFO) section. GNU ld still gives it
+    the current location counter, a non-zero flash address; LLD always places non-allocated
+    sections at address 0. Host event ids are then plain offsets 0..size, so
+    "inside the .log_fmt range" holds for nearly any small word (0 included)
+    and says nothing about whether a record really starts there.
+    """
+    return bool(_HOST_FMT_MAX) and _HOST_FMT_MIN == 0
+
+
+def _event_id_in_distinctive_fmt_range(event_id: int) -> bool:
+    """In a .log_fmt range that ordinary data is unlikely to fall into."""
+    if _event_id_in_ta_fmt(event_id):
+        return True
+    return _event_id_in_host_fmt(event_id) and not _host_fmt_zero_based()
 
 
 def validate_log_fields(ts: int, event_id: int, arg_count: int,
@@ -698,26 +753,37 @@ def validate_log_fields(ts: int, event_id: int, arg_count: int,
     if event_id == 0xFFFFFFFF:
         return 1 <= version <= 2
 
-    # Only the timestamped shape carries a timestamp; the host shape reports 0.
-    if has_ts and ts == 0:
+    # The NWP never reports timestamp 0. The host does, until its timer has been
+    # synchronised with the NWP, so 0 is only junk on core 1.
+    if has_ts and ts == 0 and core_id != 0:
+        return False
+    # The upper half of a host timestamp is the epoch: wraps of a 32-bit
+    # microsecond counter, about 71 minutes each. A large epoch means the
+    # window is misaligned and holds other data where the timestamp should be.
+    if has_ts and core_id == 0 and (ts >> 32) > HOST_EPOCH_MAX:
         return False
 
     lvl_code = (flags >> 1) & 0x07
     # Host: DEBUG..ERROR = 1..4; NWP also CRASH=5. Reject 0 and >5.
     if lvl_code == 0 or lvl_code > 5:
         # Host sometimes packs level differently; accept known .log_fmt VMA.
-        if not _event_id_in_fmt_range(event_id):
+        if not _event_id_in_distinctive_fmt_range(event_id):
             return False
     if version == 0 or version > 2:
-        if not _event_id_in_fmt_range(event_id):
+        if not _event_id_in_distinctive_fmt_range(event_id):
             return False
     if flags & 0xF0:
-        if not _event_id_in_fmt_range(event_id):
+        if not _event_id_in_distinctive_fmt_range(event_id):
             return False
 
     # Per-core event_id range (kills most false-positive resyncs).
     if core_id == 0:
-        if _HOST_FMT_MAX and not _event_id_in_host_fmt(event_id):
+        if _host_fmt_zero_based() and _HOST_FMT_ADDRS:
+            # The range starts at 0 and proves nothing; require the exact
+            # address of a format string.
+            if event_id not in _HOST_FMT_ADDRS:
+                return False
+        elif _HOST_FMT_MAX and not _event_id_in_host_fmt(event_id):
             return False
     else:
         # core 1: NWP .log_fmt VMA OR numeric SYSVIEW descriptor id
@@ -759,11 +825,17 @@ def match_spec_at(buffer: bytes, offset: int,
 
 
 def find_spec_sync(buffer: bytes, specs: Sequence[RecordSpec],
-                   max_search: int = 50) -> Tuple[int, Optional[RecordSpec]]:
+                   max_search: int = 50,
+                   no_ts_window: int = 0) -> Tuple[int, Optional[RecordSpec]]:
     """Scan forward for the first offset where any shape matches.
 
     Returns (offset, spec). ``spec is None`` means nothing matched within the
     window, and the caller should drop one byte and retry.
+
+    ``no_ts_window`` is the number of bytes that must follow an offset before a
+    timestamp-less shape is tried there. Set it to the widest shape so that a
+    timestamped record that has only partly arrived is not taken for a shorter
+    timestamp-less one starting inside it. 0 applies no restriction.
     """
     if not specs:
         return 1, None
@@ -772,7 +844,11 @@ def find_spec_sync(buffer: bytes, specs: Sequence[RecordSpec],
         return 0, None
     search_limit = min(max_search, len(buffer) - smallest + 1)
     for offset in range(max(search_limit, 1)):
-        spec = match_spec_at(buffer, offset, specs)
+        if offset + no_ts_window > len(buffer):
+            candidates: Sequence[RecordSpec] = [s for s in specs if s.has_ts]
+        else:
+            candidates = specs
+        spec = match_spec_at(buffer, offset, candidates)
         if spec is not None:
             return offset, spec
     return 1, None
@@ -1056,7 +1132,10 @@ class ELFStringResolver:
                 self._fps.append(fp)
                 for sec in elf.iter_sections():
                     try:
-                        if (sec.name == ".log_fmt"
+                        # A .log_fmt linked at VMA 0 (LLD) is left out: it would
+                        # shadow low RAM addresses, and a %s argument pointing
+                        # at a RAM buffer would print an unrelated format string.
+                        if ((sec.name == ".log_fmt" and sec["sh_addr"])
                                 or (sec["sh_addr"] and sec["sh_size"]
                                     and (sec["sh_flags"] & 0x2)
                                     and sec["sh_type"] == "SHT_PROGBITS")):
@@ -1479,9 +1558,15 @@ def decode_message(event_id: int,
 
     # Address lookup ordered by core, then the other core's pool as fallback.
     # Host (0x08xxxxxx) and NWP (0xFExxxxxx) .log_fmt ranges are disjoint, so the
-    # fallback is unambiguous and survives a mislabelled core_id.
-    pools = (((host_fmt_map, False), (ta_fmt_map, True)) if core_id == 0
-             else ((ta_fmt_map, True), (host_fmt_map, False)))
+    # fallback is unambiguous and survives a mislabelled core_id. A host pool
+    # linked at VMA 0 is not a fallback for core 1: its addresses are small
+    # integers and would claim numeric NWP event ids.
+    if core_id == 0:
+        pools = ((host_fmt_map, False), (ta_fmt_map, True))
+    elif _host_fmt_zero_based():
+        pools = ((ta_fmt_map, True),)
+    else:
+        pools = ((ta_fmt_map, True), (host_fmt_map, False))
     for pool, is_ta_pool in pools:
         hit = _format_from_fmt_map(event_id, pool, args_val, arg_count,
                                    no_arg_format, resolver, level_str,
@@ -1566,6 +1651,9 @@ def main() -> None:
               f"[0x{base:08X}..0x{end:08X}) ({Path(app_out_path).name})")
         if end > base:
             host_fmt_min, host_fmt_max = base, end - 1
+        if host_fmt_map and base == 0:
+            print("Host .log_fmt is linked at address 0 (LLVM/LLD build): "
+                  "host event ids are section offsets.")
 
     if nwp_out_path:
         ta_fmt_map, base, end = load_log_fmt_map(nwp_out_path)
@@ -1612,7 +1700,8 @@ def main() -> None:
     manifest_max_id = max(manifest_map.keys()) if manifest_map else 0
     layout = normalize_layout(args.layout)
     set_event_id_bounds(host_fmt_min, host_fmt_max, ta_fmt_min, ta_fmt_max,
-                        manifest_max_id, has_timestamp=layout_has_timestamp(layout))
+                        manifest_max_id, has_timestamp=layout_has_timestamp(layout),
+                        host_fmt_addrs=host_fmt_map.keys())
 
     elf_paths = [p for p in (app_out_path, nwp_out_path) if p]
     resolver = ELFStringResolver(out_paths=elf_paths) if elf_paths else None
@@ -1632,9 +1721,9 @@ def main() -> None:
     print(f"Framing [{args.source}]: layout={layout} [{shape_desc}], "
           f"host max_args={max_args}. "
           f"Decode: core0=--app-out/--m4-out .log_fmt, core1=--nwp-out .log_fmt then --descriptor.")
-    print("TS/DELTA: core1=firmware TSF (us); "
-          "core0/host=PC receive time since decoder start (us) "
-          "[host wire record has no timestamp field].")
+    print("TS/DELTA: firmware time from the record (us); host records logged "
+          "before the host/NWP time sync carry 0. Records decoded without "
+          "their timestamp show PC receive time since decoder start (us).")
 
     # ---- Open transport ----
     ser: Any
@@ -1803,9 +1892,9 @@ def main() -> None:
             actual_ch = _ch if _is_rtt_multi else args.rtt_channel
             _pre_align_channel(actual_ch, _buf)
 
-    # Host M4 records have no on-wire timestamp. Synthesize a receive-time
-    # counter (us since decoder start) so TS/DELTA are useful for core 0,
-    # without mis-parsing event_id / .log_fmt VMA the way the previous decoder did.
+    # Records decoded through the timestamp-less fallback have no firmware time.
+    # Synthesize a receive-time counter (us since decoder start) so TS/DELTA are
+    # still useful for them.
     host_ts_t0 = time.perf_counter()
 
     def _host_receive_ts_us() -> int:
@@ -1819,7 +1908,7 @@ def main() -> None:
         if has_ts:
             display_ts = int(ts)
         else:
-            # Synthetic host/M4 receive timestamp (microseconds).
+            # Synthetic receive timestamp (microseconds).
             display_ts = _host_receive_ts_us()
 
         last_ts = last_ts_by_core.get(core_id)
@@ -1902,17 +1991,31 @@ def main() -> None:
 
     smallest_spec = min(s.size for s in specs)
     largest_spec = max(s.size for s in specs)
+    # Updated by the read loop whenever bytes arrive.
+    last_rx_time = time.monotonic()
 
     def _parse_buffer(buf: bytearray) -> None:
         while len(buf) >= smallest_spec:
+            # The timestamp-less shape is the shortest one, and part of a
+            # timestamped record that is still arriving can pass for it
+            # (timestamp or epoch read as event_id), most easily when .log_fmt
+            # is linked at address 0. While bytes keep coming, such a match
+            # needs a window as long as the widest shape. Once the line is
+            # quiet the rest of a record is not coming, and what is buffered
+            # is judged as it is.
+            line_quiet = (time.monotonic() - last_rx_time) >= SHORT_WINDOW_SETTLE_S
+            no_ts_window = 0 if line_quiet else largest_spec
             spec = match_spec_at(buf, 0, specs)
+            if spec is not None and not spec.has_ts and len(buf) < no_ts_window:
+                break
             if spec is None:
                 # Not aligned here. Keep enough bytes for the widest shape so a
                 # 28-byte NWP record is never judged on a truncated window.
-                if len(buf) < largest_spec:
+                if len(buf) < largest_spec and not line_quiet:
                     break
                 skip, spec = find_spec_sync(buf, specs,
-                                            max_search=min(256, len(buf)))
+                                            max_search=min(256, len(buf)),
+                                            no_ts_window=no_ts_window)
                 if spec is None:
                     n = max(skip, 1)
                     _account_discard(n, raw=bytes(buf[:n]))
@@ -1960,6 +2063,7 @@ def main() -> None:
                         bytes_rx += len(data)
                         buf.extend(data)
                         got_any = True
+                        last_rx_time = time.monotonic()
                     _parse_buffer(buf)
             else:
                 try:
@@ -1972,6 +2076,7 @@ def main() -> None:
                     bytes_rx += len(data)
                     buf.extend(data)
                     got_any = True
+                    last_rx_time = time.monotonic()
                 _parse_buffer(buf)
 
             if not got_any:
@@ -1994,7 +2099,10 @@ def main() -> None:
         elif record_count == 0 and bytes_rx > 0:
             print("HINT: bytes arrived but no valid record matched. "
                   "Check --max-args vs host SL_LOG_CONFIG_ARG; --layout auto "
-                  "accepts both the 4+4*N+4 host and 28-byte NWP shapes. "
+                  "accepts the 12+4*N+4 host and 28-byte NWP shapes. "
+                  "Check that --app-out is the ELF of the firmware "
+                  "on the board: an LLVM build is matched on exact format-string "
+                  "addresses. "
                   "ASCII printf on the same COM port is skipped until sync.")
         if log_file:
             print(f"Log saved to: {args.log_file}")

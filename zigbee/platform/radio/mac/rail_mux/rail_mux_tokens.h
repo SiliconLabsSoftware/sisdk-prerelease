@@ -18,5 +18,6 @@
 #include "sl_token_manager_defines.h"
 
 // 0 = Standard/FCS+HDR, 1 = DC/FCS+HDR. Default registered in sli_rail_mux_token_init().
+// Single key at 0x8DAD, the first key after the MAC mux aux channel key (0x8DAC).
 #define COMMON_TOKEN_RAIL_MUX_RXDC_PHY_SELECT \
-  SL_TOKEN_GET_DYNAMIC_TOKEN((SL_TOKEN_NVM3_REGION_ZIGBEE | 0x8730), 0)
+  SL_TOKEN_GET_DYNAMIC_TOKEN((SL_TOKEN_NVM3_REGION_ZIGBEE | 0x8DAD), 0)

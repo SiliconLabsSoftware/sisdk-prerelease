@@ -34,6 +34,9 @@ void slxi_zigbee_stack_switch_role_sleepy_end_device_process_ipc_command(sli_zig
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t slx_zigbee_switch_role_router(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -43,6 +46,9 @@ sl_status_t slx_zigbee_switch_role_router(void)
   return msg.data.switch_role_router.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t slx_zigbee_switch_role_sleepy_end_device(uint8_t end_device_configuration)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

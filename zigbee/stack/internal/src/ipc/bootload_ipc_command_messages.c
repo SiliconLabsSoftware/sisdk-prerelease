@@ -32,6 +32,9 @@ void sli_zigbee_stack_send_bootload_message_process_ipc_command(sli_zigbee_ipc_c
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_send_bootload_message(bool broadcast,
                                             sl_802154_long_addr_t destEui64,
                                             uint8_t messageLength,

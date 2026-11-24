@@ -111,6 +111,9 @@ void mfglibInternalStopTone_process_ipc_command(sli_zigbee_ipc_cmd_t *msg)
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t mfglibEnd(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -120,6 +123,9 @@ sl_status_t mfglibEnd(void)
   return msg.data.mfgEnd.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t mfglibGetChannel(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -129,6 +135,9 @@ uint8_t mfglibGetChannel(void)
   return msg.data.mfgGetChannel.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint16_t mfglibGetCtune(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -138,6 +147,9 @@ uint16_t mfglibGetCtune(void)
   return msg.data.mfgGetCtune.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t mfglibGetOptions(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -147,6 +159,9 @@ uint8_t mfglibGetOptions(void)
   return msg.data.mfgGetOptions.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 int8_t mfglibGetPower(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -156,6 +171,9 @@ int8_t mfglibGetPower(void)
   return msg.data.mfgGetPower.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 int8_t mfglibGetSynOffset(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -165,6 +183,9 @@ int8_t mfglibGetSynOffset(void)
   return msg.data.mfgGetSynOffset.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t mfglibSendPacket(uint8_t *packet,
                              uint16_t repeat)
 {
@@ -188,6 +209,9 @@ sl_status_t mfglibSendPacket(uint8_t *packet,
   return msg.data.mfgSendPacket.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t mfglibSetChannel(uint8_t chan)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -197,6 +221,9 @@ sl_status_t mfglibSetChannel(uint8_t chan)
   return msg.data.mfgSetChannel.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t mfglibSetCtune(uint16_t ctune)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -206,6 +233,9 @@ sl_status_t mfglibSetCtune(uint16_t ctune)
   return msg.data.mfgSetCtune.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t mfglibSetOptions(uint8_t options)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -215,6 +245,9 @@ sl_status_t mfglibSetOptions(uint8_t options)
   return msg.data.mfgSetOptions.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t mfglibSetPower(uint16_t txPowerMode,
                            int8_t power)
 {
@@ -226,6 +259,9 @@ sl_status_t mfglibSetPower(uint16_t txPowerMode,
   return msg.data.mfgSetPower.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void mfglibSetSynOffset(int8_t synOffset)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -233,6 +269,9 @@ void mfglibSetSynOffset(int8_t synOffset)
   sli_zigbee_send_ipc_cmd(mfglibInternalSetSynOffset_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t mfglibStart(MfglibRxCallback mfglibRxCallback)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -242,6 +281,9 @@ sl_status_t mfglibStart(MfglibRxCallback mfglibRxCallback)
   return msg.data.mfgStart.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t mfglibStartStream(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -251,6 +293,9 @@ sl_status_t mfglibStartStream(void)
   return msg.data.mfgStartStream.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t mfglibStartTone(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -260,6 +305,9 @@ sl_status_t mfglibStartTone(void)
   return msg.data.mfgStartTone.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t mfglibStopStream(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -269,6 +317,9 @@ sl_status_t mfglibStopStream(void)
   return msg.data.mfgStopStream.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t mfglibStopTone(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

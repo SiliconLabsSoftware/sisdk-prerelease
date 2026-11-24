@@ -32,6 +32,9 @@ void sli_zigbee_stack_request_beacon_survey_process_ipc_command(sli_zigbee_ipc_c
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_request_beacon_survey(sl_802154_short_addr_t dest,
                                             uint8_t channel_page_count,
                                             uint32_t *channel_masks,

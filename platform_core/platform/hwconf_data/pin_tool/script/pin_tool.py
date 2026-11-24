@@ -798,3 +798,15 @@ def get_module_instance(name):
   instance = name[len(name.rstrip('0123456789')):]
 
   return instance
+
+def disable_prs_routes(module, changeset):
+  if module is None or module.getProperty('type') != 'prs':
+    return
+  for selector in module.getMode().getPortIO().selectors:
+    if selector.getModule().getName() != module.getName():
+      continue
+    for route in selector.routes:
+      changeset.append(Studio.halConfig.newPropertySetting(
+        route.enablePropertyReference,
+        "Disabled"
+      ))

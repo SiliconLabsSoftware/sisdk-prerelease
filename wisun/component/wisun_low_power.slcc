@@ -10,10 +10,19 @@ provides:
 
 requires:
 - name: "power_manager"
+- name: "device_init_dcdc"
+  condition: [device_has_dcdc]
 
 conflicts:
 - name: "wisun_br_stack"
 
+
+source:
+- path: "plugin/app_custom_cli_tick.c"
+  condition: [cli]
+
+validation_helper:
+- path: component/component_validation/low_power_validation.lua
 
 template_contribution:
 - name: component_catalog

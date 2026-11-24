@@ -81,6 +81,9 @@ void sli_zigbee_stack_rail_mux_aux_write_tx_fifo_process_ipc_command(sli_zigbee_
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint32_t sl_zigbee_rail_mux_aux_get_default_listen_rx_packet_count(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -90,6 +93,9 @@ uint32_t sl_zigbee_rail_mux_aux_get_default_listen_rx_packet_count(void)
   return msg.data.rail_mux_aux_get_default_listen_rx_packet_count.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_rail_config_t * sl_zigbee_rail_mux_aux_get_default_rail_config(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -99,6 +105,9 @@ sl_rail_config_t * sl_zigbee_rail_mux_aux_get_default_rail_config(void)
   return msg.data.rail_mux_aux_get_default_rail_config.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_rail_handle_t sl_zigbee_rail_mux_aux_get_default_rail_handle(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -108,6 +117,9 @@ sl_rail_handle_t sl_zigbee_rail_mux_aux_get_default_rail_handle(void)
   return msg.data.rail_mux_aux_get_default_rail_handle.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_rail_status_t sl_zigbee_rail_mux_aux_register_and_start_rx(uint8_t channel)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -117,6 +129,9 @@ sl_rail_status_t sl_zigbee_rail_mux_aux_register_and_start_rx(uint8_t channel)
   return msg.data.rail_mux_aux_register_and_start_rx.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_rail_status_t sl_zigbee_rail_mux_aux_register_protocol(sl_rail_handle_t *out_rail_handle,
                                                           sl_rail_config_t *rail_config,
                                                           sl_rail_init_complete_callback_t init_complete_callback)
@@ -145,6 +160,9 @@ sl_rail_status_t sl_zigbee_rail_mux_aux_register_protocol(sl_rail_handle_t *out_
   return msg.data.rail_mux_aux_register_protocol.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_rail_status_t sl_zigbee_rail_mux_aux_start_cca_csma_tx(sl_rail_handle_t rail_handle,
                                                           uint8_t channel,
                                                           sl_rail_tx_options_t options,
@@ -169,6 +187,9 @@ sl_rail_status_t sl_zigbee_rail_mux_aux_start_cca_csma_tx(sl_rail_handle_t rail_
   return msg.data.rail_mux_aux_start_cca_csma_tx.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_rail_status_t sl_zigbee_rail_mux_aux_start_tx(sl_rail_handle_t rail_handle,
                                                  uint8_t channel,
                                                  sl_rail_tx_options_t options,
@@ -188,6 +209,9 @@ sl_rail_status_t sl_zigbee_rail_mux_aux_start_tx(sl_rail_handle_t rail_handle,
   return msg.data.rail_mux_aux_start_tx.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_rail_status_t sl_zigbee_rail_mux_aux_unregister_protocol(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -197,6 +221,9 @@ sl_rail_status_t sl_zigbee_rail_mux_aux_unregister_protocol(void)
   return msg.data.rail_mux_aux_unregister_protocol.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint16_t sl_zigbee_rail_mux_aux_write_tx_fifo(sl_rail_handle_t rail_handle,
                                               const uint8_t *data_ptr,
                                               uint16_t write_length,

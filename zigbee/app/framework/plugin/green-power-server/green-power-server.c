@@ -361,6 +361,51 @@ bool isCommissioningAppEndpoint(uint8_t endpoint)
   return false;
 }
 
+static bool sli_gp_is_valid_application_endpoint(uint8_t endpt)
+{
+  return (endpt != 0xFF)
+         && (endpt >= GREEN_POWER_SERVER_MIN_VALID_APP_ENDPOINT)
+         && (endpt <= GREEN_POWER_SERVER_MAX_VALID_APP_ENDPOINT);
+}
+
+static void sli_gp_append_valid_application_endpoint(uint8_t endpt,
+                                                     uint8_t *endpoints,
+                                                     uint8_t *numberOfAppEndpoints)
+{
+  if (!sli_gp_is_valid_application_endpoint(endpt)) {
+    return;
+  }
+  if (*numberOfAppEndpoints >= MAX_ENDPOINT_COUNT) {
+    return;
+  }
+  endpoints[(*numberOfAppEndpoints)++] = endpt;
+}
+
+static void sli_gp_collect_valid_application_endpoints(uint8_t *endpoints, uint8_t *count)
+{
+  *count = 0;
+#if defined(SL_ZIGBEE_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+  uint8_t endptCount = sl_zigbee_get_endpoint_count();
+  for (uint8_t i = 0; i < endptCount; i++) {
+    if (*count >= MAX_ENDPOINT_COUNT) {
+      return;
+    }
+    sli_gp_append_valid_application_endpoint(sl_zigbee_get_endpoint(i),
+                                             endpoints,
+                                             count);
+  }
+#else // !(defined(SL_ZIGBEE_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT))
+  for (uint8_t i = 0; i < ZCL_FIXED_ENDPOINT_COUNT; i++) {
+    if (*count >= MAX_ENDPOINT_COUNT) {
+      return;
+    }
+    sli_gp_append_valid_application_endpoint(sli_zigbee_af_endpoints[i].endpoint,
+                                             endpoints,
+                                             count);
+  }
+#endif // defined(SL_ZIGBEE_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+}
+
 static uint8_t getGpCommissioningEndpoint(uint8_t *endpoints)
 {
   uint8_t numberOfAppEndpoints = 0;
@@ -368,25 +413,7 @@ static uint8_t getGpCommissioningEndpoint(uint8_t *endpoints)
       || commissioningState.endpoint == GREEN_POWER_SERVER_SINK_DERIVES_ENDPOINTS  // Sink Derives the end points
       || commissioningState.endpoint == GREEN_POWER_SERVER_RESERVED_ENDPOINTS      // No Endpoint specified
       || commissioningState.endpoint == GREEN_POWER_SERVER_NO_PAIRED_ENDPOINTS) {  // No endpoint specified
-#if defined(SL_ZIGBEE_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
-    uint8_t endptCount = sl_zigbee_get_endpoint_count();
-    for (uint8_t i = 0; (i < endptCount) && (i < MAX_ENDPOINT_COUNT); i++) {
-      uint8_t endpt = sl_zigbee_get_endpoint(i);
-      // Check only valid application endpoint ranges does not include GP EP
-      if (endpt >= GREEN_POWER_SERVER_MIN_VALID_APP_ENDPOINT
-          && endpt <= GREEN_POWER_SERVER_MAX_VALID_APP_ENDPOINT) {
-        endpoints[numberOfAppEndpoints++] = endpt;
-      }
-    }
-#else // !(defined(SL_ZIGBEE_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT))
-    for (uint8_t i = 0; i < ZCL_FIXED_ENDPOINT_COUNT; i++) {
-      // Check only valid application endpoint ranges does not include GP EP
-      if (sli_zigbee_af_endpoints[i].endpoint >= GREEN_POWER_SERVER_MIN_VALID_APP_ENDPOINT
-          && sli_zigbee_af_endpoints[i].endpoint <= GREEN_POWER_SERVER_MAX_VALID_APP_ENDPOINT) {
-        endpoints[numberOfAppEndpoints++] = sli_zigbee_af_endpoints[i].endpoint;
-      }
-    }
-#endif //defined(SL_ZIGBEE_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
+    sli_gp_collect_valid_application_endpoints(endpoints, &numberOfAppEndpoints);
   } else {
     // else just one endpoint in commissioning
     endpoints[0] = commissioningState.endpoint;
@@ -785,24 +812,41 @@ static void sendGpPairingConfigBasedOnSinkCommunicationMode(sli_zigbee_gp_comm_d
   }
 }
 
-static uint8_t reportLength(const uint8_t *inReport)
+static uint8_t reportLength(const uint8_t *inReport, uint16_t bytesRemaining)
 {
-  uint8_t length = 0; // 0 - position of reportId
-  length += 1;  // 1 - position of reportOption
+  if ((inReport == NULL) || (bytesRemaining < GREEN_POWER_SERVER_MIN_REPORT_LENGTH)) {
+    return 0;
+  }
+  uint16_t length = 0;
+  length += 1;
+  if (length >= bytesRemaining) {
+    return 0;
+  }
   if (inReport[length]
       & SL_ZIGBEE_AF_GP_GPD_APPLICATION_DESCRIPTION_COMMAND_REPORT_OPTIONS_TIMEOUT_PERIOD_PRESENT) {
-    length += 3; // 2,3 - position of timeout and 4 position of length
+    if (bytesRemaining < 5) {
+      return 0;
+    }
+    length += 3;
   } else {
-    length += 1; // 2 position of length excluding itself
+    length += 1;
   }
-  length += inReport[length]; // sum up length of report descriptor remaining length
-  length += 1; // add the length byte itself
-  return length;
+  if (length >= bytesRemaining) {
+    return 0;
+  }
+  uint16_t descriptorBody = inReport[length];
+  length += descriptorBody;
+  length += 1;
+  if ((length > bytesRemaining) || (length > UINT8_MAX)) {
+    return 0;
+  }
+  return (uint8_t)length;
 }
 
 static bool saveReportDescriptor(uint8_t totalNumberOfReports,
                                  uint8_t numberOfReports,
                                  uint8_t *reports,
+                                 uint16_t reportsPayloadLen,
                                  sli_zigbee_gp_comm_data_saved_t *commissioningGpd)
 {
   if ((totalNumberOfReports == 0)
@@ -810,23 +854,39 @@ static bool saveReportDescriptor(uint8_t totalNumberOfReports,
           && (commissioningGpd->reports.numberOfReports == commissioningGpd->reports.totalNbOfReport))) {
     return true; // the report was already collected
   }
+  if ((reports == NULL) || (numberOfReports == 0)) {
+    return false;
+  }
+  // A malformed frame must be dropped without further processing, so any
+  // report saved from this frame is rolled back when a later one is rejected.
+  const uint8_t savedNumberOfReports = commissioningGpd->reports.numberOfReports;
+  const uint8_t savedLastIndex = commissioningGpd->reports.lastIndex;
+  const uint8_t savedTotalNbOfReport = commissioningGpd->reports.totalNbOfReport;
   uint8_t *temp = reports;
-  uint8_t length = 0; // 0 - position of reportId
+  uint16_t bytesLeft = reportsPayloadLen;
+  uint8_t length = 0;
   for (uint8_t noOfReport = 0; noOfReport < numberOfReports; noOfReport++) {
-    length = reportLength(temp);
+    length = reportLength(temp, bytesLeft);
     // Negative test - drop the packet if the record is of bad length - 4.4.1.12
-    // Minimum length for 1 report that has 1 option record in that 1 attribute record =
-    // reportId(1) + option(1) + length(1) of option records
-    // Option Record = option (1) + clusterid (2)
-    // Attribute record = attrId (2) + datatype (1) + att option(1)
-    if (length < GREEN_POWER_SERVER_MIN_REPORT_LENGTH ) {
-      // Error, so return without saving
+    // (also covers a record that does not fit in the received payload)
+    bool rejected = (length < GREEN_POWER_SERVER_MIN_REPORT_LENGTH);
+    // The report is not already collected
+    bool alreadyCollected = !rejected
+                            && (NULL != sli_zigbee_af_gp_find_report_id(*temp,
+                                                                        commissioningGpd->reports.numberOfReports,
+                                                                        commissioningGpd->reports.reportsStorage));
+    if (!rejected && !alreadyCollected
+        && (uint16_t)(commissioningGpd->reports.lastIndex + length) > SIZE_OF_REPORT_STORAGE) {
+      sl_zigbee_af_green_power_cluster_println("DROP Report Desc : storage overflow");
+      rejected = true;
+    }
+    if (rejected) {
+      commissioningGpd->reports.numberOfReports = savedNumberOfReports;
+      commissioningGpd->reports.lastIndex = savedLastIndex;
+      commissioningGpd->reports.totalNbOfReport = savedTotalNbOfReport;
       return false;
     }
-    // The report is not already collected
-    if (NULL ==  sli_zigbee_af_gp_find_report_id(*temp,
-                                                 commissioningGpd->reports.numberOfReports,
-                                                 commissioningGpd->reports.reportsStorage)) {
+    if (!alreadyCollected) {
       // now save the entire payload, appending to last received reports if any
       memcpy(&(commissioningGpd->reports.reportsStorage[commissioningGpd->reports.lastIndex]),
              temp,
@@ -838,37 +898,83 @@ static bool saveReportDescriptor(uint8_t totalNumberOfReports,
       sl_zigbee_af_green_power_cluster_println("Duplicate ReportId %d - Not Saved", *temp);
     }
     temp = temp + length;
+    bytesLeft -= length;
   }
   return true;
 }
 
+static bool sli_gp_within_report(const uint8_t *report, uint8_t reportLen, const uint8_t *ptr, uint8_t nbytes)
+{
+  if ((report == NULL) || (ptr == NULL) || (ptr < report)) {
+    return false;
+  }
+  uint16_t offset = (uint16_t)(ptr - report);
+  return ((uint16_t)(offset + nbytes) <= reportLen);
+}
+
+
+static int sli_gp_index_after_datapoint(const uint8_t *report,
+                                        uint8_t reportLen,
+                                        const uint8_t *finger,
+                                        int index)
+{
+  uint8_t datapointOptions = finger[index];
+  index += 3 + ((datapointOptions & 0x10) ? 2 : 0);
+  uint8_t attrRecords = (uint8_t)((datapointOptions & 0x07u) + 1u);
+  for (uint8_t attr = 0; attr < attrRecords; attr++) {
+    index += 3;
+    if (!sli_gp_within_report(report, reportLen, &finger[index], 1)) {
+      return -1;
+    }
+    uint8_t attributeOptions = finger[index];
+    index += (int)((attributeOptions & 0x0fu) + 1u);
+  }
+  return index;
+}
+
 static const uint8_t *findDataPointDescriptorInReport(uint8_t dataPointDescriptorId,
-                                                      const uint8_t *report)
+                                                      const uint8_t *report,
+                                                      uint8_t reportLen)
 {
   uint8_t remainingLength;
   const uint8_t *finger;
-  if (report[1]) {
-    remainingLength = report[4]; // with timeout
+
+  if ((report == NULL) || (reportLen < GREEN_POWER_SERVER_MIN_REPORT_LENGTH)) {
+    return NULL;
+  }
+  if (report[1]
+      & SL_ZIGBEE_AF_GP_GPD_APPLICATION_DESCRIPTION_COMMAND_REPORT_OPTIONS_TIMEOUT_PERIOD_PRESENT) {
+    if (reportLen < 5) {
+      return NULL;
+    }
+    remainingLength = report[4];
     finger = &report[5];
   } else {
-    remainingLength = report[2]; // without timeout
+    if (reportLen < 3) {
+      return NULL;
+    }
+    remainingLength = report[2];
     finger = &report[3];
   }
+  if ((remainingLength < 2)
+      || !sli_gp_within_report(report, reportLen, finger, remainingLength)) {
+    return NULL;
+  }
   uint8_t tempDatapointDescrId = 0;
-  for (int index = 0; index < remainingLength - 1; index++) {
-    // travel through each data point descriptor from here until the input is
-    // found
+  int index = 0;
+  while (index < (int)remainingLength - 1) {
+    if (!sli_gp_within_report(report, reportLen, &finger[index], 1)) {
+      return NULL;
+    }
     if (tempDatapointDescrId == dataPointDescriptorId) {
       return &finger[index];
     }
-    uint8_t datapointOptions = finger[index];
-    index += 3 + ((datapointOptions & 0x10) ? 2 : 0); //for ManufactureId
-    // traverse the attribute records in each data point
-    for (int i = 0; i < ((datapointOptions & 0x07) + 1); i++) {
-      index += 3;
-      uint8_t attributeOptions = finger[index];
-      index += ((attributeOptions & 0x0f) + 1);
+    int nextIndex = sli_gp_index_after_datapoint(report, reportLen, finger, index);
+    if (nextIndex < 0) {
+      return NULL;
     }
+    // Legacy for-loop also advanced index after each datapoint walk.
+    index = nextIndex + 1;
     tempDatapointDescrId++;
   }
   return NULL;
@@ -994,27 +1100,34 @@ static void sendGpPairingLookingUpAddressInSinkEntry(sl_zigbee_gp_address_t *gpd
 }
 
 // Builds a list of all the gpd commands from incoming commissioning req
+// Builds the GPD command list in gpdCommandList, which holds at most
+// gpdCommandListCapacity entries. Anything that would not fit is dropped.
 static uint8_t formGpdCommandListFromIncommingCommReq(uint8_t gpdDeviceId,
                                                       uint8_t *inGpdCommandList,
                                                       uint8_t inCommandListLength,
-                                                      uint8_t *gpdCommandList)
+                                                      uint8_t *gpdCommandList,
+                                                      uint8_t gpdCommandListCapacity)
 {
   uint8_t gpdCommandListLength = 0;
   // if there is already a command list present in incoming payload copy that
   // Realign A0-A3 as AF if TT compacting is enabled and filter out duplicate AF
   bool foundAlready = false;
-  for (int i = 0; i < inCommandListLength; i++) {
-    if (inGpdCommandList[i] == SL_ZIGBEE_ZCL_GP_GPDF_ATTRIBUTE_REPORTING
-        || inGpdCommandList[i] == SL_ZIGBEE_ZCL_GP_GPDF_MULTI_CLUSTER_RPTG
-        || inGpdCommandList[i] == SL_ZIGBEE_ZCL_GP_GPDF_MFR_SP_ATTR_RPTG
-        || inGpdCommandList[i] == SL_ZIGBEE_ZCL_GP_GPDF_MFR_SP_MULTI_CLUSTER_RPTG) {
-      if (!foundAlready) {
-        foundAlready = true;
-        gpdCommandList[gpdCommandListLength++] = SL_ZIGBEE_ZCL_GP_GPDF_ANY_GPD_SENSOR_CMD;
-      }
-    } else {
-      gpdCommandList[gpdCommandListLength++] = inGpdCommandList[i];
+  for (uint8_t i = 0; i < inCommandListLength; i++) {
+    if (gpdCommandListLength >= gpdCommandListCapacity) {
+      break;
     }
+    uint8_t command = inGpdCommandList[i];
+    if ((command == SL_ZIGBEE_ZCL_GP_GPDF_ATTRIBUTE_REPORTING)
+        || (command == SL_ZIGBEE_ZCL_GP_GPDF_MULTI_CLUSTER_RPTG)
+        || (command == SL_ZIGBEE_ZCL_GP_GPDF_MFR_SP_ATTR_RPTG)
+        || (command == SL_ZIGBEE_ZCL_GP_GPDF_MFR_SP_MULTI_CLUSTER_RPTG)) {
+      if (foundAlready) {
+        continue;
+      }
+      foundAlready = true;
+      command = SL_ZIGBEE_ZCL_GP_GPDF_ANY_GPD_SENSOR_CMD;
+    }
+    gpdCommandList[gpdCommandListLength++] = command;
   }
   //Now extend the command list for the device id, take out the duplicate if any
   if (gpdDeviceId != 0xFE) {
@@ -1025,6 +1138,61 @@ static uint8_t formGpdCommandListFromIncommingCommReq(uint8_t gpdDeviceId,
     }
   }
   return gpdCommandListLength;
+}
+
+
+static void sli_gp_try_add_paired_endpoint(uint8_t endpt,
+                                           uint8_t *pairedEndpoints,
+                                           uint8_t pairedEpLimit,
+                                           uint8_t *tempEndpointsOnSink,
+                                           uint8_t *tempSupportedEndpointCount)
+{
+  if (endpt == 0xFF) {
+    return;
+  }
+  for (uint8_t j = 0; j < pairedEpLimit; j++) {
+    if (pairedEndpoints[j] != endpt) {
+      continue;
+    }
+    sl_zigbee_af_green_power_cluster_println("Checking PairedEp[%d]=%02X with SinkEp = %d ",
+                                             j, pairedEndpoints[j], endpt);
+    if (*tempSupportedEndpointCount >= MAX_ENDPOINT_COUNT) {
+      return;
+    }
+    tempEndpointsOnSink[(*tempSupportedEndpointCount)++] = endpt;
+    return;
+  }
+}
+
+static uint8_t sli_gp_map_endpoints_to_cluster_list(uint8_t tempSupportedEndpointCount,
+                                                    uint8_t *tempEndpointsOnSink,
+                                                    uint8_t numberOfClusters,
+                                                    sli_zigbee_zigbee_cluster_t *clusterList,
+                                                    sli_zigbee_supported_gpd_command_cluster_endpoint_map_t *gpdCommandClusterEpMap)
+{
+  uint8_t count = 0;
+  if (tempSupportedEndpointCount > MAX_ENDPOINT_COUNT) {
+    tempSupportedEndpointCount = MAX_ENDPOINT_COUNT;
+  }
+  for (uint8_t i = 0; i < tempSupportedEndpointCount; i++) {
+    uint8_t endpoint = tempEndpointsOnSink[i];
+    for (uint8_t j = 0; j < numberOfClusters; j++) {
+      if (clusterList[j].clusterId == 0xFFFF) {
+        continue;
+      }
+      if (!sli_zigbee_af_gp_endpoint_and_cluster_id_validation(endpoint,
+                                                               clusterList[j].serverClient,
+                                                               clusterList[j].clusterId)) {
+        continue;
+      }
+      if (count >= MAX_ENDPOINT_COUNT) {
+        return count;
+      }
+      gpdCommandClusterEpMap->endpoints[count++] = endpoint;
+      break;
+    }
+  }
+  return count;
 }
 
 // resolves and relates endpoint - cluster from the given the number of paired endpoints
@@ -1041,6 +1209,10 @@ static uint8_t buildSinkSupportedClusterEndPointListForGpdCommands(uint8_t numbe
   //sl_zigbee_af_green_power_cluster_println("");
   uint8_t tempEndpointsOnSink[MAX_ENDPOINT_COUNT] = { 0 };
   uint8_t tempSupportedEndpointCount = 0;
+  uint8_t pairedEpLimit = numberOfPairedEndpoints;
+  if ((pairedEpLimit < 0xFD) && (pairedEpLimit > GREEN_POWER_SERVER_MAX_GPD_PAIRED_ENDPOINTS)) {
+    pairedEpLimit = GREEN_POWER_SERVER_MAX_GPD_PAIRED_ENDPOINTS;
+  }
   if (numberOfPairedEndpoints == GREEN_POWER_SERVER_NO_PAIRED_ENDPOINTS
       || numberOfPairedEndpoints == GREEN_POWER_SERVER_RESERVED_ENDPOINTS) {
     // The target endpoint for validation is the Current commissioning Ep
@@ -1052,54 +1224,30 @@ static uint8_t buildSinkSupportedClusterEndPointListForGpdCommands(uint8_t numbe
 #if defined(SL_ZIGBEE_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
     uint8_t endptCount = sl_zigbee_get_endpoint_count();
     for (uint8_t i = 0; (i < endptCount) && (i < MAX_ENDPOINT_COUNT); i++) {
-      uint8_t endpt = sl_zigbee_get_endpoint(i);
-      if (endpt != 0xFF) {
-        for (int j = 0; j < numberOfPairedEndpoints; j++) {
-          sl_zigbee_af_green_power_cluster_println("Checking PairedEp[%d]=%02X with SinkEp = %d ",
-                                                   j, pairedEndpoints[j], endpt);
-          if (pairedEndpoints[j] == endpt) {
-            tempEndpointsOnSink[tempSupportedEndpointCount] = endpt;
-            tempSupportedEndpointCount++;
-            // Found, so break inner loop
-            // - this is ensure the temp endpoint list is sorted without duplicate
-            break;
-          }
-        }
-      }
+      sli_gp_try_add_paired_endpoint(sl_zigbee_get_endpoint(i),
+                                     pairedEndpoints,
+                                     pairedEpLimit,
+                                     tempEndpointsOnSink,
+                                     &tempSupportedEndpointCount);
     }
 #else // !(defined(SL_ZIGBEE_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT))
-    for (int i = 0; i < MAX_ENDPOINT_COUNT; i++) {
-      for (int j = 0; j < numberOfPairedEndpoints; j++) {
-        sl_zigbee_af_green_power_cluster_println("Checking PairedEp[%d]=%02X with SinkEp = %d ",
-                                                 j, pairedEndpoints[j], sli_zigbee_af_endpoints[i].endpoint);
-        if (pairedEndpoints[j] == sli_zigbee_af_endpoints[i].endpoint) {
-          tempEndpointsOnSink[tempSupportedEndpointCount] = sli_zigbee_af_endpoints[i].endpoint;
-          tempSupportedEndpointCount++;
-          // Found, so break inner loop
-          // - this is ensure the temp endpoint list is sorted without duplicate
-          break;
-        }
-      }
+    for (uint8_t i = 0; (i < ZCL_FIXED_ENDPOINT_COUNT) && (i < MAX_ENDPOINT_COUNT); i++) {
+      sli_gp_try_add_paired_endpoint(sli_zigbee_af_endpoints[i].endpoint,
+                                     pairedEndpoints,
+                                     pairedEpLimit,
+                                     tempEndpointsOnSink,
+                                     &tempSupportedEndpointCount);
     }
 #endif //defined(SL_ZIGBEE_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
   }
   // Here, the endpoints are filtered, those, only are supported out of input paired
   // endpoint list - run through all the clusters for each end point to filter
   // (endpoint, cluster) pair that is supported.
-  uint8_t count = 0;
-  for (int i = 0; i < tempSupportedEndpointCount; i++) {
-    for (int j = 0; j < numberOfClusters; j++) {
-      if (0xFFFF != clusterList[j].clusterId) {
-        if (sli_zigbee_af_gp_endpoint_and_cluster_id_validation(tempEndpointsOnSink[i],
-                                                                clusterList[j].serverClient,
-                                                                clusterList[j].clusterId)) {
-          gpdCommandClusterEpMap->endpoints[count] = tempEndpointsOnSink[i];
-          count++;
-          break;
-        }
-      }
-    }
-  }
+  uint8_t count = sli_gp_map_endpoints_to_cluster_list(tempSupportedEndpointCount,
+                                                       tempEndpointsOnSink,
+                                                       numberOfClusters,
+                                                       clusterList,
+                                                       gpdCommandClusterEpMap);
   noOfCommissionedEndpoints = 0;
   gpdCommandClusterEpMap->numberOfEndpoints = 0;
 #if defined(SL_ZIGBEE_AF_NCP) && defined(SL_CATALOG_ZIGBEE_AF_SUPPORT_PRESENT)
@@ -1158,25 +1306,32 @@ static bool validateSwitchCommand(uint8_t *validatedCommands,
   return false;
 }
 
+
 static uint8_t sli_gp_append_clusters_from_report(const uint8_t *report,
-                                                 sli_zigbee_zigbee_cluster_t *clusterPtr,
-                                                 bool reverseDirection,
-                                                 uint8_t count)
+                                                  uint8_t reportLen,
+                                                  sli_zigbee_zigbee_cluster_t *clusterPtr,
+                                                  bool reverseDirection,
+                                                  uint8_t count)
 {
   for (uint8_t j = 0;; j++) {
-    const uint8_t *datapointOption = findDataPointDescriptorInReport(j, report);
+    const uint8_t *datapointOption = findDataPointDescriptorInReport(j, report, reportLen);
     if (datapointOption == NULL) {
-      break;
+      return count;
+    }
+    if (!sli_gp_within_report(report, reportLen, datapointOption, 3)) {
+      return count;
+    }
+    if (count >= GREEN_POWER_SERVER_MAX_CAR_CLUSTERS) {
+      sl_zigbee_af_green_power_cluster_println("DROP CAR clusters : max %d", GREEN_POWER_SERVER_MAX_CAR_CLUSTERS);
+      return count;
     }
     clusterPtr[count].serverClient = (uint8_t)((datapointOption[0] & 0x08) >> 3);
     if (reverseDirection) {
       clusterPtr[count].serverClient = !(clusterPtr[count].serverClient);
     }
-    clusterPtr[count].clusterId = (uint16_t)(datapointOption[1]
-                                             + (((uint16_t)datapointOption[2]) << 8));
+    clusterPtr[count].clusterId = (uint16_t)(datapointOption[1] + (((uint16_t)datapointOption[2]) << 8));
     count++;
   }
-  return count;
 }
 
 static uint8_t appendClustersFromApplicationDescription(sli_zigbee_zigbee_cluster_t *clusterPtr,
@@ -1188,9 +1343,16 @@ static uint8_t appendClustersFromApplicationDescription(sli_zigbee_zigbee_cluste
     const uint8_t *report = sli_zigbee_af_gp_find_report_id(index,
                                                             commissioningGpd->reports.numberOfReports,
                                                             commissioningGpd->reports.reportsStorage);
-    if (report != NULL) {
-      count = sli_gp_append_clusters_from_report(report, clusterPtr, reverseDirection, count);
+    if (report == NULL) {
+      continue;
     }
+    uint16_t bytesLeft = SIZE_OF_REPORT_STORAGE
+                         - (uint16_t)(report - commissioningGpd->reports.reportsStorage);
+    uint8_t reportLen = reportLength(report, bytesLeft);
+    if (reportLen < GREEN_POWER_SERVER_MIN_REPORT_LENGTH) {
+      continue;
+    }
+    count = sli_gp_append_clusters_from_report(report, reportLen, clusterPtr, reverseDirection, count);
   }
   return count;
 }
@@ -1207,24 +1369,105 @@ static bool validateCARCommand(uint8_t *validatedCommands,
   // Handle Compact Attribute Reporting command validation, check the clusterts present in the
   // stored report descriptor and validate those cluster to see if sink has it on the eintended
   // endpoint on sink.
-  if (commandId == SL_ZIGBEE_ZCL_GP_GPDF_COMPACT_ATTRIBUTE_REPORTING) {
-    gpdCommandClusterEpMap[commandIndex].gpdCommand = commandId;
-    sli_zigbee_zigbee_cluster_t *clusterPtr = &cluster[noOfClusters];
-    noOfClusters += appendClustersFromApplicationDescription(clusterPtr,
-                                                             true,
-                                                             commissioningGpd);
-    uint8_t endpointCount = 0;
-    endpointCount = buildSinkSupportedClusterEndPointListForGpdCommands(applicationInfo->numberOfPairedEndpoints,
-                                                                        applicationInfo->pairedEndpoints,
-                                                                        noOfClusters,
-                                                                        cluster,
-                                                                        &gpdCommandClusterEpMap[commandIndex]);
-    if (endpointCount) {
-      *validatedCommands += 1;
-    }
-    return true;
+  if (commandId != SL_ZIGBEE_ZCL_GP_GPDF_COMPACT_ATTRIBUTE_REPORTING) {
+    return false;
   }
-  return false;
+  gpdCommandClusterEpMap[commandIndex].gpdCommand = commandId;
+  noOfClusters += appendClustersFromApplicationDescription(&cluster[noOfClusters],
+                                                           true,
+                                                           commissioningGpd);
+  // CAR clusters are validated against the paired (or commissioning) endpoints
+  // only, exactly like every other GPD command.
+  uint8_t endpointCount = buildSinkSupportedClusterEndPointListForGpdCommands(applicationInfo->numberOfPairedEndpoints,
+                                                                              applicationInfo->pairedEndpoints,
+                                                                              noOfClusters,
+                                                                              cluster,
+                                                                              &gpdCommandClusterEpMap[commandIndex]);
+  if (endpointCount > 0) {
+    *validatedCommands += 1;
+  }
+  return true;
+}
+
+
+static uint8_t sli_gp_append_app_info_clusters_to_list(sl_zigbee_gp_application_info_t *applicationInfo,
+                                                       sli_zigbee_zigbee_cluster_t *cluster)
+{
+  uint8_t noOfClusters = 0;
+  uint8_t clientClusterCount = applicationInfo->numberOfGpdClientCluster;
+  uint8_t serverClusterCount = applicationInfo->numberOfGpdServerCluster;
+  if (clientClusterCount > GREEN_POWER_SERVER_MAX_GPD_APPLICATION_CLUSTERS) {
+    clientClusterCount = GREEN_POWER_SERVER_MAX_GPD_APPLICATION_CLUSTERS;
+  }
+  if (serverClusterCount > GREEN_POWER_SERVER_MAX_GPD_APPLICATION_CLUSTERS) {
+    serverClusterCount = GREEN_POWER_SERVER_MAX_GPD_APPLICATION_CLUSTERS;
+  }
+  for (uint8_t i = 0; i < clientClusterCount; i++) {
+    if (noOfClusters >= GREEN_POWER_SERVER_MAX_CAR_CLUSTERS) {
+      return noOfClusters;
+    }
+    cluster[noOfClusters].clusterId = applicationInfo->clientClusters[i];
+    cluster[noOfClusters].serverClient = 1;
+    noOfClusters++;
+  }
+  for (uint8_t i = 0; i < serverClusterCount; i++) {
+    if (noOfClusters >= GREEN_POWER_SERVER_MAX_CAR_CLUSTERS) {
+      return noOfClusters;
+    }
+    cluster[noOfClusters].clusterId = applicationInfo->serverClusters[i];
+    cluster[noOfClusters].serverClient = 0;
+    noOfClusters++;
+  }
+  return noOfClusters;
+}
+
+static uint8_t sli_gp_build_clusters_from_translation(uint8_t commandId,
+                                                       sl_zigbee_gp_application_info_t *applicationInfo,
+                                                       sli_zigbee_zigbee_cluster_t *cluster)
+{
+  uint8_t noOfClusters = 0;
+  sli_zigbee_zigbee_cluster_t gpdCluster;
+  if (!sli_zigbee_af_get_cluster_list_from_cmd_id_lookup(commandId, &gpdCluster)) {
+    return 0;
+  }
+  if (gpdCluster.clusterId != 0xFFFF) {
+    cluster[noOfClusters].clusterId = gpdCluster.clusterId;
+    cluster[noOfClusters].serverClient = gpdCluster.serverClient;
+    noOfClusters += 1;
+  } else {
+    noOfClusters += sli_zigbee_af_get_cluster_list_from_device_id_lookup(applicationInfo->deviceId,
+                                                                         &cluster[noOfClusters]);
+  }
+  return noOfClusters;
+}
+
+static bool sli_gp_validate_default_gpd_command(uint8_t *validatedCommands,
+                                                uint8_t commandIndex,
+                                                uint8_t commandId,
+                                                sl_zigbee_gp_application_info_t *applicationInfo,
+                                                sli_zigbee_supported_gpd_command_cluster_endpoint_map_t *gpdCommandClusterEpMap)
+{
+  sli_zigbee_zigbee_cluster_t cluster[30] = { 0 };
+  uint8_t noOfClusters = 0;
+
+  gpdCommandClusterEpMap[commandIndex].gpdCommand = commandId;
+  if ((applicationInfo->numberOfGpdClientCluster != 0)
+      || (applicationInfo->numberOfGpdServerCluster != 0)) {
+    noOfClusters = sli_gp_append_app_info_clusters_to_list(applicationInfo, cluster);
+  } else {
+    noOfClusters = sli_gp_build_clusters_from_translation(commandId, applicationInfo, cluster);
+    if (noOfClusters == 0) {
+      return false;
+    }
+  }
+  if (buildSinkSupportedClusterEndPointListForGpdCommands(applicationInfo->numberOfPairedEndpoints,
+                                                          applicationInfo->pairedEndpoints,
+                                                          noOfClusters,
+                                                          cluster,
+                                                          &gpdCommandClusterEpMap[commandIndex])) {
+    (*validatedCommands)++;
+  }
+  return true;
 }
 
 // final list of mapping of gpdCommand-Cluster-EndpointList that is supported
@@ -1235,75 +1478,30 @@ static uint8_t validateGpdCommandSupportOnSink(uint8_t *gpdCommandList,
                                                sli_zigbee_gp_comm_data_saved_t *commissioningGpd)
 {
   uint8_t validatedCommands = 0;
-  for (int commandIndex = 0; commandIndex < gpdCommandListLength; commandIndex++) {
-    // First see if it is switch command - validate it else do rest of
-    // the command validation
+  for (uint8_t commandIndex = 0; commandIndex < gpdCommandListLength; commandIndex++) {
+    uint8_t commandId = gpdCommandList[commandIndex];
     if (validateSwitchCommand(&validatedCommands,
                               commandIndex,
-                              gpdCommandList[commandIndex],
+                              commandId,
                               applicationInfo,
                               gpdCommandClusterEpMap,
                               commissioningGpd)) {
-    } else if (validateCARCommand(&validatedCommands,
-                                  commandIndex,
-                                  gpdCommandList[commandIndex],
-                                  applicationInfo,
-                                  gpdCommandClusterEpMap,
-                                  commissioningGpd)) {
-    } else {
-      // default sub translation table has the (gpdCommnd<->ClusterId) mapping,
-      // use the look up to decide when the mapped clusterId = 0xFFFF, then it
-      // need to use the cluster list from the incoming message payload.
-      // pick up clusters to validate against the supplied pair of end points
-      // and available endpoints in sink;
-      gpdCommandClusterEpMap[commandIndex].gpdCommand = gpdCommandList[commandIndex];
-      // Prepare a cluster list that will be input for next level
-      uint8_t noOfClusters = 0;
-      sli_zigbee_zigbee_cluster_t cluster[30] = { 0 };
-      if ((applicationInfo->numberOfGpdClientCluster != 0)
-          || (applicationInfo->numberOfGpdServerCluster != 0)) {
-        // Now a generic cluster - read, write, reporting etc
-        // many clusters are in for the command
-        // prepare a list of all the clusters in the incoming message
-        // pick from appInfo
-        for (int i = 0; i < applicationInfo->numberOfGpdClientCluster; i++) {
-          cluster[noOfClusters].clusterId = applicationInfo->clientClusters[i];
-          cluster[noOfClusters].serverClient = 1; // reverse for the match
-          noOfClusters++;
-        }
-        for (int i = 0; i < applicationInfo->numberOfGpdServerCluster; i++) {
-          cluster[noOfClusters].clusterId = applicationInfo->serverClusters[i];
-          cluster[noOfClusters].serverClient = 0; // reverse for the match
-          noOfClusters++;
-        }
-      } else {
-        sli_zigbee_zigbee_cluster_t gpdCluster;
-        if (!sli_zigbee_af_get_cluster_list_from_cmd_id_lookup(gpdCommandList[commandIndex],
-                                                               &gpdCluster)) {
-          continue;
-        }
-
-        // Apend the cluster found in the TT (default or customised) if available
-        if (0xFFFF != gpdCluster.clusterId) {
-          cluster[noOfClusters].clusterId = gpdCluster.clusterId;
-          cluster[noOfClusters].serverClient = gpdCluster.serverClient;
-          noOfClusters += 1;
-        } else {
-          // Now, get the list of clusters from the device Id if the cluster associated with this
-          // command in the translation table is reserved.
-          noOfClusters += sli_zigbee_af_get_cluster_list_from_device_id_lookup(applicationInfo->deviceId,
-                                                                               &cluster[noOfClusters]);
-        }
-      }
-      uint8_t endpointCount = 0;
-      endpointCount = buildSinkSupportedClusterEndPointListForGpdCommands(applicationInfo->numberOfPairedEndpoints,
-                                                                          applicationInfo->pairedEndpoints,
-                                                                          noOfClusters,
-                                                                          cluster,
-                                                                          &gpdCommandClusterEpMap[commandIndex]);
-      if (endpointCount) {
-        validatedCommands += 1;
-      }
+      continue;
+    }
+    if (validateCARCommand(&validatedCommands,
+                           commandIndex,
+                           commandId,
+                           applicationInfo,
+                           gpdCommandClusterEpMap,
+                           commissioningGpd)) {
+      continue;
+    }
+    if (!sli_gp_validate_default_gpd_command(&validatedCommands,
+                                             commandIndex,
+                                             commandId,
+                                             applicationInfo,
+                                             gpdCommandClusterEpMap)) {
+      continue;
     }
   }
   return validatedCommands;
@@ -1316,12 +1514,17 @@ static uint8_t getMatchedSinkFunctionality(sli_zigbee_supported_gpd_command_clus
   sl_zigbee_gp_application_info_t *applicationInfo = &(commissioningGpd->applicationInfo);
   // to hold the temporary list of gpd commands derived from deviceId and added
   // from the gpdCommandList from app info
-  uint8_t gpdCommandList[50] = { 0 };
+  uint8_t gpdCommandList[GREEN_POWER_SERVER_MAX_GPD_COMMANDS] = { 0 };
   // Build a list of all the commands - present and derived from GPD ID look up
+  uint8_t inCommandCount = applicationInfo->numberOfGpdCommands;
+  if (inCommandCount > sizeof(applicationInfo->gpdCommands)) {
+    inCommandCount = sizeof(applicationInfo->gpdCommands);
+  }
   uint8_t gpdCommandListLength = formGpdCommandListFromIncommingCommReq(applicationInfo->deviceId,
                                                                         applicationInfo->gpdCommands,
-                                                                        applicationInfo->numberOfGpdCommands,
-                                                                        gpdCommandList);
+                                                                        inCommandCount,
+                                                                        gpdCommandList,
+                                                                        sizeof(gpdCommandList));
   // Simulate the commands as per the spec from other information in absence of
   // command list and device Id
   if (gpdCommandListLength == 0
@@ -1373,7 +1576,7 @@ static bool handleGpdMatchingSinkFunctionality(sli_zigbee_gp_comm_data_saved_t *
   // means TT entries ZbProfile ZHA, ZbCluster 0x0006, ZbCmd ON+OFF+TOGGLE,
   // for Gps endpoint which match this cluster On/Off 0x0006
   uint8_t gpdMatch = 0;
-  sli_zigbee_supported_gpd_command_cluster_endpoint_map_t gpdCommandClusterEpMap[50] = { 0 };
+  sli_zigbee_supported_gpd_command_cluster_endpoint_map_t gpdCommandClusterEpMap[GREEN_POWER_SERVER_MAX_GPD_COMMANDS] = { 0 };
   gpdMatch = getMatchedSinkFunctionality(gpdCommandClusterEpMap,
                                          commissioningGpd);
   return (gpdMatch ? true : false);
@@ -1577,7 +1780,7 @@ static bool handleAddingTranstionTableEntry(sli_zigbee_gp_comm_data_saved_t *com
   }
   uint8_t gpdMatch = 0;
 
-  sli_zigbee_supported_gpd_command_cluster_endpoint_map_t gpdCommandClusterEpMap[50] = { 0 };
+  sli_zigbee_supported_gpd_command_cluster_endpoint_map_t gpdCommandClusterEpMap[GREEN_POWER_SERVER_MAX_GPD_COMMANDS] = { 0 };
   gpdMatch = getMatchedSinkFunctionality(gpdCommandClusterEpMap,
                                          commissioningGpd);
 
@@ -1804,7 +2007,14 @@ typedef struct {
   sl_zigbee_key_data_t key;
   uint32_t outgoingFrameCounter;
   uint8_t index;
+  uint8_t payloadEnd; // index of the first byte past the payload (payload[0] + 1)
 } sli_gp_cn_commissioning_parse_t;
+
+// True if "count" more bytes can be read from the payload at parsed->index.
+static bool sli_gp_cn_has_bytes(const sli_gp_cn_commissioning_parse_t *parsed, uint8_t count)
+{
+  return ((uint16_t)parsed->index + count) <= parsed->payloadEnd;
+}
 
 static bool sli_gp_cn_should_drop_security_level(uint8_t securityLevel,
                                                    sl_zigbee_af_status_t attrStatus,
@@ -1847,11 +2057,24 @@ static bool sli_gp_cn_should_drop_missing_key(uint16_t commNotificationOptions,
 static bool sli_gp_cn_parse_commissioning_header(uint8_t *gpdCommandPayload,
                                                   sli_gp_cn_commissioning_parse_t *parsed)
 {
+  // gpdCommandPayload is a ZCL octet string: [0] = length, [1..] = data. A
+  // notification without payload points at a one byte zero-length string, so
+  // nothing beyond [0] may be read. 0xFF is the invalid-string marker.
+  if ((gpdCommandPayload == NULL) || (gpdCommandPayload[0] == 0xFF)) {
+    return false;
+  }
+  parsed->payloadEnd = (uint8_t)(gpdCommandPayload[0] + 1);
   parsed->index = 1;
+  if (!sli_gp_cn_has_bytes(parsed, 2)) {
+    return false;
+  }
   parsed->appInfo.deviceId = gpdCommandPayload[parsed->index++];
   parsed->gpdfOptions = gpdCommandPayload[parsed->index++];
   parsed->gpdfExtendedOptions = 0;
   if (parsed->gpdfOptions & SL_ZIGBEE_AF_GP_GPD_COMMISSIONING_OPTIONS_EXTENDED_OPTIONS_FIELD) {
+    if (!sli_gp_cn_has_bytes(parsed, 1)) {
+      return false;
+    }
     parsed->gpdfExtendedOptions = gpdCommandPayload[parsed->index++];
   }
   parsed->securityLevel = (parsed->gpdfExtendedOptions
@@ -1861,6 +2084,9 @@ static bool sli_gp_cn_parse_commissioning_header(uint8_t *gpdCommandPayload,
                              >> SL_ZIGBEE_AF_GP_GPD_COMMISSIONING_EXTENDED_OPTIONS_KEY_TYPE_OFFSET);
 
   if (parsed->gpdfExtendedOptions & SL_ZIGBEE_AF_GP_GPD_COMMISSIONING_EXTENDED_OPTIONS_GPD_KEY_PRESENT) {
+    if (!sli_gp_cn_has_bytes(parsed, SL_ZIGBEE_ENCRYPTION_KEY_SIZE)) {
+      return false;
+    }
     memmove(parsed->key.contents, (gpdCommandPayload + parsed->index), SL_ZIGBEE_ENCRYPTION_KEY_SIZE);
     parsed->index += SL_ZIGBEE_ENCRYPTION_KEY_SIZE;
   }
@@ -1917,6 +2143,80 @@ static bool sli_gp_cn_process_encrypted_key(uint8_t securityKeyType,
 #endif
 }
 
+// GPD command list: count byte followed by that many command ids.
+static bool sli_gp_cn_parse_gpd_commands(const uint8_t *gpdCommandPayload,
+                                          sli_gp_cn_commissioning_parse_t *parsed)
+{
+  if (!sli_gp_cn_has_bytes(parsed, 1)) {
+    return false;
+  }
+  uint8_t numberOfGpdCommands = gpdCommandPayload[parsed->index++];
+  // The declared count must fit appInfo.gpdCommands[] and the payload
+  // before the first command is stored.
+  if ((numberOfGpdCommands > GREEN_POWER_SERVER_MAX_GPD_COMMANDS)
+      || !sli_gp_cn_has_bytes(parsed, numberOfGpdCommands)) {
+    return false;
+  }
+  parsed->appInfo.numberOfGpdCommands = numberOfGpdCommands;
+  for (uint8_t i = 0; i < numberOfGpdCommands; i++) {
+    parsed->appInfo.gpdCommands[i] = gpdCommandPayload[parsed->index++];
+    if ((parsed->appInfo.gpdCommands[i] == SL_ZIGBEE_ZCL_GP_GPDF_8BITS_VECTOR_PRESS)
+        || (parsed->appInfo.gpdCommands[i] == SL_ZIGBEE_ZCL_GP_GPDF_8BITS_VECTOR_RELEASE)) {
+      parsed->genericCmdPresent = true;
+    }
+  }
+  return true;
+}
+
+// Cluster list: one count byte (server count low nibble, client count high
+// nibble) followed by the server cluster ids and then the client cluster ids.
+static bool sli_gp_cn_parse_cluster_list(const uint8_t *gpdCommandPayload,
+                                          sli_gp_cn_commissioning_parse_t *parsed)
+{
+  if (!sli_gp_cn_has_bytes(parsed, 1)) {
+    return false;
+  }
+  uint8_t numClusters = gpdCommandPayload[parsed->index++];
+  uint8_t numServer = numClusters & 0x0F;
+  uint8_t numClient = numClusters >> 4;
+  if ((numServer > GREEN_POWER_SERVER_MAX_GPD_APPLICATION_CLUSTERS)
+      || (numClient > GREEN_POWER_SERVER_MAX_GPD_APPLICATION_CLUSTERS)
+      || !sli_gp_cn_has_bytes(parsed, (uint8_t)(2 * (numServer + numClient)))) {
+    return false;
+  }
+  parsed->appInfo.numberOfGpdServerCluster = numServer;
+  for (uint8_t i = 0; i < numServer; i++) {
+    parsed->appInfo.serverClusters[i] = sl_util_fetch_low_high_int16u(gpdCommandPayload + parsed->index);
+    parsed->index += 2;
+  }
+  parsed->appInfo.numberOfGpdClientCluster = numClient;
+  for (uint8_t i = 0; i < numClient; i++) {
+    parsed->appInfo.clientClusters[i] = sl_util_fetch_low_high_int16u(gpdCommandPayload + parsed->index);
+    parsed->index += 2;
+  }
+  return true;
+}
+
+// Switch information: length, configuration and current contact status bytes.
+static bool sli_gp_cn_parse_switch_info(const uint8_t *gpdCommandPayload,
+                                         sli_gp_cn_commissioning_parse_t *parsed)
+{
+  if (!sli_gp_cn_has_bytes(parsed, 3)) {
+    return false;
+  }
+  parsed->switchInfo.switchInfoLength = gpdCommandPayload[parsed->index++];
+  parsed->switchInfo.nbOfContacts = (gpdCommandPayload[parsed->index]
+                                     & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_CONFIGURATION_NB_OF_CONTACT);
+  parsed->switchInfo.switchType = ((gpdCommandPayload[parsed->index++]
+                                    & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_CONFIGURATION_SWITCH_TYPE)
+                                   >> SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_CONFIGURATION_SWITCH_TYPE_OFFSET);
+  parsed->switchInfo.currentContact = gpdCommandPayload[parsed->index++];
+  return true;
+}
+
+// Every read is checked against the payload length (parsed->payloadEnd) and
+// every count against the capacity of the application information it fills,
+// before anything is written. Returns false for a short or oversize payload.
 static bool sli_gp_cn_parse_commissioning_tail(uint8_t *gpdCommandPayload,
                                                 uint32_t gpdSecurityFrameCounter,
                                                 sli_gp_cn_commissioning_parse_t *parsed)
@@ -1924,61 +2224,52 @@ static bool sli_gp_cn_parse_commissioning_tail(uint8_t *gpdCommandPayload,
   parsed->outgoingFrameCounter = gpdSecurityFrameCounter;
   if (parsed->securityLevel >= SL_ZIGBEE_GP_SECURITY_LEVEL_FC_MIC
       && (parsed->gpdfExtendedOptions & SL_ZIGBEE_AF_GP_GPD_COMMISSIONING_EXTENDED_OPTIONS_GPD_OUTGOING_COUNTER_PRESENT)) {
+    if (!sli_gp_cn_has_bytes(parsed, 4)) {
+      return false;
+    }
     parsed->outgoingFrameCounter = sl_util_fetch_low_high_int32u(gpdCommandPayload + parsed->index);
     parsed->index += 4;
   }
 
   if (parsed->gpdfOptions & SL_ZIGBEE_AF_GP_GPD_COMMISSIONING_OPTIONS_APPLICATION_INFORMATION_PRESENT) {
+    if (!sli_gp_cn_has_bytes(parsed, 1)) {
+      return false;
+    }
     parsed->appInfo.applInfoBitmap = gpdCommandPayload[parsed->index++];
   }
 
   if (parsed->appInfo.applInfoBitmap & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_MANUFACTURE_ID_PRESENT) {
+    if (!sli_gp_cn_has_bytes(parsed, 2)) {
+      return false;
+    }
     parsed->appInfo.manufacturerId = sl_util_fetch_low_high_int16u(gpdCommandPayload + parsed->index);
     parsed->index += 2;
   }
   if (parsed->appInfo.applInfoBitmap & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_MODEL_ID_PRESENT) {
+    if (!sli_gp_cn_has_bytes(parsed, 2)) {
+      return false;
+    }
     parsed->appInfo.modelId = sl_util_fetch_low_high_int16u(gpdCommandPayload + parsed->index);
     parsed->index += 2;
   }
 
   parsed->genericCmdPresent = false;
-  if (parsed->appInfo.applInfoBitmap & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_GPD_COMMANDS_PRESENT) {
-    parsed->appInfo.numberOfGpdCommands = gpdCommandPayload[parsed->index++];
-    for (int i = 0; i < parsed->appInfo.numberOfGpdCommands; i++) {
-      parsed->appInfo.gpdCommands[i] = gpdCommandPayload[parsed->index];
-      if ((parsed->appInfo.gpdCommands[i] == SL_ZIGBEE_ZCL_GP_GPDF_8BITS_VECTOR_PRESS)
-          || (parsed->appInfo.gpdCommands[i] == SL_ZIGBEE_ZCL_GP_GPDF_8BITS_VECTOR_RELEASE)) {
-        parsed->genericCmdPresent = true;
-      }
-      parsed->index++;
-    }
+  if ((parsed->appInfo.applInfoBitmap & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_GPD_COMMANDS_PRESENT)
+      && !sli_gp_cn_parse_gpd_commands(gpdCommandPayload, parsed)) {
+    return false;
   }
 
-  if (parsed->appInfo.applInfoBitmap & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_PRESENT) {
-    uint8_t numClusters = gpdCommandPayload[parsed->index++];
-    parsed->appInfo.numberOfGpdServerCluster = numClusters & 0x0F;
-    for (int i = 0; i < parsed->appInfo.numberOfGpdServerCluster; i++) {
-      parsed->appInfo.serverClusters[i] = sl_util_fetch_low_high_int16u(gpdCommandPayload + parsed->index);
-      parsed->index += 2;
-    }
-    parsed->appInfo.numberOfGpdClientCluster = numClusters >> 4;
-    for (int i = 0; i < parsed->appInfo.numberOfGpdClientCluster; i++) {
-      parsed->appInfo.clientClusters[i] = sl_util_fetch_low_high_int16u(gpdCommandPayload + parsed->index);
-      parsed->index += 2;
-    }
+  if ((parsed->appInfo.applInfoBitmap & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_PRESENT)
+      && !sli_gp_cn_parse_cluster_list(gpdCommandPayload, parsed)) {
+    return false;
   }
 
-  if (parsed->appInfo.applInfoBitmap & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_PRESENT) {
-    parsed->switchInfo.switchInfoLength = gpdCommandPayload[parsed->index++];
-    parsed->switchInfo.nbOfContacts = (gpdCommandPayload[parsed->index]
-                                       & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_CONFIGURATION_NB_OF_CONTACT);
-    parsed->switchInfo.switchType = ((gpdCommandPayload[parsed->index++]
-                                      & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_CONFIGURATION_SWITCH_TYPE)
-                                     >> SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_CONFIGURATION_SWITCH_TYPE_OFFSET);
-    parsed->switchInfo.currentContact = gpdCommandPayload[parsed->index++];
+  if ((parsed->appInfo.applInfoBitmap & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_PRESENT)
+      && !sli_gp_cn_parse_switch_info(gpdCommandPayload, parsed)) {
+    return false;
   }
 
-  return (parsed->index <= gpdCommandPayload[0] + 1);
+  return (parsed->index <= parsed->payloadEnd);
 }
 
 static void sli_gp_cn_store_commissioning_gpd(sl_zigbee_gp_address_t *gpdAddr,
@@ -2092,7 +2383,10 @@ static bool gpCommissioningNotificationCommissioningGpdf(uint16_t commNotificati
   }
 #endif
 
-  (void)sli_gp_cn_parse_commissioning_header(gpdCommandPayload, &parsed);
+  if (!sli_gp_cn_parse_commissioning_header(gpdCommandPayload, &parsed)) {
+    sl_zigbee_af_green_power_cluster_println("DROP - GP CN : Short payload");
+    return true;
+  }
 
   if (sli_gp_cn_should_drop_security_level(parsed.securityLevel,
                                           status,
@@ -2108,6 +2402,13 @@ static bool gpCommissioningNotificationCommissioningGpdf(uint16_t commNotificati
                                          parsed.gpdfExtendedOptions,
                                          commissioningGpd)) {
     sl_zigbee_af_green_power_cluster_println("Sec Level > 0, No Key Received Yet");
+    return true;
+  }
+
+  if ((parsed.gpdfExtendedOptions & SL_ZIGBEE_AF_GP_GPD_COMMISSIONING_EXTENDED_OPTIONS_GPD_KEY_PRESENT)
+      && (parsed.gpdfExtendedOptions & SL_ZIGBEE_AF_GP_GPD_COMMISSIONING_EXTENDED_OPTIONS_GPD_KEY_ENCRYPTION)
+      && !sli_gp_cn_has_bytes(&parsed, 4)) { // the key MIC follows the encrypted key
+    sl_zigbee_af_green_power_cluster_println("DROP - GP CN : Short payload");
     return true;
   }
 
@@ -2203,9 +2504,13 @@ static bool gpCommissioningNotificationApplicationDescriptionGpdf(uint16_t commN
                                     delay * MILLISECOND_TICKS_PER_SECOND);
   }
   // Collect the report descriptors in RAM with short payload error check
+  uint16_t adcfReportLen = (gpdCommandPayload[0] > 2)
+                             ? (uint16_t)(gpdCommandPayload[0] - 2)
+                             : 0;
   if (!saveReportDescriptor(gpdCommandPayload[1],    // Total Number of Reports
                             gpdCommandPayload[2],    // Number of reports in this frame
                             &gpdCommandPayload[3],
+                            adcfReportLen,
                             commissioningGpd)) { // Start of report data
     // Error in Application Description payload
     sl_zigbee_af_green_power_cluster_println("ADCF DROP : Error in Report Desc.");
@@ -2220,8 +2525,9 @@ static bool gpCommissioningNotificationApplicationDescriptionGpdf(uint16_t commN
   }
   // Check if all the reports received else keep collecting
   if (commissioningGpd->reports.numberOfReports != commissioningGpd->reports.totalNbOfReport) {
-    sl_zigbee_af_green_power_cluster_println("ADCF : Wait for % d more reports",
-                                             (commissioningGpd->reports.totalNbOfReport - commissioningGpd->reports.totalNbOfReport));
+    sl_zigbee_af_green_power_cluster_println("ADCF : Wait for %d more reports",
+                                             (commissioningGpd->reports.totalNbOfReport
+                                              - commissioningGpd->reports.numberOfReports));
     return true;
   }
   sl_zigbee_af_green_power_cluster_println("ADCF : Collected All the reports -- looking for last reportId");
@@ -2290,7 +2596,7 @@ static void handleChannelRequest(uint16_t options,
                                  bool rxAfterTx,
                                  uint8_t *gpdCommandPayload)
 {
-  if (gpdCommandPayload == NULL) {
+  if ((gpdCommandPayload == NULL) || (gpdCommandPayload[0] < 1)) {
     return; // Channel request has always one byte payload
   }
   if (!rxAfterTx) {
@@ -2468,13 +2774,18 @@ const uint8_t *sli_zigbee_af_gp_find_report_id(uint8_t reportId,
 {
   const uint8_t *temp = reports;
   uint8_t length = 0; // 0 - position of reportId
+  uint16_t bytesLeft = SIZE_OF_REPORT_STORAGE;
   for (uint8_t noOfReport = 0; noOfReport < numberOfReports; noOfReport++) {
     // calculate the length of each report in the payload
     if (*temp == reportId) {
       return temp;
     }
-    length = reportLength(temp);
+    length = reportLength(temp, bytesLeft);
+    if (length == 0) {
+      return NULL;
+    }
     temp = temp + length;
+    bytesLeft -= length;
   }
   return NULL;
 }
@@ -3154,6 +3465,69 @@ sl_zigbee_af_zcl_request_status_t sli_zigbee_af_green_power_client_gp_proxy_comm
                                                                                                                bool localCommandLoopback);
 #endif // SL_CATALOG_ZIGBEE_GREEN_POWER_CLIENT_PRESENT
 
+static bool sli_gp_sink_table_entry_has_no_sinks(const sl_zigbee_gp_sink_table_entry_t *entry)
+{
+  for (uint8_t i = 0; i < GP_SINK_LIST_ENTRIES; i++) {
+    if (entry->sinkList[i].type != SL_ZIGBEE_GP_SINK_TYPE_UNUSED
+        || entry->sinkList[i].target.groupcast.groupID != 0
+        || entry->sinkList[i].target.groupcast.alias != 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+static void sli_gp_pairing_config_try_remove_listed_group(uint8_t sinkEntryIndex,
+                                                          const sl_zigbee_gp_sink_table_entry_t *entry,
+                                                          const sl_zigbee_gp_sink_group_t *candidate,
+                                                          sl_zigbee_gp_sink_group_t *recordedGroups,
+                                                          uint8_t *recordedCount)
+{
+  for (uint8_t j = 0; j < GP_SINK_LIST_ENTRIES; j++) {
+    if (entry->sinkList[j].type != SL_ZIGBEE_GP_SINK_TYPE_GROUPCAST) {
+      continue;
+    }
+    if (entry->sinkList[j].target.groupcast.groupID != candidate->groupID) {
+      continue;
+    }
+    sl_zigbee_af_green_power_cluster_println("Remove GPD group ID: 0x%04X", candidate->groupID);
+    sl_zigbee_gp_sink_table_remove_group(sinkEntryIndex,
+                                         candidate->groupID,
+                                         candidate->alias);
+    if (*recordedCount < GP_SINK_LIST_ENTRIES) {
+      recordedGroups[*recordedCount] = *candidate;
+      (*recordedCount)++;
+    }
+    return;
+  }
+}
+
+static void sli_gp_pairing_config_send_groupcast_remove_pairings(
+  const sl_zcl_green_power_cluster_gp_pairing_configuration_command_t *cmd_data,
+  sl_zigbee_gp_sink_table_entry_t *entry,
+  const sl_zigbee_gp_sink_group_t *removedGroups,
+  uint8_t removedCount)
+{
+  uint32_t pairingOptionsBase = (cmd_data->options
+                                 & SL_ZIGBEE_AF_GP_PAIRING_CONFIGURATION_OPTION_APPLICATION_ID);
+  for (uint8_t i = 0u; i < removedCount; i++) {
+    uint32_t pairingOptions = pairingOptionsBase;
+    pairingOptions |= (2 << SL_ZIGBEE_AF_GP_PAIRING_OPTION_COMMUNICATION_MODE_OFFSET);
+    sl_status_t retval = sendGpPairingMessage(SL_ZIGBEE_OUTGOING_BROADCAST,
+                                              SL_ZIGBEE_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS,
+                                              pairingOptions,
+                                              &(entry->gpd),
+                                              removedGroups[i].groupID,
+                                              0xFF,
+                                              0xFFFFFFFFu,
+                                              NULL,
+                                              0xFFFF,
+                                              0xFF,
+                                              true);
+    sl_zigbee_af_green_power_cluster_println("Send GP Pairing, returned: %d", retval);
+  }
+}
+
 static sl_zigbee_af_zcl_request_status_t sli_gp_pairing_config_remove_groupcast_pairing(
   sl_zigbee_gp_address_t *gpdAddr,
   sl_zcl_green_power_cluster_gp_pairing_configuration_command_t *cmd_data,
@@ -3164,29 +3538,22 @@ static sl_zigbee_af_zcl_request_status_t sli_gp_pairing_config_remove_groupcast_
     return SL_ZIGBEE_ZCL_STATUS_INTERNAL_COMMAND_HANDLED;
   }
 
-  uint8_t cnt = 0u;
+  uint8_t removedCount = 0u;
   sl_zigbee_gp_sink_group_t gpPairingConfigGroupID[GP_SINK_LIST_ENTRIES];
 
-  for (uint8_t i = 0; i < cmd_data->groupListCount && cnt < GP_SINK_LIST_ENTRIES; i++) {
+  for (uint8_t i = 0; i < cmd_data->groupListCount && removedCount < GP_SINK_LIST_ENTRIES; i++) {
     sl_zigbee_gp_sink_group_t candidate;
     memcpy(&candidate,
            &(cmd_data->groupList[i * sizeof(sl_zigbee_gp_sink_group_t)]),
            sizeof(sl_zigbee_gp_sink_group_t));
-    for (uint8_t j = 0; j < GP_SINK_LIST_ENTRIES; j++) {
-      if (entry->sinkList[j].type == SL_ZIGBEE_GP_SINK_TYPE_GROUPCAST
-          && entry->sinkList[j].target.groupcast.groupID == candidate.groupID) {
-        sl_zigbee_af_green_power_cluster_println("Remove GPD group ID: 0x%04X", candidate.groupID);
-        sl_zigbee_gp_sink_table_remove_group(sinkEntryIndex,
-                                             candidate.groupID,
-                                             candidate.alias);
-        gpPairingConfigGroupID[cnt] = candidate;
-        cnt++;
-        break;
-      }
-    }
+    sli_gp_pairing_config_try_remove_listed_group(sinkEntryIndex,
+                                                  entry,
+                                                  &candidate,
+                                                  gpPairingConfigGroupID,
+                                                  &removedCount);
   }
 
-  if (cnt == 0u) {
+  if (removedCount == 0u) {
     sl_zigbee_af_green_power_cluster_println("Group ID mismatch found");
     return SL_ZIGBEE_ZCL_STATUS_INTERNAL_COMMAND_HANDLED;
   }
@@ -3196,37 +3563,17 @@ static sl_zigbee_af_zcl_request_status_t sli_gp_pairing_config_remove_groupcast_
     return SL_ZIGBEE_ZCL_STATUS_INTERNAL_COMMAND_HANDLED;
   }
 
-  bool isRemoved = true;
-  for (uint8_t i = 0; i < GP_SINK_LIST_ENTRIES; i++) {
-    if (entry->sinkList[i].type != SL_ZIGBEE_GP_SINK_TYPE_UNUSED
-        || entry->sinkList[i].target.groupcast.groupID != 0
-        || entry->sinkList[i].target.groupcast.alias != 0) {
-      isRemoved = false;
-    }
-  }
-  if (isRemoved) {
+  if (sli_gp_sink_table_entry_has_no_sinks(entry)) {
     sl_zigbee_af_green_power_cluster_println("decommission GPD!");
     decommissionGpd(0, 0, gpdAddr, false, cmd_data->actions & SL_ZIGBEE_AF_GP_PAIRING_CONFIGURATION_ACTIONS_SEND_GP_PAIRING);
     return SL_ZIGBEE_ZCL_STATUS_SUCCESS;
   }
 
   if (cmd_data->actions & SL_ZIGBEE_AF_GP_PAIRING_CONFIGURATION_ACTIONS_SEND_GP_PAIRING) {
-    for (uint8_t i = 0u; i < cnt; i++) {
-      uint32_t pairingOptions = (cmd_data->options & SL_ZIGBEE_AF_GP_PAIRING_CONFIGURATION_OPTION_APPLICATION_ID);
-      pairingOptions |= (2 << SL_ZIGBEE_AF_GP_PAIRING_OPTION_COMMUNICATION_MODE_OFFSET);
-      sl_status_t retval = sendGpPairingMessage(SL_ZIGBEE_OUTGOING_BROADCAST,
-                                                SL_ZIGBEE_RX_ON_WHEN_IDLE_BROADCAST_ADDRESS,
-                                                pairingOptions,
-                                                &(entry->gpd),
-                                                gpPairingConfigGroupID[i].groupID,
-                                                0xFF,
-                                                0xFFFFFFFFu,
-                                                NULL,
-                                                0xFFFF,
-                                                0xFF,
-                                                true);
-      sl_zigbee_af_green_power_cluster_println("Send GP Pairing, returned: %d", retval);
-    }
+    sli_gp_pairing_config_send_groupcast_remove_pairings(cmd_data,
+                                                         entry,
+                                                         gpPairingConfigGroupID,
+                                                         removedCount);
   }
   return SL_ZIGBEE_ZCL_STATUS_SUCCESS;
 }
@@ -3268,6 +3615,8 @@ static sl_zigbee_af_zcl_request_status_t sli_gp_pairing_config_handle_remove_a_p
   return SL_ZIGBEE_ZCL_STATUS_SUCCESS;
 }
 
+// Counts and array extents were already validated by
+// sli_gp_pairing_config_validate_payload(), so nothing here can fail or overflow.
 static void sli_gp_pairing_config_save_application_info(
   sli_zigbee_gp_comm_data_saved_t *commissioningGpd,
   sl_zcl_green_power_cluster_gp_pairing_configuration_command_t *cmd_data,
@@ -3291,14 +3640,16 @@ static void sli_gp_pairing_config_save_application_info(
            cmd_data->numberOfGpdCommands);
   }
   if (cmd_data->applicationInformation & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_PRESENT) {
-    commissioningGpd->applicationInfo.numberOfGpdClientCluster = cmd_data->clusterIdListCount >> 4;
+    uint8_t nClient = cmd_data->clusterIdListCount >> 4;
+    uint8_t nServer = cmd_data->clusterIdListCount & 0x0f;
+    commissioningGpd->applicationInfo.numberOfGpdClientCluster = nClient;
     memcpy(commissioningGpd->applicationInfo.clientClusters,
            cmd_data->clusterListClient,
-           (commissioningGpd->applicationInfo.numberOfGpdClientCluster * 2));
-    commissioningGpd->applicationInfo.numberOfGpdServerCluster = cmd_data->clusterIdListCount & 0x0f;
+           (nClient * 2));
+    commissioningGpd->applicationInfo.numberOfGpdServerCluster = nServer;
     memcpy(commissioningGpd->applicationInfo.serverClusters,
            cmd_data->clusterListServer,
-           (commissioningGpd->applicationInfo.numberOfGpdServerCluster * 2));
+           (nServer * 2));
   }
   if (cmd_data->applicationInformation & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_SWITCH_INFORMATION_PRESENT) {
     commissioningGpd->switchInformationStruct.switchInfoLength = cmd_data->switchInformationLength;
@@ -3328,9 +3679,10 @@ static void sli_gp_pairing_config_merge_existing_sink_groups(
     return;
   }
 
-  for (uint8_t index = 0;
-       index < GP_SINK_LIST_ENTRIES && commissioningGpd->groupList[0] < GP_SINK_LIST_ENTRIES;
-       index++) {
+  for (uint8_t index = 0; index < GP_SINK_LIST_ENTRIES; index++) {
+    if (commissioningGpd->groupList[0] >= GP_SINK_LIST_ENTRIES) {
+      break;
+    }
     uint8_t pos = (uint8_t)(commissioningGpd->groupList[0] * sizeof(sl_zigbee_gp_sink_group_t) + 1);
     if (entry.sinkList[index].type == SL_ZIGBEE_GP_SINK_TYPE_GROUPCAST) {
       memcpy(&commissioningGpd->groupList[pos],
@@ -3467,6 +3819,7 @@ static sl_zigbee_af_zcl_request_status_t sli_gp_pairing_config_handle_extend_rep
 }
 
 static sl_zigbee_af_zcl_request_status_t sli_gp_pairing_config_handle_application_description(
+  sl_zigbee_af_cluster_command_t *cmd,
   sl_zigbee_gp_address_t *gpdAddr,
   sl_zcl_green_power_cluster_gp_pairing_configuration_command_t *cmd_data,
   sli_zigbee_gp_comm_data_saved_t *commissioningGpd)
@@ -3484,9 +3837,17 @@ static sl_zigbee_af_zcl_request_status_t sli_gp_pairing_config_handle_applicatio
   if (commissioningGpd->commissionState != GP_SINK_COMM_STATE_COLLECT_REPORTS) {
     return SL_ZIGBEE_ZCL_STATUS_UNSUP_COMMAND;
   }
+  uint16_t reportPayloadLen = 0;
+  if ((cmd_data->reportDescriptor != NULL)
+      && (cmd_data->reportDescriptor >= cmd->buffer)
+      && ((uint16_t)(cmd_data->reportDescriptor - cmd->buffer) <= cmd->bufLen)) {
+    reportPayloadLen = cmd->bufLen
+                       - (uint16_t)(cmd_data->reportDescriptor - cmd->buffer);
+  }
   if (!saveReportDescriptor(cmd_data->totalNumberOfReports,
                             cmd_data->numberOfReports,
                             cmd_data->reportDescriptor,
+                            reportPayloadLen,
                             commissioningGpd)) {
     return SL_ZIGBEE_ZCL_STATUS_UNSUP_COMMAND;
   }
@@ -3548,10 +3909,81 @@ static sl_zigbee_af_zcl_request_status_t sli_gp_pairing_config_handle_sink_table
   }
 
   if (gpConfigAtion == SL_ZIGBEE_ZCL_GP_PAIRING_CONFIGURATION_ACTION_APPLICATION_DESCRIPTION) {
-    return sli_gp_pairing_config_handle_application_description(gpdAddr, cmd_data, commissioningGpd);
+    return sli_gp_pairing_config_handle_application_description(cmd, gpdAddr, cmd_data, commissioningGpd);
   }
 
   return SL_ZIGBEE_ZCL_STATUS_SUCCESS;
+}
+
+// True if byteCount bytes starting at "array" lie inside the received payload.
+static bool sli_gp_pairing_config_array_in_payload(const sl_zigbee_af_cluster_command_t *cmd,
+                                                    const uint8_t *array,
+                                                    uint16_t byteCount)
+{
+  if (byteCount == 0) {
+    return true;
+  }
+  if ((array == NULL) || (array < cmd->buffer)) {
+    return false;
+  }
+  return ((uint32_t)(array - cmd->buffer) + byteCount) <= cmd->bufLen;
+}
+
+// The ZAP generated parser only advances over the variable length arrays, it
+// does not check their declared counts against the payload length or against
+// the storage they are later copied into. Validate everything up front, before
+// any commissioning state is modified, so a malformed command leaves no partial state.
+static bool sli_gp_pairing_config_validate_payload(
+  const sl_zigbee_af_cluster_command_t *cmd,
+  const sl_zcl_green_power_cluster_gp_pairing_configuration_command_t *cmd_data)
+{
+  if (((cmd_data->options & 0x0018) == 0x0010)
+      && !sli_gp_pairing_config_array_in_payload(cmd,
+                                                 (const uint8_t *)cmd_data->groupList,
+                                                 (uint16_t)(cmd_data->groupListCount
+                                                            * sizeof(sl_zigbee_zcl_gp_pairing_configuration_group_list_t)))) {
+    return false;
+  }
+
+  if ((cmd_data->numberOfPairedEndpoints > 0) && (cmd_data->numberOfPairedEndpoints < 0xFD)
+      && ((cmd_data->numberOfPairedEndpoints > GREEN_POWER_SERVER_MAX_GPD_PAIRED_ENDPOINTS)
+          || !sli_gp_pairing_config_array_in_payload(cmd,
+                                                     cmd_data->pairedEndpoints,
+                                                     cmd_data->numberOfPairedEndpoints))) {
+    return false;
+  }
+
+  if (!(cmd_data->options & SL_ZIGBEE_AF_GP_PAIRING_CONFIGURATION_OPTION_APPLICATION_INFORMATION_PRESENT)) {
+    return true;
+  }
+
+  if ((cmd_data->applicationInformation & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_GPD_COMMANDS_PRESENT)
+      && ((cmd_data->numberOfGpdCommands > GREEN_POWER_SERVER_MAX_GPD_COMMANDS)
+          || !sli_gp_pairing_config_array_in_payload(cmd,
+                                                     cmd_data->gpdCommandIdList,
+                                                     cmd_data->numberOfGpdCommands))) {
+    return false;
+  }
+
+  if (cmd_data->applicationInformation & SL_ZIGBEE_AF_GP_APPLICATION_INFORMATION_CLUSTER_LIST_PRESENT) {
+    uint8_t nClient = cmd_data->clusterIdListCount >> 4;
+    uint8_t nServer = cmd_data->clusterIdListCount & 0x0F;
+    if ((nClient > GREEN_POWER_SERVER_MAX_GPD_APPLICATION_CLUSTERS)
+        || (nServer > GREEN_POWER_SERVER_MAX_GPD_APPLICATION_CLUSTERS)
+        || !sli_gp_pairing_config_array_in_payload(cmd, (const uint8_t *)cmd_data->clusterListServer, (uint16_t)(nServer * 2))
+        || !sli_gp_pairing_config_array_in_payload(cmd, (const uint8_t *)cmd_data->clusterListClient, (uint16_t)(nClient * 2))) {
+      return false;
+    }
+  }
+
+  // The report descriptor is the tail of the payload; its start must not be past the end.
+  if ((cmd_data->reportDescriptor != NULL)
+      && ((cmd_data->reportDescriptor < cmd->buffer)
+          || ((uint32_t)(cmd_data->reportDescriptor - cmd->buffer) > cmd->bufLen))) {
+    return false;
+  }
+
+  return true;
 }
 
 sl_zigbee_af_zcl_request_status_t sl_zigbee_af_green_power_cluster_gp_pairing_configuration_cb(sl_zigbee_af_cluster_command_t *cmd)
@@ -3566,6 +3998,11 @@ sl_zigbee_af_zcl_request_status_t sl_zigbee_af_green_power_cluster_gp_pairing_co
   if (cmd->source == sl_zigbee_get_node_id()) {
     // Silent Drop : Loopback message - return true to ensure no action from the framework.
     return SL_ZIGBEE_ZCL_STATUS_INTERNAL_COMMAND_HANDLED;
+  }
+
+  if (!sli_gp_pairing_config_validate_payload(cmd, &cmd_data)) {
+    sl_zigbee_af_green_power_cluster_println("DROP - GP Pairing Config : malformed counts/lengths");
+    return SL_ZIGBEE_ZCL_STATUS_UNSUP_COMMAND;
   }
 
   uint8_t gpdAppId = (cmd_data.options & SL_ZIGBEE_AF_GP_PAIRING_CONFIGURATION_OPTION_APPLICATION_ID);
@@ -3626,7 +4063,6 @@ sl_zigbee_af_zcl_request_status_t sl_zigbee_af_green_power_cluster_gp_pairing_co
                                                          gpPairingConfigCommunicationMode,
                                                          gpPairingConfigSecurityLevel);
 }
-
 sl_zigbee_af_zcl_request_status_t sl_zigbee_af_green_power_cluster_gp_sink_table_request_cb(sl_zigbee_af_cluster_command_t *cmd)
 {
   sl_zcl_green_power_cluster_gp_sink_table_request_command_t cmd_data;

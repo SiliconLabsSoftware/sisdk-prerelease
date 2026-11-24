@@ -42,6 +42,9 @@ void sli_zigbee_stack_sec_man_ecc_init_with_test_vector_process_ipc_command(sli_
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_dlk_ecc_test_vector_profile_data_t * sl_zigbee_dlk_ecc_test_vector_get_profile(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -51,6 +54,9 @@ sl_zigbee_dlk_ecc_test_vector_profile_data_t * sl_zigbee_dlk_ecc_test_vector_get
   return msg.data.dlk_ecc_test_vector_get_profile.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_dlk_ecc_test_vector_set_profile(const sl_zigbee_dlk_ecc_test_vector_profile_data_t *profile)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -62,6 +68,9 @@ void sl_zigbee_dlk_ecc_test_vector_set_profile(const sl_zigbee_dlk_ecc_test_vect
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_dlk_ecc_test_vector_set_profile_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_sec_man_ecc_init_with_test_vector(sl_zigbee_sec_man_dlk_ecc_context_t *dlk_ecc_ctx,
                                                         sl_zb_dlk_ecc_config_t *config,
                                                         uint8_t *psk,

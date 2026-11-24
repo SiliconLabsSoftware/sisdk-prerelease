@@ -233,6 +233,19 @@ const RAIL_ChannelConfig_t *const RAIL_BLE_Phy500kbps =
 #endif // SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
 #endif // SL_RAIL_BLE_SUPPORTS_CODED_PHY
 
+#if SL_RAIL_BLE_SUPPORTS_PROTOCOL_HDT
+#if SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
+const RAIL_ChannelConfig_t *const RAIL_BLE_PhyHDT =
+  &sl_rail_ble_phy_hdt_38M4Hz_channelConfig;
+#elif SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 39000000
+const RAIL_ChannelConfig_t *const RAIL_BLE_PhyHDT =
+  &sl_rail_ble_phy_hdt_39MHz_channelConfig;
+#else
+const RAIL_ChannelConfig_t *const RAIL_BLE_PhyHDT =
+  &sl_rail_ble_phy_hdt_40MHz_channelConfig;
+#endif // SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
+#endif // SL_RAIL_BLE_SUPPORTS_PROTOCOL_HDT
+
 #if SL_RAIL_BLE_SUPPORTS_SIMULSCAN_PHY
 #if SL_RAIL_SUPPORTS_MULTIPLE_XTAL_PHYS && SL_RAIL_PHY_INIT_HFXO_FREQ == 38400000
 const RAIL_ChannelConfig_t *const RAIL_BLE_PhySimulscan =

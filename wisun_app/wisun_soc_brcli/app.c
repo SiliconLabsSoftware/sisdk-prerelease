@@ -28,6 +28,7 @@
 #include "sl_cli.h"
 #include "border_router/sl_wisun_br_api.h"
 #include "sl_wisun_api.h"
+#include "sl_wisun_common.h"
 #include "sl_wisun_trace_api.h"
 #include "app_settings.h"
 #include "sl_wisun_cli_core.h"
@@ -669,39 +670,6 @@ static void app_handle_error_ind(sl_wisun_evt_t *evt)
   printf("[Error: %"PRIu32"]\r\n", evt->evt.error.status);
 }
 
-static sl_status_t channel_spacing_khz_to_id(uint32_t channel_spacing_khz, uint8_t *channel_spacing_id)
-{
-  sl_status_t result = SL_STATUS_OK;
-
-  switch (channel_spacing_khz) {
-    case 100:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_100KHZ;
-      break;
-    case 200:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_200KHZ;
-      break;
-    case 250:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_250KHZ;
-      break;
-    case 400:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_400KHZ;
-      break;
-    case 600:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_600KHZ;
-      break;
-    case 800:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_800KHZ;
-      break;
-    case 1200:
-      *channel_spacing_id = SL_WISUN_CHANNEL_SPACING_1200KHZ;
-      break;
-    default:
-      result = SL_STATUS_FAIL;
-  }
-
-  return result;
-}
-
 static void app_service_task(void* arguments)
 {
   ssize_t count;
@@ -1191,7 +1159,8 @@ static void app_start(sl_wisun_phy_config_type_t phy_config_type)
       case SL_WISUN_PHY_CONFIG_EXPLICIT:
         phy_config.config.explicit_plan.ch0_frequency_khz = app_settings_wisun.ch0_frequency;
         phy_config.config.explicit_plan.number_of_channels = app_settings_wisun.number_of_channels;
-        status = channel_spacing_khz_to_id(app_settings_wisun.channel_spacing, &channel_spacing_id);
+        status = sl_wisun_channel_spacing_hz_to_id(app_settings_wisun.channel_spacing * 1000,
+                                                   &channel_spacing_id);
         if (status != SL_STATUS_OK) {
           printf("[Failed: invalid channel spacing %"PRIu16"kHz]\r\n", app_settings_wisun.channel_spacing);
           goto cleanup;

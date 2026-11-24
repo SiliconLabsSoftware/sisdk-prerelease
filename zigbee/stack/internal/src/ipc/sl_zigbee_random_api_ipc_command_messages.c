@@ -40,6 +40,9 @@ void sli_zigbee_stack_get_strong_random_number_array_process_ipc_command(sli_zig
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint16_t sl_zigbee_get_pseudo_random_number(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -49,6 +52,9 @@ uint16_t sl_zigbee_get_pseudo_random_number(void)
   return msg.data.get_pseudo_random_number.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_entropy_source_t sl_zigbee_get_strong_random_entropy_source(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -58,6 +64,9 @@ sl_zigbee_entropy_source_t sl_zigbee_get_strong_random_entropy_source(void)
   return msg.data.get_strong_random_entropy_source.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_get_strong_random_number_array(uint16_t *randomNumber,
                                                      uint8_t count)
 {

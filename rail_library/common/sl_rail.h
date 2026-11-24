@@ -705,7 +705,7 @@ uint16_t sl_rail_set_fixed_length(sl_rail_handle_t rail_handle, uint16_t bytes);
  *   configuration change occurs. May be NULL if do not need a callback.
  * @return Status code indicating success of the function call.
  *
- * @note Unlike RAIL 2.x \ref RAIL_ConfigChannels(), this function only caches
+ * @note Unlike RAIL 2.x RAIL_ConfigChannels(), this function only caches
  *   the configuration and does not prepare any channel in the configuration.
  *   That action is deferred to the next call to a RAIL API where channel is
  *   passed as a parameter, namely
@@ -2095,7 +2095,7 @@ uint16_t sl_rail_write_tx_fifo(sl_rail_handle_t rail_handle,
  * suitable for \ref sl_rail_data_method_t::SL_RAIL_DATA_METHOD_PACKET_MODE
  * only.
  *
- * @note This is different than RAIL 2.x \ref RAIL_SetTxFifo() which
+ * @note This is different than RAIL 2.x RAIL_SetTxFifo() which
  *   disallowed transmit FIFOs smaller than \ref SL_RAIL_MINIMUM_FIFO_BYTES
  *   and would round down a non-power-of-2 size to the next-smaller power-of-2.
  *
@@ -3603,7 +3603,7 @@ sl_rail_status_t sl_rail_start_rx(sl_rail_handle_t rail_handle,
  * In multiprotocol, ensure that you properly yield the radio after this
  * call. See \ref rail_radio_scheduler_yield for more details.
  *
- * @note Unlike RAIL 2.x \ref RAIL_ScheduleRx(), in RAIL 3 the
+ * @note Unlike RAIL 2.x RAIL_ScheduleRx(), in RAIL 3 the
  *   \ref SL_RAIL_EVENT_RX_SCHEDULED_RX_END occurs
  *   regardless of \ref sl_rail_scheduled_rx_config_t::rx_transition_end_schedule
  *   setting. See that event for details.
@@ -7198,6 +7198,16 @@ bool sl_rail_ble_supports_signal_identifier(sl_rail_handle_t rail_handle);
  * Runtime refinement of compile-time \ref SL_RAIL_BLE_SUPPORTS_SIMULSCAN_PHY.
  */
 bool sl_rail_ble_supports_simulscan_phy(sl_rail_handle_t rail_handle);
+
+/**
+ * Indicate whether this chip supports BLE HDT operation.
+ *
+ * @param[in] rail_handle A radio-generic or real RAIL instance handle.
+ * @return true if BLE HDT PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time -ref SL_RAIL_BLE_SUPPORTS_PROTOCOL_HDT.
+ */
+bool sl_rail_ble_supports_hdt_phy(sl_rail_handle_t rail_handle);
 
 /**
  * Indicate whether this chip supports the IEEE 802.15.4 protocol.

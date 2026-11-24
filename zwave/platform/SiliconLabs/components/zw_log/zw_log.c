@@ -46,7 +46,17 @@ void zpal_log(
 
 #define ZW_LOG_QUEUE_LENGTH 8
 #define ZW_LOG_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 128)
-#define ZW_LOG_QUEUE_WAIT_TICKS pdMS_TO_TICKS(100)
+/*
+ * Block on a task notification until a message arrives. A bounded timeout
+ * would wake the MCU periodically from EM2 (defeating FreeRTOS tickless idle)
+ * and prevent EM4 entry on sleeping devices.
+ * Override it for debug with:
+ * -DZW_LOG_QUEUE_WAIT_TICKS="pdMS_TO_TICKS(2000)".
+ */
+#ifndef ZW_LOG_QUEUE_WAIT_TICKS
+#define ZW_LOG_QUEUE_WAIT_TICKS portMAX_DELAY
+#endif
+#define ZW_LOG_TASK_NOTIFY_BIT (1U << 0)
 
 struct zpal_log_event {
   zpal_log_component_t component;
@@ -64,6 +74,7 @@ static StaticQueue_t log_queue_buffer;
 static uint8_t log_queue_storage[ZW_LOG_QUEUE_LENGTH * sizeof(struct zpal_log_event)];
 static StaticTask_t log_task_buffer;
 static StackType_t log_task_stack[ZW_LOG_TASK_STACK_SIZE];
+static TaskHandle_t log_task_handle;
 static volatile uint32_t log_dropped_count;
 
 static const bool log_channels[ZPAL_LOG_LEVEL_END] = {
@@ -149,41 +160,43 @@ static void zpal_log_task(void * p_parameters)
   struct zpal_log_event event;
 
   for (;;) {
-    if (xQueueReceive(log_queue, &event, ZW_LOG_QUEUE_WAIT_TICKS) != pdTRUE) {
-      zpal_log_report_drops();
-      continue;
-    }
+    (void)xTaskNotifyWait(0,
+                          ZW_LOG_TASK_NOTIFY_BIT,
+                          NULL,
+                          ZW_LOG_QUEUE_WAIT_TICKS);
 
-    size_t msg_len = 0;
-    if (ZW_LOG_DISPLAY_TIMESTAMP) {
+    while (xQueueReceive(log_queue, &event, 0) == pdTRUE) {
+      size_t msg_len = 0;
+      if (ZW_LOG_DISPLAY_TIMESTAMP) {
+        zpal_log_append((char *)log_buffer,
+                        ZW_LOG_BUFFER_SIZE,
+                        &msg_len,
+                        "%09u ",
+                        (unsigned int)xTaskGetTickCount());
+      }
+      if (ZW_LOG_DISPLAY_LEVEL) {
+        zpal_log_append((char *)log_buffer,
+                        ZW_LOG_BUFFER_SIZE,
+                        &msg_len,
+                        "[%c] ",
+                        level_chars[event.level]);
+      }
+      if (ZW_LOG_DISPLAY_COMPONENT) {
+        zpal_log_append((char *)log_buffer,
+                        ZW_LOG_BUFFER_SIZE,
+                        &msg_len,
+                        "(%d) ",
+                        event.component);
+      }
       zpal_log_append((char *)log_buffer,
                       ZW_LOG_BUFFER_SIZE,
                       &msg_len,
-                      "%09u ",
-                      (unsigned int)xTaskGetTickCount());
-    }
-    if (ZW_LOG_DISPLAY_LEVEL) {
-      zpal_log_append((char *)log_buffer,
-                      ZW_LOG_BUFFER_SIZE,
-                      &msg_len,
-                      "[%c] ",
-                      level_chars[event.level]);
-    }
-    if (ZW_LOG_DISPLAY_COMPONENT) {
-      zpal_log_append((char *)log_buffer,
-                      ZW_LOG_BUFFER_SIZE,
-                      &msg_len,
-                      "(%d) ",
-                      event.component);
-    }
-    zpal_log_append((char *)log_buffer,
-                    ZW_LOG_BUFFER_SIZE,
-                    &msg_len,
-                    "%s",
-                    (char *)event.message);
+                      "%s",
+                      (char *)event.message);
 
-    if ((msg_len > 0) && log_channels[event.level]) {
-      zpal_log_emit_via_sl_log("%s", (char *)log_buffer);
+      if ((msg_len > 0) && log_channels[event.level]) {
+        zpal_log_emit_via_sl_log("%s", (char *)log_buffer);
+      }
     }
     zpal_log_report_drops();
   }
@@ -221,6 +234,8 @@ void zpal_log_init(void)
                                                    &log_task_buffer);
       if (task_handle == NULL) {
         log_queue = NULL;
+      } else {
+        log_task_handle = task_handle;
       }
     }
   }
@@ -270,6 +285,7 @@ void zpal_log(
   if (xQueueSend(log_queue, &event, 0) != pdTRUE) {
     zpal_log_record_drop();
   }
+  (void)xTaskNotify(log_task_handle, ZW_LOG_TASK_NOTIFY_BIT, eSetBits);
 }
 
 #else // ZPAL_LOG_BACKEND_COMPACT

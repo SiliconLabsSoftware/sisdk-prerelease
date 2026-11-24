@@ -51,6 +51,9 @@ void sli_zigbee_stack_multi_phy_stop_process_ipc_command(sli_zigbee_ipc_cmd_t *m
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_multi_phy_set_radio_channel(uint8_t phyIndex,
                                                   uint8_t page,
                                                   uint8_t channel)
@@ -64,6 +67,9 @@ sl_status_t sl_zigbee_multi_phy_set_radio_channel(uint8_t phyIndex,
   return msg.data.multi_phy_set_radio_channel.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_multi_phy_set_radio_power(uint8_t phyIndex,
                                                 int8_t power)
 {
@@ -75,6 +81,9 @@ sl_status_t sl_zigbee_multi_phy_set_radio_power(uint8_t phyIndex,
   return msg.data.multi_phy_set_radio_power.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_multi_phy_start(uint8_t phyIndex,
                                       uint8_t page,
                                       uint8_t channel,
@@ -92,6 +101,9 @@ sl_status_t sl_zigbee_multi_phy_start(uint8_t phyIndex,
   return msg.data.multi_phy_start.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_multi_phy_stop(uint8_t phyIndex)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

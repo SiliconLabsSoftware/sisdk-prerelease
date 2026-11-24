@@ -47,6 +47,9 @@ struct tfm_crypto_operation_s {
 #ifndef TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED
         psa_key_derivation_operation_t key_deriv; /*!< Key derivation operation context */
 #endif
+#ifndef TFM_CRYPTO_PAKE_MODULE_DISABLED
+        psa_pake_operation_t pake;        /*!< PAKE operation context */
+#endif
       uint32_t placeholder;  /* Placeholder if all modules are disabled. */
     } operation;
 };

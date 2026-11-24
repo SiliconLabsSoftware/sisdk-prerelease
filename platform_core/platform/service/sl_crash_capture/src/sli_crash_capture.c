@@ -597,13 +597,18 @@ static void crash_capture_scratch(sli_diag_cpu_crash_scratch_t *scratch,
 #endif
 }
 
-static void crash_reset(void) /**< fault_seal requires the caller to reset after it returns. */
+SL_WEAK void sli_crash_capture_system_reset(void) /**< Default: NVIC reset, else spin. Override to change post-seal behavior. */
 {
 #if defined(__ARM_ARCH) || defined(__CORTEX_M)
   NVIC_SystemReset();
 #endif
   while (1) {
   }
+}
+
+static void crash_reset(void) /**< fault_seal requires the caller to reset after it returns. */
+{
+  sli_crash_capture_system_reset();
 }
 
 /*******************************************************************************

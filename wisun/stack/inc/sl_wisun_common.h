@@ -35,6 +35,7 @@
 #include <stdbool.h>
 #include <sl_slist.h>
 #include <stdint.h>
+#include "sl_status.h"
 
 #define CMSIS_RTOS_ERROR_MASK       0x80000000
 
@@ -90,6 +91,31 @@ bool sli_wisun_param_check_limits(double param, double min, double max, const ch
   sli_wisun_param_check_limits((double)(OBJ->MEMBER), (double)(MIN), (double)(MAX), DBG_STR(#MEMBER))
 
 uint64_t divide_integer(uint64_t dividend, uint32_t divisor);
+
+/**
+ * @brief Convert a channel spacing ID to its value in Hz
+ *
+ * @param channel_spacing_id Channel spacing ID (#sl_wisun_channel_spacing_t)
+ * @param[out] channel_spacing_hz Channel spacing in Hz
+ *
+ * @return SL_STATUS_OK on success, SL_STATUS_NULL_POINTER if the output
+ *         pointer is NULL, SL_STATUS_INVALID_PARAMETER if the ID is unknown
+ */
+sl_status_t sl_wisun_channel_spacing_id_to_hz(uint8_t channel_spacing_id,
+                                              uint32_t *channel_spacing_hz);
+
+/**
+ * @brief Convert a channel spacing in Hz to its ID
+ *
+ * @param channel_spacing_hz Channel spacing in Hz
+ * @param[out] channel_spacing_id Channel spacing ID (#sl_wisun_channel_spacing_t)
+ *
+ * @return SL_STATUS_OK on success, SL_STATUS_NULL_POINTER if the output
+ *         pointer is NULL, SL_STATUS_INVALID_PARAMETER if the value is not a
+ *         supported spacing
+ */
+sl_status_t sl_wisun_channel_spacing_hz_to_id(uint32_t channel_spacing_hz,
+                                              uint8_t *channel_spacing_id);
 
 // Seconds to milliseconds
 #define S_TO_MS(x) ((x)*1000)

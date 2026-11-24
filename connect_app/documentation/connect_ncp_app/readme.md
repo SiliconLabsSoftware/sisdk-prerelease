@@ -23,6 +23,12 @@ the PHY configuration and the pin configuration.
 
 This application requires a bootloader to be flashed on the SoC. If you wish to use this application without a bootloader, you need to remove the *bootloader_interface* component or the app will fail on series 2 devices. If you are using *SLC CLI* to generate the project, use the `--without=bootloader_interface` argument.
 
+Further readings:
+
+- [Connect Online Documentation](https://docs.silabs.com/connect-stack/latest/)
+- [Connect Tutorial
+  Series](https://community.silabs.com/s/article/connect-tutorial-series?language=en_US)
+
 ## Usage
 
 The example NCP application provides the same functionality as *Connect - SoC

@@ -45,6 +45,9 @@ void sli_zigbee_stack_zdo_set_send_configuration_req_process_ipc_command(sli_zig
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_zdo_get_configuration_req(sl_802154_short_addr_t device_short,
                                                 bool encrypt,
                                                 uint8_t *tag_ids,
@@ -72,6 +75,9 @@ sl_status_t sl_zigbee_zdo_get_configuration_req(sl_802154_short_addr_t device_sh
   return msg.data.zdo_get_configuration_req.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_zdo_set_add_configuration(uint8_t tag_id,
                                                 size_t zdo_config_arg_len,
                                                 const uint8_t *zdo_config_arg)
@@ -91,6 +97,9 @@ sl_status_t sl_zigbee_zdo_set_add_configuration(uint8_t tag_id,
   return msg.data.zdo_set_add_configuration.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_zdo_set_send_configuration_req(sl_802154_short_addr_t device_short,
                                                      bool encrypt)
 {

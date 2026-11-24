@@ -56,6 +56,12 @@
 #define GP_PAIRING_CONFIGURATION_FIXED_FLAG (0x230)
 
 #define GREEN_POWER_SERVER_MIN_REPORT_LENGTH (10)
+// Capacity limits derived from the storage they protect, so they cannot drift
+// from sl_zigbee_gp_application_info_t.
+#define GREEN_POWER_SERVER_MAX_CAR_CLUSTERS    (30)
+#define GREEN_POWER_SERVER_MAX_GPD_PAIRED_ENDPOINTS (GP_COMMISSIONING_MAX_BYTES - 1)
+#define GREEN_POWER_SERVER_MAX_GPD_COMMANDS (GP_COMMISSIONING_MAX_BYTES - 1)
+#define GREEN_POWER_SERVER_MAX_GPD_APPLICATION_CLUSTERS (15)
 
 // payload [0] = length of payload,[1] = cmdID,[2] = report id,[3] = 1st data value
 #define FIX_SHIFT_REPORTING_DATA_POSITION_CONVERT_TO_PAYLOAD_INDEX          (3)

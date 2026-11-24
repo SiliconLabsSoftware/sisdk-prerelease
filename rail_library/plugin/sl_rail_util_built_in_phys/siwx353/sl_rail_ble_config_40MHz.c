@@ -83,6 +83,7 @@ __ALIGNED(4) static const uint8_t stackInfo_4[2] = { 0x03, 0x04 };
 __ALIGNED(4) static const uint8_t stackInfo_5[2] = { 0x03, 0x07 };
 __ALIGNED(4) static const uint8_t stackInfo_6[2] = { 0x03, 0x08 };
 __ALIGNED(4) static const uint8_t stackInfo_7[2] = { 0x03, 0x0a };
+__ALIGNED(4) static const uint8_t stackInfo_8[2] = { 0x0f, 0x00 };
 #endif // RADIO_CONFIG_ENABLE_STACK_INFO
 
 static RAIL_ChannelConfigEntryAttr_t channelConfigEntryAttr_0 = {
@@ -316,6 +317,34 @@ static const uint32_t phyInfo_6[] = {
   (uint32_t) 8UL,
   (uint32_t) 16UL,
   (uint32_t) 0UL,
+};
+
+// Thin HDT PHY info (mirrors siwx353fpga HDT stub; silicon layout keeps the
+// 32 MHz auxiliary field used by other silicon BLE phyInfo entries).
+static const uint32_t phyInfo_7[] = {
+  22UL,
+  0x0051EB85UL, // 81.92
+  (uint32_t) NULL,
+  (uint32_t) irCalConfig_0,
+  (uint32_t) timingConfig_4,
+  0x00000000UL,
+  0UL,
+  0UL,
+  2000008UL,
+  0x00F00101UL,
+  0x02504624UL,
+  (uint32_t) NULL,
+  (uint32_t) hfxoRetimingConfigEntries,
+  (uint32_t) NULL,
+  0UL,
+  0UL,
+  2000000UL,
+  (uint32_t) NULL,
+  (uint32_t) NULL,
+  (uint32_t) NULL,
+  (uint32_t) 0UL,
+  (uint32_t) 8UL,
+  (uint32_t) 16UL,
   (uint32_t) 0UL,
 };
 
@@ -1369,6 +1398,11 @@ const uint32_t sl_rail_ble_phy_simulscan_40MHz_modemConfig[] = {
   0xFFFFFFFFUL,
 };
 
+const uint32_t sl_rail_ble_phy_hdt_40MHz_modemConfig[] = {
+  0x0304001CUL, (uint32_t) &phyInfo_7,
+  0xFFFFFFFFUL,
+};
+
 const uint32_t sl_rail_ble_phy_1Mbps_viterbi_cs_0_78_40MHz_modemConfig[] = {
   0x0304001CUL, (uint32_t) &phyInfo_5,
   0x00040110UL, 0x00101FFFUL,
@@ -1734,6 +1768,26 @@ const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_simulscan_40MHz_channels[] = {
   },
 };
 
+const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_hdt_40MHz_channels[] = {
+  {
+    .phyConfigDeltaAdd = sl_rail_ble_phy_hdt_40MHz_modemConfig,
+    .baseFrequency = 2402000000,
+    .channelSpacing = 2000000,
+    .physicalChannelOffset = 0,
+    .channelNumberStart = 0,
+    .channelNumberEnd = 39,
+    .maxPower = RAIL_TX_POWER_MAX,
+    .attr = &channelConfigEntryAttr_0,
+#ifdef RADIO_CONFIG_ENABLE_CONC_PHY
+    .entryType = 0,
+#endif
+#ifdef RADIO_CONFIG_ENABLE_STACK_INFO
+    .stackInfo = stackInfo_8,
+#endif
+    .alternatePhy = NULL,
+  },
+};
+
 const RAIL_ChannelConfigEntry_t sl_rail_ble_phy_1Mbps_viterbi_cs_40MHz_channels[] = {
   {
     .phyConfigDeltaAdd = sl_rail_ble_phy_1Mbps_viterbi_cs_0_78_40MHz_modemConfig,
@@ -1834,6 +1888,15 @@ const RAIL_ChannelConfig_t sl_rail_ble_phy_simulscan_40MHz_channelConfig = {
   .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_40MHz_modemConfigBase,
   .phyConfigDeltaSubtract = NULL,
   .configs = sl_rail_ble_phy_simulscan_40MHz_channels,
+  .length = 1U,
+  .signature = 0UL,
+  .xtalFrequencyHz = 40000000UL,
+};
+
+const RAIL_ChannelConfig_t sl_rail_ble_phy_hdt_40MHz_channelConfig = {
+  .phyConfigBase = sl_rail_ble_phy_1Mbps_viterbi_40MHz_modemConfigBase,
+  .phyConfigDeltaSubtract = NULL,
+  .configs = sl_rail_ble_phy_hdt_40MHz_channels,
   .length = 1U,
   .signature = 0UL,
   .xtalFrequencyHz = 40000000UL,

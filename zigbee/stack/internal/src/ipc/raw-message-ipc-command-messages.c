@@ -67,6 +67,9 @@ void sli_zigbee_stack_set_mac_passthrough_flags_process_ipc_command(sli_zigbee_i
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_802154_short_addr_t sl_zigbee_get_embernet_passthrough_source_address(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -76,6 +79,9 @@ sl_802154_short_addr_t sl_zigbee_get_embernet_passthrough_source_address(void)
   return msg.data.get_embernet_passthrough_source_address.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_zigbee_mac_passthrough_type_t sl_zigbee_get_mac_passthrough_flags(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -85,6 +91,9 @@ sl_zigbee_mac_passthrough_type_t sl_zigbee_get_mac_passthrough_flags(void)
   return msg.data.get_mac_passthrough_flags.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_send_raw_message(const uint8_t *message,
                                        uint8_t message_length,
                                        sl_zigbee_transmit_priority_t priority,
@@ -106,6 +115,9 @@ sl_status_t sl_zigbee_send_raw_message(const uint8_t *message,
   return msg.data.send_raw_message.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_send_raw_message_with_tag(const uint8_t *message,
                                                 uint8_t message_length,
                                                 sl_zigbee_transmit_priority_t priority,
@@ -129,6 +141,9 @@ sl_status_t sl_zigbee_send_raw_message_with_tag(const uint8_t *message,
   return msg.data.send_raw_message_with_tag.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_set_embernet_passthrough_source_address(sl_802154_short_addr_t address)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -136,6 +151,9 @@ void sl_zigbee_set_embernet_passthrough_source_address(sl_802154_short_addr_t ad
   sli_zigbee_send_ipc_cmd(sli_zigbee_stack_set_embernet_passthrough_source_address_process_ipc_command, &msg);
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_set_mac_filter_match_list(const sl_zigbee_mac_filter_match_data_t *macFilterMatchList,
                                                 uint8_t listLength)
 {
@@ -153,6 +171,9 @@ sl_status_t sl_zigbee_set_mac_filter_match_list(const sl_zigbee_mac_filter_match
   return msg.data.set_mac_filter_match_list.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_zigbee_set_mac_passthrough_flags(sl_zigbee_mac_passthrough_type_t type)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

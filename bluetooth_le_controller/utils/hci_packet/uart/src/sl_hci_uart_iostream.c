@@ -47,7 +47,9 @@ void on_write_completed(sli_iostream_write_async_op_t *op, sl_status_t status, v
 {
   (void) op;
   void (*callback)(uint32_t) = (void (*)(uint32_t))arg;
-  callback(status);
+  if (callback != NULL) {
+    callback(status);
+  }
 }
 
 /**
@@ -65,7 +67,9 @@ Ecode_t sl_hci_uart_write(uint8_t *data, uint16_t len, void (*callback)(uint32_t
 #ifdef UART_SYNC_MODE
   sl_status_t status;
   status = sl_iostream_write(sl_iostream_vcom_handle, data, len);
-  callback(status);
+  if (callback != NULL) {
+    callback(status);
+  }
 
   return 0;
 #else

@@ -83,7 +83,7 @@ extern "C" {
 /**
  * @struct sl_rail_nvm_pa_curve_t
  * @brief NVM-suitable PA curve structure to map to a
- *   \ref RAIL_TxPowerCurveAlt_t.
+ *   RAIL_TxPowerCurveAlt_t.
  *
  * The size of this structure must be a multiple of 4 bytes.
  */
@@ -99,7 +99,7 @@ typedef struct sl_rail_nvm_pa_curve {
 /**
  * @struct sl_rail_nvm_pa_table_t
  * @brief NVM-suitable PA mapping table structure to map to a
- *   \ref RAIL_PowerConversion_t::mappingTable.
+ *   RAIL_PowerConversion_t::mappingTable.
  *
  * The size of this structure must be a multiple of 4 bytes.
  */
@@ -111,7 +111,7 @@ typedef struct sl_rail_nvm_pa_table {
 /**
  * @struct sl_rail_nvm_pa_descriptor_t
  * @brief NVM-suitable PA descriptor structure to map to a
- *   \ref RAIL_PaDescriptor_t.
+ *   RAIL_PaDescriptor_t.
  *
  * The size of this structure must be a multiple of 4 bytes.
  */
@@ -122,7 +122,7 @@ typedef struct sl_rail_nvm_pa_descriptor {
    * The number of curve piecewise segments or mapping table entries
    * provided for the PA according to its algorithm.
    * This should not exceed \ref SL_RAIL_NVM_PA_CURVE_SEGMENTS
-   * for a PA using \ref RAIL_PA_ALGORITHM_PIECEWISE_LINEAR or
+   * for a PA using RAIL_PA_ALGORITHM_PIECEWISE_LINEAR or
    * \ref SL_RAIL_NVM_PA_TABLE_ENTRIES for a PA using
    * \ref RAIL_PA_ALGORITHM_MAPPING_TABLE.
    */
@@ -136,7 +136,7 @@ typedef struct sl_rail_nvm_pa_descriptor {
 /**
  * @struct sl_rail_nvm_pa_config_t
  * @brief NVM-suitable PA curves/tables configuration structure to map to a
- *   \ref RAIL_TxPowerCurvesConfigAlt_t.
+ *   RAIL_TxPowerCurvesConfigAlt_t.
  */
 typedef struct sl_rail_nvm_pa_config {
   /**
@@ -155,17 +155,16 @@ typedef struct sl_rail_nvm_pa_config {
   uint32_t signature;
   /** The PA data descriptor, one for each PA. */
   sl_rail_nvm_pa_descriptor_t pa_descriptors[SL_RAIL_NVM_PA_COUNT];
-  /** Union for either a curve or table. */
   union {
     /** PA piecewise-linear curve. */
     sl_rail_nvm_pa_curve_t curve;
     /** PA raw to dBm mapping table. */
     sl_rail_nvm_pa_table_t table;
-  } pa_curve_or_table[SL_RAIL_NVM_PA_COUNT];
+  } pa_curve_or_table[SL_RAIL_NVM_PA_COUNT]; /**< Union for either a curve or table. */
 } sl_rail_nvm_pa_config_t;
 
 /**
- * Store a \ref RAIL_TxPowerMode_t into NVM.
+ * Store a RAIL_TxPowerMode_t into NVM.
  *
  * @param[in] pa_mode The PA mode.
  * @return Status code indicating success of the function call.
@@ -173,7 +172,7 @@ typedef struct sl_rail_nvm_pa_config {
 sl_status_t sl_rail_util_pa_nvm_write_mode(RAIL_TxPowerMode_t pa_mode);
 
 /**
- * Reads stored \ref RAIL_TxPowerMode_t from NVM.
+ * Reads stored RAIL_TxPowerMode_t from NVM.
  *
  * @return The stored PA mode, or RAIL_TX_POWER_MODE_NONE
  *   if no stored PA mode exists or is invalid.
@@ -198,7 +197,7 @@ sl_status_t sl_rail_util_pa_nvm_read_config(sl_rail_nvm_pa_config_t *p_pa_config
 #ifndef DOXYGEN_UNDOCUMENTED
 
 /**
- * Convert \ref sl_rail_nvm_pa_config_t to \ref RAIL_TxPowerCurvesConfigAlt_t.
+ * Convert \ref sl_rail_nvm_pa_config_t to RAIL_TxPowerCurvesConfigAlt_t.
  * @param[in] p_pa_config A non-NULL pointer to the NVM PA curves/table config
  *   to convert.
  * @return A pointer to global or internally-allocated RAM storage containing
@@ -208,7 +207,7 @@ sl_status_t sl_rail_util_pa_nvm_read_config(sl_rail_nvm_pa_config_t *p_pa_config
 RAIL_TxPowerCurvesConfigAlt_t *sli_rail_util_pa_nvm_deserialize_config(const sl_rail_nvm_pa_config_t *p_pa_config);
 
 /**
- * Convert \ref RAIL_TxPowerCurvesConfigAlt_t to \ref sl_rail_nvm_pa_config_t.
+ * Convert RAIL_TxPowerCurvesConfigAlt_t to \ref sl_rail_nvm_pa_config_t.
  * @param[in] p_tx_curves A non-NULL pointer to the \ref
      RAIL_TxPowerCurvesConfigAlt_t to convert.
  * @param[out] p_pa_config A non-NULL pointer to an NVM PA curves/table config
@@ -236,7 +235,7 @@ void sli_rail_util_pa_nvm_print_serialized_json(const sl_rail_nvm_pa_config_t *p
 
 /**
  * Print deserialized PA Tx Power configuration in C initializer syntax.
- * @param[in] p_pa_config A non-NULL pointer to a \ref
+ * @param[in] p_pa_config A non-NULL pointer to a
  *   RAIL_TxPowerCurvesConfigAlt_t structure.
  */
 void sli_rail_util_pa_nvm_print_deserialized(const RAIL_TxPowerCurvesConfigAlt_t *p_tx_curves);

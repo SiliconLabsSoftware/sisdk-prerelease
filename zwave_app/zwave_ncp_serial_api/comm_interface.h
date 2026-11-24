@@ -19,7 +19,8 @@
 
 #define RECEIVE_BUFFER_SIZE     180
 #define FRAME_LENGTH_MIN        3
-#define FRAME_LENGTH_MAX        RECEIVE_BUFFER_SIZE
+// The receive buffer must hold SOF plus len bytes
+#define FRAME_LENGTH_MAX        (RECEIVE_BUFFER_SIZE - 1)
 
 typedef enum {
   TRANSPORT_TYPE_UART,

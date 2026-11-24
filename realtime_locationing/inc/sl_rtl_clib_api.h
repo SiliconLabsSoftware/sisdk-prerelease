@@ -842,7 +842,8 @@ typedef enum  {
                                          (RTT) */
   SL_RTL_CS_MODE_PBR =          2,  /**< Round-trip phase based estimation
                                          (PBR) */
-  SL_RTL_CS_MODE_COMBINED =     3,  /**< Combined PBR and RTT estimation. */
+  SL_RTL_CS_MODE_COMBINED =     3,  /**< Combined PBR and RTT estimation.
+                                         Experimental feature. */
   SL_RTL_CS_MODE_NONE =         0xFF,  /**< No mode is set. This option is used
                                            solely to indicate the absence of a
                                            sub mode. */

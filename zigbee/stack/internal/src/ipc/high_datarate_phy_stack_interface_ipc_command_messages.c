@@ -59,6 +59,9 @@ void sli_mac_stack_set_mode_switch_sync_detect_process_ipc_command(sli_zigbee_ip
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_mac_force_tx_after_failed_hdr_phy_cca(uint8_t hdr_csma_attempts,
                                                      uint32_t min_bo_period_us,
                                                      uint32_t max_bo_period_us)
@@ -72,6 +75,9 @@ sl_status_t sl_mac_force_tx_after_failed_hdr_phy_cca(uint8_t hdr_csma_attempts,
   return msg.data.force_tx_after_failed_hdr_phy_cca.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_mac_lower_mac_set_high_datarate_csma_params(sl_rail_csma_config_t *csma_params)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -87,6 +93,9 @@ void sl_mac_lower_mac_set_high_datarate_csma_params(sl_rail_csma_config_t *csma_
   }
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 void sl_mac_lower_mac_set_high_datarate_phy_radio_priorities(sl_802154_radio_priorities_t *priorities)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -102,6 +111,9 @@ void sl_mac_lower_mac_set_high_datarate_phy_radio_priorities(sl_802154_radio_pri
   }
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_mac_send_raw_high_datarate_phy_message(uint8_t nwk_index,
                                                       uint8_t *payload)
 {
@@ -125,6 +137,9 @@ sl_status_t sl_mac_send_raw_high_datarate_phy_message(uint8_t nwk_index,
   return msg.data.send_raw_high_datarate_phy_message.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_mac_send_raw_high_datarate_phy_scheduled_message(uint8_t nwk_index,
                                                                 uint8_t *payload,
                                                                 sl_rail_time_t timestamp)
@@ -150,6 +165,9 @@ sl_status_t sl_mac_send_raw_high_datarate_phy_scheduled_message(uint8_t nwk_inde
   return msg.data.send_raw_high_datarate_phy_scheduled_message.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_rail_status_t sl_mac_set_mode_switch_sync_detect(bool enable_f)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };

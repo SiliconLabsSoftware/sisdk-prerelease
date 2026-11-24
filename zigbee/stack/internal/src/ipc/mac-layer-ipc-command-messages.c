@@ -34,6 +34,9 @@ void sli_zigbee_stack_get_max_mac_retries_process_ipc_command(sli_zigbee_ipc_cmd
 
 // public entrypoints
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 sl_status_t sl_zigbee_force_tx_after_failed_cca(uint8_t csmaAttempts)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
@@ -43,6 +46,9 @@ sl_status_t sl_zigbee_force_tx_after_failed_cca(uint8_t csmaAttempts)
   return msg.data.force_tx_after_failed_cca.response.result;
 }
 
+#if defined(__GNUC__)
+__attribute__((noinline))
+#endif
 uint8_t sl_zigbee_get_max_mac_retries(void)
 {
   sli_zigbee_ipc_cmd_t msg = { 0, };
