@@ -658,6 +658,9 @@ autoselected_components:
   id: psa_crypto_ecc_curve25519
 - package: platform_core
   vendor: silabs
+  id: psa_crypto_ecc_key_pair_derive
+- package: platform_core
+  vendor: silabs
   id: psa_crypto_ecc_secp256r1
 - package: platform_core
   vendor: silabs
@@ -1036,11 +1039,11 @@ sdk_extension:
   id: bluetooth_apploader
   version: 11.2.0-beta.1
 - vendor: silabs
-  id: mbedtls
-  version: 4.1.0
-- vendor: silabs
   id: bluetooth_common
   version: 1.2.0-beta.1
+- vendor: silabs
+  id: mbedtls
+  version: 4.1.0
 - vendor: silabs
   id: cpc_extra
   version: 1.1.0
@@ -1060,16 +1063,16 @@ sdk_extension:
   id: cmsis_dsp
   version: 1.16.5
 - vendor: silabs
-  id: unity_test_framework
-  version: 1.2.0
-- vendor: silabs
   id: security_libcryptosoc
   version: 1.2.0
 - vendor: silabs
-  id: common_15_4
+  id: unity_test_framework
   version: 1.2.0
 - vendor: silabs
   id: platform_core
+  version: 1.2.0
+- vendor: silabs
+  id: common_15_4
   version: 1.2.0
 - vendor: silabs
   id: security_tfm
@@ -1096,11 +1099,11 @@ sdk_extension:
   id: freertos
   version: 1.2.0
 - vendor: silabs
-  id: bluetooth_le_host
-  version: 11.2.0-beta.1
-- vendor: silabs
   id: security_sxsymcrypt
   version: 1.2.0
+- vendor: silabs
+  id: bluetooth_le_host
+  version: 11.2.0-beta.1
 - vendor: silabs
   id: coremark
   version: 1.1.0

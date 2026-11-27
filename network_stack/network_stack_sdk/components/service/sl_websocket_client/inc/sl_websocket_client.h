@@ -168,7 +168,15 @@ sl_websocket_error_t sl_websocket_deinit(sl_websocket_client_t *handle);
  *   Pointer to an @ref sl_websocket_tcp_tls_advanced_options_t structure containing the TCP/TLS options. Must not be NULL.
  *
  * @return
- *   sl_websocket_error_t - Error code indicating the result of the operation.
+ *   - @ref SL_WEBSOCKET_SUCCESS on success.
+ *   - @ref SL_WEBSOCKET_ERR_INVALID_PARAMETER if @p handle or @p options is NULL.
+ *   - @ref SL_WEBSOCKET_ERR_INVALID_STATE if the client is not in
+ *     @ref SL_WEBSOCKET_STATE_DISCONNECTED (late update after connect has started is rejected).
+ *
+ * @note
+ *   Options are stored on the handle and applied at @ref sl_websocket_connect.
+ *   Reconfigure only while disconnected; after a closed connection, finish close/deinit
+ *   back to @ref SL_WEBSOCKET_STATE_DISCONNECTED before setting new options.
  */
 sl_websocket_error_t sl_websocket_set_tcp_tls_advanced_configuration(
   sl_websocket_client_t *handle,

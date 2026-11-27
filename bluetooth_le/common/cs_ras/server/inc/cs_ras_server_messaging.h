@@ -47,10 +47,14 @@ typedef struct {
     uint8_t                 sent      : 1;   ///< Message segment has been sent
     uint8_t                 confirmed : 1;   ///< Message segment indication was confirmed
     uint8_t                 stopped   : 1;   ///< Stop transmission
+    uint8_t                 streaming : 1;   ///< Unknown-size streaming transfer
+    uint8_t                 completed : 1;   ///< Streaming complete() has been called
   } message_status;                          ///< Message status bitfield
   sl_status_t               status;          ///< Transmission status
   cs_ras_messaging_config_t config;          ///< Transmission config
   uint16_t                  segment_size;    ///< Size of the segment
+  uint32_t                  available_size;  ///< Bytes available to send (streaming watermark)
+  uint32_t                  final_size;      ///< Final size after complete (or UNKNOWN)
   cs_ras_segment_storage_t  storage;         ///< Internal storage for a segment
 } cs_ras_server_messaging_transmit_t;
 
@@ -64,6 +68,10 @@ extern "C" {
  *
  * @note The @ref start_segment and @ref end_segment fields pointed by
  * @ref config are omitted.
+ * @note If @ref config->data_size is @ref CS_RAS_MESSAGING_UNKNOWN_SIZE, a
+ *       streaming transfer is started. Use @ref cs_ras_server_messaging_flush
+ *       and @ref cs_ras_server_messaging_complete to raise the watermark and
+ *       finalize.
  *
  * @param[in] tx     Pointer to the transmit structure
  * @param[in] config Pointer to the transmit configuration
@@ -90,6 +98,30 @@ sl_status_t cs_ras_server_messaging_transmit(cs_ras_server_messaging_transmit_t 
  * @return Status of the operation.
  *****************************************************************************/
 sl_status_t cs_ras_server_messaging_cancel(cs_ras_server_messaging_transmit_t *tx);
+
+/**************************************************************************//**
+ * Raise the streaming send watermark so segments may be transmitted up to
+ * @ref actual_size. Valid only for an active streaming transfer that has
+ * not been completed yet.
+ *
+ * @param[in] tx          Pointer to the transmit structure
+ * @param[in] actual_size Number of bytes currently available in the buffer
+ * @return Status of the operation.
+ *****************************************************************************/
+sl_status_t cs_ras_server_messaging_flush(cs_ras_server_messaging_transmit_t *tx,
+                                          uint32_t                           actual_size);
+
+/**************************************************************************//**
+ * Finalize a streaming transfer. Flushes to @ref actual_size, then sets the
+ * final size so the last segment can be marked and the transfer can finish.
+ * If all bytes have already been sent, finishes immediately.
+ *
+ * @param[in] tx          Pointer to the transmit structure
+ * @param[in] actual_size Final number of bytes in the buffer
+ * @return Status of the operation.
+ *****************************************************************************/
+sl_status_t cs_ras_server_messaging_complete(cs_ras_server_messaging_transmit_t *tx,
+                                             uint32_t                           actual_size);
 
 #ifdef __cplusplus
 };

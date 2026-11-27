@@ -716,6 +716,7 @@ void sli_si91x_free_socket(int socket)
 }
 
 // Get the SI91X socket with the specified index, if it is valid and not in RESET state
+SL_TPUT_CLASSIFIER
 sli_si91x_socket_t *sli_get_si91x_socket(int32_t socket)
 {
   if (socket < 0 || socket >= SLI_NUMBER_OF_SOCKETS) {
@@ -2119,6 +2120,7 @@ sl_status_t sli_si91x_socket_data_event_handler(sl_wifi_buffer_t *rx_buffer)
   return SL_STATUS_OK;
 }
 
+SL_TPUT_CLASSIFIER
 sl_status_t sli_si91x_send_socket_data(sli_si91x_socket_t *si91x_socket,
                                        const sli_si91x_socket_send_request_t *request,
                                        const void *data)
@@ -2389,6 +2391,32 @@ bool sli_check_null_sets_and_range(int nfds,
 }
 
 #ifndef __ZEPHYR__
+static bool sli_select_host_fd_is_requested(uint8_t host_socket_index, const fd_set *readfds, const fd_set *writefds)
+{
+  return ((readfds != NULL) && FD_ISSET(host_socket_index, readfds))
+         || ((writefds != NULL) && FD_ISSET(host_socket_index, writefds));
+}
+#else
+static bool sli_select_host_fd_is_requested(uint8_t host_socket_index,
+                                            const sl_si91x_fdset_t *readfds,
+                                            const sl_si91x_fdset_t *writefds)
+{
+  return ((readfds != NULL) && SL_SI91X_FD_ISSET(host_socket_index, readfds))
+         || ((writefds != NULL) && SL_SI91X_FD_ISSET(host_socket_index, writefds));
+}
+#endif
+
+static void sli_select_request_add_read_socket(sli_si91x_socket_select_req_t *request, const sli_si91x_socket_t *socket)
+{
+  request->read_fds.fd_array[0] |= (1U << (uint32_t)socket->id);
+  // LISTEN sockets set the pending_type bit for this firmware id so firmware can
+  // distinguish accept readiness from data readiness.
+  if (socket->state == LISTEN) {
+    request->pending_type |= SLI_SI91X_SELECT_PENDING_CONNECTION_BIT(socket->id);
+  }
+}
+
+#ifndef __ZEPHYR__
 uint8_t sli_prepare_select_request(int nfds,
                                    const fd_set *readfds,
                                    const fd_set *writefds,
@@ -2407,14 +2435,7 @@ uint8_t sli_prepare_select_request(int nfds,
     const sli_si91x_socket_t *socket = sli_get_si91x_socket(host_socket_index);
 
     // Throw error if the socket file descriptor set is invalid
-    if (socket == NULL
-#ifndef __ZEPHYR__
-        && ((readfds != NULL && FD_ISSET(host_socket_index, readfds))
-            || (writefds != NULL && FD_ISSET(host_socket_index, writefds)))) {
-#else
-        && ((readfds != NULL && SL_SI91X_FD_ISSET(host_socket_index, readfds))
-            || (writefds != NULL && SL_SI91X_FD_ISSET(host_socket_index, writefds)))) {
-#endif
+    if ((socket == NULL) && sli_select_host_fd_is_requested(host_socket_index, readfds, writefds)) {
       return EBADF; // Bad file descriptor
     }
 
@@ -2426,28 +2447,20 @@ uint8_t sli_prepare_select_request(int nfds,
     // A host fd is selectable only once the firmware has assigned a valid socket id
     // that fits in the firmware select bitmap (fd_array[0]).
     if ((socket->id < 0 || (uint32_t)socket->id >= SLI_SI91X_SELECT_FW_ID_BIT_WIDTH)
-#ifndef __ZEPHYR__
-        && ((readfds != NULL && FD_ISSET(host_socket_index, readfds))
-            || (writefds != NULL && FD_ISSET(host_socket_index, writefds)))) {
-#else
-        && ((readfds != NULL && SL_SI91X_FD_ISSET(host_socket_index, readfds))
-            || (writefds != NULL && SL_SI91X_FD_ISSET(host_socket_index, writefds)))) {
-#endif
+        && sli_select_host_fd_is_requested(host_socket_index, readfds, writefds)) {
       return EBADF;
     }
 
     // Check if the socket is set for read operations in the readfds set
-    // Set the corresponding bit in the read file descriptor set
 #ifndef __ZEPHYR__
     if ((readfds != NULL) && (FD_ISSET(host_socket_index, readfds))) {
 #else
     if ((readfds != NULL) && (SL_SI91X_FD_ISSET(host_socket_index, readfds))) {
 #endif
-      request->read_fds.fd_array[0] |= (1U << (uint32_t)socket->id);
+      sli_select_request_add_read_socket(request, socket);
     }
 
     // Check if the socket is set for write operations in the writefds set
-    // Set the corresponding bit in the write file descriptor set
 #ifndef __ZEPHYR__
     if ((writefds != NULL) && (FD_ISSET(host_socket_index, writefds))) {
 #else

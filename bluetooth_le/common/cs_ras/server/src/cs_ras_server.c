@@ -134,14 +134,77 @@ static sl_status_t cs_ras_server_ranging_data_arrived(uint8_t connection,
 
   cs_ras_server_get_mode(server, &mode, &indication);
   switch (mode) {
-    case CS_RAS_MODE_REAL_TIME_RANGING_DATA:
-      sc = cs_ras_server_database_store_result(evt, mode);
+    case CS_RAS_MODE_REAL_TIME_RANGING_DATA: {
+      bool subevent_completed = false;
+      sc = cs_ras_server_database_store_result(evt, mode, &subevent_completed);
+      #if (CS_RAS_SERVER_CONFIG_REAL_TIME_SEND_ON_SUBEVENT_COMPLETE == 1)
+      {
+        uint8_t *ranging_data = NULL;
+        uint32_t ranging_data_size = 0;
+        bool sent = false;
+        bool has_ranging_data = cs_ras_server_get_ranging_data(server,
+                                                               CS_RAS_INVALID_RANGING_COUNTER,
+                                                               &sent,
+                                                               &ranging_data,
+                                                               &ranging_data_size);
+
+        if (has_ranging_data && ranging_data != NULL) {
+          if (!server->rt_streaming_active) {
+            cs_ras_messaging_config_t config;
+            config.conn_handle = server->connection;
+            config.att_mtu = server->att_mtu;
+            config.real_time = true;
+            config.indication = indication;
+            config.data = ranging_data;
+            config.data_size = CS_RAS_MESSAGING_UNKNOWN_SIZE;
+            config.start_segment = 0;
+            config.end_segment = CS_RAS_MESSAGING_ALL_SEGMENTS;
+            sl_status_t tx_sc = cs_ras_server_messaging_transmit_all(&server->transmit,
+                                                                     &config);
+            if (tx_sc == SL_STATUS_OK) {
+              server->rt_streaming_active = true;
+              cs_ras_server_log_debug(CONN_PREFIX "Real-Time streaming transfer started" LOG_NL,
+                                      server->connection);
+            } else {
+              cs_ras_server_log_error(CONN_PREFIX "Failed to start Real-Time streaming, sc = 0x%04lx" LOG_NL,
+                                      server->connection,
+                                      (unsigned long)tx_sc);
+            }
+          }
+
+          if (server->rt_streaming_active) {
+            if (sc == SL_STATUS_FULL) {
+              // Procedure end: complete flushes and finalizes
+              sl_status_t tx_sc = cs_ras_server_messaging_complete(&server->transmit,
+                                                                   ranging_data_size);
+              if (tx_sc != SL_STATUS_OK) {
+                cs_ras_server_log_error(CONN_PREFIX "Real-Time streaming complete failed, sc = 0x%04lx" LOG_NL,
+                                        server->connection,
+                                        (unsigned long)tx_sc);
+              }
+              server->rt_streaming_active = false;
+            } else if (subevent_completed) {
+              sl_status_t tx_sc = cs_ras_server_messaging_flush(&server->transmit,
+                                                                ranging_data_size);
+              if (tx_sc != SL_STATUS_OK) {
+                cs_ras_server_log_error(CONN_PREFIX "Real-Time streaming flush failed, sc = 0x%04lx" LOG_NL,
+                                        server->connection,
+                                        (unsigned long)tx_sc);
+              }
+            }
+          }
+        }
+      }
+      #else // CS_RAS_SERVER_CONFIG_REAL_TIME_SEND_ON_SUBEVENT_COMPLETE
+      (void)subevent_completed;
       if (sc == SL_STATUS_FULL) {
         server->transmit_request = true;
       }
+      #endif // CS_RAS_SERVER_CONFIG_REAL_TIME_SEND_ON_SUBEVENT_COMPLETE
       break;
+    }
     case CS_RAS_MODE_ON_DEMAND_RANGING_DATA:
-      (void)cs_ras_server_database_store_result(evt, mode);
+      (void)cs_ras_server_database_store_result(evt, mode, NULL);
       break;
     default:
       return SL_STATUS_INVALID_STATE;
@@ -309,6 +372,8 @@ bool cs_ras_server_on_bt_event(sl_bt_msg_t *evt)
       (void)app_timer_stop(&server->timer.response);
       // Cancel any operation
       (void)cs_ras_server_messaging_cancel(&server->transmit);
+      server->rt_streaming_active = false;
+      server->transmit_request = false;
       cs_ras_server_log_info(CONN_PREFIX "Client disconnected, reason: 0x%04x" LOG_NL,
                              server->connection,
                              evt->data.evt_connection_closed.reason);

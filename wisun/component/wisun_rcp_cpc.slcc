@@ -23,8 +23,12 @@ define:
 - name: DEBUG_EFM
 
 source:
-- path: sl_wsrcp_cpc.h
 - path: sl_wsrcp_cpc.c
+
+include:
+- path: .
+  file_list:
+  - path: sl_wsrcp_cpc.h
 
 template_contribution:
 - name: component_catalog

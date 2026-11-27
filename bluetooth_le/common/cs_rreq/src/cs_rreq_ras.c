@@ -675,10 +675,10 @@ static void process_remote_ranging_data(rreq_t *rreq,
   evt.evt_ranging_data.is_local = false;
   evt.evt_ranging_data.data = data;
   evt.evt_ranging_data.data_size = data_size;
-  // Check done status of the procedure
+  // Check done status using the peer role that produced this Ranging data
   evt.evt_ranging_data.procedure_state = ranging_data_is_complete(data,
                                                                   data_size,
-                                                                  rreq->config.is_initiator,
+                                                                  !rreq->config.is_initiator,
                                                                   rreq->num_antenna_path);
   sc = sm_on_evt(rreq, RREQ_EVT_RANGING_DATA, &evt);
   if (sc != SL_STATUS_OK) {

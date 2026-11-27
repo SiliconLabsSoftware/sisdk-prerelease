@@ -11,7 +11,9 @@
  * [1] www.silabs.com/about-us/legal/master-software-license-agreement
  *
  ******************************************************************************/
-#include "sl_component_catalog.h"
+#include <sl_component_catalog.h>
+// HACK: Use preprocessor condition instead of slcp condition.
+#ifdef SL_CATALOG_GECKO_BOOTLOADER_INTERFACE_PRESENT
 #include "sl_wsrcp_btl_interface.h"
 #include "sl_wsrcp_log.h"
 
@@ -25,3 +27,5 @@ void wisun_rcp_btl_reset(void)
     BUG_ON(ret != BOOTLOADER_OK);
     bootloader_rebootAndInstall();
 }
+
+#endif

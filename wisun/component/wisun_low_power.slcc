@@ -22,7 +22,7 @@ source:
   condition: [cli]
 
 validation_helper:
-- path: component/component_validation/low_power_validation.lua
+- path: component/scripts/low_power_validation.lua
 
 template_contribution:
 - name: component_catalog

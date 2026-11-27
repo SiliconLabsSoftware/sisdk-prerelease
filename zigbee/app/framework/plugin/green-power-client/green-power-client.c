@@ -1097,6 +1097,9 @@ static bool channelRequestGpdfCallback(sl_zigbee_gp_params_t *params)
   } else {
     //TODO: check for a reason not to forward (busy, etc)
 
+    // Align tunneling delay with CN option: Channel Request always treated as RxAfterTx
+    params->bidirectionalInfo |= SL_ZIGBEE_GP_BIDIRECTION_INFO_RX_AFTER_TX_MASK;
+
     uint16_t options = 0; //always uses appID srcID becase srcID is absent was addr.applicationId;
 
     //rxAfter Tx always set for channel request

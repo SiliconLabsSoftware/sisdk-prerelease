@@ -235,3 +235,25 @@
 #endif
 
 /** @} */
+
+/* Optional throughput classifier.
+ * Kept in network_stack_sdk so Test Agent / Conan builds do not depend on a
+ * matching wiseconnect_common revision for SL_TPUT_CLASSIFIER.
+ * Disabled by default (no RAM impact). Enable with:
+ *   -DSL_SI91X_ENABLE_TPUT_CLASSIFICATION=1
+ */
+#ifndef SL_SI91X_ENABLE_TPUT_CLASSIFICATION
+#define SL_SI91X_ENABLE_TPUT_CLASSIFICATION 0
+#endif
+
+#if SL_SI91X_ENABLE_TPUT_CLASSIFICATION
+#include "sli_code_classification.h"
+#endif
+
+#ifndef SL_TPUT_CLASSIFIER
+#if SL_SI91X_ENABLE_TPUT_CLASSIFICATION
+#define SL_TPUT_CLASSIFIER SL_CODE_CLASSIFY(SL_CODE_COMPONENT_SI91X_WIRELESS, SL_CODE_CLASS_TIME_CRITICAL)
+#else
+#define SL_TPUT_CLASSIFIER
+#endif
+#endif

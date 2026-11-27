@@ -90,7 +90,8 @@ typedef enum {
   SL_WEBSOCKET_ERR_CLOSE_FRAME         = -6, /**< Error closing frame */
   SL_WEBSOCKET_ERR_SSL_SETSOCKOPT      = -7, /**< Error setting socket options for SSL */
   SL_WEBSOCKET_ERR_INVALID_PARAMETER   = -8, /**< Invalid input parameter */
-  SL_WEBSOCKET_ERR_MAX_LENGTH_EXCEEDED = -9  /**< Max length exceeded */
+  SL_WEBSOCKET_ERR_MAX_LENGTH_EXCEEDED = -9, /**< Max length exceeded */
+  SL_WEBSOCKET_ERR_INVALID_STATE       = -10 /**< Client is not in a valid state for the requested operation */
 } sl_websocket_error_t;
 
 /**

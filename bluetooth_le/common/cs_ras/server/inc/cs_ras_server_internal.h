@@ -108,6 +108,7 @@ typedef struct {
   uint8_t connection;
   int8_t tx_power_dbm;
   bool transmit_request;
+  bool rt_streaming_active;
   uint8_t antenna_config;
   cs_ras_server_messaging_transmit_t transmit;
 } cs_ras_server_t;

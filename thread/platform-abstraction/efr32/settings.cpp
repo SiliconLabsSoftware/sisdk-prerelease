@@ -153,7 +153,7 @@ static otError mapNvm3Error(sl_status_t aNvm3Status)
     return error;
 }
 
-sl_status_t settingsApiCheck(otInstance *aInstance)
+sl_status_t settingsApiCheck(const otInstance *aInstance)
 {
     sl_status_t status = SL_STATUS_OK;
 
@@ -165,7 +165,7 @@ exit:
     return status;
 }
 
-sl_status_t settingsApiCheck(otInstance *aInstance, uint16_t aKey)
+sl_status_t settingsApiCheck(const otInstance *aInstance, uint16_t aKey)
 {
     sl_status_t status = settingsApiCheck(aInstance);
 

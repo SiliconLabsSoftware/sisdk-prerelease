@@ -141,7 +141,8 @@ cs_procedure_data_t *cs_ras_server_database_find_next_slot(const uint8_t conn_ha
 }
 
 sl_status_t cs_ras_server_database_store_result(sl_bt_msg_t *cs_res,
-                                                cs_ras_mode_t mode)
+                                                cs_ras_mode_t mode,
+                                                bool *subevent_completed)
 {
   cs_ras_server_t *server;
   sl_status_t sc;
@@ -152,6 +153,10 @@ sl_status_t cs_ras_server_database_store_result(sl_bt_msg_t *cs_res,
   bool continue_evt = false;
   bool save_address_to_db;
   bool overwritten = false;
+
+  if (subevent_completed != NULL) {
+    *subevent_completed = false;
+  }
 
   switch (SL_BT_MSG_ID(cs_res->header)) {
     case sl_bt_evt_cs_result_id:
@@ -339,6 +344,9 @@ sl_status_t cs_ras_server_database_store_result(sl_bt_msg_t *cs_res,
                CS_RAS_SUBEVENT_HEADER_LEN);
       }
       subevent_header_pos = 0;
+      if (subevent_completed != NULL) {
+        *subevent_completed = true;
+      }
       break;
     case sl_bt_cs_done_status_partial_results_continue:
       cs_ras_server_log_debug(CONN_PREFIX "Subevent continue" LOG_NL, conn_handle);

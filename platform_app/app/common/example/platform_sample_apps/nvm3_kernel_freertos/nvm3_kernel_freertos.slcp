@@ -40,8 +40,8 @@ configuration:
     value: 1024
   - name: SL_CLI_INPUT_BUFFER_SIZE
     value: 256
-  - name: SL_CLI_TASK_STACK_SIZE
-    value: 2048
+  - name: SL_CLI_VCOM_TASK_STACK_SIZE
+    value: 800
 template_contribution:
   - name: cli_command
     value:

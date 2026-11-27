@@ -84,6 +84,9 @@ typedef uint8_t cs_ras_segment_header_t;
 #define CS_RAS_ALL_SEGMENTS                          0xFF
 #define CS_RAS_MESSAGING_ALL_SEGMENTS                CS_RAS_ALL_SEGMENTS
 
+// Unknown total size for streaming Real-Time transfers (do not use for segment math)
+#define CS_RAS_MESSAGING_UNKNOWN_SIZE                UINT32_MAX
+
 // Type for storing a messaging segment
 typedef PACKSTRUCT (struct {
   union {

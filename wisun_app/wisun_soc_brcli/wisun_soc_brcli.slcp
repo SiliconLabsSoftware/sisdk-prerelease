@@ -58,12 +58,6 @@ define:
 configuration:
   - name: "SL_BOARD_ENABLE_VCOM"
     value: "1"
-  - name: "SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE"
-    value: "usartHwFlowControlCtsAndRts"
-    condition: [iostream_usart]
-  - name: "SL_IOSTREAM_USART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF"
-    value: "1"
-    condition: [iostream_usart]
   - name: SL_IOSTREAM_EUSART_VCOM_CONVERT_BY_DEFAULT_LF_TO_CRLF
     value: "true"
     condition: [iostream_eusart]

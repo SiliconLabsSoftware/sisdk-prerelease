@@ -18,7 +18,6 @@
 #include <sl_common.h>
 #include <SEGGER_RTT.h>
 
-#include "sl_micrium_debug.h"
 #include "sl_wsrcp.h"
 #include "sl_wsrcp_api.h"
 #include "sl_wsrcp_hif.h"
@@ -193,7 +192,6 @@ void wisun_rcp_init(void)
 
     sl_iostream_set_default(sl_iostream_rtt_handle);
     SEGGER_RTT_SetFlagsUpBuffer(0, SEGGER_RTT_MODE_NO_BLOCK_SKIP);
-    export_debugger_data();
     // Note: this function is launched before the Operating System, you can't
     // acquire anymutex in.
     rcp_app->main_events = osEventFlagsNew(NULL);

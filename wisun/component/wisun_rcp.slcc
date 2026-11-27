@@ -14,6 +14,7 @@ conflicts:
 - name: wisun_br_stack
 
 requires:
+- name: a_radio_config
 - name: device_supports_wisun
 - name: iostream
 - name: rail_lib
@@ -29,8 +30,20 @@ requires:
 - name: hal_prs
 - name: clock_manager_runtime
 - name: wisun_ffn_unicast_idle_schedule_implementation
+- name: emlib_ldma   # em_ldma.h required
+- name: cpc_secondary
+  condition: [cpc_secondary_driver]
+- name: wisun_rcp_interface
+- name: wisun_rcp_cpc
+  condition: [cpc_secondary]
+- name: wisun_rcp_uart_plt
+  condition: [iostream_eusart]
+- name: wisun_rcp_cpc
+  condition: [device_sdid_210]
 
 recommends:
+- id: wisun_rcp_cpc
+  vendor: silabs
 - id: rail_lib_singleprotocol
   vendor: silabs
 - id: wisun_ffn_unicast_idle_schedule_stubs
@@ -95,7 +108,7 @@ library:
   unless: [wisun_stack_debug]
 
 validation_helper:
-- path: component/component_validation/rcp_validation.lua
+- path: component/scripts/rcp_validation.lua
 
 template_contribution:
 - name: component_catalog

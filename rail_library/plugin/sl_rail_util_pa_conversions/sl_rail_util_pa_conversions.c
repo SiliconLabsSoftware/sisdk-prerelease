@@ -43,6 +43,13 @@
 #include "rail.h"
 #include "sl_rail_util_pa_conversions.h"
 #include "sl_rail_util_pa_config.h"
+#if defined(__ICCARM__)
+// IAR doesn't support copying const data (in flash) to RAM.
+#undef SL_CODE_CLASSIFY
+#define SL_CODE_CLASSIFY(a, ...) /* no-op */
+#else
+#include "sl_code_classification.h"
+#endif
 
 #if     SL_RAIL_UTIL_PA_NVM_ENABLED
 #error  NVM PA configuration is not yet supported by the sl_rail_util_pa component
@@ -182,6 +189,7 @@ sl_rail_status_t sl_rail_util_pa_convert_power_to_actual(sl_rail_handle_t rail_h
   return SL_RAIL_STATUS_NO_ERROR;
 }
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 sl_rail_status_t sl_railcb_convert_ddbm_to_power_setting_entry(sl_rail_handle_t rail_handle,
                                                                sl_rail_tx_power_t power_ddbm,
                                                                sl_rail_tx_pa_mode_t pa_mode,
@@ -382,6 +390,7 @@ RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_ofdm(void)
 #endif
 }
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
                                          RAIL_TxPowerMode_t mode,
                                          RAIL_TxPower_t power)
@@ -393,6 +402,7 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
   return RAIL_TX_POWER_LEVEL_INVALID;
 }
 
+SL_CODE_CLASSIFY(rail_lib, SL_CODE_CLASS_TIME_CRITICAL)
 RAIL_Status_t RAIL_ConvertDbmToPowerSettingEntry(RAIL_Handle_t railHandle,
                                                  RAIL_TxPowerMode_t mode,
                                                  RAIL_TxPower_t power,

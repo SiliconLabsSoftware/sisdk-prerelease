@@ -56,6 +56,10 @@ static void stop_reception(cs_ras_client_messaging_reception_t *rx,
 static void handle_data(cs_ras_client_messaging_reception_t *rx,
                         uint8_t                             size,
                         uint8_t                             *data);
+static sl_status_t check_and_copy_segment(cs_ras_client_messaging_reception_t *rx,
+                                          uint8_t                             size,
+                                          uint8_t                             *data,
+                                          bool                                real_time);
 static sl_status_t start_reception(cs_ras_client_messaging_reception_t *rx,
                                    cs_ras_messaging_config_t           *config,
                                    cs_ras_gattdb_handles_t             *handles,
@@ -284,15 +288,65 @@ static void stop_reception(cs_ras_client_messaging_reception_t *rx,
                                             rx->lost_segments);               // Lost segments
 }
 
+static sl_status_t check_and_copy_segment(cs_ras_client_messaging_reception_t *rx,
+                                          uint8_t                             size,
+                                          uint8_t                             *data,
+                                          bool                                real_time)
+{
+  cs_ras_segment_storage_t *segment = (cs_ras_segment_storage_t *)data;
+  uint32_t payload;
+  uint32_t index;
+
+  // Check message length (accept any size up to MTU segment size)
+  if ((size < (CS_RAS_SEGMENT_HEADER_SIZE + 1))
+      || (CS_RAS_SEGMENT_SIZE(rx->config.att_mtu) < size)) {
+    return SL_STATUS_INVALID_COUNT;
+  }
+
+  payload = size - CS_RAS_SEGMENT_HEADER_SIZE;
+
+  if (real_time) {
+    // Real-Time: append payload contiguously (no gaps between messages)
+    index = rx->size;
+  } else {
+    // On-Demand: place payload at fixed slot based on segment counter
+    index = rx->counter.current
+            * CS_RAS_SEGMENT_DATA_SIZE(rx->config.att_mtu);
+  }
+
+  // Check for fit in the buffer
+  if ((index + payload) > rx->config.data_size) {
+    cs_ras_client_log_warning(CONN_PREFIX "Data overflow: current = %u, "
+                                          "index = %lu, size = %u, data_size= %lu" LOG_NL,
+                              rx->config.conn_handle,
+                              rx->counter.current,
+                              (unsigned long)index,
+                              size,
+                              (unsigned long)rx->config.data_size);
+    return SL_STATUS_WOULD_OVERFLOW;
+  }
+
+  // Copy data into the destination array
+  memcpy(&rx->config.data[index],
+         segment->segment.data,
+         payload);
+
+  // Advance / set received size for both modes
+  rx->size = index + payload;
+
+  return SL_STATUS_OK;
+}
+
 static void handle_data(cs_ras_client_messaging_reception_t *rx,
                         uint8_t                             size,
                         uint8_t                             *data)
 {
   // Parse segment
   cs_ras_segment_storage_t *segment = (cs_ras_segment_storage_t *)data;
+  sl_status_t sc;
 
-  // Check message length
-  if ((size < CS_RAS_SEGMENT_HEADER_SIZE + 1)
+  // Check message length before parsing header
+  if ((size < (CS_RAS_SEGMENT_HEADER_SIZE + 1))
       || (CS_RAS_SEGMENT_SIZE(rx->config.att_mtu) < size)) {
     stop_reception(rx,
                    CS_RAS_MESSAGING_STATUS_FAILURE,
@@ -366,28 +420,16 @@ static void handle_data(cs_ras_client_messaging_reception_t *rx,
   if ((rx->counter.current >= rx->config.start_segment)
       && ((rx->config.end_segment == CS_RAS_MESSAGING_ALL_SEGMENTS)
           || (rx->counter.current <= rx->config.end_segment))) {
-    // Calculate index from data size and counter value
-    uint32_t index = rx->counter.current
-                     * CS_RAS_SEGMENT_DATA_SIZE(rx->config.att_mtu);
-    // Check for fit in the buffer
-    if ((index + size - CS_RAS_SEGMENT_HEADER_SIZE) > rx->config.data_size) {
-      cs_ras_client_log_warning(CONN_PREFIX "Data overflow: current = %u, "
-                                            "index = %lu, size = %u, data_size= %lu" LOG_NL,
-                                rx->config.conn_handle,
-                                rx->counter.current,
-                                (unsigned long)index,
+    sc = check_and_copy_segment(rx,
                                 size,
-                                (unsigned long)rx->config.data_size);
+                                data,
+                                rx->config.real_time);
+    if (sc != SL_STATUS_OK) {
       stop_reception(rx,
                      CS_RAS_MESSAGING_STATUS_FAILURE,
-                     SL_STATUS_WOULD_OVERFLOW);
+                     sc);
       return;
     }
-    rx->size = index + size - CS_RAS_SEGMENT_HEADER_SIZE;
-    // Copy data into the destination array
-    memcpy(&rx->config.data[index],
-           segment->segment.data,
-           size - CS_RAS_SEGMENT_HEADER_SIZE);
   }
 
   cs_ras_client_messaging_segment_received(rx, rx->counter.current);

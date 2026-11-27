@@ -2571,6 +2571,21 @@ static bool gpCommissioningNotificationSuccessGpdf(uint16_t commNotificationOpti
     sl_zigbee_af_green_power_cluster_println("DROP - GP CN Success: Frame Counter Too Low");
     return true;
   }
+  // The pairing may only be finalised from Success when the commissioning
+  // sequence has actually progressed to that point:
+  //  - WAIT_FOR_SUCCESS: Commissioning Reply was sent, Success is the expected next GPDF.
+  //  - FINALISE_PAIRING: a previous finalisation attempt failed, allow a retry.
+  // In particular, in COLLECT_REPORTS the Commissioning GPDF announced that a GPD
+  // Application Description follows, but it has not been (completely) received yet,
+  // so the commissioning must not be completed by a Success GPDF.
+  // Similarly, do not finalise while awaiting the GP TC response or before the
+  // Commissioning Reply is sent.
+  if (commissioningGpd->commissionState != GP_SINK_COMM_STATE_WAIT_FOR_SUCCESS
+      && commissioningGpd->commissionState != GP_SINK_COMM_STATE_FINALISE_PAIRING) {
+    sl_zigbee_af_green_power_cluster_println("DROP - GP CN Success: Unexpected commissioning state %d (Application Description not complete?)",
+                                             commissioningGpd->commissionState);
+    return true;
+  }
   // Save FC
   commissioningGpd->outgoingFrameCounter = gpdSecurityFrameCounter;
   sl_zigbee_af_green_power_cluster_print("GP CN : Process Success - Finalise Pairing");
@@ -2634,7 +2649,8 @@ static void handleChannelRequest(uint16_t options,
   }
 }
 
-#if (SL_ZIGBEE_GP_SINK_TABLE_SIZE > 0)
+// Always compile this helper. On EZSP_HOST, SL_ZIGBEE_GP_SINK_TABLE_SIZE is a
+// runtime variable (gpSinkTableSize); preprocessor #if would always treat it as 0.
 static uint16_t storeSinkTableEntryInBuffer(sl_zigbee_gp_sink_table_entry_t *entry,
                                             uint8_t *buffer)
 {
@@ -2726,7 +2742,41 @@ static uint16_t storeSinkTableEntryInBuffer(sl_zigbee_gp_sink_table_entry_t *ent
   }
   return (uint16_t)(finger - buffer);
 }
-#endif // SL_ZIGBEE_GP_SINK_TABLE_SIZE > 0
+
+// Encode active sink table entries into the ZCL response buffer.
+// Updates *stringDataOffset; returns ZCL status (SUCCESS or INSUFFICIENT_SPACE).
+static uint8_t appendSinkTableEntriesToAttributeResponse(uint16_t *stringDataOffset,
+                                                         uint16_t readLength)
+{
+  uint8_t zclStatus = SL_ZIGBEE_ZCL_STATUS_SUCCESS;
+  uint8_t sinkTableEntryAppResponseData[SL_ZIGBEE_AF_RESPONSE_BUFFER_LEN];
+
+  // Runtime check: on EZSP_HOST, SL_ZIGBEE_GP_SINK_TABLE_SIZE is gpSinkTableSize.
+  if (SL_ZIGBEE_GP_SINK_TABLE_SIZE == 0) {
+    return zclStatus;
+  }
+
+  for (uint8_t i = 0; i < SL_ZIGBEE_GP_SINK_TABLE_SIZE; i++) {
+    sl_zigbee_gp_sink_table_entry_t entry;
+    if (sl_zigbee_gp_sink_table_get_entry(i, &entry) != SL_STATUS_OK) {
+      continue;
+    }
+
+    sl_zigbee_af_green_power_cluster_println("Craft Response - Encode Sink Table %d", i);
+    uint16_t sinkTableEntryLength = storeSinkTableEntryInBuffer(&entry, sinkTableEntryAppResponseData);
+    if ((sinkTableEntryLength + *stringDataOffset) > readLength) {
+      zclStatus = SL_ZIGBEE_ZCL_STATUS_INSUFFICIENT_SPACE;
+      sl_zigbee_af_green_power_cluster_println("Sink Table Attribute read INSUFFICIENT SPACE");
+      break;
+    }
+
+    sl_zigbee_af_green_power_cluster_println("SAVE ENTRY %d", i);
+    memmove(&appResponseData[*stringDataOffset], sinkTableEntryAppResponseData, sinkTableEntryLength);
+    *stringDataOffset += sinkTableEntryLength;
+  }
+
+  return zclStatus;
+}
 
 static bool processCommNotificationsWithSecurityProcessingFailedFlag(uint16_t commNotificationOptions,
                                                                      sl_zigbee_gp_address_t *gpdAddr,
@@ -2864,28 +2914,7 @@ bool sli_zigbee_af_green_power_server_retrieve_attribute_and_craft_response(uint
     // Four bytes extra = 2byte length + 1 byte ZCl Status + 1 byte Attribute Type
     uint16_t stringDataOffset =  appResponseLength + 4;
     stringDataOffsetStart = stringDataOffset;
-    // Search the sink table and respond with entries
-    #if (SL_ZIGBEE_GP_SINK_TABLE_SIZE > 0)
-    uint8_t sinkTableEntryAppResponseData[SL_ZIGBEE_AF_RESPONSE_BUFFER_LEN];
-    for (uint8_t i = 0; i < SL_ZIGBEE_GP_SINK_TABLE_SIZE; i++) {
-      sl_zigbee_gp_sink_table_entry_t entry;
-      if (sl_zigbee_gp_sink_table_get_entry(i, &entry) == SL_STATUS_OK) {
-        sl_zigbee_af_green_power_cluster_println("Craft Response - Encode Sink Table %d", i);
-        // Have a valid entry so encode response in temp buffer and add if it fits
-        uint16_t sinkTableEntryLength = storeSinkTableEntryInBuffer(&entry, sinkTableEntryAppResponseData);
-        if ((sinkTableEntryLength + stringDataOffset) > readLength) {
-          // String is too big so
-          zclStatus = SL_ZIGBEE_ZCL_STATUS_INSUFFICIENT_SPACE;
-          sl_zigbee_af_green_power_cluster_println("Sink Table Attribute read INSUFFICIENT SPACE");
-          break;
-        } else {
-          sl_zigbee_af_green_power_cluster_println("SAVE ENTRY %d", i);
-          memmove(&appResponseData[stringDataOffset], sinkTableEntryAppResponseData, sinkTableEntryLength);
-          stringDataOffset += sinkTableEntryLength;
-        }
-      }
-    }
-    #endif // SL_ZIGBEE_GP_SINK_TABLE_SIZE > 0
+    zclStatus = appendSinkTableEntriesToAttributeResponse(&stringDataOffset, readLength);
     // calculate string length
     stringLength = stringDataOffset - stringDataOffsetStart;
     if (zclStatus == SL_ZIGBEE_ZCL_STATUS_SUCCESS) {
@@ -4063,6 +4092,105 @@ sl_zigbee_af_zcl_request_status_t sl_zigbee_af_green_power_cluster_gp_pairing_co
                                                          gpPairingConfigCommunicationMode,
                                                          gpPairingConfigSecurityLevel);
 }
+
+static void sendSinkTableNotFoundResponse(uint8_t validEntriesCount, uint8_t startIndex)
+{
+  sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_response_smart(SL_ZIGBEE_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
+                                                                             validEntriesCount,
+                                                                             startIndex,
+                                                                             0);
+  sli_zigbee_af_gp_send_response_unicast();
+}
+
+static void handleSinkTableRequestByGpdId(const sl_zcl_green_power_cluster_gp_sink_table_request_command_t *cmd_data,
+                                          uint8_t appId,
+                                          uint8_t validEntriesCount)
+{
+  sl_zigbee_gp_address_t gpdAddr;
+  sl_zigbee_gp_sink_table_entry_t entry;
+
+  if (!sli_zigbee_af_gp_make_addr(&gpdAddr,
+                                  appId,
+                                  cmd_data->gpdSrcId,
+                                  cmd_data->gpdIeee,
+                                  cmd_data->endpoint)
+      || gpdAddrZero(&gpdAddr)) {
+    sendSinkTableNotFoundResponse(validEntriesCount, 0xFF);
+    return;
+  }
+
+  uint8_t entryIndex = sl_zigbee_gp_sink_table_lookup(&gpdAddr);
+  if (entryIndex == 0xFF) {
+    // Valid entries present but none for this gpdAddr.
+    sendSinkTableNotFoundResponse(validEntriesCount, entryIndex);
+    return;
+  }
+
+  // A valid entry with the ID is present: SUCCESS with one entry, Start index 0xff.
+  if (sl_zigbee_gp_sink_table_get_entry(entryIndex, &entry) != SL_STATUS_OK) {
+    return;
+  }
+
+  sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_response_smart(SL_ZIGBEE_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                             validEntriesCount,
+                                                                             0xff,
+                                                                             1);
+  appResponseLength += storeSinkTableEntryInBuffer(&entry, (appResponseData + appResponseLength));
+  sli_zigbee_af_gp_send_response_unicast();
+}
+
+static void handleSinkTableRequestByIndex(uint8_t requestIndex, uint8_t validEntriesCount)
+{
+  sl_zigbee_gp_sink_table_entry_t entry;
+
+  if (requestIndex >= validEntriesCount) {
+    sendSinkTableNotFoundResponse(validEntriesCount, requestIndex);
+    return;
+  }
+
+  // Include entries from the indicated index while they fit in one message.
+  sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_response_smart(SL_ZIGBEE_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                             validEntriesCount,
+                                                                             requestIndex,
+                                                                             0xff);
+  uint8_t scannedActiveCount = 0;
+  uint8_t entriesCount = 0;
+  for (uint8_t entryIndex = 0; entryIndex < SL_ZIGBEE_GP_SINK_TABLE_SIZE; entryIndex++) {
+    if (sl_zigbee_gp_sink_table_get_entry(entryIndex, &entry) != SL_STATUS_OK) {
+      continue;
+    }
+    if (entry.status == SL_ZIGBEE_GP_SINK_TABLE_ENTRY_STATUS_UNUSED
+        || entry.status == 0) {
+      continue;
+    }
+
+    scannedActiveCount++;
+    if (scannedActiveCount <= requestIndex) {
+      continue;
+    }
+
+    uint8_t tempDatabuffer[SL_ZIGBEE_AF_RESPONSE_BUFFER_LEN];
+    uint16_t tempDataLength = storeSinkTableEntryInBuffer(&entry, tempDatabuffer);
+    if (sizeof(appResponseData) <= (appResponseLength + tempDataLength)) {
+      break;
+    }
+
+    memmove(&appResponseData[appResponseLength], tempDatabuffer, tempDataLength);
+    appResponseLength += tempDataLength;
+    entriesCount++;
+  }
+
+  appResponseData[GP_SINK_TABLE_RESPONSE_ENTRIES_OFFSET + GP_NON_MANUFACTURER_ZCL_HEADER_LENGTH] = entriesCount;
+  sl_status_t status = sli_zigbee_af_gp_send_response_unicast();
+  if (status == SL_STATUS_MESSAGE_TOO_LONG) {
+    sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_response_smart(SL_ZIGBEE_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
+                                                                               scannedActiveCount,
+                                                                               requestIndex,
+                                                                               0);
+    sli_zigbee_af_gp_send_response_unicast();
+  }
+}
+
 sl_zigbee_af_zcl_request_status_t sl_zigbee_af_green_power_cluster_gp_sink_table_request_cb(sl_zigbee_af_cluster_command_t *cmd)
 {
   sl_zcl_green_power_cluster_gp_sink_table_request_command_t cmd_data;
@@ -4077,16 +4205,13 @@ sl_zigbee_af_zcl_request_status_t sl_zigbee_af_green_power_cluster_gp_sink_table
   // the device SHALL check if it implements a Sink Table.
   // If not, it SHALL generate a ZCL Default Response command,
   // with the Status code field carrying UNSUP_COMMAND, subject to the rules as specified in sec. 2.4.12 of [3]
-  #if (SL_ZIGBEE_GP_SINK_TABLE_SIZE == 0)
-  sl_zigbee_af_green_power_cluster_println("Unsup cluster command");
-  sl_zigbee_af_send_immediate_default_response(SL_ZIGBEE_ZCL_STATUS_UNSUP_COMMAND);
-  return SL_ZIGBEE_ZCL_STATUS_UNSUP_COMMAND;
-  #else
-  uint8_t entryIndex = 0;
-  uint8_t appId = (cmd_data.options & SL_ZIGBEE_AF_GP_SINK_TABLE_REQUEST_OPTIONS_APPLICATION_ID);
-  uint8_t requestType = (cmd_data.options & SL_ZIGBEE_AF_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TYPE)
-                        >> SL_ZIGBEE_AF_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_OFFSET;
-  sl_zigbee_gp_sink_table_entry_t entry;
+  // Runtime check: on EZSP_HOST, SL_ZIGBEE_GP_SINK_TABLE_SIZE is gpSinkTableSize (NCP config).
+  // A preprocessor #if would always treat the Host identifier as 0 and force UNSUP.
+  if (SL_ZIGBEE_GP_SINK_TABLE_SIZE == 0) {
+    sl_zigbee_af_green_power_cluster_println("Unsup cluster command");
+    sl_zigbee_af_send_immediate_default_response(SL_ZIGBEE_ZCL_STATUS_UNSUP_COMMAND);
+    return SL_ZIGBEE_ZCL_STATUS_UNSUP_COMMAND;
+  }
 
   // only respond to unicast messages.
   if (cmd->type != SL_ZIGBEE_INCOMING_UNICAST) {
@@ -4100,137 +4225,24 @@ sl_zigbee_af_zcl_request_status_t sl_zigbee_af_green_power_cluster_gp_sink_table
   }
 
   uint8_t validEntriesCount = sl_zigbee_gp_sink_table_get_number_of_active_entries();
+  uint8_t appId = (cmd_data.options & SL_ZIGBEE_AF_GP_SINK_TABLE_REQUEST_OPTIONS_APPLICATION_ID);
+  uint8_t requestType = (cmd_data.options & SL_ZIGBEE_AF_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TYPE)
+                        >> SL_ZIGBEE_AF_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TYPE_OFFSET;
 
-  // If its Sink Table is empty, and the triggering GP Sink Table Request was received in unicast,
-  // then the GP Sink Table Response SHALL be sent with Status NOT_FOUND,
-  // Total number of non-empty Sink Table entries carrying 0x00,
-  // Start index carrying 0xFF (in case of request by GPD ID) or
-  // the Index value from the triggering GP Sink Table Request (in case of request by index),
-  // Entries count field set to 0x00, and any Sink Table entry fields absent
+  // Empty table: NOT_FOUND; Start index from request (by index) or as decoded (by ID).
   if (validEntriesCount == 0) {
-    // "index" is already 0xFF if search by ID
-    // or already set to the value from "SinkTableRequest" triggered frame in case it is search by INDEX
-    sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_response_smart(SL_ZIGBEE_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                                               0,
-                                                                               cmd_data.index,
-                                                                               0);
-    sli_zigbee_af_gp_send_response_unicast();
+    sendSinkTableNotFoundResponse(0, cmd_data.index);
     return SL_ZIGBEE_ZCL_STATUS_SUCCESS;
-  } else {
-    // Valid Entries are present!
-    if (requestType == SL_ZIGBEE_ZCL_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TABLE_ENTRIES_BY_GPD_ID) {
-      sl_zigbee_gp_address_t gpdAddr;
-      if (!sli_zigbee_af_gp_make_addr(&gpdAddr,
-                                      appId,
-                                      cmd_data.gpdSrcId,
-                                      cmd_data.gpdIeee,
-                                      cmd_data.endpoint)) {
-        sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_response_smart(SL_ZIGBEE_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                                                   validEntriesCount,
-                                                                                   0xFF,
-                                                                                   0);
-        sli_zigbee_af_gp_send_response_unicast();
-        return SL_ZIGBEE_ZCL_STATUS_SUCCESS;
-      }
-      // Check for gpd addr = 0
-      if (gpdAddrZero(&gpdAddr)) {
-        sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_response_smart(SL_ZIGBEE_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                                                   validEntriesCount,
-                                                                                   0xFF,
-                                                                                   0);
-        sli_zigbee_af_gp_send_response_unicast();
-        return SL_ZIGBEE_ZCL_STATUS_SUCCESS;
-      }
-      entryIndex = sl_zigbee_gp_sink_table_lookup(&gpdAddr);
-      if (entryIndex == 0xFF) {
-        // Valid entries present but none for this gpdAddr - Send NOT FOUND sesponse.
-        sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_response_smart(SL_ZIGBEE_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                                                   validEntriesCount,
-                                                                                   entryIndex,
-                                                                                   0);
-        sli_zigbee_af_gp_send_response_unicast();
-        goto kickout;
-      } else {
-        // A valid entry with the ID is present
-        if (sl_zigbee_gp_sink_table_get_entry(entryIndex, &entry) == SL_STATUS_OK) {
-          // If the triggering GP Sink Table Request command contained a GPD ID field, the device SHALL check
-          // if it has a Sink Table entry for this GPD ID (and Endpoint, if ApplicationID = 0b010). If yes, the device
-          // SHALL create a GP Sink Table Response with Status SUCCESS, Total number of non-empty Sink Table
-          // entries carrying the total number of non-empty Sink Table entries on this device, Start index set to
-          // 0xff, Entries count field set to 0x01, and one Sink Table entry field for the requested GPD ID (and
-          // Endpoint, if ApplicationID = 0b010), formatted as specified in sec. A.3.3.2.2.1, present.
-          sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_response_smart(SL_ZIGBEE_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                                                     validEntriesCount,
-                                                                                     0xff,
-                                                                                     1);
-          appResponseLength += storeSinkTableEntryInBuffer(&entry, (appResponseData + appResponseLength));
-          sli_zigbee_af_gp_send_response_unicast();
-        } else {
-          // Not found status to go out.
-        }
-        goto kickout;
-      }
-    } else if (requestType == SL_ZIGBEE_ZCL_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TABLE_ENTRIES_BY_INDEX) {
-      if (cmd_data.index >= validEntriesCount) {
-        sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_response_smart(SL_ZIGBEE_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_NOT_FOUND,
-                                                                                   validEntriesCount,
-                                                                                   cmd_data.index,
-                                                                                   0);
-        sli_zigbee_af_gp_send_response_unicast();
-        return SL_ZIGBEE_ZCL_STATUS_SUCCESS;
-      } else {
-        // return the sink table entry content into the reponse payload from indicated
-        // index and nexts until these are consistant (adress type, etc) and
-        // as long as it feet into one message
-        sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_response_smart(SL_ZIGBEE_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                                                   validEntriesCount,
-                                                                                   cmd_data.index,
-                                                                                   0xff);
-        validEntriesCount = 0;
-        uint16_t entriesCount = 0;
-        for (entryIndex = 0; entryIndex < SL_ZIGBEE_GP_SINK_TABLE_SIZE; entryIndex++) {
-          if (sl_zigbee_gp_sink_table_get_entry(entryIndex, &entry) != SL_STATUS_OK) {
-            continue;
-          }
-
-          uint8_t  tempDatabuffer[SL_ZIGBEE_AF_RESPONSE_BUFFER_LEN];
-          uint16_t tempDataLength = 0;
-
-          if (entry.status != SL_ZIGBEE_GP_SINK_TABLE_ENTRY_STATUS_UNUSED
-              && entry.status != 0) {
-            validEntriesCount++;
-            if (validEntriesCount > cmd_data.index) {
-              // Copy to a temp buffer and add if there is space
-              tempDataLength = storeSinkTableEntryInBuffer(&entry, tempDatabuffer);
-              // If space add to buffer
-              if (sizeof(appResponseData) > (appResponseLength + tempDataLength)) {
-                memmove(&appResponseData[appResponseLength], tempDatabuffer, tempDataLength);
-                appResponseLength +=  tempDataLength;
-                entriesCount++;
-              } else {
-                break;
-              }
-            }
-          }
-        }
-        //Insert the number of entries actually included
-        appResponseData[GP_SINK_TABLE_RESPONSE_ENTRIES_OFFSET + GP_NON_MANUFACTURER_ZCL_HEADER_LENGTH] = entriesCount;
-        sl_status_t status = sli_zigbee_af_gp_send_response_unicast();
-        if (status == SL_STATUS_MESSAGE_TOO_LONG) {
-          sl_zigbee_af_fill_command_green_power_cluster_gp_sink_table_response_smart(SL_ZIGBEE_ZCL_GP_SINK_TABLE_RESPONSE_STATUS_SUCCESS,
-                                                                                     validEntriesCount,
-                                                                                     cmd_data.index,
-                                                                                     0);
-          sli_zigbee_af_gp_send_response_unicast();
-        }
-        goto kickout;
-      }
-    } else {
-      // nothing, other value of requestType are reserved
-    }
   }
-  kickout: return SL_ZIGBEE_ZCL_STATUS_SUCCESS;
-  #endif // SL_ZIGBEE_GP_SINK_TABLE_SIZE == 0
+
+  if (requestType == SL_ZIGBEE_ZCL_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TABLE_ENTRIES_BY_GPD_ID) {
+    handleSinkTableRequestByGpdId(&cmd_data, appId, validEntriesCount);
+  } else if (requestType == SL_ZIGBEE_ZCL_GP_SINK_TABLE_REQUEST_OPTIONS_REQUEST_TABLE_ENTRIES_BY_INDEX) {
+    handleSinkTableRequestByIndex(cmd_data.index, validEntriesCount);
+  }
+  // other requestType values are reserved
+
+  return SL_ZIGBEE_ZCL_STATUS_SUCCESS;
 }
 
 sli_zigbee_gp_comm_data_saved_t *sl_zigbee_af_green_power_server_find_commissioning_gpd_instance(sl_zigbee_gp_address_t *gpdAddr)

@@ -58,6 +58,11 @@
 // <i> Default: 1
 #define CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_REAL_TIME_RANGING_DATA                  1
 
+// <q CS_RAS_SERVER_CONFIG_REAL_TIME_SEND_ON_SUBEVENT_COMPLETE> Send Real-Time data on subevent complete
+// <i> When enabled, Real-Time ranging data transfer is sent after each subevent.
+// <i> Default: 0
+#define CS_RAS_SERVER_CONFIG_REAL_TIME_SEND_ON_SUBEVENT_COMPLETE                     0
+
 // <q CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_RETRIEVE_LOST_RANGING_DATA_SEGMENTS> Retrieve Lost Ranging Data Segments
 // <i> Default: 1
 #define CS_RAS_SERVER_CONFIG_SUPPORT_FEATURE_RETRIEVE_LOST_RANGING_DATA_SEGMENTS     1

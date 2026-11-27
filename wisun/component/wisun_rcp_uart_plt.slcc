@@ -22,9 +22,7 @@ provides:
 - name: wisun_rcp_interface
 
 source:
-- path: sl_wsrcp_crc.h
 - path: sl_wsrcp_crc.c
-- path: sl_wsrcp_uart_plt.h
 - path: sl_wsrcp_uart_plt.c
 
 include:

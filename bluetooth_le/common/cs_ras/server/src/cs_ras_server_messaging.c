@@ -30,6 +30,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 #include "cs_ras_server_messaging.h"
 #include "cs_ras_server_messaging_internal.h"
 #include "cs_ras_server_internal.h"
@@ -59,6 +60,10 @@ static bool find_transmit(cs_ras_server_messaging_transmit_t *tx);
 static cs_ras_server_messaging_transmit_t *find_transmit_by_connection(uint8_t conn_handle);
 static uint16_t segment_count(uint16_t att_mtu, uint32_t data_size);
 static uint16_t segments_left(cs_ras_server_messaging_transmit_t *tx);
+static bool transfer_finished(cs_ras_server_messaging_transmit_t *tx);
+static sl_status_t apply_flush(cs_ras_server_messaging_transmit_t *tx,
+                               uint32_t                           actual_size);
+static void finish_transfer_now(cs_ras_server_messaging_transmit_t *tx);
 static sl_status_t transmit_segment(cs_ras_server_messaging_transmit_t *tx);
 static sl_status_t send_data(uint8_t  conn_handle,
                              bool     real_time,
@@ -101,7 +106,8 @@ void cs_ras_server_messaging_step(void)
     cs_ras_server_log_debug(CONN_PREFIX "Segment left: %u" LOG_NL,
                             tx->config.conn_handle,
                             remaining_segments);
-    if (remaining_segments == 0 || tx->message_status.stopped) {
+    (void) remaining_segments;
+    if (transfer_finished(tx)) {
       // Transmission finished
       sl_slist_remove(&transmit_list_head, &tx->node);
 
@@ -224,6 +230,92 @@ sl_status_t cs_ras_server_messaging_cancel(cs_ras_server_messaging_transmit_t *t
   return sc;
 }
 
+sl_status_t cs_ras_server_messaging_flush(cs_ras_server_messaging_transmit_t *tx,
+                                          uint32_t                           actual_size)
+{
+  CORE_DECLARE_IRQ_STATE;
+  sl_status_t sc;
+
+  if (tx == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  CORE_ENTER_ATOMIC();
+  if (!find_transmit(tx)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_NOT_FOUND;
+  }
+  if (!tx->message_status.streaming || tx->message_status.completed) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+  sc = apply_flush(tx, actual_size);
+  CORE_EXIT_ATOMIC();
+  return sc;
+}
+
+sl_status_t cs_ras_server_messaging_complete(cs_ras_server_messaging_transmit_t *tx,
+                                             uint32_t                           actual_size)
+{
+  CORE_DECLARE_IRQ_STATE;
+  sl_status_t sc;
+  uint16_t payload_size;
+  uint32_t bytes_sent;
+
+  if (tx == NULL) {
+    return SL_STATUS_NULL_POINTER;
+  }
+
+  CORE_ENTER_ATOMIC();
+  if (!find_transmit(tx)) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_NOT_FOUND;
+  }
+  if (!tx->message_status.streaming || tx->message_status.completed) {
+    CORE_EXIT_ATOMIC();
+    return SL_STATUS_INVALID_STATE;
+  }
+
+  // complete() also flushes to the final watermark
+  sc = apply_flush(tx, actual_size);
+  if (sc != SL_STATUS_OK) {
+    CORE_EXIT_ATOMIC();
+    return sc;
+  }
+
+  tx->final_size = actual_size;
+  tx->config.data_size = actual_size;
+  tx->message_status.completed = true;
+
+  if (actual_size == 0) {
+    tx->config.start_segment = 0;
+    tx->config.end_segment = 0;
+    finish_transfer_now(tx);
+    CORE_EXIT_ATOMIC();
+    cs_ras_server_log_debug(CONN_PREFIX "Streaming complete with size 0" LOG_NL,
+                            tx->config.conn_handle);
+    return SL_STATUS_OK;
+  }
+
+  tx->config.end_segment = segment_count(tx->config.att_mtu, actual_size) - 1;
+  payload_size = CS_RAS_SEGMENT_DATA_SIZE(tx->config.att_mtu);
+  bytes_sent = (uint32_t)tx->segment_counter * (uint32_t)payload_size;
+
+  // Already sent everything that complete made available
+  if (bytes_sent >= actual_size
+      && !tx->message_status.created
+      && !tx->message_status.sent) {
+    finish_transfer_now(tx);
+  }
+
+  CORE_EXIT_ATOMIC();
+  cs_ras_server_log_debug(CONN_PREFIX "Streaming complete, size = %lu, end_segment = %u" LOG_NL,
+                          tx->config.conn_handle,
+                          (unsigned long)actual_size,
+                          tx->config.end_segment);
+  return SL_STATUS_OK;
+}
+
 bool cs_ras_server_messaging_has_data_to_process(void)
 {
   return (transmit_list_head != NULL);
@@ -238,6 +330,7 @@ static sl_status_t transmit(cs_ras_server_messaging_transmit_t *tx,
 {
   sl_status_t sc = SL_STATUS_OK;
   CORE_DECLARE_IRQ_STATE;
+  bool streaming;
 
   if (tx == NULL || config == NULL) {
     return SL_STATUS_NULL_POINTER;
@@ -245,7 +338,8 @@ static sl_status_t transmit(cs_ras_server_messaging_transmit_t *tx,
   if (config->data == NULL) {
     return SL_STATUS_NULL_POINTER;
   }
-  if (config->data_size == 0) {
+  streaming = (config->data_size == CS_RAS_MESSAGING_UNKNOWN_SIZE);
+  if (!streaming && config->data_size == 0) {
     return SL_STATUS_INVALID_PARAMETER;
   }
   if (config->conn_handle == SL_BT_INVALID_CONNECTION_HANDLE) {
@@ -254,7 +348,15 @@ static sl_status_t transmit(cs_ras_server_messaging_transmit_t *tx,
   if (config->att_mtu < ATT_MTU_MIN || config->att_mtu > ATT_MTU_MAX) {
     return SL_STATUS_INVALID_PARAMETER;
   }
-  uint16_t end_segment = segment_count(config->att_mtu, config->data_size) - 1;
+  // Streaming is only via transmit_all
+  if (streaming && !all) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  uint16_t end_segment = 0;
+  if (!streaming) {
+    end_segment = segment_count(config->att_mtu, config->data_size) - 1;
+  }
   // Check segments in config
   if (!all) {
     if (config->start_segment > config->end_segment) {
@@ -279,12 +381,23 @@ static sl_status_t transmit(cs_ras_server_messaging_transmit_t *tx,
   }
   memset(tx, 0, sizeof(cs_ras_server_messaging_transmit_t));
   memcpy(&tx->config, config, sizeof(tx->config));
-  if (all) {
-    tx->config.start_segment   = 0;
-    tx->config.end_segment     = end_segment;
-  }
-  if (tx->config.end_segment == CS_RAS_MESSAGING_ALL_SEGMENTS) {
-    tx->config.end_segment     = end_segment;
+  if (streaming) {
+    tx->config.start_segment           = 0;
+    tx->config.end_segment             = CS_RAS_MESSAGING_ALL_SEGMENTS;
+    tx->message_status.streaming       = true;
+    tx->message_status.completed       = false;
+    tx->available_size                 = 0;
+    tx->final_size                     = CS_RAS_MESSAGING_UNKNOWN_SIZE;
+  } else {
+    if (all) {
+      tx->config.start_segment   = 0;
+      tx->config.end_segment     = end_segment;
+    }
+    if (tx->config.end_segment == CS_RAS_MESSAGING_ALL_SEGMENTS) {
+      tx->config.end_segment     = end_segment;
+    }
+    tx->available_size           = config->data_size;
+    tx->final_size               = config->data_size;
   }
   tx->segment_counter          = tx->config.start_segment;
   tx->segment_size             = 0;
@@ -299,10 +412,11 @@ static sl_status_t transmit(cs_ras_server_messaging_transmit_t *tx,
 
   CORE_EXIT_ATOMIC();
 
-  cs_ras_server_log_debug(CONN_PREFIX "Added transmission, segments %u -> %u" LOG_NL,
+  cs_ras_server_log_debug(CONN_PREFIX "Added transmission, segments %u -> %u%s" LOG_NL,
                           tx->config.conn_handle,
                           tx->config.start_segment,
-                          tx->config.end_segment);
+                          tx->config.end_segment,
+                          streaming ? " (streaming)" : "");
   return sc;
 }
 
@@ -337,16 +451,89 @@ static uint16_t segment_count(uint16_t att_mtu, uint32_t data_size)
 {
   uint16_t count;
   uint16_t segment_data_size = CS_RAS_SEGMENT_DATA_SIZE(att_mtu);
+  if (data_size == 0 || segment_data_size == 0) {
+    return 0;
+  }
   count = (uint16_t)((data_size + (segment_data_size - 1)) / segment_data_size);
   return count;
 }
 
 static uint16_t segments_left(cs_ras_server_messaging_transmit_t *tx)
 {
+  uint32_t segment_data_size;
+  uint32_t segment_pos;
+  uint32_t send_limit;
+  uint32_t remaining;
+
+  // Open-ended streaming
+  if (tx->message_status.streaming && !tx->message_status.completed) {
+    return UINT16_MAX;
+  }
+
+  if (tx->message_status.streaming && tx->message_status.completed) {
+    send_limit = tx->final_size;
+    segment_data_size = CS_RAS_SEGMENT_DATA_SIZE(tx->config.att_mtu);
+    segment_pos = (uint32_t)tx->segment_counter * segment_data_size;
+    if (segment_pos >= send_limit) {
+      return 0;
+    }
+    remaining = send_limit - segment_pos;
+    return (uint16_t)((remaining + segment_data_size - 1) / segment_data_size);
+  }
+
   if (tx->segment_counter > tx->config.end_segment) {
     return 0;
   }
   return tx->config.end_segment + 1 - tx->segment_counter;
+}
+
+static bool transfer_finished(cs_ras_server_messaging_transmit_t *tx)
+{
+  if (tx->message_status.stopped) {
+    return true;
+  }
+  // Open-ended streaming waits for complete()
+  if (tx->message_status.streaming && !tx->message_status.completed) {
+    return false;
+  }
+  return (segments_left(tx) == 0
+          && !tx->message_status.created
+          && !tx->message_status.sent);
+}
+
+static sl_status_t apply_flush(cs_ras_server_messaging_transmit_t *tx,
+                               uint32_t                           actual_size)
+{
+  if (actual_size > CS_PROCEDURE_MAX_LEN) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  if (actual_size < tx->available_size) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  tx->available_size = actual_size;
+  return SL_STATUS_OK;
+}
+
+static void finish_transfer_now(cs_ras_server_messaging_transmit_t *tx)
+{
+  cs_ras_messaging_status_t transfer_status;
+
+  tx->status = SL_STATUS_OK;
+  tx->message_status.stopped = true;
+  tx->message_status.created = false;
+  tx->message_status.sent = false;
+  tx->message_status.confirmed = false;
+
+  if (!find_transmit(tx)) {
+    return;
+  }
+  sl_slist_remove(&transmit_list_head, &tx->node);
+  transfer_status = CS_RAS_MESSAGING_STATUS_SUCCESS;
+  cs_ras_server_log_info(CONN_PREFIX "Transmit ended, status = %u, sc = 0x%04lx" LOG_NL,
+                         tx->config.conn_handle,
+                         transfer_status,
+                         (unsigned long)tx->status);
+  cs_ras_server_messaging_on_transmit_finished(tx, transfer_status, tx->status);
 }
 
 static sl_status_t transmit_segment(cs_ras_server_messaging_transmit_t *tx)
@@ -355,6 +542,9 @@ static sl_status_t transmit_segment(cs_ras_server_messaging_transmit_t *tx)
   uint16_t remaining_segments;
   uint32_t segment_data_size;
   uint32_t segment_pos;
+  uint32_t send_limit;
+  uint32_t remaining_data;
+  bool last_segment;
 
   if (tx->message_status.stopped) {
     cs_ras_server_log_debug(CONN_PREFIX "Stopped at " SEGMENT_PREFIX LOG_NL,
@@ -409,25 +599,50 @@ static sl_status_t transmit_segment(cs_ras_server_messaging_transmit_t *tx)
     segment_pos = tx->segment_counter * segment_data_size;
     // Apply segment counter
     CS_RAS_SET_SEGMENT_COUNTER(tx->storage.segment.header, tx->segment_counter);
-    uint16_t end_segment
-      = segment_count(tx->config.att_mtu, tx->config.data_size) - 1;
-    if (tx->segment_counter == end_segment) {
-      // Last segment
-      CS_RAS_SET_LAST_SEGMENT(tx->storage.segment.header);
-      cs_ras_server_log_debug(CONN_PREFIX SEGMENT_PREFIX "is the last segment." LOG_NL,
-                              tx->config.conn_handle,
-                              tx->segment_counter);
-      // Remaining bytes in the segment
-      tx->segment_size = tx->config.data_size + CS_RAS_SEGMENT_HEADER_SIZE
-                         - (tx->segment_counter * segment_data_size);
+
+    if (tx->message_status.streaming) {
+      send_limit = tx->message_status.completed ? tx->final_size : tx->available_size;
+      if (segment_pos >= send_limit) {
+        return SL_STATUS_OK;
+      }
+      remaining_data = send_limit - segment_pos;
+      if (!tx->message_status.completed
+          && remaining_data <= segment_data_size) {
+        // Wait for more flush or complete (hold trailing full/partial for LAST)
+        return SL_STATUS_OK;
+      }
+      last_segment = tx->message_status.completed
+                     && (remaining_data <= segment_data_size);
+      if (last_segment) {
+        CS_RAS_SET_LAST_SEGMENT(tx->storage.segment.header);
+        cs_ras_server_log_debug(CONN_PREFIX SEGMENT_PREFIX "is the last segment." LOG_NL,
+                                tx->config.conn_handle,
+                                tx->segment_counter);
+        tx->segment_size = (uint16_t)(remaining_data + CS_RAS_SEGMENT_HEADER_SIZE);
+      } else {
+        tx->segment_size = (uint16_t)(segment_data_size + CS_RAS_SEGMENT_HEADER_SIZE);
+      }
     } else {
-      // Complete segment
-      tx->segment_size = segment_data_size + CS_RAS_SEGMENT_HEADER_SIZE;
+      uint16_t end_segment
+        = segment_count(tx->config.att_mtu, tx->config.data_size) - 1;
+      if (tx->segment_counter == end_segment) {
+        // Last segment
+        CS_RAS_SET_LAST_SEGMENT(tx->storage.segment.header);
+        cs_ras_server_log_debug(CONN_PREFIX SEGMENT_PREFIX "is the last segment." LOG_NL,
+                                tx->config.conn_handle,
+                                tx->segment_counter);
+        // Remaining bytes in the segment
+        tx->segment_size = tx->config.data_size + CS_RAS_SEGMENT_HEADER_SIZE
+                           - (tx->segment_counter * segment_data_size);
+      } else {
+        // Complete segment
+        tx->segment_size = segment_data_size + CS_RAS_SEGMENT_HEADER_SIZE;
+      }
     }
-    // Copy data to the data part of the segment
+    // Copy payload only (segment_size includes the header)
     memcpy(tx->storage.segment.data,
            &tx->config.data[segment_pos],
-           tx->segment_size);
+           tx->segment_size - CS_RAS_SEGMENT_HEADER_SIZE);
     // Set created
     tx->message_status.created   = true;
     tx->message_status.sent      = false;

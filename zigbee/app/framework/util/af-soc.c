@@ -51,6 +51,12 @@
   #include "app/test/pro-compliance.h"
 #endif
 
+#if (SL_ZIGBEE_ADDRESS_TABLE_SIZE \
+     < (SL_ZIGBEE_AF_PLUGIN_ADDRESS_TABLE_SIZE \
+        + SL_ZIGBEE_AF_PLUGIN_ADDRESS_TABLE_TRUST_CENTER_CACHE_SIZE))
+#error "SL_ZIGBEE_ADDRESS_TABLE_SIZE must be >= (SL_ZIGBEE_AF_PLUGIN_ADDRESS_TABLE_SIZE + SL_ZIGBEE_AF_PLUGIN_ADDRESS_TABLE_TRUST_CENTER_CACHE_SIZE)"
+#endif
+
 //------------------------------------------------------------------------------
 // Internal callbacks
 
@@ -151,7 +157,7 @@ sl_zigbee_zdo_status_t sli_zigbee_af_remote_delete_binding_callback(uint8_t inde
   status = sl_zigbee_af_remote_delete_binding_permission_cb(index) == SL_STATUS_OK
            ? SL_ZIGBEE_ZDP_SUCCESS
            : SL_ZIGBEE_ZDP_NOT_AUTHORIZED;
-  if (status == SL_STATUS_OK) {
+  if (status == SL_ZIGBEE_ZDP_SUCCESS) {
     deleteStatus = sl_zigbee_delete_binding(index);
     status = deleteStatus == SL_STATUS_OK ? SL_ZIGBEE_ZDP_SUCCESS // binding deleted
              : (deleteStatus == SL_STATUS_ZIGBEE_BINDING_IS_ACTIVE ? SL_ZIGBEE_ZDP_NOT_AUTHORIZED //selected index is active

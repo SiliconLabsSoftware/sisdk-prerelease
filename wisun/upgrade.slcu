@@ -114,18 +114,6 @@ upgrade:
           Custom assert function has been removed from the stack library and moved to the crash handler.
         add:
           - wisun_crash_handler
-      - trigger: wisun_stack_ffn
-        description: >
-          Direct Connect server was moved out of the FFN stack library into the
-          optional wisun_stack_dc_server component. It is added automatically so
-          upgraded projects keep prior DC server behavior and APIs.
-        add:
-          - wisun_stack_dc_server
-      - trigger: wisun_stack_ffn
-        description: >
-          LFN parenting has been moved to its own component and is not provided by wisun_stack_ffn by default.
-        add:
-          - wisun_lfn_parent
       - trigger: sl_wisun_app_core
         description: >
           sl_wisun_event_mgr is no longer required by sl_wisun_app_core. Upgraded
@@ -133,3 +121,7 @@ upgrade:
           existing application code and sl_wisun_event_mgr.h includes keep working.
         add:
           - sl_wisun_event_mgr
+      - script: wisun/component/scripts/upgrade_wisun_ffn_stack_split.lua
+        description: >
+          On FFN router projects, Direct Connect server and LFN parent are added as
+          optional components to match pre-2026.12 bundled stack behavior.

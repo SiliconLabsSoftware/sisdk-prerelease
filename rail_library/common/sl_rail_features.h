@@ -528,7 +528,9 @@ extern "C" {
 
 /// Boolean to indicate whether the selected chip supports a front end module.
 /// See also runtime refinement \ref sl_rail_ieee802154_supports_fem_phy().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG != 8)
+/// Margay (config 8 / xg28) and Curl (config 11 / xg2b) have no 15.4 FEM PHYs.
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG != 8) \
+  && (_SILICON_LABS_32B_SERIES_2_CONFIG != 11))
 #define SL_RAIL_IEEE802154_SUPPORTS_FEM_PHY (SL_RAIL_IEEE802154_SUPPORTS_2P4_GHZ_BAND)
 #else
 #define SL_RAIL_IEEE802154_SUPPORTS_FEM_PHY 0

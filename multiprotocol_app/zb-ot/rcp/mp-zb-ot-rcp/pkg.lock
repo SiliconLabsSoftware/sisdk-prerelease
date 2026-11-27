@@ -6,7 +6,7 @@ version = 2
   python = {version = "3.10.4", installer = "archive", type = "apack", ref = "python/3.10.4"}
   java21 = {version = "21.0.6", installer = "archive", type = "tools", ref = "java21/21.0.6"}
   base_sdk = {version = "2026.12.0", installer = "conan", type = "sdk", ref = "base_sdk/2026.12.0@silabs/2026-12#5430da17a010025655b2a28fed660256"}
-  boards = {version = "1.2.0", installer = "conan", type = "sdk", ref = "boards/1.2.0@silabs/2026-12#d328c1ee299b1fbec2e18e62f699a147"}
+  boards = {version = "1.2.0", installer = "conan", type = "sdk", ref = "boards/1.2.0@silabs/2026-12#480856ee5c3dde9478edbf7aa6de16e8"}
   bootloader = {version = "3.4.0", installer = "conan", type = "sdk", ref = "bootloader/3.4.0@silabs/2026-12#70c3f2f896af70f8c7e2a338c4485c15"}
   cmake = {version = "3.30.2", installer = "conan", type = "apack", ref = "cmake/3.30.2@silabs#8798657aa78b2da38a3ae465f2d10090"}
   cmsis = {version = "1.2.0", installer = "conan", type = "sdk", ref = "cmsis/1.2.0@silabs/2026-12#8c8e5679dfa86f65ad9e06fe2d46df92"}
@@ -15,25 +15,22 @@ version = 2
   cpc = {version = "4.10.0-alpha.8", installer = "conan", type = "sdk", ref = "cpc/4.10.0-alpha.8@silabs/2026-12#8a921987e11f5f04b93a629ce6f4faa3c21d4eb4"}
   cpc_extra = {version = "1.1.0-alpha.5", installer = "conan", type = "sdk", ref = "cpc_extra/1.1.0-alpha.5@silabs/2026-12#fe4365511165bb0d524fe8bf784ad5fea1b51a9c"}
   delta_dfu = {version = "1.1.1", installer = "conan", type = "sdk", ref = "delta_dfu/1.1.1@silabs/2026-12#894af66bed526c1955393131553f6d7a8e101b3f"}
-  freertos = {version = "1.2.0", installer = "conan", type = "sdk", ref = "freertos/1.2.0@silabs/2026-12#3d8107e929af94b261b555c50503f6a9"}
+  freertos = {version = "1.2.0", installer = "conan", type = "sdk", ref = "freertos/1.2.0@silabs/2026-12#e9b10cdc8e60fe98fe3844e5cae6ac05"}
   gcc-arm-none-eabi = {version = "14.2.rel1", installer = "conan", type = "toolchain", ref = "gcc-arm-none-eabi/14.2.rel1@silabs#7a5e7220af325e610937338dde99651b"}
   llvm-arm-toolchain-for-embedded = {version = "21.1.1", installer = "conan", type = "toolchain", ref = "llvm-arm-toolchain-for-embedded/21.1.1@silabs#877f3e0faf9658c618b4c2fe80bbb9fa"}
-  mbedtls = {version = "4.1.0", installer = "conan", type = "sdk", ref = "mbedtls/4.1.0@silabs/2026-12#4ed4d20938ab0d079a877ead58c2b5d8"}
+  mbedtls = {version = "4.1.0", installer = "conan", type = "sdk", ref = "mbedtls/4.1.0@silabs/2026-12#2aa711c5892043a6354225f8147c415e"}
   micriumos = {version = "6.2.0", installer = "conan", type = "sdk", ref = "micriumos/6.2.0@silabs/2026-12#2c72a912dbc10438a8900783dd2fd4a3"}
   ninja = {version = "1.12.1", installer = "conan", type = "apack", ref = "ninja/1.12.1@silabs#9ce59e07a142d4da1c532b49742fe16d"}
   openthread_forks = {version = "3.2.0-beta.66", installer = "conan", type = "sdk", ref = "openthread_forks/3.2.0-beta.66@silabs/2026-12#687f43c268101fd4a83e19bfa74247cf51ce9104"}
-  platform = {version = "6.2.0-alpha.89", installer = "conan", type = "sdk", ref = "platform/6.2.0-alpha.89@silabs/2026-12#5370a7eafb5850c42e11c32775561889"}
-  platform_core = {version = "1.2.0", installer = "conan", type = "sdk", ref = "platform_core/1.2.0@silabs/2026-12#8e6a37f0100d04afd0cb32ca89a88274"}
+  platform = {version = "6.2.0-alpha.93", installer = "conan", type = "sdk", ref = "platform/6.2.0-alpha.93@silabs/2026-12#1d546ea9f0170679682e6689aa19da52"}
+  platform_core = {version = "1.2.0", installer = "conan", type = "sdk", ref = "platform_core/1.2.0@silabs/2026-12#371b045f1ac137bc7187fb9b02cc6660"}
   printf = {version = "1.2.0", installer = "conan", type = "sdk", ref = "printf/1.2.0@silabs/2026-12#17d8e2c2b7b59b85592d976f578d85ec"}
-  rail_library = {version = "3.2.0-alpha.22", installer = "conan", type = "sdk", ref = "rail_library/3.2.0-alpha.22@silabs/2026-12#b8f3435e8f27d93214c7cc7c4de80bd08c39dc6b"}
+  rail_library = {version = "3.2.0-alpha.51", installer = "conan", type = "sdk", ref = "rail_library/3.2.0-alpha.51@silabs/2026-12#b13d85d0b065680f8fabc9d53cc0f7d9f55a4abd"}
   security_libcryptosoc = {version = "1.2.0", installer = "conan", type = "sdk", ref = "security_libcryptosoc/1.2.0@silabs/2026-12#42a9890f9b2dd4ca6aa97960eae57dce"}
-  security_sxsymcrypt = {version = "1.2.0", installer = "conan", type = "sdk", ref = "security_sxsymcrypt/1.2.0@silabs#059c0dec8aa6b0592db386c6223554ff"}
+  security_sxsymcrypt = {version = "1.2.0", installer = "conan", type = "sdk", ref = "security_sxsymcrypt/1.2.0@silabs/2026-12#023e2db8c03efd7af6a870492f4cfb23"}
   security_tfm = {version = "1.2.0", installer = "conan", type = "sdk", ref = "security_tfm/1.2.0@silabs/2026-12#86644133c261cfa5d3a040aaadbc82be"}
-  segger = {version = "1.2.0", installer = "conan", type = "sdk", ref = "segger/1.2.0@silabs/2026-12#bca12f7dda989a8cb730a890a5d737de"}
-  silabs_package_assistant = [
-    {version = "1.8.0", installer = "conan", type = "python_requires", ref = "silabs_package_assistant/1.8.0@silabs|python_requires#1f4a525f99fdcc0d289cfd2fd532b6aefa7006c7"},
-    {version = "2.0.3", installer = "conan", type = "python_requires", ref = "silabs_package_assistant/2.0.3@silabs|python_requires#3049ef4c4d1a9c9b2bfcc48fb931e7d41e707434"},
-  ]
+  segger = {version = "1.2.0", installer = "conan", type = "sdk", ref = "segger/1.2.0@silabs/2026-12#39667f026ebb249dcad96d1244b80210"}
+  silabs_package_assistant = {version = "2.0.3", installer = "conan", type = "python_requires", ref = "silabs_package_assistant/2.0.3@silabs|python_requires#3049ef4c4d1a9c9b2bfcc48fb931e7d41e707434"}
   thread = {version = "3.2.0-beta.66", installer = "conan", type = "sdk", ref = "thread/3.2.0-beta.66@silabs/2026-12#687f43c268101fd4a83e19bfa74247cf51ce9104"}
   unity_test_framework = {version = "1.2.0", installer = "conan", type = "sdk", ref = "unity_test_framework/1.2.0@silabs/2026-12#781714e52e8e666477080a606340b003"}
   usb = {version = "1.8.0", installer = "conan", type = "sdk", ref = "usb/1.8.0@silabs/2026-12#01cbe72ebb3adb140ce650e11f741a9a"}

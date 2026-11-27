@@ -14,9 +14,37 @@ component:
   - id: iostream_rtt
   - id: iostream_retarget_stdio
   - id: wisun_default_radioconf
-  - id: wisun_rcp_app
+  - id: wisun_rcp
+  - id: device_init
+  - id: sl_main
+  - id: memory_manager
+  - id: freertos
   - id: cpc_secondary_recommended_uart_interface
     condition: [cpc_secondary]
+
+define:
+  - name: DEBUG_EFM_USER
+
+source:
+  - path: sl_wsrcp.c
+  - path: sl_ring.c
+  - path: sl_wsrcp_btl_interface.c
+
+include:
+  - path: .
+    file_list:
+      - path: sl_wsrcp.h
+      - path: sl_ring.h
+      - path: sl_wsrcp_btl_interface.h
+      - path: sl_wsrcp_api.h
+      - path: sl_wsrcp_hif.h
+
+template_contribution:
+  - name: event_handler
+    value:
+      event: internal_app_init
+      include: sl_wsrcp.h
+      handler: wisun_rcp_init
 
 configuration:
   - name: SL_CPC_RX_PAYLOAD_MAX_LENGTH
@@ -63,12 +91,6 @@ configuration:
     condition: [cpc_secondary]
   - name: SL_BOARD_ENABLE_VCOM
     value: 1
-  - name: OS_CFG_APP_HOOKS_EN
-    value: 1
-    condition: [micriumos_kernel]
-  - name: OS_CFG_DBG_EN
-    value: 1
-    condition: [micriumos_kernel]
   - name: SL_RAIL_UTIL_PTI_BAUD_RATE_HZ
     value: 3200000
   - name: SL_MAIN_START_TASK_STACK_SIZE_BYTES

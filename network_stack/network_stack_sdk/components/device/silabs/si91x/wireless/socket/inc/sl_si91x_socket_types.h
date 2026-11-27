@@ -67,6 +67,10 @@
 
 #define SLI_SI91X_MAX_DOMAIN_NAME_LENGTH 256
 
+// Bit N set: firmware socket id N is listening (accept).
+// A clear bit means data readiness on an existing connection.
+#define SLI_SI91X_SELECT_PENDING_CONNECTION_BIT(firmware_id) ((1U) << (uint32_t)(firmware_id))
+
 /* NUMBER_OF_BSD_SOCKETS must be < 32 (sizeof(unsigned) * 8) */
 #ifdef __ZEPHYR__
 typedef struct sl_si91x_fdset_s {
@@ -280,7 +284,7 @@ typedef enum {
 #define SLI_SI91X_MAX_SIZE_OF_EXTENSION_DATA 256
 
 #ifdef SLI_SI91X_NETWORK_DUAL_STACK
-#if LWIP_SOCKET && !LWIP_IPV4
+#if LWIP_SOCKET && !LWIP_IPV4 && !defined(SLI_SI91X_SOCKADDR_DEFINED)
 struct sockaddr_in {
   u8_t sin_len;            /* length of this structure    */
   sa_family_t sin_family;  /* AF_INET                     */
@@ -289,7 +293,7 @@ struct sockaddr_in {
   char sin_zero[8];        /* padding                     */
 };
 #endif
-#if LWIP_SOCKET && !LWIP_IPV6
+#if LWIP_SOCKET && !LWIP_IPV6 && !defined(SLI_SI91X_SOCKADDR_DEFINED)
 struct sockaddr_in6 {
   u8_t sin6_len;             /* length of this structure    */
   sa_family_t sin6_family;   /* AF_INET6                    */
@@ -504,6 +508,7 @@ typedef struct {
   sli_si91x_fd_set_t write_fds;       ///< Write file descriptors
   sl_si91x_time_value select_timeout; ///< Select timeout
   uint8_t no_timeout;                 ///< No timeout
+  uint32_t pending_type;              ///< Bit N set: firmware socket id N is awaiting accept
 } sli_si91x_socket_select_req_t;
 
 /// Si91x specific socket select response structure

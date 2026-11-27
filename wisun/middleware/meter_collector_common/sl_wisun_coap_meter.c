@@ -527,6 +527,7 @@ static sl_wisun_coap_packet_t *_measurement_response_cb(const sockaddr_in6_t * c
   static sl_wisun_coap_notify_t notify = { 0 };
   const sl_wisun_coap_notify_t *tmp_notify = NULL;
   const char *addr_str = NULL;
+  const char *notify_id = NULL;
 #else
   (void) src_addr;
 #endif
@@ -602,7 +603,6 @@ static sl_wisun_coap_packet_t *_measurement_response_cb(const sockaddr_in6_t * c
     // Remove request handling
   } else if (!strncmp(payload_str, SL_WISUN_METER_REQUEST_TYPE_STR_REMOVE,
                       SL_WISUN_METER_REQUEST_RESPONSE_STR_MAX_LEN)) {
-    // Free notification id
     addr_str = app_wisun_trace_util_get_ip_str(&src_addr->sin6_addr);
     tmp_notify = sl_wisun_coap_notify_get_by_id(addr_str);
     if (tmp_notify == NULL || addr_str == NULL) {
@@ -612,9 +612,9 @@ static sl_wisun_coap_packet_t *_measurement_response_cb(const sockaddr_in6_t * c
                                SL_WISUN_COAP_METER_GET_COLLECTOR_FAILED_RESP,
                                COAP_MSG_CODE_RESPONSE_BAD_REQUEST);
     }
-    sl_free((void *) tmp_notify->id);
 
     // Remove meter
+    notify_id = tmp_notify->id;
     if (sl_wisun_coap_notify_remove_by_id(addr_str) != SL_STATUS_OK) {
       app_wisun_trace_util_destroy_ip_str(addr_str);
       sl_wisun_coap_destroy_payload_str(payload_str);
@@ -623,6 +623,7 @@ static sl_wisun_coap_packet_t *_measurement_response_cb(const sockaddr_in6_t * c
                                COAP_MSG_CODE_RESPONSE_BAD_REQUEST);
     }
     _metrics_cnt.reg_coll_cnt--;
+    app_wisun_trace_util_destroy_ip_str(notify_id);
     app_wisun_trace_util_destroy_ip_str(addr_str);
 
     resp_packet = _build_const_resp(req_packet,

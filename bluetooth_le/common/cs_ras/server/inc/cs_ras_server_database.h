@@ -81,12 +81,15 @@ sl_status_t cs_ras_server_database_set_filter(uint8_t conn_handle,
 /**************************************************************************//**
  * Store a CS result to the database.
  *
- * @param[in]  cs_res         A pointer to a BLE message.
- * @param[in]  mode           RAS mode
+ * @param[in]  cs_res              A pointer to a BLE message.
+ * @param[in]  mode                RAS mode
+ * @param[out] subevent_completed  Optional. Set true when the stored result
+ *                                 completed or aborted a subevent. May be NULL.
  * @return status of the operation.
  *****************************************************************************/
 sl_status_t cs_ras_server_database_store_result(sl_bt_msg_t *cs_res,
-                                                cs_ras_mode_t mode);
+                                                cs_ras_mode_t mode,
+                                                bool *subevent_completed);
 
 /**************************************************************************//**
  * Mark a procedure sent.

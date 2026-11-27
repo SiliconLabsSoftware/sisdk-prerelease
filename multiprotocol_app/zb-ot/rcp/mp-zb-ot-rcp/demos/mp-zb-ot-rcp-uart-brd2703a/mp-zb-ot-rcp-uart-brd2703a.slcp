@@ -561,6 +561,9 @@ autoselected_components:
   id: psa_crypto_ecc_curve25519
 - package: platform_core
   vendor: silabs
+  id: psa_crypto_ecc_key_pair_derive
+- package: platform_core
+  vendor: silabs
   id: psa_crypto_ecc_secp256r1
 - package: platform_core
   vendor: silabs
@@ -860,10 +863,10 @@ sdk_extension:
   id: cpc
   version: 4.10.0
 - vendor: silabs
-  id: printf
+  id: freertos
   version: 1.2.0
 - vendor: silabs
-  id: freertos
+  id: printf
   version: 1.2.0
 - vendor: silabs
   id: delta_dfu

@@ -1,5 +1,9 @@
 # RAILTest usage for BLE / BT manual measurements
 
+#Known issues and limitations
+- The RAILTest application does not support Energy Management. It stays in EM0 so any power-consumption measurement will be much higher than the values expected in EM1P.
+
+
 # Purpose/Scope
 
 These instructions explain how to use the RAILTest application to transmit and receive BLE and Bluetooth Classic (BTC) test packets and measure packet error rate (PER). RAILTest supports RF testing across multiple Low Power Wireless radio (LPW) protocols.

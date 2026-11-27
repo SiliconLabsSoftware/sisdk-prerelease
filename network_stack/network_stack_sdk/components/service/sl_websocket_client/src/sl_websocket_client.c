@@ -134,6 +134,12 @@ sl_websocket_error_t sl_websocket_set_tcp_tls_advanced_configuration(
     return SL_WEBSOCKET_ERR_INVALID_PARAMETER;
   }
 
+  // Options are consumed at connect time; only allow configuration while disconnected.
+  if (handle->state != SL_WEBSOCKET_STATE_DISCONNECTED) {
+    SL_DEBUG_LOG_V2(DEBUG, "[websocket_client] Invalid state for setting TCP/TLS advanced configuration\r\n");
+    return SL_WEBSOCKET_ERR_INVALID_STATE;
+  }
+
   handle->tcp_options            = *options;
   handle->tcp_options_configured = true;
 

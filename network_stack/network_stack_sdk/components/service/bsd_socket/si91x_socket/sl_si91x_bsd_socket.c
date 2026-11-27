@@ -134,6 +134,7 @@ int *__h_errno_location(void)
   return &herrno;
 }
 
+SL_TPUT_CLASSIFIER
 int16_t sl_si91x_get_socket_mss(int32_t socketIndex)
 {
   // Retrieve the SI91X socket associated with the given socket index
@@ -371,6 +372,7 @@ int connect(int socket_id, const struct sockaddr *addr, socklen_t addr_len)
   return sli_si91x_connect(socket_id, addr, addr_len);
 }
 
+SL_TPUT_CLASSIFIER
 ssize_t send(int socket_id, const void *data, size_t data_len, int flags)
 {
   // Sending data to a socket without specifying a destination address
@@ -383,6 +385,7 @@ ssize_t recv(int socket_id, void *buf, size_t buf_len, int flags)
   return recvfrom(socket_id, buf, buf_len, flags, NULL, NULL);
 }
 
+SL_TPUT_CLASSIFIER
 ssize_t sendto(int socket_id,
                const void *data,
                size_t data_len,

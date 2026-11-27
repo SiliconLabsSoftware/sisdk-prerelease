@@ -32,6 +32,7 @@
 #define CURRENT_MODULE_NAME "OPENTHREAD_SAMPLE_APP"
 
 #include <assert.h>
+#include <inttypes.h>
 #include <string.h>
 
 #include <common/code_utils.hpp>
@@ -287,9 +288,9 @@ void sleepyInit(void)
     }
     else
     {
-        otCliOutputFormat("starting (child_timeout=%lu s, wake_s=%lu)\r\n",
-                          (unsigned long)otThreadGetChildTimeout(instance),
-                          (unsigned long)(sl_ot_em4_get_default_wake_ms(instance) / 1000U));
+        otCliOutputFormat("starting (child_timeout=%" PRIu32 " s, wake_s=%" PRIu32 ")\r\n",
+                          otThreadGetChildTimeout(instance),
+                          sl_ot_em4_get_default_wake_ms(instance) / 1000U);
         otCliOutputFormat("holding EM1 until EM4 armed\r\n");
     }
 

@@ -119,7 +119,7 @@ EmberStatus emApiSetNcpSecurityKey(uint8_t *keyContents, uint8_t keyLength)
 void sli_connect_ncp_key_loader_handler(void)
 {
   psa_key_id_t key_id;
-  sl_token_manager_get_data(COMMON_TOKEN_STACK_SECURITY_KEY_ID, (void*)key_id, COMMON_TOKEN_STACK_SECURITY_KEY_ID_SIZE);
+  sl_token_manager_get_data(COMMON_TOKEN_STACK_SECURITY_KEY_ID, (void*)&key_id, COMMON_TOKEN_STACK_SECURITY_KEY_ID_SIZE);
 
   if ((key_id != SLI_CONNECT_CRYPTO_INVALID_KEY_ID) && (key_id != 0xFFFFFFFFu)) {
     emApiSetPsaSecurityKey(key_id);

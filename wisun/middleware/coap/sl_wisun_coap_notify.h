@@ -63,7 +63,7 @@ extern "C" {
 
 /// CoAP Notify type definition
 typedef struct sl_wisun_coap_notify {
-  /// ID string
+  /// ID string. Not owned by this pointer.
   const char *id;
   /// Remote address
   sockaddr_in6_t remote_addr;

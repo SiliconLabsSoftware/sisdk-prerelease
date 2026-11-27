@@ -418,6 +418,7 @@ void cs_ras_server_messaging_on_transmit_finished(cs_ras_server_messaging_transm
                                 status,
                                 (unsigned long)sc);
     }
+    server->rt_streaming_active = false;
     cs_ras_server_database_clear(server->connection, CS_RAS_INVALID_RANGING_COUNTER);
     return;
   }
